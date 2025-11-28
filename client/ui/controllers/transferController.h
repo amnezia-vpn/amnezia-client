@@ -28,6 +28,7 @@ public:
                                 const QSharedPointer<ServersModel> &serversModel,
                                 ExportController *exportController,
                                 QObject *parent = nullptr);
+    ~TransferController() override;
 
     Q_INVOKABLE void generateNewQrCode();
 
@@ -56,6 +57,7 @@ signals:
     void postFailed(const QString &message);
 
 private:
+    void handleImportControllerDestroyed();
     QString buildQrPayloadJson(const QString &gatewayUrl, const QString &uuid, int version) const;
     QString getPremiumConfigToSend() const;
     QString m_pendingQrCode;

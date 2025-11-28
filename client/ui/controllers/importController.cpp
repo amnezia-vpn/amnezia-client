@@ -576,6 +576,18 @@ static QMutex qrDecodeMutex;
 // static
 bool ImportController::decodeQrCode(const QString &code)
 {
+    //old version
+    /*QMutexLocker lock(&qrDecodeMutex);
+
+    if (!mInstance->m_isQrCodeProcessed) {
+        mInstance->m_qrCodeChunks.clear();
+        mInstance->m_isQrCodeProcessed = true;
+        mInstance->m_totalQrCodeChunksCount = 0;
+        mInstance->m_receivedQrCodeChunksCount = 0;
+    }
+    return mInstance->parseQrCodeChunk(code);*/
+
+    //new version for transferController Qr
     QMutexLocker lock(&qrDecodeMutex);
 
     if (!mInstance->m_isQrCodeProcessed) {
@@ -584,7 +596,26 @@ bool ImportController::decodeQrCode(const QString &code)
         mInstance->m_totalQrCodeChunksCount = 0;
         mInstance->m_receivedQrCodeChunksCount = 0;
     }
-    return mInstance->parseQrCodeChunk(code);
+
+    // trying as old QR with config chunks
+    if (mInstance->parseQrCodeChunk(code)) {
+        return true;
+    }
+
+    //if not chinked-QR, trying transferController QR
+    QJsonParseError err;
+    const QJsonDocument doc = QJsonDocument::fromJson(code.toUtf8(), &err);
+    if (err.error == QJsonParseError::NoError && doc.isObject()) {
+        const QJsonObject obj = doc.object();
+        if (obj.contains(QStringLiteral("gw")) && obj.contains(QStringLiteral("u"))) {
+            // это наш QR для передачи устройства
+            mInstance->m_isQrCodeProcessed = false;   // reset state
+            emit mInstance->transferQrDecoded(code);  // send string to QML
+            return true;
+        }
+    }
+
+    return false;
 }
 #endif
 

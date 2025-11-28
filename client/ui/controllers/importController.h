@@ -57,6 +57,7 @@ signals:
     void importErrorOccurred(ErrorCode errorCode, bool goToPageHome);
 
     void qrDecodingFinished();
+    void transferQrDecoded(const QString &code);
 
     void restoreAppConfig(const QByteArray &data);
 

@@ -50,6 +50,7 @@ PageType {
                 Layout.topMargin: 16
 
                 text: qsTr("Yes, share")
+                enabled: root.getAvailableCount() > 0 && TransferController.pendingQrCode !== ""
 
                 clickedFunc: function() {
                     if (TransferController.pendingQrCode !== "") {
@@ -78,6 +79,22 @@ PageType {
                     PageController.closePage()
                 }
             }
+        }
+    }
+
+    Connections {
+        target: TransferController
+
+        function onPostStarted() {
+            PageController.showInfoMessage(qsTr("Sending configuration..."))
+        }
+
+        function onPostSucceeded() {
+            PageController.showInfoMessage(qsTr("Configuration sent successfully"))
+        }
+
+        function onPostFailed(message) {
+            PageController.showErrorMessage(message)
         }
     }
 }

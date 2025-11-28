@@ -15,22 +15,17 @@ import "../Config"
 PageType {
     id: root
 
-    // Единая логика при входе на страницу
     Component.onCompleted: {
-        // Страница имеет смысл только на мобилках
         if (!GC.isMobile()) {
             PageController.closePage()
             return
         }
-
-        // Проверяем наличие камеры
         if (!SettingsController.isCameraPresent()) {
             PageController.showErrorMessage(qsTr("Camera is not available on this device"))
             PageController.closePage()
             return
         }
 
-        // Android: запускаем нативный сканер камеры
         if (Qt.platform.os === "android"
                 && typeof ImportController !== "undefined"
                 && ImportController.startDecodingQr) {
@@ -73,13 +68,12 @@ PageType {
                 anchors.rightMargin: 16
                 anchors.bottomMargin: 16
                 anchors.topMargin: 16
-                visible: Qt.platform.os === "ios"  // На Android используется нативная камера
+                visible: Qt.platform.os === "ios"
 
                 color: AmneziaStyle.color.transparent
                 border.color: AmneziaStyle.color.paleGray
                 border.width: 1
 
-                // ВАЖНО: ридер виден на всех мобильных платформах
                 QRCodeReader {
                     id: qrReader
 
@@ -93,6 +87,9 @@ PageType {
                     }
 
                     Component.onCompleted: {
+                        if (Qt.platform.os !== "ios")
+                            return
+
                         qrReader.setCameraSize(
                                     Qt.rect(cameraArea.x,
                                             cameraArea.y,
@@ -109,10 +106,36 @@ PageType {
                 Connections {
                     target: TransferController
                     function onScannerShouldStop() {
-                        qrReader.stopReading()
+                        if (Qt.platform.os === "ios") {
+                            qrReader.stopReading()
+                        } else if (Qt.platform.os === "android"
+                                   && typeof ImportController !== "undefined"
+                                   && ImportController.stopDecodingQr) {
+                            ImportController.stopDecodingQr()
+                        }
                     }
                 }
             }
+        }
+    }
+
+    Connections {
+        target: ImportController
+
+        function onTransferQrDecoded(code) {
+            if (!code || code.length === 0)
+                return
+
+            TransferController.setPendingQrCode(code)
+            PageController.goToPage(PageEnum.PageSettingsApiAddDeviceConfirm)
+        }
+    }
+
+    Component.onDestruction: {
+        if (Qt.platform.os === "android"
+                && typeof ImportController !== "undefined"
+                && ImportController.stopDecodingQr) {
+            ImportController.stopDecodingQr()
         }
     }
 }
