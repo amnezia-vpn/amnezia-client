@@ -25,7 +25,6 @@ PageType {
         anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         backButtonFunction: {
-            ImportController.clearConfigFileName()
             PageController.closePage()
         }
         
@@ -33,6 +32,14 @@ PageType {
             if(backButton.enabled && backButton.activeFocus) {
                 listView.positionViewAtBeginning()
             }
+        }
+    }
+
+    Connections {
+        target: PageController
+
+        function onClosePage() {
+            ImportController.clearConfigFileName()
         }
     }
 
