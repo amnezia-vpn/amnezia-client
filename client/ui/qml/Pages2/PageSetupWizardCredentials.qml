@@ -71,6 +71,7 @@ PageType {
 
                 clickedFunc: function () {
                     clickedHandler()
+                    buttonImageSource = textField.text !== "" ? imageSource : ""
                 }
 
                 textField.onFocusChanged: {
@@ -78,8 +79,8 @@ PageType {
                 }
 
                 textField.onTextChanged: {
-                    if (hideContent) {
-                        buttonImageSource = textField.text !== "" ? (hideContent ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg") : ""
+                    if (headerText == qsTr("Password or SSH private key")) {
+                        buttonImageSource = textField.text !== "" ? imageSource : ""
                     }
                 }
             }
@@ -211,8 +212,10 @@ PageType {
         property string title: qsTr("Password or SSH private key")
         readonly property string placeholderContent: ""
         property bool hideContent: true
+        property string imageSource: "qrc:/images/controls/eye.svg"
         readonly property var clickedHandler: function() {
             hideContent = !hideContent
+            imageSource = hideContent ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
         }
     }
 

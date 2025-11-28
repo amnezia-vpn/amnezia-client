@@ -324,7 +324,7 @@ void CoreController::initContainerModelUpdateHandler()
             &ContainersModel::updateModel);
     connect(m_serversModel.get(), &ServersModel::gatewayStacksExpanded, this, [this]() {
         if (m_serversModel->hasServersFromGatewayApi()) {
-            m_apiNewsController->fetchNews();
+            m_apiNewsController->fetchNews(false);
         }
     });
     m_serversModel->resetModel();
