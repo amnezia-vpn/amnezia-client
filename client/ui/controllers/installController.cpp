@@ -451,12 +451,6 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                                     serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
                             containerConfig[config_key::transportPacketJunkSize] =
                                     serverConfigMap.value(config_key::transportPacketJunkSize);
-
-                            containerConfig[config_key::specialJunk1] = serverConfigMap.value(config_key::specialJunk1);
-                            containerConfig[config_key::specialJunk2] = serverConfigMap.value(config_key::specialJunk2);
-                            containerConfig[config_key::specialJunk3] = serverConfigMap.value(config_key::specialJunk3);
-                            containerConfig[config_key::specialJunk4] = serverConfigMap.value(config_key::specialJunk4);
-                            containerConfig[config_key::specialJunk5] = serverConfigMap.value(config_key::specialJunk5);
                         }
 
                     } else if (protocol == Proto::WireGuard) {
