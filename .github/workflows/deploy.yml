@@ -183,8 +183,6 @@ jobs:
       DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
       FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
-      # Specify branch for 3rd-prebuilt submodule (defaults to feature/add-support-arm64)
-      # To override, uncomment and set the desired branch name:
 
     steps:
     - name: 'Get sources'

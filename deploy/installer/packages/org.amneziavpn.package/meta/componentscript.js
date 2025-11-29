@@ -73,7 +73,6 @@ Component.prototype.createOperations = function()
                                        "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
 
         if (!vcRuntimeIsInstalled()) {
-			// Check for vc_redist files in target directory to determine architecture
 			var targetDir = installer.value("TargetDir").replace(/\//g, '\\');
 			var vcRedistArm64 = installer.findPath("vc_redist.arm64.exe", [targetDir]);
 			var vcRedistX86 = installer.findPath("vc_redist.x86.exe", [targetDir]);
