@@ -88,20 +88,6 @@ QString TransferController::getPremiumConfigToSend() const
 
 QString TransferController::getCurrentApiKey() const
 {
-    /*qDebug() << "getting current ApiKey: ";
-    const int idx = m_serversModel ? m_serversModel->getProcessedServerIndex() : -1;
-    if (idx >= 0 && m_serversModel) {
-        const QJsonObject server = m_serversModel->getServerConfig(idx);
-        qDebug() << "server: " << server;
-        const QJsonObject apiConfig = server.value(apiDefs::key::apiConfig).toObject();
-        qDebug() << "apiConfig: " << apiConfig;
-        const QString key = apiConfig.value(apiDefs::key::apiKey).toString();
-        qDebug() << "key: " << key;
-        return key;
-    }
-    qDebug() << "returned with zero value";
-    return QString();*/
-
     const int idx = m_serversModel ? m_serversModel->getProcessedServerIndex() : -1;
     if (idx < 0 || !m_serversModel) {
         return QString();
@@ -109,23 +95,13 @@ QString TransferController::getCurrentApiKey() const
 
     const QJsonObject server = m_serversModel->getServerConfig(idx);
 
-    // если нужно — можешь оставить лог:
     qDebug() << "server:" << server;
 
-    // 1. читаем api_config — он тебе нужен для vpn_key и прочего
     const QJsonObject apiConfig = server.value(apiDefs::key::apiConfig).toObject();
-    // qDebug() << "apiConfig:" << apiConfig;
-
-    // 2. читаем auth_data с верхнего уровня
     QJsonObject authData = server.value(QStringLiteral("auth_data")).toObject();
-    // или если есть константа: apiDefs::key::authData
-    // QJsonObject authData = server.value(apiDefs::key::authData).toObject();
-
     QString key = authData.value(apiDefs::key::apiKey).toString();
 
-   // на всякий случай можно добавить fallback, если где-то старый формат:
     if (key.isEmpty()) {
-        // вдруг когда-то api_key лежал в api_config.auth_data
         const QJsonObject nestedAuth =
                 apiConfig.value(QStringLiteral("auth_data")).toObject();
         if (!nestedAuth.isEmpty()) {
@@ -209,7 +185,6 @@ void TransferController::onTransferQrScanned(const QString &code)
         QUrlQuery q;
         q.addQueryItem(QStringLiteral("uuid"), uuid);
         q.addQueryItem(QStringLiteral("api_key"), apiKey);
-        //const QString endpoint = QString("%1sendConfig?%2").arg(gw, q.query(QUrl::FullyEncoded));
         const QString endpoint = QStringLiteral("%1sendConfig?%2")
                                         .arg(gw)
                                         .arg(q.query(QUrl::FullyEncoded));
@@ -325,7 +300,6 @@ void TransferController::startWaitForConfig(ImportController *importController)
                     const QJsonObject obj = doc.object();
                     const QString cfg = obj.value(QStringLiteral("config")).toString();
                     if (cfg == QStringLiteral("timeout")) {
-                        // ничего не пришло → продолжаем ждать
                         QThread::msleep(pollIntervalMs);
                         continue;
                     }
