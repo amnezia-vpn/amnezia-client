@@ -208,6 +208,7 @@ bool ImportController::extractConfigFromData(QString data)
     }
     case ConfigTypes::Invalid: {
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
+        m_configFileName.clear();
         break;
     }
     }
