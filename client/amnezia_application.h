@@ -45,7 +45,11 @@ public:
     QNetworkAccessManager *networkManager();
     QClipboard *getClipboard();
 
+public slots:
+    void forceQuit();
+
 private:
+    static bool m_forceQuit;
     QQmlApplicationEngine *m_engine {};
     std::shared_ptr<Settings> m_settings;
 

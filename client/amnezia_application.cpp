@@ -27,6 +27,8 @@
 #include <QtQuick/QQuickWindow>  // for QQuickWindow
 #include <QWindow>              // for qobject_cast<QWindow*>
 
+bool AmneziaApplication::m_forceQuit = false;
+
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv),
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
       m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
@@ -273,14 +275,24 @@ bool AmneziaApplication::eventFilter(QObject *watched, QEvent *event)
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
         quit();
 #else
-        if (m_coreController && m_coreController->pageController()) {
-            m_coreController->pageController()->hideMainWindow();
+        if (m_forceQuit) {
+            quit();
+        } else {
+            if (m_coreController && m_coreController->pageController()) {
+                m_coreController->pageController()->hideMainWindow();
+            }
         }
 #endif
         return true; // eat the close
     }
     // call base QObject::eventFilter
     return QObject::eventFilter(watched, event);
+}
+
+void AmneziaApplication::forceQuit()
+{
+    m_forceQuit = true;
+    quit();
 }
 
 QQmlApplicationEngine *AmneziaApplication::qmlEngine() const

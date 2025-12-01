@@ -2,6 +2,9 @@
 
 #include <QCoreApplication>
 #include <QSocketNotifier>
+#include <QMetaObject>
+
+#include "../amnezia_application.h"
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     #include <pthread.h>
@@ -15,7 +18,6 @@
 #endif
 
 #ifdef Q_OS_WIN
-    #include <QMetaObject>
     #include <windows.h>
 #endif
 
@@ -34,7 +36,12 @@ namespace
         case CTRL_LOGOFF_EVENT:
         case CTRL_SHUTDOWN_EVENT:
             if (QCoreApplication::instance()) {
-                QMetaObject::invokeMethod(QCoreApplication::instance(), "quit", Qt::QueuedConnection);
+                AmneziaApplication *app = qobject_cast<AmneziaApplication*>(QCoreApplication::instance());
+                if (app) {
+                    QMetaObject::invokeMethod(app, "forceQuit", Qt::QueuedConnection);
+                } else {
+                    QMetaObject::invokeMethod(QCoreApplication::instance(), "quit", Qt::QueuedConnection);
+                }
             }
             return TRUE;
         default: return FALSE;
