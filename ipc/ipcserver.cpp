@@ -157,10 +157,15 @@ bool IpcServer::updateResolvers(const QString &ifname, const QList<QHostAddress>
     return Router::updateResolvers(ifname, resolvers);
 }
 
+bool IpcServer::restoreResolvers() {
+    return Router::restoreResolvers();
+}
+
 bool IpcServer::StartRoutingIpv6()
 {
     return Router::StartRoutingIpv6();
 }
+
 bool IpcServer::StopRoutingIpv6()
 {
     return Router::StopRoutingIpv6();

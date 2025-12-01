@@ -54,6 +54,8 @@ private:
         apiDefs::ConfigType configType;
 
         QStringList supportedProtocols;
+
+        QString subscriptionDescription;
     };
 
     AccountInfoData m_accountInfoData;

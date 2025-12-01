@@ -26,9 +26,8 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 
     initNotificationHandler();
 
-    auto locale = m_settings->getAppLanguage();
     m_translator.reset(new QTranslator());
-    updateTranslator(locale);
+    updateTranslator(m_settings->getAppLanguage());
 }
 
 void CoreController::initModels()
@@ -100,6 +99,9 @@ void CoreController::initModels()
 
     m_apiDevicesModel.reset(new ApiDevicesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiDevicesModel", m_apiDevicesModel.get());
+
+    m_newsModel.reset(new NewsModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("NewsModel", m_newsModel.get());
 }
 
 void CoreController::initControllers()
@@ -154,6 +156,9 @@ void CoreController::initControllers()
 
     m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
+
+    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
+    m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
 }
 
 void CoreController::initAndroidController()
@@ -317,6 +322,11 @@ void CoreController::initContainerModelUpdateHandler()
     connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(), &ContainersModel::updateModel);
     connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
             &ContainersModel::updateModel);
+    connect(m_serversModel.get(), &ServersModel::gatewayStacksExpanded, this, [this]() {
+        if (m_serversModel->hasServersFromGatewayApi()) {
+            m_apiNewsController->fetchNews(false);
+        }
+    });
     m_serversModel->resetModel();
 }
 

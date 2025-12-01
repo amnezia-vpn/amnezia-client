@@ -29,7 +29,6 @@ namespace
         constexpr char uuid[] = "installation_uuid";
         constexpr char osVersion[] = "os_version";
         constexpr char appVersion[] = "app_version";
-        constexpr char appLanguage[] = "app_language";
 
         constexpr char userCountryCode[] = "user_country_code";
         constexpr char serverCountryCode[] = "server_country_code";
@@ -47,6 +46,8 @@ namespace
 
         constexpr char subscription[] = "subscription";
         constexpr char endDate[] = "end_date";
+
+        constexpr char isConnectEvent[] = "is_connect_event";
     }
 
     struct ProtocolData
@@ -63,6 +64,7 @@ namespace
     {
         QString osVersion;
         QString appVersion;
+        QString appLanguage;
 
         QString installationUuid;
 
@@ -81,6 +83,9 @@ namespace
             }
             if (!appVersion.isEmpty()) {
                 obj[configKey::appVersion] = appVersion;
+            }
+            if (!appLanguage.isEmpty()) {
+                obj[apiDefs::key::appLanguage] = appLanguage;
             }
             if (!installationUuid.isEmpty()) {
                 obj[configKey::uuid] = installationUuid;
@@ -221,6 +226,9 @@ namespace
         if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
             apiConfig.insert(apiDefs::key::supportedProtocols,
                              QJsonDocument::fromJson(apiResponseBody).object().value(apiDefs::key::supportedProtocols).toArray());
+
+            apiConfig.insert(apiDefs::key::serviceInfo,
+                             QJsonDocument::fromJson(apiResponseBody).object().value(apiDefs::key::serviceInfo).toObject());
         }
 
         serverConfig[configKey::apiConfig] = apiConfig;
@@ -249,6 +257,23 @@ ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &s
 {
 }
 
+bool ApiConfigsController::exportVpnKey(const QString &fileName)
+{
+    if (fileName.isEmpty()) {
+        emit errorOccurred(ErrorCode::PermissionsError);
+        return false;
+    }
+
+    prepareVpnKeyExport();
+    if (m_vpnKey.isEmpty()) {
+        emit errorOccurred(ErrorCode::ApiConfigEmptyError);
+        return false;
+    }
+
+    SystemController::saveFile(fileName, m_vpnKey);
+    return true;
+}
+
 bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, const QString &fileName)
 {
     if (fileName.isEmpty()) {
@@ -266,6 +291,7 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             apiConfigObject.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,
@@ -306,6 +332,7 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             apiConfigObject.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,
@@ -330,6 +357,13 @@ void ApiConfigsController::prepareVpnKeyExport()
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     auto vpnKey = apiConfigObject.value(apiDefs::key::vpnKey).toString();
+    if (vpnKey.isEmpty()) {
+        vpnKey = apiUtils::getPremiumV2VpnKey(serverConfigObject);
+        apiConfigObject.insert(apiDefs::key::vpnKey, vpnKey);
+        serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
+        m_serversModel->editServer(serverConfigObject, m_serversModel->getProcessedServerIndex());
+    }
+
     m_vpnKey = vpnKey;
 
     vpnKey.replace("vpn://", "");
@@ -349,7 +383,7 @@ bool ApiConfigsController::fillAvailableServices()
 {
     QJsonObject apiPayload;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
-    apiPayload[configKey::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
+    apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
@@ -373,6 +407,7 @@ bool ApiConfigsController::importServiceFromGateway()
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             m_apiServicesModel->getCountryCode(),
                                             "",
@@ -431,6 +466,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             apiConfig.value(configKey::userCountryCode).toString(),
                                             newCountryCode,
@@ -442,6 +478,10 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
+
+    if (newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig) {
+        apiPayload.insert(configKey::isConnectEvent, true);
+    }
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
@@ -526,7 +566,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     }
 }
 
-bool ApiConfigsController::deactivateDevice()
+bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
@@ -537,12 +577,17 @@ bool ApiConfigsController::deactivateDevice()
     }
 
     if (isSubscriptionExpired(apiConfigObject)) {
-        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
-        return false;
+        if (isRemoveEvent) {
+            return true;
+        } else {
+            emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+            return false;
+        }
     }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             apiConfigObject.value(configKey::userCountryCode).toString(),
                                             apiConfigObject.value(configKey::serverCountryCode).toString(),
@@ -582,6 +627,7 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             uuid,
                                             apiConfigObject.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,

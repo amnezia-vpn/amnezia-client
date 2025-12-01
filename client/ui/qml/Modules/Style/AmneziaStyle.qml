@@ -28,5 +28,7 @@ QtObject {
         readonly property color cloudyGray: Qt.rgba(215/255, 216/255, 219/255, 0.65)
         readonly property color pearlGray: '#EAEAEC'
         readonly property color translucentRichBrown: Qt.rgba(99/255, 51/255, 3/255, 0.26)
+        readonly property color translucentSlateGray: Qt.rgba(85/255, 86/255, 92/255, 0.13)
+        readonly property color translucentOnyxBlack: Qt.rgba(28/255, 29/255, 33/255, 0.13)
     }
 }

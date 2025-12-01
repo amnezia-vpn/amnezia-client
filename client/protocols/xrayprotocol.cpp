@@ -171,6 +171,8 @@ void XrayProtocol::stop()
     disableKillSwitchResp.waitForFinished(1000);
     QRemoteObjectPendingReply<bool> StartRoutingIpv6Resp = IpcClient::Interface()->StartRoutingIpv6();
     StartRoutingIpv6Resp.waitForFinished(1000);
+    QRemoteObjectPendingReply<bool> restoreResolvers = IpcClient::Interface()->restoreResolvers();
+    restoreResolvers.waitForFinished(1000);
 #if !defined(Q_OS_MACOS)
     QRemoteObjectPendingReply<bool> deleteTunResp = IpcClient::Interface()->deleteTun("tun2");
     deleteTunResp.waitForFinished(1000);

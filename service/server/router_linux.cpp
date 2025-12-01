@@ -281,6 +281,10 @@ bool RouterLinux::updateResolvers(const QString& ifname, const QList<QHostAddres
     return m_dnsUtil->updateResolvers(ifname, resolvers);
 }
 
+bool RouterLinux::restoreResolvers() {
+    return m_dnsUtil->restoreResolvers();
+}
+
 bool RouterLinux::StartRoutingIpv6()
 {
     QProcess process;

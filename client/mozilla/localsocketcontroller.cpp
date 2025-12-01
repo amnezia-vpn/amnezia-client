@@ -264,13 +264,13 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
              && !wgConfig.value(amnezia::config_key::junkPacketMaxSize).isUndefined()
              && !wgConfig.value(amnezia::config_key::initPacketJunkSize).isUndefined()
              && !wgConfig.value(amnezia::config_key::responsePacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::config_key::cookieReplyPacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::config_key::transportPacketJunkSize).isUndefined()
+             // && !wgConfig.value(amnezia::config_key::cookieReplyPacketJunkSize).isUndefined()
+             // && !wgConfig.value(amnezia::config_key::transportPacketJunkSize).isUndefined()
              && !wgConfig.value(amnezia::config_key::initPacketMagicHeader).isUndefined()
              && !wgConfig.value(amnezia::config_key::responsePacketMagicHeader).isUndefined()
              && !wgConfig.value(amnezia::config_key::underloadPacketMagicHeader).isUndefined()
              && !wgConfig.value(amnezia::config_key::transportPacketMagicHeader).isUndefined()
-             && !wgConfig.value(amnezia::config_key::specialJunk1).isUndefined()
+/*             && !wgConfig.value(amnezia::config_key::specialJunk1).isUndefined()
              && !wgConfig.value(amnezia::config_key::specialJunk2).isUndefined()
              && !wgConfig.value(amnezia::config_key::specialJunk3).isUndefined()
              && !wgConfig.value(amnezia::config_key::specialJunk4).isUndefined()
@@ -278,27 +278,27 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
              && !wgConfig.value(amnezia::config_key::controlledJunk1).isUndefined()
              && !wgConfig.value(amnezia::config_key::controlledJunk2).isUndefined()
              && !wgConfig.value(amnezia::config_key::controlledJunk3).isUndefined()
-             && !wgConfig.value(amnezia::config_key::specialHandshakeTimeout).isUndefined()) {
+             && !wgConfig.value(amnezia::config_key::specialHandshakeTimeout).isUndefined()*/) {
     json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
     json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
     json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));
     json.insert(amnezia::config_key::initPacketJunkSize, wgConfig.value(amnezia::config_key::initPacketJunkSize));
     json.insert(amnezia::config_key::responsePacketJunkSize, wgConfig.value(amnezia::config_key::responsePacketJunkSize));
-    json.insert(amnezia::config_key::cookieReplyPacketJunkSize, wgConfig.value(amnezia::config_key::cookieReplyPacketJunkSize));
-    json.insert(amnezia::config_key::transportPacketJunkSize, wgConfig.value(amnezia::config_key::transportPacketJunkSize));
+    // json.insert(amnezia::config_key::cookieReplyPacketJunkSize, wgConfig.value(amnezia::config_key::cookieReplyPacketJunkSize));
+    // json.insert(amnezia::config_key::transportPacketJunkSize, wgConfig.value(amnezia::config_key::transportPacketJunkSize));
     json.insert(amnezia::config_key::initPacketMagicHeader, wgConfig.value(amnezia::config_key::initPacketMagicHeader));
     json.insert(amnezia::config_key::responsePacketMagicHeader, wgConfig.value(amnezia::config_key::responsePacketMagicHeader));
     json.insert(amnezia::config_key::underloadPacketMagicHeader, wgConfig.value(amnezia::config_key::underloadPacketMagicHeader));
     json.insert(amnezia::config_key::transportPacketMagicHeader, wgConfig.value(amnezia::config_key::transportPacketMagicHeader));
-    json.insert(amnezia::config_key::specialJunk1, wgConfig.value(amnezia::config_key::specialJunk1));
-    json.insert(amnezia::config_key::specialJunk2, wgConfig.value(amnezia::config_key::specialJunk2));
-    json.insert(amnezia::config_key::specialJunk3, wgConfig.value(amnezia::config_key::specialJunk3));
-    json.insert(amnezia::config_key::specialJunk4, wgConfig.value(amnezia::config_key::specialJunk4));
-    json.insert(amnezia::config_key::specialJunk5, wgConfig.value(amnezia::config_key::specialJunk5));
-    json.insert(amnezia::config_key::controlledJunk1, wgConfig.value(amnezia::config_key::controlledJunk1));
-    json.insert(amnezia::config_key::controlledJunk2, wgConfig.value(amnezia::config_key::controlledJunk2));
-    json.insert(amnezia::config_key::controlledJunk3, wgConfig.value(amnezia::config_key::controlledJunk3));
-    json.insert(amnezia::config_key::specialHandshakeTimeout, wgConfig.value(amnezia::config_key::specialHandshakeTimeout));
+    // json.insert(amnezia::config_key::specialJunk1, wgConfig.value(amnezia::config_key::specialJunk1));
+    // json.insert(amnezia::config_key::specialJunk2, wgConfig.value(amnezia::config_key::specialJunk2));
+    // json.insert(amnezia::config_key::specialJunk3, wgConfig.value(amnezia::config_key::specialJunk3));
+    // json.insert(amnezia::config_key::specialJunk4, wgConfig.value(amnezia::config_key::specialJunk4));
+    // json.insert(amnezia::config_key::specialJunk5, wgConfig.value(amnezia::config_key::specialJunk5));
+    // json.insert(amnezia::config_key::controlledJunk1, wgConfig.value(amnezia::config_key::controlledJunk1));
+    // json.insert(amnezia::config_key::controlledJunk2, wgConfig.value(amnezia::config_key::controlledJunk2));
+    // json.insert(amnezia::config_key::controlledJunk3, wgConfig.value(amnezia::config_key::controlledJunk3));
+    // json.insert(amnezia::config_key::specialHandshakeTimeout, wgConfig.value(amnezia::config_key::specialHandshakeTimeout));
   }
 
   write(json);

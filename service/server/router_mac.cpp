@@ -158,6 +158,9 @@ bool RouterMac::updateResolvers(const QString& ifname, const QList<QHostAddress>
     return m_dnsUtil->updateResolvers(ifname, resolvers);
 }
 
+bool RouterMac::restoreResolvers() {
+    return m_dnsUtil->restoreResolvers();
+}
 
 bool RouterMac::deleteTun(const QString &dev)
 {

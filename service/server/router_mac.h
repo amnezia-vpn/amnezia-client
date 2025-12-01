@@ -33,6 +33,7 @@ public:
     bool createTun(const QString &dev, const QString &subnet);
     bool deleteTun(const QString &dev);
     bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
+    bool restoreResolvers();
     
 public slots:
 

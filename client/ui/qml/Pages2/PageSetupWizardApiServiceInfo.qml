@@ -21,7 +21,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -87,7 +87,7 @@ PageType {
                 textFormat: Text.RichText
                 text: {
                     var text = ApiServicesModel.getSelectedServiceData("features")
-                    return text.replace("%1", LanguageModel.getCurrentSiteUrl("free"))
+                    return text.replace("%1", LanguageModel.getCurrentSiteUrl("free")).replace("/free", "") // todo link should come from gateway
                 }
 
                 MouseArea {

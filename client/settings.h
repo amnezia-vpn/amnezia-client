@@ -174,7 +174,7 @@ public:
 
     QLocale getAppLanguage()
     {
-        QString localeStr = m_settings.value("Conf/appLanguage").toString();
+        QString localeStr = m_settings.value("Conf/appLanguage", QLocale::system().name()).toString();
         return QLocale(localeStr);
     };
     void setAppLanguage(QLocale locale)
@@ -236,6 +236,9 @@ public:
     QStringList allowedDnsServers() const;
     void setAllowedDnsServers(const QStringList &servers);
 
+    QStringList readNewsIds() const;
+    void setReadNewsIds(const QStringList &ids);
+
 signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);
@@ -251,7 +254,6 @@ private:
     mutable SecureQSettings m_settings;
 
     QString m_gatewayEndpoint;
-    bool m_isDevGatewayEnv = false;
 };
 
 #endif // SETTINGS_H

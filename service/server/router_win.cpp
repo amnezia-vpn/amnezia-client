@@ -444,6 +444,9 @@ bool RouterWin::updateResolvers(const QString& ifname, const QList<QHostAddress>
     return m_dnsUtil->updateResolvers(ifname, resolvers);
 }
 
+bool RouterWin::restoreResolvers() {
+    return m_dnsUtil->restoreResolvers();
+}
 
 bool RouterWin::StopRoutingIpv6()
 {
