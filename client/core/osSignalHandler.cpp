@@ -53,7 +53,7 @@ namespace
         sigaddset(&set, SIGINT);
         sigaddset(&set, SIGTERM);
 
-        pthread_sigmask(SIBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_BLOCK, &set, nullptr);
 
         signalFd = signalfd(-1, &set, SFD_NONBLOCK | SFD_CLOEXEC);
         if (signalFd < 0)
