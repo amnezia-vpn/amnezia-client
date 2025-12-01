@@ -1,6 +1,5 @@
 import Foundation
 import NetworkExtension
-import WireGuardKitGo
 
 enum XrayErrors: Error {
     case noXrayConfig

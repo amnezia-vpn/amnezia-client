@@ -61,7 +61,7 @@ PageType {
             width: root.width
 
             BackButtonType {
-                Layout.topMargin: 20
+                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
             }
 
             Label {

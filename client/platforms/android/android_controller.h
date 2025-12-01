@@ -73,6 +73,8 @@ signals:
     void importConfigFromOutside(QString config);
     void initConnectionState(Vpn::ConnectionState state);
     void authenticationResult(bool result);
+    void imeInsetsChanged(int heightDp);
+    void systemBarsInsetsChanged(int navBarHeightDp, int statusBarHeightDp);
 
 private:
     bool isWaitingStatus = true;
@@ -101,6 +103,8 @@ private:
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
     static void onAuthResult(JNIEnv *env, jobject thiz, jboolean result);
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
+    static void onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp);
+    static void onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jint navBarHeightDp, jint statusBarHeightDp);
 
     template <typename Ret, typename ...Args>
     static auto callActivityMethod(const char *methodName, const char *signature, Args &&...args);

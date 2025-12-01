@@ -165,9 +165,11 @@ PageType {
         ScrollBar.vertical: ScrollBarType { policy: ScrollBar.AlwaysOn }
 
         anchors.top: header.bottom
-        anchors.bottom: addAppButton.top
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin + (searchField.textField.activeFocus ? 0 : SettingsController.imeHeight)
         anchors.left: parent.left
         anchors.right: parent.right
+        clip: true
 
         model: SortFilterProxyModel {
             id: proxyAppSplitTunnelingModel
@@ -215,50 +217,54 @@ PageType {
     }
 
     Rectangle {
-        anchors.fill: addAppButton
-        anchors.bottomMargin: -24 - SettingsController.safeAreaBottomMargin
-        color: AmneziaStyle.color.midnightBlack
-        opacity: 0.8
-    }
-
-    RowLayout {
-        id: addAppButton
-
-        enabled: root.pageEnabled
-
-        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 24
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
-        anchors.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
+        anchors.bottom: parent.bottom
+        
+        height: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin
+        
+        color: AmneziaStyle.color.midnightBlack
+        opacity: 0.8
+        
+        RowLayout {
+            id: addAppButton
 
-        TextFieldWithHeaderType {
-            id: searchField
+            enabled: root.pageEnabled
 
-            Layout.fillWidth: true
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 24
+            anchors.rightMargin: 16
+            anchors.leftMargin: 16
+            anchors.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
 
-            textField.placeholderText: qsTr("application name")
-            buttonImageSource: "qrc:/images/controls/plus.svg"
+            TextFieldWithHeaderType {
+                id: searchField
 
-            rightButtonClickedOnEnter: true
+                Layout.fillWidth: true
 
-            clickedFunc: function() {
-                searchField.focus = false
-                PageController.showBusyIndicator(true)
+                textField.placeholderText: qsTr("application name")
+                buttonImageSource: "qrc:/images/controls/plus.svg"
 
-                if (Qt.platform.os === "windows") {
-                    var fileName = SystemController.getFileName(qsTr("Open executable file"),
-                                                                qsTr("Executable files (*.*)"))
-                    if (fileName !== "") {
-                        AppSplitTunnelingController.addApp(fileName)
+                rightButtonClickedOnEnter: true
+
+                clickedFunc: function() {
+                    searchField.focus = false
+                    PageController.showBusyIndicator(true)
+
+                    if (Qt.platform.os === "windows") {
+                        var fileName = SystemController.getFileName(qsTr("Open executable file"),
+                                                                    qsTr("Executable files (*.*)"))
+                        if (fileName !== "") {
+                            AppSplitTunnelingController.addApp(fileName)
+                        }
+                    } else if (Qt.platform.os === "android"){
+                        installedAppDrawer.openTriggered()
                     }
-                } else if (Qt.platform.os === "android"){
-                    installedAppDrawer.openTriggered()
-                }
 
-                PageController.showBusyIndicator(false)
+                    PageController.showBusyIndicator(false)
+                }
             }
         }
     }

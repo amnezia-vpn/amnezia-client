@@ -165,6 +165,7 @@ bool IpcServer::StartRoutingIpv6()
 {
     return Router::StartRoutingIpv6();
 }
+
 bool IpcServer::StopRoutingIpv6()
 {
     return Router::StopRoutingIpv6();

@@ -35,6 +35,10 @@ import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.Insets
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
@@ -300,11 +304,44 @@ class AmneziaActivity : QtActivity() {
                 isAppearanceLightStatusBars = false
                 isAppearanceLightNavigationBars = false
             }
+
+            // Workaround for Android 14 (API 34+) IME adjustResize bug
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                setupImeInsetsListener()
+            }
         } else {
             window.apply {
                 addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                 statusBarColor = getColor(R.color.black)
             }
+        }
+    }
+
+    private fun setupImeInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
+            val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
+            val imeVisible = windowInsets.isVisible(WindowInsetsCompat.Type.ime())
+            
+            val imeHeight = if (imeVisible) imeInsets.bottom else 0
+
+            val density = resources.displayMetrics.density
+            val imeHeightDp = (imeHeight / density).toInt()
+            
+            // Also track system bars (navigation bar, status bar) changes
+            val systemBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val navBarHeight = systemBarsInsets.bottom
+            val navBarHeightDp = (navBarHeight / density).toInt()
+            val statusBarHeight = systemBarsInsets.top
+            val statusBarHeightDp = (statusBarHeight / density).toInt()
+            
+            mainScope.launch {
+                qtInitialized.await()
+                QtAndroidController.onImeInsetsChanged(imeHeightDp)
+                QtAndroidController.onSystemBarsInsetsChanged(navBarHeightDp, statusBarHeightDp)
+            }
+            
+            // Return windowInsets instead of CONSUMED to allow proper handling
+            windowInsets
         }
     }
 

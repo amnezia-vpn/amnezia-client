@@ -20,10 +20,12 @@ PageType {
             PageController.showBusyIndicator(false)
         }
         
-        function onErrorOccurred(errorCode) {
-            PageController.showErrorMessage(errorCode)
-            PageController.closePage()
-            PageController.showBusyIndicator(false)
+        function onErrorOccurred(errorCode, showError) {
+            if (showError) {
+                PageController.showErrorMessage(errorCode)
+                PageController.closePage()
+                PageController.showBusyIndicator(false)
+            }
         }
     }
 
@@ -153,7 +155,7 @@ PageType {
                 return;
             }
             PageController.showBusyIndicator(true)
-            ApiNewsController.fetchNews()
+            ApiNewsController.fetchNews(true)
             PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
         }
     }

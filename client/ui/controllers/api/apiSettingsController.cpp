@@ -46,7 +46,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     if (reload) {
         QEventLoop wait;
         QTimer::singleShot(1000, &wait, &QEventLoop::quit);
-        wait.exec();
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
 
     GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), requestTimeoutMsecs,

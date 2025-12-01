@@ -183,7 +183,7 @@ Window  {
             id: privateKeyPassphraseDrawer
 
             anchors.fill: parent
-            expandedHeight: root.height * 0.35 + SettingsController.safeAreaBottomMargin
+            expandedHeight: root.height * 0.35 + SettingsController.safeAreaBottomMargin + SettingsController.imeHeight
 
             expandedStateContent: ColumnLayout {
                 anchors.top: parent.top
