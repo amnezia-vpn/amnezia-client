@@ -51,6 +51,10 @@ ListViewType {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
                         break
                     }
+                    case ContainerEnum.CryptPad: {
+                        PageController.goToPage(PageEnum.PageServiceCryptpadSettings)
+                        break
+                    }
                     default: {
                         ProtocolsModel.updateModel(config)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)

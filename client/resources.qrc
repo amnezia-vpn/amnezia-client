@@ -108,6 +108,10 @@
         <file>server_scripts/socks5_proxy/Dockerfile</file>
         <file>server_scripts/socks5_proxy/run_container.sh</file>
         <file>server_scripts/socks5_proxy/start.sh</file>
+        <file>server_scripts/cryptpad/configure_container.sh</file>
+        <file>server_scripts/cryptpad/Dockerfile</file>
+        <file>server_scripts/cryptpad/run_container.sh</file>
+        <file>server_scripts/cryptpad/start.sh</file>
         <file>server_scripts/website_tor/configure_container.sh</file>
         <file>server_scripts/website_tor/Dockerfile</file>
         <file>server_scripts/website_tor/run_container.sh</file>
@@ -196,6 +200,7 @@
         <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
         <file>ui/qml/Pages2/PageServiceSocksProxySettings.qml</file>
         <file>ui/qml/Pages2/PageServiceTorWebsiteSettings.qml</file>
+        <file>ui/qml/Pages2/PageServiceCryptpadSettings.qml</file>
         <file>ui/qml/Pages2/PageSettings.qml</file>
         <file>ui/qml/Pages2/PageSettingsAbout.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiAvailableCountries.qml</file>
