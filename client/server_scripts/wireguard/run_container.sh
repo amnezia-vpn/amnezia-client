@@ -1,3 +1,8 @@
+# Create docker volume if not exists
+if ! sudo docker volume ls | grep -q $CONTAINER_NAME; then
+    sudo docker volume create $CONTAINER_NAME
+fi
+
 # Run container
 sudo docker run -d \
 --log-driver none \
@@ -7,6 +12,7 @@ sudo docker run -d \
 --cap-add=SYS_MODULE \
 -p $WIREGUARD_SERVER_PORT:$WIREGUARD_SERVER_PORT/udp \
 -v /lib/modules:/lib/modules \
+-v $CONTAINER_NAME:/opt/amnezia \
 --sysctl="net.ipv4.conf.all.src_valid_mark=1" \
 --name $CONTAINER_NAME \
 $CONTAINER_NAME

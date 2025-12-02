@@ -1,13 +1,20 @@
 mkdir -p /opt/amnezia/awg
 cd /opt/amnezia/awg
-WIREGUARD_SERVER_PRIVATE_KEY=$(wg genkey)
-echo $WIREGUARD_SERVER_PRIVATE_KEY > /opt/amnezia/awg/wireguard_server_private_key.key
 
-WIREGUARD_SERVER_PUBLIC_KEY=$(echo $WIREGUARD_SERVER_PRIVATE_KEY | wg pubkey)
-echo $WIREGUARD_SERVER_PUBLIC_KEY > /opt/amnezia/awg/wireguard_server_public_key.key
+if [ ! -f /opt/amnezia/wireguard/wireguard_server_private_key.key ]; then
+    WIREGUARD_SERVER_PRIVATE_KEY=$(wg genkey)
+fi
+echo $WIREGUARD_SERVER_PRIVATE_KEY > /opt/amnezia/wireguard/wireguard_server_private_key.key
 
-WIREGUARD_PSK=$(wg genpsk)
-echo $WIREGUARD_PSK > /opt/amnezia/awg/wireguard_psk.key
+if [ ! -f /opt/amnezia/wireguard/wireguard_server_private_key.key ]; then
+    WIREGUARD_SERVER_PUBLIC_KEY=$(echo $WIREGUARD_SERVER_PRIVATE_KEY | wg pubkey)
+fi
+echo $WIREGUARD_SERVER_PUBLIC_KEY > /opt/amnezia/wireguard/wireguard_server_public_key.key
+
+if [ ! -f /opt/amnezia/wireguard/wireguard_psk.key ]; then
+    WIREGUARD_PSK=$(wg genpsk)
+fi
+echo $WIREGUARD_PSK > /opt/amnezia/wireguard/wireguard_psk.key
 
 cat > /opt/amnezia/awg/wg0.conf <<EOF
 [Interface]
