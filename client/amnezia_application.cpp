@@ -13,6 +13,8 @@
 #include <QTimer>
 #include <QTranslator>
 #include <QEvent>
+#include <QDir>
+#include <QSettings>
 
 #include "logger.h"
 #include "ui/controllers/pageController.h"
@@ -53,7 +55,19 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
 
 AmneziaApplication::~AmneziaApplication()
 {
+    if (m_vpnConnection) {
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::QueuedConnection);
+        QThread::msleep(2000);
+    }
+
+    m_vpnConnectionThread.requestInterruption();
     m_vpnConnectionThread.quit();
+
+    if (!m_vpnConnectionThread.wait(3000)) {
+        m_vpnConnectionThread.terminate();
+        m_vpnConnectionThread.wait(500);
+    }
 
     if (m_engine) {
         QObject::disconnect(m_engine, 0, 0, 0);
@@ -61,8 +75,24 @@ AmneziaApplication::~AmneziaApplication()
     }
 }
 
+#ifdef Q_OS_ANDROID
+namespace {
+    static void clearQtCaches()
+    {
+        const QString cacheRoot = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+        if (!cacheRoot.isEmpty()) {
+            QDir(cacheRoot + "/QtShaderCache").removeRecursively();
+            QDir(cacheRoot + "/qmlcache").removeRecursively();
+        }
+    }
+}
+#endif
+
 void AmneziaApplication::init()
 {
+#ifdef Q_OS_ANDROID
+    clearQtCaches();
+#endif
     m_engine = new QQmlApplicationEngine;
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));

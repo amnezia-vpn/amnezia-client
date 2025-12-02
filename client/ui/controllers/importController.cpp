@@ -208,6 +208,7 @@ bool ImportController::extractConfigFromData(QString data)
     }
     case ConfigTypes::Invalid: {
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
+        m_configFileName.clear();
         break;
     }
     }
@@ -339,6 +340,11 @@ void ImportController::importConfig()
     m_config = {};
     m_configFileName.clear();
     m_maliciousWarningText.clear();
+}
+
+void ImportController::clearConfigFileName()
+{
+    m_configFileName.clear();
 }
 
 QJsonObject ImportController::extractOpenVpnConfig(const QString &data)

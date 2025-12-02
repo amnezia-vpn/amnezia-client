@@ -12,7 +12,7 @@ class IpcInterface
     SLOT( int routeAddList(const QString &gw, const QStringList &ips) );
     SLOT( bool clearSavedRoutes() );
     SLOT( bool routeDeleteList(const QString &gw, const QStringList &ip) );
-    SLOT( void flushDns() );
+    SLOT( bool flushDns() );
     SLOT( void resetIpStack() );
 
     SLOT( bool checkAndInstallDriver() );
@@ -25,8 +25,8 @@ class IpcInterface
     SLOT( bool createTun(const QString &dev, const QString &subnet) );
     SLOT( bool deleteTun(const QString &dev) );
 
-    SLOT( void StartRoutingIpv6() );
-    SLOT( void StopRoutingIpv6() );
+    SLOT( bool StartRoutingIpv6() );
+    SLOT( bool StopRoutingIpv6() );
 
     SLOT( bool disableKillSwitch() );
     SLOT( bool disableAllTraffic() );

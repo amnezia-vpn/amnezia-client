@@ -304,9 +304,12 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
+        
+        // Also adjust TabBar position when keyboard appears (Android 14+ workaround)
+        anchors.bottomMargin: SettingsController.imeHeight
 
         topPadding: 8
-        bottomPadding: 8
+        bottomPadding: 8 + SettingsController.safeAreaBottomMargin
         leftPadding: 96
         rightPadding: 96
 

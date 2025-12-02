@@ -82,7 +82,7 @@ void ApiPremV1MigrationController::sendMigrationCode(const int subscriptionIndex
 {
     QEventLoop wait;
     QTimer::singleShot(1000, &wait, &QEventLoop::quit);
-    wait.exec();
+    wait.exec(QEventLoop::ExcludeUserInputEvents);
 
     GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                         m_settings->isStrictKillSwitchEnabled());

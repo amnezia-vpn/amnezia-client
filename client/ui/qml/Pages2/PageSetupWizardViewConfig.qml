@@ -22,7 +22,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
         
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -32,9 +32,18 @@ PageType {
     }
 
     Connections {
+        target: PageController
+
+        function onClosePage() {
+            ImportController.clearConfigFileName()
+        }
+    }
+
+    Connections {
         target: ImportController
 
         function onImportErrorOccurred(error, goToPageHome) {
+            PageController.showBusyIndicator(false)
             if (goToPageHome) {
                 PageController.goToStartPage()
             } else {
@@ -43,6 +52,7 @@ PageType {
         }
 
         function onImportFinished() {
+            PageController.showBusyIndicator(false)
             if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
                 ServersModel.processedIndex = ServersModel.defaultIndex
@@ -216,6 +226,7 @@ PageType {
                     if (cloakingCheckBoxItem.checked) {
                         ImportController.processNativeWireGuardConfig()
                     }
+                    PageController.showBusyIndicator(true)
                     ImportController.importConfig()
                 }
             }

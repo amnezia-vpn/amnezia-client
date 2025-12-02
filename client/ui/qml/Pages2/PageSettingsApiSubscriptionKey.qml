@@ -61,7 +61,7 @@ PageType {
             width: root.width
 
             BackButtonType {
-                Layout.topMargin: 20
+                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
             }
 
             Label {
@@ -119,7 +119,7 @@ PageType {
 
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        ExportController.exportConfig(fileName)
+                        ApiConfigsController.exportVpnKey(fileName)
                         PageController.showBusyIndicator(false)
                     }
                 }

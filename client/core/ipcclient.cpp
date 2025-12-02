@@ -105,8 +105,9 @@ bool IpcClient::init(IpcClient *instance)
     }
 
     qDebug() << "IpcClient::init succeed";
+    instance->m_isSocketConnected = (Instance()->m_ipcClient->isReplicaValid() && Instance()->m_Tun2SocksClient->isReplicaValid());
 
-    return (Instance()->m_ipcClient->isReplicaValid() && Instance()->m_Tun2SocksClient->isReplicaValid());
+    return Instance()->isSocketConnected();
 }
 
 QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()

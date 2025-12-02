@@ -42,14 +42,14 @@ int Router::routeDeleteList(const QString &gw, const QStringList &ips)
 #endif
 }
 
-void Router::flushDns()
+bool Router::flushDns()
 {
 #ifdef Q_OS_WIN
-    RouterWin::Instance().flushDns();
+    return RouterWin::Instance().flushDns();
 #elif defined (Q_OS_MAC)
-    RouterMac::Instance().flushDns();
+    return RouterMac::Instance().flushDns();
 #elif defined Q_OS_LINUX
-    RouterLinux::Instance().flushDns();
+    return RouterLinux::Instance().flushDns();
 #endif
 }
 
@@ -111,25 +111,25 @@ bool Router::restoreResolvers() {
 #endif
 }
 
-void Router::StopRoutingIpv6()
+bool Router::StopRoutingIpv6()
 {
 #ifdef Q_OS_WIN
-    RouterWin::Instance().StopRoutingIpv6();
+    return RouterWin::Instance().StopRoutingIpv6();
 #elif defined (Q_OS_MAC)
-    // todo fixme
+    return true;// todo fixme
 #elif defined Q_OS_LINUX
-    RouterLinux::Instance().StopRoutingIpv6();
+    return RouterLinux::Instance().StopRoutingIpv6();
 #endif
 }
 
-void Router::StartRoutingIpv6()
+bool Router::StartRoutingIpv6()
 {
 #ifdef Q_OS_WIN
-    RouterWin::Instance().StartRoutingIpv6();
+    return RouterWin::Instance().StartRoutingIpv6();
 #elif defined (Q_OS_MAC)
-    // todo fixme
+    return true;// todo fixme
 #elif defined Q_OS_LINUX
-    RouterLinux::Instance().StartRoutingIpv6();
+    return RouterLinux::Instance().StartRoutingIpv6();
 #endif
 }
 

@@ -28,6 +28,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.h
+    ${CLIENT_ROOT_DIR}/core/osSignalHandler.h
 )
 
 # Mozilla headres
@@ -78,6 +79,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/../common/logger/logger.cpp
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/osSignalHandler.cpp
 )
 
 # Mozilla sources
@@ -173,7 +175,7 @@ if(WIN32)
     )
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
 
@@ -201,5 +203,16 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/awgprotocol.cpp
+    )
+endif()
+
+if(APPLE AND MACOS_NE)
+    # Include only the tray notification handler in NE builds
+    set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.h
+    )
+
+    set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
     )
 endif()

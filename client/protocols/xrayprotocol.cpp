@@ -166,10 +166,17 @@ ErrorCode XrayProtocol::startTun2Sock()
 
 void XrayProtocol::stop()
 {
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    IpcClient::Interface()->disableKillSwitch();
-    IpcClient::Interface()->StartRoutingIpv6();
-    IpcClient::Interface()->restoreResolvers();
+#ifdef AMNEZIA_DESKTOP
+    QRemoteObjectPendingReply<bool> disableKillSwitchResp = IpcClient::Interface()->disableKillSwitch();
+    disableKillSwitchResp.waitForFinished(1000);
+    QRemoteObjectPendingReply<bool> StartRoutingIpv6Resp = IpcClient::Interface()->StartRoutingIpv6();
+    StartRoutingIpv6Resp.waitForFinished(1000);
+    QRemoteObjectPendingReply<bool> restoreResolvers = IpcClient::Interface()->restoreResolvers();
+    restoreResolvers.waitForFinished(1000);
+#if !defined(Q_OS_MACOS)
+    QRemoteObjectPendingReply<bool> deleteTunResp = IpcClient::Interface()->deleteTun("tun2");
+    deleteTunResp.waitForFinished(1000);
+#endif
 #endif
     qDebug() << "XrayProtocol::stop()";
     m_xrayProcess.disconnect();
@@ -177,6 +184,7 @@ void XrayProtocol::stop()
     m_xrayProcess.waitForFinished(3000);
     if (m_t2sProcess) {
         m_t2sProcess->stop();
+        QThread::msleep(200);
     }
 
     setConnectionState(Vpn::ConnectionState::Disconnected);

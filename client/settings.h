@@ -254,7 +254,6 @@ private:
     mutable SecureQSettings m_settings;
 
     QString m_gatewayEndpoint;
-    bool m_isDevGatewayEnv = true;
 };
 
 #endif // SETTINGS_H

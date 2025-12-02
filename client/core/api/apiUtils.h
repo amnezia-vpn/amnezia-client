@@ -23,6 +23,7 @@ namespace apiUtils
                                                const QByteArray &responseBody);
 
     QString getPremiumV1VpnKey(const QJsonObject &serverConfigObject);
+    QString getPremiumV2VpnKey(const QJsonObject &serverConfigObject);
 }
 
 #endif // APIUTILS_H

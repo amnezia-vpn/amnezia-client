@@ -162,3 +162,51 @@ QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
 
     return QString("vpn://%1").arg(QString(signedData.toBase64(QByteArray::Base64UrlEncoding)));
 }
+
+QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
+{
+    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV2) {
+        return {};
+    }
+
+    QString vpnKeyText = "";
+
+    auto apiConfig = serverConfigObject.value(apiDefs::key::apiConfig).toObject();
+    auto authData = serverConfigObject.value(QLatin1String("auth_data")).toObject();
+
+    const QString name = serverConfigObject.value(apiDefs::key::name).toString();
+    const QString description = serverConfigObject.value(apiDefs::key::description).toString();
+    const double configVersion = serverConfigObject.value(apiDefs::key::configVersion).toDouble();
+
+    const QString serviceType = apiConfig.value(apiDefs::key::serviceType).toString();
+    const QString serviceProtocol = apiConfig.value(QLatin1String("service_protocol")).toString();
+    const QString userCountryCode = apiConfig.value(QLatin1String("user_country_code")).toString();
+
+    const QString apiKey = authData.value(apiDefs::key::apiKey).toString();
+
+    QString vpnKeyStr = "{";
+    vpnKeyStr += "\"" + QString(apiDefs::key::name) + "\": \"" + name + "\", ";
+    vpnKeyStr += "\"" + QString(apiDefs::key::description) + "\": \"" + description + "\", ";
+    vpnKeyStr += "\"" + QString(apiDefs::key::configVersion) + "\": " + QString::number(static_cast<int>(configVersion)) + ", ";
+
+    vpnKeyStr += "\"" + QString(apiDefs::key::apiConfig) + "\": {";
+    vpnKeyStr += "\"" + QString(apiDefs::key::serviceType) + "\": \"" + serviceType + "\", ";
+    vpnKeyStr += "\"service_protocol\": \"" + serviceProtocol + "\", ";
+    vpnKeyStr += "\"user_country_code\": \"" + userCountryCode + "\"";
+    vpnKeyStr += "}, ";
+
+    vpnKeyStr += "\"auth_data\": {";
+    vpnKeyStr += "\"" + QString(apiDefs::key::apiKey) + "\": \"" + apiKey + "\"";
+    vpnKeyStr += "}";
+
+    vpnKeyStr += "}";
+
+    QByteArray vpnKeyCompressed = escapeUnicode(vpnKeyStr).toUtf8();
+    vpnKeyCompressed = qCompress(vpnKeyCompressed, 6);
+    vpnKeyCompressed = vpnKeyCompressed.mid(4);
+
+    QByteArray signedData = AMNEZIA_CONFIG_SIGNATURE + vpnKeyCompressed;
+    vpnKeyText = QString("vpn://%1").arg(QString(signedData.toBase64(QByteArray::Base64UrlEncoding)));
+
+    return vpnKeyText;
+}

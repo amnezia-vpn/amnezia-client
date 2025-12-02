@@ -169,7 +169,7 @@ bool RouterMac::deleteTun(const QString &dev)
     return true;
 }
 
-void RouterMac::flushDns()
+bool RouterMac::flushDns()
 {
     // sudo killall -HUP mDNSResponder
     QProcess p;
@@ -177,5 +177,7 @@ void RouterMac::flushDns()
 
     p.start("killall", QStringList() << "-HUP" << "mDNSResponder");
     p.waitForFinished();
+    
     qDebug().noquote() << "OUTPUT killall -HUP mDNSResponder: " + p.readAll();
+    return true;
 }

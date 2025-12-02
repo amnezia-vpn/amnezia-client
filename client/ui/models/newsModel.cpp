@@ -78,34 +78,28 @@ void NewsModel::setProcessedIndex(int index)
 
 void NewsModel::updateModel(const QJsonArray &serverItems)
 {
-    QSet<QString> existingIds;
-    for (const NewsItem &item : m_items) {
-        existingIds.insert(item.id);
-    }
+    QList<NewsItem> updatedItems;
 
-    QList<NewsItem> newItems;
     for (const QJsonValue &value : serverItems) {
         if (!value.isObject())
             continue;
-        const QJsonObject obj = value.toObject();
-        QString id = obj.value("id").toString();
 
-        if (!existingIds.contains(id)) {
-            NewsItem item;
-            item.id = id;
-            item.title = obj.value("title").toString();
-            item.content = obj.value("content").toString();
-            item.timestamp = QDateTime::fromString(obj.value("timestamp").toString(), Qt::ISODate);
-            item.read = m_readIds.contains(id);
-            newItems.append(item);
-            existingIds.insert(id);
-        }
+        QJsonObject object = value.toObject();
+        
+        NewsItem item;
+        item.id = object.value("id").toString();
+        item.title = object.value("title").toString();
+        item.content = object.value("content").toString();
+        item.timestamp = QDateTime::fromString(object.value("timestamp").toString(), Qt::ISODate);
+        item.read = m_readIds.contains(object.value("id").toString());
+        updatedItems.append(item);
     }
 
     beginResetModel();
-    m_items.append(newItems);
+    m_items = updatedItems;
     std::sort(m_items.begin(), m_items.end(), [](const NewsItem &a, const NewsItem &b) { return a.timestamp > b.timestamp; });
     endResetModel();
+    loadReadIds();
     emit hasUnreadChanged();
 }
 

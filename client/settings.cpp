@@ -541,12 +541,12 @@ QString Settings::getGatewayEndpoint()
 
 bool Settings::isDevGatewayEnv()
 {
-    return m_isDevGatewayEnv;
+    return value("Conf/devGatewayEnv", false).toBool();
 }
 
 void Settings::toggleDevGatewayEnv(bool enabled)
 {
-    m_isDevGatewayEnv = enabled;
+    setValue("Conf/devGatewayEnv", enabled);
 }
 
 bool Settings::isHomeAdLabelVisible()

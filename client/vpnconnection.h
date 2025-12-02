@@ -58,6 +58,7 @@ public slots:
     void deleteRoutes(const QStringList &ips);
     void flushDns();
     void onKillSwitchModeChanged(bool enabled);
+    void disconnectSlots();
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -108,6 +109,7 @@ private:
    void appendSplitTunnelingConfig();
    void appendKillSwitchConfig();
    bool startNetworkCheckIfReady();
+   bool InterfaceReady();
 };
 
 #endif // VPNCONNECTION_H

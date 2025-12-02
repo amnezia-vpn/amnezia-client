@@ -39,11 +39,11 @@ public:
     int routeAddList(const QString &gw, const QStringList &ips);
     bool clearSavedRoutes();
     int routeDeleteList(const QString &gw, const QStringList &ips);
-    void flushDns();
+    bool flushDns();
     void resetIpStack();
 
-    void StartRoutingIpv6();
-    void StopRoutingIpv6();
+    bool StartRoutingIpv6();
+    bool StopRoutingIpv6();
 
     void suspendWcmSvc(bool suspend);
     bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);

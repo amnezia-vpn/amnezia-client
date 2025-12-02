@@ -59,7 +59,7 @@ PageType {
         id: listView
 
         anchors.fill: parent
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
         anchors.bottomMargin: 24
 
         model: supportModel

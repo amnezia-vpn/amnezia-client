@@ -34,7 +34,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
     }
 
     FlickableType {
@@ -63,6 +63,18 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: newsItem.content
+
+                textFormat: Text.RichText
+
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
         }
     }
