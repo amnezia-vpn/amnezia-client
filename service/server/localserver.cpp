@@ -1,11 +1,15 @@
+#include "localserver.h"
+
 #include <QCoreApplication>
+#include <QDebug>
 #include <QFileInfo>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QObject>
+#include <QSharedPointer>
+#include <QString>
 
 #include "ipc.h"
-#include "localserver.h"
-
 #include "killswitch.h"
 #include "logger.h"
 
@@ -46,6 +50,9 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
         return;
     }
 
+    m_networkWatcher.initialize();
+    connect(&m_networkWatcher, &NetworkWatcher::sleepMode, &m_ipcServer, &IpcServer::networkChange);
+    connect(&m_networkWatcher, &NetworkWatcher::networkChange, &m_ipcServer, &IpcServer::networkChange);
     KillSwitch::instance()->init();
 
 #ifdef Q_OS_LINUX

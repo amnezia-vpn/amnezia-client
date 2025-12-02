@@ -1,9 +1,17 @@
 #include "ipcserver.h"
 
 #include <QDateTime>
+#include <QDebug>
 #include <QFileInfo>
+#include <QHostAddress>
+#include <QJsonObject>
+#include <QLocalServer>
 #include <QLocalSocket>
 #include <QObject>
+#include <QRemoteObjectHost>
+#include <QRemoteObjectNode>
+#include <QString>
+#include <QStringList>
 
 #include "logger.h"
 #include "router.h"
@@ -16,8 +24,8 @@
 
 
 IpcServer::IpcServer(QObject *parent) : IpcInterfaceSource(parent)
-
 {
+    connect(&m_pingHelper, &PingHelper::connectionLose, this, &IpcServer::connectionLose);
 }
 
 int IpcServer::createPrivilegedProcess()
@@ -83,7 +91,7 @@ bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
     return Router::routeDeleteList(gw, ips);
 }
 
-void IpcServer::flushDns()
+bool IpcServer::flushDns()
 {
 #ifdef MZ_DEBUG
     qDebug() << "IpcServer::flushDns";
@@ -157,13 +165,18 @@ bool IpcServer::updateResolvers(const QString &ifname, const QList<QHostAddress>
     return Router::updateResolvers(ifname, resolvers);
 }
 
-void IpcServer::StartRoutingIpv6()
-{
-    Router::StartRoutingIpv6();
+bool IpcServer::restoreResolvers() {
+    return Router::restoreResolvers();
 }
-void IpcServer::StopRoutingIpv6()
+
+bool IpcServer::StartRoutingIpv6()
 {
-    Router::StopRoutingIpv6();
+    return Router::StartRoutingIpv6();
+}
+
+bool IpcServer::StopRoutingIpv6()
+{
+    return Router::StopRoutingIpv6();
 }
 
 void IpcServer::setLogsEnabled(bool enabled)
@@ -177,6 +190,20 @@ void IpcServer::setLogsEnabled(bool enabled)
     } else {
         Logger::deInit();
     }
+}
+
+bool IpcServer::startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address)
+{
+    qDebug() << "startNetworkCheck";
+    m_pingHelper.start(serverIpv4Gateway, deviceIpv4Address);
+    return true;
+}
+
+bool IpcServer::stopNetworkCheck()
+{
+    qDebug() << "stopNetworkCheck";
+    m_pingHelper.stop();
+    return true;
 }
 
 bool IpcServer::resetKillSwitchAllowedRange(QStringList ranges)

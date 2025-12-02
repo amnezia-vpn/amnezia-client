@@ -23,6 +23,7 @@ class LinuxNetworkWatcherWorker final : public QObject {
 
  signals:
   void unsecuredNetwork(const QString& networkName, const QString& networkId);
+  void sleepMode();
 
  public slots:
   void initialize();
@@ -30,6 +31,7 @@ class LinuxNetworkWatcherWorker final : public QObject {
  private slots:
   void propertyChanged(QString interface, QVariantMap properties,
                        QStringList list);
+  void NMStateChanged(quint32 state);
 
  private:
   // We collect the list of DBus wifi network device paths during the

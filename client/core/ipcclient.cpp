@@ -18,6 +18,22 @@ bool IpcClient::isSocketConnected() const
     return m_isSocketConnected;
 }
 
+void IpcClient::closeAndResetInstance(bool deleteSelf)
+{
+    if (m_localSocket)
+    {
+        m_localSocket->disconnectFromServer();
+        m_localSocket->deleteLater();
+        m_localSocket.clear();
+    }
+    m_ipcClient.reset();
+    m_Tun2SocksClient.reset();
+    m_isSocketConnected = false;
+    if (deleteSelf) {
+        m_instance = nullptr;
+    }
+}
+
 IpcClient *IpcClient::Instance()
 {
     return m_instance;
@@ -39,6 +55,10 @@ QSharedPointer<IpcProcessTun2SocksReplica> IpcClient::InterfaceTun2Socks()
 
 bool IpcClient::init(IpcClient *instance)
 {
+    if (m_instance && m_instance != instance) {
+        m_instance->closeAndResetInstance(false);
+        m_instance->deleteLater();
+    }
     m_instance = instance;
 
     Instance()->m_localSocket = new QLocalSocket(Instance());
@@ -85,8 +105,9 @@ bool IpcClient::init(IpcClient *instance)
     }
 
     qDebug() << "IpcClient::init succeed";
+    instance->m_isSocketConnected = (Instance()->m_ipcClient->isReplicaValid() && Instance()->m_Tun2SocksClient->isReplicaValid());
 
-    return (Instance()->m_ipcClient->isReplicaValid() && Instance()->m_Tun2SocksClient->isReplicaValid());
+    return Instance()->isSocketConnected();
 }
 
 QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()

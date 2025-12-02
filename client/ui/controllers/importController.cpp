@@ -208,6 +208,7 @@ bool ImportController::extractConfigFromData(QString data)
     }
     case ConfigTypes::Invalid: {
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
+        m_configFileName.clear();
         break;
     }
     }
@@ -274,7 +275,7 @@ void ImportController::processNativeWireGuardConfig()
         auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::WireGuard)).toObject();
         auto clientProtocolConfig = QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
-        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
+        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(4, 7));
         QString junkPacketMinSize = QString::number(10);
         QString junkPacketMaxSize = QString::number(50);
         clientProtocolConfig[config_key::junkPacketCount] = junkPacketCount;
@@ -339,6 +340,11 @@ void ImportController::importConfig()
     m_config = {};
     m_configFileName.clear();
     m_maliciousWarningText.clear();
+}
+
+void ImportController::clearConfigFileName()
+{
+    m_configFileName.clear();
 }
 
 QJsonObject ImportController::extractOpenVpnConfig(const QString &data)

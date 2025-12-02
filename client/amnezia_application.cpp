@@ -13,6 +13,8 @@
 #include <QTimer>
 #include <QTranslator>
 #include <QEvent>
+#include <QDir>
+#include <QSettings>
 
 #include "logger.h"
 #include "ui/controllers/pageController.h"
@@ -25,7 +27,9 @@
 #include <QtQuick/QQuickWindow>  // for QQuickWindow
 #include <QWindow>              // for qobject_cast<QWindow*>
 
-AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv)
+AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv),
+      m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
+      m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs"))
 {
     setQuitOnLastWindowClosed(false);
 
@@ -52,15 +56,17 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
 AmneziaApplication::~AmneziaApplication()
 {
     if (m_vpnConnection) {
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::QueuedConnection);
         QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "deleteLater", Qt::QueuedConnection);
+        QThread::msleep(2000);
     }
 
+    m_vpnConnectionThread.requestInterruption();
     m_vpnConnectionThread.quit();
 
-    if (!m_vpnConnectionThread.wait(5000)) {
+    if (!m_vpnConnectionThread.wait(3000)) {
         m_vpnConnectionThread.terminate();
-        m_vpnConnectionThread.wait();
+        m_vpnConnectionThread.wait(500);
     }
 
     if (m_engine) {
@@ -69,8 +75,24 @@ AmneziaApplication::~AmneziaApplication()
     }
 }
 
+#ifdef Q_OS_ANDROID
+namespace {
+    static void clearQtCaches()
+    {
+        const QString cacheRoot = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+        if (!cacheRoot.isEmpty()) {
+            QDir(cacheRoot + "/QtShaderCache").removeRecursively();
+            QDir(cacheRoot + "/qmlcache").removeRecursively();
+        }
+    }
+}
+#endif
+
 void AmneziaApplication::init()
 {
+#ifdef Q_OS_ANDROID
+    clearQtCaches();
+#endif
     m_engine = new QQmlApplicationEngine;
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
@@ -119,7 +141,7 @@ void AmneziaApplication::init()
     Logger::setServiceLogsEnabled(enabled);
 
 #ifdef Q_OS_WIN //TODO
-    if (m_parser.isSet("a"))
+    if (m_parser.isSet(m_optAutostart))
         m_coreController->pageController()->showOnStartup();
     else
         emit m_coreController->pageController()->raiseMainWindow();
@@ -187,15 +209,12 @@ bool AmneziaApplication::parseCommands()
     m_parser.addHelpOption();
     m_parser.addVersionOption();
 
-    QCommandLineOption c_autostart { { "a", "autostart" }, "System autostart" };
-    m_parser.addOption(c_autostart);
-
-    QCommandLineOption c_cleanup { { "c", "cleanup" }, "Cleanup logs" };
-    m_parser.addOption(c_cleanup);
+    m_parser.addOption(m_optAutostart);
+    m_parser.addOption(m_optCleanup);
     
     m_parser.process(*this);
 
-    if (m_parser.isSet(c_cleanup)) {
+    if (m_parser.isSet(m_optCleanup)) {
         Logger::cleanUp();
         QTimer::singleShot(100, this, [this] { quit(); });
         exec();

@@ -6,6 +6,8 @@ import Qt.labs.platform 1.1
 
 import QtCore
 
+import SortFilterProxyModel 0.2
+
 import PageEnum 1.0
 import Style 1.0
 
@@ -16,6 +18,33 @@ import "../Components"
 
 PageType {
     id: root
+
+    property var processedServer
+
+    Connections {
+        target: ServersModel
+
+        function onProcessedServerChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    SortFilterProxyModel {
+        id: proxyServersModel
+        objectName: "proxyServersModel"
+
+        sourceModel: ServersModel
+        filters: [
+            ValueFilter {
+                roleName: "isCurrentlyProcessed"
+                value: true
+            }
+        ]
+
+        Component.onCompleted: {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
 
     Component.onCompleted: {
         PageController.showBusyIndicator(true)
@@ -32,7 +61,7 @@ PageType {
             width: root.width
 
             BackButtonType {
-                Layout.topMargin: 20
+                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
             }
 
             Label {
@@ -40,7 +69,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
-                text: qsTr("Amnezia Premium\nsubscription key")
+                text: qsTr(root.processedServer.name + "\nsubscription key")
                 font.pixelSize: 32
                 font.bold: true
                 color: AmneziaStyle.color.paleGray
@@ -56,7 +85,7 @@ PageType {
                 text: qsTr("Copy key")
                 leftImageSource: "qrc:/images/controls/copy.svg"
 
-                onClicked: {
+                clickedFunc: function() {
                     ApiConfigsController.copyVpnKeyToClipboard()
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
@@ -77,20 +106,20 @@ PageType {
                 text: qsTr("Save key as a file")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
 
-                onClicked: {
+                clickedFunc: function() {
                     var fileName = GC.isMobile()
-                        ? "amnezia_vpn_key.vpn"
+                        ? root.processedServer.name.toLowerCase().replace(/\s+/g, "_") + "_key.vpn"
                         : SystemController.getFileName(
                             qsTr("Save AmneziaVPN config"),
                             qsTr("Config files (*.vpn)"),
-                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/amnezia_vpn_key",
+                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + root.processedServer.name.toLowerCase().replace(/\s+/g, "_") + "_key",
                             true,
                             ".vpn"
                         )
 
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        ExportController.exportConfig(fileName)
+                        ApiConfigsController.exportVpnKey(fileName)
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -110,7 +139,7 @@ PageType {
                 text: qsTr("Show key text")
                 leftImageSource: "qrc:/images/controls/eye.svg"
 
-                onClicked: {
+                clickedFunc: function() {
                     PageController.showBusyIndicator(true)
                     ApiConfigsController.prepareVpnKeyExport()
                     PageController.showBusyIndicator(false)
@@ -119,8 +148,9 @@ PageType {
             }
 
             Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: width
+                Layout.preferredWidth: Math.min(Math.min(root.width - (Layout.leftMargin + Layout.rightMargin), root.height * 0.5), 360)
+                Layout.preferredHeight: Layout.preferredWidth
+                Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 20
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -132,6 +162,9 @@ PageType {
                 Image {
                     anchors.fill: parent
                     smooth: false
+                    fillMode: Image.PreserveAspectFit
+                    sourceSize.width: parent.width
+                    sourceSize.height: parent.height
                     source: ApiConfigsController.qrCodesCount > 0 && ApiConfigsController.qrCodes[0] ? ApiConfigsController.qrCodes[0] : ""
                 }
             }
@@ -173,7 +206,7 @@ PageType {
 
                 Header2Type {
                     Layout.fillWidth: true
-                    headerText: qsTr("Amnezia Premium Subscription key")
+                    headerText: qsTr(root.processedServer.name + " Subscription key")
                 }
 
                 TextArea {

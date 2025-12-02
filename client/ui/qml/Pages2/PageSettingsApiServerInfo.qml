@@ -93,7 +93,7 @@ PageType {
                 id: backButton
                 objectName: "backButton"
 
-                Layout.topMargin: 20
+                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
@@ -359,7 +359,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (ApiConfigsController.deactivateDevice()) {
+                            if (ApiConfigsController.deactivateDevice(false)) {
                                 ApiSettingsController.getAccountInfo(true)
                             }
                             PageController.showBusyIndicator(false)
@@ -396,7 +396,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (ApiConfigsController.deactivateDevice()) {
+                            if (ApiConfigsController.deactivateDevice(true)) {
                                 InstallController.removeProcessedServer()
                             }
                             PageController.showBusyIndicator(false)

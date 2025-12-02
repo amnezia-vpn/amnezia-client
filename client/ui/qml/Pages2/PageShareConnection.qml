@@ -34,7 +34,7 @@ PageType {
     //     configExtension = ".vpn"
     //     configCaption = qsTr("Save AmneziaVPN config")
     //     configFileName = "amnezia_config"
-        
+
     //     if (visible) {
     //         var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
     //         headerText = qsTr("Connection to ") + serverName
@@ -47,7 +47,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
     }
 
     Text {
@@ -55,7 +55,7 @@ PageType {
         anchors.top: backButton.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
@@ -269,8 +269,9 @@ PageType {
 
             Rectangle {
                 id: qrCodeContainer
-                Layout.fillWidth: true
-                Layout.preferredHeight: width
+                Layout.preferredWidth: Math.min(Math.min(listView.width - (Layout.leftMargin + Layout.rightMargin), pageShareConnection.height * 0.5), 360)
+                Layout.preferredHeight: Layout.preferredWidth
+                Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 20
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -280,6 +281,9 @@ PageType {
                 Image {
                     anchors.fill: parent
                     smooth: false
+                    fillMode: Image.PreserveAspectFit
+                    sourceSize.width: parent.width
+                    sourceSize.height: parent.height
                     source: pageShareConnection.isSelfHostedConfig ? (isQrCodeVisible ? ExportController.qrCodes[0] : "") : (isQrCodeVisible ? ApiConfigsController.qrCodes[0] : "")
                     property bool isFocusable: true
                     Keys.onTabPressed: FocusController.nextKeyTabItem()

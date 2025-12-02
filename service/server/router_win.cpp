@@ -273,7 +273,7 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
     return success_count;
 }
 
-void RouterWin::flushDns()
+bool RouterWin::flushDns()
 {
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
@@ -281,6 +281,7 @@ void RouterWin::flushDns()
 
     p.start(command);
     p.waitForFinished();
+    return true;
     //qDebug().noquote() << "OUTPUT ipconfig /flushdns: " + p.readAll();
 }
 
@@ -443,8 +444,11 @@ bool RouterWin::updateResolvers(const QString& ifname, const QList<QHostAddress>
     return m_dnsUtil->updateResolvers(ifname, resolvers);
 }
 
+bool RouterWin::restoreResolvers() {
+    return m_dnsUtil->restoreResolvers();
+}
 
-void RouterWin::StopRoutingIpv6()
+bool RouterWin::StopRoutingIpv6()
 {
     {
         QProcess p;
@@ -464,9 +468,10 @@ void RouterWin::StopRoutingIpv6()
         p.start(command);
         p.waitForFinished();
     }
+    return true;
 }
 
-void RouterWin::StartRoutingIpv6()
+bool RouterWin::StartRoutingIpv6()
 {
     {
         QProcess p;
@@ -486,5 +491,6 @@ void RouterWin::StartRoutingIpv6()
         p.start(command);
         p.waitForFinished();
     }
+    return true;
 }
 

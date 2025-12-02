@@ -25,7 +25,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -73,7 +73,7 @@ PageType {
                 id: serverSelector
                 objectName: "serverSelector"
 
-                signal severSelectorIndexChanged
+                signal serverSelectorIndexChanged
                 property int currentIndex: 0
 
                 Layout.fillWidth: true
@@ -107,8 +107,9 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        if (serverSelector.currentIndex !== serverSelectorListView.currentIndex) {
-                            serverSelector.currentIndex = serverSelectorListView.currentIndex
+                        if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
+                            serverSelector.currentIndex = serverSelectorListView.selectedIndex
+                            serverSelector.severSelectorIndexChanged()
                         }
 
                         listView.headerText = qsTr("Accessing ") + serverSelector.text
@@ -124,7 +125,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
                     }
                 }
             }
@@ -159,7 +160,7 @@ PageType {
 
                     PageController.showBusyIndicator(false)
                     
-                    PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", "", "")
+                    PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", ".vpn", "amnezia_config")
                 }
             }
         }

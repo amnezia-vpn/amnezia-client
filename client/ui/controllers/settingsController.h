@@ -32,6 +32,10 @@ public:
     Q_PROPERTY(bool isDevGatewayEnv READ isDevGatewayEnv WRITE toggleDevGatewayEnv NOTIFY devGatewayEnvChanged)
 
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
+    Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
+    Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin NOTIFY safeAreaTopMarginChanged)
+    Q_PROPERTY(int safeAreaBottomMargin READ getSafeAreaBottomMargin NOTIFY safeAreaBottomMarginChanged)
+    Q_PROPERTY(int imeHeight READ getImeHeight NOTIFY imeHeightChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -95,6 +99,12 @@ public slots:
     void toggleDevGatewayEnv(bool enabled);
 
     bool isOnTv();
+    bool isEdgeToEdgeEnabled();
+    int getStatusBarHeight();
+    int getNavigationBarHeight();
+    int getSafeAreaTopMargin();
+    int getSafeAreaBottomMargin();
+    int getImeHeight();
 
     bool isHomeAdLabelVisible();
     void disableHomeAdLabel();
@@ -123,8 +133,13 @@ signals:
     void devModeEnabled();
     void gatewayEndpointChanged(const QString &endpoint);
     void devGatewayEnvChanged(bool enabled);
+    
+    void imeHeightChanged(int height);
+    void safeAreaTopMarginChanged();
+    void safeAreaBottomMarginChanged();
 
     void isHomeAdLabelVisibleChanged(bool visible);
+    void startMinimizedChanged();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;
@@ -132,6 +147,12 @@ private:
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<SitesModel> m_sitesModel;
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
+    
+    mutable int m_cachedStatusBarHeight = -1;
+    mutable int m_cachedNavigationBarHeight = -1;
+    mutable bool m_cachedEdgeToEdgeEnabled = false;
+    mutable bool m_edgeToEdgeCached = false;
+    int m_imeHeight = 0;
     std::shared_ptr<Settings> m_settings;
 
     QString m_appVersion;

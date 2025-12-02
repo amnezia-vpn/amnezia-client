@@ -32,8 +32,27 @@ WindowsNetworkWatcher::~WindowsNetworkWatcher() {
   }
 }
 
+LRESULT WindowsNetworkWatcher::PowerWndProcCallback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  auto obj = reinterpret_cast<WindowsNetworkWatcher*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+  if (!obj){
+    logger.debug() << "obj not casted";
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+  }
+  switch (uMsg) {
+  case WM_POWERBROADCAST:
+    if (wParam == PBT_APMRESUMESUSPEND) {
+        emit obj->sleepMode();
+    }
+    break;
+  default:
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+  }
+  return 0;
+}
+
 void WindowsNetworkWatcher::initialize() {
   logger.debug() << "initialize";
+
 
   DWORD negotiatedVersion;
   if (WlanOpenHandle(2, nullptr, &negotiatedVersion, &m_wlanHandle) !=
@@ -50,6 +69,25 @@ void WindowsNetworkWatcher::initialize() {
     WindowsUtils::windowsLog("Failed to register a wlan callback");
     return;
   }
+
+  const wchar_t* className = L"PowerMonitorClass";
+  WNDCLASS wc = { 0 };
+  wc.lpfnWndProc = &WindowsNetworkWatcher::PowerWndProcCallback;
+  wc.hInstance = GetModuleHandle(NULL);
+  wc.lpszClassName = className;
+  wc.cbWndExtra = sizeof(WindowsNetworkWatcher*);
+
+  if (!RegisterClass(&wc)) {
+    logger.debug() << "Failed to register window class in createPowerMonitorWindow.";
+    return;
+  }
+
+  HWND hwnd = CreateWindowEx(0, className, L"Power Monitor", 0, 0, 0, 0, 0, NULL, NULL, GetModuleHandle(NULL), static_cast<LPVOID>(this));
+  if (!hwnd) {
+    logger.debug() << "Failed to create window in createPowerMonitorWindow.";
+    return;
+  }
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
   logger.debug() << "callback registered";
 }

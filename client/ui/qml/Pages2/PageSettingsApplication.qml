@@ -20,7 +20,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -157,9 +157,9 @@ PageType {
                 enabled: switcherAutoStart.checked
                 opacity: enabled ? 1.0 : 0.5
 
-                checked: SettingsController.isStartMinimizedEnabled()
+                checked: SettingsController.startMinimized
                 onToggled: function() {
-                    if (checked !== SettingsController.isStartMinimizedEnabled()) {
+                    if (checked !== SettingsController.startMinimized) {
                         SettingsController.toggleStartMinimized(checked)
                     }
                 }

@@ -44,6 +44,8 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
 
     connect(this, &ServersModel::processedServerIndexChanged, this, &ServersModel::processedServerChanged);
     connect(this, &ServersModel::dataChanged, this, &ServersModel::processedServerChanged);
+
+    connect(this, &QAbstractItemModel::modelReset, this, &ServersModel::recomputeGatewayStacks);
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -156,6 +158,18 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         QString primaryDns = server.value(config_key::dns1).toString();
         return primaryDns == protocols::dns::amneziaDnsIp;
     }
+    case IsAdVisibleRole:{
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::isAdVisible).toBool(false);
+    }
+    case AdHeaderRole: {
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adHeader).toString();
+    }
+    case AdDescriptionRole: {
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adDescription).toString();
+    }
+    case AdEndpointRole: {
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adEndpoint).toString();
+    }
     }
 
     return QVariant();
@@ -173,6 +187,7 @@ void ServersModel::resetModel()
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
     m_processedServerIndex = m_defaultServerIndex;
+    m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
 }
@@ -374,7 +389,6 @@ QHash<int, QByteArray> ServersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
 
-    roles[NameRole] = "serverName";
     roles[NameRole] = "name";
     roles[ServerDescriptionRole] = "serverDescription";
     roles[CollapsedServerDescriptionRole] = "collapsedServerDescription";
@@ -401,6 +415,12 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[IsCountrySelectionAvailableRole] = "isCountrySelectionAvailable";
     roles[ApiAvailableCountriesRole] = "apiAvailableCountries";
     roles[ApiServerCountryCodeRole] = "apiServerCountryCode";
+
+    roles[IsAdVisibleRole] = "isAdVisible";
+    roles[AdHeaderRole] = "adHeader";
+    roles[AdDescriptionRole] = "adDescription";
+    roles[AdEndpointRole] = "adEndpoint";
+
     return roles;
 }
 
@@ -755,6 +775,68 @@ bool ServersModel::isServerFromApi(const int serverIndex)
     return data(serverIndex, IsServerFromTelegramApiRole).toBool() || data(serverIndex, IsServerFromGatewayApiRole).toBool();
 }
 
+bool ServersModel::hasServersFromGatewayApi()
+{
+    return !m_gatewayStacks.isEmpty();
+}
+
+bool ServersModel::GatewayStacks::operator==(const GatewayStacks &other) const
+{
+    return userCountryCodes == other.userCountryCodes && serviceTypes == other.serviceTypes;
+}
+
+QJsonObject ServersModel::GatewayStacks::toJson() const
+{
+    QJsonObject obj;
+    if (!userCountryCodes.isEmpty()) {
+        obj.insert(configKey::userCountryCode, QJsonArray::fromStringList(userCountryCodes.values()));
+    }
+    if (!serviceTypes.isEmpty()) {
+        obj.insert(configKey::serviceType, QJsonArray::fromStringList(serviceTypes.values()));
+    }
+    return obj;
+}
+
+void ServersModel::recomputeGatewayStacks()
+{
+    const bool wasEmpty = m_gatewayStacks.isEmpty();
+    GatewayStacks computed;
+    bool hasNewTags = false;
+
+    for (int i = 0; i < m_servers.count(); ++i) {
+        if (data(i, IsServerFromGatewayApiRole).toBool()) {
+            const QJsonObject server = m_servers.at(i).toObject();
+            const QJsonObject apiConfig = server.value(configKey::apiConfig).toObject();
+
+            const QString userCountryCode = apiConfig.value(configKey::userCountryCode).toString();
+            const QString serviceType = apiConfig.value(configKey::serviceType).toString();
+
+            if (!userCountryCode.isEmpty()) {
+                if (!m_gatewayStacks.userCountryCodes.contains(userCountryCode)) {
+                    hasNewTags = true;
+                }
+                computed.userCountryCodes.insert(userCountryCode);
+            }
+
+            if (!serviceType.isEmpty()) {
+                if (!m_gatewayStacks.serviceTypes.contains(serviceType)) {
+                    hasNewTags = true;
+                }
+                computed.serviceTypes.insert(serviceType);
+            }
+        }
+    }
+
+    m_gatewayStacks = std::move(computed);
+    if (hasNewTags) {
+        emit gatewayStacksExpanded();
+    }
+
+    if (wasEmpty != m_gatewayStacks.isEmpty()) {
+        emit hasServersFromGatewayApiChanged();
+    }
+}
+
 bool ServersModel::isApiKeyExpired(const int serverIndex)
 {
     auto serverConfig = m_servers.at(serverIndex).toObject();
@@ -820,4 +902,19 @@ const QString ServersModel::getDefaultServerImagePathCollapsed()
 bool ServersModel::processedServerIsPremium() const
 {
     return apiUtils::isPremiumServer(getServerConfig(m_processedServerIndex));
+}
+
+bool ServersModel::isAdVisible()
+{
+    return data(m_defaultServerIndex, IsAdVisibleRole).toBool();
+}
+
+QString ServersModel::adHeader()
+{
+    return data(m_defaultServerIndex, AdHeaderRole).toString();
+}
+
+QString ServersModel::adDescription()
+{
+    return data(m_defaultServerIndex, AdDescriptionRole).toString();
 }

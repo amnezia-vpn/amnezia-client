@@ -103,6 +103,11 @@ QString VpnProtocol::vpnGateway() const
     return m_vpnGateway;
 }
 
+QString VpnProtocol::vpnLocalAddress() const
+{
+    return m_vpnLocalAddress;
+}
+
 VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &configuration)
 {
     switch (container) {

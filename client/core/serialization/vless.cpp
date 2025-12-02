@@ -252,5 +252,65 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
     root["inbounds"] = QJsonArray { inbound };
     return root;
 }
-} // namespace amnezia::serialization::vless
+
+const QString Serialize(const VlessServerObject &server, const QString &alias)
+{
+    
+    QUrl url;
+    
+    // Set basic URL components
+    url.setScheme("vless");
+    url.setUserInfo(server.id);
+    url.setHost(server.address);
+    url.setPort(server.port);
+
+    QUrlQuery query;
+
+    if (!server.network.isEmpty() && server.network != "tcp") {
+        query.addQueryItem("type", server.network);
+    }
+    
+    if (!server.encryption.isEmpty()) {
+        query.addQueryItem("encryption", server.encryption);
+    }
+    
+    if (!server.security.isEmpty() && server.security != "none") {
+        query.addQueryItem("security", server.security);
+    }
+    
+    if (!server.flow.isEmpty() && (server.security == "xtls" || server.security == "reality")) {
+        query.addQueryItem("flow", server.flow);
+    }
+    
+    if (!server.serverName.isEmpty()) {
+        query.addQueryItem("sni", server.serverName);
+    }
+    
+    if (server.security == "reality") {
+        if (!server.fingerprint.isEmpty()) {
+            query.addQueryItem("fp", server.fingerprint);
+        }
+        
+        if (!server.publicKey.isEmpty()) {
+            query.addQueryItem("pbk", server.publicKey);
+        }
+        
+        if (!server.shortId.isEmpty()) {
+            query.addQueryItem("sid", server.shortId);
+        }
+        
+        if (!server.spiderX.isEmpty()) {
+            query.addQueryItem("spiderX", server.spiderX);
+        }
+    }
+    
+    url.setQuery(query);
+    
+    if (!alias.isEmpty()) {
+        url.setFragment(alias);
+    }
+    
+    return url.toString(QUrl::ComponentFormattingOption::FullyEncoded);
+}
+}
 

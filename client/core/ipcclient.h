@@ -23,6 +23,7 @@ public:
    static QSharedPointer<PrivilegedProcess> CreatePrivilegedProcess();
 
    bool isSocketConnected() const;
+   void closeAndResetInstance(bool deleteSelf = false);
 
 signals:
 

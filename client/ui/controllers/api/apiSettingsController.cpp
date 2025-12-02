@@ -46,7 +46,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     if (reload) {
         QEventLoop wait;
         QTimer::singleShot(1000, &wait, &QEventLoop::quit);
-        wait.exec();
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
 
     GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), requestTimeoutMsecs,
@@ -62,6 +62,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[configKey::serviceType] = apiConfig.value(configKey::serviceType).toString();
     apiPayload[configKey::authData] = authData;
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
 
