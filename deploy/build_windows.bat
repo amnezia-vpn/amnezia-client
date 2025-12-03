@@ -71,8 +71,6 @@ if defined QT_HOST_BIN_DIR (
 )
 cmake --version
 
-REM Calculate Qt root directory BEFORE entering if blocks (batch variable expansion issue)
-REM Remove \bin from QT_BIN_DIR to get Qt root
 set "QT_ROOT_DIR=%QT_BIN_DIR:\bin=%"
 
 cd %PROJECT_DIR%
@@ -99,25 +97,8 @@ if defined QT_HOST_PATH (
         echo "ERROR: Qt ARM64 lib directory not found at %QT_ROOT_DIR%\lib"
         exit /b 1
     )
-    echo "Qt ARM64 lib directory found: %QT_ROOT_DIR%\lib"
-    dir "%QT_ROOT_DIR%\lib\Qt6Core*.lib"
-    
-    REM Check architecture of Qt6Core.lib (if dumpbin is available)
-    echo "Verifying Qt6Core.lib architecture..."
-    where dumpbin >nul 2>&1
-    if %errorlevel% equ 0 (
-        echo "dumpbin found, checking architecture..."
-        dumpbin /headers "%QT_ROOT_DIR%\lib\Qt6Core.lib" | findstr /C:"machine"
-        if %errorlevel% equ 0 (
-            echo "Architecture check completed"
-        ) else (
-            echo "WARNING: Could not extract machine type from Qt6Core.lib"
-        )
-    ) else (
-        echo "NOTE: dumpbin not available, skipping architecture verification"
-        echo "This is not critical - build will continue"
-    )
-    
+
+    echo "Building for ARM64"
     call cmake . -B %WORK_DIR% -A ARM64 "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_ROOT_DIR%" "-DQT_HOST_PATH:PATH=%QT_HOST_PATH%"
 ) else (
     REM x64 build - QT_ROOT_DIR already calculated above
@@ -232,14 +213,9 @@ if defined QT_HOST_BIN_DIR (
         
         echo "ARM64 Qt libraries copied successfully"
         
-        REM Verify Qt6Core.dll architecture
-        echo "Verifying Qt6Core.dll was copied:"
-        if exist "%OUT_APP_DIR:"=%\Qt6Core.dll" (
-            echo "Qt6Core.dll found in output directory"
-        ) else (
-            echo "ERROR: Qt6Core.dll not found after copy"
-            exit /b 1
-        )
+        REM Remove ALL debug DLLs recursively (Qt6*d.dll, *d.dll in all subdirectories)
+        echo "Removing debug DLLs and libraries from output directory (recursive)..."
+        del /s /q "%OUT_APP_DIR:"=%\*d.dll" >nul 2>&1
     ) else (
         echo "ERROR: ARM64 Qt DLLs not found in %QT_BIN_DIR:"=%"
         exit /b 1

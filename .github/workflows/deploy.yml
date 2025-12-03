@@ -234,12 +234,6 @@ jobs:
           }
         }
 
-
-    - name: 'Setup Python 3.11'
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
     - name: 'Install Qt Desktop (host for cross-compilation)'
       uses: jurplel/install-qt-action@v3
       with:
@@ -249,42 +243,11 @@ jobs:
         arch: 'win64_msvc2022_64'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
-        setup-python: 'false'
+        setup-python: 'true'
         set-env: 'false'
         aqtversion: '==3.3.0'
         py7zrversion: '==0.22.*'
         extra: '--base ${{ env.QT_MIRROR }}'
-
-    - name: 'Verify Qt Desktop (host) installation'
-      shell: cmd
-      run: |
-        echo "Checking Qt Desktop (host) installation..."
-        set QT_HOST_DIR=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_64
-        echo "Qt host directory: %QT_HOST_DIR%"
-        if exist "%QT_HOST_DIR%" (
-          echo "Qt host directory exists"
-          dir "%QT_HOST_DIR%\bin\Qt6*.dll"
-        ) else (
-          echo "ERROR: Qt host directory does not exist"
-          exit /b 1
-        )
-
-    - name: 'Cleanup Qt ARM64 directory before install'
-      shell: pwsh
-      run: |
-        $baseDir = "${{ runner.temp }}"
-        $qtVersion = "${{ env.QT_VERSION }}"
-        # Handle both path formats (with \ and /)
-        $paths = @(
-          "$baseDir\Qt\$qtVersion\msvc2022_arm64",
-          "$baseDir/Qt/$qtVersion/msvc2022_arm64"
-        )
-        foreach ($path in $paths) {
-          if (Test-Path $path) {
-            Write-Host "Removing $path before ARM64 Qt install..."
-            Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue
-          }
-        }
 
     - name: 'Install Qt ARM64'
       uses: jurplel/install-qt-action@v3
@@ -295,66 +258,17 @@ jobs:
         arch: 'win64_msvc2022_arm64_cross_compiled'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
-        setup-python: 'false'
+        setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'false'
         aqtversion: '==3.3.0'
         py7zrversion: '==0.22.*'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
-    - name: 'Verify Qt ARM64 installation'
-      shell: cmd
-      run: |
-        echo "Checking Qt ARM64 installation..."
-        set QT_ARM64_DIR=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_arm64
-        echo "Qt ARM64 directory: %QT_ARM64_DIR%"
-        if exist "%QT_ARM64_DIR%" (
-          echo "Qt ARM64 directory exists"
-          echo.
-          echo "Checking bin directory..."
-          if exist "%QT_ARM64_DIR%\bin" (
-            echo "bin directory exists"
-            dir "%QT_ARM64_DIR%\bin\Qt6*.dll" | findstr /C:"Qt6Core.dll"
-          ) else (
-            echo "ERROR: bin directory does not exist"
-            exit /b 1
-          )
-          echo.
-          echo "Checking lib directory..."
-          if exist "%QT_ARM64_DIR%\lib" (
-            echo "lib directory exists"
-            dir "%QT_ARM64_DIR%\lib\Qt6Core*.lib"
-          ) else (
-            echo "ERROR: lib directory does not exist"
-            exit /b 1
-          )
-          echo "Qt ARM64 installation verified successfully"
-        ) else (
-          echo "ERROR: Qt ARM64 directory does not exist"
-          exit /b 1
-        )
-
     - name: 'Setup mvsc'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: 'x64_arm64'
-
-    - name: 'Check environment variables before build'
-      shell: cmd
-      run: |
-        echo "=== Environment Variables Check ==="
-        echo "Checking for Qt-related environment variables..."
-        set | findstr /I "Qt"
-        set | findstr /I "CMAKE"
-        echo.
-        echo "Checking for MSVC tools in PATH..."
-        where cl 2>nul && echo "cl.exe found" || echo "WARNING: cl.exe not found"
-        where dumpbin 2>nul && echo "dumpbin.exe found" || echo "NOTE: dumpbin.exe not found"
-        where link 2>nul && echo "link.exe found" || echo "WARNING: link.exe not found"
-        echo.
-        echo "MSVC environment variables:"
-        set | findstr /I "VCINSTALLDIR VSINSTALLDIR"
-        echo "===================================="
 
     - name: 'Build project'
       shell: cmd
@@ -383,29 +297,6 @@ jobs:
       with:
         name: AmneziaVPN_Windows_ARM64_unpacked
         path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
-        retention-days: 7
-
-    - name: 'Create Qt ARM64 archive'
-      shell: pwsh
-      run: |
-        $qtArm64Dir = "${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_arm64"
-        $archivePath = "Qt_${{ env.QT_VERSION }}_ARM64.zip"
-        
-        if (Test-Path $qtArm64Dir) {
-          Write-Host "Creating Qt ARM64 archive from: $qtArm64Dir"
-          Compress-Archive -Path $qtArm64Dir -DestinationPath $archivePath -Force
-          Write-Host "Archive created: $archivePath"
-          Write-Host "Archive size: $((Get-Item $archivePath).Length / 1MB) MB"
-        } else {
-          Write-Host "ERROR: Qt ARM64 directory not found: $qtArm64Dir"
-          exit 1
-        }
-
-    - name: 'Upload Qt ARM64 archive'
-      uses: actions/upload-artifact@v4
-      with:
-        name: Qt_${{ env.QT_VERSION }}_ARM64
-        path: Qt_${{ env.QT_VERSION }}_ARM64.zip
         retention-days: 7
 # ------------------------------------------------------
 
