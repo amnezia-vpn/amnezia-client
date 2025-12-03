@@ -17,7 +17,8 @@ ExportController::ExportController(ServersController* serversController,
                                   ContainersModel* containersModel,
                                   ClientManagementController* clientManagementController,
                                   QAppSettingsRepository* appSettingsRepository,
-                                  const std::shared_ptr<Settings> &settings, QObject *parent)
+                                  const std::shared_ptr<Settings> &settings,
+                                  QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
       m_serversModel(serversModel),
@@ -108,7 +109,7 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
 
     int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversController->getServerCredentials(serverIndex);
-    auto dns = m_serversController->getDnsPair(serverIndex, m_settings->useAmneziaDns());
+    auto dns = m_serversController->getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
     bool isApiConfig = qvariant_cast<bool>(m_serversModel->data(serverIndex, ServersModel::IsServerFromTelegramApiRole));
 
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);

@@ -1,4 +1,4 @@
-#include "installController.h"
+#include "installUiController.h"
 
 #include <QDesktopServices>
 #include <QDir>
@@ -10,6 +10,7 @@
 
 #include "core/api/apiUtils.h"
 #include "core/controllers/serverController.h"
+#include "core/controllers/installController.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/networkUtilities.h"
 #include "logger.h"
@@ -19,7 +20,7 @@
 
 namespace
 {
-    Logger logger("ServerController");
+    Logger logger("InstallUiController");
 
     namespace configKey
     {
@@ -37,13 +38,17 @@ namespace
     }
 }
 
-InstallController::InstallController(ServersController* serversController,
+InstallUiController::InstallUiController(InstallController* installController,
+                                     ServersRepository* serversRepository,
+                                     ServersController* serversController,
                                      ServersModel* serversModel, ContainersModel* containersModel,
                                      ProtocolsModel* protocolsModel,
                                      ClientManagementController* clientManagementController,
                                      QAppSettingsRepository* appSettingsRepository,
                                      const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
+      m_installController(installController),
+      m_serversRepository(serversRepository),
       m_serversController(serversController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
@@ -54,7 +59,7 @@ InstallController::InstallController(ServersController* serversController,
 {
 }
 
-InstallController::~InstallController()
+InstallUiController::~InstallController()
 {
 #ifdef Q_OS_WINDOWS
     for (QSharedPointer<QProcess> process : m_sftpMountProcesses) {
@@ -65,7 +70,7 @@ InstallController::~InstallController()
 #endif
 }
 
-void InstallController::install(DockerContainer container, int port, TransportProto transportProto, int serverIndex)
+void InstallUiController::install(DockerContainer container, int port, TransportProto transportProto, int serverIndex)
 {
     QJsonObject config;
     auto mainProto = ContainerProps::defaultProtocol(container);
@@ -175,8 +180,8 @@ void InstallController::install(DockerContainer container, int port, TransportPr
     }
 
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    connect(serverController.get(), &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
-    connect(this, &InstallController::cancelInstallation, serverController.get(), &ServerController::cancelInstallation);
+    connect(serverController.get(), &ServerController::serverIsBusy, this, &InstallUiController::serverIsBusy);
+    connect(this, &InstallUiController::cancelInstallation, serverController.get(), &ServerController::cancelInstallation);
 
     QMap<DockerContainer, QJsonObject> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(serverCredentials, serverController, installedContainers);
@@ -188,7 +193,8 @@ void InstallController::install(DockerContainer container, int port, TransportPr
     QString finishMessage = "";
 
     if (!installedContainers.contains(container)) {
-        errorCode = serverController->setupContainer(serverCredentials, container, config);
+        InstallController installController(serverController.get());
+        errorCode = installController.setupContainer(serverCredentials, container, config);
         if (errorCode) {
             emit installationErrorOccurred(errorCode);
             return;
@@ -212,7 +218,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
     }
 }
 
-void InstallController::installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
+void InstallUiController::installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
                                       const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
                                       QString &finishMessage)
 {
@@ -259,7 +265,7 @@ void InstallController::installServer(const DockerContainer container, const QMa
     emit installServerFinished(finishMessage);
 }
 
-void InstallController::installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
+void InstallUiController::installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
                                          const ServerCredentials &serverCredentials,
                                          const QSharedPointer<ServerController> &serverController, QString &finishMessage, int serverIndex)
 {
@@ -303,7 +309,7 @@ void InstallController::installContainer(const DockerContainer container, const 
     emit installContainerFinished(finishMessage, ContainerProps::containerService(container) == ServiceType::Other);
 }
 
-bool InstallController::isServerAlreadyExists()
+bool InstallUiController::isServerAlreadyExists()
 {
     for (int i = 0; i < m_serversController->getServersCount(); i++) {
         const ServerCredentials credentials = m_serversController->getServerCredentials(i);
@@ -315,7 +321,7 @@ bool InstallController::isServerAlreadyExists()
     return false;
 }
 
-void InstallController::scanServerForInstalledContainers(int serverIndex)
+void InstallUiController::scanServerForInstalledContainers(int serverIndex)
 {
     ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverIndex);
 
@@ -364,7 +370,7 @@ void InstallController::scanServerForInstalledContainers(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentials &credentials,
+ErrorCode InstallUiController::getAlreadyInstalledContainers(const ServerCredentials &credentials,
                                                            const QSharedPointer<ServerController> &serverController,
                                                            QMap<DockerContainer, QJsonObject> &installedContainers)
 {
@@ -695,7 +701,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
     return ErrorCode::NoError;
 }
 
-void InstallController::updateContainer(int serverIndex, QJsonObject config)
+void InstallUiController::updateContainer(int serverIndex, QJsonObject config)
 {
     ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverIndex);
 
@@ -705,10 +711,11 @@ void InstallController::updateContainer(int serverIndex, QJsonObject config)
 
     if (isUpdateDockerContainerRequired(container, oldContainerConfig, config)) {
         QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-        connect(serverController.get(), &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
-        connect(this, &InstallController::cancelInstallation, serverController.get(), &ServerController::cancelInstallation);
+        connect(serverController.get(), &ServerController::serverIsBusy, this, &InstallUiController::serverIsBusy);
+        connect(this, &InstallUiController::cancelInstallation, serverController.get(), &ServerController::cancelInstallation);
 
-        errorCode = serverController->updateContainer(serverCredentials, container, oldContainerConfig, config);
+        InstallController installController(serverController.get());
+        errorCode = installController.updateContainer(serverCredentials, container, oldContainerConfig, config);
         clearCachedProfile(serverIndex, serverController);
     }
 
@@ -729,12 +736,11 @@ void InstallController::updateContainer(int serverIndex, QJsonObject config)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallController::rebootServer(int serverIndex)
+void InstallUiController::rebootServer(int serverIndex)
 {
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    const auto errorCode = m_serversController->rebootServer(serverController.get(), serverIndex);
+    const auto errorCode = m_installController->rebootServer(m_serversRepository, serverIndex);
     if (errorCode == ErrorCode::NoError) {
         emit rebootServerFinished(tr("Server '%1' was rebooted").arg(serverName));
     } else {
@@ -742,7 +748,7 @@ void InstallController::rebootServer(int serverIndex)
     }
 }
 
-void InstallController::removeServer(int serverIndex)
+void InstallUiController::removeServer(int serverIndex)
 {
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
@@ -750,12 +756,11 @@ void InstallController::removeServer(int serverIndex)
     emit removeServerFinished(tr("Server '%1' was removed").arg(serverName));
 }
 
-void InstallController::removeAllContainers(int serverIndex)
+void InstallUiController::removeAllContainers(int serverIndex)
 {
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    ErrorCode errorCode = m_serversController->removeAllContainers(serverController.get(), serverIndex);
+    ErrorCode errorCode = m_installController->removeAllContainers(m_serversRepository, serverIndex);
     if (errorCode == ErrorCode::NoError) {
         emit removeAllContainersFinished(tr("All containers from server '%1' have been removed").arg(serverName));
         return;
@@ -763,15 +768,14 @@ void InstallController::removeAllContainers(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallController::removeContainer(int serverIndex)
+void InstallUiController::removeContainer(int serverIndex)
 {
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     int container = m_containersModel->getProcessedContainerIndex();
     QString containerName = m_containersModel->getProcessedContainerName();
 
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    ErrorCode errorCode = m_serversController->removeContainer(serverController.get(), serverIndex, static_cast<DockerContainer>(container));
+    ErrorCode errorCode = m_installController->removeContainer(m_serversRepository, serverIndex, static_cast<DockerContainer>(container));
     if (errorCode == ErrorCode::NoError) {
 
         emit removeContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
@@ -780,13 +784,13 @@ void InstallController::removeContainer(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallController::removeApiConfig(const int serverIndex)
+void InstallUiController::removeApiConfig(const int serverIndex)
 {
     m_serversController->removeApiConfig(serverIndex);
     emit apiConfigRemoved(tr("Api config removed"));
 }
 
-void InstallController::clearCachedProfile(int serverIndex, QSharedPointer<ServerController> serverController)
+void InstallUiController::clearCachedProfile(int serverIndex, QSharedPointer<ServerController> serverController)
 {
     if (serverController.isNull()) {
         serverController.reset(new ServerController(m_settings));
@@ -808,17 +812,17 @@ void InstallController::clearCachedProfile(int serverIndex, QSharedPointer<Serve
     emit profileCleared(updatedConfig);
 }
 
-QRegularExpression InstallController::ipAddressPortRegExp()
+QRegularExpression InstallUiController::ipAddressPortRegExp()
 {
     return NetworkUtilities::ipAddressPortRegExp();
 }
 
-QRegularExpression InstallController::ipAddressRegExp()
+QRegularExpression InstallUiController::ipAddressRegExp()
 {
     return NetworkUtilities::ipAddressRegExp();
 }
 
-void InstallController::setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)
+void InstallUiController::setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)
 {
     m_processedServerCredentials.hostName = hostName;
     if (m_processedServerCredentials.hostName.contains(":")) {
@@ -830,7 +834,7 @@ void InstallController::setProcessedServerCredentials(const QString &hostName, c
 }
 
 
-void InstallController::mountSftpDrive(int serverIndex, const QString &port, const QString &password, const QString &username)
+void InstallUiController::mountSftpDrive(int serverIndex, const QString &port, const QString &password, const QString &username)
 {
     QString mountPath;
     QString cmd;
@@ -902,7 +906,7 @@ void InstallController::mountSftpDrive(int serverIndex, const QString &port, con
 #endif
 }
 
-bool InstallController::checkSshConnection(QSharedPointer<ServerController> serverController)
+bool InstallUiController::checkSshConnection(QSharedPointer<ServerController> serverController)
 {
     if (serverController.isNull()) {
         serverController.reset(new ServerController(m_settings));
@@ -915,7 +919,7 @@ bool InstallController::checkSshConnection(QSharedPointer<ServerController> serv
         auto passphraseCallback = [this]() {
             emit passphraseRequestStarted();
             QEventLoop loop;
-            QObject::connect(this, &InstallController::passphraseRequestFinished, &loop, &QEventLoop::quit);
+            QObject::connect(this, &InstallUiController::passphraseRequestFinished, &loop, &QEventLoop::quit);
             loop.exec();
 
             return m_privateKeyPassphrase;
@@ -947,13 +951,13 @@ bool InstallController::checkSshConnection(QSharedPointer<ServerController> serv
     return true;
 }
 
-void InstallController::setEncryptedPassphrase(QString passphrase)
+void InstallUiController::setEncryptedPassphrase(QString passphrase)
 {
     m_privateKeyPassphrase = passphrase;
     emit passphraseRequestFinished();
 }
 
-void InstallController::addEmptyServer()
+void InstallUiController::addEmptyServer()
 {
     QJsonObject server;
     server.insert(config_key::hostName, m_processedServerCredentials.hostName);
@@ -968,7 +972,7 @@ void InstallController::addEmptyServer()
     emit installServerFinished(tr("Server added successfully"));
 }
 
-bool InstallController::isConfigValid()
+bool InstallUiController::isConfigValid()
 {
     int serverIndex = m_serversController->getDefaultServerIndex();
     QJsonObject serverConfigObject = m_serversController->getServerConfig(serverIndex);
@@ -1043,7 +1047,7 @@ bool InstallController::isConfigValid()
     return true;
 }
 
-bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig,
+bool InstallUiController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig,
                                                         const QJsonObject &newConfig)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);

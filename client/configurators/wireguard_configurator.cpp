@@ -17,6 +17,7 @@
 #include "core/controllers/serverController.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
+#include "protocols/protocols_defs.h"
 #include "settings.h"
 #include "utilities.h"
 
@@ -173,7 +174,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 
     errorCode = m_serverController->runScript(
             credentials,
-            m_serverController->replaceVars(script, m_serverController->genVarsForScript(credentials, container)));
+            m_serverController->replaceVars(script, amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns())));
 
     return connData;
 }
@@ -181,9 +182,10 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 QString WireguardConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
                                             const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
+    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
+    vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
-    QString config = m_serverController->replaceVars(
-            scriptData, m_serverController->genVarsForScript(credentials, container, containerConfig));
+    QString config = m_serverController->replaceVars(scriptData, vars);
 
     ConnectionData connData = prepareWireguardConfig(credentials, container, containerConfig, errorCode);
     if (errorCode != ErrorCode::NoError) {

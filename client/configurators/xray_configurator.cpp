@@ -9,6 +9,7 @@
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
 #include "core/scripts_registry.h"
+#include "protocols/protocols_defs.h"
 
 namespace {
 Logger logger("XrayConfigurator");
@@ -106,7 +107,7 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
     errorCode = m_serverController->runScript(
         credentials, 
-        m_serverController->replaceVars(restartScript, m_serverController->genVarsForScript(credentials, container))
+        m_serverController->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns()))
     );
 
     if (errorCode != ErrorCode::NoError) {
@@ -128,8 +129,9 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
         return "";
     }
 
-    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container),
-                                                     m_serverController->genVarsForScript(credentials, container, containerConfig));
+    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
+    vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
+    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container), vars);
     
     if (config.isEmpty()) {
         logger.error() << "Failed to get config template";

@@ -1,5 +1,4 @@
 #include "serversController.h"
-#include "serverController.h"
 #include "core/networkUtilities.h"
 #include "core/api/apiDefs.h"
 #include "protocols/protocols_defs.h"
@@ -89,61 +88,6 @@ void ServersController::addContainerConfig(int serverIndex, DockerContainer cont
     }
     
     m_serversRepository->editServer(serverIndex, server);
-}
-
-ErrorCode ServersController::removeContainer(ServerController *serverController, int serverIndex, DockerContainer container)
-{
-    auto credentials = m_serversRepository->serverCredentials(serverIndex);
-    ErrorCode errorCode = serverController->removeContainer(credentials, container);
-    
-    if (errorCode == ErrorCode::NoError) {
-        QJsonObject server = m_serversRepository->server(serverIndex);
-        QJsonArray containers = server.value(config_key::containers).toArray();
-        
-        for (auto it = containers.begin(); it != containers.end(); it++) {
-            if (it->toObject().value(config_key::container).toString() == ContainerProps::containerToString(container)) {
-                containers.erase(it);
-                break;
-            }
-        }
-        
-        server.insert(config_key::containers, containers);
-        
-        auto defaultContainer = ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
-        if (defaultContainer == container) {
-            if (containers.empty()) {
-                defaultContainer = DockerContainer::None;
-            } else {
-                defaultContainer = ContainerProps::containerFromString(containers.begin()->toObject().value(config_key::container).toString());
-            }
-            server.insert(config_key::defaultContainer, ContainerProps::containerToString(defaultContainer));
-        }
-        
-        m_serversRepository->editServer(serverIndex, server);
-    }
-    
-    return errorCode;
-}
-
-ErrorCode ServersController::removeAllContainers(ServerController *serverController, int serverIndex)
-{
-    ErrorCode errorCode = serverController->removeAllContainers(m_serversRepository->serverCredentials(serverIndex));
-    
-    if (errorCode == ErrorCode::NoError) {
-        QJsonObject server = m_serversRepository->server(serverIndex);
-        server.insert(config_key::containers, QJsonArray());
-        server.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
-        
-        m_serversRepository->editServer(serverIndex, server);
-    }
-    
-    return errorCode;
-}
-
-ErrorCode ServersController::rebootServer(ServerController *serverController, int serverIndex)
-{
-    auto credentials = m_serversRepository->serverCredentials(serverIndex);
-    return serverController->rebootServer(credentials);
 }
 
 void ServersController::clearCachedProfile(int serverIndex, DockerContainer container)

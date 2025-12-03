@@ -14,6 +14,7 @@
 #include "core/repositories/appSettingsRepository.h"
 
 class ServerController;
+class InstallController;
 
 using namespace amnezia;
 
@@ -53,11 +54,6 @@ public:
     void setDefaultContainer(int serverIndex, DockerContainer container);
     void updateContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config);
     void addContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config);
-
-    // Container operations (requires ServerController)
-    ErrorCode removeContainer(ServerController *serverController, int serverIndex, DockerContainer container);
-    ErrorCode removeAllContainers(ServerController *serverController, int serverIndex);
-    ErrorCode rebootServer(ServerController *serverController, int serverIndex);
 
     // Cache management
     void clearCachedProfile(int serverIndex, DockerContainer container);

@@ -140,16 +140,16 @@ void CoreController::initControllers()
     m_focusController = new FocusController(m_engine, this);
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController);
 
-    m_installController = new InstallController(m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementController, m_appSettingsRepository, m_settings, this);
-    m_engine->rootContext()->setContextProperty("InstallController", m_installController);
+    m_installUiController = new InstallUiController(m_installController, m_serversRepository, m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementController, m_appSettingsRepository, m_settings, this);
+    m_engine->rootContext()->setContextProperty("InstallController", m_installUiController);
 
-    connect(m_installController, &InstallController::currentContainerUpdated, m_connectionController,
+    connect(m_installUiController, &InstallUiController::currentContainerUpdated, m_connectionController,
             &ConnectionController::onCurrentContainerUpdated); // TODO remove this
 
-    connect(m_installController, &InstallController::profileCleared,
+    connect(m_installUiController, &InstallUiController::profileCleared,
             m_protocolsUiController, &ProtocolsUiController::updateProtocols);
 
-    m_importController = new ImportController(m_serversController, m_serversModel, m_containersModel, m_appSettingsRepository, m_settings, this);
+    m_importController = new ImportController(m_serversController, m_serversModel, m_containersModel, m_appSettingsRepository, this);
     m_engine->rootContext()->setContextProperty("ImportController", m_importController);
 
     m_exportController = new ExportController(m_serversController, m_serversModel, m_containersModel, m_clientManagementController, m_appSettingsRepository, m_settings, this);
@@ -363,15 +363,15 @@ void CoreController::initContainerModelUpdateHandler()
 
 void CoreController::initAdminConfigRevokedHandler()
 {
-    // Admin config revocation is now handled by InstallController::clearCachedProfile
+    // Admin config revocation is now handled by InstallUiController::clearCachedProfile
 }
 
 void CoreController::initPassphraseRequestHandler()
 {
-    connect(m_installController, &InstallController::passphraseRequestStarted, m_pageController,
+    connect(m_installUiController, &InstallUiController::passphraseRequestStarted, m_pageController,
             &PageController::showPassphraseRequestDrawer);
-    connect(m_pageController, &PageController::passphraseRequestDrawerClosed, m_installController,
-            &InstallController::setEncryptedPassphrase);
+    connect(m_pageController, &PageController::passphraseRequestDrawerClosed, m_installUiController,
+            &InstallUiController::setEncryptedPassphrase);
 }
 
 void CoreController::initTranslationsUpdatedHandler()
@@ -472,7 +472,7 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
-        if (!m_installController->isConfigValid()) {
+        if (!m_installUiController->isConfigValid()) {
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }

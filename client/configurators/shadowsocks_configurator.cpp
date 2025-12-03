@@ -6,6 +6,8 @@
 
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
+#include "core/scripts_registry.h"
+#include "protocols/protocols_defs.h"
 
 ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
                                                  QObject *parent)
@@ -32,8 +34,9 @@ QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentia
     config.insert("timeout", 60);
     config.insert("method", "$SHADOWSOCKS_CIPHER");
 
-    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
-                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
+    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
+    vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
+    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(), vars);
 
     // qDebug().noquote() << textCfg;
     return textCfg;

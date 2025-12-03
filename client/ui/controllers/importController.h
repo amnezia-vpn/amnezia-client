@@ -30,7 +30,7 @@ public:
                               ServersModel* serversModel,
                               ContainersModel* containersModel,
                               QAppSettingsRepository* appSettingsRepository,
-                              const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+                              QObject *parent = nullptr);
 
 public slots:
     void importConfig();
@@ -81,7 +81,6 @@ private:
     ServersModel* m_serversModel;
     ContainersModel* m_containersModel;
     QAppSettingsRepository* m_appSettingsRepository;
-    std::shared_ptr<Settings> m_settings;
 
     QJsonObject m_config;
     QString m_configFileName;

@@ -2,10 +2,15 @@
 #define SCRIPTS_REGISTRY_H
 
 #include <QLatin1String>
+#include <QList>
+#include <QPair>
+#include <QString>
 #include "core/defs.h"
 #include "containers/containers_defs.h"
 
 namespace amnezia {
+
+typedef QList<QPair<QString, QString>> ScriptVars;
 
 enum SharedScriptType {
     // General scripts
@@ -39,6 +44,22 @@ QString scriptName(ProtocolScriptType type);
 
 QString scriptData(SharedScriptType type);
 QString scriptData(ProtocolScriptType type, DockerContainer container);
+
+ScriptVars genBaseVars(const ServerCredentials &credentials, 
+                       DockerContainer container,
+                       const QString &primaryDns,
+                       const QString &secondaryDns);
+
+ScriptVars genOpenVpnVars(const QJsonObject &containerConfig);
+ScriptVars genShadowSocksVars(const QJsonObject &containerConfig);
+ScriptVars genCloakVars(const QJsonObject &containerConfig);
+ScriptVars genXrayVars(const QJsonObject &containerConfig);
+ScriptVars genWireGuardVars(const QJsonObject &containerConfig);
+ScriptVars genAwgVars(const QJsonObject &containerConfig);
+ScriptVars genSftpVars(const QJsonObject &containerConfig);
+ScriptVars genSocks5ProxyVars(const QJsonObject &containerConfig);
+
+ScriptVars genProtocolVarsForContainer(DockerContainer container, const QJsonObject &containerConfig);
 }
 
 #endif // SCRIPTS_REGISTRY_H

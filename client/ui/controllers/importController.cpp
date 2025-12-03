@@ -71,8 +71,8 @@ namespace
 ImportController::ImportController(ServersController* serversController,
                                    ServersModel* serversModel, ContainersModel* containersModel,
                                    QAppSettingsRepository* appSettingsRepository,
-                                   const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_containersModel(containersModel), m_appSettingsRepository(appSettingsRepository), m_settings(settings)
+                                   QObject *parent)
+    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_containersModel(containersModel), m_appSettingsRepository(appSettingsRepository)
 {
 #ifdef Q_OS_ANDROID
     mInstance = this;

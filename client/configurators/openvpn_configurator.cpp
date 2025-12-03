@@ -76,8 +76,9 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
                                           const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
-    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container),
-                                                     m_serverController->genVarsForScript(credentials, container, containerConfig));
+    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
+    vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
+    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container), vars);
 
     ConnectionData connData = prepareOpenVpnConfig(credentials, container, errorCode);
     if (errorCode != ErrorCode::NoError) {
@@ -218,7 +219,7 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerC
                                   .arg(clientId);
 
     QStringList scriptList { script_import, script_sign };
-    QString script = m_serverController->replaceVars(scriptList.join("\n"), m_serverController->genVarsForScript(credentials, container));
+    QString script = m_serverController->replaceVars(scriptList.join("\n"), amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns()));
 
     return m_serverController->runScript(credentials, script);
 }

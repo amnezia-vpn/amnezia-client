@@ -16,6 +16,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/serverController.h
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.h
     ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/installController.h
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.h
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.h
@@ -77,6 +78,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/serverController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/installController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.cpp

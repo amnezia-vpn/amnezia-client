@@ -1,5 +1,5 @@
-#ifndef INSTALLCONTROLLER_H
-#define INSTALLCONTROLLER_H
+#ifndef INSTALLUICONTROLLER_H
+#define INSTALLUICONTROLLER_H
 
 #include <QObject>
 #include <QProcess>
@@ -7,17 +7,21 @@
 #include "containers/containers_defs.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/clientManagementController.h"
+#include "core/controllers/installController.h"
 #include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/serversRepository.h"
 #include "core/defs.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
 
-class InstallController : public QObject
+class InstallUiController : public QObject
 {
     Q_OBJECT
 public:
-    explicit InstallController(ServersController* serversController,
+    explicit InstallUiController(InstallController* installController,
+                               ServersRepository* serversRepository,
+                               ServersController* serversController,
                                ServersModel* serversModel, ContainersModel* containersModel,
                                ProtocolsModel* protocolsModel,
                                ClientManagementController* clientManagementController,
@@ -101,6 +105,8 @@ private:
                                             QMap<DockerContainer, QJsonObject> &installedContainers);
     bool isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
 
+    InstallController* m_installController;
+    ServersRepository* m_serversRepository;
     ServersController* m_serversController;
     ServersModel* m_serversModel;
     ContainersModel* m_containersModel;
@@ -119,4 +125,4 @@ private:
 #endif
 };
 
-#endif // INSTALLCONTROLLER_H
+#endif // INSTALLUICONTROLLER_H

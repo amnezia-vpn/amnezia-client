@@ -19,7 +19,7 @@
 #include "ui/controllers/exportController.h"
 #include "ui/controllers/focusController.h"
 #include "ui/controllers/importController.h"
-#include "ui/controllers/installController.h"
+#include "ui/controllers/installUiController.h"
 #include "ui/controllers/pageController.h"
 #include "ui/controllers/protocolsUiController.h"
 #include "ui/controllers/settingsController.h"
@@ -136,7 +136,7 @@ private:
     ConnectionController* m_connectionController;
     FocusController* m_focusController;
     PageController* m_pageController;
-    InstallController* m_installController;
+    InstallUiController* m_installUiController;
     ImportController* m_importController;
     ExportController* m_exportController;
     SettingsController* m_settingsController;

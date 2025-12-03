@@ -5,6 +5,7 @@
 #include <QDateTime>
 
 #include "core/controllers/serverController.h"
+#include "core/scripts_registry.h"
 #include "logger.h"
 #include "protocols/protocols_defs.h"
 
@@ -92,7 +93,7 @@ ErrorCode ClientManagementController::wgShow(const DockerContainer container, co
 
     const QString command = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%1'").arg("wg show all");
 
-    QString script = serverController->replaceVars(command, serverController->genVarsForScript(credentials, container));
+    QString script = serverController->replaceVars(command, amnezia::genBaseVars(credentials, container, QString(), QString()));
     error = serverController->runScript(credentials, script, cbReadStdOut);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to execute wg show command";
@@ -155,7 +156,7 @@ ErrorCode ClientManagementController::getOpenVpnClients(const DockerContainer co
     };
 
     const QString getOpenVpnClientsList = "sudo docker exec -i $CONTAINER_NAME bash -c 'ls /opt/amnezia/openvpn/pki/issued'";
-    QString script = serverController->replaceVars(getOpenVpnClientsList, serverController->genVarsForScript(credentials, container));
+    QString script = serverController->replaceVars(getOpenVpnClientsList, amnezia::genBaseVars(credentials, container, QString(), QString()));
     error = serverController->runScript(credentials, script, cbReadStdOut);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to retrieve the list of issued certificates on the server";
@@ -542,7 +543,7 @@ ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerC
                                                "cp pki/crl.pem .'")
                                                .arg(clientId);
 
-    const QString script = serverController->replaceVars(getOpenVpnCertData, serverController->genVarsForScript(credentials, container));
+    const QString script = serverController->replaceVars(getOpenVpnCertData, amnezia::genBaseVars(credentials, container, QString(), QString()));
     ErrorCode error = serverController->runScript(credentials, script);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to revoke the certificate";
@@ -618,7 +619,7 @@ ErrorCode ClientManagementController::revokeWireGuard(const int row, const Docke
     const QString script = "sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip %1)'";
     error = serverController->runScript(
             credentials,
-            serverController->replaceVars(script.arg(wireGuardConfigFile), serverController->genVarsForScript(credentials, container)));
+            serverController->replaceVars(script.arg(wireGuardConfigFile), amnezia::genBaseVars(credentials, container, QString(), QString())));
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to execute the command 'wg syncconf' on the server";
         return error;
@@ -722,7 +723,7 @@ ErrorCode ClientManagementController::revokeXray(const int row,
     QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
     error = serverController->runScript(
         credentials, 
-        serverController->replaceVars(restartScript, serverController->genVarsForScript(credentials, container))
+        serverController->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, QString(), QString()))
     );
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to restart xray container";

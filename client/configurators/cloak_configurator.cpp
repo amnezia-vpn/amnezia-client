@@ -6,6 +6,8 @@
 
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
+#include "core/scripts_registry.h"
+#include "protocols/protocols_defs.h"
 
 CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
     : ConfiguratorBase(settings, serverController, parent)
@@ -44,8 +46,9 @@ QString CloakConfigurator::createConfig(const ServerCredentials &credentials, Do
     config.insert("RemoteHost", credentials.hostName);
     config.insert("RemotePort", "$CLOAK_SERVER_PORT");
 
-    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
-                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
+    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
+    vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
+    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(), vars);
 
     return textCfg;
 }
