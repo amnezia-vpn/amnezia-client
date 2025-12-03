@@ -356,6 +356,29 @@ jobs:
         name: AmneziaVPN_Windows_ARM64_unpacked
         path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
         retention-days: 7
+
+    - name: 'Create Qt ARM64 archive'
+      shell: pwsh
+      run: |
+        $qtArm64Dir = "${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_arm64"
+        $archivePath = "Qt_${{ env.QT_VERSION }}_ARM64.zip"
+        
+        if (Test-Path $qtArm64Dir) {
+          Write-Host "Creating Qt ARM64 archive from: $qtArm64Dir"
+          Compress-Archive -Path $qtArm64Dir -DestinationPath $archivePath -Force
+          Write-Host "Archive created: $archivePath"
+          Write-Host "Archive size: $((Get-Item $archivePath).Length / 1MB) MB"
+        } else {
+          Write-Host "ERROR: Qt ARM64 directory not found: $qtArm64Dir"
+          exit 1
+        }
+
+    - name: 'Upload Qt ARM64 archive'
+      uses: actions/upload-artifact@v4
+      with:
+        name: Qt_${{ env.QT_VERSION }}_ARM64
+        path: Qt_${{ env.QT_VERSION }}_ARM64.zip
+        retention-days: 7
 # ------------------------------------------------------
 
   Build-iOS:

@@ -60,7 +60,8 @@ cmake --version
 
 cd %PROJECT_DIR%
 if defined QT_HOST_PATH (
-    call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%" "-DQT_HOST_PATH:PATH=%QT_HOST_PATH%"
+    REM ARM64 cross-compilation - set generator platform to ARM64
+    call cmake . -B %WORK_DIR% -A ARM64 "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%" "-DQT_HOST_PATH:PATH=%QT_HOST_PATH%"
 ) else (
     call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%"
 )
@@ -108,77 +109,78 @@ if defined QT_HOST_BIN_DIR (
         echo "ERROR: ARM64 exe file not found: %OUT_APP_DIR%\%APP_FILENAME%"
         exit /b 1
     )
-    REM For ARM64 cross-compilation, use windeployqt from host (x64) Qt
-    REM Set Qt environment variables to point to ARM64 Qt
-    echo "Using host windeployqt for ARM64 cross-compilation"
+    REM For ARM64 cross-compilation, manually copy all Qt ARM64 libraries
+    REM windeployqt from x64 host copies x64 libraries, not ARM64
+    echo "Manually copying ARM64 Qt libraries (windeployqt copies x64 instead)"
     echo "ARM64 Qt path: %QT_BIN_DIR:"=%"
-    echo "Host Qt path: %QT_HOST_BIN_DIR:"=%"
     
-    REM Set environment variables to help windeployqt find ARM64 Qt
-    set "PATH=%QT_BIN_DIR:"=%;%PATH%"
-    set "QT_PLUGIN_PATH=%QT_BIN_DIR:"=%\..\plugins"
-    set "QML2_IMPORT_PATH=%QT_BIN_DIR:"=%\..\qml"
+    REM First, use windeployqt ONLY to detect QML dependencies (--dry-run would be ideal but not supported)
+    REM We'll let it run to create directory structure, then overwrite with ARM64 DLLs
+    echo "Running windeployqt to detect QML dependencies..."
+    "%QT_HOST_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client" --force --no-translations --compiler-runtime "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
     
-    REM Use host windeployqt with --dir parameter to specify ARM64 Qt location
-    REM The --libdir parameter tells windeployqt where to find the ARM64 Qt libraries
-    echo "Running windeployqt..."
-    "%QT_HOST_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client" --libdir "%QT_BIN_DIR:"=%" --plugindir "%QT_BIN_DIR:"=%\..\plugins" --force --no-translations --compiler-runtime "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
-    
-    echo "Checking output directory after windeployqt..."
-    echo "Listing all files and directories in output directory:"
-    dir "%OUT_APP_DIR:"=%" /s
-    REM Check if windeployqt succeeded
-    if not exist "%OUT_APP_DIR:"=%\Qt6Core.dll" (
-        echo "WARNING: windeployqt may have failed, Qt6Core.dll not found"
-        echo "Attempting fallback: manual copy of Qt ARM64 DLLs..."
+    REM Now overwrite all x64 DLLs with ARM64 DLLs
+    echo "Overwriting x64 Qt DLLs with ARM64 versions..."
+    if exist "%QT_BIN_DIR:"=%\Qt6Core.dll" (
+        echo "Copying all ARM64 Qt DLLs from %QT_BIN_DIR:"=%"
+        copy "%QT_BIN_DIR:"=%\*.dll" "%OUT_APP_DIR:"=%\" /y >nul 2>&1
         
-        if exist "%QT_BIN_DIR:"=%\Qt6Core.dll" (
-            echo "Copying Qt DLLs from %QT_BIN_DIR:"=%"
-            copy "%QT_BIN_DIR:"=%\*.dll" "%OUT_APP_DIR:"=%\" >nul 2>&1
-            
-            REM Copy all essential Qt directories
-            if exist "%QT_BIN_DIR:"=%\..\plugins" (
-                echo "Copying Qt plugins (all subdirectories)"
-                xcopy "%QT_BIN_DIR:"=%\..\plugins" "%OUT_APP_DIR:"=%\" /s /e /y /i >nul 2>&1
+        REM Also copy DLLs from Qt root directory (d3dcompiler_47.dll, dxcompiler.dll, etc.)
+        set "QT_ROOT=%QT_BIN_DIR:"=%\.."
+        if exist "%QT_ROOT%\*.dll" (
+            echo "Copying additional ARM64 DLLs from Qt root"
+            copy "%QT_ROOT%\*.dll" "%OUT_APP_DIR:"=%\" /y >nul 2>&1
+        )
+        
+        REM Copy all ARM64 Qt plugins (overwrite x64 versions)
+        if exist "%QT_BIN_DIR:"=%\..\plugins" (
+            echo "Copying ARM64 Qt plugins"
+            xcopy "%QT_BIN_DIR:"=%\..\plugins" "%OUT_APP_DIR:"=%\" /s /e /y /i >nul 2>&1
+        )
+        
+        REM Copy ARM64 QML modules  
+        if exist "%QT_BIN_DIR:"=%\..\qml" (
+            echo "Copying ARM64 QML modules"
+            xcopy "%QT_BIN_DIR:"=%\..\qml" "%OUT_APP_DIR:"=%\qml\" /s /e /y /i >nul 2>&1
+        )
+        
+        REM Copy translations
+        if exist "%QT_BIN_DIR:"=%\..\translations" (
+            echo "Copying translations"
+            xcopy "%QT_BIN_DIR:"=%\..\translations" "%OUT_APP_DIR:"=%\translations\" /s /e /y /i >nul 2>&1
+        )
+        
+        REM Copy resources
+        if exist "%QT_BIN_DIR:"=%\..\resources" (
+            echo "Copying resources"
+            xcopy "%QT_BIN_DIR:"=%\..\resources" "%OUT_APP_DIR:"=%\resources\" /s /e /y /i >nul 2>&1
+        )
+        
+        REM Copy all additional Qt module directories that exist
+        echo "Copying additional ARM64 Qt module directories..."
+        set "QT_ROOT=%QT_BIN_DIR:"=%\.."
+        
+        REM List of Qt module directories to copy
+        for %%d in (cloak cygwin generic iconengines imageformats networkinformation openvpn platforms qmltooling ss styles tap tls xray) do (
+            if exist "%QT_ROOT%\%%d" (
+                echo "Copying %%d directory"
+                xcopy "%QT_ROOT%\%%d" "%OUT_APP_DIR:"=%\%%d\" /s /e /y /i >nul 2>&1
             )
-            
-            REM Copy QML modules
-            if exist "%QT_BIN_DIR:"=%\..\qml" (
-                echo "Copying QML modules"
-                xcopy "%QT_BIN_DIR:"=%\..\qml" "%OUT_APP_DIR:"=%\qml\" /s /e /y /i >nul 2>&1
-            )
-            
-            REM Copy translations
-            if exist "%QT_BIN_DIR:"=%\..\translations" (
-                echo "Copying Qt translations"
-                xcopy "%QT_BIN_DIR:"=%\..\translations" "%OUT_APP_DIR:"=%\translations\" /s /e /y /i >nul 2>&1
-            )
-            
-            REM Copy resources
-            if exist "%QT_BIN_DIR:"=%\..\resources" (
-                echo "Copying Qt resources"
-                xcopy "%QT_BIN_DIR:"=%\..\resources" "%OUT_APP_DIR:"=%\resources\" /s /e /y /i >nul 2>&1
-            )
-            
-            echo "Fallback copy completed"
-            
-            REM Verify that Qt DLLs were copied
-            if exist "%OUT_APP_DIR:"=%\Qt6Core.dll" (
-                echo "Success: Qt6Core.dll found after fallback copy"
-            ) else (
-                echo "ERROR: Qt6Core.dll still not found after fallback copy"
-                echo "Listing DLL files in output directory:"
-                dir "%OUT_APP_DIR:"=%\*.dll"
-                exit /b 1
-            )
+        )
+        
+        echo "ARM64 Qt libraries copied successfully"
+        
+        REM Verify Qt6Core.dll architecture
+        echo "Verifying Qt6Core.dll was copied:"
+        if exist "%OUT_APP_DIR:"=%\Qt6Core.dll" (
+            echo "Qt6Core.dll found in output directory"
         ) else (
-            echo "ERROR: Qt DLLs not found in %QT_BIN_DIR:"=%"
+            echo "ERROR: Qt6Core.dll not found after copy"
             exit /b 1
         )
     ) else (
-        echo "windeployqt completed successfully"
-        echo "Verifying Qt6Core.dll exists:"
-        dir "%OUT_APP_DIR:"=%\Qt6Core.dll"
+        echo "ERROR: ARM64 Qt DLLs not found in %QT_BIN_DIR:"=%"
+        exit /b 1
     )
 ) else (
     "%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
