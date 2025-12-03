@@ -50,6 +50,19 @@ del %TARGET_FILENAME%
 
 mkdir %WORK_DIR%
 
+echo "Checking MSVC environment..."
+where cl >nul 2>&1
+if %errorlevel% equ 0 (
+    echo "MSVC compiler found"
+    cl 2>&1 | findstr /C:"Version"
+) else (
+    echo "ERROR: MSVC compiler not found in PATH"
+    echo "Please ensure 'Setup mvsc' step in GitHub Actions workflow is configured correctly"
+    echo "Trying to find cl.exe..."
+    where cl 2>&1
+    exit /b 1
+)
+
 call "%QT_BIN_DIR:"=%\qt-cmake" --version
 if defined QT_HOST_BIN_DIR (
     "%QT_HOST_BIN_DIR:"=%\windeployqt" -v
@@ -58,12 +71,61 @@ if defined QT_HOST_BIN_DIR (
 )
 cmake --version
 
+REM Calculate Qt root directory BEFORE entering if blocks (batch variable expansion issue)
+REM Remove \bin from QT_BIN_DIR to get Qt root
+set "QT_ROOT_DIR=%QT_BIN_DIR:\bin=%"
+
 cd %PROJECT_DIR%
 if defined QT_HOST_PATH (
     REM ARM64 cross-compilation - set generator platform to ARM64
-    call cmake . -B %WORK_DIR% -A ARM64 "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%" "-DQT_HOST_PATH:PATH=%QT_HOST_PATH%"
+    REM CMAKE_PREFIX_PATH must point to Qt root (not bin), so CMake can find lib directory
+    
+    echo "=== CMake Configuration for ARM64 ==="
+    echo "QT_BIN_DIR:              %QT_BIN_DIR%"
+    echo "QT_ROOT_DIR:             %QT_ROOT_DIR%"
+    echo "QT_HOST_PATH:            %QT_HOST_PATH%"
+    echo "CMAKE_PREFIX_PATH:       %QT_ROOT_DIR%"
+    echo "Generator Platform:      ARM64"
+    echo "===================================="
+    
+    REM Verify Qt ARM64 directories exist
+    if not exist "%QT_ROOT_DIR%" (
+        echo "ERROR: Qt ARM64 root directory not found at %QT_ROOT_DIR%"
+        exit /b 1
+    )
+    echo "Qt ARM64 root directory exists: %QT_ROOT_DIR%"
+    
+    if not exist "%QT_ROOT_DIR%\lib" (
+        echo "ERROR: Qt ARM64 lib directory not found at %QT_ROOT_DIR%\lib"
+        exit /b 1
+    )
+    echo "Qt ARM64 lib directory found: %QT_ROOT_DIR%\lib"
+    dir "%QT_ROOT_DIR%\lib\Qt6Core*.lib"
+    
+    REM Check architecture of Qt6Core.lib (if dumpbin is available)
+    echo "Verifying Qt6Core.lib architecture..."
+    where dumpbin >nul 2>&1
+    if %errorlevel% equ 0 (
+        echo "dumpbin found, checking architecture..."
+        dumpbin /headers "%QT_ROOT_DIR%\lib\Qt6Core.lib" | findstr /C:"machine"
+        if %errorlevel% equ 0 (
+            echo "Architecture check completed"
+        ) else (
+            echo "WARNING: Could not extract machine type from Qt6Core.lib"
+        )
+    ) else (
+        echo "NOTE: dumpbin not available, skipping architecture verification"
+        echo "This is not critical - build will continue"
+    )
+    
+    call cmake . -B %WORK_DIR% -A ARM64 "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_ROOT_DIR%" "-DQT_HOST_PATH:PATH=%QT_HOST_PATH%"
 ) else (
-    call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%"
+    REM x64 build - QT_ROOT_DIR already calculated above
+    echo "=== CMake Configuration for x64 ==="
+    echo "QT_ROOT_DIR: %QT_ROOT_DIR%"
+    echo "===================================="
+    
+    call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_ROOT_DIR%"
 )
 
 cd %WORK_DIR%

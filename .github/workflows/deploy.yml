@@ -145,9 +145,9 @@ jobs:
       shell: cmd
       run: |
         set BUILD_ARCH=${{ env.BUILD_ARCH }}
-        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_64\\bin"
-        set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
-        call deploy\\build_windows.bat
+        set "QT_BIN_DIR=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2019_64\bin"
+        set "QIF_BIN_DIR=${{ runner.temp }}\Qt\Tools\QtInstallerFramework\${{ env.QIF_VERSION }}\bin"
+        call deploy\build_windows.bat
 
     - name: 'Rename Windows installer'
       shell: cmd
@@ -297,7 +297,7 @@ jobs:
         dir: ${{ runner.temp }}
         setup-python: 'false'
         tools: 'tools_ifw'
-        set-env: 'true'
+        set-env: 'false'
         aqtversion: '==3.3.0'
         py7zrversion: '==0.22.*'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
@@ -310,23 +310,51 @@ jobs:
         echo "Qt ARM64 directory: %QT_ARM64_DIR%"
         if exist "%QT_ARM64_DIR%" (
           echo "Qt ARM64 directory exists"
-          dir "%QT_ARM64_DIR%"
           echo.
           echo "Checking bin directory..."
           if exist "%QT_ARM64_DIR%\bin" (
             echo "bin directory exists"
-            dir "%QT_ARM64_DIR%\bin\Qt6*.dll"
+            dir "%QT_ARM64_DIR%\bin\Qt6*.dll" | findstr /C:"Qt6Core.dll"
           ) else (
             echo "ERROR: bin directory does not exist"
+            exit /b 1
           )
+          echo.
+          echo "Checking lib directory..."
+          if exist "%QT_ARM64_DIR%\lib" (
+            echo "lib directory exists"
+            dir "%QT_ARM64_DIR%\lib\Qt6Core*.lib"
+          ) else (
+            echo "ERROR: lib directory does not exist"
+            exit /b 1
+          )
+          echo "Qt ARM64 installation verified successfully"
         ) else (
           echo "ERROR: Qt ARM64 directory does not exist"
+          exit /b 1
         )
 
     - name: 'Setup mvsc'
       uses: ilammy/msvc-dev-cmd@v1
       with:
-        arch: 'arm64'
+        arch: 'x64_arm64'
+
+    - name: 'Check environment variables before build'
+      shell: cmd
+      run: |
+        echo "=== Environment Variables Check ==="
+        echo "Checking for Qt-related environment variables..."
+        set | findstr /I "Qt"
+        set | findstr /I "CMAKE"
+        echo.
+        echo "Checking for MSVC tools in PATH..."
+        where cl 2>nul && echo "cl.exe found" || echo "WARNING: cl.exe not found"
+        where dumpbin 2>nul && echo "dumpbin.exe found" || echo "NOTE: dumpbin.exe not found"
+        where link 2>nul && echo "link.exe found" || echo "WARNING: link.exe not found"
+        echo.
+        echo "MSVC environment variables:"
+        set | findstr /I "VCINSTALLDIR VSINSTALLDIR"
+        echo "===================================="
 
     - name: 'Build project'
       shell: cmd
