@@ -1177,7 +1177,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="146"/>
         <source>Save settings?</source>
-        <translation>Guardar configuración?</translation>
+        <translation>¿Guardar ajustes?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="147"/>
@@ -1273,7 +1273,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="119"/>
         <source>Save settings?</source>
-        <translation>¿Guardar ajustes?</translation>
+        <translation type="unfinished">Guardar configuración?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="120"/>
