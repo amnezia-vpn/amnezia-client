@@ -43,7 +43,7 @@
     <message>
         <location filename="../ui/controllers/allowedDnsController.cpp" line="62"/>
         <source>The JSON data is not an array in file: %1</source>
-        <translation>Los datos JSON no es un arreglo en el archivo: %1</translation>
+        <translation>Los datos JSON no son un arreglo en el archivo: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsController.cpp" line="82"/>
@@ -436,17 +436,13 @@ No se puede desactivar para el servidor actual</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="217"/>
-        <source>
-Added containers that were already installed on the server</source>
-        <translation>
-Добавлены сервисы и протоколы, которые были ранее установлены на сервер</translation>
+        <source>Added containers that were already installed on the server</source>
+        <translation>Se han añadido los contenedores que ya estaban instalados en el servidor</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="297"/>
-        <source>
-Already installed containers were found on the server. All installed containers have been added to the application</source>
-        <translation>
-На сервере обнаружены установленные протоколы и сервисы. Все они были добавлены в приложение</translation>
+        <source>Already installed containers were found on the server. All installed containers have been added to the application</source>
+        <translation>Se han encontrado contenedores ya instalados en el servidor. Todos se han añadido a la aplicación</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="727"/>
@@ -1273,7 +1269,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="119"/>
         <source>Save settings?</source>
-        <translation type="unfinished">Guardar configuración?</translation>
+        <translation type="unfinished">¿Guardar configuración?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="120"/>
@@ -1461,7 +1457,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="232"/>
         <source>Detailed instructions</source>
-        <translation>Instruciones detalladas</translation>
+        <translation>Instrucсiones detalladas</translation>
     </message>
 </context>
 <context>
@@ -1695,7 +1691,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
         <source>Software version: %1</source>
-        <translation>Version de software: %1</translation>
+        <translation>Versión de software: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="149"/>
@@ -1864,7 +1860,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="102"/>
         <source>Setup guides on the Amnezia website</source>
-        <translation>uías de instalación en el sitio web de Amnezia</translation>
+        <translation>Guías de instalación en el sitio web de Amnezia</translation>
     </message>
 </context>
 <context>
@@ -1912,7 +1908,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="201"/>
         <source>Config file saved</source>
-        <translation>Archivo de configuración guardada</translation>
+        <translation>Se ha guardado el archivo de configuración</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="215"/>
