@@ -76,6 +76,7 @@ set(AMNEZIAVPN_TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_uk_UA.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ur_PK.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_hi_IN.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_es_ES.ts
 )
 
 file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)

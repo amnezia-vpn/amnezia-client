@@ -48,6 +48,7 @@ QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLan
     case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
     case LanguageSettings::AvailableLanguageEnum::Urdu: strLanguage = "اُرْدُوْ"; break;
     case LanguageSettings::AvailableLanguageEnum::Hindi: strLanguage = "हिन्दी"; break;
+    case LanguageSettings::AvailableLanguageEnum::Spanish: strLanguage = "Español"; break;
     default: break;
     }
 
@@ -66,6 +67,7 @@ void LanguageModel::changeLanguage(const LanguageSettings::AvailableLanguageEnum
     case LanguageSettings::AvailableLanguageEnum::Burmese: emit updateTranslations(QLocale::Burmese); break;
     case LanguageSettings::AvailableLanguageEnum::Urdu: emit updateTranslations(QLocale::Urdu); break;
     case LanguageSettings::AvailableLanguageEnum::Hindi: emit updateTranslations(QLocale::Hindi); break;
+    case LanguageSettings::AvailableLanguageEnum::Spanish: emit updateTranslations(QLocale::Spanish); break;
     default: emit updateTranslations(QLocale::English); break;
     }
 }
@@ -83,6 +85,7 @@ int LanguageModel::getCurrentLanguageIndex()
     case QLocale::Burmese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Burmese); break;
     case QLocale::Urdu: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Urdu); break;
     case QLocale::Hindi: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Hindi); break;
+    case QLocale::Spanish: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Spanish); break;
     default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     }
 }
@@ -113,6 +116,7 @@ LanguageSettings::AvailableLanguageEnum LanguageModel::getSystemLanguageEnum()
     case QLocale::Burmese: return LanguageSettings::AvailableLanguageEnum::Burmese;
     case QLocale::Urdu: return LanguageSettings::AvailableLanguageEnum::Urdu;
     case QLocale::Hindi: return LanguageSettings::AvailableLanguageEnum::Hindi;
+		case QLocale::Spanish: return LanguageSettings::AvailableLanguageEnum::Spanish;
     case QLocale::English: return LanguageSettings::AvailableLanguageEnum::English;
     default: return LanguageSettings::AvailableLanguageEnum::English;
     }
