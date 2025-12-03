@@ -116,7 +116,7 @@ LanguageSettings::AvailableLanguageEnum LanguageModel::getSystemLanguageEnum()
     case QLocale::Burmese: return LanguageSettings::AvailableLanguageEnum::Burmese;
     case QLocale::Urdu: return LanguageSettings::AvailableLanguageEnum::Urdu;
     case QLocale::Hindi: return LanguageSettings::AvailableLanguageEnum::Hindi;
-		case QLocale::Spanish: return LanguageSettings::AvailableLanguageEnum::Spanish;
+    case QLocale::Spanish: return LanguageSettings::AvailableLanguageEnum::Spanish;
     case QLocale::English: return LanguageSettings::AvailableLanguageEnum::English;
     default: return LanguageSettings::AvailableLanguageEnum::English;
     }
