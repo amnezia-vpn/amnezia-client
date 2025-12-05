@@ -132,6 +132,8 @@ jobs:
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
+        aqtversion: '==3.1.21'
+        py7zrversion: '==0.22.*'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Setup mvsc'
@@ -143,20 +145,20 @@ jobs:
       shell: cmd
       run: |
         set BUILD_ARCH=${{ env.BUILD_ARCH }}
-        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_64\\bin"
-        set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
-        call deploy\\build_windows.bat
+        set "QT_BIN_DIR=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2019_64\bin"
+        set "QIF_BIN_DIR=${{ runner.temp }}\Qt\Tools\QtInstallerFramework\${{ env.QIF_VERSION }}\bin"
+        call deploy\build_windows.bat
 
     - name: 'Rename Windows installer'
       shell: cmd
       run: |
-        copy AmneziaVPN_x${{ env.BUILD_ARCH }}.exe AmneziaVPN_%VERSION%_x64.exe
+        copy AmneziaVPN_x${{ env.BUILD_ARCH }}.exe AmneziaVPN_%VERSION%_x${{ env.BUILD_ARCH }}.exe
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_x64.exe
-        path: AmneziaVPN_${{ env.VERSION }}_x64.exe
+        name: AmneziaVPN_${{ env.VERSION }}_x${{ env.BUILD_ARCH }}.exe
+        path: AmneziaVPN_${{ env.VERSION }}_x${{ env.BUILD_ARCH }}.exe
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
@@ -166,6 +168,136 @@ jobs:
         path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
         retention-days: 7
 
+# ------------------------------------------------------
+
+  Build-Windows-ARM64:
+    runs-on: windows-latest
+
+    env:
+      QT_VERSION: 6.8.3
+      QIF_VERSION: 4.7
+      BUILD_ARCH: arm64
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+
+    steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Get 3rd-prebuilt'
+      shell: bash
+      run: |
+        rm -rf client/3rd-prebuilt
+
+    - name: 'Checkout 3rd-prebuilt'
+      uses: actions/checkout@v4
+      with:
+        repository: amnezia-vpn/3rd-prebuilt
+        ref: feature/add-support-arm64
+        path: client/3rd-prebuilt
+
+    - name: 'Get version from CMakeLists.txt'
+      id: get_version
+      shell: bash
+      run: |
+        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version: $VERSION"
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: 'Cleanup Qt directory'
+      shell: pwsh
+      run: |
+        $baseDir = "${{ runner.temp }}"
+        $qtVersion = "${{ env.QT_VERSION }}"
+        # Handle both path formats (with \ and /)
+        $paths = @(
+          "$baseDir\Qt\$qtVersion\msvc2022_64",
+          "$baseDir/Qt/$qtVersion/msvc2022_64",
+          "$baseDir\Qt\$qtVersion\msvc2022_arm64",
+          "$baseDir/Qt/$qtVersion/msvc2022_arm64"
+        )
+        foreach ($path in $paths) {
+          if (Test-Path $path) {
+            Write-Host "Removing $path..."
+            Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue
+          }
+        }
+
+    - name: 'Install Qt Desktop (host for cross-compilation)'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_64'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'false'
+        aqtversion: '==3.3.0'
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install Qt ARM64'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_arm64_cross_compiled'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        tools: 'tools_ifw'
+        set-env: 'false'
+        aqtversion: '==3.3.0'
+        py7zrversion: '==0.22.*'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+
+    - name: 'Setup mvsc'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: 'x64_arm64'
+
+    - name: 'Build project'
+      shell: cmd
+      run: |
+        set BUILD_ARCH=${{ env.BUILD_ARCH }}
+        set "QT_BIN_DIR=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_arm64\bin"
+        set "QT_HOST_PATH=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_64"
+        set "QT_HOST_BIN_DIR=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin"
+        set "QIF_BIN_DIR=${{ runner.temp }}\Qt\Tools\QtInstallerFramework\${{ env.QIF_VERSION }}\bin"
+        call deploy\build_windows.bat
+
+    - name: 'Rename Windows installer'
+      shell: cmd
+      run: |
+        copy AmneziaVPN_x${{ env.BUILD_ARCH }}.exe AmneziaVPN_%VERSION%_x${{ env.BUILD_ARCH }}.exe
+
+    - name: 'Upload installer artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_${{ env.VERSION }}_x${{ env.BUILD_ARCH }}.exe
+        path: AmneziaVPN_${{ env.VERSION }}_x${{ env.BUILD_ARCH }}.exe
+        retention-days: 7
+
+    - name: 'Upload unpacked artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_Windows_ARM64_unpacked
+        path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
+        retention-days: 7
 # ------------------------------------------------------
 
   Build-iOS:

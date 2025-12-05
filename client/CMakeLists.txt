@@ -39,6 +39,20 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
+# Diagnostic: Print Qt configuration
+message(STATUS "=== Qt Configuration Diagnostics ===")
+message(STATUS "Qt6_DIR: ${Qt6_DIR}")
+message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+message(STATUS "CMAKE_GENERATOR_PLATFORM: ${CMAKE_GENERATOR_PLATFORM}")
+message(STATUS "CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
+if(TARGET Qt6::Core)
+    get_target_property(Qt6Core_LOCATION Qt6::Core LOCATION)
+    message(STATUS "Qt6::Core location: ${Qt6Core_LOCATION}")
+    get_target_property(Qt6Core_IMPLIB Qt6::Core IMPORTED_IMPLIB_RELEASE)
+    message(STATUS "Qt6::Core import library: ${Qt6Core_IMPLIB}")
+endif()
+message(STATUS "====================================")
+
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
@@ -199,7 +213,9 @@ target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAM
 
 # deploy artifacts required to run the application to the debug build folder
 if(WIN32)
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+        set(DEPLOY_PLATFORM_PATH "windows/arm64")
+    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(DEPLOY_PLATFORM_PATH "windows/x64")
     else()
         set(DEPLOY_PLATFORM_PATH "windows/x32")

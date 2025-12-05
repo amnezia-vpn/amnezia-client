@@ -4,6 +4,7 @@
 #include <QRegularExpressionMatchIterator>
 #include <QCoreApplication>
 #include <QOperatingSystemVersion>
+#include <QSysInfo>
 
 #include "tapcontroller_win.h"
 
@@ -266,6 +267,12 @@ QString TapController::getOpenVpnPath()
 
 QString TapController::getTapDriverDir()
 {
+    // For ARM64 architecture, use the arm64-specific tap driver directory
+    QString cpuArch = QSysInfo::currentCpuArchitecture();
+    if (cpuArch == "arm64" || cpuArch == "arm64-little-endian") {
+        return qApp->applicationDirPath() + "\\tap\\arm64";
+    }
+    
     if (oldDriversRequired()) {
         return qApp->applicationDirPath() + "\\tap\\windows_7";
     }
