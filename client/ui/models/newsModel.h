@@ -16,7 +16,6 @@ struct NewsItem
     QString title;
     QString content;
     QDateTime timestamp;
-    bool read;
 };
 
 class NewsModel : public QAbstractListModel
@@ -39,7 +38,7 @@ public:
     int processedIndex() const;
     void setProcessedIndex(int index);
 
-    void updateModel(const QJsonArray &items);
+    void setNewsList(const QJsonArray &items);
     bool hasUnread() const;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -52,11 +51,13 @@ signals:
 
 private:
     QVector<NewsItem> m_items;
+    QVector<NewsItem> m_apiItems;
     int m_processedIndex = -1;
     std::shared_ptr<Settings> m_settings;
     QSet<QString> m_readIds;
     void loadReadIds();
     void saveReadIds() const;
+    void updateModel();
 };
 
 #endif // NEWSMODEL_H

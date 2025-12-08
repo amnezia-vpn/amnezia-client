@@ -63,7 +63,7 @@ void ApiNewsController::fetchNews(bool showError)
             }
         }
 
-        m_newsModel->updateModel(newsArray);
+        m_newsModel->setNewsList(newsArray);
         emit fetchNewsFinished();
     });
 }
