@@ -2,7 +2,6 @@
 
 #include <QVariant>
 #include <QJsonParseError>
-#include <QUrlQuery>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QThread>
 #include <QDebug>
@@ -179,17 +178,13 @@ void TransferController::onTransferQrScanned(const QString &code)
                                             m_settings->isStrictKillSwitchEnabled());
         QByteArray responseBody;
         QJsonObject payload;
-        payload.insert("config", config);
+        payload.insert(QStringLiteral("config"), config);
+        payload.insert(QStringLiteral("uuid"), uuid);
+        payload.insert(QStringLiteral("api_key"), apiKey);
+        const QString endpoint = QStringLiteral("%1sendConfig").arg(gw);
 
-        // URL-encode query
-        QUrlQuery q;
-        q.addQueryItem(QStringLiteral("uuid"), uuid);
-        q.addQueryItem(QStringLiteral("api_key"), apiKey);
-        const QString endpoint = QStringLiteral("%1sendConfig?%2")
-                                        .arg(gw)
-                                        .arg(q.query(QUrl::FullyEncoded));
-
-        qDebug() << "TransferController::onTransferQrScanned: sending POST to" << endpoint;
+        qDebug() << "TransferController::onTransferQrScanned: sending POST to" << endpoint
+                << "with payload:" << QJsonDocument(payload).toJson(QJsonDocument::Compact);
         auto errorCode = gatewayController.post(endpoint, payload, responseBody);
         qDebug() << "TransferController::onTransferQrScanned: POST finished with code"
                  << static_cast<int>(errorCode);
@@ -276,12 +271,7 @@ void TransferController::startWaitForConfig(ImportController *importController)
                 break;
             }
 
-            QUrlQuery q;
-            q.addQueryItem(QStringLiteral("uuid"), uuid);
-
-            const QString endpoint = QStringLiteral("%1waitConfig?%2")
-                                             .arg(gw)
-                                             .arg(q.query(QUrl::FullyEncoded));
+            const QString endpoint = QStringLiteral("%1waitConfig").arg(gw);
             qDebug() << "waitConfig endpoint:" << endpoint;
 
             QByteArray responseBody;
@@ -289,6 +279,8 @@ void TransferController::startWaitForConfig(ImportController *importController)
                                                 m_settings->isDevGatewayEnv(),
                                                 apiDefs::requestTimeoutMsecs,
                                                 m_settings->isStrictKillSwitchEnabled());
+            QJsonObject payload;
+            payload.insert(QStringLiteral("uuid"), uuid);
 
             auto errorCode = gatewayController.get(endpoint, responseBody);
             if (errorCode == ErrorCode::NoError) {
