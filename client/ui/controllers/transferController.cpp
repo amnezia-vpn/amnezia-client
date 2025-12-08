@@ -2,8 +2,6 @@
 
 #include <QVariant>
 #include <QJsonParseError>
-#include <QtConcurrent/QtConcurrentRun>
-#include <QThread>
 #include <QDebug>
 
 #include "settings.h"
@@ -29,11 +27,6 @@ void TransferController::handleImportControllerDestroyed()
 }
 
 TransferController::~TransferController() {
-    m_stopWaiting.storeRelease(1);
-    if (m_waitFuture.isRunning())
-        m_waitFuture.waitForFinished();
-    if (m_postFuture.isRunning())
-        m_postFuture.waitForFinished();
 }
 
 QString TransferController::buildQrPayloadJson(const QString &gatewayUrl, const QString &uuid, int version) const
@@ -65,9 +58,6 @@ void TransferController::generateNewQrCode()
     auto qr = qrCodeUtils::generateQrCode(payload.toUtf8());
     const QString svg = QString::fromStdString(toSvgString(qr, 1));
     m_qrCodeUrl = qrCodeUtils::svgToBase64(svg);
-
-    // Bump generation so existing wait loops can detect regeneration
-    m_waitGeneration.fetchAndAddRelaxed(1);
 
     emit qrCodeUpdated();
 }
@@ -114,10 +104,6 @@ QString TransferController::getCurrentApiKey() const
 void TransferController::onTransferQrScanned(const QString &code)
 {
     qDebug() << "TransferController  has scanned the Qr";
-    if (m_postInFlight.loadAcquire()) {
-        // prevent duplicate POSTs
-        return;
-    }
 
     QJsonParseError err;
     const QJsonDocument doc = QJsonDocument::fromJson(code.toUtf8(), &err);
@@ -161,57 +147,50 @@ void TransferController::onTransferQrScanned(const QString &code)
         return;
     }
 
-    m_postInFlight.storeRelease(1);
     emit postStarted();
 
-    m_postFuture = QtConcurrent::run([this, gw, uuid, apiKey, config]() {
+    qDebug() << "entered POST section";
+    qDebug() << "gw: " << gw;
+    qDebug() << "uuid: " << uuid;
+    qDebug() << "apiKey: " << apiKey;
+    qDebug() << "config: " << config;
 
-        qDebug() << "entered QFuture section";
-        qDebug() << "gw: " << gw;
-        qDebug() << "uuid: " << uuid;
-        qDebug() << "apiKey: " << apiKey;
-        qDebug() << "config: " << config;
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(),
+                                        m_settings->isDevGatewayEnv(),
+                                        apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
+    QByteArray responseBody;
+    QJsonObject payload;
+    payload.insert(QStringLiteral("config"), config);
+    payload.insert(QStringLiteral("uuid"), uuid);
+    payload.insert(QStringLiteral("api_key"), apiKey);
+    const QString endpoint = QStringLiteral("%1sendConfig").arg(gw);
 
-        GatewayController gatewayController(m_settings->getGatewayEndpoint(),
-                                            m_settings->isDevGatewayEnv(),
-                                            apiDefs::requestTimeoutMsecs,
-                                            m_settings->isStrictKillSwitchEnabled());
-        QByteArray responseBody;
-        QJsonObject payload;
-        payload.insert(QStringLiteral("config"), config);
-        payload.insert(QStringLiteral("uuid"), uuid);
-        payload.insert(QStringLiteral("api_key"), apiKey);
-        const QString endpoint = QStringLiteral("%1sendConfig").arg(gw);
+    qDebug() << "TransferController::onTransferQrScanned: sending POST to " << endpoint
+            << "with payload: " << QJsonDocument(payload).toJson(QJsonDocument::Compact);
+    auto errorCode = gatewayController.post(endpoint, payload, responseBody);
+    qDebug() << "TransferController::onTransferQrScanned: POST finished with code"
+            << static_cast<int>(errorCode);
 
-        qDebug() << "TransferController::onTransferQrScanned: sending POST to" << endpoint
-                << "with payload:" << QJsonDocument(payload).toJson(QJsonDocument::Compact);
-        auto errorCode = gatewayController.post(endpoint, payload, responseBody);
-        qDebug() << "TransferController::onTransferQrScanned: POST finished with code"
-                 << static_cast<int>(errorCode);
-
-        QMetaObject::invokeMethod(this, [this, errorCode, responseBody]() {
-            m_postInFlight.storeRelease(0);
-            if (errorCode == ErrorCode::NoError) {
-                QJsonParseError err;
-                const QJsonDocument doc = QJsonDocument::fromJson(responseBody, &err);
-                if (err.error == QJsonParseError::NoError && doc.isObject()) {
-                    const QJsonObject obj = doc.object();
-                    if (obj.value("status").toString() == QStringLiteral("success")) {
-
-                        qDebug() << "TransferController::onTransferQrScanned: gateway returned success";
-                        emit postSucceeded();
-                        stopScanner();
-                        return;
-                    }
-                }
-                qWarning() << "TransferController::onTransferQrScanned: gateway response error";
-                emit postFailed(QStringLiteral("Gateway response error"));
-            } else {
-                qWarning() << "TransferController::onTransferQrScanned: network error during POST";
-                emit postFailed(QStringLiteral("Network error"));
+    if (errorCode == ErrorCode::NoError) {
+        QJsonParseError err;
+        const QJsonDocument doc = QJsonDocument::fromJson(responseBody, &err);
+        if (err.error == QJsonParseError::NoError && doc.isObject()) {
+            const QJsonObject obj = doc.object();
+            if (obj.value(QStringLiteral("status")).toString() == QStringLiteral("success")) {
+                qDebug() << "TransferController::onTransferQrScanned: gateway returned success";
+                emit postSucceeded();
+                stopScanner();
+                return;
             }
-        }, Qt::QueuedConnection);
-    });
+        }
+
+        qWarning() << "TransferController::onTransferQrScanned: gateway response error";
+        emit postFailed(QStringLiteral("Gateway response error"));
+    } else {
+        qWarning() << "TransferController::onTransferQrScanned: network error during POST";
+        emit postFailed(QStringLiteral("Network error"));
+    }
 }
 
 QString TransferController::qrCodeUrl() const
@@ -221,26 +200,16 @@ QString TransferController::qrCodeUrl() const
 
 void TransferController::startWaitForConfig(ImportController *importController)
 {
-    if (m_waitFuture.isRunning()) {
-        qWarning() << "startWaitForConfig called while previous wait is still running; ignoring";
-        return;
-    }
-
     QString gw = m_settings->getGatewayEndpoint();
-    if (!gw.endsWith('/')) {
-        gw.append('/');
+    if (!gw.endsWith(QLatin1Char('/'))) {
+        gw.append(QLatin1Char('/'));
     }
 
     const QString uuid = m_currentUuid;
-    qDebug() << "TransferController::startWaitForConfig: starting wait with uuid" << m_currentUuid;
-    const int generation = m_waitGeneration.loadAcquire();
-
-    qDebug() << "gw: " << gw;
-    qDebug() << "uuid: " << uuid;
-    qDebug() << "generation: " << generation;
+    qDebug() << "TransferController::startWaitForConfig: starting blocking wait with uuid: " << uuid;
 
     if (uuid.isEmpty()) {
-        qDebug() << "error: no uuid";
+        qWarning() << "TransferController::startWaitForConfig: no uuid";
         emit waitError(QStringLiteral("No UUID"));
         return;
     }
@@ -253,77 +222,61 @@ void TransferController::startWaitForConfig(ImportController *importController)
                 Qt::UniqueConnection);
     }
 
-    m_stopWaiting.storeRelease(0);
+    // Blocking request to /waitConfig with a timeout.
+    const int waitTimeoutMs = 30000;
 
-    m_waitFuture = QtConcurrent::run([this, gw, uuid, generation]() {
-        qDebug() << "started waiting for QFuture";
-        //int backoffMs = 500;
-        //const int maxBackoffMs = 5000;
-        const int pollIntervalMs = 6000;
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(),
+                                        m_settings->isDevGatewayEnv(),
+                                        waitTimeoutMs,
+                                        m_settings->isStrictKillSwitchEnabled());
+    const QString endpoint = QStringLiteral("%1waitConfig").arg(gw);
+    qDebug() << "waitConfig endpoint: " << endpoint;
 
-        qDebug() << "TransferController::startWaitForConfig: waiting for config with"
-                 << "gw =" << gw
-                 << "uuid =" << uuid
-                 << "generation =" << generation;
+    QJsonObject payload;
+    payload.insert(QStringLiteral("uuid"), uuid);
+    QByteArray responseBody;
 
-        while (!m_stopWaiting.loadAcquire()) {
-            if (generation != m_waitGeneration.loadAcquire()) {
-                break;
-            }
+    auto errorCode = gatewayController.post(endpoint, payload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        qWarning() << "TransferController::startWaitForConfig: network error during waitConfig";
+        emit waitError(QStringLiteral("Network error"));
+        return;
+    }
 
-            const QString endpoint = QStringLiteral("%1waitConfig").arg(gw);
-            qDebug() << "waitConfig endpoint:" << endpoint;
+    QJsonParseError err;
+    const QJsonDocument doc = QJsonDocument::fromJson(responseBody, &err);
+    if (err.error != QJsonParseError::NoError ||!doc.isObject()) {
+        qWarning() << "TransferController::startWaitForConfig: invalid gateway JSON";
+        emit waitError(QStringLiteral("Gateway Response Error"));
+        return;
+    }
 
-            QByteArray responseBody;
-            GatewayController gatewayController(m_settings->getGatewayEndpoint(),
-                                                m_settings->isDevGatewayEnv(),
-                                                apiDefs::requestTimeoutMsecs,
-                                                m_settings->isStrictKillSwitchEnabled());
-            QJsonObject payload;
-            payload.insert(QStringLiteral("uuid"), uuid);
+    const QJsonObject obj = doc.object();
+    QString cfg = obj.value(QStringLiteral("config")).toString();
 
-            auto errorCode = gatewayController.get(endpoint, responseBody);
-            if (errorCode == ErrorCode::NoError) {
-                QJsonParseError err;
-                const QJsonDocument doc = QJsonDocument::fromJson(responseBody, &err);
-                if (err.error != QJsonParseError::NoError || !doc.isObject()) {
-                    emit waitError(QStringLiteral("Gateway response error"));
-                } else {
-                    const QJsonObject obj = doc.object();
-                    const QString cfg = obj.value(QStringLiteral("config")).toString();
-                    if (cfg == QStringLiteral("timeout")) {
-                        QThread::msleep(pollIntervalMs);
-                        continue;
-                    }
-                    if (!cfg.isEmpty()) {
-                        QMetaObject::invokeMethod(this, [this, cfg]() {
-                            if (!m_importController)
-                                return;
+    if (cfg.isEmpty() || cfg == QStringLiteral("timeout")) {
+        qWarning() << "TransferController::startWaitForConfig: timeout or empty config";
+        emit waitError(QStringLiteral("Gateway response error (timeout)"));
+        return;
+    }
 
-                            if (!m_importController->extractConfigFromData(cfg)) {
-                                emit waitError(QStringLiteral("Invalid config received from gateway"));
-                                return;
-                            }
+    if (!m_importController) {
+        qWarning() << "TransferController::startWaitForConfig: import controller is null";
+        emit waitError(QStringLiteral("Import Controller destroyed"));
+        return;
+    }
 
-                            m_importController->importConfig();
-                            emit configApplied();
-                        }, Qt::QueuedConnection);
-                        break;
-                    }
-                }
-            } else {
-                emit waitError(QStringLiteral("Network error"));
-            }
+    if (!m_importController->extractConfigFromData(cfg)) {
+        qWarning() << "TransferController::startWaitForConfig: invalid config received from gateway";
+        emit waitError(QStringLiteral("Invalid config received from gateway"));
+        return;
+    }
 
-            QThread::msleep(pollIntervalMs);
-            //QThread::msleep(static_cast<unsigned long>(backoffMs));
-            //backoffMs = qMin(backoffMs * 2, maxBackoffMs);
-        }
-    });
+    m_importController->importConfig();
+    emit configApplied();
 }
 
 void TransferController::stopWaitForConfig()
 {
     qDebug() << "TransferController::stopWaitForConfig: stop flag set";
-    m_stopWaiting.storeRelease(1);
 }

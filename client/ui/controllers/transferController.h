@@ -6,8 +6,6 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QUuid>
-#include <QAtomicInt>
-#include <QFuture>
 
 #include "core/qrCodeUtils.h"
 
@@ -56,8 +54,10 @@ signals:
     void postSucceeded();
     void postFailed(const QString &message);
 
-private:
+private slots:
     void handleImportControllerDestroyed();
+
+private:
     QString buildQrPayloadJson(const QString &gatewayUrl, const QString &uuid, int version) const;
     QString getPremiumConfigToSend() const;
     QString m_pendingQrCode;
@@ -71,12 +71,6 @@ private:
 
     QString m_qrCodeUrl;
     QString m_currentUuid;
-    QAtomicInt m_stopWaiting { 0 };
-    QAtomicInt m_waitGeneration { 0 };
-    QAtomicInt m_postInFlight { 0 };
-
-    QFuture<void> m_waitFuture;
-    QFuture<void> m_postFuture;
 };
 
 #endif // TRANSFERCONTROLLER_H 
