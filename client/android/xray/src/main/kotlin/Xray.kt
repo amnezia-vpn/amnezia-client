@@ -157,7 +157,7 @@ class Xray : Protocol() {
         state.value = DISCONNECTED
     }
 
-    override fun reconnectVpn(vpnBuilder: Builder) {
+    override fun reconnectVpn(vpnBuilder: Builder, protect: (Int) -> Boolean) {
         state.value = CONNECTED
     }
 
