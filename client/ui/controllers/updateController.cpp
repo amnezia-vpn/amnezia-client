@@ -8,8 +8,10 @@
 #include <QEventLoop>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSysInfo>
 
 #include "amnezia_application.h"
+#include "core/api/apiDefs.h"
 #include "core/errorstrings.h"
 #include "core/scripts_registry.h"
 #include "logger.h"
@@ -93,15 +95,19 @@ bool UpdateController::fetchGatewayUrl()
                                         7000,
                                         m_settings->isStrictKillSwitchEnabled());
 
+    QJsonObject apiPayload;
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
+    apiPayload[apiDefs::key::installationUuid] = m_settings->getInstallationUuid(true);
+    
     QByteArray gatewayResponse;
-    auto err = gatewayController.get(QStringLiteral("%1v1/updater_endpoint"), gatewayResponse);
+    auto err = gatewayController.post(QStringLiteral("%1v1/updater_endpoint"), apiPayload, gatewayResponse);
     if (err != ErrorCode::NoError) {
         logger.error() << errorString(err);
         return false;
     }
     
     QJsonObject gatewayData = QJsonDocument::fromJson(gatewayResponse).object();
-    qDebug() << "gatewayData:" << gatewayData;
     
     QString baseUrl = gatewayData.value("url").toString();
     if (baseUrl.endsWith('/')) {
