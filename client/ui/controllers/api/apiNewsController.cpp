@@ -3,6 +3,8 @@
 #include "core/api/apiUtils.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QEventLoop>
+#include <QTimer>
 
 namespace
 {
@@ -29,6 +31,13 @@ void ApiNewsController::fetchNews(bool showError)
     if (stacks.isEmpty()) {
         qDebug() << "No Gateway stacks, skip fetchNews";
         return;
+    }
+
+    // Delay to avoid sending news call immediately after other gateway requests (rate-limit workaround)
+    {
+        QEventLoop wait;
+        QTimer::singleShot(1000, &wait, &QEventLoop::quit);
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
 
     auto gatewayController = QSharedPointer<GatewayController>::create(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),

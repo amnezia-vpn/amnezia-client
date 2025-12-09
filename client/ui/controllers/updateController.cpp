@@ -99,6 +99,13 @@ void UpdateController::checkForUpdates()
 
 bool UpdateController::fetchGatewayUrl()
 {
+    // Workaround: wait before contacting gateway to avoid rate limit triggered by other requests (news etc.)
+    {
+        QEventLoop wait;
+        QTimer::singleShot(1000, &wait, &QEventLoop::quit);
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
+    }
+
     GatewayController gatewayController(m_settings->getGatewayEndpoint(),
                                         m_settings->isDevGatewayEnv(),
                                         7000,
@@ -110,6 +117,7 @@ bool UpdateController::fetchGatewayUrl()
     apiPayload[apiDefs::key::installationUuid] = m_settings->getInstallationUuid(true);
     
     QByteArray gatewayResponse;
+    
     auto err = gatewayController.post(QStringLiteral("%1v1/updater_endpoint"), apiPayload, gatewayResponse);
     if (err != ErrorCode::NoError) {
         logger.error() << errorString(err);
