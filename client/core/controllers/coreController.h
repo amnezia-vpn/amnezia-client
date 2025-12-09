@@ -65,7 +65,6 @@ public:
     QSharedPointer<PageController> pageController() const;
     void setQmlRoot();
 
-    void openConnectionDefault();
     void openConnectionByIndex(int serverIndex);
     void importConfigFromData(const QString &data);
 
