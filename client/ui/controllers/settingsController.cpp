@@ -296,6 +296,36 @@ void SettingsController::toggleStartMinimized(bool enable)
     emit startMinimizedChanged();
 }
 
+bool SettingsController::isFileEncryptionEnabled()
+{
+    return m_settings->isFileEncryption();
+}
+
+void SettingsController::toggleFileEncryption(bool enable)
+{
+    m_settings->setFileEncryption(enable);
+}
+
+void SettingsController::setPassword(QString pwd)
+{
+    m_settings->setPassword(pwd);
+}
+
+QString SettingsController::getPassword()
+{
+    return m_settings->getPassword();
+}
+
+void SettingsController::setHint(QString hint)
+{
+    m_settings->setHint(hint);
+}
+
+QString SettingsController::getHint()
+{
+    return m_settings->getHint();
+}
+
 bool SettingsController::isScreenshotsEnabled()
 {
     return m_settings->isScreenshotsEnabled();

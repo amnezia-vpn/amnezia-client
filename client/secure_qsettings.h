@@ -16,6 +16,9 @@ public:
     explicit SecureQSettings(const QString &organization, const QString &application = QString(),
                              QObject *parent = nullptr);
 
+    Q_INVOKABLE bool encryptFile(const QString &filePath, const QString &password, QString *error = nullptr) const;
+    Q_INVOKABLE bool decryptFile(const QString &filePath, const QString &password, QString *error = nullptr) const;
+
     Q_INVOKABLE QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     Q_INVOKABLE void setValue(const QString &key, const QVariant &value);
     void remove(const QString &key);
@@ -35,6 +38,12 @@ public:
     static QByteArray getSecTag(const QString &tag);
     static void setSecTag(const QString &tag, const QByteArray &data);
 
+    void setPassword(const QString &pwd);
+    void setHint(const QString &hint);
+
+    QString getPassword() const;
+    QString getHint() const;
+
     void clearSettings();
 
 private:
@@ -47,6 +56,9 @@ private:
     QStringList m_fieldsToBackup = {
         "Conf/", "Servers/",
     };
+
+    mutable QString m_password;
+    mutable QString m_hint;
 
     mutable QByteArray m_key;
     mutable QByteArray m_iv;

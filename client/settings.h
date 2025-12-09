@@ -94,6 +94,33 @@ public:
         setValue("Conf/startMinimized", enabled);
     }
 
+    bool isFileEncryption() const
+    {
+        return value("Sec/fileEncryption", false).toBool();
+    }
+    void setFileEncryption(bool enabled)
+    {
+        setValue("Sec/fileEncryption", enabled);
+    }
+
+    QString getPassword() const
+    {
+        return m_settings.getPassword();
+    }
+    void setPassword(const QString &pwd)
+    {
+        m_settings.setPassword(pwd);
+    }
+
+    QString getHint() const
+    {
+        return m_settings.getHint();
+    }
+    void setHint(const QString &hint)
+    {
+        m_settings.setHint(hint);
+    }
+
     bool isSaveLogs() const
     {
         return value("Conf/saveLogs", false).toBool();
