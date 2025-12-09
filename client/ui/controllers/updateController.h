@@ -17,6 +17,7 @@ public:
 public slots:
     QString getHeaderText();
     QString getChangelogText();
+    QString getVersion() const;
 
     void checkForUpdates();
     void runInstaller();

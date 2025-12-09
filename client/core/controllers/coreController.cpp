@@ -414,8 +414,11 @@ void CoreController::initStrictKillSwitchHandler()
 void CoreController::initUpdateFoundHandler()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    connect(m_updateController.get(), &UpdateController::updateFound, this,
-            [this]() { QTimer::singleShot(1000, this, [this]() { m_pageController->showChangelogDrawer(); }); });
+    connect(m_updateController.get(), &UpdateController::updateFound, this, [this]() {
+        const QString version = m_updateController->getVersion();
+        const QString updateId = version.isEmpty() ? QStringLiteral("update") : QStringLiteral("update-%1").arg(version);
+        m_newsModel->setUpdateNotification(updateId, m_updateController->getHeaderText(), m_updateController->getChangelogText());
+    });
 
     m_updateController->checkForUpdates();
 #endif

@@ -29,7 +29,7 @@ namespace
     const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_macos.zip");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.zip";
 #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux.tar.zip");
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux_x64.tar.zip");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.tar.zip";
 #endif
 }
@@ -40,7 +40,11 @@ UpdateController::UpdateController(const std::shared_ptr<Settings> &settings, QO
 
 QString UpdateController::getHeaderText()
 {
-    return tr("New version released: %1 (%2)").arg(m_version, m_releaseDate);
+    if (m_releaseDate.trimmed().isEmpty()) {
+        return tr("New version released: %1").arg(m_version);
+    } else {
+        return tr("New version released: %1 (%2)").arg(m_version, m_releaseDate);
+    }
 }
 
 QString UpdateController::getChangelogText()
@@ -73,6 +77,11 @@ QString UpdateController::getChangelogText()
     }
 
     return filteredChangeLogText.join("\n");
+}
+
+QString UpdateController::getVersion() const
+{
+    return m_version;
 }
 
 void UpdateController::checkForUpdates()
@@ -149,10 +158,10 @@ bool UpdateController::fetchChangelog()
 bool UpdateController::fetchReleaseDate()
 {
     QByteArray data;
-    if (!doSyncGet("/RELEASE_DATE", data)) {
-        m_releaseDate = QStringLiteral("Failed to load release date");
-    } else {
+    if (doSyncGet("/RELEASE_DATE", data)) {
         m_releaseDate = QString::fromUtf8(data).trimmed();
+    } else {
+        m_releaseDate = QString();
     }
     return true;
 }
