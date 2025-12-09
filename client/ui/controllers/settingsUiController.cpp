@@ -186,6 +186,36 @@ void SettingsUiController::clearSettings()
 #endif
 }
 
+bool SettingsUiController::isFileEncryptionEnabled()
+{
+    return m_settingsController->isFileEncryptionEnabled();
+}
+
+void SettingsUiController::toggleFileEncryption(bool enable)
+{
+    m_settingsController->toggleFileEncryption(enable);
+}
+
+void SettingsUiController::setPassword(QString pwd)
+{
+    m_settingsController->setPassword(pwd);
+}
+
+QString SettingsUiController::getPassword()
+{
+    return m_settingsController->getPassword();
+}
+
+void SettingsUiController::setHint(QString hint)
+{
+    m_settingsController->setHint(hint);
+}
+
+QString SettingsUiController::getHint()
+{
+    return m_settingsController->getHint();
+}
+
 bool SettingsUiController::isAutoConnectEnabled()
 {
     return m_settingsController->isAutoConnectEnabled();

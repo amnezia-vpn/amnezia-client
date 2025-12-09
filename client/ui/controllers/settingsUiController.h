@@ -61,6 +61,14 @@ public slots:
 
     void clearSettings();
 
+    bool isFileEncryptionEnabled();
+    void toggleFileEncryption(bool enable);
+
+    void setPassword(QString pwd);
+    QString getPassword();
+    void setHint(QString hint);
+    QString getHint();
+
     bool isAutoConnectEnabled();
     void toggleAutoConnect(bool enable);
 

@@ -26,6 +26,15 @@ public:
 
     void clearSettings();
 
+    void setPassword(const QString &pwd);
+    void setHint(const QString &hint);
+
+    QString getPassword() const;
+    QString getHint() const;
+
+    bool encryptFile(const QString &filePath, const QString &password, QString *error = nullptr) const;
+    bool decryptFile(const QString &filePath, const QString &password, QString *error = nullptr) const;
+
 private:
     QByteArray encryptText(const QByteArray &value) const;
     QByteArray decryptText(const QByteArray &ba) const;
@@ -47,6 +56,9 @@ private:
     QStringList m_fieldsToBackup = {
         "Conf/", "Servers/",
     };
+
+    mutable QString m_password;
+    mutable QString m_hint;
 
     mutable QByteArray m_key;
     mutable QByteArray m_iv;

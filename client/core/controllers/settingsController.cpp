@@ -192,6 +192,36 @@ void SettingsController::clearSettings()
     toggleAutoStart(false);
 }
 
+bool SettingsController::isFileEncryptionEnabled()
+{
+    return m_appSettingsRepository->isFileEncryption();
+}
+
+void SettingsController::toggleFileEncryption(bool enable)
+{
+    m_appSettingsRepository->setFileEncryption(enable);
+}
+
+void SettingsController::setPassword(QString pwd)
+{
+    m_appSettingsRepository->setPassword(pwd);
+}
+
+QString SettingsController::getPassword()
+{
+    return m_appSettingsRepository->getPassword();
+}
+
+void SettingsController::setHint(QString hint)
+{
+    m_appSettingsRepository->setHint(hint);
+}
+
+QString SettingsController::getHint()
+{
+    return m_appSettingsRepository->getHint();
+}
+
 bool SettingsController::isAutoConnectEnabled() const
 {
     return m_appSettingsRepository->isAutoConnect();
