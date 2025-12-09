@@ -2,6 +2,7 @@
 #define CONNECTIONUICONTROLLER_H
 
 #include <QObject>
+#include <QTimer>
 
 #include "core/controllers/connectionController.h"
 #include "core/utils/errorCodes.h"
@@ -40,6 +41,9 @@ public slots:
 
     void onTranslationsUpdated();
 
+private slots:
+    void onAwgStateTimeout();
+
 signals:
     void connectionStateChanged();
 
@@ -49,9 +53,12 @@ signals:
     void preparingConfig();
     void prepareConfig();
 
+    void requestSetCurrentProtocol(const QString &protocol);
+
 private:
     Vpn::ConnectionState getCurrentConnectionState();
 
+    QTimer m_awgStateTimer;
     ConnectionController* m_connectionController;
     ServersController* m_serversController;
 
