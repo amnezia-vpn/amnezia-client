@@ -124,6 +124,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
                                       .toObject()
                                       .value(config_key::subnet_address)
                                       .toString(protocols::wireguard::defaultSubnetAddress));
+            lastIp.setAddress(lastIp.toIPv4Address() + 1);
         } else {
             lastIp = ips.last();
         }
