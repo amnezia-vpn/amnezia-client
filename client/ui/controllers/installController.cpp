@@ -72,7 +72,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
             containerConfig.insert(config_key::port, QString::number(port));
             containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
 
-            if (container == DockerContainer::Awg) {
+            if (container == DockerContainer::Awg2) {
                 QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(4, 7));
                 QString junkPacketMinSize = QString::number(10);
                 QString junkPacketMaxSize = QString::number(50);
@@ -413,7 +413,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
                     if (protocol == Proto::Awg) {
                         QString configPath = amnezia::protocols::awg::serverConfigPath;
-                        if (container == DockerContainer::AwgLegacy) {
+                        if (container == DockerContainer::Awg) {
                             configPath = amnezia::protocols::awg::serverLegacyConfigPath;
                         }
                         QString serverConfig = serverController->getTextFileFromContainer(container, credentials,
@@ -446,7 +446,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         containerConfig[config_key::transportPacketMagicHeader] =
                                 serverConfigMap.value(config_key::transportPacketMagicHeader);
 
-                        if (container == DockerContainer::Awg) {
+                        if (container == DockerContainer::Awg2) {
                             containerConfig[config_key::cookieReplyPacketJunkSize] =
                                     serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
                             containerConfig[config_key::transportPacketJunkSize] =
@@ -1058,7 +1058,7 @@ bool InstallController::isUpdateDockerContainerRequired(const DockerContainer co
     const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
     const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
 
-    if (container == DockerContainer::Awg) {
+    if (container == DockerContainer::Awg2) {
         const AwgConfig oldConfig(oldProtoConfig);
         const AwgConfig newConfig(newProtoConfig);
 

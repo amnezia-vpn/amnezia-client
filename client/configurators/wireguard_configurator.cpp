@@ -104,7 +104,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     }
 
     QString configPath = m_serverConfigPath;
-    if (container == DockerContainer::AwgLegacy) {
+    if (container == DockerContainer::Awg) {
         configPath = amnezia::protocols::awg::serverLegacyConfigPath;
     }
     QString getIpsScript = QString("cat %1 | grep AllowedIPs").arg(configPath);
@@ -172,7 +172,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         return connData;
     }
 
-    bool isAwg = (container == DockerContainer::Awg);
+    bool isAwg = (container == DockerContainer::Awg2);
     QString bin = isAwg ? QStringLiteral("awg") : QStringLiteral("wg");
     QString iface = isAwg ? QStringLiteral("awg0") : QStringLiteral("wg0");
     QString script = QString(

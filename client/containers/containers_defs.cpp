@@ -28,10 +28,12 @@ QString ContainerProps::containerToString(amnezia::DockerContainer c)
         return "none";
     if (c == DockerContainer::Cloak)
         return "amnezia-openvpn-cloak";
-    if (c == DockerContainer::AwgLegacy)
-        return "amnezia-awg";
     if (c == DockerContainer::Awg)
-        return "amnezia-awg-go";
+        return "amnezia-awg";
+    if (c == DockerContainer::Awg1_5)
+        return "amnezia-awg1.5";
+    if (c == DockerContainer::Awg2)
+        return "amnezia-awg2";
 
     QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
     QString containerKey = metaEnum.valueToKey(static_cast<int>(c));
@@ -45,10 +47,12 @@ QString ContainerProps::containerTypeToString(amnezia::DockerContainer c)
         return "none";
     if (c == DockerContainer::Ipsec)
         return "ikev2";
-    if (c == DockerContainer::AwgLegacy)
-        return "awg";
     if (c == DockerContainer::Awg)
-        return "awg-go";
+        return "awg";
+    if (c == DockerContainer::Awg1_5)
+        return "awg1.5";
+    if (c == DockerContainer::Awg2)
+        return "awg2";
 
     QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
     QString containerKey = metaEnum.valueToKey(static_cast<int>(c));
@@ -79,8 +83,9 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
 
     case DockerContainer::Socks5Proxy: return { Proto::Socks5Proxy };
 
-    case DockerContainer::AwgLegacy: return { Proto::Awg };
-
+    case DockerContainer::Awg: return { Proto::Awg };
+    case DockerContainer::Awg1_5: return { Proto::Awg };
+    case DockerContainer::Awg2: return { Proto::Awg };
     default: return { defaultProtocol(container) };
     }
 }
@@ -103,8 +108,9 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::ShadowSocks, "OpenVPN over SS" },
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
+             { DockerContainer::Awg2, "AmneziaWG 2" },
+             { DockerContainer::Awg1_5, "AmneziaWG 1.5" },
              { DockerContainer::Awg, "AmneziaWG" },
-             { DockerContainer::AwgLegacy, "AmneziaWG Legacy" },
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
              { DockerContainer::SSXray, "Shadowsocks"},
@@ -128,11 +134,11 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::WireGuard,
                QObject::tr("WireGuard - popular VPN protocol with high performance, high speed and low power "
                            "consumption.") },
-             { DockerContainer::Awg,
+             { DockerContainer::Awg2,
                QObject::tr("AmneziaWG is a special protocol from Amnezia based on WireGuard. "
                            "It provides high connection speed and ensures stable operation even in the most challenging network conditions.") },
-             { DockerContainer::AwgLegacy,
-               QObject::tr("AmneziaWG Legacy is an old version of AmneziaWG protocol from Amnezia based on WireGuard. "
+             { DockerContainer::Awg,
+               QObject::tr("AmneziaWG is a special protocol from Amnezia based on WireGuard. "
                            "It provides high connection speed and ensures stable operation even in the most challenging network conditions.") },
              { DockerContainer::Xray,
                QObject::tr("XRay with REALITY masks VPN traffic as web traffic and protects against active probing. "
@@ -196,7 +202,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Minimal configuration required\n"
                       "* Easily detected by DPI systems (susceptible to blocking)\n"
                       "* Operates over UDP protocol") },
-        { DockerContainer::Awg,
+        { DockerContainer::Awg2,
           QObject::tr("AmneziaWG is a modern VPN protocol based on WireGuard, "
                       "combining simplified architecture with high performance across all devices. "
                       "It addresses WireGuard's main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, "
@@ -208,8 +214,8 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Minimal settings required\n"
                       "* Undetectable by traffic analysis systems (DPI)\n"
                       "* Operates over UDP protocol") },
-        { DockerContainer::AwgLegacy,
-          QObject::tr("AmneziaWG Legacy is an older version of the AmneziaWG protocol based on WireGuard."
+        { DockerContainer::Awg,
+          QObject::tr("AmneziaWG is an older version of the AmneziaWG protocol based on WireGuard."
                       "It addresses WireGuard's main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, "
                       "making VPN traffic indistinguishable from regular internet traffic.\n"
                       "\nAmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.\n"
@@ -267,8 +273,9 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::Cloak: return Proto::Cloak;
     case DockerContainer::ShadowSocks: return Proto::ShadowSocks;
     case DockerContainer::WireGuard: return Proto::WireGuard;
+    case DockerContainer::Awg2: return Proto::Awg;
+    case DockerContainer::Awg1_5: return Proto::Awg;
     case DockerContainer::Awg: return Proto::Awg;
-    case DockerContainer::AwgLegacy: return Proto::Awg;
     case DockerContainer::Xray: return Proto::Xray;
     case DockerContainer::Ipsec: return Proto::Ikev2;
     case DockerContainer::SSXray: return Proto::SSXray;
@@ -300,8 +307,9 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
+    case DockerContainer::Awg2: return true;
+    case DockerContainer::Awg1_5: return true;
     case DockerContainer::Awg: return true;
-    case DockerContainer::AwgLegacy: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::Cloak: return true;
     case DockerContainer::SSXray: return true;
@@ -314,7 +322,8 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     // macOS build using Network Extension – hide OpenVPN-based containers
     switch (c) {
     case DockerContainer::WireGuard: return true;
-    case DockerContainer::Awg: return true;
+    case DockerContainer::Awg2: return true;
+    case DockerContainer::Awg1_5: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
     case DockerContainer::OpenVpn:
@@ -336,8 +345,9 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
     case DockerContainer::ShadowSocks: return false;
+    case DockerContainer::Awg2: return true;
+    case DockerContainer::Awg1_5: return true;
     case DockerContainer::Awg: return true;
-    case DockerContainer::AwgLegacy: return true;
     case DockerContainer::Cloak: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
@@ -366,7 +376,7 @@ QStringList ContainerProps::fixedPortsForContainer(DockerContainer c)
 bool ContainerProps::isEasySetupContainer(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::Awg: return true;
+    case DockerContainer::Awg2: return true;
     default: return false;
     }
 }
@@ -374,7 +384,7 @@ bool ContainerProps::isEasySetupContainer(DockerContainer container)
 QString ContainerProps::easySetupHeader(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::Awg: return tr("Automatic");
+    case DockerContainer::Awg2: return tr("Automatic");
     default: return "";
     }
 }
@@ -382,7 +392,7 @@ QString ContainerProps::easySetupHeader(DockerContainer container)
 QString ContainerProps::easySetupDescription(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::Awg: return tr("AmneziaWG protocol will be installed. "
+    case DockerContainer::Awg2: return tr("AmneziaWG protocol will be installed. "
                                          "It provides high connection speed and ensures stable operation even in the most challenging network conditions.");
     default: return "";
     }
@@ -391,7 +401,7 @@ QString ContainerProps::easySetupDescription(DockerContainer container)
 int ContainerProps::easySetupOrder(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::Awg: return 1;
+    case DockerContainer::Awg2: return 1;
     default: return 0;
     }
 }
@@ -405,6 +415,11 @@ bool ContainerProps::isShareable(DockerContainer container)
     case DockerContainer::Socks5Proxy: return false;
     default: return true;
     }
+}
+
+bool ContainerProps::isAwgContainer(DockerContainer container)
+{
+    return container == DockerContainer::Awg2 || container == DockerContainer::Awg || container == DockerContainer::Awg1_5;
 }
 
 QJsonObject ContainerProps::getProtocolConfigFromContainer(const Proto protocol, const QJsonObject &containerConfig)
@@ -424,7 +439,7 @@ int ContainerProps::installPageOrder(DockerContainer container)
     case DockerContainer::Cloak: return 5;
     case DockerContainer::ShadowSocks: return 6;
     case DockerContainer::WireGuard: return 2;
-    case DockerContainer::Awg: return 1;
+    case DockerContainer::Awg2: return 1;
     case DockerContainer::Xray: return 3;
     case DockerContainer::Ipsec: return 7;
     case DockerContainer::SSXray: return 8;

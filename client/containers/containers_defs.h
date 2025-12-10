@@ -16,8 +16,9 @@ namespace amnezia
         Q_NAMESPACE
         enum DockerContainer {
             None = 0,
+            Awg2,
+            Awg1_5,
             Awg,
-            AwgLegacy,
             WireGuard,
             OpenVpn,
             Cloak,
@@ -72,6 +73,8 @@ namespace amnezia
         static int easySetupOrder(amnezia::DockerContainer container);
 
         static bool isShareable(amnezia::DockerContainer container);
+
+        static bool isAwgContainer(amnezia::DockerContainer container);
 
         static QJsonObject getProtocolConfigFromContainer(const amnezia::Proto protocol, const QJsonObject &containerConfig);
 

@@ -166,9 +166,10 @@ namespace
                 qDebug() << "missing containers field";
                 return ErrorCode::ApiConfigEmptyError;
             }
-            auto container = containers.at(0).toObject();
-            QString containerName = ContainerProps::containerTypeToProtocolString(DockerContainer::Awg);
-            auto serverProtocolConfig = container.value(containerName).toObject();
+            auto containerObject = containers.at(0).toObject();
+            auto containerType = ContainerProps::containerFromString(containerObject.value(config_key::container).toString());
+            QString containerName = ContainerProps::containerTypeToString(containerType);
+            auto serverProtocolConfig = containerObject.value(containerName).toObject();
             auto clientProtocolConfig =
                     QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
@@ -194,8 +195,8 @@ namespace
 
             //
 
-            container[containerName] = serverProtocolConfig;
-            containers.replace(0, container);
+            containerObject[containerName] = serverProtocolConfig;
+            containers.replace(0, containerObject);
             newServerConfig[config_key::containers] = containers;
             configStr = QString(QJsonDocument(newServerConfig).toJson());
         }

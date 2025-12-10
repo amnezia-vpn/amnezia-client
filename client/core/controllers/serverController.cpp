@@ -345,7 +345,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
             return true;
     }
 
-    if (container == DockerContainer::Awg || container == DockerContainer::AwgLegacy) {
+    if (ContainerProps::isAwgContainer(container)) {
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
             || (oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
@@ -662,7 +662,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$SOCKS5_USER", socks5user } });
     vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
 
-    QString serverIp = (container != DockerContainer::Awg && container != DockerContainer::AwgLegacy && 
+    QString serverIp = (!ContainerProps::isAwgContainer(container) && 
         container != DockerContainer::WireGuard && container != DockerContainer::Xray)
             ? NetworkUtilities::getIPAddress(credentials.hostName)
             : credentials.hostName;

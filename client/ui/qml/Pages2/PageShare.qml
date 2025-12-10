@@ -460,7 +460,9 @@ PageType {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
                             root.connectionTypesModel.push(awgConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-awg-go")) {
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg2")) {
+                            root.connectionTypesModel.push(awgConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg1.5")) {
                             root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)

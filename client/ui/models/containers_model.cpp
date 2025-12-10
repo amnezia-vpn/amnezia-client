@@ -121,7 +121,7 @@ bool ContainersModel::hasInstalledProtocols()
 
 bool ContainersModel::isInstallationAllowed(DockerContainer container)
 {
-    return container != DockerContainer::AwgLegacy;
+    return container != DockerContainer::Awg && container != DockerContainer::Awg1_5;
 }
 
 QHash<int, QByteArray> ContainersModel::roleNames() const

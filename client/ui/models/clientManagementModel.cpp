@@ -104,7 +104,7 @@ ErrorCode ClientManagementModel::updateModel(const DockerContainer container, co
 
         if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
             error = getOpenVpnClients(container, credentials, serverController, count);
-        } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg || container == DockerContainer::AwgLegacy) {
+        } else if (container == DockerContainer::WireGuard || ContainerProps::isAwgContainer(container)) {
             error = getWireGuardClients(container, credentials, serverController, count);
         } else if (container == DockerContainer::Xray) {
             error = getXrayClients(container, credentials, serverController, count);
@@ -210,9 +210,9 @@ ErrorCode ClientManagementModel::getWireGuardClients(const DockerContainer conta
     ErrorCode error = ErrorCode::NoError;
 
     QString configPath;
-    if (container == DockerContainer::AwgLegacy) {
+    if (container == DockerContainer::Awg) {
         configPath = QString::fromLatin1(amnezia::protocols::awg::serverLegacyConfigPath);
-    } else if (container == DockerContainer::Awg) {
+    } else if (container == DockerContainer::Awg2) {
         configPath = QString::fromLatin1(amnezia::protocols::awg::serverConfigPath);
     } else {
         configPath = QString::fromLatin1(amnezia::protocols::wireguard::serverConfigPath);
@@ -314,7 +314,7 @@ ErrorCode ClientManagementModel::getXrayClients(const DockerContainer container,
 ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const ServerCredentials &credentials,
                                         const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data)
 {
-    if (container != DockerContainer::WireGuard && container != DockerContainer::Awg && container != DockerContainer::AwgLegacy) {
+    if (container != DockerContainer::WireGuard && !ContainerProps::isAwgContainer(container)) {
         return ErrorCode::NoError;
     }
 
@@ -325,7 +325,7 @@ ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const S
         return ErrorCode::NoError;
     };
 
-    QString showBin = (container == DockerContainer::Awg)
+    QString showBin = (container == DockerContainer::Awg2)
                        ? QStringLiteral("awg")
                        : QStringLiteral("wg");
     const QString command = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%1 show all'")
@@ -408,8 +408,8 @@ ErrorCode ClientManagementModel::appendClient(const DockerContainer container, c
             break;
         case DockerContainer::OpenVpn:
         case DockerContainer::WireGuard:
+        case DockerContainer::Awg2:
         case DockerContainer::Awg:
-        case DockerContainer::AwgLegacy:
         case DockerContainer::Xray:
             protocol = ContainerProps::defaultProtocol(container);
             break;
@@ -559,8 +559,8 @@ ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContain
             break;
         }
         case DockerContainer::WireGuard:
-        case DockerContainer::Awg:
-        case DockerContainer::AwgLegacy: {
+        case DockerContainer::Awg2:
+        case DockerContainer::Awg: {
             errorCode = revokeWireGuard(row, container, credentials, serverController);
             break;
         }
@@ -619,8 +619,8 @@ ErrorCode ClientManagementModel::revokeClient(const QJsonObject &containerConfig
         }
         case DockerContainer::OpenVpn:
         case DockerContainer::WireGuard:
+        case DockerContainer::Awg2:
         case DockerContainer::Awg:
-        case DockerContainer::AwgLegacy:
         case DockerContainer::Xray: {
             protocol = ContainerProps::defaultProtocol(container);
             break;
@@ -693,8 +693,8 @@ ErrorCode ClientManagementModel::revokeClient(const QJsonObject &containerConfig
         break;
     }
     case DockerContainer::WireGuard:
-    case DockerContainer::AwgLegacy:
-    case DockerContainer::Awg: {
+    case DockerContainer::Awg:
+    case DockerContainer::Awg2: {
         errorCode = revokeWireGuard(row, container, credentials, serverController);
         break;
     }
@@ -754,9 +754,9 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
     ErrorCode error = ErrorCode::NoError;
 
     QString configPath;
-    if (container == DockerContainer::AwgLegacy) {
+    if (container == DockerContainer::Awg) {
         configPath = QString::fromLatin1(amnezia::protocols::awg::serverLegacyConfigPath);
-    } else if (container == DockerContainer::Awg) {
+    } else if (container == DockerContainer::Awg2) {
         configPath = QString::fromLatin1(amnezia::protocols::awg::serverConfigPath);
     } else {
         configPath = QString::fromLatin1(amnezia::protocols::wireguard::serverConfigPath);
@@ -803,7 +803,7 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
         return error;
     }
 
-    bool isAwg = (container == DockerContainer::Awg);
+    bool isAwg = (container == DockerContainer::Awg2);
     QString command = isAwg ? QStringLiteral("awg") : QStringLiteral("wg");
     QString iface   = isAwg ? QStringLiteral("awg0") : QStringLiteral("wg0");
     QString script  = QString(

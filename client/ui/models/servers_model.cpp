@@ -753,7 +753,7 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
         if (container.value(config_key::container).toString() != ContainerProps::containerToString(defaultContainer)) {
             continue;
         }
-        if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::AwgLegacy || defaultContainer == DockerContainer::WireGuard) {
+        if (ContainerProps::isAwgContainer(defaultContainer) || defaultContainer == DockerContainer::WireGuard) {
             QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToProtocolString(defaultContainer)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             QJsonObject clientProtocolConfig = QJsonDocument::fromJson(clientProtocolConfigString.toUtf8()).object();
