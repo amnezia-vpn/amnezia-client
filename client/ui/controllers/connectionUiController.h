@@ -41,6 +41,10 @@ public slots:
 
     void onTranslationsUpdated();
 
+public slots:
+    void checkAndStartAwgStateTimer();
+    void onUpdateServiceFromGatewayCompleted(bool success, const QString &serverId);
+
 private slots:
     void onAwgStateTimeout();
 
@@ -54,6 +58,8 @@ signals:
     void prepareConfig();
 
     void requestSetCurrentProtocol(const QString &protocol);
+    void requestUpdateServiceFromGateway(const QString &serverId, const QString &newCountryCode,
+                                         const QString &newCountryName, bool reloadServiceConfig);
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();
@@ -67,6 +73,10 @@ private:
     QString m_connectionStateText = tr("Connect");
 
     Vpn::ConnectionState m_state;
+
+    QString m_pendingApiServerId;
+    bool m_apiSwitched = false;
+    bool m_waitingForApiUpdate = false;
 };
 
 #endif

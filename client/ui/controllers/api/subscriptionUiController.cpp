@@ -436,6 +436,7 @@ bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId,
         } else {
             emit changeApiCountryFinished(tr("Successfully changed the country of connection to %1").arg(newCountryName));
         }
+        emit updateServiceFromGatewayCompleted(true, serverId);
         return true;
     } else {
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
@@ -443,6 +444,7 @@ bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId,
         } else {
             emit errorOccurred(errorCode);
         }
+        emit updateServiceFromGatewayCompleted(false, serverId);
         return false;
     }
 }

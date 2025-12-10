@@ -83,6 +83,7 @@ signals:
     void changeApiCountryFinished(const QString &message);
     void reloadServerFromApiFinished(const QString &message);
     void updateServerFromApiFinished();
+    void updateServiceFromGatewayCompleted(bool success, const QString &serverId);
     void subscriptionRefreshNeeded();
 
     void apiConfigRemoved(const QString &message);
