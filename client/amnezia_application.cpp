@@ -90,9 +90,6 @@ namespace {
 
 void AmneziaApplication::init()
 {
-#ifdef Q_OS_ANDROID
-    clearQtCaches();
-#endif
     m_engine = new QQmlApplicationEngine;
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
