@@ -240,12 +240,20 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
+                visible: isAwg2
+
                 headerText: qsTr("S3 - Cookie reply packet junk size")
                 textField.text: serverCookieReplyPacketJunkSize
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverCookieReplyPacketJunkSize) {
                         serverCookieReplyPacketJunkSize = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(cookieReplyPacketJunkSizeTextField)
                     }
                 }
             }
@@ -256,12 +264,20 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
+                visible: isAwg2
+
                 headerText: qsTr("S4 - Transport packet junk size")
                 textField.text: serverTransportPacketJunkSize
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverTransportPacketJunkSize) {
                         serverTransportPacketJunkSize = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(transportPacketJunkSizeTextField)
                     }
                 }
             }
@@ -380,8 +396,8 @@ PageType {
                          responsePacketMagicHeaderTextField.errorText === "" &&
                          initPacketMagicHeaderTextField.errorText === "" &&
                          responsePacketJunkSizeTextField.errorText === "" &&
-                         cookieReplyHeaderJunkTextField.errorText === "" &&
-                         transportHeaderJunkTextField.errorText === "" &&
+                         cookieReplyPacketJunkSizeTextField.errorText === "" &&
+                         transportPacketJunkSizeTextField.errorText === "" &&
                          initPacketJunkSizeTextField.errorText === "" &&
                          junkPacketMaxSizeTextField.errorText === "" &&
                          junkPacketMinSizeTextField.errorText === "" &&

@@ -93,6 +93,8 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerResponsePacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::responsePacketMagicHeader);
     case Roles::ServerUnderloadPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::underloadPacketMagicHeader);
     case Roles::ServerTransportPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::transportPacketMagicHeader);
+
+    case Roles::IsAwg2Role: return m_container == DockerContainer::Awg2;
     }
 
     return QVariant();
@@ -161,8 +163,8 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
 QJsonObject AwgConfigModel::getConfig()
 {
-    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject());
-    const AwgConfig newConfig(m_serverProtocolConfig);
+    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject(), m_container);
+    const AwgConfig newConfig(m_serverProtocolConfig, m_container);
 
     if (!oldConfig.hasEqualServerSettings(newConfig)) {
         m_serverProtocolConfig.remove(config_key::last_config);
@@ -204,8 +206,8 @@ bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2, const int s3,
 
 bool AwgConfigModel::isServerSettingsEqual()
 {
-    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject());
-    const AwgConfig newConfig(m_serverProtocolConfig);
+    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject(), m_container);
+    const AwgConfig newConfig(m_serverProtocolConfig, m_container);
 
     return oldConfig.hasEqualServerSettings(newConfig);
 }
@@ -240,11 +242,15 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ServerUnderloadPacketMagicHeaderRole] = "serverUnderloadPacketMagicHeader";
     roles[ServerTransportPacketMagicHeaderRole] = "serverTransportPacketMagicHeader";
 
+    roles[IsAwg2Role] = "isAwg2";
+
     return roles;
 }
 
-AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
+AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig, const DockerContainer containerType)
 {
+    m_containerType = containerType;
+
     auto lastConfig = serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
     clientMtu = clientProtocolConfig[config_key::mtu].toString(protocols::awg::defaultMtu);
@@ -265,10 +271,14 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
     serverInitPacketJunkSize = serverProtocolConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
     serverResponsePacketJunkSize =
             serverProtocolConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
-    serverCookieReplyPacketJunkSize =
-            serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize);
-    serverTransportPacketJunkSize =
-            serverProtocolConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize);
+
+    if (m_containerType == DockerContainer::Awg2) {
+        serverCookieReplyPacketJunkSize =
+                serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize);
+        serverTransportPacketJunkSize =
+                serverProtocolConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize);
+    }
+
     serverInitPacketMagicHeader =
             serverProtocolConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader);
     serverResponsePacketMagicHeader =
@@ -284,14 +294,20 @@ bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
     if (subnetAddress != other.subnetAddress || port != other.port || serverJunkPacketCount != other.serverJunkPacketCount
         || serverJunkPacketMinSize != other.serverJunkPacketMinSize || serverJunkPacketMaxSize != other.serverJunkPacketMaxSize
         || serverInitPacketJunkSize != other.serverInitPacketJunkSize || serverResponsePacketJunkSize != other.serverResponsePacketJunkSize
-        || serverCookieReplyPacketJunkSize != other.serverCookieReplyPacketJunkSize
-        || serverTransportPacketJunkSize != other.serverTransportPacketJunkSize
         || serverInitPacketMagicHeader != other.serverInitPacketMagicHeader
         || serverResponsePacketMagicHeader != other.serverResponsePacketMagicHeader
         || serverUnderloadPacketMagicHeader != other.serverUnderloadPacketMagicHeader
         || serverTransportPacketMagicHeader != other.serverTransportPacketMagicHeader) {
         return false;
     }
+
+    if (m_containerType == DockerContainer::Awg2) {
+        if (serverCookieReplyPacketJunkSize != other.serverCookieReplyPacketJunkSize
+            || serverTransportPacketJunkSize != other.serverTransportPacketJunkSize) {
+            return false;
+        }
+    }
+
     return true;
 }
 

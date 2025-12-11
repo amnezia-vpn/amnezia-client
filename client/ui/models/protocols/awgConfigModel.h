@@ -16,7 +16,7 @@ namespace AwgConstant
 
 struct AwgConfig
 {
-    AwgConfig(const QJsonObject &jsonConfig);
+    AwgConfig(const QJsonObject &jsonConfig, const DockerContainer containerType);
 
     QString subnetAddress;
     QString port;
@@ -45,6 +45,9 @@ struct AwgConfig
 
     bool hasEqualServerSettings(const AwgConfig &other) const;
     bool hasEqualClientSettings(const AwgConfig &other) const;
+
+private:
+    DockerContainer m_containerType;
 };
 
 class AwgConfigModel : public QAbstractListModel
@@ -78,6 +81,8 @@ public:
         ServerResponsePacketMagicHeaderRole,
         ServerUnderloadPacketMagicHeaderRole,
         ServerTransportPacketMagicHeaderRole,
+
+        IsAwg2Role
     };
 
     explicit AwgConfigModel(QObject *parent = nullptr);
