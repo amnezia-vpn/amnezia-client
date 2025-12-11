@@ -147,6 +147,8 @@ signals:
     void autoStartChanged();
     void startMinimizedChanged();
 
+    void fileEncryptionStateChanged();
+
 private:
     SettingsController* m_settingsController;
     ServersController* m_serversController;
