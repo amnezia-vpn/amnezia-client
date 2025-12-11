@@ -13,6 +13,7 @@
     #include <QNetworkInterface>
     #include "qendian.h"
     #include <QSettings>
+    #pragma comment(lib, "iphlpapi.lib")
 #endif
 #ifdef Q_OS_LINUX
     #include <arpa/inet.h>
@@ -23,6 +24,28 @@
     #include <sys/socket.h>
     #include <unistd.h>
 #endif
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    #include <QDBusConnection>
+    #include <QDBusInterface>
+    #include <QDBusMessage>
+    #include <QDBusReply>
+    #include <QDBusArgument>
+    #include <QDBusObjectPath>
+    #include <QVariant>
+    #include <QVariantMap>
+    #include <QFile>
+    #include <QTextStream>
+    #include <QNetworkInterface>
+    #include <algorithm>
+    #include <climits>
+    #include <limits>
+    #include "platforms/linux/daemon/dbustypeslinux.h"
+
+    constexpr const char* DBUS_RESOLVE_SERVICE = "org.freedesktop.resolve1";
+    constexpr const char* DBUS_RESOLVE_PATH = "/org/freedesktop/resolve1";
+    constexpr const char* DBUS_RESOLVE_MANAGER = "org.freedesktop.resolve1.Manager";
+    constexpr const char* DBUS_PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
+#endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     #include <sys/param.h>
     #include <sys/sysctl.h>
@@ -30,10 +53,17 @@
     #include <netinet/in.h>
     #include <arpa/inet.h>
     #include <net/route.h>
+    #include <CoreFoundation/CoreFoundation.h>
+    #include <SystemConfiguration/SystemConfiguration.h>
+    #include <QFile>
+    #include <QTextStream>
+    #include <QRegularExpression>
 #endif
 
 #include <QHostAddress>
 #include <QHostInfo>
+#include <QPair>
+#include "logger.h"
 
 QRegularExpression NetworkUtilities::ipAddressRegExp()
 {
@@ -277,7 +307,7 @@ QString NetworkUtilities::getGatewayAndIface()
     free(pAdapterAddresses);
     return result;
 #endif
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     constexpr int BUFFER_SIZE = 100;
     int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
     int     sock = -1, msgseq = 0;
@@ -473,5 +503,312 @@ QString NetworkUtilities::getGatewayAndIface()
     }
 
     return gateway;
+#endif
+}
+
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+namespace {
+    struct LinkInfo {
+        int ifindex;
+        bool defaultRoute;
+        quint32 routeMetric;
+        QStringList dnsServers;
+        
+        bool operator<(const LinkInfo& other) const {
+            // Sort by defaultRoute first (true comes first), then by routeMetric (lower is better)
+            if (defaultRoute != other.defaultRoute) {
+                return defaultRoute > other.defaultRoute;
+            }
+            return routeMetric < other.routeMetric;
+        }
+    };
+    
+    QStringList extractDnsFromDbusArgument(const QDBusArgument& arg) {
+        QStringList dnsServers;
+        QDBusArgument dnsArg = arg;
+        QList<DnsResolver> resolverList = qdbus_cast<QList<DnsResolver>>(dnsArg);
+
+        for (const auto& resolver : resolverList) {
+            if (resolver.protocol() == QAbstractSocket::IPv4Protocol) {
+                const QString dnsStr = resolver.toString();
+                if (NetworkUtilities::checkIPv4Format(dnsStr) && !dnsServers.contains(dnsStr)) {
+                    dnsServers.append(dnsStr);
+                }
+            }
+        }
+        return dnsServers;
+    }
+    
+    QList<LinkInfo> getDnsFromInterfaces(const QDBusConnection& bus) {
+        QList<LinkInfo> links;
+        
+        // Get all network interfaces
+        QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
+        
+        for (const QNetworkInterface& iface : interfaces) {
+            int ifindex = iface.index();
+            if (ifindex <= 0) {
+                continue;
+            }
+            
+            // Call GetLink to get the link object path
+            QDBusMessage getLinkMsg = QDBusMessage::createMethodCall(
+                DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_RESOLVE_MANAGER, "GetLink");
+            getLinkMsg << ifindex;
+            
+            QDBusReply<QDBusObjectPath> linkReply = bus.call(getLinkMsg);
+            if (!linkReply.isValid()) {
+                continue;
+            }
+            
+            QString linkPath = linkReply.value().path();
+            
+            // Get properties from the link object
+            QDBusMessage getPropMsg = QDBusMessage::createMethodCall(
+                DBUS_RESOLVE_SERVICE, linkPath, DBUS_PROPERTY_INTERFACE, "GetAll");
+            getPropMsg << QString("org.freedesktop.resolve1.Link");
+            
+            QDBusReply<QVariantMap> propReply = bus.call(getPropMsg);
+            if (!propReply.isValid()) {
+                continue;
+            }
+            
+            QVariantMap properties = propReply.value();
+            
+            // Check if DefaultRoute is true
+            bool defaultRoute = properties.value("DefaultRoute").toBool();
+            
+            // Get RouteMetric (default to maximum if not available)
+            quint32 routeMetric = std::numeric_limits<quint32>::max();
+            if (properties.contains("RouteMetric")) {
+                routeMetric = properties.value("RouteMetric").toUInt();
+            }
+            
+            // Get DNS servers - use Get method directly for DNS property
+            QDBusMessage getDnsMsg = QDBusMessage::createMethodCall(
+                DBUS_RESOLVE_SERVICE, linkPath, DBUS_PROPERTY_INTERFACE, "Get");
+            getDnsMsg << QString("org.freedesktop.resolve1.Link");
+            getDnsMsg << QString("DNS");
+            
+            QDBusReply<QVariant> dnsReply = bus.call(getDnsMsg);
+            if (!dnsReply.isValid()) {
+                continue;
+            }
+            
+            QVariant dnsVariant = dnsReply.value();
+            QStringList dnsServers;
+            if (dnsVariant.canConvert<QDBusArgument>()) {
+                QDBusArgument dnsArg = qvariant_cast<QDBusArgument>(dnsVariant);
+                dnsServers = extractDnsFromDbusArgument(dnsArg);
+            }
+            
+            if (!dnsServers.isEmpty()) {
+                LinkInfo info;
+                info.ifindex = ifindex;
+                info.defaultRoute = defaultRoute;
+                info.routeMetric = routeMetric;
+                info.dnsServers = dnsServers;
+                links.append(info);
+            }
+        }
+        
+        return links;
+    }
+}
+#endif
+
+QPair<QString, QString> NetworkUtilities::getSystemDnsAddress()
+{
+    QPair<QString, QString> result;
+    
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    // Try systemd-resolved via D-Bus first
+    QDBusConnection bus = QDBusConnection::systemBus();
+    if (bus.isConnected()) {
+        // Try to get DNS from Resolve DNS property using org.freedesktop.DBus.Properties
+        QDBusMessage message = QDBusMessage::createMethodCall(
+            DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_PROPERTY_INTERFACE, "Get");
+        message << QString(DBUS_RESOLVE_MANAGER);
+        message << QString("DNS");
+        
+        QDBusReply<QVariant> dnsReply = bus.call(message);
+        
+        if (dnsReply.isValid()) {
+            QDBusArgument dnsArg = qvariant_cast<QDBusArgument>(dnsReply.value());
+            QList<DnsResolver> resolverList = qdbus_cast<QList<DnsResolver>>(dnsArg);
+            
+            QStringList dnsServers;
+            for (const auto& resolver : resolverList) {
+                if (resolver.protocol() == QAbstractSocket::IPv4Protocol) {
+                    QString dnsStr = resolver.toString();
+                    if (checkIPv4Format(dnsStr) && !dnsServers.contains(dnsStr)) {
+                        dnsServers.append(dnsStr);
+                    }
+                }
+            }
+            
+            if (!dnsServers.isEmpty()) {
+                result.first = dnsServers.first();
+                if (dnsServers.size() > 1) {
+                    result.second = dnsServers.at(1);
+                }
+                return result;
+            }
+        }
+        
+        // If no global DNS, try to get DNS from interfaces
+        QList<LinkInfo> links = getDnsFromInterfaces(bus);
+        if (!links.isEmpty()) {
+            // Sort by priority: DefaultRoute first, then by RouteMetric
+            std::sort(links.begin(), links.end());
+            
+            // Get DNS from the highest priority interface
+            const LinkInfo& bestLink = links.first();
+            result.first = bestLink.dnsServers.first();
+            if (bestLink.dnsServers.size() > 1) {
+                result.second = bestLink.dnsServers.at(1);
+            }
+            qDebug() << "Got DNS from interface" << bestLink.ifindex 
+                     << "DefaultRoute:" << bestLink.defaultRoute 
+                     << "RouteMetric:" << bestLink.routeMetric;
+            return result;
+        }
+    }
+    
+    // Fallback to /etc/resolv.conf
+    QFile resolvConf("/etc/resolv.conf");
+    if (resolvConf.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&resolvConf);
+        QStringList dnsServers;
+        
+        while (!in.atEnd()) {
+            QString line = in.readLine().trimmed();
+            if (line.startsWith("nameserver")) {
+                QStringList parts = line.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+                if (parts.size() >= 2) {
+                    QString dns = parts.at(1);
+                    if (checkIPv4Format(dns)) {
+                        dnsServers.append(dns);
+                    }
+                }
+            }
+        }
+        
+        if (!dnsServers.isEmpty()) {
+            result.first = dnsServers.first();
+            if (dnsServers.size() > 1) {
+                result.second = dnsServers.at(1);
+            }
+            return result;
+        }
+    }
+    
+    qWarning() << "Failed to get system DNS on Linux";
+    return result; // Return empty pair
+
+#elif defined(Q_OS_WIN)
+    // Use GetAdaptersAddresses to get DNS servers
+    ULONG bufferSize = 0;
+    DWORD ret = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, nullptr, nullptr, &bufferSize);
+    
+    if (ret == ERROR_BUFFER_OVERFLOW) {
+        PIP_ADAPTER_ADDRESSES adapterAddresses = (PIP_ADAPTER_ADDRESSES)malloc(bufferSize);
+        if (adapterAddresses) {
+            ret = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, nullptr, adapterAddresses, &bufferSize);
+            
+            if (ret == NO_ERROR) {
+                PIP_ADAPTER_ADDRESSES currentAdapter = adapterAddresses;
+                QStringList dnsServers;
+                
+                while (currentAdapter) {
+                    // Check if adapter is active and has IP addresses
+                    if (currentAdapter->OperStatus == IfOperStatusUp && 
+                        currentAdapter->FirstUnicastAddress != nullptr) {
+                        
+                        PIP_ADAPTER_DNS_SERVER_ADDRESS dnsServer = currentAdapter->FirstDnsServerAddress;
+                        while (dnsServer) {
+                            if (dnsServer->Address.lpSockaddr->sa_family == AF_INET) {
+                                struct sockaddr_in* sa_in = (struct sockaddr_in*)dnsServer->Address.lpSockaddr;
+                                char ipstr[INET_ADDRSTRLEN];
+                                inet_ntop(AF_INET, &sa_in->sin_addr, ipstr, INET_ADDRSTRLEN);
+                                QString dns = QString::fromLatin1(ipstr);
+                                if (checkIPv4Format(dns) && !dnsServers.contains(dns)) {
+                                    dnsServers.append(dns);
+                                }
+                            }
+                            dnsServer = dnsServer->Next;
+                        }
+                    }
+                    
+                    currentAdapter = currentAdapter->Next;
+                }
+                
+                if (!dnsServers.isEmpty()) {
+                    result.first = dnsServers.first();
+                    if (dnsServers.size() > 1) {
+                        result.second = dnsServers.at(1);
+                    }
+                    qDebug() << "Got system DNS from Windows:" << result.first << result.second;
+                    free(adapterAddresses);
+                    return result;
+                }
+            }
+            
+            free(adapterAddresses);
+        }
+    }
+    
+    qWarning() << "Failed to get system DNS on Windows";
+    return result; // Return empty pair
+
+#elif defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    // Use SCDynamicStore to get DNS from system configuration
+    SCDynamicStoreRef store = SCDynamicStoreCreate(kCFAllocatorDefault, CFSTR("amneziavpn"), nullptr, nullptr);
+    if (store) {
+        CFDictionaryRef dnsDict = (CFDictionaryRef)SCDynamicStoreCopyValue(store, CFSTR("State:/Network/Global/DNS"));
+        
+        if (dnsDict) {
+            CFArrayRef dnsServersArray = (CFArrayRef)CFDictionaryGetValue(dnsDict, CFSTR("ServerAddresses"));
+            
+            if (dnsServersArray && CFArrayGetCount(dnsServersArray) > 0) {
+                QStringList dnsServers;
+                
+                for (CFIndex i = 0; i < CFArrayGetCount(dnsServersArray); i++) {
+                    CFStringRef dnsString = (CFStringRef)CFArrayGetValueAtIndex(dnsServersArray, i);
+                    if (dnsString) {
+                        char buffer[256];
+                        if (CFStringGetCString(dnsString, buffer, sizeof(buffer), kCFStringEncodingUTF8)) {
+                            QString dns = QString::fromLatin1(buffer);
+                            if (checkIPv4Format(dns)) {
+                                dnsServers.append(dns);
+                            }
+                        }
+                    }
+                }
+                
+                if (!dnsServers.isEmpty()) {
+                    result.first = dnsServers.first();
+                    if (dnsServers.size() > 1) {
+                        result.second = dnsServers.at(1);
+                    }
+                    qDebug() << "Got system DNS from macOS:" << result.first << result.second;
+                    CFRelease(dnsDict);
+                    CFRelease(store);
+                    return result;
+                }
+            }
+            
+            CFRelease(dnsDict);
+        }
+        
+        CFRelease(store);
+    }
+    
+    qWarning() << "Failed to get system DNS on macOS";
+    return result; // Return empty pair
+
+#else
+    qWarning() << "System DNS reading not implemented for this platform";
+    return result; // Return empty pair
 #endif
 }

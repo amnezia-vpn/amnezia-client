@@ -26,6 +26,7 @@ public:
     Q_PROPERTY(bool isNotificationPermissionGranted READ isNotificationPermissionGranted NOTIFY onNotificationStateChanged)
     Q_PROPERTY(bool isKillSwitchEnabled READ isKillSwitchEnabled WRITE toggleKillSwitch NOTIFY killSwitchEnabledChanged)
     Q_PROPERTY(bool strictKillSwitchEnabled READ isStrictKillSwitchEnabled WRITE toggleStrictKillSwitch NOTIFY strictKillSwitchEnabledChanged)
+    Q_PROPERTY(bool useSystemDnsAddressEnabled READ isUseSystemDnsAddressEnabled WRITE setUseSystemDnsAddress NOTIFY useSystemDnsAddressChanged)
 
     Q_PROPERTY(bool isDevModeEnabled READ isDevModeEnabled NOTIFY devModeEnabled)
     Q_PROPERTY(QString gatewayEndpoint READ getGatewayEndpoint WRITE setGatewayEndpoint NOTIFY gatewayEndpointChanged)
@@ -40,6 +41,9 @@ public:
 public slots:
     void toggleAmneziaDns(bool enable);
     bool isAmneziaDnsEnabled();
+
+    bool isUseSystemDnsAddressEnabled();
+    void setUseSystemDnsAddress(bool enable);
 
     QString getPrimaryDns();
     void setPrimaryDns(const QString &dns);
@@ -125,6 +129,8 @@ signals:
     void importBackupFromOutside(QString filePath);
 
     void amneziaDnsToggled(bool enable);
+
+    void useSystemDnsAddressChanged(bool enabled);
 
     void loggingDisableByWatcher();
 

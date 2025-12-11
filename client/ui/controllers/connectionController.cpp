@@ -57,6 +57,12 @@ void ConnectionController::openConnection()
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     auto dns = m_serversModel->getDnsPair(serverIndex);
+    
+    // Check if DNS retrieval failed (empty pair means system DNS retrieval failed)
+    if (dns.first.isEmpty() && dns.second.isEmpty()) {
+        emit connectionErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
 
     auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container);
     emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);

@@ -145,6 +145,15 @@ public:
         setValue("Conf/useAmneziaDns", enabled);
     }
 
+    bool useSystemDnsAddress() const
+    {
+        return value("Conf/useSystemDnsAddress", false).toBool();
+    }
+    void setUseSystemDnsAddress(bool enabled)
+    {
+        setValue("Conf/useSystemDnsAddress", enabled);
+    }
+
     QString primaryDns() const;
     QString secondaryDns() const;
 
