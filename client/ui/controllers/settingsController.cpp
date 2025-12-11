@@ -304,6 +304,7 @@ bool SettingsController::isFileEncryptionEnabled()
 void SettingsController::toggleFileEncryption(bool enable)
 {
     m_settings->setFileEncryption(enable);
+    emit fileEncryptionStateChanged();
 }
 
 void SettingsController::setPassword(QString pwd)

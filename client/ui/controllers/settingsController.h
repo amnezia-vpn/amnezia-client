@@ -136,6 +136,8 @@ signals:
     void isHomeAdLabelVisibleChanged(bool visible);
     void startMinimizedChanged();
 
+    void fileEncryptionStateChanged();
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
