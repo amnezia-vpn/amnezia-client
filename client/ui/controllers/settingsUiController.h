@@ -130,6 +130,8 @@ signals:
 
     void loggingDisableByWatcher();
 
+    void fileEncryptionStateChanged();
+
     void appLanguageChanged(const LanguageSettings::AvailableLanguageEnum language);
     void resetLanguageToSystem();
 
@@ -144,6 +146,8 @@ signals:
 
     void isHomeAdLabelVisibleChanged(bool visible);
     void startMinimizedChanged();
+
+    void fileEncryptionStateChanged();
 
 private:
     SettingsController* m_settingsController;
