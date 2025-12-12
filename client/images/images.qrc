@@ -21,6 +21,8 @@
         <file>controls/delete.svg</file>
         <file>controls/download.svg</file>
         <file>controls/edit-3.svg</file>
+		<file>controls/eye-off-new.svg</file>
+		<file>controls/eye-new.svg</file>
         <file>controls/eye-off.svg</file>
         <file>controls/eye.svg</file>
         <file>controls/external-link.svg</file>
@@ -36,6 +38,8 @@
         <file>controls/home.svg</file>
         <file>controls/infinity.svg</file>
         <file>controls/info.svg</file>
+		<file>controls/lock-locked.svg</file>
+		<file>controls/lock-unlocked.svg</file>
         <file>controls/mail.svg</file>
         <file>controls/map-pin.svg</file>
         <file>controls/more-vertical.svg</file>

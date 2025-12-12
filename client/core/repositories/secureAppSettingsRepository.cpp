@@ -311,20 +311,20 @@ void SecureAppSettingsRepository::setFileEncryption(bool enabled)
 
 QString SecureAppSettingsRepository::getPassword() const
 {
-    return m_settings->getPassword();
+    return value("Sec/password", "").toString();
 }
 void SecureAppSettingsRepository::setPassword(const QString &pwd)
 {
-    m_settings->setPassword(pwd);
+    setValue("Sec/password", pwd);
 }
 
 QString SecureAppSettingsRepository::getHint() const
 {
-    return m_settings->getHint();
+    return value("Sec/hint", "").toString();
 }
 void SecureAppSettingsRepository::setHint(const QString &hint)
 {
-    m_settings->setHint(hint);
+    setValue("Sec/hint", hint);
 }
 
 bool SecureAppSettingsRepository::isAutoConnect() const

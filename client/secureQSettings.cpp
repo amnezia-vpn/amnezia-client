@@ -316,26 +316,6 @@ void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
     }
 }
 
-void SecureQSettings::setPassword(const QString &pwd)
-{
-    m_password = pwd;
-}
-
-void SecureQSettings::setHint(const QString &hint)
-{
-    m_hint = hint;
-}
-
-QString SecureQSettings::getPassword() const
-{
-    return m_password;
-}
-
-QString SecureQSettings::getHint() const
-{
-    return m_hint;
-}
-
 static QString opensslErrString()
 {
     unsigned long e = ERR_get_error();

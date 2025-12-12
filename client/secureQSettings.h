@@ -57,9 +57,6 @@ private:
         "Conf/", "Servers/",
     };
 
-    mutable QString m_password;
-    mutable QString m_hint;
-
     mutable QByteArray m_key;
     mutable QByteArray m_iv;
 

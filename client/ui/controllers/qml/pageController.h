@@ -37,6 +37,7 @@ namespace PageLoader
         PageSettingsSplitTunneling,
         PageSettingsAppSplitTunneling,
         PageSettingsKillSwitch,
+        PageSettingsAppEncryption,
         PageSettingsAppPassword,
         PageSettingsAppPasswordConfirm,
         PageSettingsApiServerInfo,
