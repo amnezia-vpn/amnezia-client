@@ -1,14 +1,12 @@
 #include "updateController.h"
 
-#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QVersionNumber>
-#include <QtConcurrent>
 #include <QUrl>
-#include <QEventLoop>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSysInfo>
+#include <QTimer>
 
 #include "amnezia_application.h"
 #include "core/api/apiDefs.h"
@@ -86,63 +84,124 @@ QString UpdateController::getVersion() const
 
 void UpdateController::checkForUpdates()
 {
-    qDebug() << "checkForUpdates";
-    if (!fetchGatewayUrl()) return;
-    if (!fetchVersionInfo()) return;
-    if (!isNewVersionAvailable()) return;
-    if (!fetchChangelog()) return;
-    if (!fetchReleaseDate()) return;
 
-    m_downloadUrl = composeDownloadUrl();
-    emit updateFound();
+    if (m_updateCheckRunning) {
+        return;
+    }
+    m_updateCheckRunning = true;
+
+    fetchGatewayUrl();
 }
 
-bool UpdateController::fetchGatewayUrl()
+void UpdateController::finishUpdateCheck()
 {
-    // Workaround: wait before contacting gateway to avoid rate limit triggered by other requests (news etc.)
+    m_updateCheckRunning = false;
+}
+
+void UpdateController::doGetAsync(const QString &endpoint, std::function<void(bool, QByteArray)> onDone)
+{
+    QString fullUrl = m_baseUrl + endpoint;
+    
+    QNetworkRequest req;
+    req.setTransferTimeout(7000);
+    req.setUrl(QUrl(fullUrl));
+
+    QNetworkReply *reply = amnApp->networkManager()->get(req);
+    setupNetworkErrorHandling(reply, endpoint);
+
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, endpoint, onDone]() {
+        const bool ok = (reply->error() == QNetworkReply::NoError);
+        QByteArray data;
+        if (ok) {
+            data = reply->readAll();
+        } else {
+            handleNetworkError(reply, endpoint);
+        }
+        reply->deleteLater();
+        onDone(ok, data);
+    });
+}
+
+void UpdateController::fetchGatewayUrl()
+{
     {
         QEventLoop wait;
         QTimer::singleShot(1000, &wait, &QEventLoop::quit);
         wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
-
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(),
-                                        m_settings->isDevGatewayEnv(),
-                                        7000,
-                                        m_settings->isStrictKillSwitchEnabled());
+    auto gatewayController = QSharedPointer<GatewayController>::create(m_settings->getGatewayEndpoint(),
+                                                                       m_settings->isDevGatewayEnv(),
+                                                                       7000,
+                                                                       m_settings->isStrictKillSwitchEnabled());
 
     QJsonObject apiPayload;
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
     apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
     apiPayload[apiDefs::key::installationUuid] = m_settings->getInstallationUuid(true);
-    
-    QByteArray gatewayResponse;
-    
-    auto err = gatewayController.post(QStringLiteral("%1v1/updater_endpoint"), apiPayload, gatewayResponse);
-    if (err != ErrorCode::NoError) {
-        logger.error() << errorString(err);
-        return false;
-    }
-    
-    QJsonObject gatewayData = QJsonDocument::fromJson(gatewayResponse).object();
-    
-    QString baseUrl = gatewayData.value("url").toString();
-    if (baseUrl.endsWith('/')) {
-        baseUrl.chop(1);
-    }
-    
-    m_baseUrl = baseUrl;
-    return true;
+
+    auto future = gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload);
+    future.then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {
+        auto [err, gatewayResponse] = result;
+        if (err != ErrorCode::NoError) {
+            logger.error() << errorString(err);
+            finishUpdateCheck();
+            return;
+        }
+
+        QJsonObject gatewayData = QJsonDocument::fromJson(gatewayResponse).object();
+
+        QString baseUrl = gatewayData.value("url").toString();
+        if (baseUrl.endsWith('/')) {
+            baseUrl.chop(1);
+        }
+        m_baseUrl = baseUrl;
+
+        fetchVersionInfo();
+    });
 }
 
-bool UpdateController::fetchVersionInfo()
+void UpdateController::fetchVersionInfo()
 {
-    QByteArray data;
-    if (!doSyncGet("/VERSION", data)) {
-        return false;
-    }
-    m_version = QString::fromUtf8(data).trimmed();
-    return true;
+    doGetAsync("/VERSION", [this](bool ok, QByteArray data) {
+        if (!ok) {
+            finishUpdateCheck();
+            return;
+        }
+        m_version = QString::fromUtf8(data).trimmed();
+        
+        if (!isNewVersionAvailable()) {
+            finishUpdateCheck();
+            return;
+        }
+        fetchChangelog();
+    });
+}
+
+void UpdateController::fetchChangelog()
+{
+    doGetAsync("/CHANGELOG", [this](bool ok, QByteArray data) {
+        if (!ok) {
+            m_changelogText = tr("Failed to load changelog text");
+        } else {
+            m_changelogText = QString::fromUtf8(data);
+        }
+        fetchReleaseDate();
+    });
+}
+
+void UpdateController::fetchReleaseDate()
+{
+    doGetAsync("/RELEASE_DATE", [this](bool ok, QByteArray data) {
+        if (ok) {
+            m_releaseDate = QString::fromUtf8(data).trimmed();
+        } else {
+            m_releaseDate = QString();
+        }
+
+        m_downloadUrl = composeDownloadUrl();
+        emit updateFound();
+        finishUpdateCheck();
+    });
 }
 
 bool UpdateController::isNewVersionAvailable()
@@ -150,28 +209,6 @@ bool UpdateController::isNewVersionAvailable()
     auto currentVersion = QVersionNumber::fromString(QString(APP_VERSION));
     auto newVersion = QVersionNumber::fromString(m_version);
     return newVersion > currentVersion;
-}
-
-bool UpdateController::fetchChangelog()
-{
-    QByteArray data;
-    if (!doSyncGet("/CHANGELOG", data)) {
-        m_changelogText = tr("Failed to load changelog text");
-    } else {
-        m_changelogText = QString::fromUtf8(data);
-    }
-    return true;
-}
-
-bool UpdateController::fetchReleaseDate()
-{
-    QByteArray data;
-    if (doSyncGet("/RELEASE_DATE", data)) {
-        m_releaseDate = QString::fromUtf8(data).trimmed();
-    } else {
-        m_releaseDate = QString();
-    }
-    return true;
 }
 
 void UpdateController::setupNetworkErrorHandling(QNetworkReply* reply, const QString& operation)
@@ -384,25 +421,4 @@ int UpdateController::runLinuxInstaller(const QString &installerPath)
 }
 #endif
 
-bool UpdateController::doSyncGet(const QString& endpoint, QByteArray& outData)
-{
-    QNetworkRequest req;
-    req.setTransferTimeout(7000);
-    req.setUrl(QUrl(m_baseUrl + endpoint));
 
-    QNetworkReply* reply = amnApp->networkManager()->get(req);
-    setupNetworkErrorHandling(reply, endpoint);
-    
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
-
-    bool ok = (reply->error() == QNetworkReply::NoError);
-    if (ok) {
-        outData = reply->readAll();
-    } else {
-        handleNetworkError(reply, endpoint);
-    }
-    reply->deleteLater();
-    return ok;
-}

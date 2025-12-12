@@ -1,6 +1,7 @@
 #ifndef UPDATECONTROLLER_H
 #define UPDATECONTROLLER_H
 
+#include <functional>
 #include <QObject>
 #include <QNetworkReply>
 
@@ -25,12 +26,13 @@ signals:
     void updateFound();
 
 private:
-    bool fetchGatewayUrl();
-    bool fetchVersionInfo();
-    bool fetchChangelog();
-    bool fetchReleaseDate();
+    void finishUpdateCheck();
+    void fetchGatewayUrl();
+    void fetchVersionInfo();
+    void fetchChangelog();
+    void fetchReleaseDate();
+    void doGetAsync(const QString &endpoint, std::function<void(bool, QByteArray)> onDone);
     bool isNewVersionAvailable();
-    bool doSyncGet(const QString& endpoint, QByteArray& outData);
     void setupNetworkErrorHandling(QNetworkReply* reply, const QString& operation);
     void handleNetworkError(QNetworkReply* reply, const QString& operation);
     QString composeDownloadUrl();
@@ -42,6 +44,7 @@ private:
     QString m_version;
     QString m_releaseDate;
     QString m_downloadUrl;
+    bool m_updateCheckRunning = false;
 
 #if defined(Q_OS_WINDOWS)
     int runWindowsInstaller(const QString &installerPath);
