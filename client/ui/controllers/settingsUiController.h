@@ -148,6 +148,7 @@ signals:
     void startMinimizedChanged();
 
     void fileEncryptionStateChanged();
+    void changingPassword();
 
 private:
     SettingsController* m_settingsController;
