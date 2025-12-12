@@ -65,6 +65,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16
 
                 headerText: qsTr("Password & Encryption")
                 descriptionText: qsTr("Password protection for backups and configuration files.\nRequired to restore or import encrypted files.")
@@ -133,6 +134,8 @@ PageType {
 
                 text: qsTr("Change password")
 
+                signal changingPassword
+
                 clickedFunc: function() {
                     passwordDrawer.securedFunc = function() {
                         root.isChangingPassword = true
@@ -157,6 +160,17 @@ PageType {
 
                 anchors.fill: parent
                 expandedHeight: root.height * 0.45
+
+                securedFunc: function() {
+                    root.isChangingPassword = true
+
+                    PageController.showBusyIndicator(true)
+                    PageController.closePage()
+                    PageController.goToPage(PageEnum.PageSettingsAppPassword)
+                    PageController.showBusyIndicator(false)
+
+                    SettingsController.changingPassword()
+                }
             }
         }
 
