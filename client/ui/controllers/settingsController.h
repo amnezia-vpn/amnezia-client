@@ -137,6 +137,7 @@ signals:
     void startMinimizedChanged();
 
     void fileEncryptionStateChanged();
+    void changingPassword();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

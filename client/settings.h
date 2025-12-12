@@ -105,20 +105,20 @@ public:
 
     QString getPassword() const
     {
-        return m_settings.getPassword();
+        return value("Sec/password", "").toString();
     }
     void setPassword(const QString &pwd)
     {
-        m_settings.setPassword(pwd);
+        setValue("Sec/password", pwd);
     }
 
     QString getHint() const
     {
-        return m_settings.getHint();
+        return value("Sec/hint", "").toString();
     }
     void setHint(const QString &hint)
     {
-        m_settings.setHint(hint);
+        setValue("Sec/hint", hint);
     }
 
     bool isSaveLogs() const
