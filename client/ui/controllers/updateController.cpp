@@ -124,11 +124,6 @@ void UpdateController::doGetAsync(const QString &endpoint, std::function<void(bo
 
 void UpdateController::fetchGatewayUrl()
 {
-    {
-        QEventLoop wait;
-        QTimer::singleShot(1000, &wait, &QEventLoop::quit);
-        wait.exec(QEventLoop::ExcludeUserInputEvents);
-    }
     auto gatewayController = QSharedPointer<GatewayController>::create(m_settings->getGatewayEndpoint(),
                                                                        m_settings->isDevGatewayEnv(),
                                                                        7000,
@@ -139,24 +134,27 @@ void UpdateController::fetchGatewayUrl()
     apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
     apiPayload[apiDefs::key::installationUuid] = m_settings->getInstallationUuid(true);
 
-    auto future = gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload);
-    future.then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {
-        auto [err, gatewayResponse] = result;
-        if (err != ErrorCode::NoError) {
-            logger.error() << errorString(err);
-            finishUpdateCheck();
-            return;
-        }
+    // Workaround: wait before contacting gateway to avoid rate limit triggered by other requests (news etc.)
+    QTimer::singleShot(1000, this, [this, gatewayController, apiPayload]() {
+        gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload)
+            .then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {
+                auto [err, gatewayResponse] = result;
+                if (err != ErrorCode::NoError) {
+                    logger.error() << errorString(err);
+                    finishUpdateCheck();
+                    return;
+                }
 
-        QJsonObject gatewayData = QJsonDocument::fromJson(gatewayResponse).object();
+                QJsonObject gatewayData = QJsonDocument::fromJson(gatewayResponse).object();
 
-        QString baseUrl = gatewayData.value("url").toString();
-        if (baseUrl.endsWith('/')) {
-            baseUrl.chop(1);
-        }
-        m_baseUrl = baseUrl;
+                QString baseUrl = gatewayData.value("url").toString();
+                if (baseUrl.endsWith('/')) {
+                    baseUrl.chop(1);
+                }
+                m_baseUrl = baseUrl;
 
-        fetchVersionInfo();
+                fetchVersionInfo();
+            });
     });
 }
 

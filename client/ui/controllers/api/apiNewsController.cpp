@@ -33,13 +33,6 @@ void ApiNewsController::fetchNews(bool showError)
         return;
     }
 
-    // Delay to avoid sending news call immediately after other gateway requests (rate-limit workaround)
-    {
-        QEventLoop wait;
-        QTimer::singleShot(1000, &wait, &QEventLoop::quit);
-        wait.exec(QEventLoop::ExcludeUserInputEvents);
-    }
-
     auto gatewayController = QSharedPointer<GatewayController>::create(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
                                                                        apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
     QJsonObject payload;

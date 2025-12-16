@@ -420,7 +420,9 @@ void CoreController::initUpdateFoundHandler()
         m_newsModel->setUpdateNotification(updateId, m_updateController->getHeaderText(), m_updateController->getChangelogText());
     });
 
-    m_updateController->checkForUpdates();
+    // Start update check after news are fetched to avoid rate limit issues
+    // Redo after throttler will be implemented
+    connect(m_apiNewsController.get(), &ApiNewsController::fetchNewsFinished, m_updateController.get(), &UpdateController::checkForUpdates);
 #endif
 }
 
