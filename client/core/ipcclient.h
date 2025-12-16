@@ -17,24 +17,20 @@ public:
    explicit IpcClient(QObject *parent = nullptr);
 
    static IpcClient *Instance();
-   static bool init(IpcClient *instance);
    static QSharedPointer<IpcInterfaceReplica> Interface();
    static QSharedPointer<IpcProcessTun2SocksReplica> InterfaceTun2Socks();
    static QSharedPointer<PrivilegedProcess> CreatePrivilegedProcess();
 
    bool isSocketConnected() const;
-   void closeAndResetInstance(bool deleteSelf = false);
-
 signals:
 
 private:
-    ~IpcClient() override;
+    bool establishConnection();
 
+    QMutex m_mutex;
+    QLocalSocket m_localSocket;
     QRemoteObjectNode m_ClientNode;
-    QRemoteObjectNode m_Tun2SocksNode;
     QSharedPointer<IpcInterfaceReplica> m_ipcClient;
-    QPointer<QLocalSocket> m_localSocket;
-    QPointer<QLocalSocket> m_tun2socksSocket;
     QSharedPointer<IpcProcessTun2SocksReplica> m_Tun2SocksClient;
 
     struct ProcessDescriptor {
@@ -50,8 +46,6 @@ private:
 
     QMap<int, QSharedPointer<ProcessDescriptor>> m_processNodes;
     bool m_isSocketConnected {false};
-
-    static IpcClient *m_instance;
 };
 
 #endif // IPCCLIENT_H

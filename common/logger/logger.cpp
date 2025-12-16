@@ -91,17 +91,8 @@ void Logger::deInit()
 bool Logger::setServiceLogsEnabled(bool enabled)
 {
 #ifdef AMNEZIA_DESKTOP
-    IpcClient *m_IpcClient = new IpcClient;
-
-    if (!m_IpcClient->isSocketConnected()) {
-        if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occurred when init IPC client";
-            return false;
-        }
-    }
-
-    if (m_IpcClient->Interface()) {
-        m_IpcClient->Interface()->setLogsEnabled(enabled);
+    if (auto iface = IpcClient::Interface(); iface) {
+        iface->setLogsEnabled(enabled);
     } else {
         qWarning() << "Error occurred setting up service logs";
         return false;
@@ -208,19 +199,8 @@ void Logger::clearLogs(bool isServiceLogger)
 void Logger::clearServiceLogs()
 {
 #ifdef AMNEZIA_DESKTOP
-    IpcClient *m_IpcClient = new IpcClient;
-
-    if (!m_IpcClient->isSocketConnected()) {
-        if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occurred when init IPC client";
-            return;
-        }
-    }
-
-    if (m_IpcClient->Interface()) {
-        m_IpcClient->Interface()->clearLogs();
-    } else {
-        qWarning() << "Error occurred cleaning up service logs";
+    if (auto iface = IpcClient::Interface(); iface) {
+        iface->clearLogs();
     }
 #endif
 }

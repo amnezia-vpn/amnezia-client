@@ -218,27 +218,16 @@ void VpnConnection::deleteRoutes(const QStringList &ips)
 #endif
 }
 
+// TODO: replace with something like
+// VpnConnection::withInterface([](iface){  })
 bool VpnConnection::InterfaceReady()
 {
 #ifdef AMNEZIA_DESKTOP
-    if (m_IpcClient) {
-        m_IpcClient->closeAndResetInstance(true);
-        m_IpcClient->deleteLater();
-        m_IpcClient = nullptr;
+    if (auto iface = IpcClient::Interface(); iface == nullptr) {
+        qWarning() << "Error occurred when init IPC client";
+        emit serviceIsNotReady();
+        return false;
     }
-    if (!m_IpcClient) {
-        m_IpcClient = new IpcClient(this);
-    }
-
-    if (!m_IpcClient->isSocketConnected()) {
-        if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occurred when init IPC client";
-            emit serviceIsNotReady();
-            return false;
-        }
-    }
-
-    return IpcClient::Interface() != nullptr;
 #endif
     return true;
 }

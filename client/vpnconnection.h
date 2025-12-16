@@ -93,10 +93,6 @@ private:
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
 
-#ifdef AMNEZIA_DESKTOP
-    IpcClient *m_IpcClient {nullptr};
-#endif
-
 #ifdef Q_OS_ANDROID
    AndroidVpnProtocol* androidVpnProtocol = nullptr;
 
