@@ -166,9 +166,10 @@ namespace
                 qDebug() << "missing containers field";
                 return ErrorCode::ApiConfigEmptyError;
             }
-            auto container = containers.at(0).toObject();
-            QString containerName = ContainerProps::containerTypeToString(DockerContainer::Awg);
-            auto serverProtocolConfig = container.value(containerName).toObject();
+            auto containerObject = containers.at(0).toObject();
+            auto containerType = ContainerProps::containerFromString(containerObject.value(config_key::container).toString());
+            QString containerName = ContainerProps::containerTypeToString(containerType);
+            auto serverProtocolConfig = containerObject.value(containerName).toObject();
             auto clientProtocolConfig =
                     QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
@@ -191,15 +192,11 @@ namespace
             serverProtocolConfig[config_key::specialJunk3] = clientProtocolConfig.value(config_key::specialJunk3);
             serverProtocolConfig[config_key::specialJunk4] = clientProtocolConfig.value(config_key::specialJunk4);
             serverProtocolConfig[config_key::specialJunk5] = clientProtocolConfig.value(config_key::specialJunk5);
-            serverProtocolConfig[config_key::controlledJunk1] = clientProtocolConfig.value(config_key::controlledJunk1);
-            serverProtocolConfig[config_key::controlledJunk2] = clientProtocolConfig.value(config_key::controlledJunk2);
-            serverProtocolConfig[config_key::controlledJunk3] = clientProtocolConfig.value(config_key::controlledJunk3);
-            serverProtocolConfig[config_key::specialHandshakeTimeout] = clientProtocolConfig.value(config_key::specialHandshakeTimeout);
 
             //
 
-            container[containerName] = serverProtocolConfig;
-            containers.replace(0, container);
+            containerObject[containerName] = serverProtocolConfig;
+            containers.replace(0, containerObject);
             newServerConfig[config_key::containers] = containers;
             configStr = QString(QJsonDocument(newServerConfig).toJson());
         }

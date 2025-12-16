@@ -234,37 +234,53 @@ PageType {
                 }
             }
 
-            // AwgTextField {
-            //     id: cookieReplyPacketJunkSizeTextField
+            AwgTextField {
+                id: cookieReplyPacketJunkSizeTextField
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            //     headerText: qsTr("S3 - Cookie reply packet junk size")
-            //     textField.text: serverCookieReplyPacketJunkSize
+                visible: isAwg2
 
-            //     textField.onEditingFinished: {
-            //         if (textField.text !== serverCookieReplyPacketJunkSize) {
-            //             serverCookieReplyPacketJunkSize = textField.text
-            //         }
-            //     }
-            // }
+                headerText: qsTr("S3 - Cookie reply packet junk size")
+                textField.text: serverCookieReplyPacketJunkSize
 
-            // AwgTextField {
-            //     id: transportPacketJunkSizeTextField
+                textField.onEditingFinished: {
+                    if (textField.text !== serverCookieReplyPacketJunkSize) {
+                        serverCookieReplyPacketJunkSize = textField.text
+                    }
+                }
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(cookieReplyPacketJunkSizeTextField)
+                    }
+                }
+            }
 
-            //     headerText: qsTr("S4 - Transport packet junk size")
-            //     textField.text: serverTransportPacketJunkSize
+            AwgTextField {
+                id: transportPacketJunkSizeTextField
 
-            //     textField.onEditingFinished: {
-            //         if (textField.text !== serverTransportPacketJunkSize) {
-            //             serverTransportPacketJunkSize = textField.text
-            //         }
-            //     }
-            // }
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: isAwg2
+
+                headerText: qsTr("S4 - Transport packet junk size")
+                textField.text: serverTransportPacketJunkSize
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverTransportPacketJunkSize) {
+                        serverTransportPacketJunkSize = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(transportPacketJunkSizeTextField)
+                    }
+                }
+            }
 
             AwgTextField {
                 id: initPacketMagicHeaderTextField
@@ -274,6 +290,9 @@ PageType {
 
                 headerText: qsTr("H1 - Init packet magic header")
                 textField.text: serverInitPacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverInitPacketMagicHeader) {
@@ -296,6 +315,9 @@ PageType {
 
                 headerText: qsTr("H2 - Response packet magic header")
                 textField.text: serverResponsePacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverResponsePacketMagicHeader) {
@@ -318,6 +340,9 @@ PageType {
 
                 headerText: qsTr("H3 - Underload packet magic header")
                 textField.text: serverUnderloadPacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverUnderloadPacketMagicHeader) {
@@ -340,6 +365,9 @@ PageType {
 
                 headerText: qsTr("H4 - Transport packet magic header")
                 textField.text: serverTransportPacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverTransportPacketMagicHeader) {
@@ -368,8 +396,8 @@ PageType {
                          responsePacketMagicHeaderTextField.errorText === "" &&
                          initPacketMagicHeaderTextField.errorText === "" &&
                          responsePacketJunkSizeTextField.errorText === "" &&
-                         // cookieReplyHeaderJunkTextField.errorText === "" &&
-                         // transportHeaderJunkTextField.errorText === "" &&
+                         cookieReplyPacketJunkSizeTextField.errorText === "" &&
+                         transportPacketJunkSizeTextField.errorText === "" &&
                          initPacketJunkSizeTextField.errorText === "" &&
                          junkPacketMaxSizeTextField.errorText === "" &&
                          junkPacketMinSizeTextField.errorText === "" &&
@@ -396,17 +424,12 @@ PageType {
                         }
 
                         if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
-                                                             parseInt(responsePacketJunkSizeTextField.textField.text))) {
-                            PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)"))
+                                                            parseInt(responsePacketJunkSizeTextField.textField.text),
+                                                            parseInt(cookieReplyPacketJunkSizeTextField.textField.text),
+                                                            parseInt(transportPacketJunkSizeTextField.textField.text))) {
+                            PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
                             return
                         }
-                        // if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
-                        //                                     parseInt(responsePacketJunkSizeTextField.textField.text),
-                        //                                     parseInt(cookieReplyPacketJunkSizeTextField.textField.text),
-                        //                                     parseInt(transportPacketJunkSizeTextField.textField.text))) {
-                        //     PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
-                        //     return
-                        // }
                     }
 
                     var headerText = qsTr("Save settings?")

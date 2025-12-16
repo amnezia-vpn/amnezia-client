@@ -57,8 +57,6 @@ class InterfaceConfig {
   QString m_underloadPacketMagicHeader;
   QString m_transportPacketMagicHeader;
   QMap<QString, QString> m_specialJunk;
-  QMap<QString, QString> m_controlledJunk;
-  QString m_specialHandshakeTimeout;
 
   QJsonObject toJson() const;
   QString toWgConf(

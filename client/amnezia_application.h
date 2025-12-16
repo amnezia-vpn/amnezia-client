@@ -45,7 +45,11 @@ public:
     QNetworkAccessManager *networkManager();
     QClipboard *getClipboard();
 
+public slots:
+    void forceQuit();
+
 private:
+    static bool m_forceQuit;
     QQmlApplicationEngine *m_engine {};
     std::shared_ptr<Settings> m_settings;
 
@@ -58,6 +62,8 @@ private:
 
     QCommandLineOption m_optAutostart;
     QCommandLineOption m_optCleanup;
+    QCommandLineOption m_optConnect;
+    QCommandLineOption m_optImport;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;

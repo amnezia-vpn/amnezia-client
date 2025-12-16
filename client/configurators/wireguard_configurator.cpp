@@ -103,7 +103,11 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         return connData;
     }
 
-    QString getIpsScript = QString("cat %1 | grep AllowedIPs").arg(m_serverConfigPath);
+    QString configPath = m_serverConfigPath;
+    if (container == DockerContainer::Awg) {
+        configPath = amnezia::protocols::awg::serverLegacyConfigPath;
+    }
+    QString getIpsScript = QString("cat %1 | grep AllowedIPs").arg(configPath);
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
@@ -161,15 +165,18 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
                                  "AllowedIPs = %3/32\n\n")
                                  .arg(connData.clientPubKey, connData.pskKey, connData.clientIP);
 
-    errorCode = m_serverController->uploadTextFileToContainer(container, credentials, configPart, m_serverConfigPath,
+    errorCode = m_serverController->uploadTextFileToContainer(container, credentials, configPart, configPath,
                                                               libssh::ScpOverwriteMode::ScpAppendToExisting);
 
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
 
-    QString script = QString("sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip %1)'")
-                             .arg(m_serverConfigPath);
+    bool isAwg = (container == DockerContainer::Awg2);
+    QString bin = isAwg ? QStringLiteral("awg") : QStringLiteral("wg");
+    QString iface = isAwg ? QStringLiteral("awg0") : QStringLiteral("wg0");
+    QString script = QString(
+        "sudo docker exec -i $CONTAINER_NAME bash -c '%1 syncconf %2 <(%1-quick strip %3)'").arg(bin, iface, configPath);
 
     errorCode = m_serverController->runScript(
             credentials,

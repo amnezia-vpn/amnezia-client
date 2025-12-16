@@ -16,6 +16,8 @@ namespace amnezia
         Q_NAMESPACE
         enum DockerContainer {
             None = 0,
+            Awg2,
+            Awg1_5,
             Awg,
             WireGuard,
             OpenVpn,
@@ -45,6 +47,7 @@ namespace amnezia
         Q_INVOKABLE static amnezia::DockerContainer containerFromString(const QString &container);
         Q_INVOKABLE static QString containerToString(amnezia::DockerContainer container);
         Q_INVOKABLE static QString containerTypeToString(amnezia::DockerContainer c);
+        Q_INVOKABLE static QString containerTypeToProtocolString(amnezia::DockerContainer c);
 
         Q_INVOKABLE static QList<amnezia::DockerContainer> allContainers();
 
@@ -70,6 +73,8 @@ namespace amnezia
         static int easySetupOrder(amnezia::DockerContainer container);
 
         static bool isShareable(amnezia::DockerContainer container);
+
+        static bool isAwgContainer(amnezia::DockerContainer container);
 
         static QJsonObject getProtocolConfigFromContainer(const amnezia::Proto protocol, const QJsonObject &containerConfig);
 

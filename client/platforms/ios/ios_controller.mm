@@ -670,10 +670,6 @@ bool IosController::setupAwg()
     wgConfig.insert(config_key::specialJunk3, config[config_key::specialJunk3]);
     wgConfig.insert(config_key::specialJunk4, config[config_key::specialJunk4]);
     wgConfig.insert(config_key::specialJunk5, config[config_key::specialJunk5]);
-    wgConfig.insert(config_key::controlledJunk1, config[config_key::controlledJunk1]);
-    wgConfig.insert(config_key::controlledJunk2, config[config_key::controlledJunk2]);
-    wgConfig.insert(config_key::controlledJunk3, config[config_key::controlledJunk3]);
-    wgConfig.insert(config_key::specialHandshakeTimeout, config[config_key::specialHandshakeTimeout]);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));

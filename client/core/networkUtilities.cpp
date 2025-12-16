@@ -1,11 +1,12 @@
 #include "networkUtilities.h"
+#include <QtNetwork/qnetworkinterface.h>
+#include <cstddef>
 
 #ifdef Q_OS_WIN
     #include <windows.h>
     #include <Ipexport.h>
     #include <Ws2tcpip.h>
     #include <ws2ipdef.h>
-    #include <stdint.h>
     #include <Iphlpapi.h>
     #include <Iptypes.h>
     #include <WinSock2.h>
@@ -30,6 +31,15 @@
     #include <netinet/in.h>
     #include <arpa/inet.h>
     #include <net/route.h>
+    #include <ifaddrs.h>
+    #include <net/if.h>
+    #include <net/if_dl.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <arpa/inet.h>
+    #include <unistd.h>
+    #include <ifaddrs.h>
+    #include <net/if.h>
 #endif
 
 #include <QHostAddress>
@@ -239,12 +249,14 @@ DWORD GetAdaptersAddressesWrapper(const ULONG Family,
 }
 #endif
 
-QString NetworkUtilities::getGatewayAndIface()
+QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 {
 #ifdef Q_OS_WIN
     constexpr int BUFF_LEN = 100;
     char buff[BUFF_LEN] = {'\0'};
-    QString result;
+
+    QString resGateway;
+    int resIndex = -1;
 
     PIP_ADAPTER_ADDRESSES pAdapterAddresses = nullptr;
     DWORD dwRetVal =
@@ -252,7 +264,7 @@ QString NetworkUtilities::getGatewayAndIface()
 
     if (dwRetVal != NO_ERROR) {
         qDebug() << "ipv4 stack detect GetAdaptersAddresses failed.";
-        return "";
+        return {};
     }
 
     PIP_ADAPTER_ADDRESSES pCurAddress = pAdapterAddresses;
@@ -267,7 +279,9 @@ QString NetworkUtilities::getGatewayAndIface()
                 struct sockaddr_in addr;
                 if (inet_pton(AF_INET, buff, &addr.sin_addr) == 1) {
                     qDebug() <<  "this is true v4 !";
-                    result = gw;
+                    
+                    resGateway = gw;
+                    resIndex = pCurAddress->IfIndex;
                 }
             }
         }
@@ -275,7 +289,7 @@ QString NetworkUtilities::getGatewayAndIface()
     }
 
     free(pAdapterAddresses);
-    return result;
+    return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
 #endif
 #ifdef Q_OS_LINUX
     constexpr int BUFFER_SIZE = 100;
@@ -292,7 +306,7 @@ QString NetworkUtilities::getGatewayAndIface()
 
     if ((sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE)) < 0) {
         perror("socket failed");
-        return "";
+        return {};
     }
 
     memset(msgbuf, 0, sizeof(msgbuf));
@@ -316,7 +330,7 @@ QString NetworkUtilities::getGatewayAndIface()
     /* send msg */
     if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0) {
         perror("send failed");
-        return "";
+        return {};
     }
 
     /* receive response */
@@ -325,7 +339,7 @@ QString NetworkUtilities::getGatewayAndIface()
         received_bytes = recv(sock, ptr, sizeof(buffer) - msg_len, 0);
         if (received_bytes < 0) {
             perror("Error in recv");
-            return "";
+            return {};
         }
 
         nlh = (struct nlmsghdr *) ptr;
@@ -335,7 +349,7 @@ QString NetworkUtilities::getGatewayAndIface()
             (nlmsg->nlmsg_type == NLMSG_ERROR))
         {
             perror("Error in received packet");
-            return "";
+            return {};
         }
 
         /* If we received all data break */
@@ -388,10 +402,12 @@ QString NetworkUtilities::getGatewayAndIface()
         }
     }
     close(sock);
-    return gateway_address;
+    return { gateway_address, QNetworkInterface::interfaceFromName(interface) };
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     QString gateway;
+    int index = -1;
+
     int mib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_FLAGS, RTF_GATEWAY};
     int afinet_type[] = {AF_INET, AF_INET6};
 
@@ -401,17 +417,17 @@ QString NetworkUtilities::getGatewayAndIface()
 
         size_t needed = 0;
         if (sysctl(mib, sizeof(mib) / sizeof(int), nullptr, &needed, nullptr, 0) < 0)
-            return "";
+            return {};
 
         char* buf;
         if ((buf = new char[needed]) == 0)
-            return "";
+            return {};
 
         if (sysctl(mib, sizeof(mib) / sizeof(int), buf, &needed, nullptr, 0) < 0)
         {
             qDebug() << "sysctl: net.route.0.0.dump";
             delete[] buf;
-            return gateway;
+            return {};
         }
 
         struct rt_msghdr* rt;
@@ -449,7 +465,10 @@ QString NetworkUtilities::getGatewayAndIface()
                                &(reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_GATEWAY]))->sin_addr,
                                sizeof(struct in_addr));
                         if (inet_ntop(AF_INET, srcStr4, dstStr4, INET_ADDRSTRLEN) != nullptr)
+                        {
                             gateway = dstStr4;
+                            index = rt->rtm_index;
+                        }
                         break;
                     }
                 }
@@ -463,7 +482,10 @@ QString NetworkUtilities::getGatewayAndIface()
                                &(reinterpret_cast<struct sockaddr_in6*>(sa_tab[RTAX_GATEWAY]))->sin6_addr,
                                sizeof(struct in6_addr));
                         if (inet_ntop(AF_INET6, srcStr6, dstStr6, INET6_ADDRSTRLEN) != nullptr)
+                        {
                             gateway = dstStr6;
+                            index = rt->rtm_index;
+                        }
                         break;
                     }
                 }
@@ -472,6 +494,6 @@ QString NetworkUtilities::getGatewayAndIface()
         free(buf);
     }
 
-    return gateway;
+    return { gateway, QNetworkInterface::interfaceFromIndex(index) };
 #endif
 }

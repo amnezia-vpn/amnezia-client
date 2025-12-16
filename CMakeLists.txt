@@ -49,3 +49,36 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
 
     include(${CMAKE_SOURCE_DIR}/deploy/installer/config.cmake)
 endif()
+
+set(AMNEZIA_STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
+
+if(WIN32 AND NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+    file(TO_CMAKE_PATH "${AMNEZIA_STAGE_DIR}" AMNEZIA_STAGE_DIR_CMAKE)
+
+    set(CPACK_GENERATOR "WIX")
+    set(CPACK_WIX_VERSION 4)
+    set(CPACK_PACKAGE_NAME "AmneziaVPN")
+    set(CPACK_PACKAGE_VENDOR "AmneziaVPN")
+    set(CPACK_PACKAGE_VERSION ${AMNEZIAVPN_VERSION})
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "AmneziaVPN client")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "AmneziaVPN")
+    set(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}")
+    set(CPACK_PACKAGE_EXECUTABLES "AmneziaVPN" "AmneziaVPN")
+    set(CPACK_WIX_UPGRADE_GUID "{2D55AC62-96D6-4692-8C05-0D85BBF95485}")
+    set(CPACK_WIX_PRODUCT_ICON "${CMAKE_SOURCE_DIR}/client/images/app.ico")
+
+    # WiX patches
+    set(_AMNEZIA_WIX_PATCH_SERVICE "${CMAKE_SOURCE_DIR}/deploy/installer/wix/service_install_patch.xml")
+    set(_AMNEZIA_WIX_PATCH_CLOSE_APP "${CMAKE_SOURCE_DIR}/deploy/installer/wix/close_client_patch.xml")
+    file(TO_CMAKE_PATH "${_AMNEZIA_WIX_PATCH_SERVICE}" _AMNEZIA_WIX_PATCH_SERVICE_CMAKE)
+    file(TO_CMAKE_PATH "${_AMNEZIA_WIX_PATCH_CLOSE_APP}" _AMNEZIA_WIX_PATCH_CLOSE_APP_CMAKE)
+    set(CPACK_WIX_PATCH_FILE "${_AMNEZIA_WIX_PATCH_SERVICE_CMAKE};${_AMNEZIA_WIX_PATCH_CLOSE_APP_CMAKE}")
+
+    # WiX v4 Util extension for CloseApplication + namespace for util
+    set(CPACK_WIX_EXTENSIONS "${CPACK_WIX_EXTENSIONS};WixToolset.Util.wixext")
+    set(CPACK_WIX_CUSTOM_XMLNS "util=http://wixtoolset.org/schemas/v4/wxs/util")
+
+    set(CPACK_INSTALLED_DIRECTORIES "${AMNEZIA_STAGE_DIR_CMAKE};/")
+
+    include(CPack)
+endif()

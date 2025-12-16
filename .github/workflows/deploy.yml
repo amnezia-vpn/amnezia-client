@@ -139,12 +139,28 @@ jobs:
       with:
         arch: 'x64'
 
+    - name: 'Setup .NET SDK'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: 'Install WiX Toolset'
+      shell: powershell
+      run: |
+        dotnet tool install --global wix --version 4.0.6
+        wix extension add -g WixToolset.UI.wixext/4.0.6
+        wix extension add -g WixToolset.Util.wixext/4.0.6
+        wix extension list -g
+        $wixBinDir = Join-Path $env:USERPROFILE ".dotnet\tools"
+        echo "WIX_BIN_DIR=$wixBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
     - name: 'Build project'
       shell: cmd
       run: |
         set BUILD_ARCH=${{ env.BUILD_ARCH }}
         set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_64\\bin"
         set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
+        set WIX_BIN_DIR=%USERPROFILE%\.dotnet\tools
         call deploy\\build_windows.bat
 
     - name: 'Rename Windows installer'
@@ -157,6 +173,13 @@ jobs:
       with:
         name: AmneziaVPN_${{ env.VERSION }}_x64.exe
         path: AmneziaVPN_${{ env.VERSION }}_x64.exe
+        retention-days: 7
+
+    - name: 'Upload MSI installer artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_Windows_MSI_installer
+        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.msi
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
@@ -508,7 +531,7 @@ jobs:
 
     env:
       ANDROID_BUILD_PLATFORM: android-36
-      QT_VERSION: 6.8.3
+      QT_VERSION: 6.10.1
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}

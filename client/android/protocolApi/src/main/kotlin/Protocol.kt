@@ -42,7 +42,7 @@ abstract class Protocol {
 
     abstract fun stopVpn()
 
-    abstract fun reconnectVpn(vpnBuilder: Builder)
+    abstract fun reconnectVpn(vpnBuilder: Builder, protect: (Int) -> Boolean)
 
     protected fun ProtocolConfig.Builder.configSplitTunneling(config: JSONObject) {
         if (!allowSplitTunneling) {

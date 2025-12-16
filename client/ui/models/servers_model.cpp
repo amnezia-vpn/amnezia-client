@@ -753,8 +753,8 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
         if (container.value(config_key::container).toString() != ContainerProps::containerToString(defaultContainer)) {
             continue;
         }
-        if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-            QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
+        if (ContainerProps::isAwgContainer(defaultContainer) || defaultContainer == DockerContainer::WireGuard) {
+            QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToProtocolString(defaultContainer)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             QJsonObject clientProtocolConfig = QJsonDocument::fromJson(clientProtocolConfigString.toUtf8()).object();
             return (clientProtocolConfigString.contains("AllowedIPs") && !clientProtocolConfigString.contains("AllowedIPs = 0.0.0.0/0, ::/0"))
@@ -762,7 +762,7 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
                         && !clientProtocolConfig.value(config_key::allowed_ips).toArray().contains("0.0.0.0/0"));
         } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
                    || defaultContainer == DockerContainer::ShadowSocks) {
-            auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
+            auto serverProtocolConfig = container.value(ContainerProps::containerTypeToProtocolString(DockerContainer::OpenVpn)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             return !clientProtocolConfigString.isEmpty() && !clientProtocolConfigString.contains("redirect-gateway");
         }

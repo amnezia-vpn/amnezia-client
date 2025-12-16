@@ -179,7 +179,7 @@ void ExportController::generateWireGuardConfig(const QString &clientName)
 void ExportController::generateAwgConfig(const QString &clientName)
 {
     QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::Awg, clientName, Proto::Awg, nativeConfig);
+    ErrorCode errorCode = generateNativeConfig(DockerContainer::Awg2, clientName, Proto::Awg, nativeConfig);
     if (errorCode) {
         emit exportErrorOccurred(errorCode);
         return;

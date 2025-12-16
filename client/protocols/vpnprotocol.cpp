@@ -119,6 +119,7 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &
     case DockerContainer::Cloak: return new OpenVpnOverCloakProtocol(configuration);
     case DockerContainer::ShadowSocks: return new ShadowSocksVpnProtocol(configuration);
     case DockerContainer::WireGuard: return new WireguardProtocol(configuration);
+    case DockerContainer::Awg2: return new WireguardProtocol(configuration);
     case DockerContainer::Awg: return new WireguardProtocol(configuration);
     case DockerContainer::Xray: return new XrayProtocol(configuration);
     case DockerContainer::SSXray: return new XrayProtocol(configuration);

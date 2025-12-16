@@ -27,9 +27,13 @@
 #include <QtQuick/QQuickWindow>  // for QQuickWindow
 #include <QWindow>              // for qobject_cast<QWindow*>
 
+bool AmneziaApplication::m_forceQuit = false;
+
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv),
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
-      m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs"))
+      m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
+      m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
+      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data"))
 {
     setQuitOnLastWindowClosed(false);
 
@@ -90,9 +94,6 @@ namespace {
 
 void AmneziaApplication::init()
 {
-#ifdef Q_OS_ANDROID
-    clearQtCaches();
-#endif
     m_engine = new QQmlApplicationEngine;
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
@@ -126,6 +127,16 @@ void AmneziaApplication::init()
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
 
     m_engine->addImportPath("qrc:/ui/qml/Modules/");
+
+    if (m_parser.isSet(m_optImport)) {
+        const QString data = m_parser.value(m_optImport);
+        if (!data.isEmpty()) {
+            if (m_coreController) {
+                m_coreController->importConfigFromData(data);
+            }
+        }
+    }
+
     m_engine->load(url);
 
     m_coreController->setQmlRoot();
@@ -165,6 +176,18 @@ void AmneziaApplication::init()
         }
     });
 #endif
+
+    if (m_parser.isSet(m_optConnect)) {
+        bool ok = false;
+        int idx = m_parser.value(m_optConnect).toInt(&ok);
+        if (ok) {
+            QTimer::singleShot(0, this, [this, idx]() {
+                if (m_coreController) {
+                    m_coreController->openConnectionByIndex(idx);
+                }
+            });
+        }
+    }
 }
 
 void AmneziaApplication::registerTypes()
@@ -211,6 +234,8 @@ bool AmneziaApplication::parseCommands()
 
     m_parser.addOption(m_optAutostart);
     m_parser.addOption(m_optCleanup);
+    m_parser.addOption(m_optConnect);
+    m_parser.addOption(m_optImport);
     
     m_parser.process(*this);
 
@@ -247,14 +272,24 @@ bool AmneziaApplication::eventFilter(QObject *watched, QEvent *event)
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
         quit();
 #else
-        if (m_coreController && m_coreController->pageController()) {
-            m_coreController->pageController()->hideMainWindow();
+        if (m_forceQuit) {
+            quit();
+        } else {
+            if (m_coreController && m_coreController->pageController()) {
+                m_coreController->pageController()->hideMainWindow();
+            }
         }
 #endif
         return true; // eat the close
     }
     // call base QObject::eventFilter
     return QObject::eventFilter(watched, event);
+}
+
+void AmneziaApplication::forceQuit()
+{
+    m_forceQuit = true;
+    quit();
 }
 
 QQmlApplicationEngine *AmneziaApplication::qmlEngine() const

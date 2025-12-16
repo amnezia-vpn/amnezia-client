@@ -83,10 +83,6 @@ namespace amnezia
         constexpr char specialJunk3[] = "I3";
         constexpr char specialJunk4[] = "I4";
         constexpr char specialJunk5[] = "I5";
-        constexpr char controlledJunk1[] = "J1";
-        constexpr char controlledJunk2[] = "J2";
-        constexpr char controlledJunk3[] = "J3";
-        constexpr char specialHandshakeTimeout[] = "Itime";
 
         constexpr char openvpn[] = "openvpn";
         constexpr char wireguard[] = "wireguard";
@@ -218,7 +214,8 @@ namespace amnezia
             constexpr char defaultMtu[] = "1376";
 #endif
 
-            constexpr char serverConfigPath[] = "/opt/amnezia/awg/wg0.conf";
+            constexpr char serverConfigPath[] = "/opt/amnezia/awg/awg0.conf";
+            constexpr char serverLegacyConfigPath[] = "/opt/amnezia/awg/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/awg/wireguard_server_public_key.key";
             constexpr char serverPskKeyPath[] = "/opt/amnezia/awg/wireguard_psk.key";
 
@@ -239,10 +236,6 @@ namespace amnezia
             constexpr char defaultSpecialJunk3[] = "";
             constexpr char defaultSpecialJunk4[] = "";
             constexpr char defaultSpecialJunk5[] = "";
-            constexpr char defaultControlledJunk1[] = "";
-            constexpr char defaultControlledJunk2[] = "";
-            constexpr char defaultControlledJunk3[] = "";
-            constexpr char defaultSpecialHandshakeTimeout[] = "";
         }
 
         namespace socks5Proxy
