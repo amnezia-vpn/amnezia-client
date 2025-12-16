@@ -382,6 +382,116 @@ PageType {
                 }
             }
 
+            AwgTextField {
+                id: specialJunk1TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I1 - Special junk 1")
+                textField.text: serverSpecialJunk1
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk1) {
+                        serverSpecialJunk1 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk1TextField)
+                    }
+                }
+            }
+
+            AwgTextField {
+                id: specialJunk2TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I2 - Special junk 2")
+                textField.text: serverSpecialJunk2
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk2) {
+                        serverSpecialJunk2 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk2TextField)
+                    }
+                }
+            }
+
+            AwgTextField {
+                id: specialJunk3TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I3 - Special junk 3")
+                textField.text: serverSpecialJunk3
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk3) {
+                        serverSpecialJunk3 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk3TextField)
+                    }
+                }
+            }
+
+            AwgTextField {
+                id: specialJunk4TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I4 - Special junk 4")
+                textField.text: serverSpecialJunk4
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk4) {
+                        serverSpecialJunk4 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk4TextField)
+                    }
+                }
+            }
+
+            AwgTextField {
+                id: specialJunk5TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I5 - Special junk 5")
+                textField.text: serverSpecialJunk5
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk5) {
+                        serverSpecialJunk5 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk5TextField)
+                    }
+                }
+            }
+
             BasicButtonType {
                 id: saveRestartButton
 

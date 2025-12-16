@@ -56,6 +56,11 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::ServerTransportPacketMagicHeaderRole:
         m_serverProtocolConfig.insert(config_key::transportPacketMagicHeader, value.toString());
         break;
+    case Roles::ServerSpecialJunk1Role: m_serverProtocolConfig.insert(config_key::specialJunk1, value.toString()); break;
+    case Roles::ServerSpecialJunk2Role: m_serverProtocolConfig.insert(config_key::specialJunk2, value.toString()); break;
+    case Roles::ServerSpecialJunk3Role: m_serverProtocolConfig.insert(config_key::specialJunk3, value.toString()); break;
+    case Roles::ServerSpecialJunk4Role: m_serverProtocolConfig.insert(config_key::specialJunk4, value.toString()); break;
+    case Roles::ServerSpecialJunk5Role: m_serverProtocolConfig.insert(config_key::specialJunk5, value.toString()); break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -93,8 +98,13 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerResponsePacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::responsePacketMagicHeader);
     case Roles::ServerUnderloadPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::underloadPacketMagicHeader);
     case Roles::ServerTransportPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::transportPacketMagicHeader);
+    case Roles::ServerSpecialJunk1Role: return m_serverProtocolConfig.value(config_key::specialJunk1);
+    case Roles::ServerSpecialJunk2Role: return m_serverProtocolConfig.value(config_key::specialJunk2);
+    case Roles::ServerSpecialJunk3Role: return m_serverProtocolConfig.value(config_key::specialJunk3);
+    case Roles::ServerSpecialJunk4Role: return m_serverProtocolConfig.value(config_key::specialJunk4);
+    case Roles::ServerSpecialJunk5Role: return m_serverProtocolConfig.value(config_key::specialJunk5);
 
-    case Roles::IsAwg2Role: return m_container == DockerContainer::Awg2;
+    case Roles::IsAwg2Role: return ProtocolProps::getProtocolVersion(m_fullConfig.value(config_key::awg).toObject()) == protocols::awg::awgV2;
     }
 
     return QVariant();
@@ -108,6 +118,11 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
     m_fullConfig = config;
 
     QJsonObject serverProtocolConfig = config.value(config_key::awg).toObject();
+
+    auto protocolVersion = serverProtocolConfig.value(config_key::protocolVersion).toString();
+    if (!protocolVersion.isEmpty()) {
+        m_serverProtocolConfig[config_key::protocolVersion] = protocolVersion;
+    }
 
     auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Awg), Proto::Awg);
     m_serverProtocolConfig.insert(config_key::transport_proto,
@@ -139,6 +154,17 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
     m_serverProtocolConfig[config_key::transportPacketMagicHeader] =
             serverProtocolConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader);
 
+    m_serverProtocolConfig[config_key::specialJunk1] =
+            serverProtocolConfig.value(config_key::specialJunk1).toString();
+    m_serverProtocolConfig[config_key::specialJunk2] =
+            serverProtocolConfig.value(config_key::specialJunk2).toString();
+    m_serverProtocolConfig[config_key::specialJunk3] =
+            serverProtocolConfig.value(config_key::specialJunk3).toString();
+    m_serverProtocolConfig[config_key::specialJunk4] =
+            serverProtocolConfig.value(config_key::specialJunk4).toString();
+    m_serverProtocolConfig[config_key::specialJunk5] =
+            serverProtocolConfig.value(config_key::specialJunk5).toString();
+
     auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
     m_clientProtocolConfig[config_key::mtu] = clientProtocolConfig[config_key::mtu].toString(protocols::awg::defaultMtu);
@@ -149,22 +175,22 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
     m_clientProtocolConfig[config_key::junkPacketMaxSize] =
             clientProtocolConfig.value(config_key::junkPacketMaxSize).toString(m_serverProtocolConfig[config_key::junkPacketMaxSize].toString());
     m_clientProtocolConfig[config_key::specialJunk1] =
-            clientProtocolConfig.value(config_key::specialJunk1).toString(protocols::awg::defaultSpecialJunk1);
+            clientProtocolConfig.value(config_key::specialJunk1).toString();
     m_clientProtocolConfig[config_key::specialJunk2] =
-            clientProtocolConfig.value(config_key::specialJunk2).toString(protocols::awg::defaultSpecialJunk2);
+            clientProtocolConfig.value(config_key::specialJunk2).toString();
     m_clientProtocolConfig[config_key::specialJunk3] =
-            clientProtocolConfig.value(config_key::specialJunk3).toString(protocols::awg::defaultSpecialJunk3);
+            clientProtocolConfig.value(config_key::specialJunk3).toString();
     m_clientProtocolConfig[config_key::specialJunk4] =
-            clientProtocolConfig.value(config_key::specialJunk4).toString(protocols::awg::defaultSpecialJunk4);
+            clientProtocolConfig.value(config_key::specialJunk4).toString();
     m_clientProtocolConfig[config_key::specialJunk5] =
-            clientProtocolConfig.value(config_key::specialJunk5).toString(protocols::awg::defaultSpecialJunk5);
+            clientProtocolConfig.value(config_key::specialJunk5).toString();
     endResetModel();
 }
 
 QJsonObject AwgConfigModel::getConfig()
 {
-    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject(), m_container);
-    const AwgConfig newConfig(m_serverProtocolConfig, m_container);
+    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject());
+    const AwgConfig newConfig(m_serverProtocolConfig);
 
     if (!oldConfig.hasEqualServerSettings(newConfig)) {
         m_serverProtocolConfig.remove(config_key::last_config);
@@ -182,6 +208,22 @@ QJsonObject AwgConfigModel::getConfig()
         jsonConfig[config_key::specialJunk5] = m_clientProtocolConfig[config_key::specialJunk5].toString().trimmed();
 
         m_serverProtocolConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
+    }
+
+    QString currentProtocolVersion = m_serverProtocolConfig.value(config_key::protocolVersion).toString();
+    
+    if (currentProtocolVersion != protocols::awg::awgV2) {
+        bool hasSpecialJunk = !m_serverProtocolConfig.value(config_key::specialJunk1).toString().trimmed().isEmpty() ||
+                              !m_serverProtocolConfig.value(config_key::specialJunk2).toString().trimmed().isEmpty() ||
+                              !m_serverProtocolConfig.value(config_key::specialJunk3).toString().trimmed().isEmpty() ||
+                              !m_serverProtocolConfig.value(config_key::specialJunk4).toString().trimmed().isEmpty() ||
+                              !m_serverProtocolConfig.value(config_key::specialJunk5).toString().trimmed().isEmpty();
+        
+        if (hasSpecialJunk) {
+            m_serverProtocolConfig[config_key::protocolVersion] = protocols::awg::awgV1_5;
+        } else {
+            m_serverProtocolConfig.remove(config_key::protocolVersion);
+        }
     }
 
     m_fullConfig.insert(config_key::awg, m_serverProtocolConfig);
@@ -206,8 +248,8 @@ bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2, const int s3,
 
 bool AwgConfigModel::isServerSettingsEqual()
 {
-    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject(), m_container);
-    const AwgConfig newConfig(m_serverProtocolConfig, m_container);
+    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject());
+    const AwgConfig newConfig(m_serverProtocolConfig);
 
     return oldConfig.hasEqualServerSettings(newConfig);
 }
@@ -241,15 +283,20 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ServerResponsePacketMagicHeaderRole] = "serverResponsePacketMagicHeader";
     roles[ServerUnderloadPacketMagicHeaderRole] = "serverUnderloadPacketMagicHeader";
     roles[ServerTransportPacketMagicHeaderRole] = "serverTransportPacketMagicHeader";
+    roles[ServerSpecialJunk1Role] = "serverSpecialJunk1";
+    roles[ServerSpecialJunk2Role] = "serverSpecialJunk2";
+    roles[ServerSpecialJunk3Role] = "serverSpecialJunk3";
+    roles[ServerSpecialJunk4Role] = "serverSpecialJunk4";
+    roles[ServerSpecialJunk5Role] = "serverSpecialJunk5";
 
     roles[IsAwg2Role] = "isAwg2";
 
     return roles;
 }
 
-AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig, const DockerContainer containerType)
+AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
 {
-    m_containerType = containerType;
+    m_isProtocolV2 = ProtocolProps::getProtocolVersion(serverProtocolConfig) == protocols::awg::awgV2;
 
     auto lastConfig = serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
@@ -272,7 +319,7 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig, const DockerContai
     serverResponsePacketJunkSize =
             serverProtocolConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
 
-    if (m_containerType == DockerContainer::Awg2) {
+    if (m_isProtocolV2) {
         serverCookieReplyPacketJunkSize =
                 serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize);
         serverTransportPacketJunkSize =
@@ -287,6 +334,11 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig, const DockerContai
             serverProtocolConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader);
     serverTransportPacketMagicHeader =
             serverProtocolConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader);
+    serverSpecialJunk1 = serverProtocolConfig.value(config_key::specialJunk1).toString(protocols::awg::defaultSpecialJunk1);
+    serverSpecialJunk2 = serverProtocolConfig.value(config_key::specialJunk2).toString(protocols::awg::defaultSpecialJunk2);
+    serverSpecialJunk3 = serverProtocolConfig.value(config_key::specialJunk3).toString(protocols::awg::defaultSpecialJunk3);
+    serverSpecialJunk4 = serverProtocolConfig.value(config_key::specialJunk4).toString(protocols::awg::defaultSpecialJunk4);
+    serverSpecialJunk5 = serverProtocolConfig.value(config_key::specialJunk5).toString(protocols::awg::defaultSpecialJunk5);
 }
 
 bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
@@ -297,11 +349,14 @@ bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
         || serverInitPacketMagicHeader != other.serverInitPacketMagicHeader
         || serverResponsePacketMagicHeader != other.serverResponsePacketMagicHeader
         || serverUnderloadPacketMagicHeader != other.serverUnderloadPacketMagicHeader
-        || serverTransportPacketMagicHeader != other.serverTransportPacketMagicHeader) {
+        || serverTransportPacketMagicHeader != other.serverTransportPacketMagicHeader
+        || serverSpecialJunk1 != other.serverSpecialJunk1 || serverSpecialJunk2 != other.serverSpecialJunk2
+        || serverSpecialJunk3 != other.serverSpecialJunk3 || serverSpecialJunk4 != other.serverSpecialJunk4
+        || serverSpecialJunk5 != other.serverSpecialJunk5) {
         return false;
     }
 
-    if (m_containerType == DockerContainer::Awg2) {
+    if (m_isProtocolV2) {
         if (serverCookieReplyPacketJunkSize != other.serverCookieReplyPacketJunkSize
             || serverTransportPacketJunkSize != other.serverTransportPacketJunkSize) {
             return false;

@@ -448,6 +448,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 
     QString protocolName = "wireguard";
+    QString protocolVersion;
 
     const QStringList requiredJunkFields = { config_key::junkPacketCount,           config_key::junkPacketMinSize,
                                              config_key::junkPacketMaxSize,         config_key::initPacketJunkSize,
@@ -483,19 +484,18 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
                               !configMap.value(config_key::specialJunk5).isEmpty();
 
         if (hasCookieReplyPacketJunkSize && hasTransportPacketJunkSize) {
-            protocolName = "awg2";
+            protocolVersion = "2";
         } else if (hasSpecialJunk && !hasCookieReplyPacketJunkSize && !hasTransportPacketJunkSize) {
-            protocolName = "awg1.5";
-        } else {
-            protocolName = "awg";
+            protocolVersion = "1.5";
         }
+        protocolName = "awg";
         m_configType = ConfigTypes::Awg;
     }
 
     if (!configMap.value("MTU").isEmpty()) {
         lastConfig[config_key::mtu] = configMap.value("MTU");
     } else {
-        lastConfig[config_key::mtu] = (protocolName == "awg" || protocolName == "awg2" || protocolName == "awg1.5") 
+        lastConfig[config_key::mtu] = (protocolName == "awg") 
                                        ? protocols::awg::defaultMtu 
                                        : protocols::wireguard::defaultMtu;
     }
@@ -505,6 +505,9 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     wireguardConfig[config_key::isThirdPartyConfig] = true;
     wireguardConfig[config_key::port] = port;
     wireguardConfig[config_key::transport_proto] = "udp";
+    if (protocolName == "awg" && !protocolVersion.isEmpty()) {
+        wireguardConfig[config_key::protocolVersion] = protocolVersion;
+    }
 
     QJsonObject containers;
     containers.insert(config_key::container, QJsonValue("amnezia-" + protocolName));

@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QEventLoop>
 #include <QJsonObject>
+#include <QPair>
 #include <QRandomGenerator>
 #include <QStandardPaths>
 #include <QtConcurrent>
@@ -71,8 +72,11 @@ void InstallController::install(DockerContainer container, int port, TransportPr
         if (protocol == mainProto) {
             containerConfig.insert(config_key::port, QString::number(port));
             containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
+            containerConfig.insert(config_key::subnet_address, protocols::wireguard::defaultSubnetAddress);
 
             if (container == DockerContainer::Awg2) {
+                containerConfig[config_key::protocolVersion] = "2";
+
                 QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(4, 7));
                 QString junkPacketMinSize = QString::number(10);
                 QString junkPacketMaxSize = QString::number(50);
@@ -91,8 +95,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 }
                 usedValues.insert(s2);
 
-                while (usedValues.contains(s3)
-                       || s1 + AwgConstant::messageInitiationSize == s3 + AwgConstant::messageCookieReplySize
+                while (usedValues.contains(s3) || s1 + AwgConstant::messageInitiationSize == s3 + AwgConstant::messageCookieReplySize
                        || s2 + AwgConstant::messageResponseSize == s3 + AwgConstant::messageCookieReplySize) {
                     s3 = QRandomGenerator::global()->bounded(0, 64);
                 }
@@ -107,18 +110,21 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 QString cookieReplyPacketJunkSize = QString::number(s3);
                 QString transportPacketJunkSize = QString::number(s4);
 
-                QSet<QString> headersValue;
+                QVector<QPair<QString, QString>> headersValue;
+                int min = 5;
+                auto max = (std::numeric_limits<qint32>::max)();
                 while (headersValue.size() != 4) {
-                    auto max = (std::numeric_limits<qint32>::max)();
-                    headersValue.insert(QString::number(QRandomGenerator::global()->bounded(5, max)));
+                    auto first = QRandomGenerator::global()->bounded(min, max);
+                    auto second = QRandomGenerator::global()->bounded(first, max);
+                    min = second;
+
+                    headersValue.push_back(QPair<QString, QString>(QString::number(first), QString::number(second)));
                 }
 
-                auto headersValueList = headersValue.values();
-
-                QString initPacketMagicHeader = headersValueList.at(0);
-                QString responsePacketMagicHeader = headersValueList.at(1);
-                QString underloadPacketMagicHeader = headersValueList.at(2);
-                QString transportPacketMagicHeader = headersValueList.at(3);
+                QString initPacketMagicHeader = headersValue.at(0).first + "-" + headersValue.at(0).second;
+                QString responsePacketMagicHeader = headersValue.at(1).first + "-" + headersValue.at(1).second;
+                QString underloadPacketMagicHeader = headersValue.at(2).first + "-" + headersValue.at(2).second;
+                QString transportPacketMagicHeader = headersValue.at(3).first + "-" + headersValue.at(3).second;
 
                 containerConfig[config_key::junkPacketCount] = junkPacketCount;
                 containerConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
@@ -133,11 +139,11 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 containerConfig[config_key::cookieReplyPacketJunkSize] = cookieReplyPacketJunkSize;
                 containerConfig[config_key::transportPacketJunkSize] = transportPacketJunkSize;
 
-                containerConfig[config_key::specialJunk1] = "";
-                containerConfig[config_key::specialJunk2] = "";
-                containerConfig[config_key::specialJunk3] = "";
-                containerConfig[config_key::specialJunk4] = "";
-                containerConfig[config_key::specialJunk5] = "";
+                containerConfig[config_key::specialJunk1] = protocols::awg::defaultSpecialJunk1;
+                containerConfig[config_key::specialJunk2] = protocols::awg::defaultSpecialJunk2;
+                containerConfig[config_key::specialJunk3] = protocols::awg::defaultSpecialJunk3;
+                containerConfig[config_key::specialJunk4] = protocols::awg::defaultSpecialJunk4;
+                containerConfig[config_key::specialJunk5] = protocols::awg::defaultSpecialJunk5;
 
             } else if (container == DockerContainer::Sftp) {
                 containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
@@ -395,10 +401,10 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QJsonObject config;
             Proto mainProto = ContainerProps::defaultProtocol(container);
             const auto &protocols = ContainerProps::protocolsForContainer(container);
-            
+
             for (const auto &protocol : protocols) {
                 QJsonObject containerConfig;
-                
+
                 // for Multiprotocols (OpenVPN over SS, OpenVPN over Cloak)
                 bool shouldProcessProtocol = false;
                 if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
@@ -406,7 +412,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                 } else {
                     shouldProcessProtocol = (protocol == mainProto);
                 }
-                
+
                 if (shouldProcessProtocol) {
                     containerConfig.insert(config_key::port, port);
                     containerConfig.insert(config_key::transport_proto, transportProto);
@@ -416,8 +422,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         if (container == DockerContainer::Awg) {
                             configPath = amnezia::protocols::awg::serverLegacyConfigPath;
                         }
-                        QString serverConfig = serverController->getTextFileFromContainer(container, credentials,
-                                                          configPath, errorCode);
+                        QString serverConfig = serverController->getTextFileFromContainer(container, credentials, configPath, errorCode);
 
                         QMap<QString, QString> serverConfigMap;
                         auto serverConfigLines = serverConfig.split("\n");
@@ -447,10 +452,10 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                                 serverConfigMap.value(config_key::transportPacketMagicHeader);
 
                         if (container == DockerContainer::Awg2) {
+                            containerConfig[config_key::protocolVersion] = "2";
                             containerConfig[config_key::cookieReplyPacketJunkSize] =
                                     serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
-                            containerConfig[config_key::transportPacketJunkSize] =
-                                    serverConfigMap.value(config_key::transportPacketJunkSize);
+                            containerConfig[config_key::transportPacketJunkSize] = serverConfigMap.value(config_key::transportPacketJunkSize);
                         }
 
                     } else if (protocol == Proto::WireGuard) {
@@ -586,7 +591,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         containerConfig[config_key::tls_auth] = tlsAuth;
 
                         bool blockOutsideDns = serverConfig.contains("block-outside-dns");
-                        
+
                         containerConfig[config_key::block_outside_dns] = blockOutsideDns;
 
                         QString cipher = serverConfigMap.value("cipher");
@@ -603,10 +608,10 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                                                                                          "/opt/amnezia/cloak/ck-config.json", errorCode);
 
                         QJsonDocument doc = QJsonDocument::fromJson(cloakConfig.toUtf8());
-                        
+
                         if (!doc.isNull() && doc.isObject()) {
                             QJsonObject cloakConfigObj = doc.object();
-                            
+
                             QString site = cloakConfigObj.value("RedirAddr").toString();
                             if (!site.isEmpty()) {
                                 containerConfig[config_key::site] = site;
@@ -614,13 +619,13 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         } else {
                             qDebug() << "Failed to parse main loop Cloak JSON config";
                         }
-                        
+
                     } else if (protocol == Proto::ShadowSocks) {
-                        QString shadowsocksConfig = serverController->getTextFileFromContainer(container, credentials,
-                                                                                               "/opt/amnezia/shadowsocks/ss-config.json", errorCode);
+                        QString shadowsocksConfig = serverController->getTextFileFromContainer(
+                                container, credentials, "/opt/amnezia/shadowsocks/ss-config.json", errorCode);
 
                         QJsonDocument doc = QJsonDocument::fromJson(shadowsocksConfig.toUtf8());
-                        
+
                         if (!doc.isNull() && doc.isObject()) {
                             QJsonObject ssConfigObj = doc.object();
                             QString cipher = ssConfigObj.value("method").toString();
@@ -1059,8 +1064,8 @@ bool InstallController::isUpdateDockerContainerRequired(const DockerContainer co
     const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
 
     if (container == DockerContainer::Awg2) {
-        const AwgConfig oldConfig(oldProtoConfig, container);
-        const AwgConfig newConfig(newProtoConfig, container);
+        const AwgConfig oldConfig(oldProtoConfig);
+        const AwgConfig newConfig(newProtoConfig);
 
         if (oldConfig.hasEqualServerSettings(newConfig)) {
             return false;

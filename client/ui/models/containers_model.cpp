@@ -2,8 +2,7 @@
 
 #include <QJsonArray>
 
-ContainersModel::ContainersModel(QObject *parent)
-    : QAbstractListModel(parent)
+ContainersModel::ContainersModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
 
@@ -20,10 +19,23 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     }
 
     DockerContainer container = ContainerProps::allContainers().at(index.row());
+    QString protocolKey = ContainerProps::containerTypeToProtocolString(container);
+    auto isThirdPartyConfig = m_containers.value(container).value(protocolKey).toObject().value(config_key::isThirdPartyConfig).toBool();
 
     switch (role) {
-    case NameRole: return ContainerProps::containerHumanNames().value(container);
-    case DescriptionRole: return ContainerProps::containerDescriptions().value(container);
+    case NameRole: {
+        if (container == DockerContainer::Awg && !isThirdPartyConfig) {
+            return "AmneziaWG Legacy";
+        }
+        return ContainerProps::containerHumanNames().value(container);
+    }
+    case DescriptionRole: {
+        if (container == DockerContainer::Awg && !isThirdPartyConfig) {
+            return QObject::tr("AmneziaWG Legacy is a outdated version of AmneziaWG protocol. To upgrade, install AmneziaWG and recreate users.");
+        }
+
+        return ContainerProps::containerDescriptions().value(container);
+    }
     case DetailedDescriptionRole: return ContainerProps::containerDetailedDescriptions().value(container);
     case ConfigRole: {
         if (container == DockerContainer::None) {
@@ -31,10 +43,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         }
         return m_containers.value(container);
     }
-    case IsThirdPartyConfigRole: {
-        QString protocolKey = ContainerProps::containerTypeToProtocolString(container);
-        return m_containers.value(container).value(protocolKey).toObject().value(config_key::isThirdPartyConfig).toBool();
-    }
+    case IsThirdPartyConfigRole: return isThirdPartyConfig;
     case ServiceTypeRole: return ContainerProps::containerService(container);
     case DockerContainerRole: return container;
     case IsEasySetupContainerRole: return ContainerProps::isEasySetupContainer(container);
@@ -63,8 +72,7 @@ void ContainersModel::updateModel(const QJsonArray &containers)
     beginResetModel();
     m_containers.clear();
     for (const QJsonValue &val : containers) {
-        m_containers.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()),
-                             val.toObject());
+        m_containers.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
     }
     endResetModel();
 }
@@ -121,7 +129,7 @@ bool ContainersModel::hasInstalledProtocols()
 
 bool ContainersModel::isInstallationAllowed(DockerContainer container)
 {
-    return container != DockerContainer::Awg && container != DockerContainer::Awg1_5;
+    return container != DockerContainer::Awg;
 }
 
 QHash<int, QByteArray> ContainersModel::roleNames() const
