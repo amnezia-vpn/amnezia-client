@@ -300,7 +300,7 @@ const QString Serialize(const VlessServerObject &server, const QString &alias)
         }
         
         if (!server.spiderX.isEmpty()) {
-            query.addQueryItem("spiderX", server.spiderX);
+            query.addQueryItem("spx", server.spiderX);
         }
     }
     
