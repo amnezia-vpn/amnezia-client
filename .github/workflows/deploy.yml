@@ -149,10 +149,10 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
-    runs-on: macos-latest
+    runs-on: macos-13
 
     env:
-      QT_VERSION: 6.9.2
+      QT_VERSION: 6.6.2
       CC: cc
       CXX: c++
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
@@ -167,7 +167,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '26.1'
+        xcode-version: '15.2'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -406,7 +406,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.9.2
+      QT_VERSION: 6.8.3
 
       MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
@@ -426,31 +426,21 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '26.1'
+        xcode-version: '16.2.0'
 
-    - name: 'Install desktop Qt'
+    - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
         arch: 'clang_64'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
+        setup-python: 'true'
         set-env: 'true'
-        extra: '--base ${{ env.QT_MIRROR }}'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install go'
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
-        cache: false
-
-    - name: 'Setup gomobile'
-      run: |
-          export PATH=$PATH:~/go/bin
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          gomobile init
 
     - name: 'Get sources'
       uses: actions/checkout@v4
