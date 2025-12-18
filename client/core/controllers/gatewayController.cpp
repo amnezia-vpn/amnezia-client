@@ -74,7 +74,11 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
         QString host = QUrl(encRequestData.request.url()).host();
         QString ip = NetworkUtilities::getIPAddress(host);
         if (!ip.isEmpty()) {
-            IpcClient::Interface()->addKillSwitchAllowedRange(QStringList { ip });
+            IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+                QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList { ip });
+                if (!reply.waitForFinished(1000) || !reply.returnValue())
+                    qWarning() << "GatewayController::prepareRequest(): Failed to execute remote addKillSwitchAllowedRange call";
+            });
         }
     }
 #endif

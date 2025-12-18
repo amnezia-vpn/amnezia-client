@@ -10,16 +10,16 @@ namespace
 
 IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
-    m_localSocket.setServerName(amnezia::getIpcServiceUrl());
-
     connect(&m_localSocket, &QLocalSocket::connected, this, [this]() {
-        m_ClientNode.addClientSideConnection(&m_localSocket);
-        m_ipcClient.reset(m_ClientNode.acquire<IpcInterfaceReplica>());
-        m_Tun2SocksClient.reset(m_ClientNode.acquire<IpcProcessTun2SocksReplica>());
+        m_ClientNode.reset(new QRemoteObjectNode(this));
+        m_ClientNode->addClientSideConnection(&m_localSocket);
+        m_ipcClient.reset(m_ClientNode->acquire<IpcInterfaceReplica>());
+        m_Tun2SocksClient.reset(m_ClientNode->acquire<IpcProcessTun2SocksReplica>());
         m_isSocketConnected = true;
     });
 
     connect(&m_localSocket, &QLocalSocket::disconnected, this, [this]() {
+        m_ClientNode.clear();
         m_ipcClient.clear();
         m_Tun2SocksClient.clear();
         m_isSocketConnected = false;
@@ -71,7 +71,7 @@ QSharedPointer<IpcProcessTun2SocksReplica> IpcClient::InterfaceTun2Socks()
 
 bool IpcClient::establishConnection()
 {
-    m_localSocket.connectToServer();
+    m_localSocket.connectToServer(amnezia::getIpcServiceUrl());
     return m_localSocket.waitForConnected();
 }
 

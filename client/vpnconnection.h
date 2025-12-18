@@ -105,7 +105,6 @@ private:
    void appendSplitTunnelingConfig();
    void appendKillSwitchConfig();
    bool startNetworkCheckIfReady();
-   bool InterfaceReady();
 };
 
 #endif // VPNCONNECTION_H

@@ -91,12 +91,14 @@ void Logger::deInit()
 bool Logger::setServiceLogsEnabled(bool enabled)
 {
 #ifdef AMNEZIA_DESKTOP
-    if (auto iface = IpcClient::Interface(); iface) {
+    return IpcClient::withInterface([enabled](QSharedPointer<IpcInterfaceReplica> iface) {
         iface->setLogsEnabled(enabled);
-    } else {
-        qWarning() << "Error occurred setting up service logs";
+        qDebug() << "Logger::setServiceLogsEnabled(): Logs transitioned to be " << (enabled ? "enabled" : "disabled");
+        return true;
+    },[](){
+        qWarning() << "Logger::setServiceLogsEnabled(): Service is not running";
         return false;
-    }
+    });
 #endif
 
     return true;
@@ -199,9 +201,12 @@ void Logger::clearLogs(bool isServiceLogger)
 void Logger::clearServiceLogs()
 {
 #ifdef AMNEZIA_DESKTOP
-    if (auto iface = IpcClient::Interface(); iface) {
+    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
         iface->clearLogs();
-    }
+        qDebug() << "Logger::clearServiceLogs(): Logs cleared";
+    }, []() {
+        qWarning() << "Logger::clearServiceLogs(): Service is not running";
+    });
 #endif
 }
 
