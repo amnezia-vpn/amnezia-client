@@ -41,6 +41,9 @@ void LinuxNetworkWatcher::initialize() {
   connect(m_worker, &LinuxNetworkWatcherWorker::unsecuredNetwork, this,
           &LinuxNetworkWatcher::unsecuredNetwork);
 
+  connect(m_worker, &LinuxNetworkWatcherWorker::sleepMode, this,
+          &NetworkWatcherImpl::sleepMode);
+
   // Let's wait a few seconds to allow the UI to be fully loaded and shown.
   // This is not strictly needed, but it's better for user experience because
   // it makes the UI faster to appear, plus it gives a bit of delay between the

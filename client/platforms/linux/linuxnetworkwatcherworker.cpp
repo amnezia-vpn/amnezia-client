@@ -33,7 +33,21 @@
 #define NM_802_11_AP_SEC_WEAK_CRYPTO \
   (NM_802_11_AP_SEC_PAIR_WEP40 | NM_802_11_AP_SEC_PAIR_WEP104)
 
+
+enum NMState {
+    NM_STATE_UNKNOWN = 0,
+    NM_STATE_ASLEEP = 10,
+    NM_STATE_DISCONNECTED = 20,
+    NM_STATE_DISCONNECTING = 30,
+    NM_STATE_CONNECTING = 40,
+    NM_STATE_CONNECTED_LOCAL = 50,
+    NM_STATE_CONNECTED_SITE = 60,
+    NM_STATE_CONNECTED_GLOBAL = 70
+};
+
+
 constexpr const char* DBUS_NETWORKMANAGER = "org.freedesktop.NetworkManager";
+constexpr const char* DBUS_NETWORKMANAGER_PATH = "/org/freedesktop/NetworkManager";
 
 namespace {
 Logger logger("LinuxNetworkWatcherWorker");
@@ -73,7 +87,7 @@ void LinuxNetworkWatcherWorker::initialize() {
   // documentation:
   // https://developer.gnome.org/NetworkManager/stable/gdbus-org.freedesktop.NetworkManager.html
 
-  QDBusInterface nm(DBUS_NETWORKMANAGER, "/org/freedesktop/NetworkManager",
+  QDBusInterface nm(DBUS_NETWORKMANAGER, DBUS_NETWORKMANAGER_PATH,
                     DBUS_NETWORKMANAGER, QDBusConnection::systemBus());
   if (!nm.isValid()) {
     logger.error()
@@ -107,6 +121,12 @@ void LinuxNetworkWatcherWorker::initialize() {
         "PropertiesChanged", this,
         SLOT(propertyChanged(QString, QVariantMap, QStringList)));
   }
+
+  QDBusConnection::systemBus().connect(DBUS_NETWORKMANAGER,
+                                       DBUS_NETWORKMANAGER_PATH,
+                                       DBUS_NETWORKMANAGER,
+                                       "StateChanged",
+                                       this, SLOT(NMStateChanged(quint32)));
 
   if (m_devicePaths.isEmpty()) {
     logger.warning() << "No wifi devices found";
@@ -173,5 +193,16 @@ void LinuxNetworkWatcherWorker::checkDevices() {
       emit unsecuredNetwork(ssid, bssid);
       break;
     }
+
   }
 }
+
+void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
+{
+  if (state == NM_STATE_ASLEEP) {
+    emit sleepMode();
+  }
+
+  logger.debug() << "NMStateChanged " << state;
+}
+

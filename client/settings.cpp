@@ -541,12 +541,12 @@ QString Settings::getGatewayEndpoint()
 
 bool Settings::isDevGatewayEnv()
 {
-    return m_isDevGatewayEnv;
+    return value("Conf/devGatewayEnv", false).toBool();
 }
 
 void Settings::toggleDevGatewayEnv(bool enabled)
 {
-    m_isDevGatewayEnv = enabled;
+    setValue("Conf/devGatewayEnv", enabled);
 }
 
 bool Settings::isHomeAdLabelVisible()
@@ -577,4 +577,14 @@ QStringList Settings::allowedDnsServers() const
 void Settings::setAllowedDnsServers(const QStringList &servers)
 {
     setValue("Conf/allowedDnsServers", servers);
+}
+
+QStringList Settings::readNewsIds() const
+{
+    return value("News/readIds").toStringList();
+}
+
+void Settings::setReadNewsIds(const QStringList &ids)
+{
+    setValue("News/readIds", ids);
 }

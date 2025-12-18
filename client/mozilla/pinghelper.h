@@ -33,6 +33,8 @@ class PingHelper final : public QObject {
 
  signals:
   void pingSentAndReceived(qint64 msec);
+  void connectionLose();
+
 
  private:
   void nextPing();

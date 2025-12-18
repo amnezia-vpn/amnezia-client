@@ -11,7 +11,7 @@
 #include "ipcserver.h"
 
 #include "../../client/daemon/daemonlocalserver.h"
-
+#include "../../client/mozilla/networkwatcher.h"
 
 #ifdef Q_OS_WIN
 #include "windows/daemon/windowsdaemon.h"
@@ -41,6 +41,8 @@ public:
     IpcProcessTun2Socks m_tun2socks;
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;
+
+    NetworkWatcher m_networkWatcher;
 #ifdef Q_OS_LINUX
     DaemonLocalServer server{qApp};
     LinuxDaemon daemon;

@@ -1,6 +1,7 @@
 #include "protocols_defs.h"
 
 #include <QRandomGenerator>
+#include <QJsonObject>
 
 using namespace amnezia;
 
@@ -216,4 +217,18 @@ QString ProtocolProps::key_proto_config_data(Proto p)
 QString ProtocolProps::key_proto_config_path(Proto p)
 {
     return protoToString(p) + "_config_path";
+}
+
+QString ProtocolProps::getProtocolVersion(const QJsonObject &protocolConfig)
+{
+    return protocolConfig.value(config_key::protocolVersion).toString();
+}
+
+QString ProtocolProps::getProtocolVersionString(const QJsonObject &protocolConfig)
+{
+    auto version = getProtocolVersion(protocolConfig);
+
+    if (version == protocols::awg::awgV2) return QObject::tr(" (version 2)");
+    if (version == protocols::awg::awgV1_5) return QObject::tr(" (version 1.5)");
+    return "";
 }

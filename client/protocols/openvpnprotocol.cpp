@@ -56,7 +56,8 @@ void OpenVpnProtocol::stop()
     }
 
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    IpcClient::Interface()->disableKillSwitch();
+    QRemoteObjectPendingReply<bool> disableKillSwitchResp = IpcClient::Interface()->disableKillSwitch();
+    disableKillSwitchResp.waitForFinished(1000);
 #endif
 
     setConnectionState(Vpn::ConnectionState::Disconnected);

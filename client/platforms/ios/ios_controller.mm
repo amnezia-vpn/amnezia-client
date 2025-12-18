@@ -30,12 +30,46 @@ const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
 
 #if !MACOS_NE
 static UIViewController* getViewController() {
-    NSArray *windows = [[UIApplication sharedApplication]windows];
-    for (UIWindow *window in windows) {
-        if (window.isKeyWindow) {
+    UIApplication *application = [UIApplication sharedApplication];
+
+    if (@available(iOS 13.0, *)) {
+        for (UIScene *scene in application.connectedScenes) {
+            if (scene.activationState != UISceneActivationStateForegroundActive) {
+                continue;
+            }
+
+            if (![scene isKindOfClass:[UIWindowScene class]]) {
+                continue;
+            }
+
+            UIWindowScene *windowScene = (UIWindowScene *)scene;
+
+            for (UIWindow *window in windowScene.windows) {
+                if (window.isKeyWindow && window.rootViewController) {
+                    return window.rootViewController;
+                }
+            }
+
+            for (UIWindow *window in windowScene.windows) {
+                if (!window.isHidden && window.rootViewController) {
+                    return window.rootViewController;
+                }
+            }
+        }
+    }
+
+    for (UIWindow *window in application.windows) {
+        if (window.isKeyWindow && window.rootViewController) {
             return window.rootViewController;
         }
     }
+
+    for (UIWindow *window in application.windows) {
+        if (window.rootViewController) {
+            return window.rootViewController;
+        }
+    }
+
     return nil;
 }
 #endif
@@ -640,10 +674,6 @@ bool IosController::setupAwg()
     wgConfig.insert(config_key::specialJunk3, config[config_key::specialJunk3]);
     wgConfig.insert(config_key::specialJunk4, config[config_key::specialJunk4]);
     wgConfig.insert(config_key::specialJunk5, config[config_key::specialJunk5]);
-    wgConfig.insert(config_key::controlledJunk1, config[config_key::controlledJunk1]);
-    wgConfig.insert(config_key::controlledJunk2, config[config_key::controlledJunk2]);
-    wgConfig.insert(config_key::controlledJunk3, config[config_key::controlledJunk3]);
-    wgConfig.insert(config_key::specialHandshakeTimeout, config[config_key::specialHandshakeTimeout]);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
