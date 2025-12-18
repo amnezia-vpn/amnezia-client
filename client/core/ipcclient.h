@@ -27,7 +27,6 @@ signals:
 private:
     bool establishConnection();
 
-    QMutex m_mutex;
     QLocalSocket m_localSocket;
     QRemoteObjectNode m_ClientNode;
     QSharedPointer<IpcInterfaceReplica> m_ipcClient;
@@ -44,7 +43,6 @@ private:
         QSharedPointer<QLocalSocket> localSocket;
     };
 
-    QMap<int, QSharedPointer<ProcessDescriptor>> m_processNodes;
     bool m_isSocketConnected {false};
 };
 

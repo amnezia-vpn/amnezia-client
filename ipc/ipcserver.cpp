@@ -147,35 +147,64 @@ void IpcServer::cleanUp()
 
 void IpcServer::clearLogs()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::clearLogs";
+#endif
+
     Logger::clearLogs(true);
 }
 
 bool IpcServer::createTun(const QString &dev, const QString &subnet)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::createTun";
+#endif
+
     return Router::createTun(dev, subnet);
 }
 
 bool IpcServer::deleteTun(const QString &dev)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::deleteTun";
+#endif
+
     return Router::deleteTun(dev);
 }
 
 bool IpcServer::updateResolvers(const QString &ifname, const QList<QHostAddress> &resolvers)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::updateResolvers";
+#endif
+
     return Router::updateResolvers(ifname, resolvers);
 }
 
-bool IpcServer::restoreResolvers() {
+bool IpcServer::restoreResolvers()
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::restoreResolvers";
+#endif
+
     return Router::restoreResolvers();
 }
 
 bool IpcServer::StartRoutingIpv6()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::StartRoutingIpv6";
+#endif
+
     return Router::StartRoutingIpv6();
 }
 
 bool IpcServer::StopRoutingIpv6()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::StopRoutingIpv6";
+#endif
+
     return Router::StopRoutingIpv6();
 }
 
@@ -194,59 +223,101 @@ void IpcServer::setLogsEnabled(bool enabled)
 
 bool IpcServer::startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address)
 {
-    qDebug() << "startNetworkCheck";
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::startNetworkCheck";
+#endif
+
     m_pingHelper.start(serverIpv4Gateway, deviceIpv4Address);
     return true;
 }
 
 bool IpcServer::stopNetworkCheck()
 {
-    qDebug() << "stopNetworkCheck";
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::stopNetworkCheck";
+#endif
+
     m_pingHelper.stop();
     return true;
 }
 
 bool IpcServer::resetKillSwitchAllowedRange(QStringList ranges)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::resetKillSwitchAllowedRange";
+#endif
+
     return KillSwitch::instance()->resetAllowedRange(ranges);
 }
 
 bool IpcServer::addKillSwitchAllowedRange(QStringList ranges)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::addKillSwitchAllowedRange";
+#endif
+
     return KillSwitch::instance()->addAllowedRange(ranges);
 }
 
 bool IpcServer::disableAllTraffic()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::disableAllTraffic";
+#endif
+
     return KillSwitch::instance()->disableAllTraffic();
 }
 
 bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::enableKillSwitch";
+#endif
+
     return KillSwitch::instance()->enableKillSwitch(configStr, vpnAdapterIndex);
 }
 
 bool IpcServer::disableKillSwitch()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::disableKillSwitch";
+#endif
+
     return KillSwitch::instance()->disableKillSwitch();
 }
 
 bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::enablePeerTraffic";
+#endif
+
     return KillSwitch::instance()->enablePeerTraffic(configStr);
 }
 
 bool IpcServer::refreshKillSwitch(bool enabled)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::refreshKillSwitch";
+#endif
+
     return KillSwitch::instance()->refresh(enabled);
 }
 
 void IpcServer::xrayStart(const QString& cfg)
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::xrayStart";
+#endif
+
     return Xray::getInstance().startXray(cfg);
 }
 
 void IpcServer::xrayStop()
 {
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::xrayStop";
+#endif
+
     return Xray::getInstance().stopXray();
 }
