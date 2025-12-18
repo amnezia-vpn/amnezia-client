@@ -13,6 +13,8 @@ DrawerType2 {
     id: root
     objectName: "passwordDrawer"
 
+    property bool fromOutside: true
+    property string fileName
     property var securedFunc
 
     expandedStateContent: ColumnLayout {
@@ -33,13 +35,21 @@ DrawerType2 {
         TextFieldWithHeaderType {
             id: passwordField
 
+            Connections {
+                target: root
+
+                function onCloseTriggered() {
+                    passwordField.textField.text = ""
+                }
+            }
+
             property bool hideContent: true
 
             Layout.fillWidth: true
 
             headerText: qsTr("Password")
             textField.echoMode: hideContent ? TextInput.Password : TextInput.Normal
-            textField.text: textField.text
+            textField.text: ""
 
             rightButtonClickedOnEnter: true
 
@@ -62,7 +72,7 @@ DrawerType2 {
             Layout.topMargin: 8
             Layout.bottomMargin: 16
 
-            text: SettingsController.getHint()
+            text: fromOutside ? SystemController.readHint(fileName) : SettingsController.getHint()
         }
 
         BasicButtonType {
@@ -73,9 +83,16 @@ DrawerType2 {
             text: qsTr("Done")
 
             clickedFunc: function() {
-                if (passwordField.textField.text !== SettingsController.getPassword()) {
-                    passwordField.errorText = qsTr("Incorrect password")
-                    return
+                if (fromOutside) {
+                    if (!SystemController.decryptFile(fileName, passwordField.textField.text)) {
+                        passwordField.errorText = qsTr("Incorrect password")
+                        return
+                    }
+                } else {
+                    if (passwordField.textField.text !== SettingsController.getPassword()) {
+                        passwordField.errorText = qsTr("Incorrect password")
+                        return
+                    }
                 }
 
                 if (root.securedFunc && typeof root.securedFunc === "function") {
