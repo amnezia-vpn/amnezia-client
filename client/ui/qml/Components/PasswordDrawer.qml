@@ -73,7 +73,7 @@ DrawerType2 {
 
             headerText: qsTr("Password")
             textField.echoMode: hideContent ? TextInput.Password : TextInput.Normal
-            textField.text: textField.text
+            textField.text: ""
 
             rightButtonClickedOnEnter: true
 

@@ -108,6 +108,8 @@ void SettingsUiController::exportLogsFile(const QString &fileName)
     if (!SystemController::saveFile(fileName, Logger::getLogFile())) {
         qInfo() << "SettingsUiController::exportLogsFile: save or share was cancelled or failed";
     }
+    if (isFileEncryptionEnabled())
+        SystemController::encryptFile(fileName, getPassword(), getHint());
 #endif
 }
 
@@ -119,6 +121,8 @@ void SettingsUiController::exportServiceLogsFile(const QString &fileName)
     if (!SystemController::saveFile(fileName, Logger::getServiceLogFile())) {
         qInfo() << "SettingsUiController::exportServiceLogsFile: save or share was cancelled or failed";
     }
+    if (isFileEncryptionEnabled())
+        SystemController::encryptFile(fileName, getPassword(), getHint());
 #endif
 }
 
@@ -137,6 +141,8 @@ void SettingsUiController::backupAppConfig(const QString &fileName)
     if (!SystemController::saveFile(fileName, data)) {
         qInfo() << "SettingsUiController::backupAppConfig: save or share was cancelled or failed";
     }
+    if (isFileEncryptionEnabled())
+        SystemController::encryptFile(fileName, getPassword(), getHint());
 }
 
 void SettingsUiController::restoreAppConfig(const QString &fileName)
