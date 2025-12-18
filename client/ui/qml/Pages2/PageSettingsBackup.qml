@@ -144,8 +144,22 @@ PageType {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                                 qsTr("Backup files (*.backup)"))
                     if (filePath !== "") {
-                        restoreBackup(filePath)
+                        passwordDrawer.fileName = filePath
+                        SystemController.isFileEncrypted(filePath) ? passwordDrawer.openTriggered() : passwordDrawer.securedFunc()
                     }
+                }
+            }
+
+            PasswordDrawer {
+                id: passwordDrawer
+
+                parent: root
+
+                anchors.fill: parent
+                expandedHeight: root.height * 0.45
+
+                securedFunc: function() {
+                    restoreBackup(fileName)
                 }
             }
         }

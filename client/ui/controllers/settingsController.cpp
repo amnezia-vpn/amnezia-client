@@ -123,6 +123,8 @@ void SettingsController::exportLogsFile(const QString &fileName)
     AndroidController::instance()->exportLogsFile(fileName);
 #else
     SystemController::saveFile(fileName, Logger::getLogFile());
+    if (m_settings->isFileEncryption())
+        SystemController::encryptFile(fileName, m_settings->getPassword(), m_settings->getHint());
 #endif
 }
 
@@ -132,6 +134,8 @@ void SettingsController::exportServiceLogsFile(const QString &fileName)
     AndroidController::instance()->exportLogsFile(fileName);
 #else
     SystemController::saveFile(fileName, Logger::getServiceLogFile());
+    if (m_settings->isFileEncryption())
+        SystemController::encryptFile(fileName, m_settings->getPassword(), m_settings->getHint());
 #endif
 }
 
@@ -162,6 +166,8 @@ void SettingsController::backupAppConfig(const QString &fileName)
     config["Conf/useAmneziaDns"] = isAmneziaDnsEnabled();
 
     SystemController::saveFile(fileName, QJsonDocument(config).toJson());
+    if (m_settings->isFileEncryption())
+        SystemController::encryptFile(fileName, m_settings->getPassword(), m_settings->getHint());
 }
 
 void SettingsController::restoreAppConfig(const QString &fileName)
