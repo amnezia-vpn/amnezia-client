@@ -162,11 +162,11 @@ PageType {
 
         property string title: root.isChangingPassword ? qsTr("New password") : qsTr("Set encryption password")
         readonly property string placeholderContent: ""
-        property string imageSource: "qrc:/images/controls/eye-new.svg"
+        property string imageSource: "qrc:/images/controls/eye.svg"
         property bool hideContent: true
         readonly property var clickedHandler: function() {
             hideContent = !hideContent
-            imageSource = hideContent ? "qrc:/images/controls/eye-new.svg" : "qrc:/images/controls/eye-off-new.svg"
+            imageSource = hideContent ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
         }
     }
 

@@ -119,6 +119,8 @@ PageType {
             PasswordDrawer {
                 id: passwordDrawer
 
+                fromOutside: false
+
                 parent: root
 
                 anchors.fill: parent
