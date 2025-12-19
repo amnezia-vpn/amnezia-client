@@ -71,6 +71,15 @@ PageType {
                 headerText: qsTr("Back up your configuration")
                 descriptionText: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
             }
+
+            EncryptionIndicator {
+                id: indicator
+
+                visible: SettingsController.isFileEncryptionEnabled()
+
+                textString: qsTr("Encryption enabled. Learn more")
+                iconPath: "qrc:/images/controls/lock-locked.svg"
+            }
         }
 
         model: 1 // fake model to force the ListView to be created without a model
