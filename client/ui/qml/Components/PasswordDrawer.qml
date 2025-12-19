@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import PageEnum 1.0
 import Style 1.0
 
 import "../Controls2"
@@ -17,6 +18,9 @@ DrawerType2 {
     property string fileName
     property var securedFunc
 
+    signal restoreSecuredBackup
+    signal importSecuredFile
+
     expandedStateContent: ColumnLayout {
         anchors.top: parent.top
         anchors.left: parent.left
@@ -24,6 +28,27 @@ DrawerType2 {
         anchors.topMargin: 16
         anchors.leftMargin: 16
         anchors.rightMargin: 16
+
+        Connections {
+            target: root
+
+            function onRestoreSecuredBackup() {
+                root.securedFunc = function() {
+                    SettingsController.restoreAppConfigFromData(SystemController.getDecryptedData(fileName, passwordField.textField.text))
+                }
+                passwordDrawer.openTriggered()
+            }
+
+            function onImportSecuredFile() {
+                // TODO: file name not showing on import
+                root.securedFunc = function() {
+                    if (ImportController.extractConfigFromData(SystemController.getDecryptedData(fileName, passwordField.textField.text))) {
+                        PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                    }
+                }
+                passwordDrawer.openTriggered()
+            }
+        }
 
         Header2TextType {
             Layout.fillWidth: true
@@ -49,7 +74,7 @@ DrawerType2 {
 
             headerText: qsTr("Password")
             textField.echoMode: hideContent ? TextInput.Password : TextInput.Normal
-            textField.text: ""
+            textField.text: textField.text
 
             rightButtonClickedOnEnter: true
 
@@ -84,7 +109,7 @@ DrawerType2 {
 
             clickedFunc: function() {
                 if (fromOutside) {
-                    if (!SystemController.decryptFile(fileName, passwordField.textField.text)) {
+                    if (!SystemController.isPasswordValid(fileName, passwordField.textField.text)) {
                         passwordField.errorText = qsTr("Incorrect password")
                         return
                     }
