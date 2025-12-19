@@ -11,7 +11,7 @@ namespace
 IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
     connect(&m_localSocket, &QLocalSocket::connected, this, [this]() {
-        m_ClientNode.reset(new QRemoteObjectNode(this));
+        m_ClientNode.reset(new QRemoteObjectNode);
         m_ClientNode->addClientSideConnection(&m_localSocket);
         m_ipcClient.reset(m_ClientNode->acquire<IpcInterfaceReplica>());
         m_Tun2SocksClient.reset(m_ClientNode->acquire<IpcProcessTun2SocksReplica>());
