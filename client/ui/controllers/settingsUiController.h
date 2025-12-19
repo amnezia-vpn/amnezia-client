@@ -164,6 +164,9 @@ signals:
     void changingPassword();
 
 private:
+    QString tempPassword;
+    QString tempHint;
+
     SettingsController* m_settingsController;
     ServersController* m_serversController;
 };
