@@ -3,11 +3,6 @@
 #include <QRemoteObjectNode>
 #include <QtNetwork/qlocalsocket.h>
 
-namespace
-{
-    thread_local IpcClient ipcClient;
-}
-
 IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
     m_node.connectToNode(QUrl("local:" + amnezia::getIpcServiceUrl()));
@@ -17,6 +12,7 @@ IpcClient::IpcClient(QObject *parent) : QObject(parent)
 
 IpcClient& IpcClient::Instance()
 {
+    thread_local IpcClient ipcClient;
     return ipcClient;
 }
 
