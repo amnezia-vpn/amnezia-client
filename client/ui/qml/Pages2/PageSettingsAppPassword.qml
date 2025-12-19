@@ -125,8 +125,8 @@ PageType {
                     var _password = listView.itemAtIndex(vars.passwordIndex).children[0].textField.text
                     var _hint = listView.itemAtIndex(vars.hintIndex).children[0].textField.text
 
-                    SettingsController.setPassword(_password)
-                    SettingsController.setHint(_hint)
+                    SettingsController.setTempPassword(_password)
+                    SettingsController.setTempHint(_hint)
 
                     PageController.goToPage(PageEnum.PageSettingsAppPasswordConfirm)
                     if (root.isChangingPassword) {
