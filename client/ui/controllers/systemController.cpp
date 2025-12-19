@@ -407,6 +407,11 @@ QString SystemController::readHint(const QString &filePath)
         return {};
     }
 
+QString SystemController::readHint(const QString &filePath)
+{
+    QByteArray data;
+    readFile(filePath, data);
+
     int pos = magicString.size();
 
     if (data.size() < pos + static_cast<int>(sizeof(quint32))) {
