@@ -15,7 +15,7 @@ class IpcClient : public QObject
 public:
     explicit IpcClient(QObject *parent = nullptr);
 
-    static IpcClient *Instance();
+    static IpcClient& Instance();
 
     static QSharedPointer<IpcInterfaceReplica> Interface();
     static QSharedPointer<IpcProcessTun2SocksReplica> InterfaceTun2Socks();
@@ -24,10 +24,10 @@ public:
     template <typename Func>
     static auto withInterface(Func func)
     {
-        QSharedPointer<IpcInterfaceReplica> iface = Instance()->m_ipcClient;
+        QSharedPointer<IpcInterfaceReplica> iface = Instance().m_interface;
         using ReturnType = decltype(func(std::declval<QSharedPointer<IpcInterfaceReplica>>()));
 
-        if (iface.isNull() || !iface->isReplicaValid()) {
+        if (iface.isNull() || !iface->waitForSource(1000) || !iface->isReplicaValid()) {
             qWarning() << "IpcClient::withInterface(): Service is not running";
 
             if constexpr (std::is_void_v<ReturnType>)
@@ -42,25 +42,19 @@ public:
     template <typename OnSuccess, typename OnFailure>
     static auto withInterface(OnSuccess onSuccess, OnFailure onFailure)
     {
-        QSharedPointer<IpcInterfaceReplica> iface = Instance()->m_ipcClient;
-
-        if (iface.isNull() || !iface->isReplicaValid()) {
+        QSharedPointer<IpcInterfaceReplica> iface = Instance().m_interface;
+        if (iface.isNull() || !iface->waitForSource(1000) || !iface->isReplicaValid()) {
             return onFailure();
         }
 
         return onSuccess(iface);
     }
-
-    bool isSocketConnected() const;
 signals:
 
 private:
-    bool establishConnection();
-
-    QLocalSocket m_localSocket;
-    QSharedPointer<QRemoteObjectNode> m_ClientNode;
-    QSharedPointer<IpcInterfaceReplica> m_ipcClient;
-    QSharedPointer<IpcProcessTun2SocksReplica> m_Tun2SocksClient;
+    QRemoteObjectNode m_node;
+    QSharedPointer<IpcInterfaceReplica> m_interface;
+    QSharedPointer<IpcProcessTun2SocksReplica> m_tun2socks;
 
     struct ProcessDescriptor {
         ProcessDescriptor () {
@@ -72,8 +66,6 @@ private:
         QSharedPointer<QRemoteObjectNode> replicaNode;
         QSharedPointer<QLocalSocket> localSocket;
     };
-
-    bool m_isSocketConnected {false};
 };
 
 #endif // IPCCLIENT_H

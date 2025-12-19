@@ -10,34 +10,19 @@ namespace
 
 IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
-    connect(&m_localSocket, &QLocalSocket::connected, this, [this]() {
-        m_ClientNode.reset(new QRemoteObjectNode);
-        m_ClientNode->addClientSideConnection(&m_localSocket);
-        m_ipcClient.reset(m_ClientNode->acquire<IpcInterfaceReplica>());
-        m_Tun2SocksClient.reset(m_ClientNode->acquire<IpcProcessTun2SocksReplica>());
-        m_isSocketConnected = true;
-    });
-
-    connect(&m_localSocket, &QLocalSocket::disconnected, this, [this]() {
-        m_ClientNode.clear();
-        m_ipcClient.clear();
-        m_Tun2SocksClient.clear();
-        m_isSocketConnected = false;
-    });
+    m_node.connectToNode(QUrl("local:" + amnezia::getIpcServiceUrl()));
+    m_interface.reset(m_node.acquire<IpcInterfaceReplica>());
+    m_tun2socks.reset(m_node.acquire<IpcProcessTun2SocksReplica>());
 }
 
-IpcClient *IpcClient::Instance()
+IpcClient& IpcClient::Instance()
 {
-    if (!ipcClient.m_isSocketConnected) {
-        ipcClient.establishConnection();
-    }
-
-    return &ipcClient;
+    return ipcClient;
 }
 
 QSharedPointer<IpcInterfaceReplica> IpcClient::Interface()
 {
-    QSharedPointer<IpcInterfaceReplica> rep = Instance()->m_ipcClient;
+    QSharedPointer<IpcInterfaceReplica> rep = Instance().m_interface;
     if (rep.isNull()) {
         qCritical() << "IpcClient::Interface(): Failed to acquire replica";
         return nullptr;
@@ -54,7 +39,7 @@ QSharedPointer<IpcInterfaceReplica> IpcClient::Interface()
 
 QSharedPointer<IpcProcessTun2SocksReplica> IpcClient::InterfaceTun2Socks()
 {
-    QSharedPointer<IpcProcessTun2SocksReplica> rep = Instance()->m_Tun2SocksClient;
+    QSharedPointer<IpcProcessTun2SocksReplica> rep = Instance().m_tun2socks;
     if (rep.isNull()) {
         qCritical() << "IpcClient::InterfaceTun2Socks: Replica is undefined";
         return nullptr;
@@ -67,12 +52,6 @@ QSharedPointer<IpcProcessTun2SocksReplica> IpcClient::InterfaceTun2Socks()
         qWarning() << "IpcClient::InterfaceTun2Socks(): Replica is invalid";
     }
     return rep;
-}
-
-bool IpcClient::establishConnection()
-{
-    m_localSocket.connectToServer(amnezia::getIpcServiceUrl());
-    return m_localSocket.waitForConnected();
 }
 
 QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()
