@@ -83,10 +83,8 @@ namespace amnezia
         constexpr char specialJunk3[] = "I3";
         constexpr char specialJunk4[] = "I4";
         constexpr char specialJunk5[] = "I5";
-        constexpr char controlledJunk1[] = "J1";
-        constexpr char controlledJunk2[] = "J2";
-        constexpr char controlledJunk3[] = "J3";
-        constexpr char specialHandshakeTimeout[] = "Itime";
+
+        constexpr char protocolVersion[] = "protocol_version";
 
         constexpr char openvpn[] = "openvpn";
         constexpr char wireguard[] = "wireguard";
@@ -192,7 +190,7 @@ namespace amnezia
 
             constexpr char defaultPort[] = "51820";
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
             constexpr char defaultMtu[] = "1280";
 #else
             constexpr char defaultMtu[] = "1376";
@@ -212,13 +210,14 @@ namespace amnezia
         namespace awg
         {
             constexpr char defaultPort[] = "55424";
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
             constexpr char defaultMtu[] = "1280";
 #else
             constexpr char defaultMtu[] = "1376";
 #endif
 
-            constexpr char serverConfigPath[] = "/opt/amnezia/awg/wg0.conf";
+            constexpr char serverConfigPath[] = "/opt/amnezia/awg/awg0.conf";
+            constexpr char serverLegacyConfigPath[] = "/opt/amnezia/awg/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/awg/wireguard_server_public_key.key";
             constexpr char serverPskKeyPath[] = "/opt/amnezia/awg/wireguard_psk.key";
 
@@ -234,15 +233,14 @@ namespace amnezia
             constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
             constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
             constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
-            constexpr char defaultSpecialJunk1[] = "";
+            constexpr char defaultSpecialJunk1[] = "<b 0x084481800001000300000000077469636b65747306776964676574096b696e6f706f69736b0272750000010001c00c0005000100000039001806776964676574077469636b6574730679616e646578c025c0390005000100000039002b1765787465726e616c2d7469636b6574732d776964676574066166697368610679616e646578036e657400c05d000100010000001c000457fafe25>";
             constexpr char defaultSpecialJunk2[] = "";
             constexpr char defaultSpecialJunk3[] = "";
             constexpr char defaultSpecialJunk4[] = "";
             constexpr char defaultSpecialJunk5[] = "";
-            constexpr char defaultControlledJunk1[] = "";
-            constexpr char defaultControlledJunk2[] = "";
-            constexpr char defaultControlledJunk3[] = "";
-            constexpr char defaultSpecialHandshakeTimeout[] = "";
+
+            constexpr char awgV1_5[] = "1.5";
+            constexpr char awgV2[] = "2";
         }
 
         namespace socks5Proxy
@@ -325,6 +323,9 @@ namespace amnezia
 
         Q_INVOKABLE static QString key_proto_config_data(Proto p);
         Q_INVOKABLE static QString key_proto_config_path(Proto p);
+
+        static QString getProtocolVersion(const QJsonObject &protocolConfig);
+        static QString getProtocolVersionString(const QJsonObject &protocolConfig);
     };
 } // namespace amnezia
 

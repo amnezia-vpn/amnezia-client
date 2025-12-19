@@ -6,8 +6,6 @@ struct WGConfig: Decodable {
   let junkPacketCount, junkPacketMinSize, junkPacketMaxSize: String?
   let initPacketJunkSize, responsePacketJunkSize, cookieReplyPacketJunkSize, transportPacketJunkSize: String?
   let specialJunk1, specialJunk2, specialJunk3, specialJunk4, specialJunk5: String?
-  let controlledJunk1, controlledJunk2, controlledJunk3: String?
-  let specialHandshakeTimeout: String?
   let dns1: String
   let dns2: String
   let mtu: String
@@ -28,8 +26,6 @@ struct WGConfig: Decodable {
     case junkPacketCount = "Jc", junkPacketMinSize = "Jmin", junkPacketMaxSize = "Jmax"
     case initPacketJunkSize = "S1", responsePacketJunkSize = "S2", cookieReplyPacketJunkSize = "S3", transportPacketJunkSize = "S4"
     case specialJunk1 = "I1", specialJunk2 = "I2", specialJunk3 = "I3", specialJunk4 = "I4", specialJunk5 = "I5"
-    case controlledJunk1 = "J1", controlledJunk2 = "J2", controlledJunk3 = "J3"
-    case specialHandshakeTimeout = "Itime"
     case dns1
     case dns2
     case mtu
@@ -84,18 +80,6 @@ struct WGConfig: Decodable {
     }
     if let i5 = specialJunk5, !i5.isEmpty {
       settingsLines.append("I5 = \(i5)")
-    }
-    if let j1 = controlledJunk1, !j1.isEmpty {
-      settingsLines.append("J1 = \(j1)")
-    }
-    if let j2 = controlledJunk2, !j2.isEmpty {
-      settingsLines.append("J2 = \(j2)")
-    }
-    if let j3 = controlledJunk3, !j3.isEmpty {
-      settingsLines.append("J3 = \(j3)")
-    }
-    if let itime = specialHandshakeTimeout, !itime.isEmpty {
-      settingsLines.append("Itime = \(itime)")
     }
     
     return settingsLines.joined(separator: "\n")

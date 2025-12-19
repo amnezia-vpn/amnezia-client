@@ -112,9 +112,19 @@ extension PacketTunnelProvider {
                 }
             }
 
+            let lastHandshakeString = settingsDictionary["last_handshake_time_sec"]
+            let lastHandshake: Int64
+
+            if let lastHandshakeValue = lastHandshakeString, let handshakeValue = Int64(lastHandshakeValue) {
+                lastHandshake = handshakeValue
+            } else {
+                lastHandshake = -2  // Return an error if there is no value for `last_handshake_time_sec`
+            }
+
             let response: [String: Any] = [
                 "rx_bytes": settingsDictionary["rx_bytes"] ?? "0",
-                "tx_bytes": settingsDictionary["tx_bytes"] ?? "0"
+                "tx_bytes": settingsDictionary["tx_bytes"] ?? "0",
+                "last_handshake_time_sec": lastHandshake
             ]
 
             completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
@@ -166,7 +176,7 @@ extension PacketTunnelProvider {
     }
 
     func stopWireguard(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-        wg_log(.info, message: "Stopping tunnel: reason: \(reason.description)")
+        wg_log(.info, message: "Stopping tunnel: reason: \(reason.amneziaDescription)")
 
         wgAdapter?.stop { error in
             ErrorNotifier.removeLastErrorFile()

@@ -22,7 +22,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -66,8 +66,6 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: delegateItem.isEnabled
-
                 headerText: qsTr("VPN address subnet")
                 textField.text: subnetAddress
 
@@ -86,8 +84,6 @@ PageType {
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-
-                enabled: delegateItem.isEnabled
 
                 headerText: qsTr("Port")
                 textField.text: port

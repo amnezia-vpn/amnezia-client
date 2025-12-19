@@ -2,6 +2,11 @@
 #define IOS_CONTROLLER_H
 
 #include "protocols/vpnprotocol.h"
+#include <functional>
+#include <QVariant>
+#include <QVariantMap>
+#include <QStringList>
+#include <QList>
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
@@ -46,6 +51,7 @@ public:
     void disconnectVpn();
 
     void vpnStatusDidChange(void *pNotification);
+    
     void vpnConfigurationDidChange(void *pNotification);
 
     void getBackendLogs(std::function<void(const QString &)> &&callback);
@@ -53,6 +59,22 @@ public:
 
     bool shareText(const QStringList &filesToSend);
     QString openFile();
+
+    void purchaseProduct(const QString &productId,
+                         std::function<void(bool success,
+                                            const QString &transactionId,
+                                            const QString &purchasedProductId,
+                                            const QString &originalTransactionId,
+                                            const QString &errorString)> &&callback);
+    void restorePurchases(std::function<void(bool success,
+                                             const QList<QVariantMap> &transactions,
+                                             const QString &errorString)> &&callback);
+
+    // Fetch product info for given product identifiers and return basic fields for logging
+    void fetchProducts(const QStringList &productIds,
+                       std::function<void(const QList<QVariantMap> &products,
+                                          const QStringList &invalidIds,
+                                          const QString &errorString)> &&callback);
 
     void requestInetAccess();
 signals:

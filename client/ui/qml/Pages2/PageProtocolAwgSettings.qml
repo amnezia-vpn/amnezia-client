@@ -25,7 +25,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -34,10 +34,15 @@ PageType {
         }
     }
 
+    SmartScroll {
+        id: smartScroll
+        listView: listView
+    }
+
     ListViewType {
         id: listView
 
-        anchors.top: backButtonLayout.bottom
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -81,6 +86,12 @@ PageType {
                     }
                 }
 
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(vpnAddressSubnetTextField)
+                    }
+                }
+
                 checkEmptyText: true
             }
 
@@ -104,6 +115,12 @@ PageType {
                     }
                 }
 
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(portTextField)
+                    }
+                }
+
                 checkEmptyText: true
             }
 
@@ -119,6 +136,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== serverJunkPacketCount) {
                         serverJunkPacketCount = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketCountTextField)
                     }
                 }
             }
@@ -137,6 +160,12 @@ PageType {
                         serverJunkPacketMinSize = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketMinSizeTextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -151,6 +180,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== serverJunkPacketMaxSize) {
                         serverJunkPacketMaxSize = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketMaxSizeTextField)
                     }
                 }
             }
@@ -169,6 +204,12 @@ PageType {
                         serverInitPacketJunkSize = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(initPacketJunkSizeTextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -185,39 +226,61 @@ PageType {
                         serverResponsePacketJunkSize = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(responsePacketJunkSizeTextField)
+                    }
+                }
             }
 
-            // AwgTextField {
-            //     id: cookieReplyPacketJunkSizeTextField
+            AwgTextField {
+                id: cookieReplyPacketJunkSizeTextField
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            //     headerText: qsTr("S3 - Cookie reply packet junk size")
-            //     textField.text: serverCookieReplyPacketJunkSize
+                visible: isAwg2
 
-            //     textField.onEditingFinished: {
-            //         if (textField.text !== serverCookieReplyPacketJunkSize) {
-            //             serverCookieReplyPacketJunkSize = textField.text
-            //         }
-            //     }
-            // }
+                headerText: qsTr("S3 - Cookie reply packet junk size")
+                textField.text: serverCookieReplyPacketJunkSize
 
-            // AwgTextField {
-            //     id: transportPacketJunkSizeTextField
+                textField.onEditingFinished: {
+                    if (textField.text !== serverCookieReplyPacketJunkSize) {
+                        serverCookieReplyPacketJunkSize = textField.text
+                    }
+                }
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(cookieReplyPacketJunkSizeTextField)
+                    }
+                }
+            }
 
-            //     headerText: qsTr("S4 - Transport packet junk size")
-            //     textField.text: serverTransportPacketJunkSize
+            AwgTextField {
+                id: transportPacketJunkSizeTextField
 
-            //     textField.onEditingFinished: {
-            //         if (textField.text !== serverTransportPacketJunkSize) {
-            //             serverTransportPacketJunkSize = textField.text
-            //         }
-            //     }
-            // }
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: isAwg2
+
+                headerText: qsTr("S4 - Transport packet junk size")
+                textField.text: serverTransportPacketJunkSize
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverTransportPacketJunkSize) {
+                        serverTransportPacketJunkSize = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(transportPacketJunkSizeTextField)
+                    }
+                }
+            }
 
             AwgTextField {
                 id: initPacketMagicHeaderTextField
@@ -227,10 +290,19 @@ PageType {
 
                 headerText: qsTr("H1 - Init packet magic header")
                 textField.text: serverInitPacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverInitPacketMagicHeader) {
                         serverInitPacketMagicHeader = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(initPacketMagicHeaderTextField)
                     }
                 }
             }
@@ -243,10 +315,19 @@ PageType {
 
                 headerText: qsTr("H2 - Response packet magic header")
                 textField.text: serverResponsePacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverResponsePacketMagicHeader) {
                         serverResponsePacketMagicHeader = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(responsePacketMagicHeaderTextField)
                     }
                 }
             }
@@ -259,10 +340,19 @@ PageType {
 
                 headerText: qsTr("H3 - Underload packet magic header")
                 textField.text: serverUnderloadPacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverUnderloadPacketMagicHeader) {
                         serverUnderloadPacketMagicHeader = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(underloadPacketMagicHeaderTextField)
                     }
                 }
             }
@@ -275,10 +365,129 @@ PageType {
 
                 headerText: qsTr("H4 - Transport packet magic header")
                 textField.text: serverTransportPacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverTransportPacketMagicHeader) {
                         serverTransportPacketMagicHeader = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(transportPacketMagicHeaderTextField)
+                    }
+                }
+            }
+
+            AwgTextField {
+                id: specialJunk1TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I1 - Special junk 1")
+                textField.text: serverSpecialJunk1
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk1) {
+                        serverSpecialJunk1 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk1TextField)
+                    }
+                }
+            }
+
+            AwgTextField {
+                id: specialJunk2TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I2 - Special junk 2")
+                textField.text: serverSpecialJunk2
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk2) {
+                        serverSpecialJunk2 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk2TextField)
+                    }
+                }
+            }
+
+            AwgTextField {
+                id: specialJunk3TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I3 - Special junk 3")
+                textField.text: serverSpecialJunk3
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk3) {
+                        serverSpecialJunk3 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk3TextField)
+                    }
+                }
+            }
+
+            AwgTextField {
+                id: specialJunk4TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I4 - Special junk 4")
+                textField.text: serverSpecialJunk4
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk4) {
+                        serverSpecialJunk4 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk4TextField)
+                    }
+                }
+            }
+
+            AwgTextField {
+                id: specialJunk5TextField
+
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("I5 - Special junk 5")
+                textField.text: serverSpecialJunk5
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverSpecialJunk5) {
+                        serverSpecialJunk5 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk5TextField)
                     }
                 }
             }
@@ -297,8 +506,8 @@ PageType {
                          responsePacketMagicHeaderTextField.errorText === "" &&
                          initPacketMagicHeaderTextField.errorText === "" &&
                          responsePacketJunkSizeTextField.errorText === "" &&
-                         // cookieReplyHeaderJunkTextField.errorText === "" &&
-                         // transportHeaderJunkTextField.errorText === "" &&
+                         cookieReplyPacketJunkSizeTextField.errorText === "" &&
+                         transportPacketJunkSizeTextField.errorText === "" &&
                          initPacketJunkSizeTextField.errorText === "" &&
                          junkPacketMaxSizeTextField.errorText === "" &&
                          junkPacketMinSizeTextField.errorText === "" &&
@@ -325,17 +534,12 @@ PageType {
                         }
 
                         if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
-                                                             parseInt(responsePacketJunkSizeTextField.textField.text))) {
-                            PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)"))
+                                                            parseInt(responsePacketJunkSizeTextField.textField.text),
+                                                            parseInt(cookieReplyPacketJunkSizeTextField.textField.text),
+                                                            parseInt(transportPacketJunkSizeTextField.textField.text))) {
+                            PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
                             return
                         }
-                        // if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
-                        //                                     parseInt(responsePacketJunkSizeTextField.textField.text),
-                        //                                     parseInt(cookieReplyPacketJunkSizeTextField.textField.text),
-                        //                                     parseInt(transportPacketJunkSizeTextField.textField.text))) {
-                        //     PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
-                        //     return
-                        // }
                     }
 
                     var headerText = qsTr("Save settings?")

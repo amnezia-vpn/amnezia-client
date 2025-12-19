@@ -11,7 +11,6 @@
 #include "logger.h"
 //#include "mozillavpn.h"
 #include "networkwatcherimpl.h"
-#include "platforms/dummy/dummynetworkwatcher.h"
 //#include "settingsholder.h"
 
 #ifdef MZ_WINDOWS
@@ -51,7 +50,7 @@ NetworkWatcher::NetworkWatcher() { MZ_COUNT_CTOR(NetworkWatcher); }
 NetworkWatcher::~NetworkWatcher() { MZ_COUNT_DTOR(NetworkWatcher); }
 
 void NetworkWatcher::initialize() {
-  logger.debug() << "Initialize";
+  logger.debug() << "Initialize NetworkWatcher";
 
 #if defined(MZ_WINDOWS)
   m_impl = new WindowsNetworkWatcher(this);
@@ -69,59 +68,45 @@ void NetworkWatcher::initialize() {
   m_impl = new DummyNetworkWatcher(this);
 #endif
 
+
   connect(m_impl, &NetworkWatcherImpl::unsecuredNetwork, this,
           &NetworkWatcher::unsecuredNetwork);
   connect(m_impl, &NetworkWatcherImpl::networkChanged, this,
           &NetworkWatcher::networkChange);
-
+  connect(m_impl, &NetworkWatcherImpl::sleepMode, this,
+          &NetworkWatcher::onSleepMode);
   m_impl->initialize();
 
-
-// TODO: IMPL FOR AMNEZIA
-#if 0
-  SettingsHolder* settingsHolder = SettingsHolder::instance();
-  Q_ASSERT(settingsHolder);
-
-  m_active = settingsHolder->unsecuredNetworkAlert() ||
-             settingsHolder->captivePortalAlert();
-  m_reportUnsecuredNetwork = settingsHolder->unsecuredNetworkAlert();
-  if (m_active) {
+  // Enable sleep/wake monitoring for VPN auto-reconnection
+  logger.debug() << "Starting NetworkWatcher for sleep/wake monitoring";
+  logger.debug() << "About to call m_impl->start()";
+  try {
     m_impl->start();
+    logger.debug() << "m_impl->start() completed successfully";
+  } catch (const std::exception& e) {
+    logger.error() << "Exception in m_impl->start():" << e.what();
+  } catch (...) {
+    logger.error() << "Unknown exception in m_impl->start()";
   }
-
-  connect(settingsHolder, &SettingsHolder::unsecuredNetworkAlertChanged, this,
-          &NetworkWatcher::settingsChanged);
-  connect(settingsHolder, &SettingsHolder::captivePortalAlertChanged, this,
-          &NetworkWatcher::settingsChanged);
-
-#endif
+  m_active = true;
+  m_reportUnsecuredNetwork = false; // Disable unsecured network alerts for Amnezia
 }
 
 void NetworkWatcher::settingsChanged() {
-// TODO: IMPL FOR AMNEZIA
-#if 0
-  SettingsHolder* settingsHolder = SettingsHolder::instance();
-  m_active = settingsHolder->unsecuredNetworkAlert() ||
-             settingsHolder->captivePortalAlert();
-  m_reportUnsecuredNetwork = settingsHolder->unsecuredNetworkAlert();
+  // For Amnezia: Keep NetworkWatcher always active for sleep/wake monitoring
+  logger.debug() << "NetworkWatcher settings changed - keeping sleep monitoring active";
+}
 
-  if (m_active) {
-    logger.debug()
-        << "Starting Network Watcher; Reporting of Unsecured Networks: "
-        << m_reportUnsecuredNetwork;
-    m_impl->start();
-  } else {
-    logger.debug() << "Stopping Network Watcher";
-    m_impl->stop();
-  }
-#endif
+void NetworkWatcher::onSleepMode()
+{
+  logger.debug() << "Resumed from sleep mode";
+  emit sleepMode();
 }
 
 void NetworkWatcher::unsecuredNetwork(const QString& networkName,
                                       const QString& networkId) {
   logger.debug() << "Unsecured network:" << logger.sensitive(networkName)
                  << "id:" << logger.sensitive(networkId);
-
 #ifndef UNIT_TEST
   if (!m_reportUnsecuredNetwork) {
     logger.debug() << "Disabled. Ignoring unsecured network";

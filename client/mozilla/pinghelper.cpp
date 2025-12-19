@@ -41,6 +41,7 @@ void PingHelper::start(const QString& serverIpv4Gateway,
 
   m_gateway = QHostAddress(serverIpv4Gateway);
   m_source = QHostAddress(deviceIpv4Address.section('/', 0, 0));
+
   m_pingSender = PingSenderFactory::create(m_source, this);
 
   // Some platforms require root access to send and receive ICMP pings. If
@@ -53,8 +54,10 @@ void PingHelper::start(const QString& serverIpv4Gateway,
 
   connect(m_pingSender, &PingSender::recvPing, this, &PingHelper::pingReceived,
           Qt::QueuedConnection);
-  connect(m_pingSender, &PingSender::criticalPingError, this,
-          []() { logger.info() << "Encountered Unrecoverable ping error"; });
+  connect(m_pingSender, &PingSender::criticalPingError, this, [this]() {
+        logger.info() << "Encountered Unrecoverable ping error";
+      emit connectionLose();
+  });
 
   // Reset the ping statistics
   m_sequence = 0;

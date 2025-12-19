@@ -29,6 +29,7 @@ PageType {
         readonly property string title: qsTr("Subscription Status")
         readonly property string contentKey: "subscriptionStatus"
         readonly property string objectImageSource: "qrc:/images/controls/info.svg"
+        readonly property bool isRichText: true
     }
 
     QtObject {
@@ -37,6 +38,7 @@ PageType {
         readonly property string title: qsTr("Valid Until")
         readonly property string contentKey: "endDate"
         readonly property string objectImageSource: "qrc:/images/controls/history.svg"
+        readonly property bool isRichText: false
     }
 
     QtObject {
@@ -45,6 +47,7 @@ PageType {
         readonly property string title: qsTr("Active Connections")
         readonly property string contentKey: "connectedDevices"
         readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
+        readonly property bool isRichText: false
     }
 
     property var processedServer
@@ -90,7 +93,7 @@ PageType {
                 id: backButton
                 objectName: "backButton"
 
-                Layout.topMargin: 20
+                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
@@ -134,6 +137,7 @@ PageType {
                 imageSource: objectImageSource
                 leftText: title
                 rightText: ApiAccountInfoModel.data(contentKey)
+                rightTextFormat: isRichText ? Text.RichText : Text.PlainText
 
                 visible: rightText !== ""
             }
@@ -214,9 +218,6 @@ PageType {
                     ApiConfigsController.prepareVpnKeyExport()
 
                     PageController.showBusyIndicator(false)
-                    
-                    // Navigate to PageShareConnection page
-                    //PageController.goToPage(PageEnum.PageShareConnection)
                 }
             }
 
@@ -358,7 +359,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (ApiConfigsController.deactivateDevice()) {
+                            if (ApiConfigsController.deactivateDevice(false)) {
                                 ApiSettingsController.getAccountInfo(true)
                             }
                             PageController.showBusyIndicator(false)
@@ -395,7 +396,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (ApiConfigsController.deactivateDevice()) {
+                            if (ApiConfigsController.deactivateDevice(true)) {
                                 InstallController.removeProcessedServer()
                             }
                             PageController.showBusyIndicator(false)

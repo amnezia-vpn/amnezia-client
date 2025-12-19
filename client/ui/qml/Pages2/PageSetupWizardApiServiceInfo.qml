@@ -21,7 +21,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -66,6 +66,8 @@ PageType {
                 imageSource: imagePath
                 leftText: lText
                 rightText: rText
+
+                visible: isVisible
             }
         }
 
@@ -85,7 +87,7 @@ PageType {
                 textFormat: Text.RichText
                 text: {
                     var text = ApiServicesModel.getSelectedServiceData("features")
-                    return text.replace("%1", LanguageModel.getCurrentSiteUrl("free"))
+                    return text.replace("%1", LanguageModel.getCurrentSiteUrl("free")).replace("/free", "") // todo link should come from gateway
                 }
 
                 MouseArea {
@@ -108,10 +110,14 @@ PageType {
 
                 clickedFunc: function() {
                     var endpoint = ApiServicesModel.getStoreEndpoint()
-                    if (endpoint !== undefined && endpoint !== "") {
+                    if (endpoint !== undefined && endpoint !== "" && Qt.platform.os !== "ios" && !IsMacOsNeBuild) {
                         Qt.openUrlExternally(endpoint)
                         PageController.closePage()
                         PageController.closePage()
+                    } else if (Qt.platform.os === "ios" || IsMacOsNeBuild) {
+                        PageController.showBusyIndicator(true)
+                        ApiConfigsController.importSerivceFromAppStore()
+                        PageController.showBusyIndicator(false)
                     } else {
                         PageController.showBusyIndicator(true)
                         ApiConfigsController.importServiceFromGateway()

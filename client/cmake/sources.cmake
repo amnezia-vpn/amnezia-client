@@ -28,6 +28,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.h
+    ${CLIENT_ROOT_DIR}/core/osSignalHandler.h
 )
 
 # Mozilla headres
@@ -36,10 +37,9 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.h
     ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.h
     ${CLIENT_ROOT_DIR}/mozilla/controllerimpl.h
-    ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.h
 )
 
-if(NOT IOS)
+if(NOT IOS AND NOT MACOS_NE)
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/platforms/ios/QRCodeReaderBase.h
     )
@@ -79,6 +79,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/../common/logger/logger.cpp
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/osSignalHandler.cpp
 )
 
 # Mozilla sources
@@ -86,12 +87,25 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/mozilla/models/server.cpp
     ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.cpp
     ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.cpp
-    ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
 )
 
-if(NOT IOS)
+if(NOT IOS AND NOT MACOS_NE)
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/platforms/ios/QRCodeReaderBase.cpp
+    )
+endif()
+
+# Include native macOS platform helpers (dock/status-item)
+if(APPLE AND NOT IOS)
+    list(APPEND HEADERS
+        ${CLIENT_ROOT_DIR}/platforms/macos/macosutils.h
+        ${CLIENT_ROOT_DIR}/platforms/macos/macosstatusicon.h
+        ${CLIENT_ROOT_DIR}/ui/macos_util.h
+    )
+    list(APPEND SOURCES
+        ${CLIENT_ROOT_DIR}/platforms/macos/macosutils.mm
+        ${CLIENT_ROOT_DIR}/platforms/macos/macosstatusicon.mm
+        ${CLIENT_ROOT_DIR}/ui/macos_util.mm
     )
 endif()
 
@@ -166,7 +180,7 @@ if(WIN32)
     )
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
 
@@ -180,11 +194,13 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/awgprotocol.h
+        ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/core/ipcclient.cpp
         ${CLIENT_ROOT_DIR}/core/privileged_process.cpp
+        ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.cpp
@@ -192,5 +208,16 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/awgprotocol.cpp
+    )
+endif()
+
+if(APPLE AND MACOS_NE)
+    # Include only the tray notification handler in NE builds
+    set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.h
+    )
+
+    set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
     )
 endif()

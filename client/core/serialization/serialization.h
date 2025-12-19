@@ -21,6 +21,7 @@ namespace amnezia::serialization
     namespace vless
     {
         QJsonObject Deserialize(const QString &vless, QString *alias, QString *errMessage);
+        const QString Serialize(const VlessServerObject &server, const QString &alias);
     } // namespace vless
 
     namespace ss

@@ -173,15 +173,17 @@ CheckBox {
         enabled: false
     }
 
+    Keys.onEnterPressed: event => handleSwitch(event)
+    Keys.onReturnPressed: event => handleSwitch(event)
+    Keys.onSpacePressed: event => handleSwitch(event)
 
-    Keys.onEnterPressed: {
-        root.checked = !root.checked
+    function handleSwitch(event) {
+        if (!event.isAutoRepeat) {
+            root.checked = !root.checked
+            root.checkedChanged()
+        }
+        event.accepted = true
     }
-
-    Keys.onReturnPressed: {
-        root.checked = !root.checked
-    }
-
 }
 
 

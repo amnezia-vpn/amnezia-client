@@ -10,6 +10,16 @@ class ServersModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
+    struct GatewayStacks
+    {
+        QSet<QString> userCountryCodes;
+        QSet<QString> serviceTypes;
+
+        bool isEmpty() const { return userCountryCodes.isEmpty() && serviceTypes.isEmpty(); }
+        bool operator==(const GatewayStacks &other) const;
+        QJsonObject toJson() const;
+    };
+
     enum Roles {
         NameRole = Qt::UserRole + 1,
         ServerDescriptionRole,
@@ -37,6 +47,10 @@ public:
         IsCountrySelectionAvailableRole,
         ApiAvailableCountriesRole,
         ApiServerCountryCodeRole,
+        IsAdVisibleRole,
+        AdHeaderRole,
+        AdDescriptionRole,
+        AdEndpointRole,
 
         HasAmneziaDns
     };
@@ -52,6 +66,8 @@ public:
 
     void resetModel();
 
+    GatewayStacks gatewayStacks() const { return m_gatewayStacks; }
+
     Q_PROPERTY(int defaultIndex READ getDefaultServerIndex WRITE setDefaultServerIndex NOTIFY defaultServerIndexChanged)
     Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerNameChanged)
     Q_PROPERTY(QString defaultServerDefaultContainerName READ getDefaultServerDefaultContainerName NOTIFY defaultServerDefaultContainerChanged)
@@ -62,8 +78,14 @@ public:
                        defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
 
+    Q_PROPERTY(bool hasServersFromGatewayApi READ hasServersFromGatewayApi NOTIFY hasServersFromGatewayApiChanged)
+
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
     Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerChanged)
+
+    Q_PROPERTY(bool isAdVisible READ isAdVisible NOTIFY defaultServerIndexChanged)
+    Q_PROPERTY(QString adHeader READ adHeader NOTIFY defaultServerIndexChanged)
+    Q_PROPERTY(QString adDescription READ adDescription NOTIFY defaultServerIndexChanged)
 
     bool processedServerIsPremium() const;
 
@@ -81,6 +103,8 @@ public slots:
     bool isProcessedServerHasWriteAccess();
     bool isDefaultServerHasWriteAccess();
     bool hasServerWithWriteAccess();
+
+    bool hasServersFromGatewayApi();
 
     const int getServersCount();
 
@@ -116,6 +140,7 @@ public slots:
 
     bool isServerFromApiAlreadyExists(const quint16 crc);
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol);
+    bool hasServerWithVpnKey(const QString &vpnKey) const;
 
     QVariant getDefaultServerData(const QString roleString);
 
@@ -128,6 +153,10 @@ public slots:
     bool isApiKeyExpired(const int serverIndex);
     void removeApiConfig(const int serverIndex);
 
+    bool isAdVisible();
+    QString adHeader();
+    QString adDescription();
+    
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
@@ -146,6 +175,9 @@ signals:
 
     void updateApiCountryModel();
     void updateApiServicesModel();
+
+    void hasServersFromGatewayApiChanged();
+    void gatewayStacksExpanded();
 
 private:
     ServerCredentials serverCredentials(int index) const;
@@ -167,6 +199,9 @@ private:
     int m_processedServerIndex;
 
     bool m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+
+    GatewayStacks m_gatewayStacks;
+    void recomputeGatewayStacks();
 };
 
 #endif // SERVERSMODEL_H

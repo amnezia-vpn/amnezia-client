@@ -18,6 +18,8 @@ PageType {
 
     signal lastItemTabClickedSignal()
 
+    property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
+
     Connections {
         target: InstallController
 
@@ -59,14 +61,12 @@ PageType {
         target: ServersModel
 
         function onProcessedServerIndexChanged() {
-            listView.isServerWithWriteAccess = ServersModel.isProcessedServerHasWriteAccess()
+            root.isServerWithWriteAccess = ServersModel.isProcessedServerHasWriteAccess()
         }
     }
 
     ListViewType {
         id: listView
-
-        property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
 
         anchors.fill: parent
 
@@ -107,7 +107,7 @@ PageType {
     QtObject {
         id: check
 
-        property bool isVisible: true
+        property bool isVisible: root.isServerWithWriteAccess
         readonly property string title: qsTr("Check the server for previously installed Amnezia services")
         readonly property string description: qsTr("Add them to the application if they were not displayed")
         readonly property var tColor: AmneziaStyle.color.paleGray
@@ -121,7 +121,7 @@ PageType {
     QtObject {
         id: reboot
 
-        property bool isVisible: true
+        property bool isVisible: root.isServerWithWriteAccess
         readonly property string title: qsTr("Reboot server")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -181,7 +181,7 @@ PageType {
     QtObject {
         id: clear
 
-        property bool isVisible: true
+        property bool isVisible: root.isServerWithWriteAccess
         readonly property string title: qsTr("Clear server from Amnezia software")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -240,7 +240,7 @@ PageType {
     QtObject {
         id: switch_to_premium
 
-        property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+        property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.processedServerIsPremium
         readonly property string title: qsTr("Switch to the new Amnezia Premium subscription")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed

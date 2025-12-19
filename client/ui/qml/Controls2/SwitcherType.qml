@@ -155,7 +155,7 @@ Switch {
     function handleSwitch(event) {
         if (!event.isAutoRepeat) {
             root.checked = !root.checked
-            root.checkedChanged()
+            root.toggled()
         }
         event.accepted = true
     }

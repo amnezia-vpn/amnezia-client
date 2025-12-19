@@ -21,16 +21,18 @@ public:
 public slots:
     bool exportNativeConfig(const QString &serverCountryCode, const QString &fileName);
     bool revokeNativeConfig(const QString &serverCountryCode);
-    // bool exportVpnKey(const QString &fileName);
+    bool exportVpnKey(const QString &fileName);
     void prepareVpnKeyExport();
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
+    bool importSerivceFromAppStore();
+    bool restoreSerivceFromAppStore();
     bool importServiceFromGateway();
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
     bool updateServiceFromTelegram(const int serverIndex);
-    bool deactivateDevice();
+    bool deactivateDevice(const bool isRemoveEvent);
     bool deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode);
 
     bool isConfigValid();
@@ -54,6 +56,7 @@ private:
     QString getVpnKey();
 
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
+    bool installServerFromSubscriptionResponse(const QByteArray &responseBody, ErrorCode *errorOut = nullptr);
 
     QList<QString> m_qrCodes;
     QString m_vpnKey;

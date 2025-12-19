@@ -38,9 +38,11 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
         QDesktopServices::openUrl(QUrl(websiteUrl));
     });
 
-    m_trayActionQuit = m_menu.addAction(QIcon(":/images/tray/cancel.png"), tr("Quit") + " " + APPLICATION_NAME, this, [&](){
-        qApp->quit();
-    });
+    // Quit action: disconnect VPN first on macOS NE, else quit directly
+    m_trayActionQuit = m_menu.addAction(QIcon(":/images/tray/cancel.png"),
+                                       tr("Quit") + " " + APPLICATION_NAME,
+                                       this,
+                                       [&](){ qApp->quit(); });
 
     m_systemTrayIcon.setContextMenu(&m_menu);
     setTrayState(Vpn::ConnectionState::Disconnected);

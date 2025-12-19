@@ -20,7 +20,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -66,6 +66,13 @@ PageType {
                 
                 text: qsTr("If AmneziaDNS is not used or installed")
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+
+        delegate: ColumnLayout {
+            width: listView.width
+            spacing: 16
 
             TextFieldWithHeaderType {
                 id: primaryDns
@@ -96,13 +103,6 @@ PageType {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
             }
-        }
-
-        model: 1 // fake model to force the ListView to be created without a model
-        spacing: 16
-
-        delegate: ColumnLayout {
-            width: listView.width
 
             BasicButtonType {
                 id: restoreDefaultButton
@@ -139,10 +139,6 @@ PageType {
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-        }
-
-        footer: ColumnLayout {
-            width: listView.width
 
             BasicButtonType {
                 id: saveButton

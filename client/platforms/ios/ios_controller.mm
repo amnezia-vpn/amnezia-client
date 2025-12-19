@@ -10,6 +10,7 @@
 
 #include "../protocols/vpnprotocol.h"
 #import "ios_controller_wrapper.h"
+#import "StoreKitController.h"
 
 const char* Action::start = "start";
 const char* Action::restart = "restart";
@@ -27,15 +28,51 @@ const char* MessageKey::isOnDemand = "is-on-demand";
 const char* MessageKey::SplitTunnelType = "SplitTunnelType";
 const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
 
+#if !MACOS_NE
 static UIViewController* getViewController() {
-    NSArray *windows = [[UIApplication sharedApplication]windows];
-    for (UIWindow *window in windows) {
-        if (window.isKeyWindow) {
+    UIApplication *application = [UIApplication sharedApplication];
+
+    if (@available(iOS 13.0, *)) {
+        for (UIScene *scene in application.connectedScenes) {
+            if (scene.activationState != UISceneActivationStateForegroundActive) {
+                continue;
+            }
+
+            if (![scene isKindOfClass:[UIWindowScene class]]) {
+                continue;
+            }
+
+            UIWindowScene *windowScene = (UIWindowScene *)scene;
+
+            for (UIWindow *window in windowScene.windows) {
+                if (window.isKeyWindow && window.rootViewController) {
+                    return window.rootViewController;
+                }
+            }
+
+            for (UIWindow *window in windowScene.windows) {
+                if (!window.isHidden && window.rootViewController) {
+                    return window.rootViewController;
+                }
+            }
+        }
+    }
+
+    for (UIWindow *window in application.windows) {
+        if (window.isKeyWindow && window.rootViewController) {
             return window.rootViewController;
         }
     }
+
+    for (UIWindow *window in application.windows) {
+        if (window.rootViewController) {
+            return window.rootViewController;
+        }
+    }
+
     return nil;
 }
+#endif
 
 Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
   switch (status) {
@@ -64,6 +101,9 @@ IosController::IosController() : QObject()
 {
     s_instance = this;
     m_iosControllerWrapper = [[IosControllerWrapper alloc] initWithCppController:this];
+
+    // Initialize StoreKitController early to start observing the payment queue
+    [StoreKitController sharedInstance];
 
     [[NSNotificationCenter defaultCenter]
         removeObserver: (__bridge NSObject *)m_iosControllerWrapper];
@@ -249,6 +289,21 @@ void IosController::checkStatus()
     sendVpnExtensionMessage(message, [&](NSDictionary* response){
         uint64_t txBytes = [response[@"tx_bytes"] intValue];
         uint64_t rxBytes = [response[@"rx_bytes"] intValue];
+        
+        uint64_t last_handshake_time_sec = 0;
+#if !MACOS_NE
+        if (response[@"last_handshake_time_sec"] && ![response[@"last_handshake_time_sec"] isKindOfClass:[NSNull class]]) {
+            last_handshake_time_sec = [response[@"last_handshake_time_sec"] intValue];
+        } else {
+            qDebug() << "Key last_handshake_time_sec is missing or null";
+        }
+
+        if (last_handshake_time_sec < 0) {
+            disconnectVpn();
+            qDebug() << "Invalid handshake time, disconnecting VPN.";
+        }
+#endif
+
         emit bytesChanged(rxBytes - m_rxBytes, txBytes - m_txBytes);
         m_rxBytes = rxBytes;
         m_txBytes = txBytes;
@@ -619,10 +674,6 @@ bool IosController::setupAwg()
     wgConfig.insert(config_key::specialJunk3, config[config_key::specialJunk3]);
     wgConfig.insert(config_key::specialJunk4, config[config_key::specialJunk4]);
     wgConfig.insert(config_key::specialJunk5, config[config_key::specialJunk5]);
-    wgConfig.insert(config_key::controlledJunk1, config[config_key::controlledJunk1]);
-    wgConfig.insert(config_key::controlledJunk2, config[config_key::controlledJunk2]);
-    wgConfig.insert(config_key::controlledJunk3, config[config_key::controlledJunk3]);
-    wgConfig.insert(config_key::specialHandshakeTimeout, config[config_key::specialHandshakeTimeout]);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
@@ -803,14 +854,14 @@ bool IosController::shareText(const QStringList& filesToSend) {
         NSURL *logFileUrl = [[NSURL alloc] initFileURLWithPath:filesToSend[i].toNSString()];
         [sharingItems addObject:logFileUrl];
     }
-
+#if !MACOS_NE
     UIViewController *qtController = getViewController();
     if (!qtController) return;
 
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
-
+#endif
     __block bool isAccepted = false;
-
+#if !MACOS_NE
     [activityController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
         isAccepted = completed;
         emit finished();
@@ -823,6 +874,7 @@ bool IosController::shareText(const QStringList& filesToSend) {
         popController.sourceRect = CGRectMake(100, 100, 100, 100);
     }
 
+#endif
     QEventLoop wait;
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
     wait.exec();
@@ -831,6 +883,7 @@ bool IosController::shareText(const QStringList& filesToSend) {
 }
 
 QString IosController::openFile() {
+#if !MACOS_NE
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.item"] inMode:UIDocumentPickerModeOpen];
 
     DocumentPickerDelegate *documentPickerDelegate = [[DocumentPickerDelegate alloc] init];
@@ -841,8 +894,9 @@ QString IosController::openFile() {
 
     [qtController presentViewController:documentPicker animated:YES completion:nil];
 
+#endif
     __block QString filePath;
-
+#if !MACOS_NE
     documentPickerDelegate.documentPickerClosedCallback = ^(NSString *path) {
         if (path) {
             filePath = QString::fromUtf8(path.UTF8String);
@@ -851,12 +905,141 @@ QString IosController::openFile() {
         }
         emit finished();
     };
-
+#endif
     QEventLoop wait;
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
     wait.exec();
 
     return filePath;
+}
+
+void IosController::purchaseProduct(const QString &productId,
+                                   std::function<void(bool success,
+                                                      const QString &transactionId,
+                                                      const QString &purchasedProductId,
+                                                      const QString &originalTransactionId,
+                                                      const QString &errorString)> &&callback)
+{
+    qInfo().noquote() << "[IAP][IosController] purchaseProduct called" << productId;
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        __block auto cb = std::move(callback);
+        [controller purchaseProduct:productId.toNSString() completion:^(BOOL s,
+                                                                        NSString * _Nullable transactionId,
+                                                                        NSString * _Nullable prodId,
+                                                                        NSString * _Nullable originalTxId,
+                                                                        NSError * _Nullable error) {
+            const QString txId = QString::fromUtf8((transactionId ?: @"").UTF8String);
+            const QString pId  = QString::fromUtf8((prodId        ?: @"").UTF8String);
+            const QString origTxId = QString::fromUtf8((originalTxId ?: @"").UTF8String);
+            const QString err  = QString::fromUtf8((error.localizedDescription ?: @"").UTF8String);
+
+            qInfo().noquote() << "[IAP][IosController] purchase completion" << "success=" << s
+                              << "transactionId=" << txId << "originalTransactionId=" << origTxId
+                              << "productId=" << pId << "error=" << err;
+
+            if (cb) {
+                cb(s, txId, pId, origTxId, err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(false, QString(), QString(), QString(), "StoreKit 2 requires iOS 15.0 or later");
+        }
+    }
+}
+
+void IosController::restorePurchases(std::function<void(bool success,
+                                                       const QList<QVariantMap> &transactions,
+                                                       const QString &errorString)> &&callback)
+{
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        __block auto cb = std::move(callback);
+        [controller restorePurchasesWithCompletion:^(BOOL s,
+                                                     NSArray<NSDictionary *> * _Nullable restoredTransactions,
+                                                     NSError * _Nullable error) {
+            QString err;
+            if (error) {
+                err = QString::fromUtf8(error.localizedDescription.UTF8String);
+            }
+            QList<QVariantMap> transactions;
+            for (NSDictionary *dict in restoredTransactions ?: @[]) {
+                QVariantMap transaction;
+                NSString *transactionId = dict[@"transactionId"];
+                NSString *productId = dict[@"productId"];
+                NSString *originalTransactionId = dict[@"originalTransactionId"];
+
+                if (transactionId) {
+                    transaction.insert(QStringLiteral("transactionId"), QString::fromUtf8(transactionId.UTF8String));
+                }
+                if (productId) {
+                    transaction.insert(QStringLiteral("productId"), QString::fromUtf8(productId.UTF8String));
+                }
+                if (originalTransactionId) {
+                    transaction.insert(QStringLiteral("originalTransactionId"),
+                                       QString::fromUtf8(originalTransactionId.UTF8String));
+                }
+                transactions.push_back(transaction);
+            }
+            if (cb) {
+                cb(s, transactions, err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(false, QList<QVariantMap>(), "StoreKit 2 requires iOS 15.0 or later");
+        }
+    }
+}
+
+void IosController::fetchProducts(const QStringList &productIds,
+                                  std::function<void(const QList<QVariantMap> &products,
+                                                     const QStringList &invalidIds,
+                                                     const QString &errorString)> &&callback)
+{
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        NSMutableSet<NSString *> *ids = [NSMutableSet setWithCapacity:productIds.size()];
+        for (const auto &pid : productIds) {
+            [ids addObject:pid.toNSString()];
+        }
+        __block auto cb = std::move(callback);
+
+        [controller fetchProductsWithIdentifiers:ids
+                                      completion:^(NSArray<NSDictionary *> * _Nonnull products,
+                                                   NSArray<NSString *> * _Nonnull invalidIdentifiers,
+                                                   NSError * _Nullable error) {
+            QList<QVariantMap> outProducts;
+            for (NSDictionary *p in products) {
+                QVariantMap m;
+                m["productId"] = QString::fromUtf8([p[@"productId"] UTF8String]);
+                m["title"] = QString::fromUtf8([p[@"title"] UTF8String]);
+                m["description"] = QString::fromUtf8([p[@"description"] UTF8String]);
+                m["price"] = QString::fromUtf8([p[@"price"] UTF8String]);
+                m["currencyCode"] = QString::fromUtf8([p[@"currencyCode"] UTF8String]);
+                outProducts.push_back(m);
+            }
+
+            QStringList invalid;
+            for (NSString *inv in invalidIdentifiers) {
+                invalid.push_back(QString::fromUtf8(inv.UTF8String));
+            }
+
+            QString err;
+            if (error) {
+                err = QString::fromUtf8(error.localizedDescription.UTF8String);
+            }
+
+            if (cb) {
+                cb(outProducts, invalid, err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(QList<QVariantMap>(), QStringList(), "StoreKit 2 requires iOS 15.0 or later");
+        }
+    }
 }
 
 void IosController::requestInetAccess() {
