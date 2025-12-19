@@ -78,6 +78,11 @@ public slots:
     void setHint(QString hint);
     QString getHint();
 
+    void setTempPassword(QString pwd);
+    QString getTempPassword();
+    void setTempHint(QString hint);
+    QString getTempHint();
+
     bool isScreenshotsEnabled();
     void toggleScreenshotsEnabled(bool enable);
 
@@ -150,6 +155,9 @@ private:
     QString m_appVersion;
 
     QString getPlatform();
+
+    QString tempPassword;
+    QString tempHint;
 
     QDateTime m_loggingDisableDate;
 

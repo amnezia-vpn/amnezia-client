@@ -333,6 +333,26 @@ QString SettingsController::getHint()
     return m_settings->getHint();
 }
 
+void SettingsController::setTempPassword(QString pwd)
+{
+    tempPassword = pwd;
+}
+
+QString SettingsController::getTempPassword()
+{
+    return tempPassword;
+}
+
+void SettingsController::setTempHint(QString hint)
+{
+    tempHint = hint;
+}
+
+QString SettingsController::getTempHint()
+{
+    return tempHint;
+}
+
 bool SettingsController::isScreenshotsEnabled()
 {
     return m_settings->isScreenshotsEnabled();
