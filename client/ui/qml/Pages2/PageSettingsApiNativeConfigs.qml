@@ -60,6 +60,15 @@ PageType {
                 headerText: qsTr("Configuration Files")
                 descriptionText: qsTr("For router setup or the AmneziaWG app")
             }
+
+            EncryptionIndicator {
+                id: indicator
+
+                visible: SettingsController.isFileEncryptionEnabled()
+
+                textString: qsTr("Encryption enabled. Learn more")
+                iconPath: "qrc:/images/controls/lock-locked.svg"
+            }
         }
 
         delegate: ColumnLayout {
