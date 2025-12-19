@@ -12,6 +12,7 @@ import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
+import "../Components"
 
 PageType {
     id: root
@@ -264,6 +265,15 @@ PageType {
         }
     }
 
+    PasswordDrawer {
+        id: passwordDrawer
+
+        parent: root
+
+        anchors.fill: parent
+        expandedHeight: root.height * 0.45
+    }
+
     property list<QtObject> variants: [
         amneziaVpn,
         selfHostVpn,
@@ -318,7 +328,12 @@ PageType {
                                                         qsTr("Backup files (*.backup)"))
             if (filePath !== "") {
                 PageController.showBusyIndicator(true)
-                SettingsController.restoreAppConfig(filePath)
+                if (SystemController.isFileEncrypted(filePath)) {
+                    passwordDrawer.fileName = filePath
+                    passwordDrawer.restoreSecuredBackup()
+                } else {
+                    SettingsController.restoreAppConfig(filePath)
+                }
                 PageController.showBusyIndicator(false)
             }
         }
@@ -336,8 +351,13 @@ PageType {
             var nameFilter = "Config files (*.vpn *.ovpn *.conf *.json)"
             var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
             if (fileName !== "") {
-                if (ImportController.extractConfigFromFile(fileName)) {
-                    PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                if (SystemController.isFileEncrypted(fileName)) {
+                    passwordDrawer.fileName = fileName
+                    passwordDrawer.importSecuredFile()
+                } else {
+                    if (ImportController.extractConfigFromFile(fileName)) {
+                        PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                    }
                 }
             }
         }

@@ -73,6 +73,8 @@ void ExportUiController::exportConfig(const QString &fileName)
     if (!SystemController::saveFile(fileName, m_config)) {
         qInfo() << "ExportUiController::exportConfig: save or share was cancelled or failed";
     }
+    if (m_settingsController->isFileEncryptionEnabled())
+        SystemController::encryptFile(fileName, m_settingsController->getPassword(), m_settingsController->getHint());
 }
 
 void ExportUiController::updateClientManagementModel(const QString &serverId, int containerIndex)

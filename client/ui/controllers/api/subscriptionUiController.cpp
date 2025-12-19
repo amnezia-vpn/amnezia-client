@@ -117,6 +117,8 @@ bool SubscriptionUiController::exportNativeConfig(const QString &serverId, const
     }
 
     const bool saved = SystemController::saveFile(fileName, nativeConfig);
+    if (m_settingsController->isFileEncryptionEnabled())
+        SystemController::encryptFile(fileName, m_settingsController->getPassword(), m_settingsController->getHint());
     getAccountInfo(serverId, true);
     return saved;
 }
