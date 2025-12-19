@@ -108,7 +108,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                text: SettingsController.getHint()
+                text: SettingsController.getTempHint()
             }
 
             BasicButtonType {
@@ -125,6 +125,12 @@ PageType {
                         return
                     }
 
+                    SettingsController.setPassword(SettingsController.getTempPassword())
+                    SettingsController.setHint(SettingsController.getTempHint())
+
+                    SettingsController.setTempPassword("")
+                    SettingsController.setTempHint("")
+
                     PageController.closePage()
                     PageController.goToPage(PageEnum.PageSettings)
                     PageController.goToPage(PageEnum.PageSettingsAppEncryption)
@@ -138,7 +144,7 @@ PageType {
         var notMatch = false
 
         var secretDataItem = listView.itemAtIndex(0).children[0]
-        if (secretDataItem.textField.text !== SettingsController.getPassword()) {
+        if (secretDataItem.textField.text !== SettingsController.getTempPassword()) {
             secretDataItem.errorText = qsTr("Passwords not match")
             notMatch = true
         }

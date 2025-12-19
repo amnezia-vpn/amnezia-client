@@ -81,6 +81,11 @@ public slots:
     bool isNewsNotificationsEnabled();
     void toggleNewsNotificationsEnabled(bool enable);
 
+    void setTempPassword(QString pwd);
+    QString getTempPassword();
+    void setTempHint(QString hint);
+    QString getTempHint();
+
     bool isScreenshotsEnabled();
     void toggleScreenshotsEnabled(bool enable);
 
@@ -151,6 +156,9 @@ signals:
     void changingPassword();
 
 private:
+    QString tempPassword;
+    QString tempHint;
+
     SettingsController* m_settingsController;
     ServersController* m_serversController;
     LanguageUiController* m_languageUiController;

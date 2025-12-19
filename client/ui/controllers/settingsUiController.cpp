@@ -223,6 +223,26 @@ QString SettingsUiController::getHint()
     return m_settingsController->getHint();
 }
 
+void SettingsUiController::setTempPassword(QString pwd)
+{
+    tempPassword = pwd;
+}
+
+QString SettingsUiController::getTempPassword()
+{
+    return tempPassword;
+}
+
+void SettingsUiController::setTempHint(QString hint)
+{
+    tempHint = hint;
+}
+
+QString SettingsUiController::getTempHint()
+{
+    return tempHint;
+}
+
 bool SettingsUiController::isAutoConnectEnabled()
 {
     return m_settingsController->isAutoConnectEnabled();
