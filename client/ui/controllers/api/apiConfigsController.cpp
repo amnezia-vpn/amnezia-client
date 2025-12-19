@@ -310,6 +310,8 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
     nativeConfig.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", protocolData.wireGuardClientPrivKey);
 
     SystemController::saveFile(fileName, nativeConfig);
+    if (m_settings->isFileEncryption())
+        SystemController::encryptFile(fileName, m_settings->getPassword(), m_settings->getHint());
     return true;
 }
 

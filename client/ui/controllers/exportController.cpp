@@ -282,6 +282,8 @@ QList<QString> ExportController::getQrCodes()
 void ExportController::exportConfig(const QString &fileName)
 {
     SystemController::saveFile(fileName, m_config);
+    if (m_settings->isFileEncryption())
+        SystemController::encryptFile(fileName, m_settings->getPassword(), m_settings->getHint());
 }
 
 void ExportController::updateClientManagementModel(const DockerContainer container, ServerCredentials credentials)

@@ -15,15 +15,16 @@ public:
     static bool readFile(const QString &fileName, QByteArray &data);
     static bool readFile(const QString &fileName, QString &data);
 
-    static bool encryptFile(const QString &filePath, const QString &password, const QString &hint, QString *error = nullptr);
+    static bool encryptFile(const QString &filePath, const QString &password, const QString &hint);
 
 public slots:
     QString getFileName(const QString &acceptLabel, const QString &nameFilter, const QString &selectedFile = "",
                         const bool isSaveMode = false, const QString &defaultSuffix = "");
 
-    bool decryptFile(const QString &filePath, const QString &password, QString *error = nullptr);
+    QByteArray getDecryptedData(const QString &filePath, const QString &password);
 
     bool isFileEncrypted(const QString &filePath);
+    bool isPasswordValid(const QString &filePath, const QString &password);
     QString readHint(const QString &filePath);
 
     void setQmlRoot(QObject *qmlRoot);
