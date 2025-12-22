@@ -123,6 +123,16 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
 
   override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+      if messageData.count == 1 && messageData[0] == 0 {
+          guard let completionHandler else { return }
+          if protoType == .wireguard {
+              handleWireguardAppMessage(messageData, completionHandler: completionHandler)
+          } else {
+              completionHandler(nil)
+          }
+          return
+      }
+
       guard let message = String(data: messageData, encoding: .utf8) else {
           if let completionHandler {
               completionHandler(nil)
@@ -133,6 +143,10 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       neLog(.info, title: "App said: ", message: message)
 
       guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
+          if protoType == .wireguard {
+              handleWireguardAppMessage(messageData, completionHandler: completionHandler)
+              return
+          }
           neLog(.error, message: "Failed to serialize message from app")
           return
       }

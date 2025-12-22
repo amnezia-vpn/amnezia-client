@@ -131,7 +131,7 @@ extension PacketTunnelProvider {
         }
     }
 
-    private func handleWireguardAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+    func handleWireguardAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
         if messageData.count == 1 && messageData[0] == 0 {
             wgAdapter?.getRuntimeConfiguration { settings in

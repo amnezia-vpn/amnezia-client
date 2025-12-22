@@ -468,6 +468,7 @@ bool ApiConfigsController::importSerivceFromAppStore()
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             m_apiServicesModel->getCountryCode(),
                                             "",
@@ -588,6 +589,7 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
 
         GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                                 QString(APP_VERSION),
+                                                m_settings->getAppLanguage().name().split("_").first(),
                                                 m_settings->getInstallationUuid(true),
                                                 m_apiServicesModel->getCountryCode(),
                                                 "",
