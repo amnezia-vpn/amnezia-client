@@ -61,11 +61,37 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
 
-                headerText: root.isChangingPassword ? qsTr("Password changing") : qsTr("File encryption")
-                descriptionText: root.isChangingPassword ? qsTr("Files encrypted with old password will stay encrypted with old password")
-                                                         : qsTr("For encrypting backups, configuration files, subscription keys, and logs")
+                headerText: root.isChangingPassword ? qsTr("Change password") : qsTr("Password & Encryption")
+                descriptionText: root.isChangingPassword ? qsTr("Existing encrypted files will still require the old password.\nThe new password will be used for new encrypted files.")
+                                                         : qsTr("Password protection for backups and configuration files.\nRequired to restore or import encrypted files.")
+            }
+
+            BasicButtonType {
+                Layout.leftMargin: 8
+                Layout.bottomMargin: 16
+                implicitHeight: 16
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
+
+                text: qsTr("Learn more")
+
+                clickedFunc: function() {
+                    // TODO: add link
+                }
+            }
+
+            EncryptionIndicator {
+                id: indicator
+
+                visible: !root.isChangingPassword
+
+                textString: qsTr("Password not set. Encryption disabled")
+                iconPath: "qrc:/images/controls/lock-unlocked.svg"
             }
         }
 

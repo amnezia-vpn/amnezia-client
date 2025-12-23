@@ -22,8 +22,9 @@ PageType {
         function onFileEncryptionStateChanged() {
             PageController.showBusyIndicator(true)
             PageController.closePage()
-            PageController.goToPage(PageEnum.PageSettingsAppEncryption)
+            SettingsController.isFileEncryptionEnabled() ? PageController.goToPage(PageEnum.PageSettingsAppEncryption) : PageController.goToPage(PageEnum.PageSettingsAppPassword)
             PageController.showBusyIndicator(false)
+            PageController.showNotificationMessage(SettingsController.isFileEncryptionEnabled() ? qsTr("Encryption enabled") : qsTr("Encryption disabled"))
         }
     }
 
@@ -64,33 +65,56 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
 
-                headerText: qsTr("File encryption")
-                descriptionText: qsTr("For encrypting backups, configuration files, subscription keys, and logs")
+                headerText: qsTr("Password & Encryption")
+                descriptionText: qsTr("Password protection for backups and configuration files.\nRequired to restore or import encrypted files.")
+            }
+
+            BasicButtonType {
+                Layout.leftMargin: 8
+                Layout.bottomMargin: 16
+                implicitHeight: 16
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
+
+                text: qsTr("Learn more")
+
+                clickedFunc: function() {
+                    // TODO: add link
+                }
             }
 
             EncryptionIndicator {
                 id: indicator
 
-                textString: SettingsController.isFileEncryptionEnabled() ? qsTr("Password set. Encryption on") : qsTr("Password not set. Encryption off")
-                iconPath: SettingsController.isFileEncryptionEnabled() ? "qrc:/images/controls/lock-locked.svg" : "qrc:/images/controls/lock-unlocked.svg"
+                textString: qsTr("Password set. Encryption enabled")
+                iconPath: "qrc:/images/controls/lock-locked.svg"
             }
 
 
             BasicButtonType {
-                id: switchEncryptionButton
+                id: disableEncryptionButton
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: SettingsController.isFileEncryptionEnabled() ? qsTr("Turn off encryption") : qsTr("Turn on encryption")
+                text: qsTr("Disable encryption")
 
                 clickedFunc: function() {
-                    SettingsController.isFileEncryptionEnabled() ? SettingsController.toggleFileEncryption(false)
-                                                                 : SettingsController.toggleFileEncryption(true)
+                    passwordDrawer.securedFunc = function() {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.toggleFileEncryption(false)
+                        SettingsController.setPassword("")
+                        SettingsController.setHint("")
+                        PageController.showBusyIndicator(false)
+                    }
+                    passwordDrawer.openTriggered()
                 }
             }
 
@@ -109,9 +133,17 @@ PageType {
 
                 text: qsTr("Change password")
 
-                signal changingPassword
-
                 clickedFunc: function() {
+                    passwordDrawer.securedFunc = function() {
+                        root.isChangingPassword = true
+
+                        PageController.showBusyIndicator(true)
+                        PageController.closePage()
+                        PageController.goToPage(PageEnum.PageSettingsAppPassword)
+                        PageController.showBusyIndicator(false)
+
+                        SettingsController.changingPassword()
+                    }
                     passwordDrawer.openTriggered()
                 }
             }
@@ -125,17 +157,6 @@ PageType {
 
                 anchors.fill: parent
                 expandedHeight: root.height * 0.45
-
-                securedFunc: function() {
-                    root.isChangingPassword = true
-
-                    PageController.showBusyIndicator(true)
-                    PageController.closePage()
-                    PageController.goToPage(PageEnum.PageSettingsAppPassword)
-                    PageController.showBusyIndicator(false)
-
-                    SettingsController.changingPassword()
-                }
             }
         }
 
@@ -143,8 +164,24 @@ PageType {
 
         footer: ColumnLayout {
             width: listView.width
+            CaptionTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
 
-            // TODO: add text
+                horizontalAlignment: Text.AlignHCenter
+                textFormat: Text.RichText
+
+                text: qsTr("If the password is forgotten, it can be recovered. To reset the password, "
+                         + "<a href=\"appSettings\" style=\"text-decoration:none; color:%1;\">settings must be reset</a>."
+                         + "\nEncrypted files can only be opened with password used to encrypt them").arg(AmneziaStyle.color.goldenApricot)
+                color: AmneziaStyle.color.mutedGray
+
+                onLinkActivated: function(link) {
+                    if (link === "appSettings") {
+                        PageController.closePage()
+                    }
+                }
+            }
         }
     }
 }
