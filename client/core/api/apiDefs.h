@@ -68,6 +68,7 @@ namespace apiDefs
         constexpr QLatin1String migrationCode("migration_code");
 
         constexpr QLatin1String transactionId("transaction_id");
+        constexpr QLatin1String isTestFlight("is_test_flight");
 
         constexpr QLatin1String userCountryCode("user_country_code");
 

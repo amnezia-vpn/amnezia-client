@@ -77,6 +77,7 @@ public:
                                           const QString &errorString)> &&callback);
 
     void requestInetAccess();
+    bool isTestFlight();
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);

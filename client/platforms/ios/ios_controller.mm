@@ -1060,3 +1060,8 @@ void IosController::requestInetAccess() {
     }];
     [task resume];
 }
+
+bool IosController::isTestFlight() {
+    NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
+    return receiptURL && [[receiptURL lastPathComponent] isEqualToString:@"sandboxReceipt"];
+}

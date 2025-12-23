@@ -5,6 +5,7 @@
 
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "platforms/ios/ios_controller.h"
 #include "version.h"
 
 namespace
@@ -63,6 +64,9 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[configKey::authData] = authData;
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
     apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    apiPayload[apiDefs::key::isTestFlight] = IosController::Instance()->isTestFlight();
+#endif
 
     QByteArray responseBody;
 

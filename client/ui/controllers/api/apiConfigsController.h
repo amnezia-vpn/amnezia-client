@@ -56,7 +56,7 @@ private:
     QString getVpnKey();
 
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
-    bool installServerFromSubscriptionResponse(const QByteArray &responseBody, ErrorCode *errorOut = nullptr);
+    ErrorCode importServiceFromBilling(const QByteArray &responseBody, const bool isTestFlight);
 
     QList<QString> m_qrCodes;
     QString m_vpnKey;
