@@ -40,7 +40,6 @@ DrawerType2 {
             }
 
             function onImportSecuredFile() {
-                // TODO: file name not showing on import
                 root.securedFunc = function() {
                     if (ImportController.extractConfigFromData(SystemController.getDecryptedData(fileName, passwordField.textField.text))) {
                         PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
