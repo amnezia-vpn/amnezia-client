@@ -7,7 +7,6 @@ import Style 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
-
 import "../Config"
 
 Rectangle {
@@ -36,11 +35,6 @@ Rectangle {
     RowLayout {
         id: content
         anchors.centerIn: parent
-
-        anchors.leftMargin: content.width / 4
-        anchors.rightMargin: content.width / 4
-        anchors.topMargin: 4
-        anchors.bottomMargin: 4
 
         spacing: 0
 
