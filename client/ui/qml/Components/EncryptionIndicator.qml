@@ -7,11 +7,12 @@ import Style 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
-
 import "../Config"
 
 Rectangle {
     id: root
+
+    property bool linkEnabled: false
 
     property string textColor: AmneziaStyle.color.paleGray
 
@@ -33,23 +34,15 @@ Rectangle {
 
     RowLayout {
         id: content
-        width: parent.width
-        anchors.fill: parent
-
-        anchors.leftMargin: content.width / 4
-        anchors.rightMargin: content.width / 4
-        anchors.topMargin: 4
-        anchors.bottomMargin: 4
+        anchors.centerIn: parent
 
         spacing: 0
 
         Image {
-            Layout.alignment: Qt.AlignTop
+            width: root.iconWidth
+            height: root.iconHeight
 
-            width: iconWidth
-            height: iconHeight
-
-            source: iconPath
+            source: root.iconPath
         }
 
         CaptionTextType {
@@ -58,9 +51,17 @@ Rectangle {
             Layout.fillWidth: true
             Layout.leftMargin: 8
 
-            text: textString
-            textFormat: root.textFormat
-            color: textColor
+            text: root.linkEnabled ? root.textString
+                                     + qsTr(" <a href=\"learnMore\" style=\"text-decoration:none; color:%1\">Learn more</a>").arg(AmneziaStyle.color.goldenApricot)
+                                   : root.textString
+            textFormat: Text.RichText
+            color: root.textColor
+
+            onLinkActivated: function(link) {
+                if (link === "learnMore") {
+                    console.log("Learn more pressed")
+                }
+            }
         }
     }
 }

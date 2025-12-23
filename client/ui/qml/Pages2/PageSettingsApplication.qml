@@ -218,8 +218,8 @@ PageType {
 
                 Layout.fillWidth: true
 
-                text: qsTr("File encryption")
-                descriptionText: qsTr("For encrypting backups, configuration files, subscription keys, and logs")
+                text: qsTr("Password & Encryption")
+                descriptionText: qsTr("Password protection for backups and configuration files")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

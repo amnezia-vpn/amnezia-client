@@ -54,7 +54,7 @@ DrawerType2 {
             Layout.fillWidth: true
             Layout.bottomMargin: 8
 
-            text: qsTr("Enter password to continue")
+            text: qsTr("Password required")
         }
 
         TextFieldWithHeaderType {
@@ -110,12 +110,12 @@ DrawerType2 {
             clickedFunc: function() {
                 if (fromOutside) {
                     if (!SystemController.isPasswordValid(fileName, passwordField.textField.text)) {
-                        passwordField.errorText = qsTr("Incorrect password")
+                        passwordField.errorText = qsTr("Invalid password")
                         return
                     }
                 } else {
                     if (passwordField.textField.text !== SettingsController.getPassword()) {
-                        passwordField.errorText = qsTr("Incorrect password")
+                        passwordField.errorText = qsTr("Invalid password")
                         return
                     }
                 }
