@@ -76,7 +76,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                headerText: root.isChangingPassword ? qsTr("Enter new password one more time") : qsTr("Enter password one more time")
+                headerText: root.isChangingPassword ? qsTr("Re-enter new password") : qsTr("Re-enter password")
                 textField.echoMode: hideContent ? TextInput.Password : TextInput.Normal
                 textField.placeholderText: ""
                 textField.text: textField.text
