@@ -59,7 +59,7 @@ Rectangle {
 
             onLinkActivated: function(link) {
                 if (link === "learnMore") {
-                    console.log("Learn more pressed")
+                    Qt.openUrlExternally("https://storage.googleapis.com/amnezia/docs?m-path=/documentation/instructions/encryption")
                 }
             }
         }

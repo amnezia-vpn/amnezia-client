@@ -81,7 +81,7 @@ PageType {
                 text: qsTr("Learn more")
 
                 clickedFunc: function() {
-                    // TODO: add link
+                    Qt.openUrlExternally("https://storage.googleapis.com/amnezia/docs?m-path=/documentation/instructions/encryption")
                 }
             }
 
