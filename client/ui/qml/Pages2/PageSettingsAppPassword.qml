@@ -199,7 +199,7 @@ PageType {
     QtObject {
         id: hintObject
 
-        property string title: qsTr("Hint for password")
+        property string title: root.isChangingPassword ? qsTr("New hint password (optional)") : qsTr("Password hint")
         readonly property string placeholderContent: ""
         property string imageSource: ""
         property bool hideContent: false
