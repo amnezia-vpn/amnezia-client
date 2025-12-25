@@ -65,7 +65,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
     apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    apiPayload[apiDefs::key::isTestFlight] = IosController::Instance()->isTestFlight();
+    apiPayload[apiDefs::key::isTestFlight] = apiConfig.value(apiDefs::key::isTestFlight).toBool(false);
 #endif
 
     QByteArray responseBody;

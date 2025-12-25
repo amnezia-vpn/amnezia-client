@@ -648,7 +648,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    apiPayload[apiDefs::key::isTestFlight] = apiConfigObject.value(apiDefs::key::isTestFlight).toBool(false);
+    apiPayload[apiDefs::key::isTestFlight] = apiConfig.value(apiDefs::key::isTestFlight).toBool(false);
 #endif
     appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
 
