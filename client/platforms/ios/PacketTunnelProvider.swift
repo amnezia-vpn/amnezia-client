@@ -76,7 +76,12 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 return
             }
 
-            guard hasMeaningfulChange, self.protoType != nil else { return }
+            guard hasMeaningfulChange, let proto = self.protoType else { return }
+
+            // WireGuard/AWG manages network changes internally; avoid restarting the tunnel here.
+            if proto == .wireguard {
+                return
+            }
 
             DispatchQueue.main.async {
                 self.handle(networkChange: path) { _ in }

@@ -94,6 +94,48 @@ Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
 }
 
 namespace {
+constexpr int kHandshakeTimeoutMs = 12000;
+constexpr uint64_t kHandshakeRxThreshold = 4096;
+bool isWireGuardBasedProto(amnezia::Proto proto) {
+    return proto == amnezia::Proto::WireGuard || proto == amnezia::Proto::Awg;
+}
+
+uint64_t uint64FromResponse(NSDictionary *response, NSString *key, uint64_t fallback = 0) {
+    id value = response[key];
+    if (!value || value == [NSNull null]) {
+        return fallback;
+    }
+    if ([value isKindOfClass:[NSNumber class]]) {
+        return [(NSNumber *)value unsignedLongLongValue];
+    }
+    if ([value isKindOfClass:[NSString class]]) {
+        const char *str = [(NSString *)value UTF8String];
+        if (str && *str) {
+            return strtoull(str, nullptr, 10);
+        }
+    }
+    return fallback;
+}
+
+long long int64FromResponse(NSDictionary *response, NSString *key, long long fallback = 0) {
+    id value = response[key];
+    if (!value || value == [NSNull null]) {
+        return fallback;
+    }
+    if ([value isKindOfClass:[NSNumber class]]) {
+        return [(NSNumber *)value longLongValue];
+    }
+    if ([value isKindOfClass:[NSString class]]) {
+        const char *str = [(NSString *)value UTF8String];
+        if (str && *str) {
+            return strtoll(str, nullptr, 10);
+        }
+    }
+    return fallback;
+}
+}
+
+namespace {
 IosController* s_instance = nullptr;
 }
 
@@ -112,6 +154,15 @@ IosController::IosController() : QObject()
     [[NSNotificationCenter defaultCenter]
         addObserver: (__bridge NSObject *)m_iosControllerWrapper selector:@selector(vpnConfigurationDidChange:) name:NEVPNConfigurationChangeNotification object:nil];
 
+}
+
+void IosController::emitConnectionStateIfChanged(Vpn::ConnectionState state)
+{
+    if (m_lastEmittedState == state) {
+        return;
+    }
+    m_lastEmittedState = state;
+    emit connectionStateChanged(state);
 }
 
 IosController* IosController::Instance() {
@@ -280,33 +331,65 @@ void IosController::disconnectVpn()
 
 void IosController::checkStatus()
 {
+    if (!m_currentTunnel) {
+        return;
+    }
+
+    if (m_currentTunnel.connection.status != NEVPNStatusConnected) {
+        return;
+    }
+
+    if (m_statusRequestInFlight.exchange(true)) {
+        return;
+    }
+
     NSString *actionKey = [NSString stringWithUTF8String:MessageKey::action];
     NSString *actionValue = [NSString stringWithUTF8String:Action::getStatus];
     NSString *tunnelIdKey = [NSString stringWithUTF8String:MessageKey::tunnelId];
     NSString *tunnelIdValue = !m_tunnelId.isEmpty() ? m_tunnelId.toNSString() : @"";
 
     NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue};
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     sendVpnExtensionMessage(message, [&](NSDictionary* response){
-        uint64_t txBytes = [response[@"tx_bytes"] intValue];
-        uint64_t rxBytes = [response[@"rx_bytes"] intValue];
-        
-        uint64_t last_handshake_time_sec = 0;
-#if !MACOS_NE
-        if (response[@"last_handshake_time_sec"] && ![response[@"last_handshake_time_sec"] isKindOfClass:[NSNull class]]) {
-            last_handshake_time_sec = [response[@"last_handshake_time_sec"] intValue];
-        } else {
-            qDebug() << "Key last_handshake_time_sec is missing or null";
+        if (!response) {
+            QMetaObject::invokeMethod(this, [this]() {
+                m_statusRequestInFlight = false;
+            }, Qt::QueuedConnection);
+            return;
         }
 
-        if (last_handshake_time_sec < 0) {
-            disconnectVpn();
-            qDebug() << "Invalid handshake time, disconnecting VPN.";
-        }
-#endif
+        const uint64_t txBytes = uint64FromResponse(response, @"tx_bytes");
+        const uint64_t rxBytes = uint64FromResponse(response, @"rx_bytes");
+        const long long last_handshake_time_sec = int64FromResponse(response, @"last_handshake_time_sec");
 
-        emit bytesChanged(rxBytes - m_rxBytes, txBytes - m_txBytes);
-        m_rxBytes = rxBytes;
-        m_txBytes = txBytes;
+        QMetaObject::invokeMethod(this, [this, txBytes, rxBytes, last_handshake_time_sec]() {
+            if (isWireGuardBasedProto(m_proto) && m_handshakeAwaiting) {
+                const bool hasHandshakeData = (last_handshake_time_sec >= 0);
+                const bool hasFreshHandshake = hasHandshakeData &&
+                        ((last_handshake_time_sec > 0) ||
+                         (rxBytes >= kHandshakeRxThreshold) ||
+                         (txBytes >= kHandshakeRxThreshold));
+
+                if (hasFreshHandshake) {
+                    m_handshakeConfirmed = true;
+                    m_handshakeAwaiting = false;
+                    m_handshakeTimer.invalidate();
+                    qDebug() << "IosController::checkStatus : handshake confirmed";
+                    emitConnectionStateIfChanged(Vpn::ConnectionState::Connected);
+                } else if (m_handshakeTimer.isValid() &&
+                           m_handshakeTimer.elapsed() > kHandshakeTimeoutMs) {
+                    m_handshakeTimer.restart();
+                    qDebug() << "IosController::checkStatus : handshake timed out, keeping tunnel alive";
+                    emitConnectionStateIfChanged(Vpn::ConnectionState::Reconnecting);
+                }
+            }
+
+            emit bytesChanged(rxBytes - m_rxBytes, txBytes - m_txBytes);
+            m_rxBytes = rxBytes;
+            m_txBytes = txBytes;
+            m_statusRequestInFlight = false;
+        }, Qt::QueuedConnection);
+    });
     });
 }
 
@@ -413,7 +496,22 @@ void IosController::vpnStatusDidChange(void *pNotification)
             }
         }
 
-        emit connectionStateChanged(iosStatusToState(session.status));
+        Vpn::ConnectionState nextState = iosStatusToState(session.status);
+        if (session.status == NEVPNStatusConnected && isWireGuardBasedProto(m_proto)) {
+            if (!m_handshakeConfirmed) {
+                nextState = Vpn::ConnectionState::Connecting;
+                if (!m_handshakeAwaiting) {
+                    m_handshakeAwaiting = true;
+                    m_handshakeTimer.restart();
+                }
+            }
+        } else if (session.status != NEVPNStatusConnected) {
+            m_handshakeAwaiting = false;
+            m_handshakeConfirmed = false;
+            m_handshakeTimer.invalidate();
+            m_statusRequestInFlight = false;
+        }
+        emitConnectionStateIfChanged(nextState);
     }
 }
 
@@ -799,6 +897,9 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
 {
     if (!m_currentTunnel) {
         qDebug() << "Cannot set an extension callback without a tunnel manager";
+        if (callback) {
+            callback(nil);
+        }
         return;
     }
 
@@ -808,6 +909,9 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
     if (!data || error) {
         qDebug() << "Failed to serialize message to VpnExtension as JSON. Error:"
                  << [error.localizedDescription UTF8String];
+        if (callback) {
+            callback(nil);
+        }
         return;
     }
 
@@ -838,11 +942,18 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
         [session sendProviderMessage:data returnError:&sendError responseHandler:completionHandler];
     } else {
         qDebug() << "Method sendProviderMessage:responseHandler:error: does not exist";
+        if (callback) {
+            callback(nil);
+        }
+        return;
     }
 
     if (sendError) {
         qDebug() << "Failed to send message to VpnExtension. Error:"
                  << [sendError.localizedDescription UTF8String];
+        if (callback) {
+            callback(nil);
+        }
     }
 
 }
