@@ -21,4 +21,5 @@ if [ "$(systemctl is-active docker)" != "active" ]; then \
   sleep 5; sudo systemctl start docker; sleep 5;\
 fi;\
 if ! command -v sudo > /dev/null 2>&1; then echo "Failed to install sudo, command not found"; exit 1; fi;\
-docker --version
+docker --version;\
+uname -sr
