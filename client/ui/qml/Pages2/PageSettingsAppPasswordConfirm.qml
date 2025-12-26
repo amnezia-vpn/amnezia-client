@@ -55,8 +55,9 @@ PageType {
                 Layout.rightMargin: 16
 
                 headerText: root.isChangingPassword ? qsTr("Confirm new password") : qsTr("Confirm password")
-                descriptionText: root.isChangingPassword ? qsTr("") : qsTr("If you forget your password, you'll have to reset all app settings to reset it."
-                                                                         + " Encrypted files will remain encrypted")
+                descriptionText: root.isChangingPassword ? qsTr("") : qsTr("If the password is forgotten, it cant be recovered. "
+                                                                         + "To reset the password, the app settings must be reset.\n"
+                                                                         + "Encrypted files can only be opened with the password used to encrypt them")
             }
         }
 
