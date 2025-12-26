@@ -390,6 +390,7 @@ PageType {
 
                 headerText: qsTr("I1 - Special junk 1")
                 textField.text: serverSpecialJunk1
+                checkEmptyText: false
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverSpecialJunk1) {
@@ -412,6 +413,7 @@ PageType {
 
                 headerText: qsTr("I2 - Special junk 2")
                 textField.text: serverSpecialJunk2
+                checkEmptyText: false
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverSpecialJunk2) {
@@ -434,6 +436,7 @@ PageType {
 
                 headerText: qsTr("I3 - Special junk 3")
                 textField.text: serverSpecialJunk3
+                checkEmptyText: false
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverSpecialJunk3) {
@@ -456,6 +459,7 @@ PageType {
 
                 headerText: qsTr("I4 - Special junk 4")
                 textField.text: serverSpecialJunk4
+                checkEmptyText: false
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverSpecialJunk4) {
@@ -524,6 +528,7 @@ PageType {
                 }
 
                 clickedFunc: function() {
+                    forceActiveFocus()
                     if (delegateItem.isEnabled) {
                         if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
                                                           transportPacketMagicHeaderTextField.textField.text,
