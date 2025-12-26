@@ -752,6 +752,12 @@ bool SubscriptionController::isVlessProtocol(const QString &serverId) const
     return apiV2.has_value() && apiV2->serviceProtocol() == "vless";
 }
 
+bool SubscriptionController::isAwgProtocol(const QString &serverId) const
+{
+    auto apiV2 = m_serversRepository->apiV2Config(serverId);
+    return apiV2.has_value() && apiV2->serviceProtocol() == "awg";
+}
+
 ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
                                                           const QString &serviceProtocol, const QString &productId,
                                                           int *duplicateServerIndex)

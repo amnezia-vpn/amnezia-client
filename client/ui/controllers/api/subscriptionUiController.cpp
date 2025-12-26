@@ -510,6 +510,11 @@ bool SubscriptionUiController::isVlessProtocol(const QString &serverId)
     return m_subscriptionController->isVlessProtocol(serverId);
 }
 
+bool SubscriptionUiController::isAwgProtocol(const QString &serverId)
+{
+    return m_subscriptionController->isAwgProtocol(serverId);
+}
+
 
 void SubscriptionUiController::removeApiConfig(const QString &serverId)
 {

@@ -296,6 +296,7 @@ PageType {
                 visible: footer.isVisibleForAmneziaFree
             }
 
+
             WarningType {
                 id: warning
 
@@ -320,11 +321,25 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: connectionSwitcher
+
+                Layout.fillWidth: true
+                Layout.topMargin: warning.visible ? 16 : 32
+                text: qsTr("Connection")
+                descriptionText: qsTr("Protocol selection and local proxy setup")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsConnectionType)
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
                 id: vpnKey
 
                 Layout.fillWidth: true
-                Layout.topMargin: warning.visible ? 16 : 0
-
                 visible: footer.isVisibleForAmneziaFree
 
                 text: qsTr("Subscription Key")
