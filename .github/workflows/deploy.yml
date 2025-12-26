@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      QT_VERSION: 6.6.2
+      QT_VERSION: 6.9.2
       QIF_VERSION: 4.7
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
@@ -91,7 +91,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      QT_VERSION: 6.6.2
+      QT_VERSION: 6.9.2
       QIF_VERSION: 4.7
       BUILD_ARCH: 64
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
@@ -374,7 +374,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.8.3
+      QT_VERSION: 6.9.2
 
       MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
