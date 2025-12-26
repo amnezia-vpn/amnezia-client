@@ -55,8 +55,8 @@ private:
     int getQrCodesCount();
     QString getVpnKey();
 
-    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
-    ErrorCode importServiceFromBilling(const QByteArray &responseBody, const bool isTestFlight);
+    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
+    ErrorCode importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase);
 
     QList<QString> m_qrCodes;
     QString m_vpnKey;

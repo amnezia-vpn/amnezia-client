@@ -136,9 +136,8 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
 }
 
 GatewayController::DecryptionResult GatewayController::tryDecryptResponseBody(const QByteArray &encryptedResponseBody,
-                                                                             QNetworkReply::NetworkError replyError,
-                                                                             const QByteArray &key, const QByteArray &iv,
-                                                                             const QByteArray &salt)
+                                                                              QNetworkReply::NetworkError replyError, const QByteArray &key,
+                                                                              const QByteArray &iv, const QByteArray &salt)
 {
     DecryptionResult result;
     result.decryptedBody = encryptedResponseBody;
@@ -179,23 +178,24 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     reply->deleteLater();
 
-    auto decryptionResult = tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
+    auto decryptionResult =
+            tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
 
-    if (sslErrors.isEmpty()
-        && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
+    if (sslErrors.isEmpty() && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
         auto requestFunction = [&encRequestData, &encryptedResponseBody](const QString &url) {
             encRequestData.request.setUrl(url);
             return amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
         };
 
-        auto replyProcessingFunction = [&encryptedResponseBody, &replyErrorString, &replyError, &httpStatusCode, &sslErrors,
-                                        &encRequestData, &decryptionResult, this](QNetworkReply *reply, const QList<QSslError> &nestedSslErrors) {
+        auto replyProcessingFunction = [&encryptedResponseBody, &replyErrorString, &replyError, &httpStatusCode, &sslErrors, &encRequestData,
+                                        &decryptionResult, this](QNetworkReply *reply, const QList<QSslError> &nestedSslErrors) {
             encryptedResponseBody = reply->readAll();
             replyErrorString = reply->errorString();
             replyError = reply->error();
             httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
-            decryptionResult = tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
+            decryptionResult =
+                    tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
 
             if (!sslErrors.isEmpty()
                 || shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
@@ -210,7 +210,8 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
         bypassProxy(endpoint, serviceType, userCountryCode, requestFunction, replyProcessingFunction);
     }
 
-    auto errorCode = apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, decryptionResult.decryptedBody);
+    auto errorCode =
+            apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, decryptionResult.decryptedBody);
     if (errorCode) {
         return errorCode;
     }
@@ -250,12 +251,14 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 
         reply->deleteLater();
 
-        auto decryptionResult = tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
+        auto decryptionResult =
+                tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
 
-        auto processResponse = [promise, encRequestData](const GatewayController::DecryptionResult &decryptionResult, const QList<QSslError> &sslErrors,
-                                                         QNetworkReply::NetworkError replyError, const QString &replyErrorString,
-                                                         int httpStatusCode) {
-            auto errorCode = apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, decryptionResult.decryptedBody);
+        auto processResponse = [promise, encRequestData](const GatewayController::DecryptionResult &decryptionResult,
+                                                         const QList<QSslError> &sslErrors, QNetworkReply::NetworkError replyError,
+                                                         const QString &replyErrorString, int httpStatusCode) {
+            auto errorCode = apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode,
+                                                               decryptionResult.decryptedBody);
             if (errorCode) {
                 promise->addResult(qMakePair(errorCode, QByteArray()));
                 promise->finish();
@@ -274,8 +277,7 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
             promise->finish();
         };
 
-        if (sslErrors->isEmpty()
-            && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
+        if (sslErrors->isEmpty() && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
             auto serviceType = apiPayload.value(apiDefs::key::serviceType).toString("");
             auto userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString("");
 
@@ -299,14 +301,15 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 
             getProxyUrlsAsync(proxyStorageUrls, 0, [this, encRequestData, endpoint, processResponse](const QStringList &proxyUrls) {
                 getProxyUrlAsync(proxyUrls, 0, [this, encRequestData, endpoint, processResponse](const QString &proxyUrl) {
-                    bypassProxyAsync(endpoint, proxyUrl, encRequestData, [processResponse, this](const QByteArray &decryptedBody, bool isDecryptionSuccessful,
-                                                                                                 const QList<QSslError> &sslErrors, QNetworkReply::NetworkError replyError,
-                                                                                                 const QString &replyErrorString, int httpStatusCode) {
-                        GatewayController::DecryptionResult result;
-                        result.decryptedBody = decryptedBody;
-                        result.isDecryptionSuccessful = isDecryptionSuccessful;
-                        processResponse(result, sslErrors, replyError, replyErrorString, httpStatusCode);
-                    });
+                    bypassProxyAsync(endpoint, proxyUrl, encRequestData,
+                                     [processResponse, this](const QByteArray &decryptedBody, bool isDecryptionSuccessful,
+                                                             const QList<QSslError> &sslErrors, QNetworkReply::NetworkError replyError,
+                                                             const QString &replyErrorString, int httpStatusCode) {
+                                         GatewayController::DecryptionResult result;
+                                         result.decryptedBody = decryptedBody;
+                                         result.isDecryptionSuccessful = isDecryptionSuccessful;
+                                         processResponse(result, sslErrors, replyError, replyErrorString, httpStatusCode);
+                                     });
                 });
             });
 
@@ -404,7 +407,8 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
     return {};
 }
 
-bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody, bool isDecryptionSuccessful)
+bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody,
+                                          bool isDecryptionSuccessful)
 {
     const QByteArray &responseBody = decryptedResponseBody;
 
@@ -594,7 +598,8 @@ void GatewayController::getProxyUrlsAsync(const QStringList proxyStorageUrls, co
     });
 }
 
-void GatewayController::getProxyUrlAsync(const QStringList proxyUrls, const int currentProxyIndex, std::function<void(const QString &)> onComplete)
+void GatewayController::getProxyUrlAsync(const QStringList proxyUrls, const int currentProxyIndex,
+                                         std::function<void(const QString &)> onComplete)
 {
     if (currentProxyIndex >= proxyUrls.size()) {
         onComplete("");
@@ -651,9 +656,10 @@ void GatewayController::bypassProxyAsync(
 
         reply->deleteLater();
 
-        auto decryptionResult = tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
+        auto decryptionResult =
+                tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
 
-        onComplete(decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful,
-                    *sslErrors, replyError, replyErrorString, httpStatusCode);
+        onComplete(decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, *sslErrors, replyError, replyErrorString,
+                   httpStatusCode);
     });
 }

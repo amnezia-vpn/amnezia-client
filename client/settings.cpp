@@ -14,7 +14,7 @@ namespace
     const char cloudFlareNs1[] = "1.1.1.1";
     const char cloudFlareNs2[] = "1.0.0.1";
 
-    constexpr char gatewayEndpoint[] = "http://192.168.0.142:80/";
+    constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
 }
 
 Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this)
@@ -534,14 +534,14 @@ void Settings::setDevGatewayEndpoint()
     m_gatewayEndpoint = DEV_AGW_ENDPOINT;
 }
 
-QString Settings::getGatewayEndpoint()
+QString Settings::getGatewayEndpoint(bool isTestPurchase)
 {
-    return m_gatewayEndpoint;
+    return isTestPurchase ? DEV_AGW_ENDPOINT : m_gatewayEndpoint;
 }
 
-bool Settings::isDevGatewayEnv()
+bool Settings::isDevGatewayEnv(bool isTestPurchase)
 {
-    return value("Conf/devGatewayEnv", false).toBool();
+    return isTestPurchase ? true : value("Conf/devGatewayEnv", false).toBool();
 }
 
 void Settings::toggleDevGatewayEnv(bool enabled)

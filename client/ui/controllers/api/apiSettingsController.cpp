@@ -50,13 +50,14 @@ bool ApiSettingsController::getAccountInfo(bool reload)
         wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
-
     auto processedIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfig = m_serversModel->getServerConfig(processedIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
     auto authData = serverConfig.value(configKey::authData).toObject();
+
+    bool isTestPurchase = apiConfig.value(apiDefs::key::isTestPurchase).toBool(false);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), m_settings->isDevGatewayEnv(isTestPurchase),
+                                        requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
 
     QJsonObject apiPayload;
     apiPayload[configKey::userCountryCode] = apiConfig.value(configKey::userCountryCode).toString();
@@ -64,9 +65,6 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[configKey::authData] = authData;
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
     apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    apiPayload[apiDefs::key::isTestFlight] = apiConfig.value(apiDefs::key::isTestFlight).toBool(false);
-#endif
 
     QByteArray responseBody;
 

@@ -286,12 +286,9 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    apiPayload[apiDefs::key::isTestFlight] = apiConfigObject.value(apiDefs::key::isTestFlight).toBool(false);
-#endif
-
+    bool isTestPurchase = apiConfigObject.value(apiDefs::key::isTestPurchase).toBool(false);
     QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/native_config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/native_config"), apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -321,12 +318,9 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
                                             serverConfigObject.value(configKey::authData).toObject() };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    apiPayload[apiDefs::key::isTestFlight] = apiConfigObject.value(apiDefs::key::isTestFlight).toBool(false);
-#endif
-
+    bool isTestPurchase = apiConfigObject.value(apiDefs::key::isTestPurchase).toBool(false);
     QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_native_config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_native_config"), apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         emit errorOccurred(errorCode);
         return false;
@@ -430,18 +424,17 @@ bool ApiConfigsController::importSerivceFromAppStore()
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     apiPayload[apiDefs::key::transactionId] = originalTransactionId;
-    auto isTestFlight = IosController::Instance()->isTestFlight();
-    apiPayload[apiDefs::key::isTestFlight] = isTestFlight;
+    auto isTestPurchase = IosController::Instance()->isTestPurchase();
 
     ErrorCode errorCode;
     QByteArray responseBody;
-    errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody);
+    errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
     }
 
-    errorCode = importServiceFromBilling(responseBody, isTestFlight);
+    errorCode = importServiceFromBilling(responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -469,12 +462,16 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
     }
 
     // Ensure we have a valid premium selection for gateway requests
+    bool premiumSelected = false;
     for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
         m_apiServicesModel->setServiceIndex(i);
         if (m_apiServicesModel->getSelectedServiceType() == premiumServiceType) {
+            premiumSelected = true;
             break;
         }
+    }
 
+    if (!premiumSelected) {
         emit errorOccurred(ErrorCode::ApiServicesMissingError);
         return false;
     }
@@ -539,17 +536,16 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
 
         QJsonObject apiPayload = gatewayRequestData.toJsonObject();
         apiPayload[apiDefs::key::transactionId] = originalTransactionId;
-        auto isTestFlight = IosController::Instance()->isTestFlight();
-        apiPayload[apiDefs::key::isTestFlight] = isTestFlight;
+        auto isTestPurchase = IosController::Instance()->isTestPurchase();
         QByteArray responseBody;
-        ErrorCode errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody);
+        ErrorCode errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody, isTestPurchase);
         if (errorCode != ErrorCode::NoError) {
             qWarning().noquote() << "[IAP] Failed to restore transaction" << originalTransactionId
                                  << "errorCode =" << static_cast<int>(errorCode);
             continue;
         }
 
-        ErrorCode installError = importServiceFromBilling(responseBody, isTestFlight);
+        ErrorCode installError = importServiceFromBilling(responseBody, isTestPurchase);
         if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
             duplicateConfigAlreadyPresent = true;
             qInfo().noquote() << "[IAP] Skipping restored transaction" << originalTransactionId
@@ -647,17 +643,15 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     ProtocolData protocolData = generateProtocolData(gatewayRequestData.serviceProtocol);
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    apiPayload[apiDefs::key::isTestFlight] = apiConfig.value(apiDefs::key::isTestFlight).toBool(false);
-#endif
     appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
 
     if (newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig) {
         apiPayload.insert(configKey::isConnectEvent, true);
     }
 
+    bool isTestPurchase = apiConfig.value(apiDefs::key::isTestPurchase).toBool(false);
     QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody, isTestPurchase);
 
     QJsonObject newServerConfig;
     if (errorCode == ErrorCode::NoError) {
@@ -760,12 +754,10 @@ bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
                                             serverConfigObject.value(configKey::authData).toObject() };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    apiPayload[apiDefs::key::isTestFlight] = apiConfigObject.value(apiDefs::key::isTestFlight).toBool(false);
-#endif
-
+    bool isTestPurchase = apiConfigObject.value(apiDefs::key::isTestPurchase).toBool(false);
     QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody, isTestPurchase);
+
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         emit errorOccurred(errorCode);
         return false;
@@ -798,12 +790,9 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
                                             serverConfigObject.value(configKey::authData).toObject() };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    apiPayload[apiDefs::key::isTestFlight] = apiConfigObject.value(apiDefs::key::isTestFlight).toBool(false);
-#endif
-
+    bool isTestPurchase = apiConfigObject.value(apiDefs::key::isTestPurchase).toBool(false);
     QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         emit errorOccurred(errorCode);
         return false;
@@ -882,7 +871,7 @@ QString ApiConfigsController::getVpnKey()
     return m_vpnKey;
 }
 
-ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &responseBody, const bool isTestFlight)
+ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase)
 {
 #ifdef Q_OS_IOS
     QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
@@ -916,7 +905,7 @@ ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &respo
     quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
     auto apiConfig = configObject.value(apiDefs::key::apiConfig).toObject();
     apiConfig[apiDefs::key::vpnKey] = normalizedKey;
-    apiConfig[apiDefs::key::isTestFlight] = isTestFlight;
+    apiConfig[apiDefs::key::isTestPurchase] = isTestPurchase;
 
     configObject.insert(apiDefs::key::apiConfig, apiConfig);
     configObject.insert(config_key::crc, crc);
@@ -925,14 +914,15 @@ ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &respo
     return ErrorCode::NoError;
 #else
     Q_UNUSED(responseBody)
-    Q_UNUSED(isTestFlight)
+    Q_UNUSED(isTestPurchase)
     return ErrorCode::NoError;
 #endif
 }
 
-ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)
+ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody,
+                                               bool isTestPurchase)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), m_settings->isDevGatewayEnv(isTestPurchase),
+                                        apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }
