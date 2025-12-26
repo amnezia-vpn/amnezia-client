@@ -73,8 +73,9 @@ PageType {
                 id: indicator
 
                 visible: SettingsController.isFileEncryptionEnabled()
+                linkEnabled: true
 
-                textString: qsTr("Encryption enabled. Learn more")
+                textString: qsTr("Encryption enabled.")
                 iconPath: "qrc:/images/controls/lock-locked.svg"
             }
 

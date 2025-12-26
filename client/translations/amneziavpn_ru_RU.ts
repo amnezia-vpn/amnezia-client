@@ -89,17 +89,17 @@
 <context>
     <name>ApiConfigsController</name>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="413"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="441"/>
         <source>%1 installed successfully.</source>
         <translation>%1 успешно установлен.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="473"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="505"/>
         <source>API config reloaded</source>
         <translation>Конфигурация API перезагружена</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="477"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="509"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>Страна подключения изменена на %1</translation>
     </message>
@@ -350,6 +350,14 @@
         <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="29"/>
         <source>&amp;SelectAll</source>
         <translation>Выбрать всё</translation>
+    </message>
+</context>
+<context>
+    <name>EncryptionIndicator</name>
+    <message>
+        <location filename="../ui/qml/Components/EncryptionIndicator.qml" line="55"/>
+        <source> &lt;a href=&quot;learnMore&quot; style=&quot;text-decoration:none; color:%1&quot;&gt;Learn more&lt;/a&gt;</source>
+        <translation>&lt;a href=&quot;Подробнее&quot; style=&quot;text-decoration:none; color:%1&quot;&gt;Learn more&lt;/a&gt;</translation>
     </message>
 </context>
 <context>
@@ -632,22 +640,27 @@ Thank you for staying with us!</source>
         <translation>Логирование включено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="130"/>
+        <source>Dev gateway enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="172"/>
         <source>Split tunneling enabled</source>
         <translation>Раздельное туннелирование включено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="172"/>
         <source>Split tunneling disabled</source>
         <translation>Раздельное туннелирование выключено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="381"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="409"/>
         <source>VPN protocol</source>
         <translation>VPN-протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="434"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="462"/>
         <source>Servers</source>
         <translation>Серверы</translation>
     </message>
@@ -1579,32 +1592,37 @@ Thank you for staying with us!</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="102"/>
         <source>Servers</source>
         <translation>Серверы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="112"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="113"/>
         <source>Connection</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="124"/>
         <source>Application</source>
         <translation>Приложение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="134"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="135"/>
+        <source>News &amp; Notifications</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="152"/>
         <source>Backup</source>
         <translation>Резервное копирование</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="163"/>
         <source>About AmneziaVPN</source>
         <translation>Об AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="156"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="174"/>
         <source>Dev console</source>
         <translation>Dev console</translation>
     </message>
@@ -1879,67 +1897,72 @@ Thank you for staying with us!</source>
         <translation>Для настройки роутера или приложения AmneziaWG</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="70"/>
+        <source>Encryption enabled.</source>
+        <translation>Шифрование включено.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="83"/>
         <source>The configuration needs to be reissued</source>
         <translation>Необходимо заново скачать конфигурацию и добавить ее в приложение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="135"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="145"/>
         <source> configuration file</source>
         <translation> файл конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="159"/>
         <source>Generate a new configuration file</source>
         <translation>Создать новый файл конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="150"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="160"/>
         <source>The previously created one will stop working</source>
         <translation>Ранее созданный файл перестанет работать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="178"/>
         <source>Revoke the current configuration file</source>
         <translation>Отозвать текущий  файл конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="201"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="211"/>
         <source>Config file saved</source>
         <translation>Файл конфигурации сохранен</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="225"/>
         <source>The config has been revoked</source>
         <translation>Конфигурация была отозвана</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="232"/>
         <source>Generate a new %1 configuration file?</source>
         <translation>Создать новый %1 файл конфигурации?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="234"/>
         <source>Revoke the current %1 configuration file?</source>
         <translation>Отозвать текущий %1 файл конфигурации?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="227"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="237"/>
         <source>Your previous configuration file will no longer work, and it will not be possible to connect using it</source>
         <translation>Ваш предыдущий файл конфигурации не будет работать, и вы больше не сможете использовать его для подключения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="228"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="238"/>
         <source>Download</source>
         <translation>Скачать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="228"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="238"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="229"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="239"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
@@ -2158,6 +2181,180 @@ Thank you for staying with us!</source>
     </message>
 </context>
 <context>
+    <name>PageSettingsAppEncryption</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppEncryption.qml" line="27"/>
+        <source>Encryption enabled</source>
+        <translation>Шифрование включено</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppEncryption.qml" line="27"/>
+        <source>Encryption disabled</source>
+        <translation>Шифрование выключено</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppEncryption.qml" line="69"/>
+        <source>Password &amp; Encryption</source>
+        <translation>Пароль и шифрование</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppEncryption.qml" line="70"/>
+        <source>Password protection for backups and configuration files.
+Required to restore or import encrypted files.</source>
+        <translation>Пароль используется для защиты резервных копий и файлов конфигурации.
+Он потребуется при восстановлении или импорте зашифрованных файлов.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppEncryption.qml" line="84"/>
+        <source>Learn more</source>
+        <translation>Подробнее</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppEncryption.qml" line="94"/>
+        <source>Password set. Encryption enabled</source>
+        <translation>Пароль задан. Шифрование включено</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppEncryption.qml" line="107"/>
+        <source>Disable encryption</source>
+        <translation>Выключить шифрование</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppEncryption.qml" line="174"/>
+        <source>If the password is forgotten, it can be recovered. To reset the password, &lt;a href=&quot;appSettings&quot; style=&quot;text-decoration:none; color:%1;&quot;&gt;settings must be reset&lt;/a&gt;.
+Encrypted files can only be opened with password used to encrypt them</source>
+        <translation>Если забудете пароль, восстановить его нельзя. Чтобы сбросить пароль, придется &lt;a href=&quot;appSettings&quot; style=&quot;text-decoration:none; color:%1;&quot;&gt;сбросить все настройки&lt;/a&gt;.
+Зашифрованные файлы открываются только тем паролем, которым были зашифрованы</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppEncryption.qml" line="134"/>
+        <source>Change password</source>
+        <translation>Измененить пароль</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsAppPassword</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="65"/>
+        <source>Password &amp; Encryption</source>
+        <translation>Пароль и шифрование</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="65"/>
+        <source>Change password</source>
+        <translation>Изменение пароля</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="66"/>
+        <source>Existing encrypted files will still require the old password.
+The new password will be used for new encrypted files.</source>
+        <translation>Ранее зашифрованные файлы по-прежнему будут требовать старый пароль.
+Новый пароль будет использоваться для новых зашифрованных файлов</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="67"/>
+        <source>Password protection for backups and configuration files.
+Required to restore or import encrypted files.</source>
+        <translation>Пароль используется для защиты резервных копий и файлов конфигурации.
+Он потребуется при восстановлении или импорте зашифрованных файлов.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="81"/>
+        <source>Learn more</source>
+        <translation>Подробнее</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="93"/>
+        <source>Password not set. Encryption disabled</source>
+        <translation>Пароль не задан. Шифрование выключено</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="144"/>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="171"/>
+        <source>Password cannot be empty</source>
+        <translation>Пароль не может быть пустым</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="174"/>
+        <source>Password too short</source>
+        <translation>Пароль слишком короткий</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="189"/>
+        <source>New password</source>
+        <translation>Новый пароль</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="189"/>
+        <source>Set encryption password</source>
+        <translation>Придумайте пароль шифрования</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="202"/>
+        <source>New password hint (optional)</source>
+        <translation>Новая подсказка (необязательно)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPassword.qml" line="202"/>
+        <source>Password hint</source>
+        <translation>Подсказка</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsAppPasswordConfirm</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml" line="57"/>
+        <source>Confirm new password</source>
+        <translation>Введите новый пароль ещё раз</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml" line="57"/>
+        <source>Confirm password</source>
+        <translation>Введите пароль ещё раз</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml" line="58"/>
+        <source></source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml" line="58"/>
+        <source>If the password is forgotten, it cant be recovered. To reset the password, the app settings must be reset.
+Encrypted files can only be opened with the password used to encrypt them</source>
+        <translation>Если забудете пароль, восстановить его нельзя. Чтобы сбросить пароль, придется сбросить все настройки.
+Зашифрованные файлы открываются только тем паролем, которым были зашифрованы</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml" line="80"/>
+        <source>Re-enter new password</source>
+        <translation>Введите новый пароль ещё раз</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml" line="80"/>
+        <source>Re-enter password</source>
+        <translation>Введите пароль ещё раз</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml" line="122"/>
+        <source>Save new password</source>
+        <translation>Сохранить новый пароль</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml" line="122"/>
+        <source>Turn on encryption</source>
+        <translation>Включить шифрование</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml" line="149"/>
+        <source>Passwords not match</source>
+        <translation>Пароли не совпадают</translation>
+    </message>
+</context>
+<context>
     <name>PageSettingsAppSplitTunneling</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="28"/>
@@ -2279,46 +2476,56 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="198"/>
+        <source>Password &amp; Encryption</source>
+        <translation>Пароль и шифрование</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="199"/>
+        <source>Password protection for backups and configuration files</source>
+        <translation>Защита паролем резервных файлов и файлов конфигурации</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="215"/>
         <source>Logging</source>
         <translation>Логирование</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="199"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="216"/>
         <source>Enabled</source>
         <translation>Включено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="199"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="216"/>
         <source>Disabled</source>
         <translation>Отключено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="231"/>
         <source>Reset settings and remove all data from the application</source>
         <translation>Сбросить настройки и удалить все данные из приложения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="219"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="236"/>
         <source>Reset settings and remove all data from the application?</source>
         <translation>Сбросить настройки и удалить все данные из приложения?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="220"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="237"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
         <translation>Все настройки будут сброшены до значений по умолчанию. Все установленные сервисы AmneziaVPN останутся на сервере.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="238"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="239"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="226"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Cannot reset settings during active connection</source>
         <translation>Невозможно сбросить настройки во время активного соединения</translation>
     </message>
@@ -2341,63 +2548,68 @@ Thank you for staying with us!</source>
         <translation>Вы можете сохранить настройки в файл резервной копии, чтобы восстановить их при следующей установке приложения.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="81"/>
+        <source>Encryption enabled.</source>
+        <translation>Шифрование включено.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="100"/>
         <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
         <translation>Резервная копия будет содержать ваши пароли и закрытые ключи для всех серверов, добавленных в AmneziaVPN. Храните эту информацию в надежном месте.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="104"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="114"/>
         <source>Make a backup</source>
         <translation>Создать резервную копию</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="121"/>
         <source>Save backup file</source>
         <translation>Сохранить резервную копию</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="112"/>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="155"/>
         <source>Backup files (*.backup)</source>
         <translation>Файлы резервных копий (*.backup)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="131"/>
         <source>Backup file saved</source>
         <translation>Резервная копия сохранена</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="141"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="151"/>
         <source>Restore from backup</source>
         <translation>Восстановить из резервной копии</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="154"/>
         <source>Open backup file</source>
         <translation>Открыть резервную копию</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="179"/>
         <source>Import settings from a backup file?</source>
         <translation>Импортировать настройки из резервной копии?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="156"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="180"/>
         <source>All current settings will be reset</source>
         <translation>Все текущие настройки будут сброшены</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="181"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="158"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="182"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="162"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="186"/>
         <source>Cannot restore backup settings during active connection</source>
         <translation>Невозможно восстановить настройки из резервной копии во время активного соединения</translation>
     </message>
@@ -2680,11 +2892,6 @@ Thank you for staying with us!</source>
         <translation>Логирование</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="51"/>
-        <source>Enabling this function will save application&apos;s logs automatically. By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
-        <translation>Включение этой функции позволяет сохранять логи на вашем устройстве. По умолчанию она отключена. Включите сохранение логов в случае сбоев в работе приложения.</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="192"/>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="218"/>
         <source>Save</source>
@@ -2703,9 +2910,19 @@ Thank you for staying with us!</source>
         <translation>Файл с логами сохранен</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="51"/>
+        <source>Logs help diagnose app errors and connection issuesLogging is disabled by default. Enable it when troubleshooting or if requested by support</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="63"/>
-        <source>Enable logs</source>
-        <translation>Включить запись логов</translation>
+        <source>Enable logging</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="80"/>
+        <source>Delete all logs</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="85"/>
@@ -2728,9 +2945,14 @@ Thank you for staying with us!</source>
         <translation>Логи очищены</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="157"/>
+        <source>Save logs to file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="181"/>
-        <source>Client logs</source>
-        <translation>Логи приложения</translation>
+        <source>App logs</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="182"/>
@@ -2743,11 +2965,6 @@ Thank you for staying with us!</source>
         <translation>Открыть папку с логами</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="157"/>
-        <source>Export logs</source>
-        <translation>Сохранить логи</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="210"/>
         <source>Service logs</source>
         <translation>Логи службы</translation>
@@ -2757,10 +2974,13 @@ Thank you for staying with us!</source>
         <source>AmneziaVPN-service logs</source>
         <translation>AmneziaVPN-service logs</translation>
     </message>
+</context>
+<context>
+    <name>PageSettingsNewsNotifications</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="80"/>
-        <source>Clear logs</source>
-        <translation>Очистить логи</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsNewsNotifications.qml" line="33"/>
+        <source>News &amp; Notifications</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3012,13 +3232,13 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="210"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="358"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="357"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="211"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="358"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
@@ -3059,8 +3279,8 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="332"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="459"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="472"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="458"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="471"/>
         <source>Sites files (*.json)</source>
         <translation>Файлы сайтов (*.json)</translation>
     </message>
@@ -3070,33 +3290,33 @@ Thank you for staying with us!</source>
         <translation>Очистить список сайтов</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="356"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="355"/>
         <source>Clear site list?</source>
         <translation>Очистить список сайтов?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="357"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="356"/>
         <source>All sites will be removed from list.</source>
         <translation>Все сайты будут удалены из списка.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="421"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="420"/>
         <source>Import a list of sites</source>
         <translation>Импортировать список с сайтами</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="456"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="455"/>
         <source>Replace site list</source>
         <translation>Заменить список с сайтами</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="458"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="471"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="457"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="470"/>
         <source>Open sites file</source>
         <translation>Открыть список с сайтами</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="469"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="468"/>
         <source>Add imported sites to existing ones</source>
         <translation>Добавить импортированные сайты к существующим</translation>
     </message>
@@ -3150,140 +3370,140 @@ Thank you for staying with us!</source>
 <context>
     <name>PageSetupWizardConfigSource</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="323"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="338"/>
         <source>File with connection settings</source>
         <translation>Файл с настройками подключения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="48"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="49"/>
         <source>Connection</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="75"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="76"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="85"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="86"/>
         <source>Enable logs</source>
         <translation>Включить запись логов</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="99"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>Export client logs</source>
         <translation>Экспорт логов клиента</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="110"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="111"/>
         <source>Logs files (*.log)</source>
         <translation>Файлы логов (*.log)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="120"/>
         <source>Logs file saved</source>
         <translation>Файл с логами сохранен</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="130"/>
         <source>Support tag</source>
         <translation>Support tag</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="140"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="141"/>
         <source>Copied</source>
         <translation>Скопировано</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="159"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="160"/>
         <source>Insert the key, add a configuration file or scan the QR-code</source>
         <translation>Вставьте ключ, добавьте файл конфигурации или отсканируйте QR-код</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="170"/>
         <source>Insert key</source>
         <translation>Вставьте ключ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="171"/>
         <source>Insert</source>
         <translation>Вставить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="188"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="189"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="206"/>
         <source>Other connection options</source>
         <translation>Другие варианты подключения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="253"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="254"/>
         <source>Site Amnezia</source>
         <translation>Сайт Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="276"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="286"/>
         <source>VPN by Amnezia</source>
         <translation>VPN от Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="277"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="287"/>
         <source>Connect to classic paid and free VPN services from Amnezia</source>
         <translation>Подключайтесь к классическим платным и бесплатным VPN-сервисам от Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="293"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="303"/>
         <source>Self-hosted VPN</source>
         <translation>Self-hosted VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="294"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="304"/>
         <source>Configure Amnezia VPN on your own server</source>
         <translation>Настроить VPN на собственном сервере</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="305"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="315"/>
         <source>Restore from backup</source>
         <translation>Восстановить из резервной копии</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="306"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="324"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="343"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="358"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="316"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="339"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="363"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="378"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="310"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="320"/>
         <source>Open backup file</source>
         <translation>Открыть резервную копию</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="311"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="321"/>
         <source>Backup files (*.backup)</source>
         <translation>Файлы резервных копий (*.backup)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="330"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="345"/>
         <source>Open config file</source>
         <translation>Открыть файл с конфигурацией</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="342"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="362"/>
         <source>QR code</source>
         <translation>QR-код</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="357"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="377"/>
         <source>I have nothing</source>
         <translation>У меня ничего нет</translation>
     </message>
@@ -3521,32 +3741,32 @@ Thank you for staying with us!</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="70"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="72"/>
         <source>New connection</source>
         <translation>Новое соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="112"/>
         <source>Collapse content</source>
         <translation>Свернуть</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="112"/>
         <source>Show content</source>
         <translation>Показать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="127"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="129"/>
         <source>Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.</source>
         <translation>Включить обфускацию WireGuard. Это может быть полезно, если WireGuard блокируется вашим провайдером.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="158"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="160"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
         <translation>Используйте файлы конфигурации только из тех источников, которым вы доверяете. Файлы из общедоступных источников могли быть созданы с целью перехвата ваших личных данных.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="202"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="204"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
@@ -3569,8 +3789,13 @@ Thank you for staying with us!</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="323"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="324"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="303"/>
+        <source>Encryption enabled.</source>
+        <translation>Шифрование включено.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="333"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="334"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>
@@ -3666,82 +3891,82 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="270"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="550"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="560"/>
         <source>Users</source>
         <translation>Пользователи</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="304"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="314"/>
         <source>User name</source>
         <translation>Имя пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="566"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="576"/>
         <source>Search</source>
         <translation>Поиск</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="691"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="701"/>
         <source>Creation date: %1</source>
         <translation>Дата создания: %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="703"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="713"/>
         <source>Latest handshake: %1</source>
         <translation>Последнее рукопожатие: %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="715"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="725"/>
         <source>Data received: %1</source>
         <translation>Получено данных: %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="727"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="737"/>
         <source>Data sent: %1</source>
         <translation>Отправлено данных: %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="737"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="747"/>
         <source>Allowed IPs: %1</source>
         <translation>Разрешенные подсети: %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="752"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="762"/>
         <source>Rename</source>
         <translation>Переименовать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="777"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="787"/>
         <source>Client name</source>
         <translation>Имя клиента</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="788"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="798"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="824"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="834"/>
         <source>Revoke</source>
         <translation>Отозвать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="827"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="837"/>
         <source>Revoke the config for a user - %1?</source>
         <translation>Отозвать конфигурацию для пользователя - %1?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="828"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="838"/>
         <source>The user will no longer be able to connect to your server.</source>
         <translation>Пользователь больше не сможет подключаться к вашему серверу.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="829"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="839"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="830"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="840"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
@@ -3751,20 +3976,20 @@ Thank you for staying with us!</source>
         <translation>Поделиться доступом к VPN без возможности управления сервером</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="384"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="385"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="394"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="395"/>
         <source>Protocol</source>
         <translation>Протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="491"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="492"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="501"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="502"/>
         <source>Connection format</source>
         <translation>Формат подключения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="220"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="532"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="542"/>
         <source>Share</source>
         <translation>Поделиться</translation>
     </message>
@@ -3828,28 +4053,33 @@ Thank you for staying with us!</source>
         <translation>Если вы поделитесь полным доступом с другими людьми, то они смогут удалять и добавлять протоколы и сервисы на сервер, что приведет к некорректной работе VPN для всех пользователей. </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="87"/>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="78"/>
+        <source>Encryption enabled.</source>
+        <translation>Шифрование включено.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="97"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="98"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="125"/>
         <source>Accessing </source>
         <translation>Доступ </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="126"/>
         <source>File with accessing settings to </source>
         <translation>Файл с настройками доступа к </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="157"/>
         <source>Share</source>
         <translation>Поделиться</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="165"/>
         <source>Access error!</source>
         <translation>Ошибка доступа!</translation>
     </message>
@@ -3870,6 +4100,30 @@ Thank you for staying with us!</source>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="210"/>
         <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
         <translation>Логирование включено. Обратите внимание, что через 14 дней оно будет автоматически отключено, а все файлы логов будут удалены.</translation>
+    </message>
+</context>
+<context>
+    <name>PasswordDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/PasswordDrawer.qml" line="56"/>
+        <source>Password required</source>
+        <translation>Для продолжения введите пароль</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/PasswordDrawer.qml" line="74"/>
+        <source>Password</source>
+        <translation>Пароль</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/PasswordDrawer.qml" line="107"/>
+        <source>Done</source>
+        <translation>Готово</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/PasswordDrawer.qml" line="112"/>
+        <location filename="../ui/qml/Components/PasswordDrawer.qml" line="117"/>
+        <source>Invalid password</source>
+        <translation>Неверный пароль</translation>
     </message>
 </context>
 <context>
@@ -4950,12 +5204,12 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="250"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="260"/>
         <source>All settings have been reset to default values</source>
         <translation>Все настройки сброшены до значений по умолчанию</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="227"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="237"/>
         <source>Backup file is corrupted</source>
         <translation>Файл резервной копии поврежден</translation>
     </message>
