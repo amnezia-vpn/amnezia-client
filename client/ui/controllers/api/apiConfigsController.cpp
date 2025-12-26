@@ -53,6 +53,12 @@ namespace
         constexpr char isConnectEvent[] = "is_connect_event";
     }
 
+    namespace serviceType
+    {
+        constexpr char amneziaFree[] = "amnezia-free";
+        constexpr char amneziaPremium[] = "amnezia-premium";
+    }
+
     struct ProtocolData
     {
         OpenVpnConfigurator::ConnectionData certRequest;
@@ -381,6 +387,26 @@ bool ApiConfigsController::fillAvailableServices()
         m_apiServicesModel->setServiceIndex(0);
     }
     return true;
+}
+
+bool ApiConfigsController::importService()
+{
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    bool isIosOrMacOsNe = true;
+#else
+    bool isIosOrMacOsNe = false;
+#endif
+
+    if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaPremium) {
+        if (isIosOrMacOsNe) {
+            importSerivceFromAppStore();
+            return true;
+        }
+    } else {
+        importServiceFromGateway();
+        return true;
+    }
+    return false;
 }
 
 bool ApiConfigsController::importSerivceFromAppStore()

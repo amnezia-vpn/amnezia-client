@@ -26,6 +26,7 @@ public slots:
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
+    bool importService();
     bool importSerivceFromAppStore();
     bool restoreSerivceFromAppStore();
     bool importServiceFromGateway();
