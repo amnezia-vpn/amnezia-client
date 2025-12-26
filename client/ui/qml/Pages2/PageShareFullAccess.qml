@@ -109,7 +109,7 @@ PageType {
 
                         if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
                             serverSelector.currentIndex = serverSelectorListView.selectedIndex
-                            serverSelector.severSelectorIndexChanged()
+                            serverSelector.serverSelectorIndexChanged()
                         }
 
                         listView.headerText = qsTr("Accessing ") + serverSelector.text
