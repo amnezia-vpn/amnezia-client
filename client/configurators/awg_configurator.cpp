@@ -31,51 +31,26 @@ QString AwgConfigurator::createConfig(const ServerCredentials &credentials, Dock
         }
     }
 
-    auto insertIfNotEmpty = [&](const QString &key) {
-        const QString value = configMap.value(key).trimmed();
-        if (!value.isEmpty()) {
-            jsonConfig[key] = value;
-        } else {
-            jsonConfig.remove(key);
-        }
-    };
-
-    insertIfNotEmpty(config_key::junkPacketCount);
-    insertIfNotEmpty(config_key::junkPacketMinSize);
-    insertIfNotEmpty(config_key::junkPacketMaxSize);
-    insertIfNotEmpty(config_key::initPacketJunkSize);
-    insertIfNotEmpty(config_key::responsePacketJunkSize);
-    insertIfNotEmpty(config_key::initPacketMagicHeader);
-    insertIfNotEmpty(config_key::responsePacketMagicHeader);
-    insertIfNotEmpty(config_key::underloadPacketMagicHeader);
-    insertIfNotEmpty(config_key::transportPacketMagicHeader);
+    jsonConfig[config_key::junkPacketCount] = configMap.value(config_key::junkPacketCount);
+    jsonConfig[config_key::junkPacketMinSize] = configMap.value(config_key::junkPacketMinSize);
+    jsonConfig[config_key::junkPacketMaxSize] = configMap.value(config_key::junkPacketMaxSize);
+    jsonConfig[config_key::initPacketJunkSize] = configMap.value(config_key::initPacketJunkSize);
+    jsonConfig[config_key::responsePacketJunkSize] = configMap.value(config_key::responsePacketJunkSize);
+    jsonConfig[config_key::initPacketMagicHeader] = configMap.value(config_key::initPacketMagicHeader);
+    jsonConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
+    jsonConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
+    jsonConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
 
     if (container == DockerContainer::Awg2) {
-        insertIfNotEmpty(config_key::cookieReplyPacketJunkSize);
-        insertIfNotEmpty(config_key::transportPacketJunkSize);
-        jsonConfig[config_key::protocolVersion] = protocols::awg::awgV2;
+        jsonConfig[config_key::cookieReplyPacketJunkSize] = configMap.value(config_key::cookieReplyPacketJunkSize);
+        jsonConfig[config_key::transportPacketJunkSize] = configMap.value(config_key::transportPacketJunkSize);
     }
 
-    insertIfNotEmpty(amnezia::config_key::specialJunk1);
-    insertIfNotEmpty(amnezia::config_key::specialJunk2);
-    insertIfNotEmpty(amnezia::config_key::specialJunk3);
-    insertIfNotEmpty(amnezia::config_key::specialJunk4);
-    insertIfNotEmpty(amnezia::config_key::specialJunk5);
-
-    const QString allowedIpsValue = configMap.value(QStringLiteral("AllowedIPs"));
-    if (!allowedIpsValue.isEmpty()) {
-        QJsonArray allowedIps;
-        const auto parts = allowedIpsValue.split(',', Qt::SkipEmptyParts);
-        for (const QString &part : parts) {
-            const QString trimmed = part.trimmed();
-            if (!trimmed.isEmpty()) {
-                allowedIps.append(trimmed);
-            }
-        }
-        if (!allowedIps.isEmpty()) {
-            jsonConfig[config_key::allowed_ips] = allowedIps;
-        }
-    }
+    jsonConfig[config_key::specialJunk1] = configMap.value(amnezia::config_key::specialJunk1);
+    jsonConfig[config_key::specialJunk2] = configMap.value(amnezia::config_key::specialJunk2);
+    jsonConfig[config_key::specialJunk3] = configMap.value(amnezia::config_key::specialJunk3);
+    jsonConfig[config_key::specialJunk4] = configMap.value(amnezia::config_key::specialJunk4);
+    jsonConfig[config_key::specialJunk5] = configMap.value(amnezia::config_key::specialJunk5);
 
     jsonConfig[config_key::mtu] =
             containerConfig.value(ProtocolProps::protoToString(Proto::Awg)).toObject().value(config_key::mtu).toString(protocols::awg::defaultMtu);
