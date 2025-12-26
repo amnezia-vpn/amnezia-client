@@ -84,7 +84,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 int s1 = QRandomGenerator::global()->bounded(15, 150);
                 int s2 = QRandomGenerator::global()->bounded(15, 150);
                 int s3 = QRandomGenerator::global()->bounded(0, 64);
-                int s4 = QRandomGenerator::global()->bounded(0, 32);
+                int s4 = QRandomGenerator::global()->bounded(0, 20);
 
                 // Ensure all values are unique and don't create equal packet sizes
                 QSet<int> usedValues;
@@ -102,7 +102,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 usedValues.insert(s3);
 
                 while (usedValues.contains(s4)) {
-                    s4 = QRandomGenerator::global()->bounded(0, 32);
+                    s4 = QRandomGenerator::global()->bounded(0, 20);
                 }
 
                 QString initPacketJunkSize = QString::number(s1);
