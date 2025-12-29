@@ -540,11 +540,9 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 void VpnConnection::disconnectFromVpn()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
+    // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();
     disconnect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
-    if (m_vpnProtocol.isNull()) {
-        return;
-    }
 #endif
 
     if (m_vpnProtocol.isNull()) {
