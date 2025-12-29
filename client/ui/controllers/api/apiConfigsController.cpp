@@ -450,7 +450,7 @@ bool ApiConfigsController::importSerivceFromAppStore()
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     apiPayload[apiDefs::key::transactionId] = originalTransactionId;
-    auto isTestPurchase = IosController::Instance()->isTestPurchase();
+    auto isTestPurchase = IosController::Instance()->isTestFlight();
 
     ErrorCode errorCode;
     QByteArray responseBody;
@@ -562,7 +562,7 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
 
         QJsonObject apiPayload = gatewayRequestData.toJsonObject();
         apiPayload[apiDefs::key::transactionId] = originalTransactionId;
-        auto isTestPurchase = IosController::Instance()->isTestPurchase();
+        auto isTestPurchase = IosController::Instance()->isTestFlight();
         QByteArray responseBody;
         ErrorCode errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody, isTestPurchase);
         if (errorCode != ErrorCode::NoError) {
