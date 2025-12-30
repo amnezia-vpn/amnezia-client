@@ -2,7 +2,7 @@
 #include <QDir>
 #include <QTextStream>
 
-ProxyLogger::ProxyLogger() : m_maxFileSize(0), m_currentLevel(LogLevel::INFO)
+ProxyLogger::ProxyLogger() : m_maxFileSize(0), m_currentLevel(LogLevel::Info)
 {
 }
 
@@ -41,22 +41,22 @@ void ProxyLogger::log(LogLevel level, const QString& message)
 
 void ProxyLogger::debug(const QString& message)
 {
-    logInternal(LogLevel::DEBUG, message);
+    logInternal(LogLevel::Debug, message);
 }
 
 void ProxyLogger::info(const QString& message)
 {
-    logInternal(LogLevel::INFO, message);
+    logInternal(LogLevel::Info, message);
 }
 
 void ProxyLogger::warning(const QString& message)
 {
-    logInternal(LogLevel::WARNING, message);
+    logInternal(LogLevel::Warning, message);
 }
 
 void ProxyLogger::error(const QString& message)
 {
-    logInternal(LogLevel::ERROR, message);
+    logInternal(LogLevel::Error, message);
 }
 
 void ProxyLogger::logInternal(LogLevel level, const QString& message)
@@ -84,10 +84,10 @@ void ProxyLogger::logInternal(LogLevel level, const QString& message)
 QString ProxyLogger::levelToString(LogLevel level)
 {
     switch (level) {
-        case LogLevel::DEBUG:   return "DEBUG";
-        case LogLevel::INFO:    return "INFO";
-        case LogLevel::WARNING: return "WARNING";
-        case LogLevel::ERROR:   return "ERROR";
+        case LogLevel::Debug:   return "DEBUG";
+        case LogLevel::Info:    return "INFO";
+        case LogLevel::Warning: return "WARNING";
+        case LogLevel::Error:   return "ERROR";
         default:               return "UNKNOWN";
     }
 }

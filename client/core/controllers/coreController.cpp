@@ -38,7 +38,7 @@ void CoreController::initLocalProxy()
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     // Logger and proxy initialization
     ProxyLogger::getInstance().init(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs/proxy.log");
-    ProxyLogger::getInstance().setLogLevel(ProxyLogger::LogLevel::INFO);
+    ProxyLogger::getInstance().setLogLevel(ProxyLogger::LogLevel::Info);
 
     m_proxyServer.reset(new ProxyServer(this));
     const quint16 proxyPort = 49490;

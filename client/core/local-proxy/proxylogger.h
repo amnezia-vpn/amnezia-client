@@ -12,10 +12,10 @@ class ProxyLogger
 
 public:
     enum class LogLevel {
-        DEBUG,
-        INFO,
-        WARNING,
-        ERROR
+        Debug,
+        Info,
+        Warning,
+        Error
     };
 
     static ProxyLogger& getInstance();
