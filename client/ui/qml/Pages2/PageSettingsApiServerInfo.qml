@@ -180,7 +180,9 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: warning.visible ? 16 : 32
                 text: qsTr("Connection")
-                descriptionText: qsTr("Protocol selection and local proxy setup")
+                descriptionText: SettingsController.isLocalProxySupported
+                                  ? qsTr("Protocol selection and local proxy setup")
+                                  : qsTr("Protocol selection")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

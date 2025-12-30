@@ -76,6 +76,8 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                visible: SettingsController.isLocalProxySupported
+                Layout.preferredHeight: visible ? implicitHeight : 0
 
                 text: qsTr("Local proxy")
                 descriptionText: SettingsController.isLocalProxyHttpEnabled ? qsTr("Running: 127.0.0.1:%1").arg(SettingsController.localProxyPort || 0)
@@ -87,7 +89,10 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: SettingsController.isLocalProxySupported
+                Layout.preferredHeight: visible ? implicitHeight : 0
+            }
         }
     }
 }

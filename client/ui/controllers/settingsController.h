@@ -36,6 +36,7 @@ public:
     Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin NOTIFY safeAreaTopMarginChanged)
     Q_PROPERTY(int safeAreaBottomMargin READ getSafeAreaBottomMargin NOTIFY safeAreaBottomMarginChanged)
     Q_PROPERTY(int imeHeight READ getImeHeight NOTIFY imeHeightChanged)
+    Q_PROPERTY(bool isLocalProxySupported READ isLocalProxySupported CONSTANT)
     Q_PROPERTY(bool isLocalProxyHttpEnabled READ isLocalProxyHttpEnabled NOTIFY localProxySettingsUpdated)
     Q_PROPERTY(int localProxyPort READ localProxyPort WRITE setLocalProxyPort NOTIFY localProxySettingsUpdated)
     Q_PROPERTY(QString localProxyOwnerUuid READ localProxyOwnerUuid NOTIFY localProxySettingsUpdated)
@@ -112,6 +113,7 @@ public slots:
     bool isHomeAdLabelVisible();
     void disableHomeAdLabel();
 
+    bool isLocalProxySupported() const;
     bool isLocalProxyHttpEnabled() const;
     int localProxyPort() const;
     QString localProxyOwnerUuid() const;

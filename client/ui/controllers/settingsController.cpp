@@ -531,6 +531,15 @@ void SettingsController::disableHomeAdLabel()
     emit isHomeAdLabelVisibleChanged(false);
 }
 
+bool SettingsController::isLocalProxySupported() const
+{
+#ifdef AMNEZIA_DESKTOP
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool SettingsController::isLocalProxyHttpEnabled() const
 {
     return m_settings->isLocalProxyHttpEnabled();
