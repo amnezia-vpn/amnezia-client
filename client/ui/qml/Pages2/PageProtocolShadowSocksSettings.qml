@@ -109,6 +109,16 @@ PageType {
                         ListElement { name : "aes-128-gcm" }
                     }
 
+                    function updateSelectedIndex() {
+                        cipherDropDown.text = cipher
+                        for (var i = 0; i < cipherListView.model.count; i++) {
+                            if (cipherListView.model.get(i).name === cipher) {
+                                selectedIndex = i
+                                break
+                            }
+                        }
+                    }
+
                     clickedFunction: function() {
                         cipherDropDown.text = selectedText
                         cipher = cipherDropDown.text
@@ -116,13 +126,14 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        cipherDropDown.text = cipher
+                        updateSelectedIndex()
+                    }
+                }
 
-                        for (var i = 0; i < cipherListView.model.count; i++) {
-                            if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                currentIndex = i
-                            }
-                        }
+                Connections {
+                    target: listView.model
+                    function onDataChanged() {
+                        cipherListView.updateSelectedIndex()
                     }
                 }
             }
