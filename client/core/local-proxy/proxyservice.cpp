@@ -31,8 +31,6 @@ bool ProxyService::updateConfig(const QString& configStr)
 bool ProxyService::startXray()
 {
     ProxyLogger::getInstance().info("Starting Xray");
-    auto activeConfig = m_configManager->getActiveConfigPath();
-    qDebug() << activeConfig;
     bool success = m_xrayController->start(m_configManager->getActiveConfigPath());
     if (success) {
         ProxyLogger::getInstance().info("Xray started successfully");

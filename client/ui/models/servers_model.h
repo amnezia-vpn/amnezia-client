@@ -52,7 +52,9 @@ public:
         AdDescriptionRole,
         AdEndpointRole,
 
-        HasAmneziaDns
+        HasAmneziaDns,
+
+        ServerUuidRole
     };
 
     ServersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -156,6 +158,8 @@ public slots:
     bool isAdVisible();
     QString adHeader();
     QString adDescription();
+
+    QString getServerUuid(int index) const;
     
 protected:
     QHash<int, QByteArray> roleNames() const override;

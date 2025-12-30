@@ -199,7 +199,7 @@ QJsonObject ConfigManager::deserializeConfig(const QString &configStr, QString *
         outConfig = amnezia::serialization::vmess_new::Deserialize(configStr, safePrefix, safeErrorMsg);
     }
 
-    if (configStr.startsWith("vmess://")) {
+    else if (configStr.startsWith("vmess://")) {
         ProxyLogger::getInstance().debug("Deserializing VMess config");
         outConfig = amnezia::serialization::vmess::Deserialize(configStr, safePrefix, safeErrorMsg);
     }

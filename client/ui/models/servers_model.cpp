@@ -179,6 +179,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case AdEndpointRole: {
         return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adEndpoint).toString();
     }
+    case ServerUuidRole: {
+        return server.value(config_key::server_uuid).toString();
+    }
     }
 
     return QVariant();
@@ -442,6 +445,8 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[AdHeaderRole] = "adHeader";
     roles[AdDescriptionRole] = "adDescription";
     roles[AdEndpointRole] = "adEndpoint";
+
+    roles[ServerUuidRole] = "serverUuid";
 
     return roles;
 }
@@ -971,4 +976,11 @@ QString ServersModel::adHeader()
 QString ServersModel::adDescription()
 {
     return data(m_defaultServerIndex, AdDescriptionRole).toString();
+}
+
+QString ServersModel::getServerUuid(int index) const
+{
+    if (index < 0 || index >= m_servers.size())
+        return QString();
+    return m_servers.at(index).toObject().value(config_key::server_uuid).toString();
 }

@@ -29,7 +29,6 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 
     initLocalProxy();
 
-    auto locale = m_settings->getAppLanguage();
     m_translator.reset(new QTranslator());
     updateTranslator(m_settings->getAppLanguage());
 }

@@ -8,6 +8,7 @@
 
 #include "containers/containers_defs.h"
 #include "logger.h"
+#include <QUuid>
 
 namespace
 {
@@ -43,6 +44,8 @@ Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_N
         }
     }
 
+    migrateServerUuids();
+
     m_gatewayEndpoint = gatewayEndpoint;
 }
 
@@ -62,8 +65,16 @@ QJsonObject Settings::server(int index) const
 
 void Settings::addServer(const QJsonObject &server)
 {
+    QJsonObject serverWithUuid = server;
+    if (!serverWithUuid.contains(config_key::server_uuid)) {
+        QString uuid = QUuid::createUuid().toString();
+        uuid.remove(0, 1);
+        uuid.chop(1);
+        serverWithUuid.insert(config_key::server_uuid, uuid);
+    }
+
     QJsonArray servers = serversArray();
-    servers.append(server);
+    servers.append(serverWithUuid);
     setServersArray(servers);
 }
 
@@ -479,6 +490,31 @@ void Settings::setInstallationUuid(const QString &uuid)
     setValue("Conf/installationUuid", uuid);
 }
 
+void Settings::migrateServerUuids()
+{
+    QJsonArray servers = serversArray();
+    bool hasChanges = false;
+
+    for (int i = 0; i < servers.size(); ++i) {
+        QJsonObject server = servers.at(i).toObject();
+        if (!server.contains(config_key::server_uuid)) {
+            QString uuid = QUuid::createUuid().toString();
+            qDebug() << "Migrating server uuid: " << uuid;
+            // Remove {} from uuid (as in getInstallationUuid)
+            uuid.remove(0, 1);
+            uuid.chop(1);
+            server.insert(config_key::server_uuid, uuid);
+            servers.replace(i, server);
+            qDebug() << "Server uuid migrated: " << server;
+            hasChanges = true;
+        }
+    }
+
+    if (hasChanges) {
+        setServersArray(servers);
+    }
+}
+
 ServerCredentials Settings::defaultServerCredentials() const
 {
     return serverCredentials(defaultServerIndex());
@@ -587,4 +623,37 @@ QStringList Settings::readNewsIds() const
 void Settings::setReadNewsIds(const QStringList &ids)
 {
     setValue("News/readIds", ids);
+}
+
+QString Settings::localProxyOwnerUuid() const
+{
+    return value("Conf/localProxyOwnerUuid", "").toString();
+}
+
+void Settings::setLocalProxyOwnerUuid(const QString &uuid)
+{
+    setValue("Conf/localProxyOwnerUuid", uuid);
+    emit localProxySettingsChanged();
+}
+
+quint16 Settings::localProxyPort() const
+{
+    return value("Conf/localProxyPort", 0).toUInt();
+}
+
+void Settings::setLocalProxyPort(quint16 port)
+{
+    setValue("Conf/localProxyPort", port);
+    emit localProxySettingsChanged();
+}
+
+bool Settings::isLocalProxyHttpEnabled() const
+{
+    return value("Conf/localProxyHttpEnabled", false).toBool();
+}
+
+void Settings::setLocalProxyHttpEnabled(bool enabled)
+{
+    setValue("Conf/localProxyHttpEnabled", enabled);
+    emit localProxySettingsChanged();
 }

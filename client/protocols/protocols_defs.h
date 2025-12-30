@@ -114,6 +114,8 @@ namespace amnezia
 
         constexpr char nameOverriddenByUser[] = "nameOverriddenByUser";
 
+        constexpr char server_uuid[] = "server_uuid";
+
     }
 
     namespace protocols

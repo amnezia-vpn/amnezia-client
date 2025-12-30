@@ -239,17 +239,28 @@ public:
     QStringList readNewsIds() const;
     void setReadNewsIds(const QStringList &ids);
 
+    // Local proxy settings
+    QString localProxyOwnerUuid() const;
+    void setLocalProxyOwnerUuid(const QString &uuid);
+    quint16 localProxyPort() const;
+    void setLocalProxyPort(quint16 port);
+    bool isLocalProxyHttpEnabled() const;
+    void setLocalProxyHttpEnabled(bool enabled);
+
 signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);
     void serverRemoved(int serverIndex);
     void settingsCleared();
+    void localProxySettingsChanged();
 
 private:
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
 
     void setInstallationUuid(const QString &uuid);
+
+    void migrateServerUuids();
 
     mutable SecureQSettings m_settings;
 
