@@ -1,8 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QProcess>
-#include <QScopedPointer>
+#include <QString>
 
 class XrayController : public QObject {
     Q_OBJECT
@@ -12,14 +11,14 @@ public:
     ~XrayController();
 
     bool start(const QString& configPath);
-    void stop();
+    bool stop();
     bool isXrayRunning() const;
     qint64 getProcessId() const;
     QString getError() const;
 
 private:
-    QString getXrayExecutablePath() const;
-    QStringList getXrayArguments(const QString& configPath) const;
+    bool loadConfigFile(const QString& configPath, QString& configContent);
 
-    QScopedPointer<QProcess> m_process;
+    bool m_isRunning {false};
+    QString m_lastError;
 }; 

@@ -155,10 +155,15 @@ QJsonObject HttpApi::handlePostUp()
 QJsonObject HttpApi::handlePostDown()
 {
     if (auto service = m_service.lock()) {
-        service->stopXray();
+        const bool stopped = service->stopXray();
         QJsonObject response;
-        response["status"] = "success";
-        response["message"] = "Xray process stopped";
+        if (stopped) {
+            response["status"] = "ok";
+            response["description"] = "Xray process stopped";
+        } else {
+            response["status"] = "error";
+            response["description"] = "Failed to stop xray process";
+        }
         return response;
     }
     return { {"status", "error"}, {"message", "Service unavailable"} };

@@ -44,10 +44,15 @@ bool ProxyService::startXray()
 bool ProxyService::stopXray()
 {
     ProxyLogger::getInstance().info("Stopping Xray");
-    m_xrayController->stop();
-    ProxyLogger::getInstance().info("Xray stopped");
-    emit xrayStatusChanged(false);
-    return true;
+    const bool stopped = m_xrayController->stop();
+    if (stopped) {
+        ProxyLogger::getInstance().info("Xray stopped");
+        emit xrayStatusChanged(false);
+        return true;
+    }
+
+    ProxyLogger::getInstance().warning(QString("Failed to stop Xray: %1").arg(m_xrayController->getError()));
+    return false;
 }
 
 bool ProxyService::isXrayRunning() const
@@ -104,7 +109,10 @@ bool ProxyService::removeConfig(const QString &uuid)
         emit configsChanged();
         if (uuid == activeUuid && isXrayRunning()) {
             ProxyLogger::getInstance().info("Removed active config, restarting Xray");
-            stopXray();
+            if (!stopXray()) {
+                ProxyLogger::getInstance().warning("Failed to stop Xray after removing active config");
+                return false;
+            }
             
             // Check if there are any configs left
             QString newActiveUuid = m_configManager->getActiveConfigUuid();
@@ -130,7 +138,10 @@ bool ProxyService::activateConfig(const QString &uuid)
         // If config is successfully activated, restart Xray
         if (isXrayRunning()) {
             ProxyLogger::getInstance().info("Restarting Xray with new config");
-            stopXray();
+            if (!stopXray()) {
+                ProxyLogger::getInstance().warning("Failed to stop Xray while activating new config");
+                return false;
+            }
             return startXray();
         }
         return true;
@@ -154,7 +165,10 @@ bool ProxyService::updateAllConfigs(const QStringList &serializedConfigs)
         emit configsChanged();
         if (isXrayRunning()) {
             ProxyLogger::getInstance().info("Restarting Xray with updated configs");
-            stopXray();
+            if (!stopXray()) {
+                ProxyLogger::getInstance().warning("Failed to stop Xray while updating configs");
+                return false;
+            }
             return startXray();
         }
     } else {

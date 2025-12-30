@@ -1,12 +1,16 @@
 #include "xraycontroller.h"
+
 #include "proxylogger.h"
-#include <QDir>
-#include <QFileInfo>
-#include <QCoreApplication>
-#include <QDebug>
+#include "core/ipcclient.h"
+
+#include <QFile>
+
+namespace {
+const QString kIpcUnavailableError = QStringLiteral("Failed to communicate with IPC service");
+}
 
 XrayController::XrayController(QObject *parent)
-    : QObject(parent), m_process(nullptr)
+    : QObject(parent)
 {
     ProxyLogger::getInstance().debug("XrayController initialized");
 }
@@ -18,99 +22,106 @@ XrayController::~XrayController()
 
 bool XrayController::start(const QString &configPath)
 {
-    if (isXrayRunning())
-    {
-        ProxyLogger::getInstance().info("Xray process is already running");
+
+    if (m_isRunning) {
+        ProxyLogger::getInstance().info("Xray is already running");
         return true;
     }
+    
+    ProxyLogger::getInstance().info("Request to start Xray via IPC");
 
-    QString xrayPath = getXrayExecutablePath();
-    ProxyLogger::getInstance().debug(QString("Xray executable path: %1").arg(xrayPath));
+    m_lastError.clear();
 
-    if (!QFile::exists(xrayPath))
-    {
-        ProxyLogger::getInstance().error(QString("Xray binary not found at: %1").arg(xrayPath));
+    QString configContent;
+    if (!loadConfigFile(configPath, configContent)) {
         return false;
     }
 
-    if (!QFile::exists(configPath))
-    {
-        ProxyLogger::getInstance().error(QString("Config file not found at: %1").arg(configPath));
+    const bool ipcResult = IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+        iface->xrayStart(configContent);
+        return true;
+    }, []() {
+        return false;
+    });
+
+    if (!ipcResult) {
+        m_lastError = kIpcUnavailableError;
+        ProxyLogger::getInstance().error(m_lastError);
         return false;
     }
 
-    ProxyLogger::getInstance().info("Starting Xray process");
-    m_process.reset(new QProcess(this));
-    m_process->setWorkingDirectory(QFileInfo(xrayPath).dir().absolutePath());
-    m_process->setProgram(xrayPath);
-    m_process->setArguments(getXrayArguments(configPath));
-
-    m_process->start();
-    if (!m_process->waitForStarted())
-    {
-        ProxyLogger::getInstance().error(QString("Failed to start Xray process: %1").arg(m_process->errorString()));
-        m_process.reset();
-        return false;
-    }
-
-    ProxyLogger::getInstance().info(QString("Xray process started successfully (PID: %1)").arg(m_process->processId()));
+    ProxyLogger::getInstance().info("Xray start command sent to IPC service");
+    m_isRunning = true;
     return true;
 }
 
-void XrayController::stop()
+bool XrayController::stop()
 {
-    if (!m_process.isNull())
-    {
-        if (m_process->state() == QProcess::Running)
-        {
-            ProxyLogger::getInstance().info(QString("Killing Xray process (PID: %1)").arg(m_process->processId()));
-            m_process->kill();
-            m_process->waitForFinished(3000);
-        }
-        m_process.reset();
-        ProxyLogger::getInstance().info("Xray process stopped");
+    ProxyLogger::getInstance().info("Stopping Xray via IPC");
+
+    const bool ipcResult = IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+        iface->xrayStop();
+        return true;
+    }, []() {
+        return false;
+    });
+
+    if (!ipcResult) {
+        m_lastError = kIpcUnavailableError;
+        ProxyLogger::getInstance().warning(m_lastError);
+        return false;
     }
+
+    m_isRunning = false;
+    return true;
 }
 
 bool XrayController::isXrayRunning() const
 {
-    return !m_process.isNull() && m_process->state() == QProcess::Running;
+    return m_isRunning;
 }
 
 qint64 XrayController::getProcessId() const
 {
-    return m_process ? m_process->processId() : -1;
+    return -1;
 }
 
 QString XrayController::getError() const
 {
-    if (m_process && m_process->error() != QProcess::UnknownError)
-    {
-        QString error = m_process->errorString();
-        ProxyLogger::getInstance().error(QString("Xray process error: %1").arg(error));
-        return error;
+    return m_lastError;
+}
+
+bool XrayController::loadConfigFile(const QString &configPath, QString &configContent)
+{
+    if (configPath.isEmpty()) {
+        m_lastError = "Config path is empty";
+        ProxyLogger::getInstance().error(m_lastError);
+        return false;
     }
-    return QString();
-}
 
-QString XrayController::getXrayExecutablePath() const
-{
-    QString xrayDir = QCoreApplication::applicationDirPath() + "/bin";
-    QString xrayPath;
+    QFile configFile(configPath);
+    if (!configFile.exists()) {
+        m_lastError = QString("Config file not found at: %1").arg(configPath);
+        ProxyLogger::getInstance().error(m_lastError);
+        return false;
+    }
 
-#if defined(Q_OS_WIN)
-    xrayPath = QDir(xrayDir).filePath("xray.exe");
-#else
-    xrayPath = QDir(xrayDir).filePath("xray");
-#endif
+    if (!configFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        m_lastError = QString("Failed to open config file: %1").arg(configFile.errorString());
+        ProxyLogger::getInstance().error(m_lastError);
+        return false;
+    }
 
-    ProxyLogger::getInstance().debug(QString("Resolved Xray executable path: %1").arg(xrayPath));
-    return xrayPath;
-}
+    QByteArray data = configFile.readAll();
+    configFile.close();
 
-QStringList XrayController::getXrayArguments(const QString &configPath) const
-{
-    QStringList args = QStringList() << "-c" << configPath << "-format=json";
-    ProxyLogger::getInstance().debug(QString("Xray arguments: %1").arg(args.join(' ')));
-    return args;
+    if (data.isEmpty()) {
+        m_lastError = QString("Config file is empty: %1").arg(configPath);
+        ProxyLogger::getInstance().error(m_lastError);
+        return false;
+    }
+
+    configContent = QString::fromUtf8(data);
+    ProxyLogger::getInstance().debug(QString("Loaded Xray config from %1").arg(configPath));
+    return true;
 }
