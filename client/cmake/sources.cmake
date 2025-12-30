@@ -17,6 +17,16 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.h
     ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.h
     ${CLIENT_ROOT_DIR}/core/controllers/installController.h
+    ${CLIENT_ROOT_DIR}/core/installers/installerBase.h
+    ${CLIENT_ROOT_DIR}/core/installers/awgInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/wireguardInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/openvpnInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/xrayInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/cloakInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/shadowsocksInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/torInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/sftpInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/socks5Installer.h
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.h
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.h
@@ -79,6 +89,16 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/installController.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/installerBase.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/awgInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/wireguardInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/openvpnInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/xrayInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/cloakInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/shadowsocksInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/torInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/sftpInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/socks5Installer.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.cpp

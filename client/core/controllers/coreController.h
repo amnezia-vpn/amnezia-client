@@ -38,6 +38,8 @@
 #include "core/controllers/allowedDnsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
+#include "core/controllers/vpnConfigurationController.h"
+#include "core/controllers/installController.h"
 
 #include "core/repositories/qServersRepository.h"
 #include "core/repositories/qAppSettingsRepository.h"
@@ -162,6 +164,7 @@ private:
     AllowedDnsController* m_allowedDnsController;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
+    InstallController* m_installController;
 
     ContainersModel* m_containersModel;
     ContainersModel* m_defaultServerContainersModel;

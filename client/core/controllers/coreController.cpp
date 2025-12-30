@@ -3,6 +3,9 @@
 #include <QDirIterator>
 #include <QTranslator>
 
+#include "core/controllers/serverController.h"
+#include "core/controllers/installController.h"
+
 #if defined(Q_OS_ANDROID)
     #include "core/installedAppsImageProvider.h"
     #include "platforms/android/android_controller.h"
@@ -127,6 +130,9 @@ void CoreController::initCoreControllers()
     m_allowedDnsController = new AllowedDnsController(appSettingsRepo);
     m_servicesCatalogController = new ServicesCatalogController(appSettingsRepo);
     m_subscriptionController = new SubscriptionController(serversRepo, appSettingsRepo);
+    
+    ServerController* serverController = new ServerController(m_settings, this);
+    m_installController = new InstallController(serverController, serversRepo, m_settings, this);
 }
 
 void CoreController::initControllers()
@@ -142,6 +148,9 @@ void CoreController::initControllers()
 
     m_installUiController = new InstallUiController(m_installController, m_serversRepository, m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementController, m_appSettingsRepository, m_settings, this);
     m_engine->rootContext()->setContextProperty("InstallController", m_installUiController);
+
+    connect(m_installController, &InstallController::serverIsBusy, m_installUiController, &InstallUiController::serverIsBusy);
+    connect(m_installUiController, &InstallUiController::cancelInstallation, m_installController, &InstallController::cancelInstallation);
 
     connect(m_installUiController, &InstallUiController::currentContainerUpdated, m_connectionController,
             &ConnectionController::onCurrentContainerUpdated); // TODO remove this
@@ -363,7 +372,19 @@ void CoreController::initContainerModelUpdateHandler()
 
 void CoreController::initAdminConfigRevokedHandler()
 {
-    // Admin config revocation is now handled by InstallUiController::clearCachedProfile
+    connect(m_installController, &InstallController::clientRevocationRequested, this,
+            [this](const QJsonObject &containerConfig, DockerContainer container,
+                   const ServerCredentials &credentials, int serverIndex) {
+                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+                m_clientManagementController->revokeClient(containerConfig, container, credentials, serverIndex, serverController);
+            });
+
+    connect(m_installController, &InstallController::clientAppendRequested, this,
+            [this](DockerContainer container, const ServerCredentials &credentials,
+                   const QJsonObject &containerConfig, const QString &clientName) {
+                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+                m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, serverController);
+            });
 }
 
 void CoreController::initPassphraseRequestHandler()

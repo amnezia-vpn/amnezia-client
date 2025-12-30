@@ -9,7 +9,7 @@
 #include "core/controllers/clientManagementController.h"
 #include "core/controllers/installController.h"
 #include "core/repositories/qAppSettingsRepository.h"
-#include "core/repositories/serversRepository.h"
+#include "core/repositories/qServersRepository.h"
 #include "core/defs.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/protocols_model.h"
@@ -20,14 +20,14 @@ class InstallUiController : public QObject
     Q_OBJECT
 public:
     explicit InstallUiController(InstallController* installController,
-                               ServersRepository* serversRepository,
+                               QServersRepository* serversRepository,
                                ServersController* serversController,
                                ServersModel* serversModel, ContainersModel* containersModel,
                                ProtocolsModel* protocolsModel,
                                ClientManagementController* clientManagementController,
                                QAppSettingsRepository* appSettingsRepository,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
-    ~InstallController();
+    ~InstallUiController();
 
 public slots:
     void install(DockerContainer container, int port, TransportProto transportProto, int serverIndex);
@@ -44,7 +44,7 @@ public slots:
 
     void removeApiConfig(int serverIndex);
 
-    void clearCachedProfile(int serverIndex, QSharedPointer<ServerController> serverController = nullptr);
+    void clearCachedProfile(int serverIndex);
 
     QRegularExpression ipAddressPortRegExp();
     QRegularExpression ipAddressRegExp();
@@ -93,20 +93,9 @@ signals:
     void profileCleared(const QJsonObject &config);
 
 private:
-    void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
-                       const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
-                       QString &finishMessage);
-    void installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
-                          const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
-                          QString &finishMessage, int serverIndex);
-    bool isServerAlreadyExists();
-
-    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
-                                            QMap<DockerContainer, QJsonObject> &installedContainers);
-    bool isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
 
     InstallController* m_installController;
-    ServersRepository* m_serversRepository;
+    QServersRepository* m_serversRepository;
     ServersController* m_serversController;
     ServersModel* m_serversModel;
     ContainersModel* m_containersModel;
@@ -119,10 +108,6 @@ private:
     ServerCredentials m_processedServerCredentials;
 
     QString m_privateKeyPassphrase;
-
-#ifndef Q_OS_IOS
-    QList<QSharedPointer<QProcess>> m_sftpMountProcesses;
-#endif
 };
 
 #endif // INSTALLUICONTROLLER_H
