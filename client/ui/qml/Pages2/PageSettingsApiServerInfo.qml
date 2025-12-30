@@ -151,32 +151,6 @@ PageType {
 
             readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
 
-            SwitcherType {
-                id: switcher
-
-                readonly property bool isVlessProtocol: ApiConfigsController.isVlessProtocol()
-
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
-
-                text: qsTr("Use VLESS protocol")
-                checked: switcher.isVlessProtocol
-                onToggled: function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                        PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
-                    } else {
-                        PageController.showBusyIndicator(true)
-                        ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
-                        ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
-                        PageController.showBusyIndicator(false)
-                    }
-                }
-            }
-
             WarningType {
                 id: warning
 
@@ -201,11 +175,25 @@ PageType {
             }
 
             LabelWithButtonType {
-                id: vpnKey
+                id: connectionSwitcher
 
                 Layout.fillWidth: true
                 Layout.topMargin: warning.visible ? 16 : 32
+                text: qsTr("Connection")
+                descriptionText: qsTr("Protocol selection and local proxy setup")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsConnectionType)
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                id: vpnKey
+
+                Layout.fillWidth: true
                 visible: footer.isVisibleForAmneziaFree
 
                 text: qsTr("Subscription Key")

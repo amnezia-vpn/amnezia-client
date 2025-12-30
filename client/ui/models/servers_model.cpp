@@ -984,3 +984,9 @@ QString ServersModel::getServerUuid(int index) const
         return QString();
     return m_servers.at(index).toObject().value(config_key::server_uuid).toString();
 }
+
+QString ServersModel::getProcessedServerUuid() const
+{
+    return getServerUuid(m_processedServerIndex);
+}
+

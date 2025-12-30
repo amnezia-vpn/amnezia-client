@@ -36,6 +36,9 @@ public:
     Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin NOTIFY safeAreaTopMarginChanged)
     Q_PROPERTY(int safeAreaBottomMargin READ getSafeAreaBottomMargin NOTIFY safeAreaBottomMarginChanged)
     Q_PROPERTY(int imeHeight READ getImeHeight NOTIFY imeHeightChanged)
+    Q_PROPERTY(bool isLocalProxyHttpEnabled READ isLocalProxyHttpEnabled NOTIFY localProxySettingsUpdated)
+    Q_PROPERTY(int localProxyPort READ localProxyPort WRITE setLocalProxyPort NOTIFY localProxySettingsUpdated)
+    Q_PROPERTY(QString localProxyOwnerUuid READ localProxyOwnerUuid NOTIFY localProxySettingsUpdated)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -109,6 +112,13 @@ public slots:
     bool isHomeAdLabelVisible();
     void disableHomeAdLabel();
 
+    bool isLocalProxyHttpEnabled() const;
+    int localProxyPort() const;
+    QString localProxyOwnerUuid() const;
+    bool setLocalProxyPort(int port);
+    bool enableLocalProxy(const QString &ownerUuid, int port);
+    void disableLocalProxy();
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();
@@ -140,6 +150,7 @@ signals:
 
     void isHomeAdLabelVisibleChanged(bool visible);
     void startMinimizedChanged();
+    void localProxySettingsUpdated();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

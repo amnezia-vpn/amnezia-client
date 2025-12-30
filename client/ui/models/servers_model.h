@@ -84,6 +84,7 @@ public:
 
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
     Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerChanged)
+    Q_PROPERTY(QString processedServerUuid READ getProcessedServerUuid NOTIFY processedServerChanged)
 
     Q_PROPERTY(bool isAdVisible READ isAdVisible NOTIFY defaultServerIndexChanged)
     Q_PROPERTY(QString adHeader READ adHeader NOTIFY defaultServerIndexChanged)
@@ -160,6 +161,8 @@ public slots:
     QString adDescription();
 
     QString getServerUuid(int index) const;
+
+    QString getProcessedServerUuid() const;
     
 protected:
     QHash<int, QByteArray> roleNames() const override;

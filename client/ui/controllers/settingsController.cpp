@@ -16,6 +16,11 @@
     #include <AmneziaVPN-Swift.h>
 #endif
 
+namespace {
+constexpr int kLocalProxyPortMin = 1024;
+constexpr int kLocalProxyPortMax = 65535;
+}
+
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                        const QSharedPointer<ContainersModel> &containersModel,
                                        const QSharedPointer<LanguageModel> &languageModel,
@@ -49,6 +54,8 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
 
     m_isDevModeEnabled = m_settings->isDevGatewayEnv();
     toggleDevGatewayEnv(m_isDevModeEnabled);
+
+    connect(m_settings.get(), &Settings::localProxySettingsChanged, this, &SettingsController::localProxySettingsUpdated);
 }
 
 QString getPlatformName()
@@ -523,3 +530,57 @@ void SettingsController::disableHomeAdLabel()
     m_settings->disableHomeAdLabel();
     emit isHomeAdLabelVisibleChanged(false);
 }
+
+bool SettingsController::isLocalProxyHttpEnabled() const
+{
+    return m_settings->isLocalProxyHttpEnabled();
+}
+
+int SettingsController::localProxyPort() const
+{
+    return static_cast<int>(m_settings->localProxyPort());
+}
+
+QString SettingsController::localProxyOwnerUuid() const
+{
+    return m_settings->localProxyOwnerUuid();
+}
+
+bool SettingsController::setLocalProxyPort(int port)
+{
+    if (port < kLocalProxyPortMin || port > kLocalProxyPortMax) {
+        return false;
+    }
+
+    if (m_settings->localProxyPort() == static_cast<quint16>(port)) {
+        return true;
+    }
+
+    m_settings->setLocalProxyPort(static_cast<quint16>(port));
+    return true;
+}
+
+bool SettingsController::enableLocalProxy(const QString &ownerUuid, int port)
+{
+    if (port < kLocalProxyPortMin || port > kLocalProxyPortMax || ownerUuid.isEmpty()) {
+        return false;
+    }
+
+    if (m_settings->isLocalProxyHttpEnabled() && m_settings->localProxyOwnerUuid() != ownerUuid) {
+        return false;
+    }
+
+    m_settings->setLocalProxyOwnerUuid(ownerUuid);
+    setLocalProxyPort(port);
+    m_settings->setLocalProxyHttpEnabled(true);
+
+    return true;
+}
+
+void SettingsController::disableLocalProxy()
+{
+    if (m_settings->isLocalProxyHttpEnabled()) {
+        m_settings->setLocalProxyHttpEnabled(false);
+    }
+}
+
