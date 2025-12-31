@@ -196,5 +196,16 @@ PageType {
             }
         }
     }
+
+    Connections {
+        target: ServersModel
+
+        function onProcessedServerChanged() {
+            localProxySwitch.syncState()
+            if (!portField.textField.activeFocus) {
+                portField.syncPortValue()
+            }
+        }
+    }
 }
 
