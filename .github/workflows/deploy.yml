@@ -25,7 +25,7 @@ jobs:
 
     steps:
     - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -121,7 +121,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'windows'
@@ -213,7 +213,7 @@ jobs:
         xcode-version: '26.1'
 
     - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
@@ -225,7 +225,7 @@ jobs:
         extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install iOS Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
@@ -327,7 +327,7 @@ jobs:
         xcode-version: '15.4.0'
 
     - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
@@ -490,7 +490,7 @@ jobs:
         xcode-version: '26.1'
 
     - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
