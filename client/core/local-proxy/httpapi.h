@@ -21,19 +21,10 @@ public:
 
 private:
     void setupRoutes();
-    
-    // Config management endpoints
-    QHttpServerResponse handleGetConfigs(const QHttpServerRequest &request);
-    QHttpServerResponse handleAddConfigs(const QHttpServerRequest &request);
-    QHttpServerResponse handleUpdateConfigs(const QHttpServerRequest &request);
-    QHttpServerResponse handleDeleteConfig(const QHttpServerRequest &request);
-    QHttpServerResponse handleActivateConfig(const QHttpServerRequest &request);
-    QHttpServerResponse handleGetActiveConfig(const QHttpServerRequest &request);
 
-    // Xray control endpoints
-    QJsonObject handlePostUp();
-    QJsonObject handlePostDown();
-    QJsonObject handleGetPing() const;
+    QHttpServerResponse handlePostUp();
+    QHttpServerResponse handlePostDown();
+    QHttpServerResponse handleGetPing() const;
 
     QHttpServer m_server;
     QScopedPointer<QTcpServer> m_tcpServer;
