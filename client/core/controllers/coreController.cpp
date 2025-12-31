@@ -37,7 +37,7 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 void CoreController::initLocalProxy()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    m_proxyServer.reset(new ProxyServer(this));
+    m_proxyServer.reset(new ProxyServer(m_settings, this));
 
     auto syncLocalProxy = [this]() {
         if (!m_proxyServer) {

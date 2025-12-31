@@ -1,47 +1,33 @@
 #pragma once
 
+#include <memory>
+#include <optional>
+
 #include <QJsonObject>
 #include <QString>
-#include <QFile>
-#include <QMap>
+
+class Settings;
 
 class ConfigManager {
 public:
-    ConfigManager();
+    struct ConfigData {
+        QString ownerUuid;
+        QString serverName;
+        QString serializedConfig;
+        QJsonObject parsedConfig;
+    };
 
-    // Main config operations
-    bool addConfigs(const QStringList &serializedConfigs);
-    bool removeConfig(const QString &uuid);
-    bool activateConfig(const QString &uuid);
-    bool updateAllConfigs(const QStringList &serializedConfigs);
-    bool clearConfigs();
+    explicit ConfigManager(const std::shared_ptr<Settings> &settings);
 
-    // Information retrieval
-    QString getActiveConfigUuid() const { return m_activeConfigUuid; }
-    QJsonObject getActiveConfig() const;
-    QMap<QString, QJsonObject> getAllConfigs() const;
-    QMap<QString, QJsonObject> getConfigsByUuids(const QStringList &uuids) const;
-    QString getActiveConfigPath() const;
-    int getConfigCount() const { return m_configCount; }
+    std::optional<ConfigData> buildConfig(QString &errorDescription) const;
+    bool writeTempConfig(const QString &serializedConfig, QString &configPath, QString &errorDescription) const;
+    bool removeTempConfig() const;
+    QString tempConfigPath() const;
 
 private:
-    // File paths
-    QString getConfigsPath() const;
-    QString getConfigsInfoPath() const;
+    std::optional<QJsonObject> findServerByUuid(const QString &uuid) const;
+    std::optional<QString> extractSerializedXrayConfig(const QJsonObject &server) const;
+    QString tempDirectory() const;
 
-    // File operations
-    QJsonObject readConfigsInfo() const;
-    bool writeConfigsInfo(const QJsonObject &configsInfo);
-    QJsonObject readActiveConfig() const;
-    bool writeActiveConfig(const QJsonObject &config);
-    bool removeActiveConfigFile();
-
-    // Helper methods
-    QString generateUuid() const;
-    QString getProtocolFromSerializedConfig(const QString &config) const;
-    QJsonObject deserializeConfig(const QString &configStr, QString *prefix = nullptr, QString *errorMsg = nullptr);
-    QJsonObject addInbounds(const QJsonObject &config);
-
-    QString m_activeConfigUuid;
-    int m_configCount{0};
-}; 
+    std::shared_ptr<Settings> m_settings;
+};
