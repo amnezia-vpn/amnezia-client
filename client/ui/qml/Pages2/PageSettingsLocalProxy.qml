@@ -114,9 +114,13 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Failed to enable local proxy. Check the port (%1-%2).")
                                                                    .arg(root.localProxyPortMin)
                                                                    .arg(root.localProxyPortMax))
+                            localProxySwitch.syncState()
+                            return
                         }
+                        localProxySwitch.syncState()
                     } else {
                         SettingsController.disableLocalProxy()
+                        localProxySwitch.syncState()
                     }
                 }
             }
@@ -186,17 +190,6 @@ PageType {
         target: SettingsController
 
         function onLocalProxySettingsUpdated() {
-            localProxySwitch.syncState()
-            if (!portField.textField.activeFocus) {
-                portField.syncPortValue()
-            }
-        }
-    }
-
-    Connections {
-        target: ServersModel
-
-        function onProcessedServerChanged() {
             localProxySwitch.syncState()
             if (!portField.textField.activeFocus) {
                 portField.syncPortValue()

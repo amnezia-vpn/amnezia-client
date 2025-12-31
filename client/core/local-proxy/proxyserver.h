@@ -23,4 +23,6 @@ private:
 
     QScopedPointer<HttpApi> m_api;
     QSharedPointer<ProxyService> m_service;
+    bool m_isRunning {false};
+    quint16 m_currentPort {0};
 };

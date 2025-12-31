@@ -1,6 +1,7 @@
 #include "coreController.h"
 
 #include <QDirIterator>
+#include <QDebug>
 #include <QTranslator>
 #include <QStandardPaths>
 
@@ -36,13 +37,39 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 void CoreController::initLocalProxy()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    // Logger and proxy initialization
-    ProxyLogger::getInstance().init(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs/proxy.log");
-    ProxyLogger::getInstance().setLogLevel(ProxyLogger::LogLevel::Info);
-
     m_proxyServer.reset(new ProxyServer(this));
-    const quint16 proxyPort = 49490;
-    m_proxyServer->start(proxyPort);
+
+    auto syncLocalProxy = [this]() {
+        if (!m_proxyServer) {
+            return;
+        }
+
+        const bool httpEnabled = m_settings->isLocalProxyHttpEnabled();
+        const quint16 port = m_settings->localProxyPort();
+
+        if (!httpEnabled) {
+            qInfo() << "Local proxy: HTTP API disabled";
+            m_proxyServer->stop();
+            return;
+        }
+
+        if (port < 1024) {
+            qWarning() << "Local proxy: invalid HTTP API port" << port << ", stopping server";
+            m_proxyServer->stop();
+            return;
+        }
+
+        if (!m_proxyServer->start(port)) {
+            qWarning() << "Local proxy: failed to start on port" << port;
+            return;
+        }
+
+        qInfo() << "Local proxy: running on 127.0.0.1:" << port;
+    };
+
+    syncLocalProxy();
+
+    connect(m_settings.get(), &Settings::localProxySettingsChanged, this, syncLocalProxy);
 #endif
 }
 

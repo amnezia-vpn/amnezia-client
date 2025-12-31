@@ -52,7 +52,6 @@
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
 #include "core/local-proxy/proxyserver.h"
-#include "core/local-proxy/proxylogger.h"
 #include "ui/notificationhandler.h"
 #endif
 
