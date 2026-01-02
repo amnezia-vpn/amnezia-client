@@ -232,9 +232,9 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
             const auto pbk = QUrl::fromPercentEncoding(query.queryItemValue("pbk").toUtf8());
             QJsonIO::SetValue(stream, pbk, { "realitySettings", "publicKey" });
         }
-        if (query.hasQueryItem("spiderX"))
+        if (query.hasQueryItem("spx"))
         {
-            const auto spiderX = QUrl::fromPercentEncoding(query.queryItemValue("spiderX").toUtf8());
+            const auto spiderX = QUrl::fromPercentEncoding(query.queryItemValue("spx").toUtf8());
             QJsonIO::SetValue(stream, spiderX, { "realitySettings", "spiderX" });
         }
         if (query.hasQueryItem("sid"))
@@ -300,7 +300,7 @@ const QString Serialize(const VlessServerObject &server, const QString &alias)
         }
         
         if (!server.spiderX.isEmpty()) {
-            query.addQueryItem("spiderX", server.spiderX);
+            query.addQueryItem("spx", server.spiderX);
         }
     }
     
