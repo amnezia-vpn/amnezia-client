@@ -4,6 +4,7 @@ Type=Application
 Name=AmneziaVPN
 Version=1.0
 Comment=Client of your self-hosted VPN
+Comment[ru]=Клиент для вашего VPN на собственном сервере
 Exec=AmneziaVPN
 Icon=/usr/share/pixmaps/AmneziaVPN.png
 Categories=Network;Qt;Security;
