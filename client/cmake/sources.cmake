@@ -8,7 +8,6 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/defs.h
     ${CLIENT_ROOT_DIR}/core/utils/errorStrings.h
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/scriptsRegistry.h
-    ${CLIENT_ROOT_DIR}/core/utils/serverDefs.h
     ${CLIENT_ROOT_DIR}/core/utils/api/apiDefs.h
     ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
@@ -81,7 +80,6 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/containers/containers_defs.cpp
     ${CLIENT_ROOT_DIR}/core/utils/errorStrings.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/scriptsRegistry.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/serverDefs.cpp
     ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
