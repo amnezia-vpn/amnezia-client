@@ -36,7 +36,9 @@ jobs:
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        aqtversion: '==3.3.0'       
+        py7zrversion: '==0.22.*'  
+        extra: '--base ${{ env.QT_MIRROR }}' 
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -51,8 +53,8 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version: $VERSION"
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -117,8 +119,8 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version: $VERSION"
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
@@ -132,7 +134,9 @@ jobs:
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        aqtversion: '==3.3.0'       
+        py7zrversion: '==0.22.*'  
+        extra: '--base ${{ env.QT_MIRROR }}' 
 
     - name: 'Setup mvsc'
       uses: ilammy/msvc-dev-cmd@v1
@@ -254,8 +258,8 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install dependencies'
       run: pip install jsonschema jinja2
@@ -346,8 +350,8 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -412,15 +416,11 @@ jobs:
         arch: 'clang_64'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
-        #setup-python: 'true'
-        #set-env: 'true'
-        #extra: '--external 7z --base ${{ env.QT_MIRROR }}'
         setup-python: 'true'
         set-env: 'true'
         aqtversion: '==3.3.0'       
         py7zrversion: '==0.22.*'  
         extra: '--base ${{ env.QT_MIRROR }}' 
-        cache: 'true'
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -435,8 +435,8 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version: $VERSION"
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -519,8 +519,8 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -629,8 +629,8 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version: $VERSION"
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Setup Java'
       uses: actions/setup-java@v4
