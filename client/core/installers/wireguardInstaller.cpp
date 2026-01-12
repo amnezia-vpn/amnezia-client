@@ -2,7 +2,7 @@
 
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 
 using namespace amnezia;
 
@@ -12,10 +12,10 @@ WireguardInstaller::WireguardInstaller(QObject *parent)
 }
 
 ErrorCode WireguardInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                         ServerController* serverController, QJsonObject &config)
+                                                         SshSession* sshSession, QJsonObject &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    QString serverConfig = serverController->getTextFileFromContainer(container, credentials,
+    QString serverConfig = sshSession->getTextFileFromContainer(container, credentials,
                                                                       protocols::wireguard::serverConfigPath, errorCode);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;

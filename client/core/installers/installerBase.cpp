@@ -16,11 +16,11 @@ QJsonObject InstallerBase::generateConfig(DockerContainer container, int port, T
 }
 
 ErrorCode InstallerBase::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                   ServerController* serverController, QJsonObject &config)
+                                                   SshSession* sshSession, QJsonObject &config)
 {
     Q_UNUSED(container);
     Q_UNUSED(credentials);
-    Q_UNUSED(serverController);
+    Q_UNUSED(sshSession);
     Q_UNUSED(config);
     return ErrorCode::NoError;
 }

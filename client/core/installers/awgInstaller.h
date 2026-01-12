@@ -11,7 +11,7 @@ public:
 
     QJsonObject generateConfig(DockerContainer container, int port, TransportProto transportProto) override;
     ErrorCode extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                         ServerController* serverController, QJsonObject &config) override;
+                                         SshSession* serverController, QJsonObject &config) override;
 
 private:
     void generateAwgParameters(QJsonObject &containerConfig, bool isAwg2 = false);

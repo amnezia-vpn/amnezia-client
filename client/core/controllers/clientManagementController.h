@@ -6,7 +6,7 @@
 #include <QJsonArray>
 
 #include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/defs.h"
 #include "core/repositories/serversRepository.h"
 
@@ -35,19 +35,19 @@ signals:
 
 public slots:
     ErrorCode updateClients(const DockerContainer container, const ServerCredentials &credentials,
-                            const QSharedPointer<ServerController> &serverController);
+                            SshSession* sshSession);
     ErrorCode appendClient(const DockerContainer container, const ServerCredentials &credentials, const QJsonObject &containerConfig,
-                          const QString &clientName, const QSharedPointer<ServerController> &serverController);
+                          const QString &clientName, SshSession* sshSession);
     ErrorCode appendClient(QJsonObject &protocolConfig, const QString &clientName, const DockerContainer container,
-                           const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController);
+                           const ServerCredentials &credentials, SshSession* sshSession);
     ErrorCode appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
-                           const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController);
+                           const ServerCredentials &credentials, SshSession* sshSession);
     ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container,
-                           const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController, bool addTimeStamp = false);
+                           const ServerCredentials &credentials, SshSession* sshSession, bool addTimeStamp = false);
     ErrorCode revokeClient(const int index, const DockerContainer container, const ServerCredentials &credentials,
-                          const int serverIndex, const QSharedPointer<ServerController> &serverController);
+                          const int serverIndex, SshSession* sshSession);
     ErrorCode revokeClient(const QJsonObject &containerConfig, const DockerContainer container, const ServerCredentials &credentials,
-                          const int serverIndex, const QSharedPointer<ServerController> &serverController);
+                          const int serverIndex, SshSession* sshSession);
 
 private:
     bool isClientExists(const QString &clientId, const QJsonArray &clientsTable);
@@ -55,21 +55,21 @@ private:
     void migration(const QByteArray &clientsTableString, QJsonArray &clientsTable);
 
     ErrorCode revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials, const int serverIndex,
-                            const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable);
+                            SshSession* sshSession, QJsonArray &clientsTable);
     ErrorCode revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                              const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable);
+                              SshSession* sshSession, QJsonArray &clientsTable);
     ErrorCode revokeXray(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                         const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable);
+                         SshSession* sshSession, QJsonArray &clientsTable);
 
     ErrorCode getOpenVpnClients(const DockerContainer container, const ServerCredentials &credentials,
-                                const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable);
+                                SshSession* sshSession, int &count, QJsonArray &clientsTable);
     ErrorCode getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
-                                  const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable);
+                                  SshSession* sshSession, int &count, QJsonArray &clientsTable);
     ErrorCode getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
-                             const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable);
+                             SshSession* sshSession, int &count, QJsonArray &clientsTable);
 
     ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
-                     const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data);
+                     SshSession* sshSession, std::vector<WgShowData> &data);
 
     ServersRepository* m_serversRepository;
     QJsonArray m_clientsTable;

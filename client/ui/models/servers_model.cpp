@@ -5,7 +5,7 @@
 #include <QJsonDocument>
 
 #include "core/api/apiDefs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/networkUtilities.h"
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)

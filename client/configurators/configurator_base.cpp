@@ -8,24 +8,24 @@
 #include "configurators/wireguard_configurator.h"
 #include "configurators/xray_configurator.h"
 
-ConfiguratorBase::ConfiguratorBase(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
-    : QObject { parent }, m_settings(settings), m_serverController(serverController)
+ConfiguratorBase::ConfiguratorBase(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)
+    : QObject { parent }, m_settings(settings), m_sshSession(sshSession)
 {
 }
 
 QScopedPointer<ConfiguratorBase> ConfiguratorBase::create(Proto protocol,
                                                           std::shared_ptr<Settings> settings,
-                                                          const QSharedPointer<ServerController> &serverController)
+                                                          SshSession* sshSession)
 {
     switch (protocol) {
-    case Proto::OpenVpn: return QScopedPointer<ConfiguratorBase>(new OpenVpnConfigurator(settings, serverController));
-    case Proto::ShadowSocks: return QScopedPointer<ConfiguratorBase>(new ShadowSocksConfigurator(settings, serverController));
-    case Proto::Cloak: return QScopedPointer<ConfiguratorBase>(new CloakConfigurator(settings, serverController));
-    case Proto::WireGuard: return QScopedPointer<ConfiguratorBase>(new WireguardConfigurator(settings, serverController, false));
-    case Proto::Awg: return QScopedPointer<ConfiguratorBase>(new AwgConfigurator(settings, serverController));
-    case Proto::Ikev2: return QScopedPointer<ConfiguratorBase>(new Ikev2Configurator(settings, serverController));
-    case Proto::Xray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(settings, serverController));
-    case Proto::SSXray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(settings, serverController));
+    case Proto::OpenVpn: return QScopedPointer<ConfiguratorBase>(new OpenVpnConfigurator(settings, sshSession));
+    case Proto::ShadowSocks: return QScopedPointer<ConfiguratorBase>(new ShadowSocksConfigurator(settings, sshSession));
+    case Proto::Cloak: return QScopedPointer<ConfiguratorBase>(new CloakConfigurator(settings, sshSession));
+    case Proto::WireGuard: return QScopedPointer<ConfiguratorBase>(new WireguardConfigurator(settings, sshSession, false));
+    case Proto::Awg: return QScopedPointer<ConfiguratorBase>(new AwgConfigurator(settings, sshSession));
+    case Proto::Ikev2: return QScopedPointer<ConfiguratorBase>(new Ikev2Configurator(settings, sshSession));
+    case Proto::Xray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(settings, sshSession));
+    case Proto::SSXray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(settings, sshSession));
     default: return QScopedPointer<ConfiguratorBase>();
     }
 }

@@ -5,13 +5,13 @@
 #include <QJsonObject>
 
 #include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/scripts_registry.h"
 #include "protocols/protocols_defs.h"
 
-ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession,
                                                  QObject *parent)
-    : ConfiguratorBase(settings, serverController, parent)
+    : ConfiguratorBase(settings, sshSession, parent)
 {
 }
 
@@ -19,7 +19,7 @@ QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentia
                                               const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
     QString ssKey =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::shadowsocks::ssKeyPath, errorCode);
+            m_sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::shadowsocks::ssKeyPath, errorCode);
     ssKey.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
@@ -36,7 +36,7 @@ QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentia
 
     amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
-    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(), vars);
+    QString textCfg = m_sshSession->replaceVars(QJsonDocument(config).toJson(), vars);
 
     // qDebug().noquote() << textCfg;
     return textCfg;

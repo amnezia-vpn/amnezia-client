@@ -8,7 +8,7 @@
 
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "utilities.h"
 #include "ui/models/protocols/awgConfigModel.h"
 
@@ -130,7 +130,7 @@ void AwgInstaller::generateAwgParameters(QJsonObject &containerConfig, bool isAw
 }
 
 ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                   ServerController* serverController, QJsonObject &config)
+                                                   SshSession* sshSession, QJsonObject &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
     
@@ -140,7 +140,7 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
         configPath = protocols::awg::serverLegacyConfigPath;
     }
     
-    QString serverConfig = serverController->getTextFileFromContainer(container, credentials, configPath, errorCode);
+    QString serverConfig = sshSession->getTextFileFromContainer(container, credentials, configPath, errorCode);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }

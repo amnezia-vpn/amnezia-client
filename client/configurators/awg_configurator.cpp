@@ -4,8 +4,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
-    : WireguardConfigurator(settings, serverController, true, parent)
+AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)
+    : WireguardConfigurator(settings, sshSession, true, parent)
 {
 }
 

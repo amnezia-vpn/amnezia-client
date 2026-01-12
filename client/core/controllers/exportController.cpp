@@ -4,7 +4,7 @@
 #include <QJsonDocument>
 
 #include "configurators/configurator_base.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/networkUtilities.h"
 #include "core/qrCodeUtils.h"
 #include "core/serialization/serialization.h"
@@ -62,11 +62,11 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     if (ContainerProps::containerService(container) != ServiceType::Other) {
-        QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+        SshSession sshSession;
         for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
             QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
 
-            auto configurator = ConfiguratorBase::create(protocol, m_settings, serverController);
+            auto configurator = ConfiguratorBase::create(protocol, m_settings, &sshSession);
             QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, result.errorCode);
             if (result.errorCode != ErrorCode::NoError) {
                 return result;
@@ -115,8 +115,8 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     QJsonObject modifiedContainerConfig = containerConfig;
     modifiedContainerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    auto configurator = ConfiguratorBase::create(protocol, m_settings, serverController);
+    SshSession sshSession;
+    auto configurator = ConfiguratorBase::create(protocol, m_settings, &sshSession);
 
     QString protocolConfigString = configurator->createConfig(credentials, container, modifiedContainerConfig, result.errorCode);
     if (result.errorCode != ErrorCode::NoError) {

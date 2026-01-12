@@ -4,7 +4,7 @@
 
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 
 using namespace amnezia;
 
@@ -14,10 +14,10 @@ CloakInstaller::CloakInstaller(QObject *parent)
 }
 
 ErrorCode CloakInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                      ServerController* serverController, QJsonObject &config)
+                                                      SshSession* sshSession, QJsonObject &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    QString cloakConfig = serverController->getTextFileFromContainer(container, credentials,
+    QString cloakConfig = sshSession->getTextFileFromContainer(container, credentials,
                                                                      "/opt/amnezia/cloak/ck-config.json", errorCode);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;

@@ -12,7 +12,7 @@
 #include "core/repositories/appSettingsRepository.h"
 #include "settings.h"
 
-class ServerController;
+class SshSession;
 class VpnConfigurationsController;
 
 using namespace amnezia;

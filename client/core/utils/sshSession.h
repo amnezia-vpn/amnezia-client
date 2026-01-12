@@ -1,5 +1,5 @@
-#ifndef SERVERCONTROLLER_H
-#define SERVERCONTROLLER_H
+#ifndef SSHSESSION_H
+#define SSHSESSION_H
 
 #include <QJsonObject>
 #include <QObject>
@@ -8,17 +8,14 @@
 #include "core/defs.h"
 #include "core/sshclient.h"
 
-class Settings;
-class VpnConfigurator;
-
 using namespace amnezia;
 
-class ServerController : public QObject
+class SshSession : public QObject
 {
     Q_OBJECT
 public:
-    ServerController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
-    ~ServerController();
+    SshSession(QObject *parent = nullptr);
+    ~SshSession();
 
     typedef QList<QPair<QString, QString>> Vars;
 
@@ -28,7 +25,7 @@ public:
     QByteArray getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials, const QString &path,
                                         ErrorCode &errorCode);
 
-    QString replaceVars(const QString &script, const Vars &vars);
+    static QString replaceVars(const QString &script, const Vars &vars);
 
     ErrorCode runScript(const ServerCredentials &credentials, QString script,
                         const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
@@ -46,10 +43,8 @@ public:
     ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
                                libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
 
-    std::shared_ptr<Settings> m_settings;
-    std::shared_ptr<VpnConfigurator> m_configurator;
-
+private:
     libssh::Client m_sshClient;
 };
 
-#endif // SERVERCONTROLLER_H
+#endif // SSHSESSION_H

@@ -10,7 +10,7 @@
 
 #include "core/api/apiUtils.h"
 #include "core/controllers/installController.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/networkUtilities.h"
 #include "logger.h"
 #include "protocols/protocols_defs.h"
@@ -279,9 +279,9 @@ void InstallUiController::mountSftpDrive(int serverIndex, const QString &port, c
     }
 }
 
-bool InstallUiController::checkSshConnection(QSharedPointer<ServerController> serverController)
+bool InstallUiController::checkSshConnection(SshSession* sshSession)
 {
-    Q_UNUSED(serverController);
+    Q_UNUSED(sshSession);
 
     m_privateKeyPassphrase = "";
 

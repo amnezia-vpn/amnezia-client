@@ -10,7 +10,7 @@
 #include "containers/containers_defs.h"
 #include "core/defs.h"
 
-class ServerController;
+class SshSession;
 class ServersRepository;
 class InstallerBase;
 class Settings;
@@ -22,7 +22,7 @@ class InstallController : public QObject
     Q_OBJECT
 
 public:
-    explicit InstallController(ServerController* serverController, 
+    explicit InstallController(SshSession* sshSession, 
                               ServersRepository* serversRepository,
                               const std::shared_ptr<Settings> &settings,
                               QObject *parent = nullptr);
@@ -90,7 +90,7 @@ private:
 
     QScopedPointer<InstallerBase> createInstaller(DockerContainer container);
 
-    ServerController* m_serverController;
+    SshSession* m_sshSession;
     ServersRepository* m_serversRepository;
     std::shared_ptr<Settings> m_settings;
     bool m_cancelInstallation = false;

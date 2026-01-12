@@ -3,7 +3,7 @@
 #include <QDirIterator>
 #include <QTranslator>
 
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/controllers/installController.h"
 
 #if defined(Q_OS_ANDROID)
@@ -131,8 +131,8 @@ void CoreController::initCoreControllers()
     m_servicesCatalogController = new ServicesCatalogController(appSettingsRepo);
     m_subscriptionController = new SubscriptionController(serversRepo, appSettingsRepo);
     
-    ServerController* serverController = new ServerController(m_settings, this);
-    m_installController = new InstallController(serverController, serversRepo, m_settings, this);
+    SshSession* sshSession = new SshSession(this);
+    m_installController = new InstallController(sshSession, serversRepo, m_settings, this);
     m_exportController = new ExportController(serversRepo, appSettingsRepo, m_settings, this);
 }
 
@@ -168,29 +168,29 @@ void CoreController::initControllers()
     connect(m_exportController, &ExportController::appendClientRequested, this,
             [this](DockerContainer container, const ServerCredentials &credentials,
                    const QJsonObject &containerConfig, const QString &clientName) {
-                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-                m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, serverController);
+                SshSession sshSession;
+                m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
             });
     connect(m_exportController, &ExportController::appendClientByConfigRequested, this,
             [this](QJsonObject protocolConfig, const QString &clientName,
                    DockerContainer container, const ServerCredentials &credentials) {
-                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-                m_clientManagementController->appendClient(protocolConfig, clientName, container, credentials, serverController);
+                SshSession sshSession;
+                m_clientManagementController->appendClient(protocolConfig, clientName, container, credentials, &sshSession);
             });
     connect(m_exportController, &ExportController::updateClientsRequested, this,
             [this](DockerContainer container, const ServerCredentials &credentials) {
-                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-                m_clientManagementController->updateClients(container, credentials, serverController);
+                SshSession sshSession;
+                m_clientManagementController->updateClients(container, credentials, &sshSession);
             });
     connect(m_exportController, &ExportController::revokeClientRequested, this,
             [this](int row, DockerContainer container, const ServerCredentials &credentials, int serverIndex) {
-                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-                m_clientManagementController->revokeClient(row, container, credentials, serverIndex, serverController);
+                SshSession sshSession;
+                m_clientManagementController->revokeClient(row, container, credentials, serverIndex, &sshSession);
             });
     connect(m_exportController, &ExportController::renameClientRequested, this,
             [this](int row, const QString &clientName, DockerContainer container, const ServerCredentials &credentials) {
-                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-                m_clientManagementController->renameClient(row, clientName, container, credentials, serverController);
+                SshSession sshSession;
+                m_clientManagementController->renameClient(row, clientName, container, credentials, &sshSession);
             });
 
     m_languageUiController = new LanguageUiController(m_appSettingsRepository, m_languageModel, this);
@@ -404,15 +404,15 @@ void CoreController::initAdminConfigRevokedHandler()
     connect(m_installController, &InstallController::clientRevocationRequested, this,
             [this](const QJsonObject &containerConfig, DockerContainer container,
                    const ServerCredentials &credentials, int serverIndex) {
-                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-                m_clientManagementController->revokeClient(containerConfig, container, credentials, serverIndex, serverController);
+                SshSession sshSession;
+                m_clientManagementController->revokeClient(containerConfig, container, credentials, serverIndex, &sshSession);
             });
 
     connect(m_installController, &InstallController::clientAppendRequested, this,
             [this](DockerContainer container, const ServerCredentials &credentials,
                    const QJsonObject &containerConfig, const QString &clientName) {
-                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-                m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, serverController);
+                SshSession sshSession;
+                m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
             });
 }
 

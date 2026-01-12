@@ -4,7 +4,7 @@
 
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 
 using namespace amnezia;
 
@@ -14,10 +14,10 @@ ShadowSocksInstaller::ShadowSocksInstaller(QObject *parent)
 }
 
 ErrorCode ShadowSocksInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                            ServerController* serverController, QJsonObject &config)
+                                                            SshSession* sshSession, QJsonObject &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    QString shadowsocksConfig = serverController->getTextFileFromContainer(container, credentials,
+    QString shadowsocksConfig = sshSession->getTextFileFromContainer(container, credentials,
                                                                            "/opt/amnezia/shadowsocks/ss-config.json", errorCode);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;

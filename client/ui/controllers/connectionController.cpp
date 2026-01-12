@@ -9,6 +9,7 @@
 #include <QJsonDocument>
 
 #include "configurators/configurator_base.h"
+#include "core/utils/sshSession.h"
 #include "protocols/protocols_defs.h"
 #include "utilities.h"
 #include "version.h"
@@ -79,8 +80,6 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
 
     bool isApiConfig = serverConfig.value(config_key::configVersion).toInt();
 
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-
     for (Proto proto : ContainerProps::protocolsForContainer(container)) {
         if (isApiConfig && container == DockerContainer::Cloak && proto == Proto::ShadowSocks) {
             continue;
@@ -89,7 +88,7 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
         QString protocolConfigString =
                 containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
 
-        auto configurator = ConfiguratorBase::create(proto, m_settings, serverController);
+        auto configurator = ConfiguratorBase::create(proto, m_settings, nullptr);
         protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
 
         QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();

@@ -5,7 +5,7 @@
 
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "logger.h"
 
 namespace {
@@ -20,10 +20,10 @@ XrayInstaller::XrayInstaller(QObject *parent)
 }
 
 ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                     ServerController* serverController, QJsonObject &config)
+                                                     SshSession* sshSession, QJsonObject &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    QString currentConfig = serverController->getTextFileFromContainer(
+    QString currentConfig = sshSession->getTextFileFromContainer(
             container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
 
     if (errorCode != ErrorCode::NoError) {

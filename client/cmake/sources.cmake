@@ -13,7 +13,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/qrCodeUtils.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/serverController.h
+    ${CLIENT_ROOT_DIR}/core/utils/sshSession.h
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.h
     ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.h
     ${CLIENT_ROOT_DIR}/core/controllers/installController.h
@@ -85,7 +85,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/qrCodeUtils.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/serverController.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/sshSession.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/installController.cpp

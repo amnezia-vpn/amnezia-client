@@ -13,7 +13,7 @@ class WireguardConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    WireguardConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+    WireguardConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession,
                           bool isAwg, QObject *parent = nullptr);
 
     struct ConnectionData

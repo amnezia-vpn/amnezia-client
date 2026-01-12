@@ -2,7 +2,7 @@
 
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 
 using namespace amnezia;
 
@@ -12,7 +12,7 @@ TorInstaller::TorInstaller(QObject *parent)
 }
 
 ErrorCode TorInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                   ServerController* serverController, QJsonObject &config)
+                                                   SshSession* sshSession, QJsonObject &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
     
@@ -29,7 +29,7 @@ ErrorCode TorInstaller::extractConfigFromContainer(DockerContainer container, co
     QString containerName = ContainerProps::containerToString(container);
     QString script = QString("sudo docker exec -i %1 sh -c 'cat /var/lib/tor/hidden_service/hostname'").arg(containerName);
 
-    errorCode = serverController->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
+    errorCode = sshSession->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }

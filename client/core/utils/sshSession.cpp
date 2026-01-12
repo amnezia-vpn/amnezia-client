@@ -1,4 +1,4 @@
-#include "serverController.h"
+#include "sshSession.h"
 
 #include <QCryptographicHash>
 #include <QDir>
@@ -27,26 +27,25 @@
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
 #include "logger.h"
-#include "settings.h"
 #include "utilities.h"
 
 namespace
 {
-    Logger logger("ServerController");
+    Logger logger("SshSession");
 }
 
-ServerController::ServerController(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings)
+SshSession::SshSession(QObject *parent) : QObject(parent)
 {
 }
 
-ServerController::~ServerController()
+SshSession::~SshSession()
 {
     m_sshClient.disconnectFromHost();
 }
 
-ErrorCode ServerController::runScript(const ServerCredentials &credentials, QString script,
-                                      const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
-                                      const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
+ErrorCode SshSession::runScript(const ServerCredentials &credentials, QString script,
+                                const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
+                                const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
 {
 
     auto error = m_sshClient.connectToHost(credentials);
@@ -56,7 +55,7 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
 
     script.replace("\r", "");
 
-    qDebug() << "ServerController::Run script";
+    qDebug() << "SshSession::Run script";
 
     QString totalLine;
     const QStringList &lines = script.split("\n", Qt::SkipEmptyParts);
@@ -89,13 +88,13 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         }
     }
 
-    qDebug().noquote() << "ServerController::runScript finished\n";
+    qDebug().noquote() << "SshSession::runScript finished\n";
     return ErrorCode::NoError;
 }
 
-ErrorCode ServerController::runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
-                                               const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
-                                               const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
+ErrorCode SshSession::runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
+                                         const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
+                                         const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
 
@@ -113,8 +112,8 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     return e;
 }
 
-ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials, const QString &file,
-                                                      const QString &path, libssh::ScpOverwriteMode overwriteMode)
+ErrorCode SshSession::uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials, const QString &file,
+                                                const QString &path, libssh::ScpOverwriteMode overwriteMode)
 {
     ErrorCode e = ErrorCode::NoError;
     QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
@@ -170,8 +169,8 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     return e;
 }
 
-QByteArray ServerController::getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials, const QString &path,
-                                                      ErrorCode &errorCode)
+QByteArray SshSession::getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials, const QString &path,
+                                                ErrorCode &errorCode)
 {
 
     errorCode = ErrorCode::NoError;
@@ -188,8 +187,8 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
     return QByteArray::fromHex(stdOut.toUtf8());
 }
 
-ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
-                                             libssh::ScpOverwriteMode overwriteMode)
+ErrorCode SshSession::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
+                                       libssh::ScpOverwriteMode overwriteMode)
 {
     auto error = m_sshClient.connectToHost(credentials);
     if (error != ErrorCode::NoError) {
@@ -209,7 +208,7 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     return ErrorCode::NoError;
 }
 
-QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode &errorCode)
+QString SshSession::checkSshConnection(const ServerCredentials &credentials, ErrorCode &errorCode)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -226,7 +225,7 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
     return stdOut;
 }
 
-QString ServerController::replaceVars(const QString &script, const Vars &vars)
+QString SshSession::replaceVars(const QString &script, const Vars &vars)
 {
     QString s = script;
     for (const QPair<QString, QString> &var : vars) {
@@ -235,8 +234,8 @@ QString ServerController::replaceVars(const QString &script, const Vars &vars)
     return s;
 }
 
-ErrorCode ServerController::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey,
-                                                   const std::function<QString()> &callback)
+ErrorCode SshSession::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey,
+                                             const std::function<QString()> &callback)
 {
     auto error = m_sshClient.getDecryptedPrivateKey(credentials, decryptedPrivateKey, callback);
     return error;

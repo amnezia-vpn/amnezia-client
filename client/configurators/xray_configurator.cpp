@@ -7,7 +7,7 @@
 #include "logger.h"
 
 #include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/scripts_registry.h"
 #include "protocols/protocols_defs.h"
 
@@ -15,8 +15,8 @@ namespace {
 Logger logger("XrayConfigurator");
 }
 
-XrayConfigurator::XrayConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
-    : ConfiguratorBase(settings, serverController, parent)
+XrayConfigurator::XrayConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)
+    : ConfiguratorBase(settings, sshSession, parent)
 {
 }
 
@@ -27,7 +27,7 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     QString clientId = QUuid::createUuid().toString(QUuid::WithoutBraces);
     
     // Get current server config
-    QString currentConfig = m_serverController->getTextFileFromContainer(
+    QString currentConfig = m_sshSession->getTextFileFromContainer(
         container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
     
     if (errorCode != ErrorCode::NoError) {
@@ -91,7 +91,7 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     
     // Save updated config to server
     QString updatedConfig = QJsonDocument(serverConfig).toJson();
-    errorCode = m_serverController->uploadTextFileToContainer(
+    errorCode = m_sshSession->uploadTextFileToContainer(
         container, 
         credentials, 
         updatedConfig,
@@ -105,9 +105,9 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
 
     // Restart container
     QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
-    errorCode = m_serverController->runScript(
+    errorCode = m_sshSession->runScript(
         credentials, 
-        m_serverController->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns()))
+        m_sshSession->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns()))
     );
 
     if (errorCode != ErrorCode::NoError) {
@@ -131,7 +131,7 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
 
     amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
-    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container), vars);
+    QString config = m_sshSession->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container), vars);
     
     if (config.isEmpty()) {
         logger.error() << "Failed to get config template";
@@ -140,7 +140,7 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
     }
 
     QString xrayPublicKey =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::PublicKeyPath, errorCode);
+            m_sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::PublicKeyPath, errorCode);
     if (errorCode != ErrorCode::NoError || xrayPublicKey.isEmpty()) {
         logger.error() << "Failed to get public key";
         errorCode = ErrorCode::InternalError;
@@ -149,7 +149,7 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
     xrayPublicKey.replace("\n", "");
     
     QString xrayShortId =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::shortidPath, errorCode);
+            m_sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::shortidPath, errorCode);
     if (errorCode != ErrorCode::NoError || xrayShortId.isEmpty()) {
         logger.error() << "Failed to get short ID";
         errorCode = ErrorCode::InternalError;

@@ -2,7 +2,7 @@
 
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "utilities.h"
 
 using namespace amnezia;
@@ -28,7 +28,7 @@ QJsonObject SftpInstaller::generateConfig(DockerContainer container, int port, T
 }
 
 ErrorCode SftpInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                     ServerController* serverController, QJsonObject &config)
+                                                     SshSession* sshSession, QJsonObject &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
     
@@ -45,7 +45,7 @@ ErrorCode SftpInstaller::extractConfigFromContainer(DockerContainer container, c
     QString containerName = ContainerProps::containerToString(container);
     QString script = QString("sudo docker inspect --format '{{.Config.Cmd}}' %1").arg(containerName);
 
-    errorCode = serverController->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
+    errorCode = sshSession->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }

@@ -13,7 +13,7 @@
 #include "core/repositories/serversRepository.h"
 #include "core/repositories/appSettingsRepository.h"
 
-class ServerController;
+class SshSession;
 class InstallController;
 
 using namespace amnezia;

@@ -2,7 +2,7 @@
 
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "utilities.h"
 
 using namespace amnezia;
@@ -28,11 +28,11 @@ QJsonObject Socks5Installer::generateConfig(DockerContainer container, int port,
 }
 
 ErrorCode Socks5Installer::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                       ServerController* serverController, QJsonObject &config)
+                                                       SshSession* sshSession, QJsonObject &config)
 {
     Q_UNUSED(container);
     Q_UNUSED(credentials);
-    Q_UNUSED(serverController);
+    Q_UNUSED(sshSession);
     Q_UNUSED(config);
     return ErrorCode::NoError;
 }

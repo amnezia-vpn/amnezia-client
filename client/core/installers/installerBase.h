@@ -6,7 +6,7 @@
 
 #include "containers/containers_defs.h"
 #include "core/defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 
 class InstallerBase : public QObject
 {
@@ -19,7 +19,7 @@ public:
 
     // Extract configuration from installed container
     virtual ErrorCode extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                 ServerController* serverController, QJsonObject &config);
+                                                 SshSession* sshSession, QJsonObject &config);
 
 protected:
     QJsonObject createBaseConfig(DockerContainer container, int port, TransportProto transportProto);

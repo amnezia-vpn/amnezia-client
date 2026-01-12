@@ -16,7 +16,7 @@
 #include "core/defs.h"
 #include "core/networkUtilities.h"
 #include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/scripts_registry.h"
 #include "settings.h"
 #include "utilities.h"
@@ -26,9 +26,9 @@
 #include <openssl/x509.h>
 
 
-OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession,
                                          QObject *parent)
-    : ConfiguratorBase(settings, serverController, parent)
+    : ConfiguratorBase(settings, sshSession, parent)
 {
 }
 
@@ -45,7 +45,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 
     QString reqFileName = QString("%1/%2.req").arg(amnezia::protocols::openvpn::clientsDirPath).arg(connData.clientId);
 
-    errorCode = m_serverController->uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
+    errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
@@ -56,15 +56,15 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     }
 
     connData.caCert =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::caCertPath, errorCode);
-    connData.clientCert = m_serverController->getTextFileFromContainer(
+            m_sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::caCertPath, errorCode);
+    connData.clientCert = m_sshSession->getTextFileFromContainer(
             container, credentials, QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), errorCode);
 
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
 
-    connData.taKey = m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath, errorCode);
+    connData.taKey = m_sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath, errorCode);
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
         errorCode = ErrorCode::SshScpFailureError;
@@ -78,7 +78,7 @@ QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, 
 {
     amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
-    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container), vars);
+    QString config = m_sshSession->replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container), vars);
 
     ConnectionData connData = prepareOpenVpnConfig(credentials, container, errorCode);
     if (errorCode != ErrorCode::NoError) {
@@ -219,9 +219,9 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerC
                                   .arg(clientId);
 
     QStringList scriptList { script_import, script_sign };
-    QString script = m_serverController->replaceVars(scriptList.join("\n"), amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns()));
+    QString script = m_sshSession->replaceVars(scriptList.join("\n"), amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns()));
 
-    return m_serverController->runScript(credentials, script);
+    return m_sshSession->runScript(credentials, script);
 }
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()

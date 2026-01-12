@@ -14,7 +14,7 @@
 #include <openssl/x509.h>
 
 #include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
 #include "protocols/protocols_defs.h"
@@ -22,9 +22,9 @@
 #include "utilities.h"
 
 WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings,
-                                             const QSharedPointer<ServerController> &serverController, bool isAwg,
+                                             SshSession* sshSession, bool isAwg,
                                              QObject *parent)
-    : ConfiguratorBase(settings, serverController, parent), m_isAwg(isAwg)
+    : ConfiguratorBase(settings, sshSession, parent), m_isAwg(isAwg)
 {
     m_serverConfigPath =
             m_isAwg ? amnezia::protocols::awg::serverConfigPath : amnezia::protocols::wireguard::serverConfigPath;
@@ -115,7 +115,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         return ErrorCode::NoError;
     };
 
-    errorCode = m_serverController->runContainerScript(credentials, container, getIpsScript, cbReadStdOut);
+    errorCode = m_sshSession->runContainerScript(credentials, container, getIpsScript, cbReadStdOut);
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
@@ -146,13 +146,13 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 
     // Get keys
     connData.serverPubKey =
-            m_serverController->getTextFileFromContainer(container, credentials, m_serverPublicKeyPath, errorCode);
+            m_sshSession->getTextFileFromContainer(container, credentials, m_serverPublicKeyPath, errorCode);
     connData.serverPubKey.replace("\n", "");
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
 
-    connData.pskKey = m_serverController->getTextFileFromContainer(container, credentials, m_serverPskKeyPath, errorCode);
+    connData.pskKey = m_sshSession->getTextFileFromContainer(container, credentials, m_serverPskKeyPath, errorCode);
     connData.pskKey.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
@@ -166,7 +166,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
                                  "AllowedIPs = %3/32\n\n")
                                  .arg(connData.clientPubKey, connData.pskKey, connData.clientIP);
 
-    errorCode = m_serverController->uploadTextFileToContainer(container, credentials, configPart, configPath,
+    errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, configPart, configPath,
                                                               libssh::ScpOverwriteMode::ScpAppendToExisting);
 
     if (errorCode != ErrorCode::NoError) {
@@ -179,9 +179,9 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     QString script = QString(
         "sudo docker exec -i $CONTAINER_NAME bash -c '%1 syncconf %2 <(%1-quick strip %3)'").arg(bin, iface, configPath);
 
-    errorCode = m_serverController->runScript(
+    errorCode = m_sshSession->runScript(
             credentials,
-            m_serverController->replaceVars(script, amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns())));
+            m_sshSession->replaceVars(script, amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns())));
 
     return connData;
 }
@@ -192,7 +192,7 @@ QString WireguardConfigurator::createConfig(const ServerCredentials &credentials
     amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
-    QString config = m_serverController->replaceVars(scriptData, vars);
+    QString config = m_sshSession->replaceVars(scriptData, vars);
 
     ConnectionData connData = prepareWireguardConfig(credentials, container, containerConfig, errorCode);
     if (errorCode != ErrorCode::NoError) {

@@ -9,7 +9,7 @@
 
 #include "configurators/configurator_base.h"
 #include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/installers/awgInstaller.h"
 #include "core/installers/cloakInstaller.h"
 #include "core/installers/installerBase.h"
@@ -47,11 +47,11 @@ namespace
     Logger logger("InstallController");
 }
 
-InstallController::InstallController(ServerController *serverController,
+InstallController::InstallController(SshSession *sshSession,
                                      ServersRepository *serversRepository,
                                      const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
-      m_serverController(serverController),
+      m_sshSession(sshSession),
       m_serversRepository(serversRepository),
       m_settings(settings),
       m_cancelInstallation(false)
@@ -93,8 +93,8 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
         return e;
     qDebug().noquote() << "InstallController::setupContainer prepareHostWorker finished";
 
-    m_serverController->runScript(credentials,
-                                  m_serverController->replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
+    m_sshSession->runScript(credentials,
+                                  m_sshSession->replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
                                                                   amnezia::genBaseVars(credentials, container, QString(), QString())));
     qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
@@ -212,13 +212,11 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
     }
 
     if (ContainerProps::containerService(container) != ServiceType::Other) {
-        QSharedPointer<ServerController> serverController(m_serverController, [](ServerController *) { }); // non-owning pointer
-
         ErrorCode errorCode = ErrorCode::NoError;
         for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
             QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
 
-            auto configurator = ConfiguratorBase::create(protocol, m_settings, serverController);
+            auto configurator = ConfiguratorBase::create(protocol, m_settings, m_sshSession);
             QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
@@ -254,8 +252,8 @@ ErrorCode InstallController::buildContainerWorker(const ServerCredentials &crede
     amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container, QString(), QString());
     amnezia::ScriptVars protocolVars = amnezia::genProtocolVarsForContainer(container, config);
     baseVars.append(protocolVars);
-    ErrorCode error = m_serverController->runScript(
-            credentials, m_serverController->replaceVars(amnezia::scriptData(SharedScriptType::build_container), baseVars), cbReadStdOut,
+    ErrorCode error = m_sshSession->runScript(
+            credentials, m_sshSession->replaceVars(amnezia::scriptData(SharedScriptType::build_container), baseVars), cbReadStdOut,
             cbReadStdErr);
 
     if (stdOut.contains("doesn't work on cgroups v2"))
@@ -279,8 +277,8 @@ ErrorCode InstallController::runContainerWorker(const ServerCredentials &credent
     amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container, QString(), QString());
     amnezia::ScriptVars protocolVars = amnezia::genProtocolVarsForContainer(container, config);
     baseVars.append(protocolVars);
-    ErrorCode e = m_serverController->runScript(
-            credentials, m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container), baseVars),
+    ErrorCode e = m_sshSession->runScript(
+            credentials, m_sshSession->replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container), baseVars),
             cbReadStdOut);
 
     if (stdOut.contains("address already in use"))
@@ -308,9 +306,9 @@ ErrorCode InstallController::configureContainerWorker(const ServerCredentials &c
     amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container, QString(), QString());
     amnezia::ScriptVars protocolVars = amnezia::genProtocolVarsForContainer(container, config);
     baseVars.append(protocolVars);
-    ErrorCode e = m_serverController->runContainerScript(
+    ErrorCode e = m_sshSession->runContainerScript(
             credentials, container,
-            m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::configure_container, container), baseVars),
+            m_sshSession->replaceVars(amnezia::scriptData(ProtocolScriptType::configure_container, container), baseVars),
             cbReadStdOut, cbReadStdErr);
 
     updateContainerConfigAfterInstallation(container, config, stdOut);
@@ -329,14 +327,14 @@ ErrorCode InstallController::startupContainerWorker(const ServerCredentials &cre
     amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container, QString(), QString());
     amnezia::ScriptVars protocolVars = amnezia::genProtocolVarsForContainer(container, config);
     baseVars.append(protocolVars);
-    ErrorCode e = m_serverController->uploadTextFileToContainer(container, credentials, m_serverController->replaceVars(script, baseVars),
+    ErrorCode e = m_sshSession->uploadTextFileToContainer(container, credentials, m_sshSession->replaceVars(script, baseVars),
                                                                 "/opt/amnezia/start.sh");
     if (e)
         return e;
 
-    return m_serverController->runScript(
+    return m_sshSession->runScript(
             credentials,
-            m_serverController->replaceVars("sudo docker exec -d $CONTAINER_NAME sh -c \"chmod a+x /opt/amnezia/start.sh && "
+            m_sshSession->replaceVars("sudo docker exec -d $CONTAINER_NAME sh -c \"chmod a+x /opt/amnezia/start.sh && "
                                             "/opt/amnezia/start.sh\"",
                                             baseVars));
 }
@@ -381,17 +379,17 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
         udpProtoScript.append("' | grep -i udp");
         tcpProtoScript.append(" | grep LISTEN");
 
-        ErrorCode errorCode = m_serverController->runScript(
+        ErrorCode errorCode = m_sshSession->runScript(
                 credentials,
-                m_serverController->replaceVars(tcpProtoScript, amnezia::genBaseVars(credentials, container, QString(), QString())),
+                m_sshSession->replaceVars(tcpProtoScript, amnezia::genBaseVars(credentials, container, QString(), QString())),
                 cbReadStdOut, cbReadStdErr);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
 
-        errorCode = m_serverController->runScript(
+        errorCode = m_sshSession->runScript(
                 credentials,
-                m_serverController->replaceVars(udpProtoScript, amnezia::genBaseVars(credentials, container, QString(), QString())),
+                m_sshSession->replaceVars(udpProtoScript, amnezia::genBaseVars(credentials, container, QString(), QString())),
                 cbReadStdOut, cbReadStdErr);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
@@ -409,8 +407,8 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
         script = script.append(" | grep LISTEN");
     }
 
-    ErrorCode errorCode = m_serverController->runScript(
-            credentials, m_serverController->replaceVars(script, amnezia::genBaseVars(credentials, container, QString(), QString())),
+    ErrorCode errorCode = m_sshSession->runScript(
+            credentials, m_sshSession->replaceVars(script, amnezia::genBaseVars(credentials, container, QString(), QString())),
             cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
@@ -519,9 +517,9 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
         return ErrorCode::NoError;
     };
 
-    ErrorCode error = m_serverController->runScript(
+    ErrorCode error = m_sshSession->runScript(
             credentials,
-            m_serverController->replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
+            m_sshSession->replaceVars(amnezia::scriptData(SharedScriptType::install_docker),
                                             amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())),
             cbReadStdOut, cbReadStdErr);
 
@@ -538,8 +536,8 @@ ErrorCode InstallController::prepareHostWorker(const ServerCredentials &credenti
 {
     Q_UNUSED(config);
     // create folder on host
-    return m_serverController->runScript(credentials,
-                                         m_serverController->replaceVars(amnezia::scriptData(SharedScriptType::prepare_host),
+    return m_sshSession->runScript(credentials,
+                                         m_sshSession->replaceVars(amnezia::scriptData(SharedScriptType::prepare_host),
                                                                          amnezia::genBaseVars(credentials, container, QString(), QString())));
 }
 
@@ -557,9 +555,9 @@ ErrorCode InstallController::isUserInSudo(const ServerCredentials &credentials, 
     };
 
     const QString scriptData = amnezia::scriptData(SharedScriptType::check_user_in_sudo);
-    ErrorCode error = m_serverController->runScript(
+    ErrorCode error = m_sshSession->runScript(
             credentials,
-            m_serverController->replaceVars(scriptData, amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())),
+            m_sshSession->replaceVars(scriptData, amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())),
             cbReadStdOut, cbReadStdErr);
 
     if (credentials.userName != "root" && stdOut.contains("sudo:") && !stdOut.contains("uname:") && stdOut.contains("not found"))
@@ -599,9 +597,9 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
                 return ErrorCode::ServerCancelInstallation;
             }
             stdOut.clear();
-            m_serverController->runScript(
+            m_sshSession->runScript(
                     credentials,
-                    m_serverController->replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
+                    m_sshSession->replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
                                                     amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())),
                     cbReadStdOut, cbReadStdErr);
 
@@ -635,9 +633,9 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
 
 ErrorCode InstallController::setupServerFirewall(const ServerCredentials &credentials)
 {
-    return m_serverController->runScript(
+    return m_sshSession->runScript(
             credentials,
-            m_serverController->replaceVars(amnezia::scriptData(SharedScriptType::setup_host_firewall),
+            m_sshSession->replaceVars(amnezia::scriptData(SharedScriptType::setup_host_firewall),
                                             amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())));
 }
 
@@ -658,13 +656,13 @@ ErrorCode InstallController::rebootServer(int serverIndex)
         return ErrorCode::NoError;
     };
 
-    return m_serverController->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
+    return m_sshSession->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
 }
 
 ErrorCode InstallController::removeAllContainers(int serverIndex)
 {
     auto credentials = m_serversRepository->serverCredentials(serverIndex);
-    ErrorCode errorCode = m_serverController->runScript(credentials, amnezia::scriptData(SharedScriptType::remove_all_containers));
+    ErrorCode errorCode = m_sshSession->runScript(credentials, amnezia::scriptData(SharedScriptType::remove_all_containers));
 
     if (errorCode == ErrorCode::NoError) {
         QJsonObject server = m_serversRepository->server(serverIndex);
@@ -680,9 +678,9 @@ ErrorCode InstallController::removeAllContainers(int serverIndex)
 ErrorCode InstallController::removeContainer(int serverIndex, DockerContainer container)
 {
     auto credentials = m_serversRepository->serverCredentials(serverIndex);
-    ErrorCode errorCode = m_serverController->runScript(
+    ErrorCode errorCode = m_sshSession->runScript(
             credentials,
-            m_serverController->replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
+            m_sshSession->replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
                                             amnezia::genBaseVars(credentials, container, QString(), QString())));
 
     if (errorCode == ErrorCode::NoError) {
@@ -929,14 +927,14 @@ ErrorCode InstallController::checkSshConnection(const ServerCredentials &credent
         }
 
         QString decryptedPrivateKey;
-        errorCode = m_serverController->getDecryptedPrivateKey(processedCredentials, decryptedPrivateKey, passphraseCallback);
+        errorCode = m_sshSession->getDecryptedPrivateKey(processedCredentials, decryptedPrivateKey, passphraseCallback);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
         processedCredentials.secretData = decryptedPrivateKey;
     }
 
-    output = m_serverController->checkSshConnection(processedCredentials, errorCode);
+    output = m_sshSession->checkSshConnection(processedCredentials, errorCode);
     return errorCode;
 }
 
@@ -1063,7 +1061,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
     };
 
     QString script = QString("sudo docker ps --format '{{.Names}} {{.Ports}}'");
-    ErrorCode errorCode = m_serverController->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
+    ErrorCode errorCode = m_sshSession->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -1103,7 +1101,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                     containerConfig.insert(config_key::transport_proto, transportProto);
 
                     auto installer = createInstaller(container);
-                    ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, m_serverController, config);
+                    ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, m_sshSession, config);
 
                     if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
                         return extractError;
@@ -1134,7 +1132,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                     containerConfig.insert(config_key::transport_proto, transportProto);
 
                     auto installer = createInstaller(container);
-                    ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, m_serverController, config);
+                    ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, m_sshSession, config);
 
                     if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
                         return extractError;

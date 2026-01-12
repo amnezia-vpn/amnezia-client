@@ -5,7 +5,7 @@
 #include <QDateTime>
 
 #include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/scripts_registry.h"
 #include "logger.h"
 #include "protocols/protocols_defs.h"
@@ -79,7 +79,7 @@ void ClientManagementController::migration(const QByteArray &clientsTableString,
 }
 
 ErrorCode ClientManagementController::wgShow(const DockerContainer container, const ServerCredentials &credentials,
-                                             const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data)
+                                             SshSession* sshSession, std::vector<WgShowData> &data)
 {
     if (container != DockerContainer::WireGuard && !ContainerProps::isAwgContainer(container)) {
         return ErrorCode::NoError;
@@ -97,8 +97,8 @@ ErrorCode ClientManagementController::wgShow(const DockerContainer container, co
                        : QStringLiteral("wg");
     const QString command = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%1 show all'").arg(showBin);
 
-    QString script = serverController->replaceVars(command, amnezia::genBaseVars(credentials, container, QString(), QString()));
-    error = serverController->runScript(credentials, script, cbReadStdOut);
+    QString script = sshSession->replaceVars(command, amnezia::genBaseVars(credentials, container, QString(), QString()));
+    error = sshSession->runScript(credentials, script, cbReadStdOut);
     if (error != ErrorCode::NoError) {
         logger.error() << QString("Failed to execute %1 show command").arg(showBin);
         return error;
@@ -150,7 +150,7 @@ ErrorCode ClientManagementController::wgShow(const DockerContainer container, co
 }
 
 ErrorCode ClientManagementController::getOpenVpnClients(const DockerContainer container, const ServerCredentials &credentials,
-                                                        const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable)
+                                                        SshSession* sshSession, int &count, QJsonArray &clientsTable)
 {
     ErrorCode error = ErrorCode::NoError;
     QString stdOut;
@@ -160,8 +160,8 @@ ErrorCode ClientManagementController::getOpenVpnClients(const DockerContainer co
     };
 
     const QString getOpenVpnClientsList = "sudo docker exec -i $CONTAINER_NAME bash -c 'ls /opt/amnezia/openvpn/pki/issued'";
-    QString script = serverController->replaceVars(getOpenVpnClientsList, amnezia::genBaseVars(credentials, container, QString(), QString()));
-    error = serverController->runScript(credentials, script, cbReadStdOut);
+    QString script = sshSession->replaceVars(getOpenVpnClientsList, amnezia::genBaseVars(credentials, container, QString(), QString()));
+    error = sshSession->runScript(credentials, script, cbReadStdOut);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to retrieve the list of issued certificates on the server";
         return error;
@@ -191,7 +191,7 @@ ErrorCode ClientManagementController::getOpenVpnClients(const DockerContainer co
 }
 
 ErrorCode ClientManagementController::getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
-                                                          const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable)
+                                                          SshSession* sshSession, int &count, QJsonArray &clientsTable)
 {
     ErrorCode error = ErrorCode::NoError;
 
@@ -203,7 +203,7 @@ ErrorCode ClientManagementController::getWireGuardClients(const DockerContainer 
     } else {
         configPath = QString::fromLatin1(protocols::wireguard::serverConfigPath);
     }
-    const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, configPath, error);
+    const QString wireguardConfigString = sshSession->getTextFileFromContainer(container, credentials, configPath, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
         return error;
@@ -236,12 +236,12 @@ ErrorCode ClientManagementController::getWireGuardClients(const DockerContainer 
 }
 
 ErrorCode ClientManagementController::getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
-                                                     const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable)
+                                                     SshSession* sshSession, int &count, QJsonArray &clientsTable)
 {
     ErrorCode error = ErrorCode::NoError;
 
     const QString serverConfigPath = amnezia::protocols::xray::serverConfigPath;
-    const QString configString = serverController->getTextFileFromContainer(container, credentials, serverConfigPath, error);
+    const QString configString = sshSession->getTextFileFromContainer(container, credentials, serverConfigPath, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the xray server config file from the server";
         return error;
@@ -279,7 +279,7 @@ ErrorCode ClientManagementController::getXrayClients(const DockerContainer conta
         }
         QString clientId = clientObj["id"].toString();
         
-        QString xrayDefaultUuid = serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::uuidPath, error);
+        QString xrayDefaultUuid = sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::uuidPath, error);
         xrayDefaultUuid.replace("\n", "");
 
         if (!isClientExists(clientId, clientsTable) && clientId != xrayDefaultUuid) {
@@ -299,7 +299,7 @@ ErrorCode ClientManagementController::getXrayClients(const DockerContainer conta
 }
 
 ErrorCode ClientManagementController::updateClients(const DockerContainer container, const ServerCredentials &credentials,
-                                                     const QSharedPointer<ServerController> &serverController)
+                                                     SshSession* sshSession)
 {
     ErrorCode error = ErrorCode::NoError;
 
@@ -310,7 +310,7 @@ ErrorCode ClientManagementController::updateClients(const DockerContainer contai
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
     }
 
-    const QByteArray clientsTableString = serverController->getTextFileFromContainer(container, credentials, clientsTableFile, error);
+    const QByteArray clientsTableString = sshSession->getTextFileFromContainer(container, credentials, clientsTableFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the clientsTable file from the server";
         emit clientsUpdated(QJsonArray());
@@ -325,11 +325,11 @@ ErrorCode ClientManagementController::updateClients(const DockerContainer contai
         int count = 0;
 
         if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
-            error = getOpenVpnClients(container, credentials, serverController, count, m_clientsTable);
+            error = getOpenVpnClients(container, credentials, sshSession, count, m_clientsTable);
         } else if (container == DockerContainer::WireGuard || ContainerProps::isAwgContainer(container)) {
-            error = getWireGuardClients(container, credentials, serverController, count, m_clientsTable);
+            error = getWireGuardClients(container, credentials, sshSession, count, m_clientsTable);
         } else if (container == DockerContainer::Xray) {
-            error = getXrayClients(container, credentials, serverController, count, m_clientsTable);
+            error = getXrayClients(container, credentials, sshSession, count, m_clientsTable);
         }
         if (error != ErrorCode::NoError) {
             emit clientsUpdated(QJsonArray());
@@ -338,7 +338,7 @@ ErrorCode ClientManagementController::updateClients(const DockerContainer contai
 
         const QByteArray newClientsTableString = QJsonDocument(m_clientsTable).toJson();
         if (clientsTableString != newClientsTableString) {
-            error = serverController->uploadTextFileToContainer(container, credentials, newClientsTableString, clientsTableFile);
+            error = sshSession->uploadTextFileToContainer(container, credentials, newClientsTableString, clientsTableFile);
             if (error != ErrorCode::NoError) {
                 logger.error() << "Failed to upload the clientsTable file to the server";
             }
@@ -346,7 +346,7 @@ ErrorCode ClientManagementController::updateClients(const DockerContainer contai
     }
 
     std::vector<WgShowData> data;
-    wgShow(container, credentials, serverController, data);
+    wgShow(container, credentials, sshSession, data);
 
     for (const auto &client : data) {
         int i = 0;
@@ -387,7 +387,7 @@ ErrorCode ClientManagementController::updateClients(const DockerContainer contai
 
 ErrorCode ClientManagementController::appendClient(const DockerContainer container, const ServerCredentials &credentials,
                                                   const QJsonObject &containerConfig, const QString &clientName,
-                                                  const QSharedPointer<ServerController> &serverController)
+                                                  SshSession* sshSession)
 {
     Proto protocol;
     switch (container) {
@@ -407,11 +407,11 @@ ErrorCode ClientManagementController::appendClient(const DockerContainer contain
     }
 
     auto protocolConfig = ContainerProps::getProtocolConfigFromContainer(protocol, containerConfig);
-    return appendClient(protocolConfig, clientName, container, credentials, serverController);
+    return appendClient(protocolConfig, clientName, container, credentials, sshSession);
 }
 
 ErrorCode ClientManagementController::appendClient(QJsonObject &protocolConfig, const QString &clientName, const DockerContainer container,
-                                                   const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController)
+                                                   const ServerCredentials &credentials, SshSession* sshSession)
 {
     QString clientId;
     if (container == DockerContainer::Xray) {
@@ -451,22 +451,22 @@ ErrorCode ClientManagementController::appendClient(QJsonObject &protocolConfig, 
         clientId = protocolConfig.value(config_key::clientId).toString();
     }
     
-    return appendClient(clientId, clientName, container, credentials, serverController);
+    return appendClient(clientId, clientName, container, credentials, sshSession);
 }
 
 ErrorCode ClientManagementController::appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
-                                                   const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController)
+                                                   const ServerCredentials &credentials, SshSession* sshSession)
 {
     ErrorCode error = ErrorCode::NoError;
 
-    error = updateClients(container, credentials, serverController);
+    error = updateClients(container, credentials, sshSession);
     if (error != ErrorCode::NoError) {
         return error;
     }
 
     int existingIndex = clientIndexById(clientId, m_clientsTable);
     if (existingIndex >= 0) {
-        return renameClient(existingIndex, clientName, container, credentials, serverController, true);
+        return renameClient(existingIndex, clientName, container, credentials, sshSession, true);
     }
 
     QJsonObject client;
@@ -487,7 +487,7 @@ ErrorCode ClientManagementController::appendClient(const QString &clientId, cons
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
     }
 
-    error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
+    error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the clientsTable file to the server";
         return error;
@@ -501,7 +501,7 @@ ErrorCode ClientManagementController::appendClient(const QString &clientId, cons
 ErrorCode ClientManagementController::renameClient(const int row, const QString &clientName,
                                                    const DockerContainer container,
                                                    const ServerCredentials &credentials,
-                                                   const QSharedPointer<ServerController> &serverController, bool addTimeStamp)
+                                                   SshSession* sshSession, bool addTimeStamp)
 {
     if (row < 0 || row >= m_clientsTable.size()) {
         return ErrorCode::InternalError;
@@ -526,7 +526,7 @@ ErrorCode ClientManagementController::renameClient(const int row, const QString 
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
     }
 
-    ErrorCode error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
+    ErrorCode error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the clientsTable file to the server";
         return error;
@@ -538,7 +538,7 @@ ErrorCode ClientManagementController::renameClient(const int row, const QString 
 }
 
 ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                                                    const int serverIndex, const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable)
+                                                    const int serverIndex, SshSession* sshSession, QJsonArray &clientsTable)
 {
     if (row < 0 || row >= clientsTable.size()) {
         return ErrorCode::InternalError;
@@ -555,8 +555,8 @@ ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerC
                                                "cp pki/crl.pem .'")
                                                .arg(clientId);
 
-    const QString script = serverController->replaceVars(getOpenVpnCertData, amnezia::genBaseVars(credentials, container, QString(), QString()));
-    ErrorCode error = serverController->runScript(credentials, script);
+    const QString script = sshSession->replaceVars(getOpenVpnCertData, amnezia::genBaseVars(credentials, container, QString(), QString()));
+    ErrorCode error = sshSession->runScript(credentials, script);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to revoke the certificate";
         return error;
@@ -568,7 +568,7 @@ ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerC
 
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
     clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
-    error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
+    error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the clientsTable file to the server";
         return error;
@@ -578,7 +578,7 @@ ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerC
 }
 
 ErrorCode ClientManagementController::revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                                                      const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable)
+                                                      SshSession* sshSession, QJsonArray &clientsTable)
 {
     if (row < 0 || row >= clientsTable.size()) {
         return ErrorCode::InternalError;
@@ -594,7 +594,7 @@ ErrorCode ClientManagementController::revokeWireGuard(const int row, const Docke
     } else {
         configPath = QString::fromLatin1(protocols::wireguard::serverConfigPath);
     }
-    const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, configPath, error);
+    const QString wireguardConfigString = sshSession->getTextFileFromContainer(container, credentials, configPath, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
         return error;
@@ -612,7 +612,7 @@ ErrorCode ClientManagementController::revokeWireGuard(const int row, const Docke
     }
     QString newWireGuardConfig = configSections.join("[");
     newWireGuardConfig.insert(0, "[");
-    error = serverController->uploadTextFileToContainer(container, credentials, newWireGuardConfig, configPath);
+    error = sshSession->uploadTextFileToContainer(container, credentials, newWireGuardConfig, configPath);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the wg conf file to the server";
         return error;
@@ -628,7 +628,7 @@ ErrorCode ClientManagementController::revokeWireGuard(const int row, const Docke
     } else {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
     }
-    error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
+    error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the clientsTable file to the server";
         return error;
@@ -640,9 +640,9 @@ ErrorCode ClientManagementController::revokeWireGuard(const int row, const Docke
     QString script  = QString(
         "sudo docker exec -i $CONTAINER_NAME bash -c '%1 syncconf %2 <(%1-quick strip %3)'"
     ).arg(command, iface, configPath);
-    error = serverController->runScript(
+    error = sshSession->runScript(
         credentials,
-        serverController->replaceVars(script, amnezia::genBaseVars(credentials, container, QString(), QString()))
+        sshSession->replaceVars(script, amnezia::genBaseVars(credentials, container, QString(), QString()))
     );
     if (error != ErrorCode::NoError) {
         logger.error() << QString("Failed to execute command '%1 syncconf %2' on the server").arg(command, iface);
@@ -655,7 +655,7 @@ ErrorCode ClientManagementController::revokeWireGuard(const int row, const Docke
 ErrorCode ClientManagementController::revokeXray(const int row,
                                                  const DockerContainer container,
                                                  const ServerCredentials &credentials,
-                                                 const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable)
+                                                 SshSession* sshSession, QJsonArray &clientsTable)
 {
     if (row < 0 || row >= clientsTable.size()) {
         return ErrorCode::InternalError;
@@ -664,7 +664,7 @@ ErrorCode ClientManagementController::revokeXray(const int row,
     ErrorCode error = ErrorCode::NoError;
 
     const QString serverConfigPath = amnezia::protocols::xray::serverConfigPath;
-    const QString configString = serverController->getTextFileFromContainer(container, credentials, serverConfigPath, error);
+    const QString configString = sshSession->getTextFileFromContainer(container, credentials, serverConfigPath, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the xray server config file";
         return error;
@@ -722,7 +722,7 @@ ErrorCode ClientManagementController::revokeXray(const int row,
     inbounds[0] = inbound;
     configObj["inbounds"] = inbounds;
 
-    error = serverController->uploadTextFileToContainer(
+    error = sshSession->uploadTextFileToContainer(
         container, 
         credentials,
         QJsonDocument(configObj).toJson(),
@@ -739,15 +739,15 @@ ErrorCode ClientManagementController::revokeXray(const int row,
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable")
         .arg(ContainerProps::containerTypeToString(container));
 
-    error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
+    error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the clientsTable file";
     }
 
     QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
-    error = serverController->runScript(
+    error = sshSession->runScript(
         credentials, 
-        serverController->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, QString(), QString()))
+        sshSession->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, QString(), QString()))
     );
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to restart xray container";
@@ -759,7 +759,7 @@ ErrorCode ClientManagementController::revokeXray(const int row,
 
 ErrorCode ClientManagementController::revokeClient(const int index, const DockerContainer container,
                                                    const ServerCredentials &credentials,
-                                                   const int serverIndex, const QSharedPointer<ServerController> &serverController)
+                                                   const int serverIndex, SshSession* sshSession)
 {
     if (index < 0 || index >= m_clientsTable.size()) {
         return ErrorCode::InternalError;
@@ -773,17 +773,17 @@ ErrorCode ClientManagementController::revokeClient(const int index, const Docker
         case DockerContainer::OpenVpn:
         case DockerContainer::ShadowSocks:
         case DockerContainer::Cloak: {
-            errorCode = revokeOpenVpn(index, container, credentials, serverIndex, serverController, m_clientsTable);
+            errorCode = revokeOpenVpn(index, container, credentials, serverIndex, sshSession, m_clientsTable);
             break;
         }
         case DockerContainer::WireGuard:
         case DockerContainer::Awg:
         case DockerContainer::Awg2: {
-            errorCode = revokeWireGuard(index, container, credentials, serverController, m_clientsTable);
+            errorCode = revokeWireGuard(index, container, credentials, sshSession, m_clientsTable);
             break;
         }
         case DockerContainer::Xray: {
-            errorCode = revokeXray(index, container, credentials, serverController, m_clientsTable);
+            errorCode = revokeXray(index, container, credentials, sshSession, m_clientsTable);
             break;
         }
         default: {
@@ -822,10 +822,10 @@ ErrorCode ClientManagementController::revokeClient(const int index, const Docker
 
 ErrorCode ClientManagementController::revokeClient(const QJsonObject &containerConfig, const DockerContainer container,
                                                    const ServerCredentials &credentials, const int serverIndex,
-                                                   const QSharedPointer<ServerController> &serverController)
+                                                   SshSession* sshSession)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    errorCode = updateClients(container, credentials, serverController);
+    errorCode = updateClients(container, credentials, sshSession);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -903,17 +903,17 @@ ErrorCode ClientManagementController::revokeClient(const QJsonObject &containerC
     case DockerContainer::OpenVpn:
     case DockerContainer::ShadowSocks:
     case DockerContainer::Cloak: {
-        errorCode = revokeOpenVpn(row, container, credentials, serverIndex, serverController, m_clientsTable);
+        errorCode = revokeOpenVpn(row, container, credentials, serverIndex, sshSession, m_clientsTable);
         break;
     }
     case DockerContainer::WireGuard:
     case DockerContainer::Awg:
     case DockerContainer::Awg2: {
-        errorCode = revokeWireGuard(row, container, credentials, serverController, m_clientsTable);
+        errorCode = revokeWireGuard(row, container, credentials, sshSession, m_clientsTable);
         break;
     }
     case DockerContainer::Xray: {
-        errorCode = revokeXray(row, container, credentials, serverController, m_clientsTable);
+        errorCode = revokeXray(row, container, credentials, sshSession, m_clientsTable);
         break;
     }
     default:

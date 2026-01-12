@@ -5,12 +5,12 @@
 #include <QJsonObject>
 
 #include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/utils/sshSession.h"
 #include "core/scripts_registry.h"
 #include "protocols/protocols_defs.h"
 
-CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
-    : ConfiguratorBase(settings, serverController, parent)
+CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)
+    : ConfiguratorBase(settings, sshSession, parent)
 {
 }
 
@@ -18,7 +18,7 @@ QString CloakConfigurator::createConfig(const ServerCredentials &credentials, Do
                                         ErrorCode &errorCode)
 {
     QString cloakPublicKey =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckPublicKeyPath, errorCode);
+            m_sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckPublicKeyPath, errorCode);
     cloakPublicKey.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
@@ -26,7 +26,7 @@ QString CloakConfigurator::createConfig(const ServerCredentials &credentials, Do
     }
 
     QString cloakBypassUid =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckBypassUidKeyPath, errorCode);
+            m_sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckBypassUidKeyPath, errorCode);
     cloakBypassUid.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
@@ -48,7 +48,7 @@ QString CloakConfigurator::createConfig(const ServerCredentials &credentials, Do
 
     amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
-    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(), vars);
+    QString textCfg = m_sshSession->replaceVars(QJsonDocument(config).toJson(), vars);
 
     return textCfg;
 }
