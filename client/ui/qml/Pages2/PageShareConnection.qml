@@ -34,7 +34,7 @@ PageType {
     //     configExtension = ".vpn"
     //     configCaption = qsTr("Save AmneziaVPN config")
     //     configFileName = "amnezia_config"
-        
+
     //     if (visible) {
     //         var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
     //         headerText = qsTr("Connection to ") + serverName

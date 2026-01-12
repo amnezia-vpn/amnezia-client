@@ -30,6 +30,15 @@ namespace
         constexpr char publicKeyInfo[] = "public_key";
         constexpr char expiresAt[] = "expires_at";
     }
+
+    QString normalizeVpnKey(const QString &vpnKey)
+    {
+        QString normalized = vpnKey.trimmed();
+        if (normalized.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+            normalized = normalized.mid(QStringLiteral("vpn://").size());
+        }
+        return normalized;
+    }
 }
 
 ServersModel::ServersModel(QObject *parent) : QAbstractListModel(parent)
@@ -120,7 +129,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         QString primaryDns = server.value(config_key::dns1).toString();
         return primaryDns == protocols::dns::amneziaDnsIp;
     }
-    case IsAdVisibleRole:{
+    case IsAdVisibleRole: {
         return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::isAdVisible).toBool(false);
     }
     case AdHeaderRole: {

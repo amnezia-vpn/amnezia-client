@@ -56,11 +56,11 @@ public:
     bool isAppsSplitTunnelingEnabled() const;
     void setAppsSplitTunnelingEnabled(bool enabled);
 
-    QString getGatewayEndpoint() const;
+    QString getGatewayEndpoint(bool isTestPurchase = false) const;
     void setGatewayEndpoint(const QString &endpoint);
     void resetGatewayEndpoint();
     void setDevGatewayEndpoint();
-    bool isDevGatewayEnv() const;
+    bool isDevGatewayEnv(bool isTestPurchase = false) const;
     void toggleDevGatewayEnv(bool enabled);
     
     bool isKillSwitchEnabled() const;

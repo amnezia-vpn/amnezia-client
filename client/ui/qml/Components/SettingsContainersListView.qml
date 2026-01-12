@@ -34,7 +34,8 @@ ListViewType {
                     ContainersModel.setProcessedContainerIndex(containerIndex)
 
                     if (serviceType !== ProtocolEnum.Other) {
-                        if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
+                        var isThirdPartyConfig = config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]
+                        if (isThirdPartyConfig) {
                             ProtocolsUiController.updateProtocols(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
                             return

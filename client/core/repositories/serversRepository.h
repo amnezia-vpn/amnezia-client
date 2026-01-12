@@ -34,6 +34,7 @@ public:
 
     // Utilities
     virtual ServerCredentials serverCredentials(int index) const = 0;
+    virtual bool hasServerWithVpnKey(const QString &vpnKey) const = 0;
 };
 
 #endif // SERVERSREPOSITORY_H

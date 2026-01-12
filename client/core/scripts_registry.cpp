@@ -16,7 +16,8 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::Cloak: return QLatin1String("openvpn_cloak");
     case DockerContainer::ShadowSocks: return QLatin1String("openvpn_shadowsocks");
     case DockerContainer::WireGuard: return QLatin1String("wireguard");
-    case DockerContainer::Awg: return QLatin1String("awg");
+    case DockerContainer::Awg2: return QLatin1String("awg");
+    case DockerContainer::Awg: return QLatin1String("awg_legacy");
     case DockerContainer::Ipsec: return QLatin1String("ipsec");
     case DockerContainer::Xray: return QLatin1String("xray");
 
@@ -98,7 +99,7 @@ amnezia::ScriptVars amnezia::genBaseVars(const ServerCredentials &credentials,
     vars.append({ { "$CONTAINER_NAME", ContainerProps::containerToString(container) } });
     vars.append({ { "$DOCKERFILE_FOLDER", "/opt/amnezia/" + ContainerProps::containerToString(container) } });
 
-    QString serverIp = (container != DockerContainer::Awg && container != DockerContainer::WireGuard && container != DockerContainer::Xray)
+    QString serverIp = (!ContainerProps::isAwgContainer(container) && container != DockerContainer::WireGuard && container != DockerContainer::Xray)
             ? NetworkUtilities::getIPAddress(credentials.hostName)
             : credentials.hostName;
     if (!serverIp.isEmpty()) {
@@ -231,6 +232,11 @@ amnezia::ScriptVars amnezia::genAwgVars(const QJsonObject &containerConfig)
     vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
     vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::cookieReplyPacketJunkSize).toString() } });
     vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::transportPacketJunkSize).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_1", amneziaWireguarConfig.value(config_key::specialJunk1).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_2", amneziaWireguarConfig.value(config_key::specialJunk2).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_3", amneziaWireguarConfig.value(config_key::specialJunk3).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_4", amneziaWireguarConfig.value(config_key::specialJunk4).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_5", amneziaWireguarConfig.value(config_key::specialJunk5).toString() } });
 
     return vars;
 }

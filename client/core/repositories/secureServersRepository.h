@@ -31,6 +31,7 @@ public:
     void clearLastConnectionConfig(int serverIndex, DockerContainer container) override;
 
     ServerCredentials serverCredentials(int index) const override;
+    bool hasServerWithVpnKey(const QString &vpnKey) const override;
 
 private:
     std::shared_ptr<Settings> m_settings;

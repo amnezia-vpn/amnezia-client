@@ -169,10 +169,6 @@ ErrorCode SubscriptionController::fillServerConfig(const QString &protocol, cons
         serverProtocolConfig[config_key::specialJunk3] = clientProtocolConfig.value(config_key::specialJunk3);
         serverProtocolConfig[config_key::specialJunk4] = clientProtocolConfig.value(config_key::specialJunk4);
         serverProtocolConfig[config_key::specialJunk5] = clientProtocolConfig.value(config_key::specialJunk5);
-        serverProtocolConfig[config_key::controlledJunk1] = clientProtocolConfig.value(config_key::controlledJunk1);
-        serverProtocolConfig[config_key::controlledJunk2] = clientProtocolConfig.value(config_key::controlledJunk2);
-        serverProtocolConfig[config_key::controlledJunk3] = clientProtocolConfig.value(config_key::controlledJunk3);
-        serverProtocolConfig[config_key::specialHandshakeTimeout] = clientProtocolConfig.value(config_key::specialHandshakeTimeout);
 
         //
 
@@ -227,9 +223,9 @@ bool SubscriptionController::isSubscriptionExpired(const QJsonObject &apiConfig)
     return false;
 }
 
-ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)
+ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
 {
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled());
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }
@@ -269,6 +265,84 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     serverConfig.insert(configKey::apiConfig, apiConfig);
 
     m_serversRepository->addServer(serverConfig);
+    return ErrorCode::NoError;
+}
+
+ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
+                                                            const QString &serviceProtocol, const ProtocolData &protocolData,
+                                                            const QString &transactionId, bool isTestPurchase,
+                                                            QJsonObject &serverConfig)
+{
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
+                                            userCountryCode,
+                                            "",
+                                            serviceType,
+                                            serviceProtocol,
+                                            QJsonObject() };
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
+    apiPayload[apiDefs::key::transactionId] = transactionId;
+
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
+                                        m_appSettingsRepository->isDevGatewayEnv(),
+                                        apiDefs::requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
+
+    QByteArray responseBody;
+    ErrorCode errorCode = gatewayController.post(QString("%1v1/subscriptions"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    // Parse the subscription response
+    QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
+    QString key = responseObject.value(QStringLiteral("key")).toString();
+    if (key.isEmpty()) {
+        qWarning().noquote() << "[IAP] Subscription response does not contain a key field";
+        return ErrorCode::ApiPurchaseError;
+    }
+
+    // Check if server with this VPN key already exists
+    for (int i = 0; i < m_serversRepository->serversCount(); ++i) {
+        QJsonObject existingServer = m_serversRepository->server(i);
+        QJsonObject existingApiConfig = existingServer.value(configKey::apiConfig).toObject();
+        if (existingApiConfig.value(apiDefs::key::vpnKey).toString() == key) {
+            qInfo().noquote() << "[IAP] Subscription config with the same vpn_key already exists";
+            return ErrorCode::ApiConfigAlreadyAdded;
+        }
+    }
+
+    QString normalizedKey = key;
+    normalizedKey.replace(QStringLiteral("vpn://"), QString());
+
+    QByteArray configString = QByteArray::fromBase64(normalizedKey.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QByteArray configUncompressed = qUncompress(configString);
+    if (!configUncompressed.isEmpty()) {
+        configString = configUncompressed;
+    }
+
+    if (configString.isEmpty()) {
+        qWarning().noquote() << "[IAP] Subscription response config payload is empty";
+        return ErrorCode::ApiPurchaseError;
+    }
+
+    QJsonObject configObject = QJsonDocument::fromJson(configString).object();
+
+    quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
+    auto apiConfig = configObject.value(apiDefs::key::apiConfig).toObject();
+    apiConfig[apiDefs::key::vpnKey] = normalizedKey;
+    apiConfig[apiDefs::key::isTestPurchase] = isTestPurchase;
+
+    configObject.insert(apiDefs::key::apiConfig, apiConfig);
+    configObject.insert(config_key::crc, crc);
+
+    serverConfig = configObject;
+    m_serversRepository->addServer(configObject);
+
     return ErrorCode::NoError;
 }
 

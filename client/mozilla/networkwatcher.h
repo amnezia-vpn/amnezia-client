@@ -29,10 +29,13 @@ public:
     // false to restore.
     void simulateDisconnection(bool simulatedDisconnection);
 
+    void onSleepMode();
+
     QNetworkInformation::Reachability getReachability();
 
 signals:
     void networkChange();
+    void sleepMode();
 
 private:
     void settingsChanged();

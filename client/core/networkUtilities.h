@@ -6,7 +6,7 @@
 #include <QString>
 #include <QHostAddress>
 #include <QNetworkReply>
-
+#include <QtNetwork/qnetworkinterface.h>
 
 class NetworkUtilities : public QObject
 {
@@ -17,7 +17,7 @@ public:
     static bool checkIPv4Format(const QString &ip);
     static bool checkIpSubnetFormat(const QString &ip);
     static bool checkIpv6Enabled();
-    static QString getGatewayAndIface();
+    static QPair<QString, QNetworkInterface> getGatewayAndIface();
     // Returns the Interface Index that could Route to dst
     static int AdapterIndexTo(const QHostAddress& dst);
 

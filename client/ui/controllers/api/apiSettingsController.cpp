@@ -5,6 +5,7 @@
 
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "platforms/ios/ios_controller.h"
 #include "version.h"
 
 namespace
@@ -52,13 +53,14 @@ bool ApiSettingsController::getAccountInfo(bool reload)
         wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
 
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), requestTimeoutMsecs,
-                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
-
     auto processedIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfig = m_serversController->getServerConfig(processedIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
     auto authData = serverConfig.value(configKey::authData).toObject();
+
+    bool isTestPurchase = apiConfig.value(apiDefs::key::isTestPurchase).toBool(false);
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
 
     QJsonObject apiPayload;
     apiPayload[configKey::userCountryCode] = apiConfig.value(configKey::userCountryCode).toString();

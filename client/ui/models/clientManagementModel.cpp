@@ -55,7 +55,6 @@ void ClientManagementModel::updateModel(const QJsonArray &clients)
     endResetModel();
 }
 
-
 QHash<int, QByteArray> ClientManagementModel::roleNames() const
 {
     QHash<int, QByteArray> roles;

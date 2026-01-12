@@ -90,3 +90,7 @@ ServerCredentials QServersRepository::serverCredentials(int index) const
     return m_secureRepository->serverCredentials(index);
 }
 
+bool QServersRepository::hasServerWithVpnKey(const QString &vpnKey) const
+{
+    return m_secureRepository->hasServerWithVpnKey(vpnKey);
+}

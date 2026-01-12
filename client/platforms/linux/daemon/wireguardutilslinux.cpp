@@ -143,12 +143,6 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     for (const QString& key : config.m_specialJunk.keys()) {
         out << key.toLower() << "=" << config.m_specialJunk.value(key) << "\n";
     }
-    for (const QString& key : config.m_controlledJunk.keys()) {
-        out << key.toLower() << "=" << config.m_controlledJunk.value(key) << "\n";
-    }
-    if (!config.m_specialHandshakeTimeout.isEmpty()) {
-        out << "itime=" << config.m_specialHandshakeTimeout << "\n";
-    }
 
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {

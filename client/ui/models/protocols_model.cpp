@@ -42,7 +42,7 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
         return static_cast<int>(clientProtocolPage(ProtocolProps::protoFromString(m_content.keys().at(index.row()))));
     case ProtocolIndexRole: return ProtocolProps::protoFromString(m_content.keys().at(index.row()));
     case RawConfigRole: {
-        auto protocolConfig = m_content.value(ContainerProps::containerTypeToString(m_container)).toObject();
+        auto protocolConfig = m_content.value(ContainerProps::containerTypeToProtocolString(m_container)).toObject();
         auto lastConfigJsonDoc =
                 QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
         auto lastConfigJson = lastConfigJsonDoc.object();
@@ -55,7 +55,8 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
         return rawConfig;
     }
     case IsClientProtocolExistsRole: {
-        auto protocolConfig = m_content.value(ContainerProps::containerTypeToString(m_container)).toObject();
+        QString protocolKey = ContainerProps::containerTypeToProtocolString(m_container);
+        auto protocolConfig = m_content.value(protocolKey).toObject();
         auto lastConfigJsonDoc =
                 QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
         auto lastConfigJson = lastConfigJsonDoc.object();

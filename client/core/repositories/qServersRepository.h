@@ -39,6 +39,7 @@ public:
     void clearLastConnectionConfig(int serverIndex, DockerContainer container);
 
     ServerCredentials serverCredentials(int index) const;
+    bool hasServerWithVpnKey(const QString &vpnKey) const;
 
 signals:
     void serverAdded(QJsonObject config);

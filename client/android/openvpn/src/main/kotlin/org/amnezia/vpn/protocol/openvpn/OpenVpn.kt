@@ -93,7 +93,7 @@ open class OpenVpn : Protocol() {
         openVpnClient = null
     }
 
-    override fun reconnectVpn(vpnBuilder: Builder) {
+    override fun reconnectVpn(vpnBuilder: Builder, protect: (Int) -> Boolean) {
         openVpnClient?.let {
             it.establish = makeEstablish(vpnBuilder)
             it.reconnect(0)

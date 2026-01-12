@@ -34,6 +34,7 @@ public:
 
 public slots:
     void importConfig();
+    void clearConfigFileName();
     bool extractConfigFromFile(const QString &fileName);
     bool extractConfigFromData(QString data);
     bool extractConfigFromQr(const QByteArray &data);

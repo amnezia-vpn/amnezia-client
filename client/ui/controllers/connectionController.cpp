@@ -6,6 +6,7 @@
     #include <QApplication>
 #endif
 
+#include "utilities.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "version.h"
 

@@ -54,11 +54,11 @@ public:
     virtual void setAppsSplitTunnelingEnabled(bool enabled) = 0;
 
     // Gateway settings
-    virtual QString getGatewayEndpoint() const = 0;
+    virtual QString getGatewayEndpoint(bool isTestPurchase = false) const = 0;
     virtual void setGatewayEndpoint(const QString &endpoint) = 0;
     virtual void resetGatewayEndpoint() = 0;
     virtual void setDevGatewayEndpoint() = 0;
-    virtual bool isDevGatewayEnv() const = 0;
+    virtual bool isDevGatewayEnv(bool isTestPurchase = false) const = 0;
     virtual void toggleDevGatewayEnv(bool enabled) = 0;
     
     // Kill switch settings

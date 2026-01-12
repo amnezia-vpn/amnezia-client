@@ -2,6 +2,7 @@
 #include <QTimer>
 
 #include "amnezia_application.h"
+#include "core/osSignalHandler.h"
 #include "migrations.h"
 #include "version.h"
 
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
 #endif
 
     AmneziaApplication app(argc, argv);
+    OsSignalHandler::setup();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (isAnotherInstanceRunning()) {

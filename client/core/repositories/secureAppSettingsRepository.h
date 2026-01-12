@@ -50,11 +50,11 @@ public:
     bool isAppsSplitTunnelingEnabled() const override;
     void setAppsSplitTunnelingEnabled(bool enabled) override;
 
-    QString getGatewayEndpoint() const override;
+    QString getGatewayEndpoint(bool isTestPurchase = false) const override;
     void setGatewayEndpoint(const QString &endpoint) override;
     void resetGatewayEndpoint() override;
     void setDevGatewayEndpoint() override;
-    bool isDevGatewayEnv() const override;
+    bool isDevGatewayEnv(bool isTestPurchase = false) const override;
     void toggleDevGatewayEnv(bool enabled) override;
     
     bool isKillSwitchEnabled() const override;

@@ -49,6 +49,11 @@ public:
                                       const QString &serviceProtocol, const ProtocolData &protocolData,
                                       QJsonObject &serverConfig);
 
+    ErrorCode importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
+                                        const QString &serviceProtocol, const ProtocolData &protocolData,
+                                        const QString &transactionId, bool isTestPurchase,
+                                        QJsonObject &serverConfig);
+
     ErrorCode updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent,
                                       const ProtocolData &protocolData);
 
@@ -68,7 +73,7 @@ public:
     ErrorCode prepareVpnKeyExport(int serverIndex, QString &vpnKey);
 
 private:
-    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
+    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
 
     ServersRepository* m_serversRepository;
     AppSettingsRepository* m_appSettingsRepository;

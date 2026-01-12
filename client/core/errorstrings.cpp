@@ -78,6 +78,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiMigrationError): errorMessage = QObject::tr("A migration error has occurred. Please contact our technical support"); break;
     case (ErrorCode::ApiUpdateRequestError): errorMessage = QObject::tr("Please update the application to use this feature"); break;
     case (ErrorCode::ApiSubscriptionExpiredError): errorMessage = QObject::tr("Your Amnezia Premium subscription has expired.\n Please check your email for renewal instructions.\n If you haven't received an email, please contact our support."); break;
+    case (ErrorCode::ApiPurchaseError): errorMessage = QObject::tr("Unable to process purchase"); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

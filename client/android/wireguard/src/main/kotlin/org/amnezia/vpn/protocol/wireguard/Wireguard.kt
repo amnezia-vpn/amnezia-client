@@ -12,6 +12,7 @@ import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
+import org.amnezia.vpn.protocol.VpnException
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
 import org.amnezia.vpn.util.Log
@@ -27,6 +28,7 @@ private const val TAG = "Wireguard"
 open class Wireguard : Protocol() {
 
     private var tunnelHandle: Int = -1
+    private var config: WireguardConfig? = null // save config for reconnect
     protected open val ifName: String = "amn0"
     private lateinit var scope: CoroutineScope
     private var statusJob: Job? = null
@@ -61,6 +63,7 @@ open class Wireguard : Protocol() {
     override suspend fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
         val wireguardConfig = parseConfig(config)
         start(wireguardConfig, vpnBuilder, protect)
+        this.config = wireguardConfig
     }
 
     protected open fun parseConfig(config: JSONObject): WireguardConfig {
@@ -122,23 +125,24 @@ open class Wireguard : Protocol() {
         configData.optStringOrNull("S2")?.let { setS2(it.toInt()) }
         configData.optStringOrNull("S3")?.let { setS3(it.toInt()) }
         configData.optStringOrNull("S4")?.let { setS4(it.toInt()) }
-        configData.optStringOrNull("H1")?.let { setH1(it.toLong()) }
-        configData.optStringOrNull("H2")?.let { setH2(it.toLong()) }
-        configData.optStringOrNull("H3")?.let { setH3(it.toLong()) }
-        configData.optStringOrNull("H4")?.let { setH4(it.toLong()) }
+        configData.optStringOrNull("H1")?.trim()?.let { if (it.isNotEmpty()) setH1(it) }
+        configData.optStringOrNull("H2")?.trim()?.let { if (it.isNotEmpty()) setH2(it) }
+        configData.optStringOrNull("H3")?.trim()?.let { if (it.isNotEmpty()) setH3(it) }
+        configData.optStringOrNull("H4")?.trim()?.let { if (it.isNotEmpty()) setH4(it) }
         configData.optStringOrNull("I1")?.let { setI1(it) }
         configData.optStringOrNull("I2")?.let { setI2(it) }
         configData.optStringOrNull("I3")?.let { setI3(it) }
         configData.optStringOrNull("I4")?.let { setI4(it) }
         configData.optStringOrNull("I5")?.let { setI5(it) }
-        configData.optStringOrNull("J1")?.let { setJ1(it) }
-        configData.optStringOrNull("J2")?.let { setJ2(it) }
-        configData.optStringOrNull("J3")?.let { setJ3(it) }
-        configData.optStringOrNull("Itime")?.let { setItime(it.toInt()) }
     }
 
-    private fun start(config: WireguardConfig, vpnBuilder: Builder, protect: (Int) -> Boolean) {
-        if (tunnelHandle != -1) {
+    private fun start(
+        config: WireguardConfig,
+        vpnBuilder: Builder,
+        protect: (Int) -> Boolean,
+        stopExistingVpn: Boolean = false
+    ) {
+        if (!stopExistingVpn && tunnelHandle != -1) {
             Log.w(TAG, "Tunnel already up")
             return
         }
@@ -146,6 +150,9 @@ open class Wireguard : Protocol() {
         buildVpnInterface(config, vpnBuilder)
 
         vpnBuilder.establish().use { tunFd ->
+            if (stopExistingVpn && tunnelHandle != -1) {
+                turnOffVpn()
+            }
             if (tunFd == null) {
                 throw VpnStartException("Create VPN interface: permission not granted or revoked")
             }
@@ -202,20 +209,25 @@ open class Wireguard : Protocol() {
         return lastHandshake
     }
 
-    override fun stopVpn() {
-        if (tunnelHandle == -1) {
-            Log.w(TAG, "Tunnel already down")
-            return
-        }
+    private fun turnOffVpn() {
         statusJob?.cancel()
         statusJob = null
         val handleToClose = tunnelHandle
         tunnelHandle = -1
         GoBackend.awgTurnOff(handleToClose)
+    }
+
+    override fun stopVpn() {
+        if (tunnelHandle == -1) {
+            Log.w(TAG, "Tunnel already down")
+            return
+        }
+        turnOffVpn()
         state.value = DISCONNECTED
     }
 
-    override fun reconnectVpn(vpnBuilder: Builder) {
-        state.value = CONNECTED
+    override fun reconnectVpn(vpnBuilder: Builder, protect: (Int) -> Boolean) {
+        val config = this.config ?: throw VpnException("Reconnect config is empty")
+        start(config, vpnBuilder, protect, true)
     }
 }

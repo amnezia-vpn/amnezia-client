@@ -1,8 +1,5 @@
 #include "apiConfigsController.h"
 
-#include <QClipboard>
-#include <QEventLoop>
-
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
 #include "core/api/apiDefs.h"
@@ -11,24 +8,55 @@
 #include "core/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"
+#include <QClipboard>
+#include <QDebug>
+#include <QEventLoop>
+#include <QSet>
+
+#include "platforms/ios/ios_controller.h"
 
 namespace
 {
     namespace configKey
     {
+        constexpr char cloak[] = "cloak";
         constexpr char awg[] = "awg";
+        constexpr char vless[] = "vless";
 
         constexpr char apiEndpoint[] = "api_endpoint";
         constexpr char accessToken[] = "api_key";
+        constexpr char certificate[] = "certificate";
+        constexpr char publicKey[] = "public_key";
         constexpr char protocol[] = "protocol";
 
         constexpr char uuid[] = "installation_uuid";
         constexpr char osVersion[] = "os_version";
         constexpr char appVersion[] = "app_version";
 
+        constexpr char userCountryCode[] = "user_country_code";
+        constexpr char serverCountryCode[] = "server_country_code";
+        constexpr char serviceType[] = "service_type";
+        constexpr char serviceInfo[] = "service_info";
+        constexpr char serviceProtocol[] = "service_protocol";
+
+        constexpr char apiPayload[] = "api_payload";
+        constexpr char keyPayload[] = "key_payload";
+
         constexpr char apiConfig[] = "api_config";
         constexpr char authData[] = "auth_data";
-        constexpr char serviceProtocol[] = "service_protocol";
+
+        constexpr char config[] = "config";
+
+        constexpr char subscription[] = "subscription";
+        constexpr char endDate[] = "end_date";
+
+        constexpr char isConnectEvent[] = "is_connect_event";
+    }
+
+    namespace serviceType
+    {
+        constexpr char amneziaFree[] = "amnezia-free";
+        constexpr char amneziaPremium[] = "amnezia-premium";
     }
 }
 
@@ -151,6 +179,203 @@ bool ApiConfigsController::fillAvailableServices()
     }
 
     m_apiServicesModel->updateModel(servicesData);
+    if (m_apiServicesModel->rowCount() > 0) {
+        m_apiServicesModel->setServiceIndex(0);
+    }
+    return true;
+}
+
+bool ApiConfigsController::importService()
+{
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    bool isIosOrMacOsNe = true;
+#else
+    bool isIosOrMacOsNe = false;
+#endif
+
+    if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaPremium) {
+        if (isIosOrMacOsNe) {
+            importSerivceFromAppStore();
+            return true;
+        }
+    } else {
+        importServiceFromGateway();
+        return true;
+    }
+    return false;
+}
+
+bool ApiConfigsController::importSerivceFromAppStore()
+{
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    bool purchaseOk = false;
+    QString originalTransactionId;
+    QString storeTransactionId;
+    QString storeProductId;
+    QString purchaseError;
+    QEventLoop waitPurchase;
+    IosController::Instance()->purchaseProduct(QStringLiteral("amnezia_premium_6_month"),
+                                               [&](bool success, const QString &txId, const QString &purchasedProductId,
+                                                   const QString &originalTxId, const QString &errorString) {
+                                                   purchaseOk = success;
+                                                   originalTransactionId = originalTxId;
+                                                   storeTransactionId = txId;
+                                                   storeProductId = purchasedProductId;
+                                                   purchaseError = errorString;
+                                                   waitPurchase.quit();
+                                               });
+    waitPurchase.exec();
+
+    if (!purchaseOk || originalTransactionId.isEmpty()) {
+        qDebug() << "IAP purchase failed:" << purchaseError;
+        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        return false;
+    }
+    qInfo().noquote() << "[IAP] Purchase success. transactionId =" << storeTransactionId
+                      << "originalTransactionId =" << originalTransactionId << "productId =" << storeProductId;
+
+    SubscriptionController::ProtocolData protocolData = m_subscriptionController->generateProtocolData(
+        m_apiServicesModel->getSelectedServiceProtocol());
+
+    auto isTestPurchase = IosController::Instance()->isTestFlight();
+
+    QJsonObject serverConfig;
+    ErrorCode errorCode = m_subscriptionController->importServiceFromAppStore(
+        m_apiServicesModel->getCountryCode(),
+        m_apiServicesModel->getSelectedServiceType(),
+        m_apiServicesModel->getSelectedServiceProtocol(),
+        protocolData,
+        originalTransactionId,
+        isTestPurchase,
+        serverConfig);
+
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return false;
+    }
+
+    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+#endif
+    return true;
+}
+
+bool ApiConfigsController::restoreSerivceFromAppStore()
+{
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    const QString premiumServiceType = QStringLiteral("amnezia-premium");
+
+    if (!fillAvailableServices()) {
+        qWarning().noquote() << "[IAP] Unable to fetch services list before restore";
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+
+    if (m_apiServicesModel->rowCount() <= 0) {
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+
+    // Ensure we have a valid premium selection for gateway requests
+    bool premiumSelected = false;
+    for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
+        m_apiServicesModel->setServiceIndex(i);
+        if (m_apiServicesModel->getSelectedServiceType() == premiumServiceType) {
+            premiumSelected = true;
+            break;
+        }
+    }
+
+    if (!premiumSelected) {
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+
+    bool restoreSuccess = false;
+    QList<QVariantMap> restoredTransactions;
+    QString restoreError;
+    QEventLoop waitRestore;
+
+    IosController::Instance()->restorePurchases([&](bool success, const QList<QVariantMap> &transactions, const QString &errorString) {
+        restoreSuccess = success;
+        restoredTransactions = transactions;
+        restoreError = errorString;
+        waitRestore.quit();
+    });
+    waitRestore.exec();
+
+    if (!restoreSuccess) {
+        qWarning().noquote() << "[IAP] Restore failed:" << restoreError;
+        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        return false;
+    }
+
+    if (restoredTransactions.isEmpty()) {
+        qInfo().noquote() << "[IAP] Restore completed, but no transactions were returned";
+        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        return false;
+    }
+
+    bool hasInstalledConfig = false;
+    bool duplicateConfigAlreadyPresent = false;
+    int duplicateCount = 0;
+    QSet<QString> processedTransactions;
+    for (const QVariantMap &transaction : restoredTransactions) {
+        const QString originalTransactionId = transaction.value(QStringLiteral("originalTransactionId")).toString();
+        const QString transactionId = transaction.value(QStringLiteral("transactionId")).toString();
+        const QString productId = transaction.value(QStringLiteral("productId")).toString();
+
+        if (originalTransactionId.isEmpty()) {
+            qWarning().noquote() << "[IAP] Skipping restored transaction without originalTransactionId" << transactionId;
+            continue;
+        }
+
+        if (processedTransactions.contains(originalTransactionId)) {
+            duplicateCount++;
+            continue;
+        }
+        processedTransactions.insert(originalTransactionId);
+
+        qInfo().noquote() << "[IAP] Restoring subscription. transactionId =" << transactionId
+                          << "originalTransactionId =" << originalTransactionId << "productId =" << productId;
+
+        SubscriptionController::ProtocolData protocolData = m_subscriptionController->generateProtocolData(
+            m_apiServicesModel->getSelectedServiceProtocol());
+
+        auto isTestPurchase = IosController::Instance()->isTestFlight();
+
+        QJsonObject serverConfig;
+        ErrorCode errorCode = m_subscriptionController->importServiceFromAppStore(
+            m_apiServicesModel->getCountryCode(),
+            m_apiServicesModel->getSelectedServiceType(),
+            m_apiServicesModel->getSelectedServiceProtocol(),
+            protocolData,
+            originalTransactionId,
+            isTestPurchase,
+            serverConfig);
+
+        if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
+            duplicateConfigAlreadyPresent = true;
+            qInfo().noquote() << "[IAP] Skipping restored transaction" << originalTransactionId
+                              << "because subscription config with the same vpn_key already exists";
+        } else if (errorCode != ErrorCode::NoError) {
+            qWarning().noquote() << "[IAP] Failed to process restored subscription response for transaction" << originalTransactionId;
+        } else {
+            hasInstalledConfig = true;
+        }
+    }
+
+    if (!hasInstalledConfig) {
+        const ErrorCode restoreErrorCode = duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiPurchaseError;
+        emit errorOccurred(restoreErrorCode);
+        return false;
+    }
+
+    emit installServerFromApiFinished(tr("Subscription restored successfully."));
+    if (duplicateCount > 0) {
+        qInfo().noquote() << "[IAP] Skipped" << duplicateCount
+                          << "duplicate restored transactions for original transaction IDs already processed";
+    }
+#endif
     return true;
 }
 
@@ -320,7 +545,7 @@ QList<QString> ApiConfigsController::getQrCodes()
 
 int ApiConfigsController::getQrCodesCount()
 {
-    return m_qrCodes.size();
+    return static_cast<int>(m_qrCodes.size());
 }
 
 QString ApiConfigsController::getVpnKey()

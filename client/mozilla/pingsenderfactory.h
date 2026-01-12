@@ -10,9 +10,10 @@ class QHostAddress;
 class QObject;
 
 class PingSenderFactory final {
- public:
-  PingSenderFactory() = delete;
-  static PingSender* create(const QHostAddress& source, QObject* parent);
+public:
+    PingSenderFactory() = delete;
+    static PingSender* create(const QHostAddress& source, QObject* parent);
 };
+
 
 #endif  // PINGSENDERFACTORY_H

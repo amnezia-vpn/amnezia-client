@@ -84,6 +84,9 @@ public:
     PageController* pageController() const;
     void setQmlRoot();
 
+    void openConnectionByIndex(int serverIndex);
+    void importConfigFromData(const QString &data);
+
 signals:
     void translationsUpdated();
     void websiteUrlChanged(const QString &newUrl);

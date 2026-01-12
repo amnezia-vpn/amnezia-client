@@ -32,6 +32,14 @@ PageType {
     }
 
     Connections {
+        target: PageController
+
+        function onClosePage() {
+            ImportController.clearConfigFileName()
+        }
+    }
+
+    Connections {
         target: ImportController
 
         function onImportErrorOccurred(error, goToPageHome) {

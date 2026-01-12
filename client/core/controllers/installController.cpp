@@ -441,7 +441,7 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             return true;
     }
 
-    if (container == DockerContainer::Awg) {
+    if (ContainerProps::isAwgContainer(container)) {
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
             || (oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
@@ -743,7 +743,7 @@ bool InstallController::isUpdateDockerContainerRequired(DockerContainer containe
     const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
     const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
 
-    if (container == DockerContainer::Awg) {
+    if (ContainerProps::isAwgContainer(container)) {
         const AwgConfig oldConfig(oldProtoConfig);
         const AwgConfig newConfig(newProtoConfig);
 

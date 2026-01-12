@@ -1,6 +1,7 @@
 #include "apiUtils.h"
 
 #include <QDateTime>
+#include <QJsonDocument>
 #include <QJsonObject>
 
 namespace
@@ -88,6 +89,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
 {
     const int httpStatusCodeConflict = 409;
     const int httpStatusCodeNotFound = 404;
+    const int httpStatusCodeNotImplemented = 501;
 
     if (!sslErrors.empty()) {
         qDebug().noquote() << sslErrors;
@@ -106,10 +108,20 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         qDebug() << replyError;
         qDebug() << replyErrorString;
         qDebug() << httpStatusCode;
-        if (httpStatusCode == httpStatusCodeConflict) {
+
+        int httpStatusFromBody = -1;
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+        if (jsonDoc.isObject()) {
+            QJsonObject jsonObj = jsonDoc.object();
+            httpStatusFromBody = jsonObj.value("http_status").toInt(-1);
+        }
+
+        if (httpStatusFromBody == httpStatusCodeConflict) {
             return amnezia::ErrorCode::ApiConfigLimitError;
-        } else if (httpStatusCode == httpStatusCodeNotFound) {
+        } else if (httpStatusFromBody == httpStatusCodeNotFound) {
             return amnezia::ErrorCode::ApiNotFoundError;
+        } else if (httpStatusFromBody == httpStatusCodeNotImplemented) {
+            return amnezia::ErrorCode::ApiUpdateRequestError;
         }
         return amnezia::ErrorCode::ApiConfigDownloadError;
     }

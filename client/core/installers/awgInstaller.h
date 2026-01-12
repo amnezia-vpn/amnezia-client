@@ -14,7 +14,7 @@ public:
                                          ServerController* serverController, QJsonObject &config) override;
 
 private:
-    void generateAwgParameters(QJsonObject &containerConfig);
+    void generateAwgParameters(QJsonObject &containerConfig, bool isAwg2 = false);
 };
 
 #endif // AWGINSTALLER_H

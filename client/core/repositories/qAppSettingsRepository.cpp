@@ -158,9 +158,9 @@ void QAppSettingsRepository::setAppsSplitTunnelingEnabled(bool enabled)
     emit appsSplitTunnelingEnabledChanged(enabled);
 }
 
-QString QAppSettingsRepository::getGatewayEndpoint() const
+QString QAppSettingsRepository::getGatewayEndpoint(bool isTestPurchase) const
 {
-    return m_secureRepository->getGatewayEndpoint();
+    return m_secureRepository->getGatewayEndpoint(isTestPurchase);
 }
 
 void QAppSettingsRepository::setGatewayEndpoint(const QString &endpoint)
@@ -178,9 +178,9 @@ void QAppSettingsRepository::setDevGatewayEndpoint()
     m_secureRepository->setDevGatewayEndpoint();
 }
 
-bool QAppSettingsRepository::isDevGatewayEnv() const
+bool QAppSettingsRepository::isDevGatewayEnv(bool isTestPurchase) const
 {
-    return m_secureRepository->isDevGatewayEnv();
+    return m_secureRepository->isDevGatewayEnv(isTestPurchase);
 }
 
 void QAppSettingsRepository::toggleDevGatewayEnv(bool enabled)

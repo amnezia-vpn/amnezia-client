@@ -281,100 +281,6 @@ PageType {
                 }
             }
 
-            AwgTextField {
-                id: controlledJunk1TextField
-
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                headerText: qsTr("J1 - First controlled junk packet")
-                textField.text: clientControlledJunk1
-                textField.validator: null
-                checkEmptyText: false
-
-                textField.onEditingFinished: {
-                    if (textField.text !== clientControlledJunk1) {
-                        clientControlledJunk1 = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(controlledJunk1TextField)
-                    }
-                }
-            }
-
-            AwgTextField {
-                id: controlledJunk2TextField
-
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                headerText: qsTr("J2 - Second controlled junk packet")
-                textField.text: clientControlledJunk2
-                textField.validator: null
-                checkEmptyText: false
-
-                textField.onEditingFinished: {
-                    if (textField.text !== clientControlledJunk2) {
-                        clientControlledJunk2 = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(controlledJunk2TextField)
-                    }
-                }
-            }
-
-            AwgTextField {
-                id: controlledJunk3TextField
-
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                headerText: qsTr("J3 - Third controlled junk packet")
-                textField.text: clientControlledJunk3
-                textField.validator: null
-                checkEmptyText: false
-
-                textField.onEditingFinished: {
-                    if (textField.text !== clientControlledJunk3) {
-                        clientControlledJunk3 = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(controlledJunk3TextField)
-                    }
-                }
-            }
-
-            AwgTextField {
-                id: iTimeTextField
-
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                headerText: qsTr("Itime - Special handshake timeout")
-                textField.text: clientSpecialHandshakeTimeout
-                checkEmptyText: false
-
-                textField.onEditingFinished: {
-                    if (textField.text !== clientSpecialHandshakeTimeout) {
-                        clientSpecialHandshakeTimeout = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(iTimeTextField)
-                    }
-                }
-            }
 
             Header2TextType {
                 Layout.fillWidth: true
@@ -421,29 +327,29 @@ PageType {
                 textField.text: serverResponsePacketJunkSize
             }
 
-            // AwgTextField {
-            //     id: cookieReplyPacketJunkSizeTextField
+            AwgTextField {
+                id: cookieReplyPacketJunkSizeTextField
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            //     enabled: false
+                enabled: false
 
-            //     headerText: "S3 - Cookie Reply packet junk size"
-            //     textField.text: serverCookieReplyPacketJunkSize
-            // }
+                headerText: "S3 - Cookie Reply packet junk size"
+                textField.text: serverCookieReplyPacketJunkSize
+            }
 
-            // AwgTextField {
-            //     id: transportPacketJunkSizeTextField
+            AwgTextField {
+                id: transportPacketJunkSizeTextField
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            //     enabled: false
+                enabled: false
 
-            //     headerText: "S4 - Transport packet junk size"
-            //     textField.text: serverTransportPacketJunkSize
-            // }
+                headerText: "S4 - Transport packet junk size"
+                textField.text: serverTransportPacketJunkSize
+            }
 
             AwgTextField {
                 id: initPacketMagicHeaderTextField

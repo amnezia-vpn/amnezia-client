@@ -10,6 +10,7 @@
 
 #include "../protocols/vpnprotocol.h"
 #import "ios_controller_wrapper.h"
+#import "StoreKitController.h"
 
 const char* Action::start = "start";
 const char* Action::restart = "restart";
@@ -93,6 +94,48 @@ Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
 }
 
 namespace {
+constexpr int kHandshakeTimeoutMs = 12000;
+constexpr uint64_t kHandshakeRxThreshold = 4096;
+bool isWireGuardBasedProto(amnezia::Proto proto) {
+    return proto == amnezia::Proto::WireGuard || proto == amnezia::Proto::Awg;
+}
+
+uint64_t uint64FromResponse(NSDictionary *response, NSString *key, uint64_t fallback = 0) {
+    id value = response[key];
+    if (!value || value == [NSNull null]) {
+        return fallback;
+    }
+    if ([value isKindOfClass:[NSNumber class]]) {
+        return [(NSNumber *)value unsignedLongLongValue];
+    }
+    if ([value isKindOfClass:[NSString class]]) {
+        const char *str = [(NSString *)value UTF8String];
+        if (str && *str) {
+            return strtoull(str, nullptr, 10);
+        }
+    }
+    return fallback;
+}
+
+long long int64FromResponse(NSDictionary *response, NSString *key, long long fallback = 0) {
+    id value = response[key];
+    if (!value || value == [NSNull null]) {
+        return fallback;
+    }
+    if ([value isKindOfClass:[NSNumber class]]) {
+        return [(NSNumber *)value longLongValue];
+    }
+    if ([value isKindOfClass:[NSString class]]) {
+        const char *str = [(NSString *)value UTF8String];
+        if (str && *str) {
+            return strtoll(str, nullptr, 10);
+        }
+    }
+    return fallback;
+}
+}
+
+namespace {
 IosController* s_instance = nullptr;
 }
 
@@ -101,6 +144,9 @@ IosController::IosController() : QObject()
     s_instance = this;
     m_iosControllerWrapper = [[IosControllerWrapper alloc] initWithCppController:this];
 
+    // Initialize StoreKitController early to start observing the payment queue
+    [StoreKitController sharedInstance];
+
     [[NSNotificationCenter defaultCenter]
         removeObserver: (__bridge NSObject *)m_iosControllerWrapper];
     [[NSNotificationCenter defaultCenter]
@@ -108,6 +154,15 @@ IosController::IosController() : QObject()
     [[NSNotificationCenter defaultCenter]
         addObserver: (__bridge NSObject *)m_iosControllerWrapper selector:@selector(vpnConfigurationDidChange:) name:NEVPNConfigurationChangeNotification object:nil];
 
+}
+
+void IosController::emitConnectionStateIfChanged(Vpn::ConnectionState state)
+{
+    if (m_lastEmittedState == state) {
+        return;
+    }
+    m_lastEmittedState = state;
+    emit connectionStateChanged(state);
 }
 
 IosController* IosController::Instance() {
@@ -276,33 +331,65 @@ void IosController::disconnectVpn()
 
 void IosController::checkStatus()
 {
+    if (!m_currentTunnel) {
+        return;
+    }
+
+    if (m_currentTunnel.connection.status != NEVPNStatusConnected) {
+        return;
+    }
+
+    if (m_statusRequestInFlight.exchange(true)) {
+        return;
+    }
+
     NSString *actionKey = [NSString stringWithUTF8String:MessageKey::action];
     NSString *actionValue = [NSString stringWithUTF8String:Action::getStatus];
     NSString *tunnelIdKey = [NSString stringWithUTF8String:MessageKey::tunnelId];
     NSString *tunnelIdValue = !m_tunnelId.isEmpty() ? m_tunnelId.toNSString() : @"";
 
     NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue};
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     sendVpnExtensionMessage(message, [&](NSDictionary* response){
-        uint64_t txBytes = [response[@"tx_bytes"] intValue];
-        uint64_t rxBytes = [response[@"rx_bytes"] intValue];
-        
-        uint64_t last_handshake_time_sec = 0;
-#if !MACOS_NE
-        if (response[@"last_handshake_time_sec"] && ![response[@"last_handshake_time_sec"] isKindOfClass:[NSNull class]]) {
-            last_handshake_time_sec = [response[@"last_handshake_time_sec"] intValue];
-        } else {
-            qDebug() << "Key last_handshake_time_sec is missing or null";
+        if (!response) {
+            QMetaObject::invokeMethod(this, [this]() {
+                m_statusRequestInFlight = false;
+            }, Qt::QueuedConnection);
+            return;
         }
 
-        if (last_handshake_time_sec < 0) {
-            disconnectVpn();
-            qDebug() << "Invalid handshake time, disconnecting VPN.";
-        }
-#endif
+        const uint64_t txBytes = uint64FromResponse(response, @"tx_bytes");
+        const uint64_t rxBytes = uint64FromResponse(response, @"rx_bytes");
+        const long long last_handshake_time_sec = int64FromResponse(response, @"last_handshake_time_sec");
 
-        emit bytesChanged(rxBytes - m_rxBytes, txBytes - m_txBytes);
-        m_rxBytes = rxBytes;
-        m_txBytes = txBytes;
+        QMetaObject::invokeMethod(this, [this, txBytes, rxBytes, last_handshake_time_sec]() {
+            if (isWireGuardBasedProto(m_proto) && m_handshakeAwaiting) {
+                const bool hasHandshakeData = (last_handshake_time_sec >= 0);
+                const bool hasFreshHandshake = hasHandshakeData &&
+                        ((last_handshake_time_sec > 0) ||
+                         (rxBytes >= kHandshakeRxThreshold) ||
+                         (txBytes >= kHandshakeRxThreshold));
+
+                if (hasFreshHandshake) {
+                    m_handshakeConfirmed = true;
+                    m_handshakeAwaiting = false;
+                    m_handshakeTimer.invalidate();
+                    qDebug() << "IosController::checkStatus : handshake confirmed";
+                    emitConnectionStateIfChanged(Vpn::ConnectionState::Connected);
+                } else if (m_handshakeTimer.isValid() &&
+                           m_handshakeTimer.elapsed() > kHandshakeTimeoutMs) {
+                    m_handshakeTimer.restart();
+                    qDebug() << "IosController::checkStatus : handshake timed out, keeping tunnel alive";
+                    emitConnectionStateIfChanged(Vpn::ConnectionState::Reconnecting);
+                }
+            }
+
+            emit bytesChanged(rxBytes - m_rxBytes, txBytes - m_txBytes);
+            m_rxBytes = rxBytes;
+            m_txBytes = txBytes;
+            m_statusRequestInFlight = false;
+        }, Qt::QueuedConnection);
+    });
     });
 }
 
@@ -409,7 +496,22 @@ void IosController::vpnStatusDidChange(void *pNotification)
             }
         }
 
-        emit connectionStateChanged(iosStatusToState(session.status));
+        Vpn::ConnectionState nextState = iosStatusToState(session.status);
+        if (session.status == NEVPNStatusConnected && isWireGuardBasedProto(m_proto)) {
+            if (!m_handshakeConfirmed) {
+                nextState = Vpn::ConnectionState::Connecting;
+                if (!m_handshakeAwaiting) {
+                    m_handshakeAwaiting = true;
+                    m_handshakeTimer.restart();
+                }
+            }
+        } else if (session.status != NEVPNStatusConnected) {
+            m_handshakeAwaiting = false;
+            m_handshakeConfirmed = false;
+            m_handshakeTimer.invalidate();
+            m_statusRequestInFlight = false;
+        }
+        emitConnectionStateIfChanged(nextState);
     }
 }
 
@@ -670,10 +772,6 @@ bool IosController::setupAwg()
     wgConfig.insert(config_key::specialJunk3, config[config_key::specialJunk3]);
     wgConfig.insert(config_key::specialJunk4, config[config_key::specialJunk4]);
     wgConfig.insert(config_key::specialJunk5, config[config_key::specialJunk5]);
-    wgConfig.insert(config_key::controlledJunk1, config[config_key::controlledJunk1]);
-    wgConfig.insert(config_key::controlledJunk2, config[config_key::controlledJunk2]);
-    wgConfig.insert(config_key::controlledJunk3, config[config_key::controlledJunk3]);
-    wgConfig.insert(config_key::specialHandshakeTimeout, config[config_key::specialHandshakeTimeout]);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
@@ -799,6 +897,9 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
 {
     if (!m_currentTunnel) {
         qDebug() << "Cannot set an extension callback without a tunnel manager";
+        if (callback) {
+            callback(nil);
+        }
         return;
     }
 
@@ -808,6 +909,9 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
     if (!data || error) {
         qDebug() << "Failed to serialize message to VpnExtension as JSON. Error:"
                  << [error.localizedDescription UTF8String];
+        if (callback) {
+            callback(nil);
+        }
         return;
     }
 
@@ -838,11 +942,18 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
         [session sendProviderMessage:data returnError:&sendError responseHandler:completionHandler];
     } else {
         qDebug() << "Method sendProviderMessage:responseHandler:error: does not exist";
+        if (callback) {
+            callback(nil);
+        }
+        return;
     }
 
     if (sendError) {
         qDebug() << "Failed to send message to VpnExtension. Error:"
                  << [sendError.localizedDescription UTF8String];
+        if (callback) {
+            callback(nil);
+        }
     }
 
 }
@@ -913,6 +1024,135 @@ QString IosController::openFile() {
     return filePath;
 }
 
+void IosController::purchaseProduct(const QString &productId,
+                                   std::function<void(bool success,
+                                                      const QString &transactionId,
+                                                      const QString &purchasedProductId,
+                                                      const QString &originalTransactionId,
+                                                      const QString &errorString)> &&callback)
+{
+    qInfo().noquote() << "[IAP][IosController] purchaseProduct called" << productId;
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        __block auto cb = std::move(callback);
+        [controller purchaseProduct:productId.toNSString() completion:^(BOOL s,
+                                                                        NSString * _Nullable transactionId,
+                                                                        NSString * _Nullable prodId,
+                                                                        NSString * _Nullable originalTxId,
+                                                                        NSError * _Nullable error) {
+            const QString txId = QString::fromUtf8((transactionId ?: @"").UTF8String);
+            const QString pId  = QString::fromUtf8((prodId        ?: @"").UTF8String);
+            const QString origTxId = QString::fromUtf8((originalTxId ?: @"").UTF8String);
+            const QString err  = QString::fromUtf8((error.localizedDescription ?: @"").UTF8String);
+
+            qInfo().noquote() << "[IAP][IosController] purchase completion" << "success=" << s
+                              << "transactionId=" << txId << "originalTransactionId=" << origTxId
+                              << "productId=" << pId << "error=" << err;
+
+            if (cb) {
+                cb(s, txId, pId, origTxId, err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(false, QString(), QString(), QString(), "StoreKit 2 requires iOS 15.0 or later");
+        }
+    }
+}
+
+void IosController::restorePurchases(std::function<void(bool success,
+                                                       const QList<QVariantMap> &transactions,
+                                                       const QString &errorString)> &&callback)
+{
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        __block auto cb = std::move(callback);
+        [controller restorePurchasesWithCompletion:^(BOOL s,
+                                                     NSArray<NSDictionary *> * _Nullable restoredTransactions,
+                                                     NSError * _Nullable error) {
+            QString err;
+            if (error) {
+                err = QString::fromUtf8(error.localizedDescription.UTF8String);
+            }
+            QList<QVariantMap> transactions;
+            for (NSDictionary *dict in restoredTransactions ?: @[]) {
+                QVariantMap transaction;
+                NSString *transactionId = dict[@"transactionId"];
+                NSString *productId = dict[@"productId"];
+                NSString *originalTransactionId = dict[@"originalTransactionId"];
+
+                if (transactionId) {
+                    transaction.insert(QStringLiteral("transactionId"), QString::fromUtf8(transactionId.UTF8String));
+                }
+                if (productId) {
+                    transaction.insert(QStringLiteral("productId"), QString::fromUtf8(productId.UTF8String));
+                }
+                if (originalTransactionId) {
+                    transaction.insert(QStringLiteral("originalTransactionId"),
+                                       QString::fromUtf8(originalTransactionId.UTF8String));
+                }
+                transactions.push_back(transaction);
+            }
+            if (cb) {
+                cb(s, transactions, err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(false, QList<QVariantMap>(), "StoreKit 2 requires iOS 15.0 or later");
+        }
+    }
+}
+
+void IosController::fetchProducts(const QStringList &productIds,
+                                  std::function<void(const QList<QVariantMap> &products,
+                                                     const QStringList &invalidIds,
+                                                     const QString &errorString)> &&callback)
+{
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        NSMutableSet<NSString *> *ids = [NSMutableSet setWithCapacity:productIds.size()];
+        for (const auto &pid : productIds) {
+            [ids addObject:pid.toNSString()];
+        }
+        __block auto cb = std::move(callback);
+
+        [controller fetchProductsWithIdentifiers:ids
+                                      completion:^(NSArray<NSDictionary *> * _Nonnull products,
+                                                   NSArray<NSString *> * _Nonnull invalidIdentifiers,
+                                                   NSError * _Nullable error) {
+            QList<QVariantMap> outProducts;
+            for (NSDictionary *p in products) {
+                QVariantMap m;
+                m["productId"] = QString::fromUtf8([p[@"productId"] UTF8String]);
+                m["title"] = QString::fromUtf8([p[@"title"] UTF8String]);
+                m["description"] = QString::fromUtf8([p[@"description"] UTF8String]);
+                m["price"] = QString::fromUtf8([p[@"price"] UTF8String]);
+                m["currencyCode"] = QString::fromUtf8([p[@"currencyCode"] UTF8String]);
+                outProducts.push_back(m);
+            }
+
+            QStringList invalid;
+            for (NSString *inv in invalidIdentifiers) {
+                invalid.push_back(QString::fromUtf8(inv.UTF8String));
+            }
+
+            QString err;
+            if (error) {
+                err = QString::fromUtf8(error.localizedDescription.UTF8String);
+            }
+
+            if (cb) {
+                cb(outProducts, invalid, err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(QList<QVariantMap>(), QStringList(), "StoreKit 2 requires iOS 15.0 or later");
+        }
+    }
+}
+
 void IosController::requestInetAccess() {
     NSURL *url = [NSURL URLWithString:@"http://captive.apple.com/generate_204"];
     if (!url) {
@@ -930,4 +1170,9 @@ void IosController::requestInetAccess() {
         }
     }];
     [task resume];
+}
+
+bool IosController::isTestFlight() {
+    NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
+    return receiptURL && [[receiptURL lastPathComponent] isEqualToString:@"sandboxReceipt"];
 }
