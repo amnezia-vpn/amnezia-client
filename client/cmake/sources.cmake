@@ -49,7 +49,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/serialization/serialization.h
     ${CLIENT_ROOT_DIR}/core/utils/serialization/transfer.h
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
-    ${CLIENT_ROOT_DIR}/utils/qmlUtils.h
+    ${CLIENT_ROOT_DIR}/ui/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
 )
@@ -121,7 +121,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/utils/serialization/vmess.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serialization/vmess_new.cpp
     ${CLIENT_ROOT_DIR}/../common/logger/logger.cpp
-    ${CLIENT_ROOT_DIR}/utils/qmlUtils.cpp
+    ${CLIENT_ROOT_DIR}/ui/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp
 )

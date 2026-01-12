@@ -1,5 +1,5 @@
 #include "listViewFocusController.h"
-#include "utils/qmlUtils.h"
+#include "ui/utils/qmlUtils.h"
 
 #include <QQuickWindow>
 
