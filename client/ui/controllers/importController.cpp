@@ -11,7 +11,7 @@
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/errorStrings.h"
 #include "core/utils/qrCodeUtils.h"
-#include "core/serialization/serialization.h"
+#include "core/utils/serialization/serialization.h"
 #include "protocols/protocols_defs.h"
 #include "systemController.h"
 #include "utilities.h"

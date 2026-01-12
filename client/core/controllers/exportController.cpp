@@ -7,7 +7,7 @@
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"
-#include "core/serialization/serialization.h"
+#include "core/utils/serialization/serialization.h"
 #include "protocols/protocols_defs.h"
 
 ExportController::ExportController(ServersRepository* serversRepository,

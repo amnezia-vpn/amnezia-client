@@ -46,8 +46,8 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.h
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.h
-    ${CLIENT_ROOT_DIR}/core/serialization/serialization.h
-    ${CLIENT_ROOT_DIR}/core/serialization/transfer.h
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/serialization.h
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/transfer.h
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.h
@@ -112,14 +112,14 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
-    ${CLIENT_ROOT_DIR}/core/serialization/outbound.cpp
-    ${CLIENT_ROOT_DIR}/core/serialization/inbound.cpp
-    ${CLIENT_ROOT_DIR}/core/serialization/ss.cpp
-    ${CLIENT_ROOT_DIR}/core/serialization/ssd.cpp
-    ${CLIENT_ROOT_DIR}/core/serialization/vless.cpp
-    ${CLIENT_ROOT_DIR}/core/serialization/trojan.cpp
-    ${CLIENT_ROOT_DIR}/core/serialization/vmess.cpp
-    ${CLIENT_ROOT_DIR}/core/serialization/vmess_new.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/outbound.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/inbound.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/ss.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/ssd.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/vless.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/trojan.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/vmess.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/serialization/vmess_new.cpp
     ${CLIENT_ROOT_DIR}/../common/logger/logger.cpp
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.cpp
