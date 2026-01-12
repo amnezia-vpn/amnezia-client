@@ -1,7 +1,7 @@
 #ifndef FOCUSCONTROLLER_H
 #define FOCUSCONTROLLER_H
 
-#include "ui/controllers/listViewFocusController.h"
+#include "ui/controllers/qml/listViewFocusController.h"
 
 #include <QQmlApplicationEngine>
 

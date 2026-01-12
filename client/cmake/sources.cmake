@@ -186,10 +186,12 @@ file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
 file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.h
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.h
+    ${CLIENT_ROOT_DIR}/ui/controllers/qml/*.h
 )
 file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.cpp
+    ${CLIENT_ROOT_DIR}/ui/controllers/qml/*.cpp
 )
 
 set(HEADERS ${HEADERS}

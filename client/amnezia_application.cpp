@@ -17,7 +17,7 @@
 #include <QSettings>
 
 #include "logger.h"
-#include "ui/controllers/pageController.h"
+#include "ui/controllers/qml/pageController.h"
 #include "ui/models/installedAppsModel.h"
 #include "version.h"
 

@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QJsonObject>
 
-#include "../controllers/pageController.h"
+#include "../controllers/qml/pageController.h"
 
 class ProtocolsModel : public QAbstractListModel
 {
