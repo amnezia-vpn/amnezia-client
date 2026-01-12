@@ -1,5 +1,5 @@
-#ifndef PRIVILEGED_PROCESS_H
-#define PRIVILEGED_PROCESS_H
+#ifndef PRIVILEGEDPROCESS_H
+#define PRIVILEGEDPROCESS_H
 
 #include <QObject>
 
@@ -19,6 +19,6 @@ public:
 
 };
 
-#endif // PRIVILEGED_PROCESS_H
+#endif // PRIVILEGEDPROCESS_H
 
 

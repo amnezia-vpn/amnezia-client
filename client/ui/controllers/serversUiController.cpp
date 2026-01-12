@@ -3,7 +3,7 @@
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
 #include "containers/containers_defs.h"
-#include "core/utils/server_defs.h"
+#include "core/utils/serverDefs.h"
 #include "protocols/protocols_defs.h"
 #include <QJsonDocument>
 #include <QJsonArray>

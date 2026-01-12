@@ -1,4 +1,4 @@
-#include "errorstrings.h"
+#include "errorStrings.h"
 
 using namespace amnezia;
 

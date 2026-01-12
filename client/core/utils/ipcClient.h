@@ -7,7 +7,7 @@
 #include "rep_ipc_interface_replica.h"
 #include "rep_ipc_process_tun2socks_replica.h"
 
-#include "privileged_process.h"
+#include "privilegedProcess.h"
 
 class IpcClient : public QObject
 {

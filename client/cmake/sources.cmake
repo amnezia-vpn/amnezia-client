@@ -6,9 +6,9 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/amnezia_application.h
     ${CLIENT_ROOT_DIR}/containers/containers_defs.h
     ${CLIENT_ROOT_DIR}/core/utils/defs.h
-    ${CLIENT_ROOT_DIR}/core/utils/errorstrings.h
-    ${CLIENT_ROOT_DIR}/core/utils/scripts_registry.h
-    ${CLIENT_ROOT_DIR}/core/utils/server_defs.h
+    ${CLIENT_ROOT_DIR}/core/utils/errorStrings.h
+    ${CLIENT_ROOT_DIR}/core/utils/scriptsRegistry.h
+    ${CLIENT_ROOT_DIR}/core/utils/serverDefs.h
     ${CLIENT_ROOT_DIR}/core/api/apiDefs.h
     ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
@@ -45,7 +45,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/ui/qautostart.h
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
-    ${CLIENT_ROOT_DIR}/core/utils/sshclient.h
+    ${CLIENT_ROOT_DIR}/core/utils/sshClient.h
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.h
     ${CLIENT_ROOT_DIR}/core/serialization/serialization.h
     ${CLIENT_ROOT_DIR}/core/serialization/transfer.h
@@ -79,9 +79,9 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/migrations.cpp
     ${CLIENT_ROOT_DIR}/amnezia_application.cpp
     ${CLIENT_ROOT_DIR}/containers/containers_defs.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/errorstrings.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/scripts_registry.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/server_defs.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/errorStrings.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/scriptsRegistry.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/serverDefs.cpp
     ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
@@ -112,7 +112,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
     ${CLIENT_ROOT_DIR}/ui/qautostart.cpp
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/sshclient.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/sshClient.cpp
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/outbound.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/inbound.cpp
@@ -228,8 +228,8 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     add_compile_definitions(AMNEZIA_DESKTOP)
 
     set(HEADERS ${HEADERS}
-        ${CLIENT_ROOT_DIR}/core/utils/ipcclient.h
-        ${CLIENT_ROOT_DIR}/core/utils/privileged_process.h
+        ${CLIENT_ROOT_DIR}/core/utils/ipcClient.h
+        ${CLIENT_ROOT_DIR}/core/utils/privilegedProcess.h
         ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.h
@@ -241,8 +241,8 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     )
 
     set(SOURCES ${SOURCES}
-        ${CLIENT_ROOT_DIR}/core/utils/ipcclient.cpp
-        ${CLIENT_ROOT_DIR}/core/utils/privileged_process.cpp
+        ${CLIENT_ROOT_DIR}/core/utils/ipcClient.cpp
+        ${CLIENT_ROOT_DIR}/core/utils/privilegedProcess.cpp
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.cpp

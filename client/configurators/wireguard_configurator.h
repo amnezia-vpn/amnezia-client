@@ -7,7 +7,7 @@
 
 #include "configurator_base.h"
 #include "core/utils/defs.h"
-#include "core/utils/scripts_registry.h"
+#include "core/utils/scriptsRegistry.h"
 
 class WireguardConfigurator : public ConfiguratorBase
 {

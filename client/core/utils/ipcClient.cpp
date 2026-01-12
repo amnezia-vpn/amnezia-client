@@ -1,4 +1,4 @@
-#include "ipcclient.h"
+#include "ipcClient.h"
 #include "ipc.h"
 #include <QRemoteObjectNode>
 #include <QtNetwork/qlocalsocket.h>

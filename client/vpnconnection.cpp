@@ -17,7 +17,7 @@
 #include <configurators/wireguard_configurator.h>
 
 #ifdef AMNEZIA_DESKTOP
-    #include "core/utils/ipcclient.h"
+    #include "core/utils/ipcClient.h"
     #include <protocols/wireguardprotocol.h>
 #endif
 

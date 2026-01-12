@@ -10,8 +10,8 @@
 
 #include "containers/containers_defs.h"
 #include "core/utils/sshSession.h"
-#include "core/utils/scripts_registry.h"
-#include "core/utils/server_defs.h"
+#include "core/utils/scriptsRegistry.h"
+#include "core/utils/serverDefs.h"
 #include "utilities.h"
 
 Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)

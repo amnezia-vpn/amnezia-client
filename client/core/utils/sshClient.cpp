@@ -1,4 +1,4 @@
-#include "sshclient.h"
+#include "sshClient.h"
 
 #include <QEventLoop>
 #include <QtConcurrent>

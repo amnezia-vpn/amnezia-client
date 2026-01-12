@@ -1,5 +1,5 @@
-#ifndef SCRIPTS_REGISTRY_H
-#define SCRIPTS_REGISTRY_H
+#ifndef SCRIPTSREGISTRY_H
+#define SCRIPTSREGISTRY_H
 
 #include <QLatin1String>
 #include <QList>
@@ -62,4 +62,4 @@ ScriptVars genSocks5ProxyVars(const QJsonObject &containerConfig);
 ScriptVars genProtocolVarsForContainer(DockerContainer container, const QJsonObject &containerConfig);
 }
 
-#endif // SCRIPTS_REGISTRY_H
+#endif // SCRIPTSREGISTRY_H

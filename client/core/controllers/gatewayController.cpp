@@ -21,7 +21,7 @@
 #include "utilities.h"
 
 #ifdef AMNEZIA_DESKTOP
-    #include "core/utils/ipcclient.h"
+    #include "core/utils/ipcClient.h"
 #endif
 
 namespace

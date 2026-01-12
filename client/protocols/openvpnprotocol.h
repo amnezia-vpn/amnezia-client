@@ -8,7 +8,7 @@
 #include "managementserver.h"
 #include "vpnprotocol.h"
 
-#include "core/utils/ipcclient.h"
+#include "core/utils/ipcClient.h"
 
 class OpenVpnProtocol : public VpnProtocol
 {

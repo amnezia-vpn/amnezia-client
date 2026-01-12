@@ -4,7 +4,7 @@
 #include "QProcess"
 
 #include "core/utils/defs.h"
-#include "core/utils/ipcclient.h"
+#include "core/utils/ipcClient.h"
 #include "vpnprotocol.h"
 #include "settings.h"
 

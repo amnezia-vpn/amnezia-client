@@ -9,7 +9,7 @@
 
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
-#include "core/utils/errorstrings.h"
+#include "core/utils/errorStrings.h"
 #include "core/utils/qrCodeUtils.h"
 #include "core/serialization/serialization.h"
 #include "protocols/protocols_defs.h"

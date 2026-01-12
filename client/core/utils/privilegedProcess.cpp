@@ -1,4 +1,4 @@
-#include "privileged_process.h"
+#include "privilegedProcess.h"
 
 PrivilegedProcess::PrivilegedProcess() :
     IpcProcessInterfaceReplica()

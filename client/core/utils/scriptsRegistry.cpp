@@ -1,4 +1,4 @@
-#include "scripts_registry.h"
+#include "scriptsRegistry.h"
 
 #include <QDebug>
 #include <QFile>

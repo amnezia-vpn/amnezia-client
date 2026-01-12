@@ -1,5 +1,5 @@
-#ifndef SERVER_DEFS_H
-#define SERVER_DEFS_H
+#ifndef SERVERDEFS_H
+#define SERVERDEFS_H
 
 #include <QObject>
 #include "containers/containers_defs.h"
@@ -12,4 +12,4 @@ QString getDockerfileFolder(amnezia::DockerContainer container);
 }
 }
 
-#endif // SERVER_DEFS_H
+#endif // SERVERDEFS_H

@@ -17,7 +17,7 @@
 #include "core/utils/networkUtilities.h"
 #include "containers/containers_defs.h"
 #include "core/utils/sshSession.h"
-#include "core/utils/scripts_registry.h"
+#include "core/utils/scriptsRegistry.h"
 #include "settings.h"
 #include "utilities.h"
 
