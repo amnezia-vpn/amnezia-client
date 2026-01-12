@@ -637,7 +637,7 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '17'
-        cache: 'gradle'
+        # cache: 'gradle'
 
     - name: 'Setup Android NDK'
       id: setup-ndk
