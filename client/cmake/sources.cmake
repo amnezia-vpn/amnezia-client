@@ -30,6 +30,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.h
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/exportController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.h
@@ -102,6 +103,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/exportController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.cpp

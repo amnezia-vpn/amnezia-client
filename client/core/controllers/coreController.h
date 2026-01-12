@@ -16,7 +16,8 @@
 #include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/allowedDnsUiController.h"
 #include "ui/controllers/connectionController.h"
-#include "ui/controllers/exportController.h"
+#include "ui/controllers/exportUiController.h"
+#include "core/controllers/exportController.h"
 #include "ui/controllers/focusController.h"
 #include "ui/controllers/importController.h"
 #include "ui/controllers/installUiController.h"
@@ -143,7 +144,7 @@ private:
     PageController* m_pageController;
     InstallUiController* m_installUiController;
     ImportController* m_importController;
-    ExportController* m_exportController;
+    ExportUiController* m_exportUiController;
     SettingsController* m_settingsController;
     ServersUiController* m_serversUiController;
     SitesUiController* m_sitesUiController;
@@ -168,6 +169,7 @@ private:
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
     InstallController* m_installController;
+    ExportController* m_exportController;
 
     ContainersModel* m_containersModel;
     ContainersModel* m_defaultServerContainersModel;

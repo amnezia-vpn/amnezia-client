@@ -133,6 +133,7 @@ void CoreController::initCoreControllers()
     
     ServerController* serverController = new ServerController(m_settings, this);
     m_installController = new InstallController(serverController, serversRepo, m_settings, this);
+    m_exportController = new ExportController(serversRepo, appSettingsRepo, m_settings, this);
 }
 
 void CoreController::initControllers()
@@ -161,8 +162,36 @@ void CoreController::initControllers()
     m_importController = new ImportController(m_serversController, m_serversModel, m_containersModel, m_appSettingsRepository, this);
     m_engine->rootContext()->setContextProperty("ImportController", m_importController);
 
-    m_exportController = new ExportController(m_serversController, m_serversModel, m_containersModel, m_clientManagementController, m_appSettingsRepository, m_settings, this);
-    m_engine->rootContext()->setContextProperty("ExportController", m_exportController);
+    m_exportUiController = new ExportUiController(m_exportController, this);
+    m_engine->rootContext()->setContextProperty("ExportController", m_exportUiController);
+
+    connect(m_exportController, &ExportController::appendClientRequested, this,
+            [this](DockerContainer container, const ServerCredentials &credentials,
+                   const QJsonObject &containerConfig, const QString &clientName) {
+                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+                m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, serverController);
+            });
+    connect(m_exportController, &ExportController::appendClientByConfigRequested, this,
+            [this](QJsonObject protocolConfig, const QString &clientName,
+                   DockerContainer container, const ServerCredentials &credentials) {
+                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+                m_clientManagementController->appendClient(protocolConfig, clientName, container, credentials, serverController);
+            });
+    connect(m_exportController, &ExportController::updateClientsRequested, this,
+            [this](DockerContainer container, const ServerCredentials &credentials) {
+                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+                m_clientManagementController->updateClients(container, credentials, serverController);
+            });
+    connect(m_exportController, &ExportController::revokeClientRequested, this,
+            [this](int row, DockerContainer container, const ServerCredentials &credentials, int serverIndex) {
+                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+                m_clientManagementController->revokeClient(row, container, credentials, serverIndex, serverController);
+            });
+    connect(m_exportController, &ExportController::renameClientRequested, this,
+            [this](int row, const QString &clientName, DockerContainer container, const ServerCredentials &credentials) {
+                QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+                m_clientManagementController->renameClient(row, clientName, container, credentials, serverController);
+            });
 
     m_languageUiController = new LanguageUiController(m_appSettingsRepository, m_languageModel, this);
     m_engine->rootContext()->setContextProperty("LanguageUiController", m_languageUiController);
