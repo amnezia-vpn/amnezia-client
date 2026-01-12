@@ -40,8 +40,8 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/repositories/qAppSettingsRepository.h
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.h
     ${CLIENT_ROOT_DIR}/protocols/qml_register_protocols.h
-    ${CLIENT_ROOT_DIR}/ui/pages.h
-    ${CLIENT_ROOT_DIR}/ui/qautostart.h
+    ${CLIENT_ROOT_DIR}/ui/utils/pages.h
+    ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.h
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.h
@@ -70,7 +70,7 @@ endif()
 
 if(NOT ANDROID)
     set(HEADERS ${HEADERS}
-        ${CLIENT_ROOT_DIR}/ui/notificationhandler.h
+        ${CLIENT_ROOT_DIR}/ui/utils/notificationHandler.h
     )
 endif()
 
@@ -108,7 +108,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/repositories/qServersRepository.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/qAppSettingsRepository.cpp
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
-    ${CLIENT_ROOT_DIR}/ui/qautostart.cpp
+    ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.cpp
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
@@ -144,18 +144,18 @@ if(APPLE AND NOT IOS)
     list(APPEND HEADERS
         ${CLIENT_ROOT_DIR}/platforms/macos/macosutils.h
         ${CLIENT_ROOT_DIR}/platforms/macos/macosstatusicon.h
-        ${CLIENT_ROOT_DIR}/ui/macos_util.h
+        ${CLIENT_ROOT_DIR}/ui/utils/macosUtil.h
     )
     list(APPEND SOURCES
         ${CLIENT_ROOT_DIR}/platforms/macos/macosutils.mm
         ${CLIENT_ROOT_DIR}/platforms/macos/macosstatusicon.mm
-        ${CLIENT_ROOT_DIR}/ui/macos_util.mm
+        ${CLIENT_ROOT_DIR}/ui/utils/macosUtil.mm
     )
 endif()
 
 if(NOT ANDROID)
     set(SOURCES ${SOURCES}
-        ${CLIENT_ROOT_DIR}/ui/notificationhandler.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/notificationHandler.cpp
     )
 endif()
 
@@ -228,7 +228,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.h
         ${CLIENT_ROOT_DIR}/core/utils/privilegedProcess.h
-        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.h
+        ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/shadowsocksvpnprotocol.h
@@ -242,7 +242,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.cpp
         ${CLIENT_ROOT_DIR}/core/utils/privilegedProcess.cpp
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
-        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/shadowsocksvpnprotocol.cpp
@@ -255,10 +255,10 @@ endif()
 if(APPLE AND MACOS_NE)
     # Include only the tray notification handler in NE builds
     set(HEADERS ${HEADERS}
-        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.h
+        ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
     )
 
     set(SOURCES ${SOURCES}
-        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
     )
 endif()

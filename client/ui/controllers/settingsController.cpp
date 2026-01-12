@@ -6,7 +6,7 @@
 #include "core/utils/defs.h"
 #include "logger.h"
 #include "systemController.h"
-#include "ui/qautostart.h"
+#include "ui/utils/qAutoStart.h"
 #include "amnezia_application.h"
 #include "version.h"
 #include "core/controllers/appSplitTunnelingController.h"

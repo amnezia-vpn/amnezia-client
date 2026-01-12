@@ -17,7 +17,7 @@
     #include "platforms/android/android_controller.h"
 #endif
 #if defined Q_OS_MAC
-    #include "ui/macos_util.h"
+    #include "ui/utils/macosUtil.h"
 #endif
 
 PageController::PageController(ServersModel* serversModel,

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <QDebug>
-#include "systemtray_notificationhandler.h"
+#include "systemTrayNotificationHandler.h"
 
 
 #ifdef Q_OS_MAC

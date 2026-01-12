@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <QDebug>
-#include "notificationhandler.h"
+#include "notificationHandler.h"
 
 #if defined(Q_OS_IOS)
 #  include "platforms/ios/iosnotificationhandler.h"
 #else
-#  include "systemtray_notificationhandler.h"
+#  include "systemTrayNotificationHandler.h"
 #endif
 
 

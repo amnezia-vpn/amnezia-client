@@ -1,7 +1,7 @@
-#ifndef NE_NOTIFICATION_HANDLER_H
-#define NE_NOTIFICATION_HANDLER_H
+#ifndef NENOTIFICATIONHANDLER_H
+#define NENOTIFICATIONHANDLER_H
 
-#include "notificationhandler.h"
+#include "notificationHandler.h"
 #include <QMenu>
 #include <QAction>
 
@@ -33,4 +33,4 @@ private:
     QAction* m_actionQuit;
 };
 
-#endif // NE_NOTIFICATION_HANDLER_H
+#endif // NENOTIFICATIONHANDLER_H

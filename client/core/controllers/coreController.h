@@ -6,7 +6,7 @@
 #include <QThread>
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    #include "ui/systemtray_notificationhandler.h"
+    #include "ui/utils/systemTrayNotificationHandler.h"
 #endif
 
 #include "ui/controllers/api/apiConfigsController.h"
@@ -70,7 +70,7 @@
 #include "ui/models/newsModel.h"
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    #include "ui/notificationhandler.h"
+    #include "ui/utils/notificationHandler.h"
 #endif
 
 class CoreController : public QObject

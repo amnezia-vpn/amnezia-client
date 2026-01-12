@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "qautostart.h"
+#include "qAutoStart.h"
 
 #include <QCoreApplication>
 #include <QTextStream>

@@ -1,4 +1,4 @@
-#include "macos_util.h"
+#include "macosUtil.h"
 
 #include <QMainWindow>
 #include <QProcess>
