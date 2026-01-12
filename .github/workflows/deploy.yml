@@ -10,9 +10,7 @@ env:
 
 jobs:
   Build-Linux-Ubuntu:
-    runs-on: 
-      - ubuntu-22.04
-      - large
+    runs-on: android-runner
 
     env:
       QT_VERSION: 6.8.3
@@ -539,9 +537,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
-    runs-on:
-      - ubuntu-latest
-      - large
+    runs-on: android-runner
 
     env:
       ANDROID_BUILD_PLATFORM: android-36
