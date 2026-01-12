@@ -7,9 +7,9 @@
 #include <QThread>
 #include <QtConcurrent>
 
+#include "configurators/configurator_base.h"
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
-#include "core/controllers/vpnConfigurationController.h"
 #include "core/installers/awgInstaller.h"
 #include "core/installers/cloakInstaller.h"
 #include "core/installers/installerBase.h"
@@ -211,12 +211,22 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
         return ErrorCode::NoError;
     }
 
-    QSharedPointer<ServerController> serverController(m_serverController, [](ServerController *) { }); // non-owning pointer
-    VpnConfigurationsController vpnConfigurationsController(m_settings, serverController);
-    
-    ErrorCode errorCode = vpnConfigurationsController.createProtocolConfigForContainer(credentials, container, containerConfig);
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
+    if (ContainerProps::containerService(container) != ServiceType::Other) {
+        QSharedPointer<ServerController> serverController(m_serverController, [](ServerController *) { }); // non-owning pointer
+
+        ErrorCode errorCode = ErrorCode::NoError;
+        for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
+            QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
+
+            auto configurator = ConfiguratorBase::create(protocol, m_settings, serverController);
+            QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
+            if (errorCode != ErrorCode::NoError) {
+                return errorCode;
+            }
+
+            protocolConfig.insert(config_key::last_config, protocolConfigString);
+            containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
+        }
     }
 
     if (serverIndex >= 0) {
@@ -303,7 +313,7 @@ ErrorCode InstallController::configureContainerWorker(const ServerCredentials &c
             m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::configure_container, container), baseVars),
             cbReadStdOut, cbReadStdErr);
 
-    VpnConfigurationsController::updateContainerConfigAfterInstallation(container, config, stdOut);
+    updateContainerConfigAfterInstallation(container, config, stdOut);
 
     return e;
 }
@@ -1020,6 +1030,23 @@ void InstallController::stopAllSftpMounts()
     }
     m_sftpMountProcesses.clear();
 #endif
+}
+
+void InstallController::updateContainerConfigAfterInstallation(DockerContainer container, QJsonObject &containerConfig, const QString &stdOut)
+{
+    Proto mainProto = ContainerProps::defaultProtocol(container);
+
+    if (container == DockerContainer::TorWebSite) {
+        QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+
+        qDebug() << "amnezia-tor onions" << stdOut;
+
+        QString onion = stdOut;
+        onion.replace("\n", "");
+        protocol.insert(config_key::site, onion);
+
+        containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
+    }
 }
 
 ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentials &credentials,

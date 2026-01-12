@@ -39,7 +39,6 @@
 #include "core/controllers/allowedDnsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
-#include "core/controllers/vpnConfigurationController.h"
 #include "core/controllers/installController.h"
 
 #include "core/repositories/qServersRepository.h"

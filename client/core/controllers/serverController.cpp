@@ -29,7 +29,6 @@
 #include "logger.h"
 #include "settings.h"
 #include "utilities.h"
-#include "vpnConfigurationController.h"
 
 namespace
 {

@@ -86,6 +86,8 @@ private:
 
     ErrorCode prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, QJsonObject &containerConfig, int serverIndex = -1);
 
+    static void updateContainerConfigAfterInstallation(DockerContainer container, QJsonObject &containerConfig, const QString &stdOut);
+
     QScopedPointer<InstallerBase> createInstaller(DockerContainer container);
 
     ServerController* m_serverController;

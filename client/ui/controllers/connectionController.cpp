@@ -6,8 +6,11 @@
     #include <QApplication>
 #endif
 
+#include <QJsonDocument>
+
+#include "configurators/configurator_base.h"
+#include "protocols/protocols_defs.h"
 #include "utilities.h"
-#include "core/controllers/vpnConfigurationController.h"
 #include "version.h"
 
 ConnectionController::ConnectionController(ServersController* serversController,
@@ -56,16 +59,64 @@ void ConnectionController::openConnection()
         return;
     }
 
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
-
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     ServerCredentials credentials = m_serversController->getServerCredentials(serverIndex);
 
     auto dns = m_serversController->getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
 
-    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container);
+    auto vpnConfiguration = createConnectionConfiguration(dns, serverConfig, containerConfig, container);
     emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
+}
+
+QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
+                                                         const QJsonObject &containerConfig, DockerContainer container)
+{
+    QJsonObject vpnConfiguration {};
+
+    if (ContainerProps::containerService(container) == ServiceType::Other) {
+        return vpnConfiguration;
+    }
+
+    bool isApiConfig = serverConfig.value(config_key::configVersion).toInt();
+
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+
+    for (Proto proto : ContainerProps::protocolsForContainer(container)) {
+        if (isApiConfig && container == DockerContainer::Cloak && proto == Proto::ShadowSocks) {
+            continue;
+        }
+
+        QString protocolConfigString =
+                containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
+
+        auto configurator = ConfiguratorBase::create(proto, m_settings, serverController);
+        protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
+
+        QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+        if (ContainerProps::isAwgContainer(container) || container == DockerContainer::WireGuard) {
+            // add mtu for old configs
+            if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
+                vpnConfigData[config_key::mtu] =
+                        ContainerProps::isAwgContainer(container) ? protocols::awg::defaultMtu :
+                        protocols::wireguard::defaultMtu;
+            }
+        }
+
+        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
+    }
+
+    Proto proto = ContainerProps::defaultProtocol(container);
+    vpnConfiguration[config_key::vpnproto] = ProtocolProps::protoToString(proto);
+
+    vpnConfiguration[config_key::dns1] = dns.first;
+    vpnConfiguration[config_key::dns2] = dns.second;
+
+    vpnConfiguration[config_key::hostName] = serverConfig.value(config_key::hostName).toString();
+    vpnConfiguration[config_key::description] = serverConfig.value(config_key::description).toString();
+
+    vpnConfiguration[config_key::configVersion] = serverConfig.value(config_key::configVersion).toInt();
+
+    return vpnConfiguration;
 }
 
 void ConnectionController::closeConnection()

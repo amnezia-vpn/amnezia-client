@@ -11,7 +11,6 @@
 #include "core/api/apiUtils.h"
 #include "core/controllers/installController.h"
 #include "core/controllers/serverController.h"
-#include "core/controllers/vpnConfigurationController.h"
 #include "core/networkUtilities.h"
 #include "logger.h"
 #include "protocols/protocols_defs.h"

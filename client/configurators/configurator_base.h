@@ -14,6 +14,10 @@ class ConfiguratorBase : public QObject
 public:
     explicit ConfiguratorBase(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
 
+    static QScopedPointer<ConfiguratorBase> create(Proto protocol,
+                                                   std::shared_ptr<Settings> settings,
+                                                   const QSharedPointer<ServerController> &serverController);
+
     virtual QString createConfig(const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &containerConfig, ErrorCode &errorCode) = 0;
 

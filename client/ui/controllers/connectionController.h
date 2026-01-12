@@ -63,6 +63,9 @@ private:
 
     void continueConnection();
 
+    QJsonObject createConnectionConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
+                                              const QJsonObject &containerConfig, DockerContainer container);
+
     ServersController* m_serversController;
     ServersModel* m_serversModel;
     ContainersModel* m_containersModel;

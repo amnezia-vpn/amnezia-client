@@ -3,8 +3,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
+#include "configurators/configurator_base.h"
 #include "core/controllers/serverController.h"
-#include "core/controllers/vpnConfigurationController.h"
 #include "core/networkUtilities.h"
 #include "core/qrCodeUtils.h"
 #include "core/serialization/serialization.h"
@@ -61,9 +61,21 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
 
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
-    result.errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
+    if (ContainerProps::containerService(container) != ServiceType::Other) {
+        QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+        for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
+            QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
+
+            auto configurator = ConfiguratorBase::create(protocol, m_settings, serverController);
+            QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, result.errorCode);
+            if (result.errorCode != ErrorCode::NoError) {
+                return result;
+            }
+
+            protocolConfig.insert(config_key::last_config, protocolConfigString);
+            containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
+        }
+    }
 
     emit appendClientRequested(container, credentials, containerConfig, clientName);
 
@@ -93,6 +105,10 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
 {
     NativeConfigResult result;
 
+    if (ContainerProps::containerService(container) == ServiceType::Other) {
+        return result;
+    }
+
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
     auto dns = getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
 
@@ -100,14 +116,13 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     modifiedContainerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
+    auto configurator = ConfiguratorBase::create(protocol, m_settings, serverController);
 
-    QString protocolConfigString;
-    result.errorCode = vpnConfigurationController.createProtocolConfigString(isApiConfig, dns, credentials, container, modifiedContainerConfig,
-                                                                              protocol, protocolConfigString);
+    QString protocolConfigString = configurator->createConfig(credentials, container, modifiedContainerConfig, result.errorCode);
     if (result.errorCode != ErrorCode::NoError) {
         return result;
     }
+    protocolConfigString = configurator->processConfigWithExportSettings(dns, isApiConfig, protocolConfigString);
 
     result.jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 
