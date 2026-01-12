@@ -3,6 +3,8 @@
 
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
+#include <QGuiApplication>
+#include <QKeyEvent>
 
 #include "logger.h"
 
@@ -212,4 +214,16 @@ void FocusController::dropListView()
         delete m_lvfc;
         m_lvfc = nullptr;
     }
+}
+
+void FocusController::activateFocusedItem()
+{
+    if (!QGuiApplication::focusWindow()) {
+        return;
+    }
+
+    QKeyEvent press(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
+    QKeyEvent release(QEvent::KeyRelease, Qt::Key_Return, Qt::NoModifier);
+    QCoreApplication::sendEvent(QGuiApplication::focusWindow(), &press);
+    QCoreApplication::sendEvent(QGuiApplication::focusWindow(), &release);
 }

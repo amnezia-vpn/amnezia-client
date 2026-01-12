@@ -228,4 +228,12 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
-qt_finalize_target(${PROJECT})
+# Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).
+if(COMMAND qt_import_qml_plugins)
+    qt_import_qml_plugins(${PROJECT})
+endif()
+if(COMMAND qt_finalize_executable)
+    qt_finalize_executable(${PROJECT})
+else()
+    qt_finalize_target(${PROJECT})
+endif()

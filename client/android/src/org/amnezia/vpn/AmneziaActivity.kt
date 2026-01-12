@@ -26,6 +26,7 @@ import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.provider.OpenableColumns
 import android.provider.Settings
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -272,6 +273,47 @@ class AmneziaActivity : QtActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         Log.d(TAG, "Window focus changed: hasFocus=$hasFocus")
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.deviceId < 0 && event.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_BUTTON_A,
+                KeyEvent.KEYCODE_BUTTON_START,
+                KeyEvent.KEYCODE_BUTTON_SELECT,
+                KeyEvent.KEYCODE_DPAD_CENTER -> {
+                    val down = KeyEvent(
+                        event.downTime,
+                        event.eventTime,
+                        KeyEvent.ACTION_DOWN,
+                        KeyEvent.KEYCODE_ENTER,
+                        0,
+                        event.metaState,
+                        0,
+                        event.scanCode,
+                        event.flags,
+                        event.source
+                    )
+                    val up = KeyEvent(
+                        event.downTime,
+                        event.eventTime,
+                        KeyEvent.ACTION_UP,
+                        KeyEvent.KEYCODE_ENTER,
+                        0,
+                        event.metaState,
+                        0,
+                        event.scanCode,
+                        event.flags,
+                        event.source
+                    )
+                    super.dispatchKeyEvent(down)
+                    super.dispatchKeyEvent(up)
+                    return true
+                }
+            }
+        }
+
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onPause() {

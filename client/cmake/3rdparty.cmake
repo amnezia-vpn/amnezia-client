@@ -83,6 +83,15 @@ add_compile_definitions(_WINSOCKAPI_)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(BUILD_WITH_QT6 ON)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
+
+if(ANDROID)
+    add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtgamepad)
+    # Ensure the QtGamepadLegacy QML module is built and deployed with the app.
+    if(TARGET GamepadLegacyQuickPrivate)
+        target_link_libraries(${PROJECT} PRIVATE GamepadLegacyQuickPrivate)
+    endif()
+endif()
+
 set(LIBS ${LIBS} qt6keychain)
 
 include_directories(
@@ -92,6 +101,7 @@ include_directories(
     ${CLIENT_ROOT_DIR}/3rd/libssh/include
     ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/src/include
     ${CLIENT_ROOT_DIR}/3rd/qtkeychain/qtkeychain
+    ${CLIENT_ROOT_DIR}/3rd/qtgamepad
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
 )

@@ -29,6 +29,7 @@ public:
     Q_INVOKABLE void pushRootObject(QObject *object);
     Q_INVOKABLE void dropRootObject(QObject *object);
     Q_INVOKABLE void resetRootObject();
+    Q_INVOKABLE void activateFocusedItem();
 
 private:
     enum class Direction {
