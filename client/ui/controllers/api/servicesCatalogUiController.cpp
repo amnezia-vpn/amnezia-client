@@ -1,6 +1,6 @@
 #include "servicesCatalogUiController.h"
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 
 ServicesCatalogUiController::ServicesCatalogUiController(ServicesCatalogController* servicesCatalogController,
                                                          ApiServicesModel* apiServicesModel,

@@ -5,7 +5,7 @@
 #include <QJsonObject>
 #include <QObject>
 #include <QLoggingCategory>
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
 

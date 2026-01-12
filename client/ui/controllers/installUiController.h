@@ -10,7 +10,7 @@
 #include "core/controllers/installController.h"
 #include "core/repositories/qAppSettingsRepository.h"
 #include "core/repositories/qServersRepository.h"
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"

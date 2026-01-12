@@ -3,7 +3,7 @@
 #include <QStandardPaths>
 #include <QOperatingSystemVersion>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "logger.h"
 #include "systemController.h"
 #include "ui/qautostart.h"

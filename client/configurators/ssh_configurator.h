@@ -5,7 +5,7 @@
 #include <QProcessEnvironment>
 
 #include "configurator_base.h"
-#include "core/defs.h"
+#include "core/utils/defs.h"
 
 class SshConfigurator : ConfiguratorBase
 {

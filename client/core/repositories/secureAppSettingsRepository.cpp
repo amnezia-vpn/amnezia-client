@@ -1,6 +1,6 @@
 #include "secureAppSettingsRepository.h"
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "settings.h"
 
 using namespace amnezia;

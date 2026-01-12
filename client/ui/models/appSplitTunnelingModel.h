@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QVector>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 
 class AppSplitTunnelingModel: public QAbstractListModel
 {

@@ -6,7 +6,7 @@
 
 #include "containers/containers_defs.h"
 #include "core/utils/sshSession.h"
-#include "core/scripts_registry.h"
+#include "core/utils/scripts_registry.h"
 #include "protocols/protocols_defs.h"
 
 CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)

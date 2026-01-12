@@ -5,7 +5,7 @@
 #include <QObject>
 
 #include "apiDefs.h"
-#include "core/defs.h"
+#include "core/utils/defs.h"
 
 namespace apiUtils
 {

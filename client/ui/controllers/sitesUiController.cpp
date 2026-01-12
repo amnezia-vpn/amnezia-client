@@ -4,9 +4,9 @@
 #include <QHostInfo>
 #include <QStandardPaths>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "systemController.h"
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 
 SitesUiController::SitesUiController(SitesController* sitesController,
                                       VpnConnection* vpnConnection,

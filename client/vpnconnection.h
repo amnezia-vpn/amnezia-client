@@ -9,11 +9,11 @@
 #include <QTimer>
 
 #include "protocols/vpnprotocol.h"
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "settings.h"
 
 #ifdef AMNEZIA_DESKTOP
-#include "core/ipcclient.h"
+#include "core/utils/ipcclient.h"
 #endif
 
 #ifdef Q_OS_ANDROID

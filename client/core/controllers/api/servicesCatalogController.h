@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QByteArray>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "core/repositories/appSettingsRepository.h"
 
 class ServicesCatalogController

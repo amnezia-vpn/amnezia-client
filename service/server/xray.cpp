@@ -1,5 +1,5 @@
 #include "xray.h"
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 
 #include <QDebug>
 #include <QNetworkInterface>

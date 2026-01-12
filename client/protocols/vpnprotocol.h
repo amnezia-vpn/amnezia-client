@@ -5,7 +5,7 @@
 #include <QString>
 #include <QJsonObject>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "containers/containers_defs.h"
 
 using namespace amnezia;

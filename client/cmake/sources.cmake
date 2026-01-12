@@ -5,12 +5,12 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/../ipc/ipc.h
     ${CLIENT_ROOT_DIR}/amnezia_application.h
     ${CLIENT_ROOT_DIR}/containers/containers_defs.h
-    ${CLIENT_ROOT_DIR}/core/defs.h
-    ${CLIENT_ROOT_DIR}/core/errorstrings.h
-    ${CLIENT_ROOT_DIR}/core/scripts_registry.h
-    ${CLIENT_ROOT_DIR}/core/server_defs.h
+    ${CLIENT_ROOT_DIR}/core/utils/defs.h
+    ${CLIENT_ROOT_DIR}/core/utils/errorstrings.h
+    ${CLIENT_ROOT_DIR}/core/utils/scripts_registry.h
+    ${CLIENT_ROOT_DIR}/core/utils/server_defs.h
     ${CLIENT_ROOT_DIR}/core/api/apiDefs.h
-    ${CLIENT_ROOT_DIR}/core/qrCodeUtils.h
+    ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.h
     ${CLIENT_ROOT_DIR}/core/utils/sshSession.h
@@ -45,14 +45,14 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/ui/qautostart.h
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
-    ${CLIENT_ROOT_DIR}/core/sshclient.h
-    ${CLIENT_ROOT_DIR}/core/networkUtilities.h
+    ${CLIENT_ROOT_DIR}/core/utils/sshclient.h
+    ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.h
     ${CLIENT_ROOT_DIR}/core/serialization/serialization.h
     ${CLIENT_ROOT_DIR}/core/serialization/transfer.h
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.h
-    ${CLIENT_ROOT_DIR}/core/osSignalHandler.h
+    ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
 )
 
 # Mozilla headres
@@ -79,10 +79,10 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/migrations.cpp
     ${CLIENT_ROOT_DIR}/amnezia_application.cpp
     ${CLIENT_ROOT_DIR}/containers/containers_defs.cpp
-    ${CLIENT_ROOT_DIR}/core/errorstrings.cpp
-    ${CLIENT_ROOT_DIR}/core/scripts_registry.cpp
-    ${CLIENT_ROOT_DIR}/core/server_defs.cpp
-    ${CLIENT_ROOT_DIR}/core/qrCodeUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/errorstrings.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/scripts_registry.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/server_defs.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
     ${CLIENT_ROOT_DIR}/core/utils/sshSession.cpp
@@ -112,8 +112,8 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
     ${CLIENT_ROOT_DIR}/ui/qautostart.cpp
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp
-    ${CLIENT_ROOT_DIR}/core/sshclient.cpp
-    ${CLIENT_ROOT_DIR}/core/networkUtilities.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/sshclient.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/outbound.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/inbound.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/ss.cpp
@@ -125,7 +125,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/../common/logger/logger.cpp
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.cpp
-    ${CLIENT_ROOT_DIR}/core/osSignalHandler.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp
 )
 
 # Mozilla sources
@@ -228,8 +228,8 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     add_compile_definitions(AMNEZIA_DESKTOP)
 
     set(HEADERS ${HEADERS}
-        ${CLIENT_ROOT_DIR}/core/ipcclient.h
-        ${CLIENT_ROOT_DIR}/core/privileged_process.h
+        ${CLIENT_ROOT_DIR}/core/utils/ipcclient.h
+        ${CLIENT_ROOT_DIR}/core/utils/privileged_process.h
         ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.h
@@ -241,8 +241,8 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     )
 
     set(SOURCES ${SOURCES}
-        ${CLIENT_ROOT_DIR}/core/ipcclient.cpp
-        ${CLIENT_ROOT_DIR}/core/privileged_process.cpp
+        ${CLIENT_ROOT_DIR}/core/utils/ipcclient.cpp
+        ${CLIENT_ROOT_DIR}/core/utils/privileged_process.cpp
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.cpp

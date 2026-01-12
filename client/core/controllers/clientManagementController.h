@@ -7,7 +7,7 @@
 
 #include "containers/containers_defs.h"
 #include "core/utils/sshSession.h"
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
 
 class ClientManagementController : public QObject

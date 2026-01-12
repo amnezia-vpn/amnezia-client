@@ -8,7 +8,7 @@
 #include <QPromise>
 #include <QSharedPointer>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 
 #ifdef Q_OS_IOS
     #include "platforms/ios/ios_controller.h"

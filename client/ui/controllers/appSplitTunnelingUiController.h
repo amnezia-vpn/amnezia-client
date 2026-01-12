@@ -5,7 +5,7 @@
 #include <QVector>
 
 #include "core/controllers/appSplitTunnelingController.h"
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "ui/models/appSplitTunnelingModel.h"
 
 class AppSplitTunnelingUiController : public QObject

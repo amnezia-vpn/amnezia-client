@@ -9,7 +9,7 @@
 #include <QPair>
 
 #include "containers/containers_defs.h"
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
 #include "core/repositories/appSettingsRepository.h"
 

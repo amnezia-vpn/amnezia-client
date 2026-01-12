@@ -8,7 +8,7 @@
 #include <QTimer>
 
 #include "vpnprotocol.h"
-#include "core/ipcclient.h"
+#include "core/utils/ipcclient.h"
 
 #include <string>
 #include <memory>

@@ -6,7 +6,7 @@
 
 #include <QProcess>
 
-#include <core/networkUtilities.h>
+#include <core/utils/networkUtilities.h>
 
 LONG (NTAPI * NtSuspendProcess)(HANDLE ProcessHandle) = NULL;
 LONG (NTAPI * NtResumeProcess)(HANDLE ProcessHandle)  = NULL;

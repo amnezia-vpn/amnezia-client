@@ -5,7 +5,7 @@
 #include <QThread>
 
 #include "wireguardprotocol.h"
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 
 #include "mozilla/localsocketcontroller.h"
 

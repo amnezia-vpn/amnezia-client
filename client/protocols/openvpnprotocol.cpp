@@ -6,7 +6,7 @@
 #include <QTcpSocket>
 #include <QNetworkInterface>
 
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 #include "ipc.h"
 #include "openvpnprotocol.h"
 #include "utilities.h"

@@ -17,7 +17,7 @@
 #include <configurators/wireguard_configurator.h>
 
 #ifdef AMNEZIA_DESKTOP
-    #include "core/ipcclient.h"
+    #include "core/utils/ipcclient.h"
     #include <protocols/wireguardprotocol.h>
 #endif
 
@@ -31,7 +31,7 @@
     #include "platforms/ios/ios_controller.h"
 #endif
 
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent)

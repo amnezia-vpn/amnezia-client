@@ -5,8 +5,8 @@
 
 #include "configurators/configurator_base.h"
 #include "core/utils/sshSession.h"
-#include "core/networkUtilities.h"
-#include "core/qrCodeUtils.h"
+#include "core/utils/networkUtilities.h"
+#include "core/utils/qrCodeUtils.h"
 #include "core/serialization/serialization.h"
 #include "protocols/protocols_defs.h"
 

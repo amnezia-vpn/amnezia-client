@@ -7,8 +7,8 @@
 #include <QJsonObject>
 
 #include "systemController.h"
-#include "core/networkUtilities.h"
-#include "core/defs.h"
+#include "core/utils/networkUtilities.h"
+#include "core/utils/defs.h"
 
 AllowedDnsUiController::AllowedDnsUiController(AllowedDnsController* allowedDnsController,
                                                  AllowedDnsModel* allowedDnsModel,

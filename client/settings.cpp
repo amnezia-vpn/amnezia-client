@@ -3,7 +3,7 @@
 #include "QCoreApplication"
 #include "QThread"
 
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 #include "version.h"
 
 #include "containers/containers_defs.h"

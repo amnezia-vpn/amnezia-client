@@ -5,7 +5,7 @@
 #include <QList>
 #include <QPair>
 #include <QString>
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "containers/containers_defs.h"
 
 namespace amnezia {

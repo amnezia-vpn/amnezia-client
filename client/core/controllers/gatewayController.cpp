@@ -17,11 +17,11 @@
 
 #include "amnezia_application.h"
 #include "core/api/apiUtils.h"
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 #include "utilities.h"
 
 #ifdef AMNEZIA_DESKTOP
-    #include "core/ipcclient.h"
+    #include "core/utils/ipcclient.h"
 #endif
 
 namespace

@@ -3,7 +3,7 @@
 
 #include <QVector>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "core/repositories/appSettingsRepository.h"
 
 class AppSplitTunnelingController

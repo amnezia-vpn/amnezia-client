@@ -4,7 +4,7 @@
 #include <QProcess>
 #include <QThread>
 
-#include <core/networkUtilities.h>
+#include <core/utils/networkUtilities.h>
 
 RouterMac &RouterMac::Instance()
 {

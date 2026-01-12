@@ -8,7 +8,7 @@
 #include <QProcess>
 
 #include "containers/containers_defs.h"
-#include "core/defs.h"
+#include "core/utils/defs.h"
 
 class SshSession;
 class ServersRepository;

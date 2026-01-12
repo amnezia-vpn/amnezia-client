@@ -11,7 +11,7 @@
 #include "core/api/apiUtils.h"
 #include "core/controllers/installController.h"
 #include "core/utils/sshSession.h"
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 #include "logger.h"
 #include "protocols/protocols_defs.h"
 #include "ui/models/protocols/awgConfigModel.h"

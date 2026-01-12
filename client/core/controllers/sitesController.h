@@ -5,7 +5,7 @@
 #include <QMap>
 #include <QPair>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "core/repositories/appSettingsRepository.h"
 
 using namespace amnezia;

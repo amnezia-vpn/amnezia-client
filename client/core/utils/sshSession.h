@@ -5,8 +5,8 @@
 #include <QObject>
 
 #include "containers/containers_defs.h"
-#include "core/defs.h"
-#include "core/sshclient.h"
+#include "core/utils/defs.h"
+#include "core/utils/sshclient.h"
 
 using namespace amnezia;
 

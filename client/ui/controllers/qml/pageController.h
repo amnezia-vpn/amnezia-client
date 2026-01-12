@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QQmlEngine>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/servers_model.h"
 

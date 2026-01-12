@@ -13,11 +13,11 @@
     #include <QApplication>
 #endif
 
-#include "core/defs.h"
-#include "core/networkUtilities.h"
+#include "core/utils/defs.h"
+#include "core/utils/networkUtilities.h"
 #include "containers/containers_defs.h"
 #include "core/utils/sshSession.h"
-#include "core/scripts_registry.h"
+#include "core/utils/scripts_registry.h"
 #include "settings.h"
 #include "utilities.h"
 

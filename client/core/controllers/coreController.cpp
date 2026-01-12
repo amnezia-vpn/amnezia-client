@@ -7,7 +7,7 @@
 #include "core/controllers/installController.h"
 
 #if defined(Q_OS_ANDROID)
-    #include "core/installedAppsImageProvider.h"
+    #include "core/utils/installedAppsImageProvider.h"
     #include "platforms/android/android_controller.h"
 #endif
 

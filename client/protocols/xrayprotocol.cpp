@@ -1,8 +1,8 @@
 #include "xrayprotocol.h"
 
-#include "core/ipcclient.h"
+#include "core/utils/ipcclient.h"
 #include "utilities.h"
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 
 #include <QCryptographicHash>
 #include <QJsonDocument>

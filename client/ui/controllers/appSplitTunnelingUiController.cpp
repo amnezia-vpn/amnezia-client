@@ -2,7 +2,7 @@
 
 #include <QFileInfo>
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 
 AppSplitTunnelingUiController::AppSplitTunnelingUiController(AppSplitTunnelingController* appSplitTunnelingController,
                                                               AppSplitTunnelingModel* appSplitTunnelingModel,

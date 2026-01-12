@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <QFileInfo>
 
-#include <core/networkUtilities.h>
+#include <core/utils/networkUtilities.h>
 
 RouterLinux &RouterLinux::Instance()
 {

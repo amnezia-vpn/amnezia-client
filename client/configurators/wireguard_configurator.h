@@ -6,8 +6,8 @@
 #include <QProcessEnvironment>
 
 #include "configurator_base.h"
-#include "core/defs.h"
-#include "core/scripts_registry.h"
+#include "core/utils/defs.h"
+#include "core/utils/scripts_registry.h"
 
 class WireguardConfigurator : public ConfiguratorBase
 {

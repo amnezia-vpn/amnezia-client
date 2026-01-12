@@ -2,7 +2,7 @@
 
 #include "settings.h"
 #include "utils/converter.h"
-#include "core/errorstrings.h"
+#include "core/utils/errorstrings.h"
 #if defined(MACOS_NE)
 #include "platforms/ios/ios_controller.h"
 #endif

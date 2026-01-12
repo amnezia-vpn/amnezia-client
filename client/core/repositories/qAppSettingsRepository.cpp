@@ -1,6 +1,6 @@
 #include "qAppSettingsRepository.h"
 
-#include "core/defs.h"
+#include "core/utils/defs.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "settings.h"
 

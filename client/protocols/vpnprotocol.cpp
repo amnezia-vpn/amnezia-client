@@ -1,7 +1,7 @@
 #include <QDebug>
 #include <QTimer>
 
-#include "core/errorstrings.h"
+#include "core/utils/errorstrings.h"
 #include "vpnprotocol.h"
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) and !defined MACOS_NE || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
