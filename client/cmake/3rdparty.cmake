@@ -85,8 +85,12 @@ set(BUILD_WITH_QT6 ON)
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
 
 if(ANDROID)
+    # Use qtgamepad from amnezia-vpn/qtgamepad repository
     add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtgamepad)
-    # Ensure the QtGamepadLegacy QML module is built and deployed with the app.
+    # Link both the C++ module and QML plugin
+    if(TARGET GamepadLegacy)
+        target_link_libraries(${PROJECT} PRIVATE GamepadLegacy)
+    endif()
     if(TARGET GamepadLegacyQuickPrivate)
         target_link_libraries(${PROJECT} PRIVATE GamepadLegacyQuickPrivate)
     endif()
@@ -101,7 +105,6 @@ include_directories(
     ${CLIENT_ROOT_DIR}/3rd/libssh/include
     ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/src/include
     ${CLIENT_ROOT_DIR}/3rd/qtkeychain/qtkeychain
-    ${CLIENT_ROOT_DIR}/3rd/qtgamepad
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
 )

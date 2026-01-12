@@ -39,6 +39,11 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
+# Android: Qt private modules (like CorePrivate) are needed by qtgamepad
+if(ANDROID)
+    find_package(Qt6CorePrivate CONFIG REQUIRED)
+endif()
+
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
@@ -228,6 +233,7 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
+
 # Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).
 if(COMMAND qt_import_qml_plugins)
     qt_import_qml_plugins(${PROJECT})

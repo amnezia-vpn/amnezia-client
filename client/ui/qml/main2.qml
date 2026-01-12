@@ -77,17 +77,6 @@ Window  {
             case Qt.Key_Left:
                 FocusController.previousKeyTabItem()
                 break
-            case Qt.Key_Return:
-            case Qt.Key_Enter:
-                if (Qt.platform.os === "android") {
-                    ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
-                    ConnectionController.connectButtonClicked()
-                    event.accepted = true
-                    break
-                }
-                PageController.keyPressEvent(event.key)
-                event.accepted = true
-                break
             default:
                 PageController.keyPressEvent(event.key)
                 event.accepted = true
@@ -105,15 +94,7 @@ Window  {
                     id: gamepad
                     deviceId: GamepadManager.connectedGamepads.length > 0 ? GamepadManager.connectedGamepads[0] : -1
 
-                    onButtonAChanged: {
-                    console.log("QML: onButtonAChanged")
-                        if (buttonA) {
-                            FocusController.activateFocusedItem()
-                        }
-                    }
-
                     onButtonStartChanged: {
-                        console.log("QML: onButtonStartChanged")
                         if (buttonStart) {
                             ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
                             ConnectionController.connectButtonClicked()
@@ -132,10 +113,8 @@ Window  {
                     function onConnectedGamepadsChanged() {
                         if (GamepadManager.connectedGamepads.length > 0) {
                             gamepad.deviceId = GamepadManager.connectedGamepads[0]
-                            console.log("QML: Gamepad connected, deviceId:", gamepad.deviceId)
                         } else {
                             gamepad.deviceId = -1
-                            console.log("QML: Gamepad disconnected")
                         }
                     }
                 }
