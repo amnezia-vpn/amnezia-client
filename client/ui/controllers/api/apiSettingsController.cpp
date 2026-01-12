@@ -3,7 +3,7 @@
 #include <QEventLoop>
 #include <QTimer>
 
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
 #include "platforms/ios/ios_controller.h"
 #include "version.h"

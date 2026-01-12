@@ -3,7 +3,7 @@
 #include <QDirIterator>
 #include <QTranslator>
 
-#include "core/utils/sshSession.h"
+#include "core/utils/selfhosted/sshSession.h"
 #include "core/controllers/installController.h"
 
 #if defined(Q_OS_ANDROID)

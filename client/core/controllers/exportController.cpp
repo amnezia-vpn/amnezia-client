@@ -4,7 +4,7 @@
 #include <QJsonDocument>
 
 #include "configurators/configurator_base.h"
-#include "core/utils/sshSession.h"
+#include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"
 #include "core/serialization/serialization.h"

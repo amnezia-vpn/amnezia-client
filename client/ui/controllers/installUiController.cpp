@@ -8,9 +8,9 @@
 #include <QStandardPaths>
 #include <QtConcurrent>
 
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiUtils.h"
 #include "core/controllers/installController.h"
-#include "core/utils/sshSession.h"
+#include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 #include "logger.h"
 #include "protocols/protocols_defs.h"

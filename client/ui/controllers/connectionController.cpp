@@ -9,7 +9,7 @@
 #include <QJsonDocument>
 
 #include "configurators/configurator_base.h"
-#include "core/utils/sshSession.h"
+#include "core/utils/selfhosted/sshSession.h"
 #include "protocols/protocols_defs.h"
 #include "utilities.h"
 #include "version.h"

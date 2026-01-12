@@ -4,7 +4,7 @@
 #include <QSysInfo>
 
 #include "core/controllers/gatewayController.h"
-#include "core/api/apiDefs.h"
+#include "core/utils/api/apiDefs.h"
 
 namespace
 {

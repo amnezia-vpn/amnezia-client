@@ -16,7 +16,7 @@
 #include "QRsa.h"
 
 #include "amnezia_application.h"
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiUtils.h"
 #include "core/utils/networkUtilities.h"
 #include "utilities.h"
 

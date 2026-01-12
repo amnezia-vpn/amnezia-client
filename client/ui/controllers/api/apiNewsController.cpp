@@ -1,6 +1,6 @@
 #include "apiNewsController.h"
 
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiUtils.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 

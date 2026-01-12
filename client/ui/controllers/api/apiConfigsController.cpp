@@ -2,8 +2,8 @@
 
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
-#include "core/api/apiDefs.h"
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiDefs.h"
+#include "core/utils/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
 #include "core/utils/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"

@@ -5,8 +5,8 @@
 #include <QJsonDocument>
 #include <QTimer>
 
-#include "core/api/apiDefs.h"
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiDefs.h"
+#include "core/utils/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
 #include "settings.h"
 

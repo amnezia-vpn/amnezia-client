@@ -7,13 +7,13 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/containers/containers_defs.h
     ${CLIENT_ROOT_DIR}/core/utils/defs.h
     ${CLIENT_ROOT_DIR}/core/utils/errorStrings.h
-    ${CLIENT_ROOT_DIR}/core/utils/scriptsRegistry.h
+    ${CLIENT_ROOT_DIR}/core/utils/selfhosted/scriptsRegistry.h
     ${CLIENT_ROOT_DIR}/core/utils/serverDefs.h
-    ${CLIENT_ROOT_DIR}/core/api/apiDefs.h
+    ${CLIENT_ROOT_DIR}/core/utils/api/apiDefs.h
     ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.h
-    ${CLIENT_ROOT_DIR}/core/utils/sshSession.h
+    ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshSession.h
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.h
     ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.h
     ${CLIENT_ROOT_DIR}/core/controllers/installController.h
@@ -45,13 +45,13 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/ui/qautostart.h
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
-    ${CLIENT_ROOT_DIR}/core/utils/sshClient.h
+    ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.h
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.h
     ${CLIENT_ROOT_DIR}/core/serialization/serialization.h
     ${CLIENT_ROOT_DIR}/core/serialization/transfer.h
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.h
-    ${CLIENT_ROOT_DIR}/core/api/apiUtils.h
+    ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
 )
 
@@ -80,12 +80,12 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/amnezia_application.cpp
     ${CLIENT_ROOT_DIR}/containers/containers_defs.cpp
     ${CLIENT_ROOT_DIR}/core/utils/errorStrings.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/scriptsRegistry.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/selfhosted/scriptsRegistry.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serverDefs.cpp
     ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/sshSession.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshSession.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/installController.cpp
@@ -112,7 +112,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
     ${CLIENT_ROOT_DIR}/ui/qautostart.cpp
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/sshClient.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/outbound.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/inbound.cpp
@@ -124,7 +124,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/serialization/vmess_new.cpp
     ${CLIENT_ROOT_DIR}/../common/logger/logger.cpp
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.cpp
-    ${CLIENT_ROOT_DIR}/core/api/apiUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp
 )
 

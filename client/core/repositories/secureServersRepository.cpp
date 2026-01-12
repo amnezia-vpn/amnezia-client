@@ -1,6 +1,6 @@
 #include "secureServersRepository.h"
 
-#include "core/api/apiDefs.h"
+#include "core/utils/api/apiDefs.h"
 #include "settings.h"
 
 SecureServersRepository::SecureServersRepository(std::shared_ptr<Settings> settings)

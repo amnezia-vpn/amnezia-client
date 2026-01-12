@@ -5,7 +5,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-#include "core/api/apiDefs.h"
+#include "core/utils/api/apiDefs.h"
 
 class ApiAccountInfoModel : public QAbstractListModel
 {

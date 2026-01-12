@@ -6,7 +6,7 @@
 #include <QJsonArray>
 
 #include "containers/containers_defs.h"
-#include "core/utils/sshSession.h"
+#include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
 

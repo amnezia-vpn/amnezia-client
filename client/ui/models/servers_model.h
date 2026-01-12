@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QJsonArray>
 
-#include "core/utils/sshSession.h"
+#include "core/utils/selfhosted/sshSession.h"
 
 class ServersModel : public QAbstractListModel
 {

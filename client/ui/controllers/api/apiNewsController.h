@@ -6,7 +6,7 @@
 #include <QSharedPointer>
 #include <memory>
 
-#include "core/api/apiDefs.h"
+#include "core/utils/api/apiDefs.h"
 #include "core/controllers/gatewayController.h"
 #include "core/controllers/serversController.h"
 #include "core/repositories/qAppSettingsRepository.h"

@@ -4,15 +4,15 @@
 #include <QSet>
 #include <QJsonDocument>
 
-#include "core/api/apiDefs.h"
-#include "core/utils/sshSession.h"
+#include "core/utils/api/apiDefs.h"
+#include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <AmneziaVPN-Swift.h>
 #endif
 
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiUtils.h"
 
 namespace
 {

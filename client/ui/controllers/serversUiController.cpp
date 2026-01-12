@@ -1,7 +1,7 @@
 #include "serversUiController.h"
 
-#include "core/api/apiDefs.h"
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiDefs.h"
+#include "core/utils/api/apiUtils.h"
 #include "containers/containers_defs.h"
 #include "core/utils/serverDefs.h"
 #include "protocols/protocols_defs.h"

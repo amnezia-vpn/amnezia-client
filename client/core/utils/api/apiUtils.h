@@ -4,7 +4,7 @@
 #include <QNetworkReply>
 #include <QObject>
 
-#include "apiDefs.h"
+#include "core/utils/api/apiDefs.h"
 #include "core/utils/defs.h"
 
 namespace apiUtils

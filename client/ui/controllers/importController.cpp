@@ -7,8 +7,8 @@
 #include <QStandardPaths>
 #include <QUrlQuery>
 
-#include "core/api/apiDefs.h"
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiDefs.h"
+#include "core/utils/api/apiUtils.h"
 #include "core/utils/errorStrings.h"
 #include "core/utils/qrCodeUtils.h"
 #include "core/serialization/serialization.h"

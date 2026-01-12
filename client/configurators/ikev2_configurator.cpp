@@ -9,8 +9,8 @@
 #include <QUuid>
 
 #include "containers/containers_defs.h"
-#include "core/utils/sshSession.h"
-#include "core/utils/scriptsRegistry.h"
+#include "core/utils/selfhosted/sshSession.h"
+#include "core/utils/selfhosted/scriptsRegistry.h"
 #include "core/utils/serverDefs.h"
 #include "utilities.h"
 
