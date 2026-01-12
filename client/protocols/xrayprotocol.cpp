@@ -1,7 +1,7 @@
 #include "xrayprotocol.h"
 
 #include "core/utils/ipcClient.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include "core/utils/networkUtilities.h"
 
 #include <QCryptographicHash>

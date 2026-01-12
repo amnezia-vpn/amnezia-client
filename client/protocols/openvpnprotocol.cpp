@@ -9,7 +9,7 @@
 #include "core/utils/networkUtilities.h"
 #include "ipc.h"
 #include "openvpnprotocol.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include "version.h"
 
 OpenVpnProtocol::OpenVpnProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)

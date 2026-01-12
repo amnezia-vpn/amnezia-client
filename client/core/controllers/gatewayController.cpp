@@ -18,7 +18,7 @@
 #include "amnezia_application.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/networkUtilities.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"

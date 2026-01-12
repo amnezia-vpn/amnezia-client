@@ -9,7 +9,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "utilities.h"
+#include "core/utils/utilities.h"
 
 #ifdef Q_OS_WINDOWS
 QString printErrorMessage(DWORD errorCode) {

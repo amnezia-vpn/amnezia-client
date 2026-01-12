@@ -39,7 +39,7 @@
 
 #include "3rd/QJsonStruct/QJsonIO.hpp"
 #include "3rd/QJsonStruct/QJsonStruct.hpp"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include "serialization.h"
 
 const inline QString QV2RAY_SSD_DEFAULT_NAME_PATTERN = "%1 - %2 (rate %3)";

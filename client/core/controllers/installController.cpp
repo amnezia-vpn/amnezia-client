@@ -30,7 +30,7 @@
 #include "settings.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include <QDesktopServices>
 #include <QDir>
 #include <QProcess>

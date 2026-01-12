@@ -18,7 +18,7 @@
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "protocols/protocols_defs.h"
 #include "settings.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 
 WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings,
                                              SshSession* sshSession, bool isAwg,

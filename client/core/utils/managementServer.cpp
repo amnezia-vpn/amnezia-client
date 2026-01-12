@@ -2,7 +2,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-#include "managementserver.h"
+#include "core/utils/managementServer.h"
 
 ManagementServer::ManagementServer(QObject *parent) : QObject(parent),
     m_tcpServer(nullptr)

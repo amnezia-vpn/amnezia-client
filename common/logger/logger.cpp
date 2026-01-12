@@ -9,7 +9,7 @@
 #include <QStandardPaths>
 #include <QUrl>
 
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include "version.h"
 
 #ifdef AMNEZIA_DESKTOP

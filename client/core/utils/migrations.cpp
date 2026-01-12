@@ -1,4 +1,4 @@
-#include "migrations.h"
+#include "core/utils/migrations.h"
 
 #include <QDebug>
 #include <QDir>

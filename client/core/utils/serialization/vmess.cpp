@@ -33,7 +33,7 @@
 #include "3rd/QJsonStruct/QJsonStruct.hpp"
 #include <QJsonDocument>
 #include "transfer.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include "serialization.h"
 
 #define nothing

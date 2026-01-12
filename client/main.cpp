@@ -3,7 +3,7 @@
 
 #include "amnezia_application.h"
 #include "core/utils/osSignalHandler.h"
-#include "migrations.h"
+#include "core/utils/migrations.h"
 #include "version.h"
 
 #include <QTimer>

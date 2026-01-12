@@ -1,6 +1,6 @@
 #include "openvpnovercloakprotocol.h"
 
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include "containers/containers_defs.h"
 
 #include <QCryptographicHash>

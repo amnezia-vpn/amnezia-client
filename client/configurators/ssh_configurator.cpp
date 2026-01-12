@@ -14,7 +14,7 @@
     #include <QApplication>
 #endif
 
-#include "utilities.h"
+#include "core/utils/utilities.h"
 
 SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)
     : ConfiguratorBase(settings, sshSession, parent)

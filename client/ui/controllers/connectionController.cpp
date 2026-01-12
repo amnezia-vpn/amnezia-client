@@ -11,7 +11,7 @@
 #include "configurators/configurator_base.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "protocols/protocols_defs.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include "version.h"
 
 ConnectionController::ConnectionController(ServersController* serversController,

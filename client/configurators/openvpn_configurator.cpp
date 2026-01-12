@@ -19,7 +19,7 @@
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "settings.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 
 #include <openssl/pem.h>
 #include <openssl/rsa.h>

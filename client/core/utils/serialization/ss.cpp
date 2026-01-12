@@ -32,7 +32,7 @@
 
 #include "3rd/QJsonStruct/QJsonIO.hpp"
 #include "3rd/QJsonStruct/QJsonStruct.hpp"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include "serialization.h"
 
 #define OUTBOUND_TAG_PROXY "PROXY"

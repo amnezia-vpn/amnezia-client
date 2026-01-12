@@ -26,7 +26,7 @@
 #include "core/utils/networkUtilities.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "logger.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 
 namespace
 {

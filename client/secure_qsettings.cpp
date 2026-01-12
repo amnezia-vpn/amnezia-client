@@ -2,7 +2,7 @@
 
 #include "../client/3rd/QSimpleCrypto/src/include/QAead.h"
 #include "../client/3rd/QSimpleCrypto/src/include/QBlockCipher.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include <QDataStream>
 #include <QDebug>
 #include <QEventLoop>

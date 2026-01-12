@@ -14,7 +14,7 @@
 #include "core/utils/serialization/serialization.h"
 #include "protocols/protocols_defs.h"
 #include "systemController.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"

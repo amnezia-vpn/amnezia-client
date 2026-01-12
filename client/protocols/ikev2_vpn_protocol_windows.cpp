@@ -9,7 +9,7 @@
 #include "ipc.h"
 #include "logger.h"
 #include "ikev2_vpn_protocol_windows.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 
 
 static Ikev2Protocol* self = nullptr;
