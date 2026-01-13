@@ -77,6 +77,8 @@ public:
     void setApiServiceProtocol(int serverIndex, const QString &protocolName);
     bool isApiServiceProtocolVless(int serverIndex) const;
 
+    ErrorCode getAccountInfo(int serverIndex, QJsonObject &accountInfo);
+
     struct AppStoreRestoreResult
     {
         bool hasInstalledConfig = false;

@@ -210,7 +210,7 @@ PageType {
     }
 
     Connections {
-        target: ApiSettingsController
+        target: SubscriptionUiController
 
         function onErrorOccurred(error) {
             PageController.showErrorMessage(error)

@@ -10,7 +10,6 @@
 #endif
 
 #include "ui/controllers/api/subscriptionUiController.h"
-#include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
@@ -153,7 +152,6 @@ private:
     AllowedDnsUiController* m_allowedDnsUiController;
     LanguageUiController* m_languageUiController;
 
-    ApiSettingsController* m_apiSettingsController;
     SubscriptionUiController* m_subscriptionUiController;
     ApiPremV1MigrationController* m_apiPremV1MigrationController;
     ApiNewsUiController* m_apiNewsUiController;

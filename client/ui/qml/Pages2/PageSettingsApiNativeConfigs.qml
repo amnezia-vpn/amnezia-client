@@ -193,7 +193,7 @@ PageType {
             PageController.showBusyIndicator(true)
             let result = SubscriptionUiController.exportNativeConfig(countryCode, fileName)
             if (result) {
-                ApiSettingsController.getAccountInfo(true)
+                SubscriptionUiController.getAccountInfo(true)
             }
 
             PageController.showBusyIndicator(false)
@@ -207,7 +207,7 @@ PageType {
         PageController.showBusyIndicator(true)
         let result = SubscriptionUiController.revokeNativeConfig(countryCode)
         if (result) {
-            ApiSettingsController.getAccountInfo(true)
+            SubscriptionUiController.getAccountInfo(true)
         }
         PageController.showBusyIndicator(false)
 

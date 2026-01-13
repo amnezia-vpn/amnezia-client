@@ -11,6 +11,8 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QSet>
+#include <QEventLoop>
+#include <QTimer>
 
 namespace
 {
@@ -62,8 +64,12 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
                                            ApiServicesModel* apiServicesModel,
                                            ServicesCatalogController* servicesCatalogController,
                                            SubscriptionController* subscriptionController,
+                                           ApiAccountInfoModel* apiAccountInfoModel,
+                                           ApiCountryModel* apiCountryModel,
+                                           ApiDevicesModel* apiDevicesModel,
+                                           QAppSettingsRepository* appSettingsRepository,
                                            QObject *parent)
-    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController)
+    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController), m_apiAccountInfoModel(apiAccountInfoModel), m_apiCountryModel(apiCountryModel), m_apiDevicesModel(apiDevicesModel), m_appSettingsRepository(appSettingsRepository)
 {
 }
 
@@ -383,5 +389,43 @@ int SubscriptionUiController::getQrCodesCount()
 QString SubscriptionUiController::getVpnKey()
 {
     return m_vpnKey;
+}
+
+bool SubscriptionUiController::getAccountInfo(bool reload)
+{
+    if (reload) {
+        QEventLoop wait;
+        QTimer::singleShot(1000, &wait, &QEventLoop::quit);
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
+    }
+
+    auto processedIndex = m_serversModel->getProcessedServerIndex();
+    QJsonObject accountInfo;
+    ErrorCode errorCode = m_subscriptionController->getAccountInfo(processedIndex, accountInfo);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return false;
+    }
+
+    auto serverConfig = m_serversController->getServerConfig(processedIndex);
+    m_apiAccountInfoModel->updateModel(accountInfo, serverConfig);
+
+    if (reload) {
+        updateApiCountryModel();
+        updateApiDevicesModel();
+    }
+
+    return true;
+}
+
+void SubscriptionUiController::updateApiCountryModel()
+{
+    m_apiCountryModel->updateModel(m_apiAccountInfoModel->getAvailableCountries(), "");
+    m_apiCountryModel->updateIssuedConfigsInfo(m_apiAccountInfoModel->getIssuedConfigsInfo());
+}
+
+void SubscriptionUiController::updateApiDevicesModel()
+{
+    m_apiDevicesModel->updateModel(m_apiAccountInfoModel->getIssuedConfigsInfo(), m_appSettingsRepository->getInstallationUuid(false));
 }
 

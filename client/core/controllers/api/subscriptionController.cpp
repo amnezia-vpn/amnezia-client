@@ -801,3 +801,34 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
 #endif
 }
 
+ErrorCode SubscriptionController::getAccountInfo(int serverIndex, QJsonObject &accountInfo)
+{
+    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
+    QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+    QJsonObject authData = serverConfig.value(configKey::authData).toObject();
+
+    bool isTestPurchase = apiConfig.value(apiDefs::key::isTestPurchase).toBool(false);
+    
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
+                                            apiConfig.value(configKey::userCountryCode).toString(),
+                                            "",
+                                            apiConfig.value(configKey::serviceType).toString(),
+                                            "",
+                                            authData };
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/account_info"), apiPayload, responseBody, isTestPurchase);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    accountInfo = QJsonDocument::fromJson(responseBody).object();
+    return ErrorCode::NoError;
+}
+

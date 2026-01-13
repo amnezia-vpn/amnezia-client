@@ -7,7 +7,11 @@
 #include "core/controllers/serversController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/api/apiServicesModel.h"
+#include "ui/models/api/apiAccountInfoModel.h"
+#include "ui/models/api/apiCountryModel.h"
+#include "ui/models/api/apiDevicesModel.h"
 #include "ui/models/servers_model.h"
 
 class SubscriptionUiController : public QObject
@@ -18,6 +22,10 @@ public:
                          ServersModel* serversModel, ApiServicesModel* apiServicesModel,
                          ServicesCatalogController* servicesCatalogController,
                          SubscriptionController* subscriptionController,
+                         ApiAccountInfoModel* apiAccountInfoModel,
+                         ApiCountryModel* apiCountryModel,
+                         ApiDevicesModel* apiDevicesModel,
+                         QAppSettingsRepository* appSettingsRepository,
                          QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
@@ -49,6 +57,10 @@ public slots:
 
     void removeApiConfig(int serverIndex);
 
+    bool getAccountInfo(bool reload);
+    void updateApiCountryModel();
+    void updateApiDevicesModel();
+
 signals:
     void errorOccurred(ErrorCode errorCode);
 
@@ -74,6 +86,10 @@ private:
     ApiServicesModel* m_apiServicesModel;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
+    ApiAccountInfoModel* m_apiAccountInfoModel;
+    ApiCountryModel* m_apiCountryModel;
+    ApiDevicesModel* m_apiDevicesModel;
+    QAppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif // SUBSCRIPTIONUICONTROLLER_H

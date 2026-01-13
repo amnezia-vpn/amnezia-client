@@ -236,7 +236,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    ApiSettingsController.updateApiCountryModel()
+                    SubscriptionUiController.updateApiCountryModel()
                     PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
                 }
             }
@@ -256,7 +256,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    ApiSettingsController.updateApiDevicesModel()
+                    SubscriptionUiController.updateApiDevicesModel()
                     PageController.goToPage(PageEnum.PageSettingsApiDevices)
                 }
             }
@@ -360,7 +360,7 @@ PageType {
                         } else {
                             PageController.showBusyIndicator(true)
                             if (SubscriptionUiController.deactivateDevice(false)) {
-                                ApiSettingsController.getAccountInfo(true)
+                                SubscriptionUiController.getAccountInfo(true)
                             }
                             PageController.showBusyIndicator(false)
                         }

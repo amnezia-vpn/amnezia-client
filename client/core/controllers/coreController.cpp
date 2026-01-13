@@ -215,13 +215,11 @@ void CoreController::initControllers()
     m_systemController = new SystemController(this);
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController);
 
-    m_apiSettingsController = new ApiSettingsController(m_serversController, m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_appSettingsRepository, this);
-    m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsController);
-
     m_servicesCatalogUiController = new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this);
     m_engine->rootContext()->setContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);
 
-    m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_serversModel, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController, this);
+    m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_serversModel, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_appSettingsRepository, this);
+    m_engine->rootContext()->setContextProperty("SubscriptionUiController", m_subscriptionUiController);
     m_engine->rootContext()->setContextProperty("SubscriptionUiController", m_subscriptionUiController);
 
     m_apiPremV1MigrationController = new ApiPremV1MigrationController(m_serversController, m_serversModel, m_appSettingsRepository, this);
