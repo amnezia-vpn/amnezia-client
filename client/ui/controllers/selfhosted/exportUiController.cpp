@@ -1,6 +1,6 @@
 #include "exportUiController.h"
 
-#include "systemController.h"
+#include "../systemController.h"
 
 ExportUiController::ExportUiController(ExportController* exportController, QObject *parent)
     : QObject(parent),
