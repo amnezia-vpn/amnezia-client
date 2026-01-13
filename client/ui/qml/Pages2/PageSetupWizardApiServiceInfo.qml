@@ -116,7 +116,7 @@ PageType {
                         PageController.closePage()
                     } else {
                         PageController.showBusyIndicator(true)
-                        ApiConfigsController.importServiceFromGateway()
+                        SubscriptionUiController.importServiceFromGateway()
                         PageController.showBusyIndicator(false)
                     }
                 }

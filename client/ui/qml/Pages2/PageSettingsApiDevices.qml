@@ -97,7 +97,7 @@ PageType {
 
     function deactivateExternalDevice(supportTag, countryCode) {
         PageController.showBusyIndicator(true)
-        if (ApiConfigsController.deactivateExternalDevice(supportTag, countryCode)) {
+        if (SubscriptionUiController.deactivateExternalDevice(supportTag, countryCode)) {
             ApiSettingsController.getAccountInfo(true)
         }
         PageController.showBusyIndicator(false)

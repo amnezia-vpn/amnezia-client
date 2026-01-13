@@ -9,7 +9,7 @@
     #include "ui/utils/systemTrayNotificationHandler.h"
 #endif
 
-#include "ui/controllers/api/apiConfigsController.h"
+#include "ui/controllers/api/subscriptionUiController.h"
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "ui/controllers/api/apiNewsUiController.h"
@@ -154,7 +154,7 @@ private:
     LanguageUiController* m_languageUiController;
 
     ApiSettingsController* m_apiSettingsController;
-    ApiConfigsController* m_apiConfigsController;
+    SubscriptionUiController* m_subscriptionUiController;
     ApiPremV1MigrationController* m_apiPremV1MigrationController;
     ApiNewsUiController* m_apiNewsUiController;
     

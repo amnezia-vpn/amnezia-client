@@ -221,8 +221,8 @@ void CoreController::initControllers()
     m_servicesCatalogUiController = new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this);
     m_engine->rootContext()->setContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);
 
-    m_apiConfigsController = new ApiConfigsController(m_serversController, m_serversModel, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController, this);
-    m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController);
+    m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_serversModel, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController, this);
+    m_engine->rootContext()->setContextProperty("SubscriptionUiController", m_subscriptionUiController);
 
     m_apiPremV1MigrationController = new ApiPremV1MigrationController(m_serversController, m_serversModel, m_appSettingsRepository, this);
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController);
@@ -376,7 +376,7 @@ void CoreController::initErrorMessagesHandler()
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
     });
 
-    connect(m_apiConfigsController, &ApiConfigsController::errorOccurred, m_pageController,
+    connect(m_subscriptionUiController, &SubscriptionUiController::errorOccurred, m_pageController,
             qOverload<ErrorCode>(&PageController::showErrorMessage));
 }
 
@@ -527,7 +527,7 @@ void CoreController::initPrepareConfigHandler()
     connect(m_connectionController, &ConnectionController::prepareConfig, this, [this]() {
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
-        if (!m_apiConfigsController->isConfigValid()) {
+        if (!m_subscriptionUiController->isConfigValid()) {
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }

@@ -218,7 +218,7 @@ PageType {
     }
 
     Connections {
-        target: ApiConfigsController
+        target: SubscriptionUiController
 
         function onApiConfigRemoved(message) {
             PageController.showNotificationMessage(message)

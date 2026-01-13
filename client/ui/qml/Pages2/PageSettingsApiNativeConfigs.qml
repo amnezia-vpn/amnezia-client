@@ -191,7 +191,7 @@ PageType {
         }
         if (fileName !== "") {
             PageController.showBusyIndicator(true)
-            let result = ApiConfigsController.exportNativeConfig(countryCode, fileName)
+            let result = SubscriptionUiController.exportNativeConfig(countryCode, fileName)
             if (result) {
                 ApiSettingsController.getAccountInfo(true)
             }
@@ -205,7 +205,7 @@ PageType {
 
     function revokeConfig(countryCode) {
         PageController.showBusyIndicator(true)
-        let result = ApiConfigsController.revokeNativeConfig(countryCode)
+        let result = SubscriptionUiController.revokeNativeConfig(countryCode)
         if (result) {
             ApiSettingsController.getAccountInfo(true)
         }

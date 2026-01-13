@@ -1,5 +1,5 @@
-#ifndef APICONFIGSCONTROLLER_H
-#define APICONFIGSCONTROLLER_H
+#ifndef SUBSCRIPTIONUICONTROLLER_H
+#define SUBSCRIPTIONUICONTROLLER_H
 
 #include <QObject>
 
@@ -10,11 +10,11 @@
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/servers_model.h"
 
-class ApiConfigsController : public QObject
+class SubscriptionUiController : public QObject
 {
     Q_OBJECT
 public:
-    ApiConfigsController(ServersController* serversController,
+    SubscriptionUiController(ServersController* serversController,
                          ServersModel* serversModel, ApiServicesModel* apiServicesModel,
                          ServicesCatalogController* servicesCatalogController,
                          SubscriptionController* subscriptionController,
@@ -76,4 +76,4 @@ private:
     SubscriptionController* m_subscriptionController;
 };
 
-#endif // APICONFIGSCONTROLLER_H
+#endif // SUBSCRIPTIONUICONTROLLER_H

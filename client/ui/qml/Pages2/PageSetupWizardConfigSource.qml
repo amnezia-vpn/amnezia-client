@@ -280,7 +280,7 @@ PageType {
         property bool isVisible: true
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            var result = ApiConfigsController.fillAvailableServices()
+            var result = SubscriptionUiController.fillAvailableServices()
             PageController.showBusyIndicator(false)
             if (result) {
                 PageController.goToPage(PageEnum.PageSetupWizardApiServicesList)
@@ -361,7 +361,7 @@ PageType {
         property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            ApiConfigsController.restoreSerivceFromAppStore()
+            SubscriptionUiController.restoreSerivceFromAppStore()
             PageController.showBusyIndicator(false)
         }
     }

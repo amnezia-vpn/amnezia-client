@@ -1,4 +1,4 @@
-#include "apiConfigsController.h"
+#include "subscriptionUiController.h"
 
 #include "amnezia_application.h"
 #include "core/configurators/wireguardConfigurator.h"
@@ -57,7 +57,7 @@ namespace
     }
 }
 
-ApiConfigsController::ApiConfigsController(ServersController* serversController,
+SubscriptionUiController::SubscriptionUiController(ServersController* serversController,
                                            ServersModel* serversModel,
                                            ApiServicesModel* apiServicesModel,
                                            ServicesCatalogController* servicesCatalogController,
@@ -67,7 +67,7 @@ ApiConfigsController::ApiConfigsController(ServersController* serversController,
 {
 }
 
-bool ApiConfigsController::exportVpnKey(const QString &fileName)
+bool SubscriptionUiController::exportVpnKey(const QString &fileName)
 {
     if (fileName.isEmpty()) {
         emit errorOccurred(ErrorCode::PermissionsError);
@@ -84,7 +84,7 @@ bool ApiConfigsController::exportVpnKey(const QString &fileName)
     return true;
 }
 
-bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, const QString &fileName)
+bool SubscriptionUiController::exportNativeConfig(const QString &serverCountryCode, const QString &fileName)
 {
     if (fileName.isEmpty()) {
         emit errorOccurred(ErrorCode::PermissionsError);
@@ -102,7 +102,7 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
     return true;
 }
 
-bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
+bool SubscriptionUiController::revokeNativeConfig(const QString &serverCountryCode)
 {
     ErrorCode errorCode = m_subscriptionController->revokeNativeConfig(m_serversModel->getProcessedServerIndex(), serverCountryCode);
     if (errorCode != ErrorCode::NoError) {
@@ -112,7 +112,7 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
     return true;
 }
 
-void ApiConfigsController::prepareVpnKeyExport()
+void SubscriptionUiController::prepareVpnKeyExport()
 {
     QString vpnKey;
     ErrorCode errorCode = m_subscriptionController->prepareVpnKeyExport(m_serversModel->getProcessedServerIndex(), vpnKey);
@@ -131,13 +131,13 @@ void ApiConfigsController::prepareVpnKeyExport()
     emit vpnKeyExportReady();
 }
 
-void ApiConfigsController::copyVpnKeyToClipboard()
+void SubscriptionUiController::copyVpnKeyToClipboard()
 {
     auto clipboard = amnApp->getClipboard();
     clipboard->setText(m_vpnKey);
 }
 
-bool ApiConfigsController::fillAvailableServices()
+bool SubscriptionUiController::fillAvailableServices()
 {
     QJsonObject servicesData;
     ErrorCode errorCode = m_servicesCatalogController->fillAvailableServices(servicesData);
@@ -153,7 +153,7 @@ bool ApiConfigsController::fillAvailableServices()
     return true;
 }
 
-bool ApiConfigsController::importService()
+bool SubscriptionUiController::importService()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     bool isIosOrMacOsNe = true;
@@ -173,7 +173,7 @@ bool ApiConfigsController::importService()
     return false;
 }
 
-bool ApiConfigsController::importSerivceFromAppStore()
+bool SubscriptionUiController::importSerivceFromAppStore()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     QJsonObject serverConfig;
@@ -194,7 +194,7 @@ bool ApiConfigsController::importSerivceFromAppStore()
     return true;
 }
 
-bool ApiConfigsController::restoreSerivceFromAppStore()
+bool SubscriptionUiController::restoreSerivceFromAppStore()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     const QString premiumServiceType = QStringLiteral("amnezia-premium");
@@ -244,7 +244,7 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
     return true;
 }
 
-bool ApiConfigsController::importServiceFromGateway()
+bool SubscriptionUiController::importServiceFromGateway()
 {
     QString userCountryCode = m_apiServicesModel->getCountryCode();
     QString serviceType = m_apiServicesModel->getSelectedServiceType();
@@ -271,7 +271,7 @@ bool ApiConfigsController::importServiceFromGateway()
     }
 }
 
-bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
+bool SubscriptionUiController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                                     bool reloadServiceConfig)
 {
     bool isConnectEvent = newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig;
@@ -293,7 +293,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     }
 }
 
-bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
+bool SubscriptionUiController::updateServiceFromTelegram(const int serverIndex)
 {
 #ifdef Q_OS_IOS
     IosController::Instance()->requestInetAccess();
@@ -311,7 +311,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     }
 }
 
-bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
+bool SubscriptionUiController::deactivateDevice(const bool isRemoveEvent)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
 
@@ -327,7 +327,7 @@ bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
     return true;
 }
 
-bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode)
+bool SubscriptionUiController::deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
 
@@ -340,7 +340,7 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
     return true;
 }
 
-bool ApiConfigsController::isConfigValid()
+bool SubscriptionUiController::isConfigValid()
 {
     int serverIndex = m_serversController->getDefaultServerIndex();
     bool hasInstalledContainers = m_serversController->hasInstalledContainers(serverIndex);
@@ -354,33 +354,33 @@ bool ApiConfigsController::isConfigValid()
     return true;
 }
 
-void ApiConfigsController::setCurrentProtocol(const QString &protocolName)
+void SubscriptionUiController::setCurrentProtocol(const QString &protocolName)
 {
     m_subscriptionController->setApiServiceProtocol(m_serversModel->getProcessedServerIndex(), protocolName);
 }
 
-bool ApiConfigsController::isVlessProtocol()
+bool SubscriptionUiController::isVlessProtocol()
 {
     return m_subscriptionController->isApiServiceProtocolVless(m_serversModel->getProcessedServerIndex());
 }
 
-void ApiConfigsController::removeApiConfig(int serverIndex)
+void SubscriptionUiController::removeApiConfig(int serverIndex)
 {
     m_subscriptionController->removeApiConfig(serverIndex);
     emit apiConfigRemoved(tr("Api config removed"));
 }
 
-QList<QString> ApiConfigsController::getQrCodes()
+QList<QString> SubscriptionUiController::getQrCodes()
 {
     return m_qrCodes;
 }
 
-int ApiConfigsController::getQrCodesCount()
+int SubscriptionUiController::getQrCodesCount()
 {
     return static_cast<int>(m_qrCodes.size());
 }
 
-QString ApiConfigsController::getVpnKey()
+QString SubscriptionUiController::getVpnKey()
 {
     return m_vpnKey;
 }
