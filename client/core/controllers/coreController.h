@@ -12,7 +12,7 @@
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
-#include "ui/controllers/api/apiNewsController.h"
+#include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/allowedDnsUiController.h"
 #include "ui/controllers/connectionController.h"
@@ -39,6 +39,7 @@
 #include "core/controllers/allowedDnsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
+#include "core/controllers/api/newsController.h"
 #include "core/controllers/installController.h"
 
 #include "core/repositories/qServersRepository.h"
@@ -155,7 +156,7 @@ private:
     ApiSettingsController* m_apiSettingsController;
     ApiConfigsController* m_apiConfigsController;
     ApiPremV1MigrationController* m_apiPremV1MigrationController;
-    ApiNewsController* m_apiNewsController;
+    ApiNewsUiController* m_apiNewsUiController;
     
     ProtocolsUiController* m_protocolsUiController;
     ServicesCatalogUiController* m_servicesCatalogUiController;
@@ -167,6 +168,7 @@ private:
     AllowedDnsController* m_allowedDnsController;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
+    NewsController* m_newsController;
     InstallController* m_installController;
     ExportController* m_exportController;
 

@@ -30,19 +30,16 @@ ServersController::ServersController(ServersRepository* serversRepository,
 void ServersController::addServer(const QJsonObject &server)
 {
     m_serversRepository->addServer(server);
-    recomputeGatewayStacks();
 }
 
 void ServersController::editServer(int index, const QJsonObject &server)
 {
     m_serversRepository->editServer(index, server);
-    recomputeGatewayStacks();
 }
 
 void ServersController::removeServer(int index)
 {
     m_serversRepository->removeServer(index);
-    recomputeGatewayStacks();
 }
 
 void ServersController::setDefaultServerIndex(int index)

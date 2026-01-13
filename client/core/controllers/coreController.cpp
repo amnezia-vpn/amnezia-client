@@ -130,6 +130,7 @@ void CoreController::initCoreControllers()
     m_allowedDnsController = new AllowedDnsController(appSettingsRepo);
     m_servicesCatalogController = new ServicesCatalogController(appSettingsRepo);
     m_subscriptionController = new SubscriptionController(serversRepo, appSettingsRepo);
+    m_newsController = new NewsController(appSettingsRepo, m_serversController);
     
     SshSession* sshSession = new SshSession(this);
     m_installController = new InstallController(sshSession, serversRepo, m_settings, this);
@@ -226,8 +227,8 @@ void CoreController::initControllers()
     m_apiPremV1MigrationController = new ApiPremV1MigrationController(m_serversController, m_serversModel, m_appSettingsRepository, this);
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController);
 
-    m_apiNewsController = new ApiNewsController(m_newsModel, m_appSettingsRepository, m_serversController, this);
-    m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController);
+    m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);
+    m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsUiController);
 }
 
 void CoreController::initAndroidController()
@@ -395,7 +396,9 @@ void CoreController::initApiCountryModelUpdateHandler()
 void CoreController::initContainerModelUpdateHandler()
 {
     connect(m_serversController, &ServersController::gatewayStacksExpanded, this, [this]() {
-        m_apiNewsController->fetchNews(false);
+        if (m_serversUiController->hasServersFromGatewayApi()) {
+            m_apiNewsUiController->fetchNews(false);
+        }
     });
 }
 
@@ -464,6 +467,13 @@ void CoreController::initServersModelUpdateHandler()
             m_serversUiController, &ServersUiController::onServerRemoved);
     connect(m_serversRepository, &QServersRepository::defaultServerChanged,
             m_serversUiController, &ServersUiController::onDefaultServerChanged);
+    
+    connect(m_serversRepository, &QServersRepository::serverAdded,
+            m_serversController, &ServersController::recomputeGatewayStacks);
+    connect(m_serversRepository, &QServersRepository::serverEdited,
+            m_serversController, &ServersController::recomputeGatewayStacks);
+    connect(m_serversRepository, &QServersRepository::serverRemoved,
+            m_serversController, &ServersController::recomputeGatewayStacks);
 }
 
 void CoreController::initClientManagementModelUpdateHandler()

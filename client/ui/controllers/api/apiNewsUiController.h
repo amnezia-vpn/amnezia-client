@@ -1,24 +1,20 @@
-#ifndef APINEWSCONTROLLER_H
-#define APINEWSCONTROLLER_H
+#ifndef APINEWSUICONTROLLER_H
+#define APINEWSUICONTROLLER_H
 
 #include <QJsonArray>
 #include <QObject>
-#include <QSharedPointer>
-#include <memory>
 
-#include "core/utils/api/apiDefs.h"
-#include "core/controllers/gatewayController.h"
-#include "core/controllers/serversController.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/utils/defs.h"
+#include "core/controllers/api/newsController.h"
 #include "ui/models/newsModel.h"
 
-class ApiNewsController : public QObject
+class ApiNewsUiController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ApiNewsController(NewsModel* newsModel,
-                               QAppSettingsRepository* appSettingsRepository,
-                               ServersController* serversController, QObject *parent = nullptr);
+    explicit ApiNewsUiController(NewsModel* newsModel,
+                                 NewsController* newsController,
+                                 QObject *parent = nullptr);
 
     Q_INVOKABLE void fetchNews(bool showError);
 
@@ -28,8 +24,7 @@ signals:
 
 private:
     NewsModel* m_newsModel;
-    QAppSettingsRepository* m_appSettingsRepository;
-    ServersController* m_serversController;
+    NewsController* m_newsController;
 };
 
-#endif // APINEWSCONTROLLER_H
+#endif // APINEWSUICONTROLLER_H

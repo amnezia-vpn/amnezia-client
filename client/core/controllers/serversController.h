@@ -78,9 +78,10 @@ public:
 signals:
     void gatewayStacksExpanded();
 
-private:
+public slots:
     void recomputeGatewayStacks();
-    
+
+private:
     ServersRepository* m_serversRepository;
     AppSettingsRepository* m_appSettingsRepository;
     GatewayStacks m_gatewayStacks;
