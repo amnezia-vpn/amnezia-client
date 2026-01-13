@@ -30,6 +30,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.h
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/exportController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/connectionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/newsController.h
@@ -105,6 +106,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/exportController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/connectionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/newsController.cpp
@@ -192,11 +194,13 @@ file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.h
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.h
     ${CLIENT_ROOT_DIR}/ui/controllers/qml/*.h
+    ${CLIENT_ROOT_DIR}/ui/controllers/selfhosted/*.h
 )
 file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/qml/*.cpp
+    ${CLIENT_ROOT_DIR}/ui/controllers/selfhosted/*.cpp
 )
 
 set(HEADERS ${HEADERS}

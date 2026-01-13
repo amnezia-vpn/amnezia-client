@@ -135,12 +135,13 @@ void CoreController::initCoreControllers()
     SshSession* sshSession = new SshSession(this);
     m_installController = new InstallController(sshSession, serversRepo, m_settings, this);
     m_exportController = new ExportController(serversRepo, appSettingsRepo, m_settings, this);
+    m_connectionController = new ConnectionController(serversRepo, appSettingsRepo, m_vpnConnection.get(), m_settings);
 }
 
 void CoreController::initControllers()
 {
-    m_connectionController = new ConnectionController(m_serversController, m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection.get(), m_appSettingsRepository, m_settings, this);
-    m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController);
+    m_connectionUiController = new ConnectionUiController(m_connectionController, m_serversController, m_containersModel, m_clientManagementModel, m_vpnConnection.get(), this);
+    m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionUiController);
 
     m_pageController = new PageController(m_serversModel, m_appSettingsRepository, this);
     m_engine->rootContext()->setContextProperty("PageController", m_pageController);
@@ -154,8 +155,8 @@ void CoreController::initControllers()
     connect(m_installController, &InstallController::serverIsBusy, m_installUiController, &InstallUiController::serverIsBusy);
     connect(m_installUiController, &InstallUiController::cancelInstallation, m_installController, &InstallController::cancelInstallation);
 
-    connect(m_installUiController, &InstallUiController::currentContainerUpdated, m_connectionController,
-            &ConnectionController::onCurrentContainerUpdated); // TODO remove this
+    connect(m_installUiController, &InstallUiController::currentContainerUpdated, m_connectionUiController,
+            &ConnectionUiController::onCurrentContainerUpdated); // TODO remove this
 
     connect(m_installUiController, &InstallUiController::profileCleared,
             m_protocolsUiController, &ProtocolsUiController::updateProtocols);
@@ -246,7 +247,7 @@ void CoreController::initAndroidController()
     connect(m_appSettingsRepository, &QAppSettingsRepository::settingsCleared, []() { AndroidController::instance()->resetLastServer(-1); });
 
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this, [this](Vpn::ConnectionState state) {
-        m_connectionController->onConnectionStateChanged(state);
+        m_connectionUiController->onConnectionStateChanged(state);
         if (m_vpnConnection)
             m_vpnConnection->restoreConnection();
     });
@@ -319,10 +320,10 @@ void CoreController::initNotificationHandler()
             &NotificationHandler::setConnectionState);
 
     connect(m_notificationHandler, &NotificationHandler::raiseRequested, m_pageController, &PageController::raiseMainWindow);
-    connect(m_notificationHandler, &NotificationHandler::connectRequested, m_connectionController,
-            static_cast<void (ConnectionController::*)()>(&ConnectionController::openConnection));
-    connect(m_notificationHandler, &NotificationHandler::disconnectRequested, m_connectionController,
-            &ConnectionController::closeConnection);
+    connect(m_notificationHandler, &NotificationHandler::connectRequested, m_connectionUiController,
+            static_cast<void (ConnectionUiController::*)()>(&ConnectionUiController::openConnection));
+    connect(m_notificationHandler, &NotificationHandler::disconnectRequested, m_connectionUiController,
+            &ConnectionUiController::closeConnection);
     connect(this, &CoreController::translationsUpdated, m_notificationHandler, &NotificationHandler::onTranslationsUpdated);
 
     auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_notificationHandler);
@@ -369,7 +370,7 @@ void CoreController::updateTranslator(const QLocale &locale)
 
 void CoreController::initErrorMessagesHandler()
 {
-    connect(m_connectionController, &ConnectionController::connectionErrorOccurred, this, [this](ErrorCode errorCode) {
+    connect(m_connectionUiController, &ConnectionUiController::connectionErrorOccurred, this, [this](ErrorCode errorCode) {
         emit m_pageController->showErrorMessage(errorCode);
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
     });
@@ -429,7 +430,7 @@ void CoreController::initTranslationsUpdatedHandler()
 {
     connect(m_languageUiController, &LanguageUiController::updateTranslations, this, &CoreController::updateTranslator);
     connect(this, &CoreController::translationsUpdated, m_languageUiController, &LanguageUiController::translationsUpdated);
-    connect(this, &CoreController::translationsUpdated, m_connectionController, &ConnectionController::onTranslationsUpdated);
+    connect(this, &CoreController::translationsUpdated, m_connectionUiController, &ConnectionUiController::onTranslationsUpdated);
 }
 
 void CoreController::initLanguageHandler()
@@ -443,7 +444,7 @@ void CoreController::initLanguageHandler()
 void CoreController::initAutoConnectHandler()
 {
     if (m_settingsController->isAutoConnectEnabled() && m_serversController->getDefaultServerIndex() >= 0) {
-        QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
+        QTimer::singleShot(1000, this, [this]() { m_connectionUiController->openConnection(); });
     }
 }
 
@@ -522,7 +523,7 @@ void CoreController::initAppSplitTunnelingModelUpdateHandler()
 
 void CoreController::initPrepareConfigHandler()
 {
-    connect(m_connectionController, &ConnectionController::prepareConfig, this, [this]() {
+    connect(m_connectionUiController, &ConnectionUiController::prepareConfig, this, [this]() {
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
         if (!m_subscriptionUiController->isConfigValid()) {
@@ -535,7 +536,7 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
-        m_connectionController->openConnection();
+        m_connectionUiController->openConnection();
     });
 }
 
@@ -577,7 +578,7 @@ void CoreController::openConnectionByIndex(int serverIndex)
     if (m_serversController) {
         m_serversController->setDefaultServerIndex(serverIndex);
     }
-    m_connectionController->toggleConnection();
+    m_connectionUiController->toggleConnection();
 }
 
 void CoreController::importConfigFromData(const QString &data)

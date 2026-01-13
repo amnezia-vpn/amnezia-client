@@ -14,7 +14,7 @@
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/allowedDnsUiController.h"
-#include "ui/controllers/connectionController.h"
+#include "ui/controllers/connectionUiController.h"
 #include "ui/controllers/selfhosted/exportUiController.h"
 #include "core/controllers/exportController.h"
 #include "ui/controllers/qml/focusController.h"
@@ -40,6 +40,7 @@
 #include "core/controllers/api/subscriptionController.h"
 #include "core/controllers/api/newsController.h"
 #include "core/controllers/installController.h"
+#include "core/controllers/connectionController.h"
 
 #include "core/repositories/qServersRepository.h"
 #include "core/repositories/qAppSettingsRepository.h"
@@ -138,7 +139,7 @@ private:
 
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 
-    ConnectionController* m_connectionController;
+    ConnectionUiController* m_connectionUiController;
     FocusController* m_focusController;
     PageController* m_pageController;
     InstallUiController* m_installUiController;
@@ -169,6 +170,7 @@ private:
     NewsController* m_newsController;
     InstallController* m_installController;
     ExportController* m_exportController;
+    ConnectionController* m_connectionController;
 
     ContainersModel* m_containersModel;
     ContainersModel* m_defaultServerContainersModel;
