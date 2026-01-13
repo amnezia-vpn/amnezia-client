@@ -1,29 +1,28 @@
-#ifndef SETTINGSCONTROLLER_H
-#define SETTINGSCONTROLLER_H
+#ifndef SETTINGSUICONTROLLER_H
+#define SETTINGSUICONTROLLER_H
 
 #include <QObject>
 
+#include "core/controllers/settingsController.h"
 #include "ui/models/containers_model.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/servers_model.h"
-#include "core/controllers/sitesController.h"
-#include "core/controllers/appSplitTunnelingController.h"
 #include "core/repositories/qServersRepository.h"
 #include "core/repositories/qAppSettingsRepository.h"
+#include "core/utils/defs.h"
 
-class SettingsController : public QObject
+class SettingsUiController : public QObject
 {
     Q_OBJECT
 public:
-    explicit SettingsController(ServersModel* serversModel,
-                                ContainersModel* containersModel,
-                                LanguageUiController* languageUiController,
-                                SitesController* sitesController,
-                                AppSplitTunnelingController* appSplitTunnelingController,
-                                QServersRepository* serversRepository,
-                                QAppSettingsRepository* appSettingsRepository,
-                                QObject *parent = nullptr);
+    explicit SettingsUiController(SettingsController* settingsController,
+                                 ServersModel* serversModel,
+                                 ContainersModel* containersModel,
+                                 LanguageUiController* languageUiController,
+                                 QServersRepository* serversRepository,
+                                 QAppSettingsRepository* appSettingsRepository,
+                                 QObject *parent = nullptr);
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
     Q_PROPERTY(QString secondaryDns READ getSecondaryDns WRITE setSecondaryDns NOTIFY secondaryDnsChanged)
@@ -38,9 +37,6 @@ public:
 
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
-    Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin NOTIFY safeAreaTopMarginChanged)
-    Q_PROPERTY(int safeAreaBottomMargin READ getSafeAreaBottomMargin NOTIFY safeAreaBottomMarginChanged)
-    Q_PROPERTY(int imeHeight READ getImeHeight NOTIFY imeHeightChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -104,12 +100,6 @@ public slots:
     void toggleDevGatewayEnv(bool enabled);
 
     bool isOnTv();
-    bool isEdgeToEdgeEnabled();
-    int getStatusBarHeight();
-    int getNavigationBarHeight();
-    int getSafeAreaTopMargin();
-    int getSafeAreaBottomMargin();
-    int getImeHeight();
 
     bool isHomeAdLabelVisible();
     void disableHomeAdLabel();
@@ -141,38 +131,17 @@ signals:
     void devModeEnabled();
     void gatewayEndpointChanged(const QString &endpoint);
     void devGatewayEnvChanged(bool enabled);
-    
-    void imeHeightChanged(int height);
-    void safeAreaTopMarginChanged();
-    void safeAreaBottomMarginChanged();
 
     void isHomeAdLabelVisibleChanged(bool visible);
     void startMinimizedChanged();
 
 private:
+    SettingsController* m_settingsController;
     ServersModel* m_serversModel;
     ContainersModel* m_containersModel;
     LanguageUiController* m_languageUiController;
-    SitesController* m_sitesController;
-    AppSplitTunnelingController* m_appSplitTunnelingController;
     QServersRepository* m_serversRepository;
     QAppSettingsRepository* m_appSettingsRepository;
-    
-    mutable int m_cachedStatusBarHeight = -1;
-    mutable int m_cachedNavigationBarHeight = -1;
-    mutable bool m_cachedEdgeToEdgeEnabled = false;
-    mutable bool m_edgeToEdgeCached = false;
-    int m_imeHeight = 0;
-
-    QString m_appVersion;
-
-    QString getPlatform();
-
-    QDateTime m_loggingDisableDate;
-
-    bool m_isDevModeEnabled = false;
-
-    void checkIfNeedDisableLogs();
 };
 
-#endif // SETTINGSCONTROLLER_H
+#endif
