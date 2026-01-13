@@ -312,3 +312,19 @@ bool ServersController::isServerFromApiAlreadyExists(const QString &userCountryC
     return false;
 }
 
+bool ServersController::hasInstalledContainers(int serverIndex) const
+{
+    QJsonObject server = m_serversRepository->server(serverIndex);
+    const auto containers = server.value(config_key::containers).toArray();
+    for (auto it = containers.begin(); it != containers.end(); it++) {
+        auto container = ContainerProps::containerFromString(it->toObject().value(config_key::container).toString());
+        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
+            return true;
+        }
+        if (container == DockerContainer::SSXray) {
+            return true;
+        }
+    }
+    return false;
+}
+

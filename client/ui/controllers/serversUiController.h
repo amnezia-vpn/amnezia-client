@@ -5,6 +5,7 @@
 
 #include <QSet>
 #include <QJsonObject>
+#include <QStringList>
 
 #include "core/controllers/serversController.h"
 #include "core/repositories/qServersRepository.h"
@@ -73,6 +74,8 @@ public slots:
     bool isAdVisible() const;
     QString adHeader() const;
     QString adDescription() const;
+    
+    QStringList getAllInstalledServicesName(int serverIndex) const;
 
 signals:
     void errorOccurred(const QString &errorMessage);

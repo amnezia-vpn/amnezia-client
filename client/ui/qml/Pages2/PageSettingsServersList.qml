@@ -73,7 +73,7 @@ PageType {
 
                     descriptionText: {
                         var servicesNameString = ""
-                        var servicesName = ServersModel.getAllInstalledServicesName(index)
+                        var servicesName = ServersUiController.getAllInstalledServicesName(index)
                         for (var i = 0; i < servicesName.length; i++) {
                             servicesNameString += servicesName[i] + " · "
                         }

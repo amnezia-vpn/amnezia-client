@@ -1,9 +1,12 @@
 #include "subscriptionController.h"
 
 #include <QDebug>
+#include <QEventLoop>
 #include <QJsonDocument>
+#include <QSet>
 #include <QSysInfo>
 #include <QUuid>
+#include <QVariantMap>
 
 #include "core/configurators/openVpnConfigurator.h"
 #include "core/configurators/wireguardConfigurator.h"
@@ -11,8 +14,13 @@
 #include "core/utils/api/apiDefs.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "core/controllers/serversController.h"
 #include "protocols/protocols_defs.h"
 #include "version.h"
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    #include "platforms/ios/ios_controller.h"
+#endif
 
 using namespace amnezia;
 
@@ -209,19 +217,6 @@ ErrorCode SubscriptionController::fillServerConfig(const QString &protocol, cons
     return ErrorCode::NoError;
 }
 
-bool SubscriptionController::isSubscriptionExpired(const QJsonObject &apiConfig)
-{
-    auto subscription = apiConfig.value(configKey::subscription).toObject();
-    if (subscription.isEmpty()) {
-        return false;
-    }
-    auto subscriptionEndDate = subscription.value(configKey::endDate).toString();
-    if (apiUtils::isSubscriptionExpired(subscriptionEndDate)) {
-        return true;
-    }
-    return false;
-}
-
 ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
 {
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
@@ -351,10 +346,6 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     QJsonObject serverConfig = m_serversRepository->server(serverIndex);
     QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
-    if (isSubscriptionExpired(apiConfig)) {
-        return ErrorCode::ApiSubscriptionExpiredError;
-    }
-
     QString serviceProtocol = apiConfig.value(configKey::serviceProtocol).toString();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -413,14 +404,6 @@ ErrorCode SubscriptionController::revokeServiceFromGateway(int serverIndex, bool
         return ErrorCode::NoError;
     }
 
-    if (isSubscriptionExpired(apiConfig)) {
-        if (isRemoveEvent) {
-            return ErrorCode::NoError;
-        } else {
-            return ErrorCode::ApiSubscriptionExpiredError;
-        }
-    }
-
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
@@ -451,10 +434,6 @@ ErrorCode SubscriptionController::revokeExternalDevice(int serverIndex, const QS
 
     if (!apiUtils::isPremiumServer(serverConfig)) {
         return ErrorCode::NoError;
-    }
-
-    if (isSubscriptionExpired(apiConfig)) {
-        return ErrorCode::ApiSubscriptionExpiredError;
     }
 
     QJsonObject apiConfigForRevoke = apiConfig;
@@ -591,5 +570,161 @@ ErrorCode SubscriptionController::prepareVpnKeyExport(int serverIndex, QString &
     }
 
     return ErrorCode::NoError;
+}
+
+ErrorCode SubscriptionController::validateAndUpdateConfig(int serverIndex, bool hasInstalledContainers, ServersController* serversController)
+{
+    QJsonObject serverConfigObject = serversController->getServerConfig(serverIndex);
+    auto configSource = apiUtils::getConfigSource(serverConfigObject);
+
+    if (configSource == apiDefs::ConfigSource::Telegram && !hasInstalledContainers) {
+        serversController->removeApiConfig(serverIndex);
+        ProtocolData protocolData = generateProtocolData(serverConfigObject.value(configKey::protocol).toString());
+        return updateServiceFromTelegram(serverIndex, protocolData);
+    } else if (configSource == apiDefs::ConfigSource::AmneziaGateway && !hasInstalledContainers) {
+        ProtocolData protocolData = generateProtocolData(serverConfigObject.value(configKey::apiConfig).toObject().value(configKey::serviceProtocol).toString());
+        return updateServiceFromGateway(serverIndex, "", false, protocolData);
+    } else if (configSource && serversController->isApiKeyExpired(serverIndex)) {
+        qDebug() << "attempt to update api config by expires_at event";
+        if (configSource == apiDefs::ConfigSource::AmneziaGateway) {
+            ProtocolData protocolData = generateProtocolData(serverConfigObject.value(configKey::apiConfig).toObject().value(configKey::serviceProtocol).toString());
+            return updateServiceFromGateway(serverIndex, "", false, protocolData);
+        } else {
+            serversController->removeApiConfig(serverIndex);
+            ProtocolData protocolData = generateProtocolData(serverConfigObject.value(configKey::protocol).toString());
+            return updateServiceFromTelegram(serverIndex, protocolData);
+        }
+    }
+    return ErrorCode::NoError;
+}
+
+ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
+                                                          const QString &serviceProtocol, const QString &productId,
+                                                          QJsonObject &serverConfig)
+{
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    bool purchaseOk = false;
+    QString originalTransactionId;
+    QString storeTransactionId;
+    QString storeProductId;
+    QString purchaseError;
+    QEventLoop waitPurchase;
+
+    IosController::Instance()->purchaseProduct(productId,
+                                               [&](bool success, const QString &txId, const QString &purchasedProductId,
+                                                   const QString &originalTxId, const QString &errorString) {
+                                                   purchaseOk = success;
+                                                   originalTransactionId = originalTxId;
+                                                   storeTransactionId = txId;
+                                                   storeProductId = purchasedProductId;
+                                                   purchaseError = errorString;
+                                                   waitPurchase.quit();
+                                               });
+    waitPurchase.exec();
+
+    if (!purchaseOk || originalTransactionId.isEmpty()) {
+        qDebug() << "IAP purchase failed:" << purchaseError;
+        return ErrorCode::ApiPurchaseError;
+    }
+    qInfo().noquote() << "[IAP] Purchase success. transactionId =" << storeTransactionId
+                      << "originalTransactionId =" << originalTransactionId << "productId =" << storeProductId;
+
+    bool isTestPurchase = IosController::Instance()->isTestFlight();
+
+    ProtocolData protocolData = generateProtocolData(serviceProtocol);
+    return importServiceFromAppStore(userCountryCode, serviceType, serviceProtocol, protocolData, originalTransactionId, isTestPurchase, serverConfig);
+#else
+    Q_UNUSED(userCountryCode);
+    Q_UNUSED(serviceType);
+    Q_UNUSED(serviceProtocol);
+    Q_UNUSED(productId);
+    Q_UNUSED(serverConfig);
+    return ErrorCode::ApiPurchaseError;
+#endif
+}
+
+SubscriptionController::AppStoreRestoreResult SubscriptionController::processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,
+                                                                                             const QString &serviceProtocol)
+{
+    AppStoreRestoreResult result;
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    bool restoreSuccess = false;
+    QList<QVariantMap> restoredTransactions;
+    QString restoreError;
+    QEventLoop waitRestore;
+
+    IosController::Instance()->restorePurchases([&](bool success, const QList<QVariantMap> &transactions, const QString &errorString) {
+        restoreSuccess = success;
+        restoredTransactions = transactions;
+        restoreError = errorString;
+        waitRestore.quit();
+    });
+    waitRestore.exec();
+
+    if (!restoreSuccess) {
+        qWarning().noquote() << "[IAP] Restore failed:" << restoreError;
+        result.errorCode = ErrorCode::ApiPurchaseError;
+        return result;
+    }
+
+    if (restoredTransactions.isEmpty()) {
+        qInfo().noquote() << "[IAP] Restore completed, but no transactions were returned";
+        result.errorCode = ErrorCode::ApiPurchaseError;
+        return result;
+    }
+
+    bool isTestPurchase = IosController::Instance()->isTestFlight();
+    QSet<QString> processedTransactions;
+
+    for (const QVariantMap &transaction : restoredTransactions) {
+        const QString originalTransactionId = transaction.value(QStringLiteral("originalTransactionId")).toString();
+        const QString transactionId = transaction.value(QStringLiteral("transactionId")).toString();
+        const QString transactionProductId = transaction.value(QStringLiteral("productId")).toString();
+
+        if (originalTransactionId.isEmpty()) {
+            qWarning().noquote() << "[IAP] Skipping restored transaction without originalTransactionId" << transactionId;
+            continue;
+        }
+
+        if (processedTransactions.contains(originalTransactionId)) {
+            result.duplicateCount++;
+            continue;
+        }
+        processedTransactions.insert(originalTransactionId);
+
+        qInfo().noquote() << "[IAP] Restoring subscription. transactionId =" << transactionId
+                          << "originalTransactionId =" << originalTransactionId << "productId =" << transactionProductId;
+
+        ProtocolData protocolData = generateProtocolData(serviceProtocol);
+        QJsonObject serverConfig;
+        ErrorCode errorCode = importServiceFromAppStore(userCountryCode, serviceType, serviceProtocol, protocolData,
+                                                        originalTransactionId, isTestPurchase, serverConfig);
+
+        if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
+            result.duplicateConfigAlreadyPresent = true;
+            qInfo().noquote() << "[IAP] Skipping restored transaction" << originalTransactionId
+                              << "because subscription config with the same vpn_key already exists";
+        } else if (errorCode != ErrorCode::NoError) {
+            qWarning().noquote() << "[IAP] Failed to process restored subscription response for transaction" << originalTransactionId;
+            result.errorCode = errorCode;
+        } else {
+            result.hasInstalledConfig = true;
+        }
+    }
+
+    if (!result.hasInstalledConfig) {
+        result.errorCode = result.duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiPurchaseError;
+    }
+
+    return result;
+#else
+    Q_UNUSED(userCountryCode);
+    Q_UNUSED(serviceType);
+    Q_UNUSED(serviceProtocol);
+    Q_UNUSED(transactions);
+    result.errorCode = ErrorCode::ApiPurchaseError;
+    return result;
+#endif
 }
 

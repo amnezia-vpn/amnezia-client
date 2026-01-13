@@ -77,6 +77,7 @@ public:
     // Validation
     bool isServerFromApiAlreadyExists(const quint16 crc) const;
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol) const;
+    bool hasInstalledContainers(int serverIndex) const;
 
 signals:
     void gatewayStacksExpanded();

@@ -362,3 +362,26 @@ void ServersUiController::updateDefaultServerContainersModel()
     m_defaultServerContainersModel->updateModel(containers);
 }
 
+QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) const
+{
+    QStringList servicesName;
+    QJsonObject server = m_serversController->getServerConfig(serverIndex);
+    const auto containers = server.value(config_key::containers).toArray();
+    for (auto it = containers.begin(); it != containers.end(); it++) {
+        auto container = ContainerProps::containerFromString(it->toObject().value(config_key::container).toString());
+        if (ContainerProps::containerService(container) == ServiceType::Other) {
+            if (container == DockerContainer::Dns) {
+                servicesName.append("DNS");
+            } else if (container == DockerContainer::Sftp) {
+                servicesName.append("SFTP");
+            } else if (container == DockerContainer::TorWebSite) {
+                servicesName.append("TOR");
+            } else if (container == DockerContainer::Socks5Proxy) {
+                servicesName.append("SOCKS5");
+            }
+        }
+    }
+    servicesName.sort();
+    return servicesName;
+}
+

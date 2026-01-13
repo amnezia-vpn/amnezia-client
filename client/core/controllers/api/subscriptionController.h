@@ -3,10 +3,14 @@
 
 #include <QJsonObject>
 #include <QByteArray>
+#include <QList>
+#include <QVariantMap>
 
 #include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
 #include "core/repositories/appSettingsRepository.h"
+
+class ServersController;
 
 class SubscriptionController
 {
@@ -37,8 +41,6 @@ public:
 
     explicit SubscriptionController(ServersRepository* serversRepository,
                                      AppSettingsRepository* appSettingsRepository);
-
-    bool isSubscriptionExpired(const QJsonObject &apiConfig);
 
     ProtocolData generateProtocolData(const QString &protocol);
     void appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload);
@@ -71,6 +73,23 @@ public:
     ErrorCode updateServiceFromTelegram(int serverIndex, const ProtocolData &protocolData);
 
     ErrorCode prepareVpnKeyExport(int serverIndex, QString &vpnKey);
+
+    ErrorCode validateAndUpdateConfig(int serverIndex, bool hasInstalledContainers, ServersController* serversController);
+
+    struct AppStoreRestoreResult
+    {
+        bool hasInstalledConfig = false;
+        bool duplicateConfigAlreadyPresent = false;
+        int duplicateCount = 0;
+        ErrorCode errorCode = ErrorCode::NoError;
+    };
+
+    ErrorCode processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
+                                     const QString &serviceProtocol, const QString &productId,
+                                     QJsonObject &serverConfig);
+
+    AppStoreRestoreResult processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,
+                                                  const QString &serviceProtocol);
 
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
