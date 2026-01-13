@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QProcessEnvironment>
 
-#include "configurator_base.h"
+#include "configuratorBase.h"
 #include "core/utils/defs.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 

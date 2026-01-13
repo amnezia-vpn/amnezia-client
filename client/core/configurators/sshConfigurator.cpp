@@ -1,4 +1,4 @@
-#include "ssh_configurator.h"
+#include "sshConfigurator.h"
 
 #include <QDebug>
 #include <QObject>

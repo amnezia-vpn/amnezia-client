@@ -52,6 +52,9 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/ui/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
+    ${CLIENT_ROOT_DIR}/core/utils/utilities.h
+    ${CLIENT_ROOT_DIR}/core/utils/managementServer.h
+    ${CLIENT_ROOT_DIR}/core/utils/constants.h
 )
 
 # Mozilla headres
@@ -124,6 +127,8 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/ui/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/utilities.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/managementServer.cpp
 )
 
 # Mozilla sources
@@ -165,8 +170,8 @@ file(GLOB COMMON_FILES_CPP CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/*.cpp)
 file(GLOB_RECURSE PAGE_LOGIC_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/ui/pages_logic/*.h)
 file(GLOB_RECURSE PAGE_LOGIC_CPP CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/ui/pages_logic/*.cpp)
 
-file(GLOB CONFIGURATORS_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/configurators/*.h)
-file(GLOB CONFIGURATORS_CPP CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/configurators/*.cpp)
+file(GLOB CONFIGURATORS_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/core/configurators/*.h)
+file(GLOB CONFIGURATORS_CPP CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/core/configurators/*.cpp)
 
 file(GLOB UI_MODELS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/models/*.h

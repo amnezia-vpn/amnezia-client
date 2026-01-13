@@ -3,7 +3,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-#include "configurators/configurator_base.h"
+#include "core/configurators/configuratorBase.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"

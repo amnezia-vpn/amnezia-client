@@ -11,10 +11,10 @@
 #include <QStringList>
 #include <QTimer>
 
-#include <configurators/cloak_configurator.h>
-#include <configurators/openvpn_configurator.h>
-#include <configurators/shadowsocks_configurator.h>
-#include <configurators/wireguard_configurator.h>
+#include <core/configurators/cloakConfigurator.h>
+#include <core/configurators/openVpnConfigurator.h>
+#include <core/configurators/shadowsocksConfigurator.h>
+#include <core/configurators/wireguardConfigurator.h>
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"

@@ -8,7 +8,7 @@
 
 #include <libssh/libssh.h>
 
-#include "defs.h"
+#include "core/utils/defs.h"
 
 using namespace amnezia;
 

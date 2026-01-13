@@ -1,12 +1,12 @@
-#include "configurator_base.h"
+#include "configuratorBase.h"
 
-#include "configurators/awg_configurator.h"
-#include "configurators/cloak_configurator.h"
-#include "configurators/ikev2_configurator.h"
-#include "configurators/openvpn_configurator.h"
-#include "configurators/shadowsocks_configurator.h"
-#include "configurators/wireguard_configurator.h"
-#include "configurators/xray_configurator.h"
+#include "core/configurators/awgConfigurator.h"
+#include "core/configurators/cloakConfigurator.h"
+#include "core/configurators/ikev2Configurator.h"
+#include "core/configurators/openVpnConfigurator.h"
+#include "core/configurators/shadowsocksConfigurator.h"
+#include "core/configurators/wireguardConfigurator.h"
+#include "core/configurators/xrayConfigurator.h"
 
 ConfiguratorBase::ConfiguratorBase(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)
     : QObject { parent }, m_settings(settings), m_sshSession(sshSession)

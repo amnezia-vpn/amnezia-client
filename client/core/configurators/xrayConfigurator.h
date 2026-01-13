@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "configurator_base.h"
+#include "configuratorBase.h"
 #include "core/utils/defs.h"
 
 class XrayConfigurator : public ConfiguratorBase

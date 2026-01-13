@@ -5,8 +5,8 @@
 #include <QSysInfo>
 #include <QUuid>
 
-#include "configurators/openvpn_configurator.h"
-#include "configurators/wireguard_configurator.h"
+#include "core/configurators/openVpnConfigurator.h"
+#include "core/configurators/wireguardConfigurator.h"
 #include "containers/containers_defs.h"
 #include "core/utils/api/apiDefs.h"
 #include "core/utils/api/apiUtils.h"

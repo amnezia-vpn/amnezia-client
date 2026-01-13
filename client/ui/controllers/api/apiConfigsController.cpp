@@ -1,7 +1,7 @@
 #include "apiConfigsController.h"
 
 #include "amnezia_application.h"
-#include "configurators/wireguard_configurator.h"
+#include "core/configurators/wireguardConfigurator.h"
 #include "core/utils/api/apiDefs.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"

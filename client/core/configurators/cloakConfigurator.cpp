@@ -1,4 +1,4 @@
-#include "cloak_configurator.h"
+#include "cloakConfigurator.h"
 
 #include <QFile>
 #include <QJsonDocument>

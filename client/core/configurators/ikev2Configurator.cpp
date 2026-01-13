@@ -1,4 +1,4 @@
-#include "ikev2_configurator.h"
+#include "ikev2Configurator.h"
 
 #include <QDebug>
 #include <QJsonDocument>

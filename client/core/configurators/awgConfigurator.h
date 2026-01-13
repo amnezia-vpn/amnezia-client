@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "wireguard_configurator.h"
+#include "wireguardConfigurator.h"
 
 class AwgConfigurator : public WireguardConfigurator
 {

@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "configurator_base.h"
+#include "configuratorBase.h"
 
 using namespace amnezia;
 

@@ -1,4 +1,4 @@
-#include "openvpn_configurator.h"
+#include "openVpnConfigurator.h"
 
 #include <QDebug>
 #include <QJsonDocument>

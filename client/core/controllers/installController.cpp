@@ -7,7 +7,7 @@
 #include <QThread>
 #include <QtConcurrent>
 
-#include "configurators/configurator_base.h"
+#include "core/configurators/configuratorBase.h"
 #include "containers/containers_defs.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/installers/awgInstaller.h"

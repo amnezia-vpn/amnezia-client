@@ -1,4 +1,4 @@
-#include "xray_configurator.h"
+#include "xrayConfigurator.h"
 
 #include <QFile>
 #include <QJsonDocument>

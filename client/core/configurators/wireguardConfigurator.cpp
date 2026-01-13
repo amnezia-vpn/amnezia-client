@@ -1,4 +1,4 @@
-#include "wireguard_configurator.h"
+#include "wireguardConfigurator.h"
 
 #include <QDebug>
 #include <QJsonDocument>

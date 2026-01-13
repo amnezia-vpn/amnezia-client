@@ -1,4 +1,4 @@
-#include "shadowsocks_configurator.h"
+#include "shadowsocksConfigurator.h"
 
 #include <QFile>
 #include <QJsonDocument>

@@ -3,7 +3,7 @@
 
 #include <QDebug>
 
-#include "defs.h"
+#include "core/utils/defs.h"
 
 using namespace amnezia;
 

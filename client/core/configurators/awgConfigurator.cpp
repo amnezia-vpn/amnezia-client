@@ -1,4 +1,4 @@
-#include "awg_configurator.h"
+#include "awgConfigurator.h"
 #include "protocols/protocols_defs.h"
 
 #include <QJsonDocument>
