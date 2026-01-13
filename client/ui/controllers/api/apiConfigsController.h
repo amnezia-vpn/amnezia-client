@@ -47,6 +47,8 @@ public slots:
     void setCurrentProtocol(const QString &protocolName);
     bool isVlessProtocol();
 
+    void removeApiConfig(int serverIndex);
+
 signals:
     void errorOccurred(ErrorCode errorCode);
 
@@ -54,6 +56,8 @@ signals:
     void changeApiCountryFinished(const QString &message);
     void reloadServerFromApiFinished(const QString &message);
     void updateServerFromApiFinished();
+
+    void apiConfigRemoved(const QString &message);
 
     void vpnKeyExportReady();
 

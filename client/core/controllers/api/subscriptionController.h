@@ -56,25 +56,26 @@ public:
                                         const QString &transactionId, bool isTestPurchase,
                                         QJsonObject &serverConfig);
 
-    ErrorCode updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent,
-                                      const ProtocolData &protocolData);
+    ErrorCode updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent);
 
     ErrorCode revokeServiceFromGateway(int serverIndex, bool isRemoveEvent);
 
     ErrorCode revokeExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode);
 
-    ErrorCode exportNativeConfig(const QJsonObject &apiConfig, const QJsonObject &authData,
-                                 const QString &serverCountryCode, const QString &serviceProtocol,
-                                 const ProtocolData &protocolData, QString &nativeConfig);
+    ErrorCode exportNativeConfig(int serverIndex, const QString &serverCountryCode, QString &nativeConfig);
 
-    ErrorCode revokeNativeConfig(const QJsonObject &apiConfig, const QJsonObject &authData,
-                                 const QString &serverCountryCode, const QString &serviceProtocol);
+    ErrorCode revokeNativeConfig(int serverIndex, const QString &serverCountryCode);
 
-    ErrorCode updateServiceFromTelegram(int serverIndex, const ProtocolData &protocolData);
+    ErrorCode updateServiceFromTelegram(int serverIndex);
 
     ErrorCode prepareVpnKeyExport(int serverIndex, QString &vpnKey);
 
-    ErrorCode validateAndUpdateConfig(int serverIndex, bool hasInstalledContainers, ServersController* serversController);
+    ErrorCode validateAndUpdateConfig(int serverIndex, bool hasInstalledContainers);
+
+    void removeApiConfig(int serverIndex);
+
+    void setApiServiceProtocol(int serverIndex, const QString &protocolName);
+    bool isApiServiceProtocolVless(int serverIndex) const;
 
     struct AppStoreRestoreResult
     {
@@ -93,6 +94,7 @@ public:
 
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
+    bool isApiKeyExpired(int serverIndex) const;
 
     ServersRepository* m_serversRepository;
     AppSettingsRepository* m_appSettingsRepository;

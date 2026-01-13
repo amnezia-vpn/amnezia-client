@@ -1,6 +1,7 @@
 #include "subscriptionController.h"
 
 #include <QDebug>
+#include <QDateTime>
 #include <QEventLoop>
 #include <QJsonDocument>
 #include <QSet>
@@ -14,12 +15,12 @@
 #include "core/utils/api/apiDefs.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
-#include "core/controllers/serversController.h"
 #include "protocols/protocols_defs.h"
 #include "version.h"
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include "platforms/ios/ios_controller.h"
+    #include <AmneziaVPN-Swift.h>
 #endif
 
 using namespace amnezia;
@@ -50,6 +51,8 @@ namespace
         constexpr char accessToken[] = "api_key";
         constexpr char apiEndpoint[] = "api_endpoint";
         constexpr char protocol[] = "protocol";
+        constexpr char publicKeyInfo[] = "public_key";
+        constexpr char expiresAt[] = "expires_at";
     }
 }
 
@@ -340,13 +343,13 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent,
-                                                           const ProtocolData &protocolData)
+ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent)
 {
     QJsonObject serverConfig = m_serversRepository->server(serverIndex);
     QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
     QString serviceProtocol = apiConfig.value(configKey::serviceProtocol).toString();
+    ProtocolData protocolData = generateProtocolData(serviceProtocol);
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
@@ -465,22 +468,27 @@ ErrorCode SubscriptionController::revokeExternalDevice(int serverIndex, const QS
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::exportNativeConfig(const QJsonObject &apiConfig, const QJsonObject &authData,
-                                                      const QString &serverCountryCode, const QString &serviceProtocol,
-                                                      const ProtocolData &protocolData, QString &nativeConfig)
+ErrorCode SubscriptionController::exportNativeConfig(int serverIndex, const QString &serverCountryCode, QString &nativeConfig)
 {
+    QJsonObject serverConfigObject = m_serversRepository->server(serverIndex);
+    QJsonObject apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    QJsonObject authData = serverConfigObject.value(configKey::authData).toObject();
+
+    QString protocol = configKey::awg; // apiConfigObject.value(configKey::serviceProtocol).toString();
+    ProtocolData protocolData = generateProtocolData(protocol);
+
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
                                             m_appSettingsRepository->getInstallationUuid(true),
-                                            apiConfig.value(configKey::userCountryCode).toString(),
+                                            apiConfigObject.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,
-                                            apiConfig.value(configKey::serviceType).toString(),
-                                            serviceProtocol,
+                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            protocol,
                                             authData };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
+    appendProtocolDataToApiPayload(protocol, protocolData, apiPayload);
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/native_config"), apiPayload, responseBody);
@@ -490,20 +498,26 @@ ErrorCode SubscriptionController::exportNativeConfig(const QJsonObject &apiConfi
 
     QJsonObject jsonConfig = QJsonDocument::fromJson(responseBody).object();
     nativeConfig = jsonConfig.value(configKey::config).toString();
+    nativeConfig.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", protocolData.wireGuardClientPrivKey);
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::revokeNativeConfig(const QJsonObject &apiConfig, const QJsonObject &authData,
-                                                      const QString &serverCountryCode, const QString &serviceProtocol)
+ErrorCode SubscriptionController::revokeNativeConfig(int serverIndex, const QString &serverCountryCode)
 {
+    QJsonObject serverConfigObject = m_serversRepository->server(serverIndex);
+    QJsonObject apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    QJsonObject authData = serverConfigObject.value(configKey::authData).toObject();
+
+    QString protocol = configKey::awg; // apiConfigObject.value(configKey::serviceProtocol).toString();
+
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
                                             m_appSettingsRepository->getInstallationUuid(true),
-                                            apiConfig.value(configKey::userCountryCode).toString(),
+                                            apiConfigObject.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,
-                                            apiConfig.value(configKey::serviceType).toString(),
-                                            serviceProtocol,
+                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            protocol,
                                             authData };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
@@ -517,10 +531,11 @@ ErrorCode SubscriptionController::revokeNativeConfig(const QJsonObject &apiConfi
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex, const ProtocolData &protocolData)
+ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex)
 {
     QJsonObject serverConfig = m_serversRepository->server(serverIndex);
     QString serviceProtocol = serverConfig.value(configKey::protocol).toString();
+    ProtocolData protocolData = generateProtocolData(serviceProtocol);
     QString installationUuid = m_appSettingsRepository->getInstallationUuid(true);
 
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
@@ -572,30 +587,89 @@ ErrorCode SubscriptionController::prepareVpnKeyExport(int serverIndex, QString &
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::validateAndUpdateConfig(int serverIndex, bool hasInstalledContainers, ServersController* serversController)
+ErrorCode SubscriptionController::validateAndUpdateConfig(int serverIndex, bool hasInstalledContainers)
 {
-    QJsonObject serverConfigObject = serversController->getServerConfig(serverIndex);
+    QJsonObject serverConfigObject = m_serversRepository->server(serverIndex);
     auto configSource = apiUtils::getConfigSource(serverConfigObject);
 
     if (configSource == apiDefs::ConfigSource::Telegram && !hasInstalledContainers) {
-        serversController->removeApiConfig(serverIndex);
-        ProtocolData protocolData = generateProtocolData(serverConfigObject.value(configKey::protocol).toString());
-        return updateServiceFromTelegram(serverIndex, protocolData);
+        removeApiConfig(serverIndex);
+        return updateServiceFromTelegram(serverIndex);
     } else if (configSource == apiDefs::ConfigSource::AmneziaGateway && !hasInstalledContainers) {
-        ProtocolData protocolData = generateProtocolData(serverConfigObject.value(configKey::apiConfig).toObject().value(configKey::serviceProtocol).toString());
-        return updateServiceFromGateway(serverIndex, "", false, protocolData);
-    } else if (configSource && serversController->isApiKeyExpired(serverIndex)) {
+        return updateServiceFromGateway(serverIndex, "", false);
+    } else if (configSource && isApiKeyExpired(serverIndex)) {
         qDebug() << "attempt to update api config by expires_at event";
         if (configSource == apiDefs::ConfigSource::AmneziaGateway) {
-            ProtocolData protocolData = generateProtocolData(serverConfigObject.value(configKey::apiConfig).toObject().value(configKey::serviceProtocol).toString());
-            return updateServiceFromGateway(serverIndex, "", false, protocolData);
+            return updateServiceFromGateway(serverIndex, "", false);
         } else {
-            serversController->removeApiConfig(serverIndex);
-            ProtocolData protocolData = generateProtocolData(serverConfigObject.value(configKey::protocol).toString());
-            return updateServiceFromTelegram(serverIndex, protocolData);
+            removeApiConfig(serverIndex);
+            return updateServiceFromTelegram(serverIndex);
         }
     }
     return ErrorCode::NoError;
+}
+
+void SubscriptionController::removeApiConfig(int serverIndex)
+{
+    auto serverConfig = m_serversRepository->server(serverIndex);
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    QString vpncName = QString("%1 (%2) %3")
+                               .arg(serverConfig[config_key::description].toString())
+                               .arg(serverConfig[config_key::hostName].toString())
+                               .arg(serverConfig[config_key::vpnproto].toString());
+
+    AmneziaVPN::removeVPNC(vpncName.toStdString());
+#endif
+
+    serverConfig.remove(config_key::dns1);
+    serverConfig.remove(config_key::dns2);
+    serverConfig.remove(config_key::containers);
+    serverConfig.remove(config_key::hostName);
+
+    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+    apiConfig.remove(configKey::publicKeyInfo);
+    serverConfig.insert(configKey::apiConfig, apiConfig);
+
+    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
+
+    m_serversRepository->editServer(serverIndex, serverConfig);
+}
+
+bool SubscriptionController::isApiKeyExpired(int serverIndex) const
+{
+    auto serverConfig = m_serversRepository->server(serverIndex);
+    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+
+    auto publicKeyInfo = apiConfig.value(configKey::publicKeyInfo).toObject();
+    const QString expiresAt = publicKeyInfo.value(configKey::expiresAt).toString();
+    
+    if (expiresAt.isEmpty()) {
+        return false;
+    }
+
+    auto expiresAtDateTime = QDateTime::fromString(expiresAt, Qt::ISODate).toUTC();
+    if (expiresAtDateTime < QDateTime::currentDateTimeUtc()) {
+        return true;
+    }
+    
+    return false;
+}
+
+void SubscriptionController::setApiServiceProtocol(int serverIndex, const QString &protocolName)
+{
+    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
+    QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+    apiConfig[configKey::serviceProtocol] = protocolName;
+    serverConfig.insert(configKey::apiConfig, apiConfig);
+    m_serversRepository->editServer(serverIndex, serverConfig);
+}
+
+bool SubscriptionController::isApiServiceProtocolVless(int serverIndex) const
+{
+    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
+    QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+    return apiConfig.value(configKey::serviceProtocol).toString() == "vless";
 }
 
 ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
@@ -722,7 +796,6 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
     Q_UNUSED(userCountryCode);
     Q_UNUSED(serviceType);
     Q_UNUSED(serviceProtocol);
-    Q_UNUSED(transactions);
     result.errorCode = ErrorCode::ApiPurchaseError;
     return result;
 #endif

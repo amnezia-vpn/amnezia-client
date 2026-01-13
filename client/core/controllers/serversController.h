@@ -59,10 +59,6 @@ public:
     void clearCachedProfile(int serverIndex, DockerContainer container);
     void reloadContainerConfig(int serverIndex, DockerContainer container);
 
-    // API operations
-    void removeApiConfig(int serverIndex);
-    bool isApiKeyExpired(int serverIndex) const;
-
     // Getters
     QJsonArray getServersArray() const;
     int getDefaultServerIndex() const;

@@ -42,8 +42,6 @@ public slots:
     void removeAllContainers(int serverIndex);
     void removeContainer(int serverIndex);
 
-    void removeApiConfig(int serverIndex);
-
     void clearCachedProfile(int serverIndex);
 
     QRegularExpression ipAddressPortRegExp();

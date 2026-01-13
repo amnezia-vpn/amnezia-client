@@ -141,10 +141,6 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
-        function onApiConfigRemoved(message) {
-            PageController.showNotificationMessage(message)
-        }
-
         function onRemoveServerFinished(finishedMessage) {
             if (!ServersModel.getServersCount()) {
                 PageController.goToPageHome()
@@ -223,6 +219,10 @@ PageType {
 
     Connections {
         target: ApiConfigsController
+
+        function onApiConfigRemoved(message) {
+            PageController.showNotificationMessage(message)
+        }
 
         function onInstallServerFromApiFinished(message) {
             if (!ConnectionController.isConnected) {

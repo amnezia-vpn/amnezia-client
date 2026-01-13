@@ -229,12 +229,6 @@ void InstallUiController::removeContainer(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::removeApiConfig(const int serverIndex)
-{
-    m_serversController->removeApiConfig(serverIndex);
-    emit apiConfigRemoved(tr("Api config removed"));
-}
-
 void InstallUiController::clearCachedProfile(int serverIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());

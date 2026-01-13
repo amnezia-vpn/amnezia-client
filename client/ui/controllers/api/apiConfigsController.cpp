@@ -91,25 +91,12 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
         return false;
     }
 
-    auto serverConfigObject = m_serversController->getServerConfig(m_serversModel->getProcessedServerIndex());
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
-
-    QString protocol = configKey::awg; // apiConfigObject.value(configKey::serviceProtocol).toString();
-    SubscriptionController::ProtocolData protocolData = m_subscriptionController->generateProtocolData(protocol);
-
     QString nativeConfig;
-    ErrorCode errorCode = m_subscriptionController->exportNativeConfig(apiConfigObject,
-                                                                       serverConfigObject.value(configKey::authData).toObject(),
-                                            serverCountryCode,
-                                                                       protocol,
-                                                                       protocolData,
-                                                                       nativeConfig);
+    ErrorCode errorCode = m_subscriptionController->exportNativeConfig(m_serversModel->getProcessedServerIndex(), serverCountryCode, nativeConfig);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
     }
-
-    nativeConfig.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", protocolData.wireGuardClientPrivKey);
 
     SystemController::saveFile(fileName, nativeConfig);
     return true;
@@ -117,13 +104,7 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
 bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 {
-    auto serverConfigObject = m_serversController->getServerConfig(m_serversModel->getProcessedServerIndex());
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
-
-    ErrorCode errorCode = m_subscriptionController->revokeNativeConfig(apiConfigObject,
-                                                                        serverConfigObject.value(configKey::authData).toObject(),
-                                            serverCountryCode,
-                                                                        configKey::awg); // apiConfigObject.value(configKey::serviceProtocol).toString()
+    ErrorCode errorCode = m_subscriptionController->revokeNativeConfig(m_serversModel->getProcessedServerIndex(), serverCountryCode);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -293,18 +274,9 @@ bool ApiConfigsController::importServiceFromGateway()
 bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                                     bool reloadServiceConfig)
 {
-    auto serverConfig = m_serversController->getServerConfig(serverIndex);
-    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
-    QString serviceProtocol = apiConfig.value(configKey::serviceProtocol).toString();
-
-    SubscriptionController::ProtocolData protocolData = m_subscriptionController->generateProtocolData(serviceProtocol);
-
     bool isConnectEvent = newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig;
 
-    ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(serverIndex,
-                                            newCountryCode,
-                                                                             isConnectEvent,
-                                                                             protocolData);
+    ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(serverIndex, newCountryCode, isConnectEvent);
 
     if (errorCode == ErrorCode::NoError) {
         if (reloadServiceConfig) {
@@ -328,11 +300,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     QThread::msleep(10);
 #endif
 
-    auto serverConfig = m_serversController->getServerConfig(serverIndex);
-    QString serviceProtocol = serverConfig.value(configKey::protocol).toString();
-    SubscriptionController::ProtocolData protocolData = m_subscriptionController->generateProtocolData(serviceProtocol);
-
-    ErrorCode errorCode = m_subscriptionController->updateServiceFromTelegram(serverIndex, protocolData);
+    ErrorCode errorCode = m_subscriptionController->updateServiceFromTelegram(serverIndex);
 
     if (errorCode == ErrorCode::NoError) {
         emit updateServerFromApiFinished();
@@ -377,7 +345,7 @@ bool ApiConfigsController::isConfigValid()
     int serverIndex = m_serversController->getDefaultServerIndex();
     bool hasInstalledContainers = m_serversController->hasInstalledContainers(serverIndex);
     
-    ErrorCode errorCode = m_subscriptionController->validateAndUpdateConfig(serverIndex, hasInstalledContainers, m_serversController);
+    ErrorCode errorCode = m_subscriptionController->validateAndUpdateConfig(serverIndex, hasInstalledContainers);
     
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
@@ -388,27 +356,18 @@ bool ApiConfigsController::isConfigValid()
 
 void ApiConfigsController::setCurrentProtocol(const QString &protocolName)
 {
-    auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversController->getServerConfig(serverIndex);
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
-
-    apiConfigObject[configKey::serviceProtocol] = protocolName;
-
-    serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
-
-    m_serversController->editServer(serverIndex, serverConfigObject);
+    m_subscriptionController->setApiServiceProtocol(m_serversModel->getProcessedServerIndex(), protocolName);
 }
 
 bool ApiConfigsController::isVlessProtocol()
 {
-    auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversController->getServerConfig(serverIndex);
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    return m_subscriptionController->isApiServiceProtocolVless(m_serversModel->getProcessedServerIndex());
+}
 
-    if (apiConfigObject[configKey::serviceProtocol].toString() == "vless") {
-        return true;
-    }
-    return false;
+void ApiConfigsController::removeApiConfig(int serverIndex)
+{
+    m_subscriptionController->removeApiConfig(serverIndex);
+    emit apiConfigRemoved(tr("Api config removed"));
 }
 
 QList<QString> ApiConfigsController::getQrCodes()

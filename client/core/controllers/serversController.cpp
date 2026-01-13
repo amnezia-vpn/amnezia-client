@@ -113,53 +113,6 @@ void ServersController::reloadContainerConfig(int serverIndex, DockerContainer c
     m_serversRepository->editServer(serverIndex, server);
 }
 
-void ServersController::removeApiConfig(int serverIndex)
-{
-    auto serverConfig = m_serversRepository->server(serverIndex);
-
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    QString vpncName = QString("%1 (%2) %3")
-                               .arg(serverConfig[config_key::description].toString())
-                               .arg(serverConfig[config_key::hostName].toString())
-                               .arg(serverConfig[config_key::vpnproto].toString());
-
-    AmneziaVPN::removeVPNC(vpncName.toStdString());
-#endif
-
-    serverConfig.remove(config_key::dns1);
-    serverConfig.remove(config_key::dns2);
-    serverConfig.remove(config_key::containers);
-    serverConfig.remove(config_key::hostName);
-
-    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
-    apiConfig.remove(configKey::publicKeyInfo);
-    serverConfig.insert(configKey::apiConfig, apiConfig);
-
-    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
-
-    m_serversRepository->editServer(serverIndex, serverConfig);
-}
-
-bool ServersController::isApiKeyExpired(int serverIndex) const
-{
-    auto serverConfig = m_serversRepository->server(serverIndex);
-    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
-
-    auto publicKeyInfo = apiConfig.value(configKey::publicKeyInfo).toObject();
-    const QString expiresAt = publicKeyInfo.value(configKey::expiresAt).toString();
-    
-    if (expiresAt.isEmpty()) {
-        return false;
-    }
-
-    auto expiresAtDateTime = QDateTime::fromString(expiresAt, Qt::ISODate).toUTC();
-    if (expiresAtDateTime < QDateTime::currentDateTimeUtc()) {
-        return true;
-    }
-    
-    return false;
-}
-
 QJsonArray ServersController::getServersArray() const
 {
     return m_serversRepository->serversArray();
