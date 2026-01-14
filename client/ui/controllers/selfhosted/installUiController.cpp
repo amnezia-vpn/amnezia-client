@@ -38,20 +38,21 @@ namespace
     }
 }
 
-InstallUiController::InstallUiController(InstallController *installController, QServersRepository *serversRepository,
-                                         ServersController *serversController, ServersModel *serversModel, ContainersModel *containersModel,
-                                         ProtocolsModel *protocolsModel, UsersController *clientManagementController,
-                                         QAppSettingsRepository *appSettingsRepository, const std::shared_ptr<Settings> &settings,
+InstallUiController::InstallUiController(InstallController *installController,
+                                         ServersController *serversController,
+                                         SettingsController *settingsController,
+                                         ServersModel *serversModel, ContainersModel *containersModel,
+                                         ProtocolsModel *protocolsModel, UsersController *usersController,
+                                         const std::shared_ptr<Settings> &settings,
                                          QObject *parent)
     : QObject(parent),
       m_installController(installController),
-      m_serversRepository(serversRepository),
       m_serversController(serversController),
+      m_settingsController(settingsController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
-      m_clientManagementController(clientManagementController),
-      m_appSettingsRepository(appSettingsRepository),
+      m_usersController(usersController),
       m_settings(settings)
 {
 }
@@ -87,8 +88,8 @@ void InstallUiController::install(DockerContainer container, int port, Transport
             return;
         }
 
-        int serverIndex = m_serversRepository->serversCount() - 1;
-        QJsonObject serverConfig = m_serversRepository->server(serverIndex);
+        int serverIndex = m_serversController->getServersCount() - 1;
+        QJsonObject serverConfig = m_serversController->getServerConfig(serverIndex);
         QJsonArray containers = serverConfig.value(config_key::containers).toArray();
         int containersCount = containers.size();
 
@@ -104,7 +105,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
 
         emit installServerFinished(finishMessage);
     } else {
-        QJsonObject serverConfig = m_serversRepository->server(serverIndex);
+        QJsonObject serverConfig = m_serversController->getServerConfig(serverIndex);
         QJsonArray containers = serverConfig.value(config_key::containers).toArray();
         int containersCount = containers.size();
 
@@ -116,7 +117,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
             return;
         }
 
-        QJsonObject newServerConfig = m_serversRepository->server(serverIndex);
+        QJsonObject newServerConfig = m_serversController->getServerConfig(serverIndex);
         QJsonArray newContainers = newServerConfig.value(config_key::containers).toArray();
         int newContainersCount = newContainers.size();
 
@@ -139,14 +140,14 @@ void InstallUiController::install(DockerContainer container, int port, Transport
 
 void InstallUiController::scanServerForInstalledContainers(int serverIndex)
 {
-    QJsonObject serverBefore = m_serversRepository->server(serverIndex);
+    QJsonObject serverBefore = m_serversController->getServerConfig(serverIndex);
     QJsonArray containersBefore = serverBefore.value(config_key::containers).toArray();
     int containersCountBefore = containersBefore.size();
 
     ErrorCode errorCode = m_installController->scanServerForInstalledContainers(serverIndex);
 
     if (errorCode == ErrorCode::NoError) {
-        QJsonObject serverAfter = m_serversRepository->server(serverIndex);
+        QJsonObject serverAfter = m_serversController->getServerConfig(serverIndex);
         QJsonArray containersAfter = serverAfter.value(config_key::containers).toArray();
         int containersCountAfter = containersAfter.size();
 
@@ -316,7 +317,7 @@ void InstallUiController::addEmptyServer()
     server.insert(config_key::userName, m_processedServerCredentials.userName);
     server.insert(config_key::password, m_processedServerCredentials.secretData);
     server.insert(config_key::port, m_processedServerCredentials.port);
-    server.insert(config_key::description, m_appSettingsRepository->nextAvailableServerName());
+    server.insert(config_key::description, m_settingsController->nextAvailableServerName());
 
     server.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 

@@ -20,16 +20,14 @@ namespace
 }
 
 ServersUiController::ServersUiController(ServersController* serversController,
-                                         QServersRepository* serversRepository,
-                                         QAppSettingsRepository* appSettingsRepository,
+                                         SettingsController* settingsController,
                                          ServersModel* serversModel,
                                          ContainersModel* containersModel,
                                          ContainersModel* defaultServerContainersModel,
                                          QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
-      m_serversRepository(serversRepository),
-      m_appSettingsRepository(appSettingsRepository),
+      m_settingsController(settingsController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_defaultServerContainersModel(defaultServerContainersModel),
@@ -76,7 +74,7 @@ void ServersUiController::setDefaultContainer(int serverIndex, int containerInde
 
 void ServersUiController::toggleAmneziaDns(bool enabled)
 {
-    m_appSettingsRepository->setUseAmneziaDns(enabled);
+    m_settingsController->toggleAmneziaDns(enabled);
     updateModel();
 }
 
@@ -112,10 +110,10 @@ void ServersUiController::onDefaultServerChanged(int index)
 
 void ServersUiController::updateModel()
 {
-    int defaultIndex = m_serversRepository->defaultServerIndex();
+    int defaultIndex = m_serversController->getDefaultServerIndex();
     bool wasEmpty = !hasServersFromGatewayApi();
     
-    m_serversModel->updateModel(m_serversRepository->serversArray(), defaultIndex, m_appSettingsRepository->useAmneziaDns());
+    m_serversModel->updateModel(m_serversController->getServersArray(), defaultIndex, m_settingsController->isAmneziaDnsEnabled());
     
     if (m_processedServerIndex < 0 || m_processedServerIndex >= m_serversController->getServersCount()) {
         m_processedServerIndex = defaultIndex;
@@ -266,7 +264,7 @@ QString ServersUiController::getDefaultServerDescription(const QJsonObject &serv
     } else if (configVersion) {
         return server.value(config_key::description).toString();
     } else if (m_serversModel->data(index, ServersModel::Roles::HasWriteAccessRole).toBool()) {
-        bool isAmneziaDnsEnabled = m_appSettingsRepository->useAmneziaDns();
+        bool isAmneziaDnsEnabled = m_settingsController->isAmneziaDnsEnabled();
         if (isAmneziaDnsEnabled && isAmneziaDnsContainerInstalled(index)) {
             description += "Amnezia DNS | ";
         }

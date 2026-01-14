@@ -60,9 +60,14 @@ public:
     bool isStrictKillSwitchEnabled() const;
     void toggleStrictKillSwitch(bool enable);
 
-    QString getInstallationUuid() const;
+    QString getInstallationUuid(bool createIfNotExists = true) const;
 
     void enableDevMode();
+    
+    bool isPremV1MigrationReminderActive() const;
+    void disablePremV1MigrationReminder();
+    
+    QString nextAvailableServerName() const;
     bool isDevModeEnabled() const;
 
     void resetGatewayEndpoint();
@@ -75,6 +80,9 @@ public:
     void disableHomeAdLabel();
 
     void checkIfNeedDisableLogs();
+
+    QLocale getAppLanguage() const;
+    void setAppLanguage(const QLocale &locale);
 
 signals:
     void siteSplitTunnelingRouteModeChanged(RouteMode mode);

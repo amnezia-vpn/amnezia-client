@@ -125,7 +125,7 @@ void CoreController::initCoreControllers()
     
     m_serversController = new ServersController(serversRepo, appSettingsRepo, this);
     m_appSplitTunnelingController = new AppSplitTunnelingController(appSettingsRepo);
-    m_clientManagementController = new UsersController(serversRepo, this);
+    m_usersController = new UsersController(serversRepo, this);
     m_sitesController = new SitesController(appSettingsRepo);
     m_allowedDnsController = new AllowedDnsController(appSettingsRepo);
     m_servicesCatalogController = new ServicesCatalogController(appSettingsRepo);
@@ -148,7 +148,7 @@ void CoreController::initControllers()
     m_focusController = new FocusController(m_engine, this);
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController);
 
-    m_installUiController = new InstallUiController(m_installController, m_serversRepository, m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementController, m_appSettingsRepository, m_settings, this);
+    m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_serversModel, m_containersModel, m_protocolsModel, m_usersController, m_settings, this);
     m_engine->rootContext()->setContextProperty("InstallController", m_installUiController);
 
     m_importController = new ImportUiController(m_importCoreController, this);
@@ -157,7 +157,7 @@ void CoreController::initControllers()
     m_exportUiController = new ExportUiController(m_exportController, this);
     m_engine->rootContext()->setContextProperty("ExportController", m_exportUiController);
 
-    m_languageUiController = new LanguageUiController(m_appSettingsRepository, m_languageModel, this);
+    m_languageUiController = new LanguageUiController(m_settingsController, m_languageModel, this);
     m_engine->rootContext()->setContextProperty("LanguageUiController", m_languageUiController);
 
     m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, m_containersModel, m_languageUiController, this);
@@ -166,7 +166,7 @@ void CoreController::initControllers()
     m_pageController = new PageController(m_serversModel, m_settingsController, this);
     m_engine->rootContext()->setContextProperty("PageController", m_pageController);
 
-    m_serversUiController = new ServersUiController(m_serversController, m_serversRepository, m_appSettingsRepository, m_serversModel, m_containersModel, m_defaultServerContainersModel, this);
+    m_serversUiController = new ServersUiController(m_serversController, m_settingsController, m_serversModel, m_containersModel, m_defaultServerContainersModel, this);
     m_engine->rootContext()->setContextProperty("ServersUiController", m_serversUiController);
 
     m_sitesUiController = new SitesUiController(m_sitesController, m_vpnConnection.get(), m_sitesModel, this);
@@ -184,11 +184,11 @@ void CoreController::initControllers()
     m_servicesCatalogUiController = new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this);
     m_engine->rootContext()->setContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);
 
-    m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_serversModel, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_appSettingsRepository, this);
+    m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_serversModel, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settingsController, this);
     m_engine->rootContext()->setContextProperty("SubscriptionUiController", m_subscriptionUiController);
     m_engine->rootContext()->setContextProperty("SubscriptionUiController", m_subscriptionUiController);
 
-    m_apiPremV1MigrationController = new ApiPremV1MigrationController(m_serversController, m_serversModel, m_appSettingsRepository, this);
+    m_apiPremV1MigrationController = new ApiPremV1MigrationController(m_serversController, m_serversModel, m_settingsController, this);
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController);
 
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);

@@ -1,10 +1,10 @@
 #include "languageUiController.h"
 
-LanguageUiController::LanguageUiController(QAppSettingsRepository* appSettingsRepository,
+LanguageUiController::LanguageUiController(SettingsController* settingsController,
                                            LanguageModel* languageModel,
                                            QObject *parent)
     : QObject(parent),
-      m_appSettingsRepository(appSettingsRepository),
+      m_settingsController(settingsController),
       m_languageModel(languageModel)
 {
 }
@@ -18,12 +18,12 @@ void LanguageUiController::onAppLanguageChanged(const QLocale &locale)
 void LanguageUiController::changeLanguage(const LanguageSettings::AvailableLanguageEnum language)
 {
     QLocale locale = languageEnumToLocale(language);
-    m_appSettingsRepository->setAppLanguage(locale);
+    m_settingsController->setAppLanguage(locale);
 }
 
 int LanguageUiController::getCurrentLanguageIndex() const
 {
-    auto locale = m_appSettingsRepository->getAppLanguage();
+    auto locale = m_settingsController->getAppLanguage();
     switch (locale.language()) {
     case QLocale::English: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     case QLocale::Russian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Russian); break;
@@ -40,7 +40,7 @@ int LanguageUiController::getCurrentLanguageIndex() const
 
 int LanguageUiController::getLineHeightAppend() const
 {
-    auto locale = m_appSettingsRepository->getAppLanguage();
+    auto locale = m_settingsController->getAppLanguage();
     switch (locale.language()) {
     case QLocale::Burmese: return 10; break;
     default: return 0; break;
@@ -72,7 +72,7 @@ LanguageSettings::AvailableLanguageEnum LanguageUiController::getSystemLanguageE
 
 QString LanguageUiController::getCurrentSiteUrl(const QString &path) const
 {
-    auto locale = m_appSettingsRepository->getAppLanguage();
+    auto locale = m_settingsController->getAppLanguage();
     if (locale.language() == QLocale::Russian) {
         return "https://storage.googleapis.com/amnezia/amnezia.org" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
     }
@@ -81,7 +81,7 @@ QString LanguageUiController::getCurrentSiteUrl(const QString &path) const
 
 QString LanguageUiController::getCurrentDocsUrl(const QString &path) const
 {
-    auto locale = m_appSettingsRepository->getAppLanguage();
+    auto locale = m_settingsController->getAppLanguage();
     if (locale.language() == QLocale::Russian) {
         return "https://storage.googleapis.com/amnezia/docs" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
     }

@@ -8,8 +8,7 @@
 #include <QStringList>
 
 #include "core/controllers/serversController.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/controllers/settingsController.h"
 #include "ui/models/serversModel.h"
 #include "ui/models/containersModel.h"
 
@@ -37,8 +36,7 @@ class ServersUiController : public QObject
     
 public:
     explicit ServersUiController(ServersController* serversController,
-                                 QServersRepository* serversRepository,
-                                 QAppSettingsRepository* appSettingsRepository,
+                                 SettingsController* settingsController,
                                  ServersModel* serversModel,
                                  ContainersModel* containersModel,
                                  ContainersModel* defaultServerContainersModel,
@@ -95,8 +93,7 @@ private:
     void updateDefaultServerContainersModel();
     
     ServersController* m_serversController;
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SettingsController* m_settingsController;
     ServersModel* m_serversModel;
     ContainersModel* m_containersModel;
     ContainersModel* m_defaultServerContainersModel;

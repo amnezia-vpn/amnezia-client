@@ -5,9 +5,9 @@
 
 #include "core/configurators/openVpnConfigurator.h"
 #include "core/controllers/serversController.h"
+#include "core/controllers/settingsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
-#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiCountryModel.h"
@@ -25,7 +25,7 @@ public:
                          ApiAccountInfoModel* apiAccountInfoModel,
                          ApiCountryModel* apiCountryModel,
                          ApiDevicesModel* apiDevicesModel,
-                         QAppSettingsRepository* appSettingsRepository,
+                         SettingsController* settingsController,
                          QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
@@ -89,7 +89,7 @@ private:
     ApiAccountInfoModel* m_apiAccountInfoModel;
     ApiCountryModel* m_apiCountryModel;
     ApiDevicesModel* m_apiDevicesModel;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SettingsController* m_settingsController;
 };
 
 #endif // SUBSCRIPTIONUICONTROLLER_H

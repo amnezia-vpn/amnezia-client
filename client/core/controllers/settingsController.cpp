@@ -237,9 +237,9 @@ void SettingsController::toggleStrictKillSwitch(bool enable)
     m_appSettingsRepository->setStrictKillSwitchEnabled(enable);
 }
 
-QString SettingsController::getInstallationUuid() const
+QString SettingsController::getInstallationUuid(bool createIfNotExists) const
 {
-    return m_appSettingsRepository->getInstallationUuid(false);
+    return m_appSettingsRepository->getInstallationUuid(createIfNotExists);
 }
 
 void SettingsController::enableDevMode()
@@ -306,5 +306,30 @@ void SettingsController::checkIfNeedDisableLogs()
 QString SettingsController::getPlatform() const
 {
     return getPlatformName();
+}
+
+QLocale SettingsController::getAppLanguage() const
+{
+    return m_appSettingsRepository->getAppLanguage();
+}
+
+void SettingsController::setAppLanguage(const QLocale &locale)
+{
+    m_appSettingsRepository->setAppLanguage(locale);
+}
+
+bool SettingsController::isPremV1MigrationReminderActive() const
+{
+    return m_appSettingsRepository->isPremV1MigrationReminderActive();
+}
+
+void SettingsController::disablePremV1MigrationReminder()
+{
+    m_appSettingsRepository->disablePremV1MigrationReminder();
+}
+
+QString SettingsController::nextAvailableServerName() const
+{
+    return m_appSettingsRepository->nextAvailableServerName();
 }
 

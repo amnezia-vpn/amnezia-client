@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "core/controllers/serversController.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/controllers/settingsController.h"
 #include "ui/models/serversModel.h"
 
 class ApiPremV1MigrationController : public QObject
@@ -13,7 +13,7 @@ class ApiPremV1MigrationController : public QObject
 public:
     ApiPremV1MigrationController(ServersController* serversController,
                                  ServersModel* serversModel,
-                                 QAppSettingsRepository* appSettingsRepository,
+                                 SettingsController* settingsController,
                                  QObject *parent = nullptr);
 
     Q_PROPERTY(QJsonArray subscriptionsModel READ getSubscriptionModel NOTIFY subscriptionsModelChanged)
@@ -45,7 +45,7 @@ signals:
 private:
     ServersController* m_serversController;
     ServersModel* m_serversModel;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SettingsController* m_settingsController;
 
     QJsonArray m_subscriptionsModel;
     int m_subscriptionIndex;

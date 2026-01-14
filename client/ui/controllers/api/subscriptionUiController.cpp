@@ -67,9 +67,9 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
                                            ApiAccountInfoModel* apiAccountInfoModel,
                                            ApiCountryModel* apiCountryModel,
                                            ApiDevicesModel* apiDevicesModel,
-                                           QAppSettingsRepository* appSettingsRepository,
+                                           SettingsController* settingsController,
                                            QObject *parent)
-    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController), m_apiAccountInfoModel(apiAccountInfoModel), m_apiCountryModel(apiCountryModel), m_apiDevicesModel(apiDevicesModel), m_appSettingsRepository(appSettingsRepository)
+    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController), m_apiAccountInfoModel(apiAccountInfoModel), m_apiCountryModel(apiCountryModel), m_apiDevicesModel(apiDevicesModel), m_settingsController(settingsController)
 {
 }
 
@@ -426,6 +426,6 @@ void SubscriptionUiController::updateApiCountryModel()
 
 void SubscriptionUiController::updateApiDevicesModel()
 {
-    m_apiDevicesModel->updateModel(m_apiAccountInfoModel->getIssuedConfigsInfo(), m_appSettingsRepository->getInstallationUuid(false));
+    m_apiDevicesModel->updateModel(m_apiAccountInfoModel->getIssuedConfigsInfo(), m_settingsController->getInstallationUuid(false));
 }
 

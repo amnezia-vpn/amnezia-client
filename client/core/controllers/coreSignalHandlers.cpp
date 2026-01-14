@@ -130,28 +130,28 @@ void CoreSignalHandlers::initExportControllerHandler()
             [this](DockerContainer container, const ServerCredentials &credentials,
                    const QJsonObject &containerConfig, const QString &clientName) {
                 SshSession sshSession;
-                m_coreController->m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
+                m_coreController->m_usersController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
             });
     connect(m_coreController->m_exportController, &ExportController::appendClientByConfigRequested, this,
             [this](QJsonObject protocolConfig, const QString &clientName,
                    DockerContainer container, const ServerCredentials &credentials) {
                 SshSession sshSession;
-                m_coreController->m_clientManagementController->appendClient(protocolConfig, clientName, container, credentials, &sshSession);
+                m_coreController->m_usersController->appendClient(protocolConfig, clientName, container, credentials, &sshSession);
             });
     connect(m_coreController->m_exportController, &ExportController::updateClientsRequested, this,
             [this](DockerContainer container, const ServerCredentials &credentials) {
                 SshSession sshSession;
-                m_coreController->m_clientManagementController->updateClients(container, credentials, &sshSession);
+                m_coreController->m_usersController->updateClients(container, credentials, &sshSession);
             });
     connect(m_coreController->m_exportController, &ExportController::revokeClientRequested, this,
             [this](int row, DockerContainer container, const ServerCredentials &credentials, int serverIndex) {
                 SshSession sshSession;
-                m_coreController->m_clientManagementController->revokeClient(row, container, credentials, serverIndex, &sshSession);
+                m_coreController->m_usersController->revokeClient(row, container, credentials, serverIndex, &sshSession);
             });
     connect(m_coreController->m_exportController, &ExportController::renameClientRequested, this,
             [this](int row, const QString &clientName, DockerContainer container, const ServerCredentials &credentials) {
                 SshSession sshSession;
-                m_coreController->m_clientManagementController->renameClient(row, clientName, container, credentials, &sshSession);
+                m_coreController->m_usersController->renameClient(row, clientName, container, credentials, &sshSession);
             });
 }
 
@@ -178,14 +178,14 @@ void CoreSignalHandlers::initAdminConfigRevokedHandler()
             [this](const QJsonObject &containerConfig, DockerContainer container,
                    const ServerCredentials &credentials, int serverIndex) {
                 SshSession sshSession;
-                m_coreController->m_clientManagementController->revokeClient(containerConfig, container, credentials, serverIndex, &sshSession);
+                m_coreController->m_usersController->revokeClient(containerConfig, container, credentials, serverIndex, &sshSession);
             });
 
     connect(m_coreController->m_installController, &InstallController::clientAppendRequested, this,
             [this](DockerContainer container, const ServerCredentials &credentials,
                    const QJsonObject &containerConfig, const QString &clientName) {
                 SshSession sshSession;
-                m_coreController->m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
+                m_coreController->m_usersController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
             });
 }
 
@@ -248,7 +248,7 @@ void CoreSignalHandlers::initServersModelUpdateHandler()
 
 void CoreSignalHandlers::initClientManagementModelUpdateHandler()
 {
-    connect(m_coreController->m_clientManagementController, &UsersController::clientsUpdated,
+    connect(m_coreController->m_usersController, &UsersController::clientsUpdated,
             m_coreController->m_clientManagementModel, &ClientManagementModel::updateModel);
 }
 

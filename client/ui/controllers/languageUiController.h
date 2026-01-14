@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QLocale>
 
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/controllers/settingsController.h"
 #include "ui/models/languageModel.h"
 
 class LanguageUiController : public QObject
@@ -16,7 +16,7 @@ class LanguageUiController : public QObject
     Q_PROPERTY(int lineHeightAppend READ getLineHeightAppend NOTIFY translationsUpdated)
 
 public:
-    explicit LanguageUiController(QAppSettingsRepository* appSettingsRepository,
+    explicit LanguageUiController(SettingsController* settingsController,
                                   LanguageModel* languageModel,
                                   QObject *parent = nullptr);
 
@@ -38,7 +38,7 @@ private:
     QString getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language) const;
     QLocale languageEnumToLocale(const LanguageSettings::AvailableLanguageEnum language) const;
 
-    QAppSettingsRepository* m_appSettingsRepository;
+    SettingsController* m_settingsController;
     LanguageModel* m_languageModel;
 };
 

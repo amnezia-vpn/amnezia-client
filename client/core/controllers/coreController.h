@@ -144,7 +144,7 @@ private:
     ServicesCatalogUiController* m_servicesCatalogUiController;
 
     ServersController* m_serversController;
-    UsersController* m_clientManagementController;
+    UsersController* m_usersController;
     AppSplitTunnelingController* m_appSplitTunnelingController;
     SitesController* m_sitesController;
     AllowedDnsController* m_allowedDnsController;
