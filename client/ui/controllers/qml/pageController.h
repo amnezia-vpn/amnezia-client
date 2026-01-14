@@ -5,7 +5,7 @@
 #include <QQmlEngine>
 
 #include "core/utils/defs.h"
-#include "ui/models/servers_model.h"
+#include "ui/models/serversModel.h"
 
 class SettingsController;
 

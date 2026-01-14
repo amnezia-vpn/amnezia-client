@@ -1,4 +1,4 @@
-#include "allowed_dns_model.h"
+#include "allowedDnsModel.h"
 
 AllowedDnsModel::AllowedDnsModel(QObject *parent)
     : QAbstractListModel(parent)

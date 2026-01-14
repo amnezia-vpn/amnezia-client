@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "core/controllers/allowedDnsController.h"
-#include "ui/models/allowed_dns_model.h"
+#include "ui/models/allowedDnsModel.h"
 
 class AllowedDnsUiController : public QObject
 {

@@ -1,4 +1,4 @@
-#include "servers_model.h"
+#include "serversModel.h"
 
 #include <QHash>
 #include <QSet>

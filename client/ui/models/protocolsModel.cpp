@@ -1,4 +1,4 @@
-#include "protocols_model.h"
+#include "protocolsModel.h"
 
 ProtocolsModel::ProtocolsModel(QObject *parent)
     : QAbstractListModel(parent)

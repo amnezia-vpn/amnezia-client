@@ -5,7 +5,7 @@
 
 #include "core/controllers/serversController.h"
 #include "core/repositories/qAppSettingsRepository.h"
-#include "ui/models/servers_model.h"
+#include "ui/models/serversModel.h"
 
 class ApiPremV1MigrationController : public QObject
 {

@@ -1,4 +1,4 @@
-#include "sites_model.h"
+#include "sitesModel.h"
 
 SitesModel::SitesModel(QObject *parent)
     : QAbstractListModel(parent)

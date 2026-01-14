@@ -21,7 +21,7 @@
 #include "ui/controllers/api/subscriptionUiController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "ui/controllers/selfhosted/protocolsUiController.h"
-#include "ui/models/servers_model.h"
+#include "ui/models/serversModel.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/sitesController.h"
 #include "core/controllers/appSplitTunnelingController.h"

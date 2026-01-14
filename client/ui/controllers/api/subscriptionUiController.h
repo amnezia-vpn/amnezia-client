@@ -12,7 +12,7 @@
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiCountryModel.h"
 #include "ui/models/api/apiDevicesModel.h"
-#include "ui/models/servers_model.h"
+#include "ui/models/serversModel.h"
 
 class SubscriptionUiController : public QObject
 {

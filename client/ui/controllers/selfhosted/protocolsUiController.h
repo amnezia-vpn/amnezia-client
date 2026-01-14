@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QJsonObject>
 
-#include "ui/models/protocols_model.h"
+#include "ui/models/protocolsModel.h"
 
 class ProtocolsUiController : public QObject
 {

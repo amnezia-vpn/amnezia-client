@@ -46,8 +46,8 @@
 #include "core/repositories/qServersRepository.h"
 #include "core/repositories/qAppSettingsRepository.h"
 
-#include "ui/models/allowed_dns_model.h"
-#include "ui/models/containers_model.h"
+#include "ui/models/allowedDnsModel.h"
+#include "ui/models/containersModel.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
 #ifdef Q_OS_WINDOWS
@@ -64,11 +64,11 @@
 #include "ui/models/protocols/shadowsocksConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "ui/models/protocols/xrayConfigModel.h"
-#include "ui/models/protocols_model.h"
-#include "ui/models/servers_model.h"
+#include "ui/models/protocolsModel.h"
+#include "ui/models/serversModel.h"
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
-#include "ui/models/sites_model.h"
+#include "ui/models/sitesModel.h"
 #include "ui/models/newsModel.h"
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)

@@ -5,8 +5,8 @@
 
 #include "core/controllers/serversController.h"
 #include "core/repositories/qAppSettingsRepository.h"
-#include "ui/models/containers_model.h"
-#include "ui/models/servers_model.h"
+#include "ui/models/containersModel.h"
+#include "ui/models/serversModel.h"
 
 namespace
 {

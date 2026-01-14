@@ -5,7 +5,7 @@
 
 #include "core/controllers/settingsController.h"
 #include "core/controllers/serversController.h"
-#include "ui/models/containers_model.h"
+#include "ui/models/containersModel.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/models/languageModel.h"
 #include "core/utils/defs.h"

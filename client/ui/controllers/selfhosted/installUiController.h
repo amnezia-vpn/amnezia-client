@@ -11,9 +11,9 @@
 #include "core/repositories/qAppSettingsRepository.h"
 #include "core/repositories/qServersRepository.h"
 #include "core/utils/defs.h"
-#include "ui/models/containers_model.h"
-#include "ui/models/protocols_model.h"
-#include "ui/models/servers_model.h"
+#include "ui/models/containersModel.h"
+#include "ui/models/protocolsModel.h"
+#include "ui/models/serversModel.h"
 
 class InstallUiController : public QObject
 {

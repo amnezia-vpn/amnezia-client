@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "core/controllers/sitesController.h"
-#include "ui/models/sites_model.h"
+#include "ui/models/sitesModel.h"
 #include "vpnconnection.h"
 
 class SitesUiController : public QObject
