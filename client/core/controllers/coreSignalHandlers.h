@@ -32,8 +32,6 @@ private:
     void initAllowedDnsModelUpdateHandler();
     void initAppSplitTunnelingModelUpdateHandler();
     void initPrepareConfigHandler();
-    void initImportPremiumV2VpnKeyHandler();
-    void initShowMigrationDrawerHandler();
     void initStrictKillSwitchHandler();
     void initAndroidSettingsHandler();
     void initAndroidConnectionHandler();

@@ -19,7 +19,6 @@
 #include "ui/controllers/selfhosted/installUiController.h"
 #include "ui/controllers/importUiController.h"
 #include "ui/controllers/api/subscriptionUiController.h"
-#include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "ui/controllers/selfhosted/protocolsUiController.h"
 #include "ui/models/serversModel.h"
 #include "core/controllers/serversController.h"
@@ -74,8 +73,6 @@ void CoreSignalHandlers::initAllHandlers()
     initAllowedDnsModelUpdateHandler();
     initAppSplitTunnelingModelUpdateHandler();
     initPrepareConfigHandler();
-    initImportPremiumV2VpnKeyHandler();
-    initShowMigrationDrawerHandler();
     initStrictKillSwitchHandler();
     initAndroidSettingsHandler();
     initAndroidConnectionHandler();
@@ -308,25 +305,6 @@ void CoreSignalHandlers::initPrepareConfigHandler()
         }
 
         m_coreController->m_connectionUiController->openConnection();
-    });
-}
-
-void CoreSignalHandlers::initImportPremiumV2VpnKeyHandler()
-{
-    connect(m_coreController->m_apiPremV1MigrationController, &ApiPremV1MigrationController::importPremiumV2VpnKey, this, [this](const QString &vpnKey) {
-        m_coreController->m_importController->extractConfigFromData(vpnKey);
-        m_coreController->m_importController->importConfig();
-
-        emit m_coreController->m_apiPremV1MigrationController->migrationFinished();
-    });
-}
-
-void CoreSignalHandlers::initShowMigrationDrawerHandler()
-{
-    QTimer::singleShot(1000, this, [this]() {
-        if (m_coreController->m_apiPremV1MigrationController->isPremV1MigrationReminderActive() && m_coreController->m_apiPremV1MigrationController->hasConfigsToMigration()) {
-            m_coreController->m_apiPremV1MigrationController->showMigrationDrawer();
-        }
     });
 }
 

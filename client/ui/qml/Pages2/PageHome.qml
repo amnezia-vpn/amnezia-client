@@ -48,30 +48,6 @@ PageType {
         }
     }
 
-    Connections {
-
-        target: ApiPremV1MigrationController
-
-        function onMigrationFinished() {
-            apiPremV1MigrationDrawer.closeTriggered()
-
-            var headerText = qsTr("You've successfully switched to the new Amnezia Premium subscription!")
-            var descriptionText = qsTr("Old keys will no longer work. Please use your new subscription key to connect. \nThank you for staying with us!")
-            var yesButtonText = qsTr("Continue")
-            var noButtonText = ""
-
-            var yesButtonFunction = function() {
-            }
-            var noButtonFunction = function() {
-            }
-
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-        }
-
-        function onShowMigrationDrawer() {
-            apiPremV1MigrationDrawer.openTriggered()
-        }
-    }
 
     Item {
         objectName: "homeColumnItem"
@@ -499,10 +475,5 @@ PageType {
                 }
             }
         }
-    }
-
-    ApiPremV1MigrationDrawer {
-        id: apiPremV1MigrationDrawer
-        anchors.fill: parent
     }
 }

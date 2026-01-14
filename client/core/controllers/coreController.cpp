@@ -188,9 +188,6 @@ void CoreController::initControllers()
     m_engine->rootContext()->setContextProperty("SubscriptionUiController", m_subscriptionUiController);
     m_engine->rootContext()->setContextProperty("SubscriptionUiController", m_subscriptionUiController);
 
-    m_apiPremV1MigrationController = new ApiPremV1MigrationController(m_serversController, m_serversModel, m_settingsController, this);
-    m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController);
-
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);
     m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsUiController);
 }
