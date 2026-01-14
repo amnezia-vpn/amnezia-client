@@ -17,7 +17,7 @@
 #include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/controllers/selfhosted/installUiController.h"
-#include "ui/controllers/importController.h"
+#include "ui/controllers/importUiController.h"
 #include "ui/controllers/api/subscriptionUiController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "ui/controllers/selfhosted/protocolsUiController.h"

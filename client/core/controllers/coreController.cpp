@@ -5,6 +5,7 @@
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/controllers/selfhosted/installController.h"
+#include "core/controllers/selfhosted/importController.h"
 #include "core/controllers/coreSignalHandlers.h"
 
 #if defined(Q_OS_ANDROID)
@@ -134,6 +135,7 @@ void CoreController::initCoreControllers()
     SshSession* sshSession = new SshSession(this);
     m_installController = new InstallController(sshSession, serversRepo, m_settings, this);
     m_exportController = new ExportController(serversRepo, appSettingsRepo, m_settings, this);
+    m_importCoreController = new ImportController(serversRepo, appSettingsRepo, this);
     m_connectionController = new ConnectionController(serversRepo, appSettingsRepo, m_vpnConnection.get(), m_settings);
     m_settingsController = new SettingsController(serversRepo, appSettingsRepo, this);
 }
@@ -149,7 +151,7 @@ void CoreController::initControllers()
     m_installUiController = new InstallUiController(m_installController, m_serversRepository, m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementController, m_appSettingsRepository, m_settings, this);
     m_engine->rootContext()->setContextProperty("InstallController", m_installUiController);
 
-    m_importController = new ImportController(m_serversController, m_serversModel, m_containersModel, m_appSettingsRepository, this);
+    m_importController = new ImportUiController(m_importCoreController, this);
     m_engine->rootContext()->setContextProperty("ImportController", m_importController);
 
     m_exportUiController = new ExportUiController(m_exportController, this);

@@ -1,36 +1,21 @@
-#ifndef IMPORTCONTROLLER_H
-#define IMPORTCONTROLLER_H
+#ifndef IMPORTUICONTROLLER_H
+#define IMPORTUICONTROLLER_H
 
 #include <QObject>
 
-#include "core/controllers/serversController.h"
-#include "core/repositories/qAppSettingsRepository.h"
-#include "ui/models/containersModel.h"
-#include "ui/models/serversModel.h"
+#include "core/controllers/selfhosted/importController.h"
 
-namespace
-{
-    enum class ConfigTypes {
-        Amnezia,
-        OpenVpn,
-        WireGuard,
-        Awg,
-        Xray,
-        ShadowSocks,
-        Backup,
-        Invalid
-    };
-}
-
-class ImportController : public QObject
+class ImportUiController : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(QString config READ getConfig NOTIFY importConfigChanged)
+    Q_PROPERTY(QString configFileName READ getConfigFileName NOTIFY importConfigChanged)
+    Q_PROPERTY(QString maliciousWarningText READ getMaliciousWarningText NOTIFY importConfigChanged)
+    Q_PROPERTY(bool isNativeWireGuardConfig READ isNativeWireGuardConfig NOTIFY importConfigChanged)
+
 public:
-    explicit ImportController(ServersController* serversController,
-                              ServersModel* serversModel,
-                              ContainersModel* containersModel,
-                              QAppSettingsRepository* appSettingsRepository,
-                              QObject *parent = nullptr);
+    explicit ImportUiController(ImportController* importController, QObject *parent = nullptr);
 
 public slots:
     void importConfig();
@@ -41,6 +26,8 @@ public slots:
     QString getConfig();
     QString getConfigFileName();
     QString getMaliciousWarningText();
+    bool isNativeWireGuardConfig();
+    void processNativeWireGuardConfig();
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void startDecodingQr();
@@ -54,39 +41,25 @@ public slots:
     static bool decodeQrCode(const QString &code);
 #endif
 
-    bool isNativeWireGuardConfig();
-    void processNativeWireGuardConfig();
-
 signals:
     void importFinished();
     void importErrorOccurred(ErrorCode errorCode, bool goToPageHome);
-
     void qrDecodingFinished();
-
     void restoreAppConfig(const QByteArray &data);
+    void importConfigChanged();
 
 private:
-    QJsonObject extractOpenVpnConfig(const QString &data);
-    QJsonObject extractWireGuardConfig(const QString &data);
-    QJsonObject extractXrayConfig(const QString &data, const QString &description = "");
-
-    void checkForMaliciousStrings(const QJsonObject &protocolConfig);
-
-    void processAmneziaConfig(QJsonObject &config);
-
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();
+    void applyImportResult(const ImportController::ImportResult &result);
 #endif
 
-    ServersController* m_serversController;
-    ServersModel* m_serversModel;
-    ContainersModel* m_containersModel;
-    QAppSettingsRepository* m_appSettingsRepository;
+    ImportController* m_importController;
 
     QJsonObject m_config;
     QString m_configFileName;
-    ConfigTypes m_configType;
     QString m_maliciousWarningText;
+    bool m_isNativeWireGuardConfig;
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     QMap<int, QByteArray> m_qrCodeChunks;
@@ -94,6 +67,10 @@ private:
     int m_totalQrCodeChunksCount;
     int m_receivedQrCodeChunksCount;
 #endif
+
+#if defined Q_OS_ANDROID
+    static ImportUiController* mInstance;
+#endif
 };
 
-#endif // IMPORTCONTROLLER_H
+#endif // IMPORTUICONTROLLER_H
