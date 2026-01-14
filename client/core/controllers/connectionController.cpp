@@ -118,28 +118,24 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     }
 
     bool isApiConfig = serverConfig.value(config_key::configVersion).toInt();
+    Proto proto = ContainerProps::defaultProtocol(container);
 
-    for (Proto proto : ContainerProps::protocolsForContainer(container)) {
+    QString protocolConfigString =
+            containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
 
-        QString protocolConfigString =
-                containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
+    auto configurator = ConfiguratorBase::create(proto, m_settings, nullptr);
+    protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
 
-        auto configurator = ConfiguratorBase::create(proto, m_settings, nullptr);
-        protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
-
-        QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-        if (ContainerProps::isAwgContainer(container) || container == DockerContainer::WireGuard) {
-            if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
-                vpnConfigData[config_key::mtu] =
-                        ContainerProps::isAwgContainer(container) ? protocols::awg::defaultMtu :
-                        protocols::wireguard::defaultMtu;
-            }
+    QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+    if (ContainerProps::isAwgContainer(container) || container == DockerContainer::WireGuard) {
+        if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
+            vpnConfigData[config_key::mtu] =
+                    ContainerProps::isAwgContainer(container) ? protocols::awg::defaultMtu :
+                    protocols::wireguard::defaultMtu;
         }
-
-        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
     }
 
-    Proto proto = ContainerProps::defaultProtocol(container);
+    vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
     vpnConfiguration[config_key::vpnproto] = ProtocolProps::protoToString(proto);
 
     vpnConfiguration[config_key::dns1] = dns.first;

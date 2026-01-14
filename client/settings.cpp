@@ -180,12 +180,9 @@ void Settings::setProtocolConfig(int serverIndex, DockerContainer container, Pro
 
 void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer container, Proto proto)
 {
-    // recursively remove
+    // If proto is Any, use the default protocol for the container
     if (proto == Proto::Any) {
-        for (Proto p : ContainerProps::protocolsForContainer(container)) {
-            clearLastConnectionConfig(serverIndex, container, p);
-        }
-        return;
+        proto = ContainerProps::defaultProtocol(container);
     }
 
     QJsonObject c = protocolConfig(serverIndex, container, proto);

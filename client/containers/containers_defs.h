@@ -52,9 +52,6 @@ namespace amnezia
         Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerDescriptions();
         Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerDetailedDescriptions();
 
-        // these protocols will be displayed in container settings
-        Q_INVOKABLE static QVector<amnezia::Proto> protocolsForContainer(amnezia::DockerContainer container);
-
         Q_INVOKABLE static amnezia::ServiceType containerService(amnezia::DockerContainer c);
 
         // binding between Docker container and main protocol of given container

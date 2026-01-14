@@ -182,15 +182,10 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
 
     auto isProtocolConfigExists = [](const QJsonObject &containerConfig, const DockerContainer container) {
-        for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-            QString protocolConfig =
-                    containerConfig.value(ProtocolProps::protoToString(protocol)).toObject().value(config_key::last_config).toString();
-
-            if (protocolConfig.isEmpty()) {
-                return false;
-            }
-        }
-        return true;
+        Proto protocol = ContainerProps::defaultProtocol(container);
+        QString protocolConfig =
+                containerConfig.value(ProtocolProps::protoToString(protocol)).toObject().value(config_key::last_config).toString();
+        return !protocolConfig.isEmpty();
     };
 
     if (!isProtocolConfigExists(containerConfig, container)) {
@@ -210,19 +205,18 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
     }
 
     if (ContainerProps::containerService(container) != ServiceType::Other) {
+        Proto protocol = ContainerProps::defaultProtocol(container);
+        QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
+
+        auto configurator = ConfiguratorBase::create(protocol, m_settings, m_sshSession);
         ErrorCode errorCode = ErrorCode::NoError;
-        for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-            QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
-
-            auto configurator = ConfiguratorBase::create(protocol, m_settings, m_sshSession);
-            QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
-            if (errorCode != ErrorCode::NoError) {
-                return errorCode;
-            }
-
-            protocolConfig.insert(config_key::last_config, protocolConfigString);
-            containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
+        QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
+        if (errorCode != ErrorCode::NoError) {
+            return errorCode;
         }
+
+        protocolConfig.insert(config_key::last_config, protocolConfigString);
+        containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
     }
 
     if (serverIndex >= 0) {
@@ -1067,31 +1061,21 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             DockerContainer container = ContainerProps::containerFromString(name);
 
             QJsonObject config;
-            Proto mainProto = ContainerProps::defaultProtocol(container);
-            const auto &protocols = ContainerProps::protocolsForContainer(container);
+            Proto protocol = ContainerProps::defaultProtocol(container);
+            QJsonObject containerConfig;
 
-            for (const auto &protocol : protocols) {
-                QJsonObject containerConfig;
+            containerConfig.insert(config_key::port, port);
+            containerConfig.insert(config_key::transport_proto, transportProto);
 
-                bool shouldProcessProtocol = (protocol == mainProto);
+            auto installer = createInstaller(container);
+            ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, m_sshSession, config);
 
-                if (shouldProcessProtocol) {
-                    containerConfig.insert(config_key::port, port);
-                    containerConfig.insert(config_key::transport_proto, transportProto);
-
-                    auto installer = createInstaller(container);
-                    ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, m_sshSession, config);
-
-                    if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
-                        return extractError;
-                    }
-
-                    config.insert(config_key::container, ContainerProps::containerToString(container));
-                }
-                if (shouldProcessProtocol) {
-                    config.insert(ProtocolProps::protoToString(protocol), containerConfig);
-                }
+            if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
+                return extractError;
             }
+
+            config.insert(config_key::container, ContainerProps::containerToString(container));
+            config.insert(ProtocolProps::protoToString(protocol), containerConfig);
             installedContainers.insert(container, config);
         }
 
@@ -1103,24 +1087,21 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             DockerContainer container = ContainerProps::containerFromString(name);
 
             QJsonObject config;
-            Proto mainProto = ContainerProps::defaultProtocol(container);
-            for (auto protocol : ContainerProps::protocolsForContainer(container)) {
-                QJsonObject containerConfig;
-                if (protocol == mainProto) {
-                    containerConfig.insert(config_key::port, port);
-                    containerConfig.insert(config_key::transport_proto, transportProto);
+            Proto protocol = ContainerProps::defaultProtocol(container);
+            QJsonObject containerConfig;
 
-                    auto installer = createInstaller(container);
-                    ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, m_sshSession, config);
+            containerConfig.insert(config_key::port, port);
+            containerConfig.insert(config_key::transport_proto, transportProto);
 
-                    if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
-                        return extractError;
-                    }
+            auto installer = createInstaller(container);
+            ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, m_sshSession, config);
 
-                    config.insert(config_key::container, ContainerProps::containerToString(container));
-                }
-                config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+            if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
+                return extractError;
             }
+
+            config.insert(config_key::container, ContainerProps::containerToString(container));
+            config.insert(ProtocolProps::protoToString(protocol), containerConfig);
             installedContainers.insert(container, config);
         }
     }

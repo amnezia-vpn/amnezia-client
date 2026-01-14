@@ -245,31 +245,29 @@ amnezia::ScriptVars amnezia::genSocks5ProxyVars(const QJsonObject &containerConf
 amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer container, const QJsonObject &containerConfig)
 {
     ScriptVars vars;
-    QVector<Proto> protocols = ContainerProps::protocolsForContainer(container);
+    Proto protocol = ContainerProps::defaultProtocol(container);
 
-    for (Proto protocol : protocols) {
-        switch (protocol) {
-        case Proto::OpenVpn:
-            vars.append(genOpenVpnVars(containerConfig));
-            break;
-        case Proto::Xray:
-            vars.append(genXrayVars(containerConfig));
-            break;
-        case Proto::WireGuard:
-            vars.append(genWireGuardVars(containerConfig));
-            break;
-        case Proto::Awg:
-            vars.append(genAwgVars(containerConfig));
-            break;
-        case Proto::Sftp:
-            vars.append(genSftpVars(containerConfig));
-            break;
-        case Proto::Socks5Proxy:
-            vars.append(genSocks5ProxyVars(containerConfig));
-            break;
-        default:
-            break;
-        }
+    switch (protocol) {
+    case Proto::OpenVpn:
+        vars.append(genOpenVpnVars(containerConfig));
+        break;
+    case Proto::Xray:
+        vars.append(genXrayVars(containerConfig));
+        break;
+    case Proto::WireGuard:
+        vars.append(genWireGuardVars(containerConfig));
+        break;
+    case Proto::Awg:
+        vars.append(genAwgVars(containerConfig));
+        break;
+    case Proto::Sftp:
+        vars.append(genSftpVars(containerConfig));
+        break;
+    case Proto::Socks5Proxy:
+        vars.append(genSocks5ProxyVars(containerConfig));
+        break;
+    default:
+        break;
     }
 
     return vars;

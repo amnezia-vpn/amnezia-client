@@ -28,18 +28,13 @@ ErrorCode InstallerBase::extractConfigFromContainer(DockerContainer container, c
 QJsonObject InstallerBase::createBaseConfig(DockerContainer container, int port, TransportProto transportProto)
 {
     QJsonObject config;
-    auto mainProto = ContainerProps::defaultProtocol(container);
-    
-    for (auto protocol : ContainerProps::protocolsForContainer(container)) {
-        QJsonObject containerConfig;
+    Proto protocol = ContainerProps::defaultProtocol(container);
+    QJsonObject containerConfig;
 
-        if (protocol == mainProto) {
-            containerConfig.insert(config_key::port, QString::number(port));
-            containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
-            config.insert(config_key::container, ContainerProps::containerToString(container));
-        }
-        config.insert(ProtocolProps::protoToString(protocol), containerConfig);
-    }
+    containerConfig.insert(config_key::port, QString::number(port));
+    containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
+    config.insert(config_key::container, ContainerProps::containerToString(container));
+    config.insert(ProtocolProps::protoToString(protocol), containerConfig);
     
     return config;
 }

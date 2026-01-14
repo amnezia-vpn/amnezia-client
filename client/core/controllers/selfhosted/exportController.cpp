@@ -32,12 +32,10 @@ ExportController::ExportResult ExportController::generateFullAccessConfig(int se
         auto containerConfig = containers.at(i).toObject();
         auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
 
-        for (auto protocol : ContainerProps::protocolsForContainer(containerType)) {
-            auto protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
-
-            protocolConfig.remove(config_key::last_config);
-            containerConfig[ProtocolProps::protoToString(protocol)] = protocolConfig;
-        }
+        Proto protocol = ContainerProps::defaultProtocol(containerType);
+        auto protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
+        protocolConfig.remove(config_key::last_config);
+        containerConfig[ProtocolProps::protoToString(protocol)] = protocolConfig;
 
         containers.replace(i, containerConfig);
     }
@@ -63,18 +61,17 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
 
     if (ContainerProps::containerService(container) != ServiceType::Other) {
         SshSession sshSession;
-        for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-            QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
+        Proto protocol = ContainerProps::defaultProtocol(container);
+        QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
 
-            auto configurator = ConfiguratorBase::create(protocol, m_settings, &sshSession);
-            QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, result.errorCode);
-            if (result.errorCode != ErrorCode::NoError) {
-                return result;
-            }
-
-            protocolConfig.insert(config_key::last_config, protocolConfigString);
-            containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
+        auto configurator = ConfiguratorBase::create(protocol, m_settings, &sshSession);
+        QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, result.errorCode);
+        if (result.errorCode != ErrorCode::NoError) {
+            return result;
         }
+
+        protocolConfig.insert(config_key::last_config, protocolConfigString);
+        containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
     }
 
     emit appendClientRequested(container, credentials, containerConfig, clientName);

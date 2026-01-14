@@ -52,31 +52,6 @@ QString ContainerProps::containerTypeToString(amnezia::DockerContainer c)
     return containerKey.toLower();
 }
 
-QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerContainer container)
-{
-    switch (container) {
-    case DockerContainer::None: return {};
-
-    case DockerContainer::OpenVpn: return { Proto::OpenVpn };
-
-    case DockerContainer::Ipsec: return { Proto::Ikev2 /*, Protocol::L2tp */ };
-
-    case DockerContainer::Xray: return { Proto::Xray };
-
-    case DockerContainer::SSXray: return { Proto::SSXray };
-
-    case DockerContainer::Dns: return { Proto::Dns };
-
-    case DockerContainer::Sftp: return { Proto::Sftp };
-
-    case DockerContainer::Socks5Proxy: return { Proto::Socks5Proxy };
-
-    case DockerContainer::Awg: return { Proto::Awg };
-    case DockerContainer::Awg2: return { Proto::Awg };
-    default: return { defaultProtocol(container) };
-    }
-}
-
 QList<DockerContainer> ContainerProps::allContainers()
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
