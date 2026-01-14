@@ -15,8 +15,9 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.h
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshSession.h
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/installController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/usersController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.h
     ${CLIENT_ROOT_DIR}/core/installers/installerBase.h
     ${CLIENT_ROOT_DIR}/core/installers/awgInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/wireguardInstaller.h
@@ -30,7 +31,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.h
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/exportController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.h
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/settingsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.h
@@ -93,8 +94,9 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshSession.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/clientManagementController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/installController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/usersController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.cpp
     ${CLIENT_ROOT_DIR}/core/installers/installerBase.cpp
     ${CLIENT_ROOT_DIR}/core/installers/awgInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/wireguardInstaller.cpp
@@ -108,7 +110,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/sitesController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/exportController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/settingsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.cpp

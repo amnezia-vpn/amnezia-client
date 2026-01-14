@@ -16,7 +16,7 @@
 #include "ui/controllers/allowedDnsUiController.h"
 #include "ui/controllers/connectionUiController.h"
 #include "ui/controllers/selfhosted/exportUiController.h"
-#include "core/controllers/exportController.h"
+#include "core/controllers/selfhosted/exportController.h"
 #include "ui/controllers/qml/focusController.h"
 #include "ui/controllers/importController.h"
 #include "ui/controllers/selfhosted/installUiController.h"
@@ -32,14 +32,14 @@
 #include "ui/controllers/api/servicesCatalogUiController.h"
 
 #include "core/controllers/serversController.h"
-#include "core/controllers/clientManagementController.h"
+#include "core/controllers/selfhosted/usersController.h"
 #include "core/controllers/appSplitTunnelingController.h"
 #include "core/controllers/sitesController.h"
 #include "core/controllers/allowedDnsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "core/controllers/api/newsController.h"
-#include "core/controllers/installController.h"
+#include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/settingsController.h"
 #include "core/controllers/connectionController.h"
 
@@ -142,7 +142,7 @@ private:
     ServicesCatalogUiController* m_servicesCatalogUiController;
 
     ServersController* m_serversController;
-    ClientManagementController* m_clientManagementController;
+    UsersController* m_clientManagementController;
     AppSplitTunnelingController* m_appSplitTunnelingController;
     SitesController* m_sitesController;
     AllowedDnsController* m_allowedDnsController;

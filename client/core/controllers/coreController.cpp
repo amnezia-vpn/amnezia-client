@@ -4,7 +4,7 @@
 #include <QTranslator>
 
 #include "core/utils/selfhosted/sshSession.h"
-#include "core/controllers/installController.h"
+#include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/coreSignalHandlers.h"
 
 #if defined(Q_OS_ANDROID)
@@ -124,7 +124,7 @@ void CoreController::initCoreControllers()
     
     m_serversController = new ServersController(serversRepo, appSettingsRepo, this);
     m_appSplitTunnelingController = new AppSplitTunnelingController(appSettingsRepo);
-    m_clientManagementController = new ClientManagementController(serversRepo, this);
+    m_clientManagementController = new UsersController(serversRepo, this);
     m_sitesController = new SitesController(appSettingsRepo);
     m_allowedDnsController = new AllowedDnsController(appSettingsRepo);
     m_servicesCatalogController = new ServicesCatalogController(appSettingsRepo);

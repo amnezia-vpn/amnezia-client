@@ -9,7 +9,7 @@
 #include <QtConcurrent>
 
 #include "core/utils/api/apiUtils.h"
-#include "core/controllers/installController.h"
+#include "core/controllers/selfhosted/installController.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 #include "logger.h"
@@ -40,7 +40,7 @@ namespace
 
 InstallUiController::InstallUiController(InstallController *installController, QServersRepository *serversRepository,
                                          ServersController *serversController, ServersModel *serversModel, ContainersModel *containersModel,
-                                         ProtocolsModel *protocolsModel, ClientManagementController *clientManagementController,
+                                         ProtocolsModel *protocolsModel, UsersController *clientManagementController,
                                          QAppSettingsRepository *appSettingsRepository, const std::shared_ptr<Settings> &settings,
                                          QObject *parent)
     : QObject(parent),

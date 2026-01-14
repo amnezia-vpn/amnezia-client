@@ -25,10 +25,10 @@
 #include "core/controllers/serversController.h"
 #include "core/controllers/sitesController.h"
 #include "core/controllers/appSplitTunnelingController.h"
-#include "core/controllers/clientManagementController.h"
+#include "core/controllers/selfhosted/usersController.h"
 #include "core/controllers/settingsController.h"
-#include "core/controllers/installController.h"
-#include "core/controllers/exportController.h"
+#include "core/controllers/selfhosted/installController.h"
+#include "core/controllers/selfhosted/exportController.h"
 #include "core/controllers/connectionController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/controllers/api/apiNewsUiController.h"
@@ -248,7 +248,7 @@ void CoreSignalHandlers::initServersModelUpdateHandler()
 
 void CoreSignalHandlers::initClientManagementModelUpdateHandler()
 {
-    connect(m_coreController->m_clientManagementController, &ClientManagementController::clientsUpdated,
+    connect(m_coreController->m_clientManagementController, &UsersController::clientsUpdated,
             m_coreController->m_clientManagementModel, &ClientManagementModel::updateModel);
 }
 

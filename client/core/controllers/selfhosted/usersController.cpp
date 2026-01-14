@@ -1,4 +1,4 @@
-#include "clientManagementController.h"
+#include "usersController.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -14,7 +14,7 @@ using namespace amnezia;
 
 namespace
 {
-    Logger logger("ClientManagementController");
+    Logger logger("UsersController");
 
     namespace configKey
     {
@@ -30,13 +30,13 @@ namespace
     }
 }
 
-ClientManagementController::ClientManagementController(ServersRepository* serversRepository, QObject *parent)
+UsersController::UsersController(ServersRepository* serversRepository, QObject *parent)
     : QObject(parent),
       m_serversRepository(serversRepository)
 {
 }
 
-bool ClientManagementController::isClientExists(const QString &clientId, const QJsonArray &clientsTable)
+bool UsersController::isClientExists(const QString &clientId, const QJsonArray &clientsTable)
 {
     for (const QJsonValue &value : std::as_const(clientsTable)) {
         if (value.isObject()) {
@@ -49,7 +49,7 @@ bool ClientManagementController::isClientExists(const QString &clientId, const Q
     return false;
 }
 
-int ClientManagementController::clientIndexById(const QString &clientId, const QJsonArray &clientsTable)
+int UsersController::clientIndexById(const QString &clientId, const QJsonArray &clientsTable)
 {
     for (int i = 0; i < clientsTable.size(); ++i) {
         if (clientsTable.at(i).isObject()) {
@@ -62,7 +62,7 @@ int ClientManagementController::clientIndexById(const QString &clientId, const Q
     return -1;
 }
 
-void ClientManagementController::migration(const QByteArray &clientsTableString, QJsonArray &clientsTable)
+void UsersController::migration(const QByteArray &clientsTableString, QJsonArray &clientsTable)
 {
     QJsonObject clientsTableObj = QJsonDocument::fromJson(clientsTableString).object();
 
@@ -78,7 +78,7 @@ void ClientManagementController::migration(const QByteArray &clientsTableString,
     }
 }
 
-ErrorCode ClientManagementController::wgShow(const DockerContainer container, const ServerCredentials &credentials,
+ErrorCode UsersController::wgShow(const DockerContainer container, const ServerCredentials &credentials,
                                              SshSession* sshSession, std::vector<WgShowData> &data)
 {
     if (container != DockerContainer::WireGuard && !ContainerProps::isAwgContainer(container)) {
@@ -149,7 +149,7 @@ ErrorCode ClientManagementController::wgShow(const DockerContainer container, co
     return error;
 }
 
-ErrorCode ClientManagementController::getOpenVpnClients(const DockerContainer container, const ServerCredentials &credentials,
+ErrorCode UsersController::getOpenVpnClients(const DockerContainer container, const ServerCredentials &credentials,
                                                         SshSession* sshSession, int &count, QJsonArray &clientsTable)
 {
     ErrorCode error = ErrorCode::NoError;
@@ -190,7 +190,7 @@ ErrorCode ClientManagementController::getOpenVpnClients(const DockerContainer co
     return error;
 }
 
-ErrorCode ClientManagementController::getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
+ErrorCode UsersController::getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
                                                           SshSession* sshSession, int &count, QJsonArray &clientsTable)
 {
     ErrorCode error = ErrorCode::NoError;
@@ -235,7 +235,7 @@ ErrorCode ClientManagementController::getWireGuardClients(const DockerContainer 
     return error;
 }
 
-ErrorCode ClientManagementController::getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
+ErrorCode UsersController::getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
                                                      SshSession* sshSession, int &count, QJsonArray &clientsTable)
 {
     ErrorCode error = ErrorCode::NoError;
@@ -298,7 +298,7 @@ ErrorCode ClientManagementController::getXrayClients(const DockerContainer conta
     return error;
 }
 
-ErrorCode ClientManagementController::updateClients(const DockerContainer container, const ServerCredentials &credentials,
+ErrorCode UsersController::updateClients(const DockerContainer container, const ServerCredentials &credentials,
                                                      SshSession* sshSession)
 {
     ErrorCode error = ErrorCode::NoError;
@@ -385,7 +385,7 @@ ErrorCode ClientManagementController::updateClients(const DockerContainer contai
     return error;
 }
 
-ErrorCode ClientManagementController::appendClient(const DockerContainer container, const ServerCredentials &credentials,
+ErrorCode UsersController::appendClient(const DockerContainer container, const ServerCredentials &credentials,
                                                   const QJsonObject &containerConfig, const QString &clientName,
                                                   SshSession* sshSession)
 {
@@ -410,7 +410,7 @@ ErrorCode ClientManagementController::appendClient(const DockerContainer contain
     return appendClient(protocolConfig, clientName, container, credentials, sshSession);
 }
 
-ErrorCode ClientManagementController::appendClient(QJsonObject &protocolConfig, const QString &clientName, const DockerContainer container,
+ErrorCode UsersController::appendClient(QJsonObject &protocolConfig, const QString &clientName, const DockerContainer container,
                                                    const ServerCredentials &credentials, SshSession* sshSession)
 {
     QString clientId;
@@ -454,7 +454,7 @@ ErrorCode ClientManagementController::appendClient(QJsonObject &protocolConfig, 
     return appendClient(clientId, clientName, container, credentials, sshSession);
 }
 
-ErrorCode ClientManagementController::appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
+ErrorCode UsersController::appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
                                                    const ServerCredentials &credentials, SshSession* sshSession)
 {
     ErrorCode error = ErrorCode::NoError;
@@ -498,7 +498,7 @@ ErrorCode ClientManagementController::appendClient(const QString &clientId, cons
     return error;
 }
 
-ErrorCode ClientManagementController::renameClient(const int row, const QString &clientName,
+ErrorCode UsersController::renameClient(const int row, const QString &clientName,
                                                    const DockerContainer container,
                                                    const ServerCredentials &credentials,
                                                    SshSession* sshSession, bool addTimeStamp)
@@ -537,7 +537,7 @@ ErrorCode ClientManagementController::renameClient(const int row, const QString 
     return error;
 }
 
-ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials,
+ErrorCode UsersController::revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials,
                                                     const int serverIndex, SshSession* sshSession, QJsonArray &clientsTable)
 {
     if (row < 0 || row >= clientsTable.size()) {
@@ -577,7 +577,7 @@ ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerC
     return ErrorCode::NoError;
 }
 
-ErrorCode ClientManagementController::revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
+ErrorCode UsersController::revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
                                                       SshSession* sshSession, QJsonArray &clientsTable)
 {
     if (row < 0 || row >= clientsTable.size()) {
@@ -652,7 +652,7 @@ ErrorCode ClientManagementController::revokeWireGuard(const int row, const Docke
     return ErrorCode::NoError;
 }
 
-ErrorCode ClientManagementController::revokeXray(const int row,
+ErrorCode UsersController::revokeXray(const int row,
                                                  const DockerContainer container,
                                                  const ServerCredentials &credentials,
                                                  SshSession* sshSession, QJsonArray &clientsTable)
@@ -757,7 +757,7 @@ ErrorCode ClientManagementController::revokeXray(const int row,
     return error;
 }
 
-ErrorCode ClientManagementController::revokeClient(const int index, const DockerContainer container,
+ErrorCode UsersController::revokeClient(const int index, const DockerContainer container,
                                                    const ServerCredentials &credentials,
                                                    const int serverIndex, SshSession* sshSession)
 {
@@ -820,7 +820,7 @@ ErrorCode ClientManagementController::revokeClient(const int index, const Docker
     return errorCode;
 }
 
-ErrorCode ClientManagementController::revokeClient(const QJsonObject &containerConfig, const DockerContainer container,
+ErrorCode UsersController::revokeClient(const QJsonObject &containerConfig, const DockerContainer container,
                                                    const ServerCredentials &credentials, const int serverIndex,
                                                    SshSession* sshSession)
 {

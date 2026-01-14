@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "core/controllers/exportController.h"
+#include "core/controllers/selfhosted/exportController.h"
 
 class ExportUiController : public QObject
 {

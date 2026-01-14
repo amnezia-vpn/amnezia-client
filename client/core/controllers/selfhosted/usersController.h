@@ -1,5 +1,5 @@
-#ifndef CLIENTMANAGEMENTCONTROLLER_H
-#define CLIENTMANAGEMENTCONTROLLER_H
+#ifndef USERSCONTROLLER_H
+#define USERSCONTROLLER_H
 
 #include <QObject>
 #include <QJsonObject>
@@ -10,7 +10,7 @@
 #include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
 
-class ClientManagementController : public QObject
+class UsersController : public QObject
 {
     Q_OBJECT
 
@@ -24,7 +24,7 @@ public:
         QString allowedIps;
     };
 
-    explicit ClientManagementController(ServersRepository* serversRepository, QObject *parent = nullptr);
+    explicit UsersController(ServersRepository* serversRepository, QObject *parent = nullptr);
 
 signals:
     void clientsUpdated(const QJsonArray &clients);
@@ -75,5 +75,5 @@ private:
     QJsonArray m_clientsTable;
 };
 
-#endif // CLIENTMANAGEMENTCONTROLLER_H
+#endif // USERSCONTROLLER_H
 
