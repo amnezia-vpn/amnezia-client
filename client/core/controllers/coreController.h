@@ -75,9 +75,12 @@
     #include "ui/utils/notificationHandler.h"
 #endif
 
+class CoreSignalHandlers;
+
 class CoreController : public QObject
 {
     Q_OBJECT
+    friend class CoreSignalHandlers;
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
@@ -88,6 +91,7 @@ public:
 
     void openConnectionByIndex(int serverIndex);
     void importConfigFromData(const QString &data);
+    void updateTranslator(const QLocale &locale);
 
 signals:
     void translationsUpdated();
@@ -101,30 +105,6 @@ private:
     void initAndroidController();
     void initAppleController();
     void initSignalHandlers();
-
-    void initNotificationHandler();
-
-    void updateTranslator(const QLocale &locale);
-
-    void initErrorMessagesHandler();
-
-    void initApiCountryModelUpdateHandler();
-    void initContainerModelUpdateHandler();
-    void initAdminConfigRevokedHandler();
-    void initPassphraseRequestHandler();
-    void initTranslationsUpdatedHandler();
-    void initLanguageHandler();
-    void initAutoConnectHandler();
-    void initAmneziaDnsToggledHandler();
-    void initServersModelUpdateHandler();
-    void initClientManagementModelUpdateHandler();
-    void initSitesModelUpdateHandler();
-    void initAllowedDnsModelUpdateHandler();
-    void initAppSplitTunnelingModelUpdateHandler();
-    void initPrepareConfigHandler();
-    void initImportPremiumV2VpnKeyHandler();
-    void initShowMigrationDrawerHandler();
-    void initStrictKillSwitchHandler();
 
     QQmlApplicationEngine *m_engine {}; // TODO use parent child system here?
     std::shared_ptr<Settings> m_settings;
@@ -201,6 +181,8 @@ private:
 #endif
     SftpConfigModel* m_sftpConfigModel;
     Socks5ProxyConfigModel* m_socks5ConfigModel;
+
+    CoreSignalHandlers* m_signalHandlers;
 };
 
 #endif // CORECONTROLLER_H

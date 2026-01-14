@@ -5,6 +5,7 @@
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/controllers/installController.h"
+#include "core/controllers/coreSignalHandlers.h"
 
 #if defined(Q_OS_ANDROID)
     #include "core/utils/installedAppsImageProvider.h"
@@ -28,8 +29,6 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 
     initAndroidController();
     initAppleController();
-
-    initNotificationHandler();
 
     m_translator = new QTranslator(this);
     updateTranslator(m_appSettingsRepository->getAppLanguage());
@@ -137,22 +136,6 @@ void CoreController::initCoreControllers()
     m_exportController = new ExportController(serversRepo, appSettingsRepo, m_settings, this);
     m_connectionController = new ConnectionController(serversRepo, appSettingsRepo, m_vpnConnection.get(), m_settings);
     m_settingsController = new SettingsController(serversRepo, appSettingsRepo, this);
-    
-    connect(m_settingsController, &SettingsController::siteSplitTunnelingRouteModeChanged, this, [this](RouteMode mode) {
-        m_sitesController->setRouteMode(mode);
-    });
-    connect(m_settingsController, &SettingsController::siteSplitTunnelingToggled, this, [this](bool enabled) {
-        m_sitesController->toggleSplitTunneling(enabled);
-    });
-    connect(m_settingsController, &SettingsController::appSplitTunnelingRouteModeChanged, this, [this](AppsRouteMode mode) {
-        m_appSplitTunnelingController->setRouteMode(mode);
-    });
-    connect(m_settingsController, &SettingsController::appSplitTunnelingToggled, this, [this](bool enabled) {
-        m_appSplitTunnelingController->toggleSplitTunneling(enabled);
-    });
-    connect(m_settingsController, &SettingsController::appSplitTunnelingClearAppsList, this, [this]() {
-        m_appSplitTunnelingController->clearAppsList();
-    });
 }
 
 void CoreController::initControllers()
@@ -166,48 +149,11 @@ void CoreController::initControllers()
     m_installUiController = new InstallUiController(m_installController, m_serversRepository, m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementController, m_appSettingsRepository, m_settings, this);
     m_engine->rootContext()->setContextProperty("InstallController", m_installUiController);
 
-    connect(m_installController, &InstallController::serverIsBusy, m_installUiController, &InstallUiController::serverIsBusy);
-    connect(m_installUiController, &InstallUiController::cancelInstallation, m_installController, &InstallController::cancelInstallation);
-
-    connect(m_installUiController, &InstallUiController::currentContainerUpdated, m_connectionUiController,
-            &ConnectionUiController::onCurrentContainerUpdated); // TODO remove this
-
-    connect(m_installUiController, &InstallUiController::profileCleared,
-            m_protocolsUiController, &ProtocolsUiController::updateProtocols);
-
     m_importController = new ImportController(m_serversController, m_serversModel, m_containersModel, m_appSettingsRepository, this);
     m_engine->rootContext()->setContextProperty("ImportController", m_importController);
 
     m_exportUiController = new ExportUiController(m_exportController, this);
     m_engine->rootContext()->setContextProperty("ExportController", m_exportUiController);
-
-    connect(m_exportController, &ExportController::appendClientRequested, this,
-            [this](DockerContainer container, const ServerCredentials &credentials,
-                   const QJsonObject &containerConfig, const QString &clientName) {
-                SshSession sshSession;
-                m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
-            });
-    connect(m_exportController, &ExportController::appendClientByConfigRequested, this,
-            [this](QJsonObject protocolConfig, const QString &clientName,
-                   DockerContainer container, const ServerCredentials &credentials) {
-                SshSession sshSession;
-                m_clientManagementController->appendClient(protocolConfig, clientName, container, credentials, &sshSession);
-            });
-    connect(m_exportController, &ExportController::updateClientsRequested, this,
-            [this](DockerContainer container, const ServerCredentials &credentials) {
-                SshSession sshSession;
-                m_clientManagementController->updateClients(container, credentials, &sshSession);
-            });
-    connect(m_exportController, &ExportController::revokeClientRequested, this,
-            [this](int row, DockerContainer container, const ServerCredentials &credentials, int serverIndex) {
-                SshSession sshSession;
-                m_clientManagementController->revokeClient(row, container, credentials, serverIndex, &sshSession);
-            });
-    connect(m_exportController, &ExportController::renameClientRequested, this,
-            [this](int row, const QString &clientName, DockerContainer container, const ServerCredentials &credentials) {
-                SshSession sshSession;
-                m_clientManagementController->renameClient(row, clientName, container, credentials, &sshSession);
-            });
 
     m_languageUiController = new LanguageUiController(m_appSettingsRepository, m_languageModel, this);
     m_engine->rootContext()->setContextProperty("LanguageUiController", m_languageUiController);
@@ -254,30 +200,14 @@ void CoreController::initAndroidController()
         qFatal("Android logging initialization failed");
     }
     AndroidController::instance()->setSaveLogs(m_appSettingsRepository->isSaveLogs());
-    connect(m_appSettingsRepository, &QAppSettingsRepository::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
-
     AndroidController::instance()->setScreenshotsEnabled(m_appSettingsRepository->isScreenshotsEnabled());
-    connect(m_appSettingsRepository, &QAppSettingsRepository::screenshotsEnabledChanged, AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
 
-    connect(m_serversRepository, &QServersRepository::serverRemoved, AndroidController::instance(), &AndroidController::resetLastServer);
-
-    connect(m_appSettingsRepository, &QAppSettingsRepository::settingsCleared, []() { AndroidController::instance()->resetLastServer(-1); });
-
-    connect(AndroidController::instance(), &AndroidController::initConnectionState, this, [this](Vpn::ConnectionState state) {
-        m_connectionUiController->onConnectionStateChanged(state);
-        if (m_vpnConnection)
-            m_vpnConnection->restoreConnection();
-    });
     if (!AndroidController::instance()->initialize()) {
         qFatal("Android controller initialization failed");
     }
 
-    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, this, [this](QString data) {
-        emit m_pageController->goToPageHome();
-        m_importController->extractConfigFromData(data);
-        data.clear();
-        emit m_pageController->goToPageViewConfig();
-    });
+    initAndroidSettingsHandler();
+    initAndroidConnectionHandler();
 
     m_engine->addImageProvider(QLatin1String("installedAppImage"), new InstalledAppsImageProvider);
 #endif
@@ -287,65 +217,14 @@ void CoreController::initAppleController()
 {
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
-    connect(IosController::Instance(), &IosController::importConfigFromOutside, this, [this](QString data) {
-        emit m_pageController->goToPageHome();
-        m_importController->extractConfigFromData(data);
-        emit m_pageController->goToPageViewConfig();
-    });
-
-    connect(IosController::Instance(), &IosController::importBackupFromOutside, this, [this](QString filePath) {
-        emit m_pageController->goToPageHome();
-        m_pageController->goToPageSettingsBackup();
-        emit m_settingsUiController->importBackupFromOutside(filePath);
-    });
-
     QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_appSettingsRepository->isScreenshotsEnabled()); });
-
-    connect(m_appSettingsRepository, &QAppSettingsRepository::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
 #endif
 }
 
 void CoreController::initSignalHandlers()
 {
-    initErrorMessagesHandler();
-
-    initApiCountryModelUpdateHandler();
-    initContainerModelUpdateHandler();
-    initAdminConfigRevokedHandler();
-    initPassphraseRequestHandler();
-    initTranslationsUpdatedHandler();
-    initLanguageHandler();
-    initAutoConnectHandler();
-    initAmneziaDnsToggledHandler();
-    initServersModelUpdateHandler();
-    initClientManagementModelUpdateHandler();
-    initSitesModelUpdateHandler();
-    initAllowedDnsModelUpdateHandler();
-    initAppSplitTunnelingModelUpdateHandler();
-    initPrepareConfigHandler();
-    initImportPremiumV2VpnKeyHandler();
-    initShowMigrationDrawerHandler();
-    initStrictKillSwitchHandler();
-}
-
-void CoreController::initNotificationHandler()
-{
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    m_notificationHandler = NotificationHandler::create(this);
-
-    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_notificationHandler,
-            &NotificationHandler::setConnectionState);
-
-    connect(m_notificationHandler, &NotificationHandler::raiseRequested, m_pageController, &PageController::raiseMainWindow);
-    connect(m_notificationHandler, &NotificationHandler::connectRequested, m_connectionUiController,
-            static_cast<void (ConnectionUiController::*)()>(&ConnectionUiController::openConnection));
-    connect(m_notificationHandler, &NotificationHandler::disconnectRequested, m_connectionUiController,
-            &ConnectionUiController::closeConnection);
-    connect(this, &CoreController::translationsUpdated, m_notificationHandler, &NotificationHandler::onTranslationsUpdated);
-
-    auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_notificationHandler);
-    connect(this, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
-#endif    
+    m_signalHandlers = new CoreSignalHandlers(this, this);
+    m_signalHandlers->initAllHandlers();
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
@@ -385,201 +264,9 @@ void CoreController::updateTranslator(const QLocale &locale)
     emit websiteUrlChanged(m_languageUiController->getCurrentSiteUrl());
 }
 
-void CoreController::initErrorMessagesHandler()
-{
-    connect(m_connectionUiController, &ConnectionUiController::connectionErrorOccurred, this, [this](ErrorCode errorCode) {
-        emit m_pageController->showErrorMessage(errorCode);
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-    });
-
-    connect(m_subscriptionUiController, &SubscriptionUiController::errorOccurred, m_pageController,
-            qOverload<ErrorCode>(&PageController::showErrorMessage));
-}
-
 void CoreController::setQmlRoot()
 {
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
-}
-
-void CoreController::initApiCountryModelUpdateHandler()
-{
-    connect(m_serversModel, &ServersModel::updateApiCountryModel, this, [this]() {
-        m_apiCountryModel->updateModel(m_serversModel->getProcessedServerData("apiAvailableCountries").toJsonArray(),
-                                       m_serversModel->getProcessedServerData("apiServerCountryCode").toString());
-    });
-}
-
-void CoreController::initContainerModelUpdateHandler()
-{
-    connect(m_serversController, &ServersController::gatewayStacksExpanded, this, [this]() {
-        if (m_serversUiController->hasServersFromGatewayApi()) {
-            m_apiNewsUiController->fetchNews(false);
-        }
-    });
-}
-
-void CoreController::initAdminConfigRevokedHandler()
-{
-    connect(m_installController, &InstallController::clientRevocationRequested, this,
-            [this](const QJsonObject &containerConfig, DockerContainer container,
-                   const ServerCredentials &credentials, int serverIndex) {
-                SshSession sshSession;
-                m_clientManagementController->revokeClient(containerConfig, container, credentials, serverIndex, &sshSession);
-            });
-
-    connect(m_installController, &InstallController::clientAppendRequested, this,
-            [this](DockerContainer container, const ServerCredentials &credentials,
-                   const QJsonObject &containerConfig, const QString &clientName) {
-                SshSession sshSession;
-                m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
-            });
-}
-
-void CoreController::initPassphraseRequestHandler()
-{
-    connect(m_installUiController, &InstallUiController::passphraseRequestStarted, m_pageController,
-            &PageController::showPassphraseRequestDrawer);
-    connect(m_pageController, &PageController::passphraseRequestDrawerClosed, m_installUiController,
-            &InstallUiController::setEncryptedPassphrase);
-}
-
-void CoreController::initTranslationsUpdatedHandler()
-{
-    connect(m_languageUiController, &LanguageUiController::updateTranslations, this, &CoreController::updateTranslator);
-    connect(this, &CoreController::translationsUpdated, m_languageUiController, &LanguageUiController::translationsUpdated);
-    connect(this, &CoreController::translationsUpdated, m_connectionUiController, &ConnectionUiController::onTranslationsUpdated);
-}
-
-void CoreController::initLanguageHandler()
-{
-    connect(m_appSettingsRepository, &QAppSettingsRepository::appLanguageChanged, m_languageUiController, &LanguageUiController::onAppLanguageChanged);
-    connect(m_settingsUiController, &SettingsUiController::resetLanguageToSystem, m_languageUiController, [this]() {
-        m_languageUiController->changeLanguage(m_languageUiController->getSystemLanguageEnum());
-    });
-}
-
-void CoreController::initAutoConnectHandler()
-{
-    if (m_settingsUiController->isAutoConnectEnabled() && m_serversController->getDefaultServerIndex() >= 0) {
-        QTimer::singleShot(1000, this, [this]() { m_connectionUiController->openConnection(); });
-    }
-}
-
-void CoreController::initAmneziaDnsToggledHandler()
-{
-    connect(m_appSettingsRepository, &QAppSettingsRepository::useAmneziaDnsChanged, m_serversUiController, [this](bool enabled) {
-        Q_UNUSED(enabled);
-        m_serversUiController->updateModel();
-    });
-}
-
-void CoreController::initServersModelUpdateHandler()
-{
-    connect(m_serversRepository, &QServersRepository::serverAdded,
-            m_serversUiController, &ServersUiController::onAddServer);
-    connect(m_serversRepository, &QServersRepository::serverEdited,
-            m_serversUiController, &ServersUiController::onServerEdited);
-    connect(m_serversRepository, &QServersRepository::serverRemoved,
-            m_serversUiController, &ServersUiController::onServerRemoved);
-    connect(m_serversRepository, &QServersRepository::defaultServerChanged,
-            m_serversUiController, &ServersUiController::onDefaultServerChanged);
-    
-    connect(m_serversRepository, &QServersRepository::serverAdded,
-            m_serversController, &ServersController::recomputeGatewayStacks);
-    connect(m_serversRepository, &QServersRepository::serverEdited,
-            m_serversController, &ServersController::recomputeGatewayStacks);
-    connect(m_serversRepository, &QServersRepository::serverRemoved,
-            m_serversController, &ServersController::recomputeGatewayStacks);
-}
-
-void CoreController::initClientManagementModelUpdateHandler()
-{
-    connect(m_clientManagementController, &ClientManagementController::clientsUpdated,
-            m_clientManagementModel, &ClientManagementModel::updateModel);
-}
-
-void CoreController::initSitesModelUpdateHandler()
-{
-    connect(m_appSettingsRepository, &QAppSettingsRepository::sitesChanged, m_sitesUiController, [this](amnezia::RouteMode mode) {
-        Q_UNUSED(mode);
-        m_sitesUiController->updateModel();
-    });
-    connect(m_appSettingsRepository, &QAppSettingsRepository::sitesSplitTunnelingEnabledChanged, m_sitesUiController, [this](bool enabled) {
-        Q_UNUSED(enabled);
-        m_sitesUiController->updateModel();
-    });
-    connect(m_appSettingsRepository, &QAppSettingsRepository::routeModeChanged, m_sitesUiController, [this](amnezia::RouteMode mode) {
-        Q_UNUSED(mode);
-        m_sitesUiController->updateModel();
-    });
-}
-
-void CoreController::initAllowedDnsModelUpdateHandler()
-{
-    connect(m_appSettingsRepository, &QAppSettingsRepository::allowedDnsServersChanged, m_allowedDnsUiController, [this](const QStringList &servers) {
-        Q_UNUSED(servers);
-        m_allowedDnsUiController->updateModel();
-    });
-}
-
-void CoreController::initAppSplitTunnelingModelUpdateHandler()
-{
-    connect(m_appSettingsRepository, &QAppSettingsRepository::appsChanged, m_appSplitTunnelingUiController, [this](amnezia::AppsRouteMode mode) {
-        Q_UNUSED(mode);
-        m_appSplitTunnelingUiController->updateModel();
-    });
-    connect(m_appSettingsRepository, &QAppSettingsRepository::appsSplitTunnelingEnabledChanged, m_appSplitTunnelingUiController, [this](bool enabled) {
-        Q_UNUSED(enabled);
-        m_appSplitTunnelingUiController->updateModel();
-    });
-    connect(m_appSettingsRepository, &QAppSettingsRepository::appsRouteModeChanged, m_appSplitTunnelingUiController, [this](amnezia::AppsRouteMode mode) {
-        Q_UNUSED(mode);
-        m_appSplitTunnelingUiController->updateModel();
-    });
-}
-
-void CoreController::initPrepareConfigHandler()
-{
-    connect(m_connectionUiController, &ConnectionUiController::prepareConfig, this, [this]() {
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
-
-        if (!m_subscriptionUiController->isConfigValid()) {
-            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-            return;
-        }
-
-        if (!m_installUiController->isConfigValid()) {
-            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-            return;
-        }
-
-        m_connectionUiController->openConnection();
-    });
-}
-
-void CoreController::initImportPremiumV2VpnKeyHandler()
-{
-    connect(m_apiPremV1MigrationController, &ApiPremV1MigrationController::importPremiumV2VpnKey, this, [this](const QString &vpnKey) {
-        m_importController->extractConfigFromData(vpnKey);
-        m_importController->importConfig();
-
-        emit m_apiPremV1MigrationController->migrationFinished();
-    });
-}
-
-void CoreController::initShowMigrationDrawerHandler()
-{
-    QTimer::singleShot(1000, this, [this]() {
-        if (m_apiPremV1MigrationController->isPremV1MigrationReminderActive() && m_apiPremV1MigrationController->hasConfigsToMigration()) {
-            m_apiPremV1MigrationController->showMigrationDrawer();
-        }
-    });
-}
-
-void CoreController::initStrictKillSwitchHandler()
-{
-    connect(m_settingsUiController, &SettingsUiController::strictKillSwitchEnabledChanged, m_vpnConnection.get(),
-            &VpnConnection::onKillSwitchModeChanged);
 }
 
 PageController* CoreController::pageController() const
