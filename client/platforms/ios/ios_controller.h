@@ -94,7 +94,6 @@ private:
     explicit IosController();
 
     bool setupOpenVPN();
-    bool setupCloak();
     bool setupWireGuard();
     bool setupAwg();
     bool setupXray();

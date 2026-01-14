@@ -64,8 +64,6 @@ namespace PageLoader
         PageSetupWizardApiServiceInfo,
 
         PageProtocolOpenVpnSettings,
-        PageProtocolShadowSocksSettings,
-        PageProtocolCloakSettings,
         PageProtocolXraySettings,
         PageProtocolWireGuardSettings,
         PageProtocolAwgSettings,

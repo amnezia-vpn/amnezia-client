@@ -79,8 +79,6 @@ namespace amnezia
 
         // Distro errors
         OpenVpnExecutableMissing = 600,
-        ShadowSocksExecutableMissing = 601,
-        CloakExecutableMissing = 602,
         AmneziaServiceConnectionFailed = 603,
         ExecutableMissing = 604,
         XrayExecutableMissing = 605,
@@ -94,8 +92,6 @@ namespace amnezia
 
         // 3rd party utils errors
         OpenSslFailed = 800,
-        ShadowSocksExecutableCrashed = 801,
-        CloakExecutableCrashed = 802,
         XrayExecutableCrashed = 803,
         Tun2SockExecutableCrashed = 804,
 

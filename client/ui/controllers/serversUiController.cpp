@@ -210,8 +210,7 @@ bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() con
             return (clientProtocolConfigString.contains("AllowedIPs") && !clientProtocolConfigString.contains("AllowedIPs = 0.0.0.0/0, ::/0"))
                     || (!clientProtocolConfig.value(config_key::allowed_ips).toArray().isEmpty()
                         && !clientProtocolConfig.value(config_key::allowed_ips).toArray().contains("0.0.0.0/0"));
-        } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
-                   || defaultContainer == DockerContainer::ShadowSocks) {
+        } else if (defaultContainer == DockerContainer::OpenVpn) {
             auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             return !clientProtocolConfigString.isEmpty() && !clientProtocolConfigString.contains("redirect-gateway");

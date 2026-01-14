@@ -88,8 +88,6 @@ PageLoader::PageEnum ProtocolsModel::serverProtocolPage(Proto protocol) const
 {
     switch (protocol) {
     case Proto::OpenVpn: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
-    case Proto::Cloak: return PageLoader::PageEnum::PageProtocolCloakSettings;
-    case Proto::ShadowSocks: return PageLoader::PageEnum::PageProtocolShadowSocksSettings;
     case Proto::WireGuard: return PageLoader::PageEnum::PageProtocolWireGuardSettings;
     case Proto::Awg: return PageLoader::PageEnum::PageProtocolAwgSettings;
     case Proto::Ikev2: return PageLoader::PageEnum::PageProtocolIKev2Settings;

@@ -51,8 +51,6 @@ ScriptVars genBaseVars(const ServerCredentials &credentials,
                        const QString &secondaryDns);
 
 ScriptVars genOpenVpnVars(const QJsonObject &containerConfig);
-ScriptVars genShadowSocksVars(const QJsonObject &containerConfig);
-ScriptVars genCloakVars(const QJsonObject &containerConfig);
 ScriptVars genXrayVars(const QJsonObject &containerConfig);
 ScriptVars genWireGuardVars(const QJsonObject &containerConfig);
 ScriptVars genAwgVars(const QJsonObject &containerConfig);

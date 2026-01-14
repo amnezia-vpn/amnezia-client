@@ -11,9 +11,7 @@
 #include <QStringList>
 #include <QTimer>
 
-#include <core/configurators/cloakConfigurator.h>
 #include <core/configurators/openVpnConfigurator.h>
-#include <core/configurators/shadowsocksConfigurator.h>
 #include <core/configurators/wireguardConfigurator.h>
 
 #ifdef AMNEZIA_DESKTOP

@@ -88,8 +88,6 @@ namespace amnezia
 
         constexpr char openvpn[] = "openvpn";
         constexpr char wireguard[] = "wireguard";
-        constexpr char shadowsocks[] = "shadowsocks";
-        constexpr char cloak[] = "cloak";
         constexpr char sftp[] = "sftp";
         constexpr char awg[] = "awg";
         constexpr char xray[] = "xray";
@@ -267,8 +265,6 @@ namespace amnezia
         enum Proto {
             Any = 0,
             OpenVpn,
-            ShadowSocks,
-            Cloak,
             WireGuard,
             Awg,
             Ikev2,

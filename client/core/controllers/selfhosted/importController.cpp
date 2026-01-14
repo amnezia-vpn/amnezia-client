@@ -127,7 +127,7 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     }
 
     if (config.startsWith("ss://") && !config.contains("plugin=")) {
-        configType = ConfigTypes::ShadowSocks;
+        configType = ConfigTypes::Xray;
         result.config = extractXrayConfig(
                 Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
                 configType, prefix);
@@ -140,7 +140,7 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     if (config.startsWith("ssd://")) {
         QStringList tmp;
         QList<std::pair<QString, QJsonObject>> servers = serialization::ssd::Deserialize(config, &prefix, &tmp);
-        configType = ConfigTypes::ShadowSocks;
+        configType = ConfigTypes::Xray;
         // Took only first config from list
         if (!servers.isEmpty()) {
             result.config = extractXrayConfig(servers.first().first, configType);
@@ -557,13 +557,8 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
     lastConfig[config_key::isThirdPartyConfig] = true;
 
     QJsonObject containers;
-    if (configType == ConfigTypes::ShadowSocks) {
-        containers.insert(config_key::ssxray, QJsonValue(lastConfig));
-        containers.insert(config_key::container, QJsonValue("amnezia-ssxray"));
-    } else {
-        containers.insert(config_key::container, QJsonValue("amnezia-xray"));
-        containers.insert(config_key::xray, QJsonValue(lastConfig));
-    }
+    containers.insert(config_key::container, QJsonValue("amnezia-xray"));
+    containers.insert(config_key::xray, QJsonValue(lastConfig));
 
     QJsonArray arr;
     arr.push_back(containers);
@@ -578,12 +573,7 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
 
     QJsonObject config;
     config[config_key::containers] = arr;
-
-    if (configType == ConfigTypes::ShadowSocks) {
-        config[config_key::defaultContainer] = "amnezia-ssxray";
-    } else {
-        config[config_key::defaultContainer] = "amnezia-xray";
-    }
+    config[config_key::defaultContainer] = "amnezia-xray";
     if (description.isEmpty()) {
         config[config_key::description] = m_appSettingsRepository->nextAvailableServerName();
     } else {
@@ -600,9 +590,7 @@ void ImportController::checkForMaliciousStrings(QJsonObject &serverConfig, QStri
     for (const QJsonValue &container : containers) {
         auto containerConfig = container.toObject();
         auto containerName = containerConfig[config_key::container].toString();
-        if ((containerName == ContainerProps::containerToString(DockerContainer::OpenVpn))
-            || (containerName == ContainerProps::containerToString(DockerContainer::Cloak))
-            || (containerName == ContainerProps::containerToString(DockerContainer::ShadowSocks))) {
+        if (containerName == ContainerProps::containerToString(DockerContainer::OpenVpn)) {
 
             QString protocolConfig =
                     containerConfig[ProtocolProps::protoToString(Proto::OpenVpn)].toObject()[config_key::last_config].toString();

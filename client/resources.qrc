@@ -87,16 +87,6 @@
         <file>server_scripts/ipsec/run_container.sh</file>
         <file>server_scripts/ipsec/start.sh</file>
         <file>server_scripts/ipsec/strongswan.profile</file>
-        <file>server_scripts/openvpn_cloak/configure_container.sh</file>
-        <file>server_scripts/openvpn_cloak/Dockerfile</file>
-        <file>server_scripts/openvpn_cloak/run_container.sh</file>
-        <file>server_scripts/openvpn_cloak/start.sh</file>
-        <file>server_scripts/openvpn_cloak/template.ovpn</file>
-        <file>server_scripts/openvpn_shadowsocks/configure_container.sh</file>
-        <file>server_scripts/openvpn_shadowsocks/Dockerfile</file>
-        <file>server_scripts/openvpn_shadowsocks/run_container.sh</file>
-        <file>server_scripts/openvpn_shadowsocks/start.sh</file>
-        <file>server_scripts/openvpn_shadowsocks/template.ovpn</file>
         <file>server_scripts/openvpn/configure_container.sh</file>
         <file>server_scripts/openvpn/Dockerfile</file>
         <file>server_scripts/openvpn/run_container.sh</file>
@@ -191,10 +181,8 @@
         <file>ui/qml/Pages2/PageDevMenu.qml</file>
         <file>ui/qml/Pages2/PageHome.qml</file>
         <file>ui/qml/Pages2/PageProtocolAwgSettings.qml</file>
-        <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolOpenVpnSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
-        <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolWireGuardSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolXraySettings.qml</file>
         <file>ui/qml/Pages2/PageServiceDnsSettings.qml</file>

@@ -40,8 +40,6 @@ public:
     ExportResult generateOpenVpnConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig);
     ExportResult generateWireGuardConfig(int serverIndex, const QString &clientName, bool isApiConfig);
     ExportResult generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig);
-    ExportResult generateShadowSocksConfig(int serverIndex, int containerIndex, bool isApiConfig);
-    ExportResult generateCloakConfig(int serverIndex, bool isApiConfig);
     ExportResult generateXrayConfig(int serverIndex, const QString &clientName, bool isApiConfig);
 
 signals:

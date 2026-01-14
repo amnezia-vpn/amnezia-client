@@ -13,8 +13,6 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
 {
     switch (container) {
     case DockerContainer::OpenVpn: return QLatin1String("openvpn");
-    case DockerContainer::Cloak: return QLatin1String("openvpn_cloak");
-    case DockerContainer::ShadowSocks: return QLatin1String("openvpn_shadowsocks");
     case DockerContainer::WireGuard: return QLatin1String("wireguard");
     case DockerContainer::Awg2: return QLatin1String("awg");
     case DockerContainer::Awg: return QLatin1String("awg_legacy");
@@ -162,30 +160,6 @@ amnezia::ScriptVars amnezia::genOpenVpnVars(const QJsonObject &containerConfig)
     return vars;
 }
 
-amnezia::ScriptVars amnezia::genShadowSocksVars(const QJsonObject &containerConfig)
-{
-    ScriptVars vars;
-    const QJsonObject &ssConfig = containerConfig.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
-
-    vars.append({ { "$SHADOWSOCKS_SERVER_PORT", ssConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort) } });
-    vars.append({ { "$SHADOWSOCKS_LOCAL_PORT",
-                    ssConfig.value(config_key::local_port).toString(protocols::shadowsocks::defaultLocalProxyPort) } });
-    vars.append({ { "$SHADOWSOCKS_CIPHER", ssConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher) } });
-
-    return vars;
-}
-
-amnezia::ScriptVars amnezia::genCloakVars(const QJsonObject &containerConfig)
-{
-    ScriptVars vars;
-    const QJsonObject &cloakConfig = containerConfig.value(ProtocolProps::protoToString(Proto::Cloak)).toObject();
-
-    vars.append({ { "$CLOAK_SERVER_PORT", cloakConfig.value(config_key::port).toString(protocols::cloak::defaultPort) } });
-    vars.append({ { "$FAKE_WEB_SITE_ADDRESS", cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) } });
-
-    return vars;
-}
-
 amnezia::ScriptVars amnezia::genXrayVars(const QJsonObject &containerConfig)
 {
     ScriptVars vars;
@@ -277,12 +251,6 @@ amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer contain
         switch (protocol) {
         case Proto::OpenVpn:
             vars.append(genOpenVpnVars(containerConfig));
-            break;
-        case Proto::ShadowSocks:
-            vars.append(genShadowSocksVars(containerConfig));
-            break;
-        case Proto::Cloak:
-            vars.append(genCloakVars(containerConfig));
             break;
         case Proto::Xray:
             vars.append(genXrayVars(containerConfig));

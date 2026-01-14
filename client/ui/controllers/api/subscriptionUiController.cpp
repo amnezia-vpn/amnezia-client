@@ -18,7 +18,6 @@ namespace
 {
     namespace configKey
     {
-        constexpr char cloak[] = "cloak";
         constexpr char awg[] = "awg";
         constexpr char vless[] = "vless";
 

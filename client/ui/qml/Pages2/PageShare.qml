@@ -24,8 +24,6 @@ PageType {
         OpenVpn,
         WireGuard,
         Awg,
-        ShadowSocks,
-        Cloak,
         Xray
     }
 
@@ -71,20 +69,6 @@ PageType {
                 configCaption = qsTr("Save AmneziaWG config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_awg"
-                break
-            }
-            case PageShare.ConfigType.ShadowSocks: {
-                ExportController.generateShadowSocksConfig()
-                configCaption = qsTr("Save Shadowsocks config")
-                configExtension = ".json"
-                configFileName = "amnezia_for_shadowsocks"
-                break
-            }
-            case PageShare.ConfigType.Cloak: {
-                ExportController.generateCloakConfig()
-                configCaption = qsTr("Save Cloak config")
-                configExtension = ".json"
-                configFileName = "amnezia_for_cloak"
                 break
             }
             case PageShare.ConfigType.Xray: {
@@ -134,16 +118,6 @@ PageType {
         id: awgConnectionFormat
         readonly property string name: qsTr("AmneziaWG native format")
         readonly property int type: PageShare.ConfigType.Awg
-    }
-    QtObject {
-        id: shadowSocksConnectionFormat
-        readonly property string name: qsTr("Shadowsocks native format")
-        readonly property int type: PageShare.ConfigType.ShadowSocks
-    }
-    QtObject {
-        id: cloakConnectionFormat
-        readonly property string name: qsTr("Cloak native format")
-        readonly property int type: PageShare.ConfigType.Cloak
     }
     QtObject {
         id: xrayConnectionFormat
@@ -373,9 +347,9 @@ PageType {
             }
 
             DropDownType {
-                id: protocolSelector
+                id: containerSelector
 
-                signal protocolSelectorTextChanged
+                signal containerSelectorTextChanged
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -387,7 +361,7 @@ PageType {
                 headerText: qsTr("Protocol")
 
                 listView: ListViewWithRadioButtonType {
-                    id: protocolSelectorListView
+                    id: containerSelectorListView
 
                     rootWidth: root.width
                     imageSource: "qrc:/images/controls/check.svg"
@@ -410,7 +384,7 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        protocolSelector.closeTriggered()
+                        containerSelector.closeTriggered()
                     }
 
                     Connections {
@@ -418,9 +392,9 @@ PageType {
 
                         function onServerSelectorIndexChanged() {
                             var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
-                            protocolSelectorListView.selectedIndex = defaultContainer
-                            protocolSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
-                            protocolSelectorListView.triggerCurrentItem()
+                            containerSelectorListView.selectedIndex = defaultContainer
+                            containerSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
+                            containerSelectorListView.triggerCurrentItem()
                         }
                     }
 
@@ -432,7 +406,7 @@ PageType {
                             root.shareButtonEnabled = true
                         }
 
-                        protocolSelector.text = selectedText
+                        containerSelector.text = selectedText
 
                         ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(selectedIndex))
 
@@ -445,7 +419,7 @@ PageType {
                             PageController.showBusyIndicator(false)
                         }
 
-                        protocolSelector.protocolSelectorTextChanged()
+                        containerSelector.containerSelectorTextChanged()
                     }
 
                     function fillConnectionTypeModel() {
@@ -461,13 +435,6 @@ PageType {
                             root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-awg2")) {
                             root.connectionTypesModel.push(awgConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
-                            root.connectionTypesModel.push(openVpnConnectionFormat)
-                            root.connectionTypesModel.push(shadowSocksConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-openvpn-cloak")) {
-                            root.connectionTypesModel.push(openVpnConnectionFormat)
-                            root.connectionTypesModel.push(shadowSocksConnectionFormat)
-                            root.connectionTypesModel.push(cloakConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-xray")) {
                             root.connectionTypesModel.push(xrayConnectionFormat)
                         }
@@ -516,9 +483,9 @@ PageType {
                     currentIndex: 0
 
                     Connections {
-                        target: protocolSelector
+                        target: containerSelector
 
-                        function onProtocolSelectorTextChanged() {
+                        function onContainerSelectorTextChanged() {
                             if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
                                 exportTypeSelectorListView.selectedIndex = 0
                                 exportTypeSelector.currentIndex = 0

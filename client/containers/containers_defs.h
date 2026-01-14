@@ -20,8 +20,6 @@ namespace amnezia
             Awg2,
             WireGuard,
             OpenVpn,
-            Cloak,
-            ShadowSocks,
             Ipsec,
             Xray,
             SSXray,

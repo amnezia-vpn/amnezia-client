@@ -43,19 +43,6 @@ void ExportUiController::generateAwgConfig(int serverIndex, int containerIndex, 
     applyExportResult(result);
 }
 
-void ExportUiController::generateShadowSocksConfig(int serverIndex, int containerIndex, bool isApiConfig)
-{
-    clearPreviousConfig();
-    auto result = m_exportController->generateShadowSocksConfig(serverIndex, containerIndex, isApiConfig);
-    applyExportResult(result);
-}
-
-void ExportUiController::generateCloakConfig(int serverIndex, bool isApiConfig)
-{
-    clearPreviousConfig();
-    auto result = m_exportController->generateCloakConfig(serverIndex, isApiConfig);
-    applyExportResult(result);
-}
 
 void ExportUiController::generateXrayConfig(int serverIndex, const QString &clientName, bool isApiConfig)
 {

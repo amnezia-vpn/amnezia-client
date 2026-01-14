@@ -29,7 +29,6 @@ namespace
 {
     namespace configKey
     {
-        constexpr char cloak[] = "cloak";
         constexpr char awg[] = "awg";
         constexpr char vless[] = "vless";
 
@@ -98,11 +97,7 @@ QJsonObject SubscriptionController::GatewayRequestData::toJsonObject() const
 SubscriptionController::ProtocolData SubscriptionController::generateProtocolData(const QString &protocol)
 {
     ProtocolData protocolData;
-    if (protocol == configKey::cloak) {
-        auto certRequest = OpenVpnConfigurator::createCertRequest();
-        protocolData.certRequest = certRequest.request;
-        protocolData.certPrivKey = certRequest.privKey;
-    } else if (protocol == configKey::awg) {
+    if (protocol == configKey::awg) {
         auto connData = WireguardConfigurator::genClientKeys();
         protocolData.wireGuardClientPubKey = connData.clientPubKey;
         protocolData.wireGuardClientPrivKey = connData.clientPrivKey;
@@ -115,9 +110,7 @@ SubscriptionController::ProtocolData SubscriptionController::generateProtocolDat
 
 void SubscriptionController::appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload)
 {
-    if (protocol == configKey::cloak) {
-        apiPayload[configKey::certificate] = protocolData.certRequest;
-    } else if (protocol == configKey::awg) {
+    if (protocol == configKey::awg) {
         apiPayload[configKey::publicKey] = protocolData.wireGuardClientPubKey;
     } else if (protocol == configKey::vless) {
         apiPayload[configKey::publicKey] = protocolData.xrayUuid;
@@ -143,10 +136,7 @@ ErrorCode SubscriptionController::fillServerConfig(const QString &protocol, cons
     }
 
     QString configStr = ba;
-    if (protocol == configKey::cloak) {
-        configStr.replace("<key>", "<key>\n");
-        configStr.replace("$OPENVPN_PRIV_KEY", protocolData.certPrivKey);
-    } else if (protocol == configKey::awg) {
+    if (protocol == configKey::awg) {
         configStr.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", protocolData.wireGuardClientPrivKey);
         auto newServerConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
         auto containers = newServerConfig.value(config_key::containers).toArray();

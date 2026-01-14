@@ -140,12 +140,7 @@ ExportController::ExportResult ExportController::generateOpenVpnConfig(int serve
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, container);
 
-    Proto protocol;
-    if (container == DockerContainer::Cloak || container == DockerContainer::ShadowSocks) {
-        protocol = Proto::OpenVpn;
-    } else {
-        protocol = ContainerProps::defaultProtocol(container);
-    }
+    Proto protocol = ContainerProps::defaultProtocol(container);
 
     auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName, protocol, isApiConfig);
     if (nativeResult.errorCode != ErrorCode::NoError) {
@@ -206,66 +201,6 @@ ExportController::ExportResult ExportController::generateAwgConfig(int serverInd
     return result;
 }
 
-ExportController::ExportResult ExportController::generateShadowSocksConfig(int serverIndex, int containerIndex, bool isApiConfig)
-{
-    ExportResult result;
-
-    DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, container);
-
-    Proto protocol;
-    if (container == DockerContainer::Cloak) {
-        protocol = Proto::ShadowSocks;
-    } else {
-        protocol = ContainerProps::defaultProtocol(container);
-    }
-
-    auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, "", protocol, isApiConfig);
-    if (nativeResult.errorCode != ErrorCode::NoError) {
-        result.errorCode = nativeResult.errorCode;
-        return result;
-    }
-
-    QStringList lines = QString(QJsonDocument(nativeResult.jsonNativeConfig).toJson()).replace("\r", "").split("\n");
-    for (const QString &line : std::as_const(lines)) {
-        result.config.append(line + "\n");
-    }
-
-    result.nativeConfigString = QString("%1:%2@%3:%4")
-                                   .arg(nativeResult.jsonNativeConfig.value("method").toString(),
-                                        nativeResult.jsonNativeConfig.value("password").toString(),
-                                        nativeResult.jsonNativeConfig.value("server").toString(),
-                                        nativeResult.jsonNativeConfig.value("server_port").toString());
-
-    result.nativeConfigString = "ss://" + result.nativeConfigString.toUtf8().toBase64();
-
-    result.qrCodes << generateSingleQrCode(result.nativeConfigString.toUtf8());
-    return result;
-}
-
-ExportController::ExportResult ExportController::generateCloakConfig(int serverIndex, bool isApiConfig)
-{
-    ExportResult result;
-
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, DockerContainer::Cloak);
-
-    auto nativeResult = generateNativeConfig(serverIndex, DockerContainer::Cloak, containerConfig, "", Proto::Cloak, isApiConfig);
-    if (nativeResult.errorCode != ErrorCode::NoError) {
-        result.errorCode = nativeResult.errorCode;
-        return result;
-    }
-
-    QJsonObject modifiedConfig = nativeResult.jsonNativeConfig;
-    modifiedConfig.remove(config_key::transport_proto);
-    modifiedConfig.insert("ProxyMethod", "shadowsocks");
-
-    QStringList lines = QString(QJsonDocument(modifiedConfig).toJson()).replace("\r", "").split("\n");
-    for (const QString &line : std::as_const(lines)) {
-        result.config.append(line + "\n");
-    }
-
-    return result;
-}
 
 ExportController::ExportResult ExportController::generateXrayConfig(int serverIndex, const QString &clientName, bool isApiConfig)
 {

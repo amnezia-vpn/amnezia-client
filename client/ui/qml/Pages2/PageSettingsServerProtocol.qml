@@ -111,8 +111,6 @@ PageType {
                 clickedFunction: function() {
                     switch (protocolIndex) {
                     case ProtocolEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                    case ProtocolEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                    case ProtocolEnum.Cloak: CloakConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
                     case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
                     case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
                     case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;

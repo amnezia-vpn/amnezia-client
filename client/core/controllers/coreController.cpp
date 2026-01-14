@@ -67,12 +67,6 @@ void CoreController::initModels()
     m_openVpnConfigModel = new OpenVpnConfigModel(this);
     m_engine->rootContext()->setContextProperty("OpenVpnConfigModel", m_openVpnConfigModel);
 
-    m_shadowSocksConfigModel = new ShadowSocksConfigModel(this);
-    m_engine->rootContext()->setContextProperty("ShadowSocksConfigModel", m_shadowSocksConfigModel);
-
-    m_cloakConfigModel = new CloakConfigModel(this);
-    m_engine->rootContext()->setContextProperty("CloakConfigModel", m_cloakConfigModel);
-
     m_wireGuardConfigModel = new WireGuardConfigModel(this);
     m_engine->rootContext()->setContextProperty("WireGuardConfigModel", m_wireGuardConfigModel);
 

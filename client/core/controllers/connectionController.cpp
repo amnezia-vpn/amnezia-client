@@ -120,9 +120,6 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     bool isApiConfig = serverConfig.value(config_key::configVersion).toInt();
 
     for (Proto proto : ContainerProps::protocolsForContainer(container)) {
-        if (isApiConfig && container == DockerContainer::Cloak && proto == Proto::ShadowSocks) {
-            continue;
-        }
 
         QString protocolConfigString =
                 containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();

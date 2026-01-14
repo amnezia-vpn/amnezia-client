@@ -17,7 +17,6 @@ namespace
         WireGuard,
         Awg,
         Xray,
-        ShadowSocks,
         Backup,
         Invalid
     };

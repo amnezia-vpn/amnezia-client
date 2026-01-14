@@ -26,8 +26,6 @@ QString ContainerProps::containerToString(amnezia::DockerContainer c)
 {
     if (c == DockerContainer::None)
         return "none";
-    if (c == DockerContainer::Cloak)
-        return "amnezia-openvpn-cloak";
     if (c == DockerContainer::Awg)
         return "amnezia-awg";
     if (c == DockerContainer::Awg2)
@@ -60,10 +58,6 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
     case DockerContainer::None: return {};
 
     case DockerContainer::OpenVpn: return { Proto::OpenVpn };
-
-    case DockerContainer::ShadowSocks: return { Proto::OpenVpn, Proto::ShadowSocks };
-
-    case DockerContainer::Cloak: return { Proto::OpenVpn, Proto::ShadowSocks, Proto::Cloak };
 
     case DockerContainer::Ipsec: return { Proto::Ikev2 /*, Protocol::L2tp */ };
 
@@ -98,8 +92,6 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return { { DockerContainer::None, "Not installed" },
              { DockerContainer::OpenVpn, "OpenVPN" },
-             { DockerContainer::ShadowSocks, "OpenVPN over SS" },
-             { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Awg, "AmneziaWG" },
              { DockerContainer::Awg2, "AmneziaWG" },
@@ -115,14 +107,9 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 
 QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
 {
-    return { { DockerContainer::OpenVpn,
+    return {              { DockerContainer::OpenVpn,
                QObject::tr("OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its "
                            "own security protocol with SSL/TLS for key exchange.") },
-             { DockerContainer::ShadowSocks,
-               QObject::tr("Shadowsocks masks VPN traffic, making it resemble normal web traffic, but it may still be detected by certain analysis systems.") },
-             { DockerContainer::Cloak,
-               QObject::tr("OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against "
-                           "active-probing detection. It is very resistant to detection, but offers low speed.") },
              { DockerContainer::WireGuard,
                QObject::tr("WireGuard - popular VPN protocol with high performance, high speed and low power "
                            "consumption.") },
@@ -161,28 +148,6 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Normal battery consumption on mobile devices\n"
                       "* Flexible customization for various devices and OS\n"
                       "* Operates over both TCP and UDP protocols") },
-        { DockerContainer::ShadowSocks,
-          QObject::tr("Shadowsocks is based on the SOCKS5 protocol and encrypts connections using AEAD cipher. "
-                      "Although designed to be discreet, it doesn't mimic a standard HTTPS connection and can be detected by some DPI systems. "
-                      "Due to limited support in Amnezia, we recommend using the AmneziaWG protocol.\n"
-                      "\nFeatures:\n"
-                      "* Available in AmneziaVPN only on desktop platforms\n"
-                      "* Customizable encryption protocol\n"
-                      "* Detectable by some DPI systems\n"
-                      "* Operates over TCP protocol\n") },
-        { DockerContainer::Cloak,
-          QObject::tr("This combination includes the OpenVPN protocol and the Cloak plugin, specifically designed to protect against blocking.\n"
-                      "\nOpenVPN securely encrypts all internet traffic between your device and the server.\n"
-                      "\nThe Cloak plugin further protects the connection from DPI detection. "
-                      "It modifies traffic metadata to disguise VPN traffic as regular web traffic and prevents detection through active probing. "
-                      "If an incoming connection fails authentication, Cloak serves a fake website, making your VPN invisible to traffic analysis systems.\n"
-                      "\nIn regions with heavy internet censorship, we strongly recommend using OpenVPN with Cloak from your first connection.\n"
-                      "\nFeatures:\n"
-                      "* Available on all AmneziaVPN platforms\n"
-                      "* High power consumption on mobile devices\n"
-                      "* Flexible configuration options\n"
-                      "* Undetectable by DPI systems\n"
-                      "* Operates over TCP protocol on port 443") },
         { DockerContainer::WireGuard,
           QObject::tr("WireGuard is a modern, streamlined VPN protocol offering stable connectivity and excellent performance across all devices. "
                       "It uses fixed encryption settings, delivering lower latency and higher data transfer speeds compared to OpenVPN. "
@@ -250,8 +215,6 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     switch (c) {
     case DockerContainer::None: return Proto::Any;
     case DockerContainer::OpenVpn: return Proto::OpenVpn;
-    case DockerContainer::Cloak: return Proto::Cloak;
-    case DockerContainer::ShadowSocks: return Proto::ShadowSocks;
     case DockerContainer::WireGuard: return Proto::WireGuard;
     case DockerContainer::Awg2: return Proto::Awg;
     case DockerContainer::Awg: return Proto::Awg;
@@ -289,9 +252,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg2: return true;
     case DockerContainer::Awg: return true;
     case DockerContainer::Xray: return true;
-    case DockerContainer::Cloak: return true;
     case DockerContainer::SSXray: return true;
-        //    case DockerContainer::ShadowSocks: return true;
     default:
         return false;
     }
@@ -305,8 +266,6 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
     case DockerContainer::OpenVpn:
-    case DockerContainer::Cloak:
-    case DockerContainer::ShadowSocks:
         return false;
     default:
         return false;
@@ -322,10 +281,8 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
-    case DockerContainer::ShadowSocks: return false;
     case DockerContainer::Awg2: return true;
     case DockerContainer::Awg: return true;
-    case DockerContainer::Cloak: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
     default: return false;
@@ -414,8 +371,6 @@ int ContainerProps::installPageOrder(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::OpenVpn: return 4;
-    case DockerContainer::Cloak: return 5;
-    case DockerContainer::ShadowSocks: return 6;
     case DockerContainer::WireGuard: return 2;
     case DockerContainer::Awg2: return 1;
     case DockerContainer::Xray: return 3;

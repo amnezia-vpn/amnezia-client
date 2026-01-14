@@ -11,11 +11,9 @@
 #include "containers/containers_defs.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/installers/awgInstaller.h"
-#include "core/installers/cloakInstaller.h"
 #include "core/installers/installerBase.h"
 #include "core/installers/openvpnInstaller.h"
 #include "core/installers/sftpInstaller.h"
-#include "core/installers/shadowsocksInstaller.h"
 #include "core/installers/socks5Installer.h"
 #include "core/installers/torInstaller.h"
 #include "core/installers/wireguardInstaller.h"
@@ -437,18 +435,6 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             return true;
     }
 
-    if (container == DockerContainer::Cloak) {
-        if (oldProtoConfig.value(config_key::port).toString(protocols::cloak::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::cloak::defaultPort))
-            return true;
-    }
-
-    if (container == DockerContainer::ShadowSocks) {
-        if (oldProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort))
-            return true;
-    }
-
     if (ContainerProps::isAwgContainer(container)) {
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
@@ -721,8 +707,6 @@ QScopedPointer<InstallerBase> InstallController::createInstaller(DockerContainer
     case DockerContainer::OpenVpn: return QScopedPointer<InstallerBase>(new OpenVpnInstaller(this));
     case DockerContainer::Xray:
     case DockerContainer::SSXray: return QScopedPointer<InstallerBase>(new XrayInstaller(this));
-    case DockerContainer::Cloak: return QScopedPointer<InstallerBase>(new CloakInstaller(this));
-    case DockerContainer::ShadowSocks: return QScopedPointer<InstallerBase>(new ShadowSocksInstaller(this));
     case DockerContainer::TorWebSite: return QScopedPointer<InstallerBase>(new TorInstaller(this));
     case DockerContainer::Sftp: return QScopedPointer<InstallerBase>(new SftpInstaller(this));
     case DockerContainer::Socks5Proxy: return QScopedPointer<InstallerBase>(new Socks5Installer(this));
@@ -1089,12 +1073,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             for (const auto &protocol : protocols) {
                 QJsonObject containerConfig;
 
-                bool shouldProcessProtocol = false;
-                if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
-                    shouldProcessProtocol = true;
-                } else {
-                    shouldProcessProtocol = (protocol == mainProto);
-                }
+                bool shouldProcessProtocol = (protocol == mainProto);
 
                 if (shouldProcessProtocol) {
                     containerConfig.insert(config_key::port, port);

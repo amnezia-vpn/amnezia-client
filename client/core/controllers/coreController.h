@@ -49,7 +49,6 @@
 #include "ui/models/allowedDnsModel.h"
 #include "ui/models/containersModel.h"
 #include "ui/models/languageModel.h"
-#include "ui/models/protocols/cloakConfigModel.h"
 #ifdef Q_OS_WINDOWS
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
@@ -61,7 +60,6 @@
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/openvpnConfigModel.h"
-#include "ui/models/protocols/shadowsocksConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "ui/models/protocols/xrayConfigModel.h"
 #include "ui/models/protocolsModel.h"
@@ -171,8 +169,6 @@ private:
     ApiDevicesModel* m_apiDevicesModel;
 
     OpenVpnConfigModel* m_openVpnConfigModel;
-    ShadowSocksConfigModel* m_shadowSocksConfigModel;
-    CloakConfigModel* m_cloakConfigModel;
     XrayConfigModel* m_xrayConfigModel;
     WireGuardConfigModel* m_wireGuardConfigModel;
     AwgConfigModel* m_awgConfigModel;

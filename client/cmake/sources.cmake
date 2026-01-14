@@ -24,8 +24,6 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/installers/wireguardInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/openvpnInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/xrayInstaller.h
-    ${CLIENT_ROOT_DIR}/core/installers/cloakInstaller.h
-    ${CLIENT_ROOT_DIR}/core/installers/shadowsocksInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/torInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/sftpInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/socks5Installer.h
@@ -104,8 +102,6 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/installers/wireguardInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/openvpnInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/xrayInstaller.cpp
-    ${CLIENT_ROOT_DIR}/core/installers/cloakInstaller.cpp
-    ${CLIENT_ROOT_DIR}/core/installers/shadowsocksInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/torInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/sftpInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/socks5Installer.cpp
@@ -249,8 +245,6 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/core/utils/privilegedProcess.h
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.h
-        ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.h
-        ${CLIENT_ROOT_DIR}/protocols/shadowsocksvpnprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/awgprotocol.h
@@ -263,8 +257,6 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.cpp
-        ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.cpp
-        ${CLIENT_ROOT_DIR}/protocols/shadowsocksvpnprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/awgprotocol.cpp

@@ -22,8 +22,6 @@ public slots:
     void generateOpenVpnConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig);
     void generateWireGuardConfig(int serverIndex, const QString &clientName, bool isApiConfig);
     void generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig);
-    void generateShadowSocksConfig(int serverIndex, int containerIndex, bool isApiConfig);
-    void generateCloakConfig(int serverIndex, bool isApiConfig);
     void generateXrayConfig(int serverIndex, const QString &clientName, bool isApiConfig);
 
     QString getConfig();

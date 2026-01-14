@@ -35,7 +35,6 @@ include(":protocolApi")
 include(":wireguard")
 include(":awg")
 include(":openvpn")
-include(":cloak")
 include(":xray")
 include(":xray:libXray")
 

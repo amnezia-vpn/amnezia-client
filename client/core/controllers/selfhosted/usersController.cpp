@@ -304,7 +304,7 @@ ErrorCode UsersController::updateClients(const DockerContainer container, const 
     ErrorCode error = ErrorCode::NoError;
 
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+    if (container == DockerContainer::OpenVpn) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
@@ -324,7 +324,7 @@ ErrorCode UsersController::updateClients(const DockerContainer container, const 
 
         int count = 0;
 
-        if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+        if (container == DockerContainer::OpenVpn) {
             error = getOpenVpnClients(container, credentials, sshSession, count, m_clientsTable);
         } else if (container == DockerContainer::WireGuard || ContainerProps::isAwgContainer(container)) {
             error = getWireGuardClients(container, credentials, sshSession, count, m_clientsTable);
@@ -391,10 +391,6 @@ ErrorCode UsersController::appendClient(const DockerContainer container, const S
 {
     Proto protocol;
     switch (container) {
-        case DockerContainer::ShadowSocks:
-        case DockerContainer::Cloak:
-            protocol = Proto::OpenVpn;
-            break;
         case DockerContainer::OpenVpn:
         case DockerContainer::WireGuard:
         case DockerContainer::Awg:
@@ -481,7 +477,7 @@ ErrorCode UsersController::appendClient(const QString &clientId, const QString &
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+    if (container == DockerContainer::OpenVpn) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
@@ -520,7 +516,7 @@ ErrorCode UsersController::renameClient(const int row, const QString &clientName
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+    if (container == DockerContainer::OpenVpn) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
@@ -623,7 +619,7 @@ ErrorCode UsersController::revokeWireGuard(const int row, const DockerContainer 
     const QByteArray clientsTableString = QJsonDocument(clientsTable).toJson();
 
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+    if (container == DockerContainer::OpenVpn) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
@@ -770,9 +766,7 @@ ErrorCode UsersController::revokeClient(const int index, const DockerContainer c
 
     switch(container)
     {
-        case DockerContainer::OpenVpn:
-        case DockerContainer::ShadowSocks:
-        case DockerContainer::Cloak: {
+        case DockerContainer::OpenVpn: {
             errorCode = revokeOpenVpn(index, container, credentials, serverIndex, sshSession, m_clientsTable);
             break;
         }
@@ -800,12 +794,7 @@ ErrorCode UsersController::revokeClient(const int index, const DockerContainer c
             auto containerConfig = containers.at(i).toObject();
             auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
             if (containerType == container) {
-                QJsonObject protocolConfig;
-                if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
-                    protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
-                } else {
-                    protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(containerType)).toObject();
-                }
+                QJsonObject protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(containerType)).toObject();
 
                 if (!clientId.isEmpty() && protocolConfig.value(config_key::last_config).toString().contains(clientId)) {
                     emit adminConfigRevoked(container);
@@ -834,11 +823,6 @@ ErrorCode UsersController::revokeClient(const QJsonObject &containerConfig, cons
 
     switch(container)
     {
-        case DockerContainer::ShadowSocks:
-        case DockerContainer::Cloak: {
-            protocol = Proto::OpenVpn;
-            break;
-        }
         case DockerContainer::OpenVpn:
         case DockerContainer::WireGuard:
         case DockerContainer::Awg:
@@ -900,9 +884,7 @@ ErrorCode UsersController::revokeClient(const QJsonObject &containerConfig, cons
 
     switch (container)
     {
-    case DockerContainer::OpenVpn:
-    case DockerContainer::ShadowSocks:
-    case DockerContainer::Cloak: {
+    case DockerContainer::OpenVpn: {
         errorCode = revokeOpenVpn(row, container, credentials, serverIndex, sshSession, m_clientsTable);
         break;
     }

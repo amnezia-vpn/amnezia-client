@@ -34,8 +34,8 @@ QVariant Ikev2ConfigModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-    case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort);
-    case Roles::CipherRole: return m_protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher);
+    case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString("");
+    case Roles::CipherRole: return m_protocolConfig.value(config_key::cipher).toString("");
     }
 
     return QVariant();
@@ -47,17 +47,17 @@ void Ikev2ConfigModel::updateModel(const QJsonObject &config)
     m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
 
     m_fullConfig = config;
-    QJsonObject protocolConfig = config.value(config_key::shadowsocks).toObject();
+    QJsonObject protocolConfig = QJsonObject(); // IKEv2 doesn't use a specific protocol config key
 
-    m_protocolConfig.insert(config_key::cipher, protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher));
-    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort));
+    m_protocolConfig.insert(config_key::cipher, protocolConfig.value(config_key::cipher).toString(""));
+    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(""));
 
     endResetModel();
 }
 
 QJsonObject Ikev2ConfigModel::getConfig()
 {
-    m_fullConfig.insert(config_key::shadowsocks, m_protocolConfig);
+    // IKEv2 doesn't use a specific protocol config key, just return the full config
     return m_fullConfig;
 }
 

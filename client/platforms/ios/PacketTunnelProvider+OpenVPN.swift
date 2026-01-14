@@ -63,7 +63,6 @@ extension PacketTunnelProvider {
     }
 
     private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data,
-                                       withShadowSocks viaSS: Bool = false,
                                        completionHandler: @escaping (Error?) -> Void) {
         ovpnLog(.info, message: "Setup and launch")
 
@@ -104,9 +103,6 @@ extension PacketTunnelProvider {
 
         let configuration = OpenVPNConfiguration()
         configuration.fileContent = sanitizedData
-        if configString.contains("cloak") {
-            configuration.setPTCloak()
-        }
 
         let evaluation: OpenVPNConfigurationEvaluation?
         do {
