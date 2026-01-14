@@ -2,8 +2,10 @@
 
 #include "core/controllers/gatewayController.h"
 #include "core/utils/api/apiDefs.h"
+#include <QtConcurrent/QtConcurrent>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSharedPointer>
 
 namespace
 {
@@ -20,23 +22,24 @@ NewsController::NewsController(AppSettingsRepository* appSettingsRepository,
 {
 }
 
-ErrorCode NewsController::fetchNews(QJsonArray &newsArray)
+QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
 {
     if (!m_serversController) {
         qWarning() << "ServersController is null, skip fetchNews";
-        return ErrorCode::InternalError;
+        return QtFuture::makeReadyFuture(qMakePair(ErrorCode::InternalError, QJsonArray()));
     }
     
     const auto stacks = m_serversController->gatewayStacks();
     if (stacks.isEmpty()) {
         qDebug() << "No Gateway stacks, skip fetchNews";
-        return ErrorCode::NoError;
+        return QtFuture::makeReadyFuture(qMakePair(ErrorCode::NoError, QJsonArray()));
     }
 
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), 
-                                       m_appSettingsRepository->isDevGatewayEnv(),
-                                       apiDefs::requestTimeoutMsecs, 
-                                       m_appSettingsRepository->isStrictKillSwitchEnabled());
+    auto gatewayController = QSharedPointer<GatewayController>::create(
+        m_appSettingsRepository->getGatewayEndpoint(),
+        m_appSettingsRepository->isDevGatewayEnv(),
+        apiDefs::requestTimeoutMsecs,
+        m_appSettingsRepository->isStrictKillSwitchEnabled());
     
     QJsonObject payload;
     payload.insert("locale", m_appSettingsRepository->getAppLanguage().name().split("_").first());
@@ -49,22 +52,25 @@ ErrorCode NewsController::fetchNews(QJsonArray &newsArray)
         payload.insert(configKey::serviceType, stacksJson.value(configKey::serviceType));
     }
 
-    QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/news"), payload, responseBody);
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
-    }
-
-    QJsonDocument doc = QJsonDocument::fromJson(responseBody);
-    if (doc.isArray()) {
-        newsArray = doc.array();
-    } else if (doc.isObject()) {
-        QJsonObject obj = doc.object();
-        if (obj.value("news").isArray()) {
-            newsArray = obj.value("news").toArray();
+    auto future = gatewayController->postAsync(QString("%1v1/news"), payload);
+    return future.then([gatewayController](QPair<ErrorCode, QByteArray> result) -> QPair<ErrorCode, QJsonArray> {
+        auto [errorCode, responseBody] = result;
+        if (errorCode != ErrorCode::NoError) {
+            return qMakePair(errorCode, QJsonArray());
         }
-    }
 
-    return ErrorCode::NoError;
+        QJsonDocument doc = QJsonDocument::fromJson(responseBody);
+        QJsonArray newsArray;
+        if (doc.isArray()) {
+            newsArray = doc.array();
+        } else if (doc.isObject()) {
+            QJsonObject obj = doc.object();
+            if (obj.value("news").isArray()) {
+                newsArray = obj.value("news").toArray();
+            }
+        }
+
+        return qMakePair(ErrorCode::NoError, newsArray);
+    });
 }
 

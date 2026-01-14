@@ -1,8 +1,9 @@
 #ifndef NEWSCONTROLLER_H
 #define NEWSCONTROLLER_H
 
+#include <QFuture>
 #include <QJsonArray>
-#include <QByteArray>
+#include <QPair>
 
 #include "core/utils/defs.h"
 #include "core/repositories/appSettingsRepository.h"
@@ -14,7 +15,7 @@ public:
     explicit NewsController(AppSettingsRepository* appSettingsRepository,
                            ServersController* serversController);
 
-    ErrorCode fetchNews(QJsonArray &newsArray);
+    QFuture<QPair<ErrorCode, QJsonArray>> fetchNews();
 
 private:
     AppSettingsRepository* m_appSettingsRepository;

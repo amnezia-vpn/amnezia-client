@@ -1,7 +1,5 @@
 #include "apiNewsUiController.h"
 
-#include <QtConcurrent/QtConcurrent>
-
 ApiNewsUiController::ApiNewsUiController(NewsModel* newsModel,
                                          NewsController* newsController,
                                          QObject *parent)
@@ -11,10 +9,14 @@ ApiNewsUiController::ApiNewsUiController(NewsModel* newsModel,
 
 void ApiNewsUiController::fetchNews(bool showError)
 {
-    QtConcurrent::run([this, showError]() {
-        QJsonArray newsArray;
-        ErrorCode errorCode = m_newsController->fetchNews(newsArray);
-        
+    if (!m_newsController) {
+        qWarning() << "NewsController is null, skip fetchNews";
+        return;
+    }
+
+    auto future = m_newsController->fetchNews();
+    future.then(this, [this, showError](QPair<ErrorCode, QJsonArray> result) {
+        auto [errorCode, newsArray] = result;
         if (errorCode != ErrorCode::NoError) {
             emit errorOccurred(errorCode, showError);
             return;
