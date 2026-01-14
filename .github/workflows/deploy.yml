@@ -10,7 +10,7 @@ env:
 
 jobs:
   Build-Linux-Ubuntu:
-    runs-on: ubuntu-24.04-16core
+    runs-on: ubuntu-24.04-4cores
 
     env:
       QT_VERSION: 6.8.3
@@ -537,7 +537,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
-    runs-on: ubuntu-24.04-16core
+    runs-on: ubuntu-24.04-4cores
 
     env:
       ANDROID_BUILD_PLATFORM: android-36
