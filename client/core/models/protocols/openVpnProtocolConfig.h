@@ -1,0 +1,53 @@
+#ifndef OPENVPNPROTOCOLCONFIG_H
+#define OPENVPNPROTOCOLCONFIG_H
+
+#include <QJsonObject>
+#include <QString>
+#include <optional>
+
+namespace amnezia
+{
+
+struct OpenVpnServerConfig {
+    QString port;
+    QString transportProto;
+    QString subnetAddress;
+    QString subnetMask;
+    QString subnetCidr;
+    QString cipher;
+    QString hash;
+    bool ncpDisable;
+    bool tlsAuth;
+    QString additionalClientConfig;
+    QString additionalServerConfig;
+    bool isThirdPartyConfig;
+    
+    QJsonObject toJson() const;
+    static OpenVpnServerConfig fromJson(const QJsonObject& json);
+};
+
+struct OpenVpnClientConfig {
+    QString nativeConfig;
+    QString clientId;
+    bool blockOutsideDns;
+    
+    QJsonObject toJson() const;
+    static OpenVpnClientConfig fromJson(const QJsonObject& json);
+};
+
+struct OpenVpnProtocolConfig {
+    OpenVpnServerConfig serverConfig;
+    std::optional<OpenVpnClientConfig> clientConfig;
+    
+    QJsonObject toJson() const;
+    static OpenVpnProtocolConfig fromJson(const QJsonObject& json);
+    
+    bool hasClientConfig() const;
+    void setClientConfig(const OpenVpnClientConfig& config);
+    void clearClientConfig();
+};
+
+} // namespace amnezia
+
+#endif // OPENVPNPROTOCOLCONFIG_H
+
