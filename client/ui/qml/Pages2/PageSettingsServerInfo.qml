@@ -62,7 +62,7 @@ PageType {
         objectName: "mainLayout"
 
         anchors.fill: parent
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         spacing: 4
 

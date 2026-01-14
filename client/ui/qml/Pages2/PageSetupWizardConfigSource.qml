@@ -41,7 +41,7 @@ PageType {
                 property bool isVisible: SettingsController.getInstallationUuid() !== "" || PageController.isStartPageVisible()
                 
                 Layout.fillWidth: true
-                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 24 + PageController.safeAreaTopMargin
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 

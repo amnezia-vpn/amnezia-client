@@ -136,15 +136,29 @@ void CoreController::initCoreControllers()
     m_installController = new InstallController(sshSession, serversRepo, m_settings, this);
     m_exportController = new ExportController(serversRepo, appSettingsRepo, m_settings, this);
     m_connectionController = new ConnectionController(serversRepo, appSettingsRepo, m_vpnConnection.get(), m_settings);
+    m_settingsController = new SettingsController(serversRepo, appSettingsRepo, this);
+    
+    connect(m_settingsController, &SettingsController::siteSplitTunnelingRouteModeChanged, this, [this](RouteMode mode) {
+        m_sitesController->setRouteMode(mode);
+    });
+    connect(m_settingsController, &SettingsController::siteSplitTunnelingToggled, this, [this](bool enabled) {
+        m_sitesController->toggleSplitTunneling(enabled);
+    });
+    connect(m_settingsController, &SettingsController::appSplitTunnelingRouteModeChanged, this, [this](AppsRouteMode mode) {
+        m_appSplitTunnelingController->setRouteMode(mode);
+    });
+    connect(m_settingsController, &SettingsController::appSplitTunnelingToggled, this, [this](bool enabled) {
+        m_appSplitTunnelingController->toggleSplitTunneling(enabled);
+    });
+    connect(m_settingsController, &SettingsController::appSplitTunnelingClearAppsList, this, [this]() {
+        m_appSplitTunnelingController->clearAppsList();
+    });
 }
 
 void CoreController::initControllers()
 {
     m_connectionUiController = new ConnectionUiController(m_connectionController, m_serversController, m_containersModel, m_clientManagementModel, m_vpnConnection.get(), this);
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionUiController);
-
-    m_pageController = new PageController(m_serversModel, m_appSettingsRepository, this);
-    m_engine->rootContext()->setContextProperty("PageController", m_pageController);
 
     m_focusController = new FocusController(m_engine, this);
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController);
@@ -198,8 +212,11 @@ void CoreController::initControllers()
     m_languageUiController = new LanguageUiController(m_appSettingsRepository, m_languageModel, this);
     m_engine->rootContext()->setContextProperty("LanguageUiController", m_languageUiController);
 
-    m_settingsController = new SettingsController(m_serversModel, m_containersModel, m_languageUiController, m_sitesController, m_appSplitTunnelingController, m_serversRepository, m_appSettingsRepository, this);
-    m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController);
+    m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, m_containersModel, m_languageUiController, this);
+    m_engine->rootContext()->setContextProperty("SettingsController", m_settingsUiController);
+
+    m_pageController = new PageController(m_serversModel, m_settingsController, this);
+    m_engine->rootContext()->setContextProperty("PageController", m_pageController);
 
     m_serversUiController = new ServersUiController(m_serversController, m_serversRepository, m_appSettingsRepository, m_serversModel, m_containersModel, m_defaultServerContainersModel, this);
     m_engine->rootContext()->setContextProperty("ServersUiController", m_serversUiController);
@@ -279,7 +296,7 @@ void CoreController::initAppleController()
     connect(IosController::Instance(), &IosController::importBackupFromOutside, this, [this](QString filePath) {
         emit m_pageController->goToPageHome();
         m_pageController->goToPageSettingsBackup();
-        emit m_settingsController->importBackupFromOutside(filePath);
+        emit m_settingsUiController->importBackupFromOutside(filePath);
     });
 
     QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_appSettingsRepository->isScreenshotsEnabled()); });
@@ -436,14 +453,14 @@ void CoreController::initTranslationsUpdatedHandler()
 void CoreController::initLanguageHandler()
 {
     connect(m_appSettingsRepository, &QAppSettingsRepository::appLanguageChanged, m_languageUiController, &LanguageUiController::onAppLanguageChanged);
-    connect(m_settingsController, &SettingsController::resetLanguageToSystem, m_languageUiController, [this]() {
+    connect(m_settingsUiController, &SettingsUiController::resetLanguageToSystem, m_languageUiController, [this]() {
         m_languageUiController->changeLanguage(m_languageUiController->getSystemLanguageEnum());
     });
 }
 
 void CoreController::initAutoConnectHandler()
 {
-    if (m_settingsController->isAutoConnectEnabled() && m_serversController->getDefaultServerIndex() >= 0) {
+    if (m_settingsUiController->isAutoConnectEnabled() && m_serversController->getDefaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this]() { m_connectionUiController->openConnection(); });
     }
 }
@@ -561,7 +578,7 @@ void CoreController::initShowMigrationDrawerHandler()
 
 void CoreController::initStrictKillSwitchHandler()
 {
-    connect(m_settingsController, &SettingsController::strictKillSwitchEnabledChanged, m_vpnConnection.get(),
+    connect(m_settingsUiController, &SettingsUiController::strictKillSwitchEnabledChanged, m_vpnConnection.get(),
             &VpnConnection::onKillSwitchModeChanged);
 }
 

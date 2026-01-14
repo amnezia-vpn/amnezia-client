@@ -3,6 +3,7 @@
 #include "settings.h"
 #include "ui/utils/converter.h"
 #include "core/utils/errorStrings.h"
+#include "core/controllers/settingsController.h"
 #if defined(MACOS_NE)
 #include "platforms/ios/ios_controller.h"
 #endif
@@ -21,13 +22,25 @@
 #endif
 
 PageController::PageController(ServersModel* serversModel,
-                               QAppSettingsRepository* appSettingsRepository,
+                               SettingsController* settingsController,
                                QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_appSettingsRepository(appSettingsRepository)
+    : QObject(parent), m_serversModel(serversModel), m_settingsController(settingsController)
 {
 #ifdef Q_OS_ANDROID
     auto initialPageNavigationBarColor = getInitialPageNavigationBarColor();
     AndroidController::instance()->setNavigationBarColor(initialPageNavigationBarColor);
+
+    connect(AndroidController::instance(), &AndroidController::imeInsetsChanged, this, [this](int heightDp) {
+        m_imeHeight = heightDp;
+        emit imeHeightChanged(heightDp);
+        emit safeAreaBottomMarginChanged();
+    });
+    connect(AndroidController::instance(), &AndroidController::systemBarsInsetsChanged, this, [this](int navBarHeightDp, int statusBarHeightDp) {
+        m_cachedNavigationBarHeight = navBarHeightDp;
+        m_cachedStatusBarHeight = statusBarHeightDp;
+        emit safeAreaBottomMarginChanged();
+        emit safeAreaTopMarginChanged();
+    });
 #endif
 
 #if defined Q_OS_MACX
@@ -66,7 +79,6 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 
 void PageController::closeWindow()
 {
-// On mobile platforms, quit app on close; on desktop, just hide window
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     qApp->quit();
 #else
@@ -116,7 +128,7 @@ void PageController::updateNavigationBarColor(const int color)
 
 void PageController::showOnStartup()
 {
-    if (!m_appSettingsRepository->isStartMinimized()) {
+    if (!m_settingsController->isStartMinimizedEnabled()) {
         emit raiseMainWindow();
     } else {
 #if defined(Q_OS_WIN) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
@@ -166,6 +178,76 @@ int PageController::decrementDrawerDepth()
     } else {
         return --m_drawerDepth;
     }
+}
+
+bool PageController::isEdgeToEdgeEnabled()
+{
+#ifdef Q_OS_ANDROID
+    if (!m_edgeToEdgeCached) {
+        m_cachedEdgeToEdgeEnabled = AndroidController::instance()->isEdgeToEdgeEnabled();
+        m_edgeToEdgeCached = true;
+    }
+    return m_cachedEdgeToEdgeEnabled;
+#else
+    return false;
+#endif
+}
+
+int PageController::getStatusBarHeight()
+{
+#ifdef Q_OS_ANDROID
+    if (m_cachedStatusBarHeight < 0) {
+        m_cachedStatusBarHeight = AndroidController::instance()->getStatusBarHeight();
+    }
+    return m_cachedStatusBarHeight;
+#else
+    return 0;
+#endif
+}
+
+int PageController::getNavigationBarHeight()
+{
+#ifdef Q_OS_ANDROID
+    if (m_cachedNavigationBarHeight < 0) {
+        m_cachedNavigationBarHeight = AndroidController::instance()->getNavigationBarHeight();
+    }
+    return m_cachedNavigationBarHeight;
+#else
+    return 0;
+#endif
+}
+
+int PageController::getSafeAreaTopMargin()
+{
+#ifdef Q_OS_ANDROID
+    if (isEdgeToEdgeEnabled()) {
+        int height = getStatusBarHeight();
+        int result = height > 0 ? height : 40;
+        return result;
+    }
+#endif
+    return 0;
+}
+
+int PageController::getSafeAreaBottomMargin()
+{
+#ifdef Q_OS_ANDROID
+    if (isEdgeToEdgeEnabled()) {
+        if (m_imeHeight > 0) {
+            return 0;
+        }
+        
+        int height = getNavigationBarHeight();
+        int result = height > 0 ? height : 56;
+        return result;
+    }
+#endif
+    return 0;
+}
+
+int PageController::getImeHeight()
+{
+    return m_imeHeight;
 }
 
 void PageController::onShowErrorMessage(ErrorCode errorCode)

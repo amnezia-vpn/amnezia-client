@@ -83,7 +83,7 @@ PageType {
             objectName: "homeColumnLayout"
 
             anchors.fill: parent
-            anchors.topMargin: 12 + SettingsController.safeAreaTopMargin
+            anchors.topMargin: 12 + PageController.safeAreaTopMargin
             anchors.bottomMargin: 16
 
             BasicButtonType {

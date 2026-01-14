@@ -5,8 +5,9 @@
 #include <QQmlEngine>
 
 #include "core/utils/defs.h"
-#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/servers_model.h"
+
+class SettingsController;
 
 namespace PageLoader
 {
@@ -92,8 +93,12 @@ class PageController : public QObject
     Q_OBJECT
 public:
     explicit PageController(ServersModel* serversModel,
-                            QAppSettingsRepository* appSettingsRepository,
+                            SettingsController* settingsController,
                             QObject *parent = nullptr);
+
+    Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin NOTIFY safeAreaTopMarginChanged)
+    Q_PROPERTY(int safeAreaBottomMargin READ getSafeAreaBottomMargin NOTIFY safeAreaBottomMarginChanged)
+    Q_PROPERTY(int imeHeight READ getImeHeight NOTIFY imeHeightChanged)
 
 public slots:
     bool isStartPageVisible();
@@ -117,6 +122,13 @@ public slots:
     int getDrawerDepth() const;
     int incrementDrawerDepth();
     int decrementDrawerDepth();
+
+    bool isEdgeToEdgeEnabled();
+    int getStatusBarHeight();
+    int getNavigationBarHeight();
+    int getSafeAreaTopMargin();
+    int getSafeAreaBottomMargin();
+    int getImeHeight();
 
 private slots:
     void onShowErrorMessage(amnezia::ErrorCode errorCode);
@@ -153,13 +165,23 @@ signals:
     void escapePressed();
     void closeTopDrawer();
 
+    void imeHeightChanged(int height);
+    void safeAreaTopMarginChanged();
+    void safeAreaBottomMarginChanged();
+
 private:
     ServersModel* m_serversModel;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SettingsController* m_settingsController;
 
     bool m_isTriggeredByConnectButton;
 
     int m_drawerDepth = 0;
+
+    mutable int m_cachedStatusBarHeight = -1;
+    mutable int m_cachedNavigationBarHeight = -1;
+    mutable bool m_cachedEdgeToEdgeEnabled = false;
+    mutable bool m_edgeToEdgeCached = false;
+    int m_imeHeight = 0;
 };
 
-#endif // PAGECONTROLLER_H
+#endif

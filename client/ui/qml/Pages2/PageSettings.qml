@@ -40,7 +40,7 @@ PageType {
             BaseHeaderType {
                 id: header
                 Layout.fillWidth: true
-                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 24 + PageController.safeAreaTopMargin
                 Layout.bottomMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16

@@ -74,7 +74,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         BackButtonType {
             id: backButton
@@ -166,7 +166,7 @@ PageType {
 
         anchors.top: header.bottom
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin + (searchField.textField.activeFocus ? 0 : SettingsController.imeHeight)
+        anchors.bottomMargin: addAppButton.implicitHeight + 48 + PageController.safeAreaBottomMargin + (searchField.textField.activeFocus ? 0 : PageController.imeHeight)
         anchors.left: parent.left
         anchors.right: parent.right
         clip: true
@@ -221,7 +221,7 @@ PageType {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         
-        height: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin
+        height: addAppButton.implicitHeight + 48 + PageController.safeAreaBottomMargin
         
         color: AmneziaStyle.color.midnightBlack
         opacity: 0.8
@@ -237,7 +237,7 @@ PageType {
             anchors.topMargin: 24
             anchors.rightMargin: 16
             anchors.leftMargin: 16
-            anchors.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
+            anchors.bottomMargin: 24 + PageController.safeAreaBottomMargin
 
             TextFieldWithHeaderType {
                 id: searchField

@@ -22,7 +22,7 @@
 #include "ui/controllers/selfhosted/installUiController.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/selfhosted/protocolsUiController.h"
-#include "ui/controllers/settingsController.h"
+#include "ui/controllers/settingsUiController.h"
 #include "ui/controllers/serversUiController.h"
 #include "ui/controllers/sitesUiController.h"
 #include "ui/controllers/systemController.h"
@@ -40,6 +40,7 @@
 #include "core/controllers/api/subscriptionController.h"
 #include "core/controllers/api/newsController.h"
 #include "core/controllers/installController.h"
+#include "core/controllers/settingsController.h"
 #include "core/controllers/connectionController.h"
 
 #include "core/repositories/qServersRepository.h"
@@ -145,7 +146,7 @@ private:
     InstallUiController* m_installUiController;
     ImportController* m_importController;
     ExportUiController* m_exportUiController;
-    SettingsController* m_settingsController;
+    SettingsUiController* m_settingsUiController;
     ServersUiController* m_serversUiController;
     SitesUiController* m_sitesUiController;
     SystemController* m_systemController;
@@ -171,6 +172,7 @@ private:
     InstallController* m_installController;
     ExportController* m_exportController;
     ConnectionController* m_connectionController;
+    SettingsController* m_settingsController;
 
     ContainersModel* m_containersModel;
     ContainersModel* m_defaultServerContainersModel;

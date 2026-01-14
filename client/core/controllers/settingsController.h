@@ -1,0 +1,99 @@
+#ifndef SETTINGSCONTROLLER_H
+#define SETTINGSCONTROLLER_H
+
+#include <QObject>
+#include <QJsonObject>
+#include <QByteArray>
+#include <QDateTime>
+
+#include "core/utils/defs.h"
+#include "core/repositories/serversRepository.h"
+#include "core/repositories/appSettingsRepository.h"
+
+using namespace amnezia;
+
+class SettingsController : public QObject
+{
+    Q_OBJECT
+public:
+    explicit SettingsController(ServersRepository* serversRepository,
+                               AppSettingsRepository* appSettingsRepository,
+                               QObject* parent = nullptr);
+    ~SettingsController() = default;
+
+    void toggleAmneziaDns(bool enable);
+    bool isAmneziaDnsEnabled() const;
+
+    QString getPrimaryDns() const;
+    void setPrimaryDns(const QString &dns);
+
+    QString getSecondaryDns() const;
+    void setSecondaryDns(const QString &dns);
+
+    bool isLoggingEnabled() const;
+    void toggleLogging(bool enable);
+
+    void clearLogs();
+
+    QByteArray backupAppConfig() const;
+    ErrorCode restoreAppConfigFromData(const QByteArray &data);
+
+    QString getAppVersion() const;
+
+    void clearSettings();
+
+    bool isAutoConnectEnabled() const;
+    void toggleAutoConnect(bool enable);
+
+    bool isAutoStartEnabled() const;
+    void toggleAutoStart(bool enable);
+
+    bool isStartMinimizedEnabled() const;
+    void toggleStartMinimized(bool enable);
+
+    bool isScreenshotsEnabled() const;
+    void toggleScreenshotsEnabled(bool enable);
+
+    bool isKillSwitchEnabled() const;
+    void toggleKillSwitch(bool enable);
+
+    bool isStrictKillSwitchEnabled() const;
+    void toggleStrictKillSwitch(bool enable);
+
+    QString getInstallationUuid() const;
+
+    void enableDevMode();
+    bool isDevModeEnabled() const;
+
+    void resetGatewayEndpoint();
+    void setGatewayEndpoint(const QString &endpoint);
+    QString getGatewayEndpoint() const;
+    bool isDevGatewayEnv() const;
+    void toggleDevGatewayEnv(bool enabled);
+
+    bool isHomeAdLabelVisible() const;
+    void disableHomeAdLabel();
+
+    void checkIfNeedDisableLogs();
+
+signals:
+    void siteSplitTunnelingRouteModeChanged(RouteMode mode);
+    void siteSplitTunnelingToggled(bool enabled);
+    void appSplitTunnelingRouteModeChanged(AppsRouteMode mode);
+    void appSplitTunnelingToggled(bool enabled);
+    void appSplitTunnelingClearAppsList();
+
+private:
+    QString getPlatform() const;
+
+    ServersRepository* m_serversRepository;
+    AppSettingsRepository* m_appSettingsRepository;
+
+    QString m_appVersion;
+    QDateTime m_loggingDisableDate;
+    bool m_isDevModeEnabled = false;
+};
+
+#endif
+
+

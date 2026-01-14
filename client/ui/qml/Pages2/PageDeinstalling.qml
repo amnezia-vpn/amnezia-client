@@ -45,7 +45,7 @@ PageType {
 
             BaseHeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 20 + PageController.safeAreaTopMargin
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

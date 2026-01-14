@@ -10,7 +10,7 @@ QtObject {
     property Connections imeConnection: Connections {
         target: SettingsController
         function onImeHeightChanged() {
-            if (root.scrollToItemTarget && SettingsController.imeHeight > 0) {
+            if (root.scrollToItemTarget && PageController.imeHeight > 0) {
                 scrollTimer.restart()
             }
         }
@@ -21,11 +21,11 @@ QtObject {
         repeat: false
         onTriggered: {
             if (root.scrollToItemTarget && root.listView) {
-                if (SettingsController.imeHeight > 0) {
+                if (PageController.imeHeight > 0) {
                     var item = root.scrollToItemTarget
                     var itemY = item.mapToItem(root.listView.contentItem, 0, 0).y
                     var itemHeight = item.height
-                    var keyboardHeight = SettingsController.imeHeight + SettingsController.safeAreaBottomMargin
+                    var keyboardHeight = PageController.imeHeight + PageController.safeAreaBottomMargin
                     var visibleHeight = root.listView.height - keyboardHeight
                     
                     var desiredTopOffset = visibleHeight * 0.25

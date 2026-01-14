@@ -20,7 +20,7 @@ PageType {
         anchors.left: parent.left
         anchors.top: parent.top
 
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
     }
 
     ParagraphTextType {

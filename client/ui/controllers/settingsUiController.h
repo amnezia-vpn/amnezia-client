@@ -4,12 +4,10 @@
 #include <QObject>
 
 #include "core/controllers/settingsController.h"
+#include "core/controllers/serversController.h"
 #include "ui/models/containers_model.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/models/languageModel.h"
-#include "ui/models/servers_model.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
 #include "core/utils/defs.h"
 
 class SettingsUiController : public QObject
@@ -17,11 +15,9 @@ class SettingsUiController : public QObject
     Q_OBJECT
 public:
     explicit SettingsUiController(SettingsController* settingsController,
-                                 ServersModel* serversModel,
+                                 ServersController* serversController,
                                  ContainersModel* containersModel,
                                  LanguageUiController* languageUiController,
-                                 QServersRepository* serversRepository,
-                                 QAppSettingsRepository* appSettingsRepository,
                                  QObject *parent = nullptr);
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
@@ -137,11 +133,9 @@ signals:
 
 private:
     SettingsController* m_settingsController;
-    ServersModel* m_serversModel;
+    ServersController* m_serversController;
     ContainersModel* m_containersModel;
     LanguageUiController* m_languageUiController;
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif

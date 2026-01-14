@@ -25,7 +25,7 @@ PageType {
             source: "qrc:/images/amneziaBigLogo.png"
 
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            Layout.topMargin: 32 + SettingsController.safeAreaTopMargin
+            Layout.topMargin: 32 + PageController.safeAreaTopMargin
             Layout.preferredWidth: 360
             Layout.preferredHeight: 287
         }
@@ -33,7 +33,7 @@ PageType {
         BasicButtonType {
             id: startButton
             Layout.fillWidth: true
-            Layout.bottomMargin: 48 + SettingsController.safeAreaBottomMargin
+            Layout.bottomMargin: 48 + PageController.safeAreaBottomMargin
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.alignment: Qt.AlignBottom
