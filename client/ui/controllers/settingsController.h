@@ -73,6 +73,9 @@ public slots:
     bool isStartMinimizedEnabled();
     void toggleStartMinimized(bool enable);
 
+    bool isNewsNotificationsEnabled();
+    void toggleNewsNotificationsEnabled(bool enable);
+
     bool isScreenshotsEnabled();
     void toggleScreenshotsEnabled(bool enable);
 
