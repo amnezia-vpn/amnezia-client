@@ -15,106 +15,132 @@ import "../Config"
 PageType {
     id: root
 
-    Component.onCompleted: {
-        if (!GC.isMobile()) {
-            PageController.closePage()
-            return
-        }
-        if (!SettingsController.isCameraPresent()) {
-            PageController.showErrorMessage(qsTr("Camera is not available on this device"))
-            PageController.closePage()
-            return
+    BackButtonType {
+        id: backButton
+        anchors.left: parent.left
+        anchors.top: parent.top
+
+        anchors.topMargin: 20
+    }
+
+    ParagraphTextType {
+        id: header
+
+        property string progressString
+
+        anchors.left: parent.left
+        anchors.top: backButton.bottom
+        anchors.right: parent.right
+
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+
+        text: qsTr("Point the camera at the QR code and hold it for a couple of seconds. ") + progressString
+    }
+
+    ProgressBarType {
+        id: progressBar
+
+        anchors.left: parent.left
+        anchors.top: header.bottom
+        anchors.right: parent.right
+
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+    }
+
+    // Manual UUID input (temporary instead of camera scanning)
+    ColumnLayout {
+        id: manualInput
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: progressBar.bottom
+        anchors.bottom: parent.bottom
+
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.topMargin: 24
+        anchors.bottomMargin: 24
+        spacing: 12
+
+        TextFieldWithHeaderType {
+            id: uuidField
+            Layout.fillWidth: true
+
+            headerText: qsTr("UUID")
+            textField.placeholderText: qsTr("Enter UUID")
         }
 
-        if (Qt.platform.os === "android"
-                && typeof ImportController !== "undefined"
-                && ImportController.startDecodingQr) {
-            ImportController.startDecodingQr()
+        BasicButtonType {
+            id: sendButton
+            Layout.fillWidth: true
+            text: qsTr("Send")
+            enabled: uuidField.textField.text.length > 0
+
+            clickedFunc: function() {
+                var gw = ""
+                if (typeof SettingsController !== "undefined") {
+                    if (SettingsController.gatewayEndpoint !== undefined) {
+                        gw = SettingsController.gatewayEndpoint
+                    } else if (SettingsController.getGatewayEndpoint) {
+                        gw = SettingsController.getGatewayEndpoint()
+                    }
+                }
+                if (!gw || gw.length === 0) {
+                    PageController.showErrorMessage(qsTr("Gateway endpoint is empty"))
+                    return
+                }
+                if (!gw.endsWith("/")) {
+                    gw = gw + "/"
+                }
+
+                var payload = JSON.stringify({ gw: gw, u: uuidField.textField.text, v: 1 })
+                TransferController.setPendingQrCode(payload)
+                PageController.goToPage(PageEnum.PageSettingsApiAddDeviceConfirm)
+            }
         }
     }
 
-    ListViewType {
-        id: listView
-        visible: GC.isMobile()
+    /*Rectangle {
+        id: qrCodeRactangle
+        visible: false
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.top: progressBar.bottom
 
-        anchors.fill: parent
-        anchors.topMargin: 20
+        anchors.topMargin: 34
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 34
 
-        header: ColumnLayout {
-            width: listView.width
+        color: AmneziaStyle.color.transparent
 
-            BackButtonType {}
+        QRCodeReader {
+            id: qrCodeReader
 
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                text: qsTr("Point the camera at the QR code and hold for a couple of seconds.")
+            onCodeReaded: function(code) {
+                // scanning disabled
+                return
             }
+
+            Component.onCompleted: { }
+
+            Component.onDestruction: qrCodeReader.stopReading()
         }
+    }*/
 
-        footer: Item { height: 0 }
+    Component.onCompleted: { }
 
-        model: 1
-
-        delegate: Item {
-            width: listView.width
-            height: listView.height - 100
-
-            Rectangle {
-                id: cameraArea
-                anchors.fill: parent
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
-                anchors.bottomMargin: 16
-                anchors.topMargin: 16
-                visible: Qt.platform.os === "ios"
-
-                color: AmneziaStyle.color.transparent
-                border.color: AmneziaStyle.color.paleGray
-                border.width: 1
-
-                QRCodeReader {
-                    id: qrReader
-
-                    onCodeReaded: function (code) {
-                        if (!code || code.length === 0)
-                            return
-
-                        qrReader.stopReading()
-                        TransferController.setPendingQrCode(code)
-                        PageController.goToPage(PageEnum.PageSettingsApiAddDeviceConfirm)
-                    }
-
-                    Component.onCompleted: {
-                        if (Qt.platform.os !== "ios")
-                            return
-
-                        qrReader.setCameraSize(
-                                    Qt.rect(cameraArea.x,
-                                            cameraArea.y,
-                                            cameraArea.width,
-                                            cameraArea.height))
-                        qrReader.startReading()
-                    }
-
-                    Component.onDestruction: {
-                        qrReader.stopReading()
-                    }
-                }
-
-                Connections {
-                    target: TransferController
-                    function onScannerShouldStop() {
-                        if (Qt.platform.os === "ios") {
-                            qrReader.stopReading()
-                        } else if (Qt.platform.os === "android"
-                                   && typeof ImportController !== "undefined"
-                                   && ImportController.stopDecodingQr) {
-                            ImportController.stopDecodingQr()
-                        }
-                    }
-                }
+    /*Connections {
+        target: TransferController
+        function onScannerShouldStop() {
+            if (qrCodeReader && qrCodeReader.stopReading) {
+                qrCodeReader.stopReading()
+            }
+            if (typeof ImportController !== "undefined"
+                    && ImportController.stopDecodingQr) {
+                ImportController.stopDecodingQr()
             }
         }
     }
@@ -123,19 +149,16 @@ PageType {
         target: ImportController
 
         function onTransferQrDecoded(code) {
-            if (!code || code.length === 0)
+            if (!code || code.length === 0) {
+                console.log("ImportController.onTransferQrDecoded: empty QR code payload")
+                if (typeof PageController !== "undefined" && PageController.showErrorMessage) {
+                    PageController.showErrorMessage(qsTr("QR code not recognized. Please try again."));
+                }
                 return
+            }
 
             TransferController.setPendingQrCode(code)
             PageController.goToPage(PageEnum.PageSettingsApiAddDeviceConfirm)
         }
-    }
-
-    Component.onDestruction: {
-        if (Qt.platform.os === "android"
-                && typeof ImportController !== "undefined"
-                && ImportController.stopDecodingQr) {
-            ImportController.stopDecodingQr()
-        }
-    }
+    }*/
 }
