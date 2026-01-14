@@ -3,13 +3,21 @@
 #include <QVariant>
 #include <QJsonParseError>
 #include <QDebug>
+#include <qeventloop.h>
+#include "core/api/apiUtils.h"
 
+#include "amnezia_application.h"
 #include "settings.h"
 #include "ui/models/servers_model.h"
 #include "ui/controllers/exportController.h"
 #include "ui/controllers/importController.h"
 #include "core/api/apiDefs.h"
 #include "core/controllers/gatewayController.h"
+
+static ErrorCode postPlainJson(const QString& url,
+                               const QJsonObject& payload,
+                               int timeoutMs,
+                               QByteArray& responseBody);
 
 TransferController::TransferController(const std::shared_ptr<Settings> &settings,
                                        const QSharedPointer<ServersModel> &serversModel,
@@ -49,9 +57,9 @@ void TransferController::generateNewQrCode()
     if (!gw.endsWith('/')) {
         gw.append('/');
     }
-    qDebug() << "gateway: " << gw;
+    qDebug() << "gateway:" << gw;
     m_currentUuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
-    qDebug() << "uuid: " <<m_currentUuid;
+    qDebug() << "uuid:" << m_currentUuid;
 
     const QString payload = buildQrPayloadJson(gw, m_currentUuid, 1);
 
@@ -88,15 +96,15 @@ QString TransferController::getCurrentApiKey() const
 
     const QJsonObject apiConfig = server.value(apiDefs::key::apiConfig).toObject();
     QJsonObject authData = server.value(QStringLiteral("auth_data")).toObject();
-    QString key = authData.value(apiDefs::key::apiKey).toString();
+    //QString key = authData.value(apiDefs::key::apiKey).toString();
+    QString key = authData.value(QStringLiteral("api_key")).toString();
 
-    if (key.isEmpty()) {
-        const QJsonObject nestedAuth =
-                apiConfig.value(QStringLiteral("auth_data")).toObject();
+    /*if (key.isEmpty()) {
+        const QJsonObject nestedAuth = apiConfig.value(QStringLiteral("auth_data")).toObject();
         if (!nestedAuth.isEmpty()) {
             key = nestedAuth.value(apiDefs::key::apiKey).toString();
         }
-    }
+    }*/
 
     return key;
 }
@@ -127,9 +135,9 @@ void TransferController::onTransferQrScanned(const QString &code)
     }
 
     const QString apiKey = getCurrentApiKey();
-    qDebug() << "scanned apiKey: " << apiKey;
+    qDebug() << "scanned apiKey:" << apiKey;
     const QString config = getPremiumConfigToSend();
-    qDebug() << "config: " << config;
+    qDebug() << "config:" << config;
     if (apiKey.isEmpty() || config.isEmpty()) {
         qWarning() << "TransferController::onTransferQrScanned: no subscription key or config to send";
         emit postFailed(QStringLiteral("No subscription key or config to send"));
@@ -150,23 +158,60 @@ void TransferController::onTransferQrScanned(const QString &code)
     emit postStarted();
 
     qDebug() << "entered POST section";
-    qDebug() << "gw: " << gw;
-    qDebug() << "uuid: " << uuid;
-    qDebug() << "apiKey: " << apiKey;
-    qDebug() << "config: " << config;
+    qDebug() << "gw:" << gw;
+    qDebug() << "uuid:" << uuid;
+    qDebug() << "apiKey:" << apiKey;
+    qDebug() << "config:" << config;
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(),
+    /*GatewayController gatewayController(gw, //m_settings->getGatewayEndpoint(),
                                         m_settings->isDevGatewayEnv(),
                                         apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+                                        m_settings->isStrictKillSwitchEnabled());*/
     QByteArray responseBody;
+
+
     QJsonObject payload;
     payload.insert(QStringLiteral("config"), config);
     payload.insert(QStringLiteral("uuid"), uuid);
     payload.insert(QStringLiteral("api_key"), apiKey);
-    const QString endpoint = QStringLiteral("%1sendConfig").arg(gw);
 
-    qDebug() << "TransferController::onTransferQrScanned: sending POST to " << endpoint
+    const QString url = gw + "sendConfig";
+    qDebug() << "TransferController::onTransferQrScanned: sending POST to" << url
+             << "with payload:" << QJsonDocument(payload).toJson(QJsonDocument::Compact);
+
+    auto ec = postPlainJson(url, payload, apiDefs::requestTimeoutMsecs, responseBody);
+    qDebug() << "TransferController::onTransferQrScanned: POST finished with code"
+             << static_cast<int>(ec);
+
+    if (ec != ErrorCode::NoError) {
+        qWarning() << "TransferController::onTransferQrScanned: network error during POST"
+                   << "body:" << responseBody;
+        emit postFailed(QStringLiteral("Network error"));
+        return;
+    }
+
+    // Parse response and handle success/failure
+    {
+        QJsonParseError parseErr;
+        const QJsonDocument respDoc = QJsonDocument::fromJson(responseBody, &parseErr);
+        if (parseErr.error == QJsonParseError::NoError && respDoc.isObject()) {
+            const QJsonObject respObj = respDoc.object();
+            const QString status = respObj.value(QStringLiteral("status")).toString();
+            if (status == QStringLiteral("success")) {
+                qDebug() << "TransferController::onTransferQrScanned: gateway returned success";
+                emit postSucceeded();
+                stopScanner();
+                return;
+            }
+        }
+        qWarning() << "TransferController::onTransferQrScanned: gateway response error" << responseBody;
+        emit postFailed(QStringLiteral("Gateway response error"));
+        return;
+    }
+    //const QString endpoint = QStringLiteral("%1sendConfig").arg(gw);
+    //const QString endpoint = QStringLiteral("sendConfig");
+
+    /*qDebug() << "TransferController::onTransferQrScanned: sending POST to " << endpoint
             << "with payload: " << QJsonDocument(payload).toJson(QJsonDocument::Compact);
     auto errorCode = gatewayController.post(endpoint, payload, responseBody);
     qDebug() << "TransferController::onTransferQrScanned: POST finished with code"
@@ -190,7 +235,7 @@ void TransferController::onTransferQrScanned(const QString &code)
     } else {
         qWarning() << "TransferController::onTransferQrScanned: network error during POST";
         emit postFailed(QStringLiteral("Network error"));
-    }
+    }*/
 }
 
 QString TransferController::qrCodeUrl() const
@@ -225,23 +270,34 @@ void TransferController::startWaitForConfig(ImportController *importController)
     // Blocking request to /waitConfig with a timeout.
     const int waitTimeoutMs = 30000;
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(),
+    /*GatewayController gatewayController(gw, //m_settings->getGatewayEndpoint(),
                                         m_settings->isDevGatewayEnv(),
                                         waitTimeoutMs,
                                         m_settings->isStrictKillSwitchEnabled());
-    const QString endpoint = QStringLiteral("%1waitConfig").arg(gw);
-    qDebug() << "waitConfig endpoint: " << endpoint;
+    const QString endpoint = QStringLiteral("%1waitConfig");
+    //const QString endpoint = QStringLiteral("waitConfig");
+
+    qDebug() << "waitConfig endpoint:" << QString(endpoint).arg(gw);*/
 
     QJsonObject payload;
     payload.insert(QStringLiteral("uuid"), uuid);
     QByteArray responseBody;
 
-    auto errorCode = gatewayController.post(endpoint, payload, responseBody);
+    const QString url = gw + "waitConfig";
+    qDebug() << "waitConfig endpoint: " << url;
+    auto ec = postPlainJson(url, payload, waitTimeoutMs, responseBody);
+    if (ec != ErrorCode::NoError) {
+        qWarning() << "waitConfig failed, code:" << (int)ec << "body:" << responseBody;
+        emit waitError(QStringLiteral("Network error"));
+        return;
+    }
+
+    /*auto errorCode = gatewayController.post(endpoint, payload, responseBody);
     if (errorCode != ErrorCode::NoError) {
         qWarning() << "TransferController::startWaitForConfig: network error during waitConfig";
         emit waitError(QStringLiteral("Network error"));
         return;
-    }
+    }*/
 
     QJsonParseError err;
     const QJsonDocument doc = QJsonDocument::fromJson(responseBody, &err);
@@ -279,4 +335,27 @@ void TransferController::startWaitForConfig(ImportController *importController)
 void TransferController::stopWaitForConfig()
 {
     qDebug() << "TransferController::stopWaitForConfig: stop flag set";
+}
+
+static ErrorCode postPlainJson(const QString& url, const QJsonObject& payload, int timeoutMs, QByteArray& responseBody)
+{
+    QNetworkRequest request;
+    request.setTransferTimeout(timeoutMs);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setUrl(QUrl(url));
+
+    QNetworkReply* reply = amnApp->networkManager()->post(request, QJsonDocument(payload).toJson(QJsonDocument::Compact));
+
+    QEventLoop wait;
+    QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
+
+    QList<QSslError> sslErrors;
+    QObject::connect(reply, &QNetworkReply::sslErrors, [&sslErrors](const QList<QSslError>& errors){ sslErrors = errors; });
+
+    wait.exec();
+    responseBody = reply->readAll();
+
+    auto ec = apiUtils::checkNetworkReplyErrors(sslErrors, reply);
+    reply->deleteLater();
+    return ec;
 }

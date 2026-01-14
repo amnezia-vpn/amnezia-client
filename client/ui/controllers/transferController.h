@@ -62,8 +62,6 @@ private:
     QString getPremiumConfigToSend() const;
     QString m_pendingQrCode;
     QString getCurrentApiKey() const;
-
-private:
     std::shared_ptr<Settings> m_settings;
     QSharedPointer<ServersModel> m_serversModel;
     ExportController *m_exportController { nullptr };
