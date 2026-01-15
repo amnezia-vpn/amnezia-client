@@ -43,7 +43,7 @@ bool ProxyService::startXray()
     ProxyLogger::getInstance().info("Starting Xray");
 
     QString error;
-    const auto configData = m_configManager->buildConfig(error);
+    const auto configData = m_configManager->buildConfigWithFetch(error);
     if (!configData) {
         logConfigError(error);
         return false;
