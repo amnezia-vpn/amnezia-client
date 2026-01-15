@@ -14,6 +14,9 @@ import "../Config"
 PageType {
     id: root
 
+    // Debug-friendly: don't auto-close on send; keep the page responsive and show status.
+    property bool isSending: false
+
     function getAvailableCount() {
         var max = ApiAccountInfoModel.data("maxDeviceCount")
         var active = ApiAccountInfoModel.data("activeDeviceCount")
@@ -32,7 +35,16 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
-            BackButtonType {}
+            BackButtonType {
+                backButtonFunction: function() {
+                    if (root.isSending) {
+                        // We cannot truly abort GatewayController::post() without changing it,
+                        // but we can at least stop waiting on the other side and let the user navigate.
+                        TransferController.stopWaitForConfig()
+                    }
+                    PageController.closePage()
+                }
+            }
 
             BaseHeaderType {
                 Layout.fillWidth: true
@@ -50,13 +62,13 @@ PageType {
                 Layout.topMargin: 16
 
                 text: qsTr("Yes, share")
-                enabled: root.getAvailableCount() > 0 && TransferController.pendingQrCode !== ""
+                enabled: !root.isSending && root.getAvailableCount() > 0 && TransferController.pendingQrCode !== ""
 
                 clickedFunc: function() {
                     if (TransferController.pendingQrCode !== "") {
+                        root.isSending = true
                         TransferController.onTransferQrScanned(TransferController.pendingQrCode)
                     }
-                    PageController.closePage()
                 }
             }
 
@@ -74,6 +86,7 @@ PageType {
                 borderWidth: 1
 
                 text: qsTr("Cancel")
+                enabled: !root.isSending
 
                 clickedFunc: function() {
                     PageController.closePage()
@@ -86,14 +99,17 @@ PageType {
         target: TransferController
 
         function onPostStarted() {
-            PageController.showInfoMessage(qsTr("Sending configuration..."))
+            PageController.showNotificationMessage(qsTr("Sending configuration..."))
         }
 
         function onPostSucceeded() {
-            PageController.showInfoMessage(qsTr("Configuration sent successfully"))
+            root.isSending = false
+            PageController.showNotificationMessage(qsTr("Configuration sent successfully"))
+            PageController.closePage()
         }
 
         function onPostFailed(message) {
+            root.isSending = false
             PageController.showErrorMessage(message)
         }
     }

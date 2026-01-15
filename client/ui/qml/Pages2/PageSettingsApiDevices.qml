@@ -60,7 +60,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
 
-                visible: GC.isMobile()
+                //visible: GC.isMobile()
 
                 defaultColor: AmneziaStyle.color.transparent
                 hoveredColor: AmneziaStyle.color.translucentWhite

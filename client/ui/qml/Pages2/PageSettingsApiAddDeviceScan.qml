@@ -4,7 +4,6 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import PageEnum 1.0
-import QRCodeReader 1.0
 import Style 1.0
 
 import "./"
@@ -35,7 +34,7 @@ PageType {
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
-        text: qsTr("Point the camera at the QR code and hold it for a couple of seconds. ") + progressString
+        text: qsTr("Debug mode: paste payload JSON from the other device (or enter UUID). ") + progressString
     }
 
     ProgressBarType {
@@ -49,7 +48,7 @@ PageType {
         anchors.rightMargin: 16
     }
 
-    // Manual UUID input (temporary instead of camera scanning)
+    // Debug: manual payload/UUID input (temporary instead of camera scanning)
     ColumnLayout {
         id: manualInput
         anchors.left: parent.left
@@ -64,6 +63,14 @@ PageType {
         spacing: 12
 
         TextFieldWithHeaderType {
+            id: payloadField
+            Layout.fillWidth: true
+
+            headerText: qsTr("Payload JSON")
+            textField.placeholderText: qsTr("Paste JSON like {\"gw\":\"...\",\"uuid\":\"...\"}")
+        }
+
+        TextFieldWithHeaderType {
             id: uuidField
             Layout.fillWidth: true
 
@@ -72,9 +79,28 @@ PageType {
         }
 
         BasicButtonType {
-            id: sendButton
+            id: usePayloadButton
             Layout.fillWidth: true
-            text: qsTr("Send")
+            text: qsTr("Next (use payload)")
+            enabled: payloadField.textField.text.length > 0
+
+            clickedFunc: function() {
+                TransferController.setPendingQrCode(payloadField.textField.text)
+                PageController.goToPage(PageEnum.PageSettingsApiAddDeviceConfirm)
+            }
+        }
+
+        BasicButtonType {
+            id: buildFromUuidButton
+            Layout.fillWidth: true
+            defaultColor: AmneziaStyle.color.transparent
+            hoveredColor: AmneziaStyle.color.translucentWhite
+            pressedColor: AmneziaStyle.color.sheerWhite
+            textColor: AmneziaStyle.color.paleGray
+            borderColor: AmneziaStyle.color.paleGray
+            borderWidth: 1
+
+            text: qsTr("Next (build from UUID)")
             enabled: uuidField.textField.text.length > 0
 
             clickedFunc: function() {
@@ -94,7 +120,7 @@ PageType {
                     gw = gw + "/"
                 }
 
-                var payload = JSON.stringify({ gw: gw, u: uuidField.textField.text, v: 1 })
+                var payload = JSON.stringify({ gw: gw, uuid: uuidField.textField.text })
                 TransferController.setPendingQrCode(payload)
                 PageController.goToPage(PageEnum.PageSettingsApiAddDeviceConfirm)
             }

@@ -7,8 +7,6 @@
 #include <QJsonDocument>
 #include <QUuid>
 
-#include "core/qrCodeUtils.h"
-
 class Settings;
 class ServersModel;
 class ExportController;
@@ -20,6 +18,9 @@ class TransferController : public QObject
 
     Q_PROPERTY(QString qrCodeUrl READ qrCodeUrl NOTIFY qrCodeUpdated)
     Q_PROPERTY(QString pendingQrCode READ pendingQrCode WRITE setPendingQrCode NOTIFY pendingQrCodeChanged)
+    // Debug / manual transfer support (temporary): expose UUID and payload JSON used to generate the QR code.
+    Q_PROPERTY(QString currentUuid READ currentUuid NOTIFY currentUuidChanged)
+    Q_PROPERTY(QString currentPayload READ currentPayload NOTIFY currentPayloadChanged)
 
 public:
     explicit TransferController(const std::shared_ptr<Settings> &settings,
@@ -41,11 +42,15 @@ public:
     Q_INVOKABLE void stopWaitForConfig();
 
     QString qrCodeUrl() const;
+    QString currentUuid() const { return m_currentUuid; }
+    QString currentPayload() const { return m_currentPayload; }
 
 signals:
     void qrCodeUpdated();
     void scannerShouldStop();
     void pendingQrCodeChanged();
+    void currentUuidChanged();
+    void currentPayloadChanged();
 
     void waitError(const QString &message);
     void configApplied();
@@ -58,10 +63,10 @@ private slots:
     void handleImportControllerDestroyed();
 
 private:
-    QString buildQrPayloadJson(const QString &gatewayUrl, const QString &uuid, int version) const;
-    QString getPremiumConfigToSend() const;
+    QString buildQrPayloadJson(const QString &gatewayUrl, const QString &uuid) const;
+    //QString getPremiumConfigToSend() const;
     QString m_pendingQrCode;
-    QString getCurrentApiKey() const;
+    QString getCurrentApiKey(QString *vpnKeyOut = nullptr) const;
     std::shared_ptr<Settings> m_settings;
     QSharedPointer<ServersModel> m_serversModel;
     ExportController *m_exportController { nullptr };
@@ -69,6 +74,7 @@ private:
 
     QString m_qrCodeUrl;
     QString m_currentUuid;
+    QString m_currentPayload;
 };
 
 #endif // TRANSFERCONTROLLER_H 

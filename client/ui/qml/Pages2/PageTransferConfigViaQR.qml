@@ -7,7 +7,6 @@ import PageEnum 1.0
 import Style 1.0
 import "../Controls2"
 import "../Components"
-import QRCodeReader 1.0
 import "../Controls2/TextTypes"
 
 PageType {
@@ -58,31 +57,56 @@ PageType {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                text: qsTr("Scan the QR code with the phone where Amnezia Premium is active")
+                text: qsTr("Debug mode: copy the payload to the other device and send it there")
             }
 
-            Rectangle {
-                id: qrContainer
+            ColumnLayout {
+                id: debugPayload
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: qrHeader.bottom
-                anchors.topMargin: 8
-                // anchors.horizontalCenter: parent.horizontalCenter  // УБРАТЬ
+                anchors.topMargin: 12
                 anchors.bottom: bottomHint.top
-                anchors.bottomMargin: 8
+                anchors.bottomMargin: 12
+                spacing: 8
 
-                color: AmneziaStyle.color.transparent
-                border.color: AmneziaStyle.color.paleGray
-                border.width: 1
+                TextArea {
+                    id: payloadArea
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    readOnly: true
+                    wrapMode: TextArea.WrapAnywhere
+                    selectByMouse: true
+                    text: TransferController.currentPayload
+                    placeholderText: qsTr("Payload will appear here after generating")
+                }
 
-                Image {
-                    id: qrImage
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width, parent.height)
-                    height: width
-                    source: TransferController.qrCodeUrl
-                    fillMode: Image.Stretch
-                    smooth: false
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    BasicButtonType {
+                        Layout.fillWidth: true
+                        text: qsTr("Regenerate")
+                        clickedFunc: function() {
+                            TransferController.generateNewQrCode()
+                            TransferController.startWaitForConfig(ImportController)
+                        }
+                    }
+
+                    BasicButtonType {
+                        Layout.fillWidth: true
+                        defaultColor: AmneziaStyle.color.transparent
+                        hoveredColor: AmneziaStyle.color.translucentWhite
+                        pressedColor: AmneziaStyle.color.sheerWhite
+                        textColor: AmneziaStyle.color.paleGray
+                        borderColor: AmneziaStyle.color.paleGray
+                        borderWidth: 1
+                        text: qsTr("Restart wait")
+                        clickedFunc: function() {
+                            TransferController.startWaitForConfig(ImportController)
+                        }
+                    }
                 }
             }
 
@@ -92,7 +116,7 @@ PageType {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 8
-                text: qsTr("In the Amnezia app on your phone, tap «+» at the bottom → «QR code»")
+                text: qsTr("Copy the JSON payload above, paste it on the other device, and confirm sending there")
                 horizontalAlignment: Text.AlignHCenter
             }
         }
@@ -100,7 +124,6 @@ PageType {
 
     Connections {
         target: TransferController
-        function onQrCodeUpdated() { qrImage.source = TransferController.qrCodeUrl }
         function onConfigApplied() {
             PageController.showNotificationMessage(qsTr("Configuration received and applied"))
         }
