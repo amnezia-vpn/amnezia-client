@@ -178,7 +178,7 @@ PageType {
                 Layout.margins: 16
 
                 text: qsTr("News Notification")
-                descriptionText: qsTr("Show notifications on app news")
+                descriptionText: qsTr("Show notification icon when has unread news")
 
                 checked: SettingsController.isNewsNotificationsEnabled()
                 onToggled: function() {
