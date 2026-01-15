@@ -253,6 +253,7 @@ signals:
     void serverRemoved(int serverIndex);
     void settingsCleared();
     void localProxySettingsChanged();
+    void localProxyStartFailed(const QString &message);
 
 private:
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;

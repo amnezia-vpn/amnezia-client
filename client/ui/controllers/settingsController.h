@@ -153,6 +153,7 @@ signals:
     void isHomeAdLabelVisibleChanged(bool visible);
     void startMinimizedChanged();
     void localProxySettingsUpdated();
+    void localProxyStartFailed(const QString &message);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

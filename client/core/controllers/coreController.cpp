@@ -56,11 +56,15 @@ void CoreController::initLocalProxy()
         if (port < 1024) {
             qWarning() << "Local proxy: invalid HTTP API port" << port << ", stopping server";
             m_proxyServer->stop();
+            m_settings->setLocalProxyHttpEnabled(false);
+            emit m_settings->localProxyStartFailed(tr("Local proxy disabled: invalid HTTP API port."));
             return;
         }
 
         if (!m_proxyServer->start(port)) {
             qWarning() << "Local proxy: failed to start on port" << port;
+            m_settings->setLocalProxyHttpEnabled(false);
+            emit m_settings->localProxyStartFailed(tr("Local proxy failed to start. Check if the port is available."));
             return;
         }
 

@@ -56,6 +56,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
     toggleDevGatewayEnv(m_isDevModeEnabled);
 
     connect(m_settings.get(), &Settings::localProxySettingsChanged, this, &SettingsController::localProxySettingsUpdated);
+    connect(m_settings.get(), &Settings::localProxyStartFailed, this, &SettingsController::localProxyStartFailed);
 }
 
 QString getPlatformName()

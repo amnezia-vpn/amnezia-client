@@ -44,24 +44,14 @@ bool ProxyService::startXray()
 
     QString error;
     const auto configData = m_configManager->buildConfig(error);
-    qDebug() << "configData:" << configData.value().serializedConfig;
-    qDebug() << "configData:" << configData.value().parsedConfig;
     if (!configData) {
         logConfigError(error);
         return false;
     }
 
-    QString configPath;
-    if (!m_configManager->writeTempConfig(configData->serializedConfig, configPath, error)) {
-        qDebug() << "configPath:" << configPath;
-        logConfigError(error);
-        return false;
-    }
-    qDebug() << "configPath:" << configPath;
-
     m_cachedConfig = configData->parsedConfig;
 
-    const bool success = m_xrayController->start(configPath);
+    const bool success = m_xrayController->start(configData->serializedConfig);
     if (success) {
         ProxyLogger::getInstance().info("Xray started successfully");
         emit xrayStatusChanged(true);
@@ -78,7 +68,6 @@ bool ProxyService::stopXray()
     const bool stopped = m_xrayController->stop();
     if (stopped) {
         ProxyLogger::getInstance().info("Xray stopped");
-        m_configManager->removeTempConfig();
         emit xrayStatusChanged(false);
         return true;
     }
