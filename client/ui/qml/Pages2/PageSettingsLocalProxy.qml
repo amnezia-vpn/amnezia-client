@@ -195,6 +195,11 @@ PageType {
                 portField.syncPortValue()
             }
         }
+
+        function onLocalProxyStartFailed(message) {
+            PageController.showNotificationMessage(message)
+            localProxySwitch.syncState()
+        }
     }
 
     Connections {

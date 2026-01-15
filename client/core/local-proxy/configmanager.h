@@ -20,6 +20,7 @@ public:
     explicit ConfigManager(const std::shared_ptr<Settings> &settings);
 
     std::optional<ConfigData> buildConfig(QString &errorDescription) const;
+    std::optional<ConfigData> buildConfigWithFetch(QString &errorDescription) const;
     bool writeTempConfig(const QString &serializedConfig, QString &configPath, QString &errorDescription) const;
     bool removeTempConfig() const;
     QString tempConfigPath() const;
@@ -27,6 +28,7 @@ public:
 private:
     std::optional<QJsonObject> findServerByUuid(const QString &uuid) const;
     std::optional<QString> extractSerializedXrayConfig(const QJsonObject &server) const;
+    std::optional<QString> fetchSerializedXrayConfigFromGateway(const QJsonObject &server, QString &errorDescription) const;
     QString tempDirectory() const;
 
     std::shared_ptr<Settings> m_settings;

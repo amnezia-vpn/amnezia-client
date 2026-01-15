@@ -28,7 +28,7 @@ QJsonObject ProxyService::getConfig()
     }
 
     QString error;
-    const auto configData = m_configManager->buildConfig(error);
+    const auto configData = m_configManager->buildConfigWithFetch(error);
     if (!configData) {
         logConfigError(error);
         return {};
