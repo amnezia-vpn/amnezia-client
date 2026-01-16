@@ -11,7 +11,6 @@
 
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
-#include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "ui/controllers/api/apiNewsController.h"
 #include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/controllers/allowedDnsController.h"
@@ -93,8 +92,6 @@ private:
     void initAutoConnectHandler();
     void initAmneziaDnsToggledHandler();
     void initPrepareConfigHandler();
-    void initImportPremiumV2VpnKeyHandler();
-    void initShowMigrationDrawerHandler();
     void initStrictKillSwitchHandler();
 
     QQmlApplicationEngine *m_engine {}; // TODO use parent child system here?
@@ -122,7 +119,6 @@ private:
 
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
-    QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
     QScopedPointer<ApiNewsController> m_apiNewsController;
 
     QSharedPointer<ContainersModel> m_containersModel;
