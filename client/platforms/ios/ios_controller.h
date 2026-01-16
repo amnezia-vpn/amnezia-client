@@ -7,6 +7,8 @@
 #include <QVariantMap>
 #include <QStringList>
 #include <QList>
+#include <QElapsedTimer>
+#include <atomic>
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
@@ -77,6 +79,7 @@ public:
                                           const QString &errorString)> &&callback);
 
     void requestInetAccess();
+    bool isTestFlight();
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -102,6 +105,7 @@ private:
     bool startXray(const QString &jsonConfig);
 
     void startTunnel();
+    void emitConnectionStateIfChanged(Vpn::ConnectionState state);
 
 private:
     void *m_iosControllerWrapper {};
@@ -115,8 +119,13 @@ private:
     amnezia::Proto m_proto;
     QJsonObject m_rawConfig;
     QString m_tunnelId;
-    uint64_t m_txBytes;
-    uint64_t m_rxBytes;
+    uint64_t m_txBytes = 0;
+    uint64_t m_rxBytes = 0;
+    bool m_handshakeAwaiting = false;
+    bool m_handshakeConfirmed = false;
+    QElapsedTimer m_handshakeTimer;
+    Vpn::ConnectionState m_lastEmittedState = Vpn::ConnectionState::Unknown;
+    std::atomic_bool m_statusRequestInFlight { false };
 };
 
 #endif // IOS_CONTROLLER_H

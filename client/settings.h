@@ -223,8 +223,8 @@ public:
     void resetGatewayEndpoint();
     void setGatewayEndpoint(const QString &endpoint);
     void setDevGatewayEndpoint();
-    QString getGatewayEndpoint();
-    bool isDevGatewayEnv();
+    QString getGatewayEndpoint(bool isTestPurchase = false);
+    bool isDevGatewayEnv(bool isTestPurchase = false);
     void toggleDevGatewayEnv(bool enabled);
 
     bool isHomeAdLabelVisible();

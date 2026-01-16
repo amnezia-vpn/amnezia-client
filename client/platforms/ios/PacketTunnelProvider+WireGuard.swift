@@ -94,15 +94,24 @@ extension PacketTunnelProvider {
             }
         } catch {
             wg_log(.error, message: "Can't parse WG config: \(error.localizedDescription)")
-            completionHandler(nil)
+            errorNotifier.notify(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
+            completionHandler(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
             return
         }
     }
 
     func handleWireguardStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
-        wgAdapter?.getRuntimeConfiguration { settings in
-            let components = settings!.components(separatedBy: "\n")
+        guard let wgAdapter = wgAdapter else {
+            completionHandler(nil)
+            return
+        }
+        wgAdapter.getRuntimeConfiguration { settings in
+            guard let settings = settings else {
+                completionHandler(nil)
+                return
+            }
+            let components = settings.components(separatedBy: "\n")
 
             var settingsDictionary: [String: String] = [:]
             for component in components {
@@ -131,7 +140,7 @@ extension PacketTunnelProvider {
         }
     }
 
-    private func handleWireguardAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+    func handleWireguardAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
         if messageData.count == 1 && messageData[0] == 0 {
             wgAdapter?.getRuntimeConfiguration { settings in

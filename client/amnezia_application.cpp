@@ -35,6 +35,7 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
       m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
       m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data"))
 {
+    setDesktopFileName(QStringLiteral(APPLICATION_NAME));
     setQuitOnLastWindowClosed(false);
 
     // Fix config file permissions
@@ -59,11 +60,13 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
 
 AmneziaApplication::~AmneziaApplication()
 {
-    if (m_vpnConnection) {
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::QueuedConnection);
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::QueuedConnection);
-        QThread::msleep(2000);
+#ifdef AMNEZIA_DESKTOP
+    if (m_vpnConnection && m_vpnConnectionThread.isRunning()) {
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::BlockingQueuedConnection);
+        
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::BlockingQueuedConnection);
     }
+#endif
 
     m_vpnConnectionThread.requestInterruption();
     m_vpnConnectionThread.quit();
@@ -74,7 +77,6 @@ AmneziaApplication::~AmneziaApplication()
     }
 
     if (m_engine) {
-        QObject::disconnect(m_engine, 0, 0, 0);
         delete m_engine;
     }
 }

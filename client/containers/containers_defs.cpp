@@ -127,7 +127,8 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("WireGuard - popular VPN protocol with high performance, high speed and low power "
                            "consumption.") },
              { DockerContainer::Awg,
-               QObject::tr("AmneziaWG Legacy is a outdated version of AmneziaWG protocol. To upgrade, install AmneziaWG and recreate users.") },
+               QObject::tr("AmneziaWG is a special protocol from Amnezia based on WireGuard. "
+                           "It provides high connection speed and ensures stable operation even in the most challenging network conditions.") },
              { DockerContainer::Awg2,
                QObject::tr("AmneziaWG is a special protocol from Amnezia based on WireGuard. "
                            "It provides high connection speed and ensures stable operation even in the most challenging network conditions.") },

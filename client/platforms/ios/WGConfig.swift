@@ -42,46 +42,64 @@ struct WGConfig: Decodable {
   }
 
   var settings: String {
-    guard junkPacketCount != nil else { return "" }
-    
+    func trimmed(_ value: String?) -> String? {
+      guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines),
+            !value.isEmpty else {
+        return nil
+      }
+      return value
+    }
+
+    guard
+      let junkPacketCount = trimmed(junkPacketCount),
+      let junkPacketMinSize = trimmed(junkPacketMinSize),
+      let junkPacketMaxSize = trimmed(junkPacketMaxSize),
+      let initPacketJunkSize = trimmed(initPacketJunkSize),
+      let responsePacketJunkSize = trimmed(responsePacketJunkSize),
+      let initPacketMagicHeader = trimmed(initPacketMagicHeader),
+      let responsePacketMagicHeader = trimmed(responsePacketMagicHeader),
+      let underloadPacketMagicHeader = trimmed(underloadPacketMagicHeader),
+      let transportPacketMagicHeader = trimmed(transportPacketMagicHeader)
+    else { return "" }
+
     var settingsLines: [String] = []
-    
+
     // Required parameters when junkPacketCount is present
-    settingsLines.append("Jc = \(junkPacketCount!)")
-    settingsLines.append("Jmin = \(junkPacketMinSize!)")
-    settingsLines.append("Jmax = \(junkPacketMaxSize!)")
-    settingsLines.append("S1 = \(initPacketJunkSize!)")
-    settingsLines.append("S2 = \(responsePacketJunkSize!)")
-    
-    settingsLines.append("H1 = \(initPacketMagicHeader!)")
-    settingsLines.append("H2 = \(responsePacketMagicHeader!)")
-    settingsLines.append("H3 = \(underloadPacketMagicHeader!)")
-    settingsLines.append("H4 = \(transportPacketMagicHeader!)")
+    settingsLines.append("Jc = \(junkPacketCount)")
+    settingsLines.append("Jmin = \(junkPacketMinSize)")
+    settingsLines.append("Jmax = \(junkPacketMaxSize)")
+    settingsLines.append("S1 = \(initPacketJunkSize)")
+    settingsLines.append("S2 = \(responsePacketJunkSize)")
+
+    settingsLines.append("H1 = \(initPacketMagicHeader)")
+    settingsLines.append("H2 = \(responsePacketMagicHeader)")
+    settingsLines.append("H3 = \(underloadPacketMagicHeader)")
+    settingsLines.append("H4 = \(transportPacketMagicHeader)")
 
     // Optional parameters - only add if not nil and not empty
-    if let s3 = cookieReplyPacketJunkSize, !s3.isEmpty {
+    if let s3 = trimmed(cookieReplyPacketJunkSize) {
       settingsLines.append("S3 = \(s3)")
     }
-    if let s4 = transportPacketJunkSize, !s4.isEmpty {
+    if let s4 = trimmed(transportPacketJunkSize) {
       settingsLines.append("S4 = \(s4)")
     }
-    
-    if let i1 = specialJunk1, !i1.isEmpty {
+
+    if let i1 = trimmed(specialJunk1) {
       settingsLines.append("I1 = \(i1)")
     }
-    if let i2 = specialJunk2, !i2.isEmpty {
+    if let i2 = trimmed(specialJunk2) {
       settingsLines.append("I2 = \(i2)")
     }
-    if let i3 = specialJunk3, !i3.isEmpty {
+    if let i3 = trimmed(specialJunk3) {
       settingsLines.append("I3 = \(i3)")
     }
-    if let i4 = specialJunk4, !i4.isEmpty {
+    if let i4 = trimmed(specialJunk4) {
       settingsLines.append("I4 = \(i4)")
     }
-    if let i5 = specialJunk5, !i5.isEmpty {
+    if let i5 = trimmed(specialJunk5) {
       settingsLines.append("I5 = \(i5)")
     }
-    
+
     return settingsLines.joined(separator: "\n")
   }
 
