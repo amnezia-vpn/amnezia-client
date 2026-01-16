@@ -96,7 +96,7 @@ public:
 
     bool isNewsNotifications() const
     {
-        return value("Conf/newsNotifications", false).toBool();
+        return value("Conf/newsNotifications", true).toBool();
     }
     void setNewsNotifications(bool enabled)
     {
