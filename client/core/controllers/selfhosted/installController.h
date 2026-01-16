@@ -45,8 +45,8 @@ public:
 
     ErrorCode installServer(const ServerCredentials &credentials, DockerContainer container, int port, TransportProto transportProto,
                                          bool &wasContainerInstalled);
-    ErrorCode installContainer(const ServerCredentials &credentials, DockerContainer container, int port, TransportProto transportProto,
-                                               int serverIndex, bool &wasContainerInstalled);
+    ErrorCode installContainer(int serverIndex, DockerContainer container, int port, TransportProto transportProto,
+                                               bool &wasContainerInstalled);
     
     bool isUpdateDockerContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig);
     

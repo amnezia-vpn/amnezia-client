@@ -33,8 +33,8 @@ public:
     ErrorCode lastError() const;
 
     QJsonObject createConnectionConfiguration(const QPair<QString, QString> &dns,
-                                             const QJsonObject &serverConfig,
-                                             const QJsonObject &containerConfig,
+                                             const ServerConfig &serverConfig,
+                                             const ContainerConfig &containerConfig,
                                              DockerContainer container);
 
     bool isServiceReady() const;
@@ -42,8 +42,6 @@ public:
     bool isContainerSupported(DockerContainer container) const;
 
 private:
-    QPair<QString, QString> getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const;
-
     ServersRepository* m_serversRepository;
     AppSettingsRepository* m_appSettingsRepository;
     VpnConnection* m_vpnConnection;

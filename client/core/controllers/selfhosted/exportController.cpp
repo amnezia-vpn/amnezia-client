@@ -82,7 +82,10 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
         selfHosted.port.reset();
     }
 
-    auto dns = getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
+    auto dns = ServerConfigUtils::getDnsPair(serverConfig,
+                                              m_appSettingsRepository->useAmneziaDns(),
+                                              m_appSettingsRepository->primaryDns(),
+                                              m_appSettingsRepository->secondaryDns());
     ServerConfigUtils::visit(serverConfig, [&dns](auto& arg) {
         arg.dns1 = dns.first;
         arg.dns2 = dns.second;
@@ -109,7 +112,11 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     }
 
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
-    auto dns = getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
+    ServerConfig serverConfig = m_serversRepository->server(serverIndex);
+    auto dns = ServerConfigUtils::getDnsPair(serverConfig,
+                                              m_appSettingsRepository->useAmneziaDns(),
+                                              m_appSettingsRepository->primaryDns(),
+                                              m_appSettingsRepository->secondaryDns());
 
     ContainerConfig modifiedContainerConfig = containerConfig;
     modifiedContainerConfig.container = container;
@@ -308,37 +315,4 @@ QString ExportController::generateSingleQrCode(const QByteArray &data)
 {
     auto qr = qrCodeUtils::generateQrCode(data);
     return qrCodeUtils::svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
-}
-
-QPair<QString, QString> ExportController::getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const
-{
-    QPair<QString, QString> dns;
-    
-    ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfig);
-    
-    bool isDnsContainerInstalled = false;
-    for (auto it = containers.begin(); it != containers.end(); ++it) {
-        if (it.key() == DockerContainer::Dns) {
-            isDnsContainerInstalled = true;
-            break;
-        }
-    }
-    
-    dns.first = ServerConfigUtils::dns1(serverConfig);
-    dns.second = ServerConfigUtils::dns2(serverConfig);
-    
-    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
-        if (isAmneziaDnsEnabled && isDnsContainerInstalled) {
-            dns.first = protocols::dns::amneziaDnsIp;
-        } else {
-            dns.first = m_appSettingsRepository->primaryDns();
-        }
-    }
-    
-    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
-        dns.second = m_appSettingsRepository->secondaryDns();
-    }
-    
-    return dns;
 }

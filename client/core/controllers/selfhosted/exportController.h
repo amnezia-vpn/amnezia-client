@@ -66,7 +66,6 @@ private:
     QString generateVpnUrl(const QByteArray &compressedConfig);
     QList<QString> generateQrCodesFromConfig(const QByteArray &data);
     QString generateSingleQrCode(const QByteArray &data);
-    QPair<QString, QString> getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const;
 
     ServersRepository* m_serversRepository;
     AppSettingsRepository* m_appSettingsRepository;

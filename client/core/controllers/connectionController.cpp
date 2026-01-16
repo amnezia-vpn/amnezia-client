@@ -10,6 +10,7 @@
 #include "containers/containers_defs.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
+#include "core/models/protocolConfig.h"
 
 ConnectionController::ConnectionController(ServersRepository* serversRepository,
                                          AppSettingsRepository* appSettingsRepository,
@@ -39,11 +40,12 @@ ErrorCode ConnectionController::prepareConnection(int serverIndex,
     ContainerConfig containerConfigModel = m_serversRepository->containerConfig(serverIndex, container);
     credentials = m_serversRepository->serverCredentials(serverIndex);
 
-    auto dns = getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
+    auto dns = ServerConfigUtils::getDnsPair(serverConfigModel, 
+                                              m_appSettingsRepository->useAmneziaDns(),
+                                              m_appSettingsRepository->primaryDns(),
+                                              m_appSettingsRepository->secondaryDns());
 
-    QJsonObject serverConfigJson = ServerConfigUtils::toJson(serverConfigModel);
-    QJsonObject containerConfigJson = containerConfigModel.toJson();
-    vpnConfiguration = createConnectionConfiguration(dns, serverConfigJson, containerConfigJson, container);
+    vpnConfiguration = createConnectionConfiguration(dns, serverConfigModel, containerConfigModel, container);
 
     return ErrorCode::NoError;
 }
@@ -73,42 +75,9 @@ ErrorCode ConnectionController::lastError() const
     return m_vpnConnection->lastError();
 }
 
-QPair<QString, QString> ConnectionController::getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const
-{
-    QPair<QString, QString> dns;
-
-    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfigModel);
-
-    bool isDnsContainerInstalled = false;
-    for (auto it = containers.begin(); it != containers.end(); ++it) {
-        if (it.key() == DockerContainer::Dns) {
-            isDnsContainerInstalled = true;
-            break;
-        }
-    }
-
-    dns.first = ServerConfigUtils::dns1(serverConfigModel);
-    dns.second = ServerConfigUtils::dns2(serverConfigModel);
-
-    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
-        if (isAmneziaDnsEnabled && isDnsContainerInstalled) {
-            dns.first = protocols::dns::amneziaDnsIp;
-        } else {
-            dns.first = m_appSettingsRepository->primaryDns();
-        }
-    }
-
-    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
-        dns.second = m_appSettingsRepository->secondaryDns();
-    }
-
-    return dns;
-}
-
 QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QString, QString> &dns,
-                                                              const QJsonObject &serverConfig,
-                                                              const QJsonObject &containerConfig,
+                                                              const ServerConfig &serverConfig,
+                                                              const ContainerConfig &containerConfig,
                                                               DockerContainer container)
 {
     QJsonObject vpnConfiguration {};
@@ -117,11 +86,11 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
         return vpnConfiguration;
     }
 
-    bool isApiConfig = serverConfig.value(config_key::configVersion).toInt();
+    bool isApiConfig = ServerConfigUtils::isApiConfig(serverConfig);
     Proto proto = ContainerProps::defaultProtocol(container);
 
-    QString protocolConfigString =
-            containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
+    QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(containerConfig.protocolConfig, proto);
+    QString protocolConfigString = protocolConfigJson.value(config_key::last_config).toString();
 
     auto configurator = ConfiguratorBase::create(proto, m_appSettingsRepository, nullptr);
     protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
@@ -141,10 +110,10 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
 
-    vpnConfiguration[config_key::hostName] = serverConfig.value(config_key::hostName).toString();
-    vpnConfiguration[config_key::description] = serverConfig.value(config_key::description).toString();
+    vpnConfiguration[config_key::hostName] = ServerConfigUtils::hostName(serverConfig);
+    vpnConfiguration[config_key::description] = ServerConfigUtils::description(serverConfig);
 
-    vpnConfiguration[config_key::configVersion] = serverConfig.value(config_key::configVersion).toInt();
+    vpnConfiguration[config_key::configVersion] = ServerConfigUtils::configVersion(serverConfig);
 
     return vpnConfiguration;
 }

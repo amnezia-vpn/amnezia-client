@@ -846,9 +846,11 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
     return ErrorCode::NoError;
 }
 
-ErrorCode InstallController::installContainer(const ServerCredentials &credentials, DockerContainer container, int port,
-                                              TransportProto transportProto, int serverIndex, bool &wasContainerInstalled)
+ErrorCode InstallController::installContainer(int serverIndex, DockerContainer container, int port,
+                                              TransportProto transportProto, bool &wasContainerInstalled)
 {
+    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    
     QMap<DockerContainer, ContainerConfig> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(credentials, installedContainers);
     if (errorCode) {

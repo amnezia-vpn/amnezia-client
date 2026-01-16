@@ -124,35 +124,11 @@ ServerCredentials ServersController::getServerCredentials(int serverIndex) const
 
 QPair<QString, QString> ServersController::getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const
 {
-    QPair<QString, QString> dns;
-    
     ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfig);
-    
-    bool isDnsContainerInstalled = false;
-    for (auto it = containers.begin(); it != containers.end(); ++it) {
-        if (it.key() == DockerContainer::Dns) {
-            isDnsContainerInstalled = true;
-            break;
-        }
-    }
-    
-    dns.first = ServerConfigUtils::dns1(serverConfig);
-    dns.second = ServerConfigUtils::dns2(serverConfig);
-    
-    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
-        if (isAmneziaDnsEnabled && isDnsContainerInstalled) {
-            dns.first = protocols::dns::amneziaDnsIp;
-        } else {
-            dns.first = m_appSettingsRepository->primaryDns();
-        }
-    }
-    
-    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
-        dns.second = m_appSettingsRepository->secondaryDns();
-    }
-    
-    return dns;
+    return ServerConfigUtils::getDnsPair(serverConfig, 
+                                          isAmneziaDnsEnabled,
+                                          m_appSettingsRepository->primaryDns(),
+                                          m_appSettingsRepository->secondaryDns());
 }
 
 bool ServersController::isServerFromApiAlreadyExists(const quint16 crc) const

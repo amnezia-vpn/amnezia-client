@@ -1,6 +1,7 @@
 #include "serverConfig.h"
 
 #include "core/utils/api/apiUtils.h"
+#include "core/utils/networkUtilities.h"
 #include "core/models/selfhosted/selfHostedServerConfig.h"
 #include "core/models/selfhosted/nativeServerConfig.h"
 #include "core/models/api/apiV1ServerConfig.h"
@@ -144,6 +145,19 @@ int ServerConfigUtils::crc(const ServerConfig& config)
     }, config);
 }
 
+int ServerConfigUtils::configVersion(const ServerConfig& config)
+{
+    return std::visit([](auto&& arg) -> int {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, ApiV1ServerConfig>) {
+            return apiDefs::ConfigSource::Telegram;
+        } else if constexpr (std::is_same_v<T, ApiV2ServerConfig>) {
+            return apiDefs::ConfigSource::AmneziaGateway;
+        }
+        return 0; // SelfHostedServerConfig or NativeServerConfig
+    }, config);
+}
+
 QJsonObject ServerConfigUtils::toJson(const ServerConfig& config)
 {
     return std::visit([](auto&& arg) -> QJsonObject {
@@ -184,6 +198,41 @@ ServerConfig ServerConfigUtils::fromJson(const QJsonObject& json)
         }
     }
     }
+}
+
+QPair<QString, QString> ServerConfigUtils::getDnsPair(const ServerConfig &serverConfig, 
+                                                       bool isAmneziaDnsEnabled,
+                                                       const QString &primaryDns,
+                                                       const QString &secondaryDns)
+{
+    QPair<QString, QString> dns;
+    
+    QMap<DockerContainer, ContainerConfig> serverContainers = ServerConfigUtils::containers(serverConfig);
+    
+    bool isDnsContainerInstalled = false;
+    for (auto it = serverContainers.begin(); it != serverContainers.end(); ++it) {
+        if (it.key() == DockerContainer::Dns) {
+            isDnsContainerInstalled = true;
+            break;
+        }
+    }
+    
+    dns.first = ServerConfigUtils::dns1(serverConfig);
+    dns.second = ServerConfigUtils::dns2(serverConfig);
+    
+    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
+        if (isAmneziaDnsEnabled && isDnsContainerInstalled) {
+            dns.first = protocols::dns::amneziaDnsIp;
+        } else {
+            dns.first = primaryDns;
+        }
+    }
+    
+    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
+        dns.second = secondaryDns;
+    }
+    
+    return dns;
 }
 
 } // namespace amnezia

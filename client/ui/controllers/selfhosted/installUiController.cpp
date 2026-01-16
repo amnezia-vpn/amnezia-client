@@ -110,7 +110,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         int containersCount = containers.size();
 
         bool wasContainerInstalled = false;
-        errorCode = m_installController->installContainer(serverCredentials, container, port, transportProto, serverIndex,
+        errorCode = m_installController->installContainer(serverIndex, container, port, transportProto,
                                                           wasContainerInstalled);
         if (errorCode) {
             emit installationErrorOccurred(errorCode);

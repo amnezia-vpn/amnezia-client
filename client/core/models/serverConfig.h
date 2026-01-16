@@ -52,6 +52,7 @@ namespace ServerConfigUtils {
     bool hasContainers(const ServerConfig& config);
     ContainerConfig containerConfig(const ServerConfig& config, DockerContainer container);
     int crc(const ServerConfig& config);
+    int configVersion(const ServerConfig& config);
     
     QJsonObject toJson(const ServerConfig& config);
     ServerConfig fromJson(const QJsonObject& json);
@@ -67,6 +68,12 @@ namespace ServerConfigUtils {
     {
         return std::visit(std::forward<Visitor>(visitor), config);
     }
+    
+    // Utility function to get DNS pair for a server
+    QPair<QString, QString> getDnsPair(const ServerConfig &serverConfig, 
+                                       bool isAmneziaDnsEnabled,
+                                       const QString &primaryDns,
+                                       const QString &secondaryDns);
 }
 
 } // namespace amnezia
