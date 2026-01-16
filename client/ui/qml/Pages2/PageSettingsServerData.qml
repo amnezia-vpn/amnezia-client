@@ -159,6 +159,7 @@ PageType {
         readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
         readonly property bool isRichText: false
         readonly property var clickedHandler: function() {
+            ApiSettingsController.getAccountInfo(false)
             ApiSettingsController.updateApiDevicesModel()
             PageController.goToPage(PageEnum.PageSettingsApiDevices)
         }
