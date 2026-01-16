@@ -60,21 +60,11 @@ QJsonObject AwgServerConfig::toJson() const
         obj[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
     }
     
-    if (!specialJunk1.isEmpty()) {
-        obj[config_key::specialJunk1] = specialJunk1;
-    }
-    if (!specialJunk2.isEmpty()) {
-        obj[config_key::specialJunk2] = specialJunk2;
-    }
-    if (!specialJunk3.isEmpty()) {
-        obj[config_key::specialJunk3] = specialJunk3;
-    }
-    if (!specialJunk4.isEmpty()) {
-        obj[config_key::specialJunk4] = specialJunk4;
-    }
-    if (!specialJunk5.isEmpty()) {
-        obj[config_key::specialJunk5] = specialJunk5;
-    }
+    obj[config_key::specialJunk1] = specialJunk1;
+    obj[config_key::specialJunk2] = specialJunk2;
+    obj[config_key::specialJunk3] = specialJunk3;
+    obj[config_key::specialJunk4] = specialJunk4;
+    obj[config_key::specialJunk5] = specialJunk5;
     
     if (isThirdPartyConfig) {
         obj[config_key::isThirdPartyConfig] = isThirdPartyConfig;
@@ -197,21 +187,11 @@ QJsonObject AwgClientConfig::toJson() const
         obj[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
     }
     
-    if (!specialJunk1.isEmpty()) {
-        obj[config_key::specialJunk1] = specialJunk1;
-    }
-    if (!specialJunk2.isEmpty()) {
-        obj[config_key::specialJunk2] = specialJunk2;
-    }
-    if (!specialJunk3.isEmpty()) {
-        obj[config_key::specialJunk3] = specialJunk3;
-    }
-    if (!specialJunk4.isEmpty()) {
-        obj[config_key::specialJunk4] = specialJunk4;
-    }
-    if (!specialJunk5.isEmpty()) {
-        obj[config_key::specialJunk5] = specialJunk5;
-    }
+    obj[config_key::specialJunk1] = specialJunk1;
+    obj[config_key::specialJunk2] = specialJunk2;
+    obj[config_key::specialJunk3] = specialJunk3;
+    obj[config_key::specialJunk4] = specialJunk4;
+    obj[config_key::specialJunk5] = specialJunk5;
     
     if (isObfuscationEnabled) {
         obj[config_key::isObfuscationEnabled] = isObfuscationEnabled;

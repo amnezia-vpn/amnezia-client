@@ -32,8 +32,12 @@ QJsonObject OpenVpnServerConfig::toJson() const
     if (!hash.isEmpty()) {
         obj[config_key::hash] = hash;
     }
-    obj[config_key::ncp_disable] = ncpDisable;
-    obj[config_key::tls_auth] = tlsAuth;
+    if (ncpDisable != false) {
+        obj[config_key::ncp_disable] = ncpDisable;
+    }
+    if (tlsAuth != true) {
+        obj[config_key::tls_auth] = tlsAuth;
+    }
     if (!additionalClientConfig.isEmpty()) {
         obj[config_key::additional_client_config] = additionalClientConfig;
     }

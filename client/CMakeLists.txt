@@ -229,3 +229,7 @@ endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 qt_finalize_target(${PROJECT})
+
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+    add_subdirectory(tests)
+endif()
