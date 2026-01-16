@@ -24,7 +24,7 @@ public:
                                ServersModel* serversModel, ContainersModel* containersModel,
                                ProtocolsModel* protocolsModel,
                                UsersController* usersController,
-                               const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+                               QObject *parent = nullptr);
     ~InstallUiController();
 
 public slots:
@@ -97,8 +97,6 @@ private:
     ContainersModel* m_containersModel;
     ProtocolsModel* m_protocolModel;
     UsersController* m_usersController;
-
-    std::shared_ptr<Settings> m_settings;
 
     ServerCredentials m_processedServerCredentials;
 

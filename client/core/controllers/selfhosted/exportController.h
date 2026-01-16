@@ -10,7 +10,6 @@
 #include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
 #include "core/repositories/appSettingsRepository.h"
-#include "settings.h"
 
 class SshSession;
 class VpnConfigurationsController;
@@ -32,7 +31,6 @@ public:
 
     explicit ExportController(ServersRepository* serversRepository,
                               AppSettingsRepository* appSettingsRepository,
-                              const std::shared_ptr<Settings> &settings,
                               QObject *parent = nullptr);
 
     ExportResult generateFullAccessConfig(int serverIndex);
@@ -43,15 +41,10 @@ public:
     ExportResult generateXrayConfig(int serverIndex, const QString &clientName, bool isApiConfig);
 
 signals:
-    void appendClientRequested(DockerContainer container, const ServerCredentials &credentials,
-                              const QJsonObject &containerConfig, const QString &clientName);
-    void appendClientByConfigRequested(QJsonObject protocolConfig, const QString &clientName,
-                                       DockerContainer container, const ServerCredentials &credentials);
-    void updateClientsRequested(DockerContainer container, const ServerCredentials &credentials);
-    void revokeClientRequested(int row, DockerContainer container, const ServerCredentials &credentials,
-                              int serverIndex);
-    void renameClientRequested(int row, const QString &clientName, DockerContainer container,
-                              const ServerCredentials &credentials);
+    void appendClientRequested(int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container);
+    void updateClientsRequested(int serverIndex, DockerContainer container);
+    void revokeClientRequested(int serverIndex, int row, DockerContainer container);
+    void renameClientRequested(int serverIndex, int row, const QString &clientName, DockerContainer container);
 
 public slots:
     void updateClientManagementModel(int serverIndex, int containerIndex);
@@ -66,7 +59,7 @@ private:
     };
 
     NativeConfigResult generateNativeConfig(int serverIndex, DockerContainer container,
-                                            const QJsonObject &containerConfig,
+                                            const ContainerConfig &containerConfig,
                                             const QString &clientName, Proto protocol,
                                             bool isApiConfig);
 
@@ -77,7 +70,6 @@ private:
 
     ServersRepository* m_serversRepository;
     AppSettingsRepository* m_appSettingsRepository;
-    std::shared_ptr<Settings> m_settings;
 };
 
 #endif // EXPORTCONTROLLER_H

@@ -12,14 +12,14 @@
 #include <QByteArray>
 
 #include "core/repositories/appSettingsRepository.h"
-#include "settings.h"
+#include "secure_qsettings.h"
 
 using namespace amnezia;
 
 class SecureAppSettingsRepository : public AppSettingsRepository
 {
 public:
-    explicit SecureAppSettingsRepository(std::shared_ptr<Settings> settings);
+    explicit SecureAppSettingsRepository(SecureQSettings* settings);
 
     QLocale getAppLanguage() const override;
     void setAppLanguage(QLocale locale) override;
@@ -85,7 +85,14 @@ public:
     QString nextAvailableServerName() const override;
 
 private:
-    std::shared_ptr<Settings> m_settings;
+    void setVpnSites(RouteMode mode, const QVariantMap &sites);
+    void setInstallationUuid(const QString &uuid);
+    
+    QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void setValue(const QString &key, const QVariant &value);
+
+    SecureQSettings* m_settings;
+    QString m_gatewayEndpoint;
 };
 
 #endif // SECUREAPPSETTINGSREPOSITORY_H

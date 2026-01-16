@@ -11,7 +11,7 @@
 #include <memory>
 
 #include "core/repositories/appSettingsRepository.h"
-#include "settings.h"
+#include "secure_qsettings.h"
 
 using namespace amnezia;
 
@@ -22,7 +22,7 @@ class QAppSettingsRepository : public QObject
     Q_OBJECT
 
 public:
-    explicit QAppSettingsRepository(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit QAppSettingsRepository(SecureQSettings* settings, QObject *parent = nullptr);
     ~QAppSettingsRepository();
 
     AppSettingsRepository* repository();

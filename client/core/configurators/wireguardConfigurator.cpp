@@ -17,13 +17,16 @@
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "protocols/protocols_defs.h"
-#include "settings.h"
 #include "core/utils/utilities.h"
+#include "core/models/containerConfig.h"
+#include "core/models/protocols/wireGuardProtocolConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include <QJsonArray>
 
-WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings,
+WireguardConfigurator::WireguardConfigurator(AppSettingsRepository* appSettingsRepository,
                                              SshSession* sshSession, bool isAwg,
                                              QObject *parent)
-    : ConfiguratorBase(settings, sshSession, parent), m_isAwg(isAwg)
+    : ConfiguratorBase(appSettingsRepository, sshSession, parent), m_isAwg(isAwg)
 {
     m_serverConfigPath =
             m_isAwg ? amnezia::protocols::awg::serverConfigPath : amnezia::protocols::wireguard::serverConfigPath;
@@ -91,12 +94,20 @@ QList<QHostAddress> WireguardConfigurator::getIpsFromConf(const QString &input)
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardConfig(const ServerCredentials &credentials,
                                                                                     DockerContainer container,
-                                                                                    const QJsonObject &containerConfig,
+                                                                                    const WireGuardServerConfig* serverConfig,
+                                                                                    const AwgServerConfig* awgServerConfig,
                                                                                     ErrorCode &errorCode)
 {
     WireguardConfigurator::ConnectionData connData = WireguardConfigurator::genClientKeys();
     connData.host = credentials.hostName;
-    connData.port = containerConfig.value(m_protocolName).toObject().value(config_key::port).toString(m_defaultPort);
+    
+    QString portStr = m_defaultPort;
+    if (serverConfig && !serverConfig->port.isEmpty()) {
+        portStr = serverConfig->port;
+    } else if (awgServerConfig && !awgServerConfig->port.isEmpty()) {
+        portStr = awgServerConfig->port;
+    }
+    connData.port = portStr;
 
     if (connData.clientPrivKey.isEmpty() || connData.clientPubKey.isEmpty()) {
         errorCode = ErrorCode::InternalError;
@@ -123,11 +134,14 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     QHostAddress nextIp = [&] {
         QHostAddress result;
         QHostAddress lastIp;
+        QString subnetAddress = protocols::wireguard::defaultSubnetAddress;
+        if (serverConfig && !serverConfig->subnetAddress.isEmpty()) {
+            subnetAddress = serverConfig->subnetAddress;
+        } else if (awgServerConfig && !awgServerConfig->subnetAddress.isEmpty()) {
+            subnetAddress = awgServerConfig->subnetAddress;
+        }
         if (ips.empty()) {
-            lastIp.setAddress(containerConfig.value(m_protocolName)
-                                      .toObject()
-                                      .value(config_key::subnet_address)
-                                      .toString(protocols::wireguard::defaultSubnetAddress));
+            lastIp.setAddress(subnetAddress);
         } else {
             lastIp = ips.last();
         }
@@ -180,22 +194,39 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 
     errorCode = m_sshSession->runScript(
             credentials,
-            m_sshSession->replaceVars(script, amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns())));
+            m_sshSession->replaceVars(script, amnezia::genBaseVars(credentials, container, m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns())));
 
     return connData;
 }
 
-QString WireguardConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                            const QJsonObject &containerConfig, ErrorCode &errorCode)
+ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                                    const ContainerConfig &containerConfig, ErrorCode &errorCode)
 {
-    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_settings->primaryDns(), m_settings->secondaryDns());
+    const WireGuardServerConfig* wireguardServerConfig = nullptr;
+    const WireGuardClientConfig* wireguardClientConfig = nullptr;
+    const AwgServerConfig* awgServerConfig = nullptr;
+    const AwgClientConfig* awgClientConfig = nullptr;
+    
+    if (auto* wireguardConfig = std::get_if<WireGuardProtocolConfig>(&containerConfig.protocolConfig)) {
+        wireguardServerConfig = &wireguardConfig->serverConfig;
+        if (wireguardConfig->clientConfig.has_value()) {
+            wireguardClientConfig = &wireguardConfig->clientConfig.value();
+        }
+    } else if (auto* awgConfig = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
+        awgServerConfig = &awgConfig->serverConfig;
+        if (awgConfig->clientConfig.has_value()) {
+            awgClientConfig = &awgConfig->clientConfig.value();
+        }
+    }
+    
+    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns());
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
     QString config = m_sshSession->replaceVars(scriptData, vars);
 
-    ConnectionData connData = prepareWireguardConfig(credentials, container, containerConfig, errorCode);
+    ConnectionData connData = prepareWireguardConfig(credentials, container, wireguardServerConfig, awgServerConfig, errorCode);
     if (errorCode != ErrorCode::NoError) {
-        return "";
+        return WireGuardProtocolConfig{};
     }
 
     config.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", connData.clientPrivKey);
@@ -203,26 +234,36 @@ QString WireguardConfigurator::createConfig(const ServerCredentials &credentials
     config.replace("$WIREGUARD_SERVER_PUBLIC_KEY", connData.serverPubKey);
     config.replace("$WIREGUARD_PSK", connData.pskKey);
 
-    const QJsonObject &wireguarConfig = containerConfig.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
-    QJsonObject jConfig;
-    jConfig[config_key::config] = config;
-
-    jConfig[config_key::hostName] = connData.host;
-    jConfig[config_key::port] = connData.port.toInt();
-    jConfig[config_key::client_priv_key] = connData.clientPrivKey;
-    jConfig[config_key::client_ip] = connData.clientIP;
-    jConfig[config_key::client_pub_key] = connData.clientPubKey;
-    jConfig[config_key::psk_key] = connData.pskKey;
-    jConfig[config_key::server_pub_key] = connData.serverPubKey;
-    jConfig[config_key::mtu] = wireguarConfig.value(config_key::mtu).toString(protocols::wireguard::defaultMtu);
-
-    jConfig[config_key::persistent_keep_alive] = "25";
-    QJsonArray allowedIps { "0.0.0.0/0", "::/0" };
-    jConfig[config_key::allowed_ips] = allowedIps;
-
-    jConfig[config_key::clientId] = connData.clientPubKey;
-
-    return QJsonDocument(jConfig).toJson();
+    QString mtu = protocols::wireguard::defaultMtu;
+    if (wireguardClientConfig && !wireguardClientConfig->mtu.isEmpty()) {
+        mtu = wireguardClientConfig->mtu;
+    } else if (awgClientConfig && !awgClientConfig->mtu.isEmpty()) {
+        mtu = awgClientConfig->mtu;
+    }
+    
+    WireGuardProtocolConfig protocolConfig;
+    if (wireguardServerConfig) {
+        protocolConfig.serverConfig = *wireguardServerConfig;
+    }
+    
+    WireGuardClientConfig clientConfig;
+    clientConfig.nativeConfig = config;
+    clientConfig.hostName = connData.host;
+    clientConfig.port = connData.port.toInt();
+    clientConfig.clientIp = connData.clientIP;
+    clientConfig.clientPrivateKey = connData.clientPrivKey;
+    clientConfig.clientPublicKey = connData.clientPubKey;
+    clientConfig.serverPublicKey = connData.serverPubKey;
+    clientConfig.presharedKey = connData.pskKey;
+    clientConfig.clientId = connData.clientPubKey;
+    clientConfig.allowedIps = QStringList { "0.0.0.0/0", "::/0" };
+    clientConfig.persistentKeepAlive = "25";
+    clientConfig.mtu = mtu;
+    clientConfig.isObfuscationEnabled = false;
+    
+    protocolConfig.setClientConfig(clientConfig);
+    
+    return protocolConfig;
 }
 
 QString WireguardConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns,

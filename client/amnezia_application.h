@@ -14,7 +14,7 @@
 #include <QClipboard>
 
 #include "core/controllers/coreController.h"
-#include "settings.h"
+#include "secure_qsettings.h"
 #include "vpnconnection.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
@@ -51,7 +51,7 @@ public slots:
 private:
     static bool m_forceQuit;
     QQmlApplicationEngine *m_engine {};
-    std::shared_ptr<Settings> m_settings;
+    SecureQSettings* m_settings;
 
     QScopedPointer<CoreController> m_coreController;
 

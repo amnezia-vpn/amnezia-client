@@ -17,6 +17,8 @@
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "core/utils/utilities.h"
+#include "core/models/serverConfig.h"
+#include "core/models/containerConfig.h"
 
 namespace
 {
@@ -43,7 +45,6 @@ InstallUiController::InstallUiController(InstallController *installController,
                                          SettingsController *settingsController,
                                          ServersModel *serversModel, ContainersModel *containersModel,
                                          ProtocolsModel *protocolsModel, UsersController *usersController,
-                                         const std::shared_ptr<Settings> &settings,
                                          QObject *parent)
     : QObject(parent),
       m_installController(installController),
@@ -52,8 +53,7 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
-      m_usersController(usersController),
-      m_settings(settings)
+      m_usersController(usersController)
 {
 }
 
@@ -89,8 +89,8 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         }
 
         int serverIndex = m_serversController->getServersCount() - 1;
-        QJsonObject serverConfig = m_serversController->getServerConfig(serverIndex);
-        QJsonArray containers = serverConfig.value(config_key::containers).toArray();
+        ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
+        QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfig);
         int containersCount = containers.size();
 
         if (wasContainerInstalled) {
@@ -105,8 +105,8 @@ void InstallUiController::install(DockerContainer container, int port, Transport
 
         emit installServerFinished(finishMessage);
     } else {
-        QJsonObject serverConfig = m_serversController->getServerConfig(serverIndex);
-        QJsonArray containers = serverConfig.value(config_key::containers).toArray();
+        ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
+        QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfig);
         int containersCount = containers.size();
 
         bool wasContainerInstalled = false;
@@ -117,8 +117,8 @@ void InstallUiController::install(DockerContainer container, int port, Transport
             return;
         }
 
-        QJsonObject newServerConfig = m_serversController->getServerConfig(serverIndex);
-        QJsonArray newContainers = newServerConfig.value(config_key::containers).toArray();
+        ServerConfig newServerConfig = m_serversController->getServerConfig(serverIndex);
+        QMap<DockerContainer, ContainerConfig> newContainers = ServerConfigUtils::containers(newServerConfig);
         int newContainersCount = newContainers.size();
 
         bool hasNewContainers = (newContainersCount - containersCount) > (wasContainerInstalled ? 1 : 0);
@@ -140,15 +140,15 @@ void InstallUiController::install(DockerContainer container, int port, Transport
 
 void InstallUiController::scanServerForInstalledContainers(int serverIndex)
 {
-    QJsonObject serverBefore = m_serversController->getServerConfig(serverIndex);
-    QJsonArray containersBefore = serverBefore.value(config_key::containers).toArray();
+    ServerConfig serverBefore = m_serversController->getServerConfig(serverIndex);
+    QMap<DockerContainer, ContainerConfig> containersBefore = ServerConfigUtils::containers(serverBefore);
     int containersCountBefore = containersBefore.size();
 
     ErrorCode errorCode = m_installController->scanServerForInstalledContainers(serverIndex);
 
     if (errorCode == ErrorCode::NoError) {
-        QJsonObject serverAfter = m_serversController->getServerConfig(serverIndex);
-        QJsonArray containersAfter = serverAfter.value(config_key::containers).toArray();
+        ServerConfig serverAfter = m_serversController->getServerConfig(serverIndex);
+        QMap<DockerContainer, ContainerConfig> containersAfter = ServerConfigUtils::containers(serverAfter);
         int containersCountAfter = containersAfter.size();
 
         bool isInstalledContainerAdded = containersCountAfter > containersCountBefore;
@@ -162,9 +162,11 @@ void InstallUiController::scanServerForInstalledContainers(int serverIndex)
 void InstallUiController::updateContainer(int serverIndex, QJsonObject config)
 {
     const DockerContainer container = ContainerProps::containerFromString(config.value(config_key::container).toString());
-    QJsonObject oldContainerConfig = m_containersModel->getContainerConfig(container);
+    QJsonObject oldContainerConfigJson = m_containersModel->getContainerConfig(container);
+    ContainerConfig oldContainerConfig = ContainerConfig::fromJson(oldContainerConfigJson);
+    ContainerConfig newContainerConfig = ContainerConfig::fromJson(config);
 
-    ErrorCode errorCode = m_installController->updateContainer(serverIndex, container, oldContainerConfig, config);
+    ErrorCode errorCode = m_installController->updateContainer(serverIndex, container, oldContainerConfig, newContainerConfig);
 
     if (errorCode == ErrorCode::NoError) {
         m_protocolModel->updateModel(config);
@@ -312,23 +314,23 @@ void InstallUiController::setEncryptedPassphrase(QString passphrase)
 
 void InstallUiController::addEmptyServer()
 {
-    QJsonObject server;
-    server.insert(config_key::hostName, m_processedServerCredentials.hostName);
-    server.insert(config_key::userName, m_processedServerCredentials.userName);
-    server.insert(config_key::password, m_processedServerCredentials.secretData);
-    server.insert(config_key::port, m_processedServerCredentials.port);
-    server.insert(config_key::description, m_settingsController->nextAvailableServerName());
+    SelfHostedServerConfig serverConfig;
+    serverConfig.hostName = m_processedServerCredentials.hostName;
+    serverConfig.userName = m_processedServerCredentials.userName;
+    serverConfig.password = m_processedServerCredentials.secretData;
+    serverConfig.port = m_processedServerCredentials.port;
+    serverConfig.description = m_settingsController->nextAvailableServerName();
+    serverConfig.defaultContainer = DockerContainer::None;
 
-    server.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
-
-    m_serversController->addServer(server);
+    m_serversController->addServer(ServerConfig(serverConfig));
     emit installServerFinished(tr("Server added successfully"));
 }
 
 bool InstallUiController::isConfigValid()
 {
     int serverIndex = m_serversController->getDefaultServerIndex();
-    QJsonObject serverConfigObject = m_serversController->getServerConfig(serverIndex);
+    ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
+    QJsonObject serverConfigObject = ServerConfigUtils::toJson(serverConfig);
 
     if (apiUtils::isServerFromApi(serverConfigObject)) {
         return true;

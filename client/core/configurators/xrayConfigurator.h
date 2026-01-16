@@ -10,13 +10,13 @@ class XrayConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    XrayConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent = nullptr);
+    XrayConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent = nullptr);
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                         ErrorCode &errorCode);
+    ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
+                                ErrorCode &errorCode);
 
 private:
-    QString prepareServerConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
+    QString prepareServerConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
                                 ErrorCode &errorCode);
 };
 

@@ -9,15 +9,16 @@
 #include "core/utils/qrCodeUtils.h"
 #include "core/utils/serialization/serialization.h"
 #include "protocols/protocols_defs.h"
+#include "core/models/serverConfig.h"
+#include "core/models/containerConfig.h"
+#include "core/models/protocolConfig.h"
 
 ExportController::ExportController(ServersRepository* serversRepository,
                                    AppSettingsRepository* appSettingsRepository,
-                                   const std::shared_ptr<Settings> &settings,
                                    QObject *parent)
     : QObject(parent),
       m_serversRepository(serversRepository),
-      m_appSettingsRepository(appSettingsRepository),
-      m_settings(settings)
+      m_appSettingsRepository(appSettingsRepository)
 {
 }
 
@@ -25,23 +26,15 @@ ExportController::ExportResult ExportController::generateFullAccessConfig(int se
 {
     ExportResult result;
 
-    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
+    ServerConfig serverConfig = m_serversRepository->server(serverIndex);
+    ServerConfigUtils::visit(serverConfig, [](auto& arg) {
+        for (auto it = arg.containers.begin(); it != arg.containers.end(); ++it) {
+            ProtocolConfigUtils::clearClientConfig(it.value().protocolConfig);
+        }
+    });
 
-    QJsonArray containers = serverConfig.value(config_key::containers).toArray();
-    for (auto i = 0; i < containers.size(); i++) {
-        auto containerConfig = containers.at(i).toObject();
-        auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
-
-        Proto protocol = ContainerProps::defaultProtocol(containerType);
-        auto protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
-        protocolConfig.remove(config_key::last_config);
-        containerConfig[ProtocolProps::protoToString(protocol)] = protocolConfig;
-
-        containers.replace(i, containerConfig);
-    }
-    serverConfig[config_key::containers] = containers;
-
-    QByteArray compressedConfig = QJsonDocument(serverConfig).toJson();
+    QJsonObject serverJson = ServerConfigUtils::toJson(serverConfig);
+    QByteArray compressedConfig = QJsonDocument(serverJson).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = generateVpnUrl(compressedConfig);
     result.qrCodes = generateQrCodesFromConfig(compressedConfig);
@@ -55,39 +48,48 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
 
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, container);
-
-    containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
 
     if (ContainerProps::containerService(container) != ServiceType::Other) {
         SshSession sshSession;
         Proto protocol = ContainerProps::defaultProtocol(container);
-        QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
 
-        auto configurator = ConfiguratorBase::create(protocol, m_settings, &sshSession);
-        QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, result.errorCode);
+        auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository, &sshSession);
+        ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, containerConfig, result.errorCode);
         if (result.errorCode != ErrorCode::NoError) {
             return result;
         }
 
-        protocolConfig.insert(config_key::last_config, protocolConfigString);
-        containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
+        containerConfig.protocolConfig = newProtocolConfig;
+        
+        QString clientId = ProtocolConfigUtils::clientId(newProtocolConfig);
+        if (!clientId.isEmpty()) {
+            emit appendClientRequested(serverIndex, clientId, clientName, container);
+        }
     }
 
-    emit appendClientRequested(container, credentials, containerConfig, clientName);
+    ServerConfig serverConfig = m_serversRepository->server(serverIndex);
+    ServerConfigUtils::visit(serverConfig, [container, containerConfig](auto& arg) {
+        arg.containers.clear();
+        arg.containers[container] = containerConfig;
+        arg.defaultContainer = container;
+    });
 
-    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
-    serverConfig.remove(config_key::userName);
-    serverConfig.remove(config_key::password);
-    serverConfig.remove(config_key::port);
-    serverConfig.insert(config_key::containers, QJsonArray { containerConfig });
-    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
+    if (ServerConfigUtils::isSelfHosted(serverConfig)) {
+        SelfHostedServerConfig& selfHosted = ServerConfigUtils::asSelfHosted(serverConfig);
+        selfHosted.userName.reset();
+        selfHosted.password.reset();
+        selfHosted.port.reset();
+    }
 
     auto dns = getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
-    serverConfig.insert(config_key::dns1, dns.first);
-    serverConfig.insert(config_key::dns2, dns.second);
+    ServerConfigUtils::visit(serverConfig, [&dns](auto& arg) {
+        arg.dns1 = dns.first;
+        arg.dns2 = dns.second;
+    });
 
-    QByteArray compressedConfig = QJsonDocument(serverConfig).toJson();
+    QJsonObject serverJson = ServerConfigUtils::toJson(serverConfig);
+    QByteArray compressedConfig = QJsonDocument(serverJson).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = generateVpnUrl(compressedConfig);
     result.qrCodes = generateQrCodesFromConfig(compressedConfig);
@@ -96,7 +98,7 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
 }
 
 ExportController::NativeConfigResult ExportController::generateNativeConfig(int serverIndex, DockerContainer container,
-                                                                             const QJsonObject &containerConfig,
+                                                                             const ContainerConfig &containerConfig,
                                                                              const QString &clientName, Proto protocol,
                                                                              bool isApiConfig)
 {
@@ -109,22 +111,28 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
     auto dns = getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
 
-    QJsonObject modifiedContainerConfig = containerConfig;
-    modifiedContainerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+    ContainerConfig modifiedContainerConfig = containerConfig;
+    modifiedContainerConfig.container = container;
 
     SshSession sshSession;
-    auto configurator = ConfiguratorBase::create(protocol, m_settings, &sshSession);
+    auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository, &sshSession);
 
-    QString protocolConfigString = configurator->createConfig(credentials, container, modifiedContainerConfig, result.errorCode);
+    ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, modifiedContainerConfig, result.errorCode);
     if (result.errorCode != ErrorCode::NoError) {
         return result;
     }
+    
+    QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(newProtocolConfig, protocol);
+    QString protocolConfigString = QString::fromUtf8(QJsonDocument(protocolConfigJson).toJson(QJsonDocument::Compact));
     protocolConfigString = configurator->processConfigWithExportSettings(dns, isApiConfig, protocolConfigString);
 
     result.jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg || protocol == Proto::Xray) {
-        emit appendClientByConfigRequested(result.jsonNativeConfig, clientName, container, credentials);
+        QString clientId = ProtocolConfigUtils::clientId(newProtocolConfig);
+        if (!clientId.isEmpty()) {
+            emit appendClientRequested(serverIndex, clientId, clientName, container);
+        }
     }
     return result;
 }
@@ -135,7 +143,7 @@ ExportController::ExportResult ExportController::generateOpenVpnConfig(int serve
     ExportResult result;
 
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, container);
+    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
 
     Proto protocol = ContainerProps::defaultProtocol(container);
 
@@ -158,7 +166,7 @@ ExportController::ExportResult ExportController::generateWireGuardConfig(int ser
 {
     ExportResult result;
 
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, DockerContainer::WireGuard);
+    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, DockerContainer::WireGuard);
 
     auto nativeResult = generateNativeConfig(serverIndex, DockerContainer::WireGuard, containerConfig, clientName, Proto::WireGuard, isApiConfig);
     if (nativeResult.errorCode != ErrorCode::NoError) {
@@ -181,7 +189,7 @@ ExportController::ExportResult ExportController::generateAwgConfig(int serverInd
     ExportResult result;
 
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, container);
+    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
 
     auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName, Proto::Awg, isApiConfig);
     if (nativeResult.errorCode != ErrorCode::NoError) {
@@ -203,7 +211,7 @@ ExportController::ExportResult ExportController::generateXrayConfig(int serverIn
 {
     ExportResult result;
 
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, DockerContainer::Xray);
+    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, DockerContainer::Xray);
 
     auto nativeResult = generateNativeConfig(serverIndex, DockerContainer::Xray, containerConfig, clientName, Proto::Xray, isApiConfig);
     if (nativeResult.errorCode != ErrorCode::NoError) {
@@ -271,22 +279,19 @@ ExportController::ExportResult ExportController::generateXrayConfig(int serverIn
 void ExportController::updateClientManagementModel(int serverIndex, int containerIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
-    emit updateClientsRequested(container, credentials);
+    emit updateClientsRequested(serverIndex, container);
 }
 
 void ExportController::revokeConfig(int row, int serverIndex, int containerIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
-    emit revokeClientRequested(row, container, credentials, serverIndex);
+    emit revokeClientRequested(serverIndex, row, container);
 }
 
 void ExportController::renameClient(int row, const QString &clientName, int serverIndex, int containerIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
-    emit renameClientRequested(row, clientName, container, credentials);
+    emit renameClientRequested(serverIndex, row, clientName, container);
 }
 
 QString ExportController::generateVpnUrl(const QByteArray &compressedConfig)
@@ -309,18 +314,19 @@ QPair<QString, QString> ExportController::getDnsPair(int serverIndex, bool isAmn
 {
     QPair<QString, QString> dns;
     
-    const QJsonObject &server = m_serversRepository->server(serverIndex);
-    const auto containers = server.value(config_key::containers).toArray();
+    ServerConfig serverConfig = m_serversRepository->server(serverIndex);
+    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfig);
     
     bool isDnsContainerInstalled = false;
-    for (const QJsonValue &container : containers) {
-        if (ContainerProps::containerFromString(container.toObject().value(config_key::container).toString()) == DockerContainer::Dns) {
+    for (auto it = containers.begin(); it != containers.end(); ++it) {
+        if (it.key() == DockerContainer::Dns) {
             isDnsContainerInstalled = true;
+            break;
         }
     }
     
-    dns.first = server.value(config_key::dns1).toString();
-    dns.second = server.value(config_key::dns2).toString();
+    dns.first = ServerConfigUtils::dns1(serverConfig);
+    dns.second = ServerConfigUtils::dns2(serverConfig);
     
     if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
         if (isAmneziaDnsEnabled && isDnsContainerInstalled) {

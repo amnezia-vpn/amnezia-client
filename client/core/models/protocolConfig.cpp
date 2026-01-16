@@ -2,6 +2,7 @@
 
 #include "protocols/protocols_defs.h"
 #include "containers/containers_defs.h"
+#include "protocols/ikev2ProtocolConfig.h"
 
 namespace amnezia
 {
@@ -26,6 +27,8 @@ Proto ProtocolConfigUtils::getProtocolType(const ProtocolConfig& config)
             return Proto::Sftp;
         } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
             return Proto::Socks5Proxy;
+        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            return Proto::Ikev2;
         }
         return Proto::Any;
     }, config);
@@ -101,6 +104,16 @@ const Socks5ProxyProtocolConfig& ProtocolConfigUtils::asSocks5Proxy(const Protoc
     return std::get<Socks5ProxyProtocolConfig>(config);
 }
 
+Ikev2ProtocolConfig& ProtocolConfigUtils::asIkev2(ProtocolConfig& config)
+{
+    return std::get<Ikev2ProtocolConfig>(config);
+}
+
+const Ikev2ProtocolConfig& ProtocolConfigUtils::asIkev2(const ProtocolConfig& config)
+{
+    return std::get<Ikev2ProtocolConfig>(config);
+}
+
 QString ProtocolConfigUtils::port(const ProtocolConfig& config)
 {
     return std::visit([](auto&& arg) -> QString {
@@ -119,6 +132,8 @@ QString ProtocolConfigUtils::port(const ProtocolConfig& config)
             return arg.port;
         } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
             return arg.port;
+        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            return QString();
         }
         return QString();
     }, config);
@@ -138,9 +153,29 @@ QString ProtocolConfigUtils::transportProto(const ProtocolConfig& config)
             return arg.serverConfig.transportProto;
         } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
             return arg.serverConfig.transportProto;
+        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            return QString();
         }
         return QString();
     }, config);
+}
+
+QString ProtocolConfigUtils::portWithDefault(const ProtocolConfig& config, Proto protocol)
+{
+    QString portValue = port(config);
+    if (portValue.isEmpty()) {
+        return QString::number(ProtocolProps::defaultPort(protocol));
+    }
+    return portValue;
+}
+
+QString ProtocolConfigUtils::transportProtoWithDefault(const ProtocolConfig& config, Proto protocol)
+{
+    QString transportProtoValue = transportProto(config);
+    if (transportProtoValue.isEmpty()) {
+        return ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
+    }
+    return transportProtoValue;
 }
 
 bool ProtocolConfigUtils::hasClientConfig(const ProtocolConfig& config)
@@ -151,10 +186,40 @@ bool ProtocolConfigUtils::hasClientConfig(const ProtocolConfig& config)
                       std::is_same_v<T, WireGuardProtocolConfig> ||
                       std::is_same_v<T, OpenVpnProtocolConfig> ||
                       std::is_same_v<T, XrayProtocolConfig> ||
-                      std::is_same_v<T, SSXrayProtocolConfig>) {
+                      std::is_same_v<T, SSXrayProtocolConfig> ||
+                      std::is_same_v<T, Ikev2ProtocolConfig>) {
             return arg.hasClientConfig();
         }
         return false;
+    }, config);
+}
+
+QString ProtocolConfigUtils::clientId(const ProtocolConfig& config)
+{
+    return std::visit([](auto&& arg) -> QString {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, AwgProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->clientId;
+            }
+        } else if constexpr (std::is_same_v<T, WireGuardProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->clientId;
+            }
+        } else if constexpr (std::is_same_v<T, OpenVpnProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->clientId;
+            }
+        } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->id;
+            }
+        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->clientId;
+            }
+        }
+        return QString();
     }, config);
 }
 
@@ -182,6 +247,10 @@ QJsonObject ProtocolConfigUtils::getClientConfigJson(const ProtocolConfig& confi
             if (arg.hasClientConfig()) {
                 return arg.clientConfig->toJson();
             }
+        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            if (arg.hasClientConfig()) {
+                return arg.clientConfig->toJson();
+            }
         }
         return QJsonObject();
     }, config);
@@ -201,6 +270,8 @@ void ProtocolConfigUtils::setClientConfigJson(ProtocolConfig& config, const QJso
             arg.setClientConfig(XrayClientConfig::fromJson(clientJson));
         } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
             arg.setClientConfig(SSXrayClientConfig::fromJson(clientJson));
+        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            arg.setClientConfig(Ikev2ClientConfig::fromJson(clientJson));
         }
     }, config);
 }
@@ -213,7 +284,8 @@ void ProtocolConfigUtils::clearClientConfig(ProtocolConfig& config)
                       std::is_same_v<T, WireGuardProtocolConfig> ||
                       std::is_same_v<T, OpenVpnProtocolConfig> ||
                       std::is_same_v<T, XrayProtocolConfig> ||
-                      std::is_same_v<T, SSXrayProtocolConfig>) {
+                      std::is_same_v<T, SSXrayProtocolConfig> ||
+                      std::is_same_v<T, Ikev2ProtocolConfig>) {
             arg.clearClientConfig();
         }
     }, config);
@@ -237,6 +309,8 @@ QJsonObject ProtocolConfigUtils::toJson(const ProtocolConfig& config, Proto prot
             return arg.toJson();
         } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
             return arg.toJson();
+        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            return arg.toJson();
         }
         return QJsonObject();
     }, config);
@@ -259,6 +333,8 @@ ProtocolConfig ProtocolConfigUtils::fromJson(const QJsonObject& json, Proto prot
         return SftpProtocolConfig::fromJson(json);
     case Proto::Socks5Proxy:
         return Socks5ProxyProtocolConfig::fromJson(json);
+    case Proto::Ikev2:
+        return Ikev2ProtocolConfig::fromJson(json);
     default:
         return AwgProtocolConfig{};
     }

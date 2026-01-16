@@ -9,7 +9,7 @@
 #include <QStandardPaths>
 #include <algorithm>
 
-NewsModel::NewsModel(const std::shared_ptr<Settings> &settings, QObject *parent) : QAbstractListModel(parent), m_settings(settings)
+NewsModel::NewsModel(SecureQSettings* settings, QObject *parent) : QAbstractListModel(parent), m_settings(settings)
 {
     loadReadIds();
 }
@@ -114,11 +114,12 @@ bool NewsModel::hasUnread() const
 
 void NewsModel::loadReadIds()
 {
-    QStringList ids = m_settings->readNewsIds();
+    QStringList ids = m_settings->value("News/readIds").toStringList();
     m_readIds = QSet<QString>(ids.begin(), ids.end());
 }
 
 void NewsModel::saveReadIds() const
 {
-    m_settings->setReadNewsIds(QStringList(m_readIds.begin(), m_readIds.end()));
+    m_settings->setValue("News/readIds", QStringList(m_readIds.begin(), m_readIds.end()));
+    m_settings->sync();
 }

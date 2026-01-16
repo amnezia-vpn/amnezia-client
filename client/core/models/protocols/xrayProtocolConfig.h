@@ -11,6 +11,7 @@ namespace amnezia
 struct XrayServerConfig {
     QString port;
     QString transportProto;
+    QString subnetAddress;
     QString site;
     bool isThirdPartyConfig;
     
@@ -21,6 +22,7 @@ struct XrayServerConfig {
 struct XrayClientConfig {
     QString nativeConfig;
     QString localPort;
+    QString id;
     
     QJsonObject toJson() const;
     static XrayClientConfig fromJson(const QJsonObject& json);

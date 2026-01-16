@@ -10,7 +10,8 @@
 
 #include "protocols/vpnprotocol.h"
 #include "core/utils/defs.h"
-#include "settings.h"
+#include "core/repositories/serversRepository.h"
+#include "core/repositories/appSettingsRepository.h"
 
 #ifdef AMNEZIA_DESKTOP
 #include "core/utils/ipcClient.h"
@@ -27,7 +28,7 @@ class VpnConnection : public QObject
     Q_OBJECT
 
 public:
-    explicit VpnConnection(std::shared_ptr<Settings> settings, QObject* parent = nullptr);
+    explicit VpnConnection(ServersRepository* serversRepository, AppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
     ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
@@ -48,6 +49,7 @@ public:
 #endif
 
 public slots:
+    void setRepositories(ServersRepository* serversRepository, AppSettingsRepository* appSettingsRepository);
     void connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
 
@@ -76,8 +78,11 @@ protected:
     QMetaObject::Connection m_connectionLoseHandle;
     QMetaObject::Connection m_networkChangeHandle;
 
+public:
+    ServersRepository* m_serversRepository;
+    AppSettingsRepository* m_appSettingsRepository;
+
 private:
-    std::shared_ptr<Settings> m_settings;
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;

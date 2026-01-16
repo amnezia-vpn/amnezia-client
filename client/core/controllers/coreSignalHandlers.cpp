@@ -124,31 +124,20 @@ void CoreSignalHandlers::initInstallControllerHandler()
 void CoreSignalHandlers::initExportControllerHandler()
 {
     connect(m_coreController->m_exportController, &ExportController::appendClientRequested, this,
-            [this](DockerContainer container, const ServerCredentials &credentials,
-                   const QJsonObject &containerConfig, const QString &clientName) {
-                SshSession sshSession;
-                m_coreController->m_usersController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
-            });
-    connect(m_coreController->m_exportController, &ExportController::appendClientByConfigRequested, this,
-            [this](QJsonObject protocolConfig, const QString &clientName,
-                   DockerContainer container, const ServerCredentials &credentials) {
-                SshSession sshSession;
-                m_coreController->m_usersController->appendClient(protocolConfig, clientName, container, credentials, &sshSession);
+            [this](int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container) {
+                m_coreController->m_usersController->appendClient(serverIndex, clientId, clientName, container);
             });
     connect(m_coreController->m_exportController, &ExportController::updateClientsRequested, this,
-            [this](DockerContainer container, const ServerCredentials &credentials) {
-                SshSession sshSession;
-                m_coreController->m_usersController->updateClients(container, credentials, &sshSession);
+            [this](int serverIndex, DockerContainer container) {
+                m_coreController->m_usersController->updateClients(serverIndex, container);
             });
     connect(m_coreController->m_exportController, &ExportController::revokeClientRequested, this,
-            [this](int row, DockerContainer container, const ServerCredentials &credentials, int serverIndex) {
-                SshSession sshSession;
-                m_coreController->m_usersController->revokeClient(row, container, credentials, serverIndex, &sshSession);
+            [this](int serverIndex, int row, DockerContainer container) {
+                m_coreController->m_usersController->revokeClient(serverIndex, row, container);
             });
     connect(m_coreController->m_exportController, &ExportController::renameClientRequested, this,
-            [this](int row, const QString &clientName, DockerContainer container, const ServerCredentials &credentials) {
-                SshSession sshSession;
-                m_coreController->m_usersController->renameClient(row, clientName, container, credentials, &sshSession);
+            [this](int serverIndex, int row, const QString &clientName, DockerContainer container) {
+                m_coreController->m_usersController->renameClient(serverIndex, row, clientName, container);
             });
 }
 
@@ -172,17 +161,13 @@ void CoreSignalHandlers::initContainerModelUpdateHandler()
 void CoreSignalHandlers::initAdminConfigRevokedHandler()
 {
     connect(m_coreController->m_installController, &InstallController::clientRevocationRequested, this,
-            [this](const QJsonObject &containerConfig, DockerContainer container,
-                   const ServerCredentials &credentials, int serverIndex) {
-                SshSession sshSession;
-                m_coreController->m_usersController->revokeClient(containerConfig, container, credentials, serverIndex, &sshSession);
+            [this](int serverIndex, const QJsonObject &containerConfig, DockerContainer container) {
+                m_coreController->m_usersController->revokeClient(serverIndex, containerConfig, container);
             });
 
     connect(m_coreController->m_installController, &InstallController::clientAppendRequested, this,
-            [this](DockerContainer container, const ServerCredentials &credentials,
-                   const QJsonObject &containerConfig, const QString &clientName) {
-                SshSession sshSession;
-                m_coreController->m_usersController->appendClient(container, credentials, containerConfig, clientName, &sshSession);
+            [this](int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container) {
+                m_coreController->m_usersController->appendClient(serverIndex, clientId, clientName, container);
             });
 }
 

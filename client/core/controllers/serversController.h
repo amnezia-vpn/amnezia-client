@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QSet>
+#include <QVector>
 
 #include <QPair>
 
@@ -12,6 +13,8 @@
 #include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
 #include "core/repositories/appSettingsRepository.h"
+#include "core/models/serverConfig.h"
+#include "core/models/containerConfig.h"
 
 class SshSession;
 class InstallController;
@@ -45,15 +48,15 @@ public:
     ~ServersController() = default;
 
     // Server management
-    void addServer(const QJsonObject &server);
-    void editServer(int index, const QJsonObject &server);
+    void addServer(const ServerConfig &server);
+    void editServer(int index, const ServerConfig &server);
     void removeServer(int index);
     void setDefaultServerIndex(int index);
 
     // Container management
     void setDefaultContainer(int serverIndex, DockerContainer container);
-    void updateContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config);
-    void addContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config);
+    void updateContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config);
+    void addContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config);
 
     // Cache management
     void clearCachedProfile(int serverIndex, DockerContainer container);
@@ -63,7 +66,7 @@ public:
     QJsonArray getServersArray() const;
     int getDefaultServerIndex() const;
     int getServersCount() const;
-    QJsonObject getServerConfig(int serverIndex) const;
+    ServerConfig getServerConfig(int serverIndex) const;
     ServerCredentials getServerCredentials(int serverIndex) const;
     QJsonObject getContainerConfig(int serverIndex, DockerContainer container) const;
     QPair<QString, QString> getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const;

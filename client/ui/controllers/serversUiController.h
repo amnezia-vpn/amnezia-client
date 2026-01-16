@@ -11,6 +11,7 @@
 #include "core/controllers/settingsController.h"
 #include "ui/models/serversModel.h"
 #include "ui/models/containersModel.h"
+#include "core/models/serverConfig.h"
 
 class ServersUiController : public QObject
 {
@@ -48,8 +49,8 @@ public slots:
     void setDefaultServerIndex(int index);
     void setDefaultContainer(int serverIndex, int containerIndex);
     void toggleAmneziaDns(bool enabled);
-    void onAddServer(QJsonObject config);
-    void onServerEdited(int index, QJsonObject config);
+    void onAddServer(const ServerConfig& config);
+    void onServerEdited(int index, const ServerConfig& config);
     void onServerRemoved(int index);
     void onDefaultServerChanged(int index);
     
@@ -86,7 +87,7 @@ public:
     void updateModel();
     
 private:
-    QString getDefaultServerDescription(const QJsonObject &server, int index) const;
+    QString getDefaultServerDescription(const ServerConfig& server, int index) const;
     bool isAmneziaDnsContainerInstalled(int serverIndex) const;
 
     void updateContainersModel();

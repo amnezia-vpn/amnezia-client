@@ -1,263 +1,412 @@
 #include "secureAppSettingsRepository.h"
 
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QUuid>
+#include <QCoreApplication>
+#include <QThread>
+
 #include "core/utils/defs.h"
-#include "settings.h"
+#include "core/utils/api/apiDefs.h"
+#include "core/models/serverConfig.h"
+#include "core/utils/networkUtilities.h"
 
 using namespace amnezia;
 
-SecureAppSettingsRepository::SecureAppSettingsRepository(std::shared_ptr<Settings> settings)
+namespace {
+    constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
+}
+
+SecureAppSettingsRepository::SecureAppSettingsRepository(SecureQSettings* settings)
     : m_settings(settings)
 {
+    QString storedEndpoint = value("Conf/gatewayEndpoint", gatewayEndpoint).toString();
+    m_gatewayEndpoint = storedEndpoint.isEmpty() ? gatewayEndpoint : storedEndpoint;
+}
+
+QVariant SecureAppSettingsRepository::value(const QString &key, const QVariant &defaultValue) const
+{
+    QVariant returnValue;
+    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
+        returnValue = m_settings->value(key, defaultValue);
+    } else {
+        QMetaObject::invokeMethod(m_settings, "value", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, returnValue),
+                                  Q_ARG(const QString &, key), Q_ARG(const QVariant &, defaultValue));
+    }
+    return returnValue;
+}
+
+void SecureAppSettingsRepository::setValue(const QString &key, const QVariant &value)
+{
+    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
+        m_settings->setValue(key, value);
+    } else {
+        QMetaObject::invokeMethod(m_settings, "setValue", Qt::BlockingQueuedConnection, Q_ARG(const QString &, key),
+                                  Q_ARG(const QVariant &, value));
+    }
 }
 
 QLocale SecureAppSettingsRepository::getAppLanguage() const
 {
-    return m_settings->getAppLanguage();
+    QString localeStr = value("Conf/appLanguage", QLocale::system().name()).toString();
+    return QLocale(localeStr);
 }
 
 void SecureAppSettingsRepository::setAppLanguage(QLocale locale)
 {
-    m_settings->setAppLanguage(locale);
+    setValue("Conf/appLanguage", locale.name());
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::useAmneziaDns() const
 {
-    return m_settings->useAmneziaDns();
+    return value("Conf/useAmneziaDns", true).toBool();
 }
 
 void SecureAppSettingsRepository::setUseAmneziaDns(bool enabled)
 {
-    m_settings->setUseAmneziaDns(enabled);
+    setValue("Conf/useAmneziaDns", enabled);
+    m_settings->sync();
 }
 
 QStringList SecureAppSettingsRepository::getAllowedDnsServers() const
 {
-    return m_settings->allowedDnsServers();
+    return value("Conf/allowedDnsServers").toStringList();
 }
 
 void SecureAppSettingsRepository::setAllowedDnsServers(const QStringList &servers)
 {
-    m_settings->setAllowedDnsServers(servers);
+    setValue("Conf/allowedDnsServers", servers);
+    m_settings->sync();
 }
 
 QString SecureAppSettingsRepository::primaryDns() const
 {
-    return m_settings->primaryDns();
+    constexpr char cloudFlareNs1[] = "1.1.1.1";
+    return value("Conf/primaryDns", cloudFlareNs1).toString();
 }
 
 void SecureAppSettingsRepository::setPrimaryDns(const QString &dns)
 {
-    m_settings->setPrimaryDns(dns);
+    setValue("Conf/primaryDns", dns);
+    m_settings->sync();
 }
 
 QString SecureAppSettingsRepository::secondaryDns() const
 {
-    return m_settings->secondaryDns();
+    constexpr char cloudFlareNs2[] = "1.0.0.1";
+    return value("Conf/secondaryDns", cloudFlareNs2).toString();
 }
 
 void SecureAppSettingsRepository::setSecondaryDns(const QString &dns)
 {
-    m_settings->setSecondaryDns(dns);
+    setValue("Conf/secondaryDns", dns);
+    m_settings->sync();
+}
+
+namespace {
+    QString routeModeString(RouteMode mode) {
+        switch (mode) {
+        case RouteMode::VpnAllSites: return "AllSites";
+        case RouteMode::VpnOnlyForwardSites: return "ForwardSites";
+        case RouteMode::VpnAllExceptSites: return "ExceptSites";
+        }
+        return QString();
+    }
 }
 
 RouteMode SecureAppSettingsRepository::routeMode() const
 {
-    return m_settings->routeMode();
+    return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
 }
 
 void SecureAppSettingsRepository::setRouteMode(RouteMode mode)
 {
-    m_settings->setRouteMode(mode);
-}
-
-bool SecureAppSettingsRepository::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
-{
-    return m_settings->addVpnSite(mode, site, ip);
-}
-
-void SecureAppSettingsRepository::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
-{
-    m_settings->addVpnSites(mode, sites);
-}
-
-void SecureAppSettingsRepository::removeVpnSite(RouteMode mode, const QString &site)
-{
-    m_settings->removeVpnSite(mode, site);
-}
-
-void SecureAppSettingsRepository::removeAllVpnSites(RouteMode mode)
-{
-    m_settings->removeAllVpnSites(mode);
+    setValue("Conf/routeMode", static_cast<int>(mode));
+    m_settings->sync();
 }
 
 QVariantMap SecureAppSettingsRepository::vpnSites(RouteMode mode) const
 {
-    return m_settings->vpnSites(mode);
+    return value("Conf/" + routeModeString(mode)).toMap();
+}
+
+void SecureAppSettingsRepository::setVpnSites(RouteMode mode, const QVariantMap &sites)
+{
+    setValue("Conf/" + routeModeString(mode), sites);
+    m_settings->sync();
+}
+
+bool SecureAppSettingsRepository::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
+{
+    QVariantMap sites = vpnSites(mode);
+    if (sites.contains(site) && ip.isEmpty())
+        return false;
+
+    sites.insert(site, ip);
+    setVpnSites(mode, sites);
+    return true;
+}
+
+void SecureAppSettingsRepository::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
+{
+    QVariantMap allSites = vpnSites(mode);
+    for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
+        const QString &site = i.key();
+        const QString &ip = i.value();
+
+        if (allSites.contains(site) && allSites.value(site) == ip)
+            continue;
+
+        allSites.insert(site, ip);
+    }
+
+    setVpnSites(mode, allSites);
+}
+
+void SecureAppSettingsRepository::removeVpnSite(RouteMode mode, const QString &site)
+{
+    QVariantMap sites = vpnSites(mode);
+    if (!sites.contains(site))
+        return;
+
+    sites.remove(site);
+    setVpnSites(mode, sites);
+}
+
+void SecureAppSettingsRepository::removeAllVpnSites(RouteMode mode)
+{
+    setVpnSites(mode, QVariantMap());
 }
 
 bool SecureAppSettingsRepository::isSitesSplitTunnelingEnabled() const
 {
-    return m_settings->isSitesSplitTunnelingEnabled();
+    return value("Conf/sitesSplitTunnelingEnabled", false).toBool();
 }
 
 void SecureAppSettingsRepository::setSitesSplitTunnelingEnabled(bool enabled)
 {
-    m_settings->setSitesSplitTunnelingEnabled(enabled);
+    setValue("Conf/sitesSplitTunnelingEnabled", enabled);
+    m_settings->sync();
+}
+
+namespace {
+    QString appsRouteModeString(AppsRouteMode mode) {
+        switch (mode) {
+        case AppsRouteMode::VpnAllApps: return "AllApps";
+        case AppsRouteMode::VpnOnlyForwardApps: return "ForwardApps";
+        case AppsRouteMode::VpnAllExceptApps: return "ExceptApps";
+        }
+        return QString();
+    }
 }
 
 AppsRouteMode SecureAppSettingsRepository::appsRouteMode() const
 {
-    return m_settings->getAppsRouteMode();
+    return static_cast<AppsRouteMode>(value("Conf/appsRouteMode", 0).toInt());
 }
 
 void SecureAppSettingsRepository::setAppsRouteMode(AppsRouteMode mode)
 {
-    m_settings->setAppsRouteMode(mode);
-}
-
-void SecureAppSettingsRepository::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps)
-{
-    m_settings->setVpnApps(mode, apps);
+    setValue("Conf/appsRouteMode", static_cast<int>(mode));
+    m_settings->sync();
 }
 
 QVector<InstalledAppInfo> SecureAppSettingsRepository::vpnApps(AppsRouteMode mode) const
 {
-    return m_settings->getVpnApps(mode);
+    QVector<InstalledAppInfo> apps;
+    auto appsArray = value("Conf/" + appsRouteModeString(mode)).toJsonArray();
+    for (const auto &app : appsArray) {
+        InstalledAppInfo appInfo;
+        appInfo.appName = app.toObject().value("appName").toString();
+        appInfo.packageName = app.toObject().value("packageName").toString();
+        appInfo.appPath = app.toObject().value("appPath").toString();
+
+        apps.push_back(appInfo);
+    }
+    return apps;
+}
+
+void SecureAppSettingsRepository::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps)
+{
+    QJsonArray appsArray;
+    for (const auto &app : apps) {
+        QJsonObject appInfo;
+        appInfo.insert("appName", app.appName);
+        appInfo.insert("packageName", app.packageName);
+        appInfo.insert("appPath", app.appPath);
+        appsArray.push_back(appInfo);
+    }
+    setValue("Conf/" + appsRouteModeString(mode), appsArray);
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isAppsSplitTunnelingEnabled() const
 {
-    return m_settings->isAppsSplitTunnelingEnabled();
+    return value("Conf/appsSplitTunnelingEnabled", false).toBool();
 }
 
 void SecureAppSettingsRepository::setAppsSplitTunnelingEnabled(bool enabled)
 {
-    m_settings->setAppsSplitTunnelingEnabled(enabled);
+    setValue("Conf/appsSplitTunnelingEnabled", enabled);
+    m_settings->sync();
 }
 
 QString SecureAppSettingsRepository::getGatewayEndpoint(bool isTestPurchase) const
 {
-    return m_settings->getGatewayEndpoint(isTestPurchase);
+    if (isTestPurchase) {
+        return QString(DEV_AGW_ENDPOINT);
+    }
+    return m_gatewayEndpoint;
 }
 
 void SecureAppSettingsRepository::setGatewayEndpoint(const QString &endpoint)
 {
-    m_settings->setGatewayEndpoint(endpoint);
+    m_gatewayEndpoint = endpoint;
+    setValue("Conf/gatewayEndpoint", endpoint);
+    m_settings->sync();
 }
 
 void SecureAppSettingsRepository::resetGatewayEndpoint()
 {
-    m_settings->resetGatewayEndpoint();
+    m_gatewayEndpoint = gatewayEndpoint;
+    setValue("Conf/gatewayEndpoint", gatewayEndpoint);
+    m_settings->sync();
 }
 
 void SecureAppSettingsRepository::setDevGatewayEndpoint()
 {
-    m_settings->setDevGatewayEndpoint();
+    m_gatewayEndpoint = QString(DEV_AGW_ENDPOINT);
+    setValue("Conf/gatewayEndpoint", DEV_AGW_ENDPOINT);
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isDevGatewayEnv(bool isTestPurchase) const
 {
-    return m_settings->isDevGatewayEnv(isTestPurchase);
+    return isTestPurchase ? true : value("Conf/devGatewayEnv", false).toBool();
 }
 
 void SecureAppSettingsRepository::toggleDevGatewayEnv(bool enabled)
 {
-    m_settings->toggleDevGatewayEnv(enabled);
+    setValue("Conf/devGatewayEnv", enabled);
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isKillSwitchEnabled() const
 {
-    return m_settings->isKillSwitchEnabled();
+    return value("Conf/killSwitchEnabled", true).toBool();
 }
 
 void SecureAppSettingsRepository::setKillSwitchEnabled(bool enabled)
 {
-    m_settings->setKillSwitchEnabled(enabled);
+    setValue("Conf/killSwitchEnabled", enabled);
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isStrictKillSwitchEnabled() const
 {
-    return m_settings->isStrictKillSwitchEnabled();
+    return value("Conf/strictKillSwitchEnabled", false).toBool();
 }
 
 void SecureAppSettingsRepository::setStrictKillSwitchEnabled(bool enabled)
 {
-    m_settings->setStrictKillSwitchEnabled(enabled);
+    setValue("Conf/strictKillSwitchEnabled", enabled);
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isAutoConnect() const
 {
-    return m_settings->isAutoConnect();
+    return value("Conf/autoConnect", false).toBool();
 }
 
 void SecureAppSettingsRepository::setAutoConnect(bool enabled)
 {
-    m_settings->setAutoConnect(enabled);
+    setValue("Conf/autoConnect", enabled);
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isStartMinimized() const
 {
-    return m_settings->isStartMinimized();
+    return value("Conf/startMinimized", false).toBool();
 }
 
 void SecureAppSettingsRepository::setStartMinimized(bool enabled)
 {
-    m_settings->setStartMinimized(enabled);
+    setValue("Conf/startMinimized", enabled);
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isScreenshotsEnabled() const
 {
-    return m_settings->isScreenshotsEnabled();
+    return value("Conf/screenshotsEnabled", true).toBool();
 }
 
 void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
 {
-    m_settings->setScreenshotsEnabled(enabled);
+    setValue("Conf/screenshotsEnabled", enabled);
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isSaveLogs() const
 {
-    return m_settings->isSaveLogs();
+    return value("Conf/saveLogs", false).toBool();
 }
 
 void SecureAppSettingsRepository::setSaveLogs(bool enabled)
 {
-    m_settings->setSaveLogs(enabled);
+    setValue("Conf/saveLogs", enabled);
+    m_settings->sync();
 }
 
 QDateTime SecureAppSettingsRepository::getLogEnableDate() const
 {
-    return m_settings->getLogEnableDate();
+    return value("Conf/logEnableDate").toDateTime();
 }
 
 void SecureAppSettingsRepository::setLogEnableDate(const QDateTime &date)
 {
-    m_settings->setLogEnableDate(date);
+    setValue("Conf/logEnableDate", date);
+    m_settings->sync();
 }
 
 QString SecureAppSettingsRepository::getInstallationUuid(bool createIfNotExists) const
 {
-    return m_settings->getInstallationUuid(createIfNotExists);
+    auto uuid = value("Conf/installationUuid", "").toString();
+    if (createIfNotExists && uuid.isEmpty()) {
+        uuid = QUuid::createUuid().toString();
+        uuid.remove(0, 1);
+        uuid.chop(1);
+        const_cast<SecureAppSettingsRepository*>(this)->setValue("Conf/installationUuid", uuid);
+        m_settings->sync();
+    } else if (uuid.contains("{") && uuid.contains("}")) {
+        uuid.remove(0, 1);
+        uuid.chop(1);
+        const_cast<SecureAppSettingsRepository*>(this)->setValue("Conf/installationUuid", uuid);
+        m_settings->sync();
+    }
+    return uuid;
 }
 
 bool SecureAppSettingsRepository::isHomeAdLabelVisible() const
 {
-    return m_settings->isHomeAdLabelVisible();
+    return value("Conf/homeAdLabelVisible", true).toBool();
 }
 
 void SecureAppSettingsRepository::disableHomeAdLabel()
 {
-    m_settings->disableHomeAdLabel();
+    setValue("Conf/homeAdLabelVisible", false);
+    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isPremV1MigrationReminderActive() const
 {
-    return m_settings->isPremV1MigrationReminderActive();
+    return value("Conf/premV1MigrationReminderActive", true).toBool();
 }
 
 void SecureAppSettingsRepository::disablePremV1MigrationReminder()
 {
-    m_settings->disablePremV1MigrationReminder();
+    setValue("Conf/premV1MigrationReminderActive", false);
+    m_settings->sync();
 }
 
 QByteArray SecureAppSettingsRepository::backupAppConfig() const
@@ -272,11 +421,36 @@ bool SecureAppSettingsRepository::restoreAppConfig(const QByteArray &cfg)
 
 void SecureAppSettingsRepository::clearSettings()
 {
+    auto uuid = getInstallationUuid(false);
     m_settings->clearSettings();
+    m_settings->setValue("Conf/installationUuid", uuid);
+    m_settings->sync();
 }
 
 QString SecureAppSettingsRepository::nextAvailableServerName() const
 {
-    return m_settings->nextAvailableServerName();
+    int i = 0;
+    bool nameExist = false;
+
+    do {
+        i++;
+        nameExist = false;
+        QJsonArray servers = QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
+        for (const QJsonValue &server : servers) {
+            if (server.toObject().value(config_key::description).toString() == QString("Server") + " " + QString::number(i)) {
+                nameExist = true;
+                break;
+            }
+        }
+    } while (nameExist);
+
+    return QString("Server") + " " + QString::number(i);
 }
+
+void SecureAppSettingsRepository::setInstallationUuid(const QString &uuid)
+{
+    m_settings->setValue("Conf/installationUuid", uuid);
+    m_settings->sync();
+}
+
 

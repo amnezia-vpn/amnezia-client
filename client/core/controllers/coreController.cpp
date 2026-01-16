@@ -2,11 +2,14 @@
 
 #include <QDirIterator>
 #include <QTranslator>
+#include <QTimer>
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/selfhosted/importController.h"
 #include "core/controllers/coreSignalHandlers.h"
+#include "core/models/serverConfig.h"
+#include "secure_qsettings.h"
 
 #if defined(Q_OS_ANDROID)
     #include "core/utils/installedAppsImageProvider.h"
@@ -18,7 +21,7 @@
     #include <AmneziaVPN-Swift.h>
 #endif
 
-CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
+CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
                                QQmlApplicationEngine *engine, QObject *parent)
     : QObject(parent), m_vpnConnection(vpnConnection), m_settings(settings), m_engine(engine)
 {
@@ -110,6 +113,13 @@ void CoreController::initRepositories()
 {
     m_serversRepository = new QServersRepository(m_settings, this);
     m_appSettingsRepository = new QAppSettingsRepository(m_settings, this);
+    
+    ServersRepository* serversRepo = m_serversRepository->repository();
+    AppSettingsRepository* appSettingsRepo = m_appSettingsRepository->repository();
+    
+    QTimer::singleShot(0, m_vpnConnection.get(), [this, serversRepo, appSettingsRepo]() {
+        m_vpnConnection->setRepositories(serversRepo, appSettingsRepo);
+    });
 }
 
 void CoreController::initCoreControllers()
@@ -127,10 +137,10 @@ void CoreController::initCoreControllers()
     m_newsController = new NewsController(appSettingsRepo, m_serversController);
     
     SshSession* sshSession = new SshSession(this);
-    m_installController = new InstallController(sshSession, serversRepo, m_settings, this);
-    m_exportController = new ExportController(serversRepo, appSettingsRepo, m_settings, this);
+    m_installController = new InstallController(sshSession, serversRepo, appSettingsRepo, this);
+    m_exportController = new ExportController(serversRepo, appSettingsRepo, this);
     m_importCoreController = new ImportController(serversRepo, appSettingsRepo, this);
-    m_connectionController = new ConnectionController(serversRepo, appSettingsRepo, m_vpnConnection.get(), m_settings);
+    m_connectionController = new ConnectionController(serversRepo, appSettingsRepo, m_vpnConnection.get());
     m_settingsController = new SettingsController(serversRepo, appSettingsRepo, this);
 }
 
@@ -142,7 +152,7 @@ void CoreController::initControllers()
     m_focusController = new FocusController(m_engine, this);
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController);
 
-    m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_serversModel, m_containersModel, m_protocolsModel, m_usersController, m_settings, this);
+    m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_serversModel, m_containersModel, m_protocolsModel, m_usersController, this);
     m_engine->rootContext()->setContextProperty("InstallController", m_installUiController);
 
     m_importController = new ImportUiController(m_importCoreController, this);

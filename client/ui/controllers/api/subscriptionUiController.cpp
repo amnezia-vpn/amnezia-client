@@ -8,6 +8,7 @@
 #include "core/utils/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"
+#include "core/models/serverConfig.h"
 #include <QClipboard>
 #include <QDebug>
 #include <QSet>
@@ -181,7 +182,7 @@ bool SubscriptionUiController::importService()
 bool SubscriptionUiController::importSerivceFromAppStore()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    QJsonObject serverConfig;
+    ServerConfig serverConfig;
     ErrorCode errorCode = m_subscriptionController->processAppStorePurchase(
         m_apiServicesModel->getCountryCode(),
         m_apiServicesModel->getSelectedServiceType(),
@@ -262,7 +263,7 @@ bool SubscriptionUiController::importServiceFromGateway()
 
     SubscriptionController::ProtocolData protocolData = m_subscriptionController->generateProtocolData(serviceProtocol);
 
-    QJsonObject serverConfig;
+    ServerConfig serverConfig;
     ErrorCode errorCode = m_subscriptionController->importServiceFromGateway(userCountryCode, serviceType,
                                                                              serviceProtocol, protocolData,
                                                                              serverConfig);
@@ -406,8 +407,9 @@ bool SubscriptionUiController::getAccountInfo(bool reload)
         return false;
     }
 
-    auto serverConfig = m_serversController->getServerConfig(processedIndex);
-    m_apiAccountInfoModel->updateModel(accountInfo, serverConfig);
+    ServerConfig serverConfig = m_serversController->getServerConfig(processedIndex);
+    QJsonObject serverConfigJson = ServerConfigUtils::toJson(serverConfig);
+    m_apiAccountInfoModel->updateModel(accountInfo, serverConfigJson);
 
     if (reload) {
         updateApiCountryModel();

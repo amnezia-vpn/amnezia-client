@@ -10,7 +10,6 @@
 #include "core/repositories/serversRepository.h"
 #include "core/repositories/appSettingsRepository.h"
 #include "vpnconnection.h"
-#include "settings.h"
 
 using namespace amnezia;
 
@@ -19,8 +18,7 @@ class ConnectionController
 public:
     explicit ConnectionController(ServersRepository* serversRepository,
                                  AppSettingsRepository* appSettingsRepository,
-                                 VpnConnection* vpnConnection,
-                                 const std::shared_ptr<Settings> &settings);
+                                 VpnConnection* vpnConnection);
     ~ConnectionController() = default;
 
     ErrorCode prepareConnection(int serverIndex,
@@ -49,7 +47,6 @@ private:
     ServersRepository* m_serversRepository;
     AppSettingsRepository* m_appSettingsRepository;
     VpnConnection* m_vpnConnection;
-    std::shared_ptr<Settings> m_settings;
 };
 
 #endif

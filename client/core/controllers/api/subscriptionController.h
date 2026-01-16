@@ -9,6 +9,7 @@
 #include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
 #include "core/repositories/appSettingsRepository.h"
+#include "core/models/serverConfig.h"
 
 class ServersController;
 
@@ -45,16 +46,16 @@ public:
     ProtocolData generateProtocolData(const QString &protocol);
     void appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload);
     ErrorCode fillServerConfig(const QString &protocol, const ProtocolData &protocolData, const QByteArray &apiResponseBody,
-                               QJsonObject &serverConfig);
+                               ServerConfig &serverConfig);
 
     ErrorCode importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                       const QString &serviceProtocol, const ProtocolData &protocolData,
-                                      QJsonObject &serverConfig);
+                                      ServerConfig &serverConfig);
 
     ErrorCode importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const ProtocolData &protocolData,
                                         const QString &transactionId, bool isTestPurchase,
-                                        QJsonObject &serverConfig);
+                                        ServerConfig &serverConfig);
 
     ErrorCode updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent);
 
@@ -89,7 +90,7 @@ public:
 
     ErrorCode processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &productId,
-                                     QJsonObject &serverConfig);
+                                     ServerConfig &serverConfig);
 
     AppStoreRestoreResult processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,
                                                   const QString &serviceProtocol);

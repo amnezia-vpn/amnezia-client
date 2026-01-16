@@ -12,9 +12,10 @@
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "core/utils/utilities.h"
+#include "core/models/protocols/ikev2ProtocolConfig.h"
 
-Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)
-    : ConfiguratorBase(settings, sshSession, parent)
+Ikev2Configurator::Ikev2Configurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent)
+    : ConfiguratorBase(appSettingsRepository, sshSession, parent)
 {
 }
 
@@ -53,17 +54,41 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
     return connData;
 }
 
-QString Ikev2Configurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                                        ErrorCode &errorCode)
+ProtocolConfig Ikev2Configurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
+                                               ErrorCode &errorCode)
 {
-    Q_UNUSED(containerConfig)
+    const Ikev2ServerConfig* serverConfig = nullptr;
+    if (auto* ikev2Config = std::get_if<Ikev2ProtocolConfig>(&containerConfig.protocolConfig)) {
+        serverConfig = &ikev2Config->serverConfig;
+    }
 
     ConnectionData connData = prepareIkev2Config(credentials, container, errorCode);
     if (errorCode != ErrorCode::NoError) {
-        return "";
+        return Ikev2ProtocolConfig{};
     }
 
-    return genIkev2Config(connData);
+    QString configJson = genIkev2Config(connData);
+    QJsonDocument doc = QJsonDocument::fromJson(configJson.toUtf8());
+    QJsonObject configObj = doc.object();
+
+    Ikev2ProtocolConfig protocolConfig;
+    if (serverConfig) {
+        protocolConfig.serverConfig = *serverConfig;
+    } else {
+        protocolConfig.serverConfig.hostName = connData.host;
+    }
+    
+    Ikev2ClientConfig clientConfig;
+    clientConfig.nativeConfig = configJson;
+    clientConfig.hostName = connData.host;
+    clientConfig.userName = connData.clientId;
+    clientConfig.cert = QString(connData.clientCert.toBase64());
+    clientConfig.password = connData.password;
+    clientConfig.clientId = connData.clientId;
+    
+    protocolConfig.setClientConfig(clientConfig);
+    
+    return protocolConfig;
 }
 
 QString Ikev2Configurator::genIkev2Config(const ConnectionData &connData)

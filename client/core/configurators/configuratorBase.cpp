@@ -6,22 +6,22 @@
 #include "core/configurators/wireguardConfigurator.h"
 #include "core/configurators/xrayConfigurator.h"
 
-ConfiguratorBase::ConfiguratorBase(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)
-    : QObject { parent }, m_settings(settings), m_sshSession(sshSession)
+ConfiguratorBase::ConfiguratorBase(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent)
+    : QObject { parent }, m_appSettingsRepository(appSettingsRepository), m_sshSession(sshSession)
 {
 }
 
 QScopedPointer<ConfiguratorBase> ConfiguratorBase::create(Proto protocol,
-                                                          std::shared_ptr<Settings> settings,
+                                                          AppSettingsRepository* appSettingsRepository,
                                                           SshSession* sshSession)
 {
     switch (protocol) {
-    case Proto::OpenVpn: return QScopedPointer<ConfiguratorBase>(new OpenVpnConfigurator(settings, sshSession));
-    case Proto::WireGuard: return QScopedPointer<ConfiguratorBase>(new WireguardConfigurator(settings, sshSession, false));
-    case Proto::Awg: return QScopedPointer<ConfiguratorBase>(new AwgConfigurator(settings, sshSession));
-    case Proto::Ikev2: return QScopedPointer<ConfiguratorBase>(new Ikev2Configurator(settings, sshSession));
-    case Proto::Xray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(settings, sshSession));
-    case Proto::SSXray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(settings, sshSession));
+    case Proto::OpenVpn: return QScopedPointer<ConfiguratorBase>(new OpenVpnConfigurator(appSettingsRepository, sshSession));
+    case Proto::WireGuard: return QScopedPointer<ConfiguratorBase>(new WireguardConfigurator(appSettingsRepository, sshSession, false));
+    case Proto::Awg: return QScopedPointer<ConfiguratorBase>(new AwgConfigurator(appSettingsRepository, sshSession));
+    case Proto::Ikev2: return QScopedPointer<ConfiguratorBase>(new Ikev2Configurator(appSettingsRepository, sshSession));
+    case Proto::Xray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(appSettingsRepository, sshSession));
+    case Proto::SSXray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(appSettingsRepository, sshSession));
     default: return QScopedPointer<ConfiguratorBase>();
     }
 }

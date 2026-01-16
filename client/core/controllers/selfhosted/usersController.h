@@ -9,6 +9,8 @@
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
+#include "core/models/containerConfig.h"
+#include "core/models/protocolConfig.h"
 
 class UsersController : public QObject
 {
@@ -34,20 +36,11 @@ signals:
     void adminConfigRevoked(DockerContainer container);
 
 public slots:
-    ErrorCode updateClients(const DockerContainer container, const ServerCredentials &credentials,
-                            SshSession* sshSession);
-    ErrorCode appendClient(const DockerContainer container, const ServerCredentials &credentials, const QJsonObject &containerConfig,
-                          const QString &clientName, SshSession* sshSession);
-    ErrorCode appendClient(QJsonObject &protocolConfig, const QString &clientName, const DockerContainer container,
-                           const ServerCredentials &credentials, SshSession* sshSession);
-    ErrorCode appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
-                           const ServerCredentials &credentials, SshSession* sshSession);
-    ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container,
-                           const ServerCredentials &credentials, SshSession* sshSession, bool addTimeStamp = false);
-    ErrorCode revokeClient(const int index, const DockerContainer container, const ServerCredentials &credentials,
-                          const int serverIndex, SshSession* sshSession);
-    ErrorCode revokeClient(const QJsonObject &containerConfig, const DockerContainer container, const ServerCredentials &credentials,
-                          const int serverIndex, SshSession* sshSession);
+    ErrorCode updateClients(int serverIndex, const DockerContainer container);
+    ErrorCode appendClient(int serverIndex, const QString &clientId, const QString &clientName, const DockerContainer container);
+    ErrorCode renameClient(int serverIndex, const int row, const QString &userName, const DockerContainer container, bool addTimeStamp = false);
+    ErrorCode revokeClient(int serverIndex, const int index, const DockerContainer container);
+    ErrorCode revokeClient(int serverIndex, const QJsonObject &containerConfig, const DockerContainer container);
 
 private:
     bool isClientExists(const QString &clientId, const QJsonArray &clientsTable);

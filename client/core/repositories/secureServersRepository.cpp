@@ -1,87 +1,178 @@
 #include "secureServersRepository.h"
 
-#include "core/utils/api/apiDefs.h"
-#include "settings.h"
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QThread>
+#include <QCoreApplication>
 
-SecureServersRepository::SecureServersRepository(std::shared_ptr<Settings> settings)
+#include "core/utils/api/apiDefs.h"
+#include "core/models/serverConfig.h"
+#include "core/models/containerConfig.h"
+#include "protocols/protocols_defs.h"
+
+SecureServersRepository::SecureServersRepository(SecureQSettings* settings)
     : m_settings(settings)
 {
 }
 
-void SecureServersRepository::addServer(const QJsonObject &server)
+QVariant SecureServersRepository::value(const QString &key, const QVariant &defaultValue) const
 {
-    m_settings->addServer(server);
-}
-
-void SecureServersRepository::editServer(int index, const QJsonObject &server)
-{
-    m_settings->editServer(index, server);
-}
-
-void SecureServersRepository::removeServer(int index)
-{
-    m_settings->removeServer(index);
-    
-    int defaultIndex = m_settings->defaultServerIndex();
-    if (defaultIndex == index) {
-        m_settings->setDefaultServer(0);
-    } else if (defaultIndex > index) {
-        m_settings->setDefaultServer(defaultIndex - 1);
+    QVariant returnValue;
+    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
+        returnValue = m_settings->value(key, defaultValue);
+    } else {
+        QMetaObject::invokeMethod(m_settings, "value", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, returnValue),
+                                  Q_ARG(const QString &, key), Q_ARG(const QVariant &, defaultValue));
     }
-    
-    if (m_settings->serversCount() == 0) {
-        m_settings->setDefaultServer(-1);
-    }
+    return returnValue;
 }
 
-QJsonObject SecureServersRepository::server(int index) const
+void SecureServersRepository::setValue(const QString &key, const QVariant &value)
 {
-    return m_settings->server(index);
+    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
+        m_settings->setValue(key, value);
+    } else {
+        QMetaObject::invokeMethod(m_settings, "setValue", Qt::BlockingQueuedConnection, Q_ARG(const QString &, key),
+                                  Q_ARG(const QVariant &, value));
+    }
 }
 
 QJsonArray SecureServersRepository::serversArray() const
 {
-    return m_settings->serversArray();
+    return QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
+}
+
+void SecureServersRepository::setServersArray(const QJsonArray &servers)
+{
+    setValue("Servers/serversList", QJsonDocument(servers).toJson());
+    m_settings->sync();
+}
+
+void SecureServersRepository::addServer(const ServerConfig &server)
+{
+    QJsonArray servers = serversArray();
+    servers.append(ServerConfigUtils::toJson(server));
+    setServersArray(servers);
+}
+
+void SecureServersRepository::editServer(int index, const ServerConfig &server)
+{
+    QJsonArray servers = serversArray();
+    if (index >= servers.size()) {
+        return;
+    }
+    servers.replace(index, ServerConfigUtils::toJson(server));
+    setServersArray(servers);
+}
+
+void SecureServersRepository::removeServer(int index)
+{
+    QJsonArray servers = serversArray();
+    if (index >= servers.size()) {
+        return;
+    }
+    
+    servers.removeAt(index);
+    setServersArray(servers);
+    
+    int defaultIndex = defaultServerIndex();
+    if (defaultIndex == index) {
+        setDefaultServer(0);
+    } else if (defaultIndex > index) {
+        setDefaultServer(defaultIndex - 1);
+    }
+    
+    if (serversCount() == 0) {
+        setDefaultServer(-1);
+    }
+}
+
+ServerConfig SecureServersRepository::server(int index) const
+{
+    const QJsonArray &servers = serversArray();
+    if (index >= servers.size()) {
+        return SelfHostedServerConfig{};
+    }
+    return ServerConfigUtils::fromJson(servers.at(index).toObject());
+}
+
+QVector<ServerConfig> SecureServersRepository::servers() const
+{
+    QVector<ServerConfig> result;
+    const QJsonArray &serversArray = this->serversArray();
+    for (const QJsonValue &val : serversArray) {
+        result.append(ServerConfigUtils::fromJson(val.toObject()));
+    }
+    return result;
 }
 
 int SecureServersRepository::serversCount() const
 {
-    return m_settings->serversCount();
+    return serversArray().size();
 }
 
 int SecureServersRepository::defaultServerIndex() const
 {
-    return m_settings->defaultServerIndex();
+    return value("Servers/defaultServerIndex", 0).toInt();
 }
 
 void SecureServersRepository::setDefaultServer(int index)
 {
-    m_settings->setDefaultServer(index);
+    setValue("Servers/defaultServerIndex", index);
+    m_settings->sync();
 }
 
 void SecureServersRepository::setDefaultContainer(int serverIndex, DockerContainer container)
 {
-    m_settings->setDefaultContainer(serverIndex, container);
+    ServerConfig config = server(serverIndex);
+    ServerConfigUtils::visit(config, [container](auto& arg) {
+        arg.defaultContainer = container;
+    });
+    editServer(serverIndex, config);
 }
 
-QJsonObject SecureServersRepository::containerConfig(int serverIndex, DockerContainer container) const
+ContainerConfig SecureServersRepository::containerConfig(int serverIndex, DockerContainer container) const
 {
-    return m_settings->containerConfig(serverIndex, container);
+    ServerConfig config = server(serverIndex);
+    return ServerConfigUtils::containerConfig(config, container);
 }
 
-void SecureServersRepository::setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config)
+void SecureServersRepository::setContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config)
 {
-    m_settings->setContainerConfig(serverIndex, container, config);
+    ServerConfig serverConfig = server(serverIndex);
+    ServerConfigUtils::visit(serverConfig, [container, &config](auto& arg) {
+        arg.containers[container] = config;
+    });
+    editServer(serverIndex, serverConfig);
 }
 
 void SecureServersRepository::clearLastConnectionConfig(int serverIndex, DockerContainer container)
 {
-    m_settings->clearLastConnectionConfig(serverIndex, container);
+    ServerConfig serverConfig = server(serverIndex);
+    ContainerConfig containerCfg = ServerConfigUtils::containerConfig(serverConfig, container);
+    
+    ProtocolConfigUtils::clearClientConfig(containerCfg.protocolConfig);
+    
+    setContainerConfig(serverIndex, container, containerCfg);
 }
 
 ServerCredentials SecureServersRepository::serverCredentials(int index) const
 {
-    return m_settings->serverCredentials(index);
+    ServerConfig config = server(index);
+    
+    if (ServerConfigUtils::isSelfHosted(config)) {
+        const SelfHostedServerConfig& selfHosted = ServerConfigUtils::asSelfHosted(config);
+        if (selfHosted.hasCredentials()) {
+            ServerCredentials cred;
+            cred.hostName = selfHosted.hostName;
+            cred.userName = selfHosted.userName.value_or(QString());
+            cred.secretData = selfHosted.password.value_or(QString());
+            cred.port = selfHosted.port.value_or(22);
+            return cred;
+        }
+    }
+    
+    return ServerCredentials{};
 }
 
 bool SecureServersRepository::hasServerWithVpnKey(const QString &vpnKey) const
@@ -94,23 +185,34 @@ bool SecureServersRepository::hasServerWithVpnKey(const QString &vpnKey) const
         return false;
     }
 
-    QJsonArray servers = m_settings->serversArray();
-    for (const auto &serverValue : std::as_const(servers)) {
-        QJsonObject server = serverValue.toObject();
-        QJsonObject apiConfig = server.value(apiDefs::key::apiConfig).toObject();
-        if (apiConfig.isEmpty()) {
-            continue;
-        }
-        QString storedKey = apiConfig.value(apiDefs::key::vpnKey).toString();
-        if (storedKey.isEmpty()) {
-            continue;
-        }
-        QString normalizedStored = storedKey.trimmed();
-        if (normalizedStored.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
-            normalizedStored = normalizedStored.mid(QStringLiteral("vpn://").size());
-        }
-        if (normalizedInput == normalizedStored) {
-            return true;
+    QVector<ServerConfig> serversList = servers();
+    for (const ServerConfig& serverConfig : serversList) {
+        if (ServerConfigUtils::isApiV1Config(serverConfig)) {
+            const ApiV1ServerConfig& apiV1 = ServerConfigUtils::asApiV1(serverConfig);
+            QString storedKey = apiV1.vpnKey();
+            if (storedKey.isEmpty()) {
+                continue;
+            }
+            QString normalizedStored = storedKey.trimmed();
+            if (normalizedStored.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+                normalizedStored = normalizedStored.mid(QStringLiteral("vpn://").size());
+            }
+            if (normalizedInput == normalizedStored) {
+                return true;
+            }
+        } else if (ServerConfigUtils::isApiV2Config(serverConfig)) {
+            const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfig);
+            QString storedKey = apiV2.vpnKey();
+            if (storedKey.isEmpty()) {
+                continue;
+            }
+            QString normalizedStored = storedKey.trimmed();
+            if (normalizedStored.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+                normalizedStored = normalizedStored.mid(QStringLiteral("vpn://").size());
+            }
+            if (normalizedInput == normalizedStored) {
+                return true;
+            }
         }
     }
     return false;

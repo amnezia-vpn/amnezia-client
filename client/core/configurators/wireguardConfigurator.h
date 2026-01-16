@@ -13,7 +13,7 @@ class WireguardConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    WireguardConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession,
+    WireguardConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession,
                           bool isAwg, QObject *parent = nullptr);
 
     struct ConnectionData
@@ -27,8 +27,8 @@ public:
         QString port;
     };
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode &errorCode);
+    ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                const ContainerConfig &containerConfig, ErrorCode &errorCode);
 
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                            QString &protocolConfigString);
@@ -40,7 +40,9 @@ public:
 private:
     QList<QHostAddress> getIpsFromConf(const QString &input);
     ConnectionData prepareWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
-                                          const QJsonObject &containerConfig, ErrorCode &errorCode);
+                                          const WireGuardServerConfig* serverConfig,
+                                          const AwgServerConfig* awgServerConfig,
+                                          ErrorCode &errorCode);
 
     bool m_isAwg;
     QString m_serverConfigPath;

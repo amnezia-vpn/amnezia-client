@@ -1,5 +1,7 @@
 #include "installController.h"
 
+#include "core/models/protocolConfig.h"
+
 #include <QDebug>
 #include <QEventLoop>
 #include <QFutureWatcher>
@@ -21,11 +23,13 @@
 #include "core/utils/networkUtilities.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/repositories/serversRepository.h"
+#include "core/repositories/appSettingsRepository.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "core/utils/selfhosted/sshClient.h"
 #include "logger.h"
 #include "protocols/protocols_defs.h"
-#include "settings.h"
+#include "core/models/serverConfig.h"
+#include "core/models/containerConfig.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "core/utils/utilities.h"
@@ -47,11 +51,12 @@ namespace
 
 InstallController::InstallController(SshSession *sshSession,
                                      ServersRepository *serversRepository,
-                                     const std::shared_ptr<Settings> &settings, QObject *parent)
+                                     AppSettingsRepository* appSettingsRepository,
+                                     QObject *parent)
     : QObject(parent),
       m_sshSession(sshSession),
       m_serversRepository(serversRepository),
-      m_settings(settings),
+      m_appSettingsRepository(appSettingsRepository),
       m_cancelInstallation(false)
 {
 }
@@ -61,7 +66,7 @@ InstallController::~InstallController()
     stopAllSftpMounts();
 }
 
-ErrorCode InstallController::setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config,
+ErrorCode InstallController::setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config,
                                             bool isUpdate)
 {
     qDebug().noquote() << "InstallController::setupContainer" << ContainerProps::containerToString(container);
@@ -118,8 +123,8 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     return startupContainerWorker(credentials, container, config);
 }
 
-ErrorCode InstallController::updateContainer(int serverIndex, DockerContainer container, const QJsonObject &oldConfig,
-                                             QJsonObject &newConfig)
+ErrorCode InstallController::updateContainer(int serverIndex, DockerContainer container, const ContainerConfig &oldConfig,
+                                             ContainerConfig &newConfig)
 {
     if (!isUpdateDockerContainerRequired(container, oldConfig, newConfig)) {
         m_serversRepository->setContainerConfig(serverIndex, container, newConfig);
@@ -155,50 +160,55 @@ void InstallController::clearCachedProfile(int serverIndex, DockerContainer cont
         return;
     }
 
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, container);
+    ContainerConfig containerConfigModel = m_serversRepository->containerConfig(serverIndex, container);
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
 
     m_serversRepository->clearLastConnectionConfig(serverIndex, container);
 
-    emit clientRevocationRequested(containerConfig, container, credentials, serverIndex);
+    emit clientRevocationRequested(serverIndex, containerConfigModel.toJson(), container);
 }
 
 ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
 {
-    QJsonObject serverConfigObject = m_serversRepository->server(serverIndex);
+    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
 
-    if (apiUtils::isServerFromApi(serverConfigObject)) {
+    if (ServerConfigUtils::isApiConfig(serverConfigModel)) {
         return ErrorCode::NoError;
     }
 
-    auto defaultContainerString = serverConfigObject.value(config_key::defaultContainer).toString();
-    DockerContainer container = ContainerProps::containerFromString(defaultContainerString);
+    DockerContainer container = ServerConfigUtils::defaultContainer(serverConfigModel);
 
     if (container == DockerContainer::None) {
         return ErrorCode::NoInstalledContainersError;
     }
 
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, container);
+    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
 
-    auto isProtocolConfigExists = [](const QJsonObject &containerConfig, const DockerContainer container) {
+    auto isProtocolConfigExists = [](const ContainerConfig &containerConfig, const DockerContainer container) {
         Proto protocol = ContainerProps::defaultProtocol(container);
-        QString protocolConfig =
-                containerConfig.value(ProtocolProps::protoToString(protocol)).toObject().value(config_key::last_config).toString();
-        return !protocolConfig.isEmpty();
+        return ProtocolConfigUtils::hasClientConfig(containerConfig.protocolConfig);
     };
 
     if (!isProtocolConfigExists(containerConfig, container)) {
-        ErrorCode errorCode = prepareContainerConfig(container, credentials, containerConfig, serverIndex);
+        ErrorCode errorCode = prepareContainerConfig(container, credentials, containerConfig);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
+        }
+        
+        m_serversRepository->setContainerConfig(serverIndex, container, containerConfig);
+        QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
+        
+        QString clientId = ProtocolConfigUtils::clientId(containerConfig.protocolConfig);
+        if (!clientId.isEmpty()) {
+            emit clientAppendRequested(serverIndex, clientId, clientName, container);
         }
     }
 
     return ErrorCode::NoError;
 }
 
-ErrorCode InstallController::prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, QJsonObject &containerConfig, int serverIndex)
+ErrorCode InstallController::prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, ContainerConfig &containerConfig)
 {
     if (!ContainerProps::isSupportedByCurrentPlatform(container)) {
         return ErrorCode::NoError;
@@ -206,30 +216,21 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
 
     if (ContainerProps::containerService(container) != ServiceType::Other) {
         Proto protocol = ContainerProps::defaultProtocol(container);
-        QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
 
-        auto configurator = ConfiguratorBase::create(protocol, m_settings, m_sshSession);
+        auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository, m_sshSession);
         ErrorCode errorCode = ErrorCode::NoError;
-        QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
+        ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, containerConfig, errorCode);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
 
-        protocolConfig.insert(config_key::last_config, protocolConfigString);
-        containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
+        containerConfig.protocolConfig = newProtocolConfig;
     }
-
-    if (serverIndex >= 0) {
-        m_serversRepository->setContainerConfig(serverIndex, container, containerConfig);
-    }
-
-    QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
-    emit clientAppendRequested(container, credentials, containerConfig, clientName);
 
     return ErrorCode::NoError;
 }
 
-ErrorCode InstallController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode InstallController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -258,7 +259,7 @@ ErrorCode InstallController::buildContainerWorker(const ServerCredentials &crede
     return error;
 }
 
-ErrorCode InstallController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
+ErrorCode InstallController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -283,7 +284,7 @@ ErrorCode InstallController::runContainerWorker(const ServerCredentials &credent
     return e;
 }
 
-ErrorCode InstallController::configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
+ErrorCode InstallController::configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -308,7 +309,7 @@ ErrorCode InstallController::configureContainerWorker(const ServerCredentials &c
     return e;
 }
 
-ErrorCode InstallController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode InstallController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config)
 {
     QString script = amnezia::scriptData(ProtocolScriptType::container_startup, container);
 
@@ -331,7 +332,7 @@ ErrorCode InstallController::startupContainerWorker(const ServerCredentials &cre
                                             baseVars));
 }
 
-ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config)
 {
     if (container == DockerContainer::Dns) {
         return ErrorCode::NoError;
@@ -348,15 +349,13 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
     };
 
     const Proto protocol = ContainerProps::defaultProtocol(container);
-    const QString containerString = ProtocolProps::protoToString(protocol);
-    const QJsonObject containerConfig = config.value(containerString).toObject();
-
     QStringList fixedPorts = ContainerProps::fixedPortsForContainer(container);
 
-    QString defaultPort("%1");
-    QString port = containerConfig.value(config_key::port).toString(defaultPort.arg(ProtocolProps::defaultPort(protocol)));
-    QString defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
-    QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
+    QString port = ProtocolConfigUtils::portWithDefault(config.protocolConfig, protocol);
+    QString transportProto = ProtocolConfigUtils::transportProtoWithDefault(config.protocolConfig, protocol);
+    if (transportProto.isEmpty()) {
+        transportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
+    }
 
     // TODO reimplement with netstat
     QString script = QString("which lsof > /dev/null 2>&1 || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
@@ -412,12 +411,12 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
     return ErrorCode::NoError;
 }
 
-bool InstallController::isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
+bool InstallController::isReinstallContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
-
-    const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
-    const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+    
+    QJsonObject oldProtoConfig = ProtocolConfigUtils::toJson(oldConfig.protocolConfig, mainProto);
+    QJsonObject newProtoConfig = ProtocolConfigUtils::toJson(newConfig.protocolConfig, mainProto);
 
     if (container == DockerContainer::OpenVpn) {
         if (oldProtoConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto)
@@ -512,7 +511,7 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
     return error;
 }
 
-ErrorCode InstallController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode InstallController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config)
 {
     Q_UNUSED(config);
     // create folder on host
@@ -645,11 +644,12 @@ ErrorCode InstallController::removeAllContainers(int serverIndex)
     ErrorCode errorCode = m_sshSession->runScript(credentials, amnezia::scriptData(SharedScriptType::remove_all_containers));
 
     if (errorCode == ErrorCode::NoError) {
-        QJsonObject server = m_serversRepository->server(serverIndex);
-        server.insert(config_key::containers, QJsonArray());
-        server.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
-
-        m_serversRepository->editServer(serverIndex, server);
+        ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
+        ServerConfigUtils::visit(serverConfigModel, [](auto& arg) {
+            arg.containers.clear();
+            arg.defaultContainer = DockerContainer::None;
+        });
+        m_serversRepository->editServer(serverIndex, serverConfigModel);
     }
 
     return errorCode;
@@ -664,30 +664,24 @@ ErrorCode InstallController::removeContainer(int serverIndex, DockerContainer co
                                             amnezia::genBaseVars(credentials, container, QString(), QString())));
 
     if (errorCode == ErrorCode::NoError) {
-        QJsonObject server = m_serversRepository->server(serverIndex);
-        QJsonArray containers = server.value(config_key::containers).toArray();
-
-        for (auto it = containers.begin(); it != containers.end(); it++) {
-            if (it->toObject().value(config_key::container).toString() == ContainerProps::containerToString(container)) {
-                containers.erase(it);
-                break;
-            }
-        }
-
-        server.insert(config_key::containers, containers);
-
-        auto defaultContainer = ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
+        ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
+        QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfigModel);
+        containers.remove(container);
+        
+        DockerContainer defaultContainer = ServerConfigUtils::defaultContainer(serverConfigModel);
         if (defaultContainer == container) {
-            if (containers.empty()) {
+            if (containers.isEmpty()) {
                 defaultContainer = DockerContainer::None;
             } else {
-                defaultContainer =
-                        ContainerProps::containerFromString(containers.begin()->toObject().value(config_key::container).toString());
+                defaultContainer = containers.begin().key();
             }
-            server.insert(config_key::defaultContainer, ContainerProps::containerToString(defaultContainer));
         }
-
-        m_serversRepository->editServer(serverIndex, server);
+        
+        ServerConfigUtils::visit(serverConfigModel, [&containers, defaultContainer](auto& arg) {
+            arg.containers = containers;
+            arg.defaultContainer = defaultContainer;
+        });
+        m_serversRepository->editServer(serverIndex, serverConfigModel);
     }
 
     return errorCode;
@@ -708,26 +702,27 @@ QScopedPointer<InstallerBase> InstallController::createInstaller(DockerContainer
     }
 }
 
-QJsonObject InstallController::generateConfig(DockerContainer container, int port, TransportProto transportProto)
+ContainerConfig InstallController::generateConfig(DockerContainer container, int port, TransportProto transportProto)
 {
     auto installer = createInstaller(container);
-    return installer->generateConfig(container, port, transportProto);
+    QJsonObject configJson = installer->generateConfig(container, port, transportProto);
+    return ContainerConfig::fromJson(configJson);
 }
 
 ErrorCode InstallController::installContainer(const ServerCredentials &credentials, DockerContainer container, int port,
-                                              TransportProto transportProto, QJsonObject &config)
+                                              TransportProto transportProto, ContainerConfig &config)
 {
     config = generateConfig(container, port, transportProto);
     return setupContainer(credentials, container, config, false);
 }
 
 
-bool InstallController::isUpdateDockerContainerRequired(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
+bool InstallController::isUpdateDockerContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
-
-    const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
-    const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+    
+    QJsonObject oldProtoConfig = ProtocolConfigUtils::toJson(oldConfig.protocolConfig, mainProto);
+    QJsonObject newProtoConfig = ProtocolConfigUtils::toJson(newConfig.protocolConfig, mainProto);
 
     if (ContainerProps::isAwgContainer(container)) {
         const AwgConfig oldConfig(oldProtoConfig);
@@ -752,45 +747,46 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
 {
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
 
-    QMap<DockerContainer, QJsonObject> installedContainers;
+    QMap<DockerContainer, ContainerConfig> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(credentials, installedContainers);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
 
-    QJsonObject server = m_serversRepository->server(serverIndex);
-    QJsonArray containers = server.value(config_key::containers).toArray();
+    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
+    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfigModel);
     bool hasNewContainers = false;
 
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
-        QJsonObject existingConfig = m_serversRepository->containerConfig(serverIndex, iterator.key());
-        if (existingConfig.isEmpty()) {
-            QJsonObject containerConfig = iterator.value();
+        if (!containers.contains(iterator.key())) {
+            ContainerConfig containerConfig = iterator.value();
 
             if (ContainerProps::isSupportedByCurrentPlatform(iterator.key())) {
-                errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig, serverIndex);
+                errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig);
                 if (errorCode != ErrorCode::NoError) {
                     return errorCode;
                 }
-            } else {
-                m_serversRepository->setContainerConfig(serverIndex, iterator.key(), containerConfig);
             }
-
-            containers.push_back(containerConfig);
+            
+            containers.insert(iterator.key(), containerConfig);
             hasNewContainers = true;
 
-            auto defaultContainer = server.value(config_key::defaultContainer).toString();
-            if (ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
+            DockerContainer defaultContainer = ServerConfigUtils::defaultContainer(serverConfigModel);
+            if (defaultContainer == DockerContainer::None
                 && ContainerProps::containerService(iterator.key()) != ServiceType::Other
                 && ContainerProps::isSupportedByCurrentPlatform(iterator.key())) {
-                server.insert(config_key::defaultContainer, ContainerProps::containerToString(iterator.key()));
+                ServerConfigUtils::visit(serverConfigModel, [iterator](auto& arg) {
+                    arg.defaultContainer = iterator.key();
+                });
             }
         }
     }
 
     if (hasNewContainers) {
-        server.insert(config_key::containers, containers);
-        m_serversRepository->editServer(serverIndex, server);
+        ServerConfigUtils::visit(serverConfigModel, [&containers](auto& arg) {
+            arg.containers = containers;
+        });
+        m_serversRepository->editServer(serverIndex, serverConfigModel);
     }
 
     return ErrorCode::NoError;
@@ -799,7 +795,7 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
 ErrorCode InstallController::installServer(const ServerCredentials &credentials, DockerContainer container, int port,
                                            TransportProto transportProto, bool &wasContainerInstalled)
 {
-    QMap<DockerContainer, QJsonObject> installedContainers;
+    QMap<DockerContainer, ContainerConfig> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(credentials, installedContainers);
     if (errorCode) {
         return errorCode;
@@ -807,7 +803,7 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
 
     wasContainerInstalled = false;
     if (!installedContainers.contains(container)) {
-        QJsonObject config;
+        ContainerConfig config;
         errorCode = installContainer(credentials, container, port, transportProto, config);
         if (errorCode) {
             return errorCode;
@@ -817,10 +813,10 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
         wasContainerInstalled = true;
     }
 
-    QMap<DockerContainer, QJsonObject> preparedContainers;
+    QMap<DockerContainer, ContainerConfig> preparedContainers;
     
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
-        QJsonObject containerConfig = iterator.value();
+        ContainerConfig containerConfig = iterator.value();
 
         if (ContainerProps::isSupportedByCurrentPlatform(iterator.key())) {
             errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig);
@@ -832,22 +828,20 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
         preparedContainers.insert(iterator.key(), containerConfig);
     }
 
-    QJsonObject server;
-    server.insert(config_key::hostName, credentials.hostName);
-    server.insert(config_key::userName, credentials.userName);
-    server.insert(config_key::password, credentials.secretData);
-    server.insert(config_key::port, credentials.port);
-    server.insert(config_key::description, m_settings->nextAvailableServerName());
+    SelfHostedServerConfig serverConfig;
+    serverConfig.hostName = credentials.hostName;
+    serverConfig.userName = credentials.userName;
+    serverConfig.password = credentials.secretData;
+    serverConfig.port = credentials.port;
+    serverConfig.description = m_appSettingsRepository->nextAvailableServerName();
 
-    QJsonArray containerConfigs;
     for (auto iterator = preparedContainers.begin(); iterator != preparedContainers.end(); iterator++) {
-        containerConfigs.append(iterator.value());
+        serverConfig.containers.insert(iterator.key(), iterator.value());
     }
 
-    server.insert(config_key::containers, containerConfigs);
-    server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
+    serverConfig.defaultContainer = container;
 
-    m_serversRepository->addServer(server);
+    m_serversRepository->addServer(ServerConfig(serverConfig));
 
     return ErrorCode::NoError;
 }
@@ -855,7 +849,7 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
 ErrorCode InstallController::installContainer(const ServerCredentials &credentials, DockerContainer container, int port,
                                               TransportProto transportProto, int serverIndex, bool &wasContainerInstalled)
 {
-    QMap<DockerContainer, QJsonObject> installedContainers;
+    QMap<DockerContainer, ContainerConfig> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(credentials, installedContainers);
     if (errorCode) {
         return errorCode;
@@ -863,7 +857,7 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
 
     wasContainerInstalled = false;
     if (!installedContainers.contains(container)) {
-        QJsonObject config;
+        ContainerConfig config;
         errorCode = installContainer(credentials, container, port, transportProto, config);
         if (errorCode) {
             return errorCode;
@@ -874,18 +868,19 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
     }
 
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
-        QJsonObject existingConfig = m_serversRepository->containerConfig(serverIndex, iterator.key());
-        if (existingConfig.isEmpty()) {
-            QJsonObject containerConfig = iterator.value();
+        ContainerConfig existingConfigModel = m_serversRepository->containerConfig(serverIndex, iterator.key());
+        if (existingConfigModel.container == DockerContainer::None) {
+            ContainerConfig containerConfig = iterator.value();
             
             if (ContainerProps::isSupportedByCurrentPlatform(iterator.key())) {
-                errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig, serverIndex);
+                errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig);
                 if (errorCode != ErrorCode::NoError) {
                     return errorCode;
                 }
-            } else {
-                m_serversRepository->setContainerConfig(serverIndex, iterator.key(), containerConfig);
             }
+            
+            ContainerConfig containerConfigModel = containerConfig;
+            m_serversRepository->setContainerConfig(serverIndex, iterator.key(), containerConfigModel);
         }
     }
 
@@ -1008,25 +1003,23 @@ void InstallController::stopAllSftpMounts()
 #endif
 }
 
-void InstallController::updateContainerConfigAfterInstallation(DockerContainer container, QJsonObject &containerConfig, const QString &stdOut)
+void InstallController::updateContainerConfigAfterInstallation(DockerContainer container, ContainerConfig &containerConfig, const QString &stdOut)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
 
     if (container == DockerContainer::TorWebSite) {
-        QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+        if (auto* xrayConfig = std::get_if<XrayProtocolConfig>(&containerConfig.protocolConfig)) {
+            qDebug() << "amnezia-tor onions" << stdOut;
 
-        qDebug() << "amnezia-tor onions" << stdOut;
-
-        QString onion = stdOut;
-        onion.replace("\n", "");
-        protocol.insert(config_key::site, onion);
-
-        containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
+            QString onion = stdOut;
+            onion.replace("\n", "");
+            xrayConfig->serverConfig.site = onion;
+        }
     }
 }
 
 ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentials &credentials,
-                                                           QMap<DockerContainer, QJsonObject> &installedContainers)
+                                                           QMap<DockerContainer, ContainerConfig> &installedContainers)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -1076,7 +1069,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
             config.insert(config_key::container, ContainerProps::containerToString(container));
             config.insert(ProtocolProps::protoToString(protocol), containerConfig);
-            installedContainers.insert(container, config);
+            installedContainers.insert(container, ContainerConfig::fromJson(config));
         }
 
         QRegularExpressionMatch torOrDnsRegMatch = torOrDnsRegExp.match(containerInfo);
@@ -1102,7 +1095,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
             config.insert(config_key::container, ContainerProps::containerToString(container));
             config.insert(ProtocolProps::protoToString(protocol), containerConfig);
-            installedContainers.insert(container, config);
+            installedContainers.insert(container, ContainerConfig::fromJson(config));
         }
     }
 

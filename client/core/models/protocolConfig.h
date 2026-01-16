@@ -14,6 +14,7 @@
 #include "protocols/ssXrayProtocolConfig.h"
 #include "protocols/sftpProtocolConfig.h"
 #include "protocols/socks5ProxyProtocolConfig.h"
+#include "protocols/ikev2ProtocolConfig.h"
 
 namespace amnezia
 {
@@ -27,7 +28,8 @@ using ProtocolConfig = std::variant<
     XrayProtocolConfig,
     SSXrayProtocolConfig,
     SftpProtocolConfig,
-    Socks5ProxyProtocolConfig
+    Socks5ProxyProtocolConfig,
+    Ikev2ProtocolConfig
 >;
 
 namespace ProtocolConfigUtils {
@@ -54,10 +56,17 @@ namespace ProtocolConfigUtils {
     Socks5ProxyProtocolConfig& asSocks5Proxy(ProtocolConfig& config);
     const Socks5ProxyProtocolConfig& asSocks5Proxy(const ProtocolConfig& config);
     
+    Ikev2ProtocolConfig& asIkev2(ProtocolConfig& config);
+    const Ikev2ProtocolConfig& asIkev2(const ProtocolConfig& config);
+    
     QString port(const ProtocolConfig& config);
     QString transportProto(const ProtocolConfig& config);
     
+    QString portWithDefault(const ProtocolConfig& config, Proto protocol);
+    QString transportProtoWithDefault(const ProtocolConfig& config, Proto protocol);
+    
     bool hasClientConfig(const ProtocolConfig& config);
+    QString clientId(const ProtocolConfig& config);
     QJsonObject getClientConfigJson(const ProtocolConfig& config);
     void setClientConfigJson(ProtocolConfig& config, const QJsonObject& clientJson);
     void clearClientConfig(ProtocolConfig& config);

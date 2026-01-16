@@ -45,6 +45,7 @@
 
 #include "core/repositories/qServersRepository.h"
 #include "core/repositories/qAppSettingsRepository.h"
+#include "secure_qsettings.h"
 
 #include "ui/models/allowedDnsModel.h"
 #include "ui/models/containersModel.h"
@@ -81,7 +82,7 @@ class CoreController : public QObject
     friend class CoreSignalHandlers;
 
 public:
-    explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
+    explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
                             QQmlApplicationEngine *engine, QObject *parent = nullptr);
 
     PageController* pageController() const;
@@ -105,7 +106,7 @@ private:
     void initSignalHandlers();
 
     QQmlApplicationEngine *m_engine {}; // TODO use parent child system here?
-    std::shared_ptr<Settings> m_settings;
+    SecureQSettings* m_settings;
     QSharedPointer<VpnConnection> m_vpnConnection;
     QTranslator* m_translator;
 

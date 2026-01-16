@@ -11,7 +11,7 @@ class Ikev2Configurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    Ikev2Configurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent = nullptr);
+    Ikev2Configurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent = nullptr);
 
     struct ConnectionData {
         QByteArray clientCert; // p12 client cert
@@ -21,8 +21,8 @@ public:
         QString host; // host ip
     };
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode &errorCode);
+    ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                const ContainerConfig &containerConfig, ErrorCode &errorCode);
 
     QString genIkev2Config(const ConnectionData &connData);
     QString genMobileConfig(const ConnectionData &connData);

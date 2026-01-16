@@ -133,6 +133,17 @@ ContainerConfig ServerConfigUtils::containerConfig(const ServerConfig& config, D
     }, config);
 }
 
+int ServerConfigUtils::crc(const ServerConfig& config)
+{
+    return std::visit([](auto&& arg) -> int {
+        if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, ApiV1ServerConfig> ||
+                      std::is_same_v<std::decay_t<decltype(arg)>, ApiV2ServerConfig>) {
+            return arg.crc;
+        }
+        return 0;
+    }, config);
+}
+
 QJsonObject ServerConfigUtils::toJson(const ServerConfig& config)
 {
     return std::visit([](auto&& arg) -> QJsonObject {

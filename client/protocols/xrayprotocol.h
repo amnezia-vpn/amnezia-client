@@ -6,7 +6,6 @@
 #include "core/utils/defs.h"
 #include "core/utils/ipcClient.h"
 #include "vpnprotocol.h"
-#include "settings.h"
 
 class XrayProtocol : public VpnProtocol
 {

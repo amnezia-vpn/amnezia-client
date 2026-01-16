@@ -8,15 +8,15 @@
 #include "core/utils/networkUtilities.h"
 #include "version.h"
 #include "containers/containers_defs.h"
+#include "core/models/serverConfig.h"
+#include "core/models/containerConfig.h"
 
 ConnectionController::ConnectionController(ServersRepository* serversRepository,
                                          AppSettingsRepository* appSettingsRepository,
-                                         VpnConnection* vpnConnection,
-                                         const std::shared_ptr<Settings> &settings)
+                                         VpnConnection* vpnConnection)
     : m_serversRepository(serversRepository),
       m_appSettingsRepository(appSettingsRepository),
-      m_vpnConnection(vpnConnection),
-      m_settings(settings)
+      m_vpnConnection(vpnConnection)
 {
 }
 
@@ -29,22 +29,21 @@ ErrorCode ConnectionController::prepareConnection(int serverIndex,
         return ErrorCode::AmneziaServiceNotRunning;
     }
 
-    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
-
-    QString defaultContainerString = serverConfig.value(config_key::defaultContainer).toString();
-    container = ContainerProps::containerFromString(defaultContainerString);
+    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
+    container = ServerConfigUtils::defaultContainer(serverConfigModel);
 
     if (!isContainerSupported(container)) {
         return ErrorCode::NotSupportedOnThisPlatform;
     }
 
-    QJsonObject containerConfig = m_serversRepository->containerConfig(serverIndex, container);
-
+    ContainerConfig containerConfigModel = m_serversRepository->containerConfig(serverIndex, container);
     credentials = m_serversRepository->serverCredentials(serverIndex);
 
     auto dns = getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
 
-    vpnConfiguration = createConnectionConfiguration(dns, serverConfig, containerConfig, container);
+    QJsonObject serverConfigJson = ServerConfigUtils::toJson(serverConfigModel);
+    QJsonObject containerConfigJson = containerConfigModel.toJson();
+    vpnConfiguration = createConnectionConfiguration(dns, serverConfigJson, containerConfigJson, container);
 
     return ErrorCode::NoError;
 }
@@ -78,18 +77,19 @@ QPair<QString, QString> ConnectionController::getDnsPair(int serverIndex, bool i
 {
     QPair<QString, QString> dns;
 
-    const QJsonObject &server = m_serversRepository->server(serverIndex);
-    const auto containers = server.value(config_key::containers).toArray();
+    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
+    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfigModel);
 
     bool isDnsContainerInstalled = false;
-    for (const QJsonValue &container : containers) {
-        if (ContainerProps::containerFromString(container.toObject().value(config_key::container).toString()) == DockerContainer::Dns) {
+    for (auto it = containers.begin(); it != containers.end(); ++it) {
+        if (it.key() == DockerContainer::Dns) {
             isDnsContainerInstalled = true;
+            break;
         }
     }
 
-    dns.first = server.value(config_key::dns1).toString();
-    dns.second = server.value(config_key::dns2).toString();
+    dns.first = ServerConfigUtils::dns1(serverConfigModel);
+    dns.second = ServerConfigUtils::dns2(serverConfigModel);
 
     if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
         if (isAmneziaDnsEnabled && isDnsContainerInstalled) {
@@ -123,7 +123,7 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     QString protocolConfigString =
             containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
 
-    auto configurator = ConfiguratorBase::create(proto, m_settings, nullptr);
+    auto configurator = ConfiguratorBase::create(proto, m_appSettingsRepository, nullptr);
     protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
 
     QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();

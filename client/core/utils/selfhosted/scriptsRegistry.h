@@ -7,6 +7,7 @@
 #include <QString>
 #include "core/utils/defs.h"
 #include "containers/containers_defs.h"
+#include "core/models/containerConfig.h"
 
 namespace amnezia {
 
@@ -50,14 +51,14 @@ ScriptVars genBaseVars(const ServerCredentials &credentials,
                        const QString &primaryDns,
                        const QString &secondaryDns);
 
-ScriptVars genOpenVpnVars(const QJsonObject &containerConfig);
-ScriptVars genXrayVars(const QJsonObject &containerConfig);
-ScriptVars genWireGuardVars(const QJsonObject &containerConfig);
-ScriptVars genAwgVars(const QJsonObject &containerConfig);
-ScriptVars genSftpVars(const QJsonObject &containerConfig);
-ScriptVars genSocks5ProxyVars(const QJsonObject &containerConfig);
+ScriptVars genOpenVpnVars(const ContainerConfig &containerConfig);
+ScriptVars genXrayVars(const ContainerConfig &containerConfig);
+ScriptVars genWireGuardVars(const ContainerConfig &containerConfig);
+ScriptVars genAwgVars(const ContainerConfig &containerConfig);
+ScriptVars genSftpVars(const ContainerConfig &containerConfig);
+ScriptVars genSocks5ProxyVars(const ContainerConfig &containerConfig);
 
-ScriptVars genProtocolVarsForContainer(DockerContainer container, const QJsonObject &containerConfig);
+ScriptVars genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig);
 }
 
 #endif // SCRIPTSREGISTRY_H

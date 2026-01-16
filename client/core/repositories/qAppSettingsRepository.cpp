@@ -2,11 +2,10 @@
 
 #include "core/utils/defs.h"
 #include "core/repositories/secureAppSettingsRepository.h"
-#include "settings.h"
 
 using namespace amnezia;
 
-QAppSettingsRepository::QAppSettingsRepository(std::shared_ptr<Settings> settings, QObject *parent)
+QAppSettingsRepository::QAppSettingsRepository(SecureQSettings* settings, QObject *parent)
     : QObject(parent), m_secureRepository(std::make_unique<SecureAppSettingsRepository>(settings))
 {
 }

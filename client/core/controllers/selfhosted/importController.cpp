@@ -18,6 +18,7 @@
 #include "core/utils/serialization/serialization.h"
 #include "core/utils/utilities.h"
 #include "protocols/protocols_defs.h"
+#include "core/models/serverConfig.h"
 
 using namespace amnezia;
 
@@ -279,14 +280,15 @@ void ImportController::importConfig(const QJsonObject &config)
     credentials.secretData = config.value(config_key::password).toString();
 
     if (credentials.isValid() || config.contains(config_key::containers)) {
-        m_serversRepository->addServer(config);
+        ServerConfig serverConfig = ServerConfigUtils::fromJson(config);
+        m_serversRepository->addServer(serverConfig);
         emit importFinished();
     } else if (config.contains(config_key::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(config).toJson());
-        auto servers = m_serversRepository->serversArray();
+        QVector<ServerConfig> servers = m_serversRepository->servers();
         bool exists = false;
-        for (const auto &server : servers) {
-            if (static_cast<quint16>(server.toObject().value(config_key::crc).toInt()) == crc) {
+        for (const ServerConfig& serverConfig : servers) {
+            if (static_cast<quint16>(ServerConfigUtils::crc(serverConfig)) == crc) {
                 exists = true;
                 break;
             }
@@ -297,7 +299,8 @@ void ImportController::importConfig(const QJsonObject &config)
         } else {
             QJsonObject configWithCrc = config;
             configWithCrc.insert(config_key::crc, crc);
-            m_serversRepository->addServer(configWithCrc);
+            ServerConfig serverConfig = ServerConfigUtils::fromJson(configWithCrc);
+            m_serversRepository->addServer(serverConfig);
             emit importFinished();
         }
     } else {

@@ -1,21 +1,41 @@
 #include "awgConfigurator.h"
 #include "protocols/protocols_defs.h"
+#include "core/models/containerConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
 
-AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent)
-    : WireguardConfigurator(settings, sshSession, true, parent)
+AwgConfigurator::AwgConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent)
+    : WireguardConfigurator(appSettingsRepository, sshSession, true, parent)
 {
 }
 
-QString AwgConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                                      ErrorCode &errorCode)
+ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
+                                              ErrorCode &errorCode)
 {
-    QString config = WireguardConfigurator::createConfig(credentials, container, containerConfig, errorCode);
-
-    QJsonObject jsonConfig = QJsonDocument::fromJson(config.toUtf8()).object();
-    QString awgConfig = jsonConfig.value(config_key::config).toString();
+    const AwgServerConfig* serverConfig = nullptr;
+    const AwgClientConfig* clientConfig = nullptr;
+    
+    if (auto* awgConfigModel = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
+        serverConfig = &awgConfigModel->serverConfig;
+        if (awgConfigModel->clientConfig.has_value()) {
+            clientConfig = &awgConfigModel->clientConfig.value();
+        }
+    }
+    
+    ProtocolConfig wireguardConfig = WireguardConfigurator::createConfig(credentials, container, containerConfig, errorCode);
+    if (errorCode != ErrorCode::NoError) {
+        return AwgProtocolConfig{};
+    }
+    
+    WireGuardProtocolConfig* wgConfig = std::get_if<WireGuardProtocolConfig>(&wireguardConfig);
+    if (!wgConfig || !wgConfig->clientConfig.has_value()) {
+        errorCode = ErrorCode::InternalError;
+        return AwgProtocolConfig{};
+    }
+    
+    QString awgConfig = wgConfig->clientConfig->nativeConfig;
 
     QMap<QString, QString> configMap;
     auto configLines = awgConfig.split("\n");
@@ -31,29 +51,53 @@ QString AwgConfigurator::createConfig(const ServerCredentials &credentials, Dock
         }
     }
 
-    jsonConfig[config_key::junkPacketCount] = configMap.value(config_key::junkPacketCount);
-    jsonConfig[config_key::junkPacketMinSize] = configMap.value(config_key::junkPacketMinSize);
-    jsonConfig[config_key::junkPacketMaxSize] = configMap.value(config_key::junkPacketMaxSize);
-    jsonConfig[config_key::initPacketJunkSize] = configMap.value(config_key::initPacketJunkSize);
-    jsonConfig[config_key::responsePacketJunkSize] = configMap.value(config_key::responsePacketJunkSize);
-    jsonConfig[config_key::initPacketMagicHeader] = configMap.value(config_key::initPacketMagicHeader);
-    jsonConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
-    jsonConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
-    jsonConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
-
-    if (container == DockerContainer::Awg2) {
-        jsonConfig[config_key::cookieReplyPacketJunkSize] = configMap.value(config_key::cookieReplyPacketJunkSize);
-        jsonConfig[config_key::transportPacketJunkSize] = configMap.value(config_key::transportPacketJunkSize);
+    AwgProtocolConfig protocolConfig;
+    if (serverConfig) {
+        protocolConfig.serverConfig = *serverConfig;
     }
-
-    jsonConfig[config_key::specialJunk1] = configMap.value(amnezia::config_key::specialJunk1);
-    jsonConfig[config_key::specialJunk2] = configMap.value(amnezia::config_key::specialJunk2);
-    jsonConfig[config_key::specialJunk3] = configMap.value(amnezia::config_key::specialJunk3);
-    jsonConfig[config_key::specialJunk4] = configMap.value(amnezia::config_key::specialJunk4);
-    jsonConfig[config_key::specialJunk5] = configMap.value(amnezia::config_key::specialJunk5);
-
-    jsonConfig[config_key::mtu] =
-            containerConfig.value(ProtocolProps::protoToString(Proto::Awg)).toObject().value(config_key::mtu).toString(protocols::awg::defaultMtu);
-
-    return QJsonDocument(jsonConfig).toJson();
+    
+    AwgClientConfig newClientConfig;
+    newClientConfig.nativeConfig = awgConfig;
+    newClientConfig.hostName = wgConfig->clientConfig->hostName;
+    newClientConfig.port = wgConfig->clientConfig->port;
+    newClientConfig.clientIp = wgConfig->clientConfig->clientIp;
+    newClientConfig.clientPrivateKey = wgConfig->clientConfig->clientPrivateKey;
+    newClientConfig.clientPublicKey = wgConfig->clientConfig->clientPublicKey;
+    newClientConfig.serverPublicKey = wgConfig->clientConfig->serverPublicKey;
+    newClientConfig.presharedKey = wgConfig->clientConfig->presharedKey;
+    newClientConfig.clientId = wgConfig->clientConfig->clientId;
+    newClientConfig.allowedIps = wgConfig->clientConfig->allowedIps;
+    newClientConfig.persistentKeepAlive = wgConfig->clientConfig->persistentKeepAlive;
+    
+    QString mtu = protocols::awg::defaultMtu;
+    if (clientConfig && !clientConfig->mtu.isEmpty()) {
+        mtu = clientConfig->mtu;
+    }
+    newClientConfig.mtu = mtu;
+    
+    newClientConfig.junkPacketCount = configMap.value(config_key::junkPacketCount);
+    newClientConfig.junkPacketMinSize = configMap.value(config_key::junkPacketMinSize);
+    newClientConfig.junkPacketMaxSize = configMap.value(config_key::junkPacketMaxSize);
+    newClientConfig.initPacketJunkSize = configMap.value(config_key::initPacketJunkSize);
+    newClientConfig.responsePacketJunkSize = configMap.value(config_key::responsePacketJunkSize);
+    newClientConfig.initPacketMagicHeader = configMap.value(config_key::initPacketMagicHeader);
+    newClientConfig.responsePacketMagicHeader = configMap.value(config_key::responsePacketMagicHeader);
+    newClientConfig.underloadPacketMagicHeader = configMap.value(config_key::underloadPacketMagicHeader);
+    newClientConfig.transportPacketMagicHeader = configMap.value(config_key::transportPacketMagicHeader);
+    newClientConfig.specialJunk1 = configMap.value(amnezia::config_key::specialJunk1);
+    newClientConfig.specialJunk2 = configMap.value(amnezia::config_key::specialJunk2);
+    newClientConfig.specialJunk3 = configMap.value(amnezia::config_key::specialJunk3);
+    newClientConfig.specialJunk4 = configMap.value(amnezia::config_key::specialJunk4);
+    newClientConfig.specialJunk5 = configMap.value(amnezia::config_key::specialJunk5);
+    
+    if (container == DockerContainer::Awg2) {
+        newClientConfig.cookieReplyPacketJunkSize = configMap.value(config_key::cookieReplyPacketJunkSize);
+        newClientConfig.transportPacketJunkSize = configMap.value(config_key::transportPacketJunkSize);
+    }
+    
+    newClientConfig.isObfuscationEnabled = false;
+    
+    protocolConfig.setClientConfig(newClientConfig);
+    
+    return protocolConfig;
 }

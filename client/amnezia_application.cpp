@@ -54,7 +54,7 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
     QFile::setPermissions(configLoc2, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 #endif
 
-    m_settings = std::shared_ptr<Settings>(new Settings);
+    m_settings = new SecureQSettings(ORGANIZATION_NAME, APPLICATION_NAME, this);
     m_nam = new QNetworkAccessManager(this);
 }
 
@@ -123,7 +123,7 @@ void AmneziaApplication::init()
     m_engine->rootContext()->setContextProperty("IsMacOsNeBuild", false);
 #endif
 
-    m_vpnConnection.reset(new VpnConnection(m_settings));
+    m_vpnConnection.reset(new VpnConnection(nullptr, nullptr));
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
@@ -144,7 +144,7 @@ void AmneziaApplication::init()
 
     m_coreController->setQmlRoot();
 
-    bool enabled = m_settings->isSaveLogs();
+    bool enabled = false;
 #ifndef Q_OS_ANDROID
     if (enabled) {
         if (!Logger::init(false)) {

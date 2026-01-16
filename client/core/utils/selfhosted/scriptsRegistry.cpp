@@ -8,6 +8,13 @@
 #include "core/utils/networkUtilities.h"
 #include "containers/containers_defs.h"
 #include "protocols/protocols_defs.h"
+#include "core/models/containerConfig.h"
+#include "core/models/protocols/openVpnProtocolConfig.h"
+#include "core/models/protocols/wireGuardProtocolConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/sftpProtocolConfig.h"
+#include "core/models/protocols/socks5ProxyProtocolConfig.h"
 
 QString amnezia::scriptFolder(amnezia::DockerContainer container)
 {
@@ -127,122 +134,125 @@ amnezia::ScriptVars amnezia::genBaseVars(const ServerCredentials &credentials,
     return vars;
 }
 
-amnezia::ScriptVars amnezia::genOpenVpnVars(const QJsonObject &containerConfig)
+amnezia::ScriptVars amnezia::genOpenVpnVars(const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
-    const QJsonObject &openvpnConfig = containerConfig.value(ProtocolProps::protoToString(Proto::OpenVpn)).toObject();
-
-    vars.append({ { "$OPENVPN_SUBNET_IP",
-                    openvpnConfig.value(config_key::subnet_address).toString(protocols::openvpn::defaultSubnetAddress) } });
-    vars.append({ { "$OPENVPN_SUBNET_CIDR", openvpnConfig.value(config_key::subnet_cidr).toString(protocols::openvpn::defaultSubnetCidr) } });
-    vars.append({ { "$OPENVPN_SUBNET_MASK", openvpnConfig.value(config_key::subnet_mask).toString(protocols::openvpn::defaultSubnetMask) } });
-    vars.append({ { "$OPENVPN_PORT", openvpnConfig.value(config_key::port).toString(protocols::openvpn::defaultPort) } });
-    vars.append({ { "$OPENVPN_TRANSPORT_PROTO",
-                    openvpnConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto) } });
-
-    bool isNcpDisabled = openvpnConfig.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
-    vars.append({ { "$OPENVPN_NCP_DISABLE", isNcpDisabled ? protocols::openvpn::ncpDisableString : "" } });
-
-    vars.append({ { "$OPENVPN_CIPHER", openvpnConfig.value(config_key::cipher).toString(protocols::openvpn::defaultCipher) } });
-    vars.append({ { "$OPENVPN_HASH", openvpnConfig.value(config_key::hash).toString(protocols::openvpn::defaultHash) } });
-
-    bool isTlsAuth = openvpnConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
-    vars.append({ { "$OPENVPN_TLS_AUTH", isTlsAuth ? protocols::openvpn::tlsAuthString : "" } });
-    if (!isTlsAuth) {
-        vars.append({ { "$OPENVPN_TA_KEY", "" } });
+    
+    if (auto* openvpnConfig = std::get_if<OpenVpnProtocolConfig>(&containerConfig.protocolConfig)) {
+        const OpenVpnServerConfig& config = openvpnConfig->serverConfig;
+        
+        vars.append({ { "$OPENVPN_SUBNET_IP", config.subnetAddress.isEmpty() ? protocols::openvpn::defaultSubnetAddress : config.subnetAddress } });
+        vars.append({ { "$OPENVPN_SUBNET_CIDR", config.subnetCidr.isEmpty() ? protocols::openvpn::defaultSubnetCidr : config.subnetCidr } });
+        vars.append({ { "$OPENVPN_SUBNET_MASK", config.subnetMask.isEmpty() ? protocols::openvpn::defaultSubnetMask : config.subnetMask } });
+        vars.append({ { "$OPENVPN_PORT", config.port.isEmpty() ? protocols::openvpn::defaultPort : config.port } });
+        vars.append({ { "$OPENVPN_TRANSPORT_PROTO", config.transportProto.isEmpty() ? protocols::openvpn::defaultTransportProto : config.transportProto } });
+        
+        vars.append({ { "$OPENVPN_NCP_DISABLE", config.ncpDisable ? protocols::openvpn::ncpDisableString : "" } });
+        vars.append({ { "$OPENVPN_CIPHER", config.cipher.isEmpty() ? protocols::openvpn::defaultCipher : config.cipher } });
+        vars.append({ { "$OPENVPN_HASH", config.hash.isEmpty() ? protocols::openvpn::defaultHash : config.hash } });
+        
+        vars.append({ { "$OPENVPN_TLS_AUTH", config.tlsAuth ? protocols::openvpn::tlsAuthString : "" } });
+        if (!config.tlsAuth) {
+            vars.append({ { "$OPENVPN_TA_KEY", "" } });
+        }
+        
+        vars.append({ { "$OPENVPN_ADDITIONAL_CLIENT_CONFIG", config.additionalClientConfig.isEmpty() ? protocols::openvpn::defaultAdditionalClientConfig : config.additionalClientConfig } });
+        vars.append({ { "$OPENVPN_ADDITIONAL_SERVER_CONFIG", config.additionalServerConfig.isEmpty() ? protocols::openvpn::defaultAdditionalServerConfig : config.additionalServerConfig } });
     }
-
-    vars.append({ { "$OPENVPN_ADDITIONAL_CLIENT_CONFIG",
-                    openvpnConfig.value(config_key::additional_client_config).toString(protocols::openvpn::defaultAdditionalClientConfig) } });
-    vars.append({ { "$OPENVPN_ADDITIONAL_SERVER_CONFIG",
-                    openvpnConfig.value(config_key::additional_server_config).toString(protocols::openvpn::defaultAdditionalServerConfig) } });
-
+    
     return vars;
 }
 
-amnezia::ScriptVars amnezia::genXrayVars(const QJsonObject &containerConfig)
+amnezia::ScriptVars amnezia::genXrayVars(const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
-    const QJsonObject &xrayConfig = containerConfig.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
-
-    vars.append({ { "$XRAY_SITE_NAME", xrayConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
-    vars.append({ { "$XRAY_SERVER_PORT", xrayConfig.value(config_key::port).toString(protocols::xray::defaultPort) } });
-
+    
+    if (auto* xrayConfig = std::get_if<XrayProtocolConfig>(&containerConfig.protocolConfig)) {
+        const XrayServerConfig& config = xrayConfig->serverConfig;
+        
+        vars.append({ { "$XRAY_SITE_NAME", config.site.isEmpty() ? protocols::xray::defaultSite : config.site } });
+        vars.append({ { "$XRAY_SERVER_PORT", config.port.isEmpty() ? protocols::xray::defaultPort : config.port } });
+    }
+    
     return vars;
 }
 
-amnezia::ScriptVars amnezia::genWireGuardVars(const QJsonObject &containerConfig)
+amnezia::ScriptVars amnezia::genWireGuardVars(const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
-    const QJsonObject &wireguarConfig = containerConfig.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
-
-    vars.append({ { "$WIREGUARD_SUBNET_IP",
-                    wireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) } });
-    vars.append({ { "$WIREGUARD_SUBNET_CIDR",
-                    wireguarConfig.value(config_key::subnet_cidr).toString(protocols::wireguard::defaultSubnetCidr) } });
-    vars.append({ { "$WIREGUARD_SUBNET_MASK",
-                    wireguarConfig.value(config_key::subnet_mask).toString(protocols::wireguard::defaultSubnetMask) } });
-    vars.append({ { "$WIREGUARD_SERVER_PORT", wireguarConfig.value(config_key::port).toString(protocols::wireguard::defaultPort) } });
-
+    
+    if (auto* wireguardConfig = std::get_if<WireGuardProtocolConfig>(&containerConfig.protocolConfig)) {
+        const WireGuardServerConfig& config = wireguardConfig->serverConfig;
+        
+        vars.append({ { "$WIREGUARD_SUBNET_IP", config.subnetAddress.isEmpty() ? protocols::wireguard::defaultSubnetAddress : config.subnetAddress } });
+        vars.append({ { "$WIREGUARD_SUBNET_CIDR", config.subnetCidr.isEmpty() ? protocols::wireguard::defaultSubnetCidr : config.subnetCidr } });
+        vars.append({ { "$WIREGUARD_SUBNET_MASK", config.subnetMask.isEmpty() ? protocols::wireguard::defaultSubnetMask : config.subnetMask } });
+        vars.append({ { "$WIREGUARD_SERVER_PORT", config.port.isEmpty() ? protocols::wireguard::defaultPort : config.port } });
+    }
+    
     return vars;
 }
 
-amnezia::ScriptVars amnezia::genAwgVars(const QJsonObject &containerConfig)
+amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
-    const QJsonObject &amneziaWireguarConfig = containerConfig.value(ProtocolProps::protoToString(Proto::Awg)).toObject();
-
-    vars.append({ { "$AWG_SUBNET_IP",
-                    amneziaWireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) } });
-    vars.append({ { "$AWG_SERVER_PORT", amneziaWireguarConfig.value(config_key::port).toString(protocols::awg::defaultPort) } });
-    vars.append({ { "$JUNK_PACKET_COUNT", amneziaWireguarConfig.value(config_key::junkPacketCount).toString() } });
-    vars.append({ { "$JUNK_PACKET_MIN_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMinSize).toString() } });
-    vars.append({ { "$JUNK_PACKET_MAX_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMaxSize).toString() } });
-    vars.append({ { "$INIT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::initPacketJunkSize).toString() } });
-    vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::responsePacketJunkSize).toString() } });
-    vars.append({ { "$INIT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::initPacketMagicHeader).toString() } });
-    vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
-    vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
-    vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
-    vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::cookieReplyPacketJunkSize).toString() } });
-    vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::transportPacketJunkSize).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_1", amneziaWireguarConfig.value(config_key::specialJunk1).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_2", amneziaWireguarConfig.value(config_key::specialJunk2).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_3", amneziaWireguarConfig.value(config_key::specialJunk3).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_4", amneziaWireguarConfig.value(config_key::specialJunk4).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_5", amneziaWireguarConfig.value(config_key::specialJunk5).toString() } });
-
+    
+    if (auto* awgConfig = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
+        const AwgServerConfig& config = awgConfig->serverConfig;
+        
+        vars.append({ { "$AWG_SUBNET_IP", config.subnetAddress.isEmpty() ? protocols::wireguard::defaultSubnetAddress : config.subnetAddress } });
+        vars.append({ { "$AWG_SERVER_PORT", config.port.isEmpty() ? protocols::awg::defaultPort : config.port } });
+        vars.append({ { "$JUNK_PACKET_COUNT", config.junkPacketCount } });
+        vars.append({ { "$JUNK_PACKET_MIN_SIZE", config.junkPacketMinSize } });
+        vars.append({ { "$JUNK_PACKET_MAX_SIZE", config.junkPacketMaxSize } });
+        vars.append({ { "$INIT_PACKET_JUNK_SIZE", config.initPacketJunkSize } });
+        vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE", config.responsePacketJunkSize } });
+        vars.append({ { "$INIT_PACKET_MAGIC_HEADER", config.initPacketMagicHeader } });
+        vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER", config.responsePacketMagicHeader } });
+        vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", config.underloadPacketMagicHeader } });
+        vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", config.transportPacketMagicHeader } });
+        vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", config.cookieReplyPacketJunkSize } });
+        vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", config.transportPacketJunkSize } });
+        vars.append({ { "$SPECIAL_JUNK_1", config.specialJunk1 } });
+        vars.append({ { "$SPECIAL_JUNK_2", config.specialJunk2 } });
+        vars.append({ { "$SPECIAL_JUNK_3", config.specialJunk3 } });
+        vars.append({ { "$SPECIAL_JUNK_4", config.specialJunk4 } });
+        vars.append({ { "$SPECIAL_JUNK_5", config.specialJunk5 } });
+    }
+    
     return vars;
 }
 
-amnezia::ScriptVars amnezia::genSftpVars(const QJsonObject &containerConfig)
+amnezia::ScriptVars amnezia::genSftpVars(const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
-    const QJsonObject &sftpConfig = containerConfig.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
-
-    vars.append({ { "$SFTP_PORT", sftpConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::Sftp))) } });
-    vars.append({ { "$SFTP_USER", sftpConfig.value(config_key::userName).toString() } });
-    vars.append({ { "$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() } });
-
+    
+    if (auto* sftpConfig = std::get_if<SftpProtocolConfig>(&containerConfig.protocolConfig)) {
+        vars.append({ { "$SFTP_PORT", sftpConfig->port.isEmpty() ? QString::number(ProtocolProps::defaultPort(Proto::Sftp)) : sftpConfig->port } });
+        vars.append({ { "$SFTP_USER", sftpConfig->userName } });
+        vars.append({ { "$SFTP_PASSWORD", sftpConfig->password } });
+    }
+    
     return vars;
 }
 
-amnezia::ScriptVars amnezia::genSocks5ProxyVars(const QJsonObject &containerConfig)
+amnezia::ScriptVars amnezia::genSocks5ProxyVars(const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
-    const QJsonObject &socks5ProxyConfig = containerConfig.value(ProtocolProps::protoToString(Proto::Socks5Proxy)).toObject();
-
-    vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort) } });
-    auto username = socks5ProxyConfig.value(config_key::userName).toString();
-    auto password = socks5ProxyConfig.value(config_key::password).toString();
-    QString socks5user = (!username.isEmpty() && !password.isEmpty()) ? QString("users %1:CL:%2").arg(username, password) : "";
-    vars.append({ { "$SOCKS5_USER", socks5user } });
-    vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
-
+    
+    if (auto* socks5Config = std::get_if<Socks5ProxyProtocolConfig>(&containerConfig.protocolConfig)) {
+        vars.append({ { "$SOCKS5_PROXY_PORT", socks5Config->port.isEmpty() ? protocols::socks5Proxy::defaultPort : socks5Config->port } });
+        QString socks5user = (!socks5Config->userName.isEmpty() && !socks5Config->password.isEmpty()) 
+            ? QString("users %1:CL:%2").arg(socks5Config->userName, socks5Config->password) 
+            : "";
+        vars.append({ { "$SOCKS5_USER", socks5user } });
+        vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
+    }
+    
     return vars;
 }
 
-amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer container, const QJsonObject &containerConfig)
+amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
     Proto protocol = ContainerProps::defaultProtocol(container);

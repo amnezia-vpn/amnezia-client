@@ -1,6 +1,5 @@
 #include "pageController.h"
 
-#include "settings.h"
 #include "ui/utils/converter.h"
 #include "core/utils/errorStrings.h"
 #include "core/controllers/settingsController.h"

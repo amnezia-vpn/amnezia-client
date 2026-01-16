@@ -51,6 +51,7 @@ namespace ServerConfigUtils {
     QString dns2(const ServerConfig& config);
     bool hasContainers(const ServerConfig& config);
     ContainerConfig containerConfig(const ServerConfig& config, DockerContainer container);
+    int crc(const ServerConfig& config);
     
     QJsonObject toJson(const ServerConfig& config);
     ServerConfig fromJson(const QJsonObject& json);

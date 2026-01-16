@@ -11,7 +11,7 @@ class OpenVpnConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    OpenVpnConfigurator(std::shared_ptr<Settings> settings, SshSession* sshSession, QObject *parent = nullptr);
+    OpenVpnConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent = nullptr);
 
     struct ConnectionData
     {
@@ -24,8 +24,8 @@ public:
         QString host;       // host ip
     };
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode &errorCode);
+    ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container,
+                               const ContainerConfig &containerConfig, ErrorCode &errorCode);
 
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                            QString &protocolConfigString);

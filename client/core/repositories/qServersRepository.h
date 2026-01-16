@@ -2,12 +2,13 @@
 #define QSERVERSREPOSITORY_H
 
 #include <QObject>
-#include <QJsonObject>
-#include <QJsonArray>
+#include <QVector>
 #include <memory>
 
 #include "core/repositories/serversRepository.h"
-#include "settings.h"
+#include "core/models/serverConfig.h"
+#include "core/models/containerConfig.h"
+#include "secure_qsettings.h"
 
 using namespace amnezia;
 
@@ -18,32 +19,32 @@ class QServersRepository : public QObject
     Q_OBJECT
 
 public:
-    explicit QServersRepository(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit QServersRepository(SecureQSettings* settings, QObject *parent = nullptr);
     ~QServersRepository();
 
     ServersRepository* repository();
 
-    void addServer(const QJsonObject &server);
-    void editServer(int index, const QJsonObject &server);
+    void addServer(const ServerConfig &server);
+    void editServer(int index, const ServerConfig &server);
     void removeServer(int index);
-    QJsonObject server(int index) const;
-    QJsonArray serversArray() const;
+    ServerConfig server(int index) const;
+    QVector<ServerConfig> servers() const;
     int serversCount() const;
 
     int defaultServerIndex() const;
     void setDefaultServer(int index);
 
     void setDefaultContainer(int serverIndex, DockerContainer container);
-    QJsonObject containerConfig(int serverIndex, DockerContainer container) const;
-    void setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config);
+    ContainerConfig containerConfig(int serverIndex, DockerContainer container) const;
+    void setContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config);
     void clearLastConnectionConfig(int serverIndex, DockerContainer container);
 
     ServerCredentials serverCredentials(int index) const;
     bool hasServerWithVpnKey(const QString &vpnKey) const;
 
 signals:
-    void serverAdded(QJsonObject config);
-    void serverEdited(int index, QJsonObject config);
+    void serverAdded(ServerConfig config);
+    void serverEdited(int index, ServerConfig config);
     void serverRemoved(int index);
     void defaultServerChanged(int index);
 
