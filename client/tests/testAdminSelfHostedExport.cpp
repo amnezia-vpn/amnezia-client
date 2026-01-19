@@ -7,12 +7,9 @@
 #include <QUuid>
 #include <QSignalSpy>
 
-#include "core/controllers/selfhosted/importController.h"
-#include "core/controllers/selfhosted/exportController.h"
-#include "core/controllers/serversController.h"
+#include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "vpnconnection.h"
 #include "secure_qsettings.h"
 
 class TestAdminSelfHostedExport : public QObject
@@ -20,12 +17,8 @@ class TestAdminSelfHostedExport : public QObject
     Q_OBJECT
 
 private:
+    CoreController* m_coreController;
     SecureQSettings* m_settings;
-    QServersRepository* m_qServersRepo;
-    QAppSettingsRepository* m_qAppSettingsRepo;
-    ServersController* m_serversController;
-    ImportController* m_importController;
-    ExportController* m_exportController;
 
     QJsonObject decodeVpnKey(const QString &vpnKey) {
         QString key = vpnKey;
@@ -87,26 +80,15 @@ private slots:
     void initTestCase() {
         QString testOrg = "AmneziaVPN-Test-" + QUuid::createUuid().toString();
         m_settings = new SecureQSettings(testOrg, "amnezia-client", nullptr, false);
-        m_qServersRepo = new QServersRepository(m_settings);
-        m_qAppSettingsRepo = new QAppSettingsRepository(m_settings);
-        m_serversController = new ServersController(m_qServersRepo->repository(), m_qAppSettingsRepo->repository());
-        m_importController = new ImportController(m_qServersRepo->repository(), m_qAppSettingsRepo->repository());
-        m_exportController = new ExportController(m_qServersRepo->repository(), m_qAppSettingsRepo->repository());
         
-        // Emulate CoreSignalHandlers::initImportControllerHandler
-        connect(m_importController, &ImportController::importFinished, this, [this]() {
-            int newServerIndex = m_serversController->getServersCount() - 1;
-            m_qServersRepo->setDefaultServer(newServerIndex);
-        });
+        auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
+        
+        m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
     }
 
     void cleanupTestCase() {
-        delete m_exportController;
-        delete m_importController;
-        delete m_serversController;
-        delete m_qAppSettingsRepo;
-        delete m_qServersRepo;
         m_settings->clearSettings();
+        delete m_coreController;
         delete m_settings;
     }
 
@@ -117,26 +99,26 @@ private slots:
     void testAdminSelfHostedExport() {
         QString vpnKey = "vpn://AAABTXjarZIxT8MwEIX_Cro5jbDjQunKUhhYyoZQZZKjRGpsy3baQtT_zp2bJh3oACLLPfvz3bOe00FpTdS1QR9g_tKB3q1h3sFCwBzEdf9N5ElBBgtJqBiQOkcFoemAbs6RInQ7oNkZemAvrrKvRV9VX6fH-lhSVSwavU9GSdcmXZX0UqSbseJRMqlioDxuSsJZH1mKWTrhvI22tJvVljKoLU-TtB3aN4NxpavKYwhpSD7LRc4t0WsTeMwqNRNsKweHbAyTtnRj8KvWE0pUEut-hNah2TpDM0-Kwu8vKMSd-ttFLrntao_rVvuKWkc9OnIk4n8t915_Ulcqo5FSxa9tYsk2rxlU-K7bTby_lDWfCKWvXTy-5jOGeLVET-9L7MOG-KQbJEBx57jXjdtgXtqG_wUdws5yJhCpa1iefhopM2gD-n4An-ElHL4BvzD6nw";
         
-        QSignalSpy importFinishedSpy(m_importController, &ImportController::importFinished);
-        QSignalSpy defaultServerChangedSpy(m_qServersRepo, &QServersRepository::defaultServerChanged);
+        QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
         
         qDebug() << "IMPORTED KEY:" << vpnKey;
         
-        auto importResult = m_importController->extractConfigFromData(vpnKey);
+        auto importResult = m_coreController->m_importCoreController->extractConfigFromData(vpnKey);
         
         QVERIFY2(importResult.errorCode == ErrorCode::NoError, "Import should succeed");
         QVERIFY2(!importResult.config.isEmpty(), "Config should not be empty");
 
         QJsonObject importedConfig = importResult.config;
 
-        m_importController->importConfig(importedConfig);
+        m_coreController->m_importCoreController->importConfig(importedConfig);
         
         QVERIFY2(importFinishedSpy.count() == 1, "importFinished signal should be emitted");
         QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted by CoreSignalHandlers handler");
-        QVERIFY2(m_qServersRepo->serversCount() > 0, "Server should be added");
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() > 0, "Server should be added");
 
-        int serverIndex = m_qServersRepo->defaultServerIndex();
-        auto exportResult = m_exportController->generateFullAccessConfig(serverIndex);
+        int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();
+        auto exportResult = m_coreController->m_exportController->generateFullAccessConfig(serverIndex);
         
         QVERIFY2(exportResult.errorCode == ErrorCode::NoError, "Export should succeed");
         QVERIFY2(!exportResult.config.isEmpty(), "Exported config should not be empty");
@@ -145,7 +127,7 @@ private slots:
 
         QJsonObject exportedConfig = decodeVpnKey(exportResult.config);
         
-        auto importResult2 = m_importController->extractConfigFromData(exportResult.config);
+        auto importResult2 = m_coreController->m_importCoreController->extractConfigFromData(exportResult.config);
         QVERIFY2(importResult2.errorCode == ErrorCode::NoError, "Re-import should succeed");
         
         QJsonObject sortedImported = sortContainers(importedConfig);

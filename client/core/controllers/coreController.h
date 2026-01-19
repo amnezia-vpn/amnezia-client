@@ -104,6 +104,7 @@ private:
     void initAndroidController();
     void initAppleController();
     void initSignalHandlers();
+    void setQmlContextProperty(const QString &name, QObject *value);
 
     QQmlApplicationEngine *m_engine {}; // TODO use parent child system here?
     SecureQSettings* m_settings;

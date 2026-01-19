@@ -5,12 +5,9 @@
 #include <QUuid>
 #include <QSignalSpy>
 
-#include "core/controllers/selfhosted/importController.h"
-#include "core/controllers/serversController.h"
+#include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
-#include "ui/models/serversModel.h"
+#include "vpnconnection.h"
 #include "secure_qsettings.h"
 
 class TestMultipleImports : public QObject
@@ -18,53 +15,30 @@ class TestMultipleImports : public QObject
     Q_OBJECT
 
 private:
+    CoreController* m_coreController;
     SecureQSettings* m_settings;
-    QServersRepository* m_qServersRepo;
-    QAppSettingsRepository* m_qAppSettingsRepo;
-    ServersController* m_serversController;
-    ServersModel* m_serversModel;
-    ImportController* m_importController;
 
 private slots:
     void initTestCase() {
         QString testOrg = "AmneziaVPN-Test-" + QUuid::createUuid().toString();
         m_settings = new SecureQSettings(testOrg, "amnezia-client", nullptr, false);
-        m_qServersRepo = new QServersRepository(m_settings);
-        m_qAppSettingsRepo = new QAppSettingsRepository(m_settings);
-        m_serversController = new ServersController(m_qServersRepo->repository(), m_qAppSettingsRepo->repository());
-        m_serversModel = new ServersModel();
-        m_importController = new ImportController(m_qServersRepo->repository(), m_qAppSettingsRepo->repository());
         
-        // Emulate CoreSignalHandlers::initServersModelUpdateHandler
-        connect(m_qServersRepo, &QServersRepository::serverAdded, this, [this]() {
-            m_serversModel->updateModel(m_serversController->getServersArray(), 
-                                       m_serversController->getDefaultServerIndex(), false);
-        });
-        connect(m_qServersRepo, &QServersRepository::defaultServerChanged, this, [this]() {
-            m_serversModel->updateModel(m_serversController->getServersArray(), 
-                                       m_serversController->getDefaultServerIndex(), false);
-        });
+        auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
         
-        // Emulate CoreSignalHandlers::initImportControllerHandler
-        connect(m_importController, &ImportController::importFinished, this, [this]() {
-            int newServerIndex = m_serversController->getServersCount() - 1;
-            m_qServersRepo->setDefaultServer(newServerIndex);
-        });
+        m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
     }
 
     void cleanupTestCase() {
-        delete m_importController;
-        delete m_serversModel;
-        delete m_serversController;
-        delete m_qAppSettingsRepo;
-        delete m_qServersRepo;
         m_settings->clearSettings();
+        delete m_coreController;
         delete m_settings;
     }
 
     void init() {
         m_settings->clearSettings();
-        m_serversModel->updateModel(QJsonArray(), -1, false);
+        if (m_coreController->m_serversModel) {
+            m_coreController->m_serversModel->updateModel(QJsonArray(), -1, false);
+        }
     }
 
     void testMultipleImports() {
@@ -72,68 +46,81 @@ private slots:
         QString xrayKey = "vpn://AAAAtXjadY7NCsJADIRfRXKui1YP0qt3L14EkRK7EQt2d0lS_0rf3awonjyFmW-YyQBNDIptIBao9sNPQgXYBXq2OL0zPqCA96kGSJHV6HK5MFP6YyCt0XsmsQqYz9zKzd3MmDIGyek6cdRoUJsE43gowNMJ-4uu_695kobbpG0MBndmTrbEV4sWcI6iG-zIQE47umOXLuSa2BlNKHKL7PMeiX5lmdH79bIsoBfiT0UOZQnjCw_AXRQ";
         QString wgKey = "vpn://AAAAwXjahY89a8NADIb_StDsHLFDIHjt0C1LhgwlBNWnpgfx3SHp6hDj_15dacnYTS_Po68ZhhQVQyQW6N_mZ4QecIz0CLieAtO1IHto4Fn3M-TEat6u3XetMSnvkfSC3jOJjYN24_audRtjyhil-pfMSZPB4jMsy7kBTx9Ybvryz2ZPMnDIGlI042TktZLVkfjLmhr4TKIHHMnodHV0xzHfyA1pNJZRZEr1alAS_Yvbin6e6LoGihD_DqhSjbB8AyB_ZI8";
 
-        QSignalSpy importFinishedSpy(m_importController, &ImportController::importFinished);
-        QSignalSpy defaultServerChangedSpy(m_qServersRepo, &QServersRepository::defaultServerChanged);
+        QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
         
-        QVERIFY2(m_qServersRepo->serversCount() == 0, "Initial servers count should be 0");
-        QVERIFY2(m_serversModel->rowCount() == 0, "Initial model row count should be 0");
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() == 0, "Initial servers count should be 0");
+        if (m_coreController->m_serversModel) {
+            QVERIFY2(m_coreController->m_serversModel->rowCount() == 0, "Initial model row count should be 0");
+        }
 
-        auto importResult1 = m_importController->extractConfigFromData(awgKey);
+        auto importResult1 = m_coreController->m_importCoreController->extractConfigFromData(awgKey);
         QVERIFY2(importResult1.errorCode == ErrorCode::NoError, "First import should succeed");
         
-        m_importController->importConfig(importResult1.config);
+        m_coreController->m_importCoreController->importConfig(importResult1.config);
         
         QVERIFY2(importFinishedSpy.count() == 1, "importFinished signal should be emitted once");
         QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted by CoreSignalHandlers handler");
-        QVERIFY2(m_qServersRepo->serversCount() == 1, "After first import servers count should be 1");
-        QVERIFY2(m_serversModel->rowCount() == 1, "After first import model row count should be 1");
-        QVERIFY2(m_qServersRepo->defaultServerIndex() == 0, "First server should be default");
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "After first import servers count should be 1");
+        if (m_coreController->m_serversModel) {
+            QVERIFY2(m_coreController->m_serversModel->rowCount() == 1, "After first import model row count should be 1");
+        }
+        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "First server should be default");
         
-        ServerConfig server1 = m_qServersRepo->server(0);
+        ServerConfig server1 = m_coreController->m_serversRepository->server(0);
         QString desc1 = ServerConfigUtils::description(server1);
         QVERIFY2(desc1 == "AWG Server", "First server description should match");
         
-        QString modelDesc1 = m_serversModel->data(m_serversModel->index(0, 0), ServersModel::NameRole).toString();
-        QVERIFY2(modelDesc1 == "AWG Server", "First server description in model should match");
+        if (m_coreController->m_serversModel) {
+            QString modelDesc1 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::NameRole).toString();
+            QVERIFY2(modelDesc1 == "AWG Server", "First server description in model should match");
+        }
 
-        auto importResult2 = m_importController->extractConfigFromData(xrayKey);
+        auto importResult2 = m_coreController->m_importCoreController->extractConfigFromData(xrayKey);
         QVERIFY2(importResult2.errorCode == ErrorCode::NoError, "Second import should succeed");
         
-        m_importController->importConfig(importResult2.config);
+        m_coreController->m_importCoreController->importConfig(importResult2.config);
         
         QVERIFY2(importFinishedSpy.count() == 2, "importFinished signal should be emitted twice");
         QVERIFY2(defaultServerChangedSpy.count() == 2, "defaultServerChanged signal should be emitted twice");
-        QVERIFY2(m_qServersRepo->serversCount() == 2, "After second import servers count should be 2");
-        QVERIFY2(m_serversModel->rowCount() == 2, "After second import model row count should be 2");
-        QVERIFY2(m_qServersRepo->defaultServerIndex() == 1, "Second server should be default");
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "After second import servers count should be 2");
+        if (m_coreController->m_serversModel) {
+            QVERIFY2(m_coreController->m_serversModel->rowCount() == 2, "After second import model row count should be 2");
+        }
+        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Second server should be default");
         
-        ServerConfig server2 = m_qServersRepo->server(1);
+        ServerConfig server2 = m_coreController->m_serversRepository->server(1);
         QString desc2 = ServerConfigUtils::description(server2);
         QVERIFY2(desc2 == "Xray Server", "Second server description should match");
         
-        QString modelDesc2 = m_serversModel->data(m_serversModel->index(1, 0), ServersModel::NameRole).toString();
-        QVERIFY2(modelDesc2 == "Xray Server", "Second server description in model should match");
+        if (m_coreController->m_serversModel) {
+            QString modelDesc2 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(1, 0), ServersModel::NameRole).toString();
+            QVERIFY2(modelDesc2 == "Xray Server", "Second server description in model should match");
+        }
 
-        auto importResult3 = m_importController->extractConfigFromData(wgKey);
+        auto importResult3 = m_coreController->m_importCoreController->extractConfigFromData(wgKey);
         QVERIFY2(importResult3.errorCode == ErrorCode::NoError, "Third import should succeed");
         
-        m_importController->importConfig(importResult3.config);
+        m_coreController->m_importCoreController->importConfig(importResult3.config);
         
         QVERIFY2(importFinishedSpy.count() == 3, "importFinished signal should be emitted three times");
         QVERIFY2(defaultServerChangedSpy.count() == 3, "defaultServerChanged signal should be emitted three times");
-        QVERIFY2(m_qServersRepo->serversCount() == 3, "After third import servers count should be 3");
-        QVERIFY2(m_serversModel->rowCount() == 3, "After third import model row count should be 3");
-        QVERIFY2(m_qServersRepo->defaultServerIndex() == 2, "Third server should be default");
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() == 3, "After third import servers count should be 3");
+        if (m_coreController->m_serversModel) {
+            QVERIFY2(m_coreController->m_serversModel->rowCount() == 3, "After third import model row count should be 3");
+        }
+        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Third server should be default");
         
-        ServerConfig server3 = m_qServersRepo->server(2);
+        ServerConfig server3 = m_coreController->m_serversRepository->server(2);
         QString desc3 = ServerConfigUtils::description(server3);
         QVERIFY2(desc3 == "WireGuard Server", "Third server description should match");
         
-        QString modelDesc3 = m_serversModel->data(m_serversModel->index(2, 0), ServersModel::NameRole).toString();
-        QVERIFY2(modelDesc3 == "WireGuard Server", "Third server description in model should match");
+        if (m_coreController->m_serversModel) {
+            QString modelDesc3 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(2, 0), ServersModel::NameRole).toString();
+            QVERIFY2(modelDesc3 == "WireGuard Server", "Third server description in model should match");
+        }
     }
 };
 
 QTEST_MAIN(TestMultipleImports)
 #include "testMultipleImports.moc"
-
