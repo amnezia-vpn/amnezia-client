@@ -8,15 +8,10 @@
 #include <QDebug>
 #include <QStandardPaths>
 
-#include "proxylogger.h"
-
 ProxyServer::ProxyServer(const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent)
     , m_service(new ProxyService(settings, this))
 {
-    const QString logDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs";
-    ProxyLogger::getInstance().init(logDir + "/proxy.log");
-    ProxyLogger::getInstance().setLogLevel(ProxyLogger::LogLevel::Info);
 }
 
 ProxyServer::~ProxyServer()

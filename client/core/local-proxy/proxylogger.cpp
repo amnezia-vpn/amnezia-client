@@ -61,6 +61,10 @@ void ProxyLogger::error(const QString& message)
 
 void ProxyLogger::logInternal(LogLevel level, const QString& message)
 {
+    if (m_logPath.isEmpty()) {
+        return;
+    }
+    
     if (level < m_currentLevel) {
         return;
     }
