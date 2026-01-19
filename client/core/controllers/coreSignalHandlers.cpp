@@ -59,6 +59,7 @@ void CoreSignalHandlers::initAllHandlers()
     initSettingsSplitTunnelingHandler();
     initInstallControllerHandler();
     initExportControllerHandler();
+    initImportControllerHandler();
     initApiCountryModelUpdateHandler();
     initContainerModelUpdateHandler();
     initAdminConfigRevokedHandler();
@@ -139,6 +140,17 @@ void CoreSignalHandlers::initExportControllerHandler()
             [this](int serverIndex, int row, const QString &clientName, DockerContainer container) {
                 m_coreController->m_usersController->renameClient(serverIndex, row, clientName, container);
             });
+}
+
+void CoreSignalHandlers::initImportControllerHandler()
+{
+    connect(m_coreController->m_importCoreController, &ImportController::importFinished, this, [this]() {
+        if (!m_coreController->m_vpnConnection->isConnected()) {
+            int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
+            m_coreController->m_serversController->setDefaultServerIndex(newServerIndex);
+            m_coreController->m_serversUiController->setProcessedServerIndex(newServerIndex);
+        }
+    });
 }
 
 void CoreSignalHandlers::initApiCountryModelUpdateHandler()

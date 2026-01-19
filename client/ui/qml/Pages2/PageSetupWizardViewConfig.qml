@@ -53,11 +53,6 @@ PageType {
 
         function onImportFinished() {
             PageController.showBusyIndicator(false)
-            if (!ConnectionController.isConnected) {
-                ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersUiController.processedIndex = ServersUiController.defaultIndex
-            }
-
             PageController.goToPageHome()
         }
     }

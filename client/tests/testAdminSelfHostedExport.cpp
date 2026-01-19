@@ -4,19 +4,26 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QDebug>
+#include <QUuid>
+#include <QSignalSpy>
 
 #include "core/controllers/selfhosted/importController.h"
 #include "core/controllers/selfhosted/exportController.h"
+#include "core/controllers/serversController.h"
 #include "core/models/serverConfig.h"
-#include "mockRepositories.h"
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
+#include "secure_qsettings.h"
 
 class TestAdminSelfHostedExport : public QObject
 {
     Q_OBJECT
 
 private:
-    MockServersRepository* m_serversRepo;
-    MockAppSettingsRepository* m_appSettingsRepo;
+    SecureQSettings* m_settings;
+    QServersRepository* m_qServersRepo;
+    QAppSettingsRepository* m_qAppSettingsRepo;
+    ServersController* m_serversController;
     ImportController* m_importController;
     ExportController* m_exportController;
 
@@ -78,25 +85,40 @@ private:
 
 private slots:
     void initTestCase() {
-        m_serversRepo = new MockServersRepository();
-        m_appSettingsRepo = new MockAppSettingsRepository();
-        m_importController = new ImportController(m_serversRepo, m_appSettingsRepo);
-        m_exportController = new ExportController(m_serversRepo, m_appSettingsRepo);
+        QString testOrg = "AmneziaVPN-Test-" + QUuid::createUuid().toString();
+        m_settings = new SecureQSettings(testOrg, "amnezia-client", nullptr, false);
+        m_qServersRepo = new QServersRepository(m_settings);
+        m_qAppSettingsRepo = new QAppSettingsRepository(m_settings);
+        m_serversController = new ServersController(m_qServersRepo->repository(), m_qAppSettingsRepo->repository());
+        m_importController = new ImportController(m_qServersRepo->repository(), m_qAppSettingsRepo->repository());
+        m_exportController = new ExportController(m_qServersRepo->repository(), m_qAppSettingsRepo->repository());
+        
+        // Emulate CoreSignalHandlers::initImportControllerHandler
+        connect(m_importController, &ImportController::importFinished, this, [this]() {
+            int newServerIndex = m_serversController->getServersCount() - 1;
+            m_qServersRepo->setDefaultServer(newServerIndex);
+        });
     }
 
     void cleanupTestCase() {
         delete m_exportController;
         delete m_importController;
-        delete m_appSettingsRepo;
-        delete m_serversRepo;
+        delete m_serversController;
+        delete m_qAppSettingsRepo;
+        delete m_qServersRepo;
+        m_settings->clearSettings();
+        delete m_settings;
     }
 
     void init() {
-        m_serversRepo->clear();
+        m_settings->clearSettings();
     }
 
     void testAdminSelfHostedExport() {
         QString vpnKey = "vpn://AAABTXjarZIxT8MwEIX_Cro5jbDjQunKUhhYyoZQZZKjRGpsy3baQtT_zp2bJh3oACLLPfvz3bOe00FpTdS1QR9g_tKB3q1h3sFCwBzEdf9N5ElBBgtJqBiQOkcFoemAbs6RInQ7oNkZemAvrrKvRV9VX6fH-lhSVSwavU9GSdcmXZX0UqSbseJRMqlioDxuSsJZH1mKWTrhvI22tJvVljKoLU-TtB3aN4NxpavKYwhpSD7LRc4t0WsTeMwqNRNsKweHbAyTtnRj8KvWE0pUEut-hNah2TpDM0-Kwu8vKMSd-ttFLrntao_rVvuKWkc9OnIk4n8t915_Ulcqo5FSxa9tYsk2rxlU-K7bTby_lDWfCKWvXTy-5jOGeLVET-9L7MOG-KQbJEBx57jXjdtgXtqG_wUdws5yJhCpa1iefhopM2gD-n4An-ElHL4BvzD6nw";
+        
+        QSignalSpy importFinishedSpy(m_importController, &ImportController::importFinished);
+        QSignalSpy defaultServerChangedSpy(m_qServersRepo, &QServersRepository::defaultServerChanged);
         
         qDebug() << "IMPORTED KEY:" << vpnKey;
         
@@ -109,9 +131,11 @@ private slots:
 
         m_importController->importConfig(importedConfig);
         
-        QVERIFY2(m_serversRepo->serversCount() > 0, "Server should be added");
+        QVERIFY2(importFinishedSpy.count() == 1, "importFinished signal should be emitted");
+        QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted by CoreSignalHandlers handler");
+        QVERIFY2(m_qServersRepo->serversCount() > 0, "Server should be added");
 
-        int serverIndex = m_serversRepo->defaultServerIndex();
+        int serverIndex = m_qServersRepo->defaultServerIndex();
         auto exportResult = m_exportController->generateFullAccessConfig(serverIndex);
         
         QVERIFY2(exportResult.errorCode == ErrorCode::NoError, "Export should succeed");

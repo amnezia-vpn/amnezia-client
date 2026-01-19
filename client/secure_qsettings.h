@@ -14,7 +14,7 @@ class SecureQSettings : public QObject
 
 public:
     explicit SecureQSettings(const QString &organization, const QString &application = QString(),
-                             QObject *parent = nullptr);
+                             QObject *parent = nullptr, bool enableEncryption = true);
 
     Q_INVOKABLE QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     Q_INVOKABLE void setValue(const QString &key, const QVariant &value);
@@ -52,6 +52,8 @@ private:
     mutable QByteArray m_iv;
 
     const QByteArray magicString { "EncData" }; // Magic keyword used for mark encrypted QByteArray
+
+    bool m_encryptionEnabled;
 
     mutable QMutex mutex;
 };

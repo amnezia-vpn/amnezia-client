@@ -21,8 +21,8 @@ namespace {
     constexpr const char *keyChainName = "AmneziaVPN-Keychain";
 }
 
-SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent)
-    : QObject { parent }, m_settings(organization, application, parent), encryptedKeys({ "Servers/serversList" })
+SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent, bool enableEncryption)
+    : QObject { parent }, m_settings(organization, application, parent), encryptedKeys({ "Servers/serversList" }), m_encryptionEnabled(enableEncryption)
 {
     bool encrypted = m_settings.value("Conf/encrypted").toBool();
 
@@ -203,6 +203,9 @@ QByteArray SecureQSettings::decryptText(const QByteArray &ba) const
 
 bool SecureQSettings::encryptionRequired() const
 {
+    if (!m_encryptionEnabled) {
+        return false;
+    }
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     // QtKeyChain failing on Linux
     return false;

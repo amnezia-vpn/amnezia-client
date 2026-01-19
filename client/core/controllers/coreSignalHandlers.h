@@ -18,6 +18,7 @@ private:
     void initSettingsSplitTunnelingHandler();
     void initInstallControllerHandler();
     void initExportControllerHandler();
+    void initImportControllerHandler();
     void initApiCountryModelUpdateHandler();
     void initContainerModelUpdateHandler();
     void initAdminConfigRevokedHandler();
