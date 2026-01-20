@@ -23,10 +23,9 @@
 #include "core/models/protocols/awgProtocolConfig.h"
 #include <QJsonArray>
 
-WireguardConfigurator::WireguardConfigurator(AppSettingsRepository* appSettingsRepository,
-                                             SshSession* sshSession, bool isAwg,
+WireguardConfigurator::WireguardConfigurator(SshSession* sshSession, bool isAwg,
                                              QObject *parent)
-    : ConfiguratorBase(appSettingsRepository, sshSession, parent), m_isAwg(isAwg)
+    : ConfiguratorBase(sshSession, parent), m_isAwg(isAwg)
 {
     m_serverConfigPath =
             m_isAwg ? amnezia::protocols::awg::serverConfigPath : amnezia::protocols::wireguard::serverConfigPath;
@@ -96,6 +95,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
                                                                                     DockerContainer container,
                                                                                     const WireGuardServerConfig* serverConfig,
                                                                                     const AwgServerConfig* awgServerConfig,
+                                                                                    const DnsSettings &dnsSettings,
                                                                                     ErrorCode &errorCode)
 {
     WireguardConfigurator::ConnectionData connData = WireguardConfigurator::genClientKeys();
@@ -194,13 +194,15 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 
     errorCode = m_sshSession->runScript(
             credentials,
-            m_sshSession->replaceVars(script, amnezia::genBaseVars(credentials, container, m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns())));
+            m_sshSession->replaceVars(script, amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns)));
 
     return connData;
 }
 
 ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                                    const ContainerConfig &containerConfig, ErrorCode &errorCode)
+                                                    const ContainerConfig &containerConfig,
+                                                    const DnsSettings &dnsSettings,
+                                                    ErrorCode &errorCode)
 {
     const WireGuardServerConfig* wireguardServerConfig = nullptr;
     const WireGuardClientConfig* wireguardClientConfig = nullptr;
@@ -219,12 +221,12 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
         }
     }
     
-    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns());
+    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns);
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
     QString config = m_sshSession->replaceVars(scriptData, vars);
 
-    ConnectionData connData = prepareWireguardConfig(credentials, container, wireguardServerConfig, awgServerConfig, errorCode);
+    ConnectionData connData = prepareWireguardConfig(credentials, container, wireguardServerConfig, awgServerConfig, dnsSettings, errorCode);
     if (errorCode != ErrorCode::NoError) {
         return WireGuardProtocolConfig{};
     }
@@ -267,8 +269,11 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
 }
 
 QString WireguardConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns,
-                                                              const bool isApiConfig, QString &protocolConfigString)
+                                                              const bool isApiConfig,
+                                                              const SplitTunnelingSettings &splitTunneling,
+                                                              QString &protocolConfigString)
 {
+    Q_UNUSED(splitTunneling);
     processConfigWithDnsSettings(dns, protocolConfigString);
 
     return protocolConfigString;

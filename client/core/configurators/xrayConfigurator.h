@@ -10,13 +10,15 @@ class XrayConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    XrayConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent = nullptr);
+    XrayConfigurator(SshSession* sshSession, QObject *parent = nullptr);
 
     ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
-                                ErrorCode &errorCode);
+                                const DnsSettings &dnsSettings,
+                                ErrorCode &errorCode) override;
 
 private:
     QString prepareServerConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
+                                const DnsSettings &dnsSettings,
                                 ErrorCode &errorCode);
 };
 

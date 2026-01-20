@@ -11,7 +11,7 @@ class OpenVpnConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    OpenVpnConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent = nullptr);
+    OpenVpnConfigurator(SshSession* sshSession, QObject *parent = nullptr);
 
     struct ConnectionData
     {
@@ -25,19 +25,24 @@ public:
     };
 
     ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container,
-                               const ContainerConfig &containerConfig, ErrorCode &errorCode);
+                               const ContainerConfig &containerConfig,
+                               const DnsSettings &dnsSettings,
+                               ErrorCode &errorCode) override;
 
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                           QString &protocolConfigString);
+                                           const SplitTunnelingSettings &splitTunneling,
+                                           QString &protocolConfigString) override;
     QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                            QString &protocolConfigString);
+                                            QString &protocolConfigString) override;
 
     static ConnectionData createCertRequest();
 
 private:
     ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-                                        ErrorCode &errorCode);
-    ErrorCode signCert(DockerContainer container, const ServerCredentials &credentials, QString clientId);
+                                       const DnsSettings &dnsSettings,
+                                       ErrorCode &errorCode);
+    ErrorCode signCert(DockerContainer container, const ServerCredentials &credentials, 
+                      const DnsSettings &dnsSettings, QString clientId);
 };
 
 #endif // OPENVPN_CONFIGURATOR_H

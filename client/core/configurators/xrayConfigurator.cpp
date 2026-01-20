@@ -18,13 +18,15 @@ namespace {
 Logger logger("XrayConfigurator");
 }
 
-XrayConfigurator::XrayConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent)
-    : ConfiguratorBase(appSettingsRepository, sshSession, parent)
+XrayConfigurator::XrayConfigurator(SshSession* sshSession, QObject *parent)
+    : ConfiguratorBase(sshSession, parent)
 {
 }
 
 QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentials, DockerContainer container,
-                                               const ContainerConfig &containerConfig, ErrorCode &errorCode)
+                                               const ContainerConfig &containerConfig,
+                                               const DnsSettings &dnsSettings,
+                                               ErrorCode &errorCode)
 {
     // Generate new UUID for client
     QString clientId = QUuid::createUuid().toString(QUuid::WithoutBraces);
@@ -110,7 +112,7 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
     errorCode = m_sshSession->runScript(
         credentials, 
-        m_sshSession->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns()))
+        m_sshSession->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns))
     );
 
     if (errorCode != ErrorCode::NoError) {
@@ -122,21 +124,23 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
 }
 
 ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                               const ContainerConfig &containerConfig, ErrorCode &errorCode)
+                                               const ContainerConfig &containerConfig,
+                                               const DnsSettings &dnsSettings,
+                                               ErrorCode &errorCode)
 {
     const XrayServerConfig* serverConfig = nullptr;
     if (auto* xrayConfig = std::get_if<XrayProtocolConfig>(&containerConfig.protocolConfig)) {
         serverConfig = &xrayConfig->serverConfig;
     }
     
-    QString xrayClientId = prepareServerConfig(credentials, container, containerConfig, errorCode);
+    QString xrayClientId = prepareServerConfig(credentials, container, containerConfig, dnsSettings, errorCode);
     if (errorCode != ErrorCode::NoError || xrayClientId.isEmpty()) {
         logger.error() << "Failed to prepare server config";
         errorCode = ErrorCode::InternalError;
         return XrayProtocolConfig{};
     }
 
-    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns());
+    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns);
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
     QString config = m_sshSession->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container), vars);
     

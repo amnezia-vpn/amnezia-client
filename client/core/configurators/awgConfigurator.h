@@ -9,10 +9,12 @@ class AwgConfigurator : public WireguardConfigurator
 {
     Q_OBJECT
 public:
-    AwgConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent = nullptr);
+    AwgConfigurator(SshSession* sshSession, QObject *parent = nullptr);
 
     ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                const ContainerConfig &containerConfig, ErrorCode &errorCode);
+                                const ContainerConfig &containerConfig,
+                                const DnsSettings &dnsSettings,
+                                ErrorCode &errorCode) override;
 };
 
 #endif // AWGCONFIGURATOR_H

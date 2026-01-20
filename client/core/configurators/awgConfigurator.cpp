@@ -6,12 +6,13 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-AwgConfigurator::AwgConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent)
-    : WireguardConfigurator(appSettingsRepository, sshSession, true, parent)
+AwgConfigurator::AwgConfigurator(SshSession* sshSession, QObject *parent)
+    : WireguardConfigurator(sshSession, true, parent)
 {
 }
 
 ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
+                                              const DnsSettings &dnsSettings,
                                               ErrorCode &errorCode)
 {
     const AwgServerConfig* serverConfig = nullptr;
@@ -24,7 +25,7 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
         }
     }
     
-    ProtocolConfig wireguardConfig = WireguardConfigurator::createConfig(credentials, container, containerConfig, errorCode);
+    ProtocolConfig wireguardConfig = WireguardConfigurator::createConfig(credentials, container, containerConfig, dnsSettings, errorCode);
     if (errorCode != ErrorCode::NoError) {
         return AwgProtocolConfig{};
     }

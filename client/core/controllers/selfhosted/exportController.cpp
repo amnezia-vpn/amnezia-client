@@ -54,8 +54,13 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
         SshSession sshSession;
         Proto protocol = ContainerProps::defaultProtocol(container);
 
-        auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository->repository(), &sshSession);
-        ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, containerConfig, result.errorCode);
+        DnsSettings dnsSettings = {
+            m_appSettingsRepository->primaryDns(),
+            m_appSettingsRepository->secondaryDns()
+        };
+
+        auto configurator = ConfiguratorBase::create(protocol, &sshSession);
+        ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, containerConfig, dnsSettings, result.errorCode);
         if (result.errorCode != ErrorCode::NoError) {
             return result;
         }
@@ -121,10 +126,15 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     ContainerConfig modifiedContainerConfig = containerConfig;
     modifiedContainerConfig.container = container;
 
-    SshSession sshSession;
-    auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository->repository(), &sshSession);
+    DnsSettings dnsSettings = {
+        m_appSettingsRepository->primaryDns(),
+        m_appSettingsRepository->secondaryDns()
+    };
 
-    ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, modifiedContainerConfig, result.errorCode);
+    SshSession sshSession;
+    auto configurator = ConfiguratorBase::create(protocol, &sshSession);
+
+    ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, modifiedContainerConfig, dnsSettings, result.errorCode);
     if (result.errorCode != ErrorCode::NoError) {
         return result;
     }

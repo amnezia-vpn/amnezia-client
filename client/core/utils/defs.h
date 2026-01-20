@@ -158,6 +158,18 @@ namespace amnezia
 
     using AppsRouteMode = apps_route_mode_ns::AppsRouteMode;
 
+    struct DnsSettings
+    {
+        QString primaryDns;
+        QString secondaryDns;
+    };
+
+    struct SplitTunnelingSettings
+    {
+        bool isSitesSplitTunnelingEnabled;
+        RouteMode routeMode;
+    };
+
 } // namespace amnezia
 
 Q_DECLARE_METATYPE(amnezia::ErrorCode)

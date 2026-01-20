@@ -26,14 +26,15 @@
 #include <openssl/x509.h>
 
 
-OpenVpnConfigurator::OpenVpnConfigurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession,
-                                         QObject *parent)
-    : ConfiguratorBase(appSettingsRepository, sshSession, parent)
+OpenVpnConfigurator::OpenVpnConfigurator(SshSession* sshSession, QObject *parent)
+    : ConfiguratorBase(sshSession, parent)
 {
 }
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
-                                                                              DockerContainer container, ErrorCode &errorCode)
+                                                                              DockerContainer container, 
+                                                                              const DnsSettings &dnsSettings,
+                                                                              ErrorCode &errorCode)
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
     connData.host = credentials.hostName;
@@ -50,7 +51,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
         return connData;
     }
 
-    errorCode = signCert(container, credentials, connData.clientId);
+    errorCode = signCert(container, credentials, dnsSettings, connData.clientId);
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
@@ -74,18 +75,20 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 }
 
 ProtocolConfig OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                                  const ContainerConfig &containerConfig, ErrorCode &errorCode)
+                                                  const ContainerConfig &containerConfig,
+                                                  const DnsSettings &dnsSettings,
+                                                  ErrorCode &errorCode)
 {
     const OpenVpnServerConfig* serverConfig = nullptr;
     if (auto* openVpnConfig = std::get_if<OpenVpnProtocolConfig>(&containerConfig.protocolConfig)) {
         serverConfig = &openVpnConfig->serverConfig;
     }
     
-    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns());
+    amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns);
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
     QString config = m_sshSession->replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container), vars);
 
-    ConnectionData connData = prepareOpenVpnConfig(credentials, container, errorCode);
+    ConnectionData connData = prepareOpenVpnConfig(credentials, container, dnsSettings, errorCode);
     if (errorCode != ErrorCode::NoError) {
         return OpenVpnProtocolConfig{};
     }
@@ -139,6 +142,7 @@ ProtocolConfig OpenVpnConfigurator::createConfig(const ServerCredentials &creden
 }
 
 QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                            const SplitTunnelingSettings &splitTunneling,
                                                             QString &protocolConfigString)
 {
     processConfigWithDnsSettings(dns, protocolConfigString);
@@ -156,13 +160,13 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
             config.replace(dnsRegex, "");
         }
 
-        if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
+        if (!splitTunneling.isSitesSplitTunnelingEnabled) {
             config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
             config.append("block-ipv6\n");
-        } else if (m_appSettingsRepository->routeMode() == amnezia::RouteMode::VpnOnlyForwardSites) {
+        } else if (splitTunneling.routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
 
                // no redirect-gateway
-        } else if (m_appSettingsRepository->routeMode() == amnezia::RouteMode::VpnAllExceptSites) {
+        } else if (splitTunneling.routeMode == amnezia::RouteMode::VpnAllExceptSites) {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
             config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
             // Prevent ipv6 leak
@@ -217,7 +221,8 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString
     return QJsonDocument(json).toJson();
 }
 
-ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerCredentials &credentials, QString clientId)
+ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerCredentials &credentials, 
+                                        const DnsSettings &dnsSettings, QString clientId)
 {
     QString script_import = QString("sudo docker exec -i %1 bash -c \"cd /opt/amnezia/openvpn && "
                                     "easyrsa import-req %2/%3.req %3\"")
@@ -231,7 +236,7 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerC
                                   .arg(clientId);
 
     QStringList scriptList { script_import, script_sign };
-    QString script = m_sshSession->replaceVars(scriptList.join("\n"), amnezia::genBaseVars(credentials, container, m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns()));
+    QString script = m_sshSession->replaceVars(scriptList.join("\n"), amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns));
 
     return m_sshSession->runScript(credentials, script);
 }

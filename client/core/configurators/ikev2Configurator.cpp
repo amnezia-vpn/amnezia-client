@@ -14,8 +14,8 @@
 #include "core/utils/utilities.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
 
-Ikev2Configurator::Ikev2Configurator(AppSettingsRepository* appSettingsRepository, SshSession* sshSession, QObject *parent)
-    : ConfiguratorBase(appSettingsRepository, sshSession, parent)
+Ikev2Configurator::Ikev2Configurator(SshSession* sshSession, QObject *parent)
+    : ConfiguratorBase(sshSession, parent)
 {
 }
 
@@ -55,6 +55,7 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
 }
 
 ProtocolConfig Ikev2Configurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
+                                               const DnsSettings &dnsSettings,
                                                ErrorCode &errorCode)
 {
     const Ikev2ServerConfig* serverConfig = nullptr;
