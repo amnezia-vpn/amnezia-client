@@ -9,6 +9,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+using namespace amnezia;
+
 AwgConfigurator::AwgConfigurator(SshSession* sshSession, QObject *parent)
     : WireguardConfigurator(sshSession, true, parent)
 {
@@ -88,11 +90,11 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
     newClientConfig.responsePacketMagicHeader = configMap.value(config_key::responsePacketMagicHeader);
     newClientConfig.underloadPacketMagicHeader = configMap.value(config_key::underloadPacketMagicHeader);
     newClientConfig.transportPacketMagicHeader = configMap.value(config_key::transportPacketMagicHeader);
-    newClientConfig.specialJunk1 = configMap.value(amnezia::config_key::specialJunk1);
-    newClientConfig.specialJunk2 = configMap.value(amnezia::config_key::specialJunk2);
-    newClientConfig.specialJunk3 = configMap.value(amnezia::config_key::specialJunk3);
-    newClientConfig.specialJunk4 = configMap.value(amnezia::config_key::specialJunk4);
-    newClientConfig.specialJunk5 = configMap.value(amnezia::config_key::specialJunk5);
+    newClientConfig.specialJunk1 = configMap.value(config_key::specialJunk1);
+    newClientConfig.specialJunk2 = configMap.value(config_key::specialJunk2);
+    newClientConfig.specialJunk3 = configMap.value(config_key::specialJunk3);
+    newClientConfig.specialJunk4 = configMap.value(config_key::specialJunk4);
+    newClientConfig.specialJunk5 = configMap.value(config_key::specialJunk5);
     
     if (container == DockerContainer::Awg2) {
         newClientConfig.cookieReplyPacketJunkSize = configMap.value(config_key::cookieReplyPacketJunkSize);

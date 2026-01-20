@@ -6,6 +6,8 @@
 #include "core/configurators/wireguardConfigurator.h"
 #include "core/configurators/xrayConfigurator.h"
 
+using namespace amnezia;
+
 ConfiguratorBase::ConfiguratorBase(SshSession* sshSession, QObject *parent)
     : QObject { parent }, m_sshSession(sshSession)
 {

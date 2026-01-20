@@ -29,13 +29,13 @@ public:
         QString port;
     };
 
-    ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                const ContainerConfig &containerConfig,
-                                const DnsSettings &dnsSettings,
-                                ErrorCode &errorCode) override;
+    amnezia::ProtocolConfig createConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
+                                const amnezia::ContainerConfig &containerConfig,
+                                const amnezia::DnsSettings &dnsSettings,
+                                amnezia::ErrorCode &errorCode) override;
 
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                           const SplitTunnelingSettings &splitTunneling,
+                                           const amnezia::SplitTunnelingSettings &splitTunneling,
                                            QString &protocolConfigString) override;
     QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                             QString &protocolConfigString) override;
@@ -44,11 +44,11 @@ public:
 
 private:
     QList<QHostAddress> getIpsFromConf(const QString &input);
-    ConnectionData prepareWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
-                                          const WireGuardServerConfig* serverConfig,
-                                          const AwgServerConfig* awgServerConfig,
-                                          const DnsSettings &dnsSettings,
-                                          ErrorCode &errorCode);
+    ConnectionData prepareWireguardConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
+                                          const amnezia::WireGuardServerConfig* serverConfig,
+                                          const amnezia::AwgServerConfig* awgServerConfig,
+                                          const amnezia::DnsSettings &dnsSettings,
+                                          amnezia::ErrorCode &errorCode);
 
     bool m_isAwg;
     QString m_serverConfigPath;

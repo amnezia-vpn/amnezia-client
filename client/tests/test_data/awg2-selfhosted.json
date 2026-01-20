@@ -24,8 +24,8 @@
   ],
   "defaultContainer": "amnezia-awg2",
   "description": "Сервер 2",
-  "hostName": "38.99.23.137",
-  "password": "XTqeScKWD+HwHFaU",
+  "hostName": "1.1.2.137",
+  "password": "password",
   "port": 22,
   "userName": "root"
 }

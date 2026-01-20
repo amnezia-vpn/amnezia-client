@@ -5,6 +5,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 
+using namespace amnezia;
 using namespace ProtocolUtils;
 
 XrayConfigModel::XrayConfigModel(QObject *parent) : QAbstractListModel(parent)

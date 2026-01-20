@@ -73,7 +73,7 @@ public slots:
     bool hasInstalledServices();
     bool hasInstalledProtocols();
 
-    static bool isInstallationAllowed(DockerContainer container);
+    static bool isInstallationAllowed(amnezia::DockerContainer container);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -82,7 +82,7 @@ signals:
     void containersModelUpdated();
 
 private:
-    QMap<DockerContainer, QJsonObject> m_containers;
+    QMap<amnezia::DockerContainer, QJsonObject> m_containers;
 
     int m_processedContainerIndex;
 };

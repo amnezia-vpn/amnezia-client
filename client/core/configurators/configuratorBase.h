@@ -21,17 +21,17 @@ class ConfiguratorBase : public QObject
 public:
     explicit ConfiguratorBase(SshSession* sshSession, QObject *parent = nullptr);
 
-    static QScopedPointer<ConfiguratorBase> create(Proto protocol,
+    static QScopedPointer<ConfiguratorBase> create(amnezia::Proto protocol,
                                                    SshSession* sshSession);
 
-    virtual ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                        const ContainerConfig &containerConfig,
-                                        const DnsSettings &dnsSettings,
-                                        ErrorCode &errorCode) = 0;
+    virtual amnezia::ProtocolConfig createConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
+                                        const amnezia::ContainerConfig &containerConfig,
+                                        const amnezia::DnsSettings &dnsSettings,
+                                        amnezia::ErrorCode &errorCode) = 0;
 
     virtual QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, 
                                                    const bool isApiConfig,
-                                                   const SplitTunnelingSettings &splitTunneling,
+                                                   const amnezia::SplitTunnelingSettings &splitTunneling,
                                                    QString &protocolConfigString);
     virtual QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                                     QString &protocolConfigString);

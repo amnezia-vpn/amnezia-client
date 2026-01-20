@@ -7,6 +7,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 
+using namespace amnezia;
 using namespace ProtocolUtils;
 
 AwgConfigModel::AwgConfigModel(QObject *parent) : QAbstractListModel(parent)
@@ -129,7 +130,7 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
         m_serverProtocolConfig[config_key::protocolVersion] = protocolVersion;
     }
 
-    auto defaultTransportProto = ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(Proto::Awg), Proto::Awg);
+    auto defaultTransportProto = ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(amnezia::Proto::Awg), amnezia::Proto::Awg);
     m_serverProtocolConfig.insert(config_key::transport_proto,
                                   serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
     m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);

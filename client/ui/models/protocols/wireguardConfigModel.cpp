@@ -7,6 +7,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 
+using namespace amnezia;
 using namespace ProtocolUtils;
 
 WireGuardConfigModel::WireGuardConfigModel(QObject *parent) : QAbstractListModel(parent)

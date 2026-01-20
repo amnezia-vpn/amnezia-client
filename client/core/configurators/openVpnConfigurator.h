@@ -26,13 +26,13 @@ public:
         QString host;       // host ip
     };
 
-    ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container,
-                               const ContainerConfig &containerConfig,
-                               const DnsSettings &dnsSettings,
-                               ErrorCode &errorCode) override;
+    amnezia::ProtocolConfig createConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
+                               const amnezia::ContainerConfig &containerConfig,
+                               const amnezia::DnsSettings &dnsSettings,
+                               amnezia::ErrorCode &errorCode) override;
 
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                           const SplitTunnelingSettings &splitTunneling,
+                                           const amnezia::SplitTunnelingSettings &splitTunneling,
                                            QString &protocolConfigString) override;
     QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                             QString &protocolConfigString) override;
@@ -40,11 +40,11 @@ public:
     static ConnectionData createCertRequest();
 
 private:
-    ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-                                       const DnsSettings &dnsSettings,
-                                       ErrorCode &errorCode);
-    ErrorCode signCert(DockerContainer container, const ServerCredentials &credentials, 
-                      const DnsSettings &dnsSettings, QString clientId);
+    ConnectionData prepareOpenVpnConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
+                                       const amnezia::DnsSettings &dnsSettings,
+                                       amnezia::ErrorCode &errorCode);
+    amnezia::ErrorCode signCert(amnezia::DockerContainer container, const amnezia::ServerCredentials &credentials, 
+                      const amnezia::DnsSettings &dnsSettings, QString clientId);
 };
 
 #endif // OPENVPN_CONFIGURATOR_H

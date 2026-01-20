@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QJsonObject>
+#include <QtQml/qqml.h>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"

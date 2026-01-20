@@ -14,14 +14,14 @@ class XrayConfigurator : public ConfiguratorBase
 public:
     XrayConfigurator(SshSession* sshSession, QObject *parent = nullptr);
 
-    ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
-                                const DnsSettings &dnsSettings,
-                                ErrorCode &errorCode) override;
+    amnezia::ProtocolConfig createConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container, const amnezia::ContainerConfig &containerConfig,
+                                const amnezia::DnsSettings &dnsSettings,
+                                amnezia::ErrorCode &errorCode) override;
 
 private:
-    QString prepareServerConfig(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &containerConfig,
-                                const DnsSettings &dnsSettings,
-                                ErrorCode &errorCode);
+    QString prepareServerConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container, const amnezia::ContainerConfig &containerConfig,
+                                const amnezia::DnsSettings &dnsSettings,
+                                amnezia::ErrorCode &errorCode);
 };
 
 #endif // XRAY_CONFIGURATOR_H

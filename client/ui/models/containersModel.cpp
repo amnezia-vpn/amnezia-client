@@ -2,6 +2,8 @@
 
 #include <QJsonArray>
 
+using namespace amnezia;
+
 ContainersModel::ContainersModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
@@ -112,7 +114,7 @@ bool ContainersModel::isSupportedByCurrentPlatform(const int containerIndex)
 
 bool ContainersModel::isServiceContainer(const int containerIndex)
 {
-    return qvariant_cast<amnezia::ServiceType>(data(index(containerIndex), ServiceTypeRole) == ServiceType::Other);
+    return qvariant_cast<ServiceType>(data(index(containerIndex), ServiceTypeRole) == ServiceType::Other);
 }
 
 bool ContainersModel::hasInstalledServices()

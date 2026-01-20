@@ -16,6 +16,8 @@
 #include "core/controllers/coreController.h"
 #include "secure_qsettings.h"
 #include "vpnconnection.h"
+#include "ui/models/containerProps.h"
+#include "ui/models/protocolProps.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 

@@ -23,17 +23,17 @@ public:
         QString host; // host ip
     };
 
-    ProtocolConfig createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                const ContainerConfig &containerConfig,
-                                const DnsSettings &dnsSettings,
-                                ErrorCode &errorCode) override;
+    amnezia::ProtocolConfig createConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
+                                const amnezia::ContainerConfig &containerConfig,
+                                const amnezia::DnsSettings &dnsSettings,
+                                amnezia::ErrorCode &errorCode) override;
 
     QString genIkev2Config(const ConnectionData &connData);
     QString genMobileConfig(const ConnectionData &connData);
     QString genStrongSwanConfig(const ConnectionData &connData);
 
-    ConnectionData prepareIkev2Config(const ServerCredentials &credentials,
-        DockerContainer container, ErrorCode &errorCode);
+    ConnectionData prepareIkev2Config(const amnezia::ServerCredentials &credentials,
+        amnezia::DockerContainer container, amnezia::ErrorCode &errorCode);
 };
 
 #endif // IKEV2_CONFIGURATOR_H

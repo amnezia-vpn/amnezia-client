@@ -46,7 +46,7 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    DockerContainer m_container;
+    amnezia::DockerContainer m_container;
     QJsonObject m_protocolConfig;
     QJsonObject m_fullConfig;
 };

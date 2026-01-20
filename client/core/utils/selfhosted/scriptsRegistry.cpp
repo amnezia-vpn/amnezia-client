@@ -21,6 +21,7 @@
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 
+using namespace amnezia;
 using namespace ProtocolUtils;
 
 QString amnezia::scriptFolder(amnezia::DockerContainer container)
