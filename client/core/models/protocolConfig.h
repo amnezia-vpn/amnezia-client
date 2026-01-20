@@ -4,8 +4,13 @@
 #include <QJsonObject>
 #include <variant>
 
-#include "core/protocols/protocolsDefs.h"
-#include "containers/containers_defs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 
 #include "core/models/protocols/awgProtocolConfig.h"
 #include "core/models/protocols/wireGuardProtocolConfig.h"

@@ -22,7 +22,9 @@
 #include <chrono>
 #include <thread>
 
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "logger.h"
@@ -174,7 +176,7 @@ QByteArray SshSession::getTextFileFromContainer(DockerContainer container, const
 
     errorCode = ErrorCode::NoError;
 
-    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2'\"").arg(ContainerProps::containerToString(container), path);
+    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2'\"").arg(ContainerUtils::containerToString(container), path);
 
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {

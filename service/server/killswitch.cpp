@@ -4,7 +4,10 @@
 #include <QApplication>
 #include <QHostAddress>
 
-#include "../client/protocols/protocols_defs.h"
+#include "../client/core/utils/protocolEnum.h"
+#include "../client/core/protocols/protocolUtils.h"
+#include "../client/core/utils/constants/configKeys.h"
+#include "../client/core/utils/constants/protocolConstants.h"
 #include "qjsonarray.h"
 #include "version.h"
 

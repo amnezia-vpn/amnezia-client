@@ -5,10 +5,15 @@
 #include <QThread>
 #include <QCoreApplication>
 
-#include "core/utils/api/apiDefs.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 
 SecureServersRepository::SecureServersRepository(SecureQSettings* settings)
     : m_settings(settings)

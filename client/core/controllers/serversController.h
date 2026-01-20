@@ -9,8 +9,12 @@
 
 #include <QPair>
 
-#include "containers/containers_defs.h"
-#include "core/utils/defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 #include "core/repositories/qServersRepository.h"
 #include "core/repositories/qAppSettingsRepository.h"
 #include "core/models/serverConfig.h"

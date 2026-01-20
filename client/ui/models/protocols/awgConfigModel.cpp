@@ -2,7 +2,12 @@
 
 #include <QJsonDocument>
 
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
+
+using namespace ProtocolUtils;
 
 AwgConfigModel::AwgConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -16,7 +21,7 @@ int AwgConfigModel::rowCount(const QModelIndex &parent) const
 
 bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
         return false;
     }
 
@@ -104,7 +109,7 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerSpecialJunk4Role: return m_serverProtocolConfig.value(config_key::specialJunk4);
     case Roles::ServerSpecialJunk5Role: return m_serverProtocolConfig.value(config_key::specialJunk5);
 
-    case Roles::IsAwg2Role: return ProtocolProps::getProtocolVersion(m_fullConfig.value(config_key::awg).toObject()) == protocols::awg::awgV2;
+    case Roles::IsAwg2Role: return ProtocolUtils::getProtocolVersion(m_fullConfig.value(config_key::awg).toObject()) == protocols::awg::awgV2;
     }
 
     return QVariant();
@@ -113,7 +118,7 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
 void AwgConfigModel::updateModel(const QJsonObject &config)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
+    m_container = ContainerUtils::containerFromString(config.value(config_key::container).toString());
 
     m_fullConfig = config;
 
@@ -124,7 +129,7 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
         m_serverProtocolConfig[config_key::protocolVersion] = protocolVersion;
     }
 
-    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Awg), Proto::Awg);
+    auto defaultTransportProto = ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(Proto::Awg), Proto::Awg);
     m_serverProtocolConfig.insert(config_key::transport_proto,
                                   serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
     m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
@@ -296,7 +301,7 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
 
 AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
 {
-    m_isProtocolV2 = ProtocolProps::getProtocolVersion(serverProtocolConfig) == protocols::awg::awgV2;
+    m_isProtocolV2 = ProtocolUtils::getProtocolVersion(serverProtocolConfig) == protocols::awg::awgV2;
 
     auto lastConfig = serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();

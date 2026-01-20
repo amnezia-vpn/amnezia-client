@@ -1,6 +1,11 @@
 #include "xrayConfigModel.h"
 
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
+
+using namespace ProtocolUtils;
 
 XrayConfigModel::XrayConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -14,7 +19,7 @@ int XrayConfigModel::rowCount(const QModelIndex &parent) const
 
 bool XrayConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
         return false;
     }
 
@@ -44,12 +49,12 @@ QVariant XrayConfigModel::data(const QModelIndex &index, int role) const
 void XrayConfigModel::updateModel(const QJsonObject &config)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
+    m_container = ContainerUtils::containerFromString(config.value(config_key::container).toString());
 
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::xray).toObject();
 
-    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Xray), Proto::Xray);
+    auto defaultTransportProto = ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(Proto::Xray), Proto::Xray);
     m_protocolConfig.insert(config_key::transport_proto,
                             protocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
     m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::xray::defaultPort));

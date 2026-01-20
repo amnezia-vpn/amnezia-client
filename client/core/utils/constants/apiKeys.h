@@ -1,24 +1,10 @@
-#ifndef APIDEFS_H
-#define APIDEFS_H
+#ifndef APIKEYS_H
+#define APIKEYS_H
 
-#include <QString>
+#include <QLatin1String>
 
 namespace apiDefs
 {
-    enum ConfigType {
-        AmneziaFreeV2 = 0,
-        AmneziaFreeV3,
-        AmneziaPremiumV1,
-        AmneziaPremiumV2,
-        SelfHosted,
-        ExternalPremium
-    };
-
-    enum ConfigSource {
-        Telegram = 1,
-        AmneziaGateway
-    };
-
     namespace key
     {
         constexpr QLatin1String configVersion("config_version");
@@ -78,8 +64,7 @@ namespace apiDefs
         constexpr QLatin1String adDescription("ad_description");
         constexpr QLatin1String adEndpoint("ad_endpoint");
     }
-
-    const int requestTimeoutMsecs = 12 * 1000; // 12 secs
 }
 
-#endif // APIDEFS_H
+#endif // APIKEYS_H
+

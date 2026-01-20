@@ -3,14 +3,21 @@
 #include <QJsonDocument>
 
 #include "core/configurators/configuratorBase.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/utilities.h"
 #include "core/utils/networkUtilities.h"
 #include "version.h"
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
+
+using namespace ProtocolUtils;
 
 ConnectionController::ConnectionController(QServersRepository* serversRepository,
                                          QAppSettingsRepository* appSettingsRepository,
@@ -82,12 +89,12 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
 {
     QJsonObject vpnConfiguration {};
 
-    if (ContainerProps::containerService(container) == ServiceType::Other) {
+    if (ContainerUtils::containerService(container) == ServiceType::Other) {
         return vpnConfiguration;
     }
 
     bool isApiConfig = ServerConfigUtils::isApiConfig(serverConfig);
-    Proto proto = ContainerProps::defaultProtocol(container);
+    Proto proto = ContainerUtils::defaultProtocol(container);
 
     QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(containerConfig.protocolConfig, proto);
     QString protocolConfigString = protocolConfigJson.value(config_key::last_config).toString();
@@ -101,16 +108,16 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, splitTunneling, protocolConfigString);
 
     QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-    if (ContainerProps::isAwgContainer(container) || container == DockerContainer::WireGuard) {
+    if (ContainerUtils::isAwgContainer(container) || container == DockerContainer::WireGuard) {
         if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
             vpnConfigData[config_key::mtu] =
-                    ContainerProps::isAwgContainer(container) ? protocols::awg::defaultMtu :
+                    ContainerUtils::isAwgContainer(container) ? protocols::awg::defaultMtu :
                     protocols::wireguard::defaultMtu;
         }
     }
 
-    vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
-    vpnConfiguration[config_key::vpnproto] = ProtocolProps::protoToString(proto);
+    vpnConfiguration.insert(ProtocolUtils::key_proto_config_data(proto), vpnConfigData);
+    vpnConfiguration[config_key::vpnproto] = ProtocolUtils::protoToString(proto);
 
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
@@ -134,5 +141,5 @@ bool ConnectionController::isServiceReady() const
 
 bool ConnectionController::isContainerSupported(DockerContainer container) const
 {
-    return ContainerProps::isSupportedByCurrentPlatform(container);
+    return ContainerUtils::isSupportedByCurrentPlatform(container);
 }

@@ -1,40 +1,12 @@
-#include "protocolsDefs.h"
+#include "protocolUtils.h"
 
 #include <QRandomGenerator>
 #include <QJsonObject>
+#include <QObject>
 
 using namespace amnezia;
 
-QDebug operator<<(QDebug debug, const amnezia::ProtocolEnumNS::Proto &p)
-{
-    QDebugStateSaver saver(debug);
-    debug.nospace() << ProtocolProps::protoToString(p);
-
-    return debug;
-}
-
-amnezia::Proto ProtocolProps::protoFromString(QString proto)
-{
-    QMetaEnum metaEnum = QMetaEnum::fromType<Proto>();
-    for (int i = 0; i < metaEnum.keyCount(); ++i) {
-        Proto p = static_cast<Proto>(i);
-        if (proto == protoToString(p))
-            return p;
-    }
-    return Proto::Any;
-}
-
-QString ProtocolProps::protoToString(amnezia::Proto p)
-{
-    if (p == Proto::Any)
-        return "";
-
-    QMetaEnum metaEnum = QMetaEnum::fromType<Proto>();
-    QString protoKey = metaEnum.valueToKey(static_cast<int>(p));
-    return protoKey.toLower();
-}
-
-QList<amnezia::Proto> ProtocolProps::allProtocols()
+QList<Proto> ProtocolUtils::allProtocols()
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<Proto>();
     QList<Proto> all;
@@ -45,7 +17,7 @@ QList<amnezia::Proto> ProtocolProps::allProtocols()
     return all;
 }
 
-TransportProto ProtocolProps::transportProtoFromString(QString p)
+TransportProto ProtocolUtils::transportProtoFromString(QString p)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<TransportProto>();
     for (int i = 0; i < metaEnum.keyCount(); ++i) {
@@ -56,14 +28,35 @@ TransportProto ProtocolProps::transportProtoFromString(QString p)
     return TransportProto::Udp;
 }
 
-QString ProtocolProps::transportProtoToString(TransportProto proto, Proto p)
+QString ProtocolUtils::transportProtoToString(TransportProto proto, Proto p)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<TransportProto>();
     QString protoKey = metaEnum.valueToKey(static_cast<int>(proto));
     return protoKey.toLower();
 }
 
-QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
+Proto ProtocolUtils::protoFromString(QString proto)
+{
+    QMetaEnum metaEnum = QMetaEnum::fromType<Proto>();
+    for (int i = 0; i < metaEnum.keyCount(); ++i) {
+        Proto p = static_cast<Proto>(i);
+        if (proto == protoToString(p))
+            return p;
+    }
+    return Proto::Any;
+}
+
+QString ProtocolUtils::protoToString(Proto p)
+{
+    if (p == Proto::Any)
+        return "";
+
+    QMetaEnum metaEnum = QMetaEnum::fromType<Proto>();
+    QString protoKey = metaEnum.valueToKey(static_cast<int>(p));
+    return protoKey.toLower();
+}
+
+QMap<Proto, QString> ProtocolUtils::protocolHumanNames()
 {
     return { { Proto::OpenVpn, "OpenVPN" },
              { Proto::WireGuard, "WireGuard" },
@@ -73,19 +66,18 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
              { Proto::Xray, "XRay" },
              { Proto::SSXray, "Shadowsocks"},
 
-
              { Proto::TorWebSite, "Website in Tor network" },
              { Proto::Dns, "DNS Service" },
              { Proto::Sftp, QObject::tr("SFTP service") },
              { Proto::Socks5Proxy, QObject::tr("SOCKS5 proxy server") } };
 }
 
-QMap<amnezia::Proto, QString> ProtocolProps::protocolDescriptions()
+QMap<Proto, QString> ProtocolUtils::protocolDescriptions()
 {
     return {};
 }
 
-amnezia::ServiceType ProtocolProps::protocolService(Proto p)
+ServiceType ProtocolUtils::protocolService(Proto p)
 {
     switch (p) {
     case Proto::Any: return ServiceType::None;
@@ -105,7 +97,7 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     }
 }
 
-int ProtocolProps::getPortForInstall(Proto p)
+int ProtocolUtils::getPortForInstall(Proto p)
 {
     switch (p) {
     case Awg:
@@ -118,7 +110,7 @@ int ProtocolProps::getPortForInstall(Proto p)
     }
 }
 
-int ProtocolProps::defaultPort(Proto p)
+int ProtocolUtils::defaultPort(Proto p)
 {
     switch (p) {
     case Proto::Any: return -1;
@@ -137,7 +129,7 @@ int ProtocolProps::defaultPort(Proto p)
     }
 }
 
-bool ProtocolProps::defaultPortChangeable(Proto p)
+bool ProtocolUtils::defaultPortChangeable(Proto p)
 {
     switch (p) {
     case Proto::Any: return false;
@@ -156,7 +148,7 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     }
 }
 
-TransportProto ProtocolProps::defaultTransportProto(Proto p)
+TransportProto ProtocolUtils::defaultTransportProto(Proto p)
 {
     switch (p) {
     case Proto::Any: return TransportProto::Udp;
@@ -175,7 +167,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     }
 }
 
-bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
+bool ProtocolUtils::defaultTransportProtoChangeable(Proto p)
 {
     switch (p) {
     case Proto::Any: return false;
@@ -196,22 +188,22 @@ bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
     return false;
 }
 
-QString ProtocolProps::key_proto_config_data(Proto p)
+QString ProtocolUtils::key_proto_config_data(Proto p)
 {
     return protoToString(p) + "_config_data";
 }
 
-QString ProtocolProps::key_proto_config_path(Proto p)
+QString ProtocolUtils::key_proto_config_path(Proto p)
 {
     return protoToString(p) + "_config_path";
 }
 
-QString ProtocolProps::getProtocolVersion(const QJsonObject &protocolConfig)
+QString ProtocolUtils::getProtocolVersion(const QJsonObject &protocolConfig)
 {
     return protocolConfig.value(config_key::protocolVersion).toString();
 }
 
-QString ProtocolProps::getProtocolVersionString(const QJsonObject &protocolConfig)
+QString ProtocolUtils::getProtocolVersionString(const QJsonObject &protocolConfig)
 {
     auto version = getProtocolVersion(protocolConfig);
 
@@ -219,3 +211,4 @@ QString ProtocolProps::getProtocolVersionString(const QJsonObject &protocolConfi
     if (version == protocols::awg::awgV1_5) return QObject::tr(" (version 1.5)");
     return "";
 }
+

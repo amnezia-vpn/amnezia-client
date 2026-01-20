@@ -1,7 +1,7 @@
 #ifndef QML_REGISTER_PROTOCOLS_H
 #define QML_REGISTER_PROTOCOLS_H
 
-#include "protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
 
 #include <QObject>
 #include <QDebug>

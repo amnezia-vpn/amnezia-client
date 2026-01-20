@@ -9,7 +9,9 @@
 #include <QTimer>
 
 #include "core/protocols/vpnProtocol.h"
-#include "core/utils/defs.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 #include "core/repositories/serversRepository.h"
 #include "core/repositories/appSettingsRepository.h"
 

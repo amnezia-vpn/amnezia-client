@@ -3,8 +3,13 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-#include "containers/containers_defs.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/models/api/apiConfig.h"
 #include "core/models/api/authData.h"
@@ -89,7 +94,7 @@ QJsonObject ApiV2ServerConfig::toJson() const
     }
     
     if (defaultContainer != DockerContainer::None) {
-        obj[config_key::defaultContainer] = ContainerProps::containerToString(defaultContainer);
+        obj[config_key::defaultContainer] = ContainerUtils::containerToString(defaultContainer);
     }
     
     if (!dns1.isEmpty()) {
@@ -131,13 +136,13 @@ ApiV2ServerConfig ApiV2ServerConfig::fromJson(const QJsonObject& json)
         ContainerConfig containerConfig = ContainerConfig::fromJson(containerObj);
         
         QString containerStr = containerObj.value(config_key::container).toString();
-        DockerContainer container = ContainerProps::containerFromString(containerStr);
+        DockerContainer container = ContainerUtils::containerFromString(containerStr);
         
         config.containers.insert(container, containerConfig);
     }
     
     QString defaultContainerStr = json.value(config_key::defaultContainer).toString();
-    config.defaultContainer = ContainerProps::containerFromString(defaultContainerStr);
+    config.defaultContainer = ContainerUtils::containerFromString(defaultContainerStr);
     
     config.dns1 = json.value(config_key::dns1).toString();
     config.dns2 = json.value(config_key::dns2).toString();

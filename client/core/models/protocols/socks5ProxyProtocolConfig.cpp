@@ -1,6 +1,13 @@
 #include "socks5ProxyProtocolConfig.h"
 
-#include "../../../core/protocols/protocolsDefs.h"
+#include "../../../core/utils/protocolEnum.h"
+#include "../../../core/protocols/protocolUtils.h"
+#include "../../../core/utils/constants/configKeys.h"
+#include "../../../core/utils/constants/protocolConstants.h"
+
+using namespace amnezia;
+using namespace ProtocolUtils;
+using namespace config_key;
 
 namespace amnezia
 {

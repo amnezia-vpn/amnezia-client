@@ -1,9 +1,15 @@
 #include "installerBase.h"
 
-#include "containers/containers_defs.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 
 using namespace amnezia;
+using namespace ProtocolUtils;
 
 InstallerBase::InstallerBase(QObject *parent)
     : QObject(parent)
@@ -28,13 +34,13 @@ ErrorCode InstallerBase::extractConfigFromContainer(DockerContainer container, c
 QJsonObject InstallerBase::createBaseConfig(DockerContainer container, int port, TransportProto transportProto)
 {
     QJsonObject config;
-    Proto protocol = ContainerProps::defaultProtocol(container);
+    Proto protocol = ContainerUtils::defaultProtocol(container);
     QJsonObject containerConfig;
 
     containerConfig.insert(config_key::port, QString::number(port));
-    containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
-    config.insert(config_key::container, ContainerProps::containerToString(container));
-    config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+    containerConfig.insert(config_key::transport_proto, ProtocolUtils::transportProtoToString(transportProto, protocol));
+    config.insert(config_key::container, ContainerUtils::containerToString(container));
+    config.insert(ProtocolUtils::protoToString(protocol), containerConfig);
     
     return config;
 }

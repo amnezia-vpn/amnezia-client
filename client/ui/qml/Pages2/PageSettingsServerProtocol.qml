@@ -5,8 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
-import ContainerEnum 1.0
 import ContainerProps 1.0
 import Style 1.0
 
@@ -64,7 +62,7 @@ PageType {
 
             width: listView.width
 
-            property bool isClientSettingsVisible: (protocolIndex === ProtocolEnum.WireGuard) || (protocolIndex === ProtocolEnum.Awg)
+            property bool isClientSettingsVisible: isWireGuard || isAwg
             property bool isServerSettingsVisible: ServersModel.isProcessedServerHasWriteAccess()
 
             LabelWithButtonType {
@@ -78,10 +76,7 @@ PageType {
 
                 clickedFunction: function() {
                     if (isClientProtocolExists) {
-                        switch (protocolIndex) {
-                        case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                        case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                        }
+                        ProtocolsUiController.openClientSettings(protocolIndex)
                         PageController.goToPage(clientProtocolPage);
                     } else {
                         PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
@@ -109,15 +104,7 @@ PageType {
                 visible: delegateContent.isServerSettingsVisible
 
                 clickedFunction: function() {
-                    switch (protocolIndex) {
-                    case ProtocolEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                    case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                    case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                    case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                    case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                    case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                    case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
-                    }
+                    ProtocolsUiController.openServerSettings(protocolIndex)
                     PageController.goToPage(serverProtocolPage);
                 }
 

@@ -4,8 +4,13 @@
 #include <QJsonObject>
 #include <QMap>
 
-#include "containers/containers_defs.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/models/protocolConfig.h"
 
 namespace amnezia

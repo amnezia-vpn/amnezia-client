@@ -1,6 +1,9 @@
 #include "ikev2ConfigModel.h"
 
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 
 Ikev2ConfigModel::Ikev2ConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -14,7 +17,7 @@ int Ikev2ConfigModel::rowCount(const QModelIndex &parent) const
 
 bool Ikev2ConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
         return false;
     }
 
@@ -44,7 +47,7 @@ QVariant Ikev2ConfigModel::data(const QModelIndex &index, int role) const
 void Ikev2ConfigModel::updateModel(const QJsonObject &config)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
+    m_container = ContainerUtils::containerFromString(config.value(config_key::container).toString());
 
     m_fullConfig = config;
     QJsonObject protocolConfig = QJsonObject(); // IKEv2 doesn't use a specific protocol config key

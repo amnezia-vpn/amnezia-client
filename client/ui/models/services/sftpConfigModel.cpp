@@ -1,6 +1,9 @@
 #include "sftpConfigModel.h"
 
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 
 SftpConfigModel::SftpConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -31,7 +34,7 @@ QVariant SftpConfigModel::data(const QModelIndex &index, int role) const
 void SftpConfigModel::updateModel(const QJsonObject &config)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
+    m_container = ContainerUtils::containerFromString(config.value(config_key::container).toString());
 
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::sftp).toObject();

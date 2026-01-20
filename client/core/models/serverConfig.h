@@ -5,7 +5,9 @@
 #include <QJsonObject>
 #include <QMap>
 
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 #include "core/models/selfhosted/selfHostedServerConfig.h"
 #include "core/models/selfhosted/nativeServerConfig.h"
 #include "core/models/api/apiV1ServerConfig.h"

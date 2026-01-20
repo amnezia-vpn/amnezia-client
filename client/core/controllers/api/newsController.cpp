@@ -1,7 +1,9 @@
 #include "newsController.h"
 
 #include "core/controllers/gatewayController.h"
-#include "core/utils/api/apiDefs.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QJsonDocument>
 #include <QJsonObject>

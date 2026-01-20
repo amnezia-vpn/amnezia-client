@@ -5,9 +5,13 @@
 #include <QMap>
 #include <optional>
 
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 #include "core/models/containerConfig.h"
-#include "core/utils/defs.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 
 namespace amnezia
 {

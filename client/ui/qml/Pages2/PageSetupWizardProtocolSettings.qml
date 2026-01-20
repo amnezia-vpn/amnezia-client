@@ -250,15 +250,15 @@ PageType {
             Component.onCompleted: {
                 var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
-                if (ProtocolProps.defaultPort(defaultContainerProto) < 0) {
+                if (ProtocolsUiController.defaultPort(defaultContainerProto) < 0) {
                     port.visible = false
                 } else {
-                    port.textField.text = ProtocolProps.getPortForInstall(defaultContainerProto)
+                    port.textField.text = ProtocolsUiController.getPortForInstall(defaultContainerProto)
                 }
-                transportProtoSelector.currentIndex = ProtocolProps.defaultTransportProto(defaultContainerProto)
+                transportProtoSelector.currentIndex = ProtocolsUiController.defaultTransportProto(defaultContainerProto)
 
-                port.enabled = ProtocolProps.defaultPortChangeable(defaultContainerProto)
-                var protocolSelectorVisible = ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
+                port.enabled = ProtocolsUiController.defaultPortChangeable(defaultContainerProto)
+                var protocolSelectorVisible = ProtocolsUiController.defaultTransportProtoChangeable(defaultContainerProto)
                 transportProtoSelector.visible = protocolSelectorVisible
                 transportProtoHeader.visible = protocolSelectorVisible
             }

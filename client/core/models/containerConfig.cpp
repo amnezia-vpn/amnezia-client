@@ -2,28 +2,34 @@
 
 #include <QJsonDocument>
 
-#include "containers/containers_defs.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 
 namespace amnezia
 {
 
 using namespace ContainerEnumNS;
 using namespace ProtocolEnumNS;
+using namespace ProtocolUtils;
 
 Proto ContainerConfig::getProtocolType() const
 {
-    return ContainerProps::defaultProtocol(container);
+    return ContainerUtils::defaultProtocol(container);
 }
 
 QJsonObject ContainerConfig::toJson() const
 {
     QJsonObject obj;
     
-    obj[config_key::container] = ContainerProps::containerToString(container);
+    obj[config_key::container] = ContainerUtils::containerToString(container);
     
     Proto protoType = getProtocolType();
-    QString protoName = ProtocolProps::protoToString(protoType);
+    QString protoName = ProtocolUtils::protoToString(protoType);
     
     QJsonObject protoJson = ProtocolConfigUtils::toJson(protocolConfig, protoType);
     
@@ -37,10 +43,10 @@ ContainerConfig ContainerConfig::fromJson(const QJsonObject& json)
     ContainerConfig config;
     
     QString containerStr = json.value(config_key::container).toString();
-    config.container = ContainerProps::containerFromString(containerStr);
+    config.container = ContainerUtils::containerFromString(containerStr);
     
-    Proto protoType = ContainerProps::defaultProtocol(config.container);
-    QString protoName = ProtocolProps::protoToString(protoType);
+    Proto protoType = ContainerUtils::defaultProtocol(config.container);
+    QString protoName = ProtocolUtils::protoToString(protoType);
     
     QJsonObject protoJson = json.value(protoName).toObject();
     

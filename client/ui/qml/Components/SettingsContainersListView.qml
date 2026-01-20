@@ -5,8 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
-import ContainerEnum 1.0
 import ContainerProps 1.0
 
 import "../Controls2"
@@ -33,7 +31,7 @@ ListViewType {
                     var containerIndex = root.model.mapToSource(index)
                     ContainersModel.setProcessedContainerIndex(containerIndex)
 
-                    if (serviceType !== ProtocolEnum.Other) {
+                    if (isVpnContainer) {
                         var isThirdPartyConfig = config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]
                         if (isThirdPartyConfig) {
                             ProtocolsUiController.updateProtocols(config)
@@ -42,20 +40,14 @@ ListViewType {
                         }
                     }
 
-                    switch (containerIndex) {
-                    case ContainerEnum.Ipsec: {
+                    if (isIpsec) {
                         ProtocolsUiController.updateProtocols(config)
                         PageController.goToPage(PageEnum.PageProtocolRaw)
-                        break
-                    }
-                    case ContainerEnum.Dns: {
+                    } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
-                        break
-                    }
-                    default: {
+                    } else {
                         ProtocolsUiController.updateProtocols(config)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
-                    }
                     }
 
                 } else {

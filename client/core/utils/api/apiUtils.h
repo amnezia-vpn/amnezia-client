@@ -4,8 +4,12 @@
 #include <QNetworkReply>
 #include <QObject>
 
-#include "core/utils/api/apiDefs.h"
-#include "core/utils/defs.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 
 namespace apiUtils
 {

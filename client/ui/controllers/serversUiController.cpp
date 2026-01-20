@@ -1,9 +1,16 @@
 #include "serversUiController.h"
 
-#include "core/utils/api/apiDefs.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
-#include "containers/containers_defs.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include <QJsonDocument>
 #include <QJsonArray>
 #include "core/models/serverConfig.h"
@@ -153,7 +160,7 @@ QString ServersUiController::getDefaultServerDefaultContainerName() const
 {
     int defaultIndex = getDefaultServerIndex();
     auto defaultContainer = qvariant_cast<DockerContainer>(m_serversModel->data(defaultIndex, ServersModel::Roles::DefaultContainerRole));
-    return ContainerProps::containerHumanNames().value(defaultContainer);
+    return ContainerUtils::containerHumanNames().value(defaultContainer);
 }
 
 QString ServersUiController::getDefaultServerDescriptionCollapsed() const
@@ -168,7 +175,7 @@ QString ServersUiController::getDefaultServerDescriptionCollapsed() const
     
     DockerContainer container = ServerConfigUtils::defaultContainer(server);
     QString hostName = ServerConfigUtils::hostName(server);
-    return description + ContainerProps::containerHumanNames().value(container) + " | " + hostName;
+    return description + ContainerUtils::containerHumanNames().value(container) + " | " + hostName;
 }
 
 QString ServersUiController::getDefaultServerImagePathCollapsed() const
@@ -209,7 +216,7 @@ bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() con
     ContainerConfig containerConfig = ServerConfigUtils::containerConfig(server, defaultContainer);
     
     if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-        QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(containerConfig.protocolConfig, ContainerProps::defaultProtocol(defaultContainer));
+        QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(containerConfig.protocolConfig, ContainerUtils::defaultProtocol(defaultContainer));
         QString clientProtocolConfigString = protocolConfigJson.value(config_key::last_config).toString();
         QJsonObject clientProtocolConfig = QJsonDocument::fromJson(clientProtocolConfigString.toUtf8()).object();
         return (clientProtocolConfigString.contains("AllowedIPs") && !clientProtocolConfigString.contains("AllowedIPs = 0.0.0.0/0, ::/0"))
@@ -361,7 +368,7 @@ void ServersUiController::updateContainersModel()
     QJsonArray containersArray;
     for (auto it = containers.begin(); it != containers.end(); ++it) {
         QJsonObject containerObj = it.value().toJson();
-        containerObj.insert(config_key::container, ContainerProps::containerToString(it.key()));
+        containerObj.insert(config_key::container, ContainerUtils::containerToString(it.key()));
         containersArray.append(containerObj);
     }
     m_containersModel->updateModel(containersArray);
@@ -378,7 +385,7 @@ void ServersUiController::updateDefaultServerContainersModel()
     QJsonArray containersArray;
     for (auto it = containers.begin(); it != containers.end(); ++it) {
         QJsonObject containerObj = it.value().toJson();
-        containerObj.insert(config_key::container, ContainerProps::containerToString(it.key()));
+        containerObj.insert(config_key::container, ContainerUtils::containerToString(it.key()));
         containersArray.append(containerObj);
     }
     m_defaultServerContainersModel->updateModel(containersArray);
@@ -392,7 +399,7 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
     
     for (auto it = containers.begin(); it != containers.end(); ++it) {
         DockerContainer container = it.key();
-        if (ContainerProps::containerService(container) == ServiceType::Other) {
+        if (ContainerUtils::containerService(container) == ServiceType::Other) {
             if (container == DockerContainer::Dns) {
                 servicesName.append("DNS");
             } else if (container == DockerContainer::Sftp) {

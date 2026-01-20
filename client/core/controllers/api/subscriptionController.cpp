@@ -11,11 +11,18 @@
 
 #include "core/configurators/openVpnConfigurator.h"
 #include "core/configurators/wireguardConfigurator.h"
-#include "containers/containers_defs.h"
-#include "core/utils/api/apiDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "version.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
@@ -147,7 +154,7 @@ ErrorCode SubscriptionController::fillServerConfig(const QString &protocol, cons
             return ErrorCode::ApiConfigEmptyError;
         }
         auto container = containers.at(0).toObject();
-        QString containerName = ContainerProps::containerTypeToString(DockerContainer::Awg);
+        QString containerName = ContainerUtils::containerTypeToString(DockerContainer::Awg);
         auto serverProtocolConfig = container.value(containerName).toObject();
         auto clientProtocolConfig =
                 QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();

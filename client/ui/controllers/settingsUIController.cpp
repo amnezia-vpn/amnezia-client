@@ -4,7 +4,9 @@
 #include <QOperatingSystemVersion>
 #include <QFile>
 
-#include "core/utils/defs.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 #include "logger.h"
 #include "systemController.h"
 #include "amnezia_application.h"

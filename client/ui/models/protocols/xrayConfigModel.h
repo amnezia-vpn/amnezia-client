@@ -4,7 +4,9 @@
 #include <QAbstractListModel>
 #include <QJsonObject>
 
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 
 class XrayConfigModel : public QAbstractListModel
 {

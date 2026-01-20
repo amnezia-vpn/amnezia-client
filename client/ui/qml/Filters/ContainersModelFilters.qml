@@ -4,19 +4,17 @@ import QtQuick 2.15
 
 import SortFilterProxyModel 0.2
 
-import ProtocolEnum 1.0
-
 Item {
     ValueFilter {
         id: vpnTypeFilter
-        roleName: "serviceType"
-        value: ProtocolEnum.Vpn
+        roleName: "isVpnContainer"
+        value: true
     }
 
     ValueFilter {
         id: serviceTypeFilter
-        roleName: "serviceType"
-        value: ProtocolEnum.Other
+        roleName: "isServiceContainer"
+        value: true
     }
 
     ValueFilter {

@@ -3,6 +3,7 @@
 #include "core/utils/ipcClient.h"
 #include "core/utils/utilities.h"
 #include "core/utils/networkUtilities.h"
+#include "core/protocols/protocolUtils.h"
 
 #include <QCryptographicHash>
 #include <QJsonDocument>
@@ -133,9 +134,9 @@ void XrayProtocol::stop()
 
 void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
 {
-    QJsonObject xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::Xray)).toObject();
+    QJsonObject xrayConfiguration = configuration.value(ProtocolUtils::key_proto_config_data(Proto::Xray)).toObject();
     if (xrayConfiguration.isEmpty()) {
-        xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::SSXray)).toObject();
+        xrayConfiguration = configuration.value(ProtocolUtils::key_proto_config_data(Proto::SSXray)).toObject();
     }
     m_xrayConfig = xrayConfiguration;
     m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());

@@ -1,38 +1,11 @@
-#ifndef DEFS_H
-#define DEFS_H
+#ifndef ERRORCODES_H
+#define ERRORCODES_H
 
 #include <QMetaEnum>
 #include <QObject>
 
 namespace amnezia
 {
-    struct ServerCredentials
-    {
-        QString hostName;
-        QString userName;
-        QString secretData;
-        int port = 22;
-
-        bool isValid() const
-        {
-            return !hostName.isEmpty() && !userName.isEmpty() && !secretData.isEmpty() && port > 0;
-        }
-    };
-
-    struct InstalledAppInfo {
-        QString appName;
-        QString packageName;
-        QString appPath;
-
-        bool operator==(const InstalledAppInfo& other) const {
-            if (!packageName.isEmpty()) {
-                return packageName == other.packageName;
-            } else {
-                return appPath == other.appPath;
-            }
-        }
-    };
-
     namespace error_code_ns
     {
       Q_NAMESPACE
@@ -131,47 +104,9 @@ namespace amnezia
     }
 
     using ErrorCode = error_code_ns::ErrorCode;
-
-    namespace route_mode_ns
-    {
-        Q_NAMESPACE
-        enum RouteMode {
-            VpnAllSites,
-            VpnOnlyForwardSites,
-            VpnAllExceptSites
-        };
-        Q_ENUM_NS(RouteMode)
-    }
-
-    using RouteMode = route_mode_ns::RouteMode;
-
-    namespace apps_route_mode_ns
-    {
-        Q_NAMESPACE
-        enum AppsRouteMode {
-            VpnAllApps,
-            VpnOnlyForwardApps,
-            VpnAllExceptApps
-        };
-        Q_ENUM_NS(AppsRouteMode)
-    }
-
-    using AppsRouteMode = apps_route_mode_ns::AppsRouteMode;
-
-    struct DnsSettings
-    {
-        QString primaryDns;
-        QString secondaryDns;
-    };
-
-    struct SplitTunnelingSettings
-    {
-        bool isSitesSplitTunnelingEnabled;
-        RouteMode routeMode;
-    };
-
-} // namespace amnezia
+}
 
 Q_DECLARE_METATYPE(amnezia::ErrorCode)
 
-#endif // DEFS_H
+#endif // ERRORCODES_H
+

@@ -9,17 +9,17 @@ ContainersModel::ContainersModel(QObject *parent) : QAbstractListModel(parent)
 int ContainersModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return ContainerProps::allContainers().size();
+    return ContainerUtils::allContainers().size();
 }
 
 QVariant ContainersModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
         return QVariant();
     }
 
-    DockerContainer container = ContainerProps::allContainers().at(index.row());
-    QString protocolKey = ContainerProps::containerTypeToProtocolString(container);
+    DockerContainer container = ContainerUtils::allContainers().at(index.row());
+    QString protocolKey = ContainerUtils::containerTypeToProtocolString(container);
     auto isThirdPartyConfig = m_containers.value(container).value(protocolKey).toObject().value(config_key::isThirdPartyConfig).toBool();
 
     switch (role) {
@@ -27,16 +27,16 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         if (container == DockerContainer::Awg && !isThirdPartyConfig) {
             return "AmneziaWG Legacy";
         }
-        return ContainerProps::containerHumanNames().value(container);
+        return ContainerUtils::containerHumanNames().value(container);
     }
     case DescriptionRole: {
         if (container == DockerContainer::Awg && !isThirdPartyConfig) {
             return QObject::tr("AmneziaWG Legacy is a outdated version of AmneziaWG protocol. To upgrade, install AmneziaWG and recreate users.");
         }
 
-        return ContainerProps::containerDescriptions().value(container);
+        return ContainerUtils::containerDescriptions().value(container);
     }
-    case DetailedDescriptionRole: return ContainerProps::containerDetailedDescriptions().value(container);
+    case DetailedDescriptionRole: return ContainerUtils::containerDetailedDescriptions().value(container);
     case ConfigRole: {
         if (container == DockerContainer::None) {
             return QJsonObject();
@@ -44,18 +44,26 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         return m_containers.value(container);
     }
     case IsThirdPartyConfigRole: return isThirdPartyConfig;
-    case ServiceTypeRole: return ContainerProps::containerService(container);
+    case ServiceTypeRole: return ContainerUtils::containerService(container);
     case DockerContainerRole: return container;
-    case IsEasySetupContainerRole: return ContainerProps::isEasySetupContainer(container);
-    case EasySetupHeaderRole: return ContainerProps::easySetupHeader(container);
-    case EasySetupDescriptionRole: return ContainerProps::easySetupDescription(container);
-    case EasySetupOrderRole: return ContainerProps::easySetupOrder(container);
+    case ContainerStringRole: return ContainerUtils::containerToString(container);
+    case IsEasySetupContainerRole: return ContainerUtils::isEasySetupContainer(container);
+    case EasySetupHeaderRole: return ContainerUtils::easySetupHeader(container);
+    case EasySetupDescriptionRole: return ContainerUtils::easySetupDescription(container);
+    case EasySetupOrderRole: return ContainerUtils::easySetupOrder(container);
     case IsInstallationAllowedRole: return ContainersModel::isInstallationAllowed(container);
     case IsInstalledRole: return m_containers.contains(container);
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_processedContainerIndex);
-    case IsSupportedRole: return ContainerProps::isSupportedByCurrentPlatform(container);
-    case IsShareableRole: return ContainerProps::isShareable(container);
-    case InstallPageOrderRole: return ContainerProps::installPageOrder(container);
+    case IsSupportedRole: return ContainerUtils::isSupportedByCurrentPlatform(container);
+    case IsShareableRole: return ContainerUtils::isShareable(container);
+    case IsVpnContainerRole: return ContainerUtils::containerService(container) == ServiceType::Vpn;
+    case IsServiceContainerRole: return ContainerUtils::containerService(container) == ServiceType::Other;
+    case IsIpsecRole: return container == DockerContainer::Ipsec;
+    case IsDnsRole: return container == DockerContainer::Dns;
+    case IsSftpRole: return container == DockerContainer::Sftp;
+    case IsTorWebsiteRole: return container == DockerContainer::TorWebSite;
+    case IsSocks5ProxyRole: return container == DockerContainer::Socks5Proxy;
+    case InstallPageOrderRole: return ContainerUtils::installPageOrder(container);
     }
 
     return QVariant();
@@ -72,7 +80,7 @@ void ContainersModel::updateModel(const QJsonArray &containers)
     beginResetModel();
     m_containers.clear();
     for (const QJsonValue &val : containers) {
-        m_containers.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
+        m_containers.insert(ContainerUtils::containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
     }
     endResetModel();
 }
@@ -89,7 +97,7 @@ int ContainersModel::getProcessedContainerIndex()
 
 QString ContainersModel::getProcessedContainerName()
 {
-    return ContainerProps::containerHumanNames().value(static_cast<DockerContainer>(m_processedContainerIndex));
+    return ContainerUtils::containerHumanNames().value(static_cast<DockerContainer>(m_processedContainerIndex));
 }
 
 QJsonObject ContainersModel::getContainerConfig(const int containerIndex)
@@ -110,7 +118,7 @@ bool ContainersModel::isServiceContainer(const int containerIndex)
 bool ContainersModel::hasInstalledServices()
 {
     for (const auto &container : m_containers.keys()) {
-        if (ContainerProps::containerService(container) == ServiceType::Other) {
+        if (ContainerUtils::containerService(container) == ServiceType::Other) {
             return true;
         }
     }
@@ -120,7 +128,7 @@ bool ContainersModel::hasInstalledServices()
 bool ContainersModel::hasInstalledProtocols()
 {
     for (const auto &container : m_containers.keys()) {
-        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
+        if (ContainerUtils::containerService(container) == ServiceType::Vpn) {
             return true;
         }
     }
@@ -132,6 +140,16 @@ bool ContainersModel::isInstallationAllowed(DockerContainer container)
     return container != DockerContainer::Awg;
 }
 
+void ContainersModel::openContainerSettings(int containerIndex)
+{
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    
+    // This method will be connected to QML signals to open appropriate settings page
+    // The actual navigation will be handled in QML based on container type
+    // For now, we emit a signal that QML can listen to
+    // In a full implementation, this would directly call PageController or emit a signal
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -140,6 +158,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[DetailedDescriptionRole] = "detailedDescription";
     roles[ServiceTypeRole] = "serviceType";
     roles[DockerContainerRole] = "dockerContainer";
+    roles[ContainerStringRole] = "containerString";
     roles[ConfigRole] = "config";
     roles[IsThirdPartyConfigRole] = "isThirdPartyConfig";
 
@@ -154,5 +173,13 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsShareableRole] = "isShareable";
     roles[IsInstallationAllowedRole] = "isInstallationAllowed";
     roles[InstallPageOrderRole] = "installPageOrder";
+    
+    roles[IsVpnContainerRole] = "isVpnContainer";
+    roles[IsServiceContainerRole] = "isServiceContainer";
+    roles[IsIpsecRole] = "isIpsec";
+    roles[IsDnsRole] = "isDns";
+    roles[IsSftpRole] = "isSftp";
+    roles[IsTorWebsiteRole] = "isTorWebsite";
+    roles[IsSocks5ProxyRole] = "isSocks5Proxy";
     return roles;
 }

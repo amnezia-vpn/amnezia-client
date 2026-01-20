@@ -2,7 +2,12 @@
 
 #include <QJsonDocument>
 
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
+
+using namespace ProtocolUtils;
 
 WireGuardConfigModel::WireGuardConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -16,7 +21,7 @@ int WireGuardConfigModel::rowCount(const QModelIndex &parent) const
 
 bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
         return false;
     }
 
@@ -48,13 +53,13 @@ QVariant WireGuardConfigModel::data(const QModelIndex &index, int role) const
 void WireGuardConfigModel::updateModel(const QJsonObject &config)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
+    m_container = ContainerUtils::containerFromString(config.value(config_key::container).toString());
 
     m_fullConfig = config;
     QJsonObject serverProtocolConfig = config.value(config_key::wireguard).toObject();
 
     auto defaultTransportProto =
-            ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::WireGuard), Proto::WireGuard);
+            ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(Proto::WireGuard), Proto::WireGuard);
     m_serverProtocolConfig.insert(config_key::transport_proto,
                                   serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
     m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);

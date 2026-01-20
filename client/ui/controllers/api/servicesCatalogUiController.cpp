@@ -1,6 +1,8 @@
 #include "servicesCatalogUiController.h"
 
-#include "core/utils/defs.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 
 ServicesCatalogUiController::ServicesCatalogUiController(ServicesCatalogController* servicesCatalogController,
                                                          ApiServicesModel* apiServicesModel,

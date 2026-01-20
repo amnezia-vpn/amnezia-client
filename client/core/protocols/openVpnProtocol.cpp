@@ -10,6 +10,7 @@
 #include "ipc.h"
 #include "openVpnProtocol.h"
 #include "core/utils/utilities.h"
+#include "core/protocols/protocolUtils.h"
 #include "version.h"
 
 OpenVpnProtocol::OpenVpnProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
@@ -98,9 +99,9 @@ void OpenVpnProtocol::killOpenVpnProcess()
 
 void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
 {
-    if (configuration.contains(ProtocolProps::key_proto_config_data(Proto::OpenVpn))) {
+    if (configuration.contains(ProtocolUtils::key_proto_config_data(Proto::OpenVpn))) {
         m_configData = configuration;
-        QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::OpenVpn)).toObject();
+        QJsonObject jConfig = configuration.value(ProtocolUtils::key_proto_config_data(Proto::OpenVpn)).toObject();
 
         m_configFile.open();
         m_configFile.write(jConfig.value(config_key::config).toString().toUtf8());

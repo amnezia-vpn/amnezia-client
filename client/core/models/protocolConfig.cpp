@@ -1,13 +1,19 @@
 #include "protocolConfig.h"
 
-#include "core/protocols/protocolsDefs.h"
-#include "containers/containers_defs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
 
 namespace amnezia
 {
 
 using namespace ProtocolEnumNS;
+using namespace ProtocolUtils;
 
 Proto ProtocolConfigUtils::getProtocolType(const ProtocolConfig& config)
 {
@@ -164,7 +170,7 @@ QString ProtocolConfigUtils::portWithDefault(const ProtocolConfig& config, Proto
 {
     QString portValue = port(config);
     if (portValue.isEmpty()) {
-        return QString::number(ProtocolProps::defaultPort(protocol));
+        return QString::number(ProtocolUtils::defaultPort(protocol));
     }
     return portValue;
 }
@@ -173,7 +179,7 @@ QString ProtocolConfigUtils::transportProtoWithDefault(const ProtocolConfig& con
 {
     QString transportProtoValue = transportProto(config);
     if (transportProtoValue.isEmpty()) {
-        return ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
+        return ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(protocol), protocol);
     }
     return transportProtoValue;
 }

@@ -1,10 +1,16 @@
 #include "wireguardInstaller.h"
 
-#include "containers/containers_defs.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
 
 using namespace amnezia;
+using namespace ProtocolUtils;
 
 WireguardInstaller::WireguardInstaller(QObject *parent)
     : InstallerBase(parent)
@@ -35,12 +41,12 @@ ErrorCode WireguardInstaller::extractConfigFromContainer(DockerContainer contain
         }
     }
 
-    auto mainProto = ContainerProps::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolProps::protoToString(mainProto)).toObject();
+    auto mainProto = ContainerUtils::defaultProtocol(container);
+    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
     
     containerConfig[config_key::subnet_address] = serverConfigMap.value("Address").remove("/24");
 
-    config.insert(ProtocolProps::protoToString(mainProto), containerConfig);
+    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
     
     return ErrorCode::NoError;
 }

@@ -15,8 +15,17 @@ public:
         ServerProtocolPageRole,
         ClientProtocolPageRole,
         ProtocolIndexRole,
+        ProtocolStringRole,
         RawConfigRole,
-        IsClientProtocolExistsRole
+        IsClientProtocolExistsRole,
+        // Protocol type check roles
+        IsWireGuardRole,
+        IsAwgRole,
+        IsOpenVpnRole,
+        IsXrayRole,
+        IsSftpRole,
+        IsIpsecRole,
+        IsSocks5ProxyRole
     };
 
     explicit ProtocolsModel(QObject *parent = nullptr);

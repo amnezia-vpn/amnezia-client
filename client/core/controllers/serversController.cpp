@@ -1,7 +1,12 @@
 #include "serversController.h"
 #include "core/utils/networkUtilities.h"
-#include "core/utils/api/apiDefs.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 
@@ -66,8 +71,8 @@ void ServersController::addContainerConfig(int serverIndex, DockerContainer cont
         arg.containers[container] = config;
         
         if (arg.defaultContainer == DockerContainer::None
-            && ContainerProps::containerService(container) != ServiceType::Other 
-            && ContainerProps::isSupportedByCurrentPlatform(container)) {
+            && ContainerUtils::containerService(container) != ServiceType::Other 
+            && ContainerUtils::isSupportedByCurrentPlatform(container)) {
             arg.defaultContainer = container;
         }
     });
@@ -227,7 +232,7 @@ bool ServersController::hasInstalledContainers(int serverIndex) const
     QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfig);
     for (auto it = containers.begin(); it != containers.end(); ++it) {
         DockerContainer container = it.key();
-        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
+        if (ContainerUtils::containerService(container) == ServiceType::Vpn) {
             return true;
         }
         if (container == DockerContainer::SSXray) {

@@ -110,8 +110,8 @@ PageType {
                     var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
                     listView.dockerContainer = dockerContainer
-                    listView.containerDefaultPort = ProtocolProps.getPortForInstall(defaultContainerProto)
-                    listView.containerDefaultTransportProto = ProtocolProps.defaultTransportProto(defaultContainerProto)
+                    listView.containerDefaultPort = ProtocolsUiController.getPortForInstall(defaultContainerProto)
+                    listView.containerDefaultTransportProto = ProtocolsUiController.defaultTransportProto(defaultContainerProto)
                 }
 
                 Keys.onReturnPressed: this.clicked()

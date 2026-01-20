@@ -13,7 +13,10 @@
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 #include "logger.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "core/utils/utilities.h"
@@ -94,9 +97,9 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         int containersCount = containers.size();
 
         if (wasContainerInstalled) {
-            finishMessage = tr("%1 installed successfully. ").arg(ContainerProps::containerHumanNames().value(container));
+            finishMessage = tr("%1 installed successfully. ").arg(ContainerUtils::containerHumanNames().value(container));
         } else {
-            finishMessage = tr("%1 is already installed on the server. ").arg(ContainerProps::containerHumanNames().value(container));
+            finishMessage = tr("%1 is already installed on the server. ").arg(ContainerUtils::containerHumanNames().value(container));
         }
 
         if (containersCount > 1) {
@@ -124,9 +127,9 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         bool hasNewContainers = (newContainersCount - containersCount) > (wasContainerInstalled ? 1 : 0);
 
         if (wasContainerInstalled) {
-            finishMessage = tr("%1 installed successfully. ").arg(ContainerProps::containerHumanNames().value(container));
+            finishMessage = tr("%1 installed successfully. ").arg(ContainerUtils::containerHumanNames().value(container));
         } else {
-            finishMessage = tr("%1 is already installed on the server. ").arg(ContainerProps::containerHumanNames().value(container));
+            finishMessage = tr("%1 is already installed on the server. ").arg(ContainerUtils::containerHumanNames().value(container));
         }
 
         if (hasNewContainers) {
@@ -134,7 +137,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
                                 "All installed containers have been added to the application");
         }
 
-        emit installContainerFinished(finishMessage, ContainerProps::containerService(container) == ServiceType::Other);
+        emit installContainerFinished(finishMessage, ContainerUtils::containerService(container) == ServiceType::Other);
     }
 }
 
@@ -161,7 +164,7 @@ void InstallUiController::scanServerForInstalledContainers(int serverIndex)
 
 void InstallUiController::updateContainer(int serverIndex, QJsonObject config)
 {
-    const DockerContainer container = ContainerProps::containerFromString(config.value(config_key::container).toString());
+    const DockerContainer container = ContainerUtils::containerFromString(config.value(config_key::container).toString());
     QJsonObject oldContainerConfigJson = m_containersModel->getContainerConfig(container);
     ContainerConfig oldContainerConfig = ContainerConfig::fromJson(oldContainerConfigJson);
     ContainerConfig newContainerConfig = ContainerConfig::fromJson(config);
@@ -235,13 +238,13 @@ void InstallUiController::removeContainer(int serverIndex)
 void InstallUiController::clearCachedProfile(int serverIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
-    if (ContainerProps::containerService(container) == ServiceType::Other) {
+    if (ContainerUtils::containerService(container) == ServiceType::Other) {
         return;
     }
 
     m_installController->clearCachedProfile(serverIndex, container);
 
-    emit cachedProfileCleared(tr("%1 cached profile cleared").arg(ContainerProps::containerHumanNames().value(container)));
+    emit cachedProfileCleared(tr("%1 cached profile cleared").arg(ContainerUtils::containerHumanNames().value(container)));
     QJsonObject updatedConfig = m_serversController->getContainerConfig(serverIndex, container);
     emit profileCleared(updatedConfig);
 }

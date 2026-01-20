@@ -6,13 +6,19 @@
 #include <QStringList>
 #include <QVector>
 
-#include "containers/containers_defs.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/utilities.h"
 #include "ui/models/protocols/awgConfigModel.h"
 
 using namespace amnezia;
+using namespace ProtocolUtils;
 
 AwgInstaller::AwgInstaller(QObject *parent)
     : InstallerBase(parent)
@@ -23,8 +29,8 @@ QJsonObject AwgInstaller::generateConfig(DockerContainer container, int port, Tr
 {
     QJsonObject config = createBaseConfig(container, port, transportProto);
     
-    auto mainProto = ContainerProps::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolProps::protoToString(mainProto)).toObject();
+    auto mainProto = ContainerUtils::defaultProtocol(container);
+    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
     
     bool isAwg2 = (container == DockerContainer::Awg2);
     generateAwgParameters(containerConfig, isAwg2);
@@ -33,7 +39,7 @@ QJsonObject AwgInstaller::generateConfig(DockerContainer container, int port, Tr
         containerConfig[config_key::protocolVersion] = "2";
     }
     
-    config.insert(ProtocolProps::protoToString(mainProto), containerConfig);
+    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
     
     return config;
 }
@@ -159,8 +165,8 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
         }
     }
 
-    auto mainProto = ContainerProps::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolProps::protoToString(mainProto)).toObject();
+    auto mainProto = ContainerUtils::defaultProtocol(container);
+    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
     
     containerConfig[config_key::subnet_address] = serverConfigMap.value("Address").remove("/24");
     containerConfig[config_key::junkPacketCount] = serverConfigMap.value(config_key::junkPacketCount);
@@ -180,7 +186,7 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
         containerConfig[config_key::transportPacketJunkSize] = serverConfigMap.value(config_key::transportPacketJunkSize);
     }
 
-    config.insert(ProtocolProps::protoToString(mainProto), containerConfig);
+    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
     
     return ErrorCode::NoError;
 }

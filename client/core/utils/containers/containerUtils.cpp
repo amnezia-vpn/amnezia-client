@@ -1,17 +1,12 @@
-#include "containers_defs.h"
+#include "containerUtils.h"
 
-#include "QJsonObject"
-#include "QJsonDocument"
+#include <QMetaEnum>
+#include <QObject>
+#include <QJsonDocument>
 
-QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c)
-{
-    QDebugStateSaver saver(debug);
-    debug.nospace() << ContainerProps::containerToString(c);
+using namespace amnezia;
 
-    return debug;
-}
-
-amnezia::DockerContainer ContainerProps::containerFromString(const QString &container)
+DockerContainer ContainerUtils::containerFromString(const QString &container)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
     for (int i = 0; i < metaEnum.keyCount(); ++i) {
@@ -22,7 +17,7 @@ amnezia::DockerContainer ContainerProps::containerFromString(const QString &cont
     return DockerContainer::None;
 }
 
-QString ContainerProps::containerToString(amnezia::DockerContainer c)
+QString ContainerUtils::containerToString(DockerContainer c)
 {
     if (c == DockerContainer::None)
         return "none";
@@ -36,7 +31,7 @@ QString ContainerProps::containerToString(amnezia::DockerContainer c)
     return "amnezia-" + containerKey.toLower();
 }
 
-QString ContainerProps::containerTypeToString(amnezia::DockerContainer c)
+QString ContainerUtils::containerTypeToString(DockerContainer c)
 {
     if (c == DockerContainer::None)
         return "none";
@@ -52,7 +47,7 @@ QString ContainerProps::containerTypeToString(amnezia::DockerContainer c)
     return containerKey.toLower();
 }
 
-QList<DockerContainer> ContainerProps::allContainers()
+QList<DockerContainer> ContainerUtils::allContainers()
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<DockerContainer>();
     QList<DockerContainer> all;
@@ -63,7 +58,7 @@ QList<DockerContainer> ContainerProps::allContainers()
     return all;
 }
 
-QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
+QMap<DockerContainer, QString> ContainerUtils::containerHumanNames()
 {
     return { { DockerContainer::None, "Not installed" },
              { DockerContainer::OpenVpn, "OpenVPN" },
@@ -80,7 +75,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") } };
 }
 
-QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
+QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
 {
     return {              { DockerContainer::OpenVpn,
                QObject::tr("OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its "
@@ -109,7 +104,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("") } };
 }
 
-QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
+QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
 {
     return {
         { DockerContainer::OpenVpn,
@@ -180,12 +175,12 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
     };
 }
 
-amnezia::ServiceType ContainerProps::containerService(DockerContainer c)
+ServiceType ContainerUtils::containerService(DockerContainer c)
 {
-    return ProtocolProps::protocolService(defaultProtocol(c));
+    return ProtocolUtils::protocolService(defaultProtocol(c));
 }
 
-Proto ContainerProps::defaultProtocol(DockerContainer c)
+Proto ContainerUtils::defaultProtocol(DockerContainer c)
 {
     switch (c) {
     case DockerContainer::None: return Proto::Any;
@@ -205,16 +200,16 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     }
 }
 
-QString ContainerProps::containerTypeToProtocolString(DockerContainer c)
+QString ContainerUtils::containerTypeToProtocolString(DockerContainer c)
 {
     if (c == DockerContainer::None)
         return "none";
 
     Proto p = defaultProtocol(c);
-    return ProtocolProps::protoToString(p);
+    return ProtocolUtils::protoToString(p);
 }
 
-bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
+bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
 {
 #ifdef Q_OS_WINDOWS
     return true;
@@ -274,7 +269,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
 #endif
 }
 
-QStringList ContainerProps::fixedPortsForContainer(DockerContainer c)
+QStringList ContainerUtils::fixedPortsForContainer(DockerContainer c)
 {
     switch (c) {
     case DockerContainer::Ipsec: return QStringList { "500", "4500" };
@@ -282,7 +277,7 @@ QStringList ContainerProps::fixedPortsForContainer(DockerContainer c)
     }
 }
 
-bool ContainerProps::isEasySetupContainer(DockerContainer container)
+bool ContainerUtils::isEasySetupContainer(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::Awg2: return true;
@@ -290,24 +285,24 @@ bool ContainerProps::isEasySetupContainer(DockerContainer container)
     }
 }
 
-QString ContainerProps::easySetupHeader(DockerContainer container)
+QString ContainerUtils::easySetupHeader(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::Awg2: return tr("Automatic");
+    case DockerContainer::Awg2: return QObject::tr("Automatic");
     default: return "";
     }
 }
 
-QString ContainerProps::easySetupDescription(DockerContainer container)
+QString ContainerUtils::easySetupDescription(DockerContainer container)
 {
     switch (container) {
-    case DockerContainer::Awg2: return tr("AmneziaWG protocol will be installed. "
+    case DockerContainer::Awg2: return QObject::tr("AmneziaWG protocol will be installed. "
                                          "It provides high connection speed and ensures stable operation even in the most challenging network conditions.");
     default: return "";
     }
 }
 
-int ContainerProps::easySetupOrder(DockerContainer container)
+int ContainerUtils::easySetupOrder(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::Awg2: return 1;
@@ -315,7 +310,7 @@ int ContainerProps::easySetupOrder(DockerContainer container)
     }
 }
 
-bool ContainerProps::isShareable(DockerContainer container)
+bool ContainerUtils::isShareable(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::TorWebSite: return false;
@@ -326,15 +321,14 @@ bool ContainerProps::isShareable(DockerContainer container)
     }
 }
 
-bool ContainerProps::isAwgContainer(DockerContainer container)
+bool ContainerUtils::isAwgContainer(DockerContainer container)
 {
     return container == DockerContainer::Awg || container == DockerContainer::Awg2;
 }
 
-
-QJsonObject ContainerProps::getProtocolConfigFromContainer(const Proto protocol, const QJsonObject &containerConfig)
+QJsonObject ContainerUtils::getProtocolConfigFromContainer(const Proto protocol, const QJsonObject &containerConfig)
 {
-    QString protocolConfigString = containerConfig.value(ProtocolProps::protoToString(protocol))
+    QString protocolConfigString = containerConfig.value(ProtocolUtils::protoToString(protocol))
     .toObject()
             .value(config_key::last_config)
             .toString();
@@ -342,7 +336,7 @@ QJsonObject ContainerProps::getProtocolConfigFromContainer(const Proto protocol,
     return QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 }
 
-int ContainerProps::installPageOrder(DockerContainer container)
+int ContainerUtils::installPageOrder(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::OpenVpn: return 4;
@@ -354,3 +348,4 @@ int ContainerProps::installPageOrder(DockerContainer container)
     default: return 0;
     }
 }
+

@@ -15,6 +15,8 @@
 #include <QEvent>
 #include <QDir>
 #include <QSettings>
+#include <QtQuick/QQuickWindow>  
+#include <QWindow>     
 
 #include "logger.h"
 #include "ui/controllers/qml/pageController.h"
@@ -22,10 +24,7 @@
 #include "version.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
-
-#include "core/protocols/qmlRegisterProtocols.h"
-#include <QtQuick/QQuickWindow>  // for QQuickWindow
-#include <QWindow>              // for qobject_cast<QWindow*>
+         
 
 bool AmneziaApplication::m_forceQuit = false;
 
@@ -198,12 +197,10 @@ void AmneziaApplication::registerTypes()
     qRegisterMetaType<ServerCredentials>("ServerCredentials");
 
     qRegisterMetaType<DockerContainer>("DockerContainer");
+    using namespace amnezia::ProtocolEnumNS;
     qRegisterMetaType<TransportProto>("TransportProto");
     qRegisterMetaType<Proto>("Proto");
     qRegisterMetaType<ServiceType>("ServiceType");
-
-    declareQmlProtocolEnum();
-    declareQmlContainerEnum();
 
     qmlRegisterType<QRCodeReader>("QRCodeReader", 1, 0, "QRCodeReader");
 

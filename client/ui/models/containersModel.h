@@ -6,7 +6,9 @@
 #include <utility>
 #include <vector>
 
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 
 class ContainersModel : public QAbstractListModel
 {
@@ -22,6 +24,7 @@ public:
         ConfigRole,
         IsThirdPartyConfigRole,
         DockerContainerRole,
+        ContainerStringRole,
 
         IsEasySetupContainerRole,
         EasySetupHeaderRole,
@@ -35,8 +38,19 @@ public:
         IsSupportedRole,
         IsShareableRole,
 
-        InstallPageOrderRole
+        InstallPageOrderRole,
+        
+        // Container type check roles
+        IsVpnContainerRole,
+        IsServiceContainerRole,
+        IsIpsecRole,
+        IsDnsRole,
+        IsSftpRole,
+        IsTorWebsiteRole,
+        IsSocks5ProxyRole
     };
+    
+    Q_INVOKABLE void openContainerSettings(int containerIndex);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 

@@ -10,7 +10,9 @@
 #include <QtConcurrent>
 
 #include "core/configurators/configuratorBase.h"
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/installers/awgInstaller.h"
 #include "core/installers/installerBase.h"
@@ -27,7 +29,10 @@
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "core/utils/selfhosted/sshClient.h"
 #include "logger.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 #include "ui/models/protocols/awgConfigModel.h"
@@ -43,6 +48,7 @@
 #endif
 
 using namespace amnezia;
+using namespace ProtocolUtils;
 
 namespace
 {
@@ -69,7 +75,7 @@ InstallController::~InstallController()
 ErrorCode InstallController::setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config,
                                             bool isUpdate)
 {
-    qDebug().noquote() << "InstallController::setupContainer" << ContainerProps::containerToString(container);
+    qDebug().noquote() << "InstallController::setupContainer" << ContainerUtils::containerToString(container);
     ErrorCode e = ErrorCode::NoError;
 
     e = isUserInSudo(credentials, container);
@@ -156,7 +162,7 @@ ErrorCode InstallController::updateContainer(int serverIndex, DockerContainer co
 
 void InstallController::clearCachedProfile(int serverIndex, DockerContainer container)
 {
-    if (ContainerProps::containerService(container) == ServiceType::Other) {
+    if (ContainerUtils::containerService(container) == ServiceType::Other) {
         return;
     }
 
@@ -186,7 +192,7 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
 
     auto isProtocolConfigExists = [](const ContainerConfig &containerConfig, const DockerContainer container) {
-        Proto protocol = ContainerProps::defaultProtocol(container);
+        Proto protocol = ContainerUtils::defaultProtocol(container);
         return ProtocolConfigUtils::hasClientConfig(containerConfig.protocolConfig);
     };
 
@@ -210,12 +216,12 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
 
 ErrorCode InstallController::prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, ContainerConfig &containerConfig)
 {
-    if (!ContainerProps::isSupportedByCurrentPlatform(container)) {
+    if (!ContainerUtils::isSupportedByCurrentPlatform(container)) {
         return ErrorCode::NoError;
     }
 
-    if (ContainerProps::containerService(container) != ServiceType::Other) {
-        Proto protocol = ContainerProps::defaultProtocol(container);
+    if (ContainerUtils::containerService(container) != ServiceType::Other) {
+        Proto protocol = ContainerUtils::defaultProtocol(container);
 
         DnsSettings dnsSettings = {
             m_appSettingsRepository->primaryDns(),
@@ -353,13 +359,13 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
         return ErrorCode::NoError;
     };
 
-    const Proto protocol = ContainerProps::defaultProtocol(container);
-    QStringList fixedPorts = ContainerProps::fixedPortsForContainer(container);
+    const Proto protocol = ContainerUtils::defaultProtocol(container);
+    QStringList fixedPorts = ContainerUtils::fixedPortsForContainer(container);
 
     QString port = ProtocolConfigUtils::portWithDefault(config.protocolConfig, protocol);
     QString transportProto = ProtocolConfigUtils::transportProtoWithDefault(config.protocolConfig, protocol);
     if (transportProto.isEmpty()) {
-        transportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
+        transportProto = ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(protocol), protocol);
     }
 
     // TODO reimplement with netstat
@@ -418,7 +424,7 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
 
 bool InstallController::isReinstallContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig)
 {
-    Proto mainProto = ContainerProps::defaultProtocol(container);
+    Proto mainProto = ContainerUtils::defaultProtocol(container);
     
     QJsonObject oldProtoConfig = ProtocolConfigUtils::toJson(oldConfig.protocolConfig, mainProto);
     QJsonObject newProtoConfig = ProtocolConfigUtils::toJson(newConfig.protocolConfig, mainProto);
@@ -433,7 +439,7 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             return true;
     }
 
-    if (ContainerProps::isAwgContainer(container)) {
+    if (ContainerUtils::isAwgContainer(container)) {
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
             || (oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
@@ -724,12 +730,12 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
 
 bool InstallController::isUpdateDockerContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig)
 {
-    Proto mainProto = ContainerProps::defaultProtocol(container);
+    Proto mainProto = ContainerUtils::defaultProtocol(container);
     
     QJsonObject oldProtoConfig = ProtocolConfigUtils::toJson(oldConfig.protocolConfig, mainProto);
     QJsonObject newProtoConfig = ProtocolConfigUtils::toJson(newConfig.protocolConfig, mainProto);
 
-    if (ContainerProps::isAwgContainer(container)) {
+    if (ContainerUtils::isAwgContainer(container)) {
         const AwgConfig oldConfig(oldProtoConfig);
         const AwgConfig newConfig(newProtoConfig);
 
@@ -766,7 +772,7 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
         if (!containers.contains(iterator.key())) {
             ContainerConfig containerConfig = iterator.value();
 
-            if (ContainerProps::isSupportedByCurrentPlatform(iterator.key())) {
+            if (ContainerUtils::isSupportedByCurrentPlatform(iterator.key())) {
                 errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig);
                 if (errorCode != ErrorCode::NoError) {
                     return errorCode;
@@ -778,8 +784,8 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
 
             DockerContainer defaultContainer = ServerConfigUtils::defaultContainer(serverConfigModel);
             if (defaultContainer == DockerContainer::None
-                && ContainerProps::containerService(iterator.key()) != ServiceType::Other
-                && ContainerProps::isSupportedByCurrentPlatform(iterator.key())) {
+                && ContainerUtils::containerService(iterator.key()) != ServiceType::Other
+                && ContainerUtils::isSupportedByCurrentPlatform(iterator.key())) {
                 ServerConfigUtils::visit(serverConfigModel, [iterator](auto& arg) {
                     arg.defaultContainer = iterator.key();
                 });
@@ -823,7 +829,7 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
         ContainerConfig containerConfig = iterator.value();
 
-        if (ContainerProps::isSupportedByCurrentPlatform(iterator.key())) {
+        if (ContainerUtils::isSupportedByCurrentPlatform(iterator.key())) {
             errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
@@ -879,7 +885,7 @@ ErrorCode InstallController::installContainer(int serverIndex, DockerContainer c
         if (existingConfigModel.container == DockerContainer::None) {
             ContainerConfig containerConfig = iterator.value();
             
-            if (ContainerProps::isSupportedByCurrentPlatform(iterator.key())) {
+            if (ContainerUtils::isSupportedByCurrentPlatform(iterator.key())) {
                 errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig);
                 if (errorCode != ErrorCode::NoError) {
                     return errorCode;
@@ -1012,7 +1018,7 @@ void InstallController::stopAllSftpMounts()
 
 void InstallController::updateContainerConfigAfterInstallation(DockerContainer container, ContainerConfig &containerConfig, const QString &stdOut)
 {
-    Proto mainProto = ContainerProps::defaultProtocol(container);
+    Proto mainProto = ContainerUtils::defaultProtocol(container);
 
     if (container == DockerContainer::TorWebSite) {
         if (auto* xrayConfig = std::get_if<XrayProtocolConfig>(&containerConfig.protocolConfig)) {
@@ -1058,10 +1064,10 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString name = containerAndPortMatch.captured(1);
             QString port = containerAndPortMatch.captured(2);
             QString transportProto = containerAndPortMatch.captured(3);
-            DockerContainer container = ContainerProps::containerFromString(name);
+            DockerContainer container = ContainerUtils::containerFromString(name);
 
             QJsonObject config;
-            Proto protocol = ContainerProps::defaultProtocol(container);
+            Proto protocol = ContainerUtils::defaultProtocol(container);
             QJsonObject containerConfig;
 
             containerConfig.insert(config_key::port, port);
@@ -1074,8 +1080,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                 return extractError;
             }
 
-            config.insert(config_key::container, ContainerProps::containerToString(container));
-            config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+            config.insert(config_key::container, ContainerUtils::containerToString(container));
+            config.insert(ProtocolUtils::protoToString(protocol), containerConfig);
             installedContainers.insert(container, ContainerConfig::fromJson(config));
         }
 
@@ -1084,10 +1090,10 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString name = torOrDnsRegMatch.captured(1);
             QString port = torOrDnsRegMatch.captured(2);
             QString transportProto = torOrDnsRegMatch.captured(3);
-            DockerContainer container = ContainerProps::containerFromString(name);
+            DockerContainer container = ContainerUtils::containerFromString(name);
 
             QJsonObject config;
-            Proto protocol = ContainerProps::defaultProtocol(container);
+            Proto protocol = ContainerUtils::defaultProtocol(container);
             QJsonObject containerConfig;
 
             containerConfig.insert(config_key::port, port);
@@ -1100,8 +1106,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                 return extractError;
             }
 
-            config.insert(config_key::container, ContainerProps::containerToString(container));
-            config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+            config.insert(config_key::container, ContainerUtils::containerToString(container));
+            config.insert(ProtocolUtils::protoToString(protocol), containerConfig);
             installedContainers.insert(container, ContainerConfig::fromJson(config));
         }
     }

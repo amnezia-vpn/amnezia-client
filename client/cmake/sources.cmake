@@ -4,11 +4,20 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/migrations.h
     ${CLIENT_ROOT_DIR}/../ipc/ipc.h
     ${CLIENT_ROOT_DIR}/amnezia_application.h
-    ${CLIENT_ROOT_DIR}/containers/containers_defs.h
-    ${CLIENT_ROOT_DIR}/core/utils/defs.h
+    ${CLIENT_ROOT_DIR}/core/utils/errorCodes.h
+    ${CLIENT_ROOT_DIR}/core/utils/routeModes.h
+    ${CLIENT_ROOT_DIR}/core/utils/commonStructs.h
+    ${CLIENT_ROOT_DIR}/core/utils/containerEnum.h
+    ${CLIENT_ROOT_DIR}/core/utils/protocolEnum.h
+    ${CLIENT_ROOT_DIR}/core/utils/containers/containerUtils.h
+    ${CLIENT_ROOT_DIR}/core/protocols/protocolUtils.h
+    ${CLIENT_ROOT_DIR}/core/utils/constants/configKeys.h
+    ${CLIENT_ROOT_DIR}/core/utils/constants/protocolConstants.h
+    ${CLIENT_ROOT_DIR}/core/utils/constants/apiKeys.h
+    ${CLIENT_ROOT_DIR}/core/utils/constants/apiConstants.h
+    ${CLIENT_ROOT_DIR}/core/utils/api/apiEnums.h
     ${CLIENT_ROOT_DIR}/core/utils/errorStrings.h
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/scriptsRegistry.h
-    ${CLIENT_ROOT_DIR}/core/utils/api/apiDefs.h
     ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreSignalHandlers.h
@@ -42,7 +51,6 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/repositories/secureAppSettingsRepository.h
     ${CLIENT_ROOT_DIR}/core/repositories/qServersRepository.h
     ${CLIENT_ROOT_DIR}/core/repositories/qAppSettingsRepository.h
-    ${CLIENT_ROOT_DIR}/core/protocols/protocolsDefs.h
     ${CLIENT_ROOT_DIR}/core/protocols/qmlRegisterProtocols.h
     ${CLIENT_ROOT_DIR}/ui/utils/pages.h
     ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.h
@@ -84,8 +92,9 @@ endif()
 set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/utils/migrations.cpp
     ${CLIENT_ROOT_DIR}/amnezia_application.cpp
-    ${CLIENT_ROOT_DIR}/containers/containers_defs.cpp
     ${CLIENT_ROOT_DIR}/core/utils/errorStrings.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/containers/containerUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/protocols/protocolUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/scriptsRegistry.cpp
     ${CLIENT_ROOT_DIR}/core/utils/qrCodeUtils.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
@@ -118,7 +127,6 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/repositories/secureAppSettingsRepository.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/qServersRepository.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/qAppSettingsRepository.cpp
-    ${CLIENT_ROOT_DIR}/core/protocols/protocolsDefs.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.cpp
     ${CLIENT_ROOT_DIR}/core/protocols/vpnProtocol.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp

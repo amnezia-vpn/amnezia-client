@@ -10,6 +10,7 @@
 #include "logger.h"
 #include "ikev2VpnProtocolWindows.h"
 #include "core/utils/utilities.h"
+#include "core/protocols/protocolUtils.h"
 
 
 static Ikev2Protocol* self = nullptr;
@@ -172,7 +173,7 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
 
 void Ikev2Protocol::readIkev2Configuration(const QJsonObject &configuration)
 {
-    m_config = configuration.value(ProtocolProps::key_proto_config_data(Proto::Ikev2)).toObject();
+    m_config = configuration.value(ProtocolUtils::key_proto_config_data(Proto::Ikev2)).toObject();
 }
 
 ErrorCode Ikev2Protocol::start()

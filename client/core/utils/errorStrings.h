@@ -3,7 +3,7 @@
 
 #include <QDebug>
 
-#include "core/utils/defs.h"
+#include "core/utils/errorCodes.h"
 
 using namespace amnezia;
 

@@ -1,5 +1,17 @@
 #include "protocolsModel.h"
 
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/constants/configKeys.h"
+#include <QJsonDocument>
+
+using namespace ProtocolUtils;
+
 ProtocolsModel::ProtocolsModel(QObject *parent)
     : QAbstractListModel(parent)
 {
@@ -19,8 +31,16 @@ QHash<int, QByteArray> ProtocolsModel::roleNames() const
     roles[ServerProtocolPageRole] = "serverProtocolPage";
     roles[ClientProtocolPageRole] = "clientProtocolPage";
     roles[ProtocolIndexRole] = "protocolIndex";
+    roles[ProtocolStringRole] = "protocolString";
     roles[RawConfigRole] = "rawConfig";
     roles[IsClientProtocolExistsRole] = "isClientProtocolExists";
+    roles[IsWireGuardRole] = "isWireGuard";
+    roles[IsAwgRole] = "isAwg";
+    roles[IsOpenVpnRole] = "isOpenVpn";
+    roles[IsXrayRole] = "isXray";
+    roles[IsSftpRole] = "isSftp";
+    roles[IsIpsecRole] = "isIpsec";
+    roles[IsSocks5ProxyRole] = "isSocks5Proxy";
 
     return roles;
 }
@@ -31,18 +51,27 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
+    amnezia::Proto proto = ProtocolUtils::protoFromString(m_content.keys().at(index.row()));
+    
     switch (role) {
     case ProtocolNameRole: {
-        amnezia::Proto proto = ProtocolProps::protoFromString(m_content.keys().at(index.row()));
-        return ProtocolProps::protocolHumanNames().value(proto);
+        return ProtocolUtils::protocolHumanNames().value(proto);
     }
     case ServerProtocolPageRole:
-        return static_cast<int>(serverProtocolPage(ProtocolProps::protoFromString(m_content.keys().at(index.row()))));
+        return static_cast<int>(serverProtocolPage(proto));
     case ClientProtocolPageRole:
-        return static_cast<int>(clientProtocolPage(ProtocolProps::protoFromString(m_content.keys().at(index.row()))));
-    case ProtocolIndexRole: return ProtocolProps::protoFromString(m_content.keys().at(index.row()));
+        return static_cast<int>(clientProtocolPage(proto));
+    case ProtocolIndexRole: return proto;
+    case ProtocolStringRole: return ProtocolUtils::protoToString(proto);
+    case IsWireGuardRole: return proto == Proto::WireGuard;
+    case IsAwgRole: return proto == Proto::Awg;
+    case IsOpenVpnRole: return proto == Proto::OpenVpn;
+    case IsXrayRole: return proto == Proto::Xray;
+    case IsSftpRole: return proto == Proto::Sftp;
+    case IsIpsecRole: return proto == Proto::Ikev2;
+    case IsSocks5ProxyRole: return proto == Proto::Socks5Proxy;
     case RawConfigRole: {
-        auto protocolConfig = m_content.value(ContainerProps::containerTypeToProtocolString(m_container)).toObject();
+        auto protocolConfig = m_content.value(ContainerUtils::containerTypeToProtocolString(m_container)).toObject();
         auto lastConfigJsonDoc =
                 QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
         auto lastConfigJson = lastConfigJsonDoc.object();
@@ -55,7 +84,7 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
         return rawConfig;
     }
     case IsClientProtocolExistsRole: {
-        QString protocolKey = ContainerProps::containerTypeToProtocolString(m_container);
+        QString protocolKey = ContainerUtils::containerTypeToProtocolString(m_container);
         auto protocolConfig = m_content.value(protocolKey).toObject();
         auto lastConfigJsonDoc =
                 QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
@@ -71,7 +100,7 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
 
 void ProtocolsModel::updateModel(const QJsonObject &content)
 {
-    m_container = ContainerProps::containerFromString(content.value(config_key::container).toString());
+    m_container = ContainerUtils::containerFromString(content.value(config_key::container).toString());
 
     m_content = content;
     m_content.remove(config_key::container);
@@ -80,7 +109,7 @@ void ProtocolsModel::updateModel(const QJsonObject &content)
 QJsonObject ProtocolsModel::getConfig()
 {
     QJsonObject config = m_content;
-    config.insert(config_key::container, ContainerProps::containerToString(m_container));
+    config.insert(config_key::container, ContainerUtils::containerToString(m_container));
     return config;
 }
 

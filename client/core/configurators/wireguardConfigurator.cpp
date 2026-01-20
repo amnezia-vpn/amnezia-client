@@ -13,10 +13,15 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/utilities.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/wireGuardProtocolConfig.h"

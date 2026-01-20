@@ -6,8 +6,13 @@
 #include <QObject>
 #include <QLoggingCategory>
 #include "core/utils/networkUtilities.h"
-#include "containers/containers_defs.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/wireGuardProtocolConfig.h"
@@ -15,6 +20,8 @@
 #include "core/models/protocols/xrayProtocolConfig.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
+
+using namespace ProtocolUtils;
 
 QString amnezia::scriptFolder(amnezia::DockerContainer container)
 {
@@ -101,10 +108,10 @@ amnezia::ScriptVars amnezia::genBaseVars(const ServerCredentials &credentials,
     ScriptVars vars;
 
     vars.append({ { "$REMOTE_HOST", credentials.hostName } });
-    vars.append({ { "$CONTAINER_NAME", ContainerProps::containerToString(container) } });
-    vars.append({ { "$DOCKERFILE_FOLDER", "/opt/amnezia/" + ContainerProps::containerToString(container) } });
+    vars.append({ { "$CONTAINER_NAME", ContainerUtils::containerToString(container) } });
+    vars.append({ { "$DOCKERFILE_FOLDER", "/opt/amnezia/" + ContainerUtils::containerToString(container) } });
 
-    QString serverIp = (!ContainerProps::isAwgContainer(container) && container != DockerContainer::WireGuard && container != DockerContainer::Xray)
+    QString serverIp = (!ContainerUtils::isAwgContainer(container) && container != DockerContainer::WireGuard && container != DockerContainer::Xray)
             ? NetworkUtilities::getIPAddress(credentials.hostName)
             : credentials.hostName;
     if (!serverIp.isEmpty()) {
@@ -228,7 +235,7 @@ amnezia::ScriptVars amnezia::genSftpVars(const ContainerConfig &containerConfig)
     ScriptVars vars;
     
     if (auto* sftpConfig = std::get_if<SftpProtocolConfig>(&containerConfig.protocolConfig)) {
-        vars.append({ { "$SFTP_PORT", sftpConfig->port.isEmpty() ? QString::number(ProtocolProps::defaultPort(Proto::Sftp)) : sftpConfig->port } });
+        vars.append({ { "$SFTP_PORT", sftpConfig->port.isEmpty() ? QString::number(ProtocolUtils::defaultPort(Proto::Sftp)) : sftpConfig->port } });
         vars.append({ { "$SFTP_USER", sftpConfig->userName } });
         vars.append({ { "$SFTP_PASSWORD", sftpConfig->password } });
     }
@@ -255,7 +262,7 @@ amnezia::ScriptVars amnezia::genSocks5ProxyVars(const ContainerConfig &container
 amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
-    Proto protocol = ContainerProps::defaultProtocol(container);
+    Proto protocol = ContainerUtils::defaultProtocol(container);
 
     switch (protocol) {
     case Proto::OpenVpn:

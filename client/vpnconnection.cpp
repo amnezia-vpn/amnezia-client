@@ -32,6 +32,8 @@
 #include "core/utils/networkUtilities.h"
 #include "vpnconnection.h"
 
+using namespace ProtocolUtils;
+
 VpnConnection::VpnConnection(ServersRepository* serversRepository, AppSettingsRepository* appSettingsRepository, QObject *parent)
     : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(new QTimer(this))
 {
@@ -76,7 +78,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             iface->resetIpStack();
             iface->flushDns();
 
-            if (!ContainerProps::isAwgContainer(container) && 
+            if (!ContainerUtils::isAwgContainer(container) && 
                 container != DockerContainer::WireGuard) {
                 QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
                 QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
@@ -275,7 +277,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
 {
     qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
                         .arg(serverIndex)
-                        .arg(ContainerProps::containerToString(container))
+                        .arg(ContainerUtils::containerToString(container))
              << m_appSettingsRepository->routeMode();
 
     m_remoteAddress = NetworkUtilities::getIPAddress(credentials.hostName);
@@ -311,7 +313,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
 
     m_vpnProtocol.reset(androidVpnProtocol);
 #elif defined Q_OS_IOS || defined(MACOS_NE)
-    Proto proto = ContainerProps::defaultProtocol(container);
+    Proto proto = ContainerUtils::defaultProtocol(container);
     IosController::Instance()->connectVpn(proto, m_vpnConfiguration);
     connect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
     return;
@@ -403,7 +405,7 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     // this block is for old native configs and for old self-hosted configs
     auto protocolName = m_vpnConfiguration.value(config_key::vpnproto).toString();
-    if (protocolName == ProtocolProps::protoToString(Proto::Awg) || protocolName == ProtocolProps::protoToString(Proto::WireGuard)) {
+    if (protocolName == ProtocolUtils::protoToString(Proto::Awg) || protocolName == ProtocolUtils::protoToString(Proto::WireGuard)) {
         allowSiteBasedSplitTunneling = false;
         auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
         if (configData.value(config_key::allowed_ips).isString()) {

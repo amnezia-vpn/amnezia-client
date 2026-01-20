@@ -13,9 +13,13 @@
     #include <QApplication>
 #endif
 
-#include "core/utils/defs.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 #include "core/utils/networkUtilities.h"
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "core/utils/utilities.h"
@@ -226,13 +230,13 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerC
 {
     QString script_import = QString("sudo docker exec -i %1 bash -c \"cd /opt/amnezia/openvpn && "
                                     "easyrsa import-req %2/%3.req %3\"")
-                                    .arg(ContainerProps::containerToString(container))
+                                    .arg(ContainerUtils::containerToString(container))
                                     .arg(amnezia::protocols::openvpn::clientsDirPath)
                                     .arg(clientId);
 
     QString script_sign = QString("sudo docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amnezia/openvpn && "
                                   "easyrsa sign-req client %2\"")
-                                  .arg(ContainerProps::containerToString(container))
+                                  .arg(ContainerUtils::containerToString(container))
                                   .arg(clientId);
 
     QStringList scriptList { script_import, script_sign };

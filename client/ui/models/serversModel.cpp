@@ -4,7 +4,9 @@
 #include <QSet>
 #include <QJsonDocument>
 
-#include "core/utils/api/apiDefs.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 
@@ -50,7 +52,7 @@ ServersModel::ServersModel(QObject *parent) : QAbstractListModel(parent)
             return;
         }
         auto defaultContainer =
-                ContainerProps::containerFromString(m_servers.at(serverIndex).toObject().value(config_key::defaultContainer).toString());
+                ContainerUtils::containerFromString(m_servers.at(serverIndex).toObject().value(config_key::defaultContainer).toString());
         emit ServersModel::defaultServerDefaultContainerChanged(defaultContainer);
         emit ServersModel::defaultServerNameChanged();
     });
@@ -102,7 +104,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return primaryDns == protocols::dns::amneziaDnsIp;
     }
     case DefaultContainerRole: {
-        return ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
+        return ContainerUtils::containerFromString(server.value(config_key::defaultContainer).toString());
     }
     case HasInstalledContainers: {
         return serverHasInstalledContainers(index.row());
@@ -184,7 +186,7 @@ QString ServersModel::getServerDescription(const QJsonObject &server, const int 
         bool isDnsInstalled = false;
         for (const auto &containerValue : containers) {
             QJsonObject containerObj = containerValue.toObject();
-            DockerContainer containerType = ContainerProps::containerFromString(containerObj.value(config_key::container).toString());
+            DockerContainer containerType = ContainerUtils::containerFromString(containerObj.value(config_key::container).toString());
             if (containerType == DockerContainer::Dns) {
                 isDnsInstalled = true;
                 break;
@@ -347,8 +349,8 @@ bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
     QJsonObject server = m_servers.at(serverIndex).toObject();
     const auto containers = server.value(config_key::containers).toArray();
     for (auto it = containers.begin(); it != containers.end(); it++) {
-        auto container = ContainerProps::containerFromString(it->toObject().value(config_key::container).toString());
-        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
+        auto container = ContainerUtils::containerFromString(it->toObject().value(config_key::container).toString());
+        if (ContainerUtils::containerService(container) == ServiceType::Vpn) {
             return true;
         }
         if (container == DockerContainer::SSXray) {

@@ -8,7 +8,9 @@
 #include <QTemporaryFile>
 #include <QUuid>
 
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "core/utils/utilities.h"

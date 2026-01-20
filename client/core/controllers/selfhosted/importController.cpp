@@ -12,15 +12,23 @@
 #include <QUrl>
 #include <algorithm>
 
-#include "containers/containers_defs.h"
-#include "core/utils/api/apiDefs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/serialization/serialization.h"
 #include "core/utils/utilities.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/models/serverConfig.h"
 
 using namespace amnezia;
+using namespace ProtocolUtils;
 
 namespace
 {
@@ -316,7 +324,7 @@ QJsonObject ImportController::processNativeWireGuardConfig(const QJsonObject &co
     auto containers = result.value(config_key::containers).toArray();
     if (!containers.isEmpty()) {
         auto container = containers.at(0).toObject();
-        auto serverProtocolConfig = container.value(ContainerProps::containerTypeToProtocolString(DockerContainer::WireGuard)).toObject();
+        auto serverProtocolConfig = container.value(ContainerUtils::containerTypeToProtocolString(DockerContainer::WireGuard)).toObject();
         auto clientProtocolConfig = QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
         QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(4, 7));
@@ -593,10 +601,10 @@ void ImportController::checkForMaliciousStrings(QJsonObject &serverConfig, QStri
     for (const QJsonValue &container : containers) {
         auto containerConfig = container.toObject();
         auto containerName = containerConfig[config_key::container].toString();
-        if (containerName == ContainerProps::containerToString(DockerContainer::OpenVpn)) {
+        if (containerName == ContainerUtils::containerToString(DockerContainer::OpenVpn)) {
 
             QString protocolConfig =
-                    containerConfig[ProtocolProps::protoToString(Proto::OpenVpn)].toObject()[config_key::last_config].toString();
+                    containerConfig[ProtocolUtils::protoToString(Proto::OpenVpn)].toObject()[config_key::last_config].toString();
             QString protocolConfigJson = QJsonDocument::fromJson(protocolConfig.toUtf8()).object()[config_key::config].toString();
 
             // https://github.com/OpenVPN/openvpn/blob/master/doc/man-sections/script-options.rst
@@ -634,9 +642,9 @@ void ImportController::processAmneziaConfig(QJsonObject &config) const
     auto containers = config.value(config_key::containers).toArray();
     for (auto i = 0; i < containers.size(); i++) {
         auto container = containers.at(i).toObject();
-        auto dockerContainer = ContainerProps::containerFromString(container.value(config_key::container).toString());
-        if (ContainerProps::isAwgContainer(dockerContainer) || dockerContainer == DockerContainer::WireGuard) {
-            auto containerConfig = container.value(ContainerProps::containerTypeToProtocolString(dockerContainer)).toObject();
+        auto dockerContainer = ContainerUtils::containerFromString(container.value(config_key::container).toString());
+        if (ContainerUtils::isAwgContainer(dockerContainer) || dockerContainer == DockerContainer::WireGuard) {
+            auto containerConfig = container.value(ContainerUtils::containerTypeToProtocolString(dockerContainer)).toObject();
             auto protocolConfig = containerConfig.value(config_key::last_config).toString();
             if (protocolConfig.isEmpty()) {
                 return;
@@ -644,11 +652,11 @@ void ImportController::processAmneziaConfig(QJsonObject &config) const
 
             QJsonObject jsonConfig = QJsonDocument::fromJson(protocolConfig.toUtf8()).object();
             jsonConfig[config_key::mtu] =
-                    ContainerProps::isAwgContainer(dockerContainer) ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+                    ContainerUtils::isAwgContainer(dockerContainer) ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
 
             containerConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
 
-            container[ContainerProps::containerTypeToProtocolString(dockerContainer)] = containerConfig;
+            container[ContainerUtils::containerTypeToProtocolString(dockerContainer)] = containerConfig;
             containers.replace(i, container);
             config.insert(config_key::containers, containers);
         }

@@ -28,6 +28,8 @@ const char* MessageKey::isOnDemand = "is-on-demand";
 const char* MessageKey::SplitTunnelType = "SplitTunnelType";
 const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
 
+using namespace ProtocolUtils;
+
 #if !MACOS_NE
 static UIViewController* getViewController() {
     UIApplication *application = [UIApplication sharedApplication];
@@ -221,13 +223,13 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     if (configuration.value(config_key::description).toString().isEmpty()) {
         tunnelName = QString("%1 %2")
           .arg(configuration.value(config_key::hostName).toString())
-          .arg(ProtocolProps::protoToString(proto));
+          .arg(ProtocolUtils::protoToString(proto));
     }
     else {
         tunnelName = QString("%1 (%2) %3")
           .arg(configuration.value(config_key::description).toString())
           .arg(configuration.value(config_key::hostName).toString())
-          .arg(ProtocolProps::protoToString(proto));
+          .arg(ProtocolUtils::protoToString(proto));
     }
 
     qDebug() << "IosController::connectVpn" << tunnelName;
@@ -519,7 +521,7 @@ void IosController::vpnConfigurationDidChange(void *pNotification)
 
 bool IosController::setupOpenVPN()
 {
-    QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
+    QJsonObject ovpn = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
     QString ovpnConfig = ovpn[config_key::config].toString();
 
     QJsonObject openVPNConfig {};
@@ -549,7 +551,7 @@ bool IosController::setupOpenVPN()
 
 bool IosController::setupWireGuard()
 {
-    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
+    QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
 
     QJsonObject wgConfig {};
     wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
@@ -614,7 +616,7 @@ bool IosController::setupWireGuard()
 
 bool IosController::setupXray()
 {
-    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Xray)].toObject();
+    QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::Xray)].toObject();
     QJsonDocument xrayConfigDoc(config);
 
     QString xrayConfigStr(xrayConfigDoc.toJson(QJsonDocument::Compact));
@@ -632,7 +634,7 @@ bool IosController::setupXray()
 
 bool IosController::setupSSXray()
 {
-    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::SSXray)].toObject();
+    QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::SSXray)].toObject();
     QJsonDocument ssXrayConfigDoc(config);
 
     QString ssXrayConfigStr(ssXrayConfigDoc.toJson(QJsonDocument::Compact));
@@ -650,7 +652,7 @@ bool IosController::setupSSXray()
 
 bool IosController::setupAwg()
 {
-    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Awg)].toObject();
+    QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::Awg)].toObject();
 
     QJsonObject wgConfig {};
     wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);

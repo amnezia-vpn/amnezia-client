@@ -8,7 +8,10 @@
 #include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"
 #include "core/utils/serialization/serialization.h"
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
@@ -50,9 +53,9 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
     ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
 
-    if (ContainerProps::containerService(container) != ServiceType::Other) {
+    if (ContainerUtils::containerService(container) != ServiceType::Other) {
         SshSession sshSession;
-        Proto protocol = ContainerProps::defaultProtocol(container);
+        Proto protocol = ContainerUtils::defaultProtocol(container);
 
         DnsSettings dnsSettings = {
             m_appSettingsRepository->primaryDns(),
@@ -112,7 +115,7 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
 {
     NativeConfigResult result;
 
-    if (ContainerProps::containerService(container) == ServiceType::Other) {
+    if (ContainerUtils::containerService(container) == ServiceType::Other) {
         return result;
     }
 
@@ -162,7 +165,7 @@ ExportController::ExportResult ExportController::generateOpenVpnConfig(int serve
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
 
-    Proto protocol = ContainerProps::defaultProtocol(container);
+    Proto protocol = ContainerUtils::defaultProtocol(container);
 
     auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName, protocol, isApiConfig);
     if (nativeResult.errorCode != ErrorCode::NoError) {

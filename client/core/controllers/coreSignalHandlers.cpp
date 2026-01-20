@@ -3,7 +3,8 @@
 #include <QTimer>
 
 #include "core/utils/selfhosted/sshSession.h"
-#include "core/utils/defs.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
 #include "core/controllers/coreController.h"
 #include "core/repositories/qServersRepository.h"
 #include "core/repositories/qAppSettingsRepository.h"

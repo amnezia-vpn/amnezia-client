@@ -1,6 +1,9 @@
 #include "socks5ProxyConfigModel.h"
 
-#include "core/protocols/protocolsDefs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 
 Socks5ProxyConfigModel::Socks5ProxyConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -14,7 +17,7 @@ int Socks5ProxyConfigModel::rowCount(const QModelIndex &parent) const
 
 bool Socks5ProxyConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
         return false;
     }
 
@@ -47,7 +50,7 @@ QVariant Socks5ProxyConfigModel::data(const QModelIndex &index, int role) const
 void Socks5ProxyConfigModel::updateModel(const QJsonObject &config)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
+    m_container = ContainerUtils::containerFromString(config.value(config_key::container).toString());
 
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::socks5proxy).toObject();

@@ -4,7 +4,9 @@
 #include <QObject>
 
 #include "configuratorBase.h"
-#include "core/utils/defs.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 
 class XrayConfigurator : public ConfiguratorBase
 {
