@@ -11,7 +11,7 @@
 
 #include "containers/containers_defs.h"
 #include "core/utils/defs.h"
-#include "core/repositories/serversRepository.h"
+#include "core/repositories/qServersRepository.h"
 #include "core/repositories/appSettingsRepository.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
@@ -42,7 +42,7 @@ public:
     };
     
 public:
-    explicit ServersController(ServersRepository* serversRepository, 
+    explicit ServersController(QServersRepository* serversRepository, 
                               AppSettingsRepository* appSettingsRepository = nullptr,
                               QObject *parent = nullptr);
     ~ServersController() = default;
@@ -85,7 +85,7 @@ public slots:
     void recomputeGatewayStacks();
 
 private:
-    ServersRepository* m_serversRepository;
+    QServersRepository* m_serversRepository;
     AppSettingsRepository* m_appSettingsRepository;
     GatewayStacks m_gatewayStacks;
 };

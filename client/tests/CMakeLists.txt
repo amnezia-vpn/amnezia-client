@@ -44,9 +44,79 @@ target_link_libraries(test_multiple_imports PRIVATE
     test_common
 )
 
+add_executable(test_server_edit
+    testServerEdit.cpp
+)
+
+target_link_libraries(test_server_edit PRIVATE
+    Qt6::Test
+    test_common
+)
+
+add_executable(test_default_server_change
+    testDefaultServerChange.cpp
+)
+
+target_link_libraries(test_default_server_change PRIVATE
+    Qt6::Test
+    test_common
+)
+
+add_executable(test_server_edge_cases
+    testServerEdgeCases.cpp
+)
+
+target_link_libraries(test_server_edge_cases PRIVATE
+    Qt6::Test
+    test_common
+)
+
+add_executable(test_signal_order
+    testSignalOrder.cpp
+)
+
+target_link_libraries(test_signal_order PRIVATE
+    Qt6::Test
+    test_common
+)
+
+add_executable(test_servers_model_sync
+    testServersModelSync.cpp
+)
+
+target_link_libraries(test_servers_model_sync PRIVATE
+    Qt6::Test
+    test_common
+)
+
+add_executable(test_gateway_stacks
+    testGatewayStacks.cpp
+)
+
+target_link_libraries(test_gateway_stacks PRIVATE
+    Qt6::Test
+    test_common
+)
+
+add_executable(test_complex_operations
+    testComplexOperations.cpp
+)
+
+target_link_libraries(test_complex_operations PRIVATE
+    Qt6::Test
+    test_common
+)
+
 enable_testing()
 add_test(NAME ImportExportTest COMMAND test_import_export)
 add_test(NAME MultipleImportsTest COMMAND test_multiple_imports)
+add_test(NAME ServerEditTest COMMAND test_server_edit)
+add_test(NAME DefaultServerChangeTest COMMAND test_default_server_change)
+add_test(NAME ServerEdgeCasesTest COMMAND test_server_edge_cases)
+add_test(NAME SignalOrderTest COMMAND test_signal_order)
+add_test(NAME ServersModelSyncTest COMMAND test_servers_model_sync)
+add_test(NAME GatewayStacksTest COMMAND test_gateway_stacks)
+add_test(NAME ComplexOperationsTest COMMAND test_complex_operations)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_data)
 configure_file(

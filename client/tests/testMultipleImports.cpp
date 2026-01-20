@@ -120,6 +120,71 @@ private slots:
             QVERIFY2(modelDesc3 == "WireGuard Server", "Third server description in model should match");
         }
     }
+
+    void testMultipleImportsRemoval() {
+        QString awgKey = "vpn://AAABFHjadZBBT4QwEIX_ipkzS2wBJdyMB1cPXvbgwRgyQnclgZa0RTYS_rszXRa52Mt77TfzOu0EldEeG62sg-J9AhxPUEywF1CAuF3WTl4dRLCXhJIVpVuUEMpWdLdFKaH7FeUb9Mx3scpFk0XTRbOLvlSkKZsOz-Gi4BsdRiV_EGEydhwlg0tWynEZmd5Yz1bkoaK3xpvKtOU3_UFjOE3SsRs-tfIl1rVVzoWQOI9FzC3eonYcU4ZmgkPdwxz9fSYdYafVT4M7-lEJ80cEtTri0PrH_2q4wlW26f1lioe3p5uDsjQWoS_j_Ct2ipvGU6zO2PWtiivT8RPQudHYmqBXzl-3Yn2slBEMTtklgYt4C_Mv3ROMwA";
+        QString xrayKey = "vpn://AAAAtXjadY7NCsJADIRfRXKui1YP0qt3L14EkRK7EQt2d0lS_0rf3awonjyFmW-YyQBNDIptIBao9sNPQgXYBXq2OL0zPqCA96kGSJHV6HK5MFP6YyCt0XsmsQqYz9zKzd3MmDIGyek6cdRoUJsE43gowNMJ-4uu_695kobbpG0MBndmTrbEV4sWcI6iG-zIQE47umOXLuSa2BlNKHKL7PMeiX5lmdH79bIsoBfiT0UOZQnjCw_AXRQ";
+
+        QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
+        QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &QServersRepository::serverRemoved);
+        
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() == 0, "Initial servers count should be 0");
+
+        auto importResult1 = m_coreController->m_importCoreController->extractConfigFromData(awgKey);
+        QVERIFY2(importResult1.errorCode == ErrorCode::NoError, "First import should succeed");
+        m_coreController->m_importCoreController->importConfig(importResult1.config);
+        
+        auto importResult2 = m_coreController->m_importCoreController->extractConfigFromData(xrayKey);
+        QVERIFY2(importResult2.errorCode == ErrorCode::NoError, "Second import should succeed");
+        m_coreController->m_importCoreController->importConfig(importResult2.config);
+        
+        QVERIFY2(importFinishedSpy.count() == 2, "importFinished signal should be emitted twice");
+        QVERIFY2(defaultServerChangedSpy.count() == 2, "defaultServerChanged signal should be emitted twice");
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "After two imports servers count should be 2");
+        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Second server should be default");
+        
+        ServerConfig server0 = m_coreController->m_serversRepository->server(0);
+        ServerConfig server1 = m_coreController->m_serversRepository->server(1);
+        QString desc0 = ServerConfigUtils::description(server0);
+        QString desc1 = ServerConfigUtils::description(server1);
+        QVERIFY2(desc0 == "AWG Server", "First server description should match");
+        QVERIFY2(desc1 == "Xray Server", "Second server description should match");
+
+        defaultServerChangedSpy.clear();
+        serverRemovedSpy.clear();
+
+        m_coreController->m_serversController->removeServer(0);
+        
+        QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");
+        QVERIFY2(serverRemovedSpy.at(0).at(0).toInt() == 0, "serverRemoved should emit index 0");
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "After removing first server, servers count should be 1");
+        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "After removing first server, default index should be 0");
+        
+        ServerConfig remainingServer = m_coreController->m_serversRepository->server(0);
+        QString remainingDesc = ServerConfigUtils::description(remainingServer);
+        QVERIFY2(remainingDesc == "Xray Server", "Remaining server should be Xray Server");
+        
+        if (m_coreController->m_serversModel) {
+            QVERIFY2(m_coreController->m_serversModel->rowCount() == 1, "After removing first server, model row count should be 1");
+            QString modelDesc = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::NameRole).toString();
+            QVERIFY2(modelDesc == "Xray Server", "Remaining server description in model should match");
+        }
+
+        defaultServerChangedSpy.clear();
+        serverRemovedSpy.clear();
+
+        m_coreController->m_serversController->removeServer(0);
+        
+        QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");
+        QVERIFY2(serverRemovedSpy.at(0).at(0).toInt() == 0, "serverRemoved should emit index 0");
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() == 0, "After removing last server, servers count should be 0");
+        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == -1, "After removing last server, default index should be -1");
+        
+        if (m_coreController->m_serversModel) {
+            QVERIFY2(m_coreController->m_serversModel->rowCount() == 0, "After removing last server, model row count should be 0");
+        }
+    }
 };
 
 QTEST_MAIN(TestMultipleImports)

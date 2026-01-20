@@ -145,10 +145,12 @@ void CoreSignalHandlers::initExportControllerHandler()
 void CoreSignalHandlers::initImportControllerHandler()
 {
     connect(m_coreController->m_importCoreController, &ImportController::importFinished, this, [this]() {
-        if (!m_coreController->m_vpnConnection->isConnected()) {
+        if (!m_coreController->m_vpnConnection || !m_coreController->m_vpnConnection->isConnected()) {
             int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
             m_coreController->m_serversController->setDefaultServerIndex(newServerIndex);
-            m_coreController->m_serversUiController->setProcessedServerIndex(newServerIndex);
+            if (m_coreController->m_serversUiController) {
+                m_coreController->m_serversUiController->setProcessedServerIndex(newServerIndex);
+            }
         }
     });
 }

@@ -135,10 +135,11 @@ void CoreController::initRepositories()
 
 void CoreController::initCoreControllers()
 {
+    QServersRepository* qServersRepo = m_serversRepository;
     ServersRepository* serversRepo = m_serversRepository->repository();
     AppSettingsRepository* appSettingsRepo = m_appSettingsRepository->repository();
     
-    m_serversController = new ServersController(serversRepo, appSettingsRepo, this);
+    m_serversController = new ServersController(qServersRepo, appSettingsRepo, this);
     m_appSplitTunnelingController = new AppSplitTunnelingController(appSettingsRepo);
     m_usersController = new UsersController(serversRepo, this);
     m_sitesController = new SitesController(appSettingsRepo);
