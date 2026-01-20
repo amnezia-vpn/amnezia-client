@@ -95,13 +95,17 @@ void SecureQSettings::setValue(const QString &key, const QVariant &value)
                 ds << value;
             }
 
-            QByteArray encryptedValue = encryptText(decryptedValue);
-            m_settings.setValue(key, magicString + encryptedValue);
+            const auto encryptedValue = encryptText(decryptedValue);
+            if (encryptedValue.has_value()) {
+                m_settings.setValue(key, magicString + *encryptedValue);
+            } else {
+                qCritical() << "SecureQSettings::setValue encryption failed, plaintext fallback";
+                m_settings.setValue(key, value);
+            }
         } else {
-            qCritical() << "SecureQSettings::setValue Encryption required, but key is empty";
-            return;
+            qCritical() << "SecureQSettings::setValue Encryption required, but key is empty. plaintext fallback";
+            m_settings.setValue(key, value);
         }
-
     } else {
         m_settings.setValue(key, value);
     }
@@ -177,16 +181,21 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
     return true;
 }
 
-QByteArray SecureQSettings::encryptText(const QByteArray &value) const
+std::optional<QByteArray> SecureQSettings::encryptText(const QByteArray &value) const
 {
     QSimpleCrypto::QBlockCipher cipher;
-    QByteArray result;
+    QByteArray encrypted;
     try {
-        result = cipher.encryptAesBlockCipher(value, getEncKey(), getEncIv());
+        encrypted = cipher.encryptAesBlockCipher(value, getEncKey(), getEncIv());
     } catch (...) { // todo change error handling in QSimpleCrypto?
         qCritical() << "error when encrypting the settings value";
+        return std::nullopt;
     }
-    return result;
+    if (encrypted.isEmpty() && !value.isEmpty()) {
+        qCritical() << "error when encrypting the settings value: empty result";
+        return std::nullopt;
+    }
+    return encrypted;
 }
 
 QByteArray SecureQSettings::decryptText(const QByteArray &ba) const

@@ -5,6 +5,7 @@
 #include <QMutexLocker>
 #include <QObject>
 #include <QSettings>
+#include <optional>
 
 #include "../client/3rd/qtkeychain/qtkeychain/keychain.h"
 
@@ -24,7 +25,7 @@ public:
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &json);
 
-    QByteArray encryptText(const QByteArray &value) const;
+    std::optional<QByteArray> encryptText(const QByteArray &value) const;
     QByteArray decryptText(const QByteArray &ba) const;
 
     bool encryptionRequired() const;
