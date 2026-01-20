@@ -43,7 +43,7 @@ public:
     
 public:
     explicit ServersController(QServersRepository* serversRepository, 
-                              AppSettingsRepository* appSettingsRepository = nullptr,
+                              QAppSettingsRepository* appSettingsRepository = nullptr,
                               QObject *parent = nullptr);
     ~ServersController() = default;
 
@@ -86,7 +86,7 @@ public slots:
 
 private:
     QServersRepository* m_serversRepository;
-    AppSettingsRepository* m_appSettingsRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
     GatewayStacks m_gatewayStacks;
 };
 

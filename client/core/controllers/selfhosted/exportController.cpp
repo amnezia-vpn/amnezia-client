@@ -54,7 +54,7 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
         SshSession sshSession;
         Proto protocol = ContainerProps::defaultProtocol(container);
 
-        auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository, &sshSession);
+        auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository->repository(), &sshSession);
         ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, containerConfig, result.errorCode);
         if (result.errorCode != ErrorCode::NoError) {
             return result;
@@ -122,7 +122,7 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     modifiedContainerConfig.container = container;
 
     SshSession sshSession;
-    auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository, &sshSession);
+    auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository->repository(), &sshSession);
 
     ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, modifiedContainerConfig, result.errorCode);
     if (result.errorCode != ErrorCode::NoError) {

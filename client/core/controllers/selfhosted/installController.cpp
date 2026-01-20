@@ -217,7 +217,7 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
     if (ContainerProps::containerService(container) != ServiceType::Other) {
         Proto protocol = ContainerProps::defaultProtocol(container);
 
-        auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository, m_sshSession);
+        auto configurator = ConfiguratorBase::create(protocol, m_appSettingsRepository->repository(), m_sshSession);
         ErrorCode errorCode = ErrorCode::NoError;
         ProtocolConfig newProtocolConfig = configurator->createConfig(credentials, container, containerConfig, errorCode);
         if (errorCode != ErrorCode::NoError) {

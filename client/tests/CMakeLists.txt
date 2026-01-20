@@ -107,6 +107,15 @@ target_link_libraries(test_complex_operations PRIVATE
     test_common
 )
 
+add_executable(test_settings_signals
+    testSettingsSignals.cpp
+)
+
+target_link_libraries(test_settings_signals PRIVATE
+    Qt6::Test
+    test_common
+)
+
 enable_testing()
 add_test(NAME ImportExportTest COMMAND test_import_export)
 add_test(NAME MultipleImportsTest COMMAND test_multiple_imports)
@@ -117,6 +126,7 @@ add_test(NAME SignalOrderTest COMMAND test_signal_order)
 add_test(NAME ServersModelSyncTest COMMAND test_servers_model_sync)
 add_test(NAME GatewayStacksTest COMMAND test_gateway_stacks)
 add_test(NAME ComplexOperationsTest COMMAND test_complex_operations)
+add_test(NAME SettingsSignalsTest COMMAND test_settings_signals)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_data)
 configure_file(

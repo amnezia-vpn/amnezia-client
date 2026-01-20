@@ -92,7 +92,7 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(containerConfig.protocolConfig, proto);
     QString protocolConfigString = protocolConfigJson.value(config_key::last_config).toString();
 
-    auto configurator = ConfiguratorBase::create(proto, m_appSettingsRepository, nullptr);
+    auto configurator = ConfiguratorBase::create(proto, m_appSettingsRepository->repository(), nullptr);
     protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
 
     QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
