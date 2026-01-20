@@ -1,7 +1,7 @@
 #ifndef ANDROID_VPNPROTOCOL_H
 #define ANDROID_VPNPROTOCOL_H
 
-#include "vpnprotocol.h"
+#include "vpnProtocol.h"
 
 using namespace amnezia;
 

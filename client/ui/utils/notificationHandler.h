@@ -6,7 +6,7 @@
 #define NOTIFICATIONHANDLER_H
 
 #include <QObject>
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 
 class QMenu;
 

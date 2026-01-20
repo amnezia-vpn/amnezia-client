@@ -8,7 +8,7 @@
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "logger.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 

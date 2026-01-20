@@ -15,7 +15,7 @@
 #include "core/utils/api/apiDefs.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "version.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"

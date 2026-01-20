@@ -1,4 +1,4 @@
-#include "protocols_defs.h"
+#include "protocolsDefs.h"
 
 #include <QRandomGenerator>
 #include <QJsonObject>

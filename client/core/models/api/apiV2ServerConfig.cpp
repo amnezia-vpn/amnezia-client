@@ -4,7 +4,7 @@
 #include <QJsonDocument>
 
 #include "containers/containers_defs.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/models/api/apiConfig.h"
 #include "core/models/api/authData.h"

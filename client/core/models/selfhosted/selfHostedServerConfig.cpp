@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "containers/containers_defs.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 
 namespace amnezia
 {

@@ -8,7 +8,7 @@
 #include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"
 #include "core/utils/serialization/serialization.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"

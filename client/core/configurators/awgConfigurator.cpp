@@ -1,5 +1,5 @@
 #include "awgConfigurator.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/awgProtocolConfig.h"
 

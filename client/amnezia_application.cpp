@@ -23,7 +23,7 @@
 
 #include "platforms/ios/QRCodeReaderBase.h"
 
-#include "protocols/qml_register_protocols.h"
+#include "core/protocols/qmlRegisterProtocols.h"
 #include <QtQuick/QQuickWindow>  // for QQuickWindow
 #include <QWindow>              // for qobject_cast<QWindow*>
 

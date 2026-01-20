@@ -1,4 +1,4 @@
-#include "xrayprotocol.h"
+#include "xrayProtocol.h"
 
 #include "core/utils/ipcClient.h"
 #include "core/utils/utilities.h"

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QQmlEngine>
 
-#include "../protocols/protocols_defs.h"
+#include "../core/protocols/protocolsDefs.h"
 
 using namespace amnezia;
 

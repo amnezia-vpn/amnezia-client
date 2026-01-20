@@ -1,7 +1,7 @@
 #include "openvpnInstaller.h"
 
 #include "containers/containers_defs.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/utils/selfhosted/sshSession.h"
 
 using namespace amnezia;

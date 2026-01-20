@@ -6,7 +6,7 @@
 #include "core/models/selfhosted/nativeServerConfig.h"
 #include "core/models/api/apiV1ServerConfig.h"
 #include "core/models/api/apiV2ServerConfig.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 
 namespace amnezia
 {

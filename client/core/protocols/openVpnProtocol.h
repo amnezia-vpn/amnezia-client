@@ -6,7 +6,7 @@
 #include <QTimer>
 
 #include "core/utils/managementServer.h"
-#include "vpnprotocol.h"
+#include "vpnProtocol.h"
 
 #include "core/utils/ipcClient.h"
 

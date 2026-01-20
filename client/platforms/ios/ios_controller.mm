@@ -8,7 +8,7 @@
 #include <QThread>
 #include <QEventLoop>
 
-#include "../protocols/vpnprotocol.h"
+#include "../core/protocols/vpnProtocol.h"
 #import "ios_controller_wrapper.h"
 #import "StoreKitController.h"
 

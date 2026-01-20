@@ -16,7 +16,7 @@
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"
-    #include <protocols/wireguardprotocol.h>
+    #include <core/protocols/wireGuardProtocol.h>
 #endif
 
 #ifdef Q_OS_ANDROID

@@ -8,7 +8,7 @@
 
 #include "ipc.h"
 #include "logger.h"
-#include "ikev2_vpn_protocol_windows.h"
+#include "ikev2VpnProtocolWindows.h"
 #include "core/utils/utilities.h"
 
 

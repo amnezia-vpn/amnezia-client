@@ -5,7 +5,7 @@
 #include <QMap>
 
 #include "containers/containers_defs.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/models/protocolConfig.h"
 
 namespace amnezia

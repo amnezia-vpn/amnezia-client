@@ -24,7 +24,7 @@
 #include "logger.h"
 #include "daemon/daemonerrors.h"
 
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 
 // How many times do we try to reconnect.
 constexpr int MAX_CONNECTION_RETRY = 10;

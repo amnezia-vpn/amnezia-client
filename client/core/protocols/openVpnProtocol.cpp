@@ -8,7 +8,7 @@
 
 #include "core/utils/networkUtilities.h"
 #include "ipc.h"
-#include "openvpnprotocol.h"
+#include "openVpnProtocol.h"
 #include "core/utils/utilities.h"
 #include "version.h"
 

@@ -1,6 +1,6 @@
 #include "sftpConfigModel.h"
 
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 
 SftpConfigModel::SftpConfigModel(QObject *parent) : QAbstractListModel(parent)
 {

@@ -1,6 +1,6 @@
 #include "ikev2ConfigModel.h"
 
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 
 Ikev2ConfigModel::Ikev2ConfigModel(QObject *parent) : QAbstractListModel(parent)
 {

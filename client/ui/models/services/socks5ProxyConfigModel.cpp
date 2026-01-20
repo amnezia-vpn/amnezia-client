@@ -1,6 +1,6 @@
 #include "socks5ProxyConfigModel.h"
 
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 
 Socks5ProxyConfigModel::Socks5ProxyConfigModel(QObject *parent) : QAbstractListModel(parent)
 {

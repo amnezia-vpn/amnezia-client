@@ -3,7 +3,7 @@
 #include <QJsonDocument>
 
 #include "core/configurators/configuratorBase.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/utils/utilities.h"
 #include "core/utils/networkUtilities.h"
 #include "version.h"

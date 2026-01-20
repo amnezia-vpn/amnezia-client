@@ -1,7 +1,7 @@
 #ifndef QML_REGISTER_PROTOCOLS_H
 #define QML_REGISTER_PROTOCOLS_H
 
-#include "protocols_defs.h"
+#include "protocolsDefs.h"
 
 #include <QObject>
 #include <QDebug>

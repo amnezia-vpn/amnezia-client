@@ -1,6 +1,6 @@
 #include "xrayConfigModel.h"
 
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 
 XrayConfigModel::XrayConfigModel(QObject *parent) : QAbstractListModel(parent)
 {

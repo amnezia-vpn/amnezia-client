@@ -1,8 +1,8 @@
 #include "protocolConfig.h"
 
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "containers/containers_defs.h"
-#include "protocols/ikev2ProtocolConfig.h"
+#include "core/models/protocols/ikev2ProtocolConfig.h"
 
 namespace amnezia
 {

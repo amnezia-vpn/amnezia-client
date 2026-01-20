@@ -2,7 +2,7 @@
 
 #include <QJsonDocument>
 
-#include "../../../protocols/protocols_defs.h"
+#include "../../../core/protocols/protocolsDefs.h"
 
 namespace amnezia
 {

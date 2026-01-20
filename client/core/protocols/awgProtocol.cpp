@@ -1,4 +1,4 @@
-#include "awgprotocol.h"
+#include "awgProtocol.h"
 
 Awg::Awg(const QJsonObject &configuration, QObject *parent)
     : WireguardProtocol(configuration, parent)

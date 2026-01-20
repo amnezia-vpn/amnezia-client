@@ -4,17 +4,17 @@
 #include <QJsonObject>
 #include <variant>
 
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "containers/containers_defs.h"
 
-#include "protocols/awgProtocolConfig.h"
-#include "protocols/wireGuardProtocolConfig.h"
-#include "protocols/openVpnProtocolConfig.h"
-#include "protocols/xrayProtocolConfig.h"
-#include "protocols/ssXrayProtocolConfig.h"
-#include "protocols/sftpProtocolConfig.h"
-#include "protocols/socks5ProxyProtocolConfig.h"
-#include "protocols/ikev2ProtocolConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/wireGuardProtocolConfig.h"
+#include "core/models/protocols/openVpnProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/ssXrayProtocolConfig.h"
+#include "core/models/protocols/sftpProtocolConfig.h"
+#include "core/models/protocols/socks5ProxyProtocolConfig.h"
+#include "core/models/protocols/ikev2ProtocolConfig.h"
 
 namespace amnezia
 {

@@ -13,7 +13,7 @@
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 #include "logger.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "core/utils/utilities.h"

@@ -1,7 +1,7 @@
 #include "serversController.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/api/apiDefs.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 

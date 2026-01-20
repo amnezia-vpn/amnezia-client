@@ -7,7 +7,7 @@
 #include <QLoggingCategory>
 #include "core/utils/networkUtilities.h"
 #include "containers/containers_defs.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/wireGuardProtocolConfig.h"

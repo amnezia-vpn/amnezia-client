@@ -5,7 +5,7 @@
 
 #include "core/controllers/connectionController.h"
 #include "core/utils/defs.h"
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 #include "core/controllers/serversController.h"
 #include "ui/models/containersModel.h"
 #include "ui/models/clientManagementModel.h"

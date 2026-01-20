@@ -8,7 +8,7 @@
 #include "core/utils/api/apiDefs.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 
 SecureServersRepository::SecureServersRepository(SecureQSettings* settings)
     : m_settings(settings)

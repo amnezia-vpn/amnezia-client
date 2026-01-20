@@ -8,7 +8,7 @@
 #include <QRemoteObjectNode>
 #include <QTimer>
 
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 #include "core/utils/defs.h"
 #include "core/repositories/serversRepository.h"
 #include "core/repositories/appSettingsRepository.h"
@@ -18,7 +18,7 @@
 #endif
 
 #ifdef Q_OS_ANDROID
-#include "protocols/android_vpnprotocol.h"
+#include "core/protocols/androidVpnProtocol.h"
 #endif
 
 using namespace amnezia;

@@ -2,16 +2,16 @@
 #include <QTimer>
 
 #include "core/utils/errorStrings.h"
-#include "vpnprotocol.h"
+#include "vpnProtocol.h"
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) and !defined MACOS_NE || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
-    #include "openvpnprotocol.h"
-    #include "wireguardprotocol.h"
-    #include "xrayprotocol.h"
+    #include "openVpnProtocol.h"
+    #include "wireGuardProtocol.h"
+    #include "xrayProtocol.h"
 #endif
 
 #ifdef Q_OS_WINDOWS
-    #include "ikev2_vpn_protocol_windows.h"
+    #include "ikev2VpnProtocolWindows.h"
 #endif
 
 VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject *parent)

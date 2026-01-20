@@ -7,7 +7,7 @@
 #include <QTemporaryFile>
 #include <QTimer>
 
-#include "vpnprotocol.h"
+#include "vpnProtocol.h"
 
 #include "mozilla/controllerimpl.h"
 

@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "wireguardprotocol.h"
+#include "wireGuardProtocol.h"
 
 class Awg : public WireguardProtocol
 {

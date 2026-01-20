@@ -1,6 +1,6 @@
 #include "openvpnConfigModel.h"
 
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 
 OpenVpnConfigModel::OpenVpnConfigModel(QObject *parent) : QAbstractListModel(parent)
 {

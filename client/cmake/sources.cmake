@@ -42,11 +42,11 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/repositories/secureAppSettingsRepository.h
     ${CLIENT_ROOT_DIR}/core/repositories/qServersRepository.h
     ${CLIENT_ROOT_DIR}/core/repositories/qAppSettingsRepository.h
-    ${CLIENT_ROOT_DIR}/protocols/protocols_defs.h
-    ${CLIENT_ROOT_DIR}/protocols/qml_register_protocols.h
+    ${CLIENT_ROOT_DIR}/core/protocols/protocolsDefs.h
+    ${CLIENT_ROOT_DIR}/core/protocols/qmlRegisterProtocols.h
     ${CLIENT_ROOT_DIR}/ui/utils/pages.h
     ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.h
-    ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.h
+    ${CLIENT_ROOT_DIR}/core/protocols/vpnProtocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.h
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.h
@@ -118,9 +118,9 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/repositories/secureAppSettingsRepository.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/qServersRepository.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/qAppSettingsRepository.cpp
-    ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
+    ${CLIENT_ROOT_DIR}/core/protocols/protocolsDefs.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.cpp
-    ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp
+    ${CLIENT_ROOT_DIR}/core/protocols/vpnProtocol.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serialization/outbound.cpp
@@ -229,11 +229,11 @@ set(SOURCES ${SOURCES}
 
 if(WIN32)
     set(HEADERS ${HEADERS}
-        ${CLIENT_ROOT_DIR}/protocols/ikev2_vpn_protocol_windows.h
+        ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.h
     )
 
     set(SOURCES ${SOURCES}
-        ${CLIENT_ROOT_DIR}/protocols/ikev2_vpn_protocol_windows.cpp
+        ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.cpp
     )
 
     set(RESOURCES ${RESOURCES}
@@ -249,10 +249,10 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.h
         ${CLIENT_ROOT_DIR}/core/utils/privilegedProcess.h
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
-        ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.h
-        ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.h
-        ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.h
-        ${CLIENT_ROOT_DIR}/protocols/awgprotocol.h
+        ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.h
+        ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.h
+        ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.h
+        ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.h
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.h
     )
 
@@ -261,10 +261,10 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/core/utils/privilegedProcess.cpp
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
-        ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.cpp
-        ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.cpp
-        ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.cpp
-        ${CLIENT_ROOT_DIR}/protocols/awgprotocol.cpp
+        ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.cpp
+        ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.cpp
+        ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.cpp
+        ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.cpp
     )
 endif()
 

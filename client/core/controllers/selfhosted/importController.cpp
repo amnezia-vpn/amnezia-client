@@ -17,7 +17,7 @@
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/serialization/serialization.h"
 #include "core/utils/utilities.h"
-#include "protocols/protocols_defs.h"
+#include "core/protocols/protocolsDefs.h"
 #include "core/models/serverConfig.h"
 
 using namespace amnezia;
