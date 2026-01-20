@@ -5,19 +5,19 @@
 #include <QByteArray>
 
 #include "core/utils/defs.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 
 class ServicesCatalogController
 {
 public:
-    explicit ServicesCatalogController(AppSettingsRepository* appSettingsRepository);
+    explicit ServicesCatalogController(QAppSettingsRepository* appSettingsRepository);
 
     ErrorCode fillAvailableServices(QJsonObject &servicesData);
 
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
 
-    AppSettingsRepository* m_appSettingsRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif // SERVICESCATALOGCONTROLLER_H

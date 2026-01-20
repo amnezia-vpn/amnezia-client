@@ -63,8 +63,8 @@ namespace
     }
 } // namespace
 
-ImportController::ImportController(ServersRepository* serversRepository,
-                                   AppSettingsRepository* appSettingsRepository,
+ImportController::ImportController(QServersRepository* serversRepository,
+                                   QAppSettingsRepository* appSettingsRepository,
                                    QObject *parent)
     : QObject(parent),
       m_serversRepository(serversRepository),

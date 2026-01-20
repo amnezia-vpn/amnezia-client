@@ -10,10 +10,10 @@
 #include "containers/containers_defs.h"
 #include "core/utils/defs.h"
 #include "core/models/containerConfig.h"
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 
 class SshSession;
-class ServersRepository;
-class AppSettingsRepository;
 class InstallerBase;
 
 using namespace amnezia;
@@ -24,8 +24,8 @@ class InstallController : public QObject
 
 public:
     explicit InstallController(SshSession* sshSession, 
-                              ServersRepository* serversRepository,
-                              AppSettingsRepository* appSettingsRepository,
+                              QServersRepository* serversRepository,
+                              QAppSettingsRepository* appSettingsRepository,
                               QObject *parent = nullptr);
     ~InstallController();
 
@@ -90,8 +90,8 @@ private:
     QScopedPointer<InstallerBase> createInstaller(DockerContainer container);
 
     SshSession* m_sshSession;
-    ServersRepository* m_serversRepository;
-    AppSettingsRepository* m_appSettingsRepository;
+    QServersRepository* m_serversRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
     bool m_cancelInstallation = false;
     
 #ifndef Q_OS_IOS

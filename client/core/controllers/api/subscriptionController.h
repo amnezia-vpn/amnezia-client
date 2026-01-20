@@ -7,8 +7,8 @@
 #include <QVariantMap>
 
 #include "core/utils/defs.h"
-#include "core/repositories/serversRepository.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "core/models/serverConfig.h"
 
 class ServersController;
@@ -40,8 +40,8 @@ public:
         QJsonObject toJsonObject() const;
     };
 
-    explicit SubscriptionController(ServersRepository* serversRepository,
-                                     AppSettingsRepository* appSettingsRepository);
+    explicit SubscriptionController(QServersRepository* serversRepository,
+                                     QAppSettingsRepository* appSettingsRepository);
 
     ProtocolData generateProtocolData(const QString &protocol);
     void appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload);
@@ -99,8 +99,8 @@ private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
     bool isApiKeyExpired(int serverIndex) const;
 
-    ServersRepository* m_serversRepository;
-    AppSettingsRepository* m_appSettingsRepository;
+    QServersRepository* m_serversRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif // SUBSCRIPTIONCONTROLLER_H

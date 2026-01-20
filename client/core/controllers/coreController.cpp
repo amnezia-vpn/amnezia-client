@@ -136,24 +136,23 @@ void CoreController::initRepositories()
 void CoreController::initCoreControllers()
 {
     QServersRepository* qServersRepo = m_serversRepository;
-    ServersRepository* serversRepo = m_serversRepository->repository();
-    AppSettingsRepository* appSettingsRepo = m_appSettingsRepository->repository();
+    QAppSettingsRepository* qAppSettingsRepo = m_appSettingsRepository;
     
-    m_serversController = new ServersController(qServersRepo, appSettingsRepo, this);
-    m_appSplitTunnelingController = new AppSplitTunnelingController(appSettingsRepo);
-    m_usersController = new UsersController(serversRepo, this);
-    m_sitesController = new SitesController(appSettingsRepo);
-    m_allowedDnsController = new AllowedDnsController(appSettingsRepo);
-    m_servicesCatalogController = new ServicesCatalogController(appSettingsRepo);
-    m_subscriptionController = new SubscriptionController(serversRepo, appSettingsRepo);
-    m_newsController = new NewsController(appSettingsRepo, m_serversController);
+    m_serversController = new ServersController(qServersRepo, qAppSettingsRepo, this);
+    m_appSplitTunnelingController = new AppSplitTunnelingController(qAppSettingsRepo);
+    m_usersController = new UsersController(qServersRepo, this);
+    m_sitesController = new SitesController(qAppSettingsRepo);
+    m_allowedDnsController = new AllowedDnsController(qAppSettingsRepo);
+    m_servicesCatalogController = new ServicesCatalogController(qAppSettingsRepo);
+    m_subscriptionController = new SubscriptionController(qServersRepo, qAppSettingsRepo);
+    m_newsController = new NewsController(qAppSettingsRepo, m_serversController);
     
     SshSession* sshSession = new SshSession(this);
-    m_installController = new InstallController(sshSession, serversRepo, appSettingsRepo, this);
-    m_exportController = new ExportController(serversRepo, appSettingsRepo, this);
-    m_importCoreController = new ImportController(serversRepo, appSettingsRepo, this);
-    m_connectionController = new ConnectionController(serversRepo, appSettingsRepo, m_vpnConnection.get());
-    m_settingsController = new SettingsController(serversRepo, appSettingsRepo, this);
+    m_installController = new InstallController(sshSession, qServersRepo, qAppSettingsRepo, this);
+    m_exportController = new ExportController(qServersRepo, qAppSettingsRepo, this);
+    m_importCoreController = new ImportController(qServersRepo, qAppSettingsRepo, this);
+    m_connectionController = new ConnectionController(qServersRepo, qAppSettingsRepo, m_vpnConnection.get());
+    m_settingsController = new SettingsController(qServersRepo, qAppSettingsRepo, this);
 }
 
 void CoreController::initControllers()

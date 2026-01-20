@@ -28,8 +28,8 @@ QString getPlatformName()
 #endif
 }
 
-SettingsController::SettingsController(ServersRepository* serversRepository,
-                                     AppSettingsRepository* appSettingsRepository,
+SettingsController::SettingsController(QServersRepository* serversRepository,
+                                     QAppSettingsRepository* appSettingsRepository,
                                      QObject* parent)
     : QObject(parent),
       m_serversRepository(serversRepository),

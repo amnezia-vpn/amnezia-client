@@ -13,8 +13,8 @@
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
 
-ExportController::ExportController(ServersRepository* serversRepository,
-                                   AppSettingsRepository* appSettingsRepository,
+ExportController::ExportController(QServersRepository* serversRepository,
+                                   QAppSettingsRepository* appSettingsRepository,
                                    QObject *parent)
     : QObject(parent),
       m_serversRepository(serversRepository),

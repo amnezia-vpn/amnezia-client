@@ -7,8 +7,8 @@
 #include <QDateTime>
 
 #include "core/utils/defs.h"
-#include "core/repositories/serversRepository.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 
 using namespace amnezia;
 
@@ -16,8 +16,8 @@ class SettingsController : public QObject
 {
     Q_OBJECT
 public:
-    explicit SettingsController(ServersRepository* serversRepository,
-                               AppSettingsRepository* appSettingsRepository,
+    explicit SettingsController(QServersRepository* serversRepository,
+                               QAppSettingsRepository* appSettingsRepository,
                                QObject* parent = nullptr);
     ~SettingsController() = default;
 
@@ -94,8 +94,8 @@ signals:
 private:
     QString getPlatform() const;
 
-    ServersRepository* m_serversRepository;
-    AppSettingsRepository* m_appSettingsRepository;
+    QServersRepository* m_serversRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
 
     QString m_appVersion;
     QDateTime m_loggingDisableDate;

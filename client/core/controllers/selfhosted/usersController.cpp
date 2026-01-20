@@ -32,7 +32,7 @@ namespace
     }
 }
 
-UsersController::UsersController(ServersRepository* serversRepository, QObject *parent)
+UsersController::UsersController(QServersRepository* serversRepository, QObject *parent)
     : QObject(parent),
       m_serversRepository(serversRepository)
 {

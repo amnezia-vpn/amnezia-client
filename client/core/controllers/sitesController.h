@@ -6,14 +6,14 @@
 #include <QPair>
 
 #include "core/utils/defs.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 
 using namespace amnezia;
 
 class SitesController
 {
 public:
-    explicit SitesController(AppSettingsRepository* appSettingsRepository);
+    explicit SitesController(QAppSettingsRepository* appSettingsRepository);
 
     bool addSite(const QString &hostname, const QString &ip);
     void addSites(const QMap<QString, QString> &sites, bool replaceExisting);
@@ -29,7 +29,7 @@ public:
 private:
     void fillSites();
 
-    AppSettingsRepository* m_appSettingsRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
     RouteMode m_currentRouteMode;
     QVector<QPair<QString, QString>> m_sites;
 };

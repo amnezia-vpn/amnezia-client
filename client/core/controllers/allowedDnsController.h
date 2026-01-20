@@ -3,12 +3,12 @@
 
 #include <QStringList>
 
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 
 class AllowedDnsController
 {
 public:
-    explicit AllowedDnsController(AppSettingsRepository* appSettingsRepository);
+    explicit AllowedDnsController(QAppSettingsRepository* appSettingsRepository);
 
     bool addDns(const QString &ip);
     void addDnsList(const QStringList &dnsServers, bool replaceExisting);
@@ -18,7 +18,7 @@ public:
 private:
     void fillDnsServers();
 
-    AppSettingsRepository* m_appSettingsRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
     QStringList m_dnsServers;
 };
 

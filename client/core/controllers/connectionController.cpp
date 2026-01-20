@@ -12,8 +12,8 @@
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
 
-ConnectionController::ConnectionController(ServersRepository* serversRepository,
-                                         AppSettingsRepository* appSettingsRepository,
+ConnectionController::ConnectionController(QServersRepository* serversRepository,
+                                         QAppSettingsRepository* appSettingsRepository,
                                          VpnConnection* vpnConnection)
     : m_serversRepository(serversRepository),
       m_appSettingsRepository(appSettingsRepository),

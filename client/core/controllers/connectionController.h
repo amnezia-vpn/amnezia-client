@@ -7,8 +7,8 @@
 
 #include "containers/containers_defs.h"
 #include "core/utils/defs.h"
-#include "core/repositories/serversRepository.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "vpnconnection.h"
 
 using namespace amnezia;
@@ -16,8 +16,8 @@ using namespace amnezia;
 class ConnectionController
 {
 public:
-    explicit ConnectionController(ServersRepository* serversRepository,
-                                 AppSettingsRepository* appSettingsRepository,
+    explicit ConnectionController(QServersRepository* serversRepository,
+                                 QAppSettingsRepository* appSettingsRepository,
                                  VpnConnection* vpnConnection);
     ~ConnectionController() = default;
 
@@ -42,8 +42,8 @@ public:
     bool isContainerSupported(DockerContainer container) const;
 
 private:
-    ServersRepository* m_serversRepository;
-    AppSettingsRepository* m_appSettingsRepository;
+    QServersRepository* m_serversRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
     VpnConnection* m_vpnConnection;
 };
 

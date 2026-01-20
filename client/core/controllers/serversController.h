@@ -12,7 +12,7 @@
 #include "containers/containers_defs.h"
 #include "core/utils/defs.h"
 #include "core/repositories/qServersRepository.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 

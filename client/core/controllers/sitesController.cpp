@@ -1,6 +1,6 @@
 #include "sitesController.h"
 
-SitesController::SitesController(AppSettingsRepository* appSettingsRepository)
+SitesController::SitesController(QAppSettingsRepository* appSettingsRepository)
     : m_appSettingsRepository(appSettingsRepository)
 {
     m_currentRouteMode = m_appSettingsRepository->routeMode();

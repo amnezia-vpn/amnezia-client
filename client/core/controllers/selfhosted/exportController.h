@@ -8,8 +8,8 @@
 
 #include "containers/containers_defs.h"
 #include "core/utils/defs.h"
-#include "core/repositories/serversRepository.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 
 class SshSession;
 class VpnConfigurationsController;
@@ -29,8 +29,8 @@ public:
         QList<QString> qrCodes;
     };
 
-    explicit ExportController(ServersRepository* serversRepository,
-                              AppSettingsRepository* appSettingsRepository,
+    explicit ExportController(QServersRepository* serversRepository,
+                              QAppSettingsRepository* appSettingsRepository,
                               QObject *parent = nullptr);
 
     ExportResult generateFullAccessConfig(int serverIndex);
@@ -67,8 +67,8 @@ private:
     QList<QString> generateQrCodesFromConfig(const QByteArray &data);
     QString generateSingleQrCode(const QByteArray &data);
 
-    ServersRepository* m_serversRepository;
-    AppSettingsRepository* m_appSettingsRepository;
+    QServersRepository* m_serversRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif // EXPORTCONTROLLER_H

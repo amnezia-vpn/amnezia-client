@@ -22,8 +22,8 @@
 #include "core/installers/xrayInstaller.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/api/apiUtils.h"
-#include "core/repositories/serversRepository.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "core/utils/selfhosted/sshClient.h"
 #include "logger.h"
@@ -50,8 +50,8 @@ namespace
 }
 
 InstallController::InstallController(SshSession *sshSession,
-                                     ServersRepository *serversRepository,
-                                     AppSettingsRepository* appSettingsRepository,
+                                     QServersRepository *serversRepository,
+                                     QAppSettingsRepository* appSettingsRepository,
                                      QObject *parent)
     : QObject(parent),
       m_sshSession(sshSession),

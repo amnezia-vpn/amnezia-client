@@ -4,12 +4,12 @@
 #include <QVector>
 
 #include "core/utils/defs.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 
 class AppSplitTunnelingController
 {
 public:
-    explicit AppSplitTunnelingController(AppSettingsRepository* appSettingsRepository);
+    explicit AppSplitTunnelingController(QAppSettingsRepository* appSettingsRepository);
 
     bool addApp(const amnezia::InstalledAppInfo &appInfo);
     void removeApp(int index);
@@ -22,7 +22,7 @@ public:
     QVector<amnezia::InstalledAppInfo> getApps() const;
 
 private:
-    AppSettingsRepository* m_appSettingsRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
     AppsRouteMode m_currentRouteMode;
     QVector<amnezia::InstalledAppInfo> m_apps;
 };

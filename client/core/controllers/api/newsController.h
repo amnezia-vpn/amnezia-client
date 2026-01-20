@@ -6,19 +6,19 @@
 #include <QPair>
 
 #include "core/utils/defs.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "core/controllers/serversController.h"
 
 class NewsController
 {
 public:
-    explicit NewsController(AppSettingsRepository* appSettingsRepository,
+    explicit NewsController(QAppSettingsRepository* appSettingsRepository,
                            ServersController* serversController);
 
     QFuture<QPair<ErrorCode, QJsonArray>> fetchNews();
 
 private:
-    AppSettingsRepository* m_appSettingsRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
     ServersController* m_serversController;
 };
 
