@@ -11,6 +11,8 @@
 #include <QNetworkReply>
 #include <QPromise>
 #include <QUrl>
+#include <QHostAddress>
+#include <QDebug>
 
 #include "QBlockCipher.h"
 #include "QRsa.h"
@@ -58,6 +60,115 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
 {
 }
 
+void GatewayController::setDnsServer(const QString &dnsServer, const QString &baseDomain, 
+                                      NetworkUtilities::DnsTransport transport, quint16 port, const QString &dohEndpoint)
+{
+    m_dnsServer = dnsServer;
+    m_dnsBaseDomain = baseDomain;
+    m_dnsTransport = transport;
+    m_dnsPort = port;
+    m_dohEndpoint = dohEndpoint;
+    
+    QString transportName;
+    switch (transport) {
+        case NetworkUtilities::DnsTransport::Udp: transportName = "UDP"; break;
+        case NetworkUtilities::DnsTransport::Tcp: transportName = "TCP"; break;
+        case NetworkUtilities::DnsTransport::Tls: transportName = "DoT"; break;
+        case NetworkUtilities::DnsTransport::Https: transportName = "DoH"; break;
+        case NetworkUtilities::DnsTransport::Quic: transportName = "DoQ"; break;
+    }
+    qDebug() << "[DNS Tunnel] Server:" << dnsServer << "BaseDomain:" << baseDomain 
+             << "Transport:" << transportName << "Port:" << port;
+}
+
+QString GatewayController::resolveGatewayHostname(const QString &hostname)
+{
+    if (m_dnsServer.isEmpty()) {
+        return QString();
+    }
+    
+    QString transportName;
+    switch (m_dnsTransport) {
+        case NetworkUtilities::DnsTransport::Udp: transportName = "UDP"; break;
+        case NetworkUtilities::DnsTransport::Tcp: transportName = "TCP"; break;
+        case NetworkUtilities::DnsTransport::Tls: transportName = "DoT"; break;
+        case NetworkUtilities::DnsTransport::Https: transportName = "DoH"; break;
+        case NetworkUtilities::DnsTransport::Quic: transportName = "DoQ"; break;
+    }
+    
+    qDebug() << "[DNS] Resolving" << hostname << "via" << transportName << "server:" << m_dnsServer << "port:" << m_dnsPort;
+    
+    QString ip = NetworkUtilities::resolveDns(hostname, m_dnsServer, m_dnsTransport, m_dnsPort, 3000, m_dohEndpoint);
+    
+    if (!ip.isEmpty()) {
+        qDebug() << "[DNS] Resolved:" << hostname << "->" << ip << "via" << transportName;
+    } else {
+        qDebug() << "[DNS] Resolution failed for:" << hostname << "via" << transportName;
+    }
+    
+    return ip;
+}
+
+ErrorCode GatewayController::postViaDns(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
+{
+    if (m_dnsServer.isEmpty() || m_dnsBaseDomain.isEmpty()) {
+        qDebug() << "[DNS Tunnel] DNS server or base domain not set";
+        return ErrorCode::AmneziaServiceConnectionFailed;
+    }
+    
+    // Prepare encrypted request
+    EncryptedRequestData encRequestData = prepareRequest(endpoint, apiPayload);
+    if (encRequestData.errorCode != ErrorCode::NoError) {
+        return encRequestData.errorCode;
+    }
+    
+    // Extract endpoint name from full path (e.g., "/v1/config" -> "config")
+    QString endpointName = endpoint;
+    endpointName.remove("%1");  // Remove placeholder
+    if (endpointName.startsWith("v1/")) {
+        endpointName = endpointName.mid(3);  // Remove "v1/"
+    }
+    if (endpointName.endsWith("/")) {
+        endpointName.chop(1);
+    }
+    
+    QString transportName;
+    switch (m_dnsTransport) {
+        case NetworkUtilities::DnsTransport::Udp: transportName = "UDP"; break;
+        case NetworkUtilities::DnsTransport::Tcp: transportName = "TCP"; break;
+        case NetworkUtilities::DnsTransport::Tls: transportName = "DoT"; break;
+        case NetworkUtilities::DnsTransport::Https: transportName = "DoH"; break;
+        case NetworkUtilities::DnsTransport::Quic: transportName = "DoQ"; break;
+    }
+    
+    qDebug() << "[DNS Tunnel] Sending request to endpoint:" << endpointName 
+             << "via" << transportName << "payload size:" << encRequestData.requestBody.size();
+    
+    // Send via DNS tunnel
+    QByteArray dnsResponse = NetworkUtilities::sendViaDnsTunnel(
+        encRequestData.requestBody, endpointName, m_dnsBaseDomain,
+        m_dnsServer, m_dnsTransport, m_dnsPort, m_requestTimeoutMsecs, m_dohEndpoint);
+    
+    if (dnsResponse.isEmpty()) {
+        qDebug() << "[DNS Tunnel] Empty response";
+        return ErrorCode::AmneziaServiceConnectionFailed;
+    }
+    
+    qDebug() << "[DNS Tunnel] Received response:" << dnsResponse.size() << "bytes";
+    
+    // Decrypt response
+    try {
+        QSimpleCrypto::QBlockCipher blockCipher;
+        responseBody = blockCipher.decryptAesBlockCipher(dnsResponse, encRequestData.key, encRequestData.iv, "", encRequestData.salt);
+        qDebug() << "[DNS Tunnel] Decrypted response:" << responseBody.left(200);
+        return ErrorCode::NoError;
+    } catch (...) {
+        qDebug() << "[DNS Tunnel] Failed to decrypt response, returning raw data";
+        responseBody = dnsResponse;
+        return ErrorCode::NoError;
+    }
+}
+
 GatewayController::EncryptedRequestData GatewayController::prepareRequest(const QString &endpoint, const QJsonObject &apiPayload)
 {
     EncryptedRequestData encRequestData;
@@ -71,7 +182,30 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     encRequestData.request.setTransferTimeout(m_requestTimeoutMsecs);
     encRequestData.request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     encRequestData.request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
-    encRequestData.request.setUrl(endpoint.arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
+    
+    // DNS резолв через TCP/UDP
+    QString finalGatewayEndpoint = m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl;
+    QUrl gatewayUrl(finalGatewayEndpoint);
+    QString hostname = gatewayUrl.host();
+    
+    // Проверяем, нужно ли резолвить (если это не IP адрес и не localhost)
+    if (!hostname.isEmpty() && 
+        hostname != "localhost" &&
+        !NetworkUtilities::checkIPv4Format(hostname) && 
+        QHostAddress(hostname).isNull()) {
+        
+        QString resolvedIp = resolveGatewayHostname(hostname);
+        if (!resolvedIp.isEmpty()) {
+            gatewayUrl.setHost(resolvedIp);
+            finalGatewayEndpoint = gatewayUrl.toString();
+            qDebug() << "DNS resolved:" << hostname << "->" << resolvedIp;
+        } else {
+            // Fallback: используем оригинальный hostname
+            qWarning() << "DNS resolution failed for:" << hostname << ", using original hostname";
+        }
+    }
+    
+    encRequestData.request.setUrl(endpoint.arg(finalGatewayEndpoint));
 
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP

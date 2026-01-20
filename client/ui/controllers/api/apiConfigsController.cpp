@@ -5,6 +5,7 @@
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "core/networkUtilities.h"
 #include "core/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"
@@ -741,7 +742,32 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     apiPayload[configKey::apiEndpoint] = serverConfig.value(configKey::apiEndpoint).toString();
 
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/proxy_config"), apiPayload, responseBody);
+    QString baseDomain = "gateway.example.com";
+    QString endpoint = QString("%1v1/proxy_config");
+    
+    // Try DNS transports first
+    // 1. UDP
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Udp, 15353);
+    ErrorCode errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        // 2. TCP
+        gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Tcp, 15353);
+        errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    }
+    if (errorCode != ErrorCode::NoError) {
+        // 3. DoT
+        gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Tls, 8853);
+        errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    }
+    if (errorCode != ErrorCode::NoError) {
+        // 4. DoH
+        gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Https, 80, "/dns-query");
+        errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    }
+    if (errorCode != ErrorCode::NoError) {
+        // 5. Fallback to HTTP
+        errorCode = gatewayController.post(endpoint, apiPayload, responseBody);
+    }
 
     if (errorCode == ErrorCode::NoError) {
         errorCode = fillServerConfig(serviceProtocol, protocolData, responseBody, serverConfig);
@@ -950,5 +976,40 @@ ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJ
 {
     GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), m_settings->isDevGatewayEnv(isTestPurchase),
                                         apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
-    return gatewayController.post(endpoint, apiPayload, responseBody);
+    
+    // 1. HTTP (primary transport)
+    ErrorCode result = gatewayController.post(endpoint, apiPayload, responseBody);
+    if (result == ErrorCode::NoError) return result;
+    
+    qDebug() << "[Transport] HTTP failed, trying DNS transports as fallback";
+    
+    // DNS tunneling fallback - base_domain: gateway.example.com
+    // Порты бэкенда: UDP/TCP=15353, DoT=8853, DoQ=8854
+    const QString baseDomain = "gateway.example.com";
+    
+    // 2. DNS UDP (порт 15353)
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Udp, 15353);
+    result = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    if (result == ErrorCode::NoError) return result;
+    
+    // 3. DNS TCP (порт 15353)
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Tcp, 15353);
+    result = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    if (result == ErrorCode::NoError) return result;
+    
+    // 4. DoT (порт 8853)
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Tls, 8853);
+    result = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    if (result == ErrorCode::NoError) return result;
+    
+    // 5. DoH (порт 80, endpoint /dns-query)
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Https, 80, "/dns-query");
+    result = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    if (result == ErrorCode::NoError) return result;
+    
+    // 6. DoQ (порт 8854)
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Quic, 8854);
+    result = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    
+    return result;
 }

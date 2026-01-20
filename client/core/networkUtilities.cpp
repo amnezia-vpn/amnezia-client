@@ -1,6 +1,9 @@
 #include "networkUtilities.h"
 #include <QtNetwork/qnetworkinterface.h>
 #include <cstddef>
+#include <QNetworkDatagram>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #ifdef Q_OS_WIN
     #include <windows.h>
@@ -44,6 +47,187 @@
 
 #include <QHostAddress>
 #include <QHostInfo>
+#include <QUdpSocket>
+#include <QTcpSocket>
+#include <QSslSocket>
+#include <QEventLoop>
+#include <QTimer>
+#include <QtEndian>
+#include <QDebug>
+#include <QDateTime>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QUrl>
+
+namespace
+{
+    constexpr quint16 DNS_PORT = 53;
+    constexpr quint16 DNS_TYPE_A = 1;      // A record
+    constexpr quint16 DNS_CLASS_IN = 1;    // Internet class
+    
+    // DNS Header structure (RFC 1035)
+    struct DnsHeader {
+        quint16 id;        // Transaction ID
+        quint16 flags;     // Flags
+        quint16 qdcount;   // Question count
+        quint16 ancount;   // Answer count
+        quint16 nscount;   // Authority count
+        quint16 arcount;   // Additional count
+    };
+    
+    // Helper function to encode hostname to QNAME format
+    QByteArray encodeDnsName(const QString &hostname)
+    {
+        QByteArray result;
+        QStringList parts = hostname.split('.');
+        
+        for (const QString &part : parts) {
+            if (part.length() > 63) {
+                return QByteArray(); // Invalid
+            }
+            result.append(static_cast<char>(part.length()));
+            result.append(part.toUtf8());
+        }
+        result.append(static_cast<char>(0)); // Null terminator
+        
+        return result;
+    }
+    
+    // Helper function to build DNS query packet
+    QByteArray buildDnsQuery(const QString &hostname, quint16 transactionId)
+    {
+        QByteArray packet;
+        
+        // DNS Header
+        DnsHeader header;
+        header.id = qToBigEndian(transactionId);
+        header.flags = qToBigEndian<quint16>(0x0100); // Standard query, recursion desired
+        header.qdcount = qToBigEndian<quint16>(1);   // One question
+        header.ancount = 0;
+        header.nscount = 0;
+        header.arcount = 0;
+        
+        packet.append(reinterpret_cast<const char*>(&header), sizeof(DnsHeader));
+        
+        // Question section
+        QByteArray qname = encodeDnsName(hostname);
+        if (qname.isEmpty()) {
+            return QByteArray();
+        }
+        packet.append(qname);
+        
+        // QTYPE (A record)
+        quint16 qtype = qToBigEndian<quint16>(DNS_TYPE_A);
+        packet.append(reinterpret_cast<const char*>(&qtype), sizeof(quint16));
+        
+        // QCLASS (IN)
+        quint16 qclass = qToBigEndian<quint16>(DNS_CLASS_IN);
+        packet.append(reinterpret_cast<const char*>(&qclass), sizeof(quint16));
+        
+        return packet;
+    }
+    
+    // Helper function to parse DNS response and extract IP address
+    QString parseDnsResponse(const QByteArray &response, bool isTcp)
+    {
+        if (response.size() < static_cast<int>(sizeof(DnsHeader))) {
+            return QString();
+        }
+        
+        // Skip length prefix for TCP
+        int offset = isTcp ? 2 : 0;
+        if (response.size() < offset + static_cast<int>(sizeof(DnsHeader))) {
+            return QString();
+        }
+        
+        // Parse header
+        DnsHeader header;
+        memcpy(&header, response.constData() + offset, sizeof(DnsHeader));
+        offset += sizeof(DnsHeader);
+        
+        quint16 flags = qFromBigEndian(header.flags);
+        quint16 ancount = qFromBigEndian(header.ancount);
+        
+        // Check if response is valid (QR bit set, no error)
+        if ((flags & 0x8000) == 0 || (flags & 0x000F) != 0) {
+            return QString(); // Not a response or has error
+        }
+        
+        if (ancount == 0) {
+            return QString(); // No answers
+        }
+        
+        // Skip question section
+        // Find end of QNAME (null terminator)
+        while (offset < response.size() && response.at(offset) != 0) {
+            quint8 length = static_cast<quint8>(response.at(offset));
+            if (length > 63) {
+                return QString(); // Invalid
+            }
+            offset += length + 1;
+        }
+        if (offset >= response.size()) {
+            return QString();
+        }
+        offset++; // Skip null terminator
+        
+        // Skip QTYPE and QCLASS (4 bytes)
+        offset += 4;
+        
+        // Parse answer section
+        for (int i = 0; i < ancount && offset < response.size(); i++) {
+            // Skip NAME (can be pointer or label)
+            if (offset >= response.size()) {
+                break;
+            }
+            
+            quint8 nameByte = static_cast<quint8>(response.at(offset));
+            if ((nameByte & 0xC0) == 0xC0) {
+                // Pointer (compressed name)
+                offset += 2;
+            } else {
+                // Label sequence
+                while (offset < response.size() && response.at(offset) != 0) {
+                    quint8 length = static_cast<quint8>(response.at(offset));
+                    if (length > 63) {
+                        return QString();
+                    }
+                    offset += length + 1;
+                }
+                offset++; // Skip null terminator
+            }
+            
+            // Read TYPE, CLASS, TTL
+            if (offset + 10 > response.size()) {
+                break;
+            }
+            
+            quint16 type = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(response.constData() + offset));
+            offset += 2;
+            offset += 2; // Skip CLASS
+            offset += 4; // Skip TTL
+            
+            // Read RDLENGTH and RDATA
+            quint16 rdlength = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(response.constData() + offset));
+            offset += 2;
+            
+            if (type == DNS_TYPE_A && rdlength == 4) {
+                // A record with IPv4 address
+                if (offset + 4 > response.size()) {
+                    break;
+                }
+                
+                QHostAddress ip;
+                ip.setAddress(qFromBigEndian<quint32>(*reinterpret_cast<const quint32*>(response.constData() + offset)));
+                return ip.toString();
+            }
+            
+            offset += rdlength; // Skip RDATA
+        }
+        
+        return QString();
+    }
+}
 
 QRegularExpression NetworkUtilities::ipAddressRegExp()
 {
@@ -496,4 +680,1141 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 
     return { gateway, QNetworkInterface::interfaceFromIndex(index) };
 #endif
+}
+
+QString NetworkUtilities::resolveDns(const QString &hostname, const QString &dnsServer, DnsTransport transport,
+                                      quint16 port, int timeoutMsecs, const QString &dohEndpoint)
+{
+    switch (transport) {
+        case DnsTransport::Udp:
+            return resolveDnsOverUdp(hostname, dnsServer, port, timeoutMsecs);
+        case DnsTransport::Tcp:
+            return resolveDnsOverTcp(hostname, dnsServer, port, timeoutMsecs);
+        case DnsTransport::Tls:
+            return resolveDnsOverTls(hostname, dnsServer, port, timeoutMsecs);
+        case DnsTransport::Https:
+            return resolveDnsOverHttps(hostname, dnsServer, dohEndpoint, timeoutMsecs);
+        case DnsTransport::Quic:
+            return resolveDnsOverQuic(hostname, dnsServer, port, timeoutMsecs);
+    }
+    return QString();
+}
+
+QString NetworkUtilities::resolveDnsOverUdp(const QString &hostname, const QString &dnsServer, quint16 port, int timeoutMsecs)
+{
+    QUdpSocket socket;
+    
+    // Генерируем случайный transaction ID
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    
+    // Формируем DNS запрос
+    QByteArray query = buildDnsQuery(hostname, transactionId);
+    if (query.isEmpty()) {
+        return QString();
+    }
+    
+    // Отправляем запрос
+    QHostAddress dnsAddress(dnsServer);
+    if (dnsAddress.isNull()) {
+        return QString();
+    }
+    
+    qint64 bytesWritten = socket.writeDatagram(query, dnsAddress, port);
+    if (bytesWritten != query.size()) {
+        return QString();
+    }
+    
+    // Ждем ответ с таймаутом
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(timeoutMsecs);
+    
+    QByteArray response;
+    bool responseReceived = false;
+    
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(&socket, &QUdpSocket::readyRead, [&]() {
+        while (socket.hasPendingDatagrams()) {
+            QNetworkDatagram datagram = socket.receiveDatagram();
+            if (datagram.isValid()) {
+                response = datagram.data();
+                responseReceived = true;
+                loop.quit();
+            }
+        }
+    });
+    
+    timer.start();
+    loop.exec();
+    timer.stop();
+    
+    if (!responseReceived || response.isEmpty()) {
+        return QString();
+    }
+    
+    // Парсим ответ
+    return parseDnsResponse(response, false);
+}
+
+QString NetworkUtilities::resolveDnsOverTcp(const QString &hostname, const QString &dnsServer, quint16 port, int timeoutMsecs)
+{
+    QTcpSocket socket;
+    
+    // Подключаемся к DNS серверу
+    QHostAddress dnsAddress(dnsServer);
+    if (dnsAddress.isNull()) {
+        return QString();
+    }
+    
+    socket.connectToHost(dnsAddress, port);
+    
+    if (!socket.waitForConnected(timeoutMsecs)) {
+        return QString();
+    }
+    
+    // Генерируем случайный transaction ID
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    
+    // Формируем DNS запрос
+    QByteArray query = buildDnsQuery(hostname, transactionId);
+    if (query.isEmpty()) {
+        socket.close();
+        return QString();
+    }
+    
+    // Для TCP добавляем 2-байтовое поле длины перед пакетом
+    quint16 length = qToBigEndian<quint16>(static_cast<quint16>(query.size()));
+    QByteArray tcpQuery;
+    tcpQuery.append(reinterpret_cast<const char*>(&length), sizeof(quint16));
+    tcpQuery.append(query);
+    
+    // Отправляем запрос
+    qint64 bytesWritten = socket.write(tcpQuery);
+    if (bytesWritten != tcpQuery.size() || !socket.waitForBytesWritten(timeoutMsecs)) {
+        socket.close();
+        return QString();
+    }
+    
+    // Ждем ответ с таймаутом
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(timeoutMsecs);
+    
+    QByteArray response;
+    bool responseReceived = false;
+    
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(&socket, &QTcpSocket::readyRead, [&]() {
+        // Читаем длину ответа (первые 2 байта)
+        if (socket.bytesAvailable() >= 2 && response.isEmpty()) {
+            QByteArray lengthBytes = socket.read(2);
+            if (lengthBytes.size() == 2) {
+                quint16 responseLength = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(lengthBytes.constData()));
+                // Читаем весь ответ
+                while (socket.bytesAvailable() < responseLength) {
+                    if (!socket.waitForReadyRead(timeoutMsecs / 2)) {
+                        break;
+                    }
+                }
+                if (socket.bytesAvailable() >= responseLength) {
+                    response = socket.read(responseLength);
+                    responseReceived = true;
+                    loop.quit();
+                }
+            }
+        }
+    });
+    
+    timer.start();
+    loop.exec();
+    timer.stop();
+    
+    socket.close();
+    
+    if (!responseReceived || response.isEmpty()) {
+        return QString();
+    }
+    
+    // Парсим ответ (для TCP уже без префикса длины)
+    return parseDnsResponse(response, true);
+}
+
+QString NetworkUtilities::resolveDnsOverTls(const QString &hostname, const QString &dnsServer, quint16 port, int timeoutMsecs)
+{
+    QSslSocket socket;
+    
+    // Подключаемся к DNS серверу через TLS
+    QHostAddress dnsAddress(dnsServer);
+    if (dnsAddress.isNull()) {
+        return QString();
+    }
+    
+    // Настраиваем SSL (отключаем проверку сертификата для простоты, можно добавить проверку позже)
+    socket.setPeerVerifyMode(QSslSocket::QueryPeer);
+    
+    socket.connectToHostEncrypted(dnsAddress.toString(), port);
+    
+    if (!socket.waitForConnected(timeoutMsecs)) {
+        return QString();
+    }
+    
+    // Ждем завершения TLS handshake
+    if (!socket.waitForEncrypted(timeoutMsecs)) {
+        socket.close();
+        return QString();
+    }
+    
+    // Генерируем случайный transaction ID
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    
+    // Формируем DNS запрос
+    QByteArray query = buildDnsQuery(hostname, transactionId);
+    if (query.isEmpty()) {
+        socket.close();
+        return QString();
+    }
+    
+    // Для TLS (как и для TCP) добавляем 2-байтовое поле длины перед пакетом
+    quint16 length = qToBigEndian<quint16>(static_cast<quint16>(query.size()));
+    QByteArray tlsQuery;
+    tlsQuery.append(reinterpret_cast<const char*>(&length), sizeof(quint16));
+    tlsQuery.append(query);
+    
+    // Отправляем запрос
+    qint64 bytesWritten = socket.write(tlsQuery);
+    if (bytesWritten != tlsQuery.size() || !socket.waitForBytesWritten(timeoutMsecs)) {
+        socket.close();
+        return QString();
+    }
+    
+    // Ждем ответ с таймаутом
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(timeoutMsecs);
+    
+    QByteArray response;
+    bool responseReceived = false;
+    
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(&socket, &QSslSocket::readyRead, [&]() {
+        // Читаем длину ответа (первые 2 байта)
+        if (socket.bytesAvailable() >= 2 && response.isEmpty()) {
+            QByteArray lengthBytes = socket.read(2);
+            if (lengthBytes.size() == 2) {
+                quint16 responseLength = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(lengthBytes.constData()));
+                // Читаем весь ответ
+                while (socket.bytesAvailable() < responseLength) {
+                    if (!socket.waitForReadyRead(timeoutMsecs / 2)) {
+                        break;
+                    }
+                }
+                if (socket.bytesAvailable() >= responseLength) {
+                    response = socket.read(responseLength);
+                    responseReceived = true;
+                    loop.quit();
+                }
+            }
+        }
+    });
+    
+    timer.start();
+    loop.exec();
+    timer.stop();
+    
+    socket.close();
+    
+    if (!responseReceived || response.isEmpty()) {
+        return QString();
+    }
+    
+    // Парсим ответ (для TLS тот же формат что и для TCP)
+    return parseDnsResponse(response, true);
+}
+
+QString NetworkUtilities::resolveDnsOverHttps(const QString &hostname, const QString &dnsServer, const QString &endpoint, int timeoutMsecs)
+{
+    // DNS over HTTPS использует указанный endpoint
+    QString dohUrl = QString("https://%1%2").arg(dnsServer, endpoint);
+    
+    // Формируем DNS запрос
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    QByteArray query = buildDnsQuery(hostname, transactionId);
+    if (query.isEmpty()) {
+        return QString();
+    }
+    
+    // Создаем HTTP запрос
+    QNetworkRequest request;
+    request.setUrl(QUrl(dohUrl));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/dns-message");
+    request.setRawHeader("Accept", "application/dns-message");
+    request.setTransferTimeout(timeoutMsecs);
+    
+    // Отправляем POST запрос
+    QNetworkAccessManager nam;
+    QNetworkReply *reply = nam.post(request, query);
+    
+    // Ждем ответ с таймаутом
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(timeoutMsecs);
+    
+    QByteArray response;
+    bool responseReceived = false;
+    
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(reply, &QNetworkReply::finished, [&]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            response = reply->readAll();
+            responseReceived = true;
+        }
+        loop.quit();
+    });
+    
+    timer.start();
+    loop.exec();
+    timer.stop();
+    
+    reply->deleteLater();
+    
+    if (!responseReceived || response.isEmpty()) {
+        return QString();
+    }
+    
+    // Парсим DNS ответ (DoH возвращает чистый DNS пакет без префикса)
+    return parseDnsResponse(response, false);
+}
+
+QString NetworkUtilities::resolveDnsOverQuic(const QString &hostname, const QString &dnsServer, quint16 port, int timeoutMsecs)
+{
+    // DNS over QUIC использует QUIC протокол (UDP-based с TLS)
+    // QUIC требует специальной библиотеки (quiche, msquic и т.д.)
+    // Qt не имеет встроенной поддержки QUIC
+    // Для упрощения используем QUdpSocket с TLS поверх UDP
+    // В реальной реализации нужна библиотека QUIC
+    
+    QUdpSocket socket;
+    
+    QHostAddress dnsAddress(dnsServer);
+    if (dnsAddress.isNull()) {
+        return QString();
+    }
+    
+    // Формируем DNS запрос
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    QByteArray query = buildDnsQuery(hostname, transactionId);
+    if (query.isEmpty()) {
+        return QString();
+    }
+    
+    // Для QUIC нужен специальный формат с QUIC заголовками
+    // Упрощенная версия: отправляем DNS пакет через UDP
+    // В реальной реализации нужно:
+    // 1. Установить QUIC соединение (Initial packet, Handshake)
+    // 2. Отправить DNS запрос в QUIC stream
+    // 3. Получить ответ из QUIC stream
+    
+    // Временная реализация: используем UDP как fallback
+    // TODO: Реализовать полноценный QUIC протокол с использованием библиотеки
+    
+    qint64 bytesWritten = socket.writeDatagram(query, dnsAddress, port);
+    if (bytesWritten != query.size()) {
+        return QString();
+    }
+    
+    // Ждем ответ с таймаутом
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(timeoutMsecs);
+    
+    QByteArray response;
+    bool responseReceived = false;
+    
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(&socket, &QUdpSocket::readyRead, [&]() {
+        while (socket.hasPendingDatagrams()) {
+            QNetworkDatagram datagram = socket.receiveDatagram();
+            if (datagram.isValid()) {
+                response = datagram.data();
+                responseReceived = true;
+                loop.quit();
+            }
+        }
+    });
+    
+    timer.start();
+    loop.exec();
+    timer.stop();
+    
+    if (!responseReceived || response.isEmpty()) {
+        return QString();
+    }
+    
+    // Парсим DNS ответ
+    return parseDnsResponse(response, false);
+}
+
+// ============== DNS Tunneling ==============
+
+namespace {
+    // EDNS0 option codes (same as backend)
+    constexpr quint16 EDNS0_PAYLOAD_OPTION_CODE = 65001;      // Payload in request
+    constexpr quint16 EDNS0_CHUNK_REQUEST_CODE = 65002;       // Client requests chunk
+    constexpr quint16 EDNS0_CHUNK_RESPONSE_CODE = 65003;      // Server responds with chunk meta
+    
+    // Chunk metadata from server response (24 bytes)
+    struct ChunkMeta {
+        QByteArray chunkId;     // 16 bytes
+        quint16 totalChunks;    // big endian
+        quint16 chunkIndex;     // big endian
+        quint32 totalSize;      // big endian
+    };
+    
+    // Helper to append big-endian uint16
+    void appendUint16BE(QByteArray &data, quint16 value) {
+        data.append(static_cast<char>((value >> 8) & 0xFF));
+        data.append(static_cast<char>(value & 0xFF));
+    }
+    
+    // Build DNS TXT query for requesting a specific chunk (no payload, just chunkId + index)
+    QByteArray buildDnsChunkRequest(const QString &queryName, quint16 transactionId, 
+                                     const QByteArray &chunkId, quint16 chunkIndex)
+    {
+        QByteArray query;
+        
+        // DNS Header (12 bytes)
+        appendUint16BE(query, transactionId);
+        appendUint16BE(query, 0x0100);         // Flags: standard query, RD=1
+        appendUint16BE(query, 1);              // Questions: 1
+        appendUint16BE(query, 0);              // Answers: 0
+        appendUint16BE(query, 0);              // Authority: 0
+        appendUint16BE(query, 1);              // Additional: 1 (EDNS0 OPT)
+        
+        // Question section - QNAME
+        QStringList labels = queryName.split('.');
+        for (const QString &label : labels) {
+            QByteArray labelBytes = label.toUtf8();
+            query.append(static_cast<char>(labelBytes.size()));
+            query.append(labelBytes);
+        }
+        query.append(static_cast<char>(0));    // Root label
+        appendUint16BE(query, 16);             // QTYPE: TXT
+        appendUint16BE(query, 1);              // QCLASS: IN
+        
+        // Additional section - EDNS0 OPT record with chunk request
+        // Format: chunkId(16) + chunkIndex(2) = 18 bytes
+        quint16 optionDataLen = 4 + 18; // code(2) + length(2) + data(18)
+        
+        query.append(static_cast<char>(0));    // Name: root
+        appendUint16BE(query, 41);             // TYPE: OPT
+        appendUint16BE(query, 4096);           // CLASS: UDP payload size
+        query.append(static_cast<char>(0));    // Extended RCODE
+        query.append(static_cast<char>(0));    // EDNS version
+        appendUint16BE(query, 0);              // Flags
+        appendUint16BE(query, optionDataLen);  // RDLENGTH
+        
+        // RDATA: EDNS0 chunk request option
+        appendUint16BE(query, EDNS0_CHUNK_REQUEST_CODE);
+        appendUint16BE(query, 18);             // Option length
+        query.append(chunkId.left(16).leftJustified(16, '\0')); // chunkId (16 bytes)
+        appendUint16BE(query, chunkIndex);     // chunkIndex
+        
+        return query;
+    }
+    
+    // Parse EDNS0 chunk metadata from DNS response
+    ChunkMeta parseChunkMeta(const QByteArray &response)
+    {
+        ChunkMeta meta;
+        meta.totalChunks = 0;
+        meta.chunkIndex = 0;
+        meta.totalSize = 0;
+        
+        if (response.size() < 12) return meta;
+        
+        const quint8 *data = reinterpret_cast<const quint8*>(response.constData());
+        
+        // Parse header
+        quint16 qdCount = (data[4] << 8) | data[5];
+        quint16 anCount = (data[6] << 8) | data[7];
+        quint16 nsCount = (data[8] << 8) | data[9];
+        quint16 arCount = (data[10] << 8) | data[11];
+        
+        int pos = 12;
+        
+        // Skip questions
+        for (int i = 0; i < qdCount && pos < response.size(); i++) {
+            while (pos < response.size() && data[pos] != 0) {
+                if ((data[pos] & 0xC0) == 0xC0) { pos += 2; break; }
+                pos += data[pos] + 1;
+            }
+            if (pos < response.size() && data[pos] == 0) pos++;
+            pos += 4; // QTYPE + QCLASS
+        }
+        
+        // Skip answers
+        for (int i = 0; i < anCount && pos < response.size(); i++) {
+            while (pos < response.size() && data[pos] != 0) {
+                if ((data[pos] & 0xC0) == 0xC0) { pos += 2; break; }
+                pos += data[pos] + 1;
+            }
+            if (pos < response.size() && data[pos] == 0) pos++;
+            if (pos + 10 > response.size()) break;
+            quint16 rdlen = (data[pos + 8] << 8) | data[pos + 9];
+            pos += 10 + rdlen;
+        }
+        
+        // Skip authority
+        for (int i = 0; i < nsCount && pos < response.size(); i++) {
+            while (pos < response.size() && data[pos] != 0) {
+                if ((data[pos] & 0xC0) == 0xC0) { pos += 2; break; }
+                pos += data[pos] + 1;
+            }
+            if (pos < response.size() && data[pos] == 0) pos++;
+            if (pos + 10 > response.size()) break;
+            quint16 rdlen = (data[pos + 8] << 8) | data[pos + 9];
+            pos += 10 + rdlen;
+        }
+        
+        // Parse additional (looking for OPT record)
+        for (int i = 0; i < arCount && pos < response.size(); i++) {
+            // Skip name
+            if (pos < response.size() && data[pos] == 0) {
+                pos++; // Root label for OPT
+            } else {
+                while (pos < response.size() && data[pos] != 0) {
+                    if ((data[pos] & 0xC0) == 0xC0) { pos += 2; break; }
+                    pos += data[pos] + 1;
+                }
+                if (pos < response.size() && data[pos] == 0) pos++;
+            }
+            
+            if (pos + 10 > response.size()) break;
+            
+            quint16 rtype = (data[pos] << 8) | data[pos + 1];
+            quint16 rdlen = (data[pos + 8] << 8) | data[pos + 9];
+            pos += 10;
+            
+            if (rtype == 41 && rdlen > 0) { // OPT record
+                int optEnd = pos + rdlen;
+                while (pos + 4 <= optEnd) {
+                    quint16 optCode = (data[pos] << 8) | data[pos + 1];
+                    quint16 optLen = (data[pos + 2] << 8) | data[pos + 3];
+                    pos += 4;
+                    
+                    if (optCode == EDNS0_CHUNK_RESPONSE_CODE && optLen >= 24) {
+                        // Parse chunk metadata: chunkId(16) + total(2) + index(2) + size(4)
+                        meta.chunkId = QByteArray(reinterpret_cast<const char*>(data + pos), 16);
+                        meta.totalChunks = (data[pos + 16] << 8) | data[pos + 17];
+                        meta.chunkIndex = (data[pos + 18] << 8) | data[pos + 19];
+                        meta.totalSize = (data[pos + 20] << 24) | (data[pos + 21] << 16) | 
+                                        (data[pos + 22] << 8) | data[pos + 23];
+                        qDebug() << "[DNS Tunnel] Chunk meta: id=" << meta.chunkId.toHex()
+                                 << "total=" << meta.totalChunks << "index=" << meta.chunkIndex
+                                 << "size=" << meta.totalSize;
+                        return meta;
+                    }
+                    pos += optLen;
+                }
+            } else {
+                pos += rdlen;
+            }
+        }
+        
+        return meta;
+    }
+    
+    // Build DNS TXT query with EDNS0 payload (initial request)
+    QByteArray buildDnsTxtQueryWithPayload(const QString &queryName, quint16 transactionId, const QByteArray &payload)
+    {
+        QByteArray query;
+        
+        // DNS Header (12 bytes)
+        appendUint16BE(query, transactionId);  // Transaction ID
+        appendUint16BE(query, 0x0100);         // Flags: standard query, RD=1
+        appendUint16BE(query, 1);              // Questions: 1
+        appendUint16BE(query, 0);              // Answers: 0
+        appendUint16BE(query, 0);              // Authority: 0
+        appendUint16BE(query, 1);              // Additional: 1 (EDNS0 OPT)
+        
+        // Question section - QNAME
+        QStringList labels = queryName.split('.');
+        for (const QString &label : labels) {
+            QByteArray labelBytes = label.toUtf8();
+            query.append(static_cast<char>(labelBytes.size()));
+            query.append(labelBytes);
+        }
+        query.append(static_cast<char>(0));    // Root label (end of QNAME)
+        appendUint16BE(query, 16);             // QTYPE: TXT (16)
+        appendUint16BE(query, 1);              // QCLASS: IN (1)
+        
+        // Additional section - EDNS0 OPT record
+        QByteArray payloadBase64 = payload.toBase64();
+        quint16 optionDataLen = 4 + payloadBase64.size(); // code(2) + length(2) + data
+        
+        query.append(static_cast<char>(0));    // Name: root (0)
+        appendUint16BE(query, 41);             // TYPE: OPT (41)
+        appendUint16BE(query, 4096);           // CLASS: UDP payload size
+        query.append(static_cast<char>(0));    // Extended RCODE
+        query.append(static_cast<char>(0));    // EDNS version
+        appendUint16BE(query, 0);              // Flags (Z)
+        appendUint16BE(query, optionDataLen);  // RDLENGTH
+        
+        // RDATA: EDNS0 payload option
+        appendUint16BE(query, EDNS0_PAYLOAD_OPTION_CODE); // Option code
+        appendUint16BE(query, payloadBase64.size());       // Option length
+        query.append(payloadBase64);                       // Option data
+        
+        return query;
+    }
+    
+    // Parse DNS TXT response and extract payload
+    QByteArray parseDnsTxtResponse(const QByteArray &response)
+    {
+        if (response.size() < 12) {
+            qDebug() << "[DNS Tunnel] Response too short:" << response.size();
+            return QByteArray();
+        }
+        
+        // Parse header manually to avoid QDataStream issues
+        const uchar *data = reinterpret_cast<const uchar*>(response.constData());
+        int pos = 0;
+        
+        quint16 transactionId = (data[pos] << 8) | data[pos+1]; pos += 2;
+        quint16 flags = (data[pos] << 8) | data[pos+1]; pos += 2;
+        quint16 qdCount = (data[pos] << 8) | data[pos+1]; pos += 2;
+        quint16 anCount = (data[pos] << 8) | data[pos+1]; pos += 2;
+        quint16 nsCount = (data[pos] << 8) | data[pos+1]; pos += 2;
+        quint16 arCount = (data[pos] << 8) | data[pos+1]; pos += 2;
+        
+        qDebug() << "[DNS Tunnel] Response header: id=" << transactionId << "flags=" << Qt::hex << flags 
+                 << "questions=" << qdCount << "answers=" << anCount << "authority=" << nsCount << "additional=" << arCount;
+        
+        // Check for errors (RCODE in lower 4 bits of flags)
+        quint8 rcode = flags & 0x0F;
+        if (rcode != 0) {
+            qDebug() << "[DNS Tunnel] Response error, RCODE:" << rcode;
+        }
+        
+        // Skip question section
+        for (int i = 0; i < qdCount && pos < response.size(); i++) {
+            // Skip name
+            while (pos < response.size()) {
+                quint8 len = data[pos++];
+                if (len == 0) break;
+                if ((len & 0xC0) == 0xC0) {
+                    pos++; // Skip pointer byte
+                    break;
+                }
+                pos += len;
+            }
+            pos += 4; // Skip QTYPE and QCLASS
+        }
+        
+        qDebug() << "[DNS Tunnel] After questions, pos=" << pos << "size=" << response.size();
+        
+        // Read answer section - looking for TXT records
+        QByteArray combinedTxt;
+        for (int i = 0; i < anCount && pos < response.size(); i++) {
+            // Skip name (handle compression)
+            while (pos < response.size()) {
+                quint8 len = data[pos++];
+                if (len == 0) break;
+                if ((len & 0xC0) == 0xC0) {
+                    pos++; // Skip pointer byte
+                    break;
+                }
+                pos += len;
+            }
+            
+            if (pos + 10 > response.size()) {
+                qDebug() << "[DNS Tunnel] Not enough data for RR header at pos=" << pos;
+                break;
+            }
+            
+            quint16 rtype = (data[pos] << 8) | data[pos+1]; pos += 2;
+            quint16 rclass = (data[pos] << 8) | data[pos+1]; pos += 2;
+            quint32 ttl = (data[pos] << 24) | (data[pos+1] << 16) | (data[pos+2] << 8) | data[pos+3]; pos += 4;
+            quint16 rdlength = (data[pos] << 8) | data[pos+1]; pos += 2;
+            
+            qDebug() << "[DNS Tunnel] Answer" << i << ": type=" << rtype << "class=" << rclass << "ttl=" << ttl << "rdlen=" << rdlength;
+            
+            if (rtype == 16) { // TXT record
+                int rdEnd = pos + rdlength;
+                while (pos < rdEnd && pos < response.size()) {
+                    quint8 txtLen = data[pos++];
+                    if (txtLen > 0 && pos + txtLen <= rdEnd) {
+                        combinedTxt.append(reinterpret_cast<const char*>(data + pos), txtLen);
+                        pos += txtLen;
+                    }
+                }
+            } else {
+                pos += rdlength; // Skip non-TXT record data
+            }
+        }
+        
+        if (combinedTxt.isEmpty()) {
+            qDebug() << "[DNS Tunnel] No TXT records in response";
+            return QByteArray();
+        }
+        
+        qDebug() << "[DNS Tunnel] Received TXT data:" << combinedTxt.size() << "bytes";
+        
+        // Decode base64
+        QByteArray decoded = QByteArray::fromBase64(combinedTxt);
+        qDebug() << "[DNS Tunnel] Decoded data:" << decoded.size() << "bytes, preview:" << decoded.left(100);
+        return decoded;
+    }
+}
+
+QByteArray NetworkUtilities::sendViaDnsTunnel(const QByteArray &payload, const QString &endpoint, const QString &baseDomain,
+                                               const QString &dnsServer, DnsTransport transport, quint16 port,
+                                               int timeoutMsecs, const QString &dohEndpoint)
+{
+    // Build query name: endpoint.baseDomain (e.g., services.gateway.example.com)
+    QString queryName = QString("%1.%2").arg(endpoint, baseDomain);
+    
+    qDebug() << "[DNS Tunnel] Sending to" << queryName << "via" << (transport == DnsTransport::Udp ? "UDP" : 
+               transport == DnsTransport::Tcp ? "TCP" : 
+               transport == DnsTransport::Tls ? "DoT" : 
+               transport == DnsTransport::Https ? "DoH" : "DoQ")
+             << "server:" << dnsServer << "port:" << port << "payload:" << payload.size() << "bytes";
+    
+    switch (transport) {
+        case DnsTransport::Udp:
+            // Try chunked UDP first (handles large responses)
+            return sendViaDnsTunnelUdpChunked(payload, queryName, dnsServer, port, timeoutMsecs);
+        case DnsTransport::Tcp:
+            return sendViaDnsTunnelTcp(payload, queryName, dnsServer, port, timeoutMsecs);
+        case DnsTransport::Tls:
+            return sendViaDnsTunnelTls(payload, queryName, dnsServer, port, timeoutMsecs);
+        case DnsTransport::Https:
+            return sendViaDnsTunnelHttps(payload, queryName, dnsServer, port, dohEndpoint, timeoutMsecs);
+        case DnsTransport::Quic:
+            // DoQ uses QUIC - not yet implemented, fallback to chunked UDP
+            qDebug() << "[DNS Tunnel] DoQ not yet implemented, falling back to UDP";
+            return sendViaDnsTunnelUdpChunked(payload, queryName, dnsServer, port, timeoutMsecs);
+    }
+    return QByteArray();
+}
+
+QByteArray NetworkUtilities::sendViaDnsTunnelUdp(const QByteArray &payload, const QString &queryName,
+                                                  const QString &dnsServer, quint16 port, int timeoutMsecs)
+{
+    QUdpSocket socket;
+    
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    QByteArray query = buildDnsTxtQueryWithPayload(queryName, transactionId, payload);
+    
+    if (query.isEmpty()) {
+        qDebug() << "[DNS Tunnel UDP] Failed to build query";
+        return QByteArray();
+    }
+    
+    QHostAddress dnsAddress(dnsServer);
+    if (dnsAddress.isNull()) {
+        qDebug() << "[DNS Tunnel UDP] Invalid DNS server address:" << dnsServer;
+        return QByteArray();
+    }
+    
+    qint64 bytesWritten = socket.writeDatagram(query, dnsAddress, port);
+    if (bytesWritten != query.size()) {
+        qDebug() << "[DNS Tunnel UDP] Failed to send query";
+        return QByteArray();
+    }
+    
+    qDebug() << "[DNS Tunnel UDP] Sent" << bytesWritten << "bytes to" << dnsServer << ":" << port;
+    
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(timeoutMsecs);
+    
+    QByteArray response;
+    bool responseReceived = false;
+    
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(&socket, &QUdpSocket::readyRead, [&]() {
+        while (socket.hasPendingDatagrams()) {
+            QNetworkDatagram datagram = socket.receiveDatagram();
+            if (datagram.isValid()) {
+                response = datagram.data();
+                responseReceived = true;
+                loop.quit();
+            }
+        }
+    });
+    
+    timer.start();
+    loop.exec();
+    timer.stop();
+    
+    if (!responseReceived || response.isEmpty()) {
+        qDebug() << "[DNS Tunnel UDP] No response received (timeout)";
+        return QByteArray();
+    }
+    
+    qDebug() << "[DNS Tunnel UDP] Received response:" << response.size() << "bytes";
+    return parseDnsTxtResponse(response);
+}
+
+QByteArray NetworkUtilities::sendViaDnsTunnelTcp(const QByteArray &payload, const QString &queryName,
+                                                  const QString &dnsServer, quint16 port, int timeoutMsecs)
+{
+    QTcpSocket socket;
+    
+    QHostAddress dnsAddress(dnsServer);
+    if (dnsAddress.isNull()) {
+        qDebug() << "[DNS Tunnel TCP] Invalid DNS server address:" << dnsServer;
+        return QByteArray();
+    }
+    
+    socket.connectToHost(dnsAddress, port);
+    if (!socket.waitForConnected(timeoutMsecs)) {
+        qDebug() << "[DNS Tunnel TCP] Connection failed:" << socket.errorString();
+        return QByteArray();
+    }
+    
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    QByteArray query = buildDnsTxtQueryWithPayload(queryName, transactionId, payload);
+    
+    if (query.isEmpty()) {
+        qDebug() << "[DNS Tunnel TCP] Failed to build query";
+        socket.close();
+        return QByteArray();
+    }
+    
+    // TCP DNS: 2-byte length prefix
+    quint16 length = qToBigEndian<quint16>(static_cast<quint16>(query.size()));
+    QByteArray tcpQuery;
+    tcpQuery.append(reinterpret_cast<const char*>(&length), sizeof(quint16));
+    tcpQuery.append(query);
+    
+    qint64 bytesWritten = socket.write(tcpQuery);
+    if (bytesWritten != tcpQuery.size() || !socket.waitForBytesWritten(timeoutMsecs)) {
+        qDebug() << "[DNS Tunnel TCP] Failed to send query";
+        socket.close();
+        return QByteArray();
+    }
+    
+    qDebug() << "[DNS Tunnel TCP] Sent" << bytesWritten << "bytes to" << dnsServer << ":" << port;
+    
+    // Wait for response
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(timeoutMsecs);
+    
+    QByteArray response;
+    bool responseReceived = false;
+    
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(&socket, &QTcpSocket::readyRead, [&]() {
+        if (socket.bytesAvailable() >= 2 && response.isEmpty()) {
+            QByteArray lengthBytes = socket.read(2);
+            if (lengthBytes.size() == 2) {
+                quint16 responseLength = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(lengthBytes.constData()));
+                while (socket.bytesAvailable() < responseLength) {
+                    if (!socket.waitForReadyRead(timeoutMsecs / 2)) {
+                        break;
+                    }
+                }
+                if (socket.bytesAvailable() >= responseLength) {
+                    response = socket.read(responseLength);
+                    responseReceived = true;
+                    loop.quit();
+                }
+            }
+        }
+    });
+    
+    timer.start();
+    loop.exec();
+    timer.stop();
+    socket.close();
+    
+    if (!responseReceived || response.isEmpty()) {
+        qDebug() << "[DNS Tunnel TCP] No response received (timeout)";
+        return QByteArray();
+    }
+    
+    qDebug() << "[DNS Tunnel TCP] Received response:" << response.size() << "bytes";
+    return parseDnsTxtResponse(response);
+}
+
+QByteArray NetworkUtilities::sendViaDnsTunnelTls(const QByteArray &payload, const QString &queryName,
+                                                  const QString &dnsServer, quint16 port, int timeoutMsecs)
+{
+    QSslSocket socket;
+    
+    // Disable certificate verification for local testing
+    socket.setPeerVerifyMode(QSslSocket::VerifyNone);
+    
+    QHostAddress dnsAddress(dnsServer);
+    if (dnsAddress.isNull()) {
+        qDebug() << "[DNS Tunnel DoT] Invalid DNS server address:" << dnsServer;
+        return QByteArray();
+    }
+    
+    socket.connectToHostEncrypted(dnsServer, port);
+    if (!socket.waitForEncrypted(timeoutMsecs)) {
+        qDebug() << "[DNS Tunnel DoT] TLS handshake failed:" << socket.errorString();
+        return QByteArray();
+    }
+    
+    qDebug() << "[DNS Tunnel DoT] TLS connected to" << dnsServer << ":" << port;
+    
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    QByteArray query = buildDnsTxtQueryWithPayload(queryName, transactionId, payload);
+    
+    if (query.isEmpty()) {
+        qDebug() << "[DNS Tunnel DoT] Failed to build query";
+        socket.close();
+        return QByteArray();
+    }
+    
+    // TCP DNS format: 2-byte length prefix
+    quint16 length = qToBigEndian<quint16>(static_cast<quint16>(query.size()));
+    QByteArray tcpQuery;
+    tcpQuery.append(reinterpret_cast<const char*>(&length), sizeof(quint16));
+    tcpQuery.append(query);
+    
+    qint64 bytesWritten = socket.write(tcpQuery);
+    if (bytesWritten != tcpQuery.size() || !socket.waitForBytesWritten(timeoutMsecs)) {
+        qDebug() << "[DNS Tunnel DoT] Failed to send query";
+        socket.close();
+        return QByteArray();
+    }
+    
+    qDebug() << "[DNS Tunnel DoT] Sent" << bytesWritten << "bytes";
+    
+    // Wait for response
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(timeoutMsecs);
+    
+    QByteArray response;
+    bool responseReceived = false;
+    
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(&socket, &QSslSocket::readyRead, [&]() {
+        if (socket.bytesAvailable() >= 2 && response.isEmpty()) {
+            QByteArray lengthBytes = socket.read(2);
+            if (lengthBytes.size() == 2) {
+                quint16 responseLength = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(lengthBytes.constData()));
+                while (socket.bytesAvailable() < responseLength) {
+                    if (!socket.waitForReadyRead(timeoutMsecs / 2)) {
+                        break;
+                    }
+                }
+                if (socket.bytesAvailable() >= responseLength) {
+                    response = socket.read(responseLength);
+                    responseReceived = true;
+                    loop.quit();
+                }
+            }
+        }
+    });
+    
+    timer.start();
+    loop.exec();
+    timer.stop();
+    socket.close();
+    
+    if (!responseReceived || response.isEmpty()) {
+        qDebug() << "[DNS Tunnel DoT] No response received (timeout)";
+        return QByteArray();
+    }
+    
+    qDebug() << "[DNS Tunnel DoT] Received response:" << response.size() << "bytes";
+    return parseDnsTxtResponse(response);
+}
+
+QByteArray NetworkUtilities::sendViaDnsTunnelHttps(const QByteArray &payload, const QString &queryName,
+                                                    const QString &dnsServer, quint16 port, const QString &endpoint, int timeoutMsecs)
+{
+    // Build DNS query packet
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    QByteArray dnsQuery = buildDnsTxtQueryWithPayload(queryName, transactionId, payload);
+    
+    if (dnsQuery.isEmpty()) {
+        qDebug() << "[DNS Tunnel DoH] Failed to build query";
+        return QByteArray();
+    }
+    
+    // DoH uses HTTP POST with application/dns-message
+    QString url = QString("http://%1:%2%3").arg(dnsServer).arg(port).arg(endpoint);
+    
+    qDebug() << "[DNS Tunnel DoH] Sending to" << url;
+    
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/dns-message");
+    request.setRawHeader("Accept", "application/dns-message");
+    request.setTransferTimeout(timeoutMsecs);
+    
+    QNetworkAccessManager manager;
+    QNetworkReply *reply = manager.post(request, dnsQuery);
+    
+    QEventLoop loop;
+    QTimer timer;
+    timer.setSingleShot(true);
+    timer.setInterval(timeoutMsecs);
+    
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    
+    timer.start();
+    loop.exec();
+    timer.stop();
+    
+    if (reply->error() != QNetworkReply::NoError) {
+        qDebug() << "[DNS Tunnel DoH] HTTP error:" << reply->errorString();
+        reply->deleteLater();
+        return QByteArray();
+    }
+    
+    QByteArray response = reply->readAll();
+    reply->deleteLater();
+    
+    if (response.isEmpty()) {
+        qDebug() << "[DNS Tunnel DoH] Empty response";
+        return QByteArray();
+    }
+    
+    qDebug() << "[DNS Tunnel DoH] Received response:" << response.size() << "bytes";
+    return parseDnsTxtResponse(response);
+}
+
+QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payload, const QString &queryName,
+                                                         const QString &dnsServer, quint16 port, int timeoutMsecs)
+{
+    qDebug() << "[DNS Tunnel UDP Chunked] Starting request to" << queryName;
+    
+    QHostAddress dnsAddress(dnsServer);
+    if (dnsAddress.isNull()) {
+        qDebug() << "[DNS Tunnel UDP Chunked] Invalid DNS server:" << dnsServer;
+        return QByteArray();
+    }
+    
+    // Helper lambda to send UDP request and get raw response
+    auto sendUdpRequest = [&](const QByteArray &query) -> QByteArray {
+        QUdpSocket socket;
+        socket.writeDatagram(query, dnsAddress, port);
+        
+        QEventLoop loop;
+        QTimer timer;
+        timer.setSingleShot(true);
+        timer.setInterval(timeoutMsecs / 5); // Shorter timeout per request
+        
+        QByteArray response;
+        bool responseReceived = false;
+        
+        QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        QObject::connect(&socket, &QUdpSocket::readyRead, [&]() {
+            while (socket.hasPendingDatagrams()) {
+                QNetworkDatagram datagram = socket.receiveDatagram();
+                if (datagram.isValid()) {
+                    response = datagram.data();
+                    responseReceived = true;
+                    loop.quit();
+                }
+            }
+        });
+        
+        timer.start();
+        loop.exec();
+        timer.stop();
+        
+        return responseReceived ? response : QByteArray();
+    };
+    
+    // Send initial request with payload
+    quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
+    QByteArray initialQuery = buildDnsTxtQueryWithPayload(queryName, transactionId, payload);
+    
+    if (initialQuery.isEmpty()) {
+        qDebug() << "[DNS Tunnel UDP Chunked] Failed to build initial query";
+        return QByteArray();
+    }
+    
+    qDebug() << "[DNS Tunnel UDP Chunked] Sending initial request, payload:" << payload.size() << "bytes";
+    QByteArray firstResponse = sendUdpRequest(initialQuery);
+    
+    if (firstResponse.isEmpty()) {
+        qDebug() << "[DNS Tunnel UDP Chunked] No response for initial request";
+        return QByteArray();
+    }
+    
+    // Parse chunk metadata from EDNS0 option 65003
+    ChunkMeta meta = parseChunkMeta(firstResponse);
+    QByteArray firstTxtData = parseDnsTxtResponse(firstResponse);
+    
+    if (firstTxtData.isEmpty()) {
+        qDebug() << "[DNS Tunnel UDP Chunked] Failed to parse TXT response";
+        return QByteArray();
+    }
+    
+    // Check if response is chunked
+    if (meta.totalChunks <= 1) {
+        // Not chunked or single chunk - return as-is
+        qDebug() << "[DNS Tunnel UDP Chunked] Single chunk response:" << firstTxtData.size() << "bytes";
+        return firstTxtData;
+    }
+    
+    qDebug() << "[DNS Tunnel UDP Chunked] Chunked response: total=" << meta.totalChunks 
+             << "size=" << meta.totalSize << "chunkId=" << meta.chunkId.toHex();
+    
+    // Collect all chunks
+    QMap<int, QByteArray> chunks;
+    chunks[0] = firstTxtData;
+    
+    // Request remaining chunks
+    for (int i = 1; i < meta.totalChunks; i++) {
+        qDebug() << "[DNS Tunnel UDP Chunked] Requesting chunk" << i;
+        
+        quint16 chunkTxId = static_cast<quint16>((QDateTime::currentMSecsSinceEpoch() + i) & 0xFFFF);
+        QByteArray chunkQuery = buildDnsChunkRequest(queryName, chunkTxId, meta.chunkId, i);
+        
+        if (chunkQuery.isEmpty()) {
+            qDebug() << "[DNS Tunnel UDP Chunked] Failed to build chunk request" << i;
+            continue;
+        }
+        
+        QByteArray chunkResponse = sendUdpRequest(chunkQuery);
+        if (chunkResponse.isEmpty()) {
+            qDebug() << "[DNS Tunnel UDP Chunked] No response for chunk" << i;
+            continue;
+        }
+        
+        QByteArray chunkTxtData = parseDnsTxtResponse(chunkResponse);
+        if (!chunkTxtData.isEmpty()) {
+            ChunkMeta chunkMeta = parseChunkMeta(chunkResponse);
+            int idx = (chunkMeta.totalChunks > 0) ? chunkMeta.chunkIndex : i;
+            chunks[idx] = chunkTxtData;
+            qDebug() << "[DNS Tunnel UDP Chunked] Received chunk" << idx << ":" << chunkTxtData.size() << "bytes";
+        }
+    }
+    
+    // Check if we have all chunks
+    if (chunks.size() != meta.totalChunks) {
+        qDebug() << "[DNS Tunnel UDP Chunked] Missing chunks:" << chunks.size() << "/" << meta.totalChunks;
+        // Try to return what we have anyway
+    }
+    
+    // Combine all chunks in order
+    QByteArray combined;
+    for (int i = 0; i < meta.totalChunks; i++) {
+        if (chunks.contains(i)) {
+            combined.append(chunks[i]);
+        }
+    }
+    
+    qDebug() << "[DNS Tunnel UDP Chunked] Combined" << chunks.size() << "chunks," << combined.size() << "bytes";
+    return combined;
 }

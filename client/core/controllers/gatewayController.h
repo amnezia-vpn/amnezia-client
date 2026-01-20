@@ -9,6 +9,7 @@
 #include <QSharedPointer>
 
 #include "core/defs.h"
+#include "core/networkUtilities.h"
 
 #ifdef Q_OS_IOS
     #include "platforms/ios/ios_controller.h"
@@ -24,6 +25,13 @@ public:
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
+    
+    // DNS transport settings
+    void setDnsServer(const QString &dnsServer, const QString &baseDomain, NetworkUtilities::DnsTransport transport, 
+                      quint16 port, const QString &dohEndpoint = "/dns-query");
+    
+    // DNS tunneling - send request via DNS transport
+    amnezia::ErrorCode postViaDns(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
 
 private:
     struct EncryptedRequestData
@@ -45,7 +53,8 @@ private:
     EncryptedRequestData prepareRequest(const QString &endpoint, const QJsonObject &apiPayload);
     DecryptionResult tryDecryptResponseBody(const QByteArray &encryptedResponseBody, QNetworkReply::NetworkError replyError,
                                             const QByteArray &key, const QByteArray &iv, const QByteArray &salt);
-
+    QString resolveGatewayHostname(const QString &hostname);
+    
     QStringList getProxyUrls(const QString &serviceType, const QString &userCountryCode);
     bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody, bool isDecryptionSuccessful);
     void bypassProxy(const QString &endpoint, const QString &serviceType, const QString &userCountryCode,
@@ -63,6 +72,13 @@ private:
     QString m_gatewayEndpoint;
     bool m_isDevEnvironment = false;
     bool m_isStrictKillSwitchEnabled = false;
+    
+    // DNS transport settings
+    QString m_dnsServer;
+    QString m_dnsBaseDomain;
+    NetworkUtilities::DnsTransport m_dnsTransport = NetworkUtilities::DnsTransport::Udp;
+    quint16 m_dnsPort = 15353;
+    QString m_dohEndpoint = "/dns-query";
 
     inline static QString m_proxyUrl;
 };

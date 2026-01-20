@@ -3,9 +3,13 @@
 #include <QEventLoop>
 #include <QTimer>
 
+#include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "core/networkUtilities.h"
+#ifdef Q_OS_IOS
 #include "platforms/ios/ios_controller.h"
+#endif
 #include "version.h"
 
 namespace
@@ -67,8 +71,35 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
-
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/account_info"), apiPayload, responseBody);
+    QString baseDomain = "gateway.example.com";
+    QString endpoint = QString("%1v1/account_info");
+    
+    // 1. HTTP (primary transport)
+    ErrorCode errorCode = gatewayController.post(endpoint, apiPayload, responseBody);
+    if (errorCode == ErrorCode::NoError) goto success;
+    
+    qDebug() << "[Transport] HTTP failed, trying DNS transports as fallback";
+    
+    // 2. DNS UDP
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Udp, 15353);
+    errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    if (errorCode == ErrorCode::NoError) goto success;
+    
+    // 3. DNS TCP
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Tcp, 15353);
+    errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    if (errorCode == ErrorCode::NoError) goto success;
+    
+    // 4. DoT
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Tls, 8853);
+    errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    if (errorCode == ErrorCode::NoError) goto success;
+    
+    // 5. DoH
+    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Https, 80, "/dns-query");
+    errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
+    
+success:
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
