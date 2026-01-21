@@ -24,6 +24,7 @@ target_link_libraries(test_common PUBLIC
 target_include_directories(test_common PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/..
     ${CMAKE_CURRENT_BINARY_DIR}/..
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 add_executable(test_import_export

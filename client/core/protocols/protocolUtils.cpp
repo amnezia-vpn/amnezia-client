@@ -158,12 +158,14 @@ TransportProto ProtocolUtils::defaultTransportProto(Proto p)
     case Proto::Ikev2: return TransportProto::Udp;
     case Proto::L2tp: return TransportProto::Udp;
     case Proto::Xray: return TransportProto::Tcp;
+    case Proto::SSXray: return TransportProto::Tcp;
 
     // non-vpn
     case Proto::TorWebSite: return TransportProto::Tcp;
     case Proto::Dns: return TransportProto::Udp;
     case Proto::Sftp: return TransportProto::Tcp;
     case Proto::Socks5Proxy: return TransportProto::Tcp;
+    default: return TransportProto::Udp;
     }
 }
 
