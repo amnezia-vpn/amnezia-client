@@ -10,10 +10,10 @@ env:
 
 jobs:
   Build-Linux-Ubuntu:
-    runs-on: ubuntu-22.04
+    runs-on: 4-core
 
     env:
-      QT_VERSION: 6.9.2
+      QT_VERSION: 6.8.3
       QIF_VERSION: 4.7
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
@@ -30,13 +30,15 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'desktop'
-        arch: 'gcc_64'
+        arch: 'linux_gcc_64'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        aqtversion: '==3.3.0'       
+        py7zrversion: '==0.22.*'  
+        extra: '--base ${{ env.QT_MIRROR }}' 
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -51,8 +53,8 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version: $VERSION"
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -91,7 +93,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      QT_VERSION: 6.9.2
+      QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
       BUILD_ARCH: 64
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
@@ -117,8 +119,8 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version: $VERSION"
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
@@ -126,13 +128,15 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'windows'
         target: 'desktop'
-        arch: 'win64_msvc2019_64'
+        arch: 'win64_msvc2022_64'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        aqtversion: '==3.3.0'       
+        py7zrversion: '==0.22.*'  
+        extra: '--base ${{ env.QT_MIRROR }}' 
 
     - name: 'Setup mvsc'
       uses: ilammy/msvc-dev-cmd@v1
@@ -158,7 +162,7 @@ jobs:
       shell: cmd
       run: |
         set BUILD_ARCH=${{ env.BUILD_ARCH }}
-        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_64\\bin"
+        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2022_64\\bin"
         set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
         set WIX_BIN_DIR=%USERPROFILE%\.dotnet\tools
         call deploy\\build_windows.bat
@@ -195,7 +199,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.9.2
+      QT_VERSION: 6.10.1
       CC: cc
       CXX: c++
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
@@ -254,8 +258,8 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install dependencies'
       run: pip install jsonschema jinja2
@@ -346,8 +350,8 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -374,7 +378,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.9.2
+      QT_VERSION: 6.10.1
 
       MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
@@ -412,15 +416,11 @@ jobs:
         arch: 'clang_64'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
-        #setup-python: 'true'
-        #set-env: 'true'
-        #extra: '--external 7z --base ${{ env.QT_MIRROR }}'
         setup-python: 'true'
         set-env: 'true'
         aqtversion: '==3.3.0'       
         py7zrversion: '==0.22.*'  
         extra: '--base ${{ env.QT_MIRROR }}' 
-        cache: 'true'
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -435,8 +435,8 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version: $VERSION"
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -467,7 +467,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.9.2
+      QT_VERSION: 6.10.1
 
       MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
@@ -519,8 +519,8 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -537,7 +537,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
-    runs-on: ubuntu-latest
+    runs-on: 4-core
 
     env:
       ANDROID_BUILD_PLATFORM: android-36
@@ -629,15 +629,15 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version: $VERSION"
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Setup Java'
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
-        cache: 'gradle'
+        # cache: 'gradle'
 
     - name: 'Setup Android NDK'
       id: setup-ndk

@@ -33,7 +33,8 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     }
     case DescriptionRole: {
         if (container == DockerContainer::Awg && !isThirdPartyConfig) {
-            return QObject::tr("AmneziaWG Legacy is a outdated version of AmneziaWG protocol. To upgrade, install AmneziaWG and recreate users.");
+            return QObject::tr("AmneziaWG is a special protocol from Amnezia based on WireGuard. "
+                           "It provides high connection speed and ensures stable operation even in the most challenging network conditions.");
         }
 
         return ContainerUtils::containerDescriptions().value(container);

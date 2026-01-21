@@ -179,6 +179,13 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
     containerConfig[config_key::underloadPacketMagicHeader] = serverConfigMap.value(config_key::underloadPacketMagicHeader);
     containerConfig[config_key::transportPacketMagicHeader] = serverConfigMap.value(config_key::transportPacketMagicHeader);
 
+    // hack to parse i1-i5 from commented lines in server config
+    containerConfig[config_key::specialJunk1] = serverConfigMap.value(QString("# ") + config_key::specialJunk1);
+    containerConfig[config_key::specialJunk2] = serverConfigMap.value(QString("# ") + config_key::specialJunk2);
+    containerConfig[config_key::specialJunk3] = serverConfigMap.value(QString("# ") + config_key::specialJunk3);
+    containerConfig[config_key::specialJunk4] = serverConfigMap.value(QString("# ") + config_key::specialJunk4);
+    containerConfig[config_key::specialJunk5] = serverConfigMap.value(QString("# ") + config_key::specialJunk5);
+
     // AWG 2.0 specific fields
     if (container == DockerContainer::Awg2) {
         containerConfig[config_key::protocolVersion] = "2";
