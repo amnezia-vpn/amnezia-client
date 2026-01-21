@@ -28,6 +28,7 @@
 #include "ui/controllers/logsUiController.h"
 #include "ui/controllers/serversUiController.h"
 #include "ui/controllers/ipSplitTunnelingUiController.h"
+#include "ui/controllers/serversBackupController.h"
 #include "ui/controllers/systemController.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/controllers/updateUiController.h"
@@ -187,6 +188,7 @@ private:
     AllowedDnsUiController* m_allowedDnsUiController;
     LanguageUiController* m_languageUiController;
     UpdateUiController* m_updateUiController;
+    ServersBackupController* m_serversBackupController;
 
     SubscriptionUiController* m_subscriptionUiController;
     ApiNewsUiController* m_apiNewsUiController;
