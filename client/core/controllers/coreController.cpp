@@ -221,9 +221,6 @@ void CoreController::initAndroidController()
         qFatal("Android controller initialization failed");
     }
 
-    initAndroidSettingsHandler();
-    initAndroidConnectionHandler();
-
     if (m_engine) {
         m_engine->addImageProvider(QLatin1String("installedAppImage"), new InstalledAppsImageProvider);
     }
