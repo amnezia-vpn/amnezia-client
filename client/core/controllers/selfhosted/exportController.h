@@ -12,8 +12,8 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 
 class SshSession;
 class VpnConfigurationsController;
@@ -33,8 +33,8 @@ public:
         QList<QString> qrCodes;
     };
 
-    explicit ExportController(QServersRepository* serversRepository,
-                              QAppSettingsRepository* appSettingsRepository,
+    explicit ExportController(SecureServersRepository* serversRepository,
+                              SecureAppSettingsRepository* appSettingsRepository,
                               QObject *parent = nullptr);
 
     ExportResult generateFullAccessConfig(int serverIndex);
@@ -71,8 +71,8 @@ private:
     QList<QString> generateQrCodesFromConfig(const QByteArray &data);
     QString generateSingleQrCode(const QByteArray &data);
 
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif // EXPORTCONTROLLER_H

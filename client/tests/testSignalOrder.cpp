@@ -43,8 +43,8 @@ private slots:
         QString awgKey = "vpn://AAABFHjadZBBT4QwEIX_ipkzS2wBJdyMB1cPXvbgwRgyQnclgZa0RTYS_rszXRa52Mt77TfzOu0EldEeG62sg-J9AhxPUEywF1CAuF3WTl4dRLCXhJIVpVuUEMpWdLdFKaH7FeUb9Mx3scpFk0XTRbOLvlSkKZsOz-Gi4BsdRiV_EGEydhwlg0tWynEZmd5Yz1bkoaK3xpvKtOU3_UFjOE3SsRs-tfIl1rVVzoWQOI9FzC3eonYcU4ZmgkPdwxz9fSYdYafVT4M7-lEJ80cEtTri0PrH_2q4wlW26f1lioe3p5uDsjQWoS_j_Ct2ipvGU6zO2PWtiivT8RPQudHYmqBXzl-3Yn2slBEMTtklgYt4C_Mv3ROMwA";
 
         QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
-        QSignalSpy serverAddedSpy(m_coreController->m_serversRepository, &QServersRepository::serverAdded);
-        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
+        QSignalSpy serverAddedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
         auto importResult = m_coreController->m_importCoreController->extractConfigFromData(awgKey);
         m_coreController->m_importCoreController->importConfig(importResult.config);
@@ -68,8 +68,8 @@ private slots:
 
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default should be index 1");
 
-        QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &QServersRepository::serverRemoved);
-        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
+        QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
         m_coreController->m_serversController->removeServer(1);
 

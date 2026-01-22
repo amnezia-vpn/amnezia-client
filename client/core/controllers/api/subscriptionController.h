@@ -9,8 +9,8 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "core/models/serverConfig.h"
 
 class ServersController;
@@ -42,8 +42,8 @@ public:
         QJsonObject toJsonObject() const;
     };
 
-    explicit SubscriptionController(QServersRepository* serversRepository,
-                                     QAppSettingsRepository* appSettingsRepository);
+    explicit SubscriptionController(SecureServersRepository* serversRepository,
+                                     SecureAppSettingsRepository* appSettingsRepository);
 
     ProtocolData generateProtocolData(const QString &protocol);
     void appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload);
@@ -101,8 +101,8 @@ private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
     bool isApiKeyExpired(int serverIndex) const;
 
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif // SUBSCRIPTIONCONTROLLER_H

@@ -5,8 +5,8 @@
 #include <QJsonObject>
 #include <QByteArray>
 
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
@@ -41,8 +41,8 @@ public:
         bool isNativeWireGuardConfig = false;
     };
 
-    explicit ImportController(QServersRepository* serversRepository,
-                              QAppSettingsRepository* appSettingsRepository,
+    explicit ImportController(SecureServersRepository* serversRepository,
+                              SecureAppSettingsRepository* appSettingsRepository,
                               QObject *parent = nullptr);
 
     ImportResult extractConfigFromData(const QString &data, const QString &configFileName = "");
@@ -64,8 +64,8 @@ private:
     void checkForMaliciousStrings(QJsonObject &serverConfig, QString &warningText) const;
     void processAmneziaConfig(QJsonObject &config) const;
 
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif // IMPORTCONTROLLER_H

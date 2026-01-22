@@ -18,7 +18,7 @@ namespace
     }
 }
 
-NewsController::NewsController(QAppSettingsRepository* appSettingsRepository,
+NewsController::NewsController(SecureAppSettingsRepository* appSettingsRepository,
                                ServersController* serversController)
     : m_appSettingsRepository(appSettingsRepository), m_serversController(serversController)
 {

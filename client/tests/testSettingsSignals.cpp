@@ -46,7 +46,7 @@ private slots:
     void testDnsSettingsSignals() {
         QSignalSpy primaryDnsChangedSpy(m_coreController->m_settingsUiController, &SettingsUiController::primaryDnsChanged);
         QSignalSpy secondaryDnsChangedSpy(m_coreController->m_settingsUiController, &SettingsUiController::secondaryDnsChanged);
-        QSignalSpy allowedDnsServersChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::allowedDnsServersChanged);
+        QSignalSpy allowedDnsServersChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::allowedDnsServersChanged);
 
         QString primaryDns = "8.8.8.8";
         QString secondaryDns = "8.8.4.4";
@@ -55,18 +55,18 @@ private slots:
         QVERIFY2(primaryDnsChangedSpy.count() == 1, "primaryDnsChanged signal should be emitted");
         QVERIFY2(m_coreController->m_settingsController->getPrimaryDns() == primaryDns, "Primary DNS should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->getPrimaryDns() == primaryDns, "Primary DNS should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->primaryDns() == primaryDns, "Primary DNS should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->primaryDns() == primaryDns, "Primary DNS should be available in SecureAppSettingsRepository");
 
         m_coreController->m_settingsUiController->setSecondaryDns(secondaryDns);
         QVERIFY2(secondaryDnsChangedSpy.count() == 1, "secondaryDnsChanged signal should be emitted");
         QVERIFY2(m_coreController->m_settingsController->getSecondaryDns() == secondaryDns, "Secondary DNS should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->getSecondaryDns() == secondaryDns, "Secondary DNS should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->secondaryDns() == secondaryDns, "Secondary DNS should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->secondaryDns() == secondaryDns, "Secondary DNS should be available in SecureAppSettingsRepository");
 
         QStringList dnsList = {"1.1.1.1", "1.0.0.1"};
         m_coreController->m_allowedDnsController->addDnsList(dnsList, true);
         QVERIFY2(allowedDnsServersChangedSpy.count() == 1, "allowedDnsServersChanged signal should be emitted");
-        QVERIFY2(m_coreController->m_appSettingsRepository->getAllowedDnsServers() == dnsList, "Allowed DNS servers should be updated in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->getAllowedDnsServers() == dnsList, "Allowed DNS servers should be updated in SecureAppSettingsRepository");
         QVERIFY2(m_coreController->m_allowedDnsController->getCurrentDnsServers() == dnsList, "Allowed DNS servers should be available in AllowedDnsController");
         
         QVERIFY2(m_coreController->m_allowedDnsUiController != nullptr, "AllowedDnsUiController should exist");
@@ -81,7 +81,7 @@ private slots:
 
     void testAmneziaDnsToggleSignal() {
         QSignalSpy amneziaDnsToggledSpy(m_coreController->m_settingsUiController, &SettingsUiController::amneziaDnsToggled);
-        QSignalSpy useAmneziaDnsChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::useAmneziaDnsChanged);
+        QSignalSpy useAmneziaDnsChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::useAmneziaDnsChanged);
 
         bool initialValue = m_coreController->m_settingsController->isAmneziaDnsEnabled();
         
@@ -91,7 +91,7 @@ private slots:
         QVERIFY2(useAmneziaDnsChangedSpy.count() == 1, "useAmneziaDnsChanged signal should be emitted");
         QVERIFY2(m_coreController->m_settingsController->isAmneziaDnsEnabled() == !initialValue, "Amnezia DNS state should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->isAmneziaDnsEnabled() == !initialValue, "Amnezia DNS state should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->useAmneziaDns() == !initialValue, "Amnezia DNS state should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->useAmneziaDns() == !initialValue, "Amnezia DNS state should be available in SecureAppSettingsRepository");
 
         m_coreController->m_settingsUiController->toggleAmneziaDns(initialValue);
         QVERIFY2(amneziaDnsToggledSpy.count() == 2, "amneziaDnsToggled signal should be emitted again");
@@ -101,7 +101,7 @@ private slots:
 
     void testLoggingSignals() {
         QSignalSpy loggingStateChangedSpy(m_coreController->m_settingsUiController, &SettingsUiController::loggingStateChanged);
-        QSignalSpy saveLogsChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::saveLogsChanged);
+        QSignalSpy saveLogsChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::saveLogsChanged);
 
         bool initialLogging = m_coreController->m_settingsController->isLoggingEnabled();
 
@@ -110,7 +110,7 @@ private slots:
         QVERIFY2(saveLogsChangedSpy.count() == 1, "saveLogsChanged signal should be emitted");
         QVERIFY2(m_coreController->m_settingsController->isLoggingEnabled() == !initialLogging, "Logging state should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->isLoggingEnabled() == !initialLogging, "Logging state should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->isSaveLogs() == !initialLogging, "Logging state should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->isSaveLogs() == !initialLogging, "Logging state should be available in SecureAppSettingsRepository");
 
         m_coreController->m_settingsUiController->toggleLogging(initialLogging);
         QVERIFY2(loggingStateChangedSpy.count() == 2, "loggingStateChanged signal should be emitted again");
@@ -119,7 +119,7 @@ private slots:
     }
 
     void testScreenshotsSignals() {
-        QSignalSpy screenshotsEnabledChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::screenshotsEnabledChanged);
+        QSignalSpy screenshotsEnabledChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::screenshotsEnabledChanged);
 
         bool initialScreenshots = m_coreController->m_settingsController->isScreenshotsEnabled();
 
@@ -128,7 +128,7 @@ private slots:
         QVERIFY2(screenshotsEnabledChangedSpy.at(0).at(0).toBool() == !initialScreenshots, "screenshotsEnabledChanged should emit correct value");
         QVERIFY2(m_coreController->m_settingsController->isScreenshotsEnabled() == !initialScreenshots, "Screenshots state should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->isScreenshotsEnabled() == !initialScreenshots, "Screenshots state should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->isScreenshotsEnabled() == !initialScreenshots, "Screenshots state should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->isScreenshotsEnabled() == !initialScreenshots, "Screenshots state should be available in SecureAppSettingsRepository");
     }
 
     void testStartMinimizedSignals() {
@@ -140,7 +140,7 @@ private slots:
         QVERIFY2(startMinimizedChangedSpy.count() == 1, "startMinimizedChanged signal should be emitted");
         QVERIFY2(m_coreController->m_settingsController->isStartMinimizedEnabled() == !initialStartMinimized, "Start minimized state should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->isStartMinimizedEnabled() == !initialStartMinimized, "Start minimized state should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->isStartMinimized() == !initialStartMinimized, "Start minimized state should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->isStartMinimized() == !initialStartMinimized, "Start minimized state should be available in SecureAppSettingsRepository");
     }
 
     void testAutoConnectSignals() {
@@ -149,7 +149,7 @@ private slots:
         m_coreController->m_settingsUiController->toggleAutoConnect(!initialAutoConnect);
         QVERIFY2(m_coreController->m_settingsController->isAutoConnectEnabled() == !initialAutoConnect, "Auto connect state should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->isAutoConnectEnabled() == !initialAutoConnect, "Auto connect state should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->isAutoConnect() == !initialAutoConnect, "Auto connect state should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->isAutoConnect() == !initialAutoConnect, "Auto connect state should be available in SecureAppSettingsRepository");
 
         m_coreController->m_settingsUiController->toggleAutoConnect(initialAutoConnect);
         QVERIFY2(m_coreController->m_settingsController->isAutoConnectEnabled() == initialAutoConnect, "Auto connect state should be restored in SettingsController");
@@ -157,7 +157,7 @@ private slots:
     }
 
     void testLanguageChangeSignals() {
-        QSignalSpy appLanguageChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::appLanguageChanged);
+        QSignalSpy appLanguageChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appLanguageChanged);
         QSignalSpy translationsUpdatedSpy(m_coreController->m_languageUiController, &LanguageUiController::translationsUpdated);
 
         QLocale initialLocale = m_coreController->m_settingsController->getAppLanguage();
@@ -167,7 +167,7 @@ private slots:
         QVERIFY2(appLanguageChangedSpy.count() == 1, "appLanguageChanged signal should be emitted");
         QVERIFY2(appLanguageChangedSpy.at(0).at(0).value<QLocale>() == newLocale, "appLanguageChanged should emit correct locale");
         QVERIFY2(m_coreController->m_settingsController->getAppLanguage() == newLocale, "App language should be updated in SettingsController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->getAppLanguage() == newLocale, "App language should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->getAppLanguage() == newLocale, "App language should be available in SecureAppSettingsRepository");
         
         if (m_coreController->m_languageModel) {
             QString newLanguageName = m_coreController->m_languageUiController->getCurrentLanguageName();
@@ -187,7 +187,7 @@ private slots:
         QVERIFY2(gatewayEndpointChangedSpy.at(0).at(0).toString() == newEndpoint, "gatewayEndpointChanged should emit correct endpoint");
         QVERIFY2(m_coreController->m_settingsController->getGatewayEndpoint() == newEndpoint, "Gateway endpoint should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->getGatewayEndpoint() == newEndpoint, "Gateway endpoint should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->getGatewayEndpoint() == newEndpoint, "Gateway endpoint should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->getGatewayEndpoint() == newEndpoint, "Gateway endpoint should be available in SecureAppSettingsRepository");
 
         bool initialDevEnv = m_coreController->m_settingsController->isDevGatewayEnv();
         m_coreController->m_settingsUiController->toggleDevGatewayEnv(!initialDevEnv);
@@ -195,11 +195,11 @@ private slots:
         QVERIFY2(devGatewayEnvChangedSpy.at(0).at(0).toBool() == !initialDevEnv, "devGatewayEnvChanged should emit correct value");
         QVERIFY2(m_coreController->m_settingsController->isDevGatewayEnv() == !initialDevEnv, "Dev gateway env state should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->isDevGatewayEnv() == !initialDevEnv, "Dev gateway env state should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->isDevGatewayEnv() == !initialDevEnv, "Dev gateway env state should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->isDevGatewayEnv() == !initialDevEnv, "Dev gateway env state should be available in SecureAppSettingsRepository");
     }
 
     void testSettingsClearedSignal() {
-        QSignalSpy settingsClearedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::settingsCleared);
+        QSignalSpy settingsClearedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::settingsCleared);
 
         m_coreController->m_settingsController->clearSettings();
         QVERIFY2(settingsClearedSpy.count() == 1, "settingsCleared signal should be emitted");
@@ -208,24 +208,24 @@ private slots:
     void testSplitTunnelingSignals() {
         QSignalSpy siteSplitTunnelingToggledSpy(m_coreController->m_settingsController, &SettingsController::siteSplitTunnelingToggled);
         QSignalSpy appSplitTunnelingToggledSpy(m_coreController->m_settingsController, &SettingsController::appSplitTunnelingToggled);
-        QSignalSpy sitesSplitTunnelingEnabledChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::sitesSplitTunnelingEnabledChanged);
-        QSignalSpy appsSplitTunnelingEnabledChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::appsSplitTunnelingEnabledChanged);
-        QSignalSpy routeModeChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::routeModeChanged);
-        QSignalSpy appsRouteModeChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::appsRouteModeChanged);
-        QSignalSpy sitesChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::sitesChanged);
-        QSignalSpy appsChangedSpy(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::appsChanged);
+        QSignalSpy sitesSplitTunnelingEnabledChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesSplitTunnelingEnabledChanged);
+        QSignalSpy appsSplitTunnelingEnabledChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsSplitTunnelingEnabledChanged);
+        QSignalSpy routeModeChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::routeModeChanged);
+        QSignalSpy appsRouteModeChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsRouteModeChanged);
+        QSignalSpy sitesChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesChanged);
+        QSignalSpy appsChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsChanged);
 
         bool initialSitesSplitTunneling = m_coreController->m_sitesController->isSplitTunnelingEnabled();
         m_coreController->m_sitesController->toggleSplitTunneling(!initialSitesSplitTunneling);
         QVERIFY2(sitesSplitTunnelingEnabledChangedSpy.count() == 1, "sitesSplitTunnelingEnabledChanged signal should be emitted");
         QVERIFY2(m_coreController->m_sitesController->isSplitTunnelingEnabled() == !initialSitesSplitTunneling, "Sites split tunneling should be updated in SitesController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->isSitesSplitTunnelingEnabled() == !initialSitesSplitTunneling, "Sites split tunneling should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->isSitesSplitTunnelingEnabled() == !initialSitesSplitTunneling, "Sites split tunneling should be available in SecureAppSettingsRepository");
 
         bool initialAppsSplitTunneling = m_coreController->m_appSplitTunnelingController->isSplitTunnelingEnabled();
         m_coreController->m_appSplitTunnelingController->toggleSplitTunneling(!initialAppsSplitTunneling);
         QVERIFY2(appsSplitTunnelingEnabledChangedSpy.count() == 1, "appsSplitTunnelingEnabledChanged signal should be emitted");
         QVERIFY2(m_coreController->m_appSplitTunnelingController->isSplitTunnelingEnabled() == !initialAppsSplitTunneling, "Apps split tunneling should be updated in AppSplitTunnelingController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->isAppsSplitTunnelingEnabled() == !initialAppsSplitTunneling, "Apps split tunneling should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->isAppsSplitTunnelingEnabled() == !initialAppsSplitTunneling, "Apps split tunneling should be available in SecureAppSettingsRepository");
 
         RouteMode initialRouteMode = m_coreController->m_sitesController->getRouteMode();
         RouteMode newRouteMode = (initialRouteMode == RouteMode::VpnOnlyForwardSites) 
@@ -234,7 +234,7 @@ private slots:
         m_coreController->m_sitesController->setRouteMode(newRouteMode);
         QVERIFY2(routeModeChangedSpy.count() == 1, "routeModeChanged signal should be emitted");
         QVERIFY2(m_coreController->m_sitesController->getRouteMode() == newRouteMode, "Route mode should be updated in SitesController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->routeMode() == newRouteMode, "Route mode should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->routeMode() == newRouteMode, "Route mode should be available in SecureAppSettingsRepository");
 
         AppsRouteMode initialAppsRouteMode = m_coreController->m_appSplitTunnelingController->getRouteMode();
         AppsRouteMode newAppsRouteMode = (initialAppsRouteMode == AppsRouteMode::VpnAllExceptApps)
@@ -243,7 +243,7 @@ private slots:
         m_coreController->m_appSplitTunnelingController->setRouteMode(newAppsRouteMode);
         QVERIFY2(appsRouteModeChangedSpy.count() == 1, "appsRouteModeChanged signal should be emitted");
         QVERIFY2(m_coreController->m_appSplitTunnelingController->getRouteMode() == newAppsRouteMode, "Apps route mode should be updated in AppSplitTunnelingController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->appsRouteMode() == newAppsRouteMode, "Apps route mode should be available in QAppSettingsRepository");
+        QVERIFY2(m_coreController->m_appSettingsRepository->appsRouteMode() == newAppsRouteMode, "Apps route mode should be available in SecureAppSettingsRepository");
 
         QMap<QString, QString> sitesMap{{"example.com", "1.2.3.4"}};
         m_coreController->m_sitesController->addSites(sitesMap, true);

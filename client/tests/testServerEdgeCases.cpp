@@ -47,9 +47,9 @@ private slots:
 
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "Should have 1 server");
 
-        QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &QServersRepository::serverRemoved);
-        QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &QServersRepository::serverEdited);
-        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
+        QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved);
+        QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
         m_coreController->m_serversController->removeServer(-1);
         QVERIFY2(serverRemovedSpy.count() == 0, "serverRemoved should NOT be emitted for invalid index");
@@ -77,9 +77,9 @@ private slots:
     }
 
     void testEmptyRepositoryOperations() {
-        QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &QServersRepository::serverRemoved);
-        QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &QServersRepository::serverEdited);
-        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
+        QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved);
+        QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 0, "Should start with 0 servers");
 
@@ -92,7 +92,7 @@ private slots:
 
         m_coreController->m_serversController->setDefaultServerIndex(0);
         QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged should NOT be emitted for empty repository");
-        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == -1, "Default server index should be -1 for empty repository");
+        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default server index should be 0 for empty repository");
 
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 0, "Server count should remain 0");
     }

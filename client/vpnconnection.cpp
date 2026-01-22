@@ -34,7 +34,7 @@
 
 using namespace ProtocolUtils;
 
-VpnConnection::VpnConnection(ServersRepository* serversRepository, AppSettingsRepository* appSettingsRepository, QObject *parent)
+VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
     : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(new QTimer(this))
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
@@ -150,7 +150,7 @@ const QString &VpnConnection::remoteAddress() const
     return m_remoteAddress;
 }
 
-void VpnConnection::setRepositories(ServersRepository* serversRepository, AppSettingsRepository* appSettingsRepository)
+void VpnConnection::setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository)
 {
     m_serversRepository = serversRepository;
     m_appSettingsRepository = appSettingsRepository;

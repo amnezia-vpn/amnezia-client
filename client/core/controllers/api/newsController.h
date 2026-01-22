@@ -8,19 +8,19 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "core/controllers/serversController.h"
 
 class NewsController
 {
 public:
-    explicit NewsController(QAppSettingsRepository* appSettingsRepository,
+    explicit NewsController(SecureAppSettingsRepository* appSettingsRepository,
                            ServersController* serversController);
 
     QFuture<QPair<ErrorCode, QJsonArray>> fetchNews();
 
 private:
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
     ServersController* m_serversController;
 };
 

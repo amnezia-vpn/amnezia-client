@@ -5,12 +5,12 @@
 
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 
 class AppSplitTunnelingController
 {
 public:
-    explicit AppSplitTunnelingController(QAppSettingsRepository* appSettingsRepository);
+    explicit AppSplitTunnelingController(SecureAppSettingsRepository* appSettingsRepository);
 
     bool addApp(const amnezia::InstalledAppInfo &appInfo);
     void removeApp(int index);
@@ -23,7 +23,7 @@ public:
     QVector<amnezia::InstalledAppInfo> getApps() const;
 
 private:
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
     AppsRouteMode m_currentRouteMode;
     QVector<amnezia::InstalledAppInfo> m_apps;
 };

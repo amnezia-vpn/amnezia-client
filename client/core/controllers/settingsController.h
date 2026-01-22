@@ -9,8 +9,8 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 
 using namespace amnezia;
 
@@ -18,8 +18,8 @@ class SettingsController : public QObject
 {
     Q_OBJECT
 public:
-    explicit SettingsController(QServersRepository* serversRepository,
-                               QAppSettingsRepository* appSettingsRepository,
+    explicit SettingsController(SecureServersRepository* serversRepository,
+                               SecureAppSettingsRepository* appSettingsRepository,
                                QObject* parent = nullptr);
     ~SettingsController() = default;
 
@@ -96,8 +96,8 @@ signals:
 private:
     QString getPlatform() const;
 
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
 
     QString m_appVersion;
     QDateTime m_loggingDisableDate;

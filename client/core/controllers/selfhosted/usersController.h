@@ -12,7 +12,7 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/qServersRepository.h"
+#include "core/repositories/secureServersRepository.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
 
@@ -30,7 +30,7 @@ public:
         QString allowedIps;
     };
 
-    explicit UsersController(QServersRepository* serversRepository, QObject *parent = nullptr);
+    explicit UsersController(SecureServersRepository* serversRepository, QObject *parent = nullptr);
 
 signals:
     void clientsUpdated(const QJsonArray &clients);
@@ -68,7 +68,7 @@ private:
     ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
                      SshSession* sshSession, std::vector<WgShowData> &data);
 
-    QServersRepository* m_serversRepository;
+    SecureServersRepository* m_serversRepository;
     QJsonArray m_clientsTable;
 };
 

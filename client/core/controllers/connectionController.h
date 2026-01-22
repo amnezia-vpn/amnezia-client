@@ -11,8 +11,8 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "vpnconnection.h"
 
 using namespace amnezia;
@@ -20,8 +20,8 @@ using namespace amnezia;
 class ConnectionController
 {
 public:
-    explicit ConnectionController(QServersRepository* serversRepository,
-                                 QAppSettingsRepository* appSettingsRepository,
+    explicit ConnectionController(SecureServersRepository* serversRepository,
+                                 SecureAppSettingsRepository* appSettingsRepository,
                                  VpnConnection* vpnConnection);
     ~ConnectionController() = default;
 
@@ -46,8 +46,8 @@ public:
     bool isContainerSupported(DockerContainer container) const;
 
 private:
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
     VpnConnection* m_vpnConnection;
 };
 

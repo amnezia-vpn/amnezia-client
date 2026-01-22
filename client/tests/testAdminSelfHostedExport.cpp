@@ -100,7 +100,7 @@ private slots:
         QString vpnKey = "vpn://AAABTXjarZIxT8MwEIX_Cro5jbDjQunKUhhYyoZQZZKjRGpsy3baQtT_zp2bJh3oACLLPfvz3bOe00FpTdS1QR9g_tKB3q1h3sFCwBzEdf9N5ElBBgtJqBiQOkcFoemAbs6RInQ7oNkZemAvrrKvRV9VX6fH-lhSVSwavU9GSdcmXZX0UqSbseJRMqlioDxuSsJZH1mKWTrhvI22tJvVljKoLU-TtB3aN4NxpavKYwhpSD7LRc4t0WsTeMwqNRNsKweHbAyTtnRj8KvWE0pUEut-hNah2TpDM0-Kwu8vKMSd-ttFLrntao_rVvuKWkc9OnIk4n8t915_Ulcqo5FSxa9tYsk2rxlU-K7bTby_lDWfCKWvXTy-5jOGeLVET-9L7MOG-KQbJEBx57jXjdtgXtqG_wUdws5yJhCpa1iefhopM2gD-n4An-ElHL4BvzD6nw";
         
         QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
-        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
         
         qDebug() << "IMPORTED KEY:" << vpnKey;
         

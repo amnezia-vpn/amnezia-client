@@ -15,8 +15,8 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 
-SecureServersRepository::SecureServersRepository(SecureQSettings* settings)
-    : m_settings(settings)
+SecureServersRepository::SecureServersRepository(SecureQSettings* settings, QObject *parent)
+    : QObject(parent), m_settings(settings)
 {
 }
 
@@ -58,22 +58,24 @@ void SecureServersRepository::addServer(const ServerConfig &server)
     QJsonArray servers = serversArray();
     servers.append(ServerConfigUtils::toJson(server));
     setServersArray(servers);
+    emit serverAdded(server);
 }
 
 void SecureServersRepository::editServer(int index, const ServerConfig &server)
 {
     QJsonArray servers = serversArray();
-    if (index >= servers.size()) {
+    if (index < 0 || index >= servers.size()) {
         return;
     }
     servers.replace(index, ServerConfigUtils::toJson(server));
     setServersArray(servers);
+    emit serverEdited(index, server);
 }
 
 void SecureServersRepository::removeServer(int index)
 {
     QJsonArray servers = serversArray();
-    if (index >= servers.size()) {
+    if (index < 0 || index >= servers.size()) {
         return;
     }
     
@@ -90,12 +92,14 @@ void SecureServersRepository::removeServer(int index)
     if (serversCount() == 0) {
         setDefaultServer(-1);
     }
+    
+    emit serverRemoved(index);
 }
 
 ServerConfig SecureServersRepository::server(int index) const
 {
     const QJsonArray &servers = serversArray();
-    if (index >= servers.size()) {
+    if (index < 0 || index >= servers.size()) {
         return SelfHostedServerConfig{};
     }
     return ServerConfigUtils::fromJson(servers.at(index).toObject());
@@ -123,8 +127,13 @@ int SecureServersRepository::defaultServerIndex() const
 
 void SecureServersRepository::setDefaultServer(int index)
 {
+    QJsonArray servers = serversArray();
+    if (index < 0 || index >= servers.size()) {
+        return;
+    }
     setValue("Servers/defaultServerIndex", index);
     m_settings->sync();
+    emit defaultServerChanged(index);
 }
 
 void SecureServersRepository::setDefaultContainer(int serverIndex, DockerContainer container)

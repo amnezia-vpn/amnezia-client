@@ -19,8 +19,8 @@
 
 using namespace ProtocolUtils;
 
-ConnectionController::ConnectionController(QServersRepository* serversRepository,
-                                         QAppSettingsRepository* appSettingsRepository,
+ConnectionController::ConnectionController(SecureServersRepository* serversRepository,
+                                         SecureAppSettingsRepository* appSettingsRepository,
                                          VpnConnection* vpnConnection)
     : m_serversRepository(serversRepository),
       m_appSettingsRepository(appSettingsRepository),

@@ -12,8 +12,8 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/serversRepository.h"
-#include "core/repositories/appSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 
 #ifdef AMNEZIA_DESKTOP
 #include "core/utils/ipcClient.h"
@@ -30,7 +30,7 @@ class VpnConnection : public QObject
     Q_OBJECT
 
 public:
-    explicit VpnConnection(ServersRepository* serversRepository, AppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
+    explicit VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
     ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
@@ -51,7 +51,7 @@ public:
 #endif
 
 public slots:
-    void setRepositories(ServersRepository* serversRepository, AppSettingsRepository* appSettingsRepository);
+    void setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository);
     void connectToVpn(int serverIndex,
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
 
@@ -81,8 +81,8 @@ protected:
     QMetaObject::Connection m_networkChangeHandle;
 
 public:
-    ServersRepository* m_serversRepository;
-    AppSettingsRepository* m_appSettingsRepository;
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
 
 private:
     QJsonObject m_vpnConfiguration;

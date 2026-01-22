@@ -14,8 +14,8 @@
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 #include "core/models/containerConfig.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 
 class SshSession;
 class InstallerBase;
@@ -28,8 +28,8 @@ class InstallController : public QObject
 
 public:
     explicit InstallController(SshSession* sshSession, 
-                              QServersRepository* serversRepository,
-                              QAppSettingsRepository* appSettingsRepository,
+                              SecureServersRepository* serversRepository,
+                              SecureAppSettingsRepository* appSettingsRepository,
                               QObject *parent = nullptr);
     ~InstallController();
 
@@ -94,8 +94,8 @@ private:
     QScopedPointer<InstallerBase> createInstaller(DockerContainer container);
 
     SshSession* m_sshSession;
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
     bool m_cancelInstallation = false;
     
 #ifndef Q_OS_IOS

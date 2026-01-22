@@ -64,8 +64,8 @@ namespace
     }
 }
 
-SubscriptionController::SubscriptionController(QServersRepository* serversRepository,
-                                               QAppSettingsRepository* appSettingsRepository)
+SubscriptionController::SubscriptionController(SecureServersRepository* serversRepository,
+                                               SecureAppSettingsRepository* appSettingsRepository)
     : m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository)
 {
 }

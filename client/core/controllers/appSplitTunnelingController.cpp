@@ -1,6 +1,6 @@
 #include "appSplitTunnelingController.h"
 
-AppSplitTunnelingController::AppSplitTunnelingController(QAppSettingsRepository* appSettingsRepository)
+AppSplitTunnelingController::AppSplitTunnelingController(SecureAppSettingsRepository* appSettingsRepository)
     : m_appSettingsRepository(appSettingsRepository)
 {
     m_currentRouteMode = m_appSettingsRepository->appsRouteMode();

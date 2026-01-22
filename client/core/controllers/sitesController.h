@@ -8,14 +8,14 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 
 using namespace amnezia;
 
 class SitesController
 {
 public:
-    explicit SitesController(QAppSettingsRepository* appSettingsRepository);
+    explicit SitesController(SecureAppSettingsRepository* appSettingsRepository);
 
     bool addSite(const QString &hostname, const QString &ip);
     void addSites(const QMap<QString, QString> &sites, bool replaceExisting);
@@ -31,7 +31,7 @@ public:
 private:
     void fillSites();
 
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
     RouteMode m_currentRouteMode;
     QVector<QPair<QString, QString>> m_sites;
 };

@@ -1,6 +1,6 @@
 #include "allowedDnsController.h"
 
-AllowedDnsController::AllowedDnsController(QAppSettingsRepository* appSettingsRepository)
+AllowedDnsController::AllowedDnsController(SecureAppSettingsRepository* appSettingsRepository)
     : m_appSettingsRepository(appSettingsRepository)
 {
     fillDnsServers();

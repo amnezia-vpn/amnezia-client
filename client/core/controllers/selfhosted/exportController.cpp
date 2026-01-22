@@ -16,8 +16,8 @@
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
 
-ExportController::ExportController(QServersRepository* serversRepository,
-                                   QAppSettingsRepository* appSettingsRepository,
+ExportController::ExportController(SecureServersRepository* serversRepository,
+                                   SecureAppSettingsRepository* appSettingsRepository,
                                    QObject *parent)
     : QObject(parent),
       m_serversRepository(serversRepository),

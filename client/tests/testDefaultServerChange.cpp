@@ -55,7 +55,7 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 3, "Should have 3 servers");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Default should be index 2");
 
-        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
         m_coreController->m_serversController->setDefaultServerIndex(0);
         QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted");
@@ -88,8 +88,8 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 3, "Should have 3 servers");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Default should be index 2");
 
-        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
-        QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &QServersRepository::serverRemoved);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
+        QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved);
 
         m_coreController->m_serversController->removeServer(0);
         QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");

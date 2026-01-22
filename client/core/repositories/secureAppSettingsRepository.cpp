@@ -21,8 +21,8 @@ namespace {
     constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
 }
 
-SecureAppSettingsRepository::SecureAppSettingsRepository(SecureQSettings* settings)
-    : m_settings(settings)
+SecureAppSettingsRepository::SecureAppSettingsRepository(SecureQSettings* settings, QObject *parent)
+    : QObject(parent), m_settings(settings)
 {
     QString storedEndpoint = value("Conf/gatewayEndpoint", gatewayEndpoint).toString();
     m_gatewayEndpoint = storedEndpoint.isEmpty() ? gatewayEndpoint : storedEndpoint;
@@ -60,6 +60,7 @@ void SecureAppSettingsRepository::setAppLanguage(QLocale locale)
 {
     setValue("Conf/appLanguage", locale.name());
     m_settings->sync();
+    emit appLanguageChanged(locale);
 }
 
 bool SecureAppSettingsRepository::useAmneziaDns() const
@@ -71,6 +72,7 @@ void SecureAppSettingsRepository::setUseAmneziaDns(bool enabled)
 {
     setValue("Conf/useAmneziaDns", enabled);
     m_settings->sync();
+    emit useAmneziaDnsChanged(enabled);
 }
 
 QStringList SecureAppSettingsRepository::getAllowedDnsServers() const
@@ -82,6 +84,7 @@ void SecureAppSettingsRepository::setAllowedDnsServers(const QStringList &server
 {
     setValue("Conf/allowedDnsServers", servers);
     m_settings->sync();
+    emit allowedDnsServersChanged(servers);
 }
 
 QString SecureAppSettingsRepository::primaryDns() const
@@ -128,6 +131,7 @@ void SecureAppSettingsRepository::setRouteMode(RouteMode mode)
 {
     setValue("Conf/routeMode", static_cast<int>(mode));
     m_settings->sync();
+    emit routeModeChanged(mode);
 }
 
 QVariantMap SecureAppSettingsRepository::vpnSites(RouteMode mode) const
@@ -149,6 +153,7 @@ bool SecureAppSettingsRepository::addVpnSite(RouteMode mode, const QString &site
 
     sites.insert(site, ip);
     setVpnSites(mode, sites);
+    emit sitesChanged(mode);
     return true;
 }
 
@@ -166,6 +171,7 @@ void SecureAppSettingsRepository::addVpnSites(RouteMode mode, const QMap<QString
     }
 
     setVpnSites(mode, allSites);
+    emit sitesChanged(mode);
 }
 
 void SecureAppSettingsRepository::removeVpnSite(RouteMode mode, const QString &site)
@@ -176,11 +182,13 @@ void SecureAppSettingsRepository::removeVpnSite(RouteMode mode, const QString &s
 
     sites.remove(site);
     setVpnSites(mode, sites);
+    emit sitesChanged(mode);
 }
 
 void SecureAppSettingsRepository::removeAllVpnSites(RouteMode mode)
 {
     setVpnSites(mode, QVariantMap());
+    emit sitesChanged(mode);
 }
 
 bool SecureAppSettingsRepository::isSitesSplitTunnelingEnabled() const
@@ -192,6 +200,7 @@ void SecureAppSettingsRepository::setSitesSplitTunnelingEnabled(bool enabled)
 {
     setValue("Conf/sitesSplitTunnelingEnabled", enabled);
     m_settings->sync();
+    emit sitesSplitTunnelingEnabledChanged(enabled);
 }
 
 namespace {
@@ -214,6 +223,7 @@ void SecureAppSettingsRepository::setAppsRouteMode(AppsRouteMode mode)
 {
     setValue("Conf/appsRouteMode", static_cast<int>(mode));
     m_settings->sync();
+    emit appsRouteModeChanged(mode);
 }
 
 QVector<InstalledAppInfo> SecureAppSettingsRepository::vpnApps(AppsRouteMode mode) const
@@ -243,6 +253,7 @@ void SecureAppSettingsRepository::setVpnApps(AppsRouteMode mode, const QVector<I
     }
     setValue("Conf/" + appsRouteModeString(mode), appsArray);
     m_settings->sync();
+    emit appsChanged(mode);
 }
 
 bool SecureAppSettingsRepository::isAppsSplitTunnelingEnabled() const
@@ -254,6 +265,7 @@ void SecureAppSettingsRepository::setAppsSplitTunnelingEnabled(bool enabled)
 {
     setValue("Conf/appsSplitTunnelingEnabled", enabled);
     m_settings->sync();
+    emit appsSplitTunnelingEnabledChanged(enabled);
 }
 
 QString SecureAppSettingsRepository::getGatewayEndpoint(bool isTestPurchase) const
@@ -349,6 +361,7 @@ void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
 {
     setValue("Conf/screenshotsEnabled", enabled);
     m_settings->sync();
+    emit screenshotsEnabledChanged(enabled);
 }
 
 bool SecureAppSettingsRepository::isSaveLogs() const
@@ -360,6 +373,7 @@ void SecureAppSettingsRepository::setSaveLogs(bool enabled)
 {
     setValue("Conf/saveLogs", enabled);
     m_settings->sync();
+    emit saveLogsChanged(enabled);
 }
 
 QDateTime SecureAppSettingsRepository::getLogEnableDate() const
@@ -429,6 +443,7 @@ void SecureAppSettingsRepository::clearSettings()
     m_settings->clearSettings();
     m_settings->setValue("Conf/installationUuid", uuid);
     m_settings->sync();
+    emit settingsCleared();
 }
 
 QString SecureAppSettingsRepository::nextAvailableServerName() const

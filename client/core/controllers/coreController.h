@@ -43,8 +43,8 @@
 #include "core/controllers/settingsController.h"
 #include "core/controllers/connectionController.h"
 
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "secure_qsettings.h"
 
 #include "ui/models/allowedDnsModel.h"
@@ -131,8 +131,8 @@ private:
     QSharedPointer<VpnConnection> m_vpnConnection;
     QTranslator* m_translator;
 
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     NotificationHandler* m_notificationHandler;

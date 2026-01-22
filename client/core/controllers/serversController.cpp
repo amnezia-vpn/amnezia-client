@@ -26,8 +26,8 @@ namespace
     }
 }
 
-ServersController::ServersController(QServersRepository* serversRepository, 
-                                      QAppSettingsRepository* appSettingsRepository,
+ServersController::ServersController(SecureServersRepository* serversRepository, 
+                                      SecureAppSettingsRepository* appSettingsRepository,
                                       QObject *parent)
     : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository)
 {

@@ -15,8 +15,8 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 
@@ -46,8 +46,8 @@ public:
     };
     
 public:
-    explicit ServersController(QServersRepository* serversRepository, 
-                              QAppSettingsRepository* appSettingsRepository = nullptr,
+    explicit ServersController(SecureServersRepository* serversRepository, 
+                              SecureAppSettingsRepository* appSettingsRepository = nullptr,
                               QObject *parent = nullptr);
     ~ServersController() = default;
 
@@ -89,8 +89,8 @@ public slots:
     void recomputeGatewayStacks();
 
 private:
-    QServersRepository* m_serversRepository;
-    QAppSettingsRepository* m_appSettingsRepository;
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
     GatewayStacks m_gatewayStacks;
 };
 

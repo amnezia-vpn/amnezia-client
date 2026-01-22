@@ -6,8 +6,8 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/controllers/coreController.h"
-#include "core/repositories/qServersRepository.h"
-#include "core/repositories/qAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "vpnconnection.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/connectionUiController.h"
@@ -203,7 +203,7 @@ void CoreSignalHandlers::initTranslationsUpdatedHandler()
 
 void CoreSignalHandlers::initLanguageHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::appLanguageChanged, m_coreController->m_languageUiController, &LanguageUiController::onAppLanguageChanged);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appLanguageChanged, m_coreController->m_languageUiController, &LanguageUiController::onAppLanguageChanged);
     connect(m_coreController->m_settingsUiController, &SettingsUiController::resetLanguageToSystem, m_coreController->m_languageUiController, [this]() {
         m_coreController->m_languageUiController->changeLanguage(m_coreController->m_languageUiController->getSystemLanguageEnum());
     });
@@ -218,7 +218,7 @@ void CoreSignalHandlers::initAutoConnectHandler()
 
 void CoreSignalHandlers::initAmneziaDnsToggledHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::useAmneziaDnsChanged, m_coreController->m_serversUiController, [this](bool enabled) {
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::useAmneziaDnsChanged, m_coreController->m_serversUiController, [this](bool enabled) {
         Q_UNUSED(enabled);
         m_coreController->m_serversUiController->updateModel();
     });
@@ -226,20 +226,20 @@ void CoreSignalHandlers::initAmneziaDnsToggledHandler()
 
 void CoreSignalHandlers::initServersModelUpdateHandler()
 {
-    connect(m_coreController->m_serversRepository, &QServersRepository::serverAdded,
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded,
             m_coreController->m_serversUiController, &ServersUiController::onAddServer);
-    connect(m_coreController->m_serversRepository, &QServersRepository::serverEdited,
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited,
             m_coreController->m_serversUiController, &ServersUiController::onServerEdited);
-    connect(m_coreController->m_serversRepository, &QServersRepository::serverRemoved,
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved,
             m_coreController->m_serversUiController, &ServersUiController::onServerRemoved);
-    connect(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged,
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged,
             m_coreController->m_serversUiController, &ServersUiController::onDefaultServerChanged);
     
-    connect(m_coreController->m_serversRepository, &QServersRepository::serverAdded,
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded,
             m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
-    connect(m_coreController->m_serversRepository, &QServersRepository::serverEdited,
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited,
             m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
-    connect(m_coreController->m_serversRepository, &QServersRepository::serverRemoved,
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved,
             m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
 }
 
@@ -251,15 +251,15 @@ void CoreSignalHandlers::initClientManagementModelUpdateHandler()
 
 void CoreSignalHandlers::initSitesModelUpdateHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::sitesChanged, m_coreController->m_sitesUiController, [this](amnezia::RouteMode mode) {
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesChanged, m_coreController->m_sitesUiController, [this](amnezia::RouteMode mode) {
         Q_UNUSED(mode);
         m_coreController->m_sitesUiController->updateModel();
     });
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::sitesSplitTunnelingEnabledChanged, m_coreController->m_sitesUiController, [this](bool enabled) {
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesSplitTunnelingEnabledChanged, m_coreController->m_sitesUiController, [this](bool enabled) {
         Q_UNUSED(enabled);
         m_coreController->m_sitesUiController->updateModel();
     });
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::routeModeChanged, m_coreController->m_sitesUiController, [this](amnezia::RouteMode mode) {
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::routeModeChanged, m_coreController->m_sitesUiController, [this](amnezia::RouteMode mode) {
         Q_UNUSED(mode);
         m_coreController->m_sitesUiController->updateModel();
     });
@@ -267,7 +267,7 @@ void CoreSignalHandlers::initSitesModelUpdateHandler()
 
 void CoreSignalHandlers::initAllowedDnsModelUpdateHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::allowedDnsServersChanged, m_coreController->m_allowedDnsUiController, [this](const QStringList &servers) {
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::allowedDnsServersChanged, m_coreController->m_allowedDnsUiController, [this](const QStringList &servers) {
         Q_UNUSED(servers);
         m_coreController->m_allowedDnsUiController->updateModel();
     });
@@ -275,15 +275,15 @@ void CoreSignalHandlers::initAllowedDnsModelUpdateHandler()
 
 void CoreSignalHandlers::initAppSplitTunnelingModelUpdateHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::appsChanged, m_coreController->m_appSplitTunnelingUiController, [this](amnezia::AppsRouteMode mode) {
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsChanged, m_coreController->m_appSplitTunnelingUiController, [this](amnezia::AppsRouteMode mode) {
         Q_UNUSED(mode);
         m_coreController->m_appSplitTunnelingUiController->updateModel();
     });
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::appsSplitTunnelingEnabledChanged, m_coreController->m_appSplitTunnelingUiController, [this](bool enabled) {
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsSplitTunnelingEnabledChanged, m_coreController->m_appSplitTunnelingUiController, [this](bool enabled) {
         Q_UNUSED(enabled);
         m_coreController->m_appSplitTunnelingUiController->updateModel();
     });
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::appsRouteModeChanged, m_coreController->m_appSplitTunnelingUiController, [this](amnezia::AppsRouteMode mode) {
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsRouteModeChanged, m_coreController->m_appSplitTunnelingUiController, [this](amnezia::AppsRouteMode mode) {
         Q_UNUSED(mode);
         m_coreController->m_appSplitTunnelingUiController->updateModel();
     });
@@ -317,10 +317,10 @@ void CoreSignalHandlers::initStrictKillSwitchHandler()
 void CoreSignalHandlers::initAndroidSettingsHandler()
 {
 #ifdef Q_OS_ANDROID
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::screenshotsEnabledChanged, AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
-    connect(m_coreController->m_serversRepository, &QServersRepository::serverRemoved, AndroidController::instance(), &AndroidController::resetLastServer);
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::settingsCleared, []() { AndroidController::instance()->resetLastServer(-1); });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::screenshotsEnabledChanged, AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved, AndroidController::instance(), &AndroidController::resetLastServer);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::settingsCleared, []() { AndroidController::instance()->resetLastServer(-1); });
 #endif
 }
 
@@ -360,7 +360,7 @@ void CoreSignalHandlers::initIosImportHandler()
 void CoreSignalHandlers::initIosSettingsHandler()
 {
 #ifdef Q_OS_IOS
-    connect(m_coreController->m_appSettingsRepository, &QAppSettingsRepository::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
 #endif
 }
 

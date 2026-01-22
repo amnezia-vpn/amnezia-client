@@ -1,40 +1,47 @@
 #ifndef SECURESERVERSREPOSITORY_H
 #define SECURESERVERSREPOSITORY_H
 
-#include <memory>
+#include <QObject>
 #include <QVector>
 #include <QJsonArray>
 #include <QJsonDocument>
 
-#include "core/repositories/serversRepository.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 #include "secure_qsettings.h"
 
 using namespace amnezia;
 
-class SecureServersRepository : public ServersRepository
+class SecureServersRepository : public QObject
 {
+    Q_OBJECT
+
 public:
-    explicit SecureServersRepository(SecureQSettings* settings);
+    explicit SecureServersRepository(SecureQSettings* settings, QObject *parent = nullptr);
 
-    void addServer(const ServerConfig &server) override;
-    void editServer(int index, const ServerConfig &server) override;
-    void removeServer(int index) override;
-    ServerConfig server(int index) const override;
-    QVector<ServerConfig> servers() const override;
-    int serversCount() const override;
+    void addServer(const ServerConfig &server);
+    void editServer(int index, const ServerConfig &server);
+    void removeServer(int index);
+    ServerConfig server(int index) const;
+    QVector<ServerConfig> servers() const;
+    int serversCount() const;
 
-    int defaultServerIndex() const override;
-    void setDefaultServer(int index) override;
+    int defaultServerIndex() const;
+    void setDefaultServer(int index);
 
-    void setDefaultContainer(int serverIndex, DockerContainer container) override;
-    ContainerConfig containerConfig(int serverIndex, DockerContainer container) const override;
-    void setContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config) override;
-    void clearLastConnectionConfig(int serverIndex, DockerContainer container) override;
+    void setDefaultContainer(int serverIndex, DockerContainer container);
+    ContainerConfig containerConfig(int serverIndex, DockerContainer container) const;
+    void setContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config);
+    void clearLastConnectionConfig(int serverIndex, DockerContainer container);
 
-    ServerCredentials serverCredentials(int index) const override;
-    bool hasServerWithVpnKey(const QString &vpnKey) const override;
+    ServerCredentials serverCredentials(int index) const;
+    bool hasServerWithVpnKey(const QString &vpnKey) const;
+
+signals:
+    void serverAdded(ServerConfig config);
+    void serverEdited(int index, ServerConfig config);
+    void serverRemoved(int index);
+    void defaultServerChanged(int index);
 
 private:
     QJsonArray serversArray() const;

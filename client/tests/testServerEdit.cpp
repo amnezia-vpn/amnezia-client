@@ -48,7 +48,7 @@ private slots:
         m_coreController->m_importCoreController->importConfig(importResult.config);
         QVERIFY2(importFinishedSpy.count() == 1, "Import should succeed");
 
-        QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &QServersRepository::serverEdited);
+        QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited);
         QSignalSpy gatewayStacksExpandedSpy(m_coreController->m_serversController, &ServersController::gatewayStacksExpanded);
 
         ServerConfig serverConfig = m_coreController->m_serversController->getServerConfig(0);
@@ -82,7 +82,7 @@ private slots:
 
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default server should be index 1");
 
-        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &QServersRepository::defaultServerChanged);
+        QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
         ServerConfig defaultServerConfig = m_coreController->m_serversController->getServerConfig(1);
         ServerConfigUtils::visit(defaultServerConfig, [](auto& arg) {

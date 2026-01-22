@@ -13,7 +13,7 @@ namespace
     constexpr char osVersion[] = "os_version";
 }
 
-ServicesCatalogController::ServicesCatalogController(QAppSettingsRepository* appSettingsRepository)
+ServicesCatalogController::ServicesCatalogController(SecureAppSettingsRepository* appSettingsRepository)
     : m_appSettingsRepository(appSettingsRepository)
 {
 }

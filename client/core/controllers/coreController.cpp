@@ -120,39 +120,33 @@ void CoreController::initModels()
 
 void CoreController::initRepositories()
 {
-    m_serversRepository = new QServersRepository(m_settings, this);
-    m_appSettingsRepository = new QAppSettingsRepository(m_settings, this);
-    
-    ServersRepository* serversRepo = m_serversRepository->repository();
-    AppSettingsRepository* appSettingsRepo = m_appSettingsRepository->repository();
+    m_serversRepository = new SecureServersRepository(m_settings, this);
+    m_appSettingsRepository = new SecureAppSettingsRepository(m_settings, this);
     
     if (m_vpnConnection) {
-        QTimer::singleShot(0, m_vpnConnection.get(), [this, serversRepo, appSettingsRepo]() {
-            m_vpnConnection->setRepositories(serversRepo, appSettingsRepo);
+        QTimer::singleShot(0, m_vpnConnection.get(), [this]() {
+            m_vpnConnection->setRepositories(m_serversRepository, m_appSettingsRepository);
         });
     }
 }
 
 void CoreController::initCoreControllers()
 {
-    QServersRepository* qServersRepo = m_serversRepository;
-    QAppSettingsRepository* qAppSettingsRepo = m_appSettingsRepository;
-    
-    m_serversController = new ServersController(qServersRepo, qAppSettingsRepo, this);
-    m_appSplitTunnelingController = new AppSplitTunnelingController(qAppSettingsRepo);
-    m_usersController = new UsersController(qServersRepo, this);
-    m_sitesController = new SitesController(qAppSettingsRepo);
-    m_allowedDnsController = new AllowedDnsController(qAppSettingsRepo);
-    m_servicesCatalogController = new ServicesCatalogController(qAppSettingsRepo);
-    m_subscriptionController = new SubscriptionController(qServersRepo, qAppSettingsRepo);
-    m_newsController = new NewsController(qAppSettingsRepo, m_serversController);
+    m_serversController = new ServersController(m_serversRepository, m_appSettingsRepository, this);
+    m_appSplitTunnelingController = new AppSplitTunnelingController(m_appSettingsRepository);
+    m_usersController = new UsersController(m_serversRepository, this);
+    m_sitesController = new SitesController(m_appSettingsRepository);
+    m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
+    m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
+    m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
+    m_newsController = new NewsController(m_appSettingsRepository, m_serversController);
     
     SshSession* sshSession = new SshSession(this);
-    m_installController = new InstallController(sshSession, qServersRepo, qAppSettingsRepo, this);
-    m_exportController = new ExportController(qServersRepo, qAppSettingsRepo, this);
-    m_importCoreController = new ImportController(qServersRepo, qAppSettingsRepo, this);
-    m_connectionController = new ConnectionController(qServersRepo, qAppSettingsRepo, m_vpnConnection.get());
-    m_settingsController = new SettingsController(qServersRepo, qAppSettingsRepo, this);
+    m_installController = new InstallController(sshSession, m_serversRepository, m_appSettingsRepository, this);
+    m_exportController = new ExportController(m_serversRepository, m_appSettingsRepository, this);
+    m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
+    m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get());
+    m_settingsController = new SettingsController(m_serversRepository, m_appSettingsRepository, this);
 }
 
 void CoreController::initControllers()
