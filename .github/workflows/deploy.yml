@@ -10,7 +10,7 @@ env:
 
 jobs:
   Build-Linux-Ubuntu:
-    runs-on: 4-core
+    runs-on: android-runner
 
     env:
       QT_VERSION: 6.8.3
@@ -537,7 +537,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
-    runs-on: 4-core
+    runs-on: android-runner
 
     env:
       ANDROID_BUILD_PLATFORM: android-36
