@@ -499,7 +499,7 @@ bool VpnConnection::startNetworkCheckIfReady()
 
     return IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         QRemoteObjectPendingReply<bool> reply = iface->startNetworkCheck(gateway, localAddress);
-        return reply.waitForFinished() && reply.returnValue();
+        return reply.waitForFinished(1000) && reply.returnValue();
     });
 #else
     return false;
