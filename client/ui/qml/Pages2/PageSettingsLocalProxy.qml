@@ -86,6 +86,7 @@ PageType {
                 onToggled: function() {
                     if (checked) {
                         const serverUuid = ServersModel.processedServerUuid
+                        console.log("serverUuid", serverUuid)
                         if (!serverUuid) {
                             checked = false
                             PageController.showNotificationMessage(qsTr("Unable to determine the current server"))

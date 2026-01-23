@@ -987,6 +987,8 @@ QString ServersModel::getServerUuid(int index) const
 
 QString ServersModel::getProcessedServerUuid() const
 {
+    qDebug() << "getProcessedServerIndex" << m_processedServerIndex;
+    qDebug() << "getServerUuid" << getServerUuid(m_processedServerIndex);
     return getServerUuid(m_processedServerIndex);
 }
 
