@@ -13,7 +13,7 @@ jobs:
     runs-on: android-runner
 
     env:
-      QT_VERSION: 6.8.3
+      QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
