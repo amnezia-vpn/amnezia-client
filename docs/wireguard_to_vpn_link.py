@@ -13,7 +13,6 @@ import json
 import zlib
 import base64
 import argparse
-import re
 from typing import Dict, Any
 
 
@@ -215,15 +214,30 @@ def main():
         # Режим декодирования
         print("Декодирование vpn:// ссылки...")
         print()
-        config = decode_vpn_link(args.decode)
-        print(json.dumps(config, indent=2, ensure_ascii=False))
+        try:
+            config = decode_vpn_link(args.decode)
+            print(json.dumps(config, indent=2, ensure_ascii=False))
+        except Exception as e:
+            print(f"Ошибка при декодировании vpn:// ссылки: {e}")
+            print("Убедитесь, что ссылка корректна и начинается с 'vpn://'")
+            return 1
         return
     
     # Режим кодирования
     if args.config:
         # Читаем конфигурацию из файла
-        with open(args.config, 'r') as f:
-            config_text = f.read()
+        try:
+            with open(args.config, 'r', encoding='utf-8') as f:
+                config_text = f.read()
+        except FileNotFoundError:
+            print(f"Ошибка: Файл '{args.config}' не найден")
+            return 1
+        except PermissionError:
+            print(f"Ошибка: Нет прав на чтение файла '{args.config}'")
+            return 1
+        except Exception as e:
+            print(f"Ошибка при чтении файла: {e}")
+            return 1
     else:
         # Используем пример конфигурации из проблемы
         config_text = """
