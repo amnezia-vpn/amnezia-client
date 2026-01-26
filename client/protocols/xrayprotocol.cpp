@@ -14,6 +14,7 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
 {
     readXrayConfiguration(configuration);
     m_routeGateway = NetworkUtilities::getGatewayAndIface().first;
+    m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_t2sProcess = IpcClient::InterfaceTun2Socks();
 }
