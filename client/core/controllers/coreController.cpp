@@ -9,7 +9,7 @@
 #include "core/controllers/selfhosted/importController.h"
 #include "core/controllers/coreSignalHandlers.h"
 #include "core/models/serverConfig.h"
-#include "secure_qsettings.h"
+#include "secureQSettings.h"
 
 #if defined(Q_OS_ANDROID)
     #include "core/utils/installedAppsImageProvider.h"

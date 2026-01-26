@@ -1,7 +1,7 @@
 #ifndef NEWSMODEL_H
 #define NEWSMODEL_H
 
-#include "secure_qsettings.h"
+#include "secureQSettings.h"
 #include <QAbstractListModel>
 #include <QDateTime>
 #include <QJsonArray>

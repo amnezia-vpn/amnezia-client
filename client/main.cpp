@@ -1,7 +1,7 @@
 #include <QDebug>
 #include <QTimer>
 
-#include "amnezia_application.h"
+#include "amneziaApplication.h"
 #include "core/utils/osSignalHandler.h"
 #include "core/utils/migrations.h"
 #include "version.h"

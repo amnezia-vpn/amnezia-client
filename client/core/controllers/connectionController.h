@@ -13,7 +13,7 @@
 #include "core/utils/commonStructs.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
-#include "vpnconnection.h"
+#include "vpnConnection.h"
 
 using namespace amnezia;
 

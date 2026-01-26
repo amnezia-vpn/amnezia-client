@@ -45,7 +45,7 @@
 
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
-#include "secure_qsettings.h"
+#include "secureQSettings.h"
 
 #include "ui/models/allowedDnsModel.h"
 #include "ui/models/containersModel.h"

@@ -16,8 +16,8 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/protocolEnum.h"
-#include "vpnconnection.h"
-#include "secure_qsettings.h"
+#include "vpnConnection.h"
+#include "secureQSettings.h"
 
 using namespace amnezia;
 

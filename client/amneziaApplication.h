@@ -14,8 +14,8 @@
 #include <QClipboard>
 
 #include "core/controllers/coreController.h"
-#include "secure_qsettings.h"
-#include "vpnconnection.h"
+#include "secureQSettings.h"
+#include "vpnConnection.h"
 #include "ui/models/containerProps.h"
 #include "ui/models/protocolProps.h"
 

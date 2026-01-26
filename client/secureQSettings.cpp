@@ -1,4 +1,4 @@
-#include "secure_qsettings.h"
+#include "secureQSettings.h"
 
 #include "../client/3rd/QSimpleCrypto/src/include/QAead.h"
 #include "../client/3rd/QSimpleCrypto/src/include/QBlockCipher.h"

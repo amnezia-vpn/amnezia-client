@@ -1,6 +1,6 @@
 #include "subscriptionUiController.h"
 
-#include "amnezia_application.h"
+#include "amneziaApplication.h"
 #include "core/configurators/wireguardConfigurator.h"
 #include "core/utils/api/apiEnums.h"
 #include "core/utils/constants/apiKeys.h"

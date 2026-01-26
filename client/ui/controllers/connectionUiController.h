@@ -11,7 +11,7 @@
 #include "core/controllers/serversController.h"
 #include "ui/models/containersModel.h"
 #include "ui/models/clientManagementModel.h"
-#include "vpnconnection.h"
+#include "vpnConnection.h"
 
 class ConnectionUiController : public QObject
 {

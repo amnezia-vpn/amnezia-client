@@ -7,8 +7,8 @@
 #include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"
 #include "ui/models/serversModel.h"
-#include "vpnconnection.h"
-#include "secure_qsettings.h"
+#include "vpnConnection.h"
+#include "secureQSettings.h"
 
 class TestServersModelSync : public QObject
 {

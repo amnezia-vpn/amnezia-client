@@ -8,7 +8,7 @@
 
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
-#include "secure_qsettings.h"
+#include "secureQSettings.h"
 
 using namespace amnezia;
 

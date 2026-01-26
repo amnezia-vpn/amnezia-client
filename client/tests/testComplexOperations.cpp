@@ -6,8 +6,8 @@
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"
-#include "vpnconnection.h"
-#include "secure_qsettings.h"
+#include "vpnConnection.h"
+#include "secureQSettings.h"
 
 class TestComplexOperations : public QObject
 {

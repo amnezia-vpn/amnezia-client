@@ -13,7 +13,7 @@
 
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "secure_qsettings.h"
+#include "secureQSettings.h"
 
 using namespace amnezia;
 

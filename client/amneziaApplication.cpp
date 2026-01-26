@@ -1,4 +1,4 @@
-#include "amnezia_application.h"
+#include "amneziaApplication.h"
 
 #include <QClipboard>
 #include <QFontDatabase>

@@ -1,4 +1,4 @@
-#include "vpnconnection.h"
+#include "vpnConnection.h"
 
 #include <QDebug>
 #include <QEventLoop>
@@ -30,7 +30,7 @@
 #endif
 
 #include "core/utils/networkUtilities.h"
-#include "vpnconnection.h"
+#include "vpnConnection.h"
 
 using namespace ProtocolUtils;
 

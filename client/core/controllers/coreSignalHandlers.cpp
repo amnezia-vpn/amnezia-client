@@ -8,7 +8,7 @@
 #include "core/controllers/coreController.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
-#include "vpnconnection.h"
+#include "vpnConnection.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/connectionUiController.h"
 #include "ui/controllers/settingsUiController.h"

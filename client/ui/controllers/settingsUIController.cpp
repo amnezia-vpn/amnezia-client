@@ -9,7 +9,7 @@
 #include "core/utils/commonStructs.h"
 #include "logger.h"
 #include "systemController.h"
-#include "amnezia_application.h"
+#include "amneziaApplication.h"
 #include "version.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"

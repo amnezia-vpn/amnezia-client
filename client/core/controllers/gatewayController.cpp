@@ -15,7 +15,7 @@
 #include "QBlockCipher.h"
 #include "QRsa.h"
 
-#include "amnezia_application.h"
+#include "amneziaApplication.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/utilities.h"

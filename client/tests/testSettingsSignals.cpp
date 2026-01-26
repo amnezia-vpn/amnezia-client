@@ -13,8 +13,8 @@
 #include "ui/models/sitesModel.h"
 #include "ui/models/appSplitTunnelingModel.h"
 #include "ui/models/languageModel.h"
-#include "vpnconnection.h"
-#include "secure_qsettings.h"
+#include "vpnConnection.h"
+#include "secureQSettings.h"
 
 class TestSettingsSignals : public QObject
 {
