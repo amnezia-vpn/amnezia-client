@@ -135,7 +135,7 @@ void CoreController::initCoreControllers()
     m_serversController = new ServersController(m_serversRepository, m_appSettingsRepository, this);
     m_appSplitTunnelingController = new AppSplitTunnelingController(m_appSettingsRepository);
     m_usersController = new UsersController(m_serversRepository, this);
-    m_sitesController = new SitesController(m_appSettingsRepository);
+    m_sitesController = new SitesController(m_appSettingsRepository, m_vpnConnection.get(), this);
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
@@ -145,13 +145,13 @@ void CoreController::initCoreControllers()
     m_installController = new InstallController(sshSession, m_serversRepository, m_appSettingsRepository, this);
     m_exportController = new ExportController(m_serversRepository, m_appSettingsRepository, this);
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
-    m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get());
+    m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);
     m_settingsController = new SettingsController(m_serversRepository, m_appSettingsRepository, this);
 }
 
 void CoreController::initControllers()
 {
-    m_connectionUiController = new ConnectionUiController(m_connectionController, m_serversController, m_containersModel, m_clientManagementModel, m_vpnConnection.get(), this);
+    m_connectionUiController = new ConnectionUiController(m_connectionController, m_serversController, this);
     setQmlContextProperty("ConnectionController", m_connectionUiController);
 
     if (m_engine) {
@@ -171,7 +171,7 @@ void CoreController::initControllers()
     m_languageUiController = new LanguageUiController(m_settingsController, m_languageModel, this);
     setQmlContextProperty("LanguageUiController", m_languageUiController);
 
-    m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, m_containersModel, m_languageUiController, this);
+    m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, m_languageUiController, this);
     setQmlContextProperty("SettingsController", m_settingsUiController);
 
     m_pageController = new PageController(m_serversModel, m_settingsController, this);
@@ -180,7 +180,7 @@ void CoreController::initControllers()
     m_serversUiController = new ServersUiController(m_serversController, m_settingsController, m_serversModel, m_containersModel, m_defaultServerContainersModel, this);
     setQmlContextProperty("ServersUiController", m_serversUiController);
 
-    m_sitesUiController = new SitesUiController(m_sitesController, m_vpnConnection.get(), m_sitesModel, this);
+    m_sitesUiController = new SitesUiController(m_sitesController, m_sitesModel, this);
     setQmlContextProperty("SitesController", m_sitesUiController);
 
     m_allowedDnsUiController = new AllowedDnsUiController(m_allowedDnsController, m_allowedDnsModel, this);

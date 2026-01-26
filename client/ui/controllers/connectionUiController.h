@@ -9,9 +9,6 @@
 #include "core/utils/commonStructs.h"
 #include "core/protocols/vpnProtocol.h"
 #include "core/controllers/serversController.h"
-#include "ui/models/containersModel.h"
-#include "ui/models/clientManagementModel.h"
-#include "vpnConnection.h"
 
 class ConnectionUiController : public QObject
 {
@@ -24,9 +21,6 @@ public:
 
     explicit ConnectionUiController(ConnectionController* connectionController,
                                     ServersController* serversController,
-                                    ContainersModel* containersModel,
-                                    ClientManagementModel* clientManagementModel,
-                                    VpnConnection* vpnConnection,
                                     QObject *parent = nullptr);
 
     ~ConnectionUiController() = default;
@@ -63,10 +57,6 @@ private:
 
     ConnectionController* m_connectionController;
     ServersController* m_serversController;
-    ContainersModel* m_containersModel;
-    ClientManagementModel* m_clientManagementModel;
-
-    VpnConnection* m_vpnConnection;
 
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;

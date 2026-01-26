@@ -5,7 +5,6 @@
 
 #include "core/controllers/sitesController.h"
 #include "ui/models/sitesModel.h"
-#include "vpnConnection.h"
 
 class SitesUiController : public QObject
 {
@@ -16,7 +15,6 @@ class SitesUiController : public QObject
 
 public:
     explicit SitesUiController(SitesController* sitesController,
-                                VpnConnection* vpnConnection,
                                 SitesModel* sitesModel, QObject *parent = nullptr);
 
 public slots:
@@ -42,7 +40,6 @@ signals:
 
 private:
     SitesController* m_sitesController;
-    VpnConnection* m_vpnConnection;
     SitesModel* m_sitesModel;
 };
 

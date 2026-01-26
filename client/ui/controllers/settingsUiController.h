@@ -5,7 +5,6 @@
 
 #include "core/controllers/settingsController.h"
 #include "core/controllers/serversController.h"
-#include "ui/models/containersModel.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/models/languageModel.h"
 #include "core/utils/errorCodes.h"
@@ -18,7 +17,6 @@ class SettingsUiController : public QObject
 public:
     explicit SettingsUiController(SettingsController* settingsController,
                                  ServersController* serversController,
-                                 ContainersModel* containersModel,
                                  LanguageUiController* languageUiController,
                                  QObject *parent = nullptr);
 
@@ -136,7 +134,6 @@ signals:
 private:
     SettingsController* m_settingsController;
     ServersController* m_serversController;
-    ContainersModel* m_containersModel;
     LanguageUiController* m_languageUiController;
 };
 

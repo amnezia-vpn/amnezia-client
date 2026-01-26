@@ -1,6 +1,7 @@
 #ifndef CONNECTIONCONTROLLER_H
 #define CONNECTIONCONTROLLER_H
 
+#include <QObject>
 #include <QJsonObject>
 #include <QPair>
 #include <memory>
@@ -13,16 +14,20 @@
 #include "core/utils/commonStructs.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
+#include "core/protocols/vpnProtocol.h"
 #include "vpnConnection.h"
 
 using namespace amnezia;
 
-class ConnectionController
+class ConnectionController : public QObject
 {
+    Q_OBJECT
+
 public:
     explicit ConnectionController(SecureServersRepository* serversRepository,
                                  SecureAppSettingsRepository* appSettingsRepository,
-                                 VpnConnection* vpnConnection);
+                                 VpnConnection* vpnConnection,
+                                 QObject* parent = nullptr);
     ~ConnectionController() = default;
 
     ErrorCode prepareConnection(int serverIndex,
@@ -44,6 +49,9 @@ public:
     bool isServiceReady() const;
 
     bool isContainerSupported(DockerContainer container) const;
+
+signals:
+    void connectionStateChanged(Vpn::ConnectionState state);
 
 private:
     SecureServersRepository* m_serversRepository;

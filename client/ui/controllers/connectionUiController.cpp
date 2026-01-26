@@ -7,24 +7,16 @@
 #endif
 
 #include "core/controllers/serversController.h"
-#include "ui/models/containersModel.h"
-#include "ui/models/clientManagementModel.h"
 #include "ui/models/serversModel.h"
 
 ConnectionUiController::ConnectionUiController(ConnectionController* connectionController,
                                                 ServersController* serversController,
-                                                ContainersModel* containersModel,
-                                                ClientManagementModel* clientManagementModel,
-                                                VpnConnection* vpnConnection,
                                                 QObject *parent)
     : QObject(parent),
       m_connectionController(connectionController),
-      m_serversController(serversController),
-      m_containersModel(containersModel),
-      m_clientManagementModel(clientManagementModel),
-      m_vpnConnection(vpnConnection)
+      m_serversController(serversController)
 {
-    connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionUiController::onConnectionStateChanged);
+    connect(m_connectionController, &ConnectionController::connectionStateChanged, this, &ConnectionUiController::onConnectionStateChanged);
 
     connect(this, &ConnectionUiController::connectButtonClicked, this, &ConnectionUiController::toggleConnection, Qt::QueuedConnection);
 

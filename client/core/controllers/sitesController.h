@@ -1,25 +1,34 @@
 #ifndef SITESCONTROLLER_H
 #define SITESCONTROLLER_H
 
+#include <QObject>
 #include <QVector>
 #include <QMap>
 #include <QPair>
+#include <QStringList>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QHostInfo>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 
+class VpnConnection;
+
 using namespace amnezia;
 
-class SitesController
+class SitesController : public QObject
 {
-public:
-    explicit SitesController(SecureAppSettingsRepository* appSettingsRepository);
+    Q_OBJECT
 
-    bool addSite(const QString &hostname, const QString &ip);
+public:
+    explicit SitesController(SecureAppSettingsRepository* appSettingsRepository, VpnConnection* vpnConnection = nullptr, QObject* parent = nullptr);
+
+    bool addSite(const QString &hostname);
     void addSites(const QMap<QString, QString> &sites, bool replaceExisting);
-    void removeSite(const QString &hostname);
+    bool removeSite(const QString &hostname);
     void removeSites();
     void setRouteMode(RouteMode routeMode);
     void toggleSplitTunneling(bool enabled);
@@ -28,10 +37,25 @@ public:
     bool isSplitTunnelingEnabled() const;
     QVector<QPair<QString, QString>> getCurrentSites() const;
 
+    void addRoutes(const QStringList& ips);
+    void deleteRoutes(const QStringList& ips);
+
+    bool importSitesFromJson(const QByteArray& jsonData, bool replaceExisting, QString &errorMessage);
+    QByteArray exportSitesToJson() const;
+
+private slots:
+    void onHostResolved(const QHostInfo &hostInfo);
+
 private:
     void fillSites();
+    bool addSiteInternal(const QString &hostname, const QString &ip);
+    QString normalizeHostname(const QString &hostname) const;
+    bool validateHostname(const QString &hostname) const;
+    void processSiteAfterResolve(const QString &hostname, const QString &ip);
+    void processSite(const QString &hostname, const QString &ip);
 
     SecureAppSettingsRepository* m_appSettingsRepository;
+    VpnConnection* m_vpnConnection;
     RouteMode m_currentRouteMode;
     QVector<QPair<QString, QString>> m_sites;
 };

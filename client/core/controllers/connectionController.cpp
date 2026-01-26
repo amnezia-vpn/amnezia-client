@@ -21,11 +21,14 @@ using namespace ProtocolUtils;
 
 ConnectionController::ConnectionController(SecureServersRepository* serversRepository,
                                          SecureAppSettingsRepository* appSettingsRepository,
-                                         VpnConnection* vpnConnection)
-    : m_serversRepository(serversRepository),
+                                         VpnConnection* vpnConnection,
+                                         QObject* parent)
+    : QObject(parent),
+      m_serversRepository(serversRepository),
       m_appSettingsRepository(appSettingsRepository),
       m_vpnConnection(vpnConnection)
 {
+    connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::connectionStateChanged);
 }
 
 ErrorCode ConnectionController::prepareConnection(int serverIndex,

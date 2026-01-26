@@ -3,7 +3,6 @@
 
 #include <QObject>
 
-#include "core/configurators/openVpnConfigurator.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
 #include "core/controllers/api/servicesCatalogController.h"

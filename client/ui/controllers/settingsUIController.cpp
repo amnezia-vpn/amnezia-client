@@ -21,13 +21,11 @@
 
 SettingsUiController::SettingsUiController(SettingsController* settingsController,
                                          ServersController* serversController,
-                                         ContainersModel* containersModel,
                                          LanguageUiController* languageUiController,
                                          QObject *parent)
     : QObject(parent),
       m_settingsController(settingsController),
       m_serversController(serversController),
-      m_containersModel(containersModel),
       m_languageUiController(languageUiController)
 {
 #ifdef Q_OS_ANDROID
