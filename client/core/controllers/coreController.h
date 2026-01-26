@@ -85,6 +85,7 @@ class TestServersModelSync;
 class TestGatewayStacks;
 class TestComplexOperations;
 class TestSettingsSignals;
+class TestUiServersModelAndController;
 
 class CoreController : public QObject
 {
@@ -100,6 +101,7 @@ class CoreController : public QObject
     friend class TestGatewayStacks;
     friend class TestComplexOperations;
     friend class TestSettingsSignals;
+    friend class TestUiServersModelAndController;
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,

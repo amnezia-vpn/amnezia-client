@@ -175,7 +175,7 @@ QString ServersUiController::getDefaultServerDescriptionCollapsed() const
     
     DockerContainer container = ServerConfigUtils::defaultContainer(server);
     QString hostName = ServerConfigUtils::hostName(server);
-    return description + ContainerUtils::containerHumanNames().value(container) + " | " + hostName;
+    return description + " " + ContainerUtils::containerHumanNames().value(container) + " | " + hostName;
 }
 
 QString ServersUiController::getDefaultServerImagePathCollapsed() const

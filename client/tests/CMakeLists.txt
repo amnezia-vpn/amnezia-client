@@ -117,6 +117,15 @@ target_link_libraries(test_settings_signals PRIVATE
     test_common
 )
 
+add_executable(test_ui_servers_model_and_controller
+    testUiServersModelAndController.cpp
+)
+
+target_link_libraries(test_ui_servers_model_and_controller PRIVATE
+    Qt6::Test
+    test_common
+)
+
 enable_testing()
 add_test(NAME ImportExportTest COMMAND test_import_export)
 add_test(NAME MultipleImportsTest COMMAND test_multiple_imports)
@@ -128,3 +137,4 @@ add_test(NAME ServersModelSyncTest COMMAND test_servers_model_sync)
 add_test(NAME GatewayStacksTest COMMAND test_gateway_stacks)
 add_test(NAME ComplexOperationsTest COMMAND test_complex_operations)
 add_test(NAME SettingsSignalsTest COMMAND test_settings_signals)
+add_test(NAME UiServersModelAndControllerTest COMMAND test_ui_servers_model_and_controller)
