@@ -638,7 +638,7 @@ void Settings::setLocalProxyOwnerUuid(const QString &uuid)
 
 quint16 Settings::localProxyPort() const
 {
-    return value("Conf/localProxyPort", 0).toUInt();
+    return value("Conf/localProxyPort", 10808).toUInt();
 }
 
 void Settings::setLocalProxyPort(quint16 port)

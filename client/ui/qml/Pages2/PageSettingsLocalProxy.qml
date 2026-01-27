@@ -135,7 +135,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                headerText: qsTr("HTTP API port")
+                headerText: qsTr("Local proxy port")
 
                 enabled: true
 
@@ -182,7 +182,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("HTTP API controls Xray via /api/v1/up and /api/v1/down. SOCKS inbound stays on port 10808.")
+                text: qsTr("SOCKS inbound listens on the specified port. Connect your client to 127.0.0.1.")
             }
         }
     }

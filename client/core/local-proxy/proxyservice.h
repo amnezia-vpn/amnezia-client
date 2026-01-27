@@ -25,6 +25,9 @@ public:
     qint64 getXrayProcessId() const override;
     QString getXrayError() const override;
 
+    void clearCache();
+    bool restartXray();
+
 signals:
     void xrayStatusChanged(bool running);
 

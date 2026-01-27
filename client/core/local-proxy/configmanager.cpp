@@ -38,6 +38,45 @@ constexpr char appVersion[] = "app_version";
 constexpr char publicKey[] = "public_key";
 constexpr char vless[] = "vless";
 } // namespace gateway_key
+
+constexpr quint16 kDefaultProxyPort = 10808;
+
+int resolveProxyPort(const std::shared_ptr<Settings> &settings)
+{
+    if (!settings) {
+        return kDefaultProxyPort;
+    }
+
+    const quint16 port = settings->localProxyPort();
+    if (port < 1024 || port > 65535) {
+        return kDefaultProxyPort;
+    }
+
+    return static_cast<int>(port);
+}
+
+bool applyProxyPortToConfig(QJsonObject &config, int port)
+{
+    if (!config.contains("inbounds") || !config.value("inbounds").isArray()) {
+        return false;
+    }
+
+    QJsonArray inbounds = config.value("inbounds").toArray();
+    if (inbounds.isEmpty() || !inbounds.at(0).isObject()) {
+        return false;
+    }
+
+    QJsonObject firstInbound = inbounds.at(0).toObject();
+    firstInbound.insert("port", port);
+    inbounds[0] = firstInbound;
+    config.insert("inbounds", inbounds);
+    return true;
+}
+
+QString serializeConfig(const QJsonObject &config)
+{
+    return QString::fromUtf8(QJsonDocument(config).toJson(QJsonDocument::Compact));
+}
 } // namespace
 
 std::optional<ConfigManager::ConfigData> ConfigManager::buildConfig(QString &errorDescription) const
@@ -96,8 +135,14 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfig(QString &err
     ConfigData data;
     data.ownerUuid = ownerUuid;
     data.serverName = ownerServer->value(amnezia::config_key::name).toString();
-    data.serializedConfig = *serializedConfig;
     data.parsedConfig = doc.object();
+    const int proxyPort = resolveProxyPort(m_settings);
+    if (applyProxyPortToConfig(data.parsedConfig, proxyPort)) {
+        data.serializedConfig = serializeConfig(data.parsedConfig);
+    } else {
+        ProxyLogger::getInstance().warning(QStringLiteral("Failed to override local proxy inbound port; using original config"));
+        data.serializedConfig = *serializedConfig;
+    }
 
     return data;
 }
@@ -158,8 +203,14 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfigWithFetch(QSt
     ConfigData data;
     data.ownerUuid = ownerUuid;
     data.serverName = ownerServer->value(amnezia::config_key::name).toString();
-    data.serializedConfig = *serializedConfig;
     data.parsedConfig = doc.object();
+    const int proxyPort = resolveProxyPort(m_settings);
+    if (applyProxyPortToConfig(data.parsedConfig, proxyPort)) {
+        data.serializedConfig = serializeConfig(data.parsedConfig);
+    } else {
+        ProxyLogger::getInstance().warning(QStringLiteral("Failed to override local proxy inbound port; using original config"));
+        data.serializedConfig = *serializedConfig;
+    }
 
     return data;
 }

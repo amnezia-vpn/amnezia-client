@@ -37,6 +37,8 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 void CoreController::initLocalProxy()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    constexpr quint16 kLocalProxyApiPort = 49490;
+
     m_proxyServer.reset(new ProxyServer(m_settings, this));
 
     auto syncLocalProxy = [this]() {
@@ -45,7 +47,6 @@ void CoreController::initLocalProxy()
         }
 
         const bool httpEnabled = m_settings->isLocalProxyHttpEnabled();
-        const quint16 port = m_settings->localProxyPort();
 
         if (!httpEnabled) {
             qInfo() << "Local proxy: HTTP API disabled";
@@ -53,22 +54,16 @@ void CoreController::initLocalProxy()
             return;
         }
 
-        if (port < 1024) {
-            qWarning() << "Local proxy: invalid HTTP API port" << port << ", stopping server";
-            m_proxyServer->stop();
-            m_settings->setLocalProxyHttpEnabled(false);
-            emit m_settings->localProxyStartFailed(tr("Local proxy disabled: invalid HTTP API port."));
-            return;
-        }
-
-        if (!m_proxyServer->start(port)) {
-            qWarning() << "Local proxy: failed to start on port" << port;
+        if (!m_proxyServer->start(kLocalProxyApiPort)) {
+            qWarning() << "Local proxy: failed to start on port" << kLocalProxyApiPort;
             m_settings->setLocalProxyHttpEnabled(false);
             emit m_settings->localProxyStartFailed(tr("Local proxy failed to start. Check if the port is available."));
             return;
         }
 
-        qInfo() << "Local proxy: running on 127.0.0.1:" << port;
+        m_proxyServer->syncSettings();
+
+        qInfo() << "Local proxy: running on 127.0.0.1:" << kLocalProxyApiPort;
     };
 
     syncLocalProxy();

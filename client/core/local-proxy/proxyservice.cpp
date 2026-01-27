@@ -90,3 +90,24 @@ QString ProxyService::getXrayError() const
 {
     return m_xrayController->getError();
 }
+
+void ProxyService::clearCache()
+{
+    m_cachedConfig = QJsonObject();
+    ProxyLogger::getInstance().debug("ProxyService cache cleared");
+}
+
+bool ProxyService::restartXray()
+{
+    ProxyLogger::getInstance().info("Restarting Xray with updated config");
+    clearCache();
+
+    if (m_xrayController->isXrayRunning()) {
+        if (!stopXray()) {
+            ProxyLogger::getInstance().error("Failed to stop Xray during restart, aborting");
+            return false;
+        }
+    }
+
+    return startXray();
+}

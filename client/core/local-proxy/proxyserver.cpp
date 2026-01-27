@@ -1,15 +1,11 @@
 #include "proxyserver.h"
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QDateTime>
-#include <QDir>
-#include <QFileInfo>
+#include "settings.h"
+
 #include <QDebug>
-#include <QStandardPaths>
 
 ProxyServer::ProxyServer(const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent)
+    , m_settings(settings)
     , m_service(new ProxyService(settings, this))
 {
 }
@@ -22,7 +18,7 @@ ProxyServer::~ProxyServer()
 bool ProxyServer::start(quint16 port)
 {
     if (m_isRunning) {
-        if (m_currentPort == port) {
+        if (m_currentApiPort == port) {
             qInfo() << "Local proxy: already running on port" << port;
             return true;
         }
@@ -37,20 +33,12 @@ bool ProxyServer::start(quint16 port)
         qWarning() << "Local proxy: port is busy:" << port;
         m_api.reset();
         m_isRunning = false;
-        m_currentPort = 0;
+        m_currentApiPort = 0;
         return false;
     }
 
-    // Auto-start Xray if config exists
-    QJsonObject config = m_service->getConfig();
-    if (!config.isEmpty()) {
-        startXrayProcess();
-    } else {
-        qDebug() << "No config found, Xray will not start automatically";
-    }
-
     m_isRunning = true;
-    m_currentPort = port;
+    m_currentApiPort = port;
 
     return true;
 }
@@ -63,7 +51,8 @@ void ProxyServer::stop()
         m_api.reset();
     }
     m_isRunning = false;
-    m_currentPort = 0;
+    m_currentApiPort = 0;
+    m_currentProxyPort = 0;
 }
 
 bool ProxyServer::startXrayProcess()
@@ -74,4 +63,28 @@ bool ProxyServer::startXrayProcess()
 void ProxyServer::stopXrayProcess()
 {
     m_service->stopXray();
+}
+
+void ProxyServer::syncSettings()
+{
+    if (!m_isRunning) {
+        qDebug() << "Local proxy: syncSettings called but server is not running";
+        return;
+    }
+
+    const quint16 newProxyPort = m_settings ? m_settings->localProxyPort() : 0;
+    const bool xrayRunning = m_service->isXrayRunning();
+
+    if (!xrayRunning) {
+        qInfo() << "Local proxy: starting Xray on port" << newProxyPort;
+        m_currentProxyPort = newProxyPort;
+        startXrayProcess();
+        return;
+    }
+
+    if (m_currentProxyPort != newProxyPort) {
+        qInfo() << "Local proxy: proxy port changed from" << m_currentProxyPort << "to" << newProxyPort;
+        m_currentProxyPort = newProxyPort;
+        m_service->restartXray();
+    }
 }
