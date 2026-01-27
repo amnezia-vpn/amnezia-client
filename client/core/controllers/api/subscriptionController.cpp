@@ -26,6 +26,7 @@
 #include "version.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
+#include "core/models/api/apiConfig.h"
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include "platforms/ios/ios_controller.h"
@@ -126,8 +127,8 @@ void SubscriptionController::appendProtocolDataToApiPayload(const QString &proto
     }
 }
 
-ErrorCode SubscriptionController::fillServerConfig(const QString &protocol, const ProtocolData &protocolData, const QByteArray &apiResponseBody,
-                                                   ServerConfig &serverConfig)
+ErrorCode SubscriptionController::extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol, 
+                                                                        const ProtocolData &protocolData, QJsonObject &serverConfigJson)
 {
     QString data = QJsonDocument::fromJson(apiResponseBody).object().value(config_key::config).toString();
 
@@ -187,29 +188,31 @@ ErrorCode SubscriptionController::fillServerConfig(const QString &protocol, cons
         configStr = QString(QJsonDocument(newServerConfig).toJson());
     }
 
-    QJsonObject newServerConfigJson = QJsonDocument::fromJson(configStr.toUtf8()).object();
-    ServerConfig newServerConfig = ServerConfigUtils::fromJson(newServerConfigJson);
-    
-    ServerConfigUtils::visit(newServerConfig, [&newServerConfigJson, &apiResponseBody](auto& arg) {
-        if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, ApiV2ServerConfig>) {
-            QJsonObject apiConfig = newServerConfigJson.value(configKey::apiConfig).toObject();
-            
-            if (newServerConfigJson.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
-                QJsonObject responseObj = QJsonDocument::fromJson(apiResponseBody).object();
-                if (responseObj.contains(apiDefs::key::supportedProtocols)) {
-                    apiConfig.insert(apiDefs::key::supportedProtocols, responseObj.value(apiDefs::key::supportedProtocols).toArray());
-                }
-                if (responseObj.contains(apiDefs::key::serviceInfo)) {
-                    apiConfig.insert(apiDefs::key::serviceInfo, responseObj.value(apiDefs::key::serviceInfo).toObject());
-                }
-            }
-            
-            arg.apiConfig = ApiConfig::fromJson(apiConfig);
-        }
-    });
-    
-    serverConfig = newServerConfig;
+    serverConfigJson = QJsonDocument::fromJson(configStr.toUtf8()).object();
     return ErrorCode::NoError;
+}
+
+void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson, const QString &serviceType, 
+                                                    const QString &serviceProtocol, const QString &userCountryCode,
+                                                    const QByteArray &apiResponseBody)
+{
+    QJsonObject apiConfig = serverConfigJson.value(configKey::apiConfig).toObject();
+    
+    apiConfig[apiDefs::key::serviceType] = serviceType;
+    apiConfig[configKey::serviceProtocol] = serviceProtocol;
+    apiConfig[configKey::userCountryCode] = userCountryCode;
+    
+    if (serverConfigJson.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+        QJsonObject responseObj = QJsonDocument::fromJson(apiResponseBody).object();
+        if (responseObj.contains(apiDefs::key::supportedProtocols)) {
+            apiConfig.insert(apiDefs::key::supportedProtocols, responseObj.value(apiDefs::key::supportedProtocols).toArray());
+        }
+        if (responseObj.contains(apiDefs::key::serviceInfo)) {
+            apiConfig.insert(apiDefs::key::serviceInfo, responseObj.value(apiDefs::key::serviceInfo).toObject());
+        }
+    }
+    
+    serverConfigJson[configKey::apiConfig] = apiConfig;
 }
 
 ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
@@ -242,27 +245,18 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
         return errorCode;
     }
 
-    ServerConfig serverConfigModel;
-    errorCode = fillServerConfig(serviceProtocol, protocolData, responseBody, serverConfigModel);
+    QJsonObject serverConfigJson;
+    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
     
+    updateApiConfigInJson(serverConfigJson, serviceType, serviceProtocol, userCountryCode, responseBody);
+    
+    ServerConfig serverConfigModel = ServerConfigUtils::fromJson(serverConfigJson);
+    
     if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
         return ErrorCode::InternalError;
-    }
-    
-    ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-    apiV2.apiConfig.userCountryCode = userCountryCode;
-    apiV2.apiConfig.serviceType = serviceType;
-    apiV2.apiConfig.serviceProtocol = serviceProtocol;
-    
-    QJsonObject responseObj = QJsonDocument::fromJson(responseBody).object();
-    if (responseObj.contains(apiDefs::key::supportedProtocols)) {
-        apiV2.apiConfig.supportedProtocols = responseObj.value(apiDefs::key::supportedProtocols).toArray();
-    }
-    if (responseObj.contains(apiDefs::key::serviceInfo)) {
-        apiV2.apiConfig.serviceInfo = ApiConfig::ServiceInfo::fromJson(responseObj.value(apiDefs::key::serviceInfo).toObject());
     }
 
     m_serversRepository->addServer(serverConfigModel);
@@ -394,11 +388,15 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
         return errorCode;
     }
 
-    ServerConfig newServerConfigModel;
-    errorCode = fillServerConfig(serviceProtocol, protocolData, responseBody, newServerConfigModel);
+    QJsonObject serverConfigJson;
+    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
+    
+    updateApiConfigInJson(serverConfigJson, apiV2.apiConfig.serviceType, serviceProtocol, apiV2.apiConfig.userCountryCode, responseBody);
+    
+    ServerConfig newServerConfigModel = ServerConfigUtils::fromJson(serverConfigJson);
     
     if (!ServerConfigUtils::isApiV2Config(newServerConfigModel)) {
         return ErrorCode::InternalError;
@@ -406,9 +404,6 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     
     ApiV2ServerConfig& newApiV2 = ServerConfigUtils::asApiV2(newServerConfigModel);
     
-    newApiV2.apiConfig.userCountryCode = apiV2.apiConfig.userCountryCode;
-    newApiV2.apiConfig.serviceType = apiV2.apiConfig.serviceType;
-    newApiV2.apiConfig.serviceProtocol = apiV2.apiConfig.serviceProtocol;
     newApiV2.apiConfig.vpnKey = apiV2.apiConfig.vpnKey;
     
     newApiV2.authData = apiV2.authData;
@@ -416,14 +411,6 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     
     if (!apiV2.name.isEmpty()) {
         newApiV2.name = apiV2.name;
-    }
-    
-    QJsonObject responseObj = QJsonDocument::fromJson(responseBody).object();
-    if (responseObj.contains(apiDefs::key::supportedProtocols)) {
-        newApiV2.apiConfig.supportedProtocols = responseObj.value(apiDefs::key::supportedProtocols).toArray();
-    }
-    if (responseObj.contains(apiDefs::key::serviceInfo)) {
-        newApiV2.apiConfig.serviceInfo = ApiConfig::ServiceInfo::fromJson(responseObj.value(apiDefs::key::serviceInfo).toObject());
     }
 
     m_serversRepository->editServer(serverIndex, newServerConfigModel);
@@ -614,11 +601,13 @@ ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex)
         return errorCode;
     }
 
-    ServerConfig newServerConfigModel;
-    errorCode = fillServerConfig(serviceProtocol, protocolData, responseBody, newServerConfigModel);
+    QJsonObject serverConfigJson;
+    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
+    
+    ServerConfig newServerConfigModel = ServerConfigUtils::fromJson(serverConfigJson);
     
     if (!ServerConfigUtils::isApiV1Config(newServerConfigModel)) {
         return ErrorCode::InternalError;

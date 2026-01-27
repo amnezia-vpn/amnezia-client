@@ -47,8 +47,7 @@ public:
 
     ProtocolData generateProtocolData(const QString &protocol);
     void appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload);
-    ErrorCode fillServerConfig(const QString &protocol, const ProtocolData &protocolData, const QByteArray &apiResponseBody,
-                               ServerConfig &serverConfig);
+    ErrorCode fillServerConfig(const QJsonObject &serverConfigJson, ServerConfig &serverConfig);
 
     ErrorCode importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                       const QString &serviceProtocol, const ProtocolData &protocolData,
@@ -100,6 +99,12 @@ public:
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
     bool isApiKeyExpired(int serverIndex) const;
+    
+    ErrorCode extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol, 
+                                                   const ProtocolData &protocolData, QJsonObject &serverConfigJson);
+    void updateApiConfigInJson(QJsonObject &serverConfigJson, const QString &serviceType, 
+                                const QString &serviceProtocol, const QString &userCountryCode,
+                                const QByteArray &apiResponseBody);
 
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
