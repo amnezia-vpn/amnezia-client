@@ -17,7 +17,7 @@ import "../Components"
 PageType {
     id: root
 
-    property bool isClearCacheVisible: ServersModel.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
+    property bool isClearCacheVisible: ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
 
     BackButtonType {
         id: backButton
@@ -63,7 +63,7 @@ PageType {
             width: listView.width
 
             property bool isClientSettingsVisible: isWireGuard || isAwg
-            property bool isServerSettingsVisible: ServersModel.isProcessedServerHasWriteAccess()
+            property bool isServerSettingsVisible: ServersUiController.isProcessedServerHasWriteAccess()
 
             LabelWithButtonType {
                 id: clientSettings
@@ -173,7 +173,7 @@ PageType {
 
                 Layout.fillWidth: true
 
-                visible: ServersModel.isProcessedServerHasWriteAccess()
+                visible: ServersUiController.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ")
                 textColor: AmneziaStyle.color.vibrantRed
@@ -185,7 +185,7 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
                                 && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
                             PageController.showNotificationMessage(qsTr("Cannot remove active container"))
                         } else
@@ -209,7 +209,7 @@ PageType {
             }
 
             DividerType {
-                visible: ServersModel.isProcessedServerHasWriteAccess()
+                visible: ServersUiController.isProcessedServerHasWriteAccess()
             }
         }
     }

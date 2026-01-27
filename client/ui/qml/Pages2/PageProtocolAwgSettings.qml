@@ -55,7 +55,7 @@ PageType {
             width: listView.width
 
             property alias vpnAddressSubnetTextField: vpnAddressSubnetTextField
-            property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
+            property bool isEnabled: ServersUiController.isProcessedServerHasWriteAccess()
 
             spacing: 0
 

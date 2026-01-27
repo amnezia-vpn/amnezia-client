@@ -48,7 +48,7 @@ PageType {
 
     Component.onCompleted: {
         PageController.showBusyIndicator(true)
-        SubscriptionUiController.prepareVpnKeyExport()
+        SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
         PageController.showBusyIndicator(false)
     }
 
@@ -119,7 +119,7 @@ PageType {
 
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        SubscriptionUiController.exportVpnKey(fileName)
+                        SubscriptionUiController.exportVpnKey(ServersUiController.getProcessedServerIndex(), fileName)
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -141,7 +141,7 @@ PageType {
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
-                    SubscriptionUiController.prepareVpnKeyExport()
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
                     PageController.showBusyIndicator(false)
                     vpnKeyDrawer.openTriggered()
                 }

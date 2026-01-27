@@ -247,7 +247,7 @@ PageType {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
-                                                                         ServersModel.getProcessedServerCredentials())
+                                                                         ServersUiController.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
 
@@ -415,7 +415,7 @@ PageType {
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
-                                                                         ServersModel.getProcessedServerCredentials())
+                                                                         ServersUiController.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
 
@@ -785,7 +785,7 @@ PageType {
                                                         ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
                                                                                       clientNameEditor.textField.text,
                                                                                       ContainersModel.getProcessedContainerIndex(),
-                                                                                      ServersModel.getProcessedServerCredentials())
+                                                                                      ServersUiController.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
                                                         Qt.callLater(function(){ clientsListView.freezeFilter = false })
                                                         clientNameEditDrawer.closeTriggered()
@@ -821,7 +821,7 @@ PageType {
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
                                                                           ContainersModel.getProcessedContainerIndex(),
-                                                                          ServersModel.getProcessedServerCredentials())
+                                                                          ServersUiController.getProcessedServerCredentials())
                                         }
                                         var noButtonFunction = function() {
                                         }

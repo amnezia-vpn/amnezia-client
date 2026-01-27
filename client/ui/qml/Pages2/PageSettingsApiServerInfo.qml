@@ -154,7 +154,7 @@ PageType {
             SwitcherType {
                 id: switcher
 
-                readonly property bool isVlessProtocol: SubscriptionUiController.isVlessProtocol()
+                readonly property bool isVlessProtocol: SubscriptionUiController.isVlessProtocol(ServersUiController.getProcessedServerIndex())
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
@@ -166,11 +166,11 @@ PageType {
                 text: qsTr("Use VLESS protocol")
                 checked: switcher.isVlessProtocol
                 onToggled: function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
                     } else {
                         PageController.showBusyIndicator(true)
-                        SubscriptionUiController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
+                        SubscriptionUiController.setCurrentProtocol(ServersUiController.getProcessedServerIndex(), switcher.isVlessProtocol ? "awg" : "vless")
                         SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedIndex, "", "", true)
                         PageController.showBusyIndicator(false)
                     }
@@ -215,7 +215,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
                     PageController.showBusyIndicator(true)
 
-                    SubscriptionUiController.prepareVpnKeyExport()
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
 
                     PageController.showBusyIndicator(false)
                 }
@@ -317,7 +317,7 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot reload API config during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
@@ -355,12 +355,12 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (SubscriptionUiController.deactivateDevice(false)) {
-                                SubscriptionUiController.getAccountInfo(true)
+                            if (SubscriptionUiController.deactivateDevice(ServersUiController.getProcessedServerIndex(), false)) {
+                                SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
                             }
                             PageController.showBusyIndicator(false)
                         }
@@ -392,11 +392,11 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (SubscriptionUiController.deactivateDevice(true)) {
+                            if (SubscriptionUiController.deactivateDevice(ServersUiController.getProcessedServerIndex(), true)) {
                                 InstallController.removeServer(ServersUiController.processedIndex)
                             }
                             PageController.showBusyIndicator(false)

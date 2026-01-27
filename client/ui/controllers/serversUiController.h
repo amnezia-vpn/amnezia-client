@@ -68,6 +68,10 @@ public slots:
     void setProcessedServerIndex(int index);
     bool processedServerIsPremium() const;
     
+    const ServerCredentials getProcessedServerCredentials() const;
+    bool isDefaultServerCurrentlyProcessed() const;
+    bool isProcessedServerHasWriteAccess() const;
+    
     bool hasServersFromGatewayApi() const;
     
     bool isAdVisible() const;
@@ -82,6 +86,8 @@ signals:
     void defaultServerIndexChanged(int index);
     void processedServerIndexChanged(int index);
     void hasServersFromGatewayApiChanged();
+    void updateApiCountryModel();
+    void updateApiServicesModel();
 
 public:
     void updateModel();

@@ -17,7 +17,7 @@ PageType {
 
     signal lastItemTabClickedSignal()
 
-    property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
+    property bool isServerWithWriteAccess: ServersUiController.isProcessedServerHasWriteAccess()
 
     Connections {
         target: InstallController
@@ -60,7 +60,7 @@ PageType {
         target: ServersUiController
 
         function onProcessedServerIndexChanged() {
-            root.isServerWithWriteAccess = ServersModel.isProcessedServerHasWriteAccess()
+            root.isServerWithWriteAccess = ServersUiController.isProcessedServerHasWriteAccess()
         }
     }
 
@@ -130,7 +130,7 @@ PageType {
             var noButtonText = qsTr("Cancel")
 
             var yesButtonFunction = function() {
-                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                     PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
@@ -160,7 +160,7 @@ PageType {
             var noButtonText = qsTr("Cancel")
 
             var yesButtonFunction = function() {
-                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                     PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
@@ -190,7 +190,7 @@ PageType {
             var noButtonText = qsTr("Cancel")
 
             var yesButtonFunction = function() {
-                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                     PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
                 } else {
                     PageController.goToPage(PageEnum.PageDeinstalling)
@@ -219,7 +219,7 @@ PageType {
             var noButtonText = qsTr("Cancel")
 
             var yesButtonFunction = function() {
-                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                     PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)

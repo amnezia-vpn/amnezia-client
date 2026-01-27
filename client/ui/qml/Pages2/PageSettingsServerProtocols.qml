@@ -38,7 +38,7 @@ PageType {
         }
 
         function updateContainersModelFilters() {
-            if (ServersModel.isProcessedServerHasWriteAccess()) {
+            if (ServersUiController.isProcessedServerHasWriteAccess()) {
                 proxyContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
             } else {
                 proxyContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()

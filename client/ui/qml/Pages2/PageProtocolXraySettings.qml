@@ -39,7 +39,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        enabled: ServersModel.isProcessedServerHasWriteAccess()
+        enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
         delegate: ColumnLayout {

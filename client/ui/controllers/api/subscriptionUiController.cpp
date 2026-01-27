@@ -75,14 +75,14 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
 {
 }
 
-bool SubscriptionUiController::exportVpnKey(const QString &fileName)
+bool SubscriptionUiController::exportVpnKey(int serverIndex, const QString &fileName)
 {
     if (fileName.isEmpty()) {
         emit errorOccurred(ErrorCode::PermissionsError);
         return false;
     }
 
-    prepareVpnKeyExport();
+    prepareVpnKeyExport(serverIndex);
     if (m_vpnKey.isEmpty()) {
         emit errorOccurred(ErrorCode::ApiConfigEmptyError);
         return false;
@@ -92,7 +92,7 @@ bool SubscriptionUiController::exportVpnKey(const QString &fileName)
     return true;
 }
 
-bool SubscriptionUiController::exportNativeConfig(const QString &serverCountryCode, const QString &fileName)
+bool SubscriptionUiController::exportNativeConfig(int serverIndex, const QString &serverCountryCode, const QString &fileName)
 {
     if (fileName.isEmpty()) {
         emit errorOccurred(ErrorCode::PermissionsError);
@@ -100,7 +100,7 @@ bool SubscriptionUiController::exportNativeConfig(const QString &serverCountryCo
     }
 
     QString nativeConfig;
-    ErrorCode errorCode = m_subscriptionController->exportNativeConfig(m_serversModel->getProcessedServerIndex(), serverCountryCode, nativeConfig);
+    ErrorCode errorCode = m_subscriptionController->exportNativeConfig(serverIndex, serverCountryCode, nativeConfig);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -110,9 +110,9 @@ bool SubscriptionUiController::exportNativeConfig(const QString &serverCountryCo
     return true;
 }
 
-bool SubscriptionUiController::revokeNativeConfig(const QString &serverCountryCode)
+bool SubscriptionUiController::revokeNativeConfig(int serverIndex, const QString &serverCountryCode)
 {
-    ErrorCode errorCode = m_subscriptionController->revokeNativeConfig(m_serversModel->getProcessedServerIndex(), serverCountryCode);
+    ErrorCode errorCode = m_subscriptionController->revokeNativeConfig(serverIndex, serverCountryCode);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -120,10 +120,10 @@ bool SubscriptionUiController::revokeNativeConfig(const QString &serverCountryCo
     return true;
 }
 
-void SubscriptionUiController::prepareVpnKeyExport()
+void SubscriptionUiController::prepareVpnKeyExport(int serverIndex)
 {
     QString vpnKey;
-    ErrorCode errorCode = m_subscriptionController->prepareVpnKeyExport(m_serversModel->getProcessedServerIndex(), vpnKey);
+    ErrorCode errorCode = m_subscriptionController->prepareVpnKeyExport(serverIndex, vpnKey);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return;
@@ -319,9 +319,8 @@ bool SubscriptionUiController::updateServiceFromTelegram(const int serverIndex)
     }
 }
 
-bool SubscriptionUiController::deactivateDevice(const bool isRemoveEvent)
+bool SubscriptionUiController::deactivateDevice(int serverIndex, const bool isRemoveEvent)
 {
-    auto serverIndex = m_serversModel->getProcessedServerIndex();
 
     ErrorCode errorCode = m_subscriptionController->revokeServiceFromGateway(serverIndex, isRemoveEvent);
     if (errorCode != ErrorCode::NoError) {
@@ -337,7 +336,22 @@ bool SubscriptionUiController::deactivateDevice(const bool isRemoveEvent)
 
 bool SubscriptionUiController::deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode)
 {
-    auto serverIndex = m_serversModel->getProcessedServerIndex();
+    // Need to find server index by country code
+    int serverIndex = -1;
+    for (int i = 0; i < m_serversController->getServersCount(); i++) {
+        ServerConfig config = m_serversController->getServerConfig(i);
+        if (ServerConfigUtils::isApiV2Config(config)) {
+            const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(config);
+            if (apiV2.apiConfig.serverCountryCode == serverCountryCode) {
+                serverIndex = i;
+                break;
+            }
+        }
+    }
+    if (serverIndex < 0) {
+        emit errorOccurred(ErrorCode::ApiNotFoundError);
+        return false;
+    }
 
     ErrorCode errorCode = m_subscriptionController->revokeExternalDevice(serverIndex, uuid, serverCountryCode);
     if (errorCode != ErrorCode::NoError) {
@@ -362,14 +376,14 @@ bool SubscriptionUiController::isConfigValid()
     return true;
 }
 
-void SubscriptionUiController::setCurrentProtocol(const QString &protocolName)
+void SubscriptionUiController::setCurrentProtocol(int serverIndex, const QString &protocolName)
 {
-    m_subscriptionController->setApiServiceProtocol(m_serversModel->getProcessedServerIndex(), protocolName);
+    m_subscriptionController->setApiServiceProtocol(serverIndex, protocolName);
 }
 
-bool SubscriptionUiController::isVlessProtocol()
+bool SubscriptionUiController::isVlessProtocol(int serverIndex)
 {
-    return m_subscriptionController->isApiServiceProtocolVless(m_serversModel->getProcessedServerIndex());
+    return m_subscriptionController->isApiServiceProtocolVless(serverIndex);
 }
 
 void SubscriptionUiController::removeApiConfig(int serverIndex)
@@ -393,23 +407,21 @@ QString SubscriptionUiController::getVpnKey()
     return m_vpnKey;
 }
 
-bool SubscriptionUiController::getAccountInfo(bool reload)
+bool SubscriptionUiController::getAccountInfo(int serverIndex, bool reload)
 {
     if (reload) {
         QEventLoop wait;
         QTimer::singleShot(1000, &wait, &QEventLoop::quit);
         wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
-
-    auto processedIndex = m_serversModel->getProcessedServerIndex();
     QJsonObject accountInfo;
-    ErrorCode errorCode = m_subscriptionController->getAccountInfo(processedIndex, accountInfo);
+    ErrorCode errorCode = m_subscriptionController->getAccountInfo(serverIndex, accountInfo);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
     }
 
-    ServerConfig serverConfig = m_serversController->getServerConfig(processedIndex);
+    ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
     QJsonObject serverConfigJson = ServerConfigUtils::toJson(serverConfig);
     m_apiAccountInfoModel->updateModel(accountInfo, serverConfigJson);
 

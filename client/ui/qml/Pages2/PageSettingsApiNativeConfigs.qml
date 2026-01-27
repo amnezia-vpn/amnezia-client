@@ -191,9 +191,9 @@ PageType {
         }
         if (fileName !== "") {
             PageController.showBusyIndicator(true)
-            let result = SubscriptionUiController.exportNativeConfig(countryCode, fileName)
+            let result = SubscriptionUiController.exportNativeConfig(ServersUiController.getProcessedServerIndex(), countryCode, fileName)
             if (result) {
-                SubscriptionUiController.getAccountInfo(true)
+                SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
             }
 
             PageController.showBusyIndicator(false)
@@ -205,9 +205,9 @@ PageType {
 
     function revokeConfig(countryCode) {
         PageController.showBusyIndicator(true)
-        let result = SubscriptionUiController.revokeNativeConfig(countryCode)
+        let result = SubscriptionUiController.revokeNativeConfig(ServersUiController.getProcessedServerIndex(), countryCode)
         if (result) {
-            SubscriptionUiController.getAccountInfo(true)
+            SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
         }
         PageController.showBusyIndicator(false)
 

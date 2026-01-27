@@ -39,7 +39,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
 
-        enabled: ServersModel.isProcessedServerHasWriteAccess()
+        enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
         header: ColumnLayout {
             width: listView.width

@@ -63,13 +63,11 @@ public slots:
     const int getServersCount();
 
     void setProcessedServerIndex(const int index);
-    int getProcessedServerIndex();
 
     const ServerCredentials getProcessedServerCredentials();
+    QVariant getProcessedServerData(const QString &roleString);
 
     QVariant getDefaultServerData(const QString roleString);
-
-    QVariant getProcessedServerData(const QString roleString);
 
     bool isServerFromApi(const int serverIndex);
 

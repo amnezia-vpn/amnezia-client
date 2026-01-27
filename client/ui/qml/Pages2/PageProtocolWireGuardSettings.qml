@@ -39,14 +39,14 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
 
-        enabled: ServersModel.isProcessedServerHasWriteAccess()
+        enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
         model: WireGuardConfigModel
 
         delegate: ColumnLayout {
             width: listView.width
 
-            property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
+            property bool isEnabled: ServersUiController.isProcessedServerHasWriteAccess()
 
             spacing: 0
 

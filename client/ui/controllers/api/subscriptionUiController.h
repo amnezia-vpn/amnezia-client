@@ -32,10 +32,10 @@ public:
     Q_PROPERTY(QString vpnKey READ getVpnKey NOTIFY vpnKeyExportReady)
 
 public slots:
-    bool exportNativeConfig(const QString &serverCountryCode, const QString &fileName);
-    bool revokeNativeConfig(const QString &serverCountryCode);
-    bool exportVpnKey(const QString &fileName);
-    void prepareVpnKeyExport();
+    bool exportNativeConfig(int serverIndex, const QString &serverCountryCode, const QString &fileName);
+    bool revokeNativeConfig(int serverIndex, const QString &serverCountryCode);
+    bool exportVpnKey(int serverIndex, const QString &fileName);
+    void prepareVpnKeyExport(int serverIndex);
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
@@ -46,17 +46,17 @@ public slots:
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
     bool updateServiceFromTelegram(const int serverIndex);
-    bool deactivateDevice(const bool isRemoveEvent);
+    bool deactivateDevice(int serverIndex, const bool isRemoveEvent);
     bool deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode);
 
     bool isConfigValid();
 
-    void setCurrentProtocol(const QString &protocolName);
-    bool isVlessProtocol();
+    void setCurrentProtocol(int serverIndex, const QString &protocolName);
+    bool isVlessProtocol(int serverIndex);
 
     void removeApiConfig(int serverIndex);
 
-    bool getAccountInfo(bool reload);
+    bool getAccountInfo(int serverIndex, bool reload);
     void updateApiCountryModel();
     void updateApiDevicesModel();
 

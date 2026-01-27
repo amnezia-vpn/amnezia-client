@@ -114,8 +114,7 @@ void ServersUiController::onServerRemoved(int index)
 void ServersUiController::onDefaultServerChanged(int index)
 {
     if (m_processedServerIndex == -1 || m_processedServerIndex >= m_serversController->getServersCount()) {
-        m_processedServerIndex = index;
-        emit processedServerIndexChanged(m_processedServerIndex);
+        setProcessedServerIndex(index);
     }
     updateModel();
     updateDefaultServerContainersModel();
@@ -127,12 +126,13 @@ void ServersUiController::updateModel()
     int defaultIndex = m_serversController->getDefaultServerIndex();
     bool wasEmpty = !hasServersFromGatewayApi();
     
-    m_serversModel->updateModel(m_serversController->getServersArray(), defaultIndex, m_settingsController->isAmneziaDnsEnabled());
-    
     if (m_processedServerIndex < 0 || m_processedServerIndex >= m_serversController->getServersCount()) {
         m_processedServerIndex = defaultIndex;
-        emit processedServerIndexChanged(m_processedServerIndex);
     }
+    
+    m_serversModel->updateModel(m_serversController->getServersArray(), defaultIndex, m_settingsController->isAmneziaDnsEnabled());
+    
+    m_serversModel->setProcessedServerIndex(m_processedServerIndex);
     
     updateContainersModel();
     updateDefaultServerContainersModel();
@@ -252,6 +252,17 @@ void ServersUiController::setProcessedServerIndex(int index)
         m_processedServerIndex = index;
         m_serversModel->setProcessedServerIndex(index);
         updateContainersModel();
+        
+        // Check if server is from Gateway API and update models if needed
+        ServerConfig server = m_serversController->getServerConfig(index);
+        if (ServerConfigUtils::isApiV2Config(server)) {
+            const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(server);
+            if (!apiV2.apiConfig.availableCountries.isEmpty()) {
+                emit updateApiCountryModel();
+            }
+            emit updateApiServicesModel();
+        }
+        
         emit processedServerIndexChanged(m_processedServerIndex);
     }
 }
@@ -266,6 +277,23 @@ bool ServersUiController::processedServerIsPremium() const
     }
     return false;
 }
+
+const ServerCredentials ServersUiController::getProcessedServerCredentials() const
+{
+    return m_serversController->getServerCredentials(m_processedServerIndex);
+}
+
+bool ServersUiController::isDefaultServerCurrentlyProcessed() const
+{
+    return m_serversController->getDefaultServerIndex() == m_processedServerIndex;
+}
+
+bool ServersUiController::isProcessedServerHasWriteAccess() const
+{
+    ServerCredentials credentials = m_serversController->getServerCredentials(m_processedServerIndex);
+    return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
+}
+
 
 QString ServersUiController::getDefaultServerDescription(const ServerConfig& server, int index) const
 {

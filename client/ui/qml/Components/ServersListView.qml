@@ -108,7 +108,7 @@ ListViewType {
                                 PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
                             } else {
                                 PageController.showBusyIndicator(true)
-                                let result = SubscriptionUiController.getAccountInfo(false)
+                                let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
                                 PageController.showBusyIndicator(false)
                                 if (!result) {
                                     return

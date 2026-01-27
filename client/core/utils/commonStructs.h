@@ -48,3 +48,4 @@ namespace amnezia
 
 #endif // COMMONSTRUCTS_H
 
+

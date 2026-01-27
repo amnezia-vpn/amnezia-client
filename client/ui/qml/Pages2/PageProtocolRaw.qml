@@ -171,7 +171,7 @@ PageType {
 
                 width: parent.width
 
-                visible: ServersModel.isProcessedServerHasWriteAccess()
+                visible: ServersUiController.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: AmneziaStyle.color.vibrantRed

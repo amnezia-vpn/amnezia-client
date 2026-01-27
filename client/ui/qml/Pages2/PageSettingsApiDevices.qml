@@ -71,7 +71,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/trash.svg"
 
                 clickedFunction: function() {
-                    if (isCurrentDevice && ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    if (isCurrentDevice && ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         return
                     }
@@ -98,7 +98,7 @@ PageType {
     function deactivateExternalDevice(supportTag, countryCode) {
         PageController.showBusyIndicator(true)
         if (SubscriptionUiController.deactivateExternalDevice(supportTag, countryCode)) {
-            SubscriptionUiController.getAccountInfo(true)
+            SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
         }
         PageController.showBusyIndicator(false)
     }

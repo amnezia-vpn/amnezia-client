@@ -159,7 +159,6 @@ void ServersModel::updateModel(const QJsonArray &servers, int defaultServerIndex
     beginResetModel();
     m_servers = servers;
     m_defaultServerIndex = defaultServerIndex;
-    m_processedServerIndex = defaultServerIndex;
     m_isAmneziaDnsEnabled = isAmneziaDnsEnabled;
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
@@ -220,19 +219,10 @@ bool ServersModel::hasServerWithWriteAccess()
 
 void ServersModel::setProcessedServerIndex(const int index)
 {
-    m_processedServerIndex = index;
-    if (data(index, IsServerFromGatewayApiRole).toBool()) {
-        if (data(index, IsCountrySelectionAvailableRole).toBool()) {
-            emit updateApiCountryModel();
-        }
-        emit updateApiServicesModel();
+    if (m_processedServerIndex != index) {
+        m_processedServerIndex = index;
+        emit processedServerIndexChanged(m_processedServerIndex);
     }
-    emit processedServerIndexChanged(m_processedServerIndex);
-}
-
-int ServersModel::getProcessedServerIndex()
-{
-    return m_processedServerIndex;
 }
 
 const ServerCredentials ServersModel::getProcessedServerCredentials()
@@ -331,7 +321,7 @@ QVariant ServersModel::getDefaultServerData(const QString roleString)
     return {};
 }
 
-QVariant ServersModel::getProcessedServerData(const QString roleString)
+QVariant ServersModel::getProcessedServerData(const QString &roleString)
 {
     auto roles = roleNames();
     for (auto it = roles.begin(); it != roles.end(); it++) {

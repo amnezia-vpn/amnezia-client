@@ -158,7 +158,7 @@ void CoreSignalHandlers::initImportControllerHandler()
 
 void CoreSignalHandlers::initApiCountryModelUpdateHandler()
 {
-    connect(m_coreController->m_serversModel, &ServersModel::updateApiCountryModel, this, [this]() {
+    connect(m_coreController->m_serversUiController, &ServersUiController::updateApiCountryModel, this, [this]() {
         m_coreController->m_apiCountryModel->updateModel(m_coreController->m_serversModel->getProcessedServerData("apiAvailableCountries").toJsonArray(),
                                        m_coreController->m_serversModel->getProcessedServerData("apiServerCountryCode").toString());
     });

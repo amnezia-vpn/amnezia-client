@@ -73,7 +73,7 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
                                 && SettingsController.isAmneziaDnsEnabled()) {
                             PageController.showNotificationMessage(qsTr("Cannot remove AmneziaDNS from running server"))
                         } else {

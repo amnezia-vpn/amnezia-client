@@ -110,3 +110,4 @@ Q_DECLARE_METATYPE(amnezia::ErrorCode)
 
 #endif // ERRORCODES_H
 
+
