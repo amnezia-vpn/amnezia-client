@@ -81,7 +81,7 @@ PageType {
 
                 text: qsTr("Local proxy")
                 descriptionText: SettingsController.isLocalProxyHttpEnabled ? qsTr("Running: 127.0.0.1:%1").arg(SettingsController.localProxyPort || 0)
-                                                                            : qsTr("Disabled")
+                                                                            : qsTr("Off")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
