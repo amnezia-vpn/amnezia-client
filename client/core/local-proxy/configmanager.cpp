@@ -9,6 +9,7 @@
 #include "settings.h"
 #include "version.h"
 
+#include <QHostAddress>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -17,6 +18,7 @@
 #include <QSaveFile>
 #include <QSysInfo>
 #include <QStandardPaths>
+#include <QTcpServer>
 #include <QUuid>
 
 ConfigManager::ConfigManager(const std::shared_ptr<Settings> &settings)
@@ -40,6 +42,8 @@ constexpr char vless[] = "vless";
 } // namespace gateway_key
 
 constexpr quint16 kDefaultProxyPort = 10808;
+constexpr int kProxyPortMin = 1024;
+constexpr int kProxyPortMax = 65535;
 
 int resolveProxyPort(const std::shared_ptr<Settings> &settings)
 {
@@ -48,14 +52,16 @@ int resolveProxyPort(const std::shared_ptr<Settings> &settings)
     }
 
     const quint16 port = settings->localProxyPort();
-    if (port < 1024 || port > 65535) {
+    if (port < kProxyPortMin || port > kProxyPortMax) {
         return kDefaultProxyPort;
     }
 
     return static_cast<int>(port);
 }
 
-bool applyProxyPortToConfig(QJsonObject &config, int port)
+} // namespace
+
+bool ConfigManager::applyProxyPortToConfig(QJsonObject &config, int port) const
 {
     if (!config.contains("inbounds") || !config.value("inbounds").isArray()) {
         return false;
@@ -73,11 +79,22 @@ bool applyProxyPortToConfig(QJsonObject &config, int port)
     return true;
 }
 
-QString serializeConfig(const QJsonObject &config)
+QString ConfigManager::serializeConfig(const QJsonObject &config) const
 {
     return QString::fromUtf8(QJsonDocument(config).toJson(QJsonDocument::Compact));
 }
-} // namespace
+
+bool ConfigManager::isPortAvailable(int port) const
+{
+    if (port < kProxyPortMin || port > kProxyPortMax) {
+        return false;
+    }
+
+    QTcpServer server;
+    const bool success = server.listen(QHostAddress::LocalHost, static_cast<quint16>(port));
+    server.close();
+    return success;
+}
 
 std::optional<ConfigManager::ConfigData> ConfigManager::buildConfig(QString &errorDescription) const
 {
@@ -204,9 +221,31 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfigWithFetch(QSt
     data.ownerUuid = ownerUuid;
     data.serverName = ownerServer->value(amnezia::config_key::name).toString();
     data.parsedConfig = doc.object();
-    const int proxyPort = resolveProxyPort(m_settings);
-    if (applyProxyPortToConfig(data.parsedConfig, proxyPort)) {
+
+    int selectedPort = resolveProxyPort(m_settings);
+    const int startPort = selectedPort;
+
+    bool found = false;
+    for (int port = selectedPort; port <= kProxyPortMax; ++port) {
+        if (isPortAvailable(port)) {
+            selectedPort = port;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        errorDescription = QStringLiteral("No available local proxy port in range %1-%2")
+                               .arg(startPort)
+                               .arg(kProxyPortMax);
+        ProxyLogger::getInstance().error(errorDescription);
+        return std::nullopt;
+    }
+
+    if (applyProxyPortToConfig(data.parsedConfig, selectedPort)) {
         data.serializedConfig = serializeConfig(data.parsedConfig);
+        if (m_settings && m_settings->localProxyPort() != static_cast<quint16>(selectedPort)) {
+            m_settings->setLocalProxyPort(static_cast<quint16>(selectedPort));
+        }
     } else {
         ProxyLogger::getInstance().warning(QStringLiteral("Failed to override local proxy inbound port; using original config"));
         data.serializedConfig = *serializedConfig;

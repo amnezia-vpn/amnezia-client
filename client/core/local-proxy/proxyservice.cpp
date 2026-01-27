@@ -42,6 +42,11 @@ bool ProxyService::startXray()
 {
     ProxyLogger::getInstance().info("Starting Xray");
 
+    if (m_xrayController->isXrayRunning()) {
+        ProxyLogger::getInstance().info("Xray is already running");
+        return true;
+    }
+
     QString error;
     const auto configData = m_configManager->buildConfigWithFetch(error);
     if (!configData) {
@@ -49,10 +54,9 @@ bool ProxyService::startXray()
         return false;
     }
 
-    m_cachedConfig = configData->parsedConfig;
-
     const bool success = m_xrayController->start(configData->serializedConfig);
     if (success) {
+        m_cachedConfig = configData->parsedConfig;
         ProxyLogger::getInstance().info("Xray started successfully");
         emit xrayStatusChanged(true);
         return true;

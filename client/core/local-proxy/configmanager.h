@@ -30,6 +30,9 @@ private:
     std::optional<QString> extractSerializedXrayConfig(const QJsonObject &server) const;
     std::optional<QString> fetchSerializedXrayConfigFromGateway(const QJsonObject &server, QString &errorDescription) const;
     QString tempDirectory() const;
+    bool applyProxyPortToConfig(QJsonObject &config, int port) const;
+    QString serializeConfig(const QJsonObject &config) const;
+    bool isPortAvailable(int port) const;
 
     std::shared_ptr<Settings> m_settings;
 };
