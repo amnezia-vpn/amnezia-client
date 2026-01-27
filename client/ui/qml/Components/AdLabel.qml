@@ -144,7 +144,7 @@ Rectangle {
 
         onClicked: function() {
             root.forceActiveFocus()
-            Qt.openUrlExternally(ServersModel.getDefaultServerData("adEndpoint"))
+            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl(ServersModel.getDefaultServerData("adEndpoint")))
         }
     }
 }
