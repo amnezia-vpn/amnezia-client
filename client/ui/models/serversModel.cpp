@@ -4,6 +4,7 @@
 #include <QSet>
 #include <QJsonDocument>
 
+#include "core/models/serverConfig.h"
 #include "core/utils/api/apiEnums.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
@@ -15,6 +16,8 @@
 #endif
 
 #include "core/utils/api/apiUtils.h"
+
+using namespace amnezia;
 
 namespace
 {
@@ -51,8 +54,7 @@ ServersModel::ServersModel(QObject *parent) : QAbstractListModel(parent)
         if (serverIndex < 0 || serverIndex >= m_servers.size()) {
             return;
         }
-        auto defaultContainer =
-                ContainerUtils::containerFromString(m_servers.at(serverIndex).toObject().value(config_key::defaultContainer).toString());
+        auto defaultContainer = ServerConfigUtils::defaultContainer(m_servers.at(serverIndex));
         emit ServersModel::defaultServerDefaultContainerChanged(defaultContainer);
         emit ServersModel::defaultServerNameChanged();
     });
@@ -72,25 +74,29 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    const QJsonObject server = m_servers.at(index.row()).toObject();
-    const auto apiConfig = server.value(configKey::apiConfig).toObject();
-    const auto configVersion = server.value(config_key::configVersion).toInt();
+    const ServerConfig &server = m_servers.at(index.row());
+    const int configVersion = ServerConfigUtils::configVersion(server);
+    
     switch (role) {
     case NameRole: {
         if (configVersion) {
-            return server.value(config_key::name).toString();
+            if (ServerConfigUtils::isApiV1Config(server)) {
+                return ServerConfigUtils::asApiV1(server).name;
+            } else if (ServerConfigUtils::isApiV2Config(server)) {
+                return ServerConfigUtils::asApiV2(server).name;
+            }
         }
-        auto name = server.value(config_key::description).toString();
+        QString name = ServerConfigUtils::description(server);
         if (name.isEmpty()) {
-            return server.value(config_key::hostName).toString();
+            return ServerConfigUtils::hostName(server);
         }
         return name;
     }
     case ServerDescriptionRole: {
         auto description = getServerDescription(server, index.row());
-        return configVersion ? description : description + server.value(config_key::hostName).toString();
+        return configVersion ? description : description + ServerConfigUtils::hostName(server);
     }
-    case HostNameRole: return server.value(config_key::hostName).toString();
+    case HostNameRole: return ServerConfigUtils::hostName(server);
     case CredentialsRole: return QVariant::fromValue(serverCredentials(index.row()));
     case CredentialsLoginRole: return serverCredentials(index.row()).userName;
     case IsDefaultRole: return index.row() == m_defaultServerIndex;
@@ -100,48 +106,69 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
     }
     case ContainsAmneziaDnsRole: {
-        QString primaryDns = server.value(config_key::dns1).toString();
+        QString primaryDns = ServerConfigUtils::dns1(server);
         return primaryDns == protocols::dns::amneziaDnsIp;
     }
     case DefaultContainerRole: {
-        return ContainerUtils::containerFromString(server.value(config_key::defaultContainer).toString());
+        return ServerConfigUtils::defaultContainer(server);
     }
     case HasInstalledContainers: {
         return serverHasInstalledContainers(index.row());
     }
     case IsServerFromTelegramApiRole: {
-        return server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::Telegram;
+        return configVersion == apiDefs::ConfigSource::Telegram;
     }
     case IsServerFromGatewayApiRole: {
-        return server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway;
+        return configVersion == apiDefs::ConfigSource::AmneziaGateway;
     }
     case ApiConfigRole: {
-        return apiConfig;
+        return QVariant();
     }
     case IsCountrySelectionAvailableRole: {
-        return !apiConfig.value(configKey::availableCountries).toArray().isEmpty();
+        if (ServerConfigUtils::isApiV2Config(server)) {
+            return !ServerConfigUtils::asApiV2(server).apiConfig.availableCountries.isEmpty();
+        }
+        return false;
     }
     case ApiAvailableCountriesRole: {
-        return apiConfig.value(configKey::availableCountries).toArray();
+        if (ServerConfigUtils::isApiV2Config(server)) {
+            return ServerConfigUtils::asApiV2(server).apiConfig.availableCountries;
+        }
+        return QJsonArray();
     }
     case ApiServerCountryCodeRole: {
-        return apiConfig.value(configKey::serverCountryCode).toString();
+        if (ServerConfigUtils::isApiV2Config(server)) {
+            return ServerConfigUtils::asApiV2(server).apiConfig.serverCountryCode;
+        }
+        return QString();
     }
     case HasAmneziaDns: {
-        QString primaryDns = server.value(config_key::dns1).toString();
+        QString primaryDns = ServerConfigUtils::dns1(server);
         return primaryDns == protocols::dns::amneziaDnsIp;
     }
     case IsAdVisibleRole: {
-        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::isAdVisible).toBool(false);
+        if (ServerConfigUtils::isApiV2Config(server)) {
+            return ServerConfigUtils::asApiV2(server).apiConfig.serviceInfo.isAdVisible;
+        }
+        return false;
     }
     case AdHeaderRole: {
-        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adHeader).toString();
+        if (ServerConfigUtils::isApiV2Config(server)) {
+            return ServerConfigUtils::asApiV2(server).apiConfig.serviceInfo.adHeader;
+        }
+        return QString();
     }
     case AdDescriptionRole: {
-        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adDescription).toString();
+        if (ServerConfigUtils::isApiV2Config(server)) {
+            return ServerConfigUtils::asApiV2(server).apiConfig.serviceInfo.adDescription;
+        }
+        return QString();
     }
     case AdEndpointRole: {
-        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adEndpoint).toString();
+        if (ServerConfigUtils::isApiV2Config(server)) {
+            return ServerConfigUtils::asApiV2(server).apiConfig.serviceInfo.adEndpoint;
+        }
+        return QString();
     }
     }
 
@@ -154,7 +181,7 @@ QVariant ServersModel::data(const int index, int role) const
     return data(modelIndex, role);
 }
 
-void ServersModel::updateModel(const QJsonArray &servers, int defaultServerIndex, bool isAmneziaDnsEnabled)
+void ServersModel::updateModel(const QVector<ServerConfig> &servers, int defaultServerIndex, bool isAmneziaDnsEnabled)
 {
     beginResetModel();
     m_servers = servers;
@@ -169,28 +196,23 @@ const int ServersModel::getDefaultServerIndex()
     return m_defaultServerIndex;
 }
 
-QString ServersModel::getServerDescription(const QJsonObject &server, const int index) const
+QString ServersModel::getServerDescription(const ServerConfig &server, const int index) const
 {
-    const auto configVersion = server.value(config_key::configVersion).toInt();
-    const auto apiConfig = server.value(configKey::apiConfig).toObject();
-
+    const int configVersion = ServerConfigUtils::configVersion(server);
     QString description;
 
-    if (configVersion && !apiConfig.value(configKey::serverCountryCode).toString().isEmpty()) {
-        return apiConfig.value(configKey::serverCountryName).toString();
-    } else if (configVersion) {
-        return server.value(config_key::description).toString();
-    } else if (data(index, HasWriteAccessRole).toBool()) {
-        const QJsonArray containers = server.value(config_key::containers).toArray();
-        bool isDnsInstalled = false;
-        for (const auto &containerValue : containers) {
-            QJsonObject containerObj = containerValue.toObject();
-            DockerContainer containerType = ContainerUtils::containerFromString(containerObj.value(config_key::container).toString());
-            if (containerType == DockerContainer::Dns) {
-                isDnsInstalled = true;
-                break;
-            }
+    if (ServerConfigUtils::isApiV2Config(server)) {
+        const ApiV2ServerConfig &apiV2 = ServerConfigUtils::asApiV2(server);
+        if (!apiV2.apiConfig.serverCountryCode.isEmpty()) {
+            return apiV2.apiConfig.serverCountryName;
         }
+        return apiV2.description;
+    } else if (ServerConfigUtils::isApiV1Config(server)) {
+        const ApiV1ServerConfig &apiV1 = ServerConfigUtils::asApiV1(server);
+        return apiV1.description;
+    } else if (data(index, HasWriteAccessRole).toBool()) {
+        QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(server);
+        bool isDnsInstalled = containers.contains(DockerContainer::Dns);
         if (m_isAmneziaDnsEnabled && isDnsInstalled) {
             description += "Amnezia DNS | ";
         }
@@ -199,12 +221,14 @@ QString ServersModel::getServerDescription(const QJsonObject &server, const int 
             description += "Amnezia DNS | ";
         }
     }
+    
+    description += ServerConfigUtils::description(server);
     return description;
 }
 
 const int ServersModel::getServersCount()
 {
-    return m_servers.count();
+    return m_servers.size();
 }
 
 bool ServersModel::hasServerWithWriteAccess()
@@ -292,15 +316,19 @@ QHash<int, QByteArray> ServersModel::roleNames() const
 
 ServerCredentials ServersModel::serverCredentials(int index) const
 {
-    const QJsonObject &s = m_servers.at(index).toObject();
-
-    ServerCredentials credentials;
-    credentials.hostName = s.value(config_key::hostName).toString();
-    credentials.userName = s.value(config_key::userName).toString();
-    credentials.secretData = s.value(config_key::password).toString();
-    credentials.port = s.value(config_key::port).toInt();
-
-    return credentials;
+    const ServerConfig &server = m_servers.at(index);
+    
+    if (ServerConfigUtils::isSelfHosted(server)) {
+        const SelfHostedServerConfig &selfHosted = ServerConfigUtils::asSelfHosted(server);
+        ServerCredentials credentials;
+        credentials.hostName = selfHosted.hostName;
+        credentials.userName = selfHosted.userName.value_or("");
+        credentials.secretData = selfHosted.password.value_or("");
+        credentials.port = selfHosted.port.value_or(22);
+        return credentials;
+    }
+    
+    return ServerCredentials();
 }
 
 bool ServersModel::isServerFromApi(const int serverIndex)
@@ -336,10 +364,11 @@ QVariant ServersModel::getProcessedServerData(const QString &roleString)
 
 bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
 {
-    QJsonObject server = m_servers.at(serverIndex).toObject();
-    const auto containers = server.value(config_key::containers).toArray();
-    for (auto it = containers.begin(); it != containers.end(); it++) {
-        auto container = ContainerUtils::containerFromString(it->toObject().value(config_key::container).toString());
+    const ServerConfig &server = m_servers.at(serverIndex);
+    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(server);
+    
+    for (auto it = containers.begin(); it != containers.end(); ++it) {
+        DockerContainer container = it.key();
         if (ContainerUtils::containerService(container) == ServiceType::Vpn) {
             return true;
         }

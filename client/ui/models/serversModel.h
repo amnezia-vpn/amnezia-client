@@ -2,9 +2,10 @@
 #define SERVERSMODEL_H
 
 #include <QAbstractListModel>
-#include <QJsonArray>
+#include <QVector>
 
 #include "core/utils/selfhosted/sshSession.h"
+#include "core/models/serverConfig.h"
 
 class ServersModel : public QAbstractListModel
 {
@@ -71,7 +72,7 @@ public slots:
 
     bool isServerFromApi(const int serverIndex);
 
-    void updateModel(const QJsonArray &servers, int defaultServerIndex, bool isAmneziaDnsEnabled = false);
+    void updateModel(const QVector<ServerConfig> &servers, int defaultServerIndex, bool isAmneziaDnsEnabled = false);
     
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -93,11 +94,11 @@ signals:
 private:
     ServerCredentials serverCredentials(int index) const;
 
-    QString getServerDescription(const QJsonObject &server, const int index) const;
+    QString getServerDescription(const ServerConfig &server, const int index) const;
 
     bool serverHasInstalledContainers(const int serverIndex) const;
 
-    QJsonArray m_servers;
+    QVector<ServerConfig> m_servers;
 
     int m_defaultServerIndex;
     int m_processedServerIndex;

@@ -101,6 +101,11 @@ QJsonArray ServersController::getServersArray() const
     return result;
 }
 
+QVector<ServerConfig> ServersController::getServers() const
+{
+    return m_serversRepository->servers();
+}
+
 ContainerConfig ServersController::getContainerConfig(int serverIndex, DockerContainer container) const
 {
     return m_serversRepository->containerConfig(serverIndex, container);

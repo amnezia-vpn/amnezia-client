@@ -17,6 +17,8 @@
 #include "core/models/protocolConfig.h"
 #include "core/models/containerConfig.h"
 
+using namespace amnezia;
+
 namespace
 {
     namespace configKey
@@ -130,7 +132,7 @@ void ServersUiController::updateModel()
         m_processedServerIndex = defaultIndex;
     }
     
-    m_serversModel->updateModel(m_serversController->getServersArray(), defaultIndex, m_settingsController->isAmneziaDnsEnabled());
+    m_serversModel->updateModel(m_serversController->getServers(), defaultIndex, m_settingsController->isAmneziaDnsEnabled());
     
     m_serversModel->setProcessedServerIndex(m_processedServerIndex);
     
@@ -334,10 +336,9 @@ bool ServersUiController::isAmneziaDnsContainerInstalled(int serverIndex) const
 
 bool ServersUiController::hasServersFromGatewayApi() const
 {
-    QJsonArray servers = m_serversController->getServersArray();
-    for (int i = 0; i < servers.size(); ++i) {
-        QJsonObject server = servers.at(i).toObject();
-        if (server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+    QVector<ServerConfig> servers = m_serversController->getServers();
+    for (const ServerConfig &server : servers) {
+        if (ServerConfigUtils::configVersion(server) == apiDefs::ConfigSource::AmneziaGateway) {
             return true;
         }
     }

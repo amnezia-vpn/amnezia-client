@@ -68,6 +68,7 @@ public:
 
     // Getters
     QJsonArray getServersArray() const;
+    QVector<ServerConfig> getServers() const;
     int getDefaultServerIndex() const;
     int getServersCount() const;
     ServerConfig getServerConfig(int serverIndex) const;

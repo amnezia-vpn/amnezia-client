@@ -13,6 +13,8 @@
 #include "ui/models/serversModel.h"
 #include "ui/models/containersModel.h"
 #include "core/utils/constants/configKeys.h"
+
+using namespace amnezia;
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/protocolEnum.h"
@@ -107,7 +109,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QJsonArray(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
         }
     }
 

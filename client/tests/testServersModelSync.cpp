@@ -10,6 +10,8 @@
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
+using namespace amnezia;
+
 class TestServersModelSync : public QObject
 {
     Q_OBJECT
@@ -36,7 +38,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QJsonArray(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
         }
     }
 
