@@ -53,10 +53,9 @@ private slots:
 
         QVERIFY2(importFinishedSpy.count() == 1, "importFinished signal should be emitted");
         QVERIFY2(serverAddedSpy.count() == 1, "serverAdded signal should be emitted");
-        QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted");
+        QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged signal should NOT be emitted (default is already 0)");
 
         QVERIFY2(serverAddedSpy.at(0).count() > 0, "serverAdded should have arguments");
-        QVERIFY2(defaultServerChangedSpy.at(0).at(0).toInt() == 0, "defaultServerChanged should emit index 0");
     }
 
     void testSignalOrderOnRemoveDefault() {

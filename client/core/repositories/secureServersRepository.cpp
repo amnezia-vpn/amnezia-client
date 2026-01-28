@@ -79,10 +79,11 @@ void SecureServersRepository::removeServer(int index)
         return;
     }
     
+    int defaultIndex = defaultServerIndex();
+    
     servers.removeAt(index);
     setServersArray(servers);
     
-    int defaultIndex = defaultServerIndex();
     if (defaultIndex == index) {
         setDefaultServer(0);
     } else if (defaultIndex > index) {
@@ -90,7 +91,7 @@ void SecureServersRepository::removeServer(int index)
     }
     
     if (serversCount() == 0) {
-        setDefaultServer(-1);
+        setDefaultServer(0);
     }
     
     emit serverRemoved(index);
@@ -128,9 +129,20 @@ int SecureServersRepository::defaultServerIndex() const
 void SecureServersRepository::setDefaultServer(int index)
 {
     QJsonArray servers = serversArray();
-    if (index < 0 || index >= servers.size()) {
+    
+    if (servers.size() > 0 && index >= servers.size()) {
         return;
     }
+    
+    if (servers.size() == 0 && index != 0) {
+        return;
+    }
+    
+    int currentIndex = defaultServerIndex();
+    if (currentIndex == index) {
+        return;
+    }
+    
     setValue("Servers/defaultServerIndex", index);
     m_settings->sync();
     emit defaultServerChanged(index);

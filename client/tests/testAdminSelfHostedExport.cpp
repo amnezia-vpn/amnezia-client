@@ -114,7 +114,7 @@ private slots:
         m_coreController->m_importCoreController->importConfig(importedConfig);
         
         QVERIFY2(importFinishedSpy.count() == 1, "importFinished signal should be emitted");
-        QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted by CoreSignalHandlers handler");
+        QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged signal should NOT be emitted (default is already 0)");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() > 0, "Server should be added");
 
         int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();

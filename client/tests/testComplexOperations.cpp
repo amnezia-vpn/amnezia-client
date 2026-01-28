@@ -61,7 +61,7 @@ private slots:
 
         QVERIFY2(importFinishedSpy.count() == 3, "importFinished should be emitted 3 times");
         QVERIFY2(serverAddedSpy.count() == 3, "serverAdded should be emitted 3 times");
-        QVERIFY2(defaultServerChangedSpy.count() == 3, "defaultServerChanged should be emitted 3 times");
+        QVERIFY2(defaultServerChangedSpy.count() == 2, "defaultServerChanged should be emitted 2 times (0->1, 1->2, first import doesn't emit as default is already 0)");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 3, "Should have 3 servers");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Default should be index 2");
 

@@ -62,7 +62,7 @@ private slots:
         m_coreController->m_importCoreController->importConfig(importResult1.config);
         
         QVERIFY2(importFinishedSpy.count() == 1, "importFinished signal should be emitted once");
-        QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted by CoreSignalHandlers handler");
+        QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged signal should NOT be emitted (default is already 0)");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "After first import servers count should be 1");
         if (m_coreController->m_serversModel) {
             QVERIFY2(m_coreController->m_serversModel->rowCount() == 1, "After first import model row count should be 1");
@@ -84,7 +84,7 @@ private slots:
         m_coreController->m_importCoreController->importConfig(importResult2.config);
         
         QVERIFY2(importFinishedSpy.count() == 2, "importFinished signal should be emitted twice");
-        QVERIFY2(defaultServerChangedSpy.count() == 2, "defaultServerChanged signal should be emitted twice");
+        QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted once (0->1, first import doesn't emit)");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "After second import servers count should be 2");
         if (m_coreController->m_serversModel) {
             QVERIFY2(m_coreController->m_serversModel->rowCount() == 2, "After second import model row count should be 2");
@@ -106,7 +106,7 @@ private slots:
         m_coreController->m_importCoreController->importConfig(importResult3.config);
         
         QVERIFY2(importFinishedSpy.count() == 3, "importFinished signal should be emitted three times");
-        QVERIFY2(defaultServerChangedSpy.count() == 3, "defaultServerChanged signal should be emitted three times");
+        QVERIFY2(defaultServerChangedSpy.count() == 2, "defaultServerChanged signal should be emitted twice (0->1, 1->2, first import doesn't emit)");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 3, "After third import servers count should be 3");
         if (m_coreController->m_serversModel) {
             QVERIFY2(m_coreController->m_serversModel->rowCount() == 3, "After third import model row count should be 3");
@@ -142,7 +142,7 @@ private slots:
         m_coreController->m_importCoreController->importConfig(importResult2.config);
         
         QVERIFY2(importFinishedSpy.count() == 2, "importFinished signal should be emitted twice");
-        QVERIFY2(defaultServerChangedSpy.count() == 2, "defaultServerChanged signal should be emitted twice");
+        QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted once (0->1, first import doesn't emit)");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "After two imports servers count should be 2");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Second server should be default");
         
@@ -181,7 +181,7 @@ private slots:
         QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");
         QVERIFY2(serverRemovedSpy.at(0).at(0).toInt() == 0, "serverRemoved should emit index 0");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 0, "After removing last server, servers count should be 0");
-        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == -1, "After removing last server, default index should be -1");
+        QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "After removing last server, default index should be 0");
         
         if (m_coreController->m_serversModel) {
             QVERIFY2(m_coreController->m_serversModel->rowCount() == 0, "After removing last server, model row count should be 0");
