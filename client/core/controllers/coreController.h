@@ -124,6 +124,7 @@ private:
     void initControllers();
     void initAndroidController();
     void initAppleController();
+    void initLogging();
     void initSignalHandlers();
     void setQmlContextProperty(const QString &name, QObject *value);
 

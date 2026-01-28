@@ -137,7 +137,9 @@ QString Logger::serviceLogsFilePath()
 
 QString Logger::getLogFile()
 {
-    m_file.flush();
+    if (m_file.isOpen()) {
+        m_file.flush();
+    }
     QFile file(userLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
@@ -152,7 +154,9 @@ QString Logger::getLogFile()
 
 QString Logger::getServiceLogFile()
 {
-    m_file.flush();
+    if (m_file.isOpen()) {
+        m_file.flush();
+    }
     QFile file(serviceLogsFilePath());
 
     file.open(QIODevice::ReadOnly);

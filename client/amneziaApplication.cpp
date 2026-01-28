@@ -142,16 +142,6 @@ void AmneziaApplication::init()
 
     m_coreController->setQmlRoot();
 
-    bool enabled = false;
-#ifndef Q_OS_ANDROID
-    if (enabled) {
-        if (!Logger::init(false)) {
-            qWarning() << "Initialization of debug subsystem failed";
-        }
-    }
-#endif
-    Logger::setServiceLogsEnabled(enabled);
-
 #ifdef Q_OS_WIN //TODO
     if (m_parser.isSet(m_optAutostart))
         m_coreController->pageController()->showOnStartup();

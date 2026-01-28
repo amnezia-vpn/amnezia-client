@@ -1,5 +1,6 @@
 #include "settingsController.h"
 
+#include <QDateTime>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QOperatingSystemVersion>
@@ -77,6 +78,20 @@ bool SettingsController::isLoggingEnabled() const
 void SettingsController::toggleLogging(bool enable)
 {
     m_appSettingsRepository->setSaveLogs(enable);
+#ifndef Q_OS_ANDROID
+    if (!enable) {
+        Logger::deInit();
+    } else {
+        if (!Logger::init(false)) {
+            qWarning() << "Initialization of debug subsystem failed";
+        }
+    }
+#endif
+    Logger::setServiceLogsEnabled(enable);
+
+    if (enable) {
+        m_appSettingsRepository->setLogEnableDate(QDateTime::currentDateTime());
+    }
 }
 
 void SettingsController::clearLogs()

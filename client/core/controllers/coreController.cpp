@@ -9,6 +9,7 @@
 #include "core/controllers/selfhosted/importController.h"
 #include "core/controllers/coreSignalHandlers.h"
 #include "core/models/serverConfig.h"
+#include "logger.h"
 #include "secureQSettings.h"
 
 #if defined(Q_OS_ANDROID)
@@ -33,6 +34,7 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 
     initAndroidController();
     initAppleController();
+    initLogging();
 
     m_translator = new QTranslator(this);
     if (m_appSettingsRepository) {
@@ -228,6 +230,19 @@ void CoreController::initAppleController()
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
     QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_appSettingsRepository->isScreenshotsEnabled()); });
+#endif
+}
+
+void CoreController::initLogging()
+{
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    bool enabled = m_appSettingsRepository->isSaveLogs();
+    if (enabled) {
+        if (!Logger::init(false)) {
+            qWarning() << "Initialization of debug subsystem failed";
+        }
+    }
+    Logger::setServiceLogsEnabled(enabled);
 #endif
 }
 
