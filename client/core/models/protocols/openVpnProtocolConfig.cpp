@@ -80,6 +80,18 @@ OpenVpnServerConfig OpenVpnServerConfig::fromJson(const QJsonObject& json)
     return config;
 }
 
+bool OpenVpnServerConfig::hasEqualServerSettings(const OpenVpnServerConfig& other) const
+{
+    return subnetAddress == other.subnetAddress && 
+           port == other.port && 
+           transportProto == other.transportProto &&
+           cipher == other.cipher &&
+           hash == other.hash &&
+           ncpDisable == other.ncpDisable &&
+           tlsAuth == other.tlsAuth &&
+           additionalServerConfig == other.additionalServerConfig;
+}
+
 QJsonObject OpenVpnClientConfig::toJson() const
 {
     QJsonObject obj;

@@ -35,7 +35,7 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
-#include "ui/models/protocols/awgConfigModel.h"
+#include "core/models/protocols/awgProtocolConfig.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "core/utils/utilities.h"
 #include <QDesktopServices>
@@ -736,17 +736,17 @@ bool InstallController::isUpdateDockerContainerRequired(DockerContainer containe
     QJsonObject newProtoConfig = ProtocolConfigUtils::toJson(newConfig.protocolConfig, mainProto);
 
     if (ContainerUtils::isAwgContainer(container)) {
-        const AwgConfig oldConfig(oldProtoConfig);
-        const AwgConfig newConfig(newProtoConfig);
+        const amnezia::AwgProtocolConfig oldAwgConfig = amnezia::AwgProtocolConfig::fromJson(oldProtoConfig);
+        const amnezia::AwgProtocolConfig newAwgConfig = amnezia::AwgProtocolConfig::fromJson(newProtoConfig);
 
-        if (oldConfig.hasEqualServerSettings(newConfig)) {
+        if (oldAwgConfig.serverConfig.hasEqualServerSettings(newAwgConfig.serverConfig)) {
             return false;
         }
     } else if (container == DockerContainer::WireGuard) {
-        const WgConfig oldConfig(oldProtoConfig);
-        const WgConfig newConfig(newProtoConfig);
+        const amnezia::WireGuardProtocolConfig oldConfig = amnezia::WireGuardProtocolConfig::fromJson(oldProtoConfig);
+        const amnezia::WireGuardProtocolConfig newConfig = amnezia::WireGuardProtocolConfig::fromJson(newProtoConfig);
 
-        if (oldConfig.hasEqualServerSettings(newConfig)) {
+        if (oldConfig.serverConfig.hasEqualServerSettings(newConfig.serverConfig)) {
             return false;
         }
     }

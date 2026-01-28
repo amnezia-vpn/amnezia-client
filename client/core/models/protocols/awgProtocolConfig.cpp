@@ -296,5 +296,48 @@ void AwgProtocolConfig::clearClientConfig()
     clientConfig.reset();
 }
 
+bool AwgServerConfig::hasEqualServerSettings(const AwgServerConfig& other) const
+{
+    if (subnetAddress != other.subnetAddress || port != other.port || 
+        junkPacketCount != other.junkPacketCount ||
+        junkPacketMinSize != other.junkPacketMinSize || junkPacketMaxSize != other.junkPacketMaxSize ||
+        initPacketJunkSize != other.initPacketJunkSize || responsePacketJunkSize != other.responsePacketJunkSize ||
+        initPacketMagicHeader != other.initPacketMagicHeader ||
+        responsePacketMagicHeader != other.responsePacketMagicHeader ||
+        underloadPacketMagicHeader != other.underloadPacketMagicHeader ||
+        transportPacketMagicHeader != other.transportPacketMagicHeader ||
+        specialJunk1 != other.specialJunk1 || specialJunk2 != other.specialJunk2 ||
+        specialJunk3 != other.specialJunk3 || specialJunk4 != other.specialJunk4 ||
+        specialJunk5 != other.specialJunk5) {
+        return false;
+    }
+
+    bool isV2 = protocolVersion == protocols::awg::awgV2;
+    if (isV2) {
+        if (cookieReplyPacketJunkSize != other.cookieReplyPacketJunkSize ||
+            transportPacketJunkSize != other.transportPacketJunkSize) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool AwgProtocolConfig::isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4)
+{
+    return (h1 == h2) || (h1 == h3) || (h1 == h4) || (h2 == h3) || (h2 == h4) || (h3 == h4);
+}
+
+bool AwgProtocolConfig::isPacketSizeEqual(int s1, int s2, int s3, int s4)
+{
+    int initSize = AwgConstant::messageInitiationSize + s1;
+    int responseSize = AwgConstant::messageResponseSize + s2;
+    int cookieSize = AwgConstant::messageCookieReplySize + s3;
+    int transportSize = AwgConstant::messageTransportSize + s4;
+
+    return (initSize == responseSize || initSize == cookieSize || initSize == transportSize || responseSize == cookieSize
+            || responseSize == transportSize || cookieSize == transportSize);
+}
+
 } // namespace amnezia
 

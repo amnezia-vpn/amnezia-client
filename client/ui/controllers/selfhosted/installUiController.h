@@ -14,9 +14,21 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
+#include "core/models/containerConfig.h"
 #include "ui/models/containersModel.h"
 #include "ui/models/protocolsModel.h"
 #include "ui/models/serversModel.h"
+#include "ui/models/protocols/awgConfigModel.h"
+#include "ui/models/protocols/wireguardConfigModel.h"
+#include "ui/models/protocols/openvpnConfigModel.h"
+#include "ui/models/protocols/xrayConfigModel.h"
+#ifdef Q_OS_WINDOWS
+#include "ui/models/protocols/ikev2ConfigModel.h"
+#endif
+#include "ui/models/services/sftpConfigModel.h"
+#include "ui/models/services/socks5ProxyConfigModel.h"
+#include "core/models/protocols/sftpProtocolConfig.h"
+#include "core/models/protocols/socks5ProxyProtocolConfig.h"
 
 class InstallUiController : public QObject
 {
@@ -28,6 +40,15 @@ public:
                                ServersModel* serversModel, ContainersModel* containersModel,
                                ProtocolsModel* protocolsModel,
                                UsersController* usersController,
+                               AwgConfigModel* awgConfigModel,
+                               WireGuardConfigModel* wireGuardConfigModel,
+                               OpenVpnConfigModel* openVpnConfigModel,
+                               XrayConfigModel* xrayConfigModel,
+#ifdef Q_OS_WINDOWS
+                               Ikev2ConfigModel* ikev2ConfigModel,
+#endif
+                               SftpConfigModel* sftpConfigModel,
+                               Socks5ProxyConfigModel* socks5ConfigModel,
                                QObject *parent = nullptr);
     ~InstallUiController();
 
@@ -37,7 +58,7 @@ public slots:
 
     void scanServerForInstalledContainers(int serverIndex);
 
-    void updateContainer(int serverIndex, QJsonObject config);
+    void updateContainer(int serverIndex, int protocolIndex);
 
     void removeServer(int serverIndex);
     void rebootServer(int serverIndex);
@@ -58,6 +79,17 @@ public slots:
     void addEmptyServer();
 
     bool isConfigValid();
+    
+    void updateProtocols(const QJsonObject &config);
+    
+    void openServerSettings(int serverIndex, int protocolIndex);
+    void openClientSettings(int serverIndex, int protocolIndex);
+    
+    int defaultPort(int protocolIndex);
+    int getPortForInstall(int protocolIndex);
+    int defaultTransportProto(int protocolIndex);
+    bool defaultPortChangeable(int protocolIndex);
+    bool defaultTransportProtoChangeable(int protocolIndex);
 
 signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
@@ -90,8 +122,6 @@ signals:
 
     void noInstalledContainers();
 
-    void profileCleared(const QJsonObject &config);
-
 private:
 
     InstallController* m_installController;
@@ -101,10 +131,22 @@ private:
     ContainersModel* m_containersModel;
     ProtocolsModel* m_protocolModel;
     UsersController* m_usersController;
+    
+    AwgConfigModel* m_awgConfigModel;
+    WireGuardConfigModel* m_wireGuardConfigModel;
+    OpenVpnConfigModel* m_openVpnConfigModel;
+    XrayConfigModel* m_xrayConfigModel;
+#ifdef Q_OS_WINDOWS
+    Ikev2ConfigModel* m_ikev2ConfigModel;
+#endif
+    SftpConfigModel* m_sftpConfigModel;
+    Socks5ProxyConfigModel* m_socks5ConfigModel;
 
     ServerCredentials m_processedServerCredentials;
 
     QString m_privateKeyPassphrase;
+    
+    void updateProtocolConfigModel(int serverIndex, int protocolIndex);
 };
 
 #endif // INSTALLUICONTROLLER_H

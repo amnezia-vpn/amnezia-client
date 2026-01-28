@@ -2,11 +2,11 @@
 #define XRAYCONFIGMODEL_H
 
 #include <QAbstractListModel>
-#include <QJsonObject>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
 
 class XrayConfigModel : public QAbstractListModel
 {
@@ -26,16 +26,18 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(const QJsonObject &config);
-    QJsonObject getConfig();
+    void updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig &protocolConfig);
+    amnezia::XrayProtocolConfig getProtocolConfig();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     amnezia::DockerContainer m_container;
-    QJsonObject m_protocolConfig;
-    QJsonObject m_fullConfig;
+    amnezia::XrayProtocolConfig m_protocolConfig;
+    amnezia::XrayProtocolConfig m_originalProtocolConfig;
+    
+    void applyDefaultsToServerConfig(amnezia::XrayServerConfig& config);
 };
 
 #endif // XRAYCONFIGMODEL_H

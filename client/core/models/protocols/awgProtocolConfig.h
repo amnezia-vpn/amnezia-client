@@ -9,6 +9,14 @@
 namespace amnezia
 {
 
+namespace AwgConstant
+{
+    const int messageInitiationSize = 148;
+    const int messageResponseSize = 92;
+    const int messageCookieReplySize = 64;
+    const int messageTransportSize = 32;
+}
+
 struct AwgServerConfig {
     QString port;
     QString transportProto;
@@ -34,6 +42,8 @@ struct AwgServerConfig {
     
     QJsonObject toJson() const;
     static AwgServerConfig fromJson(const QJsonObject& json);
+    
+    bool hasEqualServerSettings(const AwgServerConfig& other) const;
 };
 
 struct AwgClientConfig {
@@ -81,6 +91,9 @@ struct AwgProtocolConfig {
     bool hasClientConfig() const;
     void setClientConfig(const AwgClientConfig& config);
     void clearClientConfig();
+    
+    static bool isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4);
+    static bool isPacketSizeEqual(int s1, int s2, int s3, int s4);
 };
 
 } // namespace amnezia

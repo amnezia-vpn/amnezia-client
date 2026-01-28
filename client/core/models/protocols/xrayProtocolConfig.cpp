@@ -53,6 +53,11 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject& json)
     return config;
 }
 
+bool XrayServerConfig::hasEqualServerSettings(const XrayServerConfig& other) const
+{
+    return port == other.port && site == other.site;
+}
+
 QJsonObject XrayClientConfig::toJson() const
 {
     QJsonObject obj;

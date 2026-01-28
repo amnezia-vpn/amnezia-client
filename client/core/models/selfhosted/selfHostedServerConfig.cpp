@@ -27,10 +27,10 @@ bool SelfHostedServerConfig::isReadOnly() const
     return !hasCredentials();
 }
 
-ServerCredentials SelfHostedServerConfig::credentials() const
+std::optional<ServerCredentials> SelfHostedServerConfig::credentials() const
 {
     if (!hasCredentials()) {
-        throw std::runtime_error("SelfHostedServerConfig does not have credentials");
+        return std::nullopt;
     }
     
     ServerCredentials creds;

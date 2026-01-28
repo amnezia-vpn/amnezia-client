@@ -57,6 +57,11 @@ WireGuardServerConfig WireGuardServerConfig::fromJson(const QJsonObject& json)
     return config;
 }
 
+bool WireGuardServerConfig::hasEqualServerSettings(const WireGuardServerConfig& other) const
+{
+    return subnetAddress == other.subnetAddress && port == other.port;
+}
+
 QJsonObject WireGuardClientConfig::toJson() const
 {
     QJsonObject obj;

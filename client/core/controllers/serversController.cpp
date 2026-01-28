@@ -101,10 +101,9 @@ QJsonArray ServersController::getServersArray() const
     return result;
 }
 
-QJsonObject ServersController::getContainerConfig(int serverIndex, DockerContainer container) const
+ContainerConfig ServersController::getContainerConfig(int serverIndex, DockerContainer container) const
 {
-    ContainerConfig config = m_serversRepository->containerConfig(serverIndex, container);
-    return config.toJson();
+    return m_serversRepository->containerConfig(serverIndex, container);
 }
 
 int ServersController::getDefaultServerIndex() const

@@ -21,7 +21,6 @@
 #include "core/controllers/selfhosted/importController.h"
 #include "ui/controllers/selfhosted/installUiController.h"
 #include "ui/controllers/qml/pageController.h"
-#include "ui/controllers/selfhosted/protocolsUiController.h"
 #include "ui/controllers/settingsUiController.h"
 #include "ui/controllers/serversUiController.h"
 #include "ui/controllers/sitesUiController.h"
@@ -160,7 +159,6 @@ private:
     SubscriptionUiController* m_subscriptionUiController;
     ApiNewsUiController* m_apiNewsUiController;
     
-    ProtocolsUiController* m_protocolsUiController;
     ServicesCatalogUiController* m_servicesCatalogUiController;
 
     ServersController* m_serversController;

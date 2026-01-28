@@ -24,6 +24,8 @@ struct OpenVpnServerConfig {
     
     QJsonObject toJson() const;
     static OpenVpnServerConfig fromJson(const QJsonObject& json);
+    
+    bool hasEqualServerSettings(const OpenVpnServerConfig& other) const;
 };
 
 struct OpenVpnClientConfig {

@@ -19,9 +19,21 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
+#include "ui/models/protocols/openvpnConfigModel.h"
+#include "ui/models/protocols/xrayConfigModel.h"
+#ifdef Q_OS_WINDOWS
+#include "ui/models/protocols/ikev2ConfigModel.h"
+#endif
+#include "ui/models/services/sftpConfigModel.h"
+#include "ui/models/services/socks5ProxyConfigModel.h"
 #include "core/utils/utilities.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/wireGuardProtocolConfig.h"
+#include "core/models/protocols/openVpnProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
+#include "ui/models/containersModel.h"
 
 namespace
 {
@@ -48,6 +60,15 @@ InstallUiController::InstallUiController(InstallController *installController,
                                          SettingsController *settingsController,
                                          ServersModel *serversModel, ContainersModel *containersModel,
                                          ProtocolsModel *protocolsModel, UsersController *usersController,
+                                         AwgConfigModel *awgConfigModel,
+                                         WireGuardConfigModel *wireGuardConfigModel,
+                                         OpenVpnConfigModel *openVpnConfigModel,
+                                         XrayConfigModel *xrayConfigModel,
+#ifdef Q_OS_WINDOWS
+                                         Ikev2ConfigModel *ikev2ConfigModel,
+#endif
+                                         SftpConfigModel *sftpConfigModel,
+                                         Socks5ProxyConfigModel *socks5ConfigModel,
                                          QObject *parent)
     : QObject(parent),
       m_installController(installController),
@@ -56,7 +77,16 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
-      m_usersController(usersController)
+      m_usersController(usersController),
+      m_awgConfigModel(awgConfigModel),
+      m_wireGuardConfigModel(wireGuardConfigModel),
+      m_openVpnConfigModel(openVpnConfigModel),
+      m_xrayConfigModel(xrayConfigModel),
+#ifdef Q_OS_WINDOWS
+      m_ikev2ConfigModel(ikev2ConfigModel),
+#endif
+      m_sftpConfigModel(sftpConfigModel),
+      m_socks5ConfigModel(socks5ConfigModel)
 {
 }
 
@@ -162,17 +192,52 @@ void InstallUiController::scanServerForInstalledContainers(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::updateContainer(int serverIndex, QJsonObject config)
+void InstallUiController::updateContainer(int serverIndex, int protocolIndex)
 {
-    const DockerContainer container = ContainerUtils::containerFromString(config.value(config_key::container).toString());
-    QJsonObject oldContainerConfigJson = m_containersModel->getContainerConfig(container);
-    ContainerConfig oldContainerConfig = ContainerConfig::fromJson(oldContainerConfigJson);
-    ContainerConfig newContainerConfig = ContainerConfig::fromJson(config);
+    int containerIndex = m_containersModel->getProcessedContainerIndex();
+    DockerContainer container = qvariant_cast<DockerContainer>(
+        m_containersModel->data(containerIndex, ContainersModel::DockerContainerRole));
+    
+    Proto protocolType = static_cast<Proto>(protocolIndex);
+    
+    ContainerConfig containerConfig;
+    containerConfig.container = container;
+    
+    switch (protocolType) {
+    case Proto::Awg: {
+        containerConfig.protocolConfig = m_awgConfigModel->getProtocolConfig();
+        break;
+    }
+    case Proto::WireGuard: {
+        containerConfig.protocolConfig = m_wireGuardConfigModel->getProtocolConfig();
+        break;
+    }
+    case Proto::OpenVpn: {
+        containerConfig.protocolConfig = m_openVpnConfigModel->getProtocolConfig();
+        break;
+    }
+    case Proto::Xray: {
+        containerConfig.protocolConfig = m_xrayConfigModel->getProtocolConfig();
+        break;
+    }
+    case Proto::Sftp: {
+        containerConfig.protocolConfig = m_sftpConfigModel->getProtocolConfig();
+        break;
+    }
+    case Proto::Socks5Proxy: {
+        containerConfig.protocolConfig = m_socks5ConfigModel->getProtocolConfig();
+        break;
+    }
+    default:
+        return;
+    }
+    ContainerConfig oldContainerConfig = m_serversController->getContainerConfig(serverIndex, container);
 
-    ErrorCode errorCode = m_installController->updateContainer(serverIndex, container, oldContainerConfig, newContainerConfig);
+    ErrorCode errorCode = m_installController->updateContainer(serverIndex, container, oldContainerConfig, containerConfig);
 
     if (errorCode == ErrorCode::NoError) {
-        m_protocolModel->updateModel(config);
+        ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverIndex, container);
+        m_protocolModel->updateModel(updatedConfig);
 
         auto defaultContainer = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
         if ((serverIndex == m_serversController->getDefaultServerIndex()) && (container == defaultContainer)) {
@@ -245,8 +310,8 @@ void InstallUiController::clearCachedProfile(int serverIndex)
     m_installController->clearCachedProfile(serverIndex, container);
 
     emit cachedProfileCleared(tr("%1 cached profile cleared").arg(ContainerUtils::containerHumanNames().value(container)));
-    QJsonObject updatedConfig = m_serversController->getContainerConfig(serverIndex, container);
-    emit profileCleared(updatedConfig);
+    ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverIndex, container);
+    m_protocolModel->updateModel(updatedConfig);
 }
 
 QRegularExpression InstallUiController::ipAddressPortRegExp()
@@ -368,3 +433,111 @@ bool InstallUiController::isConfigValid()
 
     return true;
 }
+
+void InstallUiController::updateProtocols(const QJsonObject &config)
+{
+    ContainerConfig containerConfig = ContainerConfig::fromJson(config);
+    m_protocolModel->updateModel(containerConfig);
+}
+
+void InstallUiController::openServerSettings(int serverIndex, int protocolIndex)
+{
+    updateProtocolConfigModel(serverIndex, protocolIndex);
+}
+
+void InstallUiController::openClientSettings(int serverIndex, int protocolIndex)
+{
+    updateProtocolConfigModel(serverIndex, protocolIndex);
+}
+
+int InstallUiController::defaultPort(int protocolIndex)
+{
+    Proto proto = static_cast<Proto>(protocolIndex);
+    return ProtocolUtils::defaultPort(proto);
+}
+
+int InstallUiController::getPortForInstall(int protocolIndex)
+{
+    Proto proto = static_cast<Proto>(protocolIndex);
+    return ProtocolUtils::getPortForInstall(proto);
+}
+
+int InstallUiController::defaultTransportProto(int protocolIndex)
+{
+    Proto proto = static_cast<Proto>(protocolIndex);
+    return static_cast<int>(ProtocolUtils::defaultTransportProto(proto));
+}
+
+bool InstallUiController::defaultPortChangeable(int protocolIndex)
+{
+    Proto proto = static_cast<Proto>(protocolIndex);
+    return ProtocolUtils::defaultPortChangeable(proto);
+}
+
+bool InstallUiController::defaultTransportProtoChangeable(int protocolIndex)
+{
+    Proto proto = static_cast<Proto>(protocolIndex);
+    return ProtocolUtils::defaultTransportProtoChangeable(proto);
+}
+
+void InstallUiController::updateProtocolConfigModel(int serverIndex, int protocolIndex)
+{
+    int containerIndex = m_containersModel->getProcessedContainerIndex();
+    
+    DockerContainer container = qvariant_cast<DockerContainer>(
+        m_containersModel->data(containerIndex, ContainersModel::DockerContainerRole));
+    
+    ContainerConfig containerConfig = m_serversController->getContainerConfig(serverIndex, container);
+    
+    Proto protocolType = static_cast<Proto>(protocolIndex);
+    
+    switch (protocolType) {
+    case Proto::Awg: {
+        if (auto* awgConfig = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
+            m_awgConfigModel->updateModel(container, *awgConfig);
+        }
+        break;
+    }
+    case Proto::WireGuard: {
+        if (auto* wgConfig = std::get_if<WireGuardProtocolConfig>(&containerConfig.protocolConfig)) {
+            m_wireGuardConfigModel->updateModel(container, *wgConfig);
+        }
+        break;
+    }
+    case Proto::OpenVpn: {
+        if (auto* openVpnConfig = std::get_if<OpenVpnProtocolConfig>(&containerConfig.protocolConfig)) {
+            m_openVpnConfigModel->updateModel(container, *openVpnConfig);
+        }
+        break;
+    }
+    case Proto::Xray: {
+        if (auto* xrayConfig = std::get_if<XrayProtocolConfig>(&containerConfig.protocolConfig)) {
+            m_xrayConfigModel->updateModel(container, *xrayConfig);
+        }
+        break;
+    }
+    case Proto::Sftp: {
+        if (auto* sftpConfig = std::get_if<SftpProtocolConfig>(&containerConfig.protocolConfig)) {
+            m_sftpConfigModel->updateModel(container, *sftpConfig);
+        }
+        break;
+    }
+    case Proto::Socks5Proxy: {
+        if (auto* socks5Config = std::get_if<Socks5ProxyProtocolConfig>(&containerConfig.protocolConfig)) {
+            m_socks5ConfigModel->updateModel(container, *socks5Config);
+        }
+        break;
+    }
+#ifdef Q_OS_WINDOWS
+    case Proto::Ikev2: {
+        if (m_ikev2ConfigModel) {
+            m_ikev2ConfigModel->updateModel(containerConfigJson);
+        }
+        break;
+    }
+#endif
+    default:
+        break;
+    }
+}
+

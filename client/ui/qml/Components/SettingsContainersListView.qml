@@ -34,19 +34,19 @@ ListViewType {
                     if (isVpnContainer) {
                         var isThirdPartyConfig = config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]
                         if (isThirdPartyConfig) {
-                            ProtocolsUiController.updateProtocols(config)
+                            InstallController.updateProtocols(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
                             return
                         }
                     }
 
                     if (isIpsec) {
-                        ProtocolsUiController.updateProtocols(config)
+                        InstallController.updateProtocols(config)
                         PageController.goToPage(PageEnum.PageProtocolRaw)
                     } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
                     } else {
-                        ProtocolsUiController.updateProtocols(config)
+                        InstallController.updateProtocols(config)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                     }
 

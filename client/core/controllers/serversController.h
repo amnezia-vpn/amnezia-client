@@ -72,7 +72,7 @@ public:
     int getServersCount() const;
     ServerConfig getServerConfig(int serverIndex) const;
     ServerCredentials getServerCredentials(int serverIndex) const;
-    QJsonObject getContainerConfig(int serverIndex, DockerContainer container) const;
+    ContainerConfig getContainerConfig(int serverIndex, DockerContainer container) const;
     QPair<QString, QString> getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const;
     
     GatewayStacks gatewayStacks() const;

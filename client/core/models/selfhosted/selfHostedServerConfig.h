@@ -32,7 +32,7 @@ struct SelfHostedServerConfig {
     
     bool hasCredentials() const;
     bool isReadOnly() const;
-    ServerCredentials credentials() const;
+    std::optional<ServerCredentials> credentials() const;
     bool hasContainers() const;
     ContainerConfig containerConfig(DockerContainer container) const;
     QJsonObject toJson() const;

@@ -2,9 +2,9 @@
 #define PROTOCOLS_MODEL_H
 
 #include <QAbstractListModel>
-#include <QJsonObject>
 
 #include "../controllers/qml/pageController.h"
+#include "core/models/containerConfig.h"
 
 class ProtocolsModel : public QAbstractListModel
 {
@@ -35,8 +35,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(const QJsonObject &content);
-    QJsonObject getConfig();
+    void updateModel(const amnezia::ContainerConfig &containerConfig);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -44,9 +43,11 @@ protected:
 private:
     PageLoader::PageEnum serverProtocolPage(Proto protocol) const;
     PageLoader::PageEnum clientProtocolPage(Proto protocol) const;
+    Proto getProtocolType() const;
+    QString getRawConfig() const;
+    bool isClientProtocolExists() const;
 
-    DockerContainer m_container;
-    QJsonObject m_content;
+    amnezia::ContainerConfig m_containerConfig;
 };
 
 #endif // PROTOCOLS_MODEL_H

@@ -17,6 +17,8 @@ struct XrayServerConfig {
     
     QJsonObject toJson() const;
     static XrayServerConfig fromJson(const QJsonObject& json);
+    
+    bool hasEqualServerSettings(const XrayServerConfig& other) const;
 };
 
 struct XrayClientConfig {

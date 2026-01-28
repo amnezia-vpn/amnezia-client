@@ -20,7 +20,6 @@
 #include "ui/controllers/selfhosted/installUiController.h"
 #include "ui/controllers/importUiController.h"
 #include "ui/controllers/api/subscriptionUiController.h"
-#include "ui/controllers/selfhosted/protocolsUiController.h"
 #include "ui/models/serversModel.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/sitesController.h"
@@ -33,6 +32,8 @@
 #include "ui/models/clientManagementModel.h"
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/models/api/apiCountryModel.h"
+#include "ui/models/containersModel.h"
+#include "core/utils/containerEnum.h"
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/utils/notificationHandler.h"
@@ -119,8 +120,6 @@ void CoreSignalHandlers::initInstallControllerHandler()
     connect(m_coreController->m_installUiController, &InstallUiController::cancelInstallation, m_coreController->m_installController, &InstallController::cancelInstallation);
     connect(m_coreController->m_installUiController, &InstallUiController::currentContainerUpdated, m_coreController->m_connectionUiController,
             &ConnectionUiController::onCurrentContainerUpdated);
-    connect(m_coreController->m_installUiController, &InstallUiController::profileCleared,
-            m_coreController->m_protocolsUiController, &ProtocolsUiController::updateProtocols);
 }
 
 void CoreSignalHandlers::initExportControllerHandler()

@@ -76,7 +76,7 @@ PageType {
 
                 clickedFunction: function() {
                     if (isClientProtocolExists) {
-                        ProtocolsUiController.openClientSettings(protocolIndex)
+                        InstallController.openClientSettings(ServersUiController.processedIndex, protocolIndex)
                         PageController.goToPage(clientProtocolPage);
                     } else {
                         PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
@@ -104,7 +104,7 @@ PageType {
                 visible: delegateContent.isServerSettingsVisible
 
                 clickedFunction: function() {
-                    ProtocolsUiController.openServerSettings(protocolIndex)
+                    InstallController.openServerSettings(ServersUiController.processedIndex, protocolIndex)
                     PageController.goToPage(serverProtocolPage);
                 }
 

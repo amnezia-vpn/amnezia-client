@@ -8,7 +8,7 @@ QtObject {
     property var scrollToItemTarget: null
     
     property Connections imeConnection: Connections {
-        target: SettingsController
+        target: PageController
         function onImeHeightChanged() {
             if (root.scrollToItemTarget && PageController.imeHeight > 0) {
                 scrollTimer.restart()

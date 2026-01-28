@@ -138,7 +138,7 @@ PageType {
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateContainer(ServersUiController.processedIndex, XrayConfigModel.getConfig())
+                        InstallController.updateContainer(ServersUiController.processedIndex, ProtocolEnum.Xray)
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {

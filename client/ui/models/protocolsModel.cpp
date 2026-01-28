@@ -6,9 +6,10 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
-#include "core/utils/protocolEnum.h"
-#include "core/utils/constants/configKeys.h"
-#include <QJsonDocument>
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/wireGuardProtocolConfig.h"
+#include "core/models/protocols/openVpnProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
 
 using namespace ProtocolUtils;
 
@@ -20,7 +21,7 @@ ProtocolsModel::ProtocolsModel(QObject *parent)
 int ProtocolsModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return m_content.size();
+    return m_containerConfig.container != DockerContainer::None ? 1 : 0;
 }
 
 QHash<int, QByteArray> ProtocolsModel::roleNames() const
@@ -47,11 +48,11 @@ QHash<int, QByteArray> ProtocolsModel::roleNames() const
 
 QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= m_content.size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
         return QVariant();
     }
 
-    amnezia::Proto proto = ProtocolUtils::protoFromString(m_content.keys().at(index.row()));
+    Proto proto = getProtocolType();
     
     switch (role) {
     case ProtocolNameRole: {
@@ -61,7 +62,7 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
         return static_cast<int>(serverProtocolPage(proto));
     case ClientProtocolPageRole:
         return static_cast<int>(clientProtocolPage(proto));
-    case ProtocolIndexRole: return proto;
+    case ProtocolIndexRole: return static_cast<int>(proto);
     case ProtocolStringRole: return ProtocolUtils::protoToString(proto);
     case IsWireGuardRole: return proto == Proto::WireGuard;
     case IsAwgRole: return proto == Proto::Awg;
@@ -70,47 +71,70 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
     case IsSftpRole: return proto == Proto::Sftp;
     case IsIpsecRole: return proto == Proto::Ikev2;
     case IsSocks5ProxyRole: return proto == Proto::Socks5Proxy;
-    case RawConfigRole: {
-        auto protocolConfig = m_content.value(ContainerUtils::containerTypeToProtocolString(m_container)).toObject();
-        auto lastConfigJsonDoc =
-                QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
-        auto lastConfigJson = lastConfigJsonDoc.object();
-
-        QString rawConfig;
-        QStringList lines = lastConfigJson.value(config_key::config).toString().replace("\r", "").split("\n");
-        for (const QString &l : lines) {
-            rawConfig.append(l + "\n");
-        }
-        return rawConfig;
-    }
-    case IsClientProtocolExistsRole: {
-        QString protocolKey = ContainerUtils::containerTypeToProtocolString(m_container);
-        auto protocolConfig = m_content.value(protocolKey).toObject();
-        auto lastConfigJsonDoc =
-                QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
-        auto lastConfigJson = lastConfigJsonDoc.object();
-
-        auto configString = lastConfigJson.value(config_key::config).toString();
-        return !configString.isEmpty();
-    }
+    case RawConfigRole:
+        return getRawConfig();
+    case IsClientProtocolExistsRole:
+        return isClientProtocolExists();
     }
 
     return QVariant();
 }
 
-void ProtocolsModel::updateModel(const QJsonObject &content)
+void ProtocolsModel::updateModel(const amnezia::ContainerConfig &containerConfig)
 {
-    m_container = ContainerUtils::containerFromString(content.value(config_key::container).toString());
-
-    m_content = content;
-    m_content.remove(config_key::container);
+    beginResetModel();
+    m_containerConfig = containerConfig;
+    endResetModel();
 }
 
-QJsonObject ProtocolsModel::getConfig()
+Proto ProtocolsModel::getProtocolType() const
 {
-    QJsonObject config = m_content;
-    config.insert(config_key::container, ContainerUtils::containerToString(m_container));
-    return config;
+    return m_containerConfig.getProtocolType();
+}
+
+QString ProtocolsModel::getRawConfig() const
+{
+    QString configString;
+    
+    if (auto* awgConfig = std::get_if<amnezia::AwgProtocolConfig>(&m_containerConfig.protocolConfig)) {
+        if (awgConfig->clientConfig.has_value() && !awgConfig->clientConfig->nativeConfig.isEmpty()) {
+            configString = awgConfig->clientConfig->nativeConfig;
+        }
+    } else if (auto* wgConfig = std::get_if<amnezia::WireGuardProtocolConfig>(&m_containerConfig.protocolConfig)) {
+        if (wgConfig->clientConfig.has_value() && !wgConfig->clientConfig->nativeConfig.isEmpty()) {
+            configString = wgConfig->clientConfig->nativeConfig;
+        }
+    } else if (auto* openVpnConfig = std::get_if<amnezia::OpenVpnProtocolConfig>(&m_containerConfig.protocolConfig)) {
+        if (openVpnConfig->clientConfig.has_value() && !openVpnConfig->clientConfig->nativeConfig.isEmpty()) {
+            configString = openVpnConfig->clientConfig->nativeConfig;
+        }
+    } else if (auto* xrayConfig = std::get_if<amnezia::XrayProtocolConfig>(&m_containerConfig.protocolConfig)) {
+        if (xrayConfig->clientConfig.has_value() && !xrayConfig->clientConfig->nativeConfig.isEmpty()) {
+            configString = xrayConfig->clientConfig->nativeConfig;
+        }
+    }
+    
+    QStringList lines = configString.replace("\r", "").split("\n");
+    QString rawConfig;
+    for (const QString &l : lines) {
+        rawConfig.append(l + "\n");
+    }
+    return rawConfig;
+}
+
+bool ProtocolsModel::isClientProtocolExists() const
+{
+    if (auto* awgConfig = std::get_if<amnezia::AwgProtocolConfig>(&m_containerConfig.protocolConfig)) {
+        return awgConfig->clientConfig.has_value() && !awgConfig->clientConfig->nativeConfig.isEmpty();
+    } else if (auto* wgConfig = std::get_if<amnezia::WireGuardProtocolConfig>(&m_containerConfig.protocolConfig)) {
+        return wgConfig->clientConfig.has_value() && !wgConfig->clientConfig->nativeConfig.isEmpty();
+    } else if (auto* openVpnConfig = std::get_if<amnezia::OpenVpnProtocolConfig>(&m_containerConfig.protocolConfig)) {
+        return openVpnConfig->clientConfig.has_value() && !openVpnConfig->clientConfig->nativeConfig.isEmpty();
+    } else if (auto* xrayConfig = std::get_if<amnezia::XrayProtocolConfig>(&m_containerConfig.protocolConfig)) {
+        return xrayConfig->clientConfig.has_value() && !xrayConfig->clientConfig->nativeConfig.isEmpty();
+    }
+    
+    return false;
 }
 
 PageLoader::PageEnum ProtocolsModel::serverProtocolPage(Proto protocol) const

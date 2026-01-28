@@ -72,9 +72,6 @@ void CoreController::initModels()
 
     m_protocolsModel = new ProtocolsModel(this);
     setQmlContextProperty("ProtocolsModel", m_protocolsModel);
-    
-    m_protocolsUiController = new ProtocolsUiController(m_protocolsModel, this);
-    setQmlContextProperty("ProtocolsUiController", m_protocolsUiController);
 
     m_openVpnConfigModel = new OpenVpnConfigModel(this);
     setQmlContextProperty("OpenVpnConfigModel", m_openVpnConfigModel);
@@ -159,7 +156,12 @@ void CoreController::initControllers()
         setQmlContextProperty("FocusController", m_focusController);
     }
 
-    m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_serversModel, m_containersModel, m_protocolsModel, m_usersController, this);
+    m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_serversModel, m_containersModel, m_protocolsModel, m_usersController, 
+                                                     m_awgConfigModel, m_wireGuardConfigModel, m_openVpnConfigModel, m_xrayConfigModel,
+#ifdef Q_OS_WINDOWS
+                                                     m_ikev2ConfigModel,
+#endif
+                                                     m_sftpConfigModel, m_socks5ConfigModel, this);
     setQmlContextProperty("InstallController", m_installUiController);
 
     m_importController = new ImportUiController(m_importCoreController, this);

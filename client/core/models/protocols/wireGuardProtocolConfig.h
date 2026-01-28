@@ -19,6 +19,8 @@ struct WireGuardServerConfig {
     
     QJsonObject toJson() const;
     static WireGuardServerConfig fromJson(const QJsonObject& json);
+    
+    bool hasEqualServerSettings(const WireGuardServerConfig& other) const;
 };
 
 struct WireGuardClientConfig {

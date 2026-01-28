@@ -176,13 +176,9 @@ ServerCredentials SecureServersRepository::serverCredentials(int index) const
     
     if (ServerConfigUtils::isSelfHosted(config)) {
         const SelfHostedServerConfig& selfHosted = ServerConfigUtils::asSelfHosted(config);
-        if (selfHosted.hasCredentials()) {
-            ServerCredentials cred;
-            cred.hostName = selfHosted.hostName;
-            cred.userName = selfHosted.userName.value_or(QString());
-            cred.secretData = selfHosted.password.value_or(QString());
-            cred.port = selfHosted.port.value_or(22);
-            return cred;
+        auto creds = selfHosted.credentials();
+        if (creds.has_value()) {
+            return creds.value();
         }
     }
     

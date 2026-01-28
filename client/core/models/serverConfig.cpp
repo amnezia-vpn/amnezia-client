@@ -174,13 +174,30 @@ ServerConfig ServerConfigUtils::fromJson(const QJsonObject& json)
     
     switch (configType) {
     case apiDefs::ConfigType::SelfHosted: {
-        bool hasCredentials = json.contains(config_key::userName) && 
-                              json.contains(config_key::password) && 
-                              json.contains(config_key::port);
-        if (hasCredentials) {
-            return SelfHostedServerConfig::fromJson(json);
-        } else {
+        bool hasThirdPartyConfig = false;
+        QJsonArray containersArray = json.value(config_key::containers).toArray();
+        for (const QJsonValue& val : containersArray) {
+            QJsonObject containerObj = val.toObject();
+            for (auto it = containerObj.begin(); it != containerObj.end(); ++it) {
+                QString key = it.key();
+                if (key != config_key::container) {
+                    QJsonObject protocolObj = it.value().toObject();
+                    if (protocolObj.contains(config_key::isThirdPartyConfig) && 
+                        protocolObj.value(config_key::isThirdPartyConfig).toBool()) {
+                        hasThirdPartyConfig = true;
+                        break;
+                    }
+                }
+            }
+            if (hasThirdPartyConfig) {
+                break;
+            }
+        }
+        
+        if (hasThirdPartyConfig) {
             return NativeServerConfig::fromJson(json);
+        } else {
+            return SelfHostedServerConfig::fromJson(json);
         }
     }
     case apiDefs::ConfigType::AmneziaPremiumV1:
@@ -191,13 +208,32 @@ ServerConfig ServerConfigUtils::fromJson(const QJsonObject& json)
     case apiDefs::ConfigType::ExternalPremium:
         return ApiV2ServerConfig::fromJson(json);
     default: {
-        bool hasCredentials = json.contains(config_key::userName) && 
-                              json.contains(config_key::password) && 
-                              json.contains(config_key::port);
-        if (hasCredentials) {
-            return SelfHostedServerConfig::fromJson(json);
-        } else {
+        // Check if any container has isThirdPartyConfig
+        bool hasThirdPartyConfig = false;
+        QJsonArray containersArray = json.value(config_key::containers).toArray();
+        for (const QJsonValue& val : containersArray) {
+            QJsonObject containerObj = val.toObject();
+            // Check all protocol keys in the container object
+            for (auto it = containerObj.begin(); it != containerObj.end(); ++it) {
+                QString key = it.key();
+                if (key != config_key::container) {
+                    QJsonObject protocolObj = it.value().toObject();
+                    if (protocolObj.contains(config_key::isThirdPartyConfig) && 
+                        protocolObj.value(config_key::isThirdPartyConfig).toBool()) {
+                        hasThirdPartyConfig = true;
+                        break;
+                    }
+                }
+            }
+            if (hasThirdPartyConfig) {
+                break;
+            }
+        }
+        
+        if (hasThirdPartyConfig) {
             return NativeServerConfig::fromJson(json);
+        } else {
+            return SelfHostedServerConfig::fromJson(json);
         }
     }
     }

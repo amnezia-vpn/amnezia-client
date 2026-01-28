@@ -15,7 +15,7 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/utilities.h"
-#include "ui/models/protocols/awgConfigModel.h"
+#include "core/models/protocols/awgProtocolConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -59,13 +59,13 @@ void AwgInstaller::generateAwgParameters(QJsonObject &containerConfig, bool isAw
     QSet<int> usedValues;
     usedValues.insert(s1);
 
-    while (usedValues.contains(s2) || s1 + AwgConstant::messageInitiationSize == s2 + AwgConstant::messageResponseSize) {
+    while (usedValues.contains(s2) || s1 + amnezia::AwgConstant::messageInitiationSize == s2 + amnezia::AwgConstant::messageResponseSize) {
         s2 = QRandomGenerator::global()->bounded(15, 150);
     }
     usedValues.insert(s2);
 
-    while (usedValues.contains(s3) || s1 + AwgConstant::messageInitiationSize == s3 + AwgConstant::messageCookieReplySize
-           || s2 + AwgConstant::messageResponseSize == s3 + AwgConstant::messageCookieReplySize) {
+    while (usedValues.contains(s3) || s1 + amnezia::AwgConstant::messageInitiationSize == s3 + amnezia::AwgConstant::messageCookieReplySize
+           || s2 + amnezia::AwgConstant::messageResponseSize == s3 + amnezia::AwgConstant::messageCookieReplySize) {
         s3 = QRandomGenerator::global()->bounded(0, 64);
     }
     usedValues.insert(s3);
