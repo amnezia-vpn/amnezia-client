@@ -104,7 +104,7 @@ PageType {
 
                 actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
-                headerText: root.processedServer.name
+                headerText: root.processedServer && root.processedServer.name ? root.processedServer.name : ""
                 descriptionText: ApiAccountInfoModel.data("serviceDescription")
 
                 actionButtonFunction: function() {
@@ -214,9 +214,6 @@ PageType {
                     ApiConfigsController.prepareVpnKeyExport()
 
                     PageController.showBusyIndicator(false)
-                    
-                    // Navigate to PageShareConnection page
-                    //PageController.goToPage(PageEnum.PageShareConnection)
                 }
             }
 
@@ -416,6 +413,6 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.35
 
-        serverNameText: root.processedServer.name
+        serverNameText: root.processedServer && root.processedServer.name ? root.processedServer.name : ""
     }
 }

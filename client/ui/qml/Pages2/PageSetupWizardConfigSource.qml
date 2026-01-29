@@ -45,7 +45,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Connection")
+                headerText: qsTr("New Connection")
 
                 actionButtonImage: isVisible ? "qrc:/images/controls/more-vertical.svg" : ""
                 actionButtonFunction: function() {
@@ -156,7 +156,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 24
 
-                text: qsTr("Insert the key, add a configuration file or scan the QR-code")
+                text: qsTr("Enter a connection key, import a configuration file, or scan a QR code")
             }
 
             TextFieldWithHeaderType {
@@ -166,8 +166,8 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Insert key")
-                buttonText: qsTr("Insert")
+                headerText: qsTr("Connection key")
+                buttonText: qsTr("Paste")
 
                 clickedFunc: function() {
                     textField.text = ""
@@ -250,7 +250,7 @@ PageType {
                 disabledColor: AmneziaStyle.color.mutedGray
                 textColor: AmneziaStyle.color.goldenApricot
 
-                text: qsTr("Site Amnezia")
+                text: qsTr("Amnezia Website")
 
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
@@ -263,19 +263,17 @@ PageType {
 
     property list<QtObject> variants: [
         amneziaVpn,
-        selfHostVpn,
-        backupRestore,
         shareViaDevice,
+        selfHostVpn,
         fileOpen,
-        qrScan,        
-        siteLink
+        qrScan
     ]
     
     QtObject {
         id: amneziaVpn
 
-        property string title: qsTr("VPN by Amnezia")
-        property string description: qsTr("Connect to classic paid and free VPN services from Amnezia")
+        property string title: qsTr("Choose a VPN from Amnezia")
+        property string description: qsTr("Paid and free VPN services from Amnezia")
         property string imageSource: "qrc:/images/controls/amnezia.svg"
         property bool isVisible: true
         property var handler: function() {
@@ -289,10 +287,22 @@ PageType {
     }
 
     QtObject {
+        id: shareViaDevice
+
+        property string title: qsTr("Connect to Amnezia Premium")
+        property string description: qsTr("Via QR code from a phone with an active subscription")
+        property string imageSource: "qrc:/images/controls/monitor-with-phone.svg"
+        property bool isVisible: true
+        property var handler: function() {
+            PageController.goToPage(PageEnum.PageTransferConfigViaQR)
+        }
+    }
+
+    QtObject {
         id: selfHostVpn
 
-        property string title: qsTr("Self-hosted VPN")
-        property string description: qsTr("Configure Amnezia VPN on your own server")
+        property string title: qsTr("Set up a Self-hosted VPN")
+        property string description: qsTr("On a private server")
         property string imageSource: "qrc:/images/controls/server.svg"
         property bool isVisible: true
         property var handler: function() {
@@ -319,22 +329,10 @@ PageType {
     }
 
     QtObject {
-        id: shareViaDevice
-
-        property string title: qsTr("Set up your Amnezia Premium VPN using your phone")
-        property string description: qsTr("Which already has a premium subscription")
-        property string imageSource: "qrc:/images/controls/monitor-with-phone.svg"
-        property bool isVisible: true
-        property var handler: function() {
-            PageController.goToPage(PageEnum.PageTransferConfigViaQR)
-        }
-    }
-
-    QtObject {
         id: fileOpen
 
-        property string title: qsTr("File with connection settings")
-        property string description: qsTr("")
+        property string title: qsTr("Use a configuration file")
+        property string description: qsTr("Supported formats: .conf, .vpn, .ovpn, .json")
         property string imageSource: "qrc:/images/controls/folder-search-2.svg"
         property bool isVisible: true
         property var handler: function() {
@@ -352,8 +350,8 @@ PageType {
     QtObject {
         id: qrScan
 
-        property string title: qsTr("QR code")
-        property string description: qsTr("")
+        property string title: qsTr("Scan a QR code")
+        property string description: qsTr("To connect to a self-hosted server")
         property string imageSource: "qrc:/images/controls/scan-line.svg"
         property bool isVisible: SettingsController.isCameraPresent()
         property var handler: function() {

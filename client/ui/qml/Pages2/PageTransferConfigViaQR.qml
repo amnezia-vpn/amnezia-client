@@ -19,18 +19,6 @@ PageType {
         z: 0
     }
 
-    MouseArea {
-        anchors.fill: parent
-        z: 0
-        acceptedButtons: Qt.AllButtons
-        hoverEnabled: true
-        preventStealing: true
-        onPressed: mouse.accepted = true
-        onReleased: mouse.accepted = true
-        onClicked: mouse.accepted = true
-        onWheel: wheel.accepted = true
-    }
-
     ColumnLayout {
         z: 1
         anchors.fill: parent
@@ -39,8 +27,8 @@ PageType {
 
         BackButtonType {
             Layout.topMargin: 20
-            Layout.leftMargin: 0
-            Layout.rightMargin: 0
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
             Layout.alignment: Qt.AlignLeft
         }
 
@@ -52,72 +40,60 @@ PageType {
             Layout.rightMargin: 16
             Layout.bottomMargin: 16
 
-            ParagraphTextType {
-                id: qrHeader
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                text: qsTr("Debug mode: copy the payload to the other device and send it there")
-            }
-
             ColumnLayout {
-                id: debugPayload
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: qrHeader.bottom
-                anchors.topMargin: 12
-                anchors.bottom: bottomHint.top
-                anchors.bottomMargin: 12
-                spacing: 8
+                id: qrContent
+                anchors.fill: parent
+                spacing: 16
 
-                TextArea {
-                    id: payloadArea
+                Item { Layout.fillHeight: true }
+
+                SmallTextType {
+                    id: topHint
                     Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    readOnly: true
-                    wrapMode: TextArea.WrapAnywhere
-                    selectByMouse: true
-                    text: TransferController.currentPayload
-                    placeholderText: qsTr("Payload will appear here after generating")
+                    horizontalAlignment: Text.AlignHCenter
+                    text: qsTr("Scan this QR code with a phone that has an active\nAmnezia Premium subscription")
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
+                Rectangle {
+                    id: qrFrame
+                    Layout.alignment: Qt.AlignHCenter
+                    property real maxByHeight: qrContent.height
+                                              - topHint.implicitHeight
+                                              - bottomHint.implicitHeight
+                                              - (qrContent.spacing * 2)
+                    property real qrSize: Math.max(180, Math.min(qrContent.width, Math.max(0, maxByHeight)))
 
-                    BasicButtonType {
-                        Layout.fillWidth: true
-                        text: qsTr("Regenerate")
-                        clickedFunc: function() {
-                            TransferController.generateNewQrCode()
-                            TransferController.startWaitForConfig(ImportController)
-                        }
+                    Layout.preferredWidth: qrSize
+                    Layout.preferredHeight: qrSize
+                    radius: 16
+                    color: "white"
+
+                    Image {
+                        id: qrImage
+                        anchors.fill: parent
+                        anchors.margins: 12
+                        fillMode: Image.PreserveAspectFit
+                        smooth: false
+                        sourceSize: Qt.size(Math.round(width), Math.round(height))
+                        source: TransferController.qrCodeUrl
+                        visible: TransferController.qrCodeUrl !== ""
                     }
 
-                    BasicButtonType {
-                        Layout.fillWidth: true
-                        defaultColor: AmneziaStyle.color.transparent
-                        hoveredColor: AmneziaStyle.color.translucentWhite
-                        pressedColor: AmneziaStyle.color.sheerWhite
-                        textColor: AmneziaStyle.color.paleGray
-                        borderColor: AmneziaStyle.color.paleGray
-                        borderWidth: 1
-                        text: qsTr("Restart wait")
-                        clickedFunc: function() {
-                            TransferController.startWaitForConfig(ImportController)
-                        }
+                    BusyIndicator {
+                        anchors.centerIn: parent
+                        running: TransferController.qrCodeUrl === ""
+                        visible: TransferController.qrCodeUrl === ""
                     }
                 }
-            }
 
-            SmallTextType {
-                id: bottomHint
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 8
-                text: qsTr("Copy the JSON payload above, paste it on the other device, and confirm sending there")
-                horizontalAlignment: Text.AlignHCenter
+                SmallTextType {
+                    id: bottomHint
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    text: qsTr("AmneziaVPN → Amnezia Premium →\nPersonal Dashboard → Active Devices →\nAdd Device via QR Code")
+                }
+
+                Item { Layout.fillHeight: true }
             }
         }
     }
@@ -125,7 +101,9 @@ PageType {
     Connections {
         target: TransferController
         function onConfigApplied() {
-            PageController.showNotificationMessage(qsTr("Configuration received and applied"))
+            PageController.showNotificationMessage(qsTr("Device has been added to subscription"))
+            PageController.closePage()
+            PageController.goToPageHome()
         }
         function onWaitError(message) {
             PageController.showErrorMessage(message)
@@ -145,23 +123,4 @@ PageType {
     }
 
     Component.onDestruction: TransferController.stopWaitForConfig()
-} 
-
-/*CardWithIconsType {
-    Layout.fillWidth: true
-    Layout.leftMargin: 16
-    Layout.rightMargin: 16
-    Layout.bottomMargin: 8
-
-    headerText: qsTr("Send connection via QR")
-    bodyText: qsTr("Scan a QR code from another device to send your config to it")
-    leftImageSource: "qrc:/images/controls/scan-line.svg"
-    rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-    onClicked: {
-        showReceiveSection = false
-        showScanSection = true
-        isPosting = false
-        postStatusText = ""
-    }
-}*/
+}

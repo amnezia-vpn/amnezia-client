@@ -25,6 +25,24 @@ PageType {
         return listView.count >= maxDeviceCount
     }
 
+    function getConfigFilesCount() {
+        try {
+            var arr = ApiAccountInfoModel.getIssuedConfigsInfo()
+            if (!arr) return 0
+
+            var count = 0
+            for (var i = 0; i < arr.length; i++) {
+                var item = arr[i]
+                if (item && item["source_type"] === "country_config") {
+                    ++count
+                }
+            }
+            return count
+        } catch (e) {
+            return 0
+        }
+    }
+
     ListViewType {
         id: listView
 
@@ -60,7 +78,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
 
-                //visible: GC.isMobile()
+                visible: GC.isMobile()
 
                 defaultColor: AmneziaStyle.color.transparent
                 hoveredColor: AmneziaStyle.color.translucentWhite
@@ -80,16 +98,13 @@ PageType {
                 }
             }
 
-            WarningType {
-                Layout.topMargin: 16
+            SmallTextType {
+                Layout.topMargin: 8
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
                 Layout.fillWidth: true
 
-                textString: qsTr("You can find the identifier on the Support tab or, for older versions of the app, "
-                                 + "by tapping '+' and then the three dots at the top of the page.")
-
-                iconPath: "qrc:/images/controls/alert-circle.svg"
+                text: qsTr("On the other device, tap + at the bottom → Connect to Amnezia Premium")
             }
         }
 
@@ -126,6 +141,37 @@ PageType {
             }
 
             DividerType {}
+        }
+
+        footer: ColumnLayout {
+            width: listView.width
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+
+                text: qsTr("Configuration Files: {%1}").arg(root.getConfigFilesCount())
+                descriptionText: qsTr("Generated configuration files also count towards the device limit")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    ApiSettingsController.updateApiCountryModel()
+                    PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
+                }
+            }
+
+            DividerType {}
+
+            WarningType {
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 8
+                Layout.fillWidth: true
+
+                textString: qsTr("The Support tag is available on the Support page. In older versions: tap + in the bottom bar, then More (...) in the top-right.")
+                iconPath: "qrc:/images/controls/alert-circle.svg"
+            }
         }
 
         Connections {

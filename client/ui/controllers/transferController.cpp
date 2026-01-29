@@ -8,6 +8,7 @@
 #include <QNetworkProxyQuery>
 #include <QUrl>
 #include "core/api/apiUtils.h"
+#include "core/qrCodeUtils.h"
 
 #include "amnezia_application.h"
 #include "settings.h"
@@ -34,7 +35,6 @@ namespace {
                                  .arg(p.hostName())
                                  .arg(p.port());
         }
-        qDebug() << "TransferController: system proxies for" << urlStr << ":" << proxyDesc;
     }
 }
 
@@ -44,7 +44,6 @@ TransferController::TransferController(const std::shared_ptr<Settings> &settings
                                        QObject *parent)
     : QObject(parent), m_settings(settings), m_serversModel(serversModel), m_exportController(exportController)
 {
-    qDebug() << "TransferController created";
 }
 
 void TransferController::handleImportControllerDestroyed()
@@ -61,35 +60,36 @@ QString TransferController::buildQrPayloadJson(const QString &gatewayUrl, const 
     QJsonObject obj;
     obj["gw"] = gatewayUrl;
     obj["uuid"] = uuid;
-    qDebug() << "built QrPayload with GW = " << gatewayUrl
-             << " uuid = " << uuid;
+    // Used on the sender side for human-friendly notifications (same style as "Active Devices" list).
+#if defined(Q_OS_ANDROID)
+    obj["name"] = QStringLiteral("Android");
+#elif defined(Q_OS_IOS)
+    obj["name"] = QStringLiteral("iOS");
+#elif defined(Q_OS_WIN)
+    obj["name"] = QStringLiteral("Windows");
+#elif defined(Q_OS_MACOS)
+    obj["name"] = QStringLiteral("macOS");
+#elif defined(Q_OS_LINUX)
+    obj["name"] = QStringLiteral("Linux");
+#else
+    obj["name"] = QStringLiteral("Device");
+#endif
     return QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact));
 }
 
 void TransferController::generateNewQrCode()
 {
-    // Debug mode: keep UUID/payload generation, but disable actual QR rendering (temporary).
-    qDebug() << "TransferController::generateNewQrCode: generating transfer payload (QR rendering disabled)";
-
     QString gw = m_settings->getGatewayEndpoint();
     if (!gw.endsWith('/')) {
         gw.append('/');
     }
-    qDebug() << "gateway:" << gw;
     m_currentUuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
-    qDebug() << "uuid:" << m_currentUuid;
 
     m_currentPayload = buildQrPayloadJson(gw, m_currentUuid);
 
-    // QR generation disabled for debugging/CLI-style copy-paste flow.
-    // If/when QR is re-enabled, restore this block:
-    //
-    // auto qr = qrCodeUtils::generateQrCode(m_currentPayload.toUtf8());
-    // const QString svg = QString::fromStdString(toSvgString(qr, 1));
-    // m_qrCodeUrl = qrCodeUtils::svgToBase64(svg);
-    // emit qrCodeUpdated();
-
-    m_qrCodeUrl.clear();
+    auto qr = qrCodeUtils::generateQrCode(m_currentPayload.toUtf8());
+    const QString svg = QString::fromStdString(toSvgString(qr, 1));
+    m_qrCodeUrl = qrCodeUtils::svgToBase64(svg);
     emit qrCodeUpdated();
     emit currentUuidChanged();
     emit currentPayloadChanged();
@@ -97,7 +97,6 @@ void TransferController::generateNewQrCode()
 
 void TransferController::stopScanner()
 {
-    qDebug() << "TransferController::stopScanner: emitting scannerShouldStop";
     emit scannerShouldStop();
 }
 
@@ -110,8 +109,6 @@ QString TransferController::getCurrentApiKey(QString *vpnKeyOut) const
 
     const QJsonObject server = m_serversModel->getServerConfig(idx);
 
-    qDebug() << "server:" << server;
-
     const QJsonObject apiConfig = server.value(apiDefs::key::apiConfig).toObject();
     const QJsonObject authData = server.value(QStringLiteral("auth_data")).toObject();
 
@@ -120,7 +117,6 @@ QString TransferController::getCurrentApiKey(QString *vpnKeyOut) const
     if (vpnKeyOut) {
         QString vpnKey = apiConfig.value(apiDefs::key::vpnKey).toString();
         if (vpnKey.isEmpty()) {
-            // Fallback for older Premium V1 configs where vpn_key may be derived.
             vpnKey = apiUtils::getPremiumV1VpnKey(server);
         }
         *vpnKeyOut = vpnKey;
@@ -131,8 +127,6 @@ QString TransferController::getCurrentApiKey(QString *vpnKeyOut) const
 
 void TransferController::onTransferQrScanned(const QString &code)
 {
-    qDebug() << "TransferController has scanned the Qr";
-
     QJsonParseError err;
     const QJsonDocument doc = QJsonDocument::fromJson(code.toUtf8(), &err);
     if (err.error != QJsonParseError::NoError || !doc.isObject()) {
@@ -154,35 +148,66 @@ void TransferController::onTransferQrScanned(const QString &code)
         gw.append('/');
     }
 
+    int chosenServerIdx = -1;
+    QString apiKey;
     QString vpnKey;
-    const QString apiKey = getCurrentApiKey(&vpnKey);
-    qDebug() << "scanned apiKey:" << apiKey;
-    if (apiKey.isEmpty()) {
-        qWarning() << "TransferController::onTransferQrScanned: no subscription key or config to send";
-        emit postFailed(QStringLiteral("No subscription key or config to send"));
-        return;
+
+    auto tryServerIndex = [&](int idx) -> bool {
+        if (!m_serversModel || idx < 0 || idx >= m_serversModel->getServersCount()) {
+            return false;
+        }
+
+        const QJsonObject server = m_serversModel->getServerConfig(idx);
+        const QJsonObject apiConfig = server.value(apiDefs::key::apiConfig).toObject();
+        const QJsonObject authData = server.value(QStringLiteral("auth_data")).toObject();
+
+        const QString candidateApiKey = authData.value(QStringLiteral("api_key")).toString();
+        QString candidateVpnKey = apiConfig.value(apiDefs::key::vpnKey).toString();
+        if (candidateVpnKey.isEmpty()) {
+            // Fallback for older Premium V1 configs where vpn_key may be derived.
+            candidateVpnKey = apiUtils::getPremiumV1VpnKey(server);
+        }
+
+        const bool candidateIsPremium = apiUtils::isPremiumServer(server);
+        const bool candidateIsFromGatewayApi = m_serversModel->data(idx, ServersModel::IsServerFromGatewayApiRole).toBool();
+
+        if (candidateApiKey.isEmpty() || candidateVpnKey.isEmpty()) {
+            return false;
+        }
+        if (!candidateIsPremium && !candidateIsFromGatewayApi) {
+            return false;
+        }
+
+        chosenServerIdx = idx;
+        apiKey = candidateApiKey;
+        vpnKey = candidateVpnKey;
+        return true;
+    };
+
+    if (m_serversModel) {
+        tryServerIndex(m_serversModel->getProcessedServerIndex());
+        if (chosenServerIdx < 0) {
+            tryServerIndex(m_serversModel->getDefaultServerIndex());
+        }
+        if (chosenServerIdx < 0) {
+            const int n = m_serversModel->getServersCount();
+            for (int i = 0; i < n; i++) {
+                if (tryServerIndex(i)) {
+                    break;
+                }
+            }
+        }
     }
 
-    bool isPremium = m_serversModel && m_serversModel->processedServerIsPremium();
-    qDebug() << "isPremium: " << isPremium;
-    bool isFromGatewayApi = m_serversModel && m_serversModel->getProcessedServerData("isServerFromGatewayApi").toBool();
-    qDebug() << "is from gatewayApi: " << isFromGatewayApi;
-    if (!isPremium && !isFromGatewayApi) {
-        qWarning() << "TransferController::onTransferQrScanned: premium subscription required";
-        emit postFailed(QStringLiteral("Premium subscription required"));
+    if (chosenServerIdx < 0) {
+        qWarning() << "TransferController::onTransferQrScanned: no suitable subscription key/config found to send";
+        emit postFailed(QStringLiteral("No subscription key or config to send"));
         return;
     }
 
     emit postStarted();
 
-    if (vpnKey.isEmpty()) {
-        qWarning() << "TransferController::onTransferQrScanned: missing vpn_key";
-        emit postFailed(QStringLiteral("Missing vpn_key to send"));
-        return;
-    }
-
-    // sendConfig can take longer on slower networks / debug setups, so use a bigger timeout than generic API calls.
-    const int sendTimeoutMs = 120000;
+    const int sendTimeoutMs = 60000;
     GatewayController gatewayController(gw,
                                         m_settings->isDevGatewayEnv(),
                                         sendTimeoutMs,
@@ -236,7 +261,6 @@ void TransferController::startWaitForConfig(ImportController *importController)
     }
 
     const QString uuid = m_currentUuid;
-    qDebug() << "TransferController::startWaitForConfig: starting blocking wait with uuid: " << uuid;
 
     if (uuid.isEmpty()) {
         qWarning() << "TransferController::startWaitForConfig: no uuid";
@@ -252,7 +276,7 @@ void TransferController::startWaitForConfig(ImportController *importController)
                 Qt::UniqueConnection);
     }
 
-    const int waitTimeoutMs = 300000;
+    const int waitTimeoutMs = 60000;
 
     QJsonObject payload;
     payload.insert(QStringLiteral("uuid"), uuid);
@@ -265,8 +289,6 @@ void TransferController::startWaitForConfig(ImportController *importController)
     const QString endpoint = QStringLiteral("%1v1/waitConfig");
     QByteArray responseBody;
     const QString fullUrl = endpoint.arg(gw);
-    qDebug() << "TransferController::startWaitForConfig: POST" << fullUrl
-             << "uuid:" << uuid;
     logSystemProxiesForUrl(fullUrl);
     const auto errorCode = gatewayController.post(endpoint, payload, responseBody);
 

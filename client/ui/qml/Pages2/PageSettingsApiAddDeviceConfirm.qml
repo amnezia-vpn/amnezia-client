@@ -14,8 +14,17 @@ import "../Config"
 PageType {
     id: root
 
-    // Debug-friendly: don't auto-close on send; keep the page responsive and show status.
     property bool isSending: false
+
+    function getAddedDeviceName() {
+        try {
+            var obj = JSON.parse(TransferController.pendingQrCode)
+            if (obj && obj.name && obj.name.length > 0) {
+                return obj.name
+            }
+        } catch (e) {}
+        return qsTr("Device")
+    }
 
     function getAvailableCount() {
         var max = ApiAccountInfoModel.data("maxDeviceCount")
@@ -38,8 +47,6 @@ PageType {
             BackButtonType {
                 backButtonFunction: function() {
                     if (root.isSending) {
-                        // We cannot truly abort GatewayController::post() without changing it,
-                        // but we can at least stop waiting on the other side and let the user navigate.
                         TransferController.stopWaitForConfig()
                     }
                     PageController.closePage()
@@ -51,8 +58,8 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Share VPN with a new device?")
-                descriptionText: qsTr("Your Amnezia Premium subscription can connect %1 more devices").arg(getAvailableCount())
+                headerText: qsTr("Add a new device to the subscription?")
+                descriptionText: qsTr("Devices available with Amnezia Premium: (%1)").arg(getAvailableCount())
             }
 
             BasicButtonType {
@@ -61,7 +68,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
 
-                text: qsTr("Yes, share")
+                text: qsTr("Add Device")
                 enabled: !root.isSending && root.getAvailableCount() > 0 && TransferController.pendingQrCode !== ""
 
                 clickedFunc: function() {
@@ -104,7 +111,8 @@ PageType {
 
         function onPostSucceeded() {
             root.isSending = false
-            PageController.showNotificationMessage(qsTr("Configuration sent successfully"))
+            PageController.showNotificationMessage(qsTr("%1 has been added to your subscription").arg(root.getAddedDeviceName()))
+            PageController.closePage()
             PageController.closePage()
         }
 
