@@ -215,6 +215,10 @@ bool SecureQSettings::encryptionRequired() const
 
 QByteArray SecureQSettings::getEncKey() const
 {
+
+    if (!m_key.isEmpty()) {
+        return m_key;
+    }
     // load keys from system key storage
     m_key = getSecTag(settingsKeyTag);
 
@@ -241,6 +245,9 @@ QByteArray SecureQSettings::getEncKey() const
 
 QByteArray SecureQSettings::getEncIv() const
 {
+    if (!m_iv.isEmpty()) {
+        return m_iv;
+    }
     // load keys from system key storage
     m_iv = getSecTag(settingsIvTag);
 
