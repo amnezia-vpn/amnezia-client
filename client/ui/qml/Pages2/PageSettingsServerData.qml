@@ -153,12 +153,12 @@ PageType {
 
         property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
         readonly property string title: qsTr("Active Connections")
-        readonly property string description: qsTr("Manage currently connected devices")
+        readonly property string description: qsTr("Manage currently connected devices: " + ApiAccountInfoModel.data("connectedDevices"))
         readonly property var tColor: AmneziaStyle.color.lightGray
         readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
         readonly property bool isRichText: false
         readonly property var clickedHandler: function() {
-            ApiSettingsController.getAccountInfo(true)
+            // ApiSettingsController.updateApiCountryModel()
             // ApiSettingsController.updateApiDevicesModel()
             PageController.goToPage(PageEnum.PageSettingsApiDevices)
         }
