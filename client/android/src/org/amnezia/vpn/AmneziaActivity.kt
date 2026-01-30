@@ -88,6 +88,10 @@ class AmneziaActivity : QtActivity() {
 
     private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
     private val permissionRequestHandlers = mutableMapOf<Int, PermissionRequestHandler>()
+    
+    private var isActivityResumed = false
+    private var hasWindowFocus = false
+    private val resumeHandler = Handler(Looper.getMainLooper())
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -260,6 +264,10 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun onStop() {
+        isActivityResumed = false
+        hasWindowFocus = false
+        // Cancel all pending operations when activity stops
+        resumeHandler.removeCallbacksAndMessages(null)
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
         mainScope.launch {
@@ -271,35 +279,53 @@ class AmneziaActivity : QtActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
+        hasWindowFocus = hasFocus
         Log.d(TAG, "Window focus changed: hasFocus=$hasFocus")
+        
+        // Cancel pending operations if window loses focus
+        if (!hasFocus) {
+            resumeHandler.removeCallbacksAndMessages(null)
+        }
     }
 
     override fun onPause() {
         super.onPause()
+        isActivityResumed = false
+        // Cancel all pending operations when activity pauses
+        resumeHandler.removeCallbacksAndMessages(null)
         Log.d(TAG, "Pause Amnezia activity")
     }
 
     override fun onResume() {
         super.onResume()
-       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        isActivityResumed = true
+        Log.d(TAG, "Resume Amnezia activity")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             window.decorView.apply {
                 invalidate()
 
-                postDelayed({
-                    sendTouch(1f, 1f)
+                resumeHandler.postDelayed({
+                    // Check if activity is still resumed and has focus before executing
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        sendTouch(1f, 1f)
+                    }
                 }, 100)
                 
-                postDelayed({
-                    sendTouch(2f, 2f)
+                resumeHandler.postDelayed({
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        sendTouch(2f, 2f)
+                    }
                 }, 200)
                 
-                postDelayed({
-                    requestLayout()
-                    invalidate()
+                resumeHandler.postDelayed({
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        requestLayout()
+                        invalidate()
+                    }
                 }, 250)
             }
-        }  */      
-        Log.d(TAG, "Resume Amnezia activity")
+        }
     }
 
     private fun configureWindowForEdgeToEdge() {
@@ -362,6 +388,10 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun onDestroy() {
+        isActivityResumed = false
+        hasWindowFocus = false
+        // Cancel all pending operations when activity is destroyed
+        resumeHandler.removeCallbacksAndMessages(null)
         Log.d(TAG, "Destroy Amnezia activity")
         unregisterBroadcastReceiver(notificationStateReceiver)
         notificationStateReceiver = null
