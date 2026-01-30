@@ -12,17 +12,14 @@ jobs:
   Upload-S3:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.RELEASE_VERSION }}
-          sparse-checkout: |
-            CMakeLists.txt
-            deploy/deploy_s3.sh
-          sparse-checkout-cone-mode: false
+          fetch-depth: 0  # Fetch full history to access default branch
 
-      - name: Verify git tag
+      - name: Checkout tag and verify version
         run: |
+          git checkout ${{ inputs.RELEASE_VERSION }}
           TAG_NAME=${{ inputs.RELEASE_VERSION }}
           CMAKE_TAG=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
           if [[ "$TAG_NAME" == "$CMAKE_TAG" ]]; then
@@ -31,6 +28,32 @@ jobs:
             echo "::error::Mismatch: Git tag ($TAG_NAME) != CMakeLists.txt version ($CMAKE_TAG). Exiting with error..."
             exit 1
           fi
+
+      - name: Get deployment script from default branch
+        run: |
+          # Detect default branch (dev, main, or master)
+          DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "")
+          if [[ -z "$DEFAULT_BRANCH" ]]; then
+            # Try to detect default branch (prioritize dev)
+            if git show-ref --verify --quiet refs/remotes/origin/dev; then
+              DEFAULT_BRANCH="dev"
+            elif git show-ref --verify --quiet refs/remotes/origin/main; then
+              DEFAULT_BRANCH="main"
+            elif git show-ref --verify --quiet refs/remotes/origin/master; then
+              DEFAULT_BRANCH="master"
+            else
+              echo "::error::Could not determine default branch"
+              exit 1
+            fi
+          fi
+          echo "Default branch: $DEFAULT_BRANCH"
+          
+          # Get the script from default branch
+          mkdir -p deploy
+          git show origin/$DEFAULT_BRANCH:deploy/deploy_s3.sh > deploy/deploy_s3.sh || \
+          (echo "::error::Could not fetch deploy_s3.sh from default branch ($DEFAULT_BRANCH)" && exit 1)
+          chmod +x deploy/deploy_s3.sh
+          echo "✓ Using deployment script from $DEFAULT_BRANCH branch"
 
       - name: Setup Rclone
         uses: AnimMouse/setup-rclone@v1
