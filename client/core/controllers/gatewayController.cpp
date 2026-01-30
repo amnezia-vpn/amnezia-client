@@ -239,23 +239,6 @@ QStringList GatewayController::getProxyUrls()
         proxyStorageUrls = QString(DEV_S3_ENDPOINT).split(", ");
     } else {
         proxyStorageUrls = QString(PROD_S3_ENDPOINT).split(", ");
-    // Build and sanitize proxy storage endpoints list from env-based macros
-    /*QString endpointsStr = m_isDevEnvironment ? QString(DEV_S3_ENDPOINT) : QString(PROD_S3_ENDPOINT);
-    // Split on commas with optional whitespace and skip empty parts
-    QStringList proxyStorageUrls = endpointsStr.split(QRegularExpression("\\s*,\\s*"), Qt::SkipEmptyParts);
-
-    // Filter out invalid/empty URLs defensively
-    proxyStorageUrls.erase(std::remove_if(proxyStorageUrls.begin(),
-                                          proxyStorageUrls.end(),
-                                          [](const QString &s) {
-                                              QUrl u(s);
-                                              return s.trimmed().isEmpty() || !u.isValid() || u.scheme().isEmpty();
-                                          }),
-                           proxyStorageUrls.end());
-
-    if (proxyStorageUrls.isEmpty()) {
-        // No valid endpoints configured; skip storage probing
-        return {};*/
     }
 
     QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;

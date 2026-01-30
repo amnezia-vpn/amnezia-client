@@ -576,17 +576,6 @@ static QMutex qrDecodeMutex;
 // static
 bool ImportController::decodeQrCode(const QString &code)
 {
-    //old version
-    /*QMutexLocker lock(&qrDecodeMutex);
-
-    if (!mInstance->m_isQrCodeProcessed) {
-        mInstance->m_qrCodeChunks.clear();
-        mInstance->m_isQrCodeProcessed = true;
-        mInstance->m_totalQrCodeChunksCount = 0;
-        mInstance->m_receivedQrCodeChunksCount = 0;
-    }
-    return mInstance->parseQrCodeChunk(code);*/
-
     QMutexLocker lock(&qrDecodeMutex);
 
     if (!mInstance->m_isQrCodeProcessed) {
@@ -604,8 +593,8 @@ bool ImportController::decodeQrCode(const QString &code)
         if (obj.contains(QStringLiteral("gw"))
             && (obj.contains(QStringLiteral("uuid")) || obj.contains(QStringLiteral("u")))) {
             // это наш QR для передачи устройства
-            mInstance->m_isQrCodeProcessed = false;   // reset state
-            emit mInstance->transferQrDecoded(code);  // send string to QML
+            mInstance->m_isQrCodeProcessed = false;
+            emit mInstance->transferQrDecoded(code);
             return true;
         }
     }
