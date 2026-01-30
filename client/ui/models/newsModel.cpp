@@ -30,8 +30,8 @@ QVariant NewsModel::data(const QModelIndex &index, int role) const
     case IdRole: return item.id;
     case TitleRole: return item.title;
     case ContentRole: return item.content;
-    case TimestampRole: return item.timestamp.toString(Qt::ISODate);
-    case IsReadRole: return m_readIds.contains(item.id);
+    case TimestampRole: return item.timestamp.toLocalTime().toString(Qt::ISODate);
+    case IsReadRole: return item.read;
     case IsProcessedRole: return index.row() == m_processedIndex;
     case IsUpdateRole: return item.isUpdate;
     default: return QVariant();

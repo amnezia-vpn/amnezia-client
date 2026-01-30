@@ -29,7 +29,7 @@ fi
 
 # Unload the service if loaded and remove its plist file regardless
 if launchctl list "${APP_NAME}-service" &> /dev/null; then
-    sudo launchctl unload "$LAUNCH_DAEMONS_PLIST_NAME"
+    sudo launchctl bootout system "$LAUNCH_DAEMONS_PLIST_NAME" || sudo launchctl unload "$LAUNCH_DAEMONS_PLIST_NAME"
 fi
 sudo rm -f "$LAUNCH_DAEMONS_PLIST_NAME"
 

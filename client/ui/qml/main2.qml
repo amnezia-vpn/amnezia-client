@@ -19,8 +19,13 @@ Window  {
     Connections {
         target: Qt.application
         function onStateChanged() {
-            if (Qt.platform.os === "android" && Qt.application.state === Qt.ApplicationActive) {
-                refreshTimer.restart()
+            if (Qt.platform.os === "android") {
+                if (Qt.application.state === Qt.ApplicationActive) {
+                    refreshTimer.restart()
+                } else if (Qt.application.state === Qt.ApplicationSuspended || 
+                          Qt.application.state === Qt.ApplicationInactive) {
+                    console.log("QML: Application going to background, state:", Qt.application.state)
+                }
             }
         }
     }

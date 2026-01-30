@@ -49,6 +49,36 @@ Item {
         return drawerContent.state === stateName
     }
 
+    function findComponent(obj, typeCtor) {
+        if (!obj)
+            return null
+
+        if (obj instanceof typeCtor)
+            return obj
+
+        if (obj.children && obj.children.length > 0) {
+            for (var i = 0; i < obj.children.length; i++) {
+                var matchingChildren = findComponent(obj.children[i], typeCtor)
+                if (matchingChildren) return matchingChildren
+            }
+        }
+
+        if (obj.contentItem) {
+            var matchingContentItem = findComponent(obj.contentItem, typeCtor)
+            if (matchingContentItem) return matchingContentItem
+        }
+
+        return null
+    }
+
+    function setParentInteractive(value) {
+        var flickableType = findComponent(root.parent, Flickable)
+        var listViewType = findComponent(root.parent, ListView)
+
+        if (flickableType) flickableType.interactive = value
+        if (listViewType) listViewType.interactive = value
+    }
+
     Connections {
         target: Qt.application
 
@@ -93,6 +123,8 @@ Item {
 
             aboutToHide()
 
+            setParentInteractive(true)
+
             closed()
         }
 
@@ -117,6 +149,8 @@ Item {
             }
 
             root.aboutToShow()
+
+            setParentInteractive(false)
 
             root.opened()
         }

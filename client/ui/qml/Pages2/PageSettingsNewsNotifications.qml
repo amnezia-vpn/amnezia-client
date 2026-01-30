@@ -65,6 +65,7 @@ PageType {
                     leftImageSource: read ? "" : "qrc:/images/controls/unread-dot.svg"
                     isSmallLeftImage: !read
                     text: title
+                    descriptionText: Qt.formatDateTime(timestamp, "dd.MM.yyyy HH:mm")
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                     clickedFunction: function() {

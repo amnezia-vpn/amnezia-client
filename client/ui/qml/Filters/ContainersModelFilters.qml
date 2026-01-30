@@ -31,8 +31,19 @@ Item {
         value: true
     }
 
+    ValueFilter {
+        id: installationAllowedFilter
+        roleName: "isInstallationAllowed"
+        value: true
+    }
+
+    AnyOf {
+        id: showProtocolFilter
+        filters: [ installedFilter, installationAllowedFilter ]
+    }
+
     function getWriteAccessProtocolsListFilters() {
-        return [vpnTypeFilter]
+        return [ vpnTypeFilter, showProtocolFilter ]
     }
     function getReadAccessProtocolsListFilters() {
         return [vpnTypeFilter, installedFilter]

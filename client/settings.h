@@ -94,6 +94,15 @@ public:
         setValue("Conf/startMinimized", enabled);
     }
 
+    bool isNewsNotifications() const
+    {
+        return value("Conf/newsNotifications", true).toBool();
+    }
+    void setNewsNotifications(bool enabled)
+    {
+        setValue("Conf/newsNotifications", enabled);
+    }
+
     bool isSaveLogs() const
     {
         return value("Conf/saveLogs", false).toBool();
@@ -223,8 +232,8 @@ public:
     void resetGatewayEndpoint();
     void setGatewayEndpoint(const QString &endpoint);
     void setDevGatewayEndpoint();
-    QString getGatewayEndpoint();
-    bool isDevGatewayEnv();
+    QString getGatewayEndpoint(bool isTestPurchase = false);
+    bool isDevGatewayEnv(bool isTestPurchase = false);
     void toggleDevGatewayEnv(bool enabled);
 
     bool isHomeAdLabelVisible();

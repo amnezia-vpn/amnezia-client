@@ -44,6 +44,8 @@ public:
     virtual bool refreshKillSwitch( bool enabled ) override;
     virtual bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) override;
     virtual bool restoreResolvers() override;
+    virtual void xrayStart(const QString& cfg) override;
+    virtual void xrayStop() override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;
 

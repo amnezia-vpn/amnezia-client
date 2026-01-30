@@ -11,7 +11,6 @@
 
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
-#include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "ui/controllers/api/apiNewsController.h"
 #include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/controllers/allowedDnsController.h"
@@ -66,6 +65,9 @@ public:
     QSharedPointer<PageController> pageController() const;
     void setQmlRoot();
 
+    void openConnectionByIndex(int serverIndex);
+    void importConfigFromData(const QString &data);
+
 signals:
     void translationsUpdated();
     void websiteUrlChanged(const QString &newUrl);
@@ -91,8 +93,6 @@ private:
     void initAutoConnectHandler();
     void initAmneziaDnsToggledHandler();
     void initPrepareConfigHandler();
-    void initImportPremiumV2VpnKeyHandler();
-    void initShowMigrationDrawerHandler();
     void initStrictKillSwitchHandler();
     void initUpdateFoundHandler();
 
@@ -122,7 +122,6 @@ private:
 
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
-    QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
     QScopedPointer<ApiNewsController> m_apiNewsController;
 
     QSharedPointer<ContainersModel> m_containersModel;

@@ -26,6 +26,15 @@ namespace
         constexpr char publicKeyInfo[] = "public_key";
         constexpr char expiresAt[] = "expires_at";
     }
+
+    QString normalizeVpnKey(const QString &vpnKey)
+    {
+        QString normalized = vpnKey.trimmed();
+        if (normalized.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+            normalized = normalized.mid(QStringLiteral("vpn://").size());
+        }
+        return normalized;
+    }
 }
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
@@ -158,7 +167,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         QString primaryDns = server.value(config_key::dns1).toString();
         return primaryDns == protocols::dns::amneziaDnsIp;
     }
-    case IsAdVisibleRole:{
+    case IsAdVisibleRole: {
         return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::isAdVisible).toBool(false);
     }
     case AdHeaderRole: {
@@ -234,16 +243,29 @@ QString ServersModel::getServerDescription(const QJsonObject &server, const int 
 
 const QString ServersModel::getDefaultServerDescriptionCollapsed()
 {
-    const QJsonObject server = m_servers.at(m_defaultServerIndex).toObject();
-    const auto configVersion = server.value(config_key::configVersion).toInt();
-    auto description = getServerDescription(server, m_defaultServerIndex);
+    const QJsonObject serverConfig = m_servers.at(m_defaultServerIndex).toObject();
+    const auto configVersion = serverConfig.value(config_key::configVersion).toInt();
+    auto description = getServerDescription(serverConfig, m_defaultServerIndex);
     if (configVersion) {
         return description;
     }
 
-    auto container = ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
+    auto container = ContainerProps::containerFromString(serverConfig.value(config_key::defaultContainer).toString());
+    QString protocolVersion;
+    QString containerName = ContainerProps::containerHumanNames().value(container);
 
-    return description += ContainerProps::containerHumanNames().value(container) + " | " + server.value(config_key::hostName).toString();
+    if (ContainerProps::isAwgContainer(container)) {
+        QJsonObject containerConfig = m_settings->containerConfig(m_defaultServerIndex, container);
+        QJsonObject serverProtocolConfig = containerConfig.value(ContainerProps::containerTypeToProtocolString(container)).toObject();
+        protocolVersion = ProtocolProps::getProtocolVersionString(serverProtocolConfig);
+
+        auto isThirdPartyConfig = serverProtocolConfig.value(config_key::isThirdPartyConfig).toBool();
+        if (container == DockerContainer::Awg && !isThirdPartyConfig) {
+            containerName = "AmneziaWG Legacy";
+        }
+    }
+
+    return description += containerName + protocolVersion + " | " + serverConfig.value(config_key::hostName).toString();
 }
 
 const QString ServersModel::getDefaultServerDescriptionExpanded()
@@ -522,7 +544,22 @@ void ServersModel::setDefaultContainer(const int serverIndex, const int containe
 const QString ServersModel::getDefaultServerDefaultContainerName()
 {
     auto defaultContainer = qvariant_cast<DockerContainer>(getDefaultServerData("defaultContainer"));
-    return ContainerProps::containerHumanNames().value(defaultContainer);
+
+    QString protocolVersion;
+    QString containerName = ContainerProps::containerHumanNames().value(defaultContainer);
+
+    if (ContainerProps::isAwgContainer(defaultContainer)) {
+        QJsonObject containerConfig = m_settings->containerConfig(m_defaultServerIndex, defaultContainer);
+        QJsonObject serverProtocolConfig = containerConfig.value(ContainerProps::containerTypeToProtocolString(defaultContainer)).toObject();
+        protocolVersion = ProtocolProps::getProtocolVersionString(serverProtocolConfig);
+
+        auto isThirdPartyConfig = serverProtocolConfig.value(config_key::isThirdPartyConfig).toBool();
+        if (defaultContainer == DockerContainer::Awg && !isThirdPartyConfig) {
+            containerName = "AmneziaWG Legacy";
+        }
+    }
+
+    return containerName + protocolVersion;
 }
 
 ErrorCode ServersModel::removeAllContainers(const QSharedPointer<ServerController> &serverController)
@@ -690,6 +727,23 @@ bool ServersModel::isServerFromApiAlreadyExists(const QString &userCountryCode, 
     return false;
 }
 
+bool ServersModel::hasServerWithVpnKey(const QString &vpnKey) const
+{
+    const QString normalizedInput = normalizeVpnKey(vpnKey);
+    if (normalizedInput.isEmpty()) {
+        return false;
+    }
+
+    for (const auto &server : std::as_const(m_servers)) {
+        const auto apiConfig = server.toObject().value(configKey::apiConfig).toObject();
+        const QString existingKey = normalizeVpnKey(apiConfig.value(apiDefs::key::vpnKey).toString());
+        if (!existingKey.isEmpty() && existingKey == normalizedInput) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
 {
     QJsonObject server = m_servers.at(serverIndex).toObject();
@@ -753,8 +807,8 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
         if (container.value(config_key::container).toString() != ContainerProps::containerToString(defaultContainer)) {
             continue;
         }
-        if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-            QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
+        if (ContainerProps::isAwgContainer(defaultContainer) || defaultContainer == DockerContainer::WireGuard) {
+            QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToProtocolString(defaultContainer)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             QJsonObject clientProtocolConfig = QJsonDocument::fromJson(clientProtocolConfigString.toUtf8()).object();
             return (clientProtocolConfigString.contains("AllowedIPs") && !clientProtocolConfigString.contains("AllowedIPs = 0.0.0.0/0, ::/0"))
@@ -762,7 +816,7 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
                         && !clientProtocolConfig.value(config_key::allowed_ips).toArray().contains("0.0.0.0/0"));
         } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
                    || defaultContainer == DockerContainer::ShadowSocks) {
-            auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
+            auto serverProtocolConfig = container.value(ContainerProps::containerTypeToProtocolString(DockerContainer::OpenVpn)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             return !clientProtocolConfigString.isEmpty() && !clientProtocolConfigString.contains("redirect-gateway");
         }

@@ -140,6 +140,7 @@ public slots:
 
     bool isServerFromApiAlreadyExists(const quint16 crc);
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol);
+    bool hasServerWithVpnKey(const QString &vpnKey) const;
 
     QVariant getDefaultServerData(const QString roleString);
 

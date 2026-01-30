@@ -104,7 +104,7 @@ ErrorCode ClientManagementModel::updateModel(const DockerContainer container, co
 
         if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
             error = getOpenVpnClients(container, credentials, serverController, count);
-        } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
+        } else if (container == DockerContainer::WireGuard || ContainerProps::isAwgContainer(container)) {
             error = getWireGuardClients(container, credentials, serverController, count);
         } else if (container == DockerContainer::Xray) {
             error = getXrayClients(container, credentials, serverController, count);
@@ -209,8 +209,15 @@ ErrorCode ClientManagementModel::getWireGuardClients(const DockerContainer conta
 {
     ErrorCode error = ErrorCode::NoError;
 
-    const QString wireGuardConfigFile = QString("opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
-    const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
+    QString configPath;
+    if (container == DockerContainer::Awg) {
+        configPath = QString::fromLatin1(amnezia::protocols::awg::serverLegacyConfigPath);
+    } else if (container == DockerContainer::Awg2) {
+        configPath = QString::fromLatin1(amnezia::protocols::awg::serverConfigPath);
+    } else {
+        configPath = QString::fromLatin1(amnezia::protocols::wireguard::serverConfigPath);
+    }
+    const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, configPath, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
         return error;
@@ -307,7 +314,7 @@ ErrorCode ClientManagementModel::getXrayClients(const DockerContainer container,
 ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const ServerCredentials &credentials,
                                         const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data)
 {
-    if (container != DockerContainer::WireGuard && container != DockerContainer::Awg) {
+    if (container != DockerContainer::WireGuard && !ContainerProps::isAwgContainer(container)) {
         return ErrorCode::NoError;
     }
 
@@ -318,7 +325,11 @@ ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const S
         return ErrorCode::NoError;
     };
 
-    const QString command = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%1'").arg("wg show all");
+    QString showBin = (container == DockerContainer::Awg2)
+                       ? QStringLiteral("awg")
+                       : QStringLiteral("wg");
+    const QString command = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%1 show all'")
+                             .arg(showBin);
 
     QString script = serverController->replaceVars(command, serverController->genVarsForScript(credentials, container));
     error = serverController->runScript(credentials, script, cbReadStdOut);
@@ -397,6 +408,7 @@ ErrorCode ClientManagementModel::appendClient(const DockerContainer container, c
             break;
         case DockerContainer::OpenVpn:
         case DockerContainer::WireGuard:
+        case DockerContainer::Awg2:
         case DockerContainer::Awg:
         case DockerContainer::Xray:
             protocol = ContainerProps::defaultProtocol(container);
@@ -547,6 +559,7 @@ ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContain
             break;
         }
         case DockerContainer::WireGuard:
+        case DockerContainer::Awg2:
         case DockerContainer::Awg: {
             errorCode = revokeWireGuard(row, container, credentials, serverController);
             break;
@@ -606,6 +619,7 @@ ErrorCode ClientManagementModel::revokeClient(const QJsonObject &containerConfig
         }
         case DockerContainer::OpenVpn:
         case DockerContainer::WireGuard:
+        case DockerContainer::Awg2:
         case DockerContainer::Awg:
         case DockerContainer::Xray: {
             protocol = ContainerProps::defaultProtocol(container);
@@ -679,7 +693,8 @@ ErrorCode ClientManagementModel::revokeClient(const QJsonObject &containerConfig
         break;
     }
     case DockerContainer::WireGuard:
-    case DockerContainer::Awg: {
+    case DockerContainer::Awg:
+    case DockerContainer::Awg2: {
         errorCode = revokeWireGuard(row, container, credentials, serverController);
         break;
     }
@@ -738,9 +753,15 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
 {
     ErrorCode error = ErrorCode::NoError;
 
-    const QString wireGuardConfigFile =
-            QString("/opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
-    const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
+    QString configPath;
+    if (container == DockerContainer::Awg) {
+        configPath = QString::fromLatin1(amnezia::protocols::awg::serverLegacyConfigPath);
+    } else if (container == DockerContainer::Awg2) {
+        configPath = QString::fromLatin1(amnezia::protocols::awg::serverConfigPath);
+    } else {
+        configPath = QString::fromLatin1(amnezia::protocols::wireguard::serverConfigPath);
+    }
+    const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, configPath, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
         return error;
@@ -758,7 +779,7 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
     }
     QString newWireGuardConfig = configSections.join("[");
     newWireGuardConfig.insert(0, "[");
-    error = serverController->uploadTextFileToContainer(container, credentials, newWireGuardConfig, wireGuardConfigFile);
+    error = serverController->uploadTextFileToContainer(container, credentials, newWireGuardConfig, configPath);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the wg conf file to the server";
         return error;
@@ -782,12 +803,18 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
         return error;
     }
 
-    const QString script = "sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip %1)'";
+    bool isAwg = (container == DockerContainer::Awg2);
+    QString command = isAwg ? QStringLiteral("awg") : QStringLiteral("wg");
+    QString iface   = isAwg ? QStringLiteral("awg0") : QStringLiteral("wg0");
+    QString script  = QString(
+        "sudo docker exec -i $CONTAINER_NAME bash -c '%1 syncconf %2 <(%1-quick strip %3)'"
+    ).arg(command, iface, configPath);
     error = serverController->runScript(
-            credentials,
-            serverController->replaceVars(script.arg(wireGuardConfigFile), serverController->genVarsForScript(credentials, container)));
+        credentials,
+        serverController->replaceVars(script, serverController->genVarsForScript(credentials, container))
+    );
     if (error != ErrorCode::NoError) {
-        logger.error() << "Failed to execute the command 'wg syncconf' on the server";
+        logger.error() << QString("Failed to execute command '%1 syncconf %2' on the server").arg(command, iface);
         return error;
     }
 

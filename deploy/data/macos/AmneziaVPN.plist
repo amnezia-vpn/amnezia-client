@@ -10,6 +10,8 @@
     </array>
     <key>KeepAlive</key>
     <true/>
+    <key>RunAtLoad</key>
+    <true/>
     <key>Sockets</key>
 	<dict>
 	    <key>Listeners</key>

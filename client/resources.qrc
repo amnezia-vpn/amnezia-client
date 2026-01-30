@@ -71,6 +71,11 @@
         <file>server_scripts/awg/run_container.sh</file>
         <file>server_scripts/awg/start.sh</file>
         <file>server_scripts/awg/template.conf</file>
+        <file>server_scripts/awg_legacy/configure_container.sh</file>
+        <file>server_scripts/awg_legacy/Dockerfile</file>
+        <file>server_scripts/awg_legacy/run_container.sh</file>
+        <file>server_scripts/awg_legacy/start.sh</file>
+        <file>server_scripts/awg_legacy/template.conf</file>
         <file>server_scripts/build_container.sh</file>
         <file>server_scripts/check_connection.sh</file>
         <file>server_scripts/check_server_is_busy.sh</file>
@@ -246,9 +251,6 @@
         <file>ui/qml/Pages2/PageSettingsApiNativeConfigs.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiDevices.qml</file>
         <file>images/controls/monitor.svg</file>
-        <file>ui/qml/Components/ApiPremV1MigrationDrawer.qml</file>
-        <file>ui/qml/Components/ApiPremV1SubListDrawer.qml</file>
-        <file>ui/qml/Components/OtpCodeDrawer.qml</file>
         <file>ui/qml/Components/AwgTextField.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml</file>
         <file>ui/qml/Components/SmartScroll.qml</file>

@@ -131,7 +131,7 @@ extension PacketTunnelProvider {
         }
 
         startHandler = completionHandler
-        ovpnAdapter?.connect(using: packetFlow)
+        ovpnAdapter?.connect(using: openVPNPacketFlow())
     }
 
     func handleOpenVPNStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
@@ -153,7 +153,7 @@ extension PacketTunnelProvider {
     }
 
     func stopOpenVPN(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-        ovpnLog(.info, message: "Stopping tunnel: reason: \(reason.description)")
+        ovpnLog(.info, message: "Stopping tunnel: reason: \(reason.amneziaDescription)")
 
         stopHandler = completionHandler
         if vpnReachability.isTracking {
@@ -293,5 +293,3 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
         ovpnLog(.info, message: logMessage)
     }
 }
-
-extension NEPacketTunnelFlow: OpenVPNAdapterPacketFlow {}

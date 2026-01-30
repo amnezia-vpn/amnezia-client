@@ -242,7 +242,7 @@ PageType {
                 Layout.alignment: Qt.AlignHCenter
                 implicitHeight: 32
 
-                visible: Qt.platform.os !== "ios"
+                visible: Qt.platform.os !== "ios" && !IsMacOsNeBuild
 
                 defaultColor: AmneziaStyle.color.transparent
                 hoveredColor: AmneziaStyle.color.translucentWhite
@@ -267,6 +267,7 @@ PageType {
         backupRestore,
         fileOpen,
         qrScan,
+        restorePurchases,
         siteLink
     ]
     
@@ -352,12 +353,26 @@ PageType {
     }
 
     QtObject {
+        id: restorePurchases
+
+        property string title: qsTr("Restore purchases")
+        property string description: qsTr("")
+        property string imageSource: "qrc:/images/controls/refresh-cw.svg"
+        property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild
+        property var handler: function() {
+            PageController.showBusyIndicator(true)
+            ApiConfigsController.restoreSerivceFromAppStore()
+            PageController.showBusyIndicator(false)
+        }
+    }
+
+    QtObject {
         id: siteLink
 
         property string title: qsTr("I have nothing")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/help-circle.svg"
-        property bool isVisible: PageController.isStartPageVisible() && Qt.platform.os !== "ios"
+        property bool isVisible: PageController.isStartPageVisible() && Qt.platform.os !== "ios" && !IsMacOsNeBuild
         property var handler: function() {
             Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
         }

@@ -154,14 +154,11 @@ void CoreController::initControllers()
     m_apiConfigsController.reset(new ApiConfigsController(m_serversModel, m_apiServicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController.get());
 
-    m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
-    m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
+    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
+    m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
 
     m_updateController.reset(new UpdateController(m_settings));
     m_engine->rootContext()->setContextProperty("UpdateController", m_updateController.get());
-    
-    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
-    m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
 }
 
 void CoreController::initAndroidController()
@@ -234,8 +231,6 @@ void CoreController::initSignalHandlers()
     initAutoConnectHandler();
     initAmneziaDnsToggledHandler();
     initPrepareConfigHandler();
-    initImportPremiumV2VpnKeyHandler();
-    initShowMigrationDrawerHandler();
     initStrictKillSwitchHandler();
     initUpdateFoundHandler();
 }
@@ -386,25 +381,6 @@ void CoreController::initPrepareConfigHandler()
     });
 }
 
-void CoreController::initImportPremiumV2VpnKeyHandler()
-{
-    connect(m_apiPremV1MigrationController.get(), &ApiPremV1MigrationController::importPremiumV2VpnKey, this, [this](const QString &vpnKey) {
-        m_importController->extractConfigFromData(vpnKey);
-        m_importController->importConfig();
-
-        emit m_apiPremV1MigrationController->migrationFinished();
-    });
-}
-
-void CoreController::initShowMigrationDrawerHandler()
-{
-    QTimer::singleShot(1000, this, [this]() {
-        if (m_apiPremV1MigrationController->isPremV1MigrationReminderActive() && m_apiPremV1MigrationController->hasConfigsToMigration()) {
-            m_apiPremV1MigrationController->showMigrationDrawer();
-        }
-    });
-}
-
 void CoreController::initStrictKillSwitchHandler()
 {
     connect(m_settingsController.get(), &SettingsController::strictKillSwitchEnabledChanged, m_vpnConnection.get(),
@@ -429,4 +405,23 @@ void CoreController::initUpdateFoundHandler()
 QSharedPointer<PageController> CoreController::pageController() const
 {
     return m_pageController;
+}
+
+void CoreController::openConnectionByIndex(int serverIndex)
+{
+    if (m_serversModel) {
+        m_serversModel->setProcessedServerIndex(serverIndex);
+        m_serversModel->setDefaultServerIndex(serverIndex);
+    }
+    m_connectionController->toggleConnection();
+}
+
+void CoreController::importConfigFromData(const QString &data)
+{
+    if (!m_importController)
+        return;
+
+    if (m_importController->extractConfigFromData(data)) {
+        m_importController->importConfig();
+    }
 }

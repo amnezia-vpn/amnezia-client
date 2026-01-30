@@ -269,9 +269,19 @@ class AmneziaActivity : QtActivity() {
         super.onStop()
     }
 
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        Log.d(TAG, "Window focus changed: hasFocus=$hasFocus")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "Pause Amnezia activity")
+    }
+
     override fun onResume() {
         super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             window.decorView.apply {
                 invalidate()
 
@@ -288,7 +298,8 @@ class AmneziaActivity : QtActivity() {
                     invalidate()
                 }, 250)
             }
-        }
+        }  */      
+        Log.d(TAG, "Resume Amnezia activity")
     }
 
     private fun configureWindowForEdgeToEdge() {
@@ -313,6 +324,11 @@ class AmneziaActivity : QtActivity() {
             window.apply {
                 addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                 statusBarColor = getColor(R.color.black)
+            }
+
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                isAppearanceLightStatusBars = false
+                isAppearanceLightNavigationBars = false
             }
         }
     }

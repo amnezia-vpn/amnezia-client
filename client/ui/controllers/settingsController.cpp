@@ -308,6 +308,15 @@ void SettingsController::toggleStartMinimized(bool enable)
     emit startMinimizedChanged();
 }
 
+bool SettingsController::isNewsNotificationsEnabled()
+{
+    return m_settings->isNewsNotifications();
+}
+void SettingsController::toggleNewsNotificationsEnabled(bool enable)
+{
+    m_settings->setNewsNotifications(enable);
+}
+
 bool SettingsController::isScreenshotsEnabled()
 {
     return m_settings->isScreenshotsEnabled();
