@@ -94,6 +94,15 @@ public:
         setValue("Conf/startMinimized", enabled);
     }
 
+    bool isNewsNotifications() const
+    {
+        return value("Conf/newsNotifications", true).toBool();
+    }
+    void setNewsNotifications(bool enabled)
+    {
+        setValue("Conf/newsNotifications", enabled);
+    }
+
     bool isSaveLogs() const
     {
         return value("Conf/saveLogs", false).toBool();

@@ -383,7 +383,7 @@ PageType {
             objectName: "settingsTabButton"
 
             isSelected: tabBar.currentIndex === 2
-            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
+            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
             Binding {
                 target: settingsTabButton
                 property: "defaultColor"
