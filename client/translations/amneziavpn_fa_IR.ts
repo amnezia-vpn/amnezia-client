@@ -2974,6 +2974,11 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="229"/>
+        <source>Restore purchases</source>
+        <translation>بازیابی خریدها</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="251"/>
         <source>VPN by Amnezia</source>
         <translation>VPN توسط Amnezia</translation>

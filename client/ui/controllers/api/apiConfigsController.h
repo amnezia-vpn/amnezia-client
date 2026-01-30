@@ -26,6 +26,9 @@ public slots:
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
+    bool importService();
+    bool importSerivceFromAppStore();
+    bool restoreSerivceFromAppStore();
     bool importServiceFromGateway();
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
@@ -53,7 +56,8 @@ private:
     int getQrCodesCount();
     QString getVpnKey();
 
-    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
+    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
+    ErrorCode importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase);
 
     QList<QString> m_qrCodes;
     QString m_vpnKey;

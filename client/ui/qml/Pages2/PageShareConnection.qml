@@ -34,7 +34,7 @@ PageType {
     //     configExtension = ".vpn"
     //     configCaption = qsTr("Save AmneziaVPN config")
     //     configFileName = "amnezia_config"
-        
+
     //     if (visible) {
     //         var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
     //         headerText = qsTr("Connection to ") + serverName
@@ -47,7 +47,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
     }
 
     Text {
@@ -55,7 +55,7 @@ PageType {
         anchors.top: backButton.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
@@ -175,7 +175,7 @@ PageType {
                 id: configContentDrawer
                 parent: pageShareConnection.parent
                 anchors.fill: parent
-                expandedHeight: parent.height * 0.9
+                expandedHeight: parent ? parent.height * 0.9 : 0
                 expandedStateContent: Item {
                     id: configContentContainer
                     implicitHeight: configContentDrawer.expandedHeight

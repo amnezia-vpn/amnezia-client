@@ -120,6 +120,15 @@ public:
     {
         setValue("Sec/hint", hint);
     }
+    
+    bool isNewsNotifications() const
+    {
+        return value("Conf/newsNotifications", true).toBool();
+    }
+    void setNewsNotifications(bool enabled)
+    {
+        setValue("Conf/newsNotifications", enabled);
+    }
 
     bool isSaveLogs() const
     {
@@ -250,8 +259,8 @@ public:
     void resetGatewayEndpoint();
     void setGatewayEndpoint(const QString &endpoint);
     void setDevGatewayEndpoint();
-    QString getGatewayEndpoint();
-    bool isDevGatewayEnv();
+    QString getGatewayEndpoint(bool isTestPurchase = false);
+    bool isDevGatewayEnv(bool isTestPurchase = false);
     void toggleDevGatewayEnv(bool enabled);
 
     bool isHomeAdLabelVisible();

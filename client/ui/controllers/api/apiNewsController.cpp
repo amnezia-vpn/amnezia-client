@@ -19,7 +19,7 @@ ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
 {
 }
 
-void ApiNewsController::fetchNews()
+void ApiNewsController::fetchNews(bool showError)
 {
     if (m_serversModel.isNull()) {
         qWarning() << "ServersModel is null, skip fetchNews";
@@ -30,9 +30,9 @@ void ApiNewsController::fetchNews()
         qDebug() << "No Gateway stacks, skip fetchNews";
         return;
     }
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
-    QByteArray responseBody;
+
+    auto gatewayController = QSharedPointer<GatewayController>::create(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
+                                                                       apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
     QJsonObject payload;
     payload.insert("locale", m_settings->getAppLanguage().name().split("_").first());
 
@@ -44,22 +44,26 @@ void ApiNewsController::fetchNews()
         payload.insert(configKey::serviceType, stacksJson.value(configKey::serviceType));
     }
 
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/news"), payload, responseBody);
-    if (errorCode != ErrorCode::NoError) {
-        emit errorOccurred(errorCode);
-        return;
-    }
-
-    QJsonDocument doc = QJsonDocument::fromJson(responseBody);
-    QJsonArray newsArray;
-    if (doc.isArray()) {
-        newsArray = doc.array();
-    } else if (doc.isObject()) {
-        QJsonObject obj = doc.object();
-        if (obj.value("news").isArray()) {
-            newsArray = obj.value("news").toArray();
+    auto future = gatewayController->postAsync(QString("%1v1/news"), payload);
+    future.then(this, [this, showError, gatewayController](QPair<ErrorCode, QByteArray> result) {
+        auto [errorCode, responseBody] = result;
+        if (errorCode != ErrorCode::NoError) {
+            emit errorOccurred(errorCode, showError);
+            return;
         }
-    }
 
-    m_newsModel->updateModel(newsArray);
+        QJsonDocument doc = QJsonDocument::fromJson(responseBody);
+        QJsonArray newsArray;
+        if (doc.isArray()) {
+            newsArray = doc.array();
+        } else if (doc.isObject()) {
+            QJsonObject obj = doc.object();
+            if (obj.value("news").isArray()) {
+                newsArray = obj.value("news").toArray();
+            }
+        }
+
+        m_newsModel->updateModel(newsArray);
+        emit fetchNewsFinished();
+    });
 }

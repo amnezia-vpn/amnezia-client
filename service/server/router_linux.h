@@ -30,11 +30,11 @@ public:
     bool routeDelete(const QString &ip, const QString &gw, const int &sock);
     bool routeDeleteList(const QString &gw, const QStringList &ips);
     QString getgatewayandiface();
-    void flushDns();
+    bool flushDns();
     bool createTun(const QString &dev, const QString &subnet);
     bool deleteTun(const QString &dev);
-    void StartRoutingIpv6();
-    void StopRoutingIpv6();
+    bool StartRoutingIpv6();
+    bool StopRoutingIpv6();
     bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
     bool restoreResolvers();
 public slots:

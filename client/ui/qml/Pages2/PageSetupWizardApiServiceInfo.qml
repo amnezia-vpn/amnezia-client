@@ -21,7 +21,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -109,15 +109,15 @@ PageType {
                 text: qsTr("Connect")
 
                 clickedFunc: function() {
-                    var endpoint = ApiServicesModel.getStoreEndpoint()
-                    if (endpoint !== undefined && endpoint !== "") {
+                    PageController.showBusyIndicator(true)
+                    var result = ApiConfigsController.importService()
+                    PageController.showBusyIndicator(false)
+
+                    if (!result) {
+                        var endpoint = ApiServicesModel.getStoreEndpoint()
                         Qt.openUrlExternally(endpoint)
                         PageController.closePage()
                         PageController.closePage()
-                    } else {
-                        PageController.showBusyIndicator(true)
-                        ApiConfigsController.importServiceFromGateway()
-                        PageController.showBusyIndicator(false)
                     }
                 }
             }

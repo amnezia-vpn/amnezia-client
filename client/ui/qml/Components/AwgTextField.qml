@@ -9,7 +9,5 @@ TextFieldWithHeaderType {
     Layout.fillWidth: true
     Layout.topMargin: 16
 
-    textField.validator: IntValidator { bottom: 0 }
-
     checkEmptyText: true
 }

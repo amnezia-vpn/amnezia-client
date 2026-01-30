@@ -32,8 +32,8 @@
         <file>images/controls/history.svg</file>
         <file>images/controls/home.svg</file>
         <file>images/controls/info.svg</file>
-		<file>images/controls/lock-locked.svg</file>
-		<file>images/controls/lock-unlocked.svg</file>
+		    <file>images/controls/lock-locked.svg</file>
+		    <file>images/controls/lock-unlocked.svg</file>
         <file>images/controls/mail.svg</file>
         <file>images/controls/map-pin.svg</file>
         <file>images/controls/more-vertical.svg</file>
@@ -70,6 +70,11 @@
         <file>server_scripts/awg/run_container.sh</file>
         <file>server_scripts/awg/start.sh</file>
         <file>server_scripts/awg/template.conf</file>
+        <file>server_scripts/awg_legacy/configure_container.sh</file>
+        <file>server_scripts/awg_legacy/Dockerfile</file>
+        <file>server_scripts/awg_legacy/run_container.sh</file>
+        <file>server_scripts/awg_legacy/start.sh</file>
+        <file>server_scripts/awg_legacy/template.conf</file>
         <file>server_scripts/build_container.sh</file>
         <file>server_scripts/check_connection.sh</file>
         <file>server_scripts/check_server_is_busy.sh</file>
@@ -129,12 +134,12 @@
         <file>ui/qml/Components/HomeContainersListView.qml</file>
         <file>ui/qml/Components/HomeSplitTunnelingDrawer.qml</file>
         <file>ui/qml/Components/InstalledAppsDrawer.qml</file>
-		<file>ui/qml/Components/PasswordDrawer.qml</file>
+		    <file>ui/qml/Components/PasswordDrawer.qml</file>
         <file>ui/qml/Components/QuestionDrawer.qml</file>
         <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
         <file>ui/qml/Components/ServersListView.qml</file>
         <file>ui/qml/Components/SettingsContainersListView.qml</file>
-		<file>ui/qml/Components/EncryptionIndicator.qml</file>
+		    <file>ui/qml/Components/EncryptionIndicator.qml</file>
 		
         <file>ui/qml/Components/TransportProtoSelector.qml</file>
         <file>ui/qml/Components/AddSitePanel.qml</file>
@@ -207,9 +212,9 @@
         <file>ui/qml/Pages2/PageSettingsApiServerInfo.qml</file>
         <file>ui/qml/Pages2/PageSettingsApplication.qml</file>
         <file>ui/qml/Pages2/PageSettingsAppSplitTunneling.qml</file>
-		<file>ui/qml/Pages2/PageSettingsAppEncryption.qml</file>
-		<file>ui/qml/Pages2/PageSettingsAppPassword.qml</file>
-		<file>ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml</file>
+		    <file>ui/qml/Pages2/PageSettingsAppEncryption.qml</file>
+		    <file>ui/qml/Pages2/PageSettingsAppPassword.qml</file>
+		    <file>ui/qml/Pages2/PageSettingsAppPasswordConfirm.qml</file>
         <file>ui/qml/Pages2/PageSettingsBackup.qml</file>
         <file>ui/qml/Pages2/PageSettingsConnection.qml</file>
         <file>ui/qml/Pages2/PageSettingsDns.qml</file>
@@ -250,11 +255,9 @@
         <file>ui/qml/Pages2/PageSettingsApiNativeConfigs.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiDevices.qml</file>
         <file>images/controls/monitor.svg</file>
-        <file>ui/qml/Components/ApiPremV1MigrationDrawer.qml</file>
-        <file>ui/qml/Components/ApiPremV1SubListDrawer.qml</file>
-        <file>ui/qml/Components/OtpCodeDrawer.qml</file>
         <file>ui/qml/Components/AwgTextField.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml</file>
+        <file>ui/qml/Components/SmartScroll.qml</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

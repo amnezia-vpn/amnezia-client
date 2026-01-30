@@ -1,8 +1,12 @@
 #ifndef GATEWAYCONTROLLER_H
 #define GATEWAYCONTROLLER_H
 
+#include <QFuture>
 #include <QNetworkReply>
 #include <QObject>
+#include <QPair>
+#include <QPromise>
+#include <QSharedPointer>
 
 #include "core/defs.h"
 
@@ -19,14 +23,41 @@ public:
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
+    QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
+    struct EncryptedRequestData
+    {
+        QNetworkRequest request;
+        QByteArray requestBody;
+        QByteArray key;
+        QByteArray iv;
+        QByteArray salt;
+        amnezia::ErrorCode errorCode;
+    };
+
+    struct DecryptionResult
+    {
+        QByteArray decryptedBody;
+        bool isDecryptionSuccessful;
+    };
+
+    EncryptedRequestData prepareRequest(const QString &endpoint, const QJsonObject &apiPayload);
+    DecryptionResult tryDecryptResponseBody(const QByteArray &encryptedResponseBody, QNetworkReply::NetworkError replyError,
+                                            const QByteArray &key, const QByteArray &iv, const QByteArray &salt);
+
     QStringList getProxyUrls(const QString &serviceType, const QString &userCountryCode);
-    bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &responseBody, bool checkEncryption,
-                           const QByteArray &key = "", const QByteArray &iv = "", const QByteArray &salt = "");
+    bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody, bool isDecryptionSuccessful);
     void bypassProxy(const QString &endpoint, const QString &serviceType, const QString &userCountryCode,
                      std::function<QNetworkReply *(const QString &url)> requestFunction,
                      std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction);
+
+    void getProxyUrlsAsync(const QStringList proxyStorageUrls, const int currentProxyStorageIndex,
+                           std::function<void(const QStringList &)> onComplete);
+    void getProxyUrlAsync(const QStringList proxyUrls, const int currentProxyIndex, std::function<void(const QString &)> onComplete);
+    void bypassProxyAsync(
+            const QString &endpoint, const QString &proxyUrl, EncryptedRequestData encRequestData,
+            std::function<void(const QByteArray &, bool, const QList<QSslError> &, QNetworkReply::NetworkError, const QString &, int)> onComplete);
 
     int m_requestTimeoutMsecs;
     QString m_gatewayEndpoint;

@@ -534,14 +534,14 @@ void Settings::setDevGatewayEndpoint()
     m_gatewayEndpoint = DEV_AGW_ENDPOINT;
 }
 
-QString Settings::getGatewayEndpoint()
+QString Settings::getGatewayEndpoint(bool isTestPurchase)
 {
-    return m_gatewayEndpoint;
+    return isTestPurchase ? DEV_AGW_ENDPOINT : m_gatewayEndpoint;
 }
 
-bool Settings::isDevGatewayEnv()
+bool Settings::isDevGatewayEnv(bool isTestPurchase)
 {
-    return value("Conf/devGatewayEnv", false).toBool();
+    return isTestPurchase ? true : value("Conf/devGatewayEnv", false).toBool();
 }
 
 void Settings::toggleDevGatewayEnv(bool enabled)

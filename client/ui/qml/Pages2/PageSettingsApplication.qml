@@ -20,7 +20,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -161,6 +161,29 @@ PageType {
                 onToggled: function() {
                     if (checked !== SettingsController.startMinimized) {
                         SettingsController.toggleStartMinimized(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: !GC.isMobile()
+            }
+
+            SwitcherType {
+                id: switcherNewsNotificationEnabled
+
+                visible: ServersModel.hasServersFromGatewayApi
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("News Notification")
+                descriptionText: qsTr("Show notification icon when has unread news")
+
+                checked: SettingsController.isNewsNotificationsEnabled()
+                onToggled: function() {
+                    if (checked !== SettingsController.isNewsNotificationsEnabled()) {
+                        SettingsController.toggleNewsNotificationsEnabled(checked)
                     }
                 }
             }

@@ -173,7 +173,7 @@ PageType {
             HeaderTypeWithButton {
                 id: header
                 Layout.fillWidth: true
-                Layout.topMargin: 24
+                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
 
                 headerText: qsTr("Share VPN Access")
 
@@ -321,7 +321,7 @@ PageType {
             DropDownType {
                 id: serverSelector
 
-                signal severSelectorIndexChanged
+                signal serverSelectorIndexChanged
                 property int currentIndex: -1
 
                 Layout.fillWidth: true
@@ -358,7 +358,7 @@ PageType {
 
                         if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
                             serverSelector.currentIndex = serverSelectorListView.selectedIndex
-                            serverSelector.severSelectorIndexChanged()
+                            serverSelector.serverSelectorIndexChanged()
                         }
 
                         serverSelector.closeTriggered()
@@ -384,6 +384,8 @@ PageType {
 
             DropDownType {
                 id: protocolSelector
+
+                signal protocolSelectorTextChanged
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -424,7 +426,7 @@ PageType {
                     Connections {
                         target: serverSelector
 
-                        function onSeverSelectorIndexChanged() {
+                        function onServerSelectorIndexChanged() {
                             var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
                             protocolSelectorListView.selectedIndex = defaultContainer
                             protocolSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
@@ -446,17 +448,14 @@ PageType {
 
                         fillConnectionTypeModel()
 
-                        if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
-                            exportTypeSelector.currentIndex = 0
-                            exportTypeSelector.text = root.connectionTypesModel[0].name
-                        }
-
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
+
+                        protocolSelector.protocolSelectorTextChanged()
                     }
 
                     function fillConnectionTypeModel() {
@@ -469,6 +468,8 @@ PageType {
                         } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
+                            root.connectionTypesModel.push(awgConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg2")) {
                             root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
@@ -509,6 +510,14 @@ PageType {
                         exportTypeSelector.text = exportTypeSelectorListView.selectedText
                     }
 
+                    onModelChanged: {
+                        if (exportTypeSelector.currentIndex >= model.length || exportTypeSelector.currentIndex < 0) {
+                            exportTypeSelector.currentIndex = 0
+                        }
+                        selectedIndex = exportTypeSelector.currentIndex
+                        exportTypeSelector.text = selectedText
+                    }
+
                     rootWidth: root.width
 
                     imageSource: "qrc:/images/controls/check.svg"
@@ -516,15 +525,22 @@ PageType {
                     model: root.connectionTypesModel
                     currentIndex: 0
 
+                    Connections {
+                        target: protocolSelector
+
+                        function onProtocolSelectorTextChanged() {
+                            if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
+                                exportTypeSelectorListView.selectedIndex = 0
+                                exportTypeSelector.currentIndex = 0
+                                exportTypeSelector.text = root.connectionTypesModel[0].name
+                            }
+                        }
+                    }
+
                     clickedFunction: function() {
                         exportTypeSelector.text = exportTypeSelectorListView.selectedText
                         exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
                         exportTypeSelector.closeTriggered()
-                    }
-
-                    Component.onCompleted: {
-                        exportTypeSelector.text = exportTypeSelectorListView.selectedText
-                        exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
                     }
                 }
             }
@@ -576,6 +592,7 @@ PageType {
                     textField.placeholderText: qsTr("Search")
 
                     Keys.onEscapePressed: {
+                        searchTextField.textField.text = ""
                         root.isSearchBarVisible = false
                     }
 
@@ -596,6 +613,7 @@ PageType {
                     imageColor: AmneziaStyle.color.paleGray
 
                     function clickedFunc() {
+                        searchTextField.textField.text = ""
                         root.isSearchBarVisible = false
                     }
 
@@ -612,6 +630,8 @@ PageType {
 
                 visible: accessTypeSelector.currentIndex === 1
 
+                function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
+
                 property bool isFocusable: true
                 property bool freezeFilter: false
 
@@ -621,7 +641,7 @@ PageType {
                     filters: RegExpFilter {
                         roleName: "clientName"
                         enabled: !clientsListView.freezeFilter
-                        pattern: ".*" + searchTextField.textField.text + ".*"
+                        pattern: ".*" + clientsListView.escapeRe(searchTextField.textField.text) + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
                 }

@@ -19,6 +19,7 @@ class WindowsNetworkWatcher final : public NetworkWatcherImpl {
 
  private:
   static void wlanCallback(PWLAN_NOTIFICATION_DATA data, PVOID context);
+  static LRESULT PowerWndProcCallback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
   void processWlan(PWLAN_NOTIFICATION_DATA data);
 

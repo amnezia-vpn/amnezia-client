@@ -101,7 +101,6 @@ PageType {
         remove,
         clear,
         reset,
-        switch_to_premium,
     ]
 
     QtObject {
@@ -237,16 +236,4 @@ PageType {
         }
     }
 
-    QtObject {
-        id: switch_to_premium
-
-        property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.processedServerIsPremium
-        readonly property string title: qsTr("Switch to the new Amnezia Premium subscription")
-        readonly property string description: ""
-        readonly property var tColor: AmneziaStyle.color.vibrantRed
-        readonly property var clickedHandler: function() {
-            PageController.goToPageHome()
-            ApiPremV1MigrationController.showMigrationDrawer()
-        }
-    }
 }

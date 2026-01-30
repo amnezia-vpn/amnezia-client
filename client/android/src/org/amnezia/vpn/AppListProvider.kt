@@ -38,15 +38,15 @@ object AppListProvider {
     }
 }
 
-private class App(pi: PackageInfo, pm: PackageManager, ai: ApplicationInfo = pi.applicationInfo) : Comparable<App> {
+private class App(pi: PackageInfo, pm: PackageManager, ai: ApplicationInfo? = pi.applicationInfo) : Comparable<App> {
     val name: String?
     val packageName: String = pi.packageName
-    val icon: Boolean = ai.icon != 0
+    val icon: Boolean = (ai?.icon ?: 0) != 0
     val isLaunchable: Boolean = pm.getLaunchIntentForPackage(packageName) != null
 
     init {
-        val name = ai.loadLabel(pm).toString()
-        this.name = if (name != packageName) name else null
+        val name = ai?.loadLabel(pm)?.toString()
+        this.name = name?.takeIf { it != packageName }
     }
 
     override fun compareTo(other: App): Int {

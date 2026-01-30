@@ -10,10 +10,10 @@ env:
 
 jobs:
   Build-Linux-Ubuntu:
-    runs-on: ubuntu-22.04
+    runs-on: android-runner
 
     env:
-      QT_VERSION: 6.6.2
+      QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
@@ -30,13 +30,15 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'desktop'
-        arch: 'gcc_64'
+        arch: 'linux_gcc_64'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        aqtversion: '==3.3.0'       
+        py7zrversion: '==0.22.*'  
+        extra: '--base ${{ env.QT_MIRROR }}' 
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -44,24 +46,31 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Get version from CMakeLists.txt'
+      id: get_version
+      run: |
+        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version: $VERSION"
+
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
-        sudo apt-get install libxkbcommon-x11-0
+        sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin
         export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
         bash deploy/build_linux.sh
 
     - name: 'Pack installer'
-      run: cd deploy && tar -cf AmneziaVPN_Linux_Installer.tar AmneziaVPN_Linux_Installer.bin
+      run: cd deploy && tar -cf AmneziaVPN_Linux_Installer.tar AmneziaVPN_Linux_Installer.bin && zip AmneziaVPN_${VERSION}_linux_x64.tar.zip AmneziaVPN_Linux_Installer.tar
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_Linux_installer.tar
-        path: deploy/AmneziaVPN_Linux_Installer.tar
+        name: AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
+        path: deploy/AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
@@ -84,7 +93,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      QT_VERSION: 6.6.2
+      QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
       BUILD_ARCH: 64
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
@@ -102,8 +111,16 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Get version from CMakeLists.txt'
+      id: get_version
+      shell: bash
+      run: |
+        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version: $VERSION"
+
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
@@ -111,32 +128,62 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'windows'
         target: 'desktop'
-        arch: 'win64_msvc2019_64'
+        arch: 'win64_msvc2022_64'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        aqtversion: '==3.3.0'       
+        py7zrversion: '==0.22.*'  
+        extra: '--base ${{ env.QT_MIRROR }}' 
 
     - name: 'Setup mvsc'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: 'x64'
 
+    - name: 'Setup .NET SDK'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: 'Install WiX Toolset'
+      shell: powershell
+      run: |
+        dotnet tool install --global wix --version 4.0.6
+        wix extension add -g WixToolset.UI.wixext/4.0.6
+        wix extension add -g WixToolset.Util.wixext/4.0.6
+        wix extension list -g
+        $wixBinDir = Join-Path $env:USERPROFILE ".dotnet\tools"
+        echo "WIX_BIN_DIR=$wixBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
     - name: 'Build project'
       shell: cmd
       run: |
         set BUILD_ARCH=${{ env.BUILD_ARCH }}
-        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2019_64\\bin"
+        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2022_64\\bin"
         set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
+        set WIX_BIN_DIR=%USERPROFILE%\.dotnet\tools
         call deploy\\build_windows.bat
+
+    - name: 'Rename Windows installer'
+      shell: cmd
+      run: |
+        copy AmneziaVPN_x${{ env.BUILD_ARCH }}.exe AmneziaVPN_%VERSION%_x64.exe
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_Windows_installer
-        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
+        name: AmneziaVPN_${{ env.VERSION }}_x64.exe
+        path: AmneziaVPN_${{ env.VERSION }}_x64.exe
+        retention-days: 7
+
+    - name: 'Upload MSI installer artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_Windows_MSI_installer
+        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.msi
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
@@ -149,10 +196,10 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
-    runs-on: macos-13
+    runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.6.2
+      QT_VERSION: 6.10.1
       CC: cc
       CXX: c++
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
@@ -167,7 +214,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '15.2'
+        xcode-version: '26.1'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -211,8 +258,8 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install dependencies'
       run: pip install jsonschema jinja2
@@ -303,8 +350,8 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -331,7 +378,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.8.0
+      QT_VERSION: 6.10.1
 
       MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
@@ -361,7 +408,7 @@ jobs:
         xcode-version: '16.2.0'
 
     - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
@@ -371,8 +418,9 @@ jobs:
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
-
+        aqtversion: '==3.3.0'       
+        py7zrversion: '==0.22.*'  
+        extra: '--base ${{ env.QT_MIRROR }}' 
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -380,19 +428,32 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Get version from CMakeLists.txt'
+      id: get_version
+      run: |
+        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version: $VERSION"
+
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
         bash deploy/build_macos.sh -n
 
+    - name: 'Pack macOS installer'
+      run: |
+        cd deploy/build/pkg
+        zip -r ../../AmneziaVPN_${VERSION}_macos.zip AmneziaVPN.pkg
+        cd ../../..
+
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_MacOS_installer
-        path: deploy/build/pkg/AmneziaVPN.pkg
+        name: AmneziaVPN_${{ env.VERSION }}_macos.zip
+        path: deploy/AmneziaVPN_${{ env.VERSION }}_macos.zip
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
@@ -406,7 +467,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.8.3
+      QT_VERSION: 6.10.1
 
       MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
@@ -426,21 +487,31 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '16.2.0'
+        xcode-version: '26.1'
 
-    - name: 'Install Qt'
+    - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'desktop'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
-        setup-python: 'true'
         set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        extra: '--base ${{ env.QT_MIRROR }}'
 
+    - name: 'Install go'
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+        cache: false
+
+    - name: 'Setup gomobile'
+      run: |
+          export PATH=$PATH:~/go/bin
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          gomobile init
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -448,8 +519,8 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Build project'
       run: |
@@ -466,11 +537,11 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
-    runs-on: ubuntu-latest
+    runs-on: android-runner
 
     env:
-      ANDROID_BUILD_PLATFORM: android-34
-      QT_VERSION: 6.7.3
+      ANDROID_BUILD_PLATFORM: android-36
+      QT_VERSION: 6.10.1
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
@@ -551,15 +622,22 @@ jobs:
       with:
         submodules: 'true'
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Get version from CMakeLists.txt'
+      id: get_version
+      run: |
+        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version: $VERSION"
+
+    # - name: 'Setup ccache'
+    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Setup Java'
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
-        cache: 'gradle'
+        # cache: 'gradle'
 
     - name: 'Setup Android NDK'
       id: setup-ndk
@@ -584,35 +662,44 @@ jobs:
       shell: bash
       run: ./deploy/build_android.sh --aab --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
+    - name: 'Rename Android APKs'
+      run: |
+        cd deploy/build
+        mv AmneziaVPN-x86_64-release.apk AmneziaVPN_${VERSION}_android9+_x86_64.apk
+        mv AmneziaVPN-x86-release.apk AmneziaVPN_${VERSION}_android9+_x86.apk
+        mv AmneziaVPN-arm64-v8a-release.apk AmneziaVPN_${VERSION}_android9+_arm64-v8a.apk
+        mv AmneziaVPN-armeabi-v7a-release.apk AmneziaVPN_${VERSION}_android9+_armeabi-v7a.apk
+        cd ../..
+
     - name: 'Upload x86_64 apk'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN-android-x86_64
-        path: deploy/build/AmneziaVPN-x86_64-release.apk
+        name: AmneziaVPN_${{ env.VERSION }}_android9+_x86_64.apk
+        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_android9+_x86_64.apk
         compression-level: 0
         retention-days: 7
 
     - name: 'Upload x86 apk'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN-android-x86
-        path: deploy/build/AmneziaVPN-x86-release.apk
+        name: AmneziaVPN_${{ env.VERSION }}_android9+_x86.apk
+        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_android9+_x86.apk
         compression-level: 0
         retention-days: 7
 
     - name: 'Upload arm64-v8a apk'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN-android-arm64-v8a
-        path: deploy/build/AmneziaVPN-arm64-v8a-release.apk
+        name: AmneziaVPN_${{ env.VERSION }}_android9+_arm64-v8a.apk
+        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_android9+_arm64-v8a.apk
         compression-level: 0
         retention-days: 7
 
     - name: 'Upload armeabi-v7a apk'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN-android-armeabi-v7a
-        path: deploy/build/AmneziaVPN-armeabi-v7a-release.apk
+        name: AmneziaVPN_${{ env.VERSION }}_android9+_armeabi-v7a.apk
+        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_android9+_armeabi-v7a.apk
         compression-level: 0
         retention-days: 7
 

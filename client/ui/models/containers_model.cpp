@@ -2,8 +2,7 @@
 
 #include <QJsonArray>
 
-ContainersModel::ContainersModel(QObject *parent)
-    : QAbstractListModel(parent)
+ContainersModel::ContainersModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
 
@@ -20,10 +19,23 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     }
 
     DockerContainer container = ContainerProps::allContainers().at(index.row());
+    QString protocolKey = ContainerProps::containerTypeToProtocolString(container);
+    auto isThirdPartyConfig = m_containers.value(container).value(protocolKey).toObject().value(config_key::isThirdPartyConfig).toBool();
 
     switch (role) {
-    case NameRole: return ContainerProps::containerHumanNames().value(container);
-    case DescriptionRole: return ContainerProps::containerDescriptions().value(container);
+    case NameRole: {
+        if (container == DockerContainer::Awg && !isThirdPartyConfig) {
+            return "AmneziaWG Legacy";
+        }
+        return ContainerProps::containerHumanNames().value(container);
+    }
+    case DescriptionRole: {
+        if (container == DockerContainer::Awg && !isThirdPartyConfig) {
+            return QObject::tr("AmneziaWG Legacy is a outdated version of AmneziaWG protocol. To upgrade, install AmneziaWG and recreate users.");
+        }
+
+        return ContainerProps::containerDescriptions().value(container);
+    }
     case DetailedDescriptionRole: return ContainerProps::containerDetailedDescriptions().value(container);
     case ConfigRole: {
         if (container == DockerContainer::None) {
@@ -31,12 +43,14 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         }
         return m_containers.value(container);
     }
+    case IsThirdPartyConfigRole: return isThirdPartyConfig;
     case ServiceTypeRole: return ContainerProps::containerService(container);
     case DockerContainerRole: return container;
     case IsEasySetupContainerRole: return ContainerProps::isEasySetupContainer(container);
     case EasySetupHeaderRole: return ContainerProps::easySetupHeader(container);
     case EasySetupDescriptionRole: return ContainerProps::easySetupDescription(container);
     case EasySetupOrderRole: return ContainerProps::easySetupOrder(container);
+    case IsInstallationAllowedRole: return ContainersModel::isInstallationAllowed(container);
     case IsInstalledRole: return m_containers.contains(container);
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_processedContainerIndex);
     case IsSupportedRole: return ContainerProps::isSupportedByCurrentPlatform(container);
@@ -58,8 +72,7 @@ void ContainersModel::updateModel(const QJsonArray &containers)
     beginResetModel();
     m_containers.clear();
     for (const QJsonValue &val : containers) {
-        m_containers.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()),
-                             val.toObject());
+        m_containers.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
     }
     endResetModel();
 }
@@ -114,6 +127,11 @@ bool ContainersModel::hasInstalledProtocols()
     return false;
 }
 
+bool ContainersModel::isInstallationAllowed(DockerContainer container)
+{
+    return container != DockerContainer::Awg;
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -123,6 +141,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[ServiceTypeRole] = "serviceType";
     roles[DockerContainerRole] = "dockerContainer";
     roles[ConfigRole] = "config";
+    roles[IsThirdPartyConfigRole] = "isThirdPartyConfig";
 
     roles[IsEasySetupContainerRole] = "isEasySetupContainer";
     roles[EasySetupHeaderRole] = "easySetupHeader";
@@ -133,7 +152,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     roles[IsSupportedRole] = "isSupported";
     roles[IsShareableRole] = "isShareable";
-
+    roles[IsInstallationAllowedRole] = "isInstallationAllowed";
     roles[InstallPageOrderRole] = "installPageOrder";
     return roles;
 }

@@ -5,6 +5,7 @@
 
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "platforms/ios/ios_controller.h"
 #include "version.h"
 
 namespace
@@ -46,22 +47,24 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     if (reload) {
         QEventLoop wait;
         QTimer::singleShot(1000, &wait, &QEventLoop::quit);
-        wait.exec();
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
-
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
 
     auto processedIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfig = m_serversModel->getServerConfig(processedIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
     auto authData = serverConfig.value(configKey::authData).toObject();
 
+    bool isTestPurchase = apiConfig.value(apiDefs::key::isTestPurchase).toBool(false);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), m_settings->isDevGatewayEnv(isTestPurchase),
+                                        requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
+
     QJsonObject apiPayload;
     apiPayload[configKey::userCountryCode] = apiConfig.value(configKey::userCountryCode).toString();
     apiPayload[configKey::serviceType] = apiConfig.value(configKey::serviceType).toString();
     apiPayload[configKey::authData] = authData;
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
 

@@ -41,6 +41,8 @@ signals:
     // TODO: Only windows-networkwatcher has this, the other plattforms should
     // too.
     void networkChanged(QString newBSSID);
+    void sleepMode();
+
 
 private:
     bool m_active = false;

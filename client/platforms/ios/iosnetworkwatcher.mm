@@ -34,6 +34,9 @@ void IOSNetworkWatcher::initialize() {
   });
   nw_path_monitor_start(m_networkMonitor);
 
+  // Call start() to initialize sleep/wake monitoring (will call MacOSNetworkWatcher::start() if this is macOS)
+  this->start();
+  
   //TODO IMPL FOR AMNEZIA
 }
 

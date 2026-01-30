@@ -28,7 +28,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
         
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -81,7 +81,7 @@ PageType {
 
                 text: countryName
                 descriptionText: isWorkerExpired ? qsTr("The configuration needs to be reissued") : ""
-                hideDescription: isWorkerExpired ? true : false
+                hideDescription: isWorkerExpired ? false : true
                 descriptionColor: AmneziaStyle.color.vibrantRed
 
                 leftImageSource: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"

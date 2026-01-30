@@ -16,7 +16,7 @@ namespace AwgConstant
 
 struct AwgConfig
 {
-    AwgConfig(const QJsonObject &jsonConfig);
+    AwgConfig(const QJsonObject &serverProtocolConfig);
 
     QString subnetAddress;
     QString port;
@@ -30,10 +30,6 @@ struct AwgConfig
     QString clientSpecialJunk3;
     QString clientSpecialJunk4;
     QString clientSpecialJunk5;
-    QString clientControlledJunk1;
-    QString clientControlledJunk2;
-    QString clientControlledJunk3;
-    QString clientSpecialHandshakeTimeout;
 
     QString serverJunkPacketCount;
     QString serverJunkPacketMinSize;
@@ -46,9 +42,17 @@ struct AwgConfig
     QString serverResponsePacketMagicHeader;
     QString serverUnderloadPacketMagicHeader;
     QString serverTransportPacketMagicHeader;
+    QString serverSpecialJunk1;
+    QString serverSpecialJunk2;
+    QString serverSpecialJunk3;
+    QString serverSpecialJunk4;
+    QString serverSpecialJunk5;
 
     bool hasEqualServerSettings(const AwgConfig &other) const;
     bool hasEqualClientSettings(const AwgConfig &other) const;
+
+private:
+    bool m_isProtocolV2;
 };
 
 class AwgConfigModel : public QAbstractListModel
@@ -69,10 +73,6 @@ public:
         ClientSpecialJunk3Role,
         ClientSpecialJunk4Role,
         ClientSpecialJunk5Role,
-        ClientControlledJunk1Role,
-        ClientControlledJunk2Role,
-        ClientControlledJunk3Role,
-        ClientSpecialHandshakeTimeoutRole,
 
         ServerJunkPacketCountRole,
         ServerJunkPacketMinSizeRole,
@@ -86,6 +86,13 @@ public:
         ServerResponsePacketMagicHeaderRole,
         ServerUnderloadPacketMagicHeaderRole,
         ServerTransportPacketMagicHeaderRole,
+        ServerSpecialJunk1Role,
+        ServerSpecialJunk2Role,
+        ServerSpecialJunk3Role,
+        ServerSpecialJunk4Role,
+        ServerSpecialJunk5Role,
+
+        IsAwg2Role
     };
 
     explicit AwgConfigModel(QObject *parent = nullptr);
@@ -100,7 +107,7 @@ public slots:
     QJsonObject getConfig();
 
     bool isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4);
-    bool isPacketSizeEqual(const int s1, const int s2/*, const int s3, const int s4*/);
+    bool isPacketSizeEqual(const int s1, const int s2, const int s3, const int s4);
 
     bool isServerSettingsEqual();
 
