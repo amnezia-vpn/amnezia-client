@@ -46,8 +46,6 @@ public:
     QQmlApplicationEngine *qmlEngine() const;
     QNetworkAccessManager *networkManager();
     QClipboard *getClipboard();
-    CoreController *coreController() const { return m_coreController.data(); }
-
 
 public slots:
     void forceQuit();
