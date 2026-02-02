@@ -80,6 +80,7 @@ ErrorCode XrayProtocol::startTun2Sock()
                 iface->StopRoutingIpv6();
     #ifdef Q_OS_WIN
                 iface->updateResolvers("tun2", dnsAddr);
+                iface->enablePeerTraffic(m_xrayConfig);
     #endif
                 setConnectionState(Vpn::ConnectionState::Connected);
             }
