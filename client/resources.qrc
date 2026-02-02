@@ -163,6 +163,7 @@
         <file>ui/qml/Controls2/ListViewWithRadioButtonType.qml</file>
         <file>ui/qml/Controls2/PageType.qml</file>
         <file>ui/qml/Controls2/PopupType.qml</file>
+        <file>ui/qml/Controls2/PremiumBannerType.qml</file>
         <file>ui/qml/Controls2/ProgressBarType.qml</file>
         <file>ui/qml/Controls2/ScrollBarType.qml</file>
         <file>ui/qml/Controls2/StackViewType.qml</file>
@@ -226,6 +227,7 @@
         <file>ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardApiServicesList.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardPremiumWebView.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardConfigSource.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardCredentials.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardEasy.qml</file>
@@ -253,6 +255,10 @@
         <file>ui/qml/Components/AwgTextField.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml</file>
         <file>ui/qml/Components/SmartScroll.qml</file>
+        <file>ui/qml/Components/AmneziaWebViewPanel.qml</file>
+    </qresource>
+    <qresource prefix="/AmneziaWebView">
+        <file>core/webview/qmldir</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

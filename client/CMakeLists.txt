@@ -105,6 +105,9 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/sources.cmake)
 
+# Add webview module
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/core/webview)
+
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../ipc
     ${CMAKE_CURRENT_LIST_DIR}/../common/logger
@@ -194,7 +197,7 @@ elseif(APPLE)
     include(cmake/macos.cmake)
 endif()
 
-target_link_libraries(${PROJECT} PRIVATE ${LIBS})
+target_link_libraries(${PROJECT} PRIVATE ${LIBS} webview)
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
 # deploy artifacts required to run the application to the debug build folder

@@ -15,6 +15,11 @@
 #include <QEvent>
 #include <QDir>
 #include <QSettings>
+#include <QQmlExtensionPlugin>
+#include <QtPlugin>
+#include "core/webview/plugin.h"
+
+Q_IMPORT_PLUGIN(WebViewPlugin)
 
 #include "logger.h"
 #include "ui/controllers/pageController.h"
@@ -99,6 +104,14 @@ void AmneziaApplication::init()
 {
     m_engine = new QQmlApplicationEngine;
 
+    // Register AmneziaWebView plugin explicitly
+    QObject *pluginInstance = qt_static_plugin_WebViewPlugin().instance();
+    QQmlExtensionPlugin *p = qobject_cast<QQmlExtensionPlugin*>(pluginInstance);
+    if (p) {
+        p->registerTypes("AmneziaWebView");
+        p->initializeEngine(m_engine, "AmneziaWebView");
+    }
+
     const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
     QObject::connect(
         m_engine, &QQmlApplicationEngine::objectCreated, this,
@@ -130,6 +143,7 @@ void AmneziaApplication::init()
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
 
     m_engine->addImportPath("qrc:/ui/qml/Modules/");
+    m_engine->addImportPath("qrc:/");
 
     if (m_parser.isSet(m_optImport)) {
         const QString data = m_parser.value(m_optImport);

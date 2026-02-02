@@ -204,6 +204,84 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 22
             }
+
+            PremiumBannerType {
+                id: premiumBannerHome
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 16
+                Layout.bottomMargin: 16
+
+                property bool isAmneziaFree: {
+                    if (ServersModel.getServersCount() > 0 && ServersModel.isDefaultServerFromApi) {
+                        var apiConfig = ServersModel.getDefaultServerData("apiConfig")
+                        if (apiConfig) {
+                            // Получаем serviceType из apiConfig (ключ "service_type")
+                            var serviceType = ""
+                            if (apiConfig.service_type !== undefined) {
+                                serviceType = apiConfig.service_type
+                            } else if (apiConfig.serviceType !== undefined) {
+                                serviceType = apiConfig.serviceType
+                            }
+                            
+                            if (serviceType === "amnezia-free") {
+                                return true
+                            }
+                        }
+                        // Альтернативная проверка через имя сервера
+                        var serverName = ServersModel.defaultServerName
+                        if (serverName) {
+                            var nameLower = serverName.toString().toLowerCase()
+                            if (nameLower.indexOf("free") >= 0) {
+                                return true
+                            }
+                        }
+                    }
+                    return false
+                }
+
+                Connections {
+                    target: ServersModel
+                    function onDefaultServerIndexChanged() {
+                        // Пересчитываем isAmneziaFree при изменении сервера
+                        var apiConfig = ServersModel.getDefaultServerData("apiConfig")
+                        var newValue = false
+                        if (ServersModel.getServersCount() > 0 && ServersModel.isDefaultServerFromApi && apiConfig) {
+                            var serviceType = ""
+                            if (apiConfig.service_type !== undefined) {
+                                serviceType = apiConfig.service_type
+                            } else if (apiConfig.serviceType !== undefined) {
+                                serviceType = apiConfig.serviceType
+                            }
+                            
+                            if (serviceType === "amnezia-free") {
+                                newValue = true
+                            } else {
+                                var serverName = ServersModel.defaultServerName
+                                if (serverName) {
+                                    var nameLower = serverName.toString().toLowerCase()
+                                    if (nameLower.indexOf("free") >= 0) {
+                                        newValue = true
+                                    }
+                                }
+                            }
+                        }
+                        premiumBannerHome.isAmneziaFree = newValue
+                    }
+                }
+
+                visible: isAmneziaFree
+                enabled: visible
+
+                onClicked: {
+                    PageController.goToPage(PageEnum.PageSetupWizardPremiumWebView)
+                }
+
+                Keys.onEnterPressed: clicked()
+                Keys.onReturnPressed: clicked()
+            }
         }
     }
 
