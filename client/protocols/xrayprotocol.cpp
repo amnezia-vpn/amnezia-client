@@ -61,22 +61,14 @@ ErrorCode XrayProtocol::startTun2Sock()
                 if (!m_primaryDNS.contains(amnezia::protocols::dns::amneziaDnsIp)) {
                     dnsAddr.push_back(QHostAddress(m_secondaryDNS));
                 }
-    #ifdef Q_OS_WIN
-                QThread::msleep(8000);
-    #endif
     #ifdef Q_OS_MACOS
-                QThread::msleep(5000);
                 iface->createTun("utun22", amnezia::protocols::xray::defaultLocalAddr);
                 iface->updateResolvers("utun22", dnsAddr);
     #endif
     #ifdef Q_OS_LINUX
-                QThread::msleep(1000);
                 iface->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
                 iface->updateResolvers("tun2", dnsAddr);
     #endif
-                if (m_routeMode == Settings::RouteMode::VpnAllSites) {
-                    iface->routeAddList(m_vpnGateway, QStringList() << "1.0.0.0/8" << "2.0.0.0/7" << "4.0.0.0/6" << "8.0.0.0/5" << "16.0.0.0/4" << "32.0.0.0/3" << "64.0.0.0/2" << "128.0.0.0/1");
-                }
                 iface->StopRoutingIpv6();
     #ifdef Q_OS_WIN
                 iface->updateResolvers("tun2", dnsAddr);
