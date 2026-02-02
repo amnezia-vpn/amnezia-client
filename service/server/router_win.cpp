@@ -308,6 +308,15 @@ void RouterWin::resetIpStack()
     }
 }
 
+bool RouterWin::createTun(const QString &dev, const QString &subnet)
+{
+    const QString command = QString("netsh interface ip set address name=\"tun2\" static %1 255.255.255.255").arg(subnet);
+
+    QProcess p;
+    p.start(command);
+    return p.waitForFinished();
+}
+
 void RouterWin::suspendWcmSvc(bool suspend)
 {
     if (suspend == m_suspended) return;

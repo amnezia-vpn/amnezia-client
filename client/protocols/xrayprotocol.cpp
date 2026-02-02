@@ -61,6 +61,11 @@ ErrorCode XrayProtocol::startTun2Sock()
                 if (!m_primaryDNS.contains(amnezia::protocols::dns::amneziaDnsIp)) {
                     dnsAddr.push_back(QHostAddress(m_secondaryDNS));
                 }
+
+    #ifdef Q_OS_WIN
+                iface->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
+                iface->updateResolvers("tun2", dnsAddr);
+    #endif
     #ifdef Q_OS_MACOS
                 iface->createTun("utun22", amnezia::protocols::xray::defaultLocalAddr);
                 iface->updateResolvers("utun22", dnsAddr);
@@ -69,9 +74,11 @@ ErrorCode XrayProtocol::startTun2Sock()
                 iface->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
                 iface->updateResolvers("tun2", dnsAddr);
     #endif
+                if (m_routeMode == Settings::RouteMode::VpnAllSites) {
+                    iface->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/0");
+                }
                 iface->StopRoutingIpv6();
     #ifdef Q_OS_WIN
-                iface->updateResolvers("tun2", dnsAddr);
                 iface->enablePeerTraffic(m_xrayConfig);
     #endif
                 setConnectionState(Vpn::ConnectionState::Connected);
