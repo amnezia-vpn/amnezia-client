@@ -42,63 +42,62 @@ ErrorCode XrayProtocol::start()
     return startTun2Sock();
 }
 
-void XrayProtocol::tun2socksConnectionStateChanged(int vpnState) {
-    qDebug() << "PrivilegedProcess setConnectionState " << vpnState;
-    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        if (vpnState == Vpn::ConnectionState::Connected) {
-            setConnectionState(Vpn::ConnectionState::Connecting);
-            QList<QHostAddress> dnsAddr;
+ErrorCode XrayProtocol::setupRouting() {
+    return IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {
+        QList<QHostAddress> dnsAddr;
 
-            dnsAddr.push_back(QHostAddress(m_primaryDNS));
-            // We don't use secondary DNS if primary DNS is AmneziaDNS
-            if (!m_primaryDNS.contains(amnezia::protocols::dns::amneziaDnsIp)) {
-                dnsAddr.push_back(QHostAddress(m_secondaryDNS));
-            }
-
-            QRemoteObjectPendingReply<bool> res;
+        dnsAddr.push_back(QHostAddress(m_primaryDNS));
+        // We don't use secondary DNS if primary DNS is AmneziaDNS
+        if (!m_primaryDNS.contains(amnezia::protocols::dns::amneziaDnsIp)) {
+            dnsAddr.push_back(QHostAddress(m_secondaryDNS));
+        }
 
 #ifdef AMNEZIA_DESKTOP
-#ifdef Q_OS_MACOS
-            const QString tunName = "utun22";
-#else
-            const QString tunName = "tun2";
+    #ifdef Q_OS_MACOS
+        const QString tunName = "utun22";
+    #else
+        const QString tunName = "tun2";
+    #endif
+        auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
+        if (!createTun.waitForFinished(1000) || !createTun.returnValue()) {
+            qWarning() << "Failed to assign IP address for TUN";
+            return ErrorCode::InternalError;
+        }
+
+        auto updateResolvers = iface->updateResolvers(tunName, dnsAddr);
+        if (!updateResolvers.waitForFinished(1000) || !updateResolvers.returnValue()) {
+            qWarning() << "Failed to set DNS resolvers for TUN";
+            return ErrorCode::InternalError;
+        }
 #endif
-            res = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
-            if (!res.waitForFinished(10000)) {
-                qDebug() << "Failed to assign IP address for TUN";
-            }
 
-            res = iface->updateResolvers(tunName, dnsAddr);
-            if (!res.waitForFinished(1000)) {
-                qDebug() << "Failed to set DNS resolvers for TUN";
-            }
-#endif
+        if (m_routeMode == Settings::RouteMode::VpnAllSites) {
+            static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
 
-            if (m_routeMode == Settings::RouteMode::VpnAllSites) {
-                iface->routeAddList(m_vpnGateway, QStringList() << "1.0.0.0/8" << "2.0.0.0/7" << "4.0.0.0/6" << "8.0.0.0/5" << "16.0.0.0/4" << "32.0.0.0/3" << "64.0.0.0/2" << "128.0.0.0/1");
+            auto routeAddList =  iface->routeAddList(m_vpnGateway, subnets);
+            if (!routeAddList.waitForFinished(1000) || routeAddList.returnValue() != subnets.count()) {
+                qWarning() << "Failed to set routes for TUN";
+                return ErrorCode::InternalError;
             }
+        }
 
-            res = iface->StopRoutingIpv6();
-            if (!res.waitForFinished(1000)) {
-                qDebug() << "Failed to stop routing IPv6";
-            }
+        auto StopRoutingIpv6 = iface->StopRoutingIpv6();
+        if (!StopRoutingIpv6.waitForFinished(1000) || !StopRoutingIpv6.returnValue()) {
+            qWarning() << "Failed to disable IPv6 routing";
+            return ErrorCode::InternalError;
+        }
 
 #ifdef Q_OS_WIN
-            res = iface->enablePeerTraffic(m_xrayConfig);
-            if (!res.waitForFinished()) {
-                qDebug() << "Failed to enable peer traffic";
-            }
-#endif
-            setConnectionState(Vpn::ConnectionState::Connected);
-        }
-#if !defined(Q_OS_MACOS)
-        if (vpnState == Vpn::ConnectionState::Disconnected) {
-            setConnectionState(Vpn::ConnectionState::Disconnected);
-            iface->deleteTun("tun2");
-            iface->StartRoutingIpv6();
-            iface->clearSavedRoutes();
+        auto enablePeerTraffic = iface->enablePeerTraffic(m_xrayConfig);
+        if (!enablePeerTraffic.waitForFinished(5000) || !enablePeerTraffic.returnValue()) {
+            qWarning() << "Failed to enable peer traffic";
+            return ErrorCode::InternalError;
         }
 #endif
+        return ErrorCode::NoError;
+    },
+    [] () {
+        return ErrorCode::AmneziaServiceConnectionFailed;
     });
 }
 
@@ -111,8 +110,21 @@ ErrorCode XrayProtocol::startTun2Sock()
 
     connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::setConnectionState, this, [&](int vpnState) {
         QMetaObject::invokeMethod(this, [this, vpnState]() {
-            QThread::msleep(5000);
-            tun2socksConnectionStateChanged(vpnState);
+            qDebug() << "PrivilegedProcess setConnectionState " << vpnState;
+
+            if (vpnState == Vpn::ConnectionState::Connected) {
+                setConnectionState(Vpn::ConnectionState::Connecting);
+
+                if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
+                    stop();
+                    setLastError(res);
+                } else
+                    setConnectionState(Vpn::ConnectionState::Connected);
+            }
+
+            if (vpnState == Vpn::ConnectionState::Disconnected)
+                stop();
+
         }, Qt::QueuedConnection);
     });
 
@@ -125,19 +137,19 @@ void XrayProtocol::stop()
 
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
 #ifdef AMNEZIA_DESKTOP
-        QRemoteObjectPendingReply<bool> StartRoutingIpv6Resp = iface->StartRoutingIpv6();
-        if (!StartRoutingIpv6Resp.waitForFinished(1000)) {
+        auto StartRoutingIpv6 = iface->StartRoutingIpv6();
+        if (!StartRoutingIpv6.waitForFinished(1000) || !StartRoutingIpv6.returnValue()) {
             qWarning() << "XrayProtocol::stop(): Failed to start routing ipv6";
         }
 
-        QRemoteObjectPendingReply<bool> restoreResolvers = iface->restoreResolvers();
-        if (!restoreResolvers.waitForFinished(1000)) {
+        auto restoreResolvers = iface->restoreResolvers();
+        if (!restoreResolvers.waitForFinished(1000) || !restoreResolvers.returnValue()) {
             qWarning() << "XrayProtocol::stop(): Failed to restore resolvers";
         }
 
     #if !defined(Q_OS_MACOS)
-        QRemoteObjectPendingReply<bool> deleteTunResp = iface->deleteTun("tun2");
-        if (!deleteTunResp.waitForFinished(1000)) {
+        auto deleteTun = iface->deleteTun("tun2");
+        if (!deleteTun.waitForFinished(1000) || !deleteTun.returnValue()) {
             qWarning() << "XrayProtocol::stop(): Failed to delete tun";
         }
     #endif

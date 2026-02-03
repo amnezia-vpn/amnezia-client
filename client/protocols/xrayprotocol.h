@@ -17,7 +17,7 @@ public:
     void stop() override;
 
 private:
-    void tun2socksConnectionStateChanged(int vpnState);
+    ErrorCode setupRouting();
     ErrorCode startTun2Sock();
     void readXrayConfiguration(const QJsonObject &configuration);
     
