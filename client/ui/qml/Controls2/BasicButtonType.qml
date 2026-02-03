@@ -123,31 +123,6 @@ Button {
                     PropertyAnimation { duration: 200 }
                 }
             }
-            Rectangle {
-                visible: root.squareLeftSide
-
-                z: 1
-                radius: 13
-                width: parent.width
-                height: parent.radius
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                color: {
-                    if (root.enabled) {
-                        if (root.pressed) {
-                            return root.pressedColor
-                        }
-                        return root.hovered ? root.hoveredColor : root.defaultColor
-                    } else {
-                        return root.disabledColor
-                    }
-                }
-
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
-            }
         }
     }
 
