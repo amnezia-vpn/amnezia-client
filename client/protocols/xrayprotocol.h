@@ -14,10 +14,11 @@ public:
     virtual ~XrayProtocol() override;
 
     ErrorCode start() override;
-    ErrorCode startTun2Sock();
     void stop() override;
 
 private:
+    void tun2socksConnectionStateChanged(int vpnState);
+    ErrorCode startTun2Sock();
     void readXrayConfiguration(const QJsonObject &configuration);
     
     QJsonObject m_xrayConfig;

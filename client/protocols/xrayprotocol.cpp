@@ -42,6 +42,66 @@ ErrorCode XrayProtocol::start()
     return startTun2Sock();
 }
 
+void XrayProtocol::tun2socksConnectionStateChanged(int vpnState) {
+    qDebug() << "PrivilegedProcess setConnectionState " << vpnState;
+    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+        if (vpnState == Vpn::ConnectionState::Connected) {
+            setConnectionState(Vpn::ConnectionState::Connecting);
+            QList<QHostAddress> dnsAddr;
+
+            dnsAddr.push_back(QHostAddress(m_primaryDNS));
+            // We don't use secondary DNS if primary DNS is AmneziaDNS
+            if (!m_primaryDNS.contains(amnezia::protocols::dns::amneziaDnsIp)) {
+                dnsAddr.push_back(QHostAddress(m_secondaryDNS));
+            }
+
+            QRemoteObjectPendingReply<bool> res;
+
+#ifdef AMNEZIA_DESKTOP
+#ifdef Q_OS_MACOS
+            const QString tunName = "utun22";
+#else
+            const QString tunName = "tun2";
+#endif
+            res = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
+            if (!res.waitForFinished(10000)) {
+                qDebug() << "Failed to assign IP address for TUN";
+            }
+
+            res = iface->updateResolvers(tunName, dnsAddr);
+            if (!res.waitForFinished(1000)) {
+                qDebug() << "Failed to set DNS resolvers for TUN";
+            }
+#endif
+
+            if (m_routeMode == Settings::RouteMode::VpnAllSites) {
+                iface->routeAddList(m_vpnGateway, QStringList() << "1.0.0.0/8" << "2.0.0.0/7" << "4.0.0.0/6" << "8.0.0.0/5" << "16.0.0.0/4" << "32.0.0.0/3" << "64.0.0.0/2" << "128.0.0.0/1");
+            }
+
+            res = iface->StopRoutingIpv6();
+            if (!res.waitForFinished(1000)) {
+                qDebug() << "Failed to stop routing IPv6";
+            }
+
+#ifdef Q_OS_WIN
+            res = iface->enablePeerTraffic(m_xrayConfig);
+            if (!res.waitForFinished()) {
+                qDebug() << "Failed to enable peer traffic";
+            }
+#endif
+            setConnectionState(Vpn::ConnectionState::Connected);
+        }
+#if !defined(Q_OS_MACOS)
+        if (vpnState == Vpn::ConnectionState::Disconnected) {
+            setConnectionState(Vpn::ConnectionState::Disconnected);
+            iface->deleteTun("tun2");
+            iface->StartRoutingIpv6();
+            iface->clearSavedRoutes();
+        }
+#endif
+    });
+}
+
 ErrorCode XrayProtocol::startTun2Sock()
 {
     m_t2sProcess->start();
@@ -50,48 +110,10 @@ ErrorCode XrayProtocol::startTun2Sock()
             [&](QProcess::ProcessState newState) { qDebug() << "PrivilegedProcess stateChanged" << newState; });
 
     connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::setConnectionState, this, [&](int vpnState) {
-        qDebug() << "PrivilegedProcess setConnectionState " << vpnState;
-        IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-            if (vpnState == Vpn::ConnectionState::Connected) {
-                setConnectionState(Vpn::ConnectionState::Connecting);
-                QList<QHostAddress> dnsAddr;
-
-                dnsAddr.push_back(QHostAddress(m_primaryDNS));
-                // We don't use secondary DNS if primary DNS is AmneziaDNS
-                if (!m_primaryDNS.contains(amnezia::protocols::dns::amneziaDnsIp)) {
-                    dnsAddr.push_back(QHostAddress(m_secondaryDNS));
-                }
-
-    #ifdef Q_OS_WIN
-                iface->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
-                iface->updateResolvers("tun2", dnsAddr);
-    #endif
-    #ifdef Q_OS_MACOS
-                iface->createTun("utun22", amnezia::protocols::xray::defaultLocalAddr);
-                iface->updateResolvers("utun22", dnsAddr);
-    #endif
-    #ifdef Q_OS_LINUX
-                iface->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
-                iface->updateResolvers("tun2", dnsAddr);
-    #endif
-                if (m_routeMode == Settings::RouteMode::VpnAllSites) {
-                    iface->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/0");
-                }
-                iface->StopRoutingIpv6();
-    #ifdef Q_OS_WIN
-                iface->enablePeerTraffic(m_xrayConfig);
-    #endif
-                setConnectionState(Vpn::ConnectionState::Connected);
-            }
-    #if !defined(Q_OS_MACOS)
-            if (vpnState == Vpn::ConnectionState::Disconnected) {
-                setConnectionState(Vpn::ConnectionState::Disconnected);
-                iface->deleteTun("tun2");
-                iface->StartRoutingIpv6();
-                iface->clearSavedRoutes();
-            }
-#endif
-        });
+        QMetaObject::invokeMethod(this, [this, vpnState]() {
+            QThread::msleep(5000);
+            tun2socksConnectionStateChanged(vpnState);
+        }, Qt::QueuedConnection);
     });
 
     return ErrorCode::NoError;
