@@ -30,7 +30,11 @@ ErrorCode XrayProtocol::start()
     qDebug() << "XrayProtocol::start()";
 
     const ErrorCode err = IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->xrayStart(QJsonDocument(m_xrayConfig).toJson());
+        auto xrayStart = iface->xrayStart(QJsonDocument(m_xrayConfig).toJson());
+        if (!xrayStart.waitForFinished(1000) || !xrayStart.returnValue()) {
+            qCritical() << "Failed to start xray";
+            return ErrorCode::XrayExecutableCrashed;
+        }
         return ErrorCode::NoError;
     }, [] () {
         return ErrorCode::AmneziaServiceConnectionFailed;
@@ -110,7 +114,7 @@ ErrorCode XrayProtocol::startTun2Sock()
 
     connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::setConnectionState, this, [&](int vpnState) {
         QMetaObject::invokeMethod(this, [this, vpnState]() {
-            qDebug() << "PrivilegedProcess setConnectionState " << vpnState;
+            qDebug() << "tun2socks state changed: " << vpnState;
 
             if (vpnState == Vpn::ConnectionState::Connected) {
                 setConnectionState(Vpn::ConnectionState::Connecting);
@@ -139,22 +143,25 @@ void XrayProtocol::stop()
 #ifdef AMNEZIA_DESKTOP
         auto StartRoutingIpv6 = iface->StartRoutingIpv6();
         if (!StartRoutingIpv6.waitForFinished(1000) || !StartRoutingIpv6.returnValue()) {
-            qWarning() << "XrayProtocol::stop(): Failed to start routing ipv6";
+            qWarning() << "Failed to start routing ipv6";
         }
 
         auto restoreResolvers = iface->restoreResolvers();
         if (!restoreResolvers.waitForFinished(1000) || !restoreResolvers.returnValue()) {
-            qWarning() << "XrayProtocol::stop(): Failed to restore resolvers";
+            qWarning() << "Failed to restore resolvers";
         }
 
     #if !defined(Q_OS_MACOS)
         auto deleteTun = iface->deleteTun("tun2");
         if (!deleteTun.waitForFinished(1000) || !deleteTun.returnValue()) {
-            qWarning() << "XrayProtocol::stop(): Failed to delete tun";
+            qWarning() << "Failed to delete tun";
         }
     #endif
 #endif
-        iface->xrayStop();
+        auto xrayStop = iface->xrayStop();
+        if (!xrayStop.waitForFinished(1000) || !xrayStop.returnValue()) {
+            qWarning() << "Failed to stop xray";
+        }
     });
 
     if (m_t2sProcess) {
