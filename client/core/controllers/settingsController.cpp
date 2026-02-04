@@ -232,6 +232,16 @@ void SettingsController::toggleScreenshotsEnabled(bool enable)
     m_appSettingsRepository->setScreenshotsEnabled(enable);
 }
 
+bool SettingsController::isNewsNotificationsEnabled() const
+{
+    return m_appSettingsRepository->isNewsNotifications();
+}
+
+void SettingsController::toggleNewsNotificationsEnabled(bool enable)
+{
+    m_appSettingsRepository->setNewsNotifications(enable);
+}
+
 bool SettingsController::isKillSwitchEnabled() const
 {
     return m_appSettingsRepository->isKillSwitchEnabled();

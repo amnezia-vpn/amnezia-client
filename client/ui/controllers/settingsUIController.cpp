@@ -217,6 +217,16 @@ void SettingsUiController::toggleScreenshotsEnabled(bool enable)
     m_settingsController->toggleScreenshotsEnabled(enable);
 }
 
+bool SettingsUiController::isNewsNotificationsEnabled()
+{
+    return m_settingsController->isNewsNotificationsEnabled();
+}
+
+void SettingsUiController::toggleNewsNotificationsEnabled(bool enable)
+{
+    m_settingsController->toggleNewsNotificationsEnabled(enable);
+}
+
 bool SettingsUiController::isCameraPresent()
 {
 #if defined Q_OS_IOS

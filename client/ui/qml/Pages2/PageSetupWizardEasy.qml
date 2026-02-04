@@ -107,6 +107,7 @@ PageType {
 
                 onClicked: function() {
                     isEasySetup = true
+                    checked = true
                     var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
                     listView.dockerContainer = dockerContainer

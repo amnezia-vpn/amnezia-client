@@ -191,6 +191,16 @@ PageType {
                         ListElement { name : qsTr("SHA1") }
                     }
 
+                    function updateSelectedIndex() {
+                        hashDropDown.text = hash
+                        for (var i = 0; i < hashListView.model.count; i++) {
+                            if (hashListView.model.get(i).name === hash) {
+                                selectedIndex = i
+                                break
+                            }
+                        }
+                    }
+
                     clickedFunction: function() {
                         hashDropDown.text = selectedText
                         hash = hashDropDown.text
@@ -198,13 +208,14 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        hashDropDown.text = hash
+                        updateSelectedIndex()
+                    }
+                }
 
-                        for (var i = 0; i < hashListView.model.count; i++) {
-                            if (hashListView.model.get(i).name === hashDropDown.text) {
-                                currentIndex = i
-                            }
-                        }
+                Connections {
+                    target: listView.model
+                    function onDataChanged() {
+                        hashListView.updateSelectedIndex()
                     }
                 }
             }
@@ -241,6 +252,16 @@ PageType {
                         ListElement { name : qsTr("none") }
                     }
 
+                    function updateSelectedIndex() {
+                        cipherDropDown.text = cipher
+                        for (var i = 0; i < cipherListView.model.count; i++) {
+                            if (cipherListView.model.get(i).name === cipher) {
+                                selectedIndex = i
+                                break
+                            }
+                        }
+                    }
+
                     clickedFunction: function() {
                         cipherDropDown.text = selectedText
                         cipher = cipherDropDown.text
@@ -248,13 +269,14 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        cipherDropDown.text = cipher
+                        updateSelectedIndex()
+                    }
+                }
 
-                        for (var i = 0; i < cipherListView.model.count; i++) {
-                            if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                currentIndex = i
-                            }
-                        }
+                Connections {
+                    target: listView.model
+                    function onDataChanged() {
+                        cipherListView.updateSelectedIndex()
                     }
                 }
             }

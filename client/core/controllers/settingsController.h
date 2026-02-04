@@ -56,6 +56,9 @@ public:
     bool isScreenshotsEnabled() const;
     void toggleScreenshotsEnabled(bool enable);
 
+    bool isNewsNotificationsEnabled() const;
+    void toggleNewsNotificationsEnabled(bool enable);
+
     bool isKillSwitchEnabled() const;
     void toggleKillSwitch(bool enable);
 

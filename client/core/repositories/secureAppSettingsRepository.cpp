@@ -364,6 +364,17 @@ void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
     emit screenshotsEnabledChanged(enabled);
 }
 
+bool SecureAppSettingsRepository::isNewsNotifications() const
+{
+    return value("Conf/newsNotifications", true).toBool();
+}
+
+void SecureAppSettingsRepository::setNewsNotifications(bool enabled)
+{
+    setValue("Conf/newsNotifications", enabled);
+    m_settings->sync();
+}
+
 bool SecureAppSettingsRepository::isSaveLogs() const
 {
     return value("Conf/saveLogs", false).toBool();

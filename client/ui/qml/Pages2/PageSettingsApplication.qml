@@ -168,6 +168,29 @@ PageType {
             DividerType {
                 visible: !GC.isMobile()
             }
+
+            SwitcherType {
+                id: switcherNewsNotificationEnabled
+
+                visible: ServersModel.hasServersFromGatewayApi
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("News Notification")
+                descriptionText: qsTr("Show notification icon when has unread news")
+
+                checked: SettingsController.isNewsNotificationsEnabled()
+                onToggled: function() {
+                    if (checked !== SettingsController.isNewsNotificationsEnabled()) {
+                        SettingsController.toggleNewsNotificationsEnabled(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: !GC.isMobile()
+            }
         }
 
         footer: ColumnLayout {
