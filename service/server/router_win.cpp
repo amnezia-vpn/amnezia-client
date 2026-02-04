@@ -5,6 +5,7 @@
 #include <tchar.h>
 
 #include <QProcess>
+#include <QtConcurrent>
 
 #include <core/networkUtilities.h>
 
@@ -308,6 +309,37 @@ void RouterWin::resetIpStack()
     }
 }
 
+bool RouterWin::createTun(const QString &dev, const QString &subnet)
+{
+    NET_LUID luid;
+    DWORD res = ConvertInterfaceAliasToLuid(reinterpret_cast<const wchar_t*>(dev.utf16()), &luid);
+    if (res != NO_ERROR) {
+        qCritical() << "Failed to convert luid: " << res;
+        return false;
+    }
+
+    MIB_UNICASTIPADDRESS_ROW row;
+    InitializeUnicastIpAddressEntry(&row);
+
+    row.InterfaceLuid = luid;
+    row.Address.si_family = AF_INET;
+
+    inet_pton(AF_INET, subnet.toStdString().c_str(), &row.Address.Ipv4.sin_addr);
+
+    row.OnLinkPrefixLength = 32;
+    row.ValidLifetime = 0xffffffff;
+    row.PreferredLifetime = 0xffffffff;
+    row.DadState = IpDadStatePreferred;
+
+    res = CreateUnicastIpAddressEntry(&row);
+    if (res != NO_ERROR && res != ERROR_OBJECT_ALREADY_EXISTS) {
+        qDebug() << "Failed to create IP address:" << res;
+        return false;
+    }
+
+    return true;
+}
+
 void RouterWin::suspendWcmSvc(bool suspend)
 {
     if (suspend == m_suspended) return;
@@ -465,11 +497,19 @@ bool RouterWin::StopRoutingIpv6()
     qDebug() << "RouterWin::StopRoutingIpv6";
 
     if (auto loopback = findLoopbackIface(); loopback.isValid()) {
-        for (auto subnet : kIpv6Subnets) {
-            QProcess{}.execute("netsh", { "interface", "ipv6", "add", "route", subnet, QString("interface=%1").arg(loopback.index()), "metric=0", "store=active" });
-        }
+        QFuture<bool> res = QtConcurrent::mappedReduced(kIpv6Subnets, [loopback](const QString &subnet) -> bool {
+            int res = QProcess::execute("netsh", { "interface", "ipv6", "add", "route", subnet, QString("interface=%1").arg(loopback.index()), "metric=0", "store=active" });
+            return res == 0;
+        },
+        [](bool &result, bool success) {
+            result = result && success;
+        }, true);
+
+        res.waitForFinished();
+        return res.result();
     }
-    return true;
+
+    return false;
 }
 
 bool RouterWin::StartRoutingIpv6()
@@ -477,9 +517,14 @@ bool RouterWin::StartRoutingIpv6()
     qDebug() << "RouterWin::StartRoutingIpv6";
 
     if (auto loopback = findLoopbackIface(); loopback.isValid()) {
-        for (auto subnet : kIpv6Subnets) {
-            QProcess{}.execute("netsh", { "interface", "ipv6", "delete", "route", subnet, QString("interface=%1").arg(loopback.index()) });
-        }
+        QFuture<bool> res = QtConcurrent::mappedReduced(kIpv6Subnets, [loopback](const QString &subnet) -> bool {
+            int res = QProcess::execute("netsh", { "interface", "ipv6", "delete", "route", subnet, QString("interface=%1").arg(loopback.index()) });
+            return res == 0;
+        },
+        [](bool &result, bool success) {
+            result = result && success;
+        }, true);
     }
-    return true;
+
+    return false;
 }

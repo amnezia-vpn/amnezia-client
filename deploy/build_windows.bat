@@ -31,6 +31,7 @@ set SCRIPT_DIR=%PROJECT_DIR:"=%\deploy
 set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
 set APP_NAME=AmneziaVPN
 set APP_FILENAME=%APP_NAME:"=%.exe
+set SERVICE_FILENAME=%APP_NAME:"=%-service.exe
 set APP_DOMAIN=org.amneziavpn.package
 set OUT_APP_DIR=%WORK_DIR:"=%\client\release
 set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
@@ -43,6 +44,7 @@ set STAGE_DIR=%WORK_DIR:"=%\stage
 echo "Environment:"
 echo "WORK_DIR:             %WORK_DIR%"
 echo "APP_FILENAME:         %APP_FILENAME%"
+echo "SERVICE_FILENAME:     %SERVICE_FILENAME%"
 echo "PROJECT_DIR:          %PROJECT_DIR%"
 echo "SCRIPT_DIR:           %SCRIPT_DIR%"
 echo "OUT_APP_DIR:          %OUT_APP_DIR%"
@@ -74,7 +76,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 echo "Deploying..."
 
 mkdir "%OUT_APP_DIR%"
-copy "%WORK_DIR%\service\server\release\%APP_NAME%-service.exe" "%OUT_APP_DIR%"
+copy "%WORK_DIR%\service\server\release\%SERVICE_FILENAME%" "%OUT_APP_DIR%"
 rem copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
 
 copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\AmneziaVPN.ico" >nul
@@ -84,6 +86,7 @@ cd %OUT_APP_DIR%
 signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe
 
 "%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
+"%QT_BIN_DIR:"=%\windeployqt" --release "%OUT_APP_DIR:"=%\%SERVICE_FILENAME:"=%"
 
 signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll
 
