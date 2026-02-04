@@ -17,6 +17,10 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_t2sProcess = IpcClient::InterfaceTun2Socks();
+
+    auto vpnServer = NetworkUtilities::getIPAddress(configuration.value(amnezia::config_key::hostName).toString());
+    m_rawConfig.insert("vpnGateway", m_vpnGateway);
+    m_rawConfig.insert("vpnServer", vpnServer);
 }
 
 XrayProtocol::~XrayProtocol()
@@ -63,14 +67,14 @@ ErrorCode XrayProtocol::setupRouting() {
         const QString tunName = "tun2";
     #endif
         auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
-        if (!createTun.waitForFinished(1000) || !createTun.returnValue()) {
-            qWarning() << "Failed to assign IP address for TUN";
+        if (!createTun.waitForFinished() || !createTun.returnValue()) {
+            qCritical() << "Failed to assign IP address for TUN";
             return ErrorCode::InternalError;
         }
 
         auto updateResolvers = iface->updateResolvers(tunName, dnsAddr);
-        if (!updateResolvers.waitForFinished(1000) || !updateResolvers.returnValue()) {
-            qWarning() << "Failed to set DNS resolvers for TUN";
+        if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
+            qCritical() << "Failed to set DNS resolvers for TUN";
             return ErrorCode::InternalError;
         }
 #endif
@@ -79,22 +83,43 @@ ErrorCode XrayProtocol::setupRouting() {
             static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
 
             auto routeAddList =  iface->routeAddList(m_vpnGateway, subnets);
-            if (!routeAddList.waitForFinished(1000) || routeAddList.returnValue() != subnets.count()) {
-                qWarning() << "Failed to set routes for TUN";
+            if (!routeAddList.waitForFinished() || routeAddList.returnValue() != subnets.count()) {
+                qCritical() << "Failed to set routes for TUN";
                 return ErrorCode::InternalError;
             }
         }
 
         auto StopRoutingIpv6 = iface->StopRoutingIpv6();
-        if (!StopRoutingIpv6.waitForFinished(1000) || !StopRoutingIpv6.returnValue()) {
-            qWarning() << "Failed to disable IPv6 routing";
+        if (!StopRoutingIpv6.waitForFinished() || !StopRoutingIpv6.returnValue()) {
+            qCritical() << "Failed to disable IPv6 routing";
             return ErrorCode::InternalError;
         }
 
 #ifdef Q_OS_WIN
+        int index = -1;
+
+        QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
+        for (int i = 0; i < netInterfaces.size(); i++) {
+            for (int j = 0; j < netInterfaces.at(i).addressEntries().size(); j++) {
+                // killSwitch toggle
+                if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
+                    index = netInterfaces.at(1).index();
+                }
+            }
+        }
+
+        if (QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool()) {
+            m_rawConfig.insert("vpnAdapterIndex", index);
+            auto enableKillSwitch = IpcClient::Interface()->enableKillSwitch(m_rawConfig, index);
+            if (!enableKillSwitch.waitForFinished() || !enableKillSwitch.returnValue()) {
+                qCritical() << "Failed to enable killswitch";
+                return ErrorCode::InternalError;
+            }
+        }
+
         auto enablePeerTraffic = iface->enablePeerTraffic(m_rawConfig);
-        if (!enablePeerTraffic.waitForFinished(5000) || !enablePeerTraffic.returnValue()) {
-            qWarning() << "Failed to enable peer traffic";
+        if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
+            qCritical() << "Failed to enable peer traffic";
             return ErrorCode::InternalError;
         }
 #endif
@@ -141,25 +166,30 @@ void XrayProtocol::stop()
 
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
 #ifdef AMNEZIA_DESKTOP
+        auto disableKillSwitch = iface->disableKillSwitch();
+        if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue()) {
+            qWarning() << "Failed to disable killswitch";
+        }
+
         auto StartRoutingIpv6 = iface->StartRoutingIpv6();
-        if (!StartRoutingIpv6.waitForFinished(1000) || !StartRoutingIpv6.returnValue()) {
+        if (!StartRoutingIpv6.waitForFinished() || !StartRoutingIpv6.returnValue()) {
             qWarning() << "Failed to start routing ipv6";
         }
 
         auto restoreResolvers = iface->restoreResolvers();
-        if (!restoreResolvers.waitForFinished(1000) || !restoreResolvers.returnValue()) {
+        if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue()) {
             qWarning() << "Failed to restore resolvers";
         }
 
     #if !defined(Q_OS_MACOS)
         auto deleteTun = iface->deleteTun("tun2");
-        if (!deleteTun.waitForFinished(1000) || !deleteTun.returnValue()) {
+        if (!deleteTun.waitForFinished() || !deleteTun.returnValue()) {
             qWarning() << "Failed to delete tun";
         }
     #endif
 #endif
         auto xrayStop = iface->xrayStop();
-        if (!xrayStop.waitForFinished(1000) || !xrayStop.returnValue()) {
+        if (!xrayStop.waitForFinished() || !xrayStop.returnValue()) {
             qWarning() << "Failed to stop xray";
         }
     });
