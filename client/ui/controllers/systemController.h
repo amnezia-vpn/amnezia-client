@@ -18,6 +18,13 @@ public:
 public slots:
     QString getFileName(const QString &acceptLabel, const QString &nameFilter, const QString &selectedFile = "",
                         const bool isSaveMode = false, const QString &defaultSuffix = "");
+    
+    /**
+     * @brief Получить имя файла из пути или URI (для Android)
+     * @param filePath Путь к файлу или URI
+     * @return Имя файла
+     */
+    Q_INVOKABLE QString getFileNameFromPath(const QString &filePath);
 
     void setQmlRoot(QObject *qmlRoot);
 

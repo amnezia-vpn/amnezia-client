@@ -4,13 +4,18 @@
 #include <QRegularExpression>
 #include <QJsonDocument>
 #include <QStandardPaths>
+#include <QTemporaryFile>
+#include <QUrl>
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
+#include "platforms/android/android_controller.h"
 #endif
 #ifdef Q_OS_IOS
 #include "platforms/ios/ios_controller.h"
 #endif
 #include "containers/containers_defs.h"
+#include "core/networkUtilities.h"
+#include "systemController.h"
 
 ServersBackupController::ServersBackupController(std::shared_ptr<Settings> settings, QObject *parent)
     : QObject(parent)
@@ -18,6 +23,8 @@ ServersBackupController::ServersBackupController(std::shared_ptr<Settings> setti
     , m_serverController(new ServerController(settings, this))
     , m_status(Idle)
     , m_backupDir("/var/backups/amnezia")
+    , m_restoreReplaceMode(false)
+    , m_tempUploadFile(nullptr)
 {
 }
 
@@ -43,8 +50,17 @@ void ServersBackupController::createBackup(const ServerCredentials &credentials)
     m_currentOutput.clear();
     m_currentError.clear();
 
-    // Получаем bash скрипт для backup
-    QString script = getBackupScript();
+    // Получаем IP адрес сервера
+    QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
+    if (serverIp.isEmpty()) {
+        serverIp = credentials.hostName;
+    }
+    // Форматируем IP: заменяем точки на подчеркивания
+    QString ipFormatted = serverIp;
+    ipFormatted.replace(".", "_");
+
+    // Получаем bash скрипт для backup с IP адресом
+    QString script = getBackupScript(ipFormatted);
 
     // Callback для обработки stdout
     auto cbStdOut = [this](const QString &data, libssh::Client &client) -> ErrorCode {
@@ -62,12 +78,12 @@ void ServersBackupController::createBackup(const ServerCredentials &credentials)
     ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     if (error == ErrorCode::NoError) {
-        // Парсим имя созданного backup из вывода
-        QRegularExpression re("backup_(\\d{8}_\\d{6})\\.tar\\.gz");
+        // Парсим имя созданного backup из вывода: формат "IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz"
+        QRegularExpression re("([\\d_]+)\\s+-\\s+(\\d{2}-\\d{2}-\\d{4})_(\\d{2}-\\d{2}-\\d{2})\\.tgz");
         QRegularExpressionMatch match = re.match(m_currentOutput);
         
         if (match.hasMatch()) {
-            QString backupFilename = "backup_" + match.captured(1) + ".tar.gz";
+            QString backupFilename = match.captured(1) + " - " + match.captured(2) + "_" + match.captured(3) + ".tgz";
             setStatus(Success);
             setProgress(100, tr("Backup created successfully"));
             emit backupCreated(backupFilename);
@@ -105,7 +121,16 @@ void ServersBackupController::createContainerBackup(const ServerCredentials &cre
     m_currentOutput.clear();
     m_currentError.clear();
 
-    QString script = getContainerBackupScript(container);
+    // Получаем IP адрес сервера
+    QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
+    if (serverIp.isEmpty()) {
+        serverIp = credentials.hostName;
+    }
+    // Форматируем IP: заменяем точки на подчеркивания
+    QString ipFormatted = serverIp;
+    ipFormatted.replace(".", "_");
+
+    QString script = getContainerBackupScript(container, ipFormatted);
 
     auto cbStdOut = [this](const QString &data, libssh::Client &client) -> ErrorCode {
         Q_UNUSED(client);
@@ -120,11 +145,12 @@ void ServersBackupController::createContainerBackup(const ServerCredentials &cre
     ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     if (error == ErrorCode::NoError) {
-        QRegularExpression re("backup_(\\d{8}_\\d{6})\\.tar\\.gz");
+        // Парсим имя созданного backup из вывода: формат "IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz"
+        QRegularExpression re("([\\d_]+)\\s+-\\s+(\\d{2}-\\d{2}-\\d{4})_(\\d{2}-\\d{2}-\\d{2})\\.tgz");
         QRegularExpressionMatch match = re.match(m_currentOutput);
         
         if (match.hasMatch()) {
-            QString backupFilename = "backup_" + match.captured(1) + ".tar.gz";
+            QString backupFilename = match.captured(1) + " - " + match.captured(2) + "_" + match.captured(3) + ".tgz";
             setStatus(Success);
             setProgress(100, tr("Container backup created successfully"));
             emit backupCreated(backupFilename);
@@ -151,7 +177,16 @@ void ServersBackupController::createContainersBackup(const ServerCredentials &cr
     m_currentOutput.clear();
     m_currentError.clear();
 
-    QString script = getContainersBackupScript(containers);
+    // Получаем IP адрес сервера
+    QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
+    if (serverIp.isEmpty()) {
+        serverIp = credentials.hostName;
+    }
+    // Форматируем IP: заменяем точки на подчеркивания
+    QString ipFormatted = serverIp;
+    ipFormatted.replace(".", "_");
+
+    QString script = getContainersBackupScript(containers, ipFormatted);
 
     auto cbStdOut = [this](const QString &data, libssh::Client &client) -> ErrorCode {
         Q_UNUSED(client);
@@ -166,11 +201,12 @@ void ServersBackupController::createContainersBackup(const ServerCredentials &cr
     ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     if (error == ErrorCode::NoError) {
-        QRegularExpression re("backup_(\\d{8}_\\d{6})\\.tar\\.gz");
+        // Парсим имя созданного backup из вывода: формат "IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz"
+        QRegularExpression re("([\\d_]+)\\s+-\\s+(\\d{2}-\\d{2}-\\d{4})_(\\d{2}-\\d{2}-\\d{2})\\.tgz");
         QRegularExpressionMatch match = re.match(m_currentOutput);
         
         if (match.hasMatch()) {
-            QString backupFilename = "backup_" + match.captured(1) + ".tar.gz";
+            QString backupFilename = match.captured(1) + " - " + match.captured(2) + "_" + match.captured(3) + ".tgz";
             setStatus(Success);
             setProgress(100, tr("Containers backup created successfully"));
             emit backupCreated(backupFilename);
@@ -224,7 +260,8 @@ void ServersBackupController::fetchBackupList(const ServerCredentials &credentia
 
 void ServersBackupController::restoreBackup(const ServerCredentials &credentials,
                                            const QString &backupFilename,
-                                           const QStringList &containers)
+                                           const QStringList &containers,
+                                           bool replaceMode)
 {
     if (m_status == InProgress) {
         emit errorOccurred("Another operation is in progress", ErrorCode::AmneziaServiceConnectionFailed);
@@ -232,12 +269,13 @@ void ServersBackupController::restoreBackup(const ServerCredentials &credentials
     }
 
     setStatus(InProgress);
-    setProgress(0, tr("Starting restore from %1...").arg(backupFilename));
+    QString modeText = replaceMode ? tr("replace mode") : tr("add mode");
+    setProgress(0, tr("Starting restore from %1 (%2)...").arg(backupFilename, modeText));
 
     m_currentOutput.clear();
     m_currentError.clear();
 
-    QString script = getRestoreScript(backupFilename, containers);
+    QString script = getRestoreScript(backupFilename, containers, replaceMode);
 
     auto cbStdOut = [this](const QString &data, libssh::Client &client) -> ErrorCode {
         Q_UNUSED(client);
@@ -251,13 +289,28 @@ void ServersBackupController::restoreBackup(const ServerCredentials &credentials
 
     ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
 
-    if (error == ErrorCode::NoError) {
-        setStatus(Success);
-        setProgress(100, tr("Backup restored successfully"));
-        emit backupRestored();
+    // Проверяем вывод на наличие ошибок, даже если скрипт завершился с кодом 0
+    bool hasError = m_currentOutput.contains("[ERROR]") || 
+                    m_currentOutput.contains("Failed to extract backup") ||
+                    m_currentError.contains("[ERROR]") ||
+                    m_currentError.contains("Failed to extract backup");
+
+    if (error == ErrorCode::NoError && !hasError) {
+        // Проверяем, что восстановление действительно завершилось успешно
+        if (m_currentOutput.contains("Restore completed successfully")) {
+            setStatus(Success);
+            setProgress(100, tr("Backup restored successfully"));
+            emit backupRestored();
+        } else {
+            setStatus(Failed);
+            emit errorOccurred(tr("Backup restore did not complete successfully. Output: %1").arg(m_currentOutput), ErrorCode::InternalError);
+        }
     } else {
         setStatus(Failed);
-        emit errorOccurred(tr("Failed to restore backup: %1").arg(m_currentError), error);
+        QString errorMessage = hasError ? 
+            tr("Failed to restore backup: %1").arg(m_currentOutput + "\n" + m_currentError) :
+            tr("Failed to restore backup: %1").arg(m_currentError);
+        emit errorOccurred(errorMessage, error);
     }
 }
 
@@ -383,14 +436,98 @@ void ServersBackupController::downloadBackup(const ServerCredentials &credential
 }
 
 void ServersBackupController::uploadBackup(const ServerCredentials &credentials,
-                                          const QString &localPath)
+                                          const QString &localPath,
+                                          bool replaceMode)
 {
     if (m_status == InProgress) {
         emit errorOccurred("Another operation is in progress", ErrorCode::AmneziaServiceConnectionFailed);
         return;
     }
 
-    // Check if local file exists
+    // Сохраняем режим восстановления для последующего использования
+    m_restoreReplaceMode = replaceMode;
+
+    QString actualLocalPath = localPath;
+    QString filename;
+    
+#ifdef Q_OS_ANDROID
+    // Для Android URI нужно получить имя файла и использовать файловый дескриптор
+    if (localPath.startsWith("content://")) {
+        // Получаем имя файла из URI
+        filename = AndroidController::instance()->getFileName(localPath);
+        if (filename.isEmpty()) {
+            // Fallback: извлекаем имя из URI
+            QStringList parts = localPath.split('/');
+            if (!parts.isEmpty()) {
+                filename = parts.last();
+                // Декодируем URL-кодированные символы
+                if (filename.contains('%')) {
+                    filename = QUrl::fromPercentEncoding(filename.toUtf8());
+                }
+            }
+        }
+        
+        // Для Android URI используем файловый дескриптор через SystemController::readFile
+        // Но scpFileCopy требует путь к файлу, поэтому нужно скопировать файл во временную директорию
+        QByteArray fileData;
+        qDebug() << "Reading Android URI:" << localPath;
+        if (!SystemController::readFile(localPath, fileData)) {
+            qDebug() << "Failed to read from Android URI";
+            emit errorOccurred(tr("Failed to read backup file from Android storage"), ErrorCode::ReadError);
+            return;
+        }
+        qDebug() << "Read" << fileData.size() << "bytes from Android URI";
+        
+        // Удаляем предыдущий временный файл, если он существует
+        if (m_tempUploadFile) {
+            delete m_tempUploadFile;
+            m_tempUploadFile = nullptr;
+        }
+        
+        // Создаем временный файл (сохраняем в член класса, чтобы не удалялся)
+        // Используем setAutoRemove(false) чтобы файл не удалялся автоматически
+        m_tempUploadFile = new QTemporaryFile(this);
+        m_tempUploadFile->setAutoRemove(false);
+        if (!m_tempUploadFile->open()) {
+            qDebug() << "Failed to create temporary file";
+            emit errorOccurred(tr("Failed to create temporary file"), ErrorCode::OpenError);
+            delete m_tempUploadFile;
+            m_tempUploadFile = nullptr;
+            return;
+        }
+        
+        qint64 written = m_tempUploadFile->write(fileData);
+        m_tempUploadFile->flush();
+        // НЕ закрываем файл - он должен оставаться открытым для SCP
+        // m_tempUploadFile->close();
+        actualLocalPath = m_tempUploadFile->fileName();
+        
+        qDebug() << "Created temp file:" << actualLocalPath << "written:" << written << "bytes, size:" << QFileInfo(actualLocalPath).size();
+        
+        // Проверяем, что файл существует и доступен для чтения
+        QFileInfo tempFileInfo(actualLocalPath);
+        if (!tempFileInfo.exists()) {
+            qDebug() << "Temp file does not exist after creation!";
+            emit errorOccurred(tr("Failed to create temporary file"), ErrorCode::OpenError);
+            delete m_tempUploadFile;
+            m_tempUploadFile = nullptr;
+            return;
+        }
+        
+        // Если имя файла пустое, используем имя из временного файла
+        if (filename.isEmpty()) {
+            filename = QFileInfo(actualLocalPath).fileName();
+        }
+    } else {
+        QFileInfo localFileInfo(localPath);
+        if (!localFileInfo.exists()) {
+            emit errorOccurred(tr("Local file does not exist: %1").arg(localPath), ErrorCode::InternalError);
+            return;
+        }
+        filename = localFileInfo.fileName();
+    }
+#else
+    // Для других платформ используем обычную проверку
     QFileInfo localFileInfo(localPath);
     if (!localFileInfo.exists()) {
         emit errorOccurred(tr("Local file does not exist: %1").arg(localPath), ErrorCode::InternalError);
@@ -401,27 +538,67 @@ void ServersBackupController::uploadBackup(const ServerCredentials &credentials,
         emit errorOccurred(tr("Path is not a file: %1").arg(localPath), ErrorCode::InternalError);
         return;
     }
+    
+    filename = localFileInfo.fileName();
+#endif
 
     setStatus(InProgress);
     setProgress(0, tr("Uploading backup..."));
 
-    // Construct remote file path with filename from local path
-    QString filename = localFileInfo.fileName();
+    // Construct remote file path with filename
     QString remotePath = QString("%1/%2").arg(m_backupDir, filename);
 
     setProgress(25, tr("Starting file transfer..."));
 
-    ErrorCode error = m_serverController->uploadFileToHostPublic(credentials, localPath, remotePath,
+    ErrorCode error = m_serverController->uploadFileToHostPublic(credentials, actualLocalPath, remotePath,
                                                                   libssh::ScpOverwriteMode::ScpOverwriteExisting);
 
+    qDebug() << "Upload result, error code:" << static_cast<int>(error);
+    
     if (error == ErrorCode::NoError) {
         setStatus(Success);
         setProgress(100, tr("Backup uploaded successfully"));
         emit backupUploaded(remotePath);
+        
+        // Удаляем временный файл после успешной загрузки
+        if (m_tempUploadFile) {
+            qDebug() << "Removing temp file:" << m_tempUploadFile->fileName();
+            m_tempUploadFile->remove();
+            delete m_tempUploadFile;
+            m_tempUploadFile = nullptr;
+        }
     } else {
         setStatus(Failed);
+        qDebug() << "Upload failed with error code:" << static_cast<int>(error);
         emit errorOccurred(tr("Failed to upload backup: error code %1").arg(static_cast<int>(error)), error);
+        
+        // Удаляем временный файл при ошибке
+        if (m_tempUploadFile) {
+            m_tempUploadFile->remove();
+            delete m_tempUploadFile;
+            m_tempUploadFile = nullptr;
+        }
     }
+}
+
+// Перегруженный метод для setup wizard с отдельными параметрами credentials
+void ServersBackupController::uploadBackupWithStrings(const QString &hostname,
+                                                     const QString &username,
+                                                     const QString &secretData,
+                                                     const QString &localPath,
+                                                     bool replaceMode)
+{
+    // Создаем ServerCredentials из строк
+    ServerCredentials credentials;
+    credentials.hostName = hostname;
+    credentials.userName = username;
+    credentials.secretData = secretData;
+    credentials.port = 22; // Default SSH port
+    
+    qDebug() << "uploadBackupWithStrings called with hostname:" << hostname << "username:" << username;
+    
+    // Вызываем основной метод
+    uploadBackup(credentials, localPath, replaceMode);
 }
 
 void ServersBackupController::deleteBackup(const ServerCredentials &credentials,
@@ -435,7 +612,10 @@ void ServersBackupController::deleteBackup(const ServerCredentials &credentials,
     setStatus(InProgress);
     setProgress(0, tr("Deleting backup..."));
 
-    QString script = QString("sudo rm -f %1/%2").arg(m_backupDir).arg(backupFilename);
+    // Экранируем имя файла для безопасного использования в bash
+    QString escapedFilename = backupFilename;
+    escapedFilename.replace("'", "'\\''"); // Экранируем одинарные кавычки
+    QString script = QString("sudo rm -f '%1/%2'").arg(m_backupDir).arg(escapedFilename);
 
     m_currentOutput.clear();
     m_currentError.clear();
@@ -465,16 +645,20 @@ void ServersBackupController::deleteBackup(const ServerCredentials &credentials,
 // ВСТРОЕННЫЕ BASH СКРИПТЫ
 // ============================================================================
 
-QString ServersBackupController::getBackupScript() const
+QString ServersBackupController::getBackupScript(const QString &ipAddress) const
 {
     // Упрощенная версия bash скрипта, встроенная в C++
+    // Формат имени файла: IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz
     return QString(R"(
 #!/bin/bash
 set -e
 
 BACKUP_DIR=%1
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_SUBDIR="$BACKUP_DIR/backup_$TIMESTAMP"
+IP_ADDRESS=%2
+DATE=$(date +%d-%m-%Y)
+TIME=$(date +%H-%M-%S)
+BACKUP_FILENAME="$IP_ADDRESS - ${DATE}_${TIME}.tgz"
+BACKUP_SUBDIR="$BACKUP_DIR/backup_temp_$$"
 
 echo "[INFO] Starting backup..."
 
@@ -509,26 +693,30 @@ done
 
 # Создание архива
 cd "$BACKUP_DIR"
-tar -czf "backup_$TIMESTAMP.tar.gz" "backup_$TIMESTAMP" 2>/dev/null
+tar -czf "$BACKUP_FILENAME" -C "$BACKUP_SUBDIR" . 2>/dev/null
 rm -rf "$BACKUP_SUBDIR"
 
-echo "[INFO] Backup created: backup_$TIMESTAMP.tar.gz"
-)").arg(m_backupDir);
+echo "[INFO] Backup created: $BACKUP_FILENAME"
+)").arg(m_backupDir, ipAddress);
 }
 
-QString ServersBackupController::getContainerBackupScript(DockerContainer container) const
+QString ServersBackupController::getContainerBackupScript(DockerContainer container, const QString &ipAddress) const
 {
     QString containerName = ContainerProps::containerToString(container);
     
     // Backup конкретного контейнера напрямую через docker cp
+    // Формат имени файла: IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz
     return QString(R"(
 #!/bin/bash
 set -e
 
 BACKUP_DIR=%1
 CONTAINER_NAME=%2
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_SUBDIR="$BACKUP_DIR/backup_$TIMESTAMP"
+IP_ADDRESS=%3
+DATE=$(date +%d-%m-%Y)
+TIME=$(date +%H-%M-%S)
+BACKUP_FILENAME="$IP_ADDRESS - ${DATE}_${TIME}.tgz"
+BACKUP_SUBDIR="$BACKUP_DIR/backup_temp_$$"
 
 echo "[INFO] Starting backup for container: $CONTAINER_NAME..."
 
@@ -562,14 +750,14 @@ sudo docker network inspect $(sudo docker inspect -f '{{range $k, $v := .Network
 
 # Создание архива
 cd "$BACKUP_DIR"
-tar -czf "backup_$TIMESTAMP.tar.gz" "backup_$TIMESTAMP" 2>/dev/null
+tar -czf "$BACKUP_FILENAME" -C "$BACKUP_SUBDIR" . 2>/dev/null
 rm -rf "$BACKUP_SUBDIR"
 
-echo "[INFO] Backup created: backup_$TIMESTAMP.tar.gz"
-)").arg(m_backupDir).arg(containerName);
+echo "[INFO] Backup created: $BACKUP_FILENAME"
+)").arg(m_backupDir, containerName, ipAddress);
 }
 
-QString ServersBackupController::getContainersBackupScript(const QList<DockerContainer> &containers) const
+QString ServersBackupController::getContainersBackupScript(const QList<DockerContainer> &containers, const QString &ipAddress) const
 {
     QString containersList;
     for (const DockerContainer &container : containers) {
@@ -577,13 +765,17 @@ QString ServersBackupController::getContainersBackupScript(const QList<DockerCon
         containersList += QString("\"%1\" ").arg(containerName);
     }
     
+    // Формат имени файла: IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz
     return QString(R"(
 #!/bin/bash
 set -e
 
 BACKUP_DIR=%1
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_SUBDIR="$BACKUP_DIR/backup_$TIMESTAMP"
+IP_ADDRESS=%2
+DATE=$(date +%d-%m-%Y)
+TIME=$(date +%H-%M-%S)
+BACKUP_FILENAME="$IP_ADDRESS - ${DATE}_${TIME}.tgz"
+BACKUP_SUBDIR="$BACKUP_DIR/backup_temp_$$"
 
 echo "[INFO] Starting backup for containers..."
 
@@ -591,7 +783,7 @@ echo "[INFO] Starting backup for containers..."
 mkdir -p "$BACKUP_SUBDIR"
 
 # Список контейнеров для backup
-CONTAINERS=(%2)
+CONTAINERS=(%3)
 
 # Backup каждого контейнера
 for container in "${CONTAINERS[@]}"; do
@@ -617,37 +809,70 @@ done
 
 # Создание архива
 cd "$BACKUP_DIR"
-tar -czf "backup_$TIMESTAMP.tar.gz" "backup_$TIMESTAMP" 2>/dev/null
+tar -czf "$BACKUP_FILENAME" -C "$BACKUP_SUBDIR" . 2>/dev/null
 rm -rf "$BACKUP_SUBDIR"
 
-echo "[INFO] Backup created: backup_$TIMESTAMP.tar.gz"
-)").arg(m_backupDir).arg(containersList.trimmed());
+echo "[INFO] Backup created: $BACKUP_FILENAME"
+)").arg(m_backupDir, ipAddress, containersList.trimmed());
 }
 
 QString ServersBackupController::getRestoreScript(const QString &backupFilename, 
-                                                  const QStringList &containers) const
+                                                  const QStringList &containers,
+                                                  bool replaceMode) const
 {
     Q_UNUSED(containers); // TODO: Использовать для выборочного восстановления
+    
+    // Экранируем имя файла для безопасного использования в bash
+    QString escapedFilename = backupFilename;
+    escapedFilename.replace("'", "'\\''"); // Экранируем одинарные кавычки
     
     return QString(R"(
 #!/bin/bash
 set -e
 
 BACKUP_DIR=%1
-BACKUP_FILE=%2
+BACKUP_FILE='%2'
+REPLACE_MODE=%3
 TEMP_DIR="/tmp/amnezia_restore_$$"
 
 echo "[INFO] Starting restore from $BACKUP_FILE..."
+if [ "$REPLACE_MODE" = "1" ]; then
+    echo "[INFO] Using replace mode: containers will be cleared before restore"
+else
+    echo "[INFO] Using add mode: data will be added to existing containers"
+fi
+
+# Проверка существования файла backup
+if [ ! -f "$BACKUP_DIR/$BACKUP_FILE" ]; then
+    echo "[ERROR] Backup file not found: $BACKUP_DIR/$BACKUP_FILE"
+    exit 1
+fi
 
 # Извлечение backup
 mkdir -p "$TEMP_DIR"
-tar -xzf "$BACKUP_DIR/$BACKUP_FILE" -C "$TEMP_DIR" 2>/dev/null
+EXTRACT_OUTPUT=$(tar -xzf "$BACKUP_DIR/$BACKUP_FILE" -C "$TEMP_DIR" 2>&1)
+EXTRACT_EXIT_CODE=$?
+if [ $EXTRACT_EXIT_CODE -ne 0 ]; then
+    echo "[ERROR] Failed to extract backup archive: $EXTRACT_OUTPUT"
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
 
+# Ищем директорию с контейнерами (может быть backup_temp_* или просто контейнеры напрямую)
 BACKUP_SUBDIR=$(ls -d "$TEMP_DIR"/backup_* 2>/dev/null | head -1)
 
+# Если не нашли backup_*, проверяем, есть ли директории контейнеров напрямую
 if [ -z "$BACKUP_SUBDIR" ]; then
-    echo "[ERROR] Failed to extract backup"
-    exit 1
+    # Проверяем, есть ли директории контейнеров (amnezia-*) напрямую в TEMP_DIR
+    if ls -d "$TEMP_DIR"/amnezia-* 2>/dev/null | head -1 > /dev/null; then
+        BACKUP_SUBDIR="$TEMP_DIR"
+    else
+        echo "[ERROR] Failed to extract backup: backup directory not found in archive"
+        echo "[DEBUG] Contents of $TEMP_DIR:"
+        ls -la "$TEMP_DIR" || true
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
 fi
 
 # Восстановление каждого контейнера
@@ -663,6 +888,18 @@ for container_dir in "$BACKUP_SUBDIR"/*; do
         
         # Остановка контейнера
         sudo docker stop "$container_name" 2>/dev/null || true
+        
+        # Режим замены: очистка контейнера перед восстановлением
+        if [ "$REPLACE_MODE" = "1" ]; then
+            echo "[INFO] Clearing container $container_name before restore..."
+            # Создаем пустую директорию для очистки /opt/amnezia
+            TEMP_CLEAR_DIR="/tmp/clear_amnezia_$$"
+            mkdir -p "$TEMP_CLEAR_DIR/amnezia"
+            # Копируем пустую директорию, что удалит старое содержимое
+            sudo docker cp "$TEMP_CLEAR_DIR/amnezia" "$container_name:/opt/" 2>/dev/null || true
+            # Удаляем временную директорию
+            rm -rf "$TEMP_CLEAR_DIR"
+        fi
         
         # Восстановление /opt/amnezia
         if [ -d "$container_dir/amnezia" ]; then
@@ -680,7 +917,7 @@ done
 rm -rf "$TEMP_DIR"
 
 echo "[INFO] Restore completed successfully"
-)").arg(m_backupDir).arg(backupFilename);
+)").arg(m_backupDir).arg(escapedFilename).arg(replaceMode ? "1" : "0");
 }
 
 QString ServersBackupController::getCheckStatusScript() const
@@ -792,6 +1029,12 @@ ErrorCode ServersBackupController::handleStdOut(const QString &data, QString &ou
     output += data;
     qDebug().noquote() << "[BACKUP]" << data;
     
+    // Проверяем на ошибки в выводе
+    if (data.contains("[ERROR]") || data.contains("ERROR")) {
+        // Ошибка обнаружена в stdout, но это не критично для handleStdOut
+        // Основная проверка будет в restoreBackup после выполнения скрипта
+    }
+    
     // Обновляем прогресс на основе вывода
     if (data.contains("Starting backup")) {
         setProgress(10, tr("Starting backup..."));
@@ -799,6 +1042,12 @@ ErrorCode ServersBackupController::handleStdOut(const QString &data, QString &ou
         setProgress(50, tr("Backing up containers..."));
     } else if (data.contains("Backup created")) {
         setProgress(90, tr("Finalizing..."));
+    } else if (data.contains("Starting restore")) {
+        setProgress(10, tr("Starting restore..."));
+    } else if (data.contains("Restoring")) {
+        setProgress(50, tr("Restoring containers..."));
+    } else if (data.contains("Restore completed successfully")) {
+        setProgress(90, tr("Finalizing restore..."));
     }
     
     return ErrorCode::NoError;

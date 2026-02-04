@@ -8,6 +8,8 @@
 #include <QJsonArray>
 #include <QFileInfo>
 
+class QTemporaryFile;
+
 #include "core/controllers/serverController.h"
 #include "core/defs.h"
 #include "containers/containers_defs.h"
@@ -90,10 +92,12 @@ public slots:
      * @param credentials Учетные данные сервера
      * @param backupFilename Имя файла backup
      * @param containers Список контейнеров (пустой = все)
+     * @param replaceMode Если true - сначала очищает контейнер, затем восстанавливает. Если false - добавляет данные поверх существующих
      */
     void restoreBackup(const ServerCredentials &credentials, 
                        const QString &backupFilename, 
-                       const QStringList &containers = QStringList());
+                       const QStringList &containers = QStringList(),
+                       bool replaceMode = false);
 
     /**
      * @brief Проверить состояние backup на сервере
@@ -115,9 +119,18 @@ public slots:
      * @brief Загрузить backup на сервер
      * @param credentials Учетные данные сервера
      * @param localPath Путь к локальному файлу
+     * @param replaceMode Режим восстановления (true = замена, false = добавление). Сохраняется для последующего использования в restoreBackup
      */
     void uploadBackup(const ServerCredentials &credentials,
-                      const QString &localPath);
+                      const QString &localPath,
+                      bool replaceMode = false);
+    
+    // Перегруженный метод для setup wizard с отдельными параметрами credentials
+    Q_INVOKABLE void uploadBackupWithStrings(const QString &hostname,
+                                             const QString &username,
+                                             const QString &secretData,
+                                             const QString &localPath,
+                                             bool replaceMode = false);
 
     /**
      * @brief Удалить backup с сервера
@@ -186,25 +199,31 @@ signals:
 private:
     /**
      * @brief Получить bash скрипт для создания backup всех контейнеров
+     * @param ipAddress IP адрес сервера в формате с подчеркиваниями (например "192_119_110_11")
      */
-    QString getBackupScript() const;
+    QString getBackupScript(const QString &ipAddress) const;
 
     /**
      * @brief Получить bash скрипт для создания backup конкретного контейнера
      * @param container Тип контейнера
+     * @param ipAddress IP адрес сервера в формате с подчеркиваниями (например "192_119_110_11")
      */
-    QString getContainerBackupScript(DockerContainer container) const;
+    QString getContainerBackupScript(DockerContainer container, const QString &ipAddress) const;
 
     /**
      * @brief Получить bash скрипт для создания backup нескольких контейнеров
      * @param containers Список контейнеров
+     * @param ipAddress IP адрес сервера в формате с подчеркиваниями (например "192_119_110_11")
      */
-    QString getContainersBackupScript(const QList<DockerContainer> &containers) const;
+    QString getContainersBackupScript(const QList<DockerContainer> &containers, const QString &ipAddress) const;
 
     /**
      * @brief Получить bash скрипт для восстановления
+     * @param backupFilename Имя файла backup
+     * @param containers Список контейнеров
+     * @param replaceMode Если true - сначала очищает контейнер, затем восстанавливает
      */
-    QString getRestoreScript(const QString &backupFilename, const QStringList &containers) const;
+    QString getRestoreScript(const QString &backupFilename, const QStringList &containers, bool replaceMode = false) const;
 
     /**
      * @brief Получить bash скрипт для проверки состояния
@@ -253,6 +272,8 @@ private:
     QString m_backupDir;
     QString m_currentOutput;
     QString m_currentError;
+    bool m_restoreReplaceMode; // Сохраняем режим восстановления для использования после uploadBackup
+    QTemporaryFile *m_tempUploadFile; // Временный файл для Android URI (чтобы не удалялся до завершения загрузки)
 };
 
 #endif // SERVERSBACKUPCONTROLLER_H

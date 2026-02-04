@@ -13,6 +13,13 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    property var setupWizardEasy: null
+    
+    // Сохраняем credentials здесь для использования при восстановлении backup
+    property string savedHostname: ""
+    property string savedUsername: ""
+    property string savedSecretData: ""
+
     BackButtonType {
         id: backButton
 
@@ -130,6 +137,12 @@ PageType {
                         return
                     }
 
+                    // Сохраняем credentials в свойствах этой страницы
+                    root.savedHostname = _hostname
+                    root.savedUsername = _username
+                    root.savedSecretData = _secretData
+                    console.log("Saved credentials in PageSetupWizardCredentials:", _hostname, _username)
+                    
                     PageController.goToPage(PageEnum.PageSetupWizardEasy)
                 }
             }

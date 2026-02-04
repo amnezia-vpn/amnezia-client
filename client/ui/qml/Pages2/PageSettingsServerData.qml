@@ -64,148 +64,10 @@ PageType {
         delegate: ColumnLayout {
             width: listView.width
 
-            // Кастомная секция для backup
-            ColumnLayout {
-                Layout.fillWidth: true
-                visible: isVisible && isBackupSection
-
-                spacing: 16
-
-                Header2Type {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 8
-                    
-                    headerText: qsTr("Backup & Restore")
-                }
-
-                ParagraphTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    
-                    text: qsTr("Create and restore server configuration backups")
-                    color: AmneziaStyle.color.mutedGray
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    spacing: 12
-
-                    LabelTextType {
-                        text: qsTr("Select containers:")
-                    }
-
-                    DropDownType {
-                        id: containerSelector
-                        Layout.fillWidth: true
-
-                        objectName: "containerSelector"
-                        descriptionText: qsTr("Choose which containers to backup")
-                        headerText: qsTr("Containers")
-                        
-                        text: "All containers"
-                        
-                        drawerHeight: 0.4375
-                        drawerParent: root
-
-                        listView: ListViewWithRadioButtonType {
-                            id: containerSelectorListView
-                            rootWidth: root.width
-                            
-                            model: ListModel {
-                                id: containersModel
-                                ListElement { name: "All containers"; value: "all" }
-                                ListElement { name: "OpenVPN"; value: "amnezia-openvpn" }
-                                ListElement { name: "WireGuard"; value: "amnezia-wireguard" }
-                                ListElement { name: "AmneziaWG (legacy)"; value: "amnezia-awg" }
-                                ListElement { name: "AmneziaWG 2"; value: "amnezia-awg2" }
-                                ListElement { name: "Xray"; value: "amnezia-xray" }
-                                ListElement { name: "IKEv2"; value: "amnezia-ipsec" }
-                                ListElement { name: "Cloak"; value: "amnezia-cloak" }
-                                ListElement { name: "ShadowSocks"; value: "amnezia-shadowsocks" }
-                            }
-
-                            clickedFunction: function() {
-                                if (containerSelectorListView.selectedText) {
-                                    containerSelector.text = containerSelectorListView.selectedText
-                                }
-                                // Сохранить выбранное значение
-                                var index = containerSelectorListView.selectedIndex
-                                if (index >= 0 && index < containersModel.count) {
-                                    root.selectedContainerValue = containersModel.get(index).value
-                                }
-                                containerSelector.closeTriggered()
-                            }
-
-                            Component.onCompleted: {
-                                containerSelectorListView.selectedIndex = 0
-                                root.selectedContainerValue = "all"
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 12
-
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            text: qsTr("Create Backup")
-                            
-                            clickedFunc: function() {
-                                createBackup(false) // false = не скачивать автоматически
-                            }
-                        }
-
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            text: qsTr("Backup & Download")
-                            
-                            clickedFunc: function() {
-                                createBackup(true) // true = скачать после создания
-                            }
-                        }
-                    }
-
-                    BasicButtonType {
-                        Layout.fillWidth: true
-                        text: qsTr("Restore Backup")
-                        defaultColor: AmneziaStyle.color.transparent
-                        hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                        pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                        disabledColor: AmneziaStyle.color.mutedGray
-                        textColor: AmneziaStyle.color.goldenApricot
-
-                        clickedFunc: function() {
-                            restoreBackup()
-                        }
-                    }
-
-                    BasicButtonType {
-                        Layout.fillWidth: true
-                        text: qsTr("Manage Backups")
-                        defaultColor: AmneziaStyle.color.transparent
-                        hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                        pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                        disabledColor: AmneziaStyle.color.mutedGray
-                        textColor: AmneziaStyle.color.goldenApricot
-
-                        clickedFunc: function() {
-                            manageBackups()
-                        }
-                    }
-                }
-            }
-
-            // Обычные кнопки для других действий
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                visible: isVisible && !isBackupSection
+                visible: isVisible
 
                 text: title
                 descriptionText: description
@@ -250,11 +112,14 @@ PageType {
         id: backupSection
 
         property bool isVisible: root.isServerWithWriteAccess
-        readonly property bool isBackupSection: true
-        readonly property string title: ""
-        readonly property string description: ""
+        readonly property bool isBackupSection: false
+        readonly property string title: qsTr("Backup")
+        readonly property string description: qsTr("Local copy of VPN protocols, services, all server settings and users")
         readonly property var tColor: AmneziaStyle.color.paleGray
-        readonly property var clickedHandler: function() {}
+        readonly property var clickedHandler: function() {
+            // Navigate to server backup page using PageController
+            PageController.goToPage(PageEnum.PageSettingsServerBackup)
+        }
     }
 
     QtObject {
