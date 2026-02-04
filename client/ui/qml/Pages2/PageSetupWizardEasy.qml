@@ -22,6 +22,156 @@ PageType {
     property int containerDefaultPort
     property int containerDefaultTransportProto
 
+    property bool isRestoreFromBackup: false
+    property string backupFilePath: ""
+    property string restoreHostname: ""
+    property string restoreUsername: ""
+    property string restoreSecretData: ""
+    property bool waitingForServerToAdd: false
+
+    property var containersToInstall: []
+    property int currentContainerIndex: 0
+    property bool isInstallingContainers: false
+
+    Connections {
+        target: ServersBackupController
+
+        function onReadyForRestore(backupFilePath, hostname, username, secretData, serverIp, fileName) {
+            var foundContainers = ServersBackupController.scanBackupForContainers(backupFilePath)
+            console.log("Found containers in backup:", foundContainers)
+
+            if (foundContainers.length === 0) {
+                PageController.showErrorMessage(qsTr("No containers found in backup file"))
+                root.isRestoreFromBackup = false
+                return
+            }
+
+            root.containersToInstall = foundContainers
+            root.currentContainerIndex = 0
+
+            InstallController.setProcessedServerCredentials(hostname, username, secretData)
+            root.waitingForServerToAdd = true
+            InstallController.addEmptyServer()
+        }
+    }
+
+    Connections {
+        target: InstallController
+
+        function onInstallServerFinished(finishedMessage) {
+            if (root.waitingForServerToAdd && root.isRestoreFromBackup && root.backupFilePath.length > 0) {
+                root.waitingForServerToAdd = false
+                root.isInstallingContainers = true
+                installNextContainer()
+            }
+        }
+
+        function onInstallContainerFinished(finishedMessage, isServiceInstall) {
+            if (root.isInstallingContainers) {
+                root.currentContainerIndex++
+
+                if (root.currentContainerIndex < root.containersToInstall.length) {
+                    installNextContainer()
+                } else {
+                    root.isInstallingContainers = false
+                    PageController.showBusyIndicator(false)
+                    navigationTimer.start()
+                }
+            }
+        }
+    }
+
+    function installNextContainer() {
+        if (root.currentContainerIndex >= root.containersToInstall.length) {
+            return
+        }
+
+        var containerName = root.containersToInstall[root.currentContainerIndex]
+        var dockerContainer = ContainerProps.containerFromString(containerName)
+
+        if (dockerContainer === 0) {
+            console.log("Unknown container:", containerName, "skipping...")
+            root.currentContainerIndex++
+            installNextContainer()
+            return
+        }
+
+        var defaultProtocol = ContainerProps.defaultProtocol(dockerContainer)
+        var defaultPort = InstallController.getPortForInstall(defaultProtocol)
+        var defaultTransport = InstallController.defaultTransportProto(defaultProtocol)
+
+        var serverId = ServersUiController.getServerId(ServersUiController.getServersCount() - 1)
+        ServersUiController.setProcessedServerId(serverId)
+
+        PageController.showBusyIndicator(true)
+        PageController.showNotificationMessage(qsTr("Installing %1 (%2/%3)...")
+            .arg(containerName)
+            .arg(root.currentContainerIndex + 1)
+            .arg(root.containersToInstall.length))
+
+        InstallController.setProcessedServerCredentials(root.restoreHostname, root.restoreUsername, root.restoreSecretData)
+
+        console.log("Installing container:", containerName, "serverId:", serverId)
+        ServersUiController.processedContainerIndex = dockerContainer
+        InstallController.install(dockerContainer, defaultPort, defaultTransport, serverId)
+    }
+
+    Timer {
+        id: navigationTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            if (root.backupFilePath.length > 0 && root.isRestoreFromBackup) {
+                var fileName = SystemController.getFileNameFromPath(root.backupFilePath)
+                if (!fileName || fileName === undefined || fileName.length === 0) {
+                    var fallbackName = root.backupFilePath.split('/').pop()
+                    fileName = (fallbackName && fallbackName.length > 0) ? fallbackName : qsTr("backup.tgz")
+                }
+                fileName = String(fileName)
+
+                var serverIp = ""
+                var ipMatch = fileName.match(/^([\d_]+)\s*-/)
+                if (ipMatch && ipMatch.length > 1) {
+                    serverIp = ipMatch[1].replace(/_/g, ".")
+                }
+                if (!serverIp || serverIp.length === 0) {
+                    serverIp = root.restoreHostname
+                }
+
+                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+
+                Qt.callLater(function() {
+                    var pagePath = "qrc:/ui/qml/Pages2/PageSettingsServerRestoreMode.qml"
+
+                    // Walk up to the containing StackView instead of a recursive downward search,
+                    // which overflows the JS stack on iOS with a large component tree.
+                    var stackView = root.parent
+                    while (stackView) {
+                        if (typeof stackView.push === "function" && stackView.hasOwnProperty("depth")) {
+                            break
+                        }
+                        stackView = stackView.parent
+                    }
+
+                    if (stackView) {
+                        stackView.push(pagePath, {
+                            "backupFilePath": root.backupFilePath,
+                            "backupFileName": fileName,
+                            "serverName": "",
+                            "serverIp": serverIp,
+                            "isFromSetupWizard": true,
+                            "wizardHostname": root.restoreHostname,
+                            "wizardUsername": root.restoreUsername,
+                            "wizardSecretData": root.restoreSecretData
+                        })
+                    } else {
+                        console.error("Could not find StackView")
+                    }
+                })
+            }
+        }
+    }
+
     SortFilterProxyModel {
         id: proxyContainersModel
 
@@ -121,6 +271,54 @@ PageType {
                     onClicked: {
                         root.isEasySetup = false
                         checked = true
+                    }
+                }
+
+                SelectableListItemType {
+                    Layout.fillWidth: true
+
+                    text: qsTr("Restore from backup")
+                    subtitle: qsTr("Restoration of VPN protocols, services, all server settings and users")
+
+                    ButtonGroup.group: buttonGroup
+
+                    onClicked: {
+                        var filter = GC.isMobile() ? "*.gz *.tgz *.tar.gz" : "Backup files (*.tar.gz *.backup *.tgz *.gz)"
+                        var localPath = SystemController.getFileName(qsTr("Select Backup to Restore"), filter, "", false, "")
+
+                        if (!localPath || localPath.length === 0) {
+                            return
+                        }
+
+                        root.backupFilePath = localPath
+                        root.isRestoreFromBackup = true
+
+                        var credentialsPage = null
+                        var item = root
+                        while (item && !item.hasOwnProperty("depth")) {
+                            item = item.parent
+                        }
+
+                        if (item && item.depth > 0) {
+                            for (var i = 0; i < item.depth; i++) {
+                                var page = item.get(i)
+                                if (page && page.hasOwnProperty("savedHostname")) {
+                                    credentialsPage = page
+                                    break
+                                }
+                            }
+                        }
+
+                        if (!credentialsPage || credentialsPage.savedHostname.length === 0) {
+                            console.log("WARNING: No credentials found")
+                            return
+                        }
+
+                        root.restoreHostname = credentialsPage.savedHostname
+                        root.restoreUsername = credentialsPage.savedUsername
+                        root.restoreSecretData = credentialsPage.savedSecretData
+
+                        ServersBackupController.prepareRestoreFromBackup(localPath, root.restoreHostname, root.restoreUsername, root.restoreSecretData)
                     }
                 }
             }
