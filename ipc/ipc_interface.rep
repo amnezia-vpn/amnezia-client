@@ -38,8 +38,8 @@ class IpcInterface
     SLOT( bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) );
     SLOT( bool restoreResolvers() );
 
-    SLOT(void xrayStart(const QString &config));
-    SLOT(void xrayStop());
+    SLOT(bool xrayStart(const QString &config));
+    SLOT(bool xrayStop());
 
     SLOT( bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) );
     SLOT( bool stopNetworkCheck() );
