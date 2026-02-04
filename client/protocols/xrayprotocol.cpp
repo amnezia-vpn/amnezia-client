@@ -92,7 +92,7 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
 #ifdef Q_OS_WIN
-        auto enablePeerTraffic = iface->enablePeerTraffic(m_xrayConfig);
+        auto enablePeerTraffic = iface->enablePeerTraffic(m_rawConfig);
         if (!enablePeerTraffic.waitForFinished(5000) || !enablePeerTraffic.returnValue()) {
             qWarning() << "Failed to enable peer traffic";
             return ErrorCode::InternalError;
