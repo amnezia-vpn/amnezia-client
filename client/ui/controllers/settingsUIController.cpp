@@ -136,7 +136,9 @@ void SettingsUiController::restoreAppConfig(const QString &fileName)
 {
     QFile file(fileName);
 
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return;
+    }
 
     QByteArray data = file.readAll();
 

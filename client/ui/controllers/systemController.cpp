@@ -38,8 +38,9 @@ void SystemController::saveFile(const QString &fileName, const QString &data)
     QFile file(fileName);
 #endif
 
-    // todo check if save successful
-    file.open(QIODevice::WriteOnly);
+    if (!file.open(QIODevice::WriteOnly)) {
+        return;
+    }
     file.write(data.toUtf8());
     file.close();
 

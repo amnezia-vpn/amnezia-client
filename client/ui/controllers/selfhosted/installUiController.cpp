@@ -531,7 +531,7 @@ void InstallUiController::updateProtocolConfigModel(int serverIndex, int protoco
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: {
         if (m_ikev2ConfigModel) {
-            m_ikev2ConfigModel->updateModel(containerConfigJson);
+            m_ikev2ConfigModel->updateModel(containerConfig.toJson());
         }
         break;
     }
