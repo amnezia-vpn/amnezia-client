@@ -318,6 +318,40 @@ bool RouterWin::createTun(const QString &dev, const QString &subnet)
         return false;
     }
 
+    HANDLE hEvent = CreateEvent(nullptr, true, false, nullptr);
+    if (!hEvent) {
+        qCritical() << "Failed to allocate event object";
+        return false;
+    }
+    auto _guardEvent = qScopeGuard([hEvent](){ CloseHandle(hEvent); });
+
+    struct {
+        HANDLE hEvent;
+        NET_LUID luid;
+        const QString &subnet;
+        bool found;
+    } ctx = { .hEvent = hEvent, .luid = luid, .subnet = subnet, .found = false };
+
+    auto cb = [](void *priv, MIB_UNICASTIPADDRESS_ROW *row, MIB_NOTIFICATION_TYPE NotificationType) {
+        auto* c = reinterpret_cast<decltype(ctx)*>(priv);
+        if (row != nullptr && row->InterfaceLuid.Value == c->luid.Value && row->Address.si_family == AF_INET) {
+            char ip[INET_ADDRSTRLEN];
+            inet_ntop(row->Address.Ipv4.sin_family, &row->Address.Ipv4.sin_addr, ip, INET_ADDRSTRLEN);
+            if (c->subnet == ip) {
+                c->found = true;
+                SetEvent(c->hEvent);
+            }
+        }
+    };
+
+    HANDLE hNotif;
+    res = NotifyUnicastIpAddressChange(AF_INET, cb, &ctx, false, &hNotif);
+    if (res != NO_ERROR) {
+        qCritical() << "Failed to subscribe to interface change";
+        return false;
+    }
+    auto _guardNotif = qScopeGuard([hNotif](){ CancelMibChangeNotify2(hNotif); });
+
     MIB_UNICASTIPADDRESS_ROW row;
     InitializeUnicastIpAddressEntry(&row);
 
@@ -337,7 +371,13 @@ bool RouterWin::createTun(const QString &dev, const QString &subnet)
         return false;
     }
 
-    return true;
+    res = WaitForSingleObject(hEvent, 10000);
+    if (res == WAIT_TIMEOUT) {
+        qCritical() << "Timeout of waiting for IP assignment for " << dev << " device";
+        return false;
+    }
+
+    return ctx.found;
 }
 
 void RouterWin::suspendWcmSvc(bool suspend)

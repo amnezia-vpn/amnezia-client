@@ -57,6 +57,11 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
 #ifdef AMNEZIA_DESKTOP
+    #ifdef Q_OS_WIN
+        const QString remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::config_key::hostName).toString());
+        const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(remoteAddress));
+    #endif
+
     #ifdef Q_OS_MACOS
         const QString tunName = "utun22";
     #else
@@ -73,10 +78,6 @@ ErrorCode XrayProtocol::setupRouting() {
             qCritical() << "Failed to set DNS resolvers for TUN";
             return ErrorCode::InternalError;
         }
-#endif
-#ifdef Q_OS_WIN
-        const QString remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::config_key::hostName).toString());
-        const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(remoteAddress));
 #endif
 
         if (m_routeMode == Settings::RouteMode::VpnAllSites) {
