@@ -382,6 +382,51 @@ bool ApiConfigsController::fillAvailableServices()
     }
 
     QJsonObject data = QJsonDocument::fromJson(responseBody).object();
+    
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    QEventLoop waitProducts;
+    bool productsFetched = false;
+    QString productPrice;
+    QString productCurrency;
+    
+    IosController::Instance()->fetchProducts(QStringList() << QStringLiteral("amnezia_premium_6_month"),
+                                             [&](const QList<QVariantMap> &products,
+                                                 const QStringList &invalidIds,
+                                                 const QString &errorString) {
+                                                 if (!errorString.isEmpty() || products.isEmpty()) {
+                                                     qWarning().noquote() << "[IAP] Failed to fetch product price:" << errorString;
+                                                 } else {
+                                                     const auto &product = products.first();
+                                                     productPrice = product.value("price").toString();
+                                                     productCurrency = product.value("currencyCode").toString();
+                                                     productsFetched = true;
+                                                     qInfo().noquote() << "[IAP] Fetched product price:" << productPrice << productCurrency;
+                                                 }
+                                                 waitProducts.quit();
+                                             });
+    waitProducts.exec();
+    
+    if (productsFetched && !productPrice.isEmpty()) {
+        QJsonArray services = data.value("services").toArray();
+        for (int i = 0; i < services.size(); ++i) {
+            QJsonObject service = services[i].toObject();
+            if (service.value(configKey::serviceType).toString() == serviceType::amneziaPremium) {
+                QJsonObject serviceInfo = service.value(configKey::serviceInfo).toObject();
+                QString formattedPrice = productPrice;
+                if (!productCurrency.isEmpty()) {
+                    formattedPrice += " " + productCurrency;
+                }
+                serviceInfo["price"] = formattedPrice;
+                service[configKey::serviceInfo] = serviceInfo;
+                services[i] = service;
+                data["services"] = services;
+                qInfo().noquote() << "[IAP] Updated premium service price in data:" << formattedPrice;
+                break;
+            }
+        }
+    }
+#endif
+    
     m_apiServicesModel->updateModel(data);
     if (m_apiServicesModel->rowCount() > 0) {
         m_apiServicesModel->setServiceIndex(0);
