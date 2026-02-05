@@ -17,10 +17,6 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_t2sProcess = IpcClient::InterfaceTun2Socks();
-
-    auto vpnServer = NetworkUtilities::getIPAddress(configuration.value(amnezia::config_key::hostName).toString());
-    m_rawConfig.insert("vpnGateway", m_vpnGateway);
-    m_rawConfig.insert("vpnServer", vpnServer);
 }
 
 XrayProtocol::~XrayProtocol()
@@ -78,6 +74,10 @@ ErrorCode XrayProtocol::setupRouting() {
             return ErrorCode::InternalError;
         }
 #endif
+#ifdef Q_OS_WIN
+        const QString remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::config_key::hostName).toString());
+        const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(remoteAddress));
+#endif
 
         if (m_routeMode == Settings::RouteMode::VpnAllSites) {
             static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
@@ -96,32 +96,41 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
 #ifdef Q_OS_WIN
-        int index = -1;
-
+        int vpnAdapterIndex = -1;
         QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
         for (int i = 0; i < netInterfaces.size(); i++) {
             for (int j = 0; j < netInterfaces.at(i).addressEntries().size(); j++) {
                 // killSwitch toggle
                 if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
-                    index = netInterfaces.at(1).index();
+                    vpnAdapterIndex = netInterfaces.at(1).index();
                 }
             }
         }
 
-        if (QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool()) {
-            m_rawConfig.insert("vpnAdapterIndex", index);
-            auto enableKillSwitch = IpcClient::Interface()->enableKillSwitch(m_rawConfig, index);
+        const bool killSwitchEnabled = QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool();
+        if (killSwitchEnabled && vpnAdapterIndex != -1) {
+            auto enableKillSwitch = IpcClient::Interface()->enableKillSwitch(m_rawConfig, vpnAdapterIndex);
             if (!enableKillSwitch.waitForFinished() || !enableKillSwitch.returnValue()) {
                 qCritical() << "Failed to enable killswitch";
                 return ErrorCode::InternalError;
             }
-        }
+        } else
+            qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
 
-        auto enablePeerTraffic = iface->enablePeerTraffic(m_rawConfig);
-        if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
-            qCritical() << "Failed to enable peer traffic";
-            return ErrorCode::InternalError;
-        }
+        if (inetAdapterIndex != 1 && vpnAdapterIndex != -1) {
+            QJsonObject config = m_rawConfig;
+            config.insert("inetAdapterIndex", inetAdapterIndex);
+            config.insert("vpnAdapterIndex", vpnAdapterIndex);
+            config.insert("vpnGateway", m_vpnGateway);
+            config.insert("vpnServer", remoteAddress);
+
+            auto enablePeerTraffic = iface->enablePeerTraffic(config);
+            if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
+                qCritical() << "Failed to enable peer traffic";
+                return ErrorCode::InternalError;
+            }
+        } else
+            qWarning() << "Failed to get adapter indexes. Split-tunneling disabled";
 #endif
         return ErrorCode::NoError;
     },
@@ -163,6 +172,7 @@ ErrorCode XrayProtocol::startTun2Sock()
 void XrayProtocol::stop()
 {
     qDebug() << "XrayProtocol::stop()";
+    setConnectionState(Vpn::ConnectionState::Disconnecting);
 
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
 #ifdef AMNEZIA_DESKTOP
@@ -194,10 +204,8 @@ void XrayProtocol::stop()
         }
     });
 
-    if (m_t2sProcess) {
+    if (m_t2sProcess)
         m_t2sProcess->stop();
-        QThread::msleep(200);
-    }
 
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }
