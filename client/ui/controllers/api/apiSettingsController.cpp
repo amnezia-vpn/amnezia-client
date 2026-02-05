@@ -60,8 +60,6 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     auto authData = serverConfig.value(configKey::authData).toObject();
 
     bool isTestPurchase = apiConfig.value(apiDefs::key::isTestPurchase).toBool(false);
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), m_settings->isDevGatewayEnv(isTestPurchase),
-                                        requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
 
     QJsonObject apiPayload;
     apiPayload[configKey::userCountryCode] = apiConfig.value(configKey::userCountryCode).toString();
@@ -71,35 +69,19 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
-    QString baseDomain = "gateway.example.com";
     QString endpoint = QString("%1v1/account_info");
     
-    // 1. HTTP (primary transport)
-    ErrorCode errorCode = gatewayController.post(endpoint, apiPayload, responseBody);
-    if (errorCode == ErrorCode::NoError) goto success;
+    // Use GatewayController with parallel transports
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), 
+                                        m_settings->isDevGatewayEnv(isTestPurchase),
+                                        requestTimeoutMsecs, 
+                                        m_settings->isStrictKillSwitchEnabled());
     
-    qDebug() << "[Transport] HTTP failed, trying DNS transports as fallback";
+    // Load transports config from file or env
+    gatewayController.loadTransportsConfig("gateway.json", "AMNEZIA_GATEWAY");
     
-    // 2. DNS UDP
-    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Udp, 15353);
-    errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
-    if (errorCode == ErrorCode::NoError) goto success;
+    ErrorCode errorCode = gatewayController.postParallel(endpoint, apiPayload, responseBody);
     
-    // 3. DNS TCP
-    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Tcp, 15353);
-    errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
-    if (errorCode == ErrorCode::NoError) goto success;
-    
-    // 4. DoT
-    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Tls, 8853);
-    errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
-    if (errorCode == ErrorCode::NoError) goto success;
-    
-    // 5. DoH
-    gatewayController.setDnsServer("127.0.0.1", baseDomain, NetworkUtilities::DnsTransport::Https, 80, "/dns-query");
-    errorCode = gatewayController.postViaDns(endpoint, apiPayload, responseBody);
-    
-success:
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;

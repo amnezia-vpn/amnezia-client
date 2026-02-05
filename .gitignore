@@ -1,5 +1,9 @@
 # User settings
 *.user
+
+# Gateway configs (contains sensitive endpoints)
+gateway.json
+client/gateway.json
 macOSPackage/
 AmneziaVPN.dmg
 AmneziaVPN.exe

@@ -1,18 +1,23 @@
 #include "gatewayController.h"
 
 #include <algorithm>
+#include <atomic>
 #include <functional>
 #include <random>
 
 #include <QCryptographicHash>
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMutex>
 #include <QNetworkReply>
+#include <QProcessEnvironment>
 #include <QPromise>
 #include <QUrl>
 #include <QHostAddress>
 #include <QDebug>
+#include <QtConcurrent>
 
 #include "QBlockCipher.h"
 #include "QRsa.h"
@@ -50,6 +55,90 @@ namespace
     constexpr int httpStatusCodeNotImplemented = 501;
 }
 
+// Parse TransportsConfig from JSON
+TransportsConfig TransportsConfig::fromJson(const QJsonObject &json)
+{
+    TransportsConfig config;
+    
+    // Parse primary transport
+    QString primaryStr = json.value("primary").toString("http").toLower();
+    if (primaryStr == "http") {
+        config.primary = PrimaryTransport::Http;
+    } else if (primaryStr == "dns_udp" || primaryStr == "udp") {
+        config.primary = PrimaryTransport::DnsUdp;
+    } else if (primaryStr == "dns_tcp" || primaryStr == "tcp") {
+        config.primary = PrimaryTransport::DnsTcp;
+    } else if (primaryStr == "dns_dot" || primaryStr == "dot") {
+        config.primary = PrimaryTransport::DnsDot;
+    } else if (primaryStr == "dns_doh" || primaryStr == "doh") {
+        config.primary = PrimaryTransport::DnsDoh;
+    } else if (primaryStr == "dns_doq" || primaryStr == "doq") {
+        config.primary = PrimaryTransport::DnsDoq;
+    }
+    
+    // Parse retry settings
+    config.retryCount = json.value("retry_count").toInt(3);
+    config.timeoutMs = json.value("timeout_ms").toInt(10000);
+    
+    // Parse HTTP config
+    if (json.contains("http")) {
+        QJsonObject httpObj = json["http"].toObject();
+        config.httpEnabled = httpObj.value("enabled").toBool(true);
+        config.httpEndpoint = httpObj.value("endpoint").toString();
+    }
+    
+    // Parse DNS transports (each with its own server/domain)
+    if (json.contains("dns_transports")) {
+        QJsonArray transportsArray = json["dns_transports"].toArray();
+        for (const auto &transportVal : transportsArray) {
+            QJsonObject transportObj = transportVal.toObject();
+            DnsTransportEntry entry;
+            
+            // Each transport has its own server and domain
+            entry.server = transportObj.value("server").toString();
+            entry.domain = transportObj.value("domain").toString();
+            entry.port = static_cast<quint16>(transportObj.value("port").toInt(15353));
+            entry.dohPath = transportObj.value("path").toString("/dns-query");
+            
+            QString typeStr = transportObj.value("type").toString().toLower();
+            if (typeStr == "udp") {
+                entry.type = NetworkUtilities::DnsTransport::Udp;
+                if (entry.port == 15353 && !transportObj.contains("port")) {
+                    entry.port = 15353;
+                }
+            } else if (typeStr == "tcp") {
+                entry.type = NetworkUtilities::DnsTransport::Tcp;
+                if (entry.port == 15353 && !transportObj.contains("port")) {
+                    entry.port = 15353;
+                }
+            } else if (typeStr == "dot" || typeStr == "tls") {
+                entry.type = NetworkUtilities::DnsTransport::Tls;
+                if (!transportObj.contains("port")) {
+                    entry.port = 8853;
+                }
+            } else if (typeStr == "doh" || typeStr == "https") {
+                entry.type = NetworkUtilities::DnsTransport::Https;
+                if (!transportObj.contains("port")) {
+                    entry.port = 443;
+                }
+            } else if (typeStr == "doq" || typeStr == "quic") {
+                entry.type = NetworkUtilities::DnsTransport::Quic;
+                if (!transportObj.contains("port")) {
+                    entry.port = 8853;
+                }
+            } else {
+                continue;  // Skip unknown transport
+            }
+            
+            if (entry.isValid()) {
+                config.dnsTransports.append(entry);
+            }
+        }
+    }
+    
+    return config;
+}
+
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                      const bool isStrictKillSwitchEnabled, QObject *parent)
     : QObject(parent),
@@ -79,6 +168,296 @@ void GatewayController::setDnsServer(const QString &dnsServer, const QString &ba
     }
     qDebug() << "[DNS Tunnel] Server:" << dnsServer << "BaseDomain:" << baseDomain 
              << "Transport:" << transportName << "Port:" << port;
+}
+
+void GatewayController::setTransportsConfig(const TransportsConfig &config)
+{
+    m_transportsConfig = config;
+    
+    // Update legacy fields for backward compatibility
+    if (!config.httpEndpoint.isEmpty()) {
+        m_gatewayEndpoint = config.httpEndpoint;
+    }
+    
+    // Update timeout from config
+    if (config.timeoutMs > 0) {
+        m_requestTimeoutMsecs = config.timeoutMs;
+    }
+    
+    qDebug() << "[Transport] Config set: HTTP enabled=" << config.httpEnabled 
+             << "endpoint=" << config.httpEndpoint
+             << "DNS transports=" << config.dnsTransports.size()
+             << "primary=" << static_cast<int>(config.primary)
+             << "retry=" << config.retryCount
+             << "timeout=" << config.timeoutMs;
+}
+
+bool GatewayController::loadTransportsConfig(const QString &filePath, const QString &envVarName)
+{
+    // Try environment variable first
+    QString envValue = QProcessEnvironment::systemEnvironment().value(envVarName);
+    if (!envValue.isEmpty()) {
+        QJsonParseError parseError;
+        QJsonDocument doc = QJsonDocument::fromJson(envValue.toUtf8(), &parseError);
+        if (parseError.error == QJsonParseError::NoError) {
+            setTransportsConfig(TransportsConfig::fromJson(doc.object()));
+            qDebug() << "[Transport] Loaded config from env:" << envVarName;
+            return true;
+        }
+        qWarning() << "[Transport] Failed to parse env" << envVarName << ":" << parseError.errorString();
+    }
+    
+    // Try file
+    QFile file(filePath);
+    if (file.open(QIODevice::ReadOnly)) {
+        QByteArray data = file.readAll();
+        file.close();
+        
+        QJsonParseError parseError;
+        QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+        if (parseError.error == QJsonParseError::NoError) {
+            setTransportsConfig(TransportsConfig::fromJson(doc.object()));
+            qDebug() << "[Transport] Loaded config from file:" << filePath;
+            return true;
+        }
+        qWarning() << "[Transport] Failed to parse file" << filePath << ":" << parseError.errorString();
+    }
+    
+    qDebug() << "[Transport] No config found, using defaults";
+    return false;
+}
+
+ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
+{
+    if (!m_transportsConfig.isValid()) {
+        qWarning() << "[Transport] Invalid config, falling back to HTTP only";
+        return post(endpoint, apiPayload, responseBody);
+    }
+    
+    // Prepare encrypted request once (skip DNS resolve for DNS tunneling)
+    EncryptedRequestData encRequestData = prepareRequest(endpoint, apiPayload, true);
+    if (encRequestData.errorCode != ErrorCode::NoError) {
+        return encRequestData.errorCode;
+    }
+    
+    // Extract endpoint name for DNS tunneling
+    QString endpointName = endpoint;
+    endpointName.remove("%1");
+    if (endpointName.startsWith("v1/")) {
+        endpointName = endpointName.mid(3);
+    }
+    if (endpointName.endsWith("/")) {
+        endpointName.chop(1);
+    }
+    
+    // Helper: find DNS transport by type
+    auto findDnsTransport = [&](NetworkUtilities::DnsTransport type) -> const DnsTransportEntry* {
+        for (const auto &t : m_transportsConfig.dnsTransports) {
+            if (t.type == type && t.isValid()) return &t;
+        }
+        return nullptr;
+    };
+    
+    // Helper: try HTTP transport
+    auto tryHttp = [&]() -> ErrorCode {
+        if (!m_transportsConfig.httpEnabled) return ErrorCode::AmneziaServiceConnectionFailed;
+        
+        qDebug() << "[Transport] PRIMARY: Trying HTTP";
+        EncryptedRequestData httpRequestData = prepareRequest(endpoint, apiPayload, false);
+        if (httpRequestData.errorCode != ErrorCode::NoError) return httpRequestData.errorCode;
+        
+        QNetworkAccessManager nam;
+        QNetworkReply *reply = nam.post(httpRequestData.request, httpRequestData.requestBody);
+        QEventLoop wait;
+        QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
+        wait.exec();
+        
+        QByteArray encryptedBody = reply->readAll();
+        auto replyError = reply->error();
+        reply->deleteLater();
+        
+        if (replyError != QNetworkReply::NoError || encryptedBody.isEmpty()) {
+            qDebug() << "[Transport] PRIMARY HTTP failed";
+            return ErrorCode::AmneziaServiceConnectionFailed;
+        }
+        
+        try {
+            QSimpleCrypto::QBlockCipher blockCipher;
+            responseBody = blockCipher.decryptAesBlockCipher(encryptedBody, httpRequestData.key, httpRequestData.iv, "", httpRequestData.salt);
+            qDebug() << "[Transport] PRIMARY HTTP succeeded";
+            return ErrorCode::NoError;
+        } catch (...) {
+            return ErrorCode::ApiConfigDecryptionError;
+        }
+    };
+    
+    // Helper: try DNS transport
+    auto tryDns = [&](const DnsTransportEntry &transport) -> ErrorCode {
+        QString transportName;
+        switch (transport.type) {
+            case NetworkUtilities::DnsTransport::Udp: transportName = "UDP"; break;
+            case NetworkUtilities::DnsTransport::Tcp: transportName = "TCP"; break;
+            case NetworkUtilities::DnsTransport::Tls: transportName = "DoT"; break;
+            case NetworkUtilities::DnsTransport::Https: transportName = "DoH"; break;
+            case NetworkUtilities::DnsTransport::Quic: transportName = "DoQ"; break;
+        }
+        
+        qDebug() << "[Transport] PRIMARY: Trying DNS" << transportName;
+        QByteArray dnsResponse = NetworkUtilities::sendViaDnsTunnel(
+            encRequestData.requestBody, endpointName, transport.domain,
+            transport.server, transport.type, transport.port, m_requestTimeoutMsecs, transport.dohPath);
+        
+        if (dnsResponse.isEmpty()) {
+            qDebug() << "[Transport] PRIMARY DNS" << transportName << "failed";
+            return ErrorCode::AmneziaServiceConnectionFailed;
+        }
+        
+        try {
+            QSimpleCrypto::QBlockCipher blockCipher;
+            responseBody = blockCipher.decryptAesBlockCipher(dnsResponse, encRequestData.key, encRequestData.iv, "", encRequestData.salt);
+            qDebug() << "[Transport] PRIMARY DNS" << transportName << "succeeded";
+            return ErrorCode::NoError;
+        } catch (...) {
+            return ErrorCode::ApiConfigDecryptionError;
+        }
+    };
+    
+    // === STEP 1: Try PRIMARY transport first ===
+    qDebug() << "[Transport] Trying primary transport:" << static_cast<int>(m_transportsConfig.primary);
+    
+    ErrorCode primaryResult = ErrorCode::AmneziaServiceConnectionFailed;
+    switch (m_transportsConfig.primary) {
+        case PrimaryTransport::Http:
+            primaryResult = tryHttp();
+            break;
+        case PrimaryTransport::DnsUdp:
+            if (auto t = findDnsTransport(NetworkUtilities::DnsTransport::Udp)) primaryResult = tryDns(*t);
+            break;
+        case PrimaryTransport::DnsTcp:
+            if (auto t = findDnsTransport(NetworkUtilities::DnsTransport::Tcp)) primaryResult = tryDns(*t);
+            break;
+        case PrimaryTransport::DnsDot:
+            if (auto t = findDnsTransport(NetworkUtilities::DnsTransport::Tls)) primaryResult = tryDns(*t);
+            break;
+        case PrimaryTransport::DnsDoh:
+            if (auto t = findDnsTransport(NetworkUtilities::DnsTransport::Https)) primaryResult = tryDns(*t);
+            break;
+        case PrimaryTransport::DnsDoq:
+            if (auto t = findDnsTransport(NetworkUtilities::DnsTransport::Quic)) primaryResult = tryDns(*t);
+            break;
+    }
+    
+    if (primaryResult == ErrorCode::NoError) {
+        return ErrorCode::NoError;
+    }
+    
+    // === STEP 2: Primary failed — launch ALL other transports in parallel ===
+    qDebug() << "[Transport] Primary failed, launching parallel fallback";
+    
+    std::atomic<bool> gotSuccess{false};
+    QByteArray successResult;
+    QString successTransport;
+    QMutex resultMutex;
+    QList<QFuture<void>> futures;
+    
+    // HTTP (if not primary and enabled)
+    if (m_transportsConfig.primary != PrimaryTransport::Http && m_transportsConfig.httpEnabled) {
+        auto httpFuture = QtConcurrent::run([&]() {
+            if (gotSuccess.load()) return;
+            
+            qDebug() << "[Transport] FALLBACK: Trying HTTP";
+            EncryptedRequestData httpRequestData = prepareRequest(endpoint, apiPayload, false);
+            if (httpRequestData.errorCode != ErrorCode::NoError) return;
+            
+            QNetworkAccessManager nam;
+            QNetworkReply *reply = nam.post(httpRequestData.request, httpRequestData.requestBody);
+            QEventLoop wait;
+            QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
+            wait.exec();
+            
+            if (gotSuccess.load()) { reply->deleteLater(); return; }
+            
+            QByteArray encryptedBody = reply->readAll();
+            auto replyError = reply->error();
+            reply->deleteLater();
+            
+            if (replyError != QNetworkReply::NoError || encryptedBody.isEmpty()) return;
+            
+            try {
+                QSimpleCrypto::QBlockCipher blockCipher;
+                QByteArray decrypted = blockCipher.decryptAesBlockCipher(encryptedBody, httpRequestData.key, httpRequestData.iv, "", httpRequestData.salt);
+                if (!gotSuccess.exchange(true)) {
+                    QMutexLocker lock(&resultMutex);
+                    successResult = decrypted;
+                    successTransport = "HTTP";
+                }
+            } catch (...) {}
+        });
+        futures.append(httpFuture);
+    }
+    
+    // DNS transports (skip the one that was primary)
+    for (const auto &transport : m_transportsConfig.dnsTransports) {
+        if (!transport.isValid()) continue;
+        
+        // Skip if this was primary
+        bool wasPrimary = false;
+        switch (m_transportsConfig.primary) {
+            case PrimaryTransport::DnsUdp: wasPrimary = (transport.type == NetworkUtilities::DnsTransport::Udp); break;
+            case PrimaryTransport::DnsTcp: wasPrimary = (transport.type == NetworkUtilities::DnsTransport::Tcp); break;
+            case PrimaryTransport::DnsDot: wasPrimary = (transport.type == NetworkUtilities::DnsTransport::Tls); break;
+            case PrimaryTransport::DnsDoh: wasPrimary = (transport.type == NetworkUtilities::DnsTransport::Https); break;
+            case PrimaryTransport::DnsDoq: wasPrimary = (transport.type == NetworkUtilities::DnsTransport::Quic); break;
+            default: break;
+        }
+        if (wasPrimary) continue;
+        
+        auto dnsFuture = QtConcurrent::run([&, transport]() {
+            if (gotSuccess.load()) return;
+            
+            QString transportName;
+            switch (transport.type) {
+                case NetworkUtilities::DnsTransport::Udp: transportName = "UDP"; break;
+                case NetworkUtilities::DnsTransport::Tcp: transportName = "TCP"; break;
+                case NetworkUtilities::DnsTransport::Tls: transportName = "DoT"; break;
+                case NetworkUtilities::DnsTransport::Https: transportName = "DoH"; break;
+                case NetworkUtilities::DnsTransport::Quic: transportName = "DoQ"; break;
+            }
+            
+            qDebug() << "[Transport] FALLBACK: Trying DNS" << transportName;
+            QByteArray dnsResponse = NetworkUtilities::sendViaDnsTunnel(
+                encRequestData.requestBody, endpointName, transport.domain,
+                transport.server, transport.type, transport.port, m_requestTimeoutMsecs, transport.dohPath);
+            
+            if (dnsResponse.isEmpty()) return;
+            
+            try {
+                QSimpleCrypto::QBlockCipher blockCipher;
+                QByteArray decrypted = blockCipher.decryptAesBlockCipher(dnsResponse, encRequestData.key, encRequestData.iv, "", encRequestData.salt);
+                if (!gotSuccess.exchange(true)) {
+                    QMutexLocker lock(&resultMutex);
+                    successResult = decrypted;
+                    successTransport = "DNS-" + transportName;
+                }
+            } catch (...) {}
+        });
+        futures.append(dnsFuture);
+    }
+    
+    // CRITICAL: Wait for ALL futures to complete to prevent use-after-free
+    // (lambdas capture references to local variables like resultMutex, successResult)
+    for (auto &future : futures) {
+        future.waitForFinished();
+    }
+    
+    if (gotSuccess.load()) {
+        responseBody = successResult;
+        qDebug() << "[Transport] FALLBACK success via" << successTransport;
+        return ErrorCode::NoError;
+    }
+    
+    qDebug() << "[Transport] All transports failed";
+    return ErrorCode::AmneziaServiceConnectionFailed;
 }
 
 QString GatewayController::resolveGatewayHostname(const QString &hostname)
@@ -116,8 +495,8 @@ ErrorCode GatewayController::postViaDns(const QString &endpoint, const QJsonObje
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
     
-    // Prepare encrypted request
-    EncryptedRequestData encRequestData = prepareRequest(endpoint, apiPayload);
+    // Prepare encrypted request (skip DNS resolve - we send directly to m_dnsServer)
+    EncryptedRequestData encRequestData = prepareRequest(endpoint, apiPayload, true);
     if (encRequestData.errorCode != ErrorCode::NoError) {
         return encRequestData.errorCode;
     }
@@ -169,7 +548,7 @@ ErrorCode GatewayController::postViaDns(const QString &endpoint, const QJsonObje
     }
 }
 
-GatewayController::EncryptedRequestData GatewayController::prepareRequest(const QString &endpoint, const QJsonObject &apiPayload)
+GatewayController::EncryptedRequestData GatewayController::prepareRequest(const QString &endpoint, const QJsonObject &apiPayload, bool skipDnsResolve)
 {
     EncryptedRequestData encRequestData;
     encRequestData.errorCode = ErrorCode::NoError;
@@ -183,13 +562,14 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     encRequestData.request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     encRequestData.request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
     
-    // DNS резолв через TCP/UDP
+    // DNS резолв через TCP/UDP (пропускаем для DNS tunneling — там запрос идёт напрямую к DNS серверу)
     QString finalGatewayEndpoint = m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl;
     QUrl gatewayUrl(finalGatewayEndpoint);
     QString hostname = gatewayUrl.host();
     
     // Проверяем, нужно ли резолвить (если это не IP адрес и не localhost)
-    if (!hostname.isEmpty() && 
+    if (!skipDnsResolve &&
+        !hostname.isEmpty() && 
         hostname != "localhost" &&
         !NetworkUtilities::checkIPv4Format(hostname) && 
         QHostAddress(hostname).isNull()) {

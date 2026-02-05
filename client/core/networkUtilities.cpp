@@ -58,6 +58,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QUrl>
+#include <QThread>
+#include <QElapsedTimer>
 
 namespace
 {
@@ -1147,37 +1149,44 @@ namespace {
         
         int pos = 12;
         
-        // Skip questions
-        for (int i = 0; i < qdCount && pos < response.size(); i++) {
-            while (pos < response.size() && data[pos] != 0) {
-                if ((data[pos] & 0xC0) == 0xC0) { pos += 2; break; }
-                pos += data[pos] + 1;
+        // Helper lambda to safely skip DNS name with bounds checking
+        auto skipDnsName = [&]() -> bool {
+            int maxLabels = 128; // Prevent infinite loops
+            while (pos < response.size() && data[pos] != 0 && maxLabels-- > 0) {
+                if ((data[pos] & 0xC0) == 0xC0) { 
+                    pos += 2; 
+                    return pos <= response.size(); 
+                }
+                int labelLen = data[pos];
+                if (pos + 1 + labelLen > response.size()) return false; // Bounds check
+                pos += labelLen + 1;
             }
             if (pos < response.size() && data[pos] == 0) pos++;
+            return pos <= response.size();
+        };
+        
+        // Skip questions
+        for (int i = 0; i < qdCount && pos < response.size(); i++) {
+            if (!skipDnsName()) return meta;
+            if (pos + 4 > response.size()) return meta;
             pos += 4; // QTYPE + QCLASS
         }
         
         // Skip answers
         for (int i = 0; i < anCount && pos < response.size(); i++) {
-            while (pos < response.size() && data[pos] != 0) {
-                if ((data[pos] & 0xC0) == 0xC0) { pos += 2; break; }
-                pos += data[pos] + 1;
-            }
-            if (pos < response.size() && data[pos] == 0) pos++;
-            if (pos + 10 > response.size()) break;
+            if (!skipDnsName()) return meta;
+            if (pos + 10 > response.size()) return meta;
             quint16 rdlen = (data[pos + 8] << 8) | data[pos + 9];
+            if (pos + 10 + rdlen > response.size()) return meta;
             pos += 10 + rdlen;
         }
         
         // Skip authority
         for (int i = 0; i < nsCount && pos < response.size(); i++) {
-            while (pos < response.size() && data[pos] != 0) {
-                if ((data[pos] & 0xC0) == 0xC0) { pos += 2; break; }
-                pos += data[pos] + 1;
-            }
-            if (pos < response.size() && data[pos] == 0) pos++;
-            if (pos + 10 > response.size()) break;
+            if (!skipDnsName()) return meta;
+            if (pos + 10 > response.size()) return meta;
             quint16 rdlen = (data[pos + 8] << 8) | data[pos + 9];
+            if (pos + 10 + rdlen > response.size()) return meta;
             pos += 10 + rdlen;
         }
         
@@ -1187,17 +1196,14 @@ namespace {
             if (pos < response.size() && data[pos] == 0) {
                 pos++; // Root label for OPT
             } else {
-                while (pos < response.size() && data[pos] != 0) {
-                    if ((data[pos] & 0xC0) == 0xC0) { pos += 2; break; }
-                    pos += data[pos] + 1;
-                }
-                if (pos < response.size() && data[pos] == 0) pos++;
+                if (!skipDnsName()) return meta;
             }
             
-            if (pos + 10 > response.size()) break;
+            if (pos + 10 > response.size()) return meta;
             
             quint16 rtype = (data[pos] << 8) | data[pos + 1];
             quint16 rdlen = (data[pos + 8] << 8) | data[pos + 9];
+            if (pos + 10 + rdlen > response.size()) return meta;
             pos += 10;
             
             if (rtype == 41 && rdlen > 0) { // OPT record
@@ -1295,24 +1301,47 @@ namespace {
         qDebug() << "[DNS Tunnel] Response header: id=" << transactionId << "flags=" << Qt::hex << flags 
                  << "questions=" << qdCount << "answers=" << anCount << "authority=" << nsCount << "additional=" << arCount;
         
+        // Validate QR bit - must be 1 for response (bit 15 of flags)
+        if ((flags & 0x8000) == 0) {
+            qDebug() << "[DNS Tunnel] Invalid response: QR bit not set (not a response)";
+            return QByteArray();
+        }
+        
         // Check for errors (RCODE in lower 4 bits of flags)
         quint8 rcode = flags & 0x0F;
         if (rcode != 0) {
             qDebug() << "[DNS Tunnel] Response error, RCODE:" << rcode;
         }
         
+        // Sanity check on counts to prevent excessive iteration
+        if (anCount > 100 || qdCount > 10) {
+            qDebug() << "[DNS Tunnel] Suspicious counts, likely garbage data";
+            return QByteArray();
+        }
+        
+        // Helper lambda to safely skip DNS name with bounds checking
+        auto skipDnsName = [&]() -> bool {
+            int maxLabels = 128; // Prevent infinite loops
+            while (pos < response.size() && data[pos] != 0 && maxLabels-- > 0) {
+                if ((data[pos] & 0xC0) == 0xC0) { 
+                    pos += 2; 
+                    return pos <= response.size(); 
+                }
+                int labelLen = data[pos];
+                if (pos + 1 + labelLen > response.size()) return false;
+                pos += labelLen + 1;
+            }
+            if (pos < response.size() && data[pos] == 0) pos++;
+            return pos <= response.size();
+        };
+        
         // Skip question section
         for (int i = 0; i < qdCount && pos < response.size(); i++) {
-            // Skip name
-            while (pos < response.size()) {
-                quint8 len = data[pos++];
-                if (len == 0) break;
-                if ((len & 0xC0) == 0xC0) {
-                    pos++; // Skip pointer byte
-                    break;
-                }
-                pos += len;
+            if (!skipDnsName()) {
+                qDebug() << "[DNS Tunnel] Failed to skip question name";
+                return QByteArray();
             }
+            if (pos + 4 > response.size()) return QByteArray();
             pos += 4; // Skip QTYPE and QCLASS
         }
         
@@ -1321,15 +1350,9 @@ namespace {
         // Read answer section - looking for TXT records
         QByteArray combinedTxt;
         for (int i = 0; i < anCount && pos < response.size(); i++) {
-            // Skip name (handle compression)
-            while (pos < response.size()) {
-                quint8 len = data[pos++];
-                if (len == 0) break;
-                if ((len & 0xC0) == 0xC0) {
-                    pos++; // Skip pointer byte
-                    break;
-                }
-                pos += len;
+            if (!skipDnsName()) {
+                qDebug() << "[DNS Tunnel] Failed to skip answer name at pos=" << pos;
+                break;
             }
             
             if (pos + 10 > response.size()) {
@@ -1344,13 +1367,21 @@ namespace {
             
             qDebug() << "[DNS Tunnel] Answer" << i << ": type=" << rtype << "class=" << rclass << "ttl=" << ttl << "rdlen=" << rdlength;
             
+            // Bounds check for rdlength
+            if (pos + rdlength > response.size()) {
+                qDebug() << "[DNS Tunnel] rdlength exceeds buffer, truncating";
+                break;
+            }
+            
             if (rtype == 16) { // TXT record
                 int rdEnd = pos + rdlength;
                 while (pos < rdEnd && pos < response.size()) {
                     quint8 txtLen = data[pos++];
-                    if (txtLen > 0 && pos + txtLen <= rdEnd) {
+                    if (txtLen > 0 && pos + txtLen <= rdEnd && pos + txtLen <= response.size()) {
                         combinedTxt.append(reinterpret_cast<const char*>(data + pos), txtLen);
                         pos += txtLen;
+                    } else {
+                        break; // Invalid TXT length
                     }
                 }
             } else {
@@ -1396,9 +1427,9 @@ QByteArray NetworkUtilities::sendViaDnsTunnel(const QByteArray &payload, const Q
         case DnsTransport::Https:
             return sendViaDnsTunnelHttps(payload, queryName, dnsServer, port, dohEndpoint, timeoutMsecs);
         case DnsTransport::Quic:
-            // DoQ uses QUIC - not yet implemented, fallback to chunked UDP
-            qDebug() << "[DNS Tunnel] DoQ not yet implemented, falling back to UDP";
-            return sendViaDnsTunnelUdpChunked(payload, queryName, dnsServer, port, timeoutMsecs);
+            // DoQ uses QUIC - not yet implemented
+            qDebug() << "[DNS Tunnel] DoQ not yet implemented";
+            return QByteArray(); // Return empty to trigger fallback to other transports
     }
     return QByteArray();
 }
@@ -1593,44 +1624,48 @@ QByteArray NetworkUtilities::sendViaDnsTunnelTls(const QByteArray &payload, cons
     
     qDebug() << "[DNS Tunnel DoT] Sent" << bytesWritten << "bytes";
     
-    // Wait for response
-    QEventLoop loop;
-    QTimer timer;
-    timer.setSingleShot(true);
-    timer.setInterval(timeoutMsecs);
-    
-    QByteArray response;
-    bool responseReceived = false;
-    
-    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    QObject::connect(&socket, &QSslSocket::readyRead, [&]() {
-        if (socket.bytesAvailable() >= 2 && response.isEmpty()) {
-            QByteArray lengthBytes = socket.read(2);
-            if (lengthBytes.size() == 2) {
-                quint16 responseLength = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(lengthBytes.constData()));
-                while (socket.bytesAvailable() < responseLength) {
-                    if (!socket.waitForReadyRead(timeoutMsecs / 2)) {
-                        break;
-                    }
-                }
-                if (socket.bytesAvailable() >= responseLength) {
-                    response = socket.read(responseLength);
-                    responseReceived = true;
-                    loop.quit();
-                }
-            }
-        }
-    });
-    
+    // Synchronous read: first get 2-byte length prefix
+    QElapsedTimer timer;
     timer.start();
-    loop.exec();
-    timer.stop();
-    socket.close();
     
-    if (!responseReceived || response.isEmpty()) {
-        qDebug() << "[DNS Tunnel DoT] No response received (timeout)";
+    while (socket.bytesAvailable() < 2) {
+        int remaining = timeoutMsecs - timer.elapsed();
+        if (remaining <= 0 || !socket.waitForReadyRead(remaining)) {
+            qDebug() << "[DNS Tunnel DoT] Timeout waiting for response length";
+            socket.close();
+            return QByteArray();
+        }
+    }
+    
+    QByteArray lengthBytes = socket.read(2);
+    if (lengthBytes.size() != 2) {
+        qDebug() << "[DNS Tunnel DoT] Failed to read response length";
+        socket.close();
         return QByteArray();
     }
+    
+    quint16 responseLength = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(lengthBytes.constData()));
+    
+    // Now read the full response body
+    QByteArray response;
+    while (response.size() < responseLength) {
+        int remaining = timeoutMsecs - timer.elapsed();
+        if (remaining <= 0) {
+            qDebug() << "[DNS Tunnel DoT] Timeout waiting for response body";
+            socket.close();
+            return QByteArray();
+        }
+        
+        if (socket.bytesAvailable() > 0) {
+            response.append(socket.read(responseLength - response.size()));
+        } else if (!socket.waitForReadyRead(remaining)) {
+            qDebug() << "[DNS Tunnel DoT] Timeout waiting for more data";
+            socket.close();
+            return QByteArray();
+        }
+    }
+    
+    socket.close();
     
     qDebug() << "[DNS Tunnel DoT] Received response:" << response.size() << "bytes";
     return parseDnsTxtResponse(response);
@@ -1649,7 +1684,9 @@ QByteArray NetworkUtilities::sendViaDnsTunnelHttps(const QByteArray &payload, co
     }
     
     // DoH uses HTTP POST with application/dns-message
-    QString url = QString("http://%1:%2%3").arg(dnsServer).arg(port).arg(endpoint);
+    // Use HTTPS for port 443, HTTP for other ports (like 80 for local testing)
+    QString scheme = (port == 443) ? "https" : "http";
+    QString url = QString("%1://%2:%3%4").arg(scheme).arg(dnsServer).arg(port).arg(endpoint);
     
     qDebug() << "[DNS Tunnel DoH] Sending to" << url;
     
@@ -1702,15 +1739,24 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payloa
         return QByteArray();
     }
     
-    // Helper lambda to send UDP request and get raw response
-    auto sendUdpRequest = [&](const QByteArray &query) -> QByteArray {
+    // Constants for retry logic
+    constexpr int MAX_INITIAL_RETRIES = 3;
+    constexpr int MAX_CHUNK_RETRIES = 2;
+    constexpr int MAX_CONCURRENT_REQUESTS = 5;
+    constexpr int BASE_TIMEOUT_MS = 2000;
+    
+    // Helper lambda to send UDP request with configurable timeout
+    auto sendUdpRequestWithTimeout = [&](const QByteArray &query, int requestTimeoutMs) -> QByteArray {
         QUdpSocket socket;
-        socket.writeDatagram(query, dnsAddress, port);
+        qint64 written = socket.writeDatagram(query, dnsAddress, port);
+        if (written != query.size()) {
+            return QByteArray();
+        }
         
         QEventLoop loop;
         QTimer timer;
         timer.setSingleShot(true);
-        timer.setInterval(timeoutMsecs / 5); // Shorter timeout per request
+        timer.setInterval(requestTimeoutMs);
         
         QByteArray response;
         bool responseReceived = false;
@@ -1734,7 +1780,27 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payloa
         return responseReceived ? response : QByteArray();
     };
     
-    // Send initial request with payload
+    // Helper lambda with retry and exponential backoff
+    auto sendWithRetry = [&](const QByteArray &query, int maxRetries) -> QByteArray {
+        for (int attempt = 0; attempt < maxRetries; attempt++) {
+            int timeout = BASE_TIMEOUT_MS * (attempt + 1); // 2s, 4s, 6s
+            qDebug() << "[DNS Tunnel UDP Chunked] Attempt" << (attempt + 1) << "/" << maxRetries 
+                     << "timeout:" << timeout << "ms";
+            
+            QByteArray response = sendUdpRequestWithTimeout(query, timeout);
+            if (!response.isEmpty()) {
+                return response;
+            }
+            
+            if (attempt < maxRetries - 1) {
+                qDebug() << "[DNS Tunnel UDP Chunked] Retry after" << (timeout / 2) << "ms";
+                QThread::msleep(timeout / 2);
+            }
+        }
+        return QByteArray();
+    };
+    
+    // === Step 1: Send initial request with retry ===
     quint16 transactionId = static_cast<quint16>(QDateTime::currentMSecsSinceEpoch() & 0xFFFF);
     QByteArray initialQuery = buildDnsTxtQueryWithPayload(queryName, transactionId, payload);
     
@@ -1744,10 +1810,10 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payloa
     }
     
     qDebug() << "[DNS Tunnel UDP Chunked] Sending initial request, payload:" << payload.size() << "bytes";
-    QByteArray firstResponse = sendUdpRequest(initialQuery);
+    QByteArray firstResponse = sendWithRetry(initialQuery, MAX_INITIAL_RETRIES);
     
     if (firstResponse.isEmpty()) {
-        qDebug() << "[DNS Tunnel UDP Chunked] No response for initial request";
+        qDebug() << "[DNS Tunnel UDP Chunked] No response for initial request after" << MAX_INITIAL_RETRIES << "attempts";
         return QByteArray();
     }
     
@@ -1762,7 +1828,6 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payloa
     
     // Check if response is chunked
     if (meta.totalChunks <= 1) {
-        // Not chunked or single chunk - return as-is
         qDebug() << "[DNS Tunnel UDP Chunked] Single chunk response:" << firstTxtData.size() << "bytes";
         return firstTxtData;
     }
@@ -1770,51 +1835,137 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payloa
     qDebug() << "[DNS Tunnel UDP Chunked] Chunked response: total=" << meta.totalChunks 
              << "size=" << meta.totalSize << "chunkId=" << meta.chunkId.toHex();
     
-    // Collect all chunks
+    // === Step 2: Collect all chunks ===
     QMap<int, QByteArray> chunks;
     chunks[0] = firstTxtData;
     
-    // Request remaining chunks
+    // Build list of chunks to request
+    QList<int> chunksToRequest;
     for (int i = 1; i < meta.totalChunks; i++) {
-        qDebug() << "[DNS Tunnel UDP Chunked] Requesting chunk" << i;
+        chunksToRequest.append(i);
+    }
+    
+    // === Step 3: Request chunks in parallel batches with retry ===
+    auto requestChunksBatch = [&](const QList<int> &chunkIndices, int batchTimeout) {
+        if (chunkIndices.isEmpty()) return;
         
-        quint16 chunkTxId = static_cast<quint16>((QDateTime::currentMSecsSinceEpoch() + i) & 0xFFFF);
-        QByteArray chunkQuery = buildDnsChunkRequest(queryName, chunkTxId, meta.chunkId, i);
+        // Create sockets and send requests for this batch
+        QList<QSharedPointer<QUdpSocket>> sockets;
+        QMap<QUdpSocket*, int> socketToIndex;
         
-        if (chunkQuery.isEmpty()) {
-            qDebug() << "[DNS Tunnel UDP Chunked] Failed to build chunk request" << i;
-            continue;
+        for (int idx : chunkIndices) {
+            if (chunks.contains(idx)) continue; // Already have this chunk
+            
+            quint16 chunkTxId = static_cast<quint16>((QDateTime::currentMSecsSinceEpoch() + idx) & 0xFFFF);
+            QByteArray chunkQuery = buildDnsChunkRequest(queryName, chunkTxId, meta.chunkId, idx);
+            
+            if (chunkQuery.isEmpty()) {
+                qDebug() << "[DNS Tunnel UDP Chunked] Failed to build chunk request" << idx;
+                continue;
+            }
+            
+            auto socket = QSharedPointer<QUdpSocket>::create();
+            socket->writeDatagram(chunkQuery, dnsAddress, port);
+            socketToIndex[socket.data()] = idx;
+            sockets.append(socket);
         }
         
-        QByteArray chunkResponse = sendUdpRequest(chunkQuery);
-        if (chunkResponse.isEmpty()) {
-            qDebug() << "[DNS Tunnel UDP Chunked] No response for chunk" << i;
-            continue;
+        if (sockets.isEmpty()) return;
+        
+        qDebug() << "[DNS Tunnel UDP Chunked] Sent" << sockets.size() << "parallel requests";
+        
+        // Wait for responses with deadline
+        QEventLoop loop;
+        QTimer deadline;
+        deadline.setSingleShot(true);
+        deadline.setInterval(batchTimeout);
+        
+        int receivedCount = 0;
+        int expectedCount = sockets.size();
+        
+        QObject::connect(&deadline, &QTimer::timeout, &loop, &QEventLoop::quit);
+        
+        for (auto &socket : sockets) {
+            QObject::connect(socket.data(), &QUdpSocket::readyRead, [&, sock = socket.data()]() {
+                while (sock->hasPendingDatagrams()) {
+                    QNetworkDatagram datagram = sock->receiveDatagram();
+                    if (datagram.isValid()) {
+                        QByteArray chunkTxtData = parseDnsTxtResponse(datagram.data());
+                        if (!chunkTxtData.isEmpty()) {
+                            ChunkMeta chunkMeta = parseChunkMeta(datagram.data());
+                            int idx = (chunkMeta.totalChunks > 0) ? chunkMeta.chunkIndex : socketToIndex.value(sock, -1);
+                            if (idx >= 0 && !chunks.contains(idx)) {
+                                chunks[idx] = chunkTxtData;
+                                qDebug() << "[DNS Tunnel UDP Chunked] Received chunk" << idx << ":" << chunkTxtData.size() << "bytes";
+                                receivedCount++;
+                            }
+                        }
+                    }
+                }
+                
+                // Exit early if we have all chunks
+                if (receivedCount >= expectedCount || chunks.size() >= meta.totalChunks) {
+                    loop.quit();
+                }
+            });
         }
         
-        QByteArray chunkTxtData = parseDnsTxtResponse(chunkResponse);
-        if (!chunkTxtData.isEmpty()) {
-            ChunkMeta chunkMeta = parseChunkMeta(chunkResponse);
-            int idx = (chunkMeta.totalChunks > 0) ? chunkMeta.chunkIndex : i;
-            chunks[idx] = chunkTxtData;
-            qDebug() << "[DNS Tunnel UDP Chunked] Received chunk" << idx << ":" << chunkTxtData.size() << "bytes";
+        deadline.start();
+        loop.exec();
+        deadline.stop();
+    };
+    
+    // Process chunks in batches
+    int totalTimeout = qMax(timeoutMsecs / 2, 5000); // At least 5 seconds for chunks
+    int batchTimeout = totalTimeout / (MAX_CHUNK_RETRIES + 1);
+    
+    for (int retryRound = 0; retryRound <= MAX_CHUNK_RETRIES; retryRound++) {
+        // Find missing chunks
+        QList<int> missing;
+        for (int i = 1; i < meta.totalChunks; i++) {
+            if (!chunks.contains(i)) {
+                missing.append(i);
+            }
+        }
+        
+        if (missing.isEmpty()) {
+            qDebug() << "[DNS Tunnel UDP Chunked] All chunks received";
+            break;
+        }
+        
+        if (retryRound > 0) {
+            qDebug() << "[DNS Tunnel UDP Chunked] Retry round" << retryRound << "for" << missing.size() << "missing chunks";
+        }
+        
+        // Process in batches of MAX_CONCURRENT_REQUESTS
+        for (int batchStart = 0; batchStart < missing.size(); batchStart += MAX_CONCURRENT_REQUESTS) {
+            QList<int> batch = missing.mid(batchStart, MAX_CONCURRENT_REQUESTS);
+            requestChunksBatch(batch, batchTimeout);
         }
     }
     
-    // Check if we have all chunks
-    if (chunks.size() != meta.totalChunks) {
-        qDebug() << "[DNS Tunnel UDP Chunked] Missing chunks:" << chunks.size() << "/" << meta.totalChunks;
-        // Try to return what we have anyway
-    }
-    
-    // Combine all chunks in order
-    QByteArray combined;
+    // === Step 4: Verify all chunks received ===
+    QList<int> finalMissing;
     for (int i = 0; i < meta.totalChunks; i++) {
-        if (chunks.contains(i)) {
-            combined.append(chunks[i]);
+        if (!chunks.contains(i)) {
+            finalMissing.append(i);
         }
     }
     
-    qDebug() << "[DNS Tunnel UDP Chunked] Combined" << chunks.size() << "chunks," << combined.size() << "bytes";
+    if (!finalMissing.isEmpty()) {
+        qDebug() << "[DNS Tunnel UDP Chunked] FAILED: Missing chunks after all retries:" << finalMissing;
+        qDebug() << "[DNS Tunnel UDP Chunked] Received" << chunks.size() << "/" << meta.totalChunks << "chunks";
+        return QByteArray(); // Return empty - don't return partial/corrupted data
+    }
+    
+    // === Step 5: Combine all chunks in order ===
+    QByteArray combined;
+    combined.reserve(meta.totalSize > 0 ? meta.totalSize : meta.totalChunks * 500);
+    
+    for (int i = 0; i < meta.totalChunks; i++) {
+        combined.append(chunks[i]);
+    }
+    
+    qDebug() << "[DNS Tunnel UDP Chunked] SUCCESS: Combined" << meta.totalChunks << "chunks," << combined.size() << "bytes";
     return combined;
 }
