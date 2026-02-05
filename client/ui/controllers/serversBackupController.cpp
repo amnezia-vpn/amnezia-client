@@ -6,6 +6,8 @@
 #include <QStandardPaths>
 #include <QTemporaryFile>
 #include <QUrl>
+#include <QProcess>
+#include <QSet>
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
 #include "platforms/android/android_controller.h"
@@ -599,6 +601,82 @@ void ServersBackupController::uploadBackupWithStrings(const QString &hostname,
     
     // Вызываем основной метод
     uploadBackup(credentials, localPath, replaceMode);
+}
+
+QStringList ServersBackupController::scanBackupForContainers(const QString &localPath)
+{
+    QStringList containers;
+    
+    qDebug() << "Scanning backup file for containers:" << localPath;
+    
+    // Для Android URI или обычного пути используем tar для просмотра содержимого
+#ifdef Q_OS_ANDROID
+    QString actualPath = localPath;
+    if (localPath.startsWith("content://")) {
+        // Для Android URI нужно сначала прочитать файл
+        int fd = AndroidController::instance()->getFd(localPath);
+        if (fd < 0) {
+            qWarning() << "Failed to get file descriptor for Android URI";
+            return containers;
+        }
+        
+        QFile file;
+        if (!file.open(fd, QIODevice::ReadOnly)) {
+            qWarning() << "Failed to open file from descriptor";
+            AndroidController::instance()->closeFd();
+            return containers;
+        }
+        
+        QByteArray data = file.readAll();
+        file.close();
+        AndroidController::instance()->closeFd();
+        
+        // Сохраняем во временный файл
+        actualPath = QDir::temp().filePath("backup_scan_temp.tgz");
+        QFile tempFile(actualPath);
+        if (!tempFile.open(QIODevice::WriteOnly)) {
+            qWarning() << "Failed to create temp file for scanning";
+            return containers;
+        }
+        tempFile.write(data);
+        tempFile.close();
+    }
+#else
+    QString actualPath = localPath;
+#endif
+    
+    // Выполняем команду tar для просмотра содержимого
+    QProcess process;
+    process.start("tar", QStringList() << "-tzf" << actualPath);
+    process.waitForFinished(5000);
+    
+    if (process.exitCode() != 0) {
+        qWarning() << "Failed to read backup archive:" << process.readAllStandardError();
+        return containers;
+    }
+    
+    QString output = process.readAllStandardOutput();
+    QStringList lines = output.split('\n', Qt::SkipEmptyParts);
+    
+    // Ищем директории контейнеров (amnezia-*)
+    QSet<QString> foundContainers;
+    for (const QString &line : lines) {
+        if (line.contains("amnezia-")) {
+            // Извлекаем имя контейнера из пути
+            QStringList parts = line.split('/');
+            for (const QString &part : parts) {
+                if (part.startsWith("amnezia-")) {
+                    foundContainers.insert(part);
+                    break;
+                }
+            }
+        }
+    }
+    
+    containers = foundContainers.values();
+    qDebug() << "Found containers in backup:" << containers;
+    
+    return containers;
 }
 
 void ServersBackupController::deleteBackup(const ServerCredentials &credentials,
