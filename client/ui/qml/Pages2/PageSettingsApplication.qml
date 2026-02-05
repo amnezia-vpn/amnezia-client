@@ -172,7 +172,7 @@ PageType {
             SwitcherType {
                 id: switcherNewsNotificationEnabled
 
-                visible: ServersModel.hasServersFromGatewayApi
+                visible: ServersUiController.hasServersFromGatewayApi
 
                 Layout.fillWidth: true
                 Layout.margins: 16

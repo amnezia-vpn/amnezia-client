@@ -37,6 +37,7 @@ public:
     ServerCredentials serverCredentials(int index) const;
     bool hasServerWithVpnKey(const QString &vpnKey) const;
 
+    void setServersArray(const QJsonArray &servers);
 signals:
     void serverAdded(ServerConfig config);
     void serverEdited(int index, ServerConfig config);
@@ -45,7 +46,6 @@ signals:
 
 private:
     QJsonArray serversArray() const;
-    void setServersArray(const QJsonArray &servers);
     
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
