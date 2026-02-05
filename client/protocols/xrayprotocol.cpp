@@ -99,12 +99,10 @@ ErrorCode XrayProtocol::setupRouting() {
 #ifdef Q_OS_WIN
         int vpnAdapterIndex = -1;
         QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
-        for (int i = 0; i < netInterfaces.size(); i++) {
-            for (int j = 0; j < netInterfaces.at(i).addressEntries().size(); j++) {
-                // killSwitch toggle
-                if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
-                    vpnAdapterIndex = netInterfaces.at(1).index();
-                }
+        for (auto& netInterface : netInterfaces) {
+            for (auto& address : netInterface.addressEntries()) {
+                if (m_vpnLocalAddress == address.ip().toString())
+                    vpnAdapterIndex = netInterface.index();
             }
         }
 
