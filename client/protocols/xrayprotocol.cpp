@@ -108,14 +108,16 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
         const bool killSwitchEnabled = QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool();
-        if (killSwitchEnabled && vpnAdapterIndex != -1) {
-            auto enableKillSwitch = IpcClient::Interface()->enableKillSwitch(m_rawConfig, vpnAdapterIndex);
-            if (!enableKillSwitch.waitForFinished() || !enableKillSwitch.returnValue()) {
-                qCritical() << "Failed to enable killswitch";
-                return ErrorCode::InternalError;
-            }
-        } else
-            qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
+        if (killSwitchEnabled) {
+            if (vpnAdapterIndex != -1) {
+                auto enableKillSwitch = IpcClient::Interface()->enableKillSwitch(m_rawConfig, vpnAdapterIndex);
+                if (!enableKillSwitch.waitForFinished() || !enableKillSwitch.returnValue()) {
+                    qCritical() << "Failed to enable killswitch";
+                    return ErrorCode::InternalError;
+                }
+            } else
+                qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
+        }
 
         if (inetAdapterIndex != 1 && vpnAdapterIndex != -1) {
             QJsonObject config = m_rawConfig;
