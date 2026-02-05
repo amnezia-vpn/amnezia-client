@@ -240,6 +240,9 @@ void CoreSignalHandlers::initServersModelUpdateHandler()
             m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
     connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved,
             m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
+    
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::restoreBackupFinished,
+            m_coreController->m_serversUiController, &ServersUiController::updateModel);
 }
 
 void CoreSignalHandlers::initClientManagementModelUpdateHandler()

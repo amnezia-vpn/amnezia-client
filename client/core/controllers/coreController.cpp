@@ -178,7 +178,7 @@ void CoreController::initControllers()
     m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, m_languageUiController, this);
     setQmlContextProperty("SettingsController", m_settingsUiController);
 
-    m_pageController = new PageController(m_serversModel, m_settingsController, this);
+    m_pageController = new PageController(m_serversController, m_settingsController, this);
     setQmlContextProperty("PageController", m_pageController);
 
     m_serversUiController = new ServersUiController(m_serversController, m_settingsController, m_serversModel, m_containersModel, m_defaultServerContainersModel, this);

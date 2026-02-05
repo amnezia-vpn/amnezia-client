@@ -123,7 +123,7 @@ PageType {
                 id: cloakingCheckBox
                 objectName: "cloakingCheckBox"
 
-                visible: ImportController.isNativeWireGuardConfig()
+                visible: ImportController.isNativeWireGuardConfig
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -144,7 +144,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                textString: ImportController.getMaliciousWarningText()
+                textString: ImportController.maliciousWarningText
                 textFormat: Qt.RichText
                 visible: textString !== ""
 

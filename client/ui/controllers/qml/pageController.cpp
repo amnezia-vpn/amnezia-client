@@ -2,7 +2,6 @@
 
 #include "ui/utils/converter.h"
 #include "core/utils/errorStrings.h"
-#include "core/controllers/settingsController.h"
 #if defined(MACOS_NE)
 #include "platforms/ios/ios_controller.h"
 #endif
@@ -20,10 +19,10 @@
     #include "ui/utils/macosUtil.h"
 #endif
 
-PageController::PageController(ServersModel* serversModel,
+PageController::PageController(ServersController* serversController,
                                SettingsController* settingsController,
                                QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_settingsController(settingsController)
+    : QObject(parent), m_serversController(serversController), m_settingsController(settingsController)
 {
 #ifdef Q_OS_ANDROID
     auto initialPageNavigationBarColor = getInitialPageNavigationBarColor();
@@ -58,10 +57,9 @@ PageController::PageController(ServersModel* serversModel,
 
 bool PageController::isStartPageVisible()
 {
-    if (m_serversModel->getServersCount()) {
-        if (m_serversModel->getDefaultServerIndex() < 0) {
-            auto defaultServerIndex = m_serversModel->index(0);
-            m_serversModel->setData(defaultServerIndex, true, ServersModel::Roles::IsDefaultRole);
+    if (m_serversController->getServersCount()) {
+        if (m_serversController->getDefaultServerIndex() < 0) {
+            m_serversController->setDefaultServerIndex(0);
         }
         return false;
     } else {
@@ -111,7 +109,7 @@ void PageController::keyPressEvent(Qt::Key key)
 
 unsigned int PageController::getInitialPageNavigationBarColor()
 {
-    if (m_serversModel->getServersCount()) {
+    if (m_serversController->getServersCount()) {
         return 0xFF1C1D21;
     } else {
         return 0xFF0E0E11;

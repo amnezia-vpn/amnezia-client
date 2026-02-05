@@ -7,9 +7,8 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "ui/models/serversModel.h"
-
-class SettingsController;
+#include "core/controllers/settingsController.h"
+#include "core/controllers/serversController.h"
 
 namespace PageLoader
 {
@@ -92,7 +91,7 @@ class PageController : public QObject
 {
     Q_OBJECT
 public:
-    explicit PageController(ServersModel* serversModel,
+    explicit PageController(ServersController* serversController,
                             SettingsController* settingsController,
                             QObject *parent = nullptr);
 
@@ -170,7 +169,7 @@ signals:
     void safeAreaBottomMarginChanged();
 
 private:
-    ServersModel* m_serversModel;
+    ServersController* m_serversController;
     SettingsController* m_settingsController;
 
     bool m_isTriggeredByConnectButton;
