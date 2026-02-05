@@ -178,22 +178,22 @@ PageType {
 
         function onBackupRestored() {
 
-            // После успешного восстановления сканируем сервер для обновления информации о контейнерах
+            console.log("  onBackupRestored, isFromSetupWizard:", isFromSetupWizard)
+            
+            PageController.showBusyIndicator(false)
+            
+            // Для setup wizard устанавливаем default container и сервер
             if (isFromSetupWizard && ServersModel.getServersCount() > 0) {
                 var serverIdx = ServersModel.getServersCount() - 1
                 console.log("  Setting server as default:", serverIdx)
                 ServersModel.setDefaultServerIndex(serverIdx)
                 ServersModel.processedIndex = serverIdx
                 
-                // Сканируем сервер для обновления информации о контейнерах
-                console.log("  Scanning server for installed containers...")
-                PageController.showNotificationMessage(qsTr("Updating container information..."))
-                InstallController.scanServerForInstalledContainers()
-                
-                // Timer запустится автоматически после получения сигнала scanServerFinished
+                // Запускаем timer для установки default container
+                // Контейнеры уже установлены через InstallController, просто ждем обновления модели
+                setDefaultContainerTimer.start()
             } else {
-                console.log("  Skipping default container setup (not from wizard or no servers)")
-                PageController.showBusyIndicator(false)
+                // Для обычного режима сразу переходим
                 navigateToRestoredPage()
             }
         }
@@ -204,19 +204,7 @@ PageType {
         }
     }
     
-    Connections {
-        target: InstallController
-        
-        function onScanServerFinished(isInstalledContainerFound) {
-            console.log("Scan finished, containers found:", isInstalledContainerFound)
-            
-            // Если это setup wizard и сканирование завершено
-            if (isFromSetupWizard) {
-                // Запускаем timer для установки default container
-                setDefaultContainerTimer.start()
-            }
-        }
-    }
+    // Удаляем Connections для scanServerFinished - больше не нужен
     
     function navigateToRestoredPage() {
         // Переход на страницу успешного восстановления

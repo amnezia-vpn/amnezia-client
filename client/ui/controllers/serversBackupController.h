@@ -131,6 +131,13 @@ public slots:
                                              const QString &secretData,
                                              const QString &localPath,
                                              bool replaceMode = false);
+    
+    /**
+     * @brief Сканировать backup файл и определить какие контейнеры в нем есть
+     * @param localPath Путь к локальному backup файлу
+     * @return Список имен контейнеров найденных в backup
+     */
+    Q_INVOKABLE QStringList scanBackupForContainers(const QString &localPath);
 
     /**
      * @brief Удалить backup с сервера

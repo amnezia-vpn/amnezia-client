@@ -25,19 +25,97 @@ PageType {
     property string restoreSecretData: ""
     property bool waitingForServerToAdd: false
     
+    // Для установки контейнеров из backup
+    property var containersToInstall: []
+    property int currentContainerIndex: 0
+    property bool isInstallingContainers: false
+    
     // Connections для отслеживания добавления сервера
     Connections {
         target: InstallController
         
         function onInstallServerFinished(finishedMessage) {
             if (root.waitingForServerToAdd && root.isRestoreFromBackup && root.backupFilePath.length > 0) {
-                console.log("Server added successfully, now showing restore mode page")
+                console.log("Server added successfully, now installing containers from backup...")
                 root.waitingForServerToAdd = false
                 
-                // Запускаем переход на страницу восстановления
-                navigationTimer.start()
+                // Сервер уже создан, устанавливаем флаг в false
+                InstallController.setShouldCreateServer(false)
+                
+                // Начинаем установку контейнеров
+                root.isInstallingContainers = true
+                installNextContainer()
             }
         }
+        
+        function onInstallContainerFinished(finishedMessage, isServiceInstall) {
+            if (root.isInstallingContainers) {
+                console.log("Container installed:", finishedMessage)
+                
+                // Переходим к следующему контейнеру
+                root.currentContainerIndex++
+                
+                if (root.currentContainerIndex < root.containersToInstall.length) {
+                    // Устанавливаем следующий контейнер
+                    installNextContainer()
+                } else {
+                    // Все контейнеры установлены, теперь делаем restore
+                    console.log("All containers installed, starting restore...")
+                    root.isInstallingContainers = false
+                    
+                    // ВАЖНО: Выключаем busy indicator перед переходом
+                    PageController.showBusyIndicator(false)
+                    
+                    // Запускаем переход на страницу выбора режима restore
+                    navigationTimer.start()
+                }
+            }
+        }
+    }
+    
+    // Функция для установки следующего контейнера из списка
+    function installNextContainer() {
+        if (root.currentContainerIndex >= root.containersToInstall.length) {
+            return
+        }
+        
+        var containerName = root.containersToInstall[root.currentContainerIndex]
+        console.log("Installing container:", containerName, "(", root.currentContainerIndex + 1, "/", root.containersToInstall.length, ")")
+        
+        // Конвертируем имя контейнера в DockerContainer enum
+        var dockerContainer = ContainerProps.containerFromString(containerName)
+        
+        if (dockerContainer === 0) { // None
+            console.log("Unknown container:", containerName, "skipping...")
+            root.currentContainerIndex++
+            installNextContainer()
+            return
+        }
+        
+        // Получаем default настройки для контейнера
+        var defaultProtocol = ContainerProps.defaultProtocol(dockerContainer)
+        var defaultPort = ProtocolProps.getPortForInstall(defaultProtocol)
+        var defaultTransport = ProtocolProps.defaultTransportProto(defaultProtocol)
+        
+        // Показываем индикатор загрузки с сообщением
+        PageController.showBusyIndicator(true)
+        PageController.showNotificationMessage(qsTr("Installing %1 (%2/%3)...")
+            .arg(containerName)
+            .arg(root.currentContainerIndex + 1)
+            .arg(root.containersToInstall.length))
+        
+        // Убеждаемся что credentials установлены
+        console.log("Setting credentials for container installation...")
+        InstallController.setProcessedServerCredentials(root.restoreHostname, root.restoreUsername, root.restoreSecretData)
+        
+        // Устанавливаем индекс сервера
+        var serverIdx = ServersModel.getServersCount() - 1
+        ServersModel.processedIndex = serverIdx
+        
+        // Устанавливаем контейнер
+        console.log("Calling InstallController.install for docker container:", dockerContainer)
+        ContainersModel.setProcessedContainerIndex(dockerContainer)
+        InstallController.install(dockerContainer, defaultPort, defaultTransport)
     }
     
     // Таймер для перехода на страницу выбора режима после выбора файла
@@ -303,6 +381,20 @@ PageType {
                     // Сохраняем путь к backup файлу
                     root.backupFilePath = localPath
                     root.isRestoreFromBackup = true
+                    
+                    // Сканируем backup для определения контейнеров
+                    console.log("Scanning backup for containers...")
+                    var foundContainers = ServersBackupController.scanBackupForContainers(localPath)
+                    console.log("Found containers:", foundContainers)
+                    
+                    if (foundContainers.length === 0) {
+                        PageController.showErrorMessage(qsTr("No containers found in backup file"))
+                        root.isRestoreFromBackup = false
+                        return
+                    }
+                    
+                    root.containersToInstall = foundContainers
+                    root.currentContainerIndex = 0
                     
                     // Получаем credentials из PageSetupWizardCredentials через поиск в StackView
                     var credentialsPage = null
