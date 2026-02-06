@@ -116,18 +116,9 @@ PageType {
         }
     }
 
-    // ============ Backup Functions ============
-
-    function getServerCredentials() {
-        var index = ServersModel.processedIndex
-        return ServersModel.getServerCredentials(index)
-    }
-
-    property bool downloadAfterCreate: false
-
     function createBackup(shouldDownload) {
-        // По умолчанию shouldDownload = true, если не указано
-        downloadAfterCreate = (shouldDownload !== undefined) ? shouldDownload : true
+        // Default shouldDownload = true
+        var downloadAfterCreate = (shouldDownload !== undefined) ? shouldDownload : true
         
         var headerText = downloadAfterCreate ? 
             qsTr("Create backup and download to device?") :
@@ -140,21 +131,15 @@ PageType {
 
         var yesButtonFunction = function() {
             PageController.showBusyIndicator(true)
-            
-            var credentials = getServerCredentials()
-            // Всегда создаем backup всех контейнеров
-            ServersBackupController.createBackup(credentials)
+            // Call C++ method that manages download and delete automatically
+            ServersBackupController.createBackupWithDownload(downloadAfterCreate, true)
         }
         var noButtonFunction = function() {}
 
         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 
-    property string selectedBackupForRestore: ""
-
     function restoreBackup() {
-        // Для мобильных устройств используем все возможные расширения backup файлов
-        // Android преобразует расширения в MIME типы автоматически
         var filter = GC.isMobile() ? "*.gz *.tgz *.tar.gz" : "Backup files (*.tar.gz *.backup *.tgz *.gz)"
         var localPath = SystemController.getFileName(
             qsTr("Select Backup to Restore"), 
@@ -168,43 +153,25 @@ PageType {
             return
         }
         
-        selectedBackupForRestore = localPath
+        // Get file information via C++
+        var fileInfo = ServersBackupController.getBackupFileInfo(localPath)
+        var fileName = fileInfo.fileName || "backup.tgz"
+        var serverIp = fileInfo.serverIp || ""
         
-        // Открываем страницу выбора режима восстановления
+        // If IP not found in filename, use current server
+        if (!serverIp || serverIp.length === 0) {
+            serverIp = ServersModel.getProcessedServerData("hostName") || ""
+        }
+        
+        var serverName = ServersModel.getProcessedServerData("name") || qsTr("Server")
+        
+        // Open restore mode selection page
         var parentItem = root.parent
         while (parentItem && parentItem.objectName !== "tabBarStackView") {
             parentItem = parentItem.parent
         }
+        
         if (parentItem && typeof parentItem.push === "function") {
-            // Используем SystemController для получения имени файла из пути или URI
-            // Это правильно обработает Android URI через ContentResolver
-            var fileName = SystemController.getFileNameFromPath(localPath)
-            
-            // Если имя файла пустое или undefined, используем fallback
-            if (!fileName || fileName === undefined || fileName.length === 0) {
-                var fallbackName = localPath.split('/').pop()
-                fileName = (fallbackName && fallbackName.length > 0) ? fallbackName : qsTr("backup.tgz")
-            }
-            
-            // Убеждаемся, что fileName - это строка
-            fileName = String(fileName)
-            
-            // Извлекаем IP адрес из имени файла (формат: IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz)
-            var serverIp = ""
-            var ipMatch = fileName.match(/^([\d_]+)\s*-/)
-            if (ipMatch && ipMatch.length > 1) {
-                // Заменяем подчеркивания на точки для отображения IP адреса
-                serverIp = ipMatch[1].replace(/_/g, ".")
-            }
-            
-            // Если не удалось извлечь IP из имени файла, используем IP из credentials
-            if (!serverIp || serverIp.length === 0) {
-                var credentials = getServerCredentials()
-                serverIp = credentials.hostName || ""
-            }
-            
-            var serverName = ServersModel.getProcessedServerData("name") || qsTr("Server")
-            
             parentItem.push(PageController.getPagePath(PageEnum.PageSettingsServerRestoreMode), {
                 "backupFilePath": localPath,
                 "backupFileName": fileName,
@@ -218,50 +185,23 @@ PageType {
 
     // ============ Backup Controller Connections ============
 
-    property string lastCreatedBackupFilename: ""
-    property string lastUploadedBackupFilename: ""
-
     Connections {
         target: ServersBackupController
 
         function onBackupCreated(backupFilename) {
-            lastCreatedBackupFilename = backupFilename
-            
-            if (downloadAfterCreate) {
-                var credentials = getServerCredentials()
-                var localPath = backupFilename
-                PageController.showNotificationMessage(qsTr("Backup created. Downloading to device..."))
-                ServersBackupController.downloadBackup(credentials, backupFilename, localPath)
-                downloadAfterCreate = false
-            } else {
-                PageController.showBusyIndicator(false)
-                PageController.showNotificationMessage(qsTr("Backup created successfully: %1").arg(backupFilename))
-            }
+            // If auto-download is not enabled, show success message
+            PageController.showBusyIndicator(false)
+            PageController.showNotificationMessage(qsTr("Backup created successfully: %1").arg(backupFilename))
         }
 
         function onBackupDownloaded(localPath) {
             PageController.showBusyIndicator(false)
             console.log("Backup downloaded to:", localPath)
-            
-            if (lastCreatedBackupFilename && lastCreatedBackupFilename.length > 0) {
-                var credentials = getServerCredentials()
-                ServersBackupController.deleteBackup(credentials, lastCreatedBackupFilename)
-                console.log("Deleting backup from server:", lastCreatedBackupFilename)
-            }
-            
             PageController.showNotificationMessage(qsTr("Backup downloaded successfully!\n\nSaved to:\n%1").arg(localPath))
-        }
-
-        function onBackupUploaded(serverPath) {
-            // Этот обработчик больше не используется здесь, так как восстановление
-            // теперь происходит через PageSettingsServerRestoreMode
-            // Оставляем для совместимости, но не выполняем действий
         }
 
         function onBackupRestored() {
             PageController.showBusyIndicator(false)
-            
-            selectedBackupForRestore = ""
             PageController.showNotificationMessage(qsTr("Backup restored successfully! Containers are restarting..."))
         }
 

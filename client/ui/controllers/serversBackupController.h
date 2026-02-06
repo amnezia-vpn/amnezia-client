@@ -9,6 +9,7 @@
 #include <QFileInfo>
 
 class QTemporaryFile;
+class ServersModel;
 
 #include "core/controllers/serverController.h"
 #include "core/defs.h"
@@ -17,24 +18,24 @@ class QTemporaryFile;
 using namespace amnezia;
 
 /**
- * @brief Контроллер для управления backup конфигураций Amnezia VPN
+ * @brief Controller for managing Amnezia VPN configuration backups
  * 
- * Использует существующий ServerController и libssh::Client из Amnezia
- * Bash скрипты встроены напрямую в C++ код
- * Поддерживает backup конкретных контейнеров напрямую через docker cp
+ * Uses existing ServerController and libssh::Client from Amnezia
+ * Bash scripts are embedded directly in C++ code
+ * Supports direct container backup via docker cp
  * 
- * Полностью кроссплатформенный: Windows, macOS, Linux, iOS, Android
+ * Fully cross-platform: Windows, macOS, Linux, iOS, Android
  */
 class ServersBackupController : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit ServersBackupController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit ServersBackupController(std::shared_ptr<Settings> settings, ServersModel *serversModel, QObject *parent = nullptr);
     ~ServersBackupController();
 
     /**
-     * @brief Информация о backup
+     * @brief Backup information
      */
     struct BackupInfo {
         QString filename;
@@ -55,44 +56,52 @@ public:
 
 public slots:
     /**
-     * @brief Создать backup на сервере (всех контейнеров)
-     * @param credentials Учетные данные сервера
+     * @brief Create backup on server (all containers)
+     * @param credentials Server credentials
      */
     void createBackup(const ServerCredentials &credentials);
+    
+    /**
+     * @brief Create backup and automatically download to device (for QML)
+     * @param downloadToDevice Download to device after creation?
+     * @param deleteFromServer Delete from server after download?
+     */
+    Q_INVOKABLE void createBackupWithDownload(bool downloadToDevice = true, 
+                                               bool deleteFromServer = true);
 
     /**
-     * @brief Создать backup конкретного контейнера
-     * @param credentials Учетные данные сервера
-     * @param container Тип контейнера для backup
+     * @brief Create backup of specific container
+     * @param credentials Server credentials
+     * @param container Container type for backup
      */
     void createContainerBackup(const ServerCredentials &credentials, DockerContainer container);
     
     /**
-     * @brief Создать backup конкретного контейнера по имени
-     * @param credentials Учетные данные сервера
-     * @param containerName Имя контейнера (например "amnezia-awg")
+     * @brief Create backup of specific container by name
+     * @param credentials Server credentials
+     * @param containerName Container name (e.g. "amnezia-awg")
      */
     void createBackupByName(const ServerCredentials &credentials, const QString &containerName);
 
     /**
-     * @brief Создать backup нескольких контейнеров
-     * @param credentials Учетные данные сервера
-     * @param containers Список контейнеров для backup
+     * @brief Create backup of multiple containers
+     * @param credentials Server credentials
+     * @param containers List of containers for backup
      */
     void createContainersBackup(const ServerCredentials &credentials, const QList<DockerContainer> &containers);
 
     /**
-     * @brief Получить список backup с сервера
-     * @param credentials Учетные данные сервера
+     * @brief Get list of backups from server
+     * @param credentials Server credentials
      */
     void fetchBackupList(const ServerCredentials &credentials);
 
     /**
-     * @brief Восстановить из backup
-     * @param credentials Учетные данные сервера
-     * @param backupFilename Имя файла backup
-     * @param containers Список контейнеров (пустой = все)
-     * @param replaceMode Если true - сначала очищает контейнер, затем восстанавливает. Если false - добавляет данные поверх существующих
+     * @brief Restore from backup
+     * @param credentials Server credentials
+     * @param backupFilename Backup file name
+     * @param containers List of containers (empty = all)
+     * @param replaceMode If true - clears container first, then restores. If false - adds data on top of existing
      */
     void restoreBackup(const ServerCredentials &credentials, 
                        const QString &backupFilename, 
@@ -100,32 +109,32 @@ public slots:
                        bool replaceMode = false);
 
     /**
-     * @brief Проверить состояние backup на сервере
-     * @param credentials Учетные данные сервера
+     * @brief Check backup status on server
+     * @param credentials Server credentials
      */
     void checkBackupStatus(const ServerCredentials &credentials);
 
     /**
-     * @brief Скачать backup на локальную машину
-     * @param credentials Учетные данные сервера
-     * @param backupFilename Имя файла backup
-     * @param localPath Путь для сохранения
+     * @brief Download backup to local machine
+     * @param credentials Server credentials
+     * @param backupFilename Backup file name
+     * @param localPath Save path
      */
     void downloadBackup(const ServerCredentials &credentials,
                         const QString &backupFilename, 
                         const QString &localPath);
 
     /**
-     * @brief Загрузить backup на сервер
-     * @param credentials Учетные данные сервера
-     * @param localPath Путь к локальному файлу
-     * @param replaceMode Режим восстановления (true = замена, false = добавление). Сохраняется для последующего использования в restoreBackup
+     * @brief Upload backup to server
+     * @param credentials Server credentials
+     * @param localPath Path to local file
+     * @param replaceMode Restore mode (true = replace, false = add). Saved for later use in restoreBackup
      */
     void uploadBackup(const ServerCredentials &credentials,
                       const QString &localPath,
                       bool replaceMode = false);
     
-    // Перегруженный метод для setup wizard с отдельными параметрами credentials
+    // Overloaded method for setup wizard with separate credential parameters
     Q_INVOKABLE void uploadBackupWithStrings(const QString &hostname,
                                              const QString &username,
                                              const QString &secretData,
@@ -133,154 +142,247 @@ public slots:
                                              bool replaceMode = false);
     
     /**
-     * @brief Сканировать backup файл и определить какие контейнеры в нем есть
-     * @param localPath Путь к локальному backup файлу
-     * @return Список имен контейнеров найденных в backup
+     * @brief Universal method to start restore (from QML)
+     * Automatically selects correct path depending on parameters
+     * @param isFromSetupWizard Restore from setup wizard?
+     * @param backupFilePath Path to local backup file
+     * @param replaceMode Restore mode (true = replace, false = add)
+     * @param wizardHostname Hostname for setup wizard (optional)
+     * @param wizardUsername Username for setup wizard (optional)
+     * @param wizardSecretData Secret data for setup wizard (optional)
+     */
+    Q_INVOKABLE void startRestore(bool isFromSetupWizard,
+                                   const QString &backupFilePath,
+                                   bool replaceMode,
+                                   const QString &wizardHostname = QString(),
+                                   const QString &wizardUsername = QString(),
+                                   const QString &wizardSecretData = QString());
+    
+    /**
+     * @brief Prepare restore information from backup file
+     * Parses filename, extracts IP, prepares metadata
+     * @param backupFilePath Path to backup file
+     * @return QVariantMap with keys: fileName, serverIp
+     */
+    Q_INVOKABLE QVariantMap getBackupFileInfo(const QString &backupFilePath);
+    
+    /**
+     * @brief Scan backup file and determine which containers it contains
+     * @param localPath Path to local backup file
+     * @return List of container names found in backup
      */
     Q_INVOKABLE QStringList scanBackupForContainers(const QString &localPath);
+    
+    /**
+     * @brief Set default server and container after restore (for setup wizard)
+     * @param isFromSetupWizard Was restore called from setup wizard
+     * @return true if successful, false if no servers or containers
+     */
+    Q_INVOKABLE bool setDefaultServerAfterRestore(bool isFromSetupWizard);
+    
+    /**
+     * @brief Install containers from backup on empty server (for setup wizard)
+     * Scans backup, adds empty server and sends signal to install containers
+     * @param backupFilePath Path to local backup file
+     * @param hostname Server hostname
+     * @param username Username for SSH
+     * @param secretData Password/key for SSH
+     */
+    Q_INVOKABLE void prepareRestoreFromBackup(const QString &backupFilePath,
+                                               const QString &hostname,
+                                               const QString &username,
+                                               const QString &secretData);
 
     /**
-     * @brief Удалить backup с сервера
-     * @param credentials Учетные данные сервера
-     * @param backupFilename Имя файла backup
+     * @brief Delete backup from server
+     * @param credentials Server credentials
+     * @param backupFilename Backup file name
      */
     void deleteBackup(const ServerCredentials &credentials,
                       const QString &backupFilename);
 
     /**
-     * @brief Установить директорию backup на сервере
+     * @brief Set backup directory on server
      */
     void setBackupDirectory(const QString &directory);
 
     /**
-     * @brief Получить директорию backup
+     * @brief Get backup directory
      */
     QString backupDirectory() const { return m_backupDir; }
 
 signals:
     /**
-     * @brief Изменился статус операции
+     * @brief Operation status changed
      */
     void statusChanged(BackupStatus status);
 
     /**
-     * @brief Прогресс операции (0-100)
+     * @brief Operation progress (0-100)
      */
     void progressChanged(int percent, const QString &message);
 
     /**
-     * @brief Получен список backup
+     * @brief Backup list received
      */
     void backupListReceived(const QList<BackupInfo> &backups);
 
     /**
-     * @brief Backup создан успешно
+     * @brief Backup created successfully
      */
     void backupCreated(const QString &backupFilename);
 
     /**
-     * @brief Backup восстановлен успешно
+     * @brief Backup restored successfully
      */
     void backupRestored();
+    
+    /**
+     * @brief Need to set default server and container (for setup wizard)
+     * This signal is sent after backupRestored() if restore was from setup wizard
+     */
+    void needSetDefaultServer();
+    
+    /**
+     * @brief Default server and container successfully set
+     * Can navigate to result page
+     */
+    void defaultServerAndContainerSet();
+    
+    /**
+     * @brief All containers from backup installed
+     * Can proceed to data restore
+     * @param backupFilePath Path to backup file
+     * @param hostname Hostname
+     * @param username Username  
+     * @param secretData Secret data
+     * @param serverIp IP address (for display)
+     * @param fileName File name (for display)
+     */
+    void readyForRestore(const QString &backupFilePath,
+                        const QString &hostname,
+                        const QString &username,
+                        const QString &secretData,
+                        const QString &serverIp,
+                        const QString &fileName);
 
     /**
-     * @brief Backup скачан
+     * @brief Backup downloaded
      */
     void backupDownloaded(const QString &localPath);
 
     /**
-     * @brief Backup загружен на сервер
+     * @brief Backup uploaded to server
      */
     void backupUploaded(const QString &serverPath);
 
     /**
-     * @brief Получена информация о состоянии backup
+     * @brief Backup status information received
      */
     void backupStatusReceived(const QJsonObject &status);
 
     /**
-     * @brief Произошла ошибка
+     * @brief Error occurred
      */
     void errorOccurred(const QString &errorMessage, ErrorCode errorCode);
 
 private:
     /**
-     * @brief Получить bash скрипт для создания backup всех контейнеров
-     * @param ipAddress IP адрес сервера в формате с подчеркиваниями (например "192_119_110_11")
+     * @brief Get bash script for creating backup of all containers
+     * @param ipAddress Server IP address in underscored format (e.g. "192_119_110_11")
      */
     QString getBackupScript(const QString &ipAddress) const;
 
     /**
-     * @brief Получить bash скрипт для создания backup конкретного контейнера
-     * @param container Тип контейнера
-     * @param ipAddress IP адрес сервера в формате с подчеркиваниями (например "192_119_110_11")
+     * @brief Get bash script for creating backup of specific container
+     * @param container Container type
+     * @param ipAddress Server IP address in underscored format (e.g. "192_119_110_11")
      */
     QString getContainerBackupScript(DockerContainer container, const QString &ipAddress) const;
 
     /**
-     * @brief Получить bash скрипт для создания backup нескольких контейнеров
-     * @param containers Список контейнеров
-     * @param ipAddress IP адрес сервера в формате с подчеркиваниями (например "192_119_110_11")
+     * @brief Get bash script for creating backup of multiple containers
+     * @param containers List of containers
+     * @param ipAddress Server IP address in underscored format (e.g. "192_119_110_11")
      */
     QString getContainersBackupScript(const QList<DockerContainer> &containers, const QString &ipAddress) const;
 
     /**
-     * @brief Получить bash скрипт для восстановления
-     * @param backupFilename Имя файла backup
-     * @param containers Список контейнеров
-     * @param replaceMode Если true - сначала очищает контейнер, затем восстанавливает
+     * @brief Get bash script for restore
+     * @param backupFilename Backup file name
+     * @param containers List of containers
+     * @param replaceMode If true - clears container first, then restores
      */
     QString getRestoreScript(const QString &backupFilename, const QStringList &containers, bool replaceMode = false) const;
 
     /**
-     * @brief Получить bash скрипт для проверки состояния
+     * @brief Get bash script for status check
      */
     QString getCheckStatusScript() const;
 
     /**
-     * @brief Получить bash скрипт для списка backup
+     * @brief Get bash script for backup list
      */
     QString getListBackupsScript() const;
 
     /**
-     * @brief Парсить список backup из вывода
+     * @brief Parse backup list from output
      */
     QList<BackupInfo> parseBackupList(const QString &output);
 
     /**
-     * @brief Парсить статус из вывода
+     * @brief Parse status from output
      */
     QJsonObject parseBackupStatus(const QString &output);
 
     /**
-     * @brief Обработать стандартный вывод
+     * @brief Handle standard output
      */
     ErrorCode handleStdOut(const QString &data, QString &output);
 
     /**
-     * @brief Обработать вывод ошибок
+     * @brief Handle error output
      */
     ErrorCode handleStdErr(const QString &data, QString &error);
 
     /**
-     * @brief Установить статус
+     * @brief Set status
      */
     void setStatus(BackupStatus status);
 
     /**
-     * @brief Установить прогресс
+     * @brief Set progress
      */
     void setProgress(int percent, const QString &message);
+    
+    /**
+     * @brief Attempt to set default container (called from timer)
+     */
+    void trySetDefaultContainer();
 
 private:
     std::shared_ptr<Settings> m_settings;
+    ServersModel *m_serversModel;
     ServerController *m_serverController;
     BackupStatus m_status;
     QString m_backupDir;
     QString m_currentOutput;
     QString m_currentError;
-    bool m_restoreReplaceMode; // Сохраняем режим восстановления для использования после uploadBackup
-    QTemporaryFile *m_tempUploadFile; // Временный файл для Android URI (чтобы не удалялся до завершения загрузки)
+    bool m_restoreReplaceMode; // Save restore mode for use after uploadBackup
+    QTemporaryFile *m_tempUploadFile; // Temp file for Android URI (to prevent deletion before upload completes)
+    
+    // For setting default container
+    int m_containerRetryCount;
+    static constexpr int m_maxContainerRetries = 3;
+    
+    // For automatic restore after upload
+    ServerCredentials m_pendingRestoreCredentials;
+    bool m_autoRestoreAfterUpload;
+    
+    // For automatic backup download/delete
+    bool m_autoDownloadAfterCreate;
+    bool m_autoDeleteAfterDownload;
+    QString m_lastCreatedBackupFilename;
 };
 
 #endif // SERVERSBACKUPCONTROLLER_H

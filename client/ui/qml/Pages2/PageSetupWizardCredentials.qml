@@ -15,7 +15,6 @@ PageType {
 
     property var setupWizardEasy: null
     
-    // Сохраняем credentials здесь для использования при восстановлении backup
     property string savedHostname: ""
     property string savedUsername: ""
     property string savedSecretData: ""
@@ -137,7 +136,6 @@ PageType {
                         return
                     }
 
-                    // Сохраняем credentials в свойствах этой страницы
                     root.savedHostname = _hostname
                     root.savedUsername = _username
                     root.savedSecretData = _secretData

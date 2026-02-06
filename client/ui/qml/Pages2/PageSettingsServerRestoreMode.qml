@@ -20,7 +20,7 @@ PageType {
     property string serverIp: ""
     property bool isFromSetupWizard: false
     
-    // Credentials для setup wizard (когда сервер еще не добавлен в ServersModel)
+    // Credentials for setup wizard (when server is not yet added to ServersModel)
     property string wizardHostname: ""
     property string wizardUsername: ""
     property string wizardSecretData: ""
@@ -71,7 +71,7 @@ PageType {
                 Layout.rightMargin: 16
                 
                 text: {
-                    // Показываем только имя файла и IP адрес, без имени сервера
+                    // Show only filename and IP address, without server name
                     if (serverIp && serverIp.length > 0) {
                         return qsTr("%1 on %2").arg(backupFileName).arg(serverIp)
                     }
@@ -95,7 +95,7 @@ PageType {
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                     clickedFunction: function() {
-                        startRestore(false) // false = режим добавления
+                        startRestore(false) // false = add mode
                     }
                 }
 
@@ -110,7 +110,7 @@ PageType {
                     textColor: AmneziaStyle.color.vibrantRed
 
                     clickedFunction: function() {
-                        startRestore(true) // true = режим замены
+                        startRestore(true) // true = replace mode
                     }
                 }
             }
@@ -121,44 +121,17 @@ PageType {
 
     function startRestore(replaceMode) {
         restoreReplaceMode = replaceMode
+        PageController.showBusyIndicator(true)
         
-        // Если это setup wizard с wizard credentials, используем их напрямую
-        if (isFromSetupWizard && wizardHostname.length > 0) {
-            console.log("Setup wizard mode, using uploadBackupWithStrings")
-            PageController.showBusyIndicator(true)
-            ServersBackupController.uploadBackupWithStrings(
-                wizardHostname,
-                wizardUsername,
-                wizardSecretData,
-                backupFilePath,
-                replaceMode
-            )
-        } else {
-            // Обычный режим - берем из ServersModel
-            PageController.showBusyIndicator(true)
-            var credentials = getServerCredentials()
-            ServersBackupController.uploadBackup(credentials, backupFilePath, replaceMode)
-        }
-    }
-
-    function getServerCredentials() {
-        // Если это setup wizard, используем переданные credentials
-        if (isFromSetupWizard && wizardHostname.length > 0) {
-            console.log("Using wizard credentials:", wizardHostname, wizardUsername)
-            // Устанавливаем credentials в InstallController
-            InstallController.setProcessedServerCredentials(wizardHostname, wizardUsername, wizardSecretData)
-            // Получаем их обратно как C++ объект через ServersModel
-            // Сначала проверяем, есть ли сервер в модели
-            if (ServersModel.getServersCount() > 0 && ServersModel.processedIndex >= 0) {
-                return ServersModel.getServerCredentials(ServersModel.processedIndex)
-            }
-            // Если сервера нет, создаем временный объект (это не сработает, нужен другой подход)
-            console.error("Server not in model yet, cannot get credentials")
-        }
-        
-        // Иначе берем из ServersModel
-        var index = ServersModel.processedIndex
-        return ServersModel.getServerCredentials(index)
+        // Call universal C++ method that will determine how to perform restore
+        ServersBackupController.startRestore(
+            isFromSetupWizard,
+            backupFilePath,
+            replaceMode,
+            wizardHostname || "",
+            wizardUsername || "",
+            wizardSecretData || ""
+        )
     }
 
     property string lastUploadedBackupFilename: ""
@@ -166,36 +139,24 @@ PageType {
     Connections {
         target: ServersBackupController
 
-        function onBackupUploaded(serverPath) {
-            PageController.showNotificationMessage(qsTr("Backup uploaded. Restoring configuration..."))
-            
-            var backupFilename = serverPath.split('/').pop()
-            lastUploadedBackupFilename = backupFilename
-            
-            var credentials = getServerCredentials()
-            ServersBackupController.restoreBackup(credentials, backupFilename, [], restoreReplaceMode)
-        }
-
         function onBackupRestored() {
-
             console.log("  onBackupRestored, isFromSetupWizard:", isFromSetupWizard)
             
-            PageController.showBusyIndicator(false)
-            
-            // Для setup wizard устанавливаем default container и сервер
-            if (isFromSetupWizard && ServersModel.getServersCount() > 0) {
-                var serverIdx = ServersModel.getServersCount() - 1
-                console.log("  Setting server as default:", serverIdx)
-                ServersModel.setDefaultServerIndex(serverIdx)
-                ServersModel.processedIndex = serverIdx
-                
-                // Запускаем timer для установки default container
-                // Контейнеры уже установлены через InstallController, просто ждем обновления модели
-                setDefaultContainerTimer.start()
+            // For setup wizard, call C++ method to set default server and container
+            if (isFromSetupWizard) {
+                ServersBackupController.setDefaultServerAfterRestore(true)
             } else {
-                // Для обычного режима сразу переходим
+                // For regular mode, navigate directly
+                PageController.showBusyIndicator(false)
                 navigateToRestoredPage()
             }
+        }
+        
+        function onDefaultServerAndContainerSet() {
+            console.log("  onDefaultServerAndContainerSet - navigating to restored page")
+            // C++ has set default server and container, navigate to result page
+            PageController.showBusyIndicator(false)
+            navigateToRestoredPage()
         }
 
         function onErrorOccurred(errorMessage, errorCode) {
@@ -204,11 +165,10 @@ PageType {
         }
     }
     
-    // Удаляем Connections для scanServerFinished - больше не нужен
     
     function navigateToRestoredPage() {
-        // Переход на страницу успешного восстановления
-        // Получаем реальное имя сервера из модели
+        // Navigate to successful restore page
+        // Get actual server name from model
         var actualServerName = serverName
         if (root.isFromSetupWizard && ServersModel.getServersCount() > 0) {
             var serverIdx = ServersModel.getServersCount() - 1
@@ -217,13 +177,13 @@ PageType {
             actualServerName = ServersModel.getProcessedServerData("name") || qsTr("Server")
             ServersModel.processedIndex = oldProcessedIndex
         } else if (!serverName || serverName.length === 0) {
-            // Если имя не передано, получаем из processedIndex
+            // If name not provided, get from processedIndex
             actualServerName = ServersModel.getProcessedServerData("name") || qsTr("Server")
         }
         
         var parentItem = root.parent
         
-        // Для setup wizard используем обычный StackView
+        // For setup wizard use regular StackView
         if (root.isFromSetupWizard) {
             while (parentItem && typeof parentItem.push !== "function") {
                 parentItem = parentItem.parent
@@ -237,7 +197,7 @@ PageType {
                 })
             }
         } else {
-            // Для меню управления ищем tabBarStackView
+            // For management menu, find tabBarStackView
             while (parentItem && parentItem.objectName !== "tabBarStackView") {
                 parentItem = parentItem.parent
             }
@@ -250,51 +210,6 @@ PageType {
                 })
             } else {
                 console.warn("Could not find StackView to navigate to restored page")
-            }
-        }
-    }
-    
-    property int containerRetryCount: 0
-    property int maxContainerRetries: 5
-    
-    Timer {
-        id: setDefaultContainerTimer
-        interval: 1000
-        repeat: false
-        
-        onTriggered: {
-            console.log("Timer: Searching for installed containers (attempt", containerRetryCount + 1, "/", maxContainerRetries, ")")
-            var serverIdx = ServersModel.getServersCount() - 1
-            
-            // Ищем первый установленный контейнер через DefaultServerContainersModel
-            console.log("  Total rows:", DefaultServerContainersModel.rowCount())
-            var foundInstalled = false
-            for (var i = 0; i < DefaultServerContainersModel.rowCount(); i++) {
-                var isInstalled = DefaultServerContainersModel.data(DefaultServerContainersModel.index(i, 0), 0x0012) // IsInstalledRole
-                if (isInstalled) {
-                    console.log("  Setting default container:", i, "for server:", serverIdx)
-                    ServersModel.setDefaultContainer(serverIdx, i)
-                    foundInstalled = true
-                    containerRetryCount = 0 // Reset counter
-                    
-                    // Выключаем индикатор загрузки и переходим на страницу результата
-                    PageController.showBusyIndicator(false)
-                    navigateToRestoredPage()
-                    return
-                }
-            }
-            
-            containerRetryCount++
-            if (containerRetryCount < maxContainerRetries) {
-                console.log("  No installed containers found yet, will retry...")
-                setDefaultContainerTimer.start()
-            } else {
-                console.log("  Max retries reached, stopping search")
-                containerRetryCount = 0 // Reset for next time
-                
-                // Все равно переходим на страницу результата
-                PageController.showBusyIndicator(false)
-                navigateToRestoredPage()
             }
         }
     }
