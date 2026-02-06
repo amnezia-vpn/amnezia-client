@@ -10,6 +10,12 @@
 #include <QNetworkInterface>
 #include <QJsonDocument>
 
+#ifdef Q_OS_MACOS
+static const QString tunName = "utun22";
+#else
+static const QString tunName = "tun2";
+#endif
+
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
     readXrayConfiguration(configuration);
@@ -31,7 +37,7 @@ ErrorCode XrayProtocol::start()
 
     const ErrorCode err = IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         auto xrayStart = iface->xrayStart(QJsonDocument(m_xrayConfig).toJson());
-        if (!xrayStart.waitForFinished(1000) || !xrayStart.returnValue()) {
+        if (!xrayStart.waitForFinished() || !xrayStart.returnValue()) {
             qCritical() << "Failed to start xray";
             return ErrorCode::XrayExecutableCrashed;
         }
@@ -57,15 +63,9 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
 #ifdef AMNEZIA_DESKTOP
-    #ifdef Q_OS_WIN
         const QString remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::config_key::hostName).toString());
+    #ifdef Q_OS_WIN
         const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(remoteAddress));
-    #endif
-
-    #ifdef Q_OS_MACOS
-        const QString tunName = "utun22";
-    #else
-        const QString tunName = "tun2";
     #endif
         auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
         if (!createTun.waitForFinished() || !createTun.returnValue()) {
@@ -77,6 +77,33 @@ ErrorCode XrayProtocol::setupRouting() {
         if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
             qCritical() << "Failed to set DNS resolvers for TUN";
             return ErrorCode::InternalError;
+        }
+
+    #ifdef Q_OS_WIN
+        int vpnAdapterIndex = -1;
+        QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
+        for (auto& netInterface : netInterfaces) {
+            for (auto& address : netInterface.addressEntries()) {
+                if (m_vpnLocalAddress == address.ip().toString())
+                    vpnAdapterIndex = netInterface.index();
+            }
+        }
+    #else
+        static const int vpnAdapterIndex = 0;
+    #endif
+        const bool killSwitchEnabled = QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool();
+        if (killSwitchEnabled) {
+            if (vpnAdapterIndex != -1) {
+                QJsonObject config = m_rawConfig;
+                config.insert("vpnServer", remoteAddress);
+
+                auto enableKillSwitch = IpcClient::Interface()->enableKillSwitch(config, vpnAdapterIndex);
+                if (!enableKillSwitch.waitForFinished() || !enableKillSwitch.returnValue()) {
+                    qCritical() << "Failed to enable killswitch";
+                    return ErrorCode::InternalError;
+                }
+            } else
+                qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
         }
 #endif
 
@@ -97,27 +124,6 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
 #ifdef Q_OS_WIN
-        int vpnAdapterIndex = -1;
-        QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
-        for (auto& netInterface : netInterfaces) {
-            for (auto& address : netInterface.addressEntries()) {
-                if (m_vpnLocalAddress == address.ip().toString())
-                    vpnAdapterIndex = netInterface.index();
-            }
-        }
-
-        const bool killSwitchEnabled = QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool();
-        if (killSwitchEnabled) {
-            if (vpnAdapterIndex != -1) {
-                auto enableKillSwitch = IpcClient::Interface()->enableKillSwitch(m_rawConfig, vpnAdapterIndex);
-                if (!enableKillSwitch.waitForFinished() || !enableKillSwitch.returnValue()) {
-                    qCritical() << "Failed to enable killswitch";
-                    return ErrorCode::InternalError;
-                }
-            } else
-                qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
-        }
-
         if (inetAdapterIndex != 1 && vpnAdapterIndex != -1) {
             QJsonObject config = m_rawConfig;
             config.insert("inetAdapterIndex", inetAdapterIndex);
@@ -175,8 +181,8 @@ void XrayProtocol::stop()
     qDebug() << "XrayProtocol::stop()";
     setConnectionState(Vpn::ConnectionState::Disconnecting);
 
-    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
 #ifdef AMNEZIA_DESKTOP
+    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
         auto disableKillSwitch = iface->disableKillSwitch();
         if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue()) {
             qWarning() << "Failed to disable killswitch";
@@ -192,18 +198,17 @@ void XrayProtocol::stop()
             qWarning() << "Failed to restore resolvers";
         }
 
-    #if !defined(Q_OS_MACOS)
-        auto deleteTun = iface->deleteTun("tun2");
+        auto deleteTun = iface->deleteTun(tunName);
         if (!deleteTun.waitForFinished() || !deleteTun.returnValue()) {
             qWarning() << "Failed to delete tun";
         }
-    #endif
-#endif
+
         auto xrayStop = iface->xrayStop();
         if (!xrayStop.waitForFinished() || !xrayStop.returnValue()) {
             qWarning() << "Failed to stop xray";
         }
     });
+#endif
 
     if (m_t2sProcess)
         m_t2sProcess->stop();
