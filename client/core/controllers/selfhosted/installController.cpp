@@ -244,6 +244,21 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
 
 ErrorCode InstallController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession)
 {
+    amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container, QString(), QString());
+    
+    QString dockerfilePath = "/opt/amnezia/" + ContainerUtils::containerToString(container) + "/Dockerfile";
+    QString removeScript = QString("sudo rm %1").arg(dockerfilePath);
+    
+    ErrorCode errorCode = sshSession.runScript(credentials, sshSession.replaceVars(removeScript, baseVars));
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    errorCode = sshSession.uploadFileToHost(credentials, amnezia::scriptData(ProtocolScriptType::dockerfile, container).toUtf8(), dockerfilePath);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
@@ -254,7 +269,6 @@ ErrorCode InstallController::buildContainerWorker(const ServerCredentials &crede
         return ErrorCode::NoError;
     };
 
-    amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container, QString(), QString());
     amnezia::ScriptVars protocolVars = amnezia::genProtocolVarsForContainer(container, config);
     baseVars.append(protocolVars);
     ErrorCode error = sshSession.runScript(
@@ -720,6 +734,7 @@ QScopedPointer<InstallerBase> InstallController::createInstaller(DockerContainer
 {
     switch (container) {
     case DockerContainer::Awg: return QScopedPointer<InstallerBase>(new AwgInstaller(this));
+    case DockerContainer::Awg2: return QScopedPointer<InstallerBase>(new AwgInstaller(this));
     case DockerContainer::WireGuard: return QScopedPointer<InstallerBase>(new WireguardInstaller(this));
     case DockerContainer::OpenVpn: return QScopedPointer<InstallerBase>(new OpenVpnInstaller(this));
     case DockerContainer::Xray:
