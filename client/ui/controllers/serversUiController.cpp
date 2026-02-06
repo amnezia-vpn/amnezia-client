@@ -16,6 +16,7 @@
 #include "core/models/serverConfig.h"
 #include "core/models/protocolConfig.h"
 #include "core/models/containerConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
 
 using namespace amnezia;
 
@@ -176,8 +177,27 @@ QString ServersUiController::getDefaultServerDescriptionCollapsed() const
     }
     
     DockerContainer container = ServerConfigUtils::defaultContainer(server);
+    QString containerName = ContainerUtils::containerHumanNames().value(container);
+    QString protocolVersion;
     QString hostName = ServerConfigUtils::hostName(server);
-    return description + " " + ContainerUtils::containerHumanNames().value(container) + " | " + hostName;
+    
+    if (ContainerUtils::isAwgContainer(container)) {
+        ContainerConfig containerConfig = ServerConfigUtils::containerConfig(server, container);
+        if (auto* awgConfig = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
+            QString version = awgConfig->serverConfig.protocolVersion;
+            if (version == protocols::awg::awgV2) {
+                protocolVersion = QObject::tr(" (version 2)");
+            } else if (version == protocols::awg::awgV1_5) {
+                protocolVersion = QObject::tr(" (version 1.5)");
+            }
+            
+            if (container == DockerContainer::Awg && !awgConfig->serverConfig.isThirdPartyConfig) {
+                containerName = "AmneziaWG Legacy";
+            }
+        }
+    }
+    
+    return description + containerName + protocolVersion + " | " + hostName;
 }
 
 QString ServersUiController::getDefaultServerImagePathCollapsed() const
@@ -311,7 +331,6 @@ QString ServersUiController::getDefaultServerDescription(const ServerConfig& ser
         const ApiV1ServerConfig& apiV1 = ServerConfigUtils::asApiV1(server);
         return apiV1.description;
     } else {
-        QString desc = ServerConfigUtils::description(server);
         if (m_serversModel->data(index, ServersModel::Roles::HasWriteAccessRole).toBool()) {
             bool isAmneziaDnsEnabled = m_settingsController->isAmneziaDnsEnabled();
             if (isAmneziaDnsEnabled && isAmneziaDnsContainerInstalled(index)) {
@@ -322,7 +341,7 @@ QString ServersUiController::getDefaultServerDescription(const ServerConfig& ser
                 description += "Amnezia DNS | ";
             }
         }
-        return description + desc;
+        return description;
     }
 }
 
