@@ -27,8 +27,7 @@ class InstallController : public QObject
     Q_OBJECT
 
 public:
-    explicit InstallController(SshSession* sshSession, 
-                              SecureServersRepository* serversRepository,
+    explicit InstallController(SecureServersRepository* serversRepository,
                               SecureAppSettingsRepository* appSettingsRepository,
                               QObject *parent = nullptr);
     ~InstallController();
@@ -41,7 +40,7 @@ public:
     ErrorCode removeContainer(int serverIndex, DockerContainer container);
 
     ContainerConfig generateConfig(DockerContainer container, int port, TransportProto transportProto);
-    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, ContainerConfig> &installedContainers);
+    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, ContainerConfig> &installedContainers, SshSession &sshSession);
     
     ErrorCode scanServerForInstalledContainers(int serverIndex);
     
@@ -74,26 +73,25 @@ signals:
     void clientAppendRequested(int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container);
 
 private:
-    ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
-    ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config = ContainerConfig{});
-    ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config);
-    ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config);
-    ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config);
-    ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config);
+    ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
+    ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
+    ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
+    ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, SshSession &sshSession);
+    ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, SshSession &sshSession);
+    ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
 
-    ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config);
-    ErrorCode isUserInSudo(const ServerCredentials &credentials, DockerContainer container);
-    ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container);
-    ErrorCode setupServerFirewall(const ServerCredentials &credentials);
+    ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
+    ErrorCode isUserInSudo(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
+    ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
+    ErrorCode setupServerFirewall(const ServerCredentials &credentials, SshSession &sshSession);
     bool isReinstallContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig);
 
-    ErrorCode prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, ContainerConfig &containerConfig);
+    ErrorCode prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, ContainerConfig &containerConfig, SshSession &sshSession);
 
     static void updateContainerConfigAfterInstallation(DockerContainer container, ContainerConfig &containerConfig, const QString &stdOut);
 
     QScopedPointer<InstallerBase> createInstaller(DockerContainer container);
 
-    SshSession* m_sshSession;
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
     bool m_cancelInstallation = false;

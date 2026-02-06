@@ -140,8 +140,7 @@ void CoreController::initCoreControllers()
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
     m_newsController = new NewsController(m_appSettingsRepository, m_serversController);
     
-    SshSession* sshSession = new SshSession(this);
-    m_installController = new InstallController(sshSession, m_serversRepository, m_appSettingsRepository, this);
+    m_installController = new InstallController(m_serversRepository, m_appSettingsRepository, this);
     m_exportController = new ExportController(m_serversRepository, m_appSettingsRepository, this);
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
     m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);
