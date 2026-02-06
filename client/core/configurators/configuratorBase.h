@@ -33,7 +33,7 @@ public:
                                                    const bool isApiConfig,
                                                    const amnezia::SplitTunnelingSettings &splitTunneling,
                                                    QString &protocolConfigString);
-    virtual QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+    virtual QString processConfigWithExportSettings(const QPair<QString, QString> &dns,
                                                     QString &protocolConfigString);
 
 protected:

@@ -155,7 +155,7 @@ PageType {
                         ExportController.exportErrorOccurred(qsTr("Access error!"))
                         return
                     } else {
-                        ExportController.generateFullAccessConfig()
+                        ExportController.generateFullAccessConfig(ServersUiController.processedIndex)
                     }
 
                     PageController.showBusyIndicator(false)

@@ -19,10 +19,10 @@ public:
 public slots:
     void generateFullAccessConfig(int serverIndex);
     void generateConnectionConfig(int serverIndex, int containerIndex, const QString &clientName);
-    void generateOpenVpnConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig);
-    void generateWireGuardConfig(int serverIndex, const QString &clientName, bool isApiConfig);
-    void generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig);
-    void generateXrayConfig(int serverIndex, const QString &clientName, bool isApiConfig);
+    void generateOpenVpnConfig(int serverIndex, const QString &clientName);
+    void generateWireGuardConfig(int serverIndex, const QString &clientName);
+    void generateAwgConfig(int serverIndex, const QString &clientName);
+    void generateXrayConfig(int serverIndex, const QString &clientName);
 
     QString getConfig();
     QString getNativeConfigString();

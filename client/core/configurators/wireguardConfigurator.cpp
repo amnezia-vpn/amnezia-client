@@ -285,7 +285,7 @@ QString WireguardConfigurator::processConfigWithLocalSettings(const QPair<QStrin
 }
 
 QString WireguardConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns,
-                                                               const bool isApiConfig, QString &protocolConfigString)
+                                                               QString &protocolConfigString)
 {
     processConfigWithDnsSettings(dns, protocolConfigString);
 

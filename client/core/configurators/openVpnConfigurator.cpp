@@ -196,7 +196,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
     return QJsonDocument(json).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns,
                                                              QString &protocolConfigString)
 {
     processConfigWithDnsSettings(dns, protocolConfigString);

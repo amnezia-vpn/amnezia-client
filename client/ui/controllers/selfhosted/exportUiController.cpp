@@ -22,32 +22,32 @@ void ExportUiController::generateConnectionConfig(int serverIndex, int container
     applyExportResult(result);
 }
 
-void ExportUiController::generateOpenVpnConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig)
+void ExportUiController::generateOpenVpnConfig(int serverIndex, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateOpenVpnConfig(serverIndex, containerIndex, clientName, isApiConfig);
+    auto result = m_exportController->generateOpenVpnConfig(serverIndex, clientName);
     applyExportResult(result);
 }
 
-void ExportUiController::generateWireGuardConfig(int serverIndex, const QString &clientName, bool isApiConfig)
+void ExportUiController::generateWireGuardConfig(int serverIndex, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateWireGuardConfig(serverIndex, clientName, isApiConfig);
+    auto result = m_exportController->generateWireGuardConfig(serverIndex, clientName);
     applyExportResult(result);
 }
 
-void ExportUiController::generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig)
+void ExportUiController::generateAwgConfig(int serverIndex, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateAwgConfig(serverIndex, containerIndex, clientName, isApiConfig);
+    auto result = m_exportController->generateAwgConfig(serverIndex, clientName);
     applyExportResult(result);
 }
 
 
-void ExportUiController::generateXrayConfig(int serverIndex, const QString &clientName, bool isApiConfig)
+void ExportUiController::generateXrayConfig(int serverIndex, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateXrayConfig(serverIndex, clientName, isApiConfig);
+    auto result = m_exportController->generateXrayConfig(serverIndex, clientName);
     applyExportResult(result);
 }
 

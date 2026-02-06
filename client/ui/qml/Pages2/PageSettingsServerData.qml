@@ -194,7 +194,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
                 } else {
                     PageController.goToPage(PageEnum.PageDeinstalling)
-                    InstallController.removeAllContainers()
+                    InstallController.removeAllContainers(ServersUiController.processedIndex)
                 }
             }
             var noButtonFunction = function() {

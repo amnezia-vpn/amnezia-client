@@ -37,7 +37,7 @@ QString ConfiguratorBase::processConfigWithLocalSettings(const QPair<QString, QS
     return protocolConfigString;
 }
 
-QString ConfiguratorBase::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+QString ConfiguratorBase::processConfigWithExportSettings(const QPair<QString, QString> &dns,
                                                           QString &protocolConfigString)
 {
     processConfigWithDnsSettings(dns, protocolConfigString);

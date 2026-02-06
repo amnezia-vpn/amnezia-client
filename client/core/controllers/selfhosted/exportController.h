@@ -39,10 +39,10 @@ public:
 
     ExportResult generateFullAccessConfig(int serverIndex);
     ExportResult generateConnectionConfig(int serverIndex, int containerIndex, const QString &clientName);
-    ExportResult generateOpenVpnConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig);
-    ExportResult generateWireGuardConfig(int serverIndex, const QString &clientName, bool isApiConfig);
-    ExportResult generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName, bool isApiConfig);
-    ExportResult generateXrayConfig(int serverIndex, const QString &clientName, bool isApiConfig);
+    ExportResult generateOpenVpnConfig(int serverIndex, const QString &clientName);
+    ExportResult generateWireGuardConfig(int serverIndex, const QString &clientName);
+    ExportResult generateAwgConfig(int serverIndex, const QString &clientName);
+    ExportResult generateXrayConfig(int serverIndex, const QString &clientName);
 
 signals:
     void appendClientRequested(int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container);
@@ -64,8 +64,7 @@ private:
 
     NativeConfigResult generateNativeConfig(int serverIndex, DockerContainer container,
                                             const ContainerConfig &containerConfig,
-                                            const QString &clientName, Proto protocol,
-                                            bool isApiConfig);
+                                            const QString &clientName);
 
     QString generateVpnUrl(const QByteArray &compressedConfig);
     QList<QString> generateQrCodesFromConfig(const QByteArray &data);

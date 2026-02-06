@@ -110,14 +110,15 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
 
 ExportController::NativeConfigResult ExportController::generateNativeConfig(int serverIndex, DockerContainer container,
                                                                              const ContainerConfig &containerConfig,
-                                                                             const QString &clientName, Proto protocol,
-                                                                             bool isApiConfig)
+                                                                             const QString &clientName)
 {
     NativeConfigResult result;
 
     if (ContainerUtils::containerService(container) == ServiceType::Other) {
         return result;
     }
+
+    Proto protocol = ContainerUtils::defaultProtocol(container);
 
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
     ServerConfig serverConfig = m_serversRepository->server(serverIndex);
@@ -144,7 +145,7 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     
     QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(newProtocolConfig, protocol);
     QString protocolConfigString = QString::fromUtf8(QJsonDocument(protocolConfigJson).toJson(QJsonDocument::Compact));
-    protocolConfigString = configurator->processConfigWithExportSettings(dns, isApiConfig, protocolConfigString);
+    protocolConfigString = configurator->processConfigWithExportSettings(dns, protocolConfigString);
 
     result.jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 
@@ -157,17 +158,14 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     return result;
 }
 
-ExportController::ExportResult ExportController::generateOpenVpnConfig(int serverIndex, int containerIndex,
-                                                                       const QString &clientName, bool isApiConfig)
+ExportController::ExportResult ExportController::generateOpenVpnConfig(int serverIndex, const QString &clientName)
 {
     ExportResult result;
 
-    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    DockerContainer container = DockerContainer::OpenVpn;
     ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
 
-    Proto protocol = ContainerUtils::defaultProtocol(container);
-
-    auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName, protocol, isApiConfig);
+    auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName);
     if (nativeResult.errorCode != ErrorCode::NoError) {
         result.errorCode = nativeResult.errorCode;
         return result;
@@ -182,13 +180,13 @@ ExportController::ExportResult ExportController::generateOpenVpnConfig(int serve
     return result;
 }
 
-ExportController::ExportResult ExportController::generateWireGuardConfig(int serverIndex, const QString &clientName, bool isApiConfig)
+ExportController::ExportResult ExportController::generateWireGuardConfig(int serverIndex, const QString &clientName)
 {
     ExportResult result;
 
     ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, DockerContainer::WireGuard);
 
-    auto nativeResult = generateNativeConfig(serverIndex, DockerContainer::WireGuard, containerConfig, clientName, Proto::WireGuard, isApiConfig);
+    auto nativeResult = generateNativeConfig(serverIndex, DockerContainer::WireGuard, containerConfig, clientName);
     if (nativeResult.errorCode != ErrorCode::NoError) {
         result.errorCode = nativeResult.errorCode;
         return result;
@@ -203,15 +201,14 @@ ExportController::ExportResult ExportController::generateWireGuardConfig(int ser
     return result;
 }
 
-ExportController::ExportResult ExportController::generateAwgConfig(int serverIndex, int containerIndex,
-                                                                   const QString &clientName, bool isApiConfig)
+ExportController::ExportResult ExportController::generateAwgConfig(int serverIndex, const QString &clientName)
 {
     ExportResult result;
 
-    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    DockerContainer container = DockerContainer::Awg2;
     ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
 
-    auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName, Proto::Awg, isApiConfig);
+    auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName);
     if (nativeResult.errorCode != ErrorCode::NoError) {
         result.errorCode = nativeResult.errorCode;
         return result;
@@ -227,13 +224,13 @@ ExportController::ExportResult ExportController::generateAwgConfig(int serverInd
 }
 
 
-ExportController::ExportResult ExportController::generateXrayConfig(int serverIndex, const QString &clientName, bool isApiConfig)
+ExportController::ExportResult ExportController::generateXrayConfig(int serverIndex, const QString &clientName)
 {
     ExportResult result;
 
     ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, DockerContainer::Xray);
 
-    auto nativeResult = generateNativeConfig(serverIndex, DockerContainer::Xray, containerConfig, clientName, Proto::Xray, isApiConfig);
+    auto nativeResult = generateNativeConfig(serverIndex, DockerContainer::Xray, containerConfig, clientName);
     if (nativeResult.errorCode != ErrorCode::NoError) {
         result.errorCode = nativeResult.errorCode;
         return result;

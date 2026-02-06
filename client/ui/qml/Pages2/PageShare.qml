@@ -42,37 +42,40 @@ PageType {
             var configExtension
             var configFileName
 
+            var serverIndex = ServersUiController.processedIndex
+            var containerIndex = ContainersModel.getProcessedContainerIndex()
+
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
-                ExportController.generateConnectionConfig(clientNameTextField.textField.text);
+                ExportController.generateConnectionConfig(serverIndex, containerIndex, clientNameTextField.textField.text);
                 configCaption = qsTr("Save AmneziaVPN config")
                 configExtension = ".vpn"
                 configFileName = "amnezia_config"
                 break;
             }
             case PageShare.ConfigType.OpenVpn: {
-                ExportController.generateOpenVpnConfig(clientNameTextField.textField.text)
+                ExportController.generateOpenVpnConfig(serverIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save OpenVPN config")
                 configExtension = ".ovpn"
                 configFileName = "amnezia_for_openvpn"
                 break
             }
             case PageShare.ConfigType.WireGuard: {
-                ExportController.generateWireGuardConfig(clientNameTextField.textField.text)
+                ExportController.generateWireGuardConfig(serverIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save WireGuard config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_wireguard"
                 break
             }
             case PageShare.ConfigType.Awg: {
-                ExportController.generateAwgConfig(clientNameTextField.textField.text)
+                ExportController.generateAwgConfig(serverIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save AmneziaWG config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_awg"
                 break
             }
             case PageShare.ConfigType.Xray: {
-                ExportController.generateXrayConfig(clientNameTextField.textField.text)
+                ExportController.generateXrayConfig(serverIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save XRay config")
                 configExtension = ".json"
                 configFileName = "amnezia_for_xray"
@@ -246,8 +249,8 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
-                                                                         ServersUiController.getProcessedServerCredentials())
+                            ExportController.updateClientManagementModel(ServersUiController.processedIndex,
+                                                                         ContainersModel.getProcessedContainerIndex())
                             PageController.showBusyIndicator(false)
                         }
 
@@ -414,8 +417,8 @@ PageType {
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
-                                                                         ServersUiController.getProcessedServerCredentials())
+                            ExportController.updateClientManagementModel(ServersUiController.processedIndex,
+                                                                         ContainersModel.getProcessedContainerIndex())
                             PageController.showBusyIndicator(false)
                         }
 
@@ -784,8 +787,8 @@ PageType {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
                                                                                       clientNameEditor.textField.text,
-                                                                                      ContainersModel.getProcessedContainerIndex(),
-                                                                                      ServersUiController.getProcessedServerCredentials())
+                                                                                      ServersUiController.processedIndex,
+                                                                                      ContainersModel.getProcessedContainerIndex())
                                                         PageController.showBusyIndicator(false)
                                                         Qt.callLater(function(){ clientsListView.freezeFilter = false })
                                                         clientNameEditDrawer.closeTriggered()
@@ -820,8 +823,8 @@ PageType {
                                             clientInfoDrawer.closeTriggered()
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
-                                                                          ContainersModel.getProcessedContainerIndex(),
-                                                                          ServersUiController.getProcessedServerCredentials())
+                                                                          ServersUiController.processedIndex,
+                                                                          ContainersModel.getProcessedContainerIndex())
                                         }
                                         var noButtonFunction = function() {
                                         }

@@ -37,7 +37,7 @@ public:
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                            const amnezia::SplitTunnelingSettings &splitTunneling,
                                            QString &protocolConfigString) override;
-    QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+    QString processConfigWithExportSettings(const QPair<QString, QString> &dns,
                                             QString &protocolConfigString) override;
 
     static ConnectionData genClientKeys();
