@@ -124,7 +124,7 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
 #ifdef Q_OS_WIN
-        if (inetAdapterIndex != 1 && vpnAdapterIndex != -1) {
+        if (inetAdapterIndex != -1 && vpnAdapterIndex != -1) {
             QJsonObject config = m_rawConfig;
             config.insert("inetAdapterIndex", inetAdapterIndex);
             config.insert("vpnAdapterIndex", vpnAdapterIndex);
