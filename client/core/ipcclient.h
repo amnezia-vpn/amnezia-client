@@ -5,7 +5,6 @@
 #include <QObject>
 
 #include "rep_ipc_interface_replica.h"
-#include "rep_ipc_process_tun2socks_replica.h"
 
 #include "privileged_process.h"
 
@@ -18,7 +17,6 @@ public:
     static IpcClient& Instance();
 
     static QSharedPointer<IpcInterfaceReplica> Interface();
-    static QSharedPointer<IpcProcessTun2SocksReplica> InterfaceTun2Socks();
     static QSharedPointer<PrivilegedProcess> CreatePrivilegedProcess();
 
     template <typename Func>
@@ -54,7 +52,6 @@ signals:
 private:
     QRemoteObjectNode m_node;
     QSharedPointer<IpcInterfaceReplica> m_interface;
-    QSharedPointer<IpcProcessTun2SocksReplica> m_tun2socks;
 
     struct ProcessDescriptor {
         ProcessDescriptor () {

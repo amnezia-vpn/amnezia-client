@@ -7,7 +7,6 @@ IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
     m_node.connectToNode(QUrl("local:" + amnezia::getIpcServiceUrl()));
     m_interface.reset(m_node.acquire<IpcInterfaceReplica>());
-    m_tun2socks.reset(m_node.acquire<IpcProcessTun2SocksReplica>());
 }
 
 IpcClient& IpcClient::Instance()
@@ -33,23 +32,6 @@ QSharedPointer<IpcInterfaceReplica> IpcClient::Interface()
     return rep;
 }
 
-QSharedPointer<IpcProcessTun2SocksReplica> IpcClient::InterfaceTun2Socks()
-{
-    QSharedPointer<IpcProcessTun2SocksReplica> rep = Instance().m_tun2socks;
-    if (rep.isNull()) {
-        qCritical() << "IpcClient::InterfaceTun2Socks: Replica is undefined";
-        return nullptr;
-    }
-    if (!rep->waitForSource(1000)) {
-        qCritical() << "IpcClient::InterfaceTun2Socks: Failed to initialize replica";
-        return nullptr;
-    }
-    if (!rep->isReplicaValid()) {
-        qWarning() << "IpcClient::InterfaceTun2Socks(): Replica is invalid";
-    }
-    return rep;
-}
-
 QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()
 {
     QSharedPointer<IpcInterfaceReplica> rep = Interface();
@@ -59,7 +41,7 @@ QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()
     }
 
     QRemoteObjectPendingReply<int> pidReply = rep->createPrivilegedProcess();
-    if (!pidReply.waitForFinished(5000)){
+    if (!pidReply.waitForFinished(5000)) {
         qCritical() << "IpcClient::createPrivilegedProcess: Failed to execute RO createPrivilegedProcess call";
         return nullptr;
     }

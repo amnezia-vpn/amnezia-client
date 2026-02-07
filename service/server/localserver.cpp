@@ -40,7 +40,6 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
         if (!m_isRemotingEnabled) {
             m_isRemotingEnabled = true;
             m_serverNode.enableRemoting(&m_ipcServer);
-            m_serverNode.enableRemoting(&m_tun2socks);
         }
     });
 

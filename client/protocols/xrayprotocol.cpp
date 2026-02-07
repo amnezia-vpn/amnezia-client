@@ -1,6 +1,8 @@
 #include "xrayprotocol.h"
 
 #include "core/ipcclient.h"
+#include "core/privileged_process.h"
+#include "ipc.h"
 #include "utilities.h"
 #include "core/networkUtilities.h"
 
@@ -9,6 +11,9 @@
 #include <QJsonObject>
 #include <QNetworkInterface>
 #include <QJsonDocument>
+#include <QtCore/qlogging.h>
+#include <QtCore/qobjectdefs.h>
+#include <QtCore/qprocess.h>
 
 #ifdef Q_OS_MACOS
 static const QString tunName = "utun22";
@@ -22,7 +27,6 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_routeGateway = NetworkUtilities::getGatewayAndIface().first;
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
-    m_t2sProcess = IpcClient::InterfaceTun2Socks();
 }
 
 XrayProtocol::~XrayProtocol()
@@ -31,9 +35,22 @@ XrayProtocol::~XrayProtocol()
     XrayProtocol::stop();
 }
 
+void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
+{
+    QJsonObject xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::Xray)).toObject();
+    if (xrayConfiguration.isEmpty()) {
+        xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::SSXray)).toObject();
+    }
+    m_xrayConfig = xrayConfiguration;
+    m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
+    m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();
+    m_secondaryDNS = configuration.value(amnezia::config_key::dns2).toString();
+}
+
 ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
+    setConnectionState(Vpn::ConnectionState::Connecting);
 
     const ErrorCode err = IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         auto xrayStart = iface->xrayStart(QJsonDocument(m_xrayConfig).toJson());
@@ -48,7 +65,6 @@ ErrorCode XrayProtocol::start()
     if (err != ErrorCode::NoError)
         return err;
 
-    setConnectionState(Vpn::ConnectionState::Connecting);
     return startTun2Sock();
 }
 
@@ -148,31 +164,43 @@ ErrorCode XrayProtocol::setupRouting() {
 
 ErrorCode XrayProtocol::startTun2Sock()
 {
-    m_t2sProcess->start();
+    m_tunProcess = IpcClient::CreatePrivilegedProcess();
+    if (!m_tunProcess->waitForSource()) {
+        return ErrorCode::AmneziaServiceConnectionFailed;
+    }
 
-    connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::stateChanged, this,
-            [&](QProcess::ProcessState newState) { qDebug() << "PrivilegedProcess stateChanged" << newState; });
+    m_tunProcess->setProgram(PermittedProcess::Tun2Socks);
+    m_tunProcess->setArguments({"-device", tunName, "-proxy", "socks5://127.0.0.1:10808" });
 
-    connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::setConnectionState, this, [&](int vpnState) {
-        QMetaObject::invokeMethod(this, [this, vpnState]() {
-            qDebug() << "tun2socks state changed: " << vpnState;
+    connect(m_tunProcess.data(), &PrivilegedProcess::readyReadStandardOutput, this, [this]() {
+        auto readAllStandardOutput = m_tunProcess->readAllStandardOutput();
+        if (!readAllStandardOutput.waitForFinished()) {
+            qWarning() << "Failed to read output from tun2socks";
+            return;
+        }
 
-            if (vpnState == Vpn::ConnectionState::Connected) {
-                setConnectionState(Vpn::ConnectionState::Connecting);
-
-                if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
-                    stop();
-                    setLastError(res);
-                } else
-                    setConnectionState(Vpn::ConnectionState::Connected);
-            }
-
-            if (vpnState == Vpn::ConnectionState::Disconnected)
+        const QString line = readAllStandardOutput.returnValue();
+        if (line.contains("[STACK] tun://") && line.contains("<-> socks5://127.0.0.1")) {
+            if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
                 stop();
+                setLastError(res);
+            }
+            else
+                setConnectionState(Vpn::ConnectionState::Connected);
+        }
+    }, Qt::QueuedConnection);
 
-        }, Qt::QueuedConnection);
-    });
+    connect(m_tunProcess.data(), &PrivilegedProcess::finished, this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
+        if (exitStatus == QProcess::ExitStatus::CrashExit) {
+            qCritical() << "Tun2socks process crashed!";
+        } else {
+            qCritical() << QString("Tun2socks process was closed with %1 exit code").arg(exitCode);
+        }
+        stop();
+        setLastError(ErrorCode::Tun2SockExecutableCrashed);
+    }, Qt::QueuedConnection);
 
+    m_tunProcess->start();
     return ErrorCode::NoError;
 }
 
@@ -208,22 +236,14 @@ void XrayProtocol::stop()
             qWarning() << "Failed to stop xray";
         }
     });
-#endif
 
-    if (m_t2sProcess)
-        m_t2sProcess->stop();
+
+    if (m_tunProcess) {
+        m_tunProcess->blockSignals(true);
+        m_tunProcess->close();
+    }
 
     setConnectionState(Vpn::ConnectionState::Disconnected);
-}
 
-void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
-{
-    QJsonObject xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::Xray)).toObject();
-    if (xrayConfiguration.isEmpty()) {
-        xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::SSXray)).toObject();
-    }
-    m_xrayConfig = xrayConfiguration;
-    m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
-    m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();
-    m_secondaryDNS = configuration.value(amnezia::config_key::dns2).toString();
+#endif
 }

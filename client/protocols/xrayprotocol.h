@@ -4,8 +4,10 @@
 #include "QProcess"
 
 #include "core/ipcclient.h"
+#include "core/privileged_process.h"
 #include "vpnprotocol.h"
 #include "settings.h"
+#include <QtCore/qsharedpointer.h>
 
 class XrayProtocol : public VpnProtocol
 {
@@ -25,8 +27,8 @@ private:
     Settings::RouteMode m_routeMode;
     QString m_primaryDNS;
     QString m_secondaryDNS;
-#ifndef Q_OS_IOS
-    QSharedPointer<IpcProcessTun2SocksReplica> m_t2sProcess;
+#ifdef AMNEZIA_DESKTOP
+    QSharedPointer<PrivilegedProcess> m_tunProcess;
 #endif
 };
 
