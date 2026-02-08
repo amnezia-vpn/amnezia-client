@@ -127,6 +127,8 @@ ErrorCode XrayProtocol::startTun2Socks()
         }
 
         const QString line = readAllStandardOutput.returnValue();
+        qDebug() << "[tun2socks]:" << line;
+        
         if (line.contains("[STACK] tun://") && line.contains("<-> socks5://127.0.0.1")) {
             if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
                 stop();
