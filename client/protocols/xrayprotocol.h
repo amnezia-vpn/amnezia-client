@@ -20,16 +20,14 @@ public:
 
 private:
     ErrorCode setupRouting();
-    void resetRouting();
     ErrorCode startTun2Socks();
 
     QJsonObject m_xrayConfig;
     Settings::RouteMode m_routeMode;
     QList<QHostAddress> m_dnsServers;
     QString m_remoteAddress;
-#ifdef AMNEZIA_DESKTOP
+
     QSharedPointer<PrivilegedProcess> m_tunProcess;
-#endif
 };
 
 #endif // XRAYPROTOCOL_H

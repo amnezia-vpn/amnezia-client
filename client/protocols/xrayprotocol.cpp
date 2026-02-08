@@ -72,8 +72,27 @@ void XrayProtocol::stop()
     qDebug() << "XrayProtocol::stop()";
     setConnectionState(Vpn::ConnectionState::Disconnecting);
 
-#ifdef AMNEZIA_DESKTOP
-    resetRouting();
+    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+        auto disableKillSwitch = iface->disableKillSwitch();
+        if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue())
+            qWarning() << "Failed to disable killswitch";
+
+        auto StartRoutingIpv6 = iface->StartRoutingIpv6();
+        if (!StartRoutingIpv6.waitForFinished() || !StartRoutingIpv6.returnValue())
+            qWarning() << "Failed to start routing ipv6";
+
+        auto restoreResolvers = iface->restoreResolvers();
+        if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue())
+            qWarning() << "Failed to restore resolvers";
+
+        auto deleteTun = iface->deleteTun(tunName);
+        if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
+            qWarning() << "Failed to delete tun";
+
+        auto xrayStop = iface->xrayStop();
+        if (!xrayStop.waitForFinished() || !xrayStop.returnValue())
+            qWarning() << "Failed to stop xray";
+    });
 
     if (m_tunProcess) {
         m_tunProcess->blockSignals(true);
@@ -81,15 +100,7 @@ void XrayProtocol::stop()
         m_tunProcess.reset();
     }
 
-    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-        auto xrayStop = iface->xrayStop();
-        if (!xrayStop.waitForFinished() || !xrayStop.returnValue())
-            qWarning() << "Failed to stop xray";
-    });
-
     setConnectionState(Vpn::ConnectionState::Disconnected);
-
-#endif
 }
 
 ErrorCode XrayProtocol::startTun2Socks()
@@ -136,10 +147,9 @@ ErrorCode XrayProtocol::startTun2Socks()
 
 ErrorCode XrayProtocol::setupRouting() {
     return IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {
-#ifdef AMNEZIA_DESKTOP
-    #ifdef Q_OS_WIN
+#ifdef Q_OS_WIN
         const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
-    #endif
+#endif
         auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
         if (!createTun.waitForFinished() || !createTun.returnValue()) {
             qCritical() << "Failed to assign IP address for TUN";
@@ -152,7 +162,7 @@ ErrorCode XrayProtocol::setupRouting() {
             return ErrorCode::InternalError;
         }
 
-    #ifdef Q_OS_WIN
+#ifdef Q_OS_WIN
         int vpnAdapterIndex = -1;
         QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
         for (auto& netInterface : netInterfaces) {
@@ -161,9 +171,9 @@ ErrorCode XrayProtocol::setupRouting() {
                     vpnAdapterIndex = netInterface.index();
             }
         }
-    #else
+#else
         static const int vpnAdapterIndex = 0;
-    #endif
+#endif
         const bool killSwitchEnabled = QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool();
         if (killSwitchEnabled) {
             if (vpnAdapterIndex != -1) {
@@ -178,7 +188,6 @@ ErrorCode XrayProtocol::setupRouting() {
             } else
                 qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
         }
-#endif
 
         if (m_routeMode == Settings::RouteMode::VpnAllSites) {
             static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
@@ -216,25 +225,5 @@ ErrorCode XrayProtocol::setupRouting() {
     },
     [] () {
         return ErrorCode::AmneziaServiceConnectionFailed;
-    });
-}
-
-void XrayProtocol::resetRouting() {
-    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-        auto disableKillSwitch = iface->disableKillSwitch();
-        if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue())
-            qWarning() << "Failed to disable killswitch";
-
-        auto StartRoutingIpv6 = iface->StartRoutingIpv6();
-        if (!StartRoutingIpv6.waitForFinished() || !StartRoutingIpv6.returnValue())
-            qWarning() << "Failed to start routing ipv6";
-
-        auto restoreResolvers = iface->restoreResolvers();
-        if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue())
-            qWarning() << "Failed to restore resolvers";
-
-        auto deleteTun = iface->deleteTun(tunName);
-        if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
-            qWarning() << "Failed to delete tun";
     });
 }
