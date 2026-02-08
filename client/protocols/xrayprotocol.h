@@ -27,7 +27,7 @@ private:
     QList<QHostAddress> m_dnsServers;
     QString m_remoteAddress;
 
-    QSharedPointer<PrivilegedProcess> m_tunProcess;
+    QSharedPointer<PrivilegedProcess> m_tun2socksProcess;
 };
 
 #endif // XRAYPROTOCOL_H

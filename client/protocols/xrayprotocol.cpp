@@ -94,27 +94,33 @@ void XrayProtocol::stop()
             qWarning() << "Failed to stop xray";
     });
 
-    if (m_tunProcess) {
-        m_tunProcess->blockSignals(true);
-        m_tunProcess->close();
-        m_tunProcess.reset();
+    if (m_tun2socksProcess) {
+        m_tun2socksProcess->blockSignals(true);
+        m_tun2socksProcess->close();
+        m_tun2socksProcess.reset();
     }
 
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
+#ifdef Q_OS_WIN
+static const QString tun2socksTunArg = QString("tun://%1?guid={081A8A84-8D12-4DF5-B8C4-396D5B0053E4}").arg(tunName);
+#else
+static const QString tun2socksTunArg = QString("tun://%1").arg(tunName);
+#endif
+
 ErrorCode XrayProtocol::startTun2Socks()
 {
-    m_tunProcess = IpcClient::CreatePrivilegedProcess();
-    if (!m_tunProcess->waitForSource()) {
+    m_tun2socksProcess = IpcClient::CreatePrivilegedProcess();
+    if (!m_tun2socksProcess->waitForSource()) {
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
 
-    m_tunProcess->setProgram(PermittedProcess::Tun2Socks);
-    m_tunProcess->setArguments({"-device", tunName, "-proxy", "socks5://127.0.0.1:10808" });
+    m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
+    m_tun2socksProcess->setArguments({"-device", tun2socksTunArg, "-proxy", "socks5://127.0.0.1:10808" });
 
-    connect(m_tunProcess.data(), &PrivilegedProcess::readyReadStandardOutput, this, [this]() {
-        auto readAllStandardOutput = m_tunProcess->readAllStandardOutput();
+    connect(m_tun2socksProcess.data(), &PrivilegedProcess::readyReadStandardOutput, this, [this]() {
+        auto readAllStandardOutput = m_tun2socksProcess->readAllStandardOutput();
         if (!readAllStandardOutput.waitForFinished()) {
             qWarning() << "Failed to read output from tun2socks";
             return;
@@ -125,13 +131,13 @@ ErrorCode XrayProtocol::startTun2Socks()
             if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
                 stop();
                 setLastError(res);
-            }
-            else
+            } else {
                 setConnectionState(Vpn::ConnectionState::Connected);
+            }
         }
     }, Qt::QueuedConnection);
 
-    connect(m_tunProcess.data(), &PrivilegedProcess::finished, this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
+    connect(m_tun2socksProcess.data(), &PrivilegedProcess::finished, this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
         if (exitStatus == QProcess::ExitStatus::CrashExit) {
             qCritical() << "Tun2socks process crashed!";
         } else {
@@ -141,7 +147,7 @@ ErrorCode XrayProtocol::startTun2Socks()
         setLastError(ErrorCode::Tun2SockExecutableCrashed);
     }, Qt::QueuedConnection);
 
-    m_tunProcess->start();
+    m_tun2socksProcess->start();
     return ErrorCode::NoError;
 }
 
