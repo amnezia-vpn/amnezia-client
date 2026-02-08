@@ -95,13 +95,19 @@ void XrayProtocol::stop()
 
     if (m_tun2socksProcess) {
         m_tun2socksProcess->blockSignals(true);
-        m_tun2socksProcess->terminate();
 
-        auto waitForFinished = m_tun2socksProcess->waitForFinished();
+#ifndef Q_OS_WIN
+        m_tun2socksProcess->terminate();
+        auto waitForFinished = m_tun2socksProcess->waitForFinished(1000);
         if (!waitForFinished.waitForFinished() || !waitForFinished.returnValue()) {
             qWarning() << "Failed to terminate tun2socks. Killing the process...";
             m_tun2socksProcess->kill();
         }
+#else
+        // terminate does not do anything useful on Windows
+        // so just kill the process
+        m_tun2socksProcess->kill();
+#endif
 
         m_tun2socksProcess->close();
         m_tun2socksProcess.reset();
