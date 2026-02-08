@@ -116,12 +116,6 @@ void XrayProtocol::stop()
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
-#ifdef Q_OS_WIN
-static const QString tun2socksTunArg = QString("tun://%1?guid={081A8A84-8D12-4DF5-B8C4-396D5B0053E4}").arg(tunName);
-#else
-static const QString tun2socksTunArg = QString("tun://%1").arg(tunName);
-#endif
-
 ErrorCode XrayProtocol::startTun2Socks()
 {
     m_tun2socksProcess = IpcClient::CreatePrivilegedProcess();
@@ -130,7 +124,7 @@ ErrorCode XrayProtocol::startTun2Socks()
     }
 
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
-    m_tun2socksProcess->setArguments({"-device", tun2socksTunArg, "-proxy", "socks5://127.0.0.1:10808" });
+    m_tun2socksProcess->setArguments({"-device", QString("tun://%1").arg(tunName), "-proxy", "socks5://127.0.0.1:10808" });
 
     connect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, [this]() {
         auto readAllStandardOutput = m_tun2socksProcess->readAllStandardOutput();
