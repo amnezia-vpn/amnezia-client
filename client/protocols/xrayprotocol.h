@@ -20,13 +20,13 @@ public:
 
 private:
     ErrorCode setupRouting();
-    ErrorCode startTun2Sock();
-    void readXrayConfiguration(const QJsonObject &configuration);
-    
+    void resetRouting();
+    ErrorCode startTun2Socks();
+
     QJsonObject m_xrayConfig;
     Settings::RouteMode m_routeMode;
-    QString m_primaryDNS;
-    QString m_secondaryDNS;
+    QList<QHostAddress> m_dnsServers;
+    QString m_remoteAddress;
 #ifdef AMNEZIA_DESKTOP
     QSharedPointer<PrivilegedProcess> m_tunProcess;
 #endif
