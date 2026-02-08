@@ -86,13 +86,20 @@ add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
 
 if(ANDROID)
     # Use qtgamepad from amnezia-vpn/qtgamepad repository
-    add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtgamepad)
-    # Link both the C++ module and QML plugin
-    if(TARGET GamepadLegacy)
-        target_link_libraries(${PROJECT} PRIVATE GamepadLegacy)
-    endif()
-    if(TARGET GamepadLegacyQuickPrivate)
-        target_link_libraries(${PROJECT} PRIVATE GamepadLegacyQuickPrivate)
+    # Only if Qt6CorePrivate is available (required by qtgamepad)
+    find_package(Qt6CorePrivate CONFIG QUIET)
+    if(Qt6CorePrivate_FOUND)
+        add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtgamepad)
+        # Link both the C++ module and QML plugin
+        if(TARGET GamepadLegacy)
+            target_link_libraries(${PROJECT} PRIVATE GamepadLegacy)
+        endif()
+        if(TARGET GamepadLegacyQuickPrivate)
+            target_link_libraries(${PROJECT} PRIVATE GamepadLegacyQuickPrivate)
+        endif()
+        message(STATUS "Gamepad support enabled for Android")
+    else()
+        message(STATUS "Qt6CorePrivate not found. Gamepad support disabled for Android.")
     endif()
 endif()
 

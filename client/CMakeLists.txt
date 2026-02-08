@@ -39,11 +39,6 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
-# Android: Qt private modules (like CorePrivate) are needed by qtgamepad
-if(ANDROID)
-    find_package(Qt6CorePrivate CONFIG REQUIRED)
-endif()
-
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
