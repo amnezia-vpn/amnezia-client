@@ -5,8 +5,7 @@
 #include <QObject>
 
 #include "rep_ipc_interface_replica.h"
-
-#include "privileged_process.h"
+#include "rep_ipc_process_interface_replica.h"
 
 class IpcClient : public QObject
 {
@@ -17,7 +16,7 @@ public:
     static IpcClient& Instance();
 
     static QSharedPointer<IpcInterfaceReplica> Interface();
-    static QSharedPointer<PrivilegedProcess> CreatePrivilegedProcess();
+    static QSharedPointer<IpcProcessInterfaceReplica> CreatePrivilegedProcess();
 
     template <typename Func>
     static auto withInterface(Func func)
@@ -52,17 +51,6 @@ signals:
 private:
     QRemoteObjectNode m_node;
     QSharedPointer<IpcInterfaceReplica> m_interface;
-
-    struct ProcessDescriptor {
-        ProcessDescriptor () {
-            replicaNode = QSharedPointer<QRemoteObjectNode>(new QRemoteObjectNode());
-            ipcProcess = QSharedPointer<PrivilegedProcess>();
-            localSocket = QSharedPointer<QLocalSocket>();
-        }
-        QSharedPointer<PrivilegedProcess> ipcProcess;
-        QSharedPointer<QRemoteObjectNode> replicaNode;
-        QSharedPointer<QLocalSocket> localSocket;
-    };
 };
 
 #endif // IPCCLIENT_H

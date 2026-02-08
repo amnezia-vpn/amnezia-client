@@ -14,6 +14,8 @@ public:
     virtual ~IpcServerProcess();
 
     void start() override;
+    void terminate() override;
+    void kill() override;
     void close() override;
 
     void setArguments(const QStringList &arguments) override;
@@ -26,6 +28,11 @@ public:
     QByteArray readAll() override;
     QByteArray readAllStandardError() override;
     QByteArray readAllStandardOutput() override;
+
+    bool waitForStarted() override;
+    bool waitForStarted(int msecs) override;
+    bool waitForFinished() override;
+    bool waitForFinished(int msecs) override;
 
 signals:
 

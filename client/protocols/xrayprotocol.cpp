@@ -1,7 +1,6 @@
 #include "xrayprotocol.h"
 
 #include "core/ipcclient.h"
-#include "core/privileged_process.h"
 #include "ipc.h"
 #include "utilities.h"
 #include "core/networkUtilities.h"
@@ -96,6 +95,14 @@ void XrayProtocol::stop()
 
     if (m_tun2socksProcess) {
         m_tun2socksProcess->blockSignals(true);
+        m_tun2socksProcess->terminate();
+
+        auto waitForFinished = m_tun2socksProcess->waitForFinished();
+        if (!waitForFinished.waitForFinished() || !waitForFinished.returnValue()) {
+            qWarning() << "Failed to terminate tun2socks. Killing the process...";
+            m_tun2socksProcess->kill();
+        }
+
         m_tun2socksProcess->close();
         m_tun2socksProcess.reset();
     }
@@ -119,7 +126,7 @@ ErrorCode XrayProtocol::startTun2Socks()
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
     m_tun2socksProcess->setArguments({"-device", tun2socksTunArg, "-proxy", "socks5://127.0.0.1:10808" });
 
-    connect(m_tun2socksProcess.data(), &PrivilegedProcess::readyReadStandardOutput, this, [this]() {
+    connect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, [this]() {
         auto readAllStandardOutput = m_tun2socksProcess->readAllStandardOutput();
         if (!readAllStandardOutput.waitForFinished()) {
             qWarning() << "Failed to read output from tun2socks";
@@ -139,7 +146,7 @@ ErrorCode XrayProtocol::startTun2Socks()
         }
     }, Qt::QueuedConnection);
 
-    connect(m_tun2socksProcess.data(), &PrivilegedProcess::finished, this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
+    connect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::finished, this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
         if (exitStatus == QProcess::ExitStatus::CrashExit) {
             qCritical() << "Tun2socks process crashed!";
         } else {

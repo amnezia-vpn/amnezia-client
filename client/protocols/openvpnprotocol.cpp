@@ -232,12 +232,6 @@ ErrorCode OpenVpnProtocol::start()
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
 
-    m_openVpnProcess->waitForSource(5000);
-    if (!m_openVpnProcess->isInitialized()) {
-        qWarning() << "IpcProcess replica is not connected!";
-        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
-        return ErrorCode::AmneziaServiceConnectionFailed;
-    }
     m_openVpnProcess->setProgram(PermittedProcess::OpenVPN);
     QStringList arguments({
             "--config", configPath(), "--management", m_managementHost, QString::number(mgmtPort),
@@ -246,13 +240,13 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
-    connect(m_openVpnProcess.data(), &PrivilegedProcess::errorOccurred,
+    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::errorOccurred,
             [&](QProcess::ProcessError error) { qDebug() << "PrivilegedProcess errorOccurred" << error; });
 
-    connect(m_openVpnProcess.data(), &PrivilegedProcess::stateChanged,
+    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::stateChanged,
             [&](QProcess::ProcessState newState) { qDebug() << "PrivilegedProcess stateChanged" << newState; });
 
-    connect(m_openVpnProcess.data(), &PrivilegedProcess::finished, this,
+    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::finished, this,
             [&]() { setConnectionState(Vpn::ConnectionState::Disconnected); });
 
     m_openVpnProcess->start();

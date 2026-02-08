@@ -40,6 +40,14 @@ void IpcServerProcess::start()
     m_process->waitForStarted();
 }
 
+void IpcServerProcess::terminate() {
+    m_process->terminate();
+}
+
+void IpcServerProcess::kill() {
+    m_process->kill();
+}
+
 void IpcServerProcess::close()
 {
     m_process->close();
@@ -90,6 +98,22 @@ QByteArray IpcServerProcess::readAllStandardError()
 QByteArray IpcServerProcess::readAllStandardOutput()
 {
     return m_process->readAllStandardOutput();
+}
+
+bool IpcServerProcess::waitForStarted() {
+    return m_process->waitForStarted();
+}
+
+bool IpcServerProcess::waitForStarted(int msecs) {
+    return m_process->waitForStarted(msecs);
+}
+
+bool IpcServerProcess::waitForFinished() {
+    return m_process->waitForFinished();
+}
+
+bool IpcServerProcess::waitForFinished(int msecs) {
+    return m_process->waitForFinished(msecs);
 }
 
 #endif

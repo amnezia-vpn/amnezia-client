@@ -4,7 +4,6 @@
 #include "QProcess"
 
 #include "core/ipcclient.h"
-#include "core/privileged_process.h"
 #include "vpnprotocol.h"
 #include "settings.h"
 #include <QtCore/qsharedpointer.h>
@@ -27,7 +26,7 @@ private:
     QList<QHostAddress> m_dnsServers;
     QString m_remoteAddress;
 
-    QSharedPointer<PrivilegedProcess> m_tun2socksProcess;
+    QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
 };
 
 #endif // XRAYPROTOCOL_H
