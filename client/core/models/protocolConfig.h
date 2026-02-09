@@ -20,6 +20,7 @@
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
+#include "core/models/protocols/torProtocolConfig.h"
 
 namespace amnezia
 {
@@ -34,7 +35,8 @@ using ProtocolConfig = std::variant<
     SSXrayProtocolConfig,
     SftpProtocolConfig,
     Socks5ProxyProtocolConfig,
-    Ikev2ProtocolConfig
+    Ikev2ProtocolConfig,
+    TorProtocolConfig
 >;
 
 namespace ProtocolConfigUtils {
@@ -64,6 +66,9 @@ namespace ProtocolConfigUtils {
     Ikev2ProtocolConfig& asIkev2(ProtocolConfig& config);
     const Ikev2ProtocolConfig& asIkev2(const ProtocolConfig& config);
     
+    TorProtocolConfig& asTor(ProtocolConfig& config);
+    const TorProtocolConfig& asTor(const ProtocolConfig& config);
+    
     QString port(const ProtocolConfig& config);
     QString transportProto(const ProtocolConfig& config);
     
@@ -77,6 +82,8 @@ namespace ProtocolConfigUtils {
     void clearClientConfig(ProtocolConfig& config);
     
     QString nativeConfig(const ProtocolConfig& config);
+    
+    bool isThirdPartyConfig(const ProtocolConfig& config);
     
     QJsonObject toJson(const ProtocolConfig& config, Proto protocolType);
     ProtocolConfig fromJson(const QJsonObject& json, Proto protocolType);

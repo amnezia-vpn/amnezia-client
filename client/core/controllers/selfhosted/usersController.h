@@ -44,7 +44,7 @@ public slots:
     ErrorCode appendClient(int serverIndex, const QString &clientId, const QString &clientName, const DockerContainer container);
     ErrorCode renameClient(int serverIndex, const int row, const QString &userName, const DockerContainer container, bool addTimeStamp = false);
     ErrorCode revokeClient(int serverIndex, const int index, const DockerContainer container);
-    ErrorCode revokeClient(int serverIndex, const QJsonObject &containerConfig, const DockerContainer container);
+    ErrorCode revokeClient(int serverIndex, const ContainerConfig &containerConfig, const DockerContainer container);
 
 private:
     bool isClientExists(const QString &clientId, const QJsonArray &clientsTable);

@@ -63,9 +63,11 @@
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "ui/models/protocols/xrayConfigModel.h"
 #include "ui/models/protocolsModel.h"
+#include "ui/models/services/torConfigModel.h"
 #include "ui/models/serversModel.h"
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
+#include "ui/models/services/torConfigModel.h"
 #include "ui/models/sitesModel.h"
 #include "ui/models/newsModel.h"
 
@@ -193,6 +195,7 @@ private:
 
     OpenVpnConfigModel* m_openVpnConfigModel;
     XrayConfigModel* m_xrayConfigModel;
+    TorConfigModel* m_torConfigModel;
     WireGuardConfigModel* m_wireGuardConfigModel;
     AwgConfigModel* m_awgConfigModel;
 #ifdef Q_OS_WINDOWS

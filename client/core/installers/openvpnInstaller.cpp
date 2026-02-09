@@ -18,9 +18,15 @@ OpenVpnInstaller::OpenVpnInstaller(QObject *parent)
 }
 
 ErrorCode OpenVpnInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                       SshSession* sshSession, QJsonObject &config)
+                                                       SshSession* sshSession, ContainerConfig &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
+    
+    if (!config.getOpenVpnProtocolConfig()) {
+        OpenVpnProtocolConfig ovpnConfig;
+        config.protocolConfig = ovpnConfig;
+    }
+    
     QString serverConfig = sshSession->getTextFileFromContainer(container, credentials,
                                                                       protocols::openvpn::serverConfigPath, errorCode);
     if (errorCode != ErrorCode::NoError) {
@@ -43,38 +49,29 @@ ErrorCode OpenVpnInstaller::extractConfigFromContainer(DockerContainer container
         }
     }
 
-    auto mainProto = ContainerUtils::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
+    if (auto* ovpnConfig = config.getOpenVpnProtocolConfig()) {
+        QString serverValue = serverConfigMap.value("server");
 
-    QString serverValue = serverConfigMap.value("server");
+        if (!serverValue.isEmpty()) {
+            QStringList serverParts = serverValue.split(" ");
+            if (serverParts.count() >= 1) {
+                ovpnConfig->serverConfig.subnetAddress = serverParts[0];
+            }
+        }
 
-    if (!serverValue.isEmpty()) {
-        QStringList serverParts = serverValue.split(" ");
-        if (serverParts.count() >= 1) {
-            containerConfig[config_key::subnet_address] = serverParts[0];
+        ovpnConfig->serverConfig.ncpDisable = serverConfig.contains("ncp-disable");
+        ovpnConfig->serverConfig.tlsAuth = serverConfig.contains("tls-auth");
+
+        QString cipher = serverConfigMap.value("cipher");
+        if (!cipher.isEmpty()) {
+            ovpnConfig->serverConfig.cipher = cipher;
+        }
+
+        QString hash = serverConfigMap.value("auth");
+        if (!hash.isEmpty()) {
+            ovpnConfig->serverConfig.hash = hash;
         }
     }
-
-    bool ncpDisable = serverConfig.contains("ncp-disable");
-    containerConfig[config_key::ncp_disable] = ncpDisable;
-
-    bool tlsAuth = serverConfig.contains("tls-auth");
-    containerConfig[config_key::tls_auth] = tlsAuth;
-
-    bool blockOutsideDns = serverConfig.contains("block-outside-dns");
-    containerConfig[config_key::block_outside_dns] = blockOutsideDns;
-
-    QString cipher = serverConfigMap.value("cipher");
-    if (!cipher.isEmpty()) {
-        containerConfig[config_key::cipher] = cipher;
-    }
-
-    QString hash = serverConfigMap.value("auth");
-    if (!hash.isEmpty()) {
-        containerConfig[config_key::hash] = hash;
-    }
-
-    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
     
     return ErrorCode::NoError;
 }

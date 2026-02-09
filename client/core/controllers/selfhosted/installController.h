@@ -69,7 +69,7 @@ public:
 signals:
     void serverIsBusy(const bool isBusy);
     void cancelInstallationRequested();
-    void clientRevocationRequested(int serverIndex, const QJsonObject &containerConfig, DockerContainer container);
+    void clientRevocationRequested(int serverIndex, const ContainerConfig &containerConfig, DockerContainer container);
     void clientAppendRequested(int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container);
 
 private:

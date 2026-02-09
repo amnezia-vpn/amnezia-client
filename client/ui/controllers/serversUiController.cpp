@@ -238,16 +238,42 @@ bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() con
     ContainerConfig containerConfig = ServerConfigUtils::containerConfig(server, defaultContainer);
     
     if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-        QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(containerConfig.protocolConfig, ContainerUtils::defaultProtocol(defaultContainer));
-        QString clientProtocolConfigString = protocolConfigJson.value(config_key::last_config).toString();
-        QJsonObject clientProtocolConfig = QJsonDocument::fromJson(clientProtocolConfigString.toUtf8()).object();
-        return (clientProtocolConfigString.contains("AllowedIPs") && !clientProtocolConfigString.contains("AllowedIPs = 0.0.0.0/0, ::/0"))
-                || (!clientProtocolConfig.value(config_key::allowed_ips).toArray().isEmpty()
-                    && !clientProtocolConfig.value(config_key::allowed_ips).toArray().contains("0.0.0.0/0"));
+        auto hasSplitTunnelingFromAllowedIps = [](const QStringList& allowedIps, const QString& nativeConfig) -> bool {
+            bool hasSplitTunneling = !allowedIps.isEmpty() && !allowedIps.contains("0.0.0.0/0");
+            if (!hasSplitTunneling && !nativeConfig.isEmpty()) {
+                hasSplitTunneling = nativeConfig.contains("AllowedIPs") 
+                    && !nativeConfig.contains("AllowedIPs = 0.0.0.0/0, ::/0");
+            }
+            return hasSplitTunneling;
+        };
+        
+        if (defaultContainer == DockerContainer::Awg) {
+            if (const auto* awgConfig = containerConfig.getAwgProtocolConfig()) {
+                if (awgConfig->hasClientConfig()) {
+                    return hasSplitTunnelingFromAllowedIps(
+                        awgConfig->clientConfig->allowedIps,
+                        awgConfig->clientConfig->nativeConfig
+                    );
+                }
+            }
+        } else if (defaultContainer == DockerContainer::WireGuard) {
+            if (const auto* wgConfig = containerConfig.getWireGuardProtocolConfig()) {
+                if (wgConfig->hasClientConfig()) {
+                    return hasSplitTunnelingFromAllowedIps(
+                        wgConfig->clientConfig->allowedIps,
+                        wgConfig->clientConfig->nativeConfig
+                    );
+                }
+            }
+        }
+        return false;
     } else if (defaultContainer == DockerContainer::OpenVpn) {
-        QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(containerConfig.protocolConfig, Proto::OpenVpn);
-        QString clientProtocolConfigString = protocolConfigJson.value(config_key::last_config).toString();
-        return !clientProtocolConfigString.isEmpty() && !clientProtocolConfigString.contains("redirect-gateway");
+        if (const auto* ovpnConfig = containerConfig.getOpenVpnProtocolConfig()) {
+            if (ovpnConfig->hasClientConfig()) {
+                return !ovpnConfig->clientConfig->nativeConfig.isEmpty() 
+                    && !ovpnConfig->clientConfig->nativeConfig.contains("redirect-gateway");
+            }
+        }
     }
     return false;
 }
@@ -413,13 +439,7 @@ void ServersUiController::updateContainersModel()
     }
     ServerConfig server = m_serversController->getServerConfig(m_processedServerIndex);
     QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(server);
-    QJsonArray containersArray;
-    for (auto it = containers.begin(); it != containers.end(); ++it) {
-        QJsonObject containerObj = it.value().toJson();
-        containerObj.insert(config_key::container, ContainerUtils::containerToString(it.key()));
-        containersArray.append(containerObj);
-    }
-    m_containersModel->updateModel(containersArray);
+    m_containersModel->updateModel(containers);
 }
 
 void ServersUiController::updateDefaultServerContainersModel()
@@ -430,13 +450,7 @@ void ServersUiController::updateDefaultServerContainersModel()
     }
     ServerConfig server = m_serversController->getServerConfig(defaultIndex);
     QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(server);
-    QJsonArray containersArray;
-    for (auto it = containers.begin(); it != containers.end(); ++it) {
-        QJsonObject containerObj = it.value().toJson();
-        containerObj.insert(config_key::container, ContainerUtils::containerToString(it.key()));
-        containersArray.append(containerObj);
-    }
-    m_defaultServerContainersModel->updateModel(containersArray);
+    m_defaultServerContainersModel->updateModel(containers);
 }
 
 QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) const

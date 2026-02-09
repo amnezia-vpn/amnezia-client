@@ -26,6 +26,7 @@
 #endif
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
+#include "ui/models/services/torConfigModel.h"
 #include "core/utils/utilities.h"
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
@@ -82,6 +83,7 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_wireGuardConfigModel(wireGuardConfigModel),
       m_openVpnConfigModel(openVpnConfigModel),
       m_xrayConfigModel(xrayConfigModel),
+      m_torConfigModel(torConfigModel),
 #ifdef Q_OS_WINDOWS
       m_ikev2ConfigModel(ikev2ConfigModel),
 #endif
@@ -96,8 +98,16 @@ InstallUiController::~InstallUiController()
 
 void InstallUiController::install(DockerContainer container, int port, TransportProto transportProto, int serverIndex)
 {
+    bool isNewServer = false;
+    
+    if (!m_processedServerCredentials.hostName.isEmpty() && 
+        !m_processedServerCredentials.userName.isEmpty() && 
+        !m_processedServerCredentials.secretData.isEmpty()) {
+        isNewServer = true;
+    }
+    
     ServerCredentials serverCredentials;
-    if (serverIndex < 0) {
+    if (isNewServer) {
         serverCredentials = m_processedServerCredentials;
     } else {
         serverCredentials = m_serversController->getServerCredentials(serverIndex);
@@ -107,7 +117,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
     QString finishMessage;
     ErrorCode errorCode;
 
-    if (serverIndex < 0) {
+    if (isNewServer) {
         int existingServerIndex = -1;
         if (m_installController->isServerAlreadyExists(serverCredentials, existingServerIndex)) {
             emit serverAlreadyExists(existingServerIndex);
@@ -220,6 +230,10 @@ void InstallUiController::updateContainer(int serverIndex, int protocolIndex)
         containerConfig.protocolConfig = m_xrayConfigModel->getProtocolConfig();
         break;
     }
+    case Proto::TorWebSite: {
+        containerConfig.protocolConfig = m_torConfigModel->getProtocolConfig();
+        break;
+    }
     case Proto::Sftp: {
         containerConfig.protocolConfig = m_sftpConfigModel->getProtocolConfig();
         break;
@@ -228,6 +242,12 @@ void InstallUiController::updateContainer(int serverIndex, int protocolIndex)
         containerConfig.protocolConfig = m_socks5ConfigModel->getProtocolConfig();
         break;
     }
+#ifdef Q_OS_WINDOWS
+    case Proto::Ikev2: {
+        containerConfig.protocolConfig = m_ikev2ConfigModel->getProtocolConfig();
+        break;
+    }
+#endif
     default:
         return;
     }
@@ -434,9 +454,10 @@ bool InstallUiController::isConfigValid()
     return true;
 }
 
-void InstallUiController::updateProtocols(const QJsonObject &config)
+void InstallUiController::updateProtocols(int serverIndex, int containerIndex)
 {
-    ContainerConfig containerConfig = ContainerConfig::fromJson(config);
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    ContainerConfig containerConfig = m_serversController->getContainerConfig(serverIndex, container);
     m_protocolModel->updateModel(containerConfig);
 }
 
@@ -516,6 +537,12 @@ void InstallUiController::updateProtocolConfigModel(int serverIndex, int protoco
         }
         break;
     }
+    case Proto::TorWebSite: {
+        if (auto* torProtocolConfig = containerConfig.getTorProtocolConfig()) {
+            m_torConfigModel->updateModel(container, *torProtocolConfig);
+        }
+        break;
+    }
     case Proto::Sftp: {
         if (auto* sftpProtocolConfig = containerConfig.getSftpProtocolConfig()) {
             m_sftpConfigModel->updateModel(container, *sftpProtocolConfig);
@@ -530,8 +557,8 @@ void InstallUiController::updateProtocolConfigModel(int serverIndex, int protoco
     }
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: {
-        if (m_ikev2ConfigModel) {
-            m_ikev2ConfigModel->updateModel(containerConfig.toJson());
+        if (auto* ikev2ProtocolConfig = containerConfig.getIkev2ProtocolConfig()) {
+            m_ikev2ConfigModel->updateModel(container, *ikev2ProtocolConfig);
         }
         break;
     }

@@ -143,8 +143,7 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
         return result;
     }
     
-    QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(newProtocolConfig, protocol);
-    QString protocolConfigString = QString::fromUtf8(QJsonDocument(protocolConfigJson).toJson(QJsonDocument::Compact));
+    QString protocolConfigString = ProtocolConfigUtils::nativeConfig(newProtocolConfig);
     protocolConfigString = configurator->processConfigWithExportSettings(dns, protocolConfigString);
 
     result.jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();

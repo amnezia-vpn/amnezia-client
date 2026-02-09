@@ -25,26 +25,24 @@ AwgInstaller::AwgInstaller(QObject *parent)
 {
 }
 
-QJsonObject AwgInstaller::generateConfig(DockerContainer container, int port, TransportProto transportProto)
+ContainerConfig AwgInstaller::generateConfig(DockerContainer container, int port, TransportProto transportProto)
 {
-    QJsonObject config = createBaseConfig(container, port, transportProto);
-    
-    auto mainProto = ContainerUtils::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
+    ContainerConfig config = createBaseConfig(container, port, transportProto);
     
     bool isAwg2 = (container == DockerContainer::Awg2);
-    generateAwgParameters(containerConfig, isAwg2);
     
-    if (isAwg2) {
-        containerConfig[config_key::protocolVersion] = "2";
+    if (auto* awgConfig = config.getAwgProtocolConfig()) {
+        generateAwgParameters(awgConfig->serverConfig, isAwg2);
+        
+        if (isAwg2) {
+            awgConfig->serverConfig.protocolVersion = "2";
+        }
     }
-    
-    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
     
     return config;
 }
 
-void AwgInstaller::generateAwgParameters(QJsonObject &containerConfig, bool isAwg2)
+void AwgInstaller::generateAwgParameters(AwgServerConfig &serverConfig, bool isAwg2)
 {
     QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(4, 7));
     QString junkPacketMinSize = QString::number(10);
@@ -115,30 +113,35 @@ void AwgInstaller::generateAwgParameters(QJsonObject &containerConfig, bool isAw
         transportPacketMagicHeader = headersValueList.at(3);
     }
 
-    containerConfig[config_key::junkPacketCount] = junkPacketCount;
-    containerConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
-    containerConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
-    containerConfig[config_key::initPacketJunkSize] = initPacketJunkSize;
-    containerConfig[config_key::responsePacketJunkSize] = responsePacketJunkSize;
-    containerConfig[config_key::initPacketMagicHeader] = initPacketMagicHeader;
-    containerConfig[config_key::responsePacketMagicHeader] = responsePacketMagicHeader;
-    containerConfig[config_key::underloadPacketMagicHeader] = underloadPacketMagicHeader;
-    containerConfig[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
+    serverConfig.junkPacketCount = junkPacketCount;
+    serverConfig.junkPacketMinSize = junkPacketMinSize;
+    serverConfig.junkPacketMaxSize = junkPacketMaxSize;
+    serverConfig.initPacketJunkSize = initPacketJunkSize;
+    serverConfig.responsePacketJunkSize = responsePacketJunkSize;
+    serverConfig.initPacketMagicHeader = initPacketMagicHeader;
+    serverConfig.responsePacketMagicHeader = responsePacketMagicHeader;
+    serverConfig.underloadPacketMagicHeader = underloadPacketMagicHeader;
+    serverConfig.transportPacketMagicHeader = transportPacketMagicHeader;
 
-    containerConfig[config_key::cookieReplyPacketJunkSize] = cookieReplyPacketJunkSize;
-    containerConfig[config_key::transportPacketJunkSize] = transportPacketJunkSize;
+    serverConfig.cookieReplyPacketJunkSize = cookieReplyPacketJunkSize;
+    serverConfig.transportPacketJunkSize = transportPacketJunkSize;
 
-    containerConfig[config_key::specialJunk1] = protocols::awg::defaultSpecialJunk1;
-    containerConfig[config_key::specialJunk2] = protocols::awg::defaultSpecialJunk2;
-    containerConfig[config_key::specialJunk3] = protocols::awg::defaultSpecialJunk3;
-    containerConfig[config_key::specialJunk4] = protocols::awg::defaultSpecialJunk4;
-    containerConfig[config_key::specialJunk5] = protocols::awg::defaultSpecialJunk5;
+    serverConfig.specialJunk1 = protocols::awg::defaultSpecialJunk1;
+    serverConfig.specialJunk2 = protocols::awg::defaultSpecialJunk2;
+    serverConfig.specialJunk3 = protocols::awg::defaultSpecialJunk3;
+    serverConfig.specialJunk4 = protocols::awg::defaultSpecialJunk4;
+    serverConfig.specialJunk5 = protocols::awg::defaultSpecialJunk5;
 }
 
 ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                   SshSession* sshSession, QJsonObject &config)
+                                                   SshSession* sshSession, ContainerConfig &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
+    
+    if (!config.getAwgProtocolConfig()) {
+        AwgProtocolConfig awgConfig;
+        config.protocolConfig = awgConfig;
+    }
     
     // Use appropriate config path based on container type
     QString configPath = protocols::awg::serverConfigPath;
@@ -165,35 +168,32 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
         }
     }
 
-    auto mainProto = ContainerUtils::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
-    
-    containerConfig[config_key::subnet_address] = serverConfigMap.value("Address").remove("/24");
-    containerConfig[config_key::junkPacketCount] = serverConfigMap.value(config_key::junkPacketCount);
-    containerConfig[config_key::junkPacketMinSize] = serverConfigMap.value(config_key::junkPacketMinSize);
-    containerConfig[config_key::junkPacketMaxSize] = serverConfigMap.value(config_key::junkPacketMaxSize);
-    containerConfig[config_key::initPacketJunkSize] = serverConfigMap.value(config_key::initPacketJunkSize);
-    containerConfig[config_key::responsePacketJunkSize] = serverConfigMap.value(config_key::responsePacketJunkSize);
-    containerConfig[config_key::initPacketMagicHeader] = serverConfigMap.value(config_key::initPacketMagicHeader);
-    containerConfig[config_key::responsePacketMagicHeader] = serverConfigMap.value(config_key::responsePacketMagicHeader);
-    containerConfig[config_key::underloadPacketMagicHeader] = serverConfigMap.value(config_key::underloadPacketMagicHeader);
-    containerConfig[config_key::transportPacketMagicHeader] = serverConfigMap.value(config_key::transportPacketMagicHeader);
+    if (auto* awgConfig = config.getAwgProtocolConfig()) {
+        awgConfig->serverConfig.subnetAddress = serverConfigMap.value("Address").remove("/24");
+        awgConfig->serverConfig.junkPacketCount = serverConfigMap.value(config_key::junkPacketCount);
+        awgConfig->serverConfig.junkPacketMinSize = serverConfigMap.value(config_key::junkPacketMinSize);
+        awgConfig->serverConfig.junkPacketMaxSize = serverConfigMap.value(config_key::junkPacketMaxSize);
+        awgConfig->serverConfig.initPacketJunkSize = serverConfigMap.value(config_key::initPacketJunkSize);
+        awgConfig->serverConfig.responsePacketJunkSize = serverConfigMap.value(config_key::responsePacketJunkSize);
+        awgConfig->serverConfig.initPacketMagicHeader = serverConfigMap.value(config_key::initPacketMagicHeader);
+        awgConfig->serverConfig.responsePacketMagicHeader = serverConfigMap.value(config_key::responsePacketMagicHeader);
+        awgConfig->serverConfig.underloadPacketMagicHeader = serverConfigMap.value(config_key::underloadPacketMagicHeader);
+        awgConfig->serverConfig.transportPacketMagicHeader = serverConfigMap.value(config_key::transportPacketMagicHeader);
 
-    // hack to parse i1-i5 from commented lines in server config
-    containerConfig[config_key::specialJunk1] = serverConfigMap.value(QString("# ") + config_key::specialJunk1);
-    containerConfig[config_key::specialJunk2] = serverConfigMap.value(QString("# ") + config_key::specialJunk2);
-    containerConfig[config_key::specialJunk3] = serverConfigMap.value(QString("# ") + config_key::specialJunk3);
-    containerConfig[config_key::specialJunk4] = serverConfigMap.value(QString("# ") + config_key::specialJunk4);
-    containerConfig[config_key::specialJunk5] = serverConfigMap.value(QString("# ") + config_key::specialJunk5);
+        // hack to parse i1-i5 from commented lines in server config
+        awgConfig->serverConfig.specialJunk1 = serverConfigMap.value(QString("# ") + config_key::specialJunk1);
+        awgConfig->serverConfig.specialJunk2 = serverConfigMap.value(QString("# ") + config_key::specialJunk2);
+        awgConfig->serverConfig.specialJunk3 = serverConfigMap.value(QString("# ") + config_key::specialJunk3);
+        awgConfig->serverConfig.specialJunk4 = serverConfigMap.value(QString("# ") + config_key::specialJunk4);
+        awgConfig->serverConfig.specialJunk5 = serverConfigMap.value(QString("# ") + config_key::specialJunk5);
 
-    // AWG 2.0 specific fields
-    if (container == DockerContainer::Awg2) {
-        containerConfig[config_key::protocolVersion] = "2";
-        containerConfig[config_key::cookieReplyPacketJunkSize] = serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
-        containerConfig[config_key::transportPacketJunkSize] = serverConfigMap.value(config_key::transportPacketJunkSize);
+        // AWG 2.0 specific fields
+        if (container == DockerContainer::Awg2) {
+            awgConfig->serverConfig.protocolVersion = "2";
+            awgConfig->serverConfig.cookieReplyPacketJunkSize = serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
+            awgConfig->serverConfig.transportPacketJunkSize = serverConfigMap.value(config_key::transportPacketJunkSize);
+        }
     }
-
-    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
     
     return ErrorCode::NoError;
 }

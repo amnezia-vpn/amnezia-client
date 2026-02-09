@@ -27,6 +27,7 @@
 #endif
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
+#include "ui/models/services/torConfigModel.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 
@@ -44,6 +45,7 @@ public:
                                WireGuardConfigModel* wireGuardConfigModel,
                                OpenVpnConfigModel* openVpnConfigModel,
                                XrayConfigModel* xrayConfigModel,
+                               TorConfigModel* torConfigModel,
 #ifdef Q_OS_WINDOWS
                                Ikev2ConfigModel* ikev2ConfigModel,
 #endif
@@ -80,7 +82,7 @@ public slots:
 
     bool isConfigValid();
     
-    void updateProtocols(const QJsonObject &config);
+    Q_INVOKABLE void updateProtocols(int serverIndex, int containerIndex);
     
     void openServerSettings(int serverIndex, int protocolIndex);
     void openClientSettings(int serverIndex, int protocolIndex);
@@ -136,6 +138,7 @@ private:
     WireGuardConfigModel* m_wireGuardConfigModel;
     OpenVpnConfigModel* m_openVpnConfigModel;
     XrayConfigModel* m_xrayConfigModel;
+    TorConfigModel* m_torConfigModel;
 #ifdef Q_OS_WINDOWS
     Ikev2ConfigModel* m_ikev2ConfigModel;
 #endif

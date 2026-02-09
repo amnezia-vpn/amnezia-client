@@ -9,6 +9,7 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
+#include "core/models/containerConfig.h"
 
 class ContainersModel : public QAbstractListModel
 {
@@ -58,7 +59,7 @@ public:
     QVariant data(const int index, int role) const;
 
 public slots:
-    void updateModel(const QJsonArray &containers);
+    void updateModel(const QMap<amnezia::DockerContainer, amnezia::ContainerConfig> &containers);
 
     void setProcessedContainerIndex(int containerIndex);
     int getProcessedContainerIndex();
@@ -82,7 +83,7 @@ signals:
     void containersModelUpdated();
 
 private:
-    QMap<amnezia::DockerContainer, QJsonObject> m_containers;
+    QMap<amnezia::DockerContainer, amnezia::ContainerConfig> m_containers;
 
     int m_processedContainerIndex;
 };

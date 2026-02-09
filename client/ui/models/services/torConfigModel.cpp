@@ -1,24 +1,26 @@
-#include "ikev2ConfigModel.h"
+#include "torConfigModel.h"
 
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
-#include "core/models/protocols/ikev2ProtocolConfig.h"
+#include "core/models/containerConfig.h"
+#include "core/models/protocols/torProtocolConfig.h"
 
 using namespace amnezia;
+using namespace ProtocolUtils;
 
-Ikev2ConfigModel::Ikev2ConfigModel(QObject *parent) : QAbstractListModel(parent)
+TorConfigModel::TorConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
 
-int Ikev2ConfigModel::rowCount(const QModelIndex &parent) const
+int TorConfigModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return 1;
 }
 
-bool Ikev2ConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool TorConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
         return false;
@@ -27,10 +29,7 @@ bool Ikev2ConfigModel::setData(const QModelIndex &index, const QVariant &value, 
     QString strValue = value.toString();
 
     switch (role) {
-    case Roles::PortRole: 
-        break;
-    case Roles::CipherRole: 
-        break;
+    case Roles::SiteRole: m_protocolConfig.serverConfig.site = strValue; break;
     default:
         return false;
     }
@@ -39,23 +38,20 @@ bool Ikev2ConfigModel::setData(const QModelIndex &index, const QVariant &value, 
     return true;
 }
 
-QVariant Ikev2ConfigModel::data(const QModelIndex &index, int role) const
+QVariant TorConfigModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
         return QVariant();
     }
 
     switch (role) {
-    case Roles::PortRole: 
-        return QString("");
-    case Roles::CipherRole: 
-        return QString("");
+    case Roles::SiteRole: return m_protocolConfig.serverConfig.site;
     }
 
     return QVariant();
 }
 
-void Ikev2ConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::Ikev2ProtocolConfig &protocolConfig)
+void TorConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::TorProtocolConfig &protocolConfig)
 {
     beginResetModel();
     m_container = container;
@@ -65,17 +61,17 @@ void Ikev2ConfigModel::updateModel(amnezia::DockerContainer container, const amn
     endResetModel();
 }
 
-amnezia::Ikev2ProtocolConfig Ikev2ConfigModel::getProtocolConfig()
+amnezia::TorProtocolConfig TorConfigModel::getProtocolConfig()
 {
     return m_protocolConfig;
 }
 
-QHash<int, QByteArray> Ikev2ConfigModel::roleNames() const
+QHash<int, QByteArray> TorConfigModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
 
-    roles[PortRole] = "port";
-    roles[CipherRole] = "cipher";
+    roles[SiteRole] = "site";
 
     return roles;
 }
+

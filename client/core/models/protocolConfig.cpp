@@ -35,6 +35,8 @@ Proto ProtocolConfigUtils::getProtocolType(const ProtocolConfig& config)
             return Proto::Socks5Proxy;
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             return Proto::Ikev2;
+        } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
+            return Proto::TorWebSite;
         }
         return Proto::Any;
     }, config);
@@ -120,6 +122,16 @@ const Ikev2ProtocolConfig& ProtocolConfigUtils::asIkev2(const ProtocolConfig& co
     return std::get<Ikev2ProtocolConfig>(config);
 }
 
+TorProtocolConfig& ProtocolConfigUtils::asTor(ProtocolConfig& config)
+{
+    return std::get<TorProtocolConfig>(config);
+}
+
+const TorProtocolConfig& ProtocolConfigUtils::asTor(const ProtocolConfig& config)
+{
+    return std::get<TorProtocolConfig>(config);
+}
+
 QString ProtocolConfigUtils::port(const ProtocolConfig& config)
 {
     return std::visit([](auto&& arg) -> QString {
@@ -139,6 +151,8 @@ QString ProtocolConfigUtils::port(const ProtocolConfig& config)
         } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
             return arg.port;
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            return QString();
+        } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
             return QString();
         }
         return QString();
@@ -160,6 +174,8 @@ QString ProtocolConfigUtils::transportProto(const ProtocolConfig& config)
         } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
             return arg.serverConfig.transportProto;
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            return QString();
+        } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
             return QString();
         }
         return QString();
@@ -330,6 +346,22 @@ QString ProtocolConfigUtils::nativeConfig(const ProtocolConfig& config)
     }, config);
 }
 
+bool ProtocolConfigUtils::isThirdPartyConfig(const ProtocolConfig& config)
+{
+    return std::visit([](auto&& arg) -> bool {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, AwgProtocolConfig> ||
+                      std::is_same_v<T, WireGuardProtocolConfig> ||
+                      std::is_same_v<T, OpenVpnProtocolConfig> ||
+                      std::is_same_v<T, XrayProtocolConfig> ||
+                      std::is_same_v<T, SSXrayProtocolConfig> ||
+                      std::is_same_v<T, Ikev2ProtocolConfig>) {
+            return arg.serverConfig.isThirdPartyConfig;
+        }
+        return false;
+    }, config);
+}
+
 QJsonObject ProtocolConfigUtils::toJson(const ProtocolConfig& config, Proto protocolType)
 {
     return std::visit([protocolType](auto&& arg) -> QJsonObject {
@@ -349,6 +381,8 @@ QJsonObject ProtocolConfigUtils::toJson(const ProtocolConfig& config, Proto prot
         } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
             return arg.toJson();
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            return arg.toJson();
+        } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
             return arg.toJson();
         }
         return QJsonObject();
@@ -374,6 +408,8 @@ ProtocolConfig ProtocolConfigUtils::fromJson(const QJsonObject& json, Proto prot
         return Socks5ProxyProtocolConfig::fromJson(json);
     case Proto::Ikev2:
         return Ikev2ProtocolConfig::fromJson(json);
+    case Proto::TorWebSite:
+        return TorProtocolConfig::fromJson(json);
     default:
         return AwgProtocolConfig{};
     }

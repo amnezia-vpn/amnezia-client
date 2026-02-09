@@ -1,24 +1,23 @@
-#ifndef IKEV2CONFIGMODEL_H
-#define IKEV2CONFIGMODEL_H
+#ifndef TORCONFIGMODEL_H
+#define TORCONFIGMODEL_H
 
 #include <QAbstractListModel>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/models/protocols/ikev2ProtocolConfig.h"
+#include "core/models/protocols/torProtocolConfig.h"
 
-class Ikev2ConfigModel : public QAbstractListModel
+class TorConfigModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
     enum Roles {
-        PortRole = Qt::UserRole + 1,
-        CipherRole
+        SiteRole
     };
 
-    explicit Ikev2ConfigModel(QObject *parent = nullptr);
+    explicit TorConfigModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -26,16 +25,17 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(amnezia::DockerContainer container, const amnezia::Ikev2ProtocolConfig &protocolConfig);
-    amnezia::Ikev2ProtocolConfig getProtocolConfig();
+    void updateModel(amnezia::DockerContainer container, const amnezia::TorProtocolConfig &protocolConfig);
+    amnezia::TorProtocolConfig getProtocolConfig();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     amnezia::DockerContainer m_container;
-    amnezia::Ikev2ProtocolConfig m_protocolConfig;
-    amnezia::Ikev2ProtocolConfig m_originalProtocolConfig;
+    amnezia::TorProtocolConfig m_protocolConfig;
+    amnezia::TorProtocolConfig m_originalProtocolConfig;
 };
 
-#endif // IKEV2CONFIGMODEL_H
+#endif // TORCONFIGMODEL_H
+

@@ -87,6 +87,9 @@ void CoreController::initModels()
     m_xrayConfigModel = new XrayConfigModel(this);
     setQmlContextProperty("XrayConfigModel", m_xrayConfigModel);
 
+    m_torConfigModel = new TorConfigModel(this);
+    setQmlContextProperty("TorConfigModel", m_torConfigModel);
+
 #ifdef Q_OS_WINDOWS
     m_ikev2ConfigModel = new Ikev2ConfigModel(this);
     setQmlContextProperty("Ikev2ConfigModel", m_ikev2ConfigModel);
@@ -158,7 +161,7 @@ void CoreController::initControllers()
     }
 
     m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_serversModel, m_containersModel, m_protocolsModel, m_usersController, 
-                                                     m_awgConfigModel, m_wireGuardConfigModel, m_openVpnConfigModel, m_xrayConfigModel,
+                                                     m_awgConfigModel, m_wireGuardConfigModel, m_openVpnConfigModel, m_xrayConfigModel, m_torConfigModel,
 #ifdef Q_OS_WINDOWS
                                                      m_ikev2ConfigModel,
 #endif

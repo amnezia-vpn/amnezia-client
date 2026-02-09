@@ -9,9 +9,9 @@ class SftpInstaller : public InstallerBase
 public:
     explicit SftpInstaller(QObject *parent = nullptr);
 
-    QJsonObject generateConfig(DockerContainer container, int port, TransportProto transportProto) override;
-    ErrorCode extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                         SshSession* serverController, QJsonObject &config) override;
+    amnezia::ContainerConfig generateConfig(amnezia::DockerContainer container, int port, amnezia::TransportProto transportProto) override;
+    amnezia::ErrorCode extractConfigFromContainer(amnezia::DockerContainer container, const amnezia::ServerCredentials &credentials,
+                                         SshSession* serverController, amnezia::ContainerConfig &config) override;
 };
 
 #endif // SFTPINSTALLER_H

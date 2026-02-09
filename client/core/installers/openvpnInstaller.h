@@ -9,8 +9,8 @@ class OpenVpnInstaller : public InstallerBase
 public:
     explicit OpenVpnInstaller(QObject *parent = nullptr);
 
-    ErrorCode extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                         SshSession* serverController, QJsonObject &config) override;
+    amnezia::ErrorCode extractConfigFromContainer(amnezia::DockerContainer container, const amnezia::ServerCredentials &credentials,
+                                         SshSession* serverController, amnezia::ContainerConfig &config) override;
 };
 
 #endif // OPENVPNINSTALLER_H

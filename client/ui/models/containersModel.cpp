@@ -2,6 +2,8 @@
 
 #include <QJsonArray>
 
+#include "core/models/protocolConfig.h"
+
 using namespace amnezia;
 
 ContainersModel::ContainersModel(QObject *parent) : QAbstractListModel(parent)
@@ -21,8 +23,11 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     }
 
     DockerContainer container = ContainerUtils::allContainers().at(index.row());
-    QString protocolKey = ContainerUtils::containerTypeToProtocolString(container);
-    auto isThirdPartyConfig = m_containers.value(container).value(protocolKey).toObject().value(config_key::isThirdPartyConfig).toBool();
+    bool isThirdPartyConfig = false;
+    if (m_containers.contains(container)) {
+        const ContainerConfig& config = m_containers.value(container);
+        isThirdPartyConfig = ProtocolConfigUtils::isThirdPartyConfig(config.protocolConfig);
+    }
 
     switch (role) {
     case NameRole: {
@@ -44,7 +49,10 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         if (container == DockerContainer::None) {
             return QJsonObject();
         }
-        return m_containers.value(container);
+        if (m_containers.contains(container)) {
+            return m_containers.value(container).toJson();
+        }
+        return QJsonObject();
     }
     case IsThirdPartyConfigRole: return isThirdPartyConfig;
     case ServiceTypeRole: return ContainerUtils::containerService(container);
@@ -78,13 +86,10 @@ QVariant ContainersModel::data(const int index, int role) const
     return data(modelIndex, role);
 }
 
-void ContainersModel::updateModel(const QJsonArray &containers)
+void ContainersModel::updateModel(const QMap<DockerContainer, ContainerConfig> &containers)
 {
     beginResetModel();
-    m_containers.clear();
-    for (const QJsonValue &val : containers) {
-        m_containers.insert(ContainerUtils::containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
-    }
+    m_containers = containers;
     endResetModel();
 }
 

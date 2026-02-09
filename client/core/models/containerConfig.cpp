@@ -135,5 +135,15 @@ const Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig() const
     return std::get_if<Ikev2ProtocolConfig>(&protocolConfig);
 }
 
+TorProtocolConfig* ContainerConfig::getTorProtocolConfig()
+{
+    return std::get_if<TorProtocolConfig>(&protocolConfig);
+}
+
+const TorProtocolConfig* ContainerConfig::getTorProtocolConfig() const
+{
+    return std::get_if<TorProtocolConfig>(&protocolConfig);
+}
+
 } // namespace amnezia
 

@@ -18,9 +18,15 @@ WireguardInstaller::WireguardInstaller(QObject *parent)
 }
 
 ErrorCode WireguardInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                         SshSession* sshSession, QJsonObject &config)
+                                                         SshSession* sshSession, ContainerConfig &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
+    
+    if (!config.getWireGuardProtocolConfig()) {
+        WireGuardProtocolConfig wgConfig;
+        config.protocolConfig = wgConfig;
+    }
+    
     QString serverConfig = sshSession->getTextFileFromContainer(container, credentials,
                                                                       protocols::wireguard::serverConfigPath, errorCode);
     if (errorCode != ErrorCode::NoError) {
@@ -41,12 +47,9 @@ ErrorCode WireguardInstaller::extractConfigFromContainer(DockerContainer contain
         }
     }
 
-    auto mainProto = ContainerUtils::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
-    
-    containerConfig[config_key::subnet_address] = serverConfigMap.value("Address").remove("/24");
-
-    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
+    if (auto* wgConfig = config.getWireGuardProtocolConfig()) {
+        wgConfig->serverConfig.subnetAddress = serverConfigMap.value("Address").remove("/24");
+    }
     
     return ErrorCode::NoError;
 }

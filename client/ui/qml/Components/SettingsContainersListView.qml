@@ -32,21 +32,21 @@ ListViewType {
                     ContainersModel.setProcessedContainerIndex(containerIndex)
 
                     if (isVpnContainer) {
-                        var isThirdPartyConfig = config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]
+                        var isThirdPartyConfig = root.model.data(index, ContainersModel.IsThirdPartyConfigRole)
                         if (isThirdPartyConfig) {
-                            InstallController.updateProtocols(config)
+                            InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
                             return
                         }
                     }
 
                     if (isIpsec) {
-                        InstallController.updateProtocols(config)
+                        InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
                         PageController.goToPage(PageEnum.PageProtocolRaw)
                     } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
                     } else {
-                        InstallController.updateProtocols(config)
+                        InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                     }
 

@@ -62,6 +62,9 @@ struct ContainerConfig {
     
     Ikev2ProtocolConfig* getIkev2ProtocolConfig();
     const Ikev2ProtocolConfig* getIkev2ProtocolConfig() const;
+    
+    TorProtocolConfig* getTorProtocolConfig();
+    const TorProtocolConfig* getTorProtocolConfig() const;
 };
 
 } // namespace amnezia

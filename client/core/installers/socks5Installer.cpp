@@ -18,23 +18,20 @@ Socks5Installer::Socks5Installer(QObject *parent)
 {
 }
 
-QJsonObject Socks5Installer::generateConfig(DockerContainer container, int port, TransportProto transportProto)
+ContainerConfig Socks5Installer::generateConfig(DockerContainer container, int port, TransportProto transportProto)
 {
-    QJsonObject config = createBaseConfig(container, port, transportProto);
+    ContainerConfig config = createBaseConfig(container, port, transportProto);
     
-    auto mainProto = ContainerUtils::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
-    
-    containerConfig.insert(config_key::userName, protocols::socks5Proxy::defaultUserName);
-    containerConfig.insert(config_key::password, Utils::getRandomString(16));
-    
-    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
+    if (auto* socks5Config = config.getSocks5ProxyProtocolConfig()) {
+        socks5Config->userName = protocols::socks5Proxy::defaultUserName;
+        socks5Config->password = Utils::getRandomString(16);
+    }
     
     return config;
 }
 
 ErrorCode Socks5Installer::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                       SshSession* sshSession, QJsonObject &config)
+                                                       SshSession* sshSession, ContainerConfig &config)
 {
     Q_UNUSED(container);
     Q_UNUSED(credentials);

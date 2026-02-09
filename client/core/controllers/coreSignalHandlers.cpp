@@ -175,7 +175,7 @@ void CoreSignalHandlers::initContainerModelUpdateHandler()
 void CoreSignalHandlers::initAdminConfigRevokedHandler()
 {
     connect(m_coreController->m_installController, &InstallController::clientRevocationRequested, this,
-            [this](int serverIndex, const QJsonObject &containerConfig, DockerContainer container) {
+            [this](int serverIndex, const ContainerConfig &containerConfig, DockerContainer container) {
                 m_coreController->m_usersController->revokeClient(serverIndex, containerConfig, container);
             });
 

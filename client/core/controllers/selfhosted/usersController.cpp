@@ -736,10 +736,9 @@ ErrorCode UsersController::revokeClient(int serverIndex, const int index, const 
     if (errorCode == ErrorCode::NoError) {
         ServerConfig serverConfig = m_serversRepository->server(serverIndex);
         ContainerConfig containerCfg = m_serversRepository->containerConfig(serverIndex, container);
-        QJsonObject containerConfigJson = containerCfg.toJson();
-        QJsonObject protocolConfigJson = containerConfigJson.value(ContainerUtils::containerTypeToString(container)).toObject();
+        QString containerClientId = ProtocolConfigUtils::clientId(containerCfg.protocolConfig);
 
-        if (!clientId.isEmpty() && protocolConfigJson.value(config_key::last_config).toString().contains(clientId)) {
+        if (!clientId.isEmpty() && !containerClientId.isEmpty() && containerClientId.contains(clientId)) {
             emit adminConfigRevoked(container);
         }
 
@@ -750,7 +749,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const int index, const 
     return errorCode;
 }
 
-ErrorCode UsersController::revokeClient(int serverIndex, const QJsonObject &containerConfig, const DockerContainer container)
+ErrorCode UsersController::revokeClient(int serverIndex, const ContainerConfig &containerConfig, const DockerContainer container)
 {
     SshSession sshSession;
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
@@ -761,7 +760,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const QJsonObject &cont
         return errorCode;
     }
 
-    Proto protocol;
+    Proto protocol = containerConfig.getProtocolType();
 
     switch(container)
     {
@@ -779,45 +778,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const QJsonObject &cont
         }
     }
 
-    auto protocolConfig = ContainerUtils::getProtocolConfigFromContainer(protocol, containerConfig);
-
-    QString clientId;
-    if (container == DockerContainer::Xray) {
-        if (!protocolConfig.contains("outbounds")) {
-            return ErrorCode::InternalError;
-        }
-        QJsonArray outbounds = protocolConfig.value("outbounds").toArray();
-        if (outbounds.isEmpty()) {
-            return ErrorCode::InternalError;
-        }
-        QJsonObject outbound = outbounds[0].toObject();
-        if (!outbound.contains("settings")) {
-            return ErrorCode::InternalError;
-        }
-        QJsonObject settings = outbound["settings"].toObject();
-        if (!settings.contains("vnext")) {
-            return ErrorCode::InternalError;
-        }
-        QJsonArray vnext = settings["vnext"].toArray();
-        if (vnext.isEmpty()) {
-            return ErrorCode::InternalError;
-        }
-        QJsonObject vnextObj = vnext[0].toObject();
-        if (!vnextObj.contains("users")) {
-            return ErrorCode::InternalError;
-        }
-        QJsonArray users = vnextObj["users"].toArray();
-        if (users.isEmpty()) {
-            return ErrorCode::InternalError;
-        }
-        QJsonObject user = users[0].toObject();
-        if (!user.contains("id")) {
-            return ErrorCode::InternalError;
-        }
-        clientId = user["id"].toString();
-    } else {
-        clientId = protocolConfig.value(config_key::clientId).toString();
-    }
+    QString clientId = ProtocolConfigUtils::clientId(containerConfig.protocolConfig);
 
     int row = clientIndexById(clientId, m_clientsTable);
     if (row < 0) {

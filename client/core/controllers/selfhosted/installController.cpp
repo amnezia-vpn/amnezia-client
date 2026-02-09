@@ -171,7 +171,7 @@ void InstallController::clearCachedProfile(int serverIndex, DockerContainer cont
 
     m_serversRepository->clearLastConnectionConfig(serverIndex, container);
 
-    emit clientRevocationRequested(serverIndex, containerConfigModel.toJson(), container);
+    emit clientRevocationRequested(serverIndex, containerConfigModel, container);
 }
 
 ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
@@ -439,63 +439,47 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
 
 bool InstallController::isReinstallContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig)
 {
-    Proto mainProto = ContainerUtils::defaultProtocol(container);
-    
-    QJsonObject oldProtoConfig = ProtocolConfigUtils::toJson(oldConfig.protocolConfig, mainProto);
-    QJsonObject newProtoConfig = ProtocolConfigUtils::toJson(newConfig.protocolConfig, mainProto);
-
     if (container == DockerContainer::OpenVpn) {
-        if (oldProtoConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto)
-            != newProtoConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto))
-            return true;
-
-        if (oldProtoConfig.value(config_key::port).toString(protocols::openvpn::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::openvpn::defaultPort))
-            return true;
+        const auto* oldOvpnConfig = oldConfig.getOpenVpnProtocolConfig();
+        const auto* newOvpnConfig = newConfig.getOpenVpnProtocolConfig();
+        
+        if (oldOvpnConfig && newOvpnConfig) {
+            if (!oldOvpnConfig->serverConfig.hasEqualServerSettings(newOvpnConfig->serverConfig)) {
+                return true;
+            }
+        }
     }
 
     if (ContainerUtils::isAwgContainer(container)) {
-        if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
-             != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
-            || (oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
-                != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
-            || (oldProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount)
-                != newProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount))
-            || (oldProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize)
-                != newProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize))
-            || (oldProtoConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize)
-                != newProtoConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize))
-            || (oldProtoConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize)
-                != newProtoConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize))
-            || (oldProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize)
-                != newProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize))
-            || (oldProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader)
-                != newProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader))
-            || (oldProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader)
-                != newProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader))
-            || (oldProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader)
-                != newProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader))
-            || (oldProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader)
-                != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
-            || (oldProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize)
-                != newProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize))
-            || (oldProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize)
-                != newProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize)))
-            return true;
+        const auto* oldAwgConfig = oldConfig.getAwgProtocolConfig();
+        const auto* newAwgConfig = newConfig.getAwgProtocolConfig();
+        
+        if (oldAwgConfig && newAwgConfig) {
+            if (!oldAwgConfig->serverConfig.hasEqualServerSettings(newAwgConfig->serverConfig)) {
+                return true;
+            }
+        }
     }
 
     if (container == DockerContainer::WireGuard) {
-        if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
-             != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
-            || (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
-                != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)))
-            return true;
+        const auto* oldWgConfig = oldConfig.getWireGuardProtocolConfig();
+        const auto* newWgConfig = newConfig.getWireGuardProtocolConfig();
+        
+        if (oldWgConfig && newWgConfig) {
+            if (!oldWgConfig->serverConfig.hasEqualServerSettings(newWgConfig->serverConfig)) {
+                return true;
+            }
+        }
     }
 
     if (container == DockerContainer::Xray) {
-        if (oldProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort))
-            return true;
+        const auto* oldXrayConfig = oldConfig.getXrayProtocolConfig();
+        const auto* newXrayConfig = newConfig.getXrayProtocolConfig();
+        
+        if (oldXrayConfig && newXrayConfig) {
+            if (oldXrayConfig->serverConfig.port != newXrayConfig->serverConfig.port)
+                return true;
+        }
     }
 
     return false;
@@ -749,8 +733,7 @@ QScopedPointer<InstallerBase> InstallController::createInstaller(DockerContainer
 ContainerConfig InstallController::generateConfig(DockerContainer container, int port, TransportProto transportProto)
 {
     auto installer = createInstaller(container);
-    QJsonObject configJson = installer->generateConfig(container, port, transportProto);
-    return ContainerConfig::fromJson(configJson);
+    return installer->generateConfig(container, port, transportProto);
 }
 
 ErrorCode InstallController::installContainer(const ServerCredentials &credentials, DockerContainer container, int port,
@@ -763,24 +746,23 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
 
 bool InstallController::isUpdateDockerContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig)
 {
-    Proto mainProto = ContainerUtils::defaultProtocol(container);
-    
-    QJsonObject oldProtoConfig = ProtocolConfigUtils::toJson(oldConfig.protocolConfig, mainProto);
-    QJsonObject newProtoConfig = ProtocolConfigUtils::toJson(newConfig.protocolConfig, mainProto);
-
     if (ContainerUtils::isAwgContainer(container)) {
-        const amnezia::AwgProtocolConfig oldAwgConfig = amnezia::AwgProtocolConfig::fromJson(oldProtoConfig);
-        const amnezia::AwgProtocolConfig newAwgConfig = amnezia::AwgProtocolConfig::fromJson(newProtoConfig);
-
-        if (oldAwgConfig.serverConfig.hasEqualServerSettings(newAwgConfig.serverConfig)) {
-            return false;
+        const auto* oldAwgConfig = oldConfig.getAwgProtocolConfig();
+        const auto* newAwgConfig = newConfig.getAwgProtocolConfig();
+        
+        if (oldAwgConfig && newAwgConfig) {
+            if (oldAwgConfig->serverConfig.hasEqualServerSettings(newAwgConfig->serverConfig)) {
+                return false;
+            }
         }
     } else if (container == DockerContainer::WireGuard) {
-        const amnezia::WireGuardProtocolConfig oldConfig = amnezia::WireGuardProtocolConfig::fromJson(oldProtoConfig);
-        const amnezia::WireGuardProtocolConfig newConfig = amnezia::WireGuardProtocolConfig::fromJson(newProtoConfig);
-
-        if (oldConfig.serverConfig.hasEqualServerSettings(newConfig.serverConfig)) {
-            return false;
+        const auto* oldWgConfig = oldConfig.getWireGuardProtocolConfig();
+        const auto* newWgConfig = newConfig.getWireGuardProtocolConfig();
+        
+        if (oldWgConfig && newWgConfig) {
+            if (oldWgConfig->serverConfig.hasEqualServerSettings(newWgConfig->serverConfig)) {
+                return false;
+            }
         }
     }
 
@@ -1058,12 +1040,12 @@ void InstallController::updateContainerConfigAfterInstallation(DockerContainer c
     Proto mainProto = ContainerUtils::defaultProtocol(container);
 
     if (container == DockerContainer::TorWebSite) {
-        if (auto* xrayProtocolConfig = containerConfig.getXrayProtocolConfig()) {
+        if (auto* torProtocolConfig = containerConfig.getTorProtocolConfig()) {
             qDebug() << "amnezia-tor onions" << stdOut;
 
             QString onion = stdOut;
             onion.replace("\n", "");
-            xrayProtocolConfig->serverConfig.site = onion;
+            torProtocolConfig->serverConfig.site = onion;
         }
     }
 }
@@ -1103,12 +1085,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString transportProto = containerAndPortMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            QJsonObject config;
-            Proto protocol = ContainerUtils::defaultProtocol(container);
-            QJsonObject containerConfig;
-
-            containerConfig.insert(config_key::port, port);
-            containerConfig.insert(config_key::transport_proto, transportProto);
+            ContainerConfig config;
+            config.container = container;
 
             auto installer = createInstaller(container);
             ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, &sshSession, config);
@@ -1117,9 +1095,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                 return extractError;
             }
 
-            config.insert(config_key::container, ContainerUtils::containerToString(container));
-            config.insert(ProtocolUtils::protoToString(protocol), containerConfig);
-            installedContainers.insert(container, ContainerConfig::fromJson(config));
+            installedContainers.insert(container, config);
         }
 
         QRegularExpressionMatch torOrDnsRegMatch = torOrDnsRegExp.match(containerInfo);
@@ -1129,12 +1105,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString transportProto = torOrDnsRegMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            QJsonObject config;
-            Proto protocol = ContainerUtils::defaultProtocol(container);
-            QJsonObject containerConfig;
-
-            containerConfig.insert(config_key::port, port);
-            containerConfig.insert(config_key::transport_proto, transportProto);
+            ContainerConfig config;
+            config.container = container;
 
             auto installer = createInstaller(container);
             ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, &sshSession, config);
@@ -1143,9 +1115,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                 return extractError;
             }
 
-            config.insert(config_key::container, ContainerUtils::containerToString(container));
-            config.insert(ProtocolUtils::protoToString(protocol), containerConfig);
-            installedContainers.insert(container, ContainerConfig::fromJson(config));
+            installedContainers.insert(container, config);
         }
     }
 

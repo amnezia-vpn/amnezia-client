@@ -11,6 +11,8 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/ssXrayProtocolConfig.h"
 #include "logger.h"
 
 namespace {
@@ -26,9 +28,19 @@ XrayInstaller::XrayInstaller(QObject *parent)
 }
 
 ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                     SshSession* sshSession, QJsonObject &config)
+                                                     SshSession* sshSession, ContainerConfig &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
+    
+    Proto proto = ContainerUtils::defaultProtocol(container);
+    if (proto == Proto::Xray && !config.getXrayProtocolConfig()) {
+        XrayProtocolConfig xrayConfig;
+        config.protocolConfig = xrayConfig;
+    } else if (proto == Proto::SSXray && !config.getSSXrayProtocolConfig()) {
+        SSXrayProtocolConfig ssXrayConfig;
+        config.protocolConfig = ssXrayConfig;
+    }
+    
     QString currentConfig = sshSession->getTextFileFromContainer(
             container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
 
@@ -69,12 +81,11 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
 
     QString siteName = realitySettings["serverNames"][0].toString();
 
-    auto mainProto = ContainerUtils::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
-    
-    containerConfig.insert(config_key::site, siteName);
-
-    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
+    if (auto* xrayConfig = config.getXrayProtocolConfig()) {
+        xrayConfig->serverConfig.site = siteName;
+    } else if (auto* ssXrayConfig = config.getSSXrayProtocolConfig()) {
+        ssXrayConfig->serverConfig.site = siteName;
+    }
     
     return ErrorCode::NoError;
 }

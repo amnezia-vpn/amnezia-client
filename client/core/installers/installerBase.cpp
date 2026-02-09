@@ -7,6 +7,16 @@
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
+#include "core/models/protocolConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/wireGuardProtocolConfig.h"
+#include "core/models/protocols/openVpnProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/ssXrayProtocolConfig.h"
+#include "core/models/protocols/sftpProtocolConfig.h"
+#include "core/models/protocols/socks5ProxyProtocolConfig.h"
+#include "core/models/protocols/ikev2ProtocolConfig.h"
+#include "core/models/protocols/torProtocolConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -16,13 +26,13 @@ InstallerBase::InstallerBase(QObject *parent)
 {
 }
 
-QJsonObject InstallerBase::generateConfig(DockerContainer container, int port, TransportProto transportProto)
+ContainerConfig InstallerBase::generateConfig(DockerContainer container, int port, TransportProto transportProto)
 {
     return createBaseConfig(container, port, transportProto);
 }
 
 ErrorCode InstallerBase::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                   SshSession* sshSession, QJsonObject &config)
+                                                   SshSession* sshSession, ContainerConfig &config)
 {
     Q_UNUSED(container);
     Q_UNUSED(credentials);
@@ -31,16 +41,78 @@ ErrorCode InstallerBase::extractConfigFromContainer(DockerContainer container, c
     return ErrorCode::NoError;
 }
 
-QJsonObject InstallerBase::createBaseConfig(DockerContainer container, int port, TransportProto transportProto)
+ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int port, TransportProto transportProto)
 {
-    QJsonObject config;
+    ContainerConfig config;
+    config.container = container;
+    
     Proto protocol = ContainerUtils::defaultProtocol(container);
-    QJsonObject containerConfig;
-
-    containerConfig.insert(config_key::port, QString::number(port));
-    containerConfig.insert(config_key::transport_proto, ProtocolUtils::transportProtoToString(transportProto, protocol));
-    config.insert(config_key::container, ContainerUtils::containerToString(container));
-    config.insert(ProtocolUtils::protoToString(protocol), containerConfig);
+    QString portStr = QString::number(port);
+    QString transportProtoStr = ProtocolUtils::transportProtoToString(transportProto, protocol);
+    
+    switch (protocol) {
+        case Proto::Awg: {
+            AwgProtocolConfig awgConfig;
+            awgConfig.serverConfig.port = portStr;
+            awgConfig.serverConfig.transportProto = transportProtoStr;
+            config.protocolConfig = awgConfig;
+            break;
+        }
+        case Proto::WireGuard: {
+            WireGuardProtocolConfig wgConfig;
+            wgConfig.serverConfig.port = portStr;
+            wgConfig.serverConfig.transportProto = transportProtoStr;
+            config.protocolConfig = wgConfig;
+            break;
+        }
+        case Proto::OpenVpn: {
+            OpenVpnProtocolConfig ovpnConfig;
+            ovpnConfig.serverConfig.port = portStr;
+            ovpnConfig.serverConfig.transportProto = transportProtoStr;
+            config.protocolConfig = ovpnConfig;
+            break;
+        }
+        case Proto::Xray: {
+            XrayProtocolConfig xrayConfig;
+            xrayConfig.serverConfig.port = portStr;
+            xrayConfig.serverConfig.transportProto = transportProtoStr;
+            config.protocolConfig = xrayConfig;
+            break;
+        }
+        case Proto::SSXray: {
+            SSXrayProtocolConfig ssXrayConfig;
+            ssXrayConfig.serverConfig.port = portStr;
+            ssXrayConfig.serverConfig.transportProto = transportProtoStr;
+            config.protocolConfig = ssXrayConfig;
+            break;
+        }
+        case Proto::Sftp: {
+            SftpProtocolConfig sftpConfig;
+            sftpConfig.serverConfig.port = portStr;
+            sftpConfig.serverConfig.transportProto = transportProtoStr;
+            config.protocolConfig = sftpConfig;
+            break;
+        }
+        case Proto::Socks5Proxy: {
+            Socks5ProxyProtocolConfig socks5Config;
+            socks5Config.serverConfig.port = portStr;
+            socks5Config.serverConfig.transportProto = transportProtoStr;
+            config.protocolConfig = socks5Config;
+            break;
+        }
+        case Proto::Ikev2: {
+            Ikev2ProtocolConfig ikev2Config;
+            config.protocolConfig = ikev2Config;
+            break;
+        }
+        case Proto::TorWebSite: {
+            TorProtocolConfig torConfig;
+            config.protocolConfig = torConfig;
+            break;
+        }
+        default:
+            break;
+    }
     
     return config;
 }

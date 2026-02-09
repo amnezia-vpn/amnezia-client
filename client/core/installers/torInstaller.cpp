@@ -8,6 +8,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
+#include "core/models/protocols/torProtocolConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -18,7 +19,7 @@ TorInstaller::TorInstaller(QObject *parent)
 }
 
 ErrorCode TorInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                   SshSession* sshSession, QJsonObject &config)
+                                                   SshSession* sshSession, ContainerConfig &config)
 {
     ErrorCode errorCode = ErrorCode::NoError;
     
@@ -47,12 +48,14 @@ ErrorCode TorInstaller::extractConfigFromContainer(DockerContainer container, co
     QString onion = stdOut;
     onion.replace("\n", "");
 
-    auto mainProto = ContainerUtils::defaultProtocol(container);
-    QJsonObject containerConfig = config.value(ProtocolUtils::protoToString(mainProto)).toObject();
-    
-    containerConfig.insert(config_key::site, onion);
+    if (!config.getTorProtocolConfig()) {
+        TorProtocolConfig torConfig;
+        config.protocolConfig = torConfig;
+    }
 
-    config.insert(ProtocolUtils::protoToString(mainProto), containerConfig);
+    if (auto* torConfig = config.getTorProtocolConfig()) {
+        torConfig->serverConfig.site = onion;
+    }
     
     return ErrorCode::NoError;
 }
