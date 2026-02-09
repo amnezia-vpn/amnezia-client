@@ -134,9 +134,13 @@ ErrorCode XrayProtocol::startTun2Socks()
         }
 
         const QString line = readAllStandardOutput.returnValue();
-        qDebug() << "[tun2socks]:" << line;
+
+        if (!line.contains("[TCP]") && !line.contains("[UDP]"))
+            qDebug() << "[tun2socks]:" << line;
         
         if (line.contains("[STACK] tun://") && line.contains("<-> socks5://127.0.0.1")) {
+            disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, nullptr);
+
             if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
                 stop();
                 setLastError(res);
