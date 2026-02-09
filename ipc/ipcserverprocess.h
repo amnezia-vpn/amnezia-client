@@ -1,6 +1,7 @@
 #ifndef IPCSERVERPROCESS_H
 #define IPCSERVERPROCESS_H
 
+#include "ipc.h"
 #include <QObject>
 
 #ifndef Q_OS_IOS
@@ -37,6 +38,7 @@ public:
 signals:
 
 private:
+    amnezia::PermittedProcess m_program = amnezia::PermittedProcess::Invalid;
     QSharedPointer<QProcess> m_process;
 };
 
