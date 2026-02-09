@@ -353,6 +353,16 @@ include_directories(
 
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES})
+
+if(LINUX)
+    target_link_options(${PROJECT} PRIVATE "LINKER:--disable-new-dtags")
+    set_target_properties(${PROJECT} PROPERTIES
+        BUILD_RPATH "\$ORIGIN/../lib"
+        INSTALL_RPATH "\$ORIGIN/../lib"
+        INSTALL_RPATH_USE_LINK_PATH FALSE
+    )
+    set_property(TARGET ${PROJECT} PROPERTY BUILD_WITH_INSTALL_RPATH TRUE)
+endif()
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::DBus Qt6::Concurrent ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
