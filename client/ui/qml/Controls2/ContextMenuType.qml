@@ -4,7 +4,7 @@ import QtQuick.Controls
 Menu {
     property var textObj
 
-    popupType: Popup.Native
+    popupType: Popup.Item
 
     MenuItem {
         text: qsTr("C&ut")
