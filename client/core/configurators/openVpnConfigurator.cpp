@@ -84,8 +84,8 @@ ProtocolConfig OpenVpnConfigurator::createConfig(const ServerCredentials &creden
                                                   ErrorCode &errorCode)
 {
     const OpenVpnServerConfig* serverConfig = nullptr;
-    if (auto* openVpnConfig = std::get_if<OpenVpnProtocolConfig>(&containerConfig.protocolConfig)) {
-        serverConfig = &openVpnConfig->serverConfig;
+    if (auto* openVpnProtocolConfig = containerConfig.getOpenVpnProtocolConfig()) {
+        serverConfig = &openVpnProtocolConfig->serverConfig;
     }
     
     amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns);

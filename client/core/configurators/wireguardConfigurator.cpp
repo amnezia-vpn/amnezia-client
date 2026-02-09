@@ -214,15 +214,15 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
     const AwgServerConfig* awgServerConfig = nullptr;
     const AwgClientConfig* awgClientConfig = nullptr;
     
-    if (auto* wireguardConfig = std::get_if<WireGuardProtocolConfig>(&containerConfig.protocolConfig)) {
-        wireguardServerConfig = &wireguardConfig->serverConfig;
-        if (wireguardConfig->clientConfig.has_value()) {
-            wireguardClientConfig = &wireguardConfig->clientConfig.value();
+    if (auto* wireGuardProtocolConfig = containerConfig.getWireGuardProtocolConfig()) {
+        wireguardServerConfig = &wireGuardProtocolConfig->serverConfig;
+        if (wireGuardProtocolConfig->clientConfig.has_value()) {
+            wireguardClientConfig = &wireGuardProtocolConfig->clientConfig.value();
         }
-    } else if (auto* awgConfig = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
-        awgServerConfig = &awgConfig->serverConfig;
-        if (awgConfig->clientConfig.has_value()) {
-            awgClientConfig = &awgConfig->clientConfig.value();
+    } else if (auto* awgProtocolConfig = containerConfig.getAwgProtocolConfig()) {
+        awgServerConfig = &awgProtocolConfig->serverConfig;
+        if (awgProtocolConfig->clientConfig.has_value()) {
+            awgClientConfig = &awgProtocolConfig->clientConfig.value();
         }
     }
     

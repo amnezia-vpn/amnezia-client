@@ -297,6 +297,39 @@ void ProtocolConfigUtils::clearClientConfig(ProtocolConfig& config)
     }, config);
 }
 
+QString ProtocolConfigUtils::nativeConfig(const ProtocolConfig& config)
+{
+    return std::visit([](auto&& arg) -> QString {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, AwgProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->nativeConfig;
+            }
+        } else if constexpr (std::is_same_v<T, WireGuardProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->nativeConfig;
+            }
+        } else if constexpr (std::is_same_v<T, OpenVpnProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->nativeConfig;
+            }
+        } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->nativeConfig;
+            }
+        } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->nativeConfig;
+            }
+        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->nativeConfig;
+            }
+        }
+        return QString();
+    }, config);
+}
+
 QJsonObject ProtocolConfigUtils::toJson(const ProtocolConfig& config, Proto protocolType)
 {
     return std::visit([protocolType](auto&& arg) -> QJsonObject {

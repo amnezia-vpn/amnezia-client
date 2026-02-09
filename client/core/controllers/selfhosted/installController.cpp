@@ -1058,12 +1058,12 @@ void InstallController::updateContainerConfigAfterInstallation(DockerContainer c
     Proto mainProto = ContainerUtils::defaultProtocol(container);
 
     if (container == DockerContainer::TorWebSite) {
-        if (auto* xrayConfig = std::get_if<XrayProtocolConfig>(&containerConfig.protocolConfig)) {
+        if (auto* xrayProtocolConfig = containerConfig.getXrayProtocolConfig()) {
             qDebug() << "amnezia-tor onions" << stdOut;
 
             QString onion = stdOut;
             onion.replace("\n", "");
-            xrayConfig->serverConfig.site = onion;
+            xrayProtocolConfig->serverConfig.site = onion;
         }
     }
 }

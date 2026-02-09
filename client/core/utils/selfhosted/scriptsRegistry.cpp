@@ -146,8 +146,8 @@ amnezia::ScriptVars amnezia::genOpenVpnVars(const ContainerConfig &containerConf
 {
     ScriptVars vars;
     
-    if (auto* openvpnConfig = std::get_if<OpenVpnProtocolConfig>(&containerConfig.protocolConfig)) {
-        const OpenVpnServerConfig& config = openvpnConfig->serverConfig;
+    if (auto* openVpnProtocolConfig = containerConfig.getOpenVpnProtocolConfig()) {
+        const OpenVpnServerConfig& config = openVpnProtocolConfig->serverConfig;
         
         vars.append({ { "$OPENVPN_SUBNET_IP", config.subnetAddress.isEmpty() ? protocols::openvpn::defaultSubnetAddress : config.subnetAddress } });
         vars.append({ { "$OPENVPN_SUBNET_CIDR", config.subnetCidr.isEmpty() ? protocols::openvpn::defaultSubnetCidr : config.subnetCidr } });
@@ -175,8 +175,8 @@ amnezia::ScriptVars amnezia::genXrayVars(const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
     
-    if (auto* xrayConfig = std::get_if<XrayProtocolConfig>(&containerConfig.protocolConfig)) {
-        const XrayServerConfig& config = xrayConfig->serverConfig;
+    if (auto* xrayProtocolConfig = containerConfig.getXrayProtocolConfig()) {
+        const XrayServerConfig& config = xrayProtocolConfig->serverConfig;
         
         vars.append({ { "$XRAY_SITE_NAME", config.site.isEmpty() ? protocols::xray::defaultSite : config.site } });
         vars.append({ { "$XRAY_SERVER_PORT", config.port.isEmpty() ? protocols::xray::defaultPort : config.port } });
@@ -189,8 +189,8 @@ amnezia::ScriptVars amnezia::genWireGuardVars(const ContainerConfig &containerCo
 {
     ScriptVars vars;
     
-    if (auto* wireguardConfig = std::get_if<WireGuardProtocolConfig>(&containerConfig.protocolConfig)) {
-        const WireGuardServerConfig& config = wireguardConfig->serverConfig;
+    if (auto* wireGuardProtocolConfig = containerConfig.getWireGuardProtocolConfig()) {
+        const WireGuardServerConfig& config = wireGuardProtocolConfig->serverConfig;
         
         vars.append({ { "$WIREGUARD_SUBNET_IP", config.subnetAddress.isEmpty() ? protocols::wireguard::defaultSubnetAddress : config.subnetAddress } });
         vars.append({ { "$WIREGUARD_SUBNET_CIDR", config.subnetCidr.isEmpty() ? protocols::wireguard::defaultSubnetCidr : config.subnetCidr } });
@@ -205,8 +205,8 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
     
-    if (auto* awgConfig = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
-        const AwgServerConfig& config = awgConfig->serverConfig;
+    if (auto* awgProtocolConfig = containerConfig.getAwgProtocolConfig()) {
+        const AwgServerConfig& config = awgProtocolConfig->serverConfig;
         
         vars.append({ { "$AWG_SUBNET_IP", config.subnetAddress.isEmpty() ? protocols::wireguard::defaultSubnetAddress : config.subnetAddress } });
         vars.append({ { "$AWG_SERVER_PORT", config.port.isEmpty() ? protocols::awg::defaultPort : config.port } });
@@ -235,10 +235,10 @@ amnezia::ScriptVars amnezia::genSftpVars(const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
     
-    if (auto* sftpConfig = std::get_if<SftpProtocolConfig>(&containerConfig.protocolConfig)) {
-        vars.append({ { "$SFTP_PORT", sftpConfig->port.isEmpty() ? QString::number(ProtocolUtils::defaultPort(Proto::Sftp)) : sftpConfig->port } });
-        vars.append({ { "$SFTP_USER", sftpConfig->userName } });
-        vars.append({ { "$SFTP_PASSWORD", sftpConfig->password } });
+    if (auto* sftpProtocolConfig = containerConfig.getSftpProtocolConfig()) {
+        vars.append({ { "$SFTP_PORT", sftpProtocolConfig->port.isEmpty() ? QString::number(ProtocolUtils::defaultPort(Proto::Sftp)) : sftpProtocolConfig->port } });
+        vars.append({ { "$SFTP_USER", sftpProtocolConfig->userName } });
+        vars.append({ { "$SFTP_PASSWORD", sftpProtocolConfig->password } });
     }
     
     return vars;
@@ -248,10 +248,10 @@ amnezia::ScriptVars amnezia::genSocks5ProxyVars(const ContainerConfig &container
 {
     ScriptVars vars;
     
-    if (auto* socks5Config = std::get_if<Socks5ProxyProtocolConfig>(&containerConfig.protocolConfig)) {
-        vars.append({ { "$SOCKS5_PROXY_PORT", socks5Config->port.isEmpty() ? protocols::socks5Proxy::defaultPort : socks5Config->port } });
-        QString socks5user = (!socks5Config->userName.isEmpty() && !socks5Config->password.isEmpty()) 
-            ? QString("users %1:CL:%2").arg(socks5Config->userName, socks5Config->password) 
+    if (auto* socks5ProxyProtocolConfig = containerConfig.getSocks5ProxyProtocolConfig()) {
+        vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyProtocolConfig->port.isEmpty() ? protocols::socks5Proxy::defaultPort : socks5ProxyProtocolConfig->port } });
+        QString socks5user = (!socks5ProxyProtocolConfig->userName.isEmpty() && !socks5ProxyProtocolConfig->password.isEmpty()) 
+            ? QString("users %1:CL:%2").arg(socks5ProxyProtocolConfig->userName, socks5ProxyProtocolConfig->password) 
             : "";
         vars.append({ { "$SOCKS5_USER", socks5user } });
         vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });

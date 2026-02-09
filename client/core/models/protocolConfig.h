@@ -76,6 +76,8 @@ namespace ProtocolConfigUtils {
     void setClientConfigJson(ProtocolConfig& config, const QJsonObject& clientJson);
     void clearClientConfig(ProtocolConfig& config);
     
+    QString nativeConfig(const ProtocolConfig& config);
+    
     QJsonObject toJson(const ProtocolConfig& config, Proto protocolType);
     ProtocolConfig fromJson(const QJsonObject& json, Proto protocolType);
 }

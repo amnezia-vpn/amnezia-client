@@ -23,10 +23,10 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
     const AwgServerConfig* serverConfig = nullptr;
     const AwgClientConfig* clientConfig = nullptr;
     
-    if (auto* awgConfigModel = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
-        serverConfig = &awgConfigModel->serverConfig;
-        if (awgConfigModel->clientConfig.has_value()) {
-            clientConfig = &awgConfigModel->clientConfig.value();
+    if (auto* awgProtocolConfig = containerConfig.getAwgProtocolConfig()) {
+        serverConfig = &awgProtocolConfig->serverConfig;
+        if (awgProtocolConfig->clientConfig.has_value()) {
+            clientConfig = &awgProtocolConfig->clientConfig.value();
         }
     }
     

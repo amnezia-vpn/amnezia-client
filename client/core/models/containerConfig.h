@@ -38,6 +38,30 @@ struct ContainerConfig {
     {
         return std::visit(std::forward<Visitor>(visitor), protocolConfig);
     }
+    
+    AwgProtocolConfig* getAwgProtocolConfig();
+    const AwgProtocolConfig* getAwgProtocolConfig() const;
+    
+    WireGuardProtocolConfig* getWireGuardProtocolConfig();
+    const WireGuardProtocolConfig* getWireGuardProtocolConfig() const;
+    
+    OpenVpnProtocolConfig* getOpenVpnProtocolConfig();
+    const OpenVpnProtocolConfig* getOpenVpnProtocolConfig() const;
+    
+    XrayProtocolConfig* getXrayProtocolConfig();
+    const XrayProtocolConfig* getXrayProtocolConfig() const;
+    
+    SSXrayProtocolConfig* getSSXrayProtocolConfig();
+    const SSXrayProtocolConfig* getSSXrayProtocolConfig() const;
+    
+    SftpProtocolConfig* getSftpProtocolConfig();
+    const SftpProtocolConfig* getSftpProtocolConfig() const;
+    
+    Socks5ProxyProtocolConfig* getSocks5ProxyProtocolConfig();
+    const Socks5ProxyProtocolConfig* getSocks5ProxyProtocolConfig() const;
+    
+    Ikev2ProtocolConfig* getIkev2ProtocolConfig();
+    const Ikev2ProtocolConfig* getIkev2ProtocolConfig() const;
 };
 
 } // namespace amnezia

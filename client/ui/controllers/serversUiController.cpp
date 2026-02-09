@@ -183,15 +183,15 @@ QString ServersUiController::getDefaultServerDescriptionCollapsed() const
     
     if (ContainerUtils::isAwgContainer(container)) {
         ContainerConfig containerConfig = ServerConfigUtils::containerConfig(server, container);
-        if (auto* awgConfig = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
-            QString version = awgConfig->serverConfig.protocolVersion;
+        if (auto* awgProtocolConfig = containerConfig.getAwgProtocolConfig()) {
+            QString version = awgProtocolConfig->serverConfig.protocolVersion;
             if (version == protocols::awg::awgV2) {
                 protocolVersion = QObject::tr(" (version 2)");
             } else if (version == protocols::awg::awgV1_5) {
                 protocolVersion = QObject::tr(" (version 1.5)");
             }
             
-            if (container == DockerContainer::Awg && !awgConfig->serverConfig.isThirdPartyConfig) {
+            if (container == DockerContainer::Awg && !awgProtocolConfig->serverConfig.isThirdPartyConfig) {
                 containerName = "AmneziaWG Legacy";
             }
         }

@@ -493,38 +493,38 @@ void InstallUiController::updateProtocolConfigModel(int serverIndex, int protoco
     
     switch (protocolType) {
     case Proto::Awg: {
-        if (auto* awgConfig = std::get_if<AwgProtocolConfig>(&containerConfig.protocolConfig)) {
-            m_awgConfigModel->updateModel(container, *awgConfig);
+        if (auto* awgProtocolConfig = containerConfig.getAwgProtocolConfig()) {
+            m_awgConfigModel->updateModel(container, *awgProtocolConfig);
         }
         break;
     }
     case Proto::WireGuard: {
-        if (auto* wgConfig = std::get_if<WireGuardProtocolConfig>(&containerConfig.protocolConfig)) {
-            m_wireGuardConfigModel->updateModel(container, *wgConfig);
+        if (auto* wireGuardProtocolConfig = containerConfig.getWireGuardProtocolConfig()) {
+            m_wireGuardConfigModel->updateModel(container, *wireGuardProtocolConfig);
         }
         break;
     }
     case Proto::OpenVpn: {
-        if (auto* openVpnConfig = std::get_if<OpenVpnProtocolConfig>(&containerConfig.protocolConfig)) {
-            m_openVpnConfigModel->updateModel(container, *openVpnConfig);
+        if (auto* openVpnProtocolConfig = containerConfig.getOpenVpnProtocolConfig()) {
+            m_openVpnConfigModel->updateModel(container, *openVpnProtocolConfig);
         }
         break;
     }
     case Proto::Xray: {
-        if (auto* xrayConfig = std::get_if<XrayProtocolConfig>(&containerConfig.protocolConfig)) {
-            m_xrayConfigModel->updateModel(container, *xrayConfig);
+        if (auto* xrayProtocolConfig = containerConfig.getXrayProtocolConfig()) {
+            m_xrayConfigModel->updateModel(container, *xrayProtocolConfig);
         }
         break;
     }
     case Proto::Sftp: {
-        if (auto* sftpConfig = std::get_if<SftpProtocolConfig>(&containerConfig.protocolConfig)) {
-            m_sftpConfigModel->updateModel(container, *sftpConfig);
+        if (auto* sftpProtocolConfig = containerConfig.getSftpProtocolConfig()) {
+            m_sftpConfigModel->updateModel(container, *sftpProtocolConfig);
         }
         break;
     }
     case Proto::Socks5Proxy: {
-        if (auto* socks5Config = std::get_if<Socks5ProxyProtocolConfig>(&containerConfig.protocolConfig)) {
-            m_socks5ConfigModel->updateModel(container, *socks5Config);
+        if (auto* socks5ProxyProtocolConfig = containerConfig.getSocks5ProxyProtocolConfig()) {
+            m_socks5ConfigModel->updateModel(container, *socks5ProxyProtocolConfig);
         }
         break;
     }
