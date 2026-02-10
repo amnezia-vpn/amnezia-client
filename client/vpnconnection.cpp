@@ -265,7 +265,7 @@ ErrorCode VpnConnection::lastError() const
 void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &vpnConfiguration)
 {
-    qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
+    qDebug() << QString("Trying to connect to VPN, server index is %1, container is %2, route mode is")
                         .arg(serverIndex)
                         .arg(ContainerProps::containerToString(container))
              << m_settings->routeMode();
@@ -482,6 +482,13 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     m_vpnConfiguration.insert(config_key::appSplitTunnelType, appsRouteMode);
     m_vpnConfiguration.insert(config_key::splitTunnelApps, appsJsonArray);
+
+    qDebug() << QString("Site split tunneling is %1, route mode is %2")
+                        .arg(m_settings->isSitesSplitTunnelingEnabled() ? "enabled" : "disabled")
+                        .arg(routeMode);
+    qDebug() << QString("App split tunneling is %1, route mode is %2")
+                        .arg(m_settings->isAppsSplitTunnelingEnabled() ? "enabled" : "disabled")
+                        .arg(appsRouteMode);
 }
 
 bool VpnConnection::startNetworkCheckIfReady()
