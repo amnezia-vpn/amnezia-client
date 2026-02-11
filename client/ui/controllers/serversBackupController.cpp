@@ -6,7 +6,9 @@
 #include <QStandardPaths>
 #include <QTemporaryFile>
 #include <QUrl>
+#if !defined(Q_OS_IOS)
 #include <QProcess>
+#endif
 #include <QSet>
 #include <QTimer>
 #ifdef Q_OS_ANDROID
@@ -681,20 +683,35 @@ QStringList ServersBackupController::scanBackupForContainers(const QString &loca
 #else
     QString actualPath = localPath;
 #endif
-    
-    // Execute tar command to view contents
+
+#ifdef Q_OS_IOS
+    // iOS sandbox does not allow spawning external processes (tar).
+    // Return all known container names that may appear in backup; server-side restore
+    // will only restore what is actually in the archive.
+    containers << QStringLiteral("amnezia-awg2")
+               << QStringLiteral("amnezia-wireguard")
+               << QStringLiteral("amnezia-xray")
+               << QStringLiteral("amnezia-openvpn-cloak")
+               << QStringLiteral("amnezia-awg");
+    qDebug() << "Found containers in backup (iOS fallback):" << containers;
+    return containers;
+#endif
+
+#if !defined(Q_OS_IOS)
+    // Execute tar command to view contents (desktop, Android with temp file).
+    // QProcess is not available on iOS (sandbox does not allow spawning processes).
     QProcess process;
     process.start("tar", QStringList() << "-tzf" << actualPath);
     process.waitForFinished(5000);
-    
+
     if (process.exitCode() != 0) {
         qWarning() << "Failed to read backup archive:" << process.readAllStandardError();
         return containers;
     }
-    
+
     QString output = process.readAllStandardOutput();
     QStringList lines = output.split('\n', Qt::SkipEmptyParts);
-    
+
     // Find container directories (amnezia-*)
     QSet<QString> foundContainers;
     for (const QString &line : lines) {
@@ -709,10 +726,11 @@ QStringList ServersBackupController::scanBackupForContainers(const QString &loca
             }
         }
     }
-    
+
     containers = foundContainers.values();
     qDebug() << "Found containers in backup:" << containers;
-    
+#endif
+
     return containers;
 }
 
@@ -1221,29 +1239,28 @@ QVariantMap ServersBackupController::getBackupFileInfo(const QString &backupFile
         fileName = AndroidController::instance()->getFileName(backupFilePath);
     }
 #endif
-#ifdef Q_OS_IOS
-    if (backupFilePath.startsWith("file://")) {
-        fileName = IosController::getFileName(backupFilePath);
-    }
-#endif
-    
+
     if (fileName.isEmpty()) {
         QFileInfo fileInfo(backupFilePath);
         fileName = fileInfo.fileName();
     }
-    
-    // If filename is empty, use fallback
+
+    // If filename is empty, use fallback (path component or URL-decoded last segment)
     if (fileName.isEmpty()) {
-        QStringList pathParts = backupFilePath.split('/');
+        QString path = backupFilePath;
+        if (path.startsWith("file://")) {
+            path = QUrl(path).toLocalFile();
+        }
+        QStringList pathParts = path.split('/');
         if (!pathParts.isEmpty()) {
-            fileName = pathParts.last();
+            fileName = QUrl::fromPercentEncoding(pathParts.last().toUtf8());
         }
     }
-    
+
     if (fileName.isEmpty()) {
         fileName = "backup.tgz";
     }
-    
+
     // Extract IP from filename (format: 38_99_23_227 - DD-MM-YYYY_HH-MM-SS.tgz)
     QString serverIp;
     QRegularExpression ipRegex("^([\\d_]+)\\s*-");
@@ -1292,17 +1309,19 @@ void ServersBackupController::prepareRestoreFromBackup(const QString &backupFile
         fileName = AndroidController::instance()->getFileName(backupFilePath);
     }
 #endif
-#ifdef Q_OS_IOS
-    if (backupFilePath.startsWith("file://")) {
-        fileName = IosController::getFileName(backupFilePath);
-    }
-#endif
-    
+
     if (fileName.isEmpty()) {
         QFileInfo fileInfo(backupFilePath);
         fileName = fileInfo.fileName();
     }
-    
+    if (fileName.isEmpty()) {
+        QString path = backupFilePath.startsWith("file://") ? QUrl(backupFilePath).toLocalFile() : backupFilePath;
+        QStringList pathParts = path.split('/');
+        if (!pathParts.isEmpty()) {
+            fileName = QUrl::fromPercentEncoding(pathParts.last().toUtf8());
+        }
+    }
+
     // Extract IP from filename (format: 38_99_23_227 - DD-MM-YYYY_HH-MM-SS.tgz)
     QString serverIp = hostname; // Default to hostname
     QRegularExpression ipRegex("^([\\d_]+)\\s*-");
@@ -1463,4 +1482,3 @@ void ServersBackupController::trySetDefaultContainer()
         emit defaultServerAndContainerSet();
     }
 }
-
