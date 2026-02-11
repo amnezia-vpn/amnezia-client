@@ -859,7 +859,11 @@ PageType {
                                         var noButtonFunction = function() {
                                         }
 
-                                        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                                        if (ConnectionController.isConnectionInProgress()) {
+                                            PageController.showNotificationMessage("Disconnect from VPN to revoke this config")
+                                        } else {
+                                            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                                        }
                                     }
                                 }
                             }
