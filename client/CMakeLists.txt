@@ -185,6 +185,7 @@ if(ANDROID)
 endif()
 
 if(IOS)
+    option(AMNEZIA_IOS_ENABLE_APPLETV_TARGET "Enable Apple TV target settings for iOS/Xcode projects" OFF)
     include(cmake/ios.cmake)
     include(cmake/ios-arch-fixup.cmake)
 elseif(APPLE AND MACOS_NE)
