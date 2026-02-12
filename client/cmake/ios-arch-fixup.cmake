@@ -39,5 +39,7 @@ while(IOS_TARGETS)
     set_target_properties(${TARGET_NAME} PROPERTIES
         XCODE_ATTRIBUTE_ARCHS[sdk=iphoneos*] "arm64"
         XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] "x86_64"
+        XCODE_ATTRIBUTE_ARCHS[sdk=appletvos*] "arm64"
+        XCODE_ATTRIBUTE_ARCHS[sdk=appletvsimulator*] "arm64 x86_64"
     )
 endwhile()
