@@ -859,7 +859,11 @@ PageType {
                                         var noButtonFunction = function() {
                                         }
 
-                                        if (ConnectionController.isConnectionInProgress()) {
+                                        var isActiveConfigForCurrentClient = ServersModel.isDefaultServerCurrentlyProcessed()
+                                                && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()
+
+                                        if ((ConnectionController.isConnectionInProgress || ConnectionController.isConnected)
+                                                && isActiveConfigForCurrentClient) {
                                             PageController.showNotificationMessage("Disconnect from VPN to revoke this config")
                                         } else {
                                             showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
