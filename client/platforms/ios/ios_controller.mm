@@ -785,8 +785,38 @@ bool IosController::startOpenVPN(const QString &config)
 
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    tunnelProtocol.providerConfiguration = @{@"ovpn": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    QByteArray configUtf8 = config.toUtf8();
+    NSData *ovpnConfigData = [NSData dataWithBytes:configUtf8.constData() length:configUtf8.size()];
+    tunnelProtocol.providerConfiguration = @{@"ovpn": ovpnConfigData};
     tunnelProtocol.serverAddress = m_serverAddress;
+    if (@available(iOS 14.0, macOS 11.0, *)) {
+        int splitTunnelType = 0;
+        QJsonParseError parseError;
+        QJsonDocument doc = QJsonDocument::fromJson(config.toUtf8(), &parseError);
+        if (parseError.error == QJsonParseError::NoError && doc.isObject()) {
+            QJsonObject obj = doc.object();
+            splitTunnelType = obj.value(config_key::splitTunnelType).toInt(0);
+        }
+#if defined(MACOS_NE)
+        // On macOS NE use route-based full tunnel. includeAllNetworks enables
+        // policy-based drop-all mode and causes enforceRoutes to be ignored.
+        tunnelProtocol.includeAllNetworks = NO;
+        if (splitTunnelType == 0) {
+            tunnelProtocol.enforceRoutes = YES;
+            if (@available(iOS 14.2, macOS 11.0, *)) {
+                tunnelProtocol.excludeLocalNetworks = YES;
+            }
+        }
+#else
+        tunnelProtocol.includeAllNetworks = (splitTunnelType == 0);
+        if (@available(iOS 14.2, macOS 11.0, *)) {
+            // Keep existing iOS behavior.
+            if (splitTunnelType == 0) {
+                tunnelProtocol.excludeLocalNetworks = NO;
+            }
+        }
+#endif
+    }
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;
 
@@ -799,7 +829,9 @@ bool IosController::startWireGuard(const QString &config)
 
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    tunnelProtocol.providerConfiguration = @{@"wireguard": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    QByteArray configUtf8 = config.toUtf8();
+    NSData *wgConfigData = [NSData dataWithBytes:configUtf8.constData() length:configUtf8.size()];
+    tunnelProtocol.providerConfiguration = @{@"wireguard": wgConfigData};
     tunnelProtocol.serverAddress = m_serverAddress;
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;
@@ -813,7 +845,9 @@ bool IosController::startXray(const QString &config)
 
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    tunnelProtocol.providerConfiguration = @{@"xray": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    QByteArray configUtf8 = config.toUtf8();
+    NSData *xrayConfigData = [NSData dataWithBytes:configUtf8.constData() length:configUtf8.size()];
+    tunnelProtocol.providerConfiguration = @{@"xray": xrayConfigData};
     tunnelProtocol.serverAddress = m_serverAddress;
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;

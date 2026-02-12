@@ -298,14 +298,14 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     }
 
 #elif defined(MACOS_NE)
-    // macOS build using Network Extension – hide OpenVPN-based containers
+    // macOS build using Network Extension – allow OpenVPN for parity with iOS.
     switch (c) {
+    case DockerContainer::OpenVpn: return true;
     case DockerContainer::WireGuard: return true;
     case DockerContainer::Awg2: return true;
     case DockerContainer::Awg: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
-    case DockerContainer::OpenVpn:
     case DockerContainer::Cloak:
     case DockerContainer::ShadowSocks:
         return false;

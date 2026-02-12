@@ -48,6 +48,14 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
     var splitTunnelType: Int?
     var splitTunnelSites: [String]?
+    var openVpnDnsServers: [String] = []
+    var openVpnRemoteAddress: String?
+    var openVpnRedirectGatewayDef1 = false
+    var openVpnLocalAddress: String?
+    var openVpnLocalMask: String?
+    var openVpnGatewayAddress: String?
+    var lastOpenVPNSettings: NEPacketTunnelNetworkSettings?
+    var lastOpenVPNStatsLogTime = Date.distantPast
 
     let vpnReachability = OpenVPNReachability()
 
@@ -78,8 +86,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
             guard hasMeaningfulChange, let proto = self.protoType else { return }
 
-            // WireGuard/AWG manages network changes internally; avoid restarting the tunnel here.
-            if proto == .wireguard {
+            // WireGuard/AWG and OpenVPN manage network changes internally; avoid restarting the tunnel here.
+            if proto == .wireguard || proto == .openvpn {
                 return
             }
 
@@ -179,6 +187,15 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         let errorNotifier = ErrorNotifier(activationAttemptId: activationAttemptId)
 
         neLog(.info, message: "Start tunnel")
+        if let vpnProto = protocolConfiguration as? NEVPNProtocol {
+            if #available(iOS 14.0, macOS 11.0, *) {
+                var details = "includeAllNetworks=\(vpnProto.includeAllNetworks)"
+                if #available(iOS 14.2, macOS 11.0, *) {
+                    details += " excludeLocalNetworks=\(vpnProto.excludeLocalNetworks)"
+                }
+                neLog(.info, title: "Protocol", message: details)
+            }
+        }
 
         if let protocolConfiguration = protocolConfiguration as? NETunnelProviderProtocol {
             let providerConfiguration = protocolConfiguration.providerConfiguration
@@ -323,6 +340,8 @@ extension WireGuardLogLevel {
 
 final class PacketTunnelFlowAdapter: NSObject, OpenVPNAdapterPacketFlow {
   private let flow: NEPacketTunnelFlow
+  private var readLogCounter = 0
+  private var writeLogCounter = 0
 
   init(flow: NEPacketTunnelFlow) {
     self.flow = flow
@@ -331,14 +350,97 @@ final class PacketTunnelFlowAdapter: NSObject, OpenVPNAdapterPacketFlow {
 
   @objc(readPacketsWithCompletionHandler:)
   func readPackets(completionHandler: @escaping ([Data], [NSNumber]) -> Void) {
-    flow.readPackets(completionHandler: completionHandler)
+    flow.readPackets { packets, protocols in
+#if os(macOS)
+      if self.readLogCounter < 20, let firstPacket = packets.first, let firstProtocol = protocols.first {
+        let prefix = firstPacket.prefix(12).map { String(format: "%02x", $0) }.joined()
+        let header = Self.describePacketHeader(firstPacket)
+        ovpnLog(.info, title: "FlowRead", message: "count=\(packets.count) proto0=\(firstProtocol) len0=\(firstPacket.count) prefix=\(prefix) \(header)")
+        self.readLogCounter += 1
+      }
+#endif
+      completionHandler(packets, protocols)
+    }
   }
 
   @objc(writePackets:withProtocols:)
   func writePackets(_ packets: [Data], withProtocols protocols: [NSNumber]) -> Bool {
-    flow.writePackets(packets, withProtocols: protocols)
+#if os(macOS)
+    if writeLogCounter < 20, let firstPacket = packets.first, let firstProtocol = protocols.first {
+      let prefix = firstPacket.prefix(12).map { String(format: "%02x", $0) }.joined()
+      let header = Self.describePacketHeader(firstPacket)
+      ovpnLog(.info, title: "FlowWrite", message: "count=\(packets.count) proto0=\(firstProtocol) len0=\(firstPacket.count) prefix=\(prefix) \(header)")
+      writeLogCounter += 1
+    }
+#endif
+    return flow.writePackets(packets, withProtocols: protocols)
+  }
+
+  private static func describePacketHeader(_ packet: Data) -> String {
+    guard let versionNibble = packet.first.map({ Int($0 >> 4) }) else {
+      return "ip=unknown"
+    }
+
+    if versionNibble == 4, packet.count >= 20 {
+      let ihl = Int(packet[0] & 0x0f) * 4
+      guard ihl >= 20, packet.count >= ihl else {
+        return "ip=ipv4 malformed"
+      }
+
+      let proto = packet[9]
+      let src = "\(packet[12]).\(packet[13]).\(packet[14]).\(packet[15])"
+      let dst = "\(packet[16]).\(packet[17]).\(packet[18]).\(packet[19])"
+      let l4Offset = ihl
+      let ports: String
+      if (proto == 6 || proto == 17) && packet.count >= l4Offset + 4 {
+        let srcPort = (UInt16(packet[l4Offset]) << 8) | UInt16(packet[l4Offset + 1])
+        let dstPort = (UInt16(packet[l4Offset + 2]) << 8) | UInt16(packet[l4Offset + 3])
+        ports = "sport=\(srcPort) dport=\(dstPort)"
+      } else {
+        ports = "sport=- dport=-"
+      }
+      let protoName: String
+      switch proto {
+      case 1: protoName = "ICMP"
+      case 6: protoName = "TCP"
+      case 17: protoName = "UDP"
+      default: protoName = "P\(proto)"
+      }
+      return "ip=ipv4 src=\(src) dst=\(dst) proto=\(protoName) \(ports)"
+    }
+
+    if versionNibble == 6, packet.count >= 40 {
+      let proto = packet[6]
+      func hex16(_ start: Int) -> String {
+        let value = (UInt16(packet[start]) << 8) | UInt16(packet[start + 1])
+        return String(format: "%x", value)
+      }
+      let src = stride(from: 8, to: 24, by: 2).map(hex16).joined(separator: ":")
+      let dst = stride(from: 24, to: 40, by: 2).map(hex16).joined(separator: ":")
+      let l4Offset = 40
+      let ports: String
+      if (proto == 6 || proto == 17) && packet.count >= l4Offset + 4 {
+        let srcPort = (UInt16(packet[l4Offset]) << 8) | UInt16(packet[l4Offset + 1])
+        let dstPort = (UInt16(packet[l4Offset + 2]) << 8) | UInt16(packet[l4Offset + 3])
+        ports = "sport=\(srcPort) dport=\(dstPort)"
+      } else {
+        ports = "sport=- dport=-"
+      }
+      let protoName: String
+      switch proto {
+      case 58: protoName = "ICMPv6"
+      case 6: protoName = "TCP"
+      case 17: protoName = "UDP"
+      default: protoName = "P\(proto)"
+      }
+      return "ip=ipv6 src=\(src) dst=\(dst) proto=\(protoName) \(ports)"
+    }
+
+    return "ip=v\(versionNibble) len=\(packet.count)"
   }
 }
+
+extension NEPacketTunnelFlow: OpenVPNAdapterPacketFlow {}
 
 extension NEProviderStopReason {
   var amneziaDescription: String {
