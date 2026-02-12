@@ -36,11 +36,6 @@ ErrorCode SftpInstaller::extractConfigFromContainer(DockerContainer container, c
 {
     ErrorCode errorCode = ErrorCode::NoError;
     
-    if (!config.getSftpProtocolConfig()) {
-        SftpProtocolConfig sftpConfig;
-        config.protocolConfig = sftpConfig;
-    }
-    
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";

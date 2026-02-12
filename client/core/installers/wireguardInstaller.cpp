@@ -22,11 +22,6 @@ ErrorCode WireguardInstaller::extractConfigFromContainer(DockerContainer contain
 {
     ErrorCode errorCode = ErrorCode::NoError;
     
-    if (!config.getWireGuardProtocolConfig()) {
-        WireGuardProtocolConfig wgConfig;
-        config.protocolConfig = wgConfig;
-    }
-    
     QString serverConfig = sshSession->getTextFileFromContainer(container, credentials,
                                                                       protocols::wireguard::serverConfigPath, errorCode);
     if (errorCode != ErrorCode::NoError) {

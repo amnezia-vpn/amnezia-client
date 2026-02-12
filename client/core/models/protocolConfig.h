@@ -21,6 +21,7 @@
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
 #include "core/models/protocols/torProtocolConfig.h"
+#include "core/models/protocols/dnsProtocolConfig.h"
 
 namespace amnezia
 {
@@ -36,7 +37,8 @@ using ProtocolConfig = std::variant<
     SftpProtocolConfig,
     Socks5ProxyProtocolConfig,
     Ikev2ProtocolConfig,
-    TorProtocolConfig
+    TorProtocolConfig,
+    DnsProtocolConfig
 >;
 
 namespace ProtocolConfigUtils {
@@ -68,6 +70,9 @@ namespace ProtocolConfigUtils {
     
     TorProtocolConfig& asTor(ProtocolConfig& config);
     const TorProtocolConfig& asTor(const ProtocolConfig& config);
+    
+    DnsProtocolConfig& asDns(ProtocolConfig& config);
+    const DnsProtocolConfig& asDns(const ProtocolConfig& config);
     
     QString port(const ProtocolConfig& config);
     QString transportProto(const ProtocolConfig& config);

@@ -145,5 +145,15 @@ const TorProtocolConfig* ContainerConfig::getTorProtocolConfig() const
     return std::get_if<TorProtocolConfig>(&protocolConfig);
 }
 
+DnsProtocolConfig* ContainerConfig::getDnsProtocolConfig()
+{
+    return std::get_if<DnsProtocolConfig>(&protocolConfig);
+}
+
+const DnsProtocolConfig* ContainerConfig::getDnsProtocolConfig() const
+{
+    return std::get_if<DnsProtocolConfig>(&protocolConfig);
+}
+
 } // namespace amnezia
 

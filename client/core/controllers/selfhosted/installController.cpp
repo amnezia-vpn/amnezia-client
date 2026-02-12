@@ -842,18 +842,18 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
     }
 
     QMap<DockerContainer, ContainerConfig> preparedContainers;
-    
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
+        DockerContainer container = iterator.key();
         ContainerConfig containerConfig = iterator.value();
 
-        if (ContainerUtils::isSupportedByCurrentPlatform(iterator.key())) {
-            errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig, sshSession);
+        if (ContainerUtils::isSupportedByCurrentPlatform(container)) {
+            errorCode = prepareContainerConfig(container, credentials, containerConfig, sshSession);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }
         }
 
-        preparedContainers.insert(iterator.key(), containerConfig);
+        preparedContainers.insert(container, containerConfig);
     }
 
     SelfHostedServerConfig serverConfig;
@@ -1081,14 +1081,19 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
         QRegularExpressionMatch containerAndPortMatch = containerAndPortRegExp.match(containerInfo);
         if (containerAndPortMatch.hasMatch()) {
             QString name = containerAndPortMatch.captured(1);
-            QString port = containerAndPortMatch.captured(2);
-            QString transportProto = containerAndPortMatch.captured(3);
+            QString portStr = containerAndPortMatch.captured(2);
+            QString transportProtoStr = containerAndPortMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            ContainerConfig config;
-            config.container = container;
+            if (container == DockerContainer::None) {
+                continue;
+            }
+
+            int port = portStr.toInt();
+            TransportProto transportProto = ProtocolUtils::transportProtoFromString(transportProtoStr);
 
             auto installer = createInstaller(container);
+            ContainerConfig config = installer->createBaseConfig(container, port, transportProto);
             ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, &sshSession, config);
 
             if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
@@ -1101,14 +1106,19 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
         QRegularExpressionMatch torOrDnsRegMatch = torOrDnsRegExp.match(containerInfo);
         if (torOrDnsRegMatch.hasMatch()) {
             QString name = torOrDnsRegMatch.captured(1);
-            QString port = torOrDnsRegMatch.captured(2);
-            QString transportProto = torOrDnsRegMatch.captured(3);
+            QString portStr = torOrDnsRegMatch.captured(2);
+            QString transportProtoStr = torOrDnsRegMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            ContainerConfig config;
-            config.container = container;
+            if (container == DockerContainer::None) {
+                continue;
+            }
+
+            int port = portStr.toInt();
+            TransportProto transportProto = ProtocolUtils::transportProtoFromString(transportProtoStr);
 
             auto installer = createInstaller(container);
+            ContainerConfig config = installer->createBaseConfig(container, port, transportProto);
             ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, &sshSession, config);
 
             if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {

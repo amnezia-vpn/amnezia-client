@@ -23,8 +23,9 @@ public:
     virtual amnezia::ErrorCode extractConfigFromContainer(amnezia::DockerContainer container, const amnezia::ServerCredentials &credentials,
                                                  SshSession* sshSession, amnezia::ContainerConfig &config);
 
-protected:
     amnezia::ContainerConfig createBaseConfig(amnezia::DockerContainer container, int port, amnezia::TransportProto transportProto);
+
+protected:
 };
 
 #endif // INSTALLERBASE_H

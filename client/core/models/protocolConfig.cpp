@@ -8,6 +8,7 @@
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
+#include "core/models/protocols/dnsProtocolConfig.h"
 
 namespace amnezia
 {
@@ -37,6 +38,8 @@ Proto ProtocolConfigUtils::getProtocolType(const ProtocolConfig& config)
             return Proto::Ikev2;
         } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
             return Proto::TorWebSite;
+        } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
+            return Proto::Dns;
         }
         return Proto::Any;
     }, config);
@@ -132,6 +135,16 @@ const TorProtocolConfig& ProtocolConfigUtils::asTor(const ProtocolConfig& config
     return std::get<TorProtocolConfig>(config);
 }
 
+DnsProtocolConfig& ProtocolConfigUtils::asDns(ProtocolConfig& config)
+{
+    return std::get<DnsProtocolConfig>(config);
+}
+
+const DnsProtocolConfig& ProtocolConfigUtils::asDns(const ProtocolConfig& config)
+{
+    return std::get<DnsProtocolConfig>(config);
+}
+
 QString ProtocolConfigUtils::port(const ProtocolConfig& config)
 {
     return std::visit([](auto&& arg) -> QString {
@@ -153,6 +166,8 @@ QString ProtocolConfigUtils::port(const ProtocolConfig& config)
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             return QString();
         } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
+            return QString();
+        } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
             return QString();
         }
         return QString();
@@ -176,6 +191,8 @@ QString ProtocolConfigUtils::transportProto(const ProtocolConfig& config)
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             return QString();
         } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
+            return QString();
+        } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
             return QString();
         }
         return QString();
@@ -384,6 +401,8 @@ QJsonObject ProtocolConfigUtils::toJson(const ProtocolConfig& config, Proto prot
             return arg.toJson();
         } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
             return arg.toJson();
+        } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
+            return arg.toJson();
         }
         return QJsonObject();
     }, config);
@@ -410,6 +429,8 @@ ProtocolConfig ProtocolConfigUtils::fromJson(const QJsonObject& json, Proto prot
         return Ikev2ProtocolConfig::fromJson(json);
     case Proto::TorWebSite:
         return TorProtocolConfig::fromJson(json);
+    case Proto::Dns:
+        return DnsProtocolConfig::fromJson(json);
     default:
         return AwgProtocolConfig{};
     }

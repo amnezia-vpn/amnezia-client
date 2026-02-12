@@ -22,11 +22,6 @@ ErrorCode OpenVpnInstaller::extractConfigFromContainer(DockerContainer container
 {
     ErrorCode errorCode = ErrorCode::NoError;
     
-    if (!config.getOpenVpnProtocolConfig()) {
-        OpenVpnProtocolConfig ovpnConfig;
-        config.protocolConfig = ovpnConfig;
-    }
-    
     QString serverConfig = sshSession->getTextFileFromContainer(container, credentials,
                                                                       protocols::openvpn::serverConfigPath, errorCode);
     if (errorCode != ErrorCode::NoError) {

@@ -65,6 +65,9 @@ struct ContainerConfig {
     
     TorProtocolConfig* getTorProtocolConfig();
     const TorProtocolConfig* getTorProtocolConfig() const;
+    
+    DnsProtocolConfig* getDnsProtocolConfig();
+    const DnsProtocolConfig* getDnsProtocolConfig() const;
 };
 
 } // namespace amnezia

@@ -32,15 +32,6 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
 {
     ErrorCode errorCode = ErrorCode::NoError;
     
-    Proto proto = ContainerUtils::defaultProtocol(container);
-    if (proto == Proto::Xray && !config.getXrayProtocolConfig()) {
-        XrayProtocolConfig xrayConfig;
-        config.protocolConfig = xrayConfig;
-    } else if (proto == Proto::SSXray && !config.getSSXrayProtocolConfig()) {
-        SSXrayProtocolConfig ssXrayConfig;
-        config.protocolConfig = ssXrayConfig;
-    }
-    
     QString currentConfig = sshSession->getTextFileFromContainer(
             container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
 

@@ -48,11 +48,6 @@ ErrorCode TorInstaller::extractConfigFromContainer(DockerContainer container, co
     QString onion = stdOut;
     onion.replace("\n", "");
 
-    if (!config.getTorProtocolConfig()) {
-        TorProtocolConfig torConfig;
-        config.protocolConfig = torConfig;
-    }
-
     if (auto* torConfig = config.getTorProtocolConfig()) {
         torConfig->serverConfig.site = onion;
     }

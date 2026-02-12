@@ -65,6 +65,7 @@ InstallUiController::InstallUiController(InstallController *installController,
                                          WireGuardConfigModel *wireGuardConfigModel,
                                          OpenVpnConfigModel *openVpnConfigModel,
                                          XrayConfigModel *xrayConfigModel,
+                                         TorConfigModel *torConfigModel,
 #ifdef Q_OS_WINDOWS
                                          Ikev2ConfigModel *ikev2ConfigModel,
 #endif
@@ -456,8 +457,10 @@ bool InstallUiController::isConfigValid()
 
 void InstallUiController::updateProtocols(int serverIndex, int containerIndex)
 {
-    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    DockerContainer container = qvariant_cast<DockerContainer>(
+        m_containersModel->data(containerIndex, ContainersModel::DockerContainerRole));
     ContainerConfig containerConfig = m_serversController->getContainerConfig(serverIndex, container);
+    containerConfig.container = container;
     m_protocolModel->updateModel(containerConfig);
 }
 
@@ -509,6 +512,7 @@ void InstallUiController::updateProtocolConfigModel(int serverIndex, int protoco
         m_containersModel->data(containerIndex, ContainersModel::DockerContainerRole));
     
     ContainerConfig containerConfig = m_serversController->getContainerConfig(serverIndex, container);
+    containerConfig.container = container;
     
     Proto protocolType = static_cast<Proto>(protocolIndex);
     

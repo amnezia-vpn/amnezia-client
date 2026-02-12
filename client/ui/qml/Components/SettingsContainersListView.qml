@@ -28,11 +28,11 @@ ListViewType {
 
             clickedFunction: function() {
                 if (isInstalled) {
-                    var containerIndex = root.model.mapToSource(index)
+                    var containerIndex = root.model.mapToSource(index.row)
                     ContainersModel.setProcessedContainerIndex(containerIndex)
 
                     if (isVpnContainer) {
-                        var isThirdPartyConfig = root.model.data(index, ContainersModel.IsThirdPartyConfigRole)
+                        // var isThirdPartyConfig = root.model.data(index, ContainersModel.IsThirdPartyConfigRole)
                         if (isThirdPartyConfig) {
                             InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
@@ -51,7 +51,8 @@ ListViewType {
                     }
 
                 } else {
-                    ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
+                    var containerIndex = root.model.mapToSource(index.row)
+                    ContainersModel.setProcessedContainerIndex(containerIndex)
                     PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 }
             }

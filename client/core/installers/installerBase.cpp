@@ -88,15 +88,13 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
         }
         case Proto::Sftp: {
             SftpProtocolConfig sftpConfig;
-            sftpConfig.serverConfig.port = portStr;
-            sftpConfig.serverConfig.transportProto = transportProtoStr;
+            sftpConfig.port = portStr;
             config.protocolConfig = sftpConfig;
             break;
         }
         case Proto::Socks5Proxy: {
             Socks5ProxyProtocolConfig socks5Config;
-            socks5Config.serverConfig.port = portStr;
-            socks5Config.serverConfig.transportProto = transportProtoStr;
+            socks5Config.port = portStr;
             config.protocolConfig = socks5Config;
             break;
         }
@@ -110,8 +108,14 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             config.protocolConfig = torConfig;
             break;
         }
-        default:
+        case Proto::Dns: {
+            DnsProtocolConfig dnsConfig;
+            config.protocolConfig = dnsConfig;
             break;
+        }
+        default: {
+            break;
+        }
     }
     
     return config;

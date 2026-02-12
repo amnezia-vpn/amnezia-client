@@ -138,11 +138,6 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
 {
     ErrorCode errorCode = ErrorCode::NoError;
     
-    if (!config.getAwgProtocolConfig()) {
-        AwgProtocolConfig awgConfig;
-        config.protocolConfig = awgConfig;
-    }
-    
     // Use appropriate config path based on container type
     QString configPath = protocols::awg::serverConfigPath;
     if (container == DockerContainer::Awg) {
