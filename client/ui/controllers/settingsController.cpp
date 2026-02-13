@@ -4,7 +4,9 @@
 #include <QOperatingSystemVersion>
 
 #include "logger.h"
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
 #include "core/local-proxy/portavailabilityhelper.h"
+#endif
 #include "systemController.h"
 #include "ui/qautostart.h"
 #include "amnezia_application.h"
@@ -576,7 +578,12 @@ bool SettingsController::setLocalProxyPort(int port)
 
 bool SettingsController::isLocalProxyPortBusy(int port) const
 {
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     return !PortAvailabilityHelper::isPortAvailable(port);
+#else
+    Q_UNUSED(port);
+    return false;
+#endif
 }
 
 bool SettingsController::isLocalProxyPortUserDefined() const
@@ -586,12 +593,22 @@ bool SettingsController::isLocalProxyPortUserDefined() const
 
 int SettingsController::findFirstAvailableLocalProxyPort(int startPort) const
 {
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     const auto port = PortAvailabilityHelper::findFirstAvailablePort(startPort, kLocalProxyPortMax);
     return port ? *port : -1;
+#else
+    Q_UNUSED(startPort);
+    return -1;
+#endif
 }
 
 bool SettingsController::enableLocalProxy(const QString &ownerUuid, int port)
 {
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    Q_UNUSED(ownerUuid);
+    Q_UNUSED(port);
+    return false;
+#else
     if (port < kLocalProxyPortMin || port > kLocalProxyPortMax || ownerUuid.isEmpty()) {
         return false;
     }
@@ -620,6 +637,7 @@ bool SettingsController::enableLocalProxy(const QString &ownerUuid, int port)
     m_settings->setLocalProxyHttpEnabled(true);
 
     return true;
+#endif
 }
 
 void SettingsController::disableLocalProxy()
