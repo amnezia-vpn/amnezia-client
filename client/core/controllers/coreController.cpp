@@ -61,7 +61,12 @@ void CoreController::initLocalProxy()
             return;
         }
 
-        m_proxyServer->syncSettings();
+        if (!m_proxyServer->syncSettings()) {
+            qWarning() << "Local proxy: failed to start proxy core (Xray)";
+            m_settings->setLocalProxyHttpEnabled(false);
+            emit m_settings->localProxyStartFailed(tr("Couldn’t start the proxy due to an internal error. Try restarting the app."));
+            return;
+        }
 
         qInfo() << "Local proxy: running on 127.0.0.1:" << kLocalProxyApiPort;
     };

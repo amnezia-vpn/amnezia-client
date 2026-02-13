@@ -118,6 +118,9 @@ public slots:
     int localProxyPort() const;
     QString localProxyOwnerUuid() const;
     bool setLocalProxyPort(int port);
+    bool isLocalProxyPortBusy(int port) const;
+    bool isLocalProxyPortUserDefined() const;
+    int findFirstAvailableLocalProxyPort(int startPort) const;
     bool enableLocalProxy(const QString &ownerUuid, int port);
     void disableLocalProxy();
 

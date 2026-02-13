@@ -65,11 +65,11 @@ void ProxyServer::stopXrayProcess()
     m_service->stopXray();
 }
 
-void ProxyServer::syncSettings()
+bool ProxyServer::syncSettings()
 {
     if (!m_isRunning) {
         qDebug() << "Local proxy: syncSettings called but server is not running";
-        return;
+        return false;
     }
 
     const quint16 newProxyPort = m_settings ? m_settings->localProxyPort() : 0;
@@ -77,14 +77,21 @@ void ProxyServer::syncSettings()
 
     if (!xrayRunning) {
         qInfo() << "Local proxy: starting Xray on port" << newProxyPort;
-        m_currentProxyPort = newProxyPort;
-        startXrayProcess();
-        return;
+        const bool started = startXrayProcess();
+        if (started) {
+            m_currentProxyPort = newProxyPort;
+        }
+        return started;
     }
 
     if (m_currentProxyPort != newProxyPort) {
         qInfo() << "Local proxy: proxy port changed from" << m_currentProxyPort << "to" << newProxyPort;
-        m_currentProxyPort = newProxyPort;
-        m_service->restartXray();
+        const bool restarted = m_service->restartXray();
+        if (restarted) {
+            m_currentProxyPort = newProxyPort;
+        }
+        return restarted;
     }
+
+    return true;
 }

@@ -244,6 +244,8 @@ public:
     void setLocalProxyOwnerUuid(const QString &uuid);
     quint16 localProxyPort() const;
     void setLocalProxyPort(quint16 port);
+    bool isLocalProxyPortUserDefined() const;
+    void setLocalProxyPortUserDefined(bool userDefined);
     bool isLocalProxyHttpEnabled() const;
     void setLocalProxyHttpEnabled(bool enabled);
 

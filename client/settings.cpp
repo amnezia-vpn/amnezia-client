@@ -647,6 +647,16 @@ void Settings::setLocalProxyPort(quint16 port)
     emit localProxySettingsChanged();
 }
 
+bool Settings::isLocalProxyPortUserDefined() const
+{
+    return value("Conf/localProxyPortUserDefined", false).toBool();
+}
+
+void Settings::setLocalProxyPortUserDefined(bool userDefined)
+{
+    setValue("Conf/localProxyPortUserDefined", userDefined);
+}
+
 bool Settings::isLocalProxyHttpEnabled() const
 {
     return value("Conf/localProxyHttpEnabled", false).toBool();

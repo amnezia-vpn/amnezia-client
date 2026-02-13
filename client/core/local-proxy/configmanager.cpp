@@ -5,11 +5,11 @@
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
 #include "core/defs.h"
+#include "portavailabilityhelper.h"
 #include "proxylogger.h"
 #include "settings.h"
 #include "version.h"
 
-#include <QHostAddress>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -18,7 +18,6 @@
 #include <QSaveFile>
 #include <QSysInfo>
 #include <QStandardPaths>
-#include <QTcpServer>
 #include <QUuid>
 
 ConfigManager::ConfigManager(const std::shared_ptr<Settings> &settings)
@@ -82,18 +81,6 @@ bool ConfigManager::applyProxyPortToConfig(QJsonObject &config, int port) const
 QString ConfigManager::serializeConfig(const QJsonObject &config) const
 {
     return QString::fromUtf8(QJsonDocument(config).toJson(QJsonDocument::Compact));
-}
-
-bool ConfigManager::isPortAvailable(int port) const
-{
-    if (port < kProxyPortMin || port > kProxyPortMax) {
-        return false;
-    }
-
-    QTcpServer server;
-    const bool success = server.listen(QHostAddress::LocalHost, static_cast<quint16>(port));
-    server.close();
-    return success;
 }
 
 std::optional<ConfigManager::ConfigData> ConfigManager::buildConfig(QString &errorDescription) const
@@ -223,29 +210,30 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfigWithFetch(QSt
     data.parsedConfig = doc.object();
 
     int selectedPort = resolveProxyPort(m_settings);
-    const int startPort = selectedPort;
+    const bool isUserDefinedPort = m_settings->isLocalProxyPortUserDefined();
 
-    bool found = false;
-    for (int port = selectedPort; port <= kProxyPortMax; ++port) {
-        if (isPortAvailable(port)) {
-            selectedPort = port;
-            found = true;
-            break;
+    if (!PortAvailabilityHelper::isPortAvailable(selectedPort)) {
+        const bool canAutoSelect = !isUserDefinedPort && selectedPort == kDefaultProxyPort;
+        if (canAutoSelect) {
+            const auto freePort = PortAvailabilityHelper::findFirstAvailablePort(kDefaultProxyPort + 1, kProxyPortMax);
+            if (!freePort) {
+                errorDescription = QStringLiteral("No available local proxy port in range %1-%2")
+                                       .arg(kDefaultProxyPort + 1)
+                                       .arg(kProxyPortMax);
+                ProxyLogger::getInstance().error(errorDescription);
+                return std::nullopt;
+            }
+            selectedPort = *freePort;
+        } else {
+            errorDescription = QStringLiteral("Local proxy port %1 is already in use")
+                                   .arg(selectedPort);
+            ProxyLogger::getInstance().error(errorDescription);
+            return std::nullopt;
         }
-    }
-    if (!found) {
-        errorDescription = QStringLiteral("No available local proxy port in range %1-%2")
-                               .arg(startPort)
-                               .arg(kProxyPortMax);
-        ProxyLogger::getInstance().error(errorDescription);
-        return std::nullopt;
     }
 
     if (applyProxyPortToConfig(data.parsedConfig, selectedPort)) {
         data.serializedConfig = serializeConfig(data.parsedConfig);
-        if (m_settings && m_settings->localProxyPort() != static_cast<quint16>(selectedPort)) {
-            m_settings->setLocalProxyPort(static_cast<quint16>(selectedPort));
-        }
     } else {
         ProxyLogger::getInstance().warning(QStringLiteral("Failed to override local proxy inbound port; using original config"));
         data.serializedConfig = *serializedConfig;

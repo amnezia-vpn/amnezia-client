@@ -14,6 +14,7 @@ Item {
     property string headerTextColor: AmneziaStyle.color.mutedGray
 
     property alias errorText: errorField.text
+    property bool clearErrorOnTextChanged: true
     property bool checkEmptyText: false
     property bool rightButtonClickedOnEnter: false
 
@@ -128,7 +129,9 @@ Item {
                         }
 
                         onTextChanged: {
-                            root.errorText = ""
+                            if (root.clearErrorOnTextChanged) {
+                                root.errorText = ""
+                            }
                         }
 
                         onActiveFocusChanged: {

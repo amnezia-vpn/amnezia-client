@@ -20,7 +20,7 @@ public:
 
     bool start(quint16 port = 49490);
     void stop();
-    void syncSettings();
+    bool syncSettings();
 
 private:
     bool startXrayProcess();

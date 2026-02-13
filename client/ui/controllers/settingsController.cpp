@@ -4,6 +4,7 @@
 #include <QOperatingSystemVersion>
 
 #include "logger.h"
+#include "core/local-proxy/portavailabilityhelper.h"
 #include "systemController.h"
 #include "ui/qautostart.h"
 #include "amnezia_application.h"
@@ -17,6 +18,7 @@
 #endif
 
 namespace {
+constexpr int kDefaultProxyPort = 10808;
 constexpr int kLocalProxyPortMin = 1024;
 constexpr int kLocalProxyPortMax = 65535;
 }
@@ -563,11 +565,29 @@ bool SettingsController::setLocalProxyPort(int port)
     }
 
     if (m_settings->localProxyPort() == static_cast<quint16>(port)) {
+        m_settings->setLocalProxyPortUserDefined(true);
         return true;
     }
 
     m_settings->setLocalProxyPort(static_cast<quint16>(port));
+    m_settings->setLocalProxyPortUserDefined(true);
     return true;
+}
+
+bool SettingsController::isLocalProxyPortBusy(int port) const
+{
+    return !PortAvailabilityHelper::isPortAvailable(port);
+}
+
+bool SettingsController::isLocalProxyPortUserDefined() const
+{
+    return m_settings->isLocalProxyPortUserDefined();
+}
+
+int SettingsController::findFirstAvailableLocalProxyPort(int startPort) const
+{
+    const auto port = PortAvailabilityHelper::findFirstAvailablePort(startPort, kLocalProxyPortMax);
+    return port ? *port : -1;
 }
 
 bool SettingsController::enableLocalProxy(const QString &ownerUuid, int port)
@@ -580,8 +600,23 @@ bool SettingsController::enableLocalProxy(const QString &ownerUuid, int port)
         return false;
     }
 
+    int selectedPort = port;
+
+    const bool isUserDefinedPort = m_settings->isLocalProxyPortUserDefined();
+    if (isUserDefinedPort) {
+        if (!PortAvailabilityHelper::isPortAvailable(selectedPort)) {
+            return false;
+        }
+    } else if (selectedPort != kDefaultProxyPort && !PortAvailabilityHelper::isPortAvailable(selectedPort)) {
+        return false;
+    }
+
+    if (m_settings->localProxyPort() != static_cast<quint16>(selectedPort)) {
+        m_settings->setLocalProxyPort(static_cast<quint16>(selectedPort));
+    }
+    m_settings->setLocalProxyPortUserDefined(isUserDefinedPort);
+
     m_settings->setLocalProxyOwnerUuid(ownerUuid);
-    setLocalProxyPort(port);
     m_settings->setLocalProxyHttpEnabled(true);
 
     return true;

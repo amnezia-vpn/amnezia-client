@@ -32,7 +32,6 @@ private:
     QString tempDirectory() const;
     bool applyProxyPortToConfig(QJsonObject &config, int port) const;
     QString serializeConfig(const QJsonObject &config) const;
-    bool isPortAvailable(int port) const;
 
     std::shared_ptr<Settings> m_settings;
 };
