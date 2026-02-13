@@ -233,7 +233,7 @@ namespace amnezia
             constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
             constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
             constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
-            constexpr char defaultSpecialJunk1[] = "<b 0x525a858000010001000000000669636c6f756403636f6d0000010001c00c000100010000105a00044d583737>";
+            constexpr char defaultSpecialJunk1[] = "<r 2><b 0x858000010001000000000669636c6f756403636f6d0000010001c00c000100010000105a00044d583737>";
             constexpr char defaultSpecialJunk2[] = "";
             constexpr char defaultSpecialJunk3[] = "";
             constexpr char defaultSpecialJunk4[] = "";
