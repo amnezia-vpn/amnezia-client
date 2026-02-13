@@ -19,9 +19,6 @@ Item {
 
     property string buttonText
     property string buttonImageSource
-    property string buttonImageColor: AmneziaStyle.color.midnightBlack
-    property string buttonBackgroundColor: AmneziaStyle.color.paleGray
-    property string buttonHoveredColor: AmneziaStyle.color.lightGray
     property var clickedFunc
 
     property alias textField: textField
@@ -70,7 +67,7 @@ Item {
             border.width: 1
 
             Behavior on border.color {
-                PropertyAnimation { duration: 100 }
+                PropertyAnimation { duration: 200 }
             }
 
             RowLayout {
@@ -124,7 +121,7 @@ Item {
 
                         background: Rectangle {
                             anchors.fill: parent
-                            color: root.enabled ? root.backgroundColor : root.backgroundDisabledColor
+                            color: root.backgroundDisabledColor
                         }
 
                         onTextChanged: {
@@ -189,14 +186,6 @@ Item {
         focusPolicy: Qt.NoFocus
         text: root.buttonText
         leftImageSource: root.buttonImageSource
-        leftImageColor: root.buttonImageColor
-
-        defaultColor: root.buttonBackgroundColor
-        hoveredColor: root.buttonHoveredColor
-        pressedColor: root.buttonHoveredColor
-        disabledColor: AmneziaStyle.color.transparent
-
-        borderWidth: 0
 
         anchors.top: content.top
         anchors.bottom: content.bottom
@@ -204,7 +193,7 @@ Item {
 
         height: content.implicitHeight
         width: content.implicitHeight
-        squareLeftSide: false
+        squareLeftSide: true
 
         clickedFunc: function() {
             if (root.clickedFunc && typeof root.clickedFunc === "function") {

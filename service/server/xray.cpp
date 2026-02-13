@@ -27,7 +27,7 @@
     #include <sys/socket.h>
 #endif
 
-void Xray::startXray(const QString &cfg)
+bool Xray::startXray(const QString &cfg)
 {
     qDebug() << "Xray::startXray()";
 
@@ -40,34 +40,38 @@ void Xray::startXray(const QString &cfg)
 
     if (auto err = amnezia_xray_setsockcallback(ctxSockCallback, this); err != nullptr) {
         qDebug() << "[xray] sockopt failed: " << err;
-        free(err);
-        return;
-    }
-
-    QByteArray bytes = cfg.toUtf8();
-    if (auto err = amnezia_xray_configure(bytes.data()); err != nullptr) {
-        qDebug() << "[xray] configuration failed: " << err;
-        free(err);
-        return;
+        amnezia_xray_free(err);
+        return false;
     }
 
     amnezia_xray_setloghandler(ctxLogHandler, this);
 
+    QByteArray bytes = cfg.toUtf8();
+    if (auto err = amnezia_xray_configure(bytes.data()); err != nullptr) {
+        qDebug() << "[xray] configuration failed: " << err;
+        amnezia_xray_free(err);
+        return false;
+    }
+
     if (auto err = amnezia_xray_start(); err != nullptr) {
         qDebug() << "[xray] failed to start: " << err;
-        free(err);
-        return;
+        amnezia_xray_free(err);
+        return false;
     }
+
+    return true;
 }
 
-void Xray::stopXray()
+bool Xray::stopXray()
 {
     qDebug() << "Xray::stopXray()";
     if (auto err = amnezia_xray_stop(); err != nullptr) {
         qDebug() << "[xray] failed to stop: " << err;
-        free(err);
-        return;
+        amnezia_xray_free(err);
+        return false;
     }
+
+    return true;
 }
 
 void Xray::logHandler(char* str)

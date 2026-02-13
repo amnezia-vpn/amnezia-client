@@ -11,6 +11,7 @@
 namespace amnezia {
 
 enum PermittedProcess {
+    Invalid,
     OpenVPN,
     Wireguard,
     Tun2Socks,
@@ -19,16 +20,18 @@ enum PermittedProcess {
 
 inline QString permittedProcessPath(PermittedProcess pid)
 {
-    if (pid == PermittedProcess::OpenVPN) {
-        return Utils::openVpnExecPath();
-    } else if (pid == PermittedProcess::Wireguard) {
-        return Utils::wireguardExecPath();
-    } else if (pid == PermittedProcess::CertUtil) {
-        return Utils::certUtilPath();
-    } else if (pid == PermittedProcess::Tun2Socks) {
-        return Utils::tun2socksPath();
+    switch (pid) {
+        case PermittedProcess::OpenVPN:
+            return Utils::openVpnExecPath();
+        case PermittedProcess::Wireguard:
+            return Utils::wireguardExecPath();
+        case PermittedProcess::CertUtil:
+            return Utils::certUtilPath();
+        case PermittedProcess::Tun2Socks:
+            return Utils::tun2socksPath();
+        default:
+            return "";
     }
-    return "";
 }
 
 
@@ -48,6 +51,51 @@ inline QString getIpcProcessUrl(int pid) {
 #endif
 }
 
+inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &args) {
+    using Validator = std::function<bool(const QString&)>;
+    QMap<QString, Validator> namedArgs;
+    QList<Validator> positionalArgs;
+
+    switch (proc) {
+    case Tun2Socks:
+        namedArgs["-device"] = [](const QString& v) { return v.startsWith("tun://"); };
+        namedArgs["-proxy"] = [](const QString& v) { return v.startsWith("socks5://"); };
+        break;
+    default:
+        //FIXME
+        return args;
+    }
+
+
+    QStringList sanitized;
+
+    for (int i = 0, pos = 0; i < args.size(); i++) {
+        const auto& key = args[i];
+
+        if (const auto found = namedArgs.find(key); found != namedArgs.end()) {
+            const auto validator = found.value();
+
+            if (validator) {
+                if (i + 1 < args.size()) {
+                    const auto& value = args[i+1];
+                    if (validator(value)) {
+                        sanitized << key << value;
+                        i++;
+                    }
+                }
+            } else {
+                sanitized << key;
+            }
+        } else if (pos < positionalArgs.size()) {
+            if (const auto validator = positionalArgs[pos]; validator && validator(key)) {
+                sanitized << key;
+                pos++;
+            }
+        }
+    }
+
+    return sanitized;
+}
 
 } // namespace amnezia
 

@@ -40,6 +40,14 @@ void IpcServerProcess::start()
     m_process->waitForStarted();
 }
 
+void IpcServerProcess::terminate() {
+    m_process->terminate();
+}
+
+void IpcServerProcess::kill() {
+    m_process->kill();
+}
+
 void IpcServerProcess::close()
 {
     m_process->close();
@@ -47,7 +55,7 @@ void IpcServerProcess::close()
 
 void IpcServerProcess::setArguments(const QStringList &arguments)
 {
-    m_process->setArguments(arguments);
+    m_process->setArguments(amnezia::sanitizeArguments(m_program, arguments));
 }
 
 void IpcServerProcess::setInputChannelMode(QProcess::InputChannelMode mode)
@@ -69,7 +77,9 @@ void IpcServerProcess::setProcessChannelMode(QProcess::ProcessChannelMode mode)
 
 void IpcServerProcess::setProgram(int programId)
 {
-    m_process->setProgram(amnezia::permittedProcessPath(static_cast<amnezia::PermittedProcess>(programId)));
+    m_program = static_cast<amnezia::PermittedProcess>(programId);
+    m_process->setProgram(amnezia::permittedProcessPath(m_program));
+    m_process->setArguments({});
 }
 
 void IpcServerProcess::setWorkingDirectory(const QString &dir)
@@ -90,6 +100,22 @@ QByteArray IpcServerProcess::readAllStandardError()
 QByteArray IpcServerProcess::readAllStandardOutput()
 {
     return m_process->readAllStandardOutput();
+}
+
+bool IpcServerProcess::waitForStarted() {
+    return m_process->waitForStarted();
+}
+
+bool IpcServerProcess::waitForStarted(int msecs) {
+    return m_process->waitForStarted(msecs);
+}
+
+bool IpcServerProcess::waitForFinished() {
+    return m_process->waitForFinished();
+}
+
+bool IpcServerProcess::waitForFinished(int msecs) {
+    return m_process->waitForFinished(msecs);
 }
 
 #endif

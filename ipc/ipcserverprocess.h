@@ -1,6 +1,7 @@
 #ifndef IPCSERVERPROCESS_H
 #define IPCSERVERPROCESS_H
 
+#include "ipc.h"
 #include <QObject>
 
 #ifndef Q_OS_IOS
@@ -14,6 +15,8 @@ public:
     virtual ~IpcServerProcess();
 
     void start() override;
+    void terminate() override;
+    void kill() override;
     void close() override;
 
     void setArguments(const QStringList &arguments) override;
@@ -27,9 +30,15 @@ public:
     QByteArray readAllStandardError() override;
     QByteArray readAllStandardOutput() override;
 
+    bool waitForStarted() override;
+    bool waitForStarted(int msecs) override;
+    bool waitForFinished() override;
+    bool waitForFinished(int msecs) override;
+
 signals:
 
 private:
+    amnezia::PermittedProcess m_program = amnezia::PermittedProcess::Invalid;
     QSharedPointer<QProcess> m_process;
 };
 

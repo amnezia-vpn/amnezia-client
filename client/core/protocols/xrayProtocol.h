@@ -2,12 +2,16 @@
 #define XRAYPROTOCOL_H
 
 #include "QProcess"
+#include <QtCore/qsharedpointer.h>
+#include <QHostAddress>
+#include <QList>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 #include "core/utils/ipcClient.h"
 #include "vpnProtocol.h"
+#include "settings.h"
 
 class XrayProtocol : public VpnProtocol
 {
@@ -20,16 +24,14 @@ public:
 
 private:
     ErrorCode setupRouting();
-    ErrorCode startTun2Sock();
-    void readXrayConfiguration(const QJsonObject &configuration);
-    
+    ErrorCode startTun2Socks();
+
     QJsonObject m_xrayConfig;
-    amnezia::RouteMode m_routeMode;
-    QString m_primaryDNS;
-    QString m_secondaryDNS;
-#ifndef Q_OS_IOS
-    QSharedPointer<IpcProcessTun2SocksReplica> m_t2sProcess;
-#endif
+    Settings::RouteMode m_routeMode;
+    QList<QHostAddress> m_dnsServers;
+    QString m_remoteAddress;
+
+    QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
 };
 
 #endif // XRAYPROTOCOL_H

@@ -85,7 +85,7 @@ echo "Signing exe"
 cd %OUT_APP_DIR%
 signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe
 
-"%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
+"%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations --force-openssl "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
 "%QT_BIN_DIR:"=%\windeployqt" --release "%OUT_APP_DIR:"=%\%SERVICE_FILENAME:"=%"
 
 signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll

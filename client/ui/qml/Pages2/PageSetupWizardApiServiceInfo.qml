@@ -97,28 +97,77 @@ PageType {
                 }
             }
 
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild) && ApiServicesModel.getSelectedServiceType() === "amnezia-premium"
+
+                horizontalAlignment: Text.AlignHCenter
+                textFormat: Text.PlainText
+                color: AmneziaStyle.color.mutedGray
+                font.pixelSize: 12
+
+                text: qsTr("Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.")
+            }
+
             BasicButtonType {
                 id: continueButton
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
-                Layout.bottomMargin: 32
+                Layout.bottomMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Connect")
+                text: ApiServicesModel.getSelectedServiceType() === "amnezia-premium" ? qsTr("Subscribe Now") : qsTr("Connect")
 
                 clickedFunc: function() {
-                    var endpoint = ApiServicesModel.getStoreEndpoint()
-                    if (endpoint !== undefined && endpoint !== "") {
-                        Qt.openUrlExternally(endpoint)
-                        PageController.closePage()
-                        PageController.closePage()
-                    } else {
-                        PageController.showBusyIndicator(true)
-                        SubscriptionUiController.importServiceFromGateway()
-                        PageController.showBusyIndicator(false)
+                    PageController.showBusyIndicator(true)
+                    var result = SubscriptionUiController.importService()
+                    PageController.showBusyIndicator(false)
+
+                    if (!result) {
+                        var endpoint = ApiServicesModel.getStoreEndpoint()
+                        if (endpoint !== undefined && endpoint !== "") {
+                            Qt.openUrlExternally(endpoint)
+                            PageController.closePage()
+                            PageController.closePage()
+                        }
                     }
+                }
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
+
+                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild) && ApiServicesModel.getSelectedServiceType() === "amnezia-premium"
+
+                horizontalAlignment: Text.AlignHCenter
+                textFormat: Text.RichText
+                color: AmneziaStyle.color.mutedGray
+                font.pixelSize: 12
+
+                text: {
+                    var termsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+                    var privacyUrl = LanguageUiController.getCurrentSiteUrl("policy")
+                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: #FBB26A;\">Terms of Use</a> and <a href=\"%2\" style=\"color: #FBB26A;\">Privacy Policy</a>").arg(termsUrl).arg(privacyUrl)
+                }
+
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                 }
             }
         }

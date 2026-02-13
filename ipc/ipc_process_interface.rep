@@ -4,6 +4,8 @@
 class IpcProcessInterface
 {
     SLOT( start() );
+    SLOT( terminate() );
+    SLOT( kill() );
     SLOT( close() );
 
     SLOT( setArguments(const QStringList &arguments) );
@@ -16,6 +18,11 @@ class IpcProcessInterface
     SLOT( QByteArray readAll() );
     SLOT( QByteArray readAllStandardError() );
     SLOT( QByteArray readAllStandardOutput() );
+
+    SLOT( bool waitForFinished() );
+    SLOT( bool waitForFinished(int msecs) );
+    SLOT( bool waitForStarted() );
+    SLOT( bool waitForStarted(int msecs) );
 
 
     SIGNAL( errorOccurred(QProcess::ProcessError error) );
