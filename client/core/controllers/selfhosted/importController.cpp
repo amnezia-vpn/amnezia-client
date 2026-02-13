@@ -288,7 +288,7 @@ void ImportController::importConfig(const QJsonObject &config)
     credentials.secretData = config.value(config_key::password).toString();
 
     if (credentials.isValid() || config.contains(config_key::containers)) {
-        ServerConfig serverConfig = ServerConfigUtils::fromJson(config);
+        ServerConfig serverConfig = ServerConfig::fromJson(config);
         m_serversRepository->addServer(serverConfig);
         emit importFinished();
     } else if (config.contains(config_key::configVersion)) {
@@ -296,7 +296,7 @@ void ImportController::importConfig(const QJsonObject &config)
         QVector<ServerConfig> servers = m_serversRepository->servers();
         bool exists = false;
         for (const ServerConfig& serverConfig : servers) {
-            if (static_cast<quint16>(ServerConfigUtils::crc(serverConfig)) == crc) {
+            if (static_cast<quint16>(serverConfig.crc()) == crc) {
                 exists = true;
                 break;
             }
@@ -307,7 +307,7 @@ void ImportController::importConfig(const QJsonObject &config)
         } else {
             QJsonObject configWithCrc = config;
             configWithCrc.insert(config_key::crc, crc);
-            ServerConfig serverConfig = ServerConfigUtils::fromJson(configWithCrc);
+            ServerConfig serverConfig = ServerConfig::fromJson(configWithCrc);
             m_serversRepository->addServer(serverConfig);
             emit importFinished();
         }

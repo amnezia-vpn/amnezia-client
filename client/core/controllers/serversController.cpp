@@ -67,7 +67,7 @@ void ServersController::updateContainerConfig(int serverIndex, DockerContainer c
 void ServersController::addContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config)
 {
     ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    ServerConfigUtils::visit(serverConfig, [container, &config](auto& arg) {
+    serverConfig.visit([container, &config](auto& arg) {
         arg.containers[container] = config;
         
         if (arg.defaultContainer == DockerContainer::None
@@ -96,7 +96,7 @@ QJsonArray ServersController::getServersArray() const
     QJsonArray result;
     QVector<ServerConfig> servers = m_serversRepository->servers();
     for (const ServerConfig& server : servers) {
-        result.append(ServerConfigUtils::toJson(server));
+        result.append(server.toJson());
     }
     return result;
 }
@@ -134,17 +134,16 @@ ServerCredentials ServersController::getServerCredentials(int serverIndex) const
 QPair<QString, QString> ServersController::getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const
 {
     ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    return ServerConfigUtils::getDnsPair(serverConfig, 
-                                          isAmneziaDnsEnabled,
-                                          m_appSettingsRepository->primaryDns(),
-                                          m_appSettingsRepository->secondaryDns());
+    return serverConfig.getDnsPair(isAmneziaDnsEnabled,
+                                   m_appSettingsRepository->primaryDns(),
+                                   m_appSettingsRepository->secondaryDns());
 }
 
 bool ServersController::isServerFromApiAlreadyExists(const quint16 crc) const
 {
     QVector<ServerConfig> servers = m_serversRepository->servers();
     for (const ServerConfig& serverConfig : servers) {
-        if (static_cast<quint16>(ServerConfigUtils::crc(serverConfig)) == crc) {
+        if (static_cast<quint16>(serverConfig.crc()) == crc) {
             return true;
         }
     }
@@ -163,10 +162,11 @@ void ServersController::recomputeGatewayStacks()
     QVector<ServerConfig> servers = m_serversRepository->servers();
 
     for (const ServerConfig& serverConfig : servers) {
-        if (ServerConfigUtils::isApiV2Config(serverConfig)) {
-            const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfig);
-            const QString userCountryCode = apiV2.apiConfig.userCountryCode;
-            const QString serviceType = apiV2.serviceType();
+        if (serverConfig.isApiV2()) {
+            const ApiV2ServerConfig* apiV2 = serverConfig.as<ApiV2ServerConfig>();
+            if (!apiV2) continue;
+            const QString userCountryCode = apiV2->apiConfig.userCountryCode;
+            const QString serviceType = apiV2->serviceType();
 
             if (!userCountryCode.isEmpty()) {
                 if (!m_gatewayStacks.userCountryCodes.contains(userCountryCode)) {
@@ -218,11 +218,12 @@ bool ServersController::isServerFromApiAlreadyExists(const QString &userCountryC
 {
     QVector<ServerConfig> servers = m_serversRepository->servers();
     for (const ServerConfig& serverConfig : servers) {
-        if (ServerConfigUtils::isApiV2Config(serverConfig)) {
-            const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfig);
-            if (apiV2.apiConfig.userCountryCode == userCountryCode
-                && apiV2.serviceType() == serviceType
-                && apiV2.serviceProtocol() == serviceProtocol) {
+        if (serverConfig.isApiV2()) {
+            const ApiV2ServerConfig* apiV2 = serverConfig.as<ApiV2ServerConfig>();
+            if (!apiV2) return false;
+            if (apiV2->apiConfig.userCountryCode == userCountryCode
+                && apiV2->serviceType() == serviceType
+                && apiV2->serviceProtocol() == serviceProtocol) {
                 return true;
             }
         }
@@ -233,7 +234,7 @@ bool ServersController::isServerFromApiAlreadyExists(const QString &userCountryC
 bool ServersController::hasInstalledContainers(int serverIndex) const
 {
     ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfig);
+    QMap<DockerContainer, ContainerConfig> containers = serverConfig.containers();
     for (auto it = containers.begin(); it != containers.end(); ++it) {
         DockerContainer container = it.key();
         if (ContainerUtils::containerService(container) == ServiceType::Vpn) {

@@ -253,9 +253,9 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     
     updateApiConfigInJson(serverConfigJson, serviceType, serviceProtocol, userCountryCode, responseBody);
     
-    ServerConfig serverConfigModel = ServerConfigUtils::fromJson(serverConfigJson);
+    ServerConfig serverConfigModel = ServerConfig::fromJson(serverConfigJson);
     
-    if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
+    if (!serverConfigModel.isApiV2()) {
         return ErrorCode::InternalError;
     }
 
@@ -306,10 +306,12 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
     for (int i = 0; i < m_serversRepository->serversCount(); ++i) {
         ServerConfig existingServerConfig = m_serversRepository->server(i);
         QString existingVpnKey;
-        if (ServerConfigUtils::isApiV1Config(existingServerConfig)) {
-            existingVpnKey = ServerConfigUtils::asApiV1(existingServerConfig).vpnKey();
-        } else if (ServerConfigUtils::isApiV2Config(existingServerConfig)) {
-            existingVpnKey = ServerConfigUtils::asApiV2(existingServerConfig).vpnKey();
+        if (existingServerConfig.isApiV1()) {
+            const ApiV1ServerConfig* apiV1 = existingServerConfig.as<ApiV1ServerConfig>();
+            existingVpnKey = apiV1 ? apiV1->vpnKey() : QString();
+        } else if (existingServerConfig.isApiV2()) {
+            const ApiV2ServerConfig* apiV2 = existingServerConfig.as<ApiV2ServerConfig>();
+            existingVpnKey = apiV2 ? apiV2->vpnKey() : QString();
         }
         if (existingVpnKey == key) {
             qInfo().noquote() << "[IAP] Subscription config with the same vpn_key already exists";
@@ -335,16 +337,19 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
 
     quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
     
-    ServerConfig serverConfigModel = ServerConfigUtils::fromJson(configObject);
+    ServerConfig serverConfigModel = ServerConfig::fromJson(configObject);
     
-    if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
+    if (!serverConfigModel.isApiV2()) {
         return ErrorCode::InternalError;
     }
-    
-    ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-    apiV2.apiConfig.vpnKey = normalizedKey;
-    apiV2.apiConfig.isTestPurchase = isTestPurchase;
-    apiV2.crc = crc;
+
+    ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (!apiV2) {
+        return ErrorCode::InternalError;
+    }
+    apiV2->apiConfig.vpnKey = normalizedKey;
+    apiV2->apiConfig.isTestPurchase = isTestPurchase;
+    apiV2->crc = crc;
 
     m_serversRepository->addServer(serverConfigModel);
     serverConfig = serverConfigModel;
@@ -356,22 +361,25 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
-    if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
+    if (!serverConfigModel.isApiV2()) {
         return ErrorCode::InternalError;
     }
-    
-    const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-    QString serviceProtocol = apiV2.serviceProtocol();
+
+    const ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (!apiV2) {
+        return ErrorCode::InternalError;
+    }
+    QString serviceProtocol = apiV2->serviceProtocol();
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
     
-    QJsonObject authDataJson = apiV2.authData.toJson();
+    QJsonObject authDataJson = apiV2->authData.toJson();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
                                             m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2.apiConfig.userCountryCode,
+                                            apiV2->apiConfig.userCountryCode,
                                             newCountryCode,
-                                            apiV2.serviceType(),
+                                            apiV2->serviceType(),
                                             serviceProtocol,
                                             authDataJson };
 
@@ -394,23 +402,26 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
         return errorCode;
     }
     
-    updateApiConfigInJson(serverConfigJson, apiV2.apiConfig.serviceType, serviceProtocol, apiV2.apiConfig.userCountryCode, responseBody);
+    updateApiConfigInJson(serverConfigJson, apiV2->apiConfig.serviceType, serviceProtocol, apiV2->apiConfig.userCountryCode, responseBody);
     
-    ServerConfig newServerConfigModel = ServerConfigUtils::fromJson(serverConfigJson);
+    ServerConfig newServerConfigModel = ServerConfig::fromJson(serverConfigJson);
     
-    if (!ServerConfigUtils::isApiV2Config(newServerConfigModel)) {
+    if (!newServerConfigModel.isApiV2()) {
+        return ErrorCode::InternalError;
+    }
+
+    ApiV2ServerConfig* newApiV2 = newServerConfigModel.as<ApiV2ServerConfig>();
+    if (!newApiV2) {
         return ErrorCode::InternalError;
     }
     
-    ApiV2ServerConfig& newApiV2 = ServerConfigUtils::asApiV2(newServerConfigModel);
+    newApiV2->apiConfig.vpnKey = apiV2->apiConfig.vpnKey;
     
-    newApiV2.apiConfig.vpnKey = apiV2.apiConfig.vpnKey;
+    newApiV2->authData = apiV2->authData;
+    newApiV2->crc = apiV2->crc;
     
-    newApiV2.authData = apiV2.authData;
-    newApiV2.crc = apiV2.crc;
-    
-    if (!apiV2.name.isEmpty()) {
-        newApiV2.name = apiV2.name;
+    if (!apiV2->name.isEmpty()) {
+        newApiV2->name = apiV2->name;
     }
 
     m_serversRepository->editServer(serverIndex, newServerConfigModel);
@@ -421,24 +432,27 @@ ErrorCode SubscriptionController::revokeServiceFromGateway(int serverIndex, bool
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
-    if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
-        return ErrorCode::NoError;
-    }
-    
-    const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-    
-    if (!apiV2.isPremium()) {
+    if (!serverConfigModel.isApiV2()) {
         return ErrorCode::NoError;
     }
 
-    QJsonObject authDataJson = apiV2.authData.toJson();
+    const ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (!apiV2) {
+        return ErrorCode::NoError;
+    }
+    
+    if (!apiV2->isPremium()) {
+        return ErrorCode::NoError;
+    }
+
+    QJsonObject authDataJson = apiV2->authData.toJson();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
                                             m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2.apiConfig.userCountryCode,
-                                            apiV2.apiConfig.serverCountryCode,
-                                            apiV2.serviceType(),
+                                            apiV2->apiConfig.userCountryCode,
+                                            apiV2->apiConfig.serverCountryCode,
+                                            apiV2->serviceType(),
                                             "",
                                             authDataJson };
 
@@ -450,7 +464,7 @@ ErrorCode SubscriptionController::revokeServiceFromGateway(int serverIndex, bool
         return errorCode;
     }
 
-    ServerConfigUtils::visit(serverConfigModel, [](auto& arg) {
+    serverConfigModel.visit([](auto& arg) {
         arg.containers.clear();
     });
     m_serversRepository->editServer(serverIndex, serverConfigModel);
@@ -461,24 +475,27 @@ ErrorCode SubscriptionController::revokeExternalDevice(int serverIndex, const QS
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
-    if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
-        return ErrorCode::NoError;
-    }
-    
-    const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-    
-    if (!apiV2.isPremium()) {
+    if (!serverConfigModel.isApiV2()) {
         return ErrorCode::NoError;
     }
 
-    QJsonObject authDataJson = apiV2.authData.toJson();
+    const ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (!apiV2) {
+        return ErrorCode::NoError;
+    }
+    
+    if (!apiV2->isPremium()) {
+        return ErrorCode::NoError;
+    }
+
+    QJsonObject authDataJson = apiV2->authData.toJson();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
                                             uuid,
-                                            apiV2.apiConfig.userCountryCode,
+                                            apiV2->apiConfig.userCountryCode,
                                             serverCountryCode,
-                                            apiV2.serviceType(),
+                                            apiV2->serviceType(),
                                             "",
                                             authDataJson };
 
@@ -491,7 +508,7 @@ ErrorCode SubscriptionController::revokeExternalDevice(int serverIndex, const QS
     }
 
     if (uuid == m_appSettingsRepository->getInstallationUuid(true)) {
-        ServerConfigUtils::visit(serverConfigModel, [](auto& arg) {
+        serverConfigModel.visit([](auto& arg) {
             arg.containers.clear();
         });
         m_serversRepository->editServer(serverIndex, serverConfigModel);
@@ -504,22 +521,25 @@ ErrorCode SubscriptionController::exportNativeConfig(int serverIndex, const QStr
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
-    if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
+    if (!serverConfigModel.isApiV2()) {
         return ErrorCode::InternalError;
     }
-    
-    const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
+
+    const ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (!apiV2) {
+        return ErrorCode::InternalError;
+    }
     QString protocol = configKey::awg;
     ProtocolData protocolData = generateProtocolData(protocol);
 
-    QJsonObject authDataJson = apiV2.authData.toJson();
+    QJsonObject authDataJson = apiV2->authData.toJson();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
                                             m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2.apiConfig.userCountryCode,
+                                            apiV2->apiConfig.userCountryCode,
                                             serverCountryCode,
-                                            apiV2.serviceType(),
+                                            apiV2->serviceType(),
                                             protocol,
                                             authDataJson };
 
@@ -542,21 +562,24 @@ ErrorCode SubscriptionController::revokeNativeConfig(int serverIndex, const QStr
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
-    if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
+    if (!serverConfigModel.isApiV2()) {
         return ErrorCode::InternalError;
     }
-    
-    const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
+
+    const ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (!apiV2) {
+        return ErrorCode::InternalError;
+    }
     QString protocol = configKey::awg;
 
-    QJsonObject authDataJson = apiV2.authData.toJson();
+    QJsonObject authDataJson = apiV2->authData.toJson();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
                                             m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2.apiConfig.userCountryCode,
+                                            apiV2->apiConfig.userCountryCode,
                                             serverCountryCode,
-                                            apiV2.serviceType(),
+                                            apiV2->serviceType(),
                                             protocol,
                                             authDataJson };
 
@@ -575,12 +598,15 @@ ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex)
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
-    if (!ServerConfigUtils::isApiV1Config(serverConfigModel)) {
+    if (!serverConfigModel.isApiV1()) {
         return ErrorCode::InternalError;
     }
-    
-    const ApiV1ServerConfig& apiV1 = ServerConfigUtils::asApiV1(serverConfigModel);
-    QString serviceProtocol = apiV1.protocol;
+
+    const ApiV1ServerConfig* apiV1 = serverConfigModel.as<ApiV1ServerConfig>();
+    if (!apiV1) {
+        return ErrorCode::InternalError;
+    }
+    QString serviceProtocol = apiV1->protocol;
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
     QString installationUuid = m_appSettingsRepository->getInstallationUuid(true);
 
@@ -592,8 +618,8 @@ ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex)
     apiPayload[configKey::uuid] = installationUuid;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
     apiPayload[configKey::appVersion] = QString(APP_VERSION);
-    apiPayload[configKey::accessToken] = apiV1.apiKey;
-    apiPayload[configKey::apiEndpoint] = apiV1.apiEndpoint;
+    apiPayload[configKey::accessToken] = apiV1->apiKey;
+    apiPayload[configKey::apiEndpoint] = apiV1->apiEndpoint;
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/proxy_config"), apiPayload, responseBody);
@@ -607,16 +633,19 @@ ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex)
         return errorCode;
     }
     
-    ServerConfig newServerConfigModel = ServerConfigUtils::fromJson(serverConfigJson);
+    ServerConfig newServerConfigModel = ServerConfig::fromJson(serverConfigJson);
     
-    if (!ServerConfigUtils::isApiV1Config(newServerConfigModel)) {
+    if (!newServerConfigModel.isApiV1()) {
         return ErrorCode::InternalError;
     }
-    
-    ApiV1ServerConfig& newApiV1 = ServerConfigUtils::asApiV1(newServerConfigModel);
-    newApiV1.apiKey = apiV1.apiKey;
-    newApiV1.apiEndpoint = apiV1.apiEndpoint;
-    newApiV1.crc = apiV1.crc;
+
+    ApiV1ServerConfig* newApiV1 = newServerConfigModel.as<ApiV1ServerConfig>();
+    if (!newApiV1) {
+        return ErrorCode::InternalError;
+    }
+    newApiV1->apiKey = apiV1->apiKey;
+    newApiV1->apiEndpoint = apiV1->apiEndpoint;
+    newApiV1->crc = apiV1->crc;
 
     m_serversRepository->editServer(serverIndex, newServerConfigModel);
     return ErrorCode::NoError;
@@ -626,19 +655,19 @@ ErrorCode SubscriptionController::prepareVpnKeyExport(int serverIndex, QString &
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
-    if (ServerConfigUtils::isApiV1Config(serverConfigModel)) {
-        const ApiV1ServerConfig& apiV1 = ServerConfigUtils::asApiV1(serverConfigModel);
-        vpnKey = apiV1.vpnKey();
-    } else if (ServerConfigUtils::isApiV2Config(serverConfigModel)) {
-        ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-        vpnKey = apiV2.vpnKey();
+    if (serverConfigModel.isApiV1()) {
+        const ApiV1ServerConfig* apiV1 = serverConfigModel.as<ApiV1ServerConfig>();
+        vpnKey = apiV1 ? apiV1->vpnKey() : QString();
+    } else if (serverConfigModel.isApiV2()) {
+        ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+        vpnKey = apiV2 ? apiV2->vpnKey() : QString();
         if (vpnKey.isEmpty()) {
-            QJsonObject serverJson = ServerConfigUtils::toJson(serverConfigModel);
+            QJsonObject serverJson = serverConfigModel.toJson();
             vpnKey = apiUtils::getPremiumV2VpnKey(serverJson);
             if (vpnKey.isEmpty()) {
                 return ErrorCode::ApiConfigEmptyError;
             }
-            apiV2.apiConfig.vpnKey = vpnKey;
+            apiV2->apiConfig.vpnKey = vpnKey;
             m_serversRepository->editServer(serverIndex, serverConfigModel);
         }
     } else {
@@ -653,9 +682,9 @@ ErrorCode SubscriptionController::validateAndUpdateConfig(int serverIndex, bool 
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
     apiDefs::ConfigSource configSource;
-    if (ServerConfigUtils::isApiV1Config(serverConfigModel)) {
+    if (serverConfigModel.isApiV1()) {
         configSource = apiDefs::ConfigSource::Telegram;
-    } else if (ServerConfigUtils::isApiV2Config(serverConfigModel)) {
+    } else if (serverConfigModel.isApiV2()) {
         configSource = apiDefs::ConfigSource::AmneziaGateway;
     } else {
         return ErrorCode::NoError;
@@ -683,8 +712,8 @@ void SubscriptionController::removeApiConfig(int serverIndex)
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    QString description = ServerConfigUtils::description(serverConfigModel);
-    QString hostName = ServerConfigUtils::hostName(serverConfigModel);
+    QString description = serverConfigModel.description();
+    QString hostName = serverConfigModel.hostName();
     QString vpncName = QString("%1 (%2) %3")
                                .arg(description)
                                .arg(hostName)
@@ -693,7 +722,7 @@ void SubscriptionController::removeApiConfig(int serverIndex)
     AmneziaVPN::removeVPNC(vpncName.toStdString());
 #endif
 
-    ServerConfigUtils::visit(serverConfigModel, [](auto& arg) {
+    serverConfigModel.visit([](auto& arg) {
         arg.dns1.clear();
         arg.dns2.clear();
         arg.containers.clear();
@@ -701,9 +730,11 @@ void SubscriptionController::removeApiConfig(int serverIndex)
         arg.defaultContainer = DockerContainer::None;
     });
 
-    if (ServerConfigUtils::isApiV2Config(serverConfigModel)) {
-        ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-        apiV2.apiConfig.publicKey = ApiConfig::PublicKeyInfo{};
+    if (serverConfigModel.isApiV2()) {
+        ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+        if (apiV2) {
+            apiV2->apiConfig.publicKey = ApiConfig::PublicKeyInfo{};
+        }
     }
 
     m_serversRepository->editServer(serverIndex, serverConfigModel);
@@ -713,12 +744,15 @@ bool SubscriptionController::isApiKeyExpired(int serverIndex) const
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
-    if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
+    if (!serverConfigModel.isApiV2()) {
         return false;
     }
-    
-    const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-    const QString expiresAt = apiV2.apiConfig.publicKey.expiresAt;
+
+    const ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (!apiV2) {
+        return false;
+    }
+    const QString expiresAt = apiV2->apiConfig.publicKey.expiresAt;
     
     if (expiresAt.isEmpty()) {
         return false;
@@ -735,9 +769,11 @@ bool SubscriptionController::isApiKeyExpired(int serverIndex) const
 void SubscriptionController::setApiServiceProtocol(int serverIndex, const QString &protocolName)
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-    if (ServerConfigUtils::isApiV2Config(serverConfigModel)) {
-        ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-        apiV2.apiConfig.serviceProtocol = protocolName;
+    if (serverConfigModel.isApiV2()) {
+        ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+        if (apiV2) {
+            apiV2->apiConfig.serviceProtocol = protocolName;
+        }
         m_serversRepository->editServer(serverIndex, serverConfigModel);
     }
 }
@@ -745,9 +781,9 @@ void SubscriptionController::setApiServiceProtocol(int serverIndex, const QStrin
 bool SubscriptionController::isApiServiceProtocolVless(int serverIndex) const
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-    if (ServerConfigUtils::isApiV2Config(serverConfigModel)) {
-        const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-        return apiV2.serviceProtocol() == "vless";
+    if (serverConfigModel.isApiV2()) {
+        const ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+        return apiV2 && apiV2->serviceProtocol() == "vless";
     }
     return false;
 }
@@ -885,21 +921,24 @@ ErrorCode SubscriptionController::getAccountInfo(int serverIndex, QJsonObject &a
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
-    if (!ServerConfigUtils::isApiV2Config(serverConfigModel)) {
+    if (!serverConfigModel.isApiV2()) {
         return ErrorCode::InternalError;
     }
+
+    const ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (!apiV2) {
+        return ErrorCode::InternalError;
+    }
+    bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
     
-    const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfigModel);
-    bool isTestPurchase = apiV2.apiConfig.isTestPurchase;
-    
-    QJsonObject authDataJson = apiV2.authData.toJson();
+    QJsonObject authDataJson = apiV2->authData.toJson();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_appSettingsRepository->getAppLanguage().name().split("_").first(),
                                             m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2.apiConfig.userCountryCode,
+                                            apiV2->apiConfig.userCountryCode,
                                             "",
-                                            apiV2.serviceType(),
+                                            apiV2->serviceType(),
                                             "",
                                             authDataJson };
 

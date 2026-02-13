@@ -178,11 +178,11 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
 
-    if (ServerConfigUtils::isApiConfig(serverConfigModel)) {
+    if (serverConfigModel.isApiConfig()) {
         return ErrorCode::NoError;
     }
 
-    DockerContainer container = ServerConfigUtils::defaultContainer(serverConfigModel);
+    DockerContainer container = serverConfigModel.defaultContainer();
 
     if (container == DockerContainer::None) {
         return ErrorCode::NoInstalledContainersError;
@@ -194,7 +194,7 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
 
     auto isProtocolConfigExists = [](const ContainerConfig &containerConfig, const DockerContainer container) {
         Proto protocol = ContainerUtils::defaultProtocol(container);
-        return ProtocolConfigUtils::hasClientConfig(containerConfig.protocolConfig);
+        return containerConfig.protocolConfig.hasClientConfig();
     };
 
     if (!isProtocolConfigExists(containerConfig, container)) {
@@ -206,7 +206,7 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
         m_serversRepository->setContainerConfig(serverIndex, container, containerConfig);
         QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
         
-        QString clientId = ProtocolConfigUtils::clientId(containerConfig.protocolConfig);
+        QString clientId = containerConfig.protocolConfig.clientId();
         if (!clientId.isEmpty()) {
             emit clientAppendRequested(serverIndex, clientId, clientName, container);
         }
@@ -377,8 +377,8 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
     const Proto protocol = ContainerUtils::defaultProtocol(container);
     QStringList fixedPorts = ContainerUtils::fixedPortsForContainer(container);
 
-    QString port = ProtocolConfigUtils::portWithDefault(config.protocolConfig, protocol);
-    QString transportProto = ProtocolConfigUtils::transportProtoWithDefault(config.protocolConfig, protocol);
+    QString port = config.protocolConfig.portWithDefault(protocol);
+    QString transportProto = config.protocolConfig.transportProtoWithDefault(protocol);
     if (transportProto.isEmpty()) {
         transportProto = ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(protocol), protocol);
     }
@@ -671,7 +671,7 @@ ErrorCode InstallController::removeAllContainers(int serverIndex)
 
     if (errorCode == ErrorCode::NoError) {
         ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-        ServerConfigUtils::visit(serverConfigModel, [](auto& arg) {
+        serverConfigModel.visit([](auto& arg) {
             arg.containers.clear();
             arg.defaultContainer = DockerContainer::None;
         });
@@ -692,10 +692,10 @@ ErrorCode InstallController::removeContainer(int serverIndex, DockerContainer co
 
     if (errorCode == ErrorCode::NoError) {
         ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-        QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfigModel);
+        QMap<DockerContainer, ContainerConfig> containers = serverConfigModel.containers();
         containers.remove(container);
         
-        DockerContainer defaultContainer = ServerConfigUtils::defaultContainer(serverConfigModel);
+        DockerContainer defaultContainer = serverConfigModel.defaultContainer();
         if (defaultContainer == container) {
             if (containers.isEmpty()) {
                 defaultContainer = DockerContainer::None;
@@ -704,7 +704,7 @@ ErrorCode InstallController::removeContainer(int serverIndex, DockerContainer co
             }
         }
         
-        ServerConfigUtils::visit(serverConfigModel, [&containers, defaultContainer](auto& arg) {
+        serverConfigModel.visit([&containers, defaultContainer](auto& arg) {
             arg.containers = containers;
             arg.defaultContainer = defaultContainer;
         });
@@ -781,7 +781,7 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
     }
 
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfigModel);
+    QMap<DockerContainer, ContainerConfig> containers = serverConfigModel.containers();
     bool hasNewContainers = false;
 
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
@@ -798,11 +798,11 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
             containers.insert(iterator.key(), containerConfig);
             hasNewContainers = true;
 
-            DockerContainer defaultContainer = ServerConfigUtils::defaultContainer(serverConfigModel);
+            DockerContainer defaultContainer = serverConfigModel.defaultContainer();
             if (defaultContainer == DockerContainer::None
                 && ContainerUtils::containerService(iterator.key()) != ServiceType::Other
                 && ContainerUtils::isSupportedByCurrentPlatform(iterator.key())) {
-                ServerConfigUtils::visit(serverConfigModel, [iterator](auto& arg) {
+                serverConfigModel.visit([iterator](auto& arg) {
                     arg.defaultContainer = iterator.key();
                 });
             }
@@ -810,7 +810,7 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
     }
 
     if (hasNewContainers) {
-        ServerConfigUtils::visit(serverConfigModel, [&containers](auto& arg) {
+        serverConfigModel.visit([&containers](auto& arg) {
             arg.containers = containers;
         });
         m_serversRepository->editServer(serverIndex, serverConfigModel);

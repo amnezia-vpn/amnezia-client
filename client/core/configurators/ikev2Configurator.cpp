@@ -61,7 +61,7 @@ ProtocolConfig Ikev2Configurator::createConfig(const ServerCredentials &credenti
                                                ErrorCode &errorCode)
 {
     const Ikev2ServerConfig* serverConfig = nullptr;
-    if (auto* ikev2Config = std::get_if<Ikev2ProtocolConfig>(&containerConfig.protocolConfig)) {
+    if (auto* ikev2Config = containerConfig.protocolConfig.as<Ikev2ProtocolConfig>()) {
         serverConfig = &ikev2Config->serverConfig;
     }
 

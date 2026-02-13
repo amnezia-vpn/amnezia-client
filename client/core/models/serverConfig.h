@@ -19,64 +19,71 @@ namespace amnezia
 
 using namespace ContainerEnumNS;
 
-using ServerConfig = std::variant<
-    SelfHostedServerConfig,
-    NativeServerConfig,
-    ApiV1ServerConfig,
-    ApiV2ServerConfig
->;
-
-namespace ServerConfigUtils {
-    bool isSelfHosted(const ServerConfig& config);
-    bool isNative(const ServerConfig& config);
-    bool isApiV1Config(const ServerConfig& config);
-    bool isApiV2Config(const ServerConfig& config);
-    bool isApiConfig(const ServerConfig& config);
+struct ServerConfig {
+    using Variant = std::variant<
+        SelfHostedServerConfig,
+        NativeServerConfig,
+        ApiV1ServerConfig,
+        ApiV2ServerConfig
+    >;
     
-    SelfHostedServerConfig& asSelfHosted(ServerConfig& config);
-    const SelfHostedServerConfig& asSelfHosted(const ServerConfig& config);
+    Variant data;
     
-    NativeServerConfig& asNative(ServerConfig& config);
-    const NativeServerConfig& asNative(const ServerConfig& config);
+    ServerConfig() = default;
+    ServerConfig(const Variant& v) : data(v) {}
+    ServerConfig(Variant&& v) : data(std::move(v)) {}
     
-    ApiV1ServerConfig& asApiV1(ServerConfig& config);
-    const ApiV1ServerConfig& asApiV1(const ServerConfig& config);
+    template<typename T, typename = std::enable_if_t<!std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, ServerConfig>::value>>
+    ServerConfig(const T& v) : data(v) {}
     
-    ApiV2ServerConfig& asApiV2(ServerConfig& config);
-    const ApiV2ServerConfig& asApiV2(const ServerConfig& config);
+    template<typename T, typename = std::enable_if_t<!std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, ServerConfig>::value>>
+    ServerConfig(T&& v) : data(std::forward<T>(v)) {}
     
-    QString description(const ServerConfig& config);
-    QString hostName(const ServerConfig& config);
-    QMap<DockerContainer, ContainerConfig> containers(const ServerConfig& config);
-    DockerContainer defaultContainer(const ServerConfig& config);
-    QString dns1(const ServerConfig& config);
-    QString dns2(const ServerConfig& config);
-    bool hasContainers(const ServerConfig& config);
-    ContainerConfig containerConfig(const ServerConfig& config, DockerContainer container);
-    int crc(const ServerConfig& config);
-    int configVersion(const ServerConfig& config);
+    QString description() const;
+    QString hostName() const;
+    QMap<DockerContainer, ContainerConfig> containers() const;
+    DockerContainer defaultContainer() const;
+    QString dns1() const;
+    QString dns2() const;
+    bool hasContainers() const;
+    ContainerConfig containerConfig(DockerContainer container) const;
     
-    QJsonObject toJson(const ServerConfig& config);
-    ServerConfig fromJson(const QJsonObject& json);
+    int crc() const;
+    int configVersion() const;
+    
+    bool isSelfHosted() const;
+    bool isNative() const;
+    bool isApiV1() const;
+    bool isApiV2() const;
+    bool isApiConfig() const;
+    
+    template<typename T>
+    T* as() {
+        return std::get_if<T>(&data);
+    }
+    
+    template<typename T>
+    const T* as() const {
+        return std::get_if<T>(&data);
+    }
+    
+    QJsonObject toJson() const;
+    static ServerConfig fromJson(const QJsonObject& json);
     
     template<typename Visitor>
-    auto visit(ServerConfig& config, Visitor&& visitor)
-    {
-        return std::visit(std::forward<Visitor>(visitor), config);
+    auto visit(Visitor&& visitor) {
+        return std::visit(std::forward<Visitor>(visitor), data);
     }
     
     template<typename Visitor>
-    auto visit(const ServerConfig& config, Visitor&& visitor)
-    {
-        return std::visit(std::forward<Visitor>(visitor), config);
+    auto visit(Visitor&& visitor) const {
+        return std::visit(std::forward<Visitor>(visitor), data);
     }
     
-    // Utility function to get DNS pair for a server
-    QPair<QString, QString> getDnsPair(const ServerConfig &serverConfig, 
-                                       bool isAmneziaDnsEnabled,
+    QPair<QString, QString> getDnsPair(bool isAmneziaDnsEnabled,
                                        const QString &primaryDns,
-                                       const QString &secondaryDns);
-}
+                                       const QString &secondaryDns) const;
+};
 
 } // namespace amnezia
 

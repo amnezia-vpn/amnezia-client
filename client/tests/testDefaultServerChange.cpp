@@ -100,8 +100,8 @@ private slots:
 
         ServerConfig remainingServer1 = m_coreController->m_serversRepository->server(0);
         ServerConfig remainingServer2 = m_coreController->m_serversRepository->server(1);
-        QString desc1 = ServerConfigUtils::description(remainingServer1);
-        QString desc2 = ServerConfigUtils::description(remainingServer2);
+        QString desc1 = remainingServer1.description();
+        QString desc2 = remainingServer2.description();
         QVERIFY2(desc1 == "Xray Server", "First remaining server should be Xray");
         QVERIFY2(desc2 == "WireGuard Server", "Second remaining server should be WireGuard");
 
@@ -114,7 +114,7 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default should be index 0 (was 1, removed 0)");
 
         ServerConfig lastServer = m_coreController->m_serversRepository->server(0);
-        QString lastDesc = ServerConfigUtils::description(lastServer);
+        QString lastDesc = lastServer.description();
         QVERIFY2(lastDesc == "WireGuard Server", "Last server should be WireGuard");
     }
 };

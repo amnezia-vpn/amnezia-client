@@ -340,9 +340,9 @@ bool SubscriptionUiController::deactivateExternalDevice(const QString &uuid, con
     int serverIndex = -1;
     for (int i = 0; i < m_serversController->getServersCount(); i++) {
         ServerConfig config = m_serversController->getServerConfig(i);
-        if (ServerConfigUtils::isApiV2Config(config)) {
-            const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(config);
-            if (apiV2.apiConfig.serverCountryCode == serverCountryCode) {
+        if (config.isApiV2()) {
+            const ApiV2ServerConfig* apiV2 = config.as<ApiV2ServerConfig>();
+            if (apiV2 && apiV2->apiConfig.serverCountryCode == serverCountryCode) {
                 serverIndex = i;
                 break;
             }
@@ -422,7 +422,7 @@ bool SubscriptionUiController::getAccountInfo(int serverIndex, bool reload)
     }
 
     ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
-    QJsonObject serverConfigJson = ServerConfigUtils::toJson(serverConfig);
+    QJsonObject serverConfigJson = serverConfig.toJson();
     m_apiAccountInfoModel->updateModel(accountInfo, serverConfigJson);
 
     if (reload) {

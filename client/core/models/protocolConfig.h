@@ -3,6 +3,7 @@
 
 #include <QJsonObject>
 #include <variant>
+#include <type_traits>
 
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
@@ -28,71 +29,62 @@ namespace amnezia
 
 using Proto = ProtocolEnumNS::Proto;
 
-using ProtocolConfig = std::variant<
-    AwgProtocolConfig,
-    WireGuardProtocolConfig,
-    OpenVpnProtocolConfig,
-    XrayProtocolConfig,
-    SSXrayProtocolConfig,
-    SftpProtocolConfig,
-    Socks5ProxyProtocolConfig,
-    Ikev2ProtocolConfig,
-    TorProtocolConfig,
-    DnsProtocolConfig
->;
-
-namespace ProtocolConfigUtils {
-    Proto getProtocolType(const ProtocolConfig& config);
+struct ProtocolConfig {
+    using Variant = std::variant<
+        AwgProtocolConfig,
+        WireGuardProtocolConfig,
+        OpenVpnProtocolConfig,
+        XrayProtocolConfig,
+        SSXrayProtocolConfig,
+        SftpProtocolConfig,
+        Socks5ProxyProtocolConfig,
+        Ikev2ProtocolConfig,
+        TorProtocolConfig,
+        DnsProtocolConfig
+    >;
     
-    AwgProtocolConfig& asAwg(ProtocolConfig& config);
-    const AwgProtocolConfig& asAwg(const ProtocolConfig& config);
+    Variant data;
     
-    WireGuardProtocolConfig& asWireGuard(ProtocolConfig& config);
-    const WireGuardProtocolConfig& asWireGuard(const ProtocolConfig& config);
+    ProtocolConfig() = default;
+    ProtocolConfig(const Variant& v) : data(v) {}
+    ProtocolConfig(Variant&& v) : data(std::move(v)) {}
     
-    OpenVpnProtocolConfig& asOpenVpn(ProtocolConfig& config);
-    const OpenVpnProtocolConfig& asOpenVpn(const ProtocolConfig& config);
+    template<typename T, typename = std::enable_if_t<!std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, ProtocolConfig>::value>>
+    ProtocolConfig(const T& v) : data(v) {}
     
-    XrayProtocolConfig& asXray(ProtocolConfig& config);
-    const XrayProtocolConfig& asXray(const ProtocolConfig& config);
+    template<typename T, typename = std::enable_if_t<!std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, ProtocolConfig>::value>>
+    ProtocolConfig(T&& v) : data(std::forward<T>(v)) {}
     
-    SSXrayProtocolConfig& asSSXray(ProtocolConfig& config);
-    const SSXrayProtocolConfig& asSSXray(const ProtocolConfig& config);
+    Proto type() const;
     
-    SftpProtocolConfig& asSftp(ProtocolConfig& config);
-    const SftpProtocolConfig& asSftp(const ProtocolConfig& config);
+    QString port() const;
+    QString transportProto() const;
+    QString portWithDefault(Proto protocol) const;
+    QString transportProtoWithDefault(Proto protocol) const;
     
-    Socks5ProxyProtocolConfig& asSocks5Proxy(ProtocolConfig& config);
-    const Socks5ProxyProtocolConfig& asSocks5Proxy(const ProtocolConfig& config);
+    bool hasClientConfig() const;
+    QString clientId() const;
+    QJsonObject getClientConfigJson() const;
+    void setClientConfigJson(const QJsonObject& json);
+    void clearClientConfig();
     
-    Ikev2ProtocolConfig& asIkev2(ProtocolConfig& config);
-    const Ikev2ProtocolConfig& asIkev2(const ProtocolConfig& config);
+    QString nativeConfig() const;
     
-    TorProtocolConfig& asTor(ProtocolConfig& config);
-    const TorProtocolConfig& asTor(const ProtocolConfig& config);
+    bool isThirdPartyConfig() const;
     
-    DnsProtocolConfig& asDns(ProtocolConfig& config);
-    const DnsProtocolConfig& asDns(const ProtocolConfig& config);
+    QJsonObject toJson() const;
+    static ProtocolConfig fromJson(const QJsonObject& json, Proto type);
     
-    QString port(const ProtocolConfig& config);
-    QString transportProto(const ProtocolConfig& config);
+    template<typename T>
+    T* as() {
+        return std::get_if<T>(&data);
+    }
     
-    QString portWithDefault(const ProtocolConfig& config, Proto protocol);
-    QString transportProtoWithDefault(const ProtocolConfig& config, Proto protocol);
-    
-    bool hasClientConfig(const ProtocolConfig& config);
-    QString clientId(const ProtocolConfig& config);
-    QJsonObject getClientConfigJson(const ProtocolConfig& config);
-    void setClientConfigJson(ProtocolConfig& config, const QJsonObject& clientJson);
-    void clearClientConfig(ProtocolConfig& config);
-    
-    QString nativeConfig(const ProtocolConfig& config);
-    
-    bool isThirdPartyConfig(const ProtocolConfig& config);
-    
-    QJsonObject toJson(const ProtocolConfig& config, Proto protocolType);
-    ProtocolConfig fromJson(const QJsonObject& json, Proto protocolType);
-}
+    template<typename T>
+    const T* as() const {
+        return std::get_if<T>(&data);
+    }
+};
 
 } // namespace amnezia
 

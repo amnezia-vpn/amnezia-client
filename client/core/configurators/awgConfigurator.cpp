@@ -35,7 +35,7 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
         return AwgProtocolConfig{};
     }
     
-    WireGuardProtocolConfig* wgConfig = std::get_if<WireGuardProtocolConfig>(&wireguardConfig);
+    WireGuardProtocolConfig* wgConfig = wireguardConfig.as<WireGuardProtocolConfig>();
     if (!wgConfig || !wgConfig->clientConfig.has_value()) {
         errorCode = ErrorCode::InternalError;
         return AwgProtocolConfig{};

@@ -16,7 +16,7 @@ namespace amnezia
 using namespace ProtocolEnumNS;
 using namespace ProtocolUtils;
 
-Proto ProtocolConfigUtils::getProtocolType(const ProtocolConfig& config)
+Proto ProtocolConfig::type() const
 {
     return std::visit([](auto&& arg) -> Proto {
         using T = std::decay_t<decltype(arg)>;
@@ -42,110 +42,10 @@ Proto ProtocolConfigUtils::getProtocolType(const ProtocolConfig& config)
             return Proto::Dns;
         }
         return Proto::Any;
-    }, config);
+    }, data);
 }
 
-AwgProtocolConfig& ProtocolConfigUtils::asAwg(ProtocolConfig& config)
-{
-    return std::get<AwgProtocolConfig>(config);
-}
-
-const AwgProtocolConfig& ProtocolConfigUtils::asAwg(const ProtocolConfig& config)
-{
-    return std::get<AwgProtocolConfig>(config);
-}
-
-WireGuardProtocolConfig& ProtocolConfigUtils::asWireGuard(ProtocolConfig& config)
-{
-    return std::get<WireGuardProtocolConfig>(config);
-}
-
-const WireGuardProtocolConfig& ProtocolConfigUtils::asWireGuard(const ProtocolConfig& config)
-{
-    return std::get<WireGuardProtocolConfig>(config);
-}
-
-OpenVpnProtocolConfig& ProtocolConfigUtils::asOpenVpn(ProtocolConfig& config)
-{
-    return std::get<OpenVpnProtocolConfig>(config);
-}
-
-const OpenVpnProtocolConfig& ProtocolConfigUtils::asOpenVpn(const ProtocolConfig& config)
-{
-    return std::get<OpenVpnProtocolConfig>(config);
-}
-
-XrayProtocolConfig& ProtocolConfigUtils::asXray(ProtocolConfig& config)
-{
-    return std::get<XrayProtocolConfig>(config);
-}
-
-const XrayProtocolConfig& ProtocolConfigUtils::asXray(const ProtocolConfig& config)
-{
-    return std::get<XrayProtocolConfig>(config);
-}
-
-SSXrayProtocolConfig& ProtocolConfigUtils::asSSXray(ProtocolConfig& config)
-{
-    return std::get<SSXrayProtocolConfig>(config);
-}
-
-const SSXrayProtocolConfig& ProtocolConfigUtils::asSSXray(const ProtocolConfig& config)
-{
-    return std::get<SSXrayProtocolConfig>(config);
-}
-
-SftpProtocolConfig& ProtocolConfigUtils::asSftp(ProtocolConfig& config)
-{
-    return std::get<SftpProtocolConfig>(config);
-}
-
-const SftpProtocolConfig& ProtocolConfigUtils::asSftp(const ProtocolConfig& config)
-{
-    return std::get<SftpProtocolConfig>(config);
-}
-
-Socks5ProxyProtocolConfig& ProtocolConfigUtils::asSocks5Proxy(ProtocolConfig& config)
-{
-    return std::get<Socks5ProxyProtocolConfig>(config);
-}
-
-const Socks5ProxyProtocolConfig& ProtocolConfigUtils::asSocks5Proxy(const ProtocolConfig& config)
-{
-    return std::get<Socks5ProxyProtocolConfig>(config);
-}
-
-Ikev2ProtocolConfig& ProtocolConfigUtils::asIkev2(ProtocolConfig& config)
-{
-    return std::get<Ikev2ProtocolConfig>(config);
-}
-
-const Ikev2ProtocolConfig& ProtocolConfigUtils::asIkev2(const ProtocolConfig& config)
-{
-    return std::get<Ikev2ProtocolConfig>(config);
-}
-
-TorProtocolConfig& ProtocolConfigUtils::asTor(ProtocolConfig& config)
-{
-    return std::get<TorProtocolConfig>(config);
-}
-
-const TorProtocolConfig& ProtocolConfigUtils::asTor(const ProtocolConfig& config)
-{
-    return std::get<TorProtocolConfig>(config);
-}
-
-DnsProtocolConfig& ProtocolConfigUtils::asDns(ProtocolConfig& config)
-{
-    return std::get<DnsProtocolConfig>(config);
-}
-
-const DnsProtocolConfig& ProtocolConfigUtils::asDns(const ProtocolConfig& config)
-{
-    return std::get<DnsProtocolConfig>(config);
-}
-
-QString ProtocolConfigUtils::port(const ProtocolConfig& config)
+QString ProtocolConfig::port() const
 {
     return std::visit([](auto&& arg) -> QString {
         using T = std::decay_t<decltype(arg)>;
@@ -171,10 +71,10 @@ QString ProtocolConfigUtils::port(const ProtocolConfig& config)
             return QString();
         }
         return QString();
-    }, config);
+    }, data);
 }
 
-QString ProtocolConfigUtils::transportProto(const ProtocolConfig& config)
+QString ProtocolConfig::transportProto() const
 {
     return std::visit([](auto&& arg) -> QString {
         using T = std::decay_t<decltype(arg)>;
@@ -196,28 +96,28 @@ QString ProtocolConfigUtils::transportProto(const ProtocolConfig& config)
             return QString();
         }
         return QString();
-    }, config);
+    }, data);
 }
 
-QString ProtocolConfigUtils::portWithDefault(const ProtocolConfig& config, Proto protocol)
+QString ProtocolConfig::portWithDefault(Proto protocol) const
 {
-    QString portValue = port(config);
+    QString portValue = port();
     if (portValue.isEmpty()) {
         return QString::number(ProtocolUtils::defaultPort(protocol));
     }
     return portValue;
 }
 
-QString ProtocolConfigUtils::transportProtoWithDefault(const ProtocolConfig& config, Proto protocol)
+QString ProtocolConfig::transportProtoWithDefault(Proto protocol) const
 {
-    QString transportProtoValue = transportProto(config);
+    QString transportProtoValue = transportProto();
     if (transportProtoValue.isEmpty()) {
         return ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(protocol), protocol);
     }
     return transportProtoValue;
 }
 
-bool ProtocolConfigUtils::hasClientConfig(const ProtocolConfig& config)
+bool ProtocolConfig::hasClientConfig() const
 {
     return std::visit([](auto&& arg) -> bool {
         using T = std::decay_t<decltype(arg)>;
@@ -230,10 +130,10 @@ bool ProtocolConfigUtils::hasClientConfig(const ProtocolConfig& config)
             return arg.hasClientConfig();
         }
         return false;
-    }, config);
+    }, data);
 }
 
-QString ProtocolConfigUtils::clientId(const ProtocolConfig& config)
+QString ProtocolConfig::clientId() const
 {
     return std::visit([](auto&& arg) -> QString {
         using T = std::decay_t<decltype(arg)>;
@@ -259,10 +159,10 @@ QString ProtocolConfigUtils::clientId(const ProtocolConfig& config)
             }
         }
         return QString();
-    }, config);
+    }, data);
 }
 
-QJsonObject ProtocolConfigUtils::getClientConfigJson(const ProtocolConfig& config)
+QJsonObject ProtocolConfig::getClientConfigJson() const
 {
     return std::visit([](auto&& arg) -> QJsonObject {
         using T = std::decay_t<decltype(arg)>;
@@ -292,30 +192,30 @@ QJsonObject ProtocolConfigUtils::getClientConfigJson(const ProtocolConfig& confi
             }
         }
         return QJsonObject();
-    }, config);
+    }, data);
 }
 
-void ProtocolConfigUtils::setClientConfigJson(ProtocolConfig& config, const QJsonObject& clientJson)
+void ProtocolConfig::setClientConfigJson(const QJsonObject& json)
 {
-    std::visit([&clientJson](auto&& arg) {
+    std::visit([&json](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, AwgProtocolConfig>) {
-            arg.setClientConfig(AwgClientConfig::fromJson(clientJson));
+            arg.setClientConfig(AwgClientConfig::fromJson(json));
         } else if constexpr (std::is_same_v<T, WireGuardProtocolConfig>) {
-            arg.setClientConfig(WireGuardClientConfig::fromJson(clientJson));
+            arg.setClientConfig(WireGuardClientConfig::fromJson(json));
         } else if constexpr (std::is_same_v<T, OpenVpnProtocolConfig>) {
-            arg.setClientConfig(OpenVpnClientConfig::fromJson(clientJson));
+            arg.setClientConfig(OpenVpnClientConfig::fromJson(json));
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
-            arg.setClientConfig(XrayClientConfig::fromJson(clientJson));
+            arg.setClientConfig(XrayClientConfig::fromJson(json));
         } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
-            arg.setClientConfig(SSXrayClientConfig::fromJson(clientJson));
+            arg.setClientConfig(SSXrayClientConfig::fromJson(json));
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
-            arg.setClientConfig(Ikev2ClientConfig::fromJson(clientJson));
+            arg.setClientConfig(Ikev2ClientConfig::fromJson(json));
         }
-    }, config);
+    }, data);
 }
 
-void ProtocolConfigUtils::clearClientConfig(ProtocolConfig& config)
+void ProtocolConfig::clearClientConfig()
 {
     std::visit([](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
@@ -327,10 +227,10 @@ void ProtocolConfigUtils::clearClientConfig(ProtocolConfig& config)
                       std::is_same_v<T, Ikev2ProtocolConfig>) {
             arg.clearClientConfig();
         }
-    }, config);
+    }, data);
 }
 
-QString ProtocolConfigUtils::nativeConfig(const ProtocolConfig& config)
+QString ProtocolConfig::nativeConfig() const
 {
     return std::visit([](auto&& arg) -> QString {
         using T = std::decay_t<decltype(arg)>;
@@ -360,10 +260,10 @@ QString ProtocolConfigUtils::nativeConfig(const ProtocolConfig& config)
             }
         }
         return QString();
-    }, config);
+    }, data);
 }
 
-bool ProtocolConfigUtils::isThirdPartyConfig(const ProtocolConfig& config)
+bool ProtocolConfig::isThirdPartyConfig() const
 {
     return std::visit([](auto&& arg) -> bool {
         using T = std::decay_t<decltype(arg)>;
@@ -376,63 +276,41 @@ bool ProtocolConfigUtils::isThirdPartyConfig(const ProtocolConfig& config)
             return arg.serverConfig.isThirdPartyConfig;
         }
         return false;
-    }, config);
+    }, data);
 }
 
-QJsonObject ProtocolConfigUtils::toJson(const ProtocolConfig& config, Proto protocolType)
+QJsonObject ProtocolConfig::toJson() const
 {
-    return std::visit([protocolType](auto&& arg) -> QJsonObject {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, AwgProtocolConfig>) {
-            return arg.toJson();
-        } else if constexpr (std::is_same_v<T, WireGuardProtocolConfig>) {
-            return arg.toJson();
-        } else if constexpr (std::is_same_v<T, OpenVpnProtocolConfig>) {
-            return arg.toJson();
-        } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
-            return arg.toJson();
-        } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
-            return arg.toJson();
-        } else if constexpr (std::is_same_v<T, SftpProtocolConfig>) {
-            return arg.toJson();
-        } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
-            return arg.toJson();
-        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
-            return arg.toJson();
-        } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
-            return arg.toJson();
-        } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
-            return arg.toJson();
-        }
-        return QJsonObject();
-    }, config);
+    return std::visit([](auto&& arg) -> QJsonObject {
+        return arg.toJson();
+    }, data);
 }
 
-ProtocolConfig ProtocolConfigUtils::fromJson(const QJsonObject& json, Proto protocolType)
+ProtocolConfig ProtocolConfig::fromJson(const QJsonObject& json, Proto type)
 {
-    switch (protocolType) {
+    switch (type) {
     case Proto::Awg:
-        return AwgProtocolConfig::fromJson(json);
+        return ProtocolConfig{AwgProtocolConfig::fromJson(json)};
     case Proto::WireGuard:
-        return WireGuardProtocolConfig::fromJson(json);
+        return ProtocolConfig{WireGuardProtocolConfig::fromJson(json)};
     case Proto::OpenVpn:
-        return OpenVpnProtocolConfig::fromJson(json);
+        return ProtocolConfig{OpenVpnProtocolConfig::fromJson(json)};
     case Proto::Xray:
-        return XrayProtocolConfig::fromJson(json);
+        return ProtocolConfig{XrayProtocolConfig::fromJson(json)};
     case Proto::SSXray:
-        return SSXrayProtocolConfig::fromJson(json);
+        return ProtocolConfig{SSXrayProtocolConfig::fromJson(json)};
     case Proto::Sftp:
-        return SftpProtocolConfig::fromJson(json);
+        return ProtocolConfig{SftpProtocolConfig::fromJson(json)};
     case Proto::Socks5Proxy:
-        return Socks5ProxyProtocolConfig::fromJson(json);
+        return ProtocolConfig{Socks5ProxyProtocolConfig::fromJson(json)};
     case Proto::Ikev2:
-        return Ikev2ProtocolConfig::fromJson(json);
+        return ProtocolConfig{Ikev2ProtocolConfig::fromJson(json)};
     case Proto::TorWebSite:
-        return TorProtocolConfig::fromJson(json);
+        return ProtocolConfig{TorProtocolConfig::fromJson(json)};
     case Proto::Dns:
-        return DnsProtocolConfig::fromJson(json);
+        return ProtocolConfig{DnsProtocolConfig::fromJson(json)};
     default:
-        return AwgProtocolConfig{};
+        return ProtocolConfig{AwgProtocolConfig{}};
     }
 }
 

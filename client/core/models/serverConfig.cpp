@@ -16,159 +16,102 @@ namespace amnezia
 
 using namespace ContainerEnumNS;
 
-bool ServerConfigUtils::isSelfHosted(const ServerConfig& config)
+QString ServerConfig::description() const
 {
-    return std::holds_alternative<SelfHostedServerConfig>(config);
+    return std::visit([](const auto& v) { return v.description; }, data);
 }
 
-bool ServerConfigUtils::isNative(const ServerConfig& config)
+QString ServerConfig::hostName() const
 {
-    return std::holds_alternative<NativeServerConfig>(config);
+    return std::visit([](const auto& v) { return v.hostName; }, data);
 }
 
-bool ServerConfigUtils::isApiV1Config(const ServerConfig& config)
+QMap<DockerContainer, ContainerConfig> ServerConfig::containers() const
 {
-    return std::holds_alternative<ApiV1ServerConfig>(config);
+    return std::visit([](const auto& v) { return v.containers; }, data);
 }
 
-bool ServerConfigUtils::isApiV2Config(const ServerConfig& config)
+DockerContainer ServerConfig::defaultContainer() const
 {
-    return std::holds_alternative<ApiV2ServerConfig>(config);
+    return std::visit([](const auto& v) { return v.defaultContainer; }, data);
 }
 
-bool ServerConfigUtils::isApiConfig(const ServerConfig& config)
+QString ServerConfig::dns1() const
 {
-    return isApiV1Config(config) || isApiV2Config(config);
+    return std::visit([](const auto& v) { return v.dns1; }, data);
 }
 
-SelfHostedServerConfig& ServerConfigUtils::asSelfHosted(ServerConfig& config)
+QString ServerConfig::dns2() const
 {
-    return std::get<SelfHostedServerConfig>(config);
+    return std::visit([](const auto& v) { return v.dns2; }, data);
 }
 
-const SelfHostedServerConfig& ServerConfigUtils::asSelfHosted(const ServerConfig& config)
+bool ServerConfig::hasContainers() const
 {
-    return std::get<SelfHostedServerConfig>(config);
+    return std::visit([](const auto& v) { return v.hasContainers(); }, data);
 }
 
-NativeServerConfig& ServerConfigUtils::asNative(ServerConfig& config)
+ContainerConfig ServerConfig::containerConfig(DockerContainer container) const
 {
-    return std::get<NativeServerConfig>(config);
+    return std::visit([container](const auto& v) { return v.containerConfig(container); }, data);
 }
 
-const NativeServerConfig& ServerConfigUtils::asNative(const ServerConfig& config)
+int ServerConfig::crc() const
 {
-    return std::get<NativeServerConfig>(config);
-}
-
-ApiV1ServerConfig& ServerConfigUtils::asApiV1(ServerConfig& config)
-{
-    return std::get<ApiV1ServerConfig>(config);
-}
-
-const ApiV1ServerConfig& ServerConfigUtils::asApiV1(const ServerConfig& config)
-{
-    return std::get<ApiV1ServerConfig>(config);
-}
-
-ApiV2ServerConfig& ServerConfigUtils::asApiV2(ServerConfig& config)
-{
-    return std::get<ApiV2ServerConfig>(config);
-}
-
-const ApiV2ServerConfig& ServerConfigUtils::asApiV2(const ServerConfig& config)
-{
-    return std::get<ApiV2ServerConfig>(config);
-}
-
-QString ServerConfigUtils::description(const ServerConfig& config)
-{
-    return std::visit([](auto&& arg) -> QString {
-        return arg.description;
-    }, config);
-}
-
-QString ServerConfigUtils::hostName(const ServerConfig& config)
-{
-    return std::visit([](auto&& arg) -> QString {
-        return arg.hostName;
-    }, config);
-}
-
-QMap<DockerContainer, ContainerConfig> ServerConfigUtils::containers(const ServerConfig& config)
-{
-    return std::visit([](auto&& arg) -> QMap<DockerContainer, ContainerConfig> {
-        return arg.containers;
-    }, config);
-}
-
-DockerContainer ServerConfigUtils::defaultContainer(const ServerConfig& config)
-{
-    return std::visit([](auto&& arg) -> DockerContainer {
-        return arg.defaultContainer;
-    }, config);
-}
-
-QString ServerConfigUtils::dns1(const ServerConfig& config)
-{
-    return std::visit([](auto&& arg) -> QString {
-        return arg.dns1;
-    }, config);
-}
-
-QString ServerConfigUtils::dns2(const ServerConfig& config)
-{
-    return std::visit([](auto&& arg) -> QString {
-        return arg.dns2;
-    }, config);
-}
-
-bool ServerConfigUtils::hasContainers(const ServerConfig& config)
-{
-    return std::visit([](auto&& arg) -> bool {
-        return arg.hasContainers();
-    }, config);
-}
-
-ContainerConfig ServerConfigUtils::containerConfig(const ServerConfig& config, DockerContainer container)
-{
-    return std::visit([container](auto&& arg) -> ContainerConfig {
-        return arg.containerConfig(container);
-    }, config);
-}
-
-int ServerConfigUtils::crc(const ServerConfig& config)
-{
-    return std::visit([](auto&& arg) -> int {
-        if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, ApiV1ServerConfig> ||
-                      std::is_same_v<std::decay_t<decltype(arg)>, ApiV2ServerConfig>) {
-            return arg.crc;
+    return std::visit([](const auto& v) -> int {
+        using T = std::decay_t<decltype(v)>;
+        if constexpr (std::is_same_v<T, ApiV1ServerConfig> ||
+                      std::is_same_v<T, ApiV2ServerConfig>) {
+            return v.crc;
         }
         return 0;
-    }, config);
+    }, data);
 }
 
-int ServerConfigUtils::configVersion(const ServerConfig& config)
+int ServerConfig::configVersion() const
 {
-    return std::visit([](auto&& arg) -> int {
-        using T = std::decay_t<decltype(arg)>;
+    return std::visit([](const auto& v) -> int {
+        using T = std::decay_t<decltype(v)>;
         if constexpr (std::is_same_v<T, ApiV1ServerConfig>) {
             return apiDefs::ConfigSource::Telegram;
         } else if constexpr (std::is_same_v<T, ApiV2ServerConfig>) {
             return apiDefs::ConfigSource::AmneziaGateway;
         }
         return 0; // SelfHostedServerConfig or NativeServerConfig
-    }, config);
+    }, data);
 }
 
-QJsonObject ServerConfigUtils::toJson(const ServerConfig& config)
+bool ServerConfig::isSelfHosted() const
 {
-    return std::visit([](auto&& arg) -> QJsonObject {
-        return arg.toJson();
-    }, config);
+    return std::holds_alternative<SelfHostedServerConfig>(data);
 }
 
-ServerConfig ServerConfigUtils::fromJson(const QJsonObject& json)
+bool ServerConfig::isNative() const
+{
+    return std::holds_alternative<NativeServerConfig>(data);
+}
+
+bool ServerConfig::isApiV1() const
+{
+    return std::holds_alternative<ApiV1ServerConfig>(data);
+}
+
+bool ServerConfig::isApiV2() const
+{
+    return std::holds_alternative<ApiV2ServerConfig>(data);
+}
+
+bool ServerConfig::isApiConfig() const
+{
+    return isApiV1() || isApiV2();
+}
+
+QJsonObject ServerConfig::toJson() const
+{
+    return std::visit([](const auto& v) { return v.toJson(); }, data);
+}
+
+ServerConfig ServerConfig::fromJson(const QJsonObject& json)
 {
     apiDefs::ConfigType configType = apiUtils::getConfigType(json);
     
@@ -195,18 +138,18 @@ ServerConfig ServerConfigUtils::fromJson(const QJsonObject& json)
         }
         
         if (hasThirdPartyConfig) {
-            return NativeServerConfig::fromJson(json);
+            return ServerConfig{NativeServerConfig::fromJson(json)};
         } else {
-            return SelfHostedServerConfig::fromJson(json);
+            return ServerConfig{SelfHostedServerConfig::fromJson(json)};
         }
     }
     case apiDefs::ConfigType::AmneziaPremiumV1:
     case apiDefs::ConfigType::AmneziaFreeV2:
-        return ApiV1ServerConfig::fromJson(json);
+        return ServerConfig{ApiV1ServerConfig::fromJson(json)};
     case apiDefs::ConfigType::AmneziaPremiumV2:
     case apiDefs::ConfigType::AmneziaFreeV3:
     case apiDefs::ConfigType::ExternalPremium:
-        return ApiV2ServerConfig::fromJson(json);
+        return ServerConfig{ApiV2ServerConfig::fromJson(json)};
     default: {
         // Check if any container has isThirdPartyConfig
         bool hasThirdPartyConfig = false;
@@ -231,22 +174,21 @@ ServerConfig ServerConfigUtils::fromJson(const QJsonObject& json)
         }
         
         if (hasThirdPartyConfig) {
-            return NativeServerConfig::fromJson(json);
+            return ServerConfig{NativeServerConfig::fromJson(json)};
         } else {
-            return SelfHostedServerConfig::fromJson(json);
+            return ServerConfig{SelfHostedServerConfig::fromJson(json)};
         }
     }
     }
 }
 
-QPair<QString, QString> ServerConfigUtils::getDnsPair(const ServerConfig &serverConfig, 
-                                                       bool isAmneziaDnsEnabled,
-                                                       const QString &primaryDns,
-                                                       const QString &secondaryDns)
+QPair<QString, QString> ServerConfig::getDnsPair(bool isAmneziaDnsEnabled,
+                                                 const QString &primaryDns,
+                                                 const QString &secondaryDns) const
 {
     QPair<QString, QString> dns;
     
-    QMap<DockerContainer, ContainerConfig> serverContainers = ServerConfigUtils::containers(serverConfig);
+    QMap<DockerContainer, ContainerConfig> serverContainers = containers();
     
     bool isDnsContainerInstalled = false;
     for (auto it = serverContainers.begin(); it != serverContainers.end(); ++it) {
@@ -256,8 +198,8 @@ QPair<QString, QString> ServerConfigUtils::getDnsPair(const ServerConfig &server
         }
     }
     
-    dns.first = ServerConfigUtils::dns1(serverConfig);
-    dns.second = ServerConfigUtils::dns2(serverConfig);
+    dns.first = dns1();
+    dns.second = dns2();
     
     if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
         if (isAmneziaDnsEnabled && isDnsContainerInstalled) {

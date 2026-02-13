@@ -159,7 +159,7 @@ private slots:
             m_coreController->m_serversUiController->setProcessedServerIndex(serverIndex);
             
             ServerConfig serverConfig = m_coreController->m_serversRepository->server(serverIndex);
-            QString actualServerName = ServerConfigUtils::description(serverConfig);
+            QString actualServerName = serverConfig.description();
             QString containerName = ContainerUtils::containerHumanNames().value(DockerContainer::Awg);
             QString hostName = "test.example.com";
             

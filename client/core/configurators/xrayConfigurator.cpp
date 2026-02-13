@@ -134,7 +134,7 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
                                                ErrorCode &errorCode)
 {
     const XrayServerConfig* serverConfig = nullptr;
-    if (auto* xrayConfig = std::get_if<XrayProtocolConfig>(&containerConfig.protocolConfig)) {
+    if (auto* xrayConfig = containerConfig.protocolConfig.as<XrayProtocolConfig>()) {
         serverConfig = &xrayConfig->serverConfig;
     }
     

@@ -56,7 +56,7 @@ private slots:
         QVERIFY2(m_coreController->m_serversController->gatewayStacks().isEmpty(), "Gateway stacks should be empty for self-hosted servers");
 
         ServerConfig serverConfig = m_coreController->m_serversController->getServerConfig(0);
-        ServerConfigUtils::visit(serverConfig, [](auto& arg) {
+        serverConfig.visit([](auto& arg) {
             arg.description = "Edited Server";
         });
         m_coreController->m_serversController->editServer(0, serverConfig);

@@ -71,7 +71,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
 #ifdef AMNEZIA_DESKTOP
     ServerConfig defaultServer = m_serversRepository->server(m_serversRepository->defaultServerIndex());
-    DockerContainer container = ServerConfigUtils::defaultContainer(defaultServer);
+    DockerContainer container = defaultServer.defaultContainer();
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         if (state == Vpn::ConnectionState::Connected) {

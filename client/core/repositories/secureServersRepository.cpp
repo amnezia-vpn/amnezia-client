@@ -56,7 +56,7 @@ void SecureServersRepository::setServersArray(const QJsonArray &servers)
 void SecureServersRepository::addServer(const ServerConfig &server)
 {
     QJsonArray servers = serversArray();
-    servers.append(ServerConfigUtils::toJson(server));
+    servers.append(server.toJson());
     setServersArray(servers);
     emit serverAdded(server);
 }
@@ -67,7 +67,7 @@ void SecureServersRepository::editServer(int index, const ServerConfig &server)
     if (index < 0 || index >= servers.size()) {
         return;
     }
-    servers.replace(index, ServerConfigUtils::toJson(server));
+    servers.replace(index, server.toJson());
     setServersArray(servers);
     emit serverEdited(index, server);
 }
@@ -103,7 +103,7 @@ ServerConfig SecureServersRepository::server(int index) const
     if (index < 0 || index >= servers.size()) {
         return SelfHostedServerConfig{};
     }
-    return ServerConfigUtils::fromJson(servers.at(index).toObject());
+    return ServerConfig::fromJson(servers.at(index).toObject());
 }
 
 QVector<ServerConfig> SecureServersRepository::servers() const
@@ -111,7 +111,7 @@ QVector<ServerConfig> SecureServersRepository::servers() const
     QVector<ServerConfig> result;
     const QJsonArray &serversArray = this->serversArray();
     for (const QJsonValue &val : serversArray) {
-        result.append(ServerConfigUtils::fromJson(val.toObject()));
+        result.append(ServerConfig::fromJson(val.toObject()));
     }
     return result;
 }
@@ -151,7 +151,7 @@ void SecureServersRepository::setDefaultServer(int index)
 void SecureServersRepository::setDefaultContainer(int serverIndex, DockerContainer container)
 {
     ServerConfig config = server(serverIndex);
-    ServerConfigUtils::visit(config, [container](auto& arg) {
+    config.visit([container](auto& arg) {
         arg.defaultContainer = container;
     });
     editServer(serverIndex, config);
@@ -160,13 +160,13 @@ void SecureServersRepository::setDefaultContainer(int serverIndex, DockerContain
 ContainerConfig SecureServersRepository::containerConfig(int serverIndex, DockerContainer container) const
 {
     ServerConfig config = server(serverIndex);
-    return ServerConfigUtils::containerConfig(config, container);
+    return config.containerConfig(container);
 }
 
 void SecureServersRepository::setContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config)
 {
     ServerConfig serverConfig = server(serverIndex);
-    ServerConfigUtils::visit(serverConfig, [container, &config](auto& arg) {
+    serverConfig.visit([container, &config](auto& arg) {
         arg.containers[container] = config;
     });
     editServer(serverIndex, serverConfig);
@@ -175,9 +175,9 @@ void SecureServersRepository::setContainerConfig(int serverIndex, DockerContaine
 void SecureServersRepository::clearLastConnectionConfig(int serverIndex, DockerContainer container)
 {
     ServerConfig serverConfig = server(serverIndex);
-    ContainerConfig containerCfg = ServerConfigUtils::containerConfig(serverConfig, container);
+    ContainerConfig containerCfg = serverConfig.containerConfig(container);
     
-    ProtocolConfigUtils::clearClientConfig(containerCfg.protocolConfig);
+    containerCfg.protocolConfig.clearClientConfig();
     
     setContainerConfig(serverIndex, container, containerCfg);
 }
@@ -186,9 +186,10 @@ ServerCredentials SecureServersRepository::serverCredentials(int index) const
 {
     ServerConfig config = server(index);
     
-    if (ServerConfigUtils::isSelfHosted(config)) {
-        const SelfHostedServerConfig& selfHosted = ServerConfigUtils::asSelfHosted(config);
-        auto creds = selfHosted.credentials();
+    if (config.isSelfHosted()) {
+        const SelfHostedServerConfig* selfHosted = config.as<SelfHostedServerConfig>();
+        if (!selfHosted) return ServerCredentials();
+        auto creds = selfHosted->credentials();
         if (creds.has_value()) {
             return creds.value();
         }
@@ -209,9 +210,10 @@ bool SecureServersRepository::hasServerWithVpnKey(const QString &vpnKey) const
 
     QVector<ServerConfig> serversList = servers();
     for (const ServerConfig& serverConfig : serversList) {
-        if (ServerConfigUtils::isApiV1Config(serverConfig)) {
-            const ApiV1ServerConfig& apiV1 = ServerConfigUtils::asApiV1(serverConfig);
-            QString storedKey = apiV1.vpnKey();
+        if (serverConfig.isApiV1()) {
+            const ApiV1ServerConfig* apiV1 = serverConfig.as<ApiV1ServerConfig>();
+            if (!apiV1) continue;
+            QString storedKey = apiV1->vpnKey();
             if (storedKey.isEmpty()) {
                 continue;
             }
@@ -222,9 +224,10 @@ bool SecureServersRepository::hasServerWithVpnKey(const QString &vpnKey) const
             if (normalizedInput == normalizedStored) {
                 return true;
             }
-        } else if (ServerConfigUtils::isApiV2Config(serverConfig)) {
-            const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfig);
-            QString storedKey = apiV2.vpnKey();
+        } else if (serverConfig.isApiV2()) {
+            const ApiV2ServerConfig* apiV2 = serverConfig.as<ApiV2ServerConfig>();
+            if (!apiV2) continue;
+            QString storedKey = apiV2->vpnKey();
             if (storedKey.isEmpty()) {
                 continue;
             }

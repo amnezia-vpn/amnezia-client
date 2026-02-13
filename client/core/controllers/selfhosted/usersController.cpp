@@ -736,7 +736,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const int index, const 
     if (errorCode == ErrorCode::NoError) {
         ServerConfig serverConfig = m_serversRepository->server(serverIndex);
         ContainerConfig containerCfg = m_serversRepository->containerConfig(serverIndex, container);
-        QString containerClientId = ProtocolConfigUtils::clientId(containerCfg.protocolConfig);
+        QString containerClientId = containerCfg.protocolConfig.clientId();
 
         if (!clientId.isEmpty() && !containerClientId.isEmpty() && containerClientId.contains(clientId)) {
             emit adminConfigRevoked(container);
@@ -778,7 +778,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const ContainerConfig &
         }
     }
 
-    QString clientId = ProtocolConfigUtils::clientId(containerConfig.protocolConfig);
+    QString clientId = containerConfig.protocolConfig.clientId();
 
     int row = clientIndexById(clientId, m_clientsTable);
     if (row < 0) {

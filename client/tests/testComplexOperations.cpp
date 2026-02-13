@@ -66,13 +66,13 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Default should be index 2");
 
         ServerConfig server0 = m_coreController->m_serversController->getServerConfig(0);
-        ServerConfigUtils::visit(server0, [](auto& arg) {
+        server0.visit([](auto& arg) {
             arg.description = "Edited First Server";
         });
         m_coreController->m_serversController->editServer(0, server0);
 
         QVERIFY2(serverEditedSpy.count() == 1, "serverEdited should be emitted");
-        QString editedDesc0 = ServerConfigUtils::description(m_coreController->m_serversRepository->server(0));
+        QString editedDesc0 = m_coreController->m_serversRepository->server(0).description();
         QVERIFY2(editedDesc0 == "Edited First Server", "First server should be edited");
 
         m_coreController->m_serversController->removeServer(1);
@@ -87,13 +87,13 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default should be index 0");
 
         ServerConfig server0After = m_coreController->m_serversController->getServerConfig(0);
-        ServerConfigUtils::visit(server0After, [](auto& arg) {
+        server0After.visit([](auto& arg) {
             arg.description = "Final Edited Server";
         });
         m_coreController->m_serversController->editServer(0, server0After);
 
         QVERIFY2(serverEditedSpy.count() == 2, "serverEdited should be emitted again");
-        QString finalDesc0 = ServerConfigUtils::description(m_coreController->m_serversRepository->server(0));
+        QString finalDesc0 = m_coreController->m_serversRepository->server(0).description();
         QVERIFY2(finalDesc0 == "Final Edited Server", "First server should be edited again");
 
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "Final servers count should be 2");

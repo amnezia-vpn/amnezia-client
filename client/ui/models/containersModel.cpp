@@ -26,7 +26,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     bool isThirdPartyConfig = false;
     if (m_containers.contains(container)) {
         const ContainerConfig& config = m_containers.value(container);
-        isThirdPartyConfig = ProtocolConfigUtils::isThirdPartyConfig(config.protocolConfig);
+        isThirdPartyConfig = config.protocolConfig.isThirdPartyConfig();
     }
 
     switch (role) {

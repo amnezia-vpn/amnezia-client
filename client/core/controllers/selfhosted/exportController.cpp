@@ -30,13 +30,13 @@ ExportController::ExportResult ExportController::generateFullAccessConfig(int se
     ExportResult result;
 
     ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    ServerConfigUtils::visit(serverConfig, [](auto& arg) {
+    serverConfig.visit([](auto& arg) {
         for (auto it = arg.containers.begin(); it != arg.containers.end(); ++it) {
-            ProtocolConfigUtils::clearClientConfig(it.value().protocolConfig);
+            it.value().protocolConfig.clearClientConfig();
         }
     });
 
-    QJsonObject serverJson = ServerConfigUtils::toJson(serverConfig);
+    QJsonObject serverJson = serverConfig.toJson();
     QByteArray compressedConfig = QJsonDocument(serverJson).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = generateVpnUrl(compressedConfig);
@@ -70,36 +70,37 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
 
         containerConfig.protocolConfig = newProtocolConfig;
         
-        QString clientId = ProtocolConfigUtils::clientId(newProtocolConfig);
+        QString clientId = newProtocolConfig.clientId();
         if (!clientId.isEmpty()) {
             emit appendClientRequested(serverIndex, clientId, clientName, container);
         }
     }
 
     ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    ServerConfigUtils::visit(serverConfig, [container, containerConfig](auto& arg) {
+    serverConfig.visit([container, containerConfig](auto& arg) {
         arg.containers.clear();
         arg.containers[container] = containerConfig;
         arg.defaultContainer = container;
     });
 
-    if (ServerConfigUtils::isSelfHosted(serverConfig)) {
-        SelfHostedServerConfig& selfHosted = ServerConfigUtils::asSelfHosted(serverConfig);
-        selfHosted.userName.reset();
-        selfHosted.password.reset();
-        selfHosted.port.reset();
+    if (serverConfig.isSelfHosted()) {
+        SelfHostedServerConfig* selfHosted = serverConfig.as<SelfHostedServerConfig>();
+        if (selfHosted) {
+            selfHosted->userName.reset();
+            selfHosted->password.reset();
+            selfHosted->port.reset();
+        }
     }
 
-    auto dns = ServerConfigUtils::getDnsPair(serverConfig,
-                                              m_appSettingsRepository->useAmneziaDns(),
-                                              m_appSettingsRepository->primaryDns(),
-                                              m_appSettingsRepository->secondaryDns());
-    ServerConfigUtils::visit(serverConfig, [&dns](auto& arg) {
+    auto dns = serverConfig.getDnsPair(m_appSettingsRepository->useAmneziaDns(),
+                                       m_appSettingsRepository->primaryDns(),
+                                       m_appSettingsRepository->secondaryDns());
+    serverConfig.visit([&dns](auto& arg) {
         arg.dns1 = dns.first;
         arg.dns2 = dns.second;
     });
 
-    QJsonObject serverJson = ServerConfigUtils::toJson(serverConfig);
+    QJsonObject serverJson = serverConfig.toJson();
     QByteArray compressedConfig = QJsonDocument(serverJson).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = generateVpnUrl(compressedConfig);
@@ -122,10 +123,9 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
 
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
     ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    auto dns = ServerConfigUtils::getDnsPair(serverConfig,
-                                              m_appSettingsRepository->useAmneziaDns(),
-                                              m_appSettingsRepository->primaryDns(),
-                                              m_appSettingsRepository->secondaryDns());
+    auto dns = serverConfig.getDnsPair(m_appSettingsRepository->useAmneziaDns(),
+                                       m_appSettingsRepository->primaryDns(),
+                                       m_appSettingsRepository->secondaryDns());
 
     ContainerConfig modifiedContainerConfig = containerConfig;
     modifiedContainerConfig.container = container;
@@ -143,13 +143,13 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
         return result;
     }
     
-    QString protocolConfigString = ProtocolConfigUtils::nativeConfig(newProtocolConfig);
+    QString protocolConfigString = newProtocolConfig.nativeConfig();
     protocolConfigString = configurator->processConfigWithExportSettings(dns, protocolConfigString);
 
     result.jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg || protocol == Proto::Xray) {
-        QString clientId = ProtocolConfigUtils::clientId(newProtocolConfig);
+        QString clientId = newProtocolConfig.clientId();
         if (!clientId.isEmpty()) {
             emit appendClientRequested(serverIndex, clientId, clientName, container);
         }

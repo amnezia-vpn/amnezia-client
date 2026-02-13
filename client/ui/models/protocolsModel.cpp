@@ -94,25 +94,7 @@ Proto ProtocolsModel::getProtocolType() const
 
 QString ProtocolsModel::getRawConfig() const
 {
-    QString configString;
-    
-    if (auto* awgConfig = std::get_if<amnezia::AwgProtocolConfig>(&m_containerConfig.protocolConfig)) {
-        if (awgConfig->clientConfig.has_value() && !awgConfig->clientConfig->nativeConfig.isEmpty()) {
-            configString = awgConfig->clientConfig->nativeConfig;
-        }
-    } else if (auto* wgConfig = std::get_if<amnezia::WireGuardProtocolConfig>(&m_containerConfig.protocolConfig)) {
-        if (wgConfig->clientConfig.has_value() && !wgConfig->clientConfig->nativeConfig.isEmpty()) {
-            configString = wgConfig->clientConfig->nativeConfig;
-        }
-    } else if (auto* openVpnConfig = std::get_if<amnezia::OpenVpnProtocolConfig>(&m_containerConfig.protocolConfig)) {
-        if (openVpnConfig->clientConfig.has_value() && !openVpnConfig->clientConfig->nativeConfig.isEmpty()) {
-            configString = openVpnConfig->clientConfig->nativeConfig;
-        }
-    } else if (auto* xrayConfig = std::get_if<amnezia::XrayProtocolConfig>(&m_containerConfig.protocolConfig)) {
-        if (xrayConfig->clientConfig.has_value() && !xrayConfig->clientConfig->nativeConfig.isEmpty()) {
-            configString = xrayConfig->clientConfig->nativeConfig;
-        }
-    }
+    QString configString = m_containerConfig.protocolConfig.nativeConfig();
     
     QStringList lines = configString.replace("\r", "").split("\n");
     QString rawConfig;
@@ -124,17 +106,8 @@ QString ProtocolsModel::getRawConfig() const
 
 bool ProtocolsModel::isClientProtocolExists() const
 {
-    if (auto* awgConfig = std::get_if<amnezia::AwgProtocolConfig>(&m_containerConfig.protocolConfig)) {
-        return awgConfig->clientConfig.has_value() && !awgConfig->clientConfig->nativeConfig.isEmpty();
-    } else if (auto* wgConfig = std::get_if<amnezia::WireGuardProtocolConfig>(&m_containerConfig.protocolConfig)) {
-        return wgConfig->clientConfig.has_value() && !wgConfig->clientConfig->nativeConfig.isEmpty();
-    } else if (auto* openVpnConfig = std::get_if<amnezia::OpenVpnProtocolConfig>(&m_containerConfig.protocolConfig)) {
-        return openVpnConfig->clientConfig.has_value() && !openVpnConfig->clientConfig->nativeConfig.isEmpty();
-    } else if (auto* xrayConfig = std::get_if<amnezia::XrayProtocolConfig>(&m_containerConfig.protocolConfig)) {
-        return xrayConfig->clientConfig.has_value() && !xrayConfig->clientConfig->nativeConfig.isEmpty();
-    }
-    
-    return false;
+    return m_containerConfig.protocolConfig.hasClientConfig() && 
+           !m_containerConfig.protocolConfig.nativeConfig().isEmpty();
 }
 
 PageLoader::PageEnum ProtocolsModel::serverProtocolPage(Proto protocol) const

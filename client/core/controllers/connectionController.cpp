@@ -41,7 +41,7 @@ ErrorCode ConnectionController::prepareConnection(int serverIndex,
     }
 
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-    container = ServerConfigUtils::defaultContainer(serverConfigModel);
+    container = serverConfigModel.defaultContainer();
 
     if (!isContainerSupported(container)) {
         return ErrorCode::NotSupportedOnThisPlatform;
@@ -50,10 +50,9 @@ ErrorCode ConnectionController::prepareConnection(int serverIndex,
     ContainerConfig containerConfigModel = m_serversRepository->containerConfig(serverIndex, container);
     credentials = m_serversRepository->serverCredentials(serverIndex);
 
-    auto dns = ServerConfigUtils::getDnsPair(serverConfigModel, 
-                                              m_appSettingsRepository->useAmneziaDns(),
-                                              m_appSettingsRepository->primaryDns(),
-                                              m_appSettingsRepository->secondaryDns());
+    auto dns = serverConfigModel.getDnsPair(m_appSettingsRepository->useAmneziaDns(),
+                                            m_appSettingsRepository->primaryDns(),
+                                            m_appSettingsRepository->secondaryDns());
 
     vpnConfiguration = createConnectionConfiguration(dns, serverConfigModel, containerConfigModel, container);
 
@@ -96,10 +95,10 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
         return vpnConfiguration;
     }
 
-    bool isApiConfig = ServerConfigUtils::isApiConfig(serverConfig);
+    bool isApiConfig = serverConfig.isApiConfig();
     Proto proto = ContainerUtils::defaultProtocol(container);
 
-    QJsonObject protocolConfigJson = ProtocolConfigUtils::toJson(containerConfig.protocolConfig, proto);
+    QJsonObject protocolConfigJson = containerConfig.protocolConfig.toJson();
     QString protocolConfigString = protocolConfigJson.value(config_key::last_config).toString();
 
     SplitTunnelingSettings splitTunneling = {
@@ -125,10 +124,10 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
 
-    vpnConfiguration[config_key::hostName] = ServerConfigUtils::hostName(serverConfig);
-    vpnConfiguration[config_key::description] = ServerConfigUtils::description(serverConfig);
+    vpnConfiguration[config_key::hostName] = serverConfig.hostName();
+    vpnConfiguration[config_key::description] = serverConfig.description();
 
-    vpnConfiguration[config_key::configVersion] = ServerConfigUtils::configVersion(serverConfig);
+    vpnConfiguration[config_key::configVersion] = serverConfig.configVersion();
 
     return vpnConfiguration;
 }

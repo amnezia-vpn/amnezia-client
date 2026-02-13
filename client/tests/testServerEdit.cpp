@@ -54,7 +54,7 @@ private slots:
         QSignalSpy gatewayStacksExpandedSpy(m_coreController->m_serversController, &ServersController::gatewayStacksExpanded);
 
         ServerConfig serverConfig = m_coreController->m_serversController->getServerConfig(0);
-        ServerConfigUtils::visit(serverConfig, [](auto& arg) {
+        serverConfig.visit([](auto& arg) {
             arg.description = "Edited AWG Server";
         });
 
@@ -64,7 +64,7 @@ private slots:
         QVERIFY2(serverEditedSpy.at(0).at(0).toInt() == 0, "serverEdited should emit index 0");
 
         ServerConfig editedServer = m_coreController->m_serversRepository->server(0);
-        QString editedDesc = ServerConfigUtils::description(editedServer);
+        QString editedDesc = editedServer.description();
         QVERIFY2(editedDesc == "Edited AWG Server", "Server description should be updated");
 
         if (m_coreController->m_serversModel) {
@@ -87,7 +87,7 @@ private slots:
         QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
         ServerConfig defaultServerConfig = m_coreController->m_serversController->getServerConfig(1);
-        ServerConfigUtils::visit(defaultServerConfig, [](auto& arg) {
+        defaultServerConfig.visit([](auto& arg) {
             arg.description = "Edited Default Server";
         });
         m_coreController->m_serversController->editServer(1, defaultServerConfig);
@@ -96,7 +96,7 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default server index should remain 1");
 
         ServerConfig nonDefaultServerConfig = m_coreController->m_serversController->getServerConfig(0);
-        ServerConfigUtils::visit(nonDefaultServerConfig, [](auto& arg) {
+        nonDefaultServerConfig.visit([](auto& arg) {
             arg.description = "Edited Non-Default Server";
         });
         m_coreController->m_serversController->editServer(0, nonDefaultServerConfig);

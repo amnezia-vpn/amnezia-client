@@ -70,7 +70,7 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "First server should be default");
         
         ServerConfig server1 = m_coreController->m_serversRepository->server(0);
-        QString desc1 = ServerConfigUtils::description(server1);
+        QString desc1 = server1.description();
         QVERIFY2(desc1 == "AWG Server", "First server description should match");
         
         if (m_coreController->m_serversModel) {
@@ -92,7 +92,7 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Second server should be default");
         
         ServerConfig server2 = m_coreController->m_serversRepository->server(1);
-        QString desc2 = ServerConfigUtils::description(server2);
+        QString desc2 = server2.description();
         QVERIFY2(desc2 == "Xray Server", "Second server description should match");
         
         if (m_coreController->m_serversModel) {
@@ -114,7 +114,7 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Third server should be default");
         
         ServerConfig server3 = m_coreController->m_serversRepository->server(2);
-        QString desc3 = ServerConfigUtils::description(server3);
+        QString desc3 = server3.description();
         QVERIFY2(desc3 == "WireGuard Server", "Third server description should match");
         
         if (m_coreController->m_serversModel) {
@@ -148,8 +148,8 @@ private slots:
         
         ServerConfig server0 = m_coreController->m_serversRepository->server(0);
         ServerConfig server1 = m_coreController->m_serversRepository->server(1);
-        QString desc0 = ServerConfigUtils::description(server0);
-        QString desc1 = ServerConfigUtils::description(server1);
+        QString desc0 = server0.description();
+        QString desc1 = server1.description();
         QVERIFY2(desc0 == "AWG Server", "First server description should match");
         QVERIFY2(desc1 == "Xray Server", "Second server description should match");
 
@@ -164,7 +164,7 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "After removing first server, default index should be 0");
         
         ServerConfig remainingServer = m_coreController->m_serversRepository->server(0);
-        QString remainingDesc = ServerConfigUtils::description(remainingServer);
+        QString remainingDesc = remainingServer.description();
         QVERIFY2(remainingDesc == "Xray Server", "Remaining server should be Xray Server");
         
         if (m_coreController->m_serversModel) {

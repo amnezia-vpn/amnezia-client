@@ -59,14 +59,18 @@ void ServersUiController::editServerName(int index, const QString &name)
 {
     ServerConfig serverConfig = m_serversController->getServerConfig(index);
     
-    if (ServerConfigUtils::isApiV1Config(serverConfig)) {
-        ApiV1ServerConfig& apiV1 = ServerConfigUtils::asApiV1(serverConfig);
-        apiV1.name = name;
-    } else if (ServerConfigUtils::isApiV2Config(serverConfig)) {
-        ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(serverConfig);
-        apiV2.name = name;
+    if (serverConfig.isApiV1()) {
+        ApiV1ServerConfig* apiV1 = serverConfig.as<ApiV1ServerConfig>();
+        if (apiV1) {
+            apiV1->name = name;
+        }
+    } else if (serverConfig.isApiV2()) {
+        ApiV2ServerConfig* apiV2 = serverConfig.as<ApiV2ServerConfig>();
+        if (apiV2) {
+            apiV2->name = name;
+        }
     } else {
-        ServerConfigUtils::visit(serverConfig, [&name](auto& arg) {
+        serverConfig.visit([&name](auto& arg) {
             arg.description = name;
         });
     }
@@ -172,17 +176,17 @@ QString ServersUiController::getDefaultServerDescriptionCollapsed() const
     const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
     QString description = getDefaultServerDescription(server, defaultIndex);
     
-    if (ServerConfigUtils::isApiConfig(server)) {
+    if (server.isApiConfig()) {
         return description;
     }
     
-    DockerContainer container = ServerConfigUtils::defaultContainer(server);
+    DockerContainer container = server.defaultContainer();
     QString containerName = ContainerUtils::containerHumanNames().value(container);
     QString protocolVersion;
-    QString hostName = ServerConfigUtils::hostName(server);
+    QString hostName = server.hostName();
     
     if (ContainerUtils::isAwgContainer(container)) {
-        ContainerConfig containerConfig = ServerConfigUtils::containerConfig(server, container);
+        ContainerConfig containerConfig = server.containerConfig(container);
         if (auto* awgProtocolConfig = containerConfig.getAwgProtocolConfig()) {
             QString version = awgProtocolConfig->serverConfig.protocolVersion;
             if (version == protocols::awg::awgV2) {
@@ -205,9 +209,10 @@ QString ServersUiController::getDefaultServerImagePathCollapsed() const
     int defaultIndex = getDefaultServerIndex();
     const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
     
-    if (ServerConfigUtils::isApiV2Config(server)) {
-        const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(server);
-        const QString countryCode = apiV2.apiConfig.serverCountryCode;
+    if (server.isApiV2()) {
+        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
+        if (!apiV2) return QString();
+        const QString countryCode = apiV2->apiConfig.serverCountryCode;
         if (countryCode.isEmpty()) {
             return "";
         }
@@ -222,20 +227,20 @@ QString ServersUiController::getDefaultServerDescriptionExpanded() const
     const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
     QString description = getDefaultServerDescription(server, defaultIndex);
     
-    if (ServerConfigUtils::isApiConfig(server)) {
+    if (server.isApiConfig()) {
         return description;
     }
     
-    return description + ServerConfigUtils::hostName(server);
+    return description + server.hostName();
 }
 
 bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() const
 {
     int defaultIndex = getDefaultServerIndex();
     const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    DockerContainer defaultContainer = ServerConfigUtils::defaultContainer(server);
+    DockerContainer defaultContainer = server.defaultContainer();
     
-    ContainerConfig containerConfig = ServerConfigUtils::containerConfig(server, defaultContainer);
+    ContainerConfig containerConfig = server.containerConfig(defaultContainer);
     
     if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
         auto hasSplitTunnelingFromAllowedIps = [](const QStringList& allowedIps, const QString& nativeConfig) -> bool {
@@ -303,9 +308,9 @@ void ServersUiController::setProcessedServerIndex(int index)
         
         // Check if server is from Gateway API and update models if needed
         ServerConfig server = m_serversController->getServerConfig(index);
-        if (ServerConfigUtils::isApiV2Config(server)) {
-            const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(server);
-            if (!apiV2.apiConfig.availableCountries.isEmpty()) {
+        if (server.isApiV2()) {
+            const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
+            if (apiV2 && !apiV2->apiConfig.availableCountries.isEmpty()) {
                 emit updateApiCountryModel();
             }
             emit updateApiServicesModel();
@@ -318,10 +323,12 @@ void ServersUiController::setProcessedServerIndex(int index)
 bool ServersUiController::processedServerIsPremium() const
 {
     ServerConfig server = m_serversController->getServerConfig(m_processedServerIndex);
-    if (ServerConfigUtils::isApiV1Config(server)) {
-        return ServerConfigUtils::asApiV1(server).isPremium();
-    } else if (ServerConfigUtils::isApiV2Config(server)) {
-        return ServerConfigUtils::asApiV2(server).isPremium();
+    if (server.isApiV1()) {
+        const ApiV1ServerConfig* apiV1 = server.as<ApiV1ServerConfig>();
+        return apiV1 ? apiV1->isPremium() : false;
+    } else if (server.isApiV2()) {
+        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
+        return apiV2 ? apiV2->isPremium() : false;
     }
     return false;
 }
@@ -347,15 +354,16 @@ QString ServersUiController::getDefaultServerDescription(const ServerConfig& ser
 {
     QString description;
     
-    if (ServerConfigUtils::isApiV2Config(server)) {
-        const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(server);
-        if (!apiV2.apiConfig.serverCountryCode.isEmpty()) {
-            return apiV2.apiConfig.serverCountryName;
+    if (server.isApiV2()) {
+        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
+        if (!apiV2) return QString();
+        if (!apiV2->apiConfig.serverCountryCode.isEmpty()) {
+            return apiV2->apiConfig.serverCountryName;
         }
-        return apiV2.description;
-    } else if (ServerConfigUtils::isApiV1Config(server)) {
-        const ApiV1ServerConfig& apiV1 = ServerConfigUtils::asApiV1(server);
-        return apiV1.description;
+        return apiV2->description;
+    } else if (server.isApiV1()) {
+        const ApiV1ServerConfig* apiV1 = server.as<ApiV1ServerConfig>();
+        return apiV1 ? apiV1->description : QString();
     } else {
         if (m_serversModel->data(index, ServersModel::Roles::HasWriteAccessRole).toBool()) {
             bool isAmneziaDnsEnabled = m_settingsController->isAmneziaDnsEnabled();
@@ -374,7 +382,7 @@ QString ServersUiController::getDefaultServerDescription(const ServerConfig& ser
 bool ServersUiController::isAmneziaDnsContainerInstalled(int serverIndex) const
 {
     const ServerConfig server = m_serversController->getServerConfig(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(server);
+    QMap<DockerContainer, ContainerConfig> containers = server.containers();
     
     return containers.contains(DockerContainer::Dns);
 }
@@ -383,7 +391,7 @@ bool ServersUiController::hasServersFromGatewayApi() const
 {
     QVector<ServerConfig> servers = m_serversController->getServers();
     for (const ServerConfig &server : servers) {
-        if (ServerConfigUtils::configVersion(server) == apiDefs::ConfigSource::AmneziaGateway) {
+        if (server.configVersion() == apiDefs::ConfigSource::AmneziaGateway) {
             return true;
         }
     }
@@ -397,9 +405,10 @@ bool ServersUiController::isAdVisible() const
         return false;
     }
     ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    if (ServerConfigUtils::isApiV2Config(server)) {
-        const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(server);
-        return apiV2.apiConfig.serviceInfo.isAdVisible;
+    if (server.isApiV2()) {
+        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
+        if (!apiV2) return false;
+        return apiV2->apiConfig.serviceInfo.isAdVisible;
     }
     return false;
 }
@@ -411,9 +420,10 @@ QString ServersUiController::adHeader() const
         return QString();
     }
     ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    if (ServerConfigUtils::isApiV2Config(server)) {
-        const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(server);
-        return apiV2.apiConfig.serviceInfo.adHeader;
+    if (server.isApiV2()) {
+        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
+        if (!apiV2) return QString();
+        return apiV2->apiConfig.serviceInfo.adHeader;
     }
     return QString();
 }
@@ -425,9 +435,10 @@ QString ServersUiController::adDescription() const
         return QString();
     }
     ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    if (ServerConfigUtils::isApiV2Config(server)) {
-        const ApiV2ServerConfig& apiV2 = ServerConfigUtils::asApiV2(server);
-        return apiV2.apiConfig.serviceInfo.adDescription;
+    if (server.isApiV2()) {
+        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
+        if (!apiV2) return QString();
+        return apiV2->apiConfig.serviceInfo.adDescription;
     }
     return QString();
 }
@@ -438,7 +449,7 @@ void ServersUiController::updateContainersModel()
         return;
     }
     ServerConfig server = m_serversController->getServerConfig(m_processedServerIndex);
-    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(server);
+    QMap<DockerContainer, ContainerConfig> containers = server.containers();
     m_containersModel->updateModel(containers);
 }
 
@@ -449,7 +460,7 @@ void ServersUiController::updateDefaultServerContainersModel()
         return;
     }
     ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(server);
+    QMap<DockerContainer, ContainerConfig> containers = server.containers();
     m_defaultServerContainersModel->updateModel(containers);
 }
 
@@ -457,7 +468,7 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
 {
     QStringList servicesName;
     ServerConfig server = m_serversController->getServerConfig(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(server);
+    QMap<DockerContainer, ContainerConfig> containers = server.containers();
     
     for (auto it = containers.begin(); it != containers.end(); ++it) {
         DockerContainer container = it.key();

@@ -19,7 +19,7 @@ using namespace ProtocolUtils;
 
 Proto ContainerConfig::getProtocolType() const
 {
-    return ContainerUtils::defaultProtocol(container);
+    return protocolConfig.type();
 }
 
 QJsonObject ContainerConfig::toJson() const
@@ -28,12 +28,10 @@ QJsonObject ContainerConfig::toJson() const
     
     obj[config_key::container] = ContainerUtils::containerToString(container);
     
-    Proto protoType = getProtocolType();
+    Proto protoType = protocolConfig.type();
     QString protoName = ProtocolUtils::protoToString(protoType);
     
-    QJsonObject protoJson = ProtocolConfigUtils::toJson(protocolConfig, protoType);
-    
-    obj[protoName] = protoJson;
+    obj[protoName] = protocolConfig.toJson();
     
     return obj;
 }
@@ -50,109 +48,109 @@ ContainerConfig ContainerConfig::fromJson(const QJsonObject& json)
     
     QJsonObject protoJson = json.value(protoName).toObject();
     
-    config.protocolConfig = ProtocolConfigUtils::fromJson(protoJson, protoType);
+    config.protocolConfig = ProtocolConfig::fromJson(protoJson, protoType);
     
     return config;
 }
 
 AwgProtocolConfig* ContainerConfig::getAwgProtocolConfig()
 {
-    return std::get_if<AwgProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<AwgProtocolConfig>();
 }
 
 const AwgProtocolConfig* ContainerConfig::getAwgProtocolConfig() const
 {
-    return std::get_if<AwgProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<AwgProtocolConfig>();
 }
 
 WireGuardProtocolConfig* ContainerConfig::getWireGuardProtocolConfig()
 {
-    return std::get_if<WireGuardProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<WireGuardProtocolConfig>();
 }
 
 const WireGuardProtocolConfig* ContainerConfig::getWireGuardProtocolConfig() const
 {
-    return std::get_if<WireGuardProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<WireGuardProtocolConfig>();
 }
 
 OpenVpnProtocolConfig* ContainerConfig::getOpenVpnProtocolConfig()
 {
-    return std::get_if<OpenVpnProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<OpenVpnProtocolConfig>();
 }
 
 const OpenVpnProtocolConfig* ContainerConfig::getOpenVpnProtocolConfig() const
 {
-    return std::get_if<OpenVpnProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<OpenVpnProtocolConfig>();
 }
 
 XrayProtocolConfig* ContainerConfig::getXrayProtocolConfig()
 {
-    return std::get_if<XrayProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<XrayProtocolConfig>();
 }
 
 const XrayProtocolConfig* ContainerConfig::getXrayProtocolConfig() const
 {
-    return std::get_if<XrayProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<XrayProtocolConfig>();
 }
 
 SSXrayProtocolConfig* ContainerConfig::getSSXrayProtocolConfig()
 {
-    return std::get_if<SSXrayProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<SSXrayProtocolConfig>();
 }
 
 const SSXrayProtocolConfig* ContainerConfig::getSSXrayProtocolConfig() const
 {
-    return std::get_if<SSXrayProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<SSXrayProtocolConfig>();
 }
 
 SftpProtocolConfig* ContainerConfig::getSftpProtocolConfig()
 {
-    return std::get_if<SftpProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<SftpProtocolConfig>();
 }
 
 const SftpProtocolConfig* ContainerConfig::getSftpProtocolConfig() const
 {
-    return std::get_if<SftpProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<SftpProtocolConfig>();
 }
 
 Socks5ProxyProtocolConfig* ContainerConfig::getSocks5ProxyProtocolConfig()
 {
-    return std::get_if<Socks5ProxyProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<Socks5ProxyProtocolConfig>();
 }
 
 const Socks5ProxyProtocolConfig* ContainerConfig::getSocks5ProxyProtocolConfig() const
 {
-    return std::get_if<Socks5ProxyProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<Socks5ProxyProtocolConfig>();
 }
 
 Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig()
 {
-    return std::get_if<Ikev2ProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<Ikev2ProtocolConfig>();
 }
 
 const Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig() const
 {
-    return std::get_if<Ikev2ProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<Ikev2ProtocolConfig>();
 }
 
 TorProtocolConfig* ContainerConfig::getTorProtocolConfig()
 {
-    return std::get_if<TorProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<TorProtocolConfig>();
 }
 
 const TorProtocolConfig* ContainerConfig::getTorProtocolConfig() const
 {
-    return std::get_if<TorProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<TorProtocolConfig>();
 }
 
 DnsProtocolConfig* ContainerConfig::getDnsProtocolConfig()
 {
-    return std::get_if<DnsProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<DnsProtocolConfig>();
 }
 
 const DnsProtocolConfig* ContainerConfig::getDnsProtocolConfig() const
 {
-    return std::get_if<DnsProtocolConfig>(&protocolConfig);
+    return protocolConfig.as<DnsProtocolConfig>();
 }
 
 } // namespace amnezia

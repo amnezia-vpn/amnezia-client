@@ -134,7 +134,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
 
         int serverIndex = m_serversController->getServersCount() - 1;
         ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
-        QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfig);
+        QMap<DockerContainer, ContainerConfig> containers = serverConfig.containers();
         int containersCount = containers.size();
 
         if (wasContainerInstalled) {
@@ -150,7 +150,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         emit installServerFinished(finishMessage);
     } else {
         ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
-        QMap<DockerContainer, ContainerConfig> containers = ServerConfigUtils::containers(serverConfig);
+        QMap<DockerContainer, ContainerConfig> containers = serverConfig.containers();
         int containersCount = containers.size();
 
         bool wasContainerInstalled = false;
@@ -162,7 +162,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         }
 
         ServerConfig newServerConfig = m_serversController->getServerConfig(serverIndex);
-        QMap<DockerContainer, ContainerConfig> newContainers = ServerConfigUtils::containers(newServerConfig);
+        QMap<DockerContainer, ContainerConfig> newContainers = newServerConfig.containers();
         int newContainersCount = newContainers.size();
 
         bool hasNewContainers = (newContainersCount - containersCount) > (wasContainerInstalled ? 1 : 0);
@@ -185,14 +185,14 @@ void InstallUiController::install(DockerContainer container, int port, Transport
 void InstallUiController::scanServerForInstalledContainers(int serverIndex)
 {
     ServerConfig serverBefore = m_serversController->getServerConfig(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containersBefore = ServerConfigUtils::containers(serverBefore);
+    QMap<DockerContainer, ContainerConfig> containersBefore = serverBefore.containers();
     int containersCountBefore = containersBefore.size();
 
     ErrorCode errorCode = m_installController->scanServerForInstalledContainers(serverIndex);
 
     if (errorCode == ErrorCode::NoError) {
         ServerConfig serverAfter = m_serversController->getServerConfig(serverIndex);
-        QMap<DockerContainer, ContainerConfig> containersAfter = ServerConfigUtils::containers(serverAfter);
+        QMap<DockerContainer, ContainerConfig> containersAfter = serverAfter.containers();
         int containersCountAfter = containersAfter.size();
 
         bool isInstalledContainerAdded = containersCountAfter > containersCountBefore;
@@ -419,7 +419,7 @@ bool InstallUiController::isConfigValid()
 {
     int serverIndex = m_serversController->getDefaultServerIndex();
     ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
-    QJsonObject serverConfigObject = ServerConfigUtils::toJson(serverConfig);
+    QJsonObject serverConfigObject = serverConfig.toJson();
 
     if (apiUtils::isServerFromApi(serverConfigObject)) {
         return true;

@@ -59,7 +59,7 @@ private slots:
         QVERIFY2(modelDesc1 == "AWG Server", "Model should have correct server name");
 
         ServerConfig serverConfig = m_coreController->m_serversController->getServerConfig(0);
-        ServerConfigUtils::visit(serverConfig, [](auto& arg) {
+        serverConfig.visit([](auto& arg) {
             arg.description = "Edited AWG Server";
         });
         m_coreController->m_serversController->editServer(0, serverConfig);
