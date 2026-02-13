@@ -4,6 +4,7 @@ set(AMNEZIA_IOS_APPLETV ${AMNEZIA_IOS_ENABLE_APPLETV_TARGET})
 
 if(AMNEZIA_IOS_APPLETV)
     message("Apple TV target mode is ON")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 17.0)
     set(QT_NO_SET_DEFAULT_IOS_LAUNCH_SCREEN TRUE)
     set(QT_NO_ADD_IOS_LAUNCH_SCREEN_TO_BUNDLE TRUE)
 else()
@@ -88,6 +89,7 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks"
+    XCODE_EMBED_APP_EXTENSIONS networkextension
 )
 
 if(AMNEZIA_IOS_APPLETV)
@@ -95,12 +97,17 @@ if(AMNEZIA_IOS_APPLETV)
         XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "appletvos appletvsimulator"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "3"
         XCODE_ATTRIBUTE_TVOS_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}"
+        XCODE_ATTRIBUTE_SDKROOT "appletvos"
+        XCODE_ATTRIBUTE_SDKROOT[sdk=appletvos*] "appletvos"
+        XCODE_ATTRIBUTE_SDKROOT[sdk=appletvsimulator*] "appletvsimulator"
+        XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS "$(inherited) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)"
+        XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS[sdk=appletvos*] "$(inherited) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)"
+        XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS[sdk=appletvsimulator*] "$(inherited) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)"
     )
 else()
     set_target_properties(${PROJECT} PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/ios/app/main.entitlements"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
-        XCODE_EMBED_APP_EXTENSIONS networkextension
     )
 endif()
 

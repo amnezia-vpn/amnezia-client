@@ -3,7 +3,9 @@ import NetworkExtension
 import Network
 import os
 import Darwin
+#if !os(tvOS)
 import OpenVPNAdapter
+#endif
 
 enum TunnelProtoType: String {
   case wireguard, openvpn, xray
@@ -37,9 +39,11 @@ struct Constants {
 }
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
+#if !os(tvOS)
     var wgAdapter: WireGuardAdapter?
     var ovpnAdapter: OpenVPNAdapter?
     private lazy var openVPNPacketFlowAdapter = PacketTunnelFlowAdapter(flow: packetFlow)
+#endif
     private let pathMonitorQueue = DispatchQueue(label: Constants.processQueueName + ".path-monitor")
     private let pathMonitor = NWPathMonitor()
     private var didReceiveInitialPathUpdate = false
@@ -49,7 +53,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     var splitTunnelType: Int?
     var splitTunnelSites: [String]?
 
+#if !os(tvOS)
     let vpnReachability = OpenVPNReachability()
+#endif
 
     var startHandler: ((Error?) -> Void)?
     var stopHandler: (() -> Void)?
@@ -57,9 +63,11 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     
     var activeIfaceIdx: UInt32 = 0
 
+#if !os(tvOS)
     func openVPNPacketFlow() -> OpenVPNAdapterPacketFlow {
         openVPNPacketFlowAdapter
     }
+#endif
 
     override init() {
         super.init()
@@ -130,11 +138,15 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
   override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
       if messageData.count == 1 && messageData[0] == 0 {
           guard let completionHandler else { return }
+#if !os(tvOS)
           if protoType == .wireguard {
               handleWireguardAppMessage(messageData, completionHandler: completionHandler)
           } else {
               completionHandler(nil)
           }
+#else
+          completionHandler(nil)
+#endif
           return
       }
 
@@ -148,10 +160,12 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       neLog(.info, title: "App said: ", message: message)
 
       guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
+#if !os(tvOS)
           if protoType == .wireguard {
               handleWireguardAppMessage(messageData, completionHandler: completionHandler)
               return
           }
+#endif
           neLog(.error, message: "Failed to serialize message from app")
           return
       }
@@ -176,7 +190,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     override func startTunnel(options: [String : NSObject]? = nil,
                               completionHandler: @escaping ((any Error)?) -> Void) {
         let activationAttemptId = options?[Constants.kActivationAttemptId] as? String
+#if !os(tvOS)
         let errorNotifier = ErrorNotifier(activationAttemptId: activationAttemptId)
+#endif
 
         neLog(.info, message: "Start tunnel")
 
@@ -202,13 +218,31 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         switch protoType {
         case .wireguard:
+#if os(tvOS)
+            completionHandler(NSError(domain: "org.amnezia.ne",
+                                      code: -1001,
+                                      userInfo: [NSLocalizedDescriptionKey: "WireGuard backend is not available for tvOS in this build"]))
+#else
             startWireguard(activationAttemptId: activationAttemptId,
                            errorNotifier: errorNotifier,
                            completionHandler: completionHandler)
+#endif
         case .openvpn:
+#if os(tvOS)
+            completionHandler(NSError(domain: "org.amnezia.ne",
+                                      code: -1002,
+                                      userInfo: [NSLocalizedDescriptionKey: "OpenVPN backend is not available for tvOS in this build"]))
+#else
             startOpenVPN(completionHandler: completionHandler)
+#endif
         case .xray:
+#if os(tvOS)
+            completionHandler(NSError(domain: "org.amnezia.ne",
+                                      code: -1003,
+                                      userInfo: [NSLocalizedDescriptionKey: "Xray backend is not available for tvOS in this build"]))
+#else
             startXray(completionHandler: completionHandler)
+#endif
 
         }
     }
@@ -222,13 +256,25 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         switch protoType {
         case .wireguard:
+#if os(tvOS)
+            completionHandler()
+#else
             stopWireguard(with: reason,
                           completionHandler: completionHandler)
+#endif
         case .openvpn:
+#if os(tvOS)
+            completionHandler()
+#else
             stopOpenVPN(with: reason,
                         completionHandler: completionHandler)
+#endif
         case .xray:
+#if os(tvOS)
+            completionHandler()
+#else
             stopXray(completionHandler: completionHandler)
+#endif
         }
     }
   
@@ -240,9 +286,17 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         switch protoType {
         case .wireguard:
+#if !os(tvOS)
             handleWireguardStatusMessage(messageData, completionHandler: completionHandler)
+#else
+            completionHandler?(nil)
+#endif
         case .openvpn:
+#if !os(tvOS)
             handleOpenVPNStatusMessage(messageData, completionHandler: completionHandler)
+#else
+            completionHandler?(nil)
+#endif
         case .xray:
             break;
         }
@@ -260,7 +314,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
   
     private func handle(networkChange changePath: Network.NWPath, completion: @escaping (Error?) -> Void) {
         updateActiveInterfaceIndex(for: changePath)
-        wg_log(.info, message: "Tunnel restarted.")
+        neLog(.info, message: "Tunnel restarted.")
         startTunnel(options: nil, completionHandler: completion)
     }
 }
@@ -310,15 +364,16 @@ private extension PacketTunnelProvider {
     }
 }
 
+#if !os(tvOS)
 extension WireGuardLogLevel {
-  var osLogLevel: OSLogType {
-    switch self {
-    case .verbose:
-      return .debug
-    case .error:
-      return .error
+    var osLogLevel: OSLogType {
+        switch self {
+        case .verbose:
+            return .debug
+        case .error:
+            return .error
+        }
     }
-  }
 }
 
 final class PacketTunnelFlowAdapter: NSObject, OpenVPNAdapterPacketFlow {
@@ -339,6 +394,7 @@ final class PacketTunnelFlowAdapter: NSObject, OpenVPNAdapterPacketFlow {
     flow.writePackets(packets, withProtocols: protocols)
   }
 }
+#endif
 
 extension NEProviderStopReason {
   var amneziaDescription: String {
