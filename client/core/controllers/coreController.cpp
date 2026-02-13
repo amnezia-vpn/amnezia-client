@@ -159,6 +159,8 @@ void CoreController::initControllers()
 
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
+    connect(m_connectionController.get(), &ConnectionController::localProxyStoppedBecauseVpnTurnedOn, m_pageController.get(),
+            &PageController::showNotificationMessage);
 
     m_focusController.reset(new FocusController(m_engine, this));
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController.get());

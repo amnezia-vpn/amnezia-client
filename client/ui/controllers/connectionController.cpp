@@ -33,6 +33,11 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
+    if (m_settings->isLocalProxyHttpEnabled()) {
+        m_settings->setLocalProxyHttpEnabled(false);
+        emit localProxyStoppedBecauseVpnTurnedOn(tr("Local proxy stopped because VPN was turned on"));
+    }
+
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
     {

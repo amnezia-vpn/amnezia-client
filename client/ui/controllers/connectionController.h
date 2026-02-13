@@ -44,6 +44,7 @@ signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
     void disconnectFromVpn();
     void connectionStateChanged();
+    void localProxyStoppedBecauseVpnTurnedOn(const QString &message);
 
     void connectionErrorOccurred(ErrorCode errorCode);
     void reconnectWithUpdatedContainer(const QString &message);

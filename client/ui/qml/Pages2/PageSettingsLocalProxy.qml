@@ -20,6 +20,7 @@ PageType {
     property string portValidationError: ""
     property int pendingStartRequestedPort: -1
     property int pendingStartAutoSelectedPort: -1
+    property bool pendingStartVpnWasActive: false
 
     Component.onCompleted: root.syncSwitchState()
 
@@ -67,6 +68,11 @@ PageType {
 
     function handleLocalProxyToggle(checked) {
         if (checked) {
+            const wasVpnActive = ConnectionController.isConnected || ConnectionController.isConnectionInProgress
+            if (wasVpnActive) {
+                ConnectionController.closeConnection()
+            }
+
             const serverUuid = ServersModel.processedServerUuid
             if (!serverUuid) {
                 root.setSwitcherChecked(false)
@@ -110,7 +116,8 @@ PageType {
                 }
             }
 
-            if (!SettingsController.enableLocalProxy(serverUuid, requestedPort)) {
+            const portToEnable = autoSelectedPort > 0 ? autoSelectedPort : requestedPort
+            if (!SettingsController.enableLocalProxy(serverUuid, portToEnable)) {
                 root.setSwitcherChecked(false)
                 PageController.showNotificationMessage(qsTr("Failed to enable local proxy. Check the port (%1-%2).")
                     .arg(root.localProxyPortMin)
@@ -120,12 +127,14 @@ PageType {
             }
             root.pendingStartRequestedPort = requestedPort
             root.pendingStartAutoSelectedPort = autoSelectedPort
+            root.pendingStartVpnWasActive = wasVpnActive
             startSuccessToastTimer.restart()
             root.syncSwitchState()
         } else {
             startSuccessToastTimer.stop()
             root.pendingStartRequestedPort = -1
             root.pendingStartAutoSelectedPort = -1
+            root.pendingStartVpnWasActive = false
             SettingsController.disableLocalProxy()
             root.syncSwitchState()
         }
@@ -334,6 +343,9 @@ PageType {
                 PageController.showNotificationMessage(qsTr("Port %1 is in use — selected free port %2.")
                     .arg(root.defaultLocalProxyPort)
                     .arg(root.pendingStartAutoSelectedPort))
+            } else if (root.pendingStartVpnWasActive && root.pendingStartRequestedPort > 0) {
+                PageController.showNotificationMessage(qsTr("VPN turned off. Local proxy is running: 127.0.0.1:%1")
+                    .arg(root.pendingStartRequestedPort))
             } else if (root.pendingStartRequestedPort > 0) {
                 PageController.showNotificationMessage(qsTr("Local proxy is running: 127.0.0.1:%1")
                     .arg(root.pendingStartRequestedPort))
@@ -341,6 +353,7 @@ PageType {
 
             root.pendingStartRequestedPort = -1
             root.pendingStartAutoSelectedPort = -1
+            root.pendingStartVpnWasActive = false
         }
     }
 
@@ -359,6 +372,7 @@ PageType {
             startSuccessToastTimer.stop()
             root.pendingStartRequestedPort = -1
             root.pendingStartAutoSelectedPort = -1
+            root.pendingStartVpnWasActive = false
             PageController.showNotificationMessage(message)
             root.syncSwitchState()
         }
