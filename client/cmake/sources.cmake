@@ -181,7 +181,6 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
 
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/ipcclient.h
-        ${CLIENT_ROOT_DIR}/core/privileged_process.h
         ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.h
@@ -194,7 +193,6 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/core/ipcclient.cpp
-        ${CLIENT_ROOT_DIR}/core/privileged_process.cpp
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.cpp

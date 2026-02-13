@@ -71,6 +71,8 @@ Item {
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
 
     MouseArea {
+        id: mouseArea
+
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: root.enabled
@@ -296,13 +298,13 @@ Item {
     }
 
     Keys.onEnterPressed: {
-        if (clickedFunction && typeof clickedFunction === "function") {
+        if (!rightImageSource && clickedFunction && typeof clickedFunction === "function") {
             clickedFunction()
         }
     }
 
     Keys.onReturnPressed: {
-        if (clickedFunction && typeof clickedFunction === "function") {
+        if (!rightImageSource && clickedFunction && typeof clickedFunction === "function") {
             clickedFunction()
         }
     }

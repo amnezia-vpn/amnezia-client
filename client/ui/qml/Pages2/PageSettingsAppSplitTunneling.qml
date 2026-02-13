@@ -224,7 +224,6 @@ PageType {
         height: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin
         
         color: AmneziaStyle.color.midnightBlack
-        opacity: 0.8
         
         RowLayout {
             id: addAppButton
