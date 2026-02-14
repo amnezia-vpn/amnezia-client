@@ -11,7 +11,6 @@
 #include "core/utils/commonStructs.h"
 #include "core/utils/ipcClient.h"
 #include "vpnProtocol.h"
-#include "settings.h"
 
 class XrayProtocol : public VpnProtocol
 {
@@ -27,7 +26,7 @@ private:
     ErrorCode startTun2Socks();
 
     QJsonObject m_xrayConfig;
-    Settings::RouteMode m_routeMode;
+    amnezia::RouteMode m_routeMode;
     QList<QHostAddress> m_dnsServers;
     QString m_remoteAddress;
 

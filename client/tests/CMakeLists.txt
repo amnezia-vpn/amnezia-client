@@ -4,17 +4,20 @@ project(AmneziaVPN_Tests)
 
 find_package(Qt6 REQUIRED COMPONENTS Test)
 
-list(REMOVE_ITEM SOURCES "${CLIENT_ROOT_DIR}/main.cpp")
+
+set(CMAKE_AUTORCC ON)
+
+qt6_add_resources(TEST_QRC ${CLIENT_ROOT_DIR}/resources.qrc)
 
 add_library(test_common OBJECT
     ${SOURCES}
     ${HEADERS}
+    ${TEST_QRC}
 )
 
 qt_add_repc_replicas(test_common
     ${CLIENT_ROOT_DIR}/../ipc/ipc_interface.rep
     ${CLIENT_ROOT_DIR}/../ipc/ipc_process_interface.rep
-    ${CLIENT_ROOT_DIR}/../ipc/ipc_process_tun2socks.rep
 )
 
 target_link_libraries(test_common PUBLIC
@@ -126,6 +129,15 @@ target_link_libraries(test_ui_servers_model_and_controller PRIVATE
     test_common
 )
 
+add_executable(test_self_hosted_server_setup
+    testSelfHostedServerSetup.cpp
+)
+
+target_link_libraries(test_self_hosted_server_setup PRIVATE
+    Qt6::Test
+    test_common
+)
+
 enable_testing()
 add_test(NAME ImportExportTest COMMAND test_import_export)
 add_test(NAME MultipleImportsTest COMMAND test_multiple_imports)
@@ -138,3 +150,4 @@ add_test(NAME GatewayStacksTest COMMAND test_gateway_stacks)
 add_test(NAME ComplexOperationsTest COMMAND test_complex_operations)
 add_test(NAME SettingsSignalsTest COMMAND test_settings_signals)
 add_test(NAME UiServersModelAndControllerTest COMMAND test_ui_servers_model_and_controller)
+add_test(NAME SelfHostedServerSetupTest COMMAND test_self_hosted_server_setup)

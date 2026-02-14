@@ -226,6 +226,12 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     )
 endif()
 
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+    add_subdirectory(tests)
+endif()
+
+list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
+
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 
 # Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).
@@ -237,6 +243,3 @@ if(COMMAND qt_finalize_executable)
 else()
     qt_finalize_target(${PROJECT})
 endif()
-
-if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
-    add_subdirectory(tests)

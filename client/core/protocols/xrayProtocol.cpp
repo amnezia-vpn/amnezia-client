@@ -27,7 +27,7 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_routeGateway = NetworkUtilities::getGatewayAndIface().first;
 
-    m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
+    m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
     m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::config_key::hostName).toString());
 
     const QString primaryDns = configuration.value(amnezia::config_key::dns1).toString();
@@ -37,9 +37,9 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
         m_dnsServers.push_back(QHostAddress(secondaryDns));
     }
 
-    QJsonObject xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::Xray)).toObject();
+    QJsonObject xrayConfiguration = configuration.value(ProtocolUtils::key_proto_config_data(Proto::Xray)).toObject();
     if (xrayConfiguration.isEmpty()) {
-        xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::SSXray)).toObject();
+        xrayConfiguration = configuration.value(ProtocolUtils::key_proto_config_data(Proto::SSXray)).toObject();
     }
     m_xrayConfig = xrayConfiguration;
 }
@@ -209,7 +209,7 @@ ErrorCode XrayProtocol::setupRouting() {
                 qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
         }
 
-        if (m_routeMode == Settings::RouteMode::VpnAllSites) {
+        if (m_routeMode == amnezia::RouteMode::VpnAllSites) {
             static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
 
             auto routeAddList =  iface->routeAddList(m_vpnGateway, subnets);

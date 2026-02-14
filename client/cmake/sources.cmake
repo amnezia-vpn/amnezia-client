@@ -174,8 +174,17 @@ if(NOT ANDROID)
     )
 endif()
 
-file(GLOB COMMON_FILES_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/*.h)
-file(GLOB COMMON_FILES_CPP CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/*.cpp)
+set(COMMON_FILES_H
+    ${CLIENT_ROOT_DIR}/amneziaApplication.h
+    ${CLIENT_ROOT_DIR}/secureQSettings.h
+    ${CLIENT_ROOT_DIR}/vpnConnection.h
+)
+
+set(COMMON_FILES_CPP
+    ${CLIENT_ROOT_DIR}/amneziaApplication.cpp
+    ${CLIENT_ROOT_DIR}/secureQSettings.cpp
+    ${CLIENT_ROOT_DIR}/vpnConnection.cpp
+)
 
 file(GLOB_RECURSE PAGE_LOGIC_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/ui/pages_logic/*.h)
 file(GLOB_RECURSE PAGE_LOGIC_CPP CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/ui/pages_logic/*.cpp)

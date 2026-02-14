@@ -420,10 +420,10 @@ void VpnConnection::appendSplitTunnelingConfig()
     m_vpnConfiguration.insert(config_key::splitTunnelApps, appsJsonArray);
 
     qDebug() << QString("Site split tunneling is %1, route mode is %2")
-                        .arg(m_settings->isSitesSplitTunnelingEnabled() ? "enabled" : "disabled")
+                        .arg(m_appSettingsRepository->isSitesSplitTunnelingEnabled() ? "enabled" : "disabled")
                         .arg(routeMode);
     qDebug() << QString("App split tunneling is %1, route mode is %2")
-                        .arg(m_settings->isAppsSplitTunnelingEnabled() ? "enabled" : "disabled")
+                        .arg(m_appSettingsRepository->isAppsSplitTunnelingEnabled() ? "enabled" : "disabled")
                         .arg(appsRouteMode);
 }
 
