@@ -7,7 +7,9 @@ find_package(Qt6 REQUIRED COMPONENTS Test)
 
 set(CMAKE_AUTORCC ON)
 
-qt6_add_resources(TEST_QRC ${CLIENT_ROOT_DIR}/resources.qrc)
+qt6_add_resources(TEST_QRC
+    ${CLIENT_ROOT_DIR}/server_scripts/serverScripts.qrc
+)
 
 add_library(test_common OBJECT
     ${SOURCES}
