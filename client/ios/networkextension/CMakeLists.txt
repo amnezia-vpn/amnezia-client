@@ -73,11 +73,9 @@ set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
 )
 
-if(NOT AMNEZIA_IOS_APPLETV)
-    set_target_properties(networkextension PROPERTIES
-        XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/WireGuardNetworkExtension-Bridging-Header.h"
-    )
-endif()
+set_target_properties(networkextension PROPERTIES
+    XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/WireGuardNetworkExtension-Bridging-Header.h"
+)
 
 set_target_properties("networkextension" PROPERTIES
     XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
@@ -89,6 +87,8 @@ find_library(FW_LIBRESOLV libresolv.9.tbd)
 if(NOT AMNEZIA_IOS_APPLETV)
     target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
     target_link_libraries(networkextension PRIVATE ${FW_LIBRESOLV})
+else()
+    target_link_libraries(networkextension PRIVATE -lresolv)
 endif()
 
 target_compile_options(networkextension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
@@ -103,7 +103,7 @@ set(NE_COMMON_SOURCES
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
 )
 
-set(NE_FULL_BACKEND_SOURCES
+set(NE_WIREGUARD_SOURCES
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/WireGuardAdapter.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PacketTunnelSettingsGenerator.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/DNSResolver.swift
@@ -123,19 +123,44 @@ set(NE_FULL_BACKEND_SOURCES
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Array+ConcurrentMap.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddress+AddrInfo.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/HevSocksTunnel.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+WireGuard.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPN.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Xray.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/WGConfig.swift
+)
+
+set(NE_XRAY_SOURCES
+    ${CLIENT_ROOT_DIR}/platforms/ios/HevSocksTunnel.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Xray.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/XrayConfig.swift
+)
+
+set(NE_OPENVPN_SOURCES
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPN.swift
+)
+
+set(NE_APPLE_GLUE_SOURCES
     ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
 )
+
+if(AMNEZIA_IOS_APPLETV)
+    list(APPEND NE_APPLE_GLUE_SOURCES
+        ${CLIENT_ROOT_DIR}/platforms/ios/tvos_cgo_stubs.c
+    )
+endif()
 
 target_sources(networkextension PRIVATE ${NE_COMMON_SOURCES})
 
 if(NOT AMNEZIA_IOS_APPLETV)
-    target_sources(networkextension PRIVATE ${NE_FULL_BACKEND_SOURCES})
+    target_sources(networkextension PRIVATE
+        ${NE_WIREGUARD_SOURCES}
+        ${NE_OPENVPN_SOURCES}
+        ${NE_XRAY_SOURCES}
+        ${NE_APPLE_GLUE_SOURCES}
+    )
+else()
+    target_sources(networkextension PRIVATE
+        ${NE_WIREGUARD_SOURCES}
+        ${NE_APPLE_GLUE_SOURCES}
+    )
 endif()
 
 target_sources(networkextension PRIVATE
@@ -146,24 +171,58 @@ set_property(TARGET networkextension APPEND PROPERTY RESOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
 )
 
-if(NOT AMNEZIA_IOS_APPLETV)
-    ## Build wireguard-go-version.h
+## Build wireguard-go-version.h
+execute_process(
+    COMMAND go list -m golang.zx2c4.com/wireguard
+    WORKING_DIRECTORY ${WG_APPLE_SOURCE_DIR}/WireGuardKitGo
+    OUTPUT_VARIABLE WG_VERSION_FULL
+)
+string(REGEX REPLACE ".*v\([0-9.]*\).*" "\\1" WG_VERSION_STRING 1.1.1)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/wireguard-go-version.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
+target_sources(networkextension PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
+
+if(AMNEZIA_IOS_APPLETV)
+    set(WG_TVOS_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/WireGuardKitGo-appletvos)
+    set(WG_TVOS_TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/WireGuardKitGo-appletvos-tmp)
     execute_process(
-        COMMAND go list -m golang.zx2c4.com/wireguard
-        WORKING_DIRECTORY ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo
-        OUTPUT_VARIABLE WG_VERSION_FULL
+        COMMAND make clean
+        WORKING_DIRECTORY ${WG_APPLE_SOURCE_DIR}/WireGuardKitGo
+        OUTPUT_QUIET
+        ERROR_QUIET
     )
-    string(REGEX REPLACE ".*v\([0-9.]*\).*" "\\1" WG_VERSION_STRING 1.1.1)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/wireguard-go-version.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
-    target_sources(networkextension PRIVATE
-        ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
+    execute_process(
+        COMMAND make build
+            PLATFORM_NAME=appletvos
+            GOOS_appletvos=ios
+            GOFLAGS=-tags=netgo
+            ARCHS=arm64
+            DEPLOYMENT_TARGET_CLANG_FLAG_NAME=mtvos-version-min
+            DEPLOYMENT_TARGET_CLANG_ENV_NAME=TVOS_DEPLOYMENT_TARGET
+            TVOS_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
+            CONFIGURATION_BUILD_DIR=${WG_TVOS_LIB_DIR}
+            CONFIGURATION_TEMP_DIR=${WG_TVOS_TMP_DIR}
+        WORKING_DIRECTORY ${WG_APPLE_SOURCE_DIR}/WireGuardKitGo
+        RESULT_VARIABLE WG_TVOS_BUILD_RESULT
+    )
+    if(NOT WG_TVOS_BUILD_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to build tvOS WireGuard Go bridge (libwg-go.a)")
+    endif()
 endif()
 
 target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(NOT AMNEZIA_IOS_APPLETV)
+    target_link_directories(networkextension PRIVATE
+        ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64
+    )
     target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
     target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework)
+else()
+    target_link_directories(networkextension PRIVATE
+        ${WG_TVOS_LIB_DIR}
+    )
+    target_link_libraries(networkextension PRIVATE ${WG_TVOS_LIB_DIR}/libwg-go.a)
 endif()

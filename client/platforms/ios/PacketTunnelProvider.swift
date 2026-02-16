@@ -39,8 +39,8 @@ struct Constants {
 }
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
-#if !os(tvOS)
     var wgAdapter: WireGuardAdapter?
+#if !os(tvOS)
     var ovpnAdapter: OpenVPNAdapter?
     private lazy var openVPNPacketFlowAdapter = PacketTunnelFlowAdapter(flow: packetFlow)
 #endif
@@ -138,15 +138,11 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
   override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
       if messageData.count == 1 && messageData[0] == 0 {
           guard let completionHandler else { return }
-#if !os(tvOS)
           if protoType == .wireguard {
               handleWireguardAppMessage(messageData, completionHandler: completionHandler)
           } else {
               completionHandler(nil)
           }
-#else
-          completionHandler(nil)
-#endif
           return
       }
 
@@ -160,12 +156,10 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       neLog(.info, title: "App said: ", message: message)
 
       guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
-#if !os(tvOS)
           if protoType == .wireguard {
               handleWireguardAppMessage(messageData, completionHandler: completionHandler)
               return
           }
-#endif
           neLog(.error, message: "Failed to serialize message from app")
           return
       }
@@ -190,9 +184,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     override func startTunnel(options: [String : NSObject]? = nil,
                               completionHandler: @escaping ((any Error)?) -> Void) {
         let activationAttemptId = options?[Constants.kActivationAttemptId] as? String
-#if !os(tvOS)
         let errorNotifier = ErrorNotifier(activationAttemptId: activationAttemptId)
-#endif
 
         neLog(.info, message: "Start tunnel")
 
@@ -218,15 +210,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         switch protoType {
         case .wireguard:
-#if os(tvOS)
-            completionHandler(NSError(domain: "org.amnezia.ne",
-                                      code: -1001,
-                                      userInfo: [NSLocalizedDescriptionKey: "WireGuard backend is not available for tvOS in this build"]))
-#else
             startWireguard(activationAttemptId: activationAttemptId,
                            errorNotifier: errorNotifier,
                            completionHandler: completionHandler)
-#endif
         case .openvpn:
 #if os(tvOS)
             completionHandler(NSError(domain: "org.amnezia.ne",
@@ -256,12 +242,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         switch protoType {
         case .wireguard:
-#if os(tvOS)
-            completionHandler()
-#else
             stopWireguard(with: reason,
                           completionHandler: completionHandler)
-#endif
         case .openvpn:
 #if os(tvOS)
             completionHandler()
@@ -286,11 +268,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         switch protoType {
         case .wireguard:
-#if !os(tvOS)
             handleWireguardStatusMessage(messageData, completionHandler: completionHandler)
-#else
-            completionHandler?(nil)
-#endif
         case .openvpn:
 #if !os(tvOS)
             handleOpenVPNStatusMessage(messageData, completionHandler: completionHandler)
@@ -364,7 +342,6 @@ private extension PacketTunnelProvider {
     }
 }
 
-#if !os(tvOS)
 extension WireGuardLogLevel {
     var osLogLevel: OSLogType {
         switch self {
@@ -376,6 +353,7 @@ extension WireGuardLogLevel {
     }
 }
 
+#if !os(tvOS)
 final class PacketTunnelFlowAdapter: NSObject, OpenVPNAdapterPacketFlow {
   private let flow: NEPacketTunnelFlow
 
