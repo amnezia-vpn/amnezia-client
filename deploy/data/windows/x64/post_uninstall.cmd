@@ -14,6 +14,8 @@ sc stop AmneziaVPN-service
 sc delete AmneziaVPN-service
 sc stop AmneziaWGTunnel$AmneziaVPN
 sc delete AmneziaWGTunnel$AmneziaVPN
+sc stop AmneziaVPNSplitTunnel
+sc delete AmneziaVPNSplitTunnel
 taskkill /IM "AmneziaVPN-service.exe" /F
 taskkill /IM "AmneziaVPN.exe" /F
 
