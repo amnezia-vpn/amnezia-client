@@ -28,6 +28,7 @@ struct ApiV2ServerConfig {
     QString dns2;
     
     QString name;
+    bool nameOverriddenByUser = false;
     int crc;
     int configVersion;
     ApiConfig apiConfig;

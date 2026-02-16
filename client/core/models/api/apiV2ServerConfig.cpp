@@ -74,6 +74,9 @@ QJsonObject ApiV2ServerConfig::toJson() const
     if (!name.isEmpty()) {
         obj[apiDefs::key::name] = name;
     }
+    if (nameOverriddenByUser) {
+        obj[config_key::nameOverriddenByUser] = true;
+    }
     if (!description.isEmpty()) {
         obj[apiDefs::key::description] = description;
     }
@@ -126,6 +129,7 @@ ApiV2ServerConfig ApiV2ServerConfig::fromJson(const QJsonObject& json)
     ApiV2ServerConfig config;
     
     config.name = json.value(apiDefs::key::name).toString();
+    config.nameOverriddenByUser = json.value(config_key::nameOverriddenByUser).toBool(false);
     config.description = json.value(apiDefs::key::description).toString();
     config.configVersion = json.value(apiDefs::key::configVersion).toInt(2);
     config.hostName = json.value(config_key::hostName).toString();

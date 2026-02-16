@@ -68,6 +68,7 @@ void ServersUiController::editServerName(int index, const QString &name)
         ApiV2ServerConfig* apiV2 = serverConfig.as<ApiV2ServerConfig>();
         if (apiV2) {
             apiV2->name = name;
+            apiV2->nameOverriddenByUser = true;
         }
     } else {
         serverConfig.visit([&name](auto& arg) {

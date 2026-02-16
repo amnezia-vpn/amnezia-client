@@ -420,8 +420,9 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     newApiV2->authData = apiV2->authData;
     newApiV2->crc = apiV2->crc;
     
-    if (!apiV2->name.isEmpty()) {
+    if (apiV2->nameOverriddenByUser) {
         newApiV2->name = apiV2->name;
+        newApiV2->nameOverriddenByUser = true;
     }
 
     m_serversRepository->editServer(serverIndex, newServerConfigModel);
