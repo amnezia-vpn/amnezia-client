@@ -43,8 +43,7 @@ ServersUiController::ServersUiController(ServersController* serversController,
       m_settingsController(settingsController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
-      m_defaultServerContainersModel(defaultServerContainersModel),
-      m_processedServerIndex(serversController->getDefaultServerIndex())
+      m_defaultServerContainersModel(defaultServerContainersModel)
 {
     updateModel();
 }
@@ -135,12 +134,13 @@ void ServersUiController::updateModel()
     bool wasEmpty = !hasServersFromGatewayApi();
     
     if (m_processedServerIndex < 0 || m_processedServerIndex >= m_serversController->getServersCount()) {
-        m_processedServerIndex = defaultIndex;
+        setProcessedServerIndex(defaultIndex);
+    } else {
+        setProcessedServerIndex(m_processedServerIndex);
     }
     
     m_serversModel->updateModel(m_serversController->getServers(), defaultIndex, m_settingsController->isAmneziaDnsEnabled());
     
-    m_serversModel->setProcessedServerIndex(m_processedServerIndex);
     
     updateContainersModel();
     updateDefaultServerContainersModel();
@@ -307,7 +307,7 @@ void ServersUiController::setProcessedServerIndex(int index)
         m_serversModel->setProcessedServerIndex(index);
         updateContainersModel();
         
-        // Check if server is from Gateway API and update models if needed
+
         ServerConfig server = m_serversController->getServerConfig(index);
         if (server.isApiV2()) {
             const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();

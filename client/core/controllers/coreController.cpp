@@ -252,6 +252,9 @@ void CoreController::initSignalHandlers()
 {
     m_signalHandlers = new CoreSignalHandlers(this, this);
     m_signalHandlers->initAllHandlers();
+    
+    // Trigger initial update after handlers are connected
+    m_serversUiController->updateModel();
 }
 
 void CoreController::updateTranslator(const QLocale &locale)

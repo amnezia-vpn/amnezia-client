@@ -158,8 +158,24 @@ void CoreSignalHandlers::initImportControllerHandler()
 void CoreSignalHandlers::initApiCountryModelUpdateHandler()
 {
     connect(m_coreController->m_serversUiController, &ServersUiController::updateApiCountryModel, this, [this]() {
-        m_coreController->m_apiCountryModel->updateModel(m_coreController->m_serversModel->getProcessedServerData("apiAvailableCountries").toJsonArray(),
-                                       m_coreController->m_serversModel->getProcessedServerData("apiServerCountryCode").toString());
+        int processedIndex = m_coreController->m_serversUiController->getProcessedServerIndex();
+        if (processedIndex < 0 || processedIndex >= m_coreController->m_serversRepository->serversCount()) {
+            return;
+        }
+        
+        ServerConfig server = m_coreController->m_serversRepository->server(processedIndex);
+        QJsonArray availableCountries;
+        QString serverCountryCode;
+        
+        if (server.isApiV2()) {
+            const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
+            if (apiV2) {
+                availableCountries = apiV2->apiConfig.availableCountries;
+                serverCountryCode = apiV2->apiConfig.serverCountryCode;
+            }
+        }
+        
+        m_coreController->m_apiCountryModel->updateModel(availableCountries, serverCountryCode);
     });
 }
 

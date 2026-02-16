@@ -98,6 +98,7 @@ private:
 
     void updateContainersModel();
     void updateDefaultServerContainersModel();
+    void updateApiModelsForProcessedServer();
     
     ServersController* m_serversController;
     SettingsController* m_settingsController;
@@ -105,7 +106,7 @@ private:
     ContainersModel* m_containersModel;
     ContainersModel* m_defaultServerContainersModel;
     
-    int m_processedServerIndex = 0;
+    int m_processedServerIndex = -1;
 };
 
 #endif // SERVERSUICONTROLLER_H
