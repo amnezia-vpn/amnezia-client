@@ -426,6 +426,28 @@ QString SettingsController::getGatewayEndpoint()
     return m_settings->isDevGatewayEnv() ? "Dev endpoint" : m_settings->getGatewayEndpoint();
 }
 
+void SettingsController::setDevProxyStorageEndpoint(const QString &endpoint)
+{
+    m_settings->setDevProxyStorageEndpoint(endpoint);
+    emit devProxyStorageEndpointChanged(endpoint);
+}
+
+QString SettingsController::getDevProxyStorageEndpoint()
+{
+    return m_settings->getDevProxyStorageEndpoint();
+}
+
+void SettingsController::setDevProxyUrl(const QString &url)
+{
+    m_settings->setDevProxyUrl(url);
+    emit devProxyUrlChanged(url);
+}
+
+QString SettingsController::getDevProxyUrl()
+{
+    return m_settings->getDevProxyUrl();
+}
+
 bool SettingsController::isDevGatewayEnv()
 {
     return m_settings->isDevGatewayEnv();

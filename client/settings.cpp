@@ -539,6 +539,26 @@ QString Settings::getGatewayEndpoint(bool isTestPurchase)
     return isTestPurchase ? DEV_AGW_ENDPOINT : m_gatewayEndpoint;
 }
 
+QString Settings::getDevProxyStorageEndpoint() const
+{
+    return value("Conf/devProxyStorageEndpoint", "").toString();
+}
+
+void Settings::setDevProxyStorageEndpoint(const QString &endpoint)
+{
+    setValue("Conf/devProxyStorageEndpoint", endpoint);
+}
+
+QString Settings::getDevProxyUrl() const
+{
+    return value("Conf/devProxyUrl", "").toString();
+}
+
+void Settings::setDevProxyUrl(const QString &url)
+{
+    setValue("Conf/devProxyUrl", url);
+}
+
 bool Settings::isDevGatewayEnv(bool isTestPurchase)
 {
     return isTestPurchase ? true : value("Conf/devGatewayEnv", false).toBool();

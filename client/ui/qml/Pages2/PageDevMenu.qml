@@ -73,6 +73,50 @@ PageType {
                     }
                 }
             }
+
+            TextFieldWithHeaderType {
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Proxy storage endpoint")
+                textField.text: SettingsController.devProxyStorageEndpoint
+
+                buttonImageSource: textField.text !== "" ? "qrc:/images/controls/refresh-cw.svg" : ""
+
+                clickedFunc: function() {
+                    SettingsController.devProxyStorageEndpoint = ""
+                }
+
+                textField.onEditingFinished: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                    if (textField.text !== SettingsController.devProxyStorageEndpoint) {
+                        SettingsController.devProxyStorageEndpoint = textField.text
+                    }
+                }
+            }
+
+            TextFieldWithHeaderType {
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Proxy endpoint")
+                textField.text: SettingsController.devProxyUrl
+
+                buttonImageSource: textField.text !== "" ? "qrc:/images/controls/refresh-cw.svg" : ""
+
+                clickedFunc: function() {
+                    SettingsController.devProxyUrl = ""
+                }
+
+                textField.onEditingFinished: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                    if (textField.text !== SettingsController.devProxyUrl) {
+                        SettingsController.devProxyUrl = textField.text
+                    }
+                }
+            }
         }
 
         footer: ColumnLayout {

@@ -20,7 +20,8 @@ class GatewayController : public QObject
 
 public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
+                               const bool isStrictKillSwitchEnabled, const QString &proxyStorageOverride = "",
+                               const QString &proxyUrlOverride = "", QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
@@ -61,6 +62,8 @@ private:
 
     int m_requestTimeoutMsecs;
     QString m_gatewayEndpoint;
+    QString m_proxyStorageOverride;
+    QString m_proxyUrlOverride;
     bool m_isDevEnvironment = false;
     bool m_isStrictKillSwitchEnabled = false;
 
