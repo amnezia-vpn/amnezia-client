@@ -18,6 +18,11 @@
 SecureServersRepository::SecureServersRepository(SecureQSettings* settings, QObject *parent)
     : QObject(parent), m_settings(settings)
 {
+    QJsonArray arr = QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
+    for (const QJsonValue &val : arr) {
+        m_servers.append(ServerConfig::fromJson(val.toObject()));
+    }
+    m_defaultServerIndex = value("Servers/defaultServerIndex", 0).toInt();
 }
 
 QVariant SecureServersRepository::value(const QString &key, const QVariant &defaultValue) const
@@ -42,107 +47,109 @@ void SecureServersRepository::setValue(const QString &key, const QVariant &value
     }
 }
 
-QJsonArray SecureServersRepository::serversArray() const
+void SecureServersRepository::syncToStorage()
 {
-    return QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
+    QJsonArray arr;
+    for (const ServerConfig &cfg : m_servers) {
+        arr.append(cfg.toJson());
+    }
+    setValue("Servers/serversList", QJsonDocument(arr).toJson());
+    m_settings->sync();
+}
+
+void SecureServersRepository::invalidateCache()
+{
+    m_servers.clear();
+    QJsonArray arr = QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
+    for (const QJsonValue &val : arr) {
+        m_servers.append(ServerConfig::fromJson(val.toObject()));
+    }
+    m_defaultServerIndex = value("Servers/defaultServerIndex", 0).toInt();
 }
 
 void SecureServersRepository::setServersArray(const QJsonArray &servers)
 {
-    setValue("Servers/serversList", QJsonDocument(servers).toJson());
-    m_settings->sync();
+    m_servers.clear();
+    for (const QJsonValue &val : servers) {
+        m_servers.append(ServerConfig::fromJson(val.toObject()));
+    }
+    syncToStorage();
 }
 
 void SecureServersRepository::addServer(const ServerConfig &server)
 {
-    QJsonArray servers = serversArray();
-    servers.append(server.toJson());
-    setServersArray(servers);
+    m_servers.append(server);
+    syncToStorage();
     emit serverAdded(server);
 }
 
 void SecureServersRepository::editServer(int index, const ServerConfig &server)
 {
-    QJsonArray servers = serversArray();
-    if (index < 0 || index >= servers.size()) {
+    if (index < 0 || index >= m_servers.size()) {
         return;
     }
-    servers.replace(index, server.toJson());
-    setServersArray(servers);
+    m_servers.replace(index, server);
+    syncToStorage();
     emit serverEdited(index, server);
 }
 
 void SecureServersRepository::removeServer(int index)
 {
-    QJsonArray servers = serversArray();
-    if (index < 0 || index >= servers.size()) {
+    if (index < 0 || index >= m_servers.size()) {
         return;
     }
-    
-    int defaultIndex = defaultServerIndex();
-    
-    servers.removeAt(index);
-    setServersArray(servers);
-    
+    int defaultIndex = m_defaultServerIndex;
+    m_servers.removeAt(index);
+
     if (defaultIndex == index) {
         setDefaultServer(0);
     } else if (defaultIndex > index) {
         setDefaultServer(defaultIndex - 1);
     }
-    
-    if (serversCount() == 0) {
+
+    if (m_servers.isEmpty()) {
         setDefaultServer(0);
     }
-    
+
+    syncToStorage();
     emit serverRemoved(index);
 }
 
 ServerConfig SecureServersRepository::server(int index) const
 {
-    const QJsonArray &servers = serversArray();
-    if (index < 0 || index >= servers.size()) {
+    if (index < 0 || index >= m_servers.size()) {
         return SelfHostedServerConfig{};
     }
-    return ServerConfig::fromJson(servers.at(index).toObject());
+    return m_servers.at(index);
 }
 
 QVector<ServerConfig> SecureServersRepository::servers() const
 {
-    QVector<ServerConfig> result;
-    const QJsonArray &serversArray = this->serversArray();
-    for (const QJsonValue &val : serversArray) {
-        result.append(ServerConfig::fromJson(val.toObject()));
-    }
-    return result;
+    return m_servers;
 }
 
 int SecureServersRepository::serversCount() const
 {
-    return serversArray().size();
+    return m_servers.size();
 }
 
 int SecureServersRepository::defaultServerIndex() const
 {
-    return value("Servers/defaultServerIndex", 0).toInt();
+    return m_defaultServerIndex;
 }
 
 void SecureServersRepository::setDefaultServer(int index)
 {
-    QJsonArray servers = serversArray();
-    
-    if (servers.size() > 0 && index >= servers.size()) {
+    if (m_servers.size() > 0 && index >= m_servers.size()) {
         return;
     }
-    
-    if (servers.size() == 0 && index != 0) {
+    if (m_servers.isEmpty() && index != 0) {
         return;
     }
-    
-    int currentIndex = defaultServerIndex();
-    if (currentIndex == index) {
+    if (m_defaultServerIndex == index) {
         return;
     }
-    
+    m_defaultServerIndex = index;
     setValue("Servers/defaultServerIndex", index);
     m_settings->sync();
     emit defaultServerChanged(index);

@@ -126,6 +126,8 @@ ErrorCode SettingsController::restoreAppConfigFromData(const QByteArray &data)
         return ErrorCode::InternalError;
     }
 
+    m_serversRepository->invalidateCache();
+
     QJsonObject newConfigData = QJsonDocument::fromJson(data).object();
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) || defined(Q_OS_MACX)

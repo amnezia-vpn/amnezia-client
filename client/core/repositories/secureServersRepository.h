@@ -38,6 +38,9 @@ public:
     bool hasServerWithVpnKey(const QString &vpnKey) const;
 
     void setServersArray(const QJsonArray &servers);
+
+    void invalidateCache();
+
 signals:
     void serverAdded(ServerConfig config);
     void serverEdited(int index, ServerConfig config);
@@ -45,12 +48,14 @@ signals:
     void defaultServerChanged(int index);
 
 private:
-    QJsonArray serversArray() const;
-    
+    void syncToStorage();
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
     
     SecureQSettings* m_settings;
+    
+    QVector<ServerConfig> m_servers;
+    int m_defaultServerIndex = 0;
 };
 
 #endif // SECURESERVERSREPOSITORY_H
