@@ -66,7 +66,6 @@ public slots:
 
     void clearCachedProfile(int serverIndex, int containerIndex);
 
-    QRegularExpression ipAddressPortRegExp();
     QRegularExpression ipAddressRegExp();
 
     void mountSftpDrive(int serverIndex, const QString &port, const QString &password, const QString &username);

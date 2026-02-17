@@ -60,11 +60,9 @@ public:
     // Container management
     void setDefaultContainer(int serverIndex, DockerContainer container);
     void updateContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config);
-    void addContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config);
 
     // Cache management
     void clearCachedProfile(int serverIndex, DockerContainer container);
-    void reloadContainerConfig(int serverIndex, DockerContainer container);
 
     // Getters
     QJsonArray getServersArray() const;
@@ -79,7 +77,6 @@ public:
     GatewayStacks gatewayStacks() const;
 
     // Validation
-    bool isServerFromApiAlreadyExists(const quint16 crc) const;
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol) const;
     bool hasInstalledContainers(int serverIndex) const;
 

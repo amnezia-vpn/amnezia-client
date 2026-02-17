@@ -64,31 +64,9 @@ void ServersController::updateContainerConfig(int serverIndex, DockerContainer c
     m_serversRepository->setContainerConfig(serverIndex, container, config);
 }
 
-void ServersController::addContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config)
-{
-    ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    serverConfig.visit([container, &config](auto& arg) {
-        arg.containers[container] = config;
-        
-        if (arg.defaultContainer == DockerContainer::None
-            && ContainerUtils::containerService(container) != ServiceType::Other 
-            && ContainerUtils::isSupportedByCurrentPlatform(container)) {
-            arg.defaultContainer = container;
-        }
-    });
-    
-    m_serversRepository->editServer(serverIndex, serverConfig);
-}
-
 void ServersController::clearCachedProfile(int serverIndex, DockerContainer container)
 {
     m_serversRepository->clearLastConnectionConfig(serverIndex, container);
-}
-
-void ServersController::reloadContainerConfig(int serverIndex, DockerContainer container)
-{
-    ContainerConfig config = m_serversRepository->containerConfig(serverIndex, container);
-    m_serversRepository->setContainerConfig(serverIndex, container, config);
 }
 
 QJsonArray ServersController::getServersArray() const
@@ -137,17 +115,6 @@ QPair<QString, QString> ServersController::getDnsPair(int serverIndex, bool isAm
     return serverConfig.getDnsPair(isAmneziaDnsEnabled,
                                    m_appSettingsRepository->primaryDns(),
                                    m_appSettingsRepository->secondaryDns());
-}
-
-bool ServersController::isServerFromApiAlreadyExists(const quint16 crc) const
-{
-    QVector<ServerConfig> servers = m_serversRepository->servers();
-    for (const ServerConfig& serverConfig : servers) {
-        if (static_cast<quint16>(serverConfig.crc()) == crc) {
-            return true;
-        }
-    }
-    return false;
 }
 
 ServersController::GatewayStacks ServersController::gatewayStacks() const

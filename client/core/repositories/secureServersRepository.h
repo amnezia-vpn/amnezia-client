@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QtGlobal>
 
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
@@ -36,6 +37,7 @@ public:
 
     ServerCredentials serverCredentials(int index) const;
     bool hasServerWithVpnKey(const QString &vpnKey) const;
+    bool hasServerWithCrc(quint16 crc) const;
 
     void setServersArray(const QJsonArray &servers);
 

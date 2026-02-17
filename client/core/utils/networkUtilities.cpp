@@ -50,12 +50,6 @@ QRegularExpression NetworkUtilities::ipAddressRegExp()
     return QRegularExpression("^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$");
 }
 
-QRegularExpression NetworkUtilities::ipAddressPortRegExp()
-{
-    return QRegularExpression("^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}"
-                              "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\\:[0-9]{1,5}){0,1}$");
-}
-
 QRegExp NetworkUtilities::ipAddressWithSubnetRegExp()
 {
     return QRegExp("(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}"

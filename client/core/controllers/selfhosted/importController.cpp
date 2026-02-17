@@ -293,16 +293,7 @@ void ImportController::importConfig(const QJsonObject &config)
         emit importFinished();
     } else if (config.contains(config_key::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(config).toJson());
-        QVector<ServerConfig> servers = m_serversRepository->servers();
-        bool exists = false;
-        for (const ServerConfig& serverConfig : servers) {
-            if (static_cast<quint16>(serverConfig.crc()) == crc) {
-                exists = true;
-                break;
-            }
-        }
-        
-        if (exists) {
+        if (m_serversRepository->hasServerWithCrc(crc)) {
             emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
             QJsonObject configWithCrc = config;

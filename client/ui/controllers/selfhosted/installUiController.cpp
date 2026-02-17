@@ -330,11 +330,6 @@ void InstallUiController::clearCachedProfile(int serverIndex, int containerIndex
     m_protocolModel->updateModel(updatedConfig);
 }
 
-QRegularExpression InstallUiController::ipAddressPortRegExp()
-{
-    return NetworkUtilities::ipAddressPortRegExp();
-}
-
 QRegularExpression InstallUiController::ipAddressRegExp()
 {
     return NetworkUtilities::ipAddressRegExp();

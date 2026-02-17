@@ -22,7 +22,6 @@ public:
     static int AdapterIndexTo(const QHostAddress& dst);
 
     static QRegularExpression ipAddressRegExp();
-    static QRegularExpression ipAddressPortRegExp();
     static QRegExp ipAddressWithSubnetRegExp();
     static QRegExp ipNetwork24RegExp();
     static QRegExp ipPortRegExp();

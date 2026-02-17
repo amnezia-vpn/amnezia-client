@@ -249,3 +249,13 @@ bool SecureServersRepository::hasServerWithVpnKey(const QString &vpnKey) const
     }
     return false;
 }
+
+bool SecureServersRepository::hasServerWithCrc(quint16 crc) const
+{
+    for (const ServerConfig& serverConfig : m_servers) {
+        if (static_cast<quint16>(serverConfig.crc()) == crc) {
+            return true;
+        }
+    }
+    return false;
+}
