@@ -45,7 +45,6 @@ ServersUiController::ServersUiController(ServersController* serversController,
       m_containersModel(containersModel),
       m_defaultServerContainersModel(defaultServerContainersModel)
 {
-    updateModel();
 }
 
 void ServersUiController::removeServer(int index)
