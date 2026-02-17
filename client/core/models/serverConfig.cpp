@@ -26,6 +26,20 @@ QString ServerConfig::hostName() const
     return std::visit([](const auto& v) { return v.hostName; }, data);
 }
 
+QString ServerConfig::displayName() const
+{
+    if (isApiV1()) {
+        const auto *apiV1 = as<ApiV1ServerConfig>();
+        return apiV1 ? apiV1->name : description();
+    }
+    if (isApiV2()) {
+        const auto *apiV2 = as<ApiV2ServerConfig>();
+        return apiV2 ? apiV2->name : description();
+    }
+    QString name = description();
+    return name.isEmpty() ? hostName() : name;
+}
+
 QMap<DockerContainer, ContainerConfig> ServerConfig::containers() const
 {
     return std::visit([](const auto& v) { return v.containers; }, data);

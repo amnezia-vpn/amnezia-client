@@ -34,7 +34,6 @@
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
-#include "ui/models/containersModel.h"
 
 namespace
 {
@@ -59,7 +58,6 @@ namespace
 InstallUiController::InstallUiController(InstallController *installController,
                                          ServersController *serversController,
                                          SettingsController *settingsController,
-                                         ServersModel *serversModel, ContainersModel *containersModel,
                                          ProtocolsModel *protocolsModel, UsersController *usersController,
                                          AwgConfigModel *awgConfigModel,
                                          WireGuardConfigModel *wireGuardConfigModel,
@@ -76,8 +74,6 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_installController(installController),
       m_serversController(serversController),
       m_settingsController(settingsController),
-      m_serversModel(serversModel),
-      m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
       m_usersController(usersController),
       m_awgConfigModel(awgConfigModel),
@@ -203,11 +199,9 @@ void InstallUiController::scanServerForInstalledContainers(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::updateContainer(int serverIndex, int protocolIndex)
+void InstallUiController::updateContainer(int serverIndex, int containerIndex, int protocolIndex)
 {
-    int containerIndex = m_containersModel->getProcessedContainerIndex();
-    DockerContainer container = qvariant_cast<DockerContainer>(
-        m_containersModel->data(containerIndex, ContainersModel::DockerContainerRole));
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
     
     Proto protocolType = static_cast<Proto>(protocolIndex);
     
@@ -260,7 +254,7 @@ void InstallUiController::updateContainer(int serverIndex, int protocolIndex)
         ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverIndex, container);
         m_protocolModel->updateModel(updatedConfig);
 
-        auto defaultContainer = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
+        auto defaultContainer = m_serversController->getServerConfig(serverIndex).defaultContainer();
         if ((serverIndex == m_serversController->getDefaultServerIndex()) && (container == defaultContainer)) {
             emit currentContainerUpdated();
         } else {
@@ -275,7 +269,7 @@ void InstallUiController::updateContainer(int serverIndex, int protocolIndex)
 
 void InstallUiController::rebootServer(int serverIndex)
 {
-    QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
+    QString serverName = m_serversController->getServerConfig(serverIndex).displayName();
 
     const auto errorCode = m_installController->rebootServer(serverIndex);
     if (errorCode == ErrorCode::NoError) {
@@ -287,7 +281,7 @@ void InstallUiController::rebootServer(int serverIndex)
 
 void InstallUiController::removeServer(int serverIndex)
 {
-    QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
+    QString serverName = m_serversController->getServerConfig(serverIndex).displayName();
 
     m_serversController->removeServer(serverIndex);
     emit removeServerFinished(tr("Server '%1' was removed").arg(serverName));
@@ -295,7 +289,7 @@ void InstallUiController::removeServer(int serverIndex)
 
 void InstallUiController::removeAllContainers(int serverIndex)
 {
-    QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
+    QString serverName = m_serversController->getServerConfig(serverIndex).displayName();
 
     ErrorCode errorCode = m_installController->removeAllContainers(serverIndex);
     if (errorCode == ErrorCode::NoError) {
@@ -305,14 +299,14 @@ void InstallUiController::removeAllContainers(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::removeContainer(int serverIndex)
+void InstallUiController::removeContainer(int serverIndex, int containerIndex)
 {
-    QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
+    QString serverName = m_serversController->getServerConfig(serverIndex).displayName();
 
-    int container = m_containersModel->getProcessedContainerIndex();
-    QString containerName = m_containersModel->getProcessedContainerName();
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    QString containerName = ContainerUtils::containerHumanNames().value(container);
 
-    ErrorCode errorCode = m_installController->removeContainer(serverIndex, static_cast<DockerContainer>(container));
+    ErrorCode errorCode = m_installController->removeContainer(serverIndex, container);
     if (errorCode == ErrorCode::NoError) {
 
         emit removeContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
@@ -321,9 +315,9 @@ void InstallUiController::removeContainer(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::clearCachedProfile(int serverIndex)
+void InstallUiController::clearCachedProfile(int serverIndex, int containerIndex)
 {
-    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
     if (ContainerUtils::containerService(container) == ServiceType::Other) {
         return;
     }
@@ -425,7 +419,7 @@ bool InstallUiController::isConfigValid()
         return true;
     }
 
-    if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
+    if (!m_serversController->hasInstalledContainers(serverIndex)) {
         emit noInstalledContainers();
         return false;
     }
@@ -457,21 +451,20 @@ bool InstallUiController::isConfigValid()
 
 void InstallUiController::updateProtocols(int serverIndex, int containerIndex)
 {
-    DockerContainer container = qvariant_cast<DockerContainer>(
-        m_containersModel->data(containerIndex, ContainersModel::DockerContainerRole));
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
     ContainerConfig containerConfig = m_serversController->getContainerConfig(serverIndex, container);
     containerConfig.container = container;
     m_protocolModel->updateModel(containerConfig);
 }
 
-void InstallUiController::openServerSettings(int serverIndex, int protocolIndex)
+void InstallUiController::openServerSettings(int serverIndex, int containerIndex, int protocolIndex)
 {
-    updateProtocolConfigModel(serverIndex, protocolIndex);
+    updateProtocolConfigModel(serverIndex, containerIndex, protocolIndex);
 }
 
-void InstallUiController::openClientSettings(int serverIndex, int protocolIndex)
+void InstallUiController::openClientSettings(int serverIndex, int containerIndex, int protocolIndex)
 {
-    updateProtocolConfigModel(serverIndex, protocolIndex);
+    updateProtocolConfigModel(serverIndex, containerIndex, protocolIndex);
 }
 
 int InstallUiController::defaultPort(int protocolIndex)
@@ -504,12 +497,9 @@ bool InstallUiController::defaultTransportProtoChangeable(int protocolIndex)
     return ProtocolUtils::defaultTransportProtoChangeable(proto);
 }
 
-void InstallUiController::updateProtocolConfigModel(int serverIndex, int protocolIndex)
+void InstallUiController::updateProtocolConfigModel(int serverIndex, int containerIndex, int protocolIndex)
 {
-    int containerIndex = m_containersModel->getProcessedContainerIndex();
-    
-    DockerContainer container = qvariant_cast<DockerContainer>(
-        m_containersModel->data(containerIndex, ContainersModel::DockerContainerRole));
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
     
     ContainerConfig containerConfig = m_serversController->getContainerConfig(serverIndex, container);
     containerConfig.container = container;

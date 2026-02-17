@@ -160,7 +160,7 @@ PageType {
 
                 clickedFunc: function() {
                     if (root.isEasySetup) {
-                        ContainersModel.setProcessedContainerIndex(listView.dockerContainer)
+                        ServersUiController.processedContainerIndex = listView.dockerContainer
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.install(listView.dockerContainer,
                                                   listView.containerDefaultPort,

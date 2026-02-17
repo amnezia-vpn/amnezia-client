@@ -62,7 +62,6 @@ namespace
 }
 
 SubscriptionUiController::SubscriptionUiController(ServersController* serversController,
-                                           ServersModel* serversModel,
                                            ApiServicesModel* apiServicesModel,
                                            ServicesCatalogController* servicesCatalogController,
                                            SubscriptionController* subscriptionController,
@@ -71,7 +70,7 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
                                            ApiDevicesModel* apiDevicesModel,
                                            SettingsController* settingsController,
                                            QObject *parent)
-    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController), m_apiAccountInfoModel(apiAccountInfoModel), m_apiCountryModel(apiCountryModel), m_apiDevicesModel(apiDevicesModel), m_settingsController(settingsController)
+    : QObject(parent), m_serversController(serversController), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController), m_apiAccountInfoModel(apiAccountInfoModel), m_apiCountryModel(apiCountryModel), m_apiDevicesModel(apiDevicesModel), m_settingsController(settingsController)
 {
 }
 

@@ -7,7 +7,6 @@
 #endif
 
 #include "core/controllers/serversController.h"
-#include "ui/models/serversModel.h"
 
 ConnectionUiController::ConnectionUiController(ConnectionController* connectionController,
                                                 ServersController* serversController,

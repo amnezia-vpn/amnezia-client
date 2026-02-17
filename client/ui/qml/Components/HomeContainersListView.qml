@@ -60,7 +60,7 @@ ListViewType {
                         containersDropDown.closeTriggered()
                         ServersUiController.setDefaultContainer(ServersUiController.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
                     } else {
-                        ContainersModel.setProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
+                        ServersUiController.processedContainerIndex = proxyDefaultServerContainersModel.mapToSource(index)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.closeTriggered()
                     }

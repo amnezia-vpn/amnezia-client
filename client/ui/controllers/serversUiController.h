@@ -27,6 +27,7 @@ class ServersUiController : public QObject
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
     
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
+    Q_PROPERTY(int processedContainerIndex READ getProcessedContainerIndex WRITE setProcessedContainerIndex NOTIFY processedContainerIndexChanged)
     Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerIndexChanged)
     
     Q_PROPERTY(bool hasServersFromGatewayApi READ hasServersFromGatewayApi NOTIFY hasServersFromGatewayApiChanged)
@@ -66,6 +67,8 @@ public slots:
     
     int getProcessedServerIndex() const;
     void setProcessedServerIndex(int index);
+    int getProcessedContainerIndex() const;
+    void setProcessedContainerIndex(int index);
     bool processedServerIsPremium() const;
     
     const ServerCredentials getProcessedServerCredentials() const;
@@ -85,6 +88,7 @@ signals:
     void finished(const QString &message);
     void defaultServerIndexChanged(int index);
     void processedServerIndexChanged(int index);
+    void processedContainerIndexChanged(int index);
     void hasServersFromGatewayApiChanged();
     void updateApiCountryModel();
     void updateApiServicesModel();
@@ -107,6 +111,7 @@ private:
     ContainersModel* m_defaultServerContainersModel;
     
     int m_processedServerIndex = -1;
+    int m_processedContainerIndex = -1;
 };
 
 #endif // SERVERSUICONTROLLER_H

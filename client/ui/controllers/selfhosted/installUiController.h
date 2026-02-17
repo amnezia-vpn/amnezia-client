@@ -15,9 +15,7 @@
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 #include "core/models/containerConfig.h"
-#include "ui/models/containersModel.h"
 #include "ui/models/protocolsModel.h"
-#include "ui/models/serversModel.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "ui/models/protocols/openvpnConfigModel.h"
@@ -38,7 +36,6 @@ public:
     explicit InstallUiController(InstallController* installController,
                                ServersController* serversController,
                                SettingsController* settingsController,
-                               ServersModel* serversModel, ContainersModel* containersModel,
                                ProtocolsModel* protocolsModel,
                                UsersController* usersController,
                                AwgConfigModel* awgConfigModel,
@@ -60,14 +57,14 @@ public slots:
 
     void scanServerForInstalledContainers(int serverIndex);
 
-    void updateContainer(int serverIndex, int protocolIndex);
+    void updateContainer(int serverIndex, int containerIndex, int protocolIndex);
 
     void removeServer(int serverIndex);
     void rebootServer(int serverIndex);
     void removeAllContainers(int serverIndex);
-    void removeContainer(int serverIndex);
+    void removeContainer(int serverIndex, int containerIndex);
 
-    void clearCachedProfile(int serverIndex);
+    void clearCachedProfile(int serverIndex, int containerIndex);
 
     QRegularExpression ipAddressPortRegExp();
     QRegularExpression ipAddressRegExp();
@@ -84,8 +81,8 @@ public slots:
     
     Q_INVOKABLE void updateProtocols(int serverIndex, int containerIndex);
     
-    void openServerSettings(int serverIndex, int protocolIndex);
-    void openClientSettings(int serverIndex, int protocolIndex);
+    void openServerSettings(int serverIndex, int containerIndex, int protocolIndex);
+    void openClientSettings(int serverIndex, int containerIndex, int protocolIndex);
     
     int defaultPort(int protocolIndex);
     int getPortForInstall(int protocolIndex);
@@ -129,8 +126,6 @@ private:
     InstallController* m_installController;
     ServersController* m_serversController;
     SettingsController* m_settingsController;
-    ServersModel* m_serversModel;
-    ContainersModel* m_containersModel;
     ProtocolsModel* m_protocolModel;
     UsersController* m_usersController;
     
@@ -149,7 +144,7 @@ private:
 
     QString m_privateKeyPassphrase;
     
-    void updateProtocolConfigModel(int serverIndex, int protocolIndex);
+    void updateProtocolConfigModel(int serverIndex, int containerIndex, int protocolIndex);
 };
 
 #endif // INSTALLUICONTROLLER_H

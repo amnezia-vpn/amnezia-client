@@ -41,6 +41,7 @@ struct ServerConfig {
     
     QString description() const;
     QString hostName() const;
+    QString displayName() const;
     QMap<DockerContainer, ContainerConfig> containers() const;
     DockerContainer defaultContainer() const;
     QString dns1() const;

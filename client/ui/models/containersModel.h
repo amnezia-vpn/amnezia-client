@@ -62,7 +62,6 @@ public slots:
     void updateModel(const QMap<amnezia::DockerContainer, amnezia::ContainerConfig> &containers);
 
     void setProcessedContainerIndex(int containerIndex);
-    int getProcessedContainerIndex();
 
     QString getProcessedContainerName();
 
@@ -85,7 +84,7 @@ signals:
 private:
     QMap<amnezia::DockerContainer, amnezia::ContainerConfig> m_containers;
 
-    int m_processedContainerIndex;
+    int m_processedContainerIndex = -1;
 };
 
 #endif // CONTAINERS_MODEL_H

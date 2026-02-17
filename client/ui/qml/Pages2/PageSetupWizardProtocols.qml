@@ -92,7 +92,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function () {
-                    ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(index));
+                    ServersUiController.processedContainerIndex = proxyContainersModel.mapToSource(index)
                     PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings);
                 }
             }

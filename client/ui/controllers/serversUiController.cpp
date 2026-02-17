@@ -161,14 +161,14 @@ int ServersUiController::getDefaultServerIndex() const
 QString ServersUiController::getDefaultServerName() const
 {
     int defaultIndex = getDefaultServerIndex();
-    return qvariant_cast<QString>(m_serversModel->data(defaultIndex, ServersModel::Roles::NameRole));
+    return m_serversController->getServerConfig(defaultIndex).displayName();
 }
 
 QString ServersUiController::getDefaultServerDefaultContainerName() const
 {
     int defaultIndex = getDefaultServerIndex();
-    auto defaultContainer = qvariant_cast<DockerContainer>(m_serversModel->data(defaultIndex, ServersModel::Roles::DefaultContainerRole));
-    return ContainerUtils::containerHumanNames().value(defaultContainer);
+    const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
+    return ContainerUtils::containerHumanNames().value(server.defaultContainer());
 }
 
 QString ServersUiController::getDefaultServerDescriptionCollapsed() const
@@ -287,13 +287,29 @@ bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() con
 bool ServersUiController::isDefaultServerFromApi() const
 {
     int defaultIndex = getDefaultServerIndex();
-    return m_serversModel->data(defaultIndex, ServersModel::Roles::IsServerFromTelegramApiRole).toBool()
-            || m_serversModel->data(defaultIndex, ServersModel::Roles::IsServerFromGatewayApiRole).toBool();
+    const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
+    const int configVersion = server.configVersion();
+    return configVersion == apiDefs::ConfigSource::Telegram
+            || configVersion == apiDefs::ConfigSource::AmneziaGateway;
 }
 
 int ServersUiController::getProcessedServerIndex() const
 {
     return m_processedServerIndex;
+}
+
+int ServersUiController::getProcessedContainerIndex() const
+{
+    return m_processedContainerIndex;
+}
+
+void ServersUiController::setProcessedContainerIndex(int index)
+{
+    if (m_processedContainerIndex != index) {
+        m_processedContainerIndex = index;
+        m_containersModel->setProcessedContainerIndex(index);
+        emit processedContainerIndexChanged(m_processedContainerIndex);
+    }
 }
 
 void ServersUiController::setProcessedServerIndex(int index)
@@ -306,9 +322,10 @@ void ServersUiController::setProcessedServerIndex(int index)
         m_processedServerIndex = index;
         m_serversModel->setProcessedServerIndex(index);
         updateContainersModel();
-        
 
         ServerConfig server = m_serversController->getServerConfig(index);
+        setProcessedContainerIndex(static_cast<int>(server.defaultContainer()));
+
         if (server.isApiV2()) {
             const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
             if (apiV2 && !apiV2->apiConfig.availableCountries.isEmpty()) {
@@ -366,13 +383,14 @@ QString ServersUiController::getDefaultServerDescription(const ServerConfig& ser
         const ApiV1ServerConfig* apiV1 = server.as<ApiV1ServerConfig>();
         return apiV1 ? apiV1->description : QString();
     } else {
-        if (m_serversModel->data(index, ServersModel::Roles::HasWriteAccessRole).toBool()) {
+        ServerCredentials credentials = m_serversController->getServerCredentials(index);
+        if (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty()) {
             bool isAmneziaDnsEnabled = m_settingsController->isAmneziaDnsEnabled();
             if (isAmneziaDnsEnabled && isAmneziaDnsContainerInstalled(index)) {
                 description += "Amnezia DNS | ";
             }
         } else {
-            if (m_serversModel->data(index, ServersModel::Roles::HasAmneziaDns).toBool()) {
+            if (server.dns1() == protocols::dns::amneziaDnsIp) {
                 description += "Amnezia DNS | ";
             }
         }

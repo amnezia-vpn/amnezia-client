@@ -43,7 +43,7 @@ PageType {
             var configFileName
 
             var serverIndex = ServersUiController.processedIndex
-            var containerIndex = ContainersModel.getProcessedContainerIndex()
+            var containerIndex = ServersUiController.processedContainerIndex
 
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
@@ -250,7 +250,7 @@ PageType {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ServersUiController.processedIndex,
-                                                                         ContainersModel.getProcessedContainerIndex())
+                                                                         ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
 
@@ -411,14 +411,14 @@ PageType {
 
                         containerSelector.text = selectedText
 
-                        ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(selectedIndex))
+                        ServersUiController.processedContainerIndex = proxyContainersModel.mapToSource(selectedIndex)
 
                         fillConnectionTypeModel()
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ServersUiController.processedIndex,
-                                                                         ContainersModel.getProcessedContainerIndex())
+                                                                         ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
 
@@ -788,7 +788,7 @@ PageType {
                                                         ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
                                                                                       clientNameEditor.textField.text,
                                                                                       ServersUiController.processedIndex,
-                                                                                      ContainersModel.getProcessedContainerIndex())
+                                                                                      ServersUiController.processedContainerIndex)
                                                         PageController.showBusyIndicator(false)
                                                         Qt.callLater(function(){ clientsListView.freezeFilter = false })
                                                         clientNameEditDrawer.closeTriggered()
@@ -824,7 +824,7 @@ PageType {
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
                                                                           ServersUiController.processedIndex,
-                                                                          ContainersModel.getProcessedContainerIndex())
+                                                                          ServersUiController.processedContainerIndex)
                                         }
                                         var noButtonFunction = function() {
                                         }

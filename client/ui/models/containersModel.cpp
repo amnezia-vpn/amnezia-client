@@ -98,11 +98,6 @@ void ContainersModel::setProcessedContainerIndex(int index)
     m_processedContainerIndex = index;
 }
 
-int ContainersModel::getProcessedContainerIndex()
-{
-    return m_processedContainerIndex;
-}
-
 QString ContainersModel::getProcessedContainerName()
 {
     return ContainerUtils::containerHumanNames().value(static_cast<DockerContainer>(m_processedContainerIndex));

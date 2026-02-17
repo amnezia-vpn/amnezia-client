@@ -11,14 +11,12 @@
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiCountryModel.h"
 #include "ui/models/api/apiDevicesModel.h"
-#include "ui/models/serversModel.h"
-
 class SubscriptionUiController : public QObject
 {
     Q_OBJECT
 public:
     SubscriptionUiController(ServersController* serversController,
-                         ServersModel* serversModel, ApiServicesModel* apiServicesModel,
+                         ApiServicesModel* apiServicesModel,
                          ServicesCatalogController* servicesCatalogController,
                          SubscriptionController* subscriptionController,
                          ApiAccountInfoModel* apiAccountInfoModel,
@@ -81,7 +79,6 @@ private:
     QString m_vpnKey;
 
     ServersController* m_serversController;
-    ServersModel* m_serversModel;
     ApiServicesModel* m_apiServicesModel;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;

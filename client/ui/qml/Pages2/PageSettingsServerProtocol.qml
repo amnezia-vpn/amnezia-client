@@ -17,7 +17,7 @@ import "../Components"
 PageType {
     id: root
 
-    property bool isClearCacheVisible: ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
+    property bool isClearCacheVisible: ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ServersUiController.processedContainerIndex)
 
     BackButtonType {
         id: backButton
@@ -76,7 +76,7 @@ PageType {
 
                 clickedFunction: function() {
                     if (isClientProtocolExists) {
-                        InstallController.openClientSettings(ServersUiController.processedIndex, protocolIndex)
+                        InstallController.openClientSettings(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, protocolIndex)
                         PageController.goToPage(clientProtocolPage);
                     } else {
                         PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
@@ -104,7 +104,7 @@ PageType {
                 visible: delegateContent.isServerSettingsVisible
 
                 clickedFunction: function() {
-                    InstallController.openServerSettings(ServersUiController.processedIndex, protocolIndex)
+                    InstallController.openServerSettings(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, protocolIndex)
                     PageController.goToPage(serverProtocolPage);
                 }
 
@@ -140,14 +140,14 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
                             var message = qsTr("Unable to clear %1 profile while there is an active connection").arg(ContainersModel.getProcessedContainerName())
                             PageController.showNotificationMessage(message)
                             return
                         }
 
                         PageController.showBusyIndicator(true)
-                        InstallController.clearCachedProfile(ServersUiController.processedIndex)
+                        InstallController.clearCachedProfile(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
                         PageController.showBusyIndicator(false)
                     }
 
@@ -186,12 +186,12 @@ PageType {
 
                     var yesButtonFunction = function() {
                         if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
-                                && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
                             PageController.showNotificationMessage(qsTr("Cannot remove active container"))
                         } else
                         {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeContainer(ServersUiController.processedIndex)
+                            InstallController.removeContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
                         }
                     }
                     var noButtonFunction = function() {

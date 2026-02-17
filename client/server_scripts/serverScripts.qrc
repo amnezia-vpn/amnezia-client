@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/server_scripts">
         <file>awg/configure_container.sh</file>
         <file>awg/Dockerfile</file>
         <file>awg/run_container.sh</file>
