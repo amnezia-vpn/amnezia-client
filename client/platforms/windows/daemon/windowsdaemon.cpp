@@ -62,6 +62,9 @@ void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAda
 }
 
 void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex) {
+    if (m_splitTunnelManager == nullptr)
+        return;
+
   if (config.m_vpnDisabledApps.length() > 0) {
       m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex);
       m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps);

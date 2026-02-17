@@ -52,7 +52,6 @@ public slots:
     const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
 
     void disconnectFromVpn();
-    void restartConnection();
 
     void addRoutes(const QStringList &ips);
     void deleteRoutes(const QStringList &ips);
@@ -73,22 +72,12 @@ protected slots:
 
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
-    QMetaObject::Connection m_connectionLoseHandle;
-    QMetaObject::Connection m_networkChangeHandle;
 
 private:
     std::shared_ptr<Settings> m_settings;
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
-
-    ServerCredentials m_serverCredentials;
-    int m_serverIndex;
-    DockerContainer m_dockerContainer;
-    
-    // Track VPN state before sleep for smart reconnection
-    bool m_wasConnectedBeforeSleep = false;
-    bool m_pendingNetworkCheck = false;
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
@@ -104,7 +93,6 @@ private:
 
    void appendSplitTunnelingConfig();
    void appendKillSwitchConfig();
-   bool startNetworkCheckIfReady();
 };
 
 #endif // VPNCONNECTION_H

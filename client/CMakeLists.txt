@@ -59,7 +59,6 @@ target_include_directories(${PROJECT} PUBLIC
 if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
-    qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_tun2socks.rep)
 endif()
 
 qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
@@ -228,4 +227,13 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
-qt_finalize_target(${PROJECT})
+
+# Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).
+if(COMMAND qt_import_qml_plugins)
+    qt_import_qml_plugins(${PROJECT})
+endif()
+if(COMMAND qt_finalize_executable)
+    qt_finalize_executable(${PROJECT})
+else()
+    qt_finalize_target(${PROJECT})
+endif()

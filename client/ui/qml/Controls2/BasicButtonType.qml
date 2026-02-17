@@ -111,11 +111,11 @@ Button {
                 color: {
                     if (root.enabled) {
                         if (root.pressed) {
-                            return pressedColor
+                            return root.pressedColor
                         }
-                        return root.hovered ? hoveredColor : defaultColor
+                        return root.hovered ? root.hoveredColor : root.defaultColor
                     } else {
-                        return disabledColor
+                        return root.disabledColor
                     }
                 }
 

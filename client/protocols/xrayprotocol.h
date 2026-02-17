@@ -6,6 +6,7 @@
 #include "core/ipcclient.h"
 #include "vpnprotocol.h"
 #include "settings.h"
+#include <QtCore/qsharedpointer.h>
 
 class XrayProtocol : public VpnProtocol
 {
@@ -18,16 +19,14 @@ public:
 
 private:
     ErrorCode setupRouting();
-    ErrorCode startTun2Sock();
-    void readXrayConfiguration(const QJsonObject &configuration);
-    
+    ErrorCode startTun2Socks();
+
     QJsonObject m_xrayConfig;
     Settings::RouteMode m_routeMode;
-    QString m_primaryDNS;
-    QString m_secondaryDNS;
-#ifndef Q_OS_IOS
-    QSharedPointer<IpcProcessTun2SocksReplica> m_t2sProcess;
-#endif
+    QList<QHostAddress> m_dnsServers;
+    QString m_remoteAddress;
+
+    QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
 };
 
 #endif // XRAYPROTOCOL_H

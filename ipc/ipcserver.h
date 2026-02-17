@@ -10,10 +10,8 @@
 
 #include "ipc.h"
 #include "ipcserverprocess.h"
-#include "ipctun2socksprocess.h"
 
 #include "rep_ipc_interface_source.h"
-#include "rep_ipc_process_tun2socks_source.h"
 
 class IpcServer : public IpcInterfaceSource
 {
@@ -44,8 +42,8 @@ public:
     virtual bool refreshKillSwitch( bool enabled ) override;
     virtual bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) override;
     virtual bool restoreResolvers() override;
-    virtual void xrayStart(const QString& cfg) override;
-    virtual void xrayStop() override;
+    virtual bool xrayStart(const QString& cfg) override;
+    virtual bool xrayStop() override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;
 
@@ -56,12 +54,10 @@ private:
         ProcessDescriptor (QObject *parent = nullptr) {
             serverNode = QSharedPointer<QRemoteObjectHost>(new QRemoteObjectHost(parent));
             ipcProcess = QSharedPointer<IpcServerProcess>(new IpcServerProcess(parent));
-            tun2socksProcess = QSharedPointer<IpcProcessTun2Socks>(new IpcProcessTun2Socks(parent));
             localServer = QSharedPointer<QLocalServer>(new QLocalServer(parent));
         }
 
         QSharedPointer<IpcServerProcess> ipcProcess;
-        QSharedPointer<IpcProcessTun2Socks> tun2socksProcess;
         QSharedPointer<QRemoteObjectHost> serverNode;
         QSharedPointer<QLocalServer> localServer;
     };

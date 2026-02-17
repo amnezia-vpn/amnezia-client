@@ -270,12 +270,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
              && !wgConfig.value(amnezia::config_key::initPacketMagicHeader).isUndefined()
              && !wgConfig.value(amnezia::config_key::responsePacketMagicHeader).isUndefined()
              && !wgConfig.value(amnezia::config_key::underloadPacketMagicHeader).isUndefined()
-             && !wgConfig.value(amnezia::config_key::transportPacketMagicHeader).isUndefined()
-             && !wgConfig.value(amnezia::config_key::specialJunk1).isUndefined()
-             && !wgConfig.value(amnezia::config_key::specialJunk2).isUndefined()
-             && !wgConfig.value(amnezia::config_key::specialJunk3).isUndefined()
-             && !wgConfig.value(amnezia::config_key::specialJunk4).isUndefined()
-             && !wgConfig.value(amnezia::config_key::specialJunk5).isUndefined()) {
+             && !wgConfig.value(amnezia::config_key::transportPacketMagicHeader).isUndefined()) {
     json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
     json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
     json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));
