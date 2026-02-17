@@ -17,7 +17,6 @@ SitesUiController::SitesUiController(SitesController* sitesController,
 void SitesUiController::addSite(QString hostname)
 {
     if (m_sitesController->addSite(hostname)) {
-        m_sitesModel->updateModel(m_sitesController->getCurrentSites());
         emit finished(tr("New site added: %1").arg(hostname));
     }
 }
@@ -27,7 +26,6 @@ void SitesUiController::removeSite(int index)
     auto modelIndex = m_sitesModel->index(index);
     auto hostname = m_sitesModel->data(modelIndex, SitesModel::Roles::UrlRole).toString();
     if (m_sitesController->removeSite(hostname)) {
-        m_sitesModel->updateModel(m_sitesController->getCurrentSites());
         emit finished(tr("Site removed: %1").arg(hostname));
     }
 }
@@ -35,7 +33,6 @@ void SitesUiController::removeSite(int index)
 void SitesUiController::removeSites()
 {
     m_sitesController->removeSites();
-    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
     emit finished(tr("Site list cleared!"));
 }
 
@@ -49,7 +46,6 @@ void SitesUiController::importSites(const QString &fileName, bool replaceExistin
 
     QString errorMessage;
     if (m_sitesController->importSitesFromJson(jsonData, replaceExisting, errorMessage)) {
-        m_sitesModel->updateModel(m_sitesController->getCurrentSites());
         emit finished(tr("Import completed"));
     } else {
         emit errorOccurred(errorMessage);
@@ -72,7 +68,6 @@ void SitesUiController::toggleSplitTunneling(bool enabled)
 void SitesUiController::setRouteMode(int routeMode)
 {
     m_sitesController->setRouteMode(static_cast<amnezia::RouteMode>(routeMode));
-    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
     emit routeModeChanged();
 }
 

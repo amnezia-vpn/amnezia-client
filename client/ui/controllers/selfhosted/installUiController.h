@@ -128,7 +128,7 @@ private:
     SettingsController* m_settingsController;
     ProtocolsModel* m_protocolModel;
     UsersController* m_usersController;
-    
+
     AwgConfigModel* m_awgConfigModel;
     WireGuardConfigModel* m_wireGuardConfigModel;
     OpenVpnConfigModel* m_openVpnConfigModel;

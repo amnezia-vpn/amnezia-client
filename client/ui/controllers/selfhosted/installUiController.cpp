@@ -58,7 +58,8 @@ namespace
 InstallUiController::InstallUiController(InstallController *installController,
                                          ServersController *serversController,
                                          SettingsController *settingsController,
-                                         ProtocolsModel *protocolsModel, UsersController *usersController,
+                                         ProtocolsModel *protocolsModel,
+                                         UsersController *usersController,
                                          AwgConfigModel *awgConfigModel,
                                          WireGuardConfigModel *wireGuardConfigModel,
                                          OpenVpnConfigModel *openVpnConfigModel,
@@ -498,65 +499,26 @@ bool InstallUiController::defaultTransportProtoChangeable(int protocolIndex)
 void InstallUiController::updateProtocolConfigModel(int serverIndex, int containerIndex, int protocolIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    
     ContainerConfig containerConfig = m_serversController->getContainerConfig(serverIndex, container);
     containerConfig.container = container;
-    
     Proto protocolType = static_cast<Proto>(protocolIndex);
-    
+
+    auto updateIfPresent = [&](auto* model, auto* config) {
+        if (model && config) model->updateModel(container, *config);
+    };
+
     switch (protocolType) {
-    case Proto::Awg: {
-        if (auto* awgProtocolConfig = containerConfig.getAwgProtocolConfig()) {
-            m_awgConfigModel->updateModel(container, *awgProtocolConfig);
-        }
-        break;
-    }
-    case Proto::WireGuard: {
-        if (auto* wireGuardProtocolConfig = containerConfig.getWireGuardProtocolConfig()) {
-            m_wireGuardConfigModel->updateModel(container, *wireGuardProtocolConfig);
-        }
-        break;
-    }
-    case Proto::OpenVpn: {
-        if (auto* openVpnProtocolConfig = containerConfig.getOpenVpnProtocolConfig()) {
-            m_openVpnConfigModel->updateModel(container, *openVpnProtocolConfig);
-        }
-        break;
-    }
-    case Proto::Xray: {
-        if (auto* xrayProtocolConfig = containerConfig.getXrayProtocolConfig()) {
-            m_xrayConfigModel->updateModel(container, *xrayProtocolConfig);
-        }
-        break;
-    }
-    case Proto::TorWebSite: {
-        if (auto* torProtocolConfig = containerConfig.getTorProtocolConfig()) {
-            m_torConfigModel->updateModel(container, *torProtocolConfig);
-        }
-        break;
-    }
-    case Proto::Sftp: {
-        if (auto* sftpProtocolConfig = containerConfig.getSftpProtocolConfig()) {
-            m_sftpConfigModel->updateModel(container, *sftpProtocolConfig);
-        }
-        break;
-    }
-    case Proto::Socks5Proxy: {
-        if (auto* socks5ProxyProtocolConfig = containerConfig.getSocks5ProxyProtocolConfig()) {
-            m_socks5ConfigModel->updateModel(container, *socks5ProxyProtocolConfig);
-        }
-        break;
-    }
+    case Proto::Awg: updateIfPresent(m_awgConfigModel, containerConfig.getAwgProtocolConfig()); break;
+    case Proto::WireGuard: updateIfPresent(m_wireGuardConfigModel, containerConfig.getWireGuardProtocolConfig()); break;
+    case Proto::OpenVpn: updateIfPresent(m_openVpnConfigModel, containerConfig.getOpenVpnProtocolConfig()); break;
+    case Proto::Xray: updateIfPresent(m_xrayConfigModel, containerConfig.getXrayProtocolConfig()); break;
+    case Proto::TorWebSite: updateIfPresent(m_torConfigModel, containerConfig.getTorProtocolConfig()); break;
+    case Proto::Sftp: updateIfPresent(m_sftpConfigModel, containerConfig.getSftpProtocolConfig()); break;
+    case Proto::Socks5Proxy: updateIfPresent(m_socks5ConfigModel, containerConfig.getSocks5ProxyProtocolConfig()); break;
 #ifdef Q_OS_WINDOWS
-    case Proto::Ikev2: {
-        if (auto* ikev2ProtocolConfig = containerConfig.getIkev2ProtocolConfig()) {
-            m_ikev2ConfigModel->updateModel(container, *ikev2ProtocolConfig);
-        }
-        break;
-    }
+    case Proto::Ikev2: updateIfPresent(m_ikev2ConfigModel, containerConfig.getIkev2ProtocolConfig()); break;
 #endif
-    default:
-        break;
+    default: break;
     }
 }
 

@@ -25,7 +25,6 @@ void AppSplitTunnelingUiController::addApp(const QString &appPath)
     }
 
     if (m_appSplitTunnelingController->addApp(appInfo)) {
-        m_appSplitTunnelingModel->updateModel(m_appSplitTunnelingController->getApps());
         emit finished(tr("Application added: %1").arg(appInfo.appName));
     } else {
         emit errorOccurred(tr("The application has already been added"));
@@ -38,7 +37,6 @@ void AppSplitTunnelingUiController::addApps(QVector<QPair<QString, QString>> app
         amnezia::InstalledAppInfo appInfo { app.first, app.second, "" };
         m_appSplitTunnelingController->addApp(appInfo);
     }
-    m_appSplitTunnelingModel->updateModel(m_appSplitTunnelingController->getApps());
     emit finished(tr("The selected applications have been added"));
 }
 
@@ -47,7 +45,6 @@ void AppSplitTunnelingUiController::removeApp(const int index)
     auto modelIndex = m_appSplitTunnelingModel->index(index);
     auto appPath = m_appSplitTunnelingModel->data(modelIndex, AppSplitTunnelingModel::Roles::AppPathRole).toString();
     m_appSplitTunnelingController->removeApp(index);
-    m_appSplitTunnelingModel->updateModel(m_appSplitTunnelingController->getApps());
 
     QFileInfo fileInfo(appPath);
     emit finished(tr("Application removed: %1").arg(fileInfo.fileName()));
@@ -62,7 +59,6 @@ void AppSplitTunnelingUiController::toggleSplitTunneling(bool enabled)
 void AppSplitTunnelingUiController::setRouteMode(int routeMode)
 {
     m_appSplitTunnelingController->setRouteMode(static_cast<amnezia::AppsRouteMode>(routeMode));
-    m_appSplitTunnelingModel->updateModel(m_appSplitTunnelingController->getApps());
     emit routeModeChanged();
 }
 

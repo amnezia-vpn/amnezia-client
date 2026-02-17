@@ -34,7 +34,6 @@ void AllowedDnsUiController::addDns(QString ip)
     }
 
     if (m_allowedDnsController->addDns(ip)) {
-        m_allowedDnsModel->updateModel(m_allowedDnsController->getCurrentDnsServers());
         emit finished(tr("New DNS server added: %1").arg(ip));
     } else {
         emit errorOccurred(tr("DNS server already exists: %1").arg(ip));
@@ -46,8 +45,6 @@ void AllowedDnsUiController::removeDns(int index)
     auto modelIndex = m_allowedDnsModel->index(index);
     auto ip = m_allowedDnsModel->data(modelIndex, AllowedDnsModel::Roles::IpRole).toString();
     m_allowedDnsController->removeDns(index);
-    m_allowedDnsModel->updateModel(m_allowedDnsController->getCurrentDnsServers());
-
     emit finished(tr("DNS server removed: %1").arg(ip));
 }
 
@@ -85,8 +82,6 @@ void AllowedDnsUiController::importDns(const QString &fileName, bool replaceExis
     }
 
     m_allowedDnsController->addDnsList(dnsServers, replaceExisting);
-    m_allowedDnsModel->updateModel(m_allowedDnsController->getCurrentDnsServers());
-
     emit finished(tr("Import completed"));
 }
 
