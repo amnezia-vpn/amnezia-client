@@ -74,15 +74,15 @@ signals:
 
 private:
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
-    ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
+    ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
     ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
     ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, SshSession &sshSession);
     ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, SshSession &sshSession);
     ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
 
     ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
-    ErrorCode isUserInSudo(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
-    ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
+    ErrorCode isUserInSudo(const ServerCredentials &credentials, SshSession &sshSession);
+    ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, SshSession &sshSession);
     ErrorCode setupServerFirewall(const ServerCredentials &credentials, SshSession &sshSession);
     bool isReinstallContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig);
 

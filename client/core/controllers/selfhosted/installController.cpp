@@ -77,11 +77,11 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     SshSession sshSession(this);
     ErrorCode e = ErrorCode::NoError;
 
-    e = isUserInSudo(credentials, container, sshSession);
+    e = isUserInSudo(credentials, sshSession);
     if (e)
         return e;
 
-    e = isServerDpkgBusy(credentials, container, sshSession);
+    e = isServerDpkgBusy(credentials, sshSession);
     if (e)
         return e;
 
@@ -96,7 +96,7 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
             return e;
     }
 
-    e = prepareHostWorker(credentials, container, config, sshSession);
+    e = prepareHostWorker(credentials, container, sshSession);
     if (e)
         return e;
     qDebug().noquote() << "InstallController::setupContainer prepareHostWorker finished";
@@ -535,18 +535,16 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
     return error;
 }
 
-ErrorCode InstallController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession)
+ErrorCode InstallController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession)
 {
-    Q_UNUSED(config);
     // create folder on host
     return sshSession.runScript(credentials,
                                          sshSession.replaceVars(amnezia::scriptData(SharedScriptType::prepare_host),
                                                                          amnezia::genBaseVars(credentials, container, QString(), QString())));
 }
 
-ErrorCode InstallController::isUserInSudo(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession)
+ErrorCode InstallController::isUserInSudo(const ServerCredentials &credentials, SshSession &sshSession)
 {
-    Q_UNUSED(container);
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
@@ -577,9 +575,8 @@ ErrorCode InstallController::isUserInSudo(const ServerCredentials &credentials, 
     return error;
 }
 
-ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession)
+ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentials, SshSession &sshSession)
 {
-    Q_UNUSED(container);
     m_cancelInstallation = false;
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {

@@ -50,9 +50,6 @@ public slots:
     void setDefaultServerIndex(int index);
     void setDefaultContainer(int serverIndex, int containerIndex);
     void toggleAmneziaDns(bool enabled);
-    void onAddServer(const ServerConfig& config);
-    void onServerEdited(int index, const ServerConfig& config);
-    void onServerRemoved(int index);
     void onDefaultServerChanged(int index);
     
     // Getters for properties

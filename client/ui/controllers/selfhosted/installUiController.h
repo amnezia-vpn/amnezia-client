@@ -71,7 +71,7 @@ public slots:
 
     void mountSftpDrive(int serverIndex, const QString &port, const QString &password, const QString &username);
 
-    bool checkSshConnection(SshSession* sshSession = nullptr);
+    bool checkSshConnection();
 
     void setEncryptedPassphrase(QString passphrase);
 

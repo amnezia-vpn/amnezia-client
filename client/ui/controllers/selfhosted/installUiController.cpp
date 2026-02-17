@@ -359,10 +359,8 @@ void InstallUiController::mountSftpDrive(int serverIndex, const QString &port, c
     }
 }
 
-bool InstallUiController::checkSshConnection(SshSession* sshSession)
+bool InstallUiController::checkSshConnection()
 {
-    Q_UNUSED(sshSession);
-
     m_privateKeyPassphrase = "";
 
     auto passphraseCallback = [this]() {

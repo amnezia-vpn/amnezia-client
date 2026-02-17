@@ -98,25 +98,6 @@ void ServersUiController::toggleAmneziaDns(bool enabled)
     updateModel();
 }
 
-void ServersUiController::onAddServer(const ServerConfig& config)
-{
-    Q_UNUSED(config);
-    updateModel();
-}
-
-void ServersUiController::onServerEdited(int index, const ServerConfig& config)
-{
-    Q_UNUSED(index);
-    Q_UNUSED(config);
-    updateModel();
-}
-
-void ServersUiController::onServerRemoved(int index)
-{
-    Q_UNUSED(index);
-    updateModel();
-}
-
 void ServersUiController::onDefaultServerChanged(int index)
 {
     if (m_processedServerIndex == -1 || m_processedServerIndex >= m_serversController->getServersCount()) {

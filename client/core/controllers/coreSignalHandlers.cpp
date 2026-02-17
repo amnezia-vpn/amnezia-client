@@ -233,20 +233,17 @@ void CoreSignalHandlers::initAutoConnectHandler()
 
 void CoreSignalHandlers::initAmneziaDnsToggledHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::useAmneziaDnsChanged, m_coreController->m_serversUiController, [this](bool enabled) {
-        Q_UNUSED(enabled);
-        m_coreController->m_serversUiController->updateModel();
-    });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::useAmneziaDnsChanged, m_coreController->m_serversUiController, &ServersUiController::updateModel);
 }
 
 void CoreSignalHandlers::initServersModelUpdateHandler()
 {
     connect(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded,
-            m_coreController->m_serversUiController, &ServersUiController::onAddServer);
+            m_coreController->m_serversUiController, &ServersUiController::updateModel);
     connect(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited,
-            m_coreController->m_serversUiController, &ServersUiController::onServerEdited);
+            m_coreController->m_serversUiController, &ServersUiController::updateModel);
     connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved,
-            m_coreController->m_serversUiController, &ServersUiController::onServerRemoved);
+            m_coreController->m_serversUiController, &ServersUiController::updateModel);
     connect(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged,
             m_coreController->m_serversUiController, &ServersUiController::onDefaultServerChanged);
     
@@ -269,42 +266,21 @@ void CoreSignalHandlers::initClientManagementModelUpdateHandler()
 
 void CoreSignalHandlers::initSitesModelUpdateHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesChanged, m_coreController->m_sitesUiController, [this](amnezia::RouteMode mode) {
-        Q_UNUSED(mode);
-        m_coreController->m_sitesUiController->updateModel();
-    });
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesSplitTunnelingEnabledChanged, m_coreController->m_sitesUiController, [this](bool enabled) {
-        Q_UNUSED(enabled);
-        m_coreController->m_sitesUiController->updateModel();
-    });
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::routeModeChanged, m_coreController->m_sitesUiController, [this](amnezia::RouteMode mode) {
-        Q_UNUSED(mode);
-        m_coreController->m_sitesUiController->updateModel();
-    });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesChanged, m_coreController->m_sitesUiController, &SitesUiController::updateModel);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesSplitTunnelingEnabledChanged, m_coreController->m_sitesUiController, &SitesUiController::updateModel);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::routeModeChanged, m_coreController->m_sitesUiController, &SitesUiController::updateModel);
 }
 
 void CoreSignalHandlers::initAllowedDnsModelUpdateHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::allowedDnsServersChanged, m_coreController->m_allowedDnsUiController, [this](const QStringList &servers) {
-        Q_UNUSED(servers);
-        m_coreController->m_allowedDnsUiController->updateModel();
-    });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::allowedDnsServersChanged, m_coreController->m_allowedDnsUiController, &AllowedDnsUiController::updateModel);
 }
 
 void CoreSignalHandlers::initAppSplitTunnelingModelUpdateHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsChanged, m_coreController->m_appSplitTunnelingUiController, [this](amnezia::AppsRouteMode mode) {
-        Q_UNUSED(mode);
-        m_coreController->m_appSplitTunnelingUiController->updateModel();
-    });
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsSplitTunnelingEnabledChanged, m_coreController->m_appSplitTunnelingUiController, [this](bool enabled) {
-        Q_UNUSED(enabled);
-        m_coreController->m_appSplitTunnelingUiController->updateModel();
-    });
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsRouteModeChanged, m_coreController->m_appSplitTunnelingUiController, [this](amnezia::AppsRouteMode mode) {
-        Q_UNUSED(mode);
-        m_coreController->m_appSplitTunnelingUiController->updateModel();
-    });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsChanged, m_coreController->m_appSplitTunnelingUiController, &AppSplitTunnelingUiController::updateModel);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsSplitTunnelingEnabledChanged, m_coreController->m_appSplitTunnelingUiController, &AppSplitTunnelingUiController::updateModel);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsRouteModeChanged, m_coreController->m_appSplitTunnelingUiController, &AppSplitTunnelingUiController::updateModel);
 }
 
 void CoreSignalHandlers::initPrepareConfigHandler()
