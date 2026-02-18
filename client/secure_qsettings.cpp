@@ -3,17 +3,20 @@
 #include "../client/3rd/QSimpleCrypto/src/include/QAead.h"
 #include "../client/3rd/QSimpleCrypto/src/include/QBlockCipher.h"
 #include "utilities.h"
+#include "protocols/protocols_defs.h"
 #include <QDataStream>
 #include <QDebug>
 #include <QEventLoop>
 #include <QIODevice>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QRandomGenerator>
 #include <QSharedPointer>
 #include <QTimer>
 
 using namespace QKeychain;
+using namespace amnezia;
 
 namespace {
     constexpr const char *settingsKeyTag = "settingsKeyTag";
@@ -150,6 +153,31 @@ QByteArray SecureQSettings::backupAppConfig() const
 
         if (!needToBackup(key))
         {
+            continue;
+        }
+
+        if (key == QLatin1String("Servers/serversList")) {
+            const QVariant rawValue = value(key);
+            const QByteArray rawJson = rawValue.toByteArray();
+
+            QJsonArray serversArray = QJsonDocument::fromJson(rawJson).array();
+            QJsonArray sanitizedServersArray;
+
+            for (const QJsonValue &serverValue : serversArray) {
+                QJsonObject serverObject = serverValue.toObject();
+
+                if (serverObject.contains(QLatin1String("api_config"))) {
+                    serverObject.remove(config_key::dns1);
+                    serverObject.remove(config_key::dns2);
+                    serverObject.remove(config_key::hostName);
+                    serverObject.remove(config_key::containers);
+                }
+
+                sanitizedServersArray.append(serverObject);
+            }
+
+            const QByteArray sanitizedJson = QJsonDocument(sanitizedServersArray).toJson(QJsonDocument::Compact);
+            cfg.insert(key, QJsonValue::fromVariant(sanitizedJson));
             continue;
         }
 
