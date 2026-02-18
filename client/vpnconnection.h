@@ -45,7 +45,7 @@ public:
 
 public slots:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
-    void reconnectToVpn(const QString& ifaceName);
+    void reconnectToVpn();
     void disconnectFromVpn();
 
     void onKillSwitchModeChanged(bool enabled);

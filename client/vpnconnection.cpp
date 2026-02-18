@@ -279,6 +279,7 @@ void VpnConnection::createProtocolConnections()
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
         connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
+        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
     });
 #endif
 }
@@ -422,18 +423,17 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
     return QString("%1 %2").arg(QString::number(mbps, 'f', 2)).arg(tr("Mbps")); // Mbit/s
 }
 
-void VpnConnection::reconnectToVpn(const QString& ifaceName) {
+void VpnConnection::reconnectToVpn() {
     if (m_vpnProtocol.isNull())
         return;
 
     if (m_connectionState != Vpn::ConnectionState::Connected) {
-        qWarning() << QString("Network change triggered on %1 during inappropriate state: %2; ignoring slot")
-                              .arg(ifaceName)
+        qWarning() << QString("Reconnect triggered on %1 during inappropriate state: %2; ignoring slot")
                               .arg(QMetaEnum::fromType<Vpn::ConnectionState>().valueToKey(m_connectionState));
         return;
     }
 
-    qDebug() << QString("Network change triggered on %1. Reconnecting to the server").arg(ifaceName);
+    qDebug() << "Reconnect triggered. Reconnecting to the server";
 
     setConnectionState(Vpn::ConnectionState::Reconnecting);
 

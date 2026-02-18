@@ -32,8 +32,8 @@ public:
     QNetworkInformation::Reachability getReachability();
 
 signals:
-    void networkChanged(const QString& ifaceName);
-    void sleepMode();
+    void networkChanged();
+    void wakeup();
 
 private:
     void settingsChanged();
