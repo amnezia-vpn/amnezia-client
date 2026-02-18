@@ -808,33 +808,30 @@ bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     if (!apiUtils::isPremiumServer(serverConfigObject)) {
         return true;
     }
 
-    if (!isRemoveEvent) {
-        auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
+                                            m_settings->getInstallationUuid(true),
+                                            apiConfigObject.value(configKey::userCountryCode).toString(),
+                                            apiConfigObject.value(configKey::serverCountryCode).toString(),
+                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            "",
+                                            serverConfigObject.value(configKey::authData).toObject() };
 
-        GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                                QString(APP_VERSION),
-                                                m_settings->getAppLanguage().name().split("_").first(),
-                                                m_settings->getInstallationUuid(true),
-                                                apiConfigObject.value(configKey::userCountryCode).toString(),
-                                                apiConfigObject.value(configKey::serverCountryCode).toString(),
-                                                apiConfigObject.value(configKey::serviceType).toString(),
-                                                "",
-                                                serverConfigObject.value(configKey::authData).toObject() };
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    bool isTestPurchase = apiConfigObject.value(apiDefs::key::isTestPurchase).toBool(false);
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody, isTestPurchase);
 
-        QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-        bool isTestPurchase = apiConfigObject.value(apiDefs::key::isTestPurchase).toBool(false);
-        QByteArray responseBody;
-        ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody, isTestPurchase);
-
-        if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
-            emit errorOccurred(errorCode);
-            return false;
-        }
+    if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
+        emit errorOccurred(errorCode);
+        return false;
     }
 
     serverConfigObject.remove(config_key::containers);
