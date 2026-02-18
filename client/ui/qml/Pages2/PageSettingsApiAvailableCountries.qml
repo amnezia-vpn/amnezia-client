@@ -19,153 +19,51 @@ PageType {
 
     property var processedServer
     property var groupedRegions: []
-    property var regionsExpanded: ({})
 
     readonly property var regionDefinitions: [
         {
-            "regionName": "Northern Europe",
+            "regionName": "Europe",
             "countries": [
-                { "code": "SE", "name": "Sweden" },
-                { "code": "FI", "name": "Finland" },
+                { "code": "BE", "name": "Belgium" },
                 { "code": "EE", "name": "Estonia" },
-                { "code": "IE", "name": "Ireland" },
-                { "code": "NO", "name": "Norway" },
-                { "code": "DK", "name": "Denmark" },
-                { "code": "IS", "name": "Iceland" }
-            ]
-        },
-        {
-            "regionName": "Western Europe",
-            "countries": [
+                { "code": "FI", "name": "Finland" },
+                { "code": "FR", "name": "France" },
+                { "code": "GE", "name": "Georgia" },
                 { "code": "DE", "name": "Germany" },
                 { "code": "NL", "name": "Netherlands" },
-                { "code": "CH", "name": "Switzerland" },
-                { "code": "FR", "name": "France" },
-                { "code": "BE", "name": "Belgium" },
-                { "code": "PT", "name": "Portugal" },
-                { "code": "IM", "name": "Isle of Man" }
-            ]
-        },
-        {
-            "regionName": "Central Europe",
-            "countries": [
                 { "code": "PL", "name": "Poland" },
-                { "code": "AT", "name": "Austria" },
-                { "code": "LU", "name": "Luxembourg" },
-                { "code": "SK", "name": "Slovakia" }
-            ]
-        },
-        {
-            "regionName": "Southern Europe & Mediterranean",
-            "countries": [
-                { "code": "ES", "name": "Spain" },
-                { "code": "IT", "name": "Italy" },
-                { "code": "CY", "name": "Cyprus" },
-                { "code": "MT", "name": "Malta" }
-            ]
-        },
-        {
-            "regionName": "Eastern Europe & Baltics",
-            "countries": [
                 { "code": "RU", "name": "Russia" },
-                { "code": "HU", "name": "Hungary" },
-                { "code": "RO", "name": "Romania" },
-                { "code": "LV", "name": "Latvia" },
-                { "code": "LT", "name": "Lithuania" }
-            ]
-        },
-        {
-            "regionName": "Balkans",
-            "countries": [
-                { "code": "BG", "name": "Bulgaria" },
-                { "code": "HR", "name": "Croatia" },
-                { "code": "BA", "name": "Bosnia and Herzegovina" },
-                { "code": "RS", "name": "Serbia" }
-            ]
-        },
-        {
-            "regionName": "Caucasus Region",
-            "countries": [
-                { "code": "GE", "name": "Georgia" }
-            ]
-        },
-        {
-            "regionName": "Eurasian Region",
-            "countries": [
-                { "code": "KZ", "name": "Kazakhstan" },
+                { "code": "ES", "name": "Spain" },
+                { "code": "SE", "name": "Sweden" },
+                { "code": "CH", "name": "Switzerland" },
                 { "code": "TR", "name": "Turkey" }
             ]
         },
         {
-            "regionName": "East Asia",
-            "countries": [
-                { "code": "JP", "name": "Japan" },
-                { "code": "KR", "name": "South Korea" },
-                { "code": "TW", "name": "Taiwan" },
-                { "code": "HK", "name": "Hong Kong" }
-            ]
-        },
-        {
-            "regionName": "Southeast Asia",
-            "countries": [
-                { "code": "SG", "name": "Singapore" },
-                { "code": "PH", "name": "Philippines" },
-                { "code": "VN", "name": "Vietnam" },
-                { "code": "ID", "name": "Indonesia" }
-            ]
-        },
-        {
-            "regionName": "Central Asia",
-            "countries": [
-            ]
-        },
-        {
-            "regionName": "Middle East",
-            "countries": [
-                { "code": "AE", "name": "UAE" }
-            ]
-        },
-        {
-            "regionName": "Oceania",
-            "countries": [
-                { "code": "AU", "name": "Australia" },
-                { "code": "NZ", "name": "New Zealand" }
-            ]
-        },
-        {
-            "regionName": "North America",
-            "countries": [
-                { "code": "US", "name": "USA East" },
-                { "code": "US", "name": "USA West" },
-                { "code": "CA", "name": "Canada East" },
-                { "code": "CA", "name": "Canada West" },
-                { "code": "MX", "name": "Mexico" }
-            ]
-        },
-        {
-            "regionName": "Central America",
-            "countries": [
-                { "code": "CR", "name": "Costa Rica" },
-                { "code": "PA", "name": "Panama" },
-                { "code": "GT", "name": "Guatemala" }
-            ]
-        },
-        {
-            "regionName": "South America",
+            "regionName": "America",
             "countries": [
                 { "code": "BR", "name": "Brazil" },
-                { "code": "AR", "name": "Argentina" },
-                { "code": "CL", "name": "Chile" },
-                { "code": "CO", "name": "Colombia" },
-                { "code": "BO", "name": "Bolivia" },
-                { "code": "PE", "name": "Peru" }
+                { "code": "CA", "name": "Canada East" },
+                { "code": "US", "name": "USA East" },
+                { "code": "US", "name": "USA West" }
             ]
         },
         {
-            "regionName": "Africa",
+            "regionName": "Asia",
             "countries": [
-                { "code": "ZA", "name": "South Africa" },
-                { "code": "KE", "name": "Kenya" }
+                { "code": "AE", "name": "UAE" },
+                { "code": "JP", "name": "Japan" },
+                { "code": "KZ", "name": "Kazakhstan" },
+                { "code": "KR", "name": "South Korea" },
+                { "code": "SG", "name": "Singapore" }
+            ]
+        },
+        {
+            "regionName": "Oceania and Africa",
+            "countries": [
+                { "code": "AU", "name": "Australia" },
+                { "code": "NZ", "name": "New Zealand" },
+                { "code": "ZA", "name": "South Africa" }
             ]
         }
     ]
@@ -188,19 +86,6 @@ PageType {
             return "";
         }
         return countryName.toString().trim().toLowerCase();
-    }
-
-    function isRegionExpanded(regionName) {
-        if (regionsExpanded[regionName] === undefined) {
-            return true;
-        }
-        return regionsExpanded[regionName];
-    }
-
-    function setRegionExpanded(regionName, isExpanded) {
-        let updated = Object.assign({}, regionsExpanded);
-        updated[regionName] = isExpanded;
-        regionsExpanded = updated;
     }
 
     function findCountryIndexByRef(countryRef, usedIndices) {
@@ -392,30 +277,22 @@ PageType {
             height: regionContent.implicitHeight
             spacing: 0
 
-            LabelWithButtonType {
+            CaptionTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 4
-                Layout.bottomMargin: 4
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+                Layout.bottomMargin: 8
 
-                textColor: AmneziaStyle.color.paleGray
-                borderFocusedColor: AmneziaStyle.color.paleGray
+                color: AmneziaStyle.color.mutedGray
 
                 text: regionData.regionName
-                rightImageSource: root.isRegionExpanded(regionData.regionName) ? "qrc:/images/controls/chevron-up.svg" : "qrc:/images/controls/chevron-down.svg"
-                textMaximumLineCount: 1
-                textElide: Qt.ElideRight
-
-                clickedFunction: function() {
-                    root.setRegionExpanded(regionData.regionName, !root.isRegionExpanded(regionData.regionName))
-                }
-            }
-
-            DividerType {
-                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
             }
 
             Repeater {
-                model: root.isRegionExpanded(regionData.regionName) ? regionData.countries : []
+                model: regionData.countries
 
                 delegate: ColumnLayout {
                     property var countryData: modelData
@@ -430,7 +307,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.leftMargin: 16
 
-                            text: countryData.countryName + " (" + root.normalizeCountryCode(countryData.countryCode) + ")"
+                            text: countryData.countryName
 
                             ButtonGroup.group: containersRadioButtonGroup
 
