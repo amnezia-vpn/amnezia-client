@@ -136,7 +136,7 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     }
 
     if (config.startsWith("ss://") && !config.contains("plugin=")) {
-        configType = ConfigTypes::Xray;
+        configType = ConfigTypes::ShadowSocks;
         result.config = extractXrayConfig(
                 Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
                 configType, prefix);
@@ -149,7 +149,7 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     if (config.startsWith("ssd://")) {
         QStringList tmp;
         QList<std::pair<QString, QJsonObject>> servers = serialization::ssd::Deserialize(config, &prefix, &tmp);
-        configType = ConfigTypes::Xray;
+        configType = ConfigTypes::ShadowSocks;
         // Took only first config from list
         if (!servers.isEmpty()) {
             result.config = extractXrayConfig(servers.first().first, configType);
@@ -561,8 +561,13 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
     lastConfig[config_key::isThirdPartyConfig] = true;
 
     QJsonObject containers;
-    containers.insert(config_key::container, QJsonValue("amnezia-xray"));
-    containers.insert(config_key::xray, QJsonValue(lastConfig));
+    if (configType == ConfigTypes::ShadowSocks) {
+        containers.insert(config_key::ssxray, QJsonValue(lastConfig));
+        containers.insert(config_key::container, QJsonValue("amnezia-ssxray"));
+    } else {
+        containers.insert(config_key::container, QJsonValue("amnezia-xray"));
+        containers.insert(config_key::xray, QJsonValue(lastConfig));
+    }
 
     QJsonArray arr;
     arr.push_back(containers);
@@ -577,7 +582,9 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
 
     QJsonObject config;
     config[config_key::containers] = arr;
-    config[config_key::defaultContainer] = "amnezia-xray";
+    config[config_key::defaultContainer] = (configType == ConfigTypes::ShadowSocks)
+            ? QStringLiteral("amnezia-ssxray")
+            : QStringLiteral("amnezia-xray");
     if (description.isEmpty()) {
         config[config_key::description] = m_appSettingsRepository->nextAvailableServerName();
     } else {

@@ -19,7 +19,7 @@ using namespace ProtocolUtils;
 
 Proto ContainerConfig::getProtocolType() const
 {
-    return protocolConfig.type();
+    return ContainerUtils::defaultProtocol(container);
 }
 
 QJsonObject ContainerConfig::toJson() const
@@ -28,7 +28,7 @@ QJsonObject ContainerConfig::toJson() const
     
     obj[config_key::container] = ContainerUtils::containerToString(container);
     
-    Proto protoType = protocolConfig.type();
+    Proto protoType = getProtocolType();
     QString protoName = ProtocolUtils::protoToString(protoType);
     
     obj[protoName] = protocolConfig.toJson();
@@ -91,16 +91,6 @@ XrayProtocolConfig* ContainerConfig::getXrayProtocolConfig()
 const XrayProtocolConfig* ContainerConfig::getXrayProtocolConfig() const
 {
     return protocolConfig.as<XrayProtocolConfig>();
-}
-
-SSXrayProtocolConfig* ContainerConfig::getSSXrayProtocolConfig()
-{
-    return protocolConfig.as<SSXrayProtocolConfig>();
-}
-
-const SSXrayProtocolConfig* ContainerConfig::getSSXrayProtocolConfig() const
-{
-    return protocolConfig.as<SSXrayProtocolConfig>();
 }
 
 SftpProtocolConfig* ContainerConfig::getSftpProtocolConfig()

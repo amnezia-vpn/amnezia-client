@@ -12,7 +12,6 @@
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
-#include "core/models/protocols/ssXrayProtocolConfig.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
@@ -72,18 +71,12 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             config.protocolConfig = ovpnConfig;
             break;
         }
-        case Proto::Xray: {
+        case Proto::Xray:
+        case Proto::SSXray: {
             XrayProtocolConfig xrayConfig;
             xrayConfig.serverConfig.port = portStr;
             xrayConfig.serverConfig.transportProto = transportProtoStr;
             config.protocolConfig = xrayConfig;
-            break;
-        }
-        case Proto::SSXray: {
-            SSXrayProtocolConfig ssXrayConfig;
-            ssXrayConfig.serverConfig.port = portStr;
-            ssXrayConfig.serverConfig.transportProto = transportProtoStr;
-            config.protocolConfig = ssXrayConfig;
             break;
         }
         case Proto::Sftp: {

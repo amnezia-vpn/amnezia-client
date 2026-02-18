@@ -17,7 +17,6 @@
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
-#include "core/models/protocols/ssXrayProtocolConfig.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
@@ -35,7 +34,6 @@ struct ProtocolConfig {
         WireGuardProtocolConfig,
         OpenVpnProtocolConfig,
         XrayProtocolConfig,
-        SSXrayProtocolConfig,
         SftpProtocolConfig,
         Socks5ProxyProtocolConfig,
         Ikev2ProtocolConfig,

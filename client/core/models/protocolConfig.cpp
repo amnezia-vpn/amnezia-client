@@ -28,8 +28,6 @@ Proto ProtocolConfig::type() const
             return Proto::OpenVpn;
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
             return Proto::Xray;
-        } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
-            return Proto::SSXray;
         } else if constexpr (std::is_same_v<T, SftpProtocolConfig>) {
             return Proto::Sftp;
         } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
@@ -57,8 +55,6 @@ QString ProtocolConfig::port() const
             return arg.serverConfig.port;
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
             return arg.serverConfig.port;
-        } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
-            return arg.serverConfig.port;
         } else if constexpr (std::is_same_v<T, SftpProtocolConfig>) {
             return arg.port;
         } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
@@ -85,8 +81,6 @@ QString ProtocolConfig::transportProto() const
         } else if constexpr (std::is_same_v<T, OpenVpnProtocolConfig>) {
             return arg.serverConfig.transportProto;
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
-            return arg.serverConfig.transportProto;
-        } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
             return arg.serverConfig.transportProto;
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             return QString();
@@ -125,7 +119,6 @@ bool ProtocolConfig::hasClientConfig() const
                       std::is_same_v<T, WireGuardProtocolConfig> ||
                       std::is_same_v<T, OpenVpnProtocolConfig> ||
                       std::is_same_v<T, XrayProtocolConfig> ||
-                      std::is_same_v<T, SSXrayProtocolConfig> ||
                       std::is_same_v<T, Ikev2ProtocolConfig>) {
             return arg.hasClientConfig();
         }
@@ -182,10 +175,6 @@ QJsonObject ProtocolConfig::getClientConfigJson() const
             if (arg.hasClientConfig()) {
                 return arg.clientConfig->toJson();
             }
-        } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
-            if (arg.hasClientConfig()) {
-                return arg.clientConfig->toJson();
-            }
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             if (arg.hasClientConfig()) {
                 return arg.clientConfig->toJson();
@@ -207,8 +196,6 @@ void ProtocolConfig::setClientConfigJson(const QJsonObject& json)
             arg.setClientConfig(OpenVpnClientConfig::fromJson(json));
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
             arg.setClientConfig(XrayClientConfig::fromJson(json));
-        } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
-            arg.setClientConfig(SSXrayClientConfig::fromJson(json));
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             arg.setClientConfig(Ikev2ClientConfig::fromJson(json));
         }
@@ -223,7 +210,6 @@ void ProtocolConfig::clearClientConfig()
                       std::is_same_v<T, WireGuardProtocolConfig> ||
                       std::is_same_v<T, OpenVpnProtocolConfig> ||
                       std::is_same_v<T, XrayProtocolConfig> ||
-                      std::is_same_v<T, SSXrayProtocolConfig> ||
                       std::is_same_v<T, Ikev2ProtocolConfig>) {
             arg.clearClientConfig();
         }
@@ -250,10 +236,6 @@ QString ProtocolConfig::nativeConfig() const
             if (arg.clientConfig.has_value()) {
                 return arg.clientConfig->nativeConfig;
             }
-        } else if constexpr (std::is_same_v<T, SSXrayProtocolConfig>) {
-            if (arg.clientConfig.has_value()) {
-                return arg.clientConfig->nativeConfig;
-            }
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             if (arg.clientConfig.has_value()) {
                 return arg.clientConfig->nativeConfig;
@@ -271,7 +253,6 @@ bool ProtocolConfig::isThirdPartyConfig() const
                       std::is_same_v<T, WireGuardProtocolConfig> ||
                       std::is_same_v<T, OpenVpnProtocolConfig> ||
                       std::is_same_v<T, XrayProtocolConfig> ||
-                      std::is_same_v<T, SSXrayProtocolConfig> ||
                       std::is_same_v<T, Ikev2ProtocolConfig>) {
             return arg.serverConfig.isThirdPartyConfig;
         }
@@ -296,9 +277,8 @@ ProtocolConfig ProtocolConfig::fromJson(const QJsonObject& json, Proto type)
     case Proto::OpenVpn:
         return ProtocolConfig{OpenVpnProtocolConfig::fromJson(json)};
     case Proto::Xray:
-        return ProtocolConfig{XrayProtocolConfig::fromJson(json)};
     case Proto::SSXray:
-        return ProtocolConfig{SSXrayProtocolConfig::fromJson(json)};
+        return ProtocolConfig{XrayProtocolConfig::fromJson(json)};
     case Proto::Sftp:
         return ProtocolConfig{SftpProtocolConfig::fromJson(json)};
     case Proto::Socks5Proxy:

@@ -12,7 +12,6 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
-#include "core/models/protocols/ssXrayProtocolConfig.h"
 #include "logger.h"
 
 namespace {
@@ -74,8 +73,6 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
 
     if (auto* xrayConfig = config.getXrayProtocolConfig()) {
         xrayConfig->serverConfig.site = siteName;
-    } else if (auto* ssXrayConfig = config.getSSXrayProtocolConfig()) {
-        ssXrayConfig->serverConfig.site = siteName;
     }
     
     return ErrorCode::NoError;

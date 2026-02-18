@@ -122,8 +122,15 @@ QJsonObject XrayProtocolConfig::toJson() const
     QJsonObject obj = serverConfig.toJson();
     
     if (clientConfig.has_value()) {
-        QJsonObject clientJson = clientConfig->toJson();
-        obj[config_key::last_config] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
+        // Third-party import: nativeConfig is raw Xray JSON (inbounds/outbounds)
+        QJsonDocument doc = QJsonDocument::fromJson(clientConfig->nativeConfig.toUtf8());
+        if (!doc.isNull() && doc.isObject() && doc.object().contains("outbounds")
+                && !doc.object().contains(config_key::config)) {
+            obj[config_key::last_config] = clientConfig->nativeConfig;
+        } else {
+            QJsonObject clientJson = clientConfig->toJson();
+            obj[config_key::last_config] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
+        }
     }
     
     return obj;
@@ -139,7 +146,24 @@ XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject& json)
     if (!lastConfigStr.isEmpty()) {
         QJsonDocument doc = QJsonDocument::fromJson(lastConfigStr.toUtf8());
         if (doc.isObject()) {
-            config.clientConfig = XrayClientConfig::fromJson(doc.object());
+            QJsonObject parsed = doc.object();
+            // Third-party import stores raw Xray config (inbounds/outbounds) directly
+            if (parsed.contains("outbounds") && !parsed.contains(config_key::config)) {
+                XrayClientConfig clientCfg;
+                clientCfg.nativeConfig = lastConfigStr;
+                if (parsed.contains("inbounds")) {
+                    QJsonArray inbounds = parsed.value("inbounds").toArray();
+                    if (!inbounds.isEmpty()) {
+                        QJsonObject inbound = inbounds[0].toObject();
+                        if (inbound.contains("port")) {
+                            clientCfg.localPort = QString::number(inbound.value("port").toInt());
+                        }
+                    }
+                }
+                config.clientConfig = clientCfg;
+            } else {
+                config.clientConfig = XrayClientConfig::fromJson(parsed);
+            }
         }
     }
     

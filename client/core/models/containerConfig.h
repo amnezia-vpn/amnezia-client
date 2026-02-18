@@ -51,9 +51,6 @@ struct ContainerConfig {
     XrayProtocolConfig* getXrayProtocolConfig();
     const XrayProtocolConfig* getXrayProtocolConfig() const;
     
-    SSXrayProtocolConfig* getSSXrayProtocolConfig();
-    const SSXrayProtocolConfig* getSSXrayProtocolConfig() const;
-    
     SftpProtocolConfig* getSftpProtocolConfig();
     const SftpProtocolConfig* getSftpProtocolConfig() const;
     
