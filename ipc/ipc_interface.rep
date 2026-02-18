@@ -45,5 +45,5 @@ class IpcInterface
     SLOT( bool stopNetworkCheck() );
 
     SIGNAL( connectionLose() );
-    SIGNAL( networkChange() );
+    SIGNAL( networkChanged(const QString& interface) );
 };
