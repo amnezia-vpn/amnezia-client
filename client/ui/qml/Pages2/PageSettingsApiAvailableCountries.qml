@@ -19,6 +19,7 @@ PageType {
 
     property var processedServer
     property var groupedRegions: []
+    property string searchText: ""
 
     readonly property var regionDefinitions: [
         {
@@ -88,6 +89,50 @@ PageType {
         return countryName.toString().trim().toLowerCase();
     }
 
+    function normalizeSearchComparableText(textValue) {
+        const normalizedText = normalizeCountryName(textValue);
+        let result = "";
+
+        for (let i = 0; i < normalizedText.length; ++i) {
+            const currentChar = normalizedText[i];
+            const isSeparator = currentChar === "." || currentChar === "-";
+
+            if (!isSeparator) {
+                result += currentChar;
+                continue;
+            }
+
+            const prevChar = i > 0 ? normalizedText[i - 1] : "";
+            const nextChar = i + 1 < normalizedText.length ? normalizedText[i + 1] : "";
+            const hasSeparatorNeighbor = prevChar === "." || prevChar === "-" || nextChar === "." || nextChar === "-";
+
+            if (hasSeparatorNeighbor) {
+                result += currentChar;
+            }
+        }
+
+        return result;
+    }
+
+    function isCountryMatchingSearch(countryName) {
+        const normalizedSearchText = normalizeSearchComparableText(searchText);
+        if (normalizedSearchText === "") {
+            return true;
+        }
+
+        const normalizedCountryName = normalizeSearchComparableText(countryName);
+        const searchRegexp = new RegExp("^" + normalizedSearchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+        return searchRegexp.test(normalizedCountryName);
+    }
+
+    function getDisplayCountryName(countryName) {
+        const p2pPostfix = "[P2P] ";
+        if (countryName && countryName.indexOf(p2pPostfix) === 0) {
+            return countryName.slice(p2pPostfix.length) + " " + p2pPostfix;
+        }
+        return countryName;
+    }
+
     function findCountryIndexByRef(countryRef, usedIndices) {
         const expectedCode = normalizeCountryCode(countryRef.code);
         const expectedName = normalizeCountryName(countryRef.name);
@@ -143,9 +188,15 @@ PageType {
                     continue;
                 }
 
+                const displayCountryName = getDisplayCountryName(sourceCountry.countryName);
+                if (!isCountryMatchingSearch(displayCountryName)) {
+                    continue;
+                }
+
                 regions[regionIndex].countries.push({
                     "sourceIndex": sourceIndex,
-                    "countryName": sourceCountry.countryName,
+                    "countryName": displayCountryName,
+                    "sourceCountryName": sourceCountry.countryName,
                     "countryCode": sourceCountry.countryCode,
                     "countryImageCode": extractCountryIsoCode(sourceCountry.countryImageCode)
                 });
@@ -266,6 +317,131 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
                 }
             }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 10
+
+                implicitHeight: 56
+                radius: 16
+
+                color: AmneziaStyle.color.onyxBlack
+                border.color: searchField.activeFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.slateGray
+                border.width: 1
+
+                Behavior on border.color {
+                    PropertyAnimation { duration: 200 }
+                }
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 8
+                    spacing: 8
+
+                    Image {
+                        source: "qrc:/images/controls/search.svg"
+                    }
+
+                    TextField {
+                        id: searchField
+
+                        Layout.fillWidth: true
+
+                        color: AmneziaStyle.color.paleGray
+                        placeholderText: "country or country code"
+                        placeholderTextColor: AmneziaStyle.color.charcoalGray
+
+                        selectionColor: AmneziaStyle.color.richBrown
+                        selectedTextColor: AmneziaStyle.color.paleGray
+
+                        font.pixelSize: 16
+                        font.weight: 400
+                        font.family: "PT Root UI VF"
+
+                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+
+                        topPadding: 0
+                        rightPadding: 0
+                        leftPadding: 0
+                        bottomPadding: 0
+
+                        background: Rectangle {
+                            color: AmneziaStyle.color.transparent
+                        }
+
+                        onTextChanged: {
+                            const shouldRestoreFocus = activeFocus
+                            const previousCursorPosition = cursorPosition
+
+                            root.searchText = text
+                            root.rebuildRegionModel()
+
+                            if (shouldRestoreFocus) {
+                                Qt.callLater(function() {
+                                    searchField.forceActiveFocus()
+                                    searchField.cursorPosition = Math.min(previousCursorPosition, searchField.text.length)
+                                })
+                            }
+                        }
+
+                        Keys.onEscapePressed: {
+                            searchField.text = ""
+                        }
+
+                        ContextMenu.menu: ContextMenuType {
+                            textObj: searchField
+                        }
+                    }
+
+                    ImageButtonType {
+                        visible: searchField.text !== ""
+
+                        implicitWidth: 40
+                        implicitHeight: 40
+
+                        hoverEnabled: true
+                        image: "qrc:/images/controls/close.svg"
+                        imageColor: AmneziaStyle.color.paleGray
+
+                        onClicked: {
+                            searchField.text = ""
+                        }
+                        Keys.onEnterPressed: {
+                            searchField.text = ""
+                        }
+                        Keys.onReturnPressed: {
+                            searchField.text = ""
+                        }
+                    }
+                }
+            }
+        }
+
+        footer: Item {
+            width: menuContent.width
+            height: groupedRegions.length === 0 ? emptyStateText.implicitHeight + 32 : 0
+
+            CaptionTextType {
+                id: emptyStateText
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+                anchors.top: parent.top
+                anchors.topMargin: 16
+
+                visible: groupedRegions.length === 0
+                color: AmneziaStyle.color.mutedGray
+
+                font.pixelSize: 15
+                horizontalAlignment: Text.AlignLeft
+                wrapMode: Text.WordWrap
+                text: "Nothing found. Try a different spelling or switch keyboard layout."
+            }
         }
 
         delegate: ColumnLayout {
@@ -330,7 +506,7 @@ PageType {
                                     PageController.showBusyIndicator(true)
                                     var prevIndex = ApiCountryModel.currentIndex
                                     ApiCountryModel.currentIndex = countryData.sourceIndex
-                                    if (!ApiConfigsController.updateServiceFromGateway(ServersModel.defaultIndex, countryData.countryCode, countryData.countryName)) {
+                                    if (!ApiConfigsController.updateServiceFromGateway(ServersModel.defaultIndex, countryData.countryCode, countryData.sourceCountryName)) {
                                         ApiCountryModel.currentIndex = prevIndex
                                     }
                                     PageController.showBusyIndicator(false)
