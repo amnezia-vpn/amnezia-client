@@ -3,6 +3,10 @@ message("Client android ${CMAKE_ANDROID_ARCH_ABI} build")
 if(NOT DEFINED APP_ANDROID_MIN_SDK)
     set(APP_ANDROID_MIN_SDK 28)
 endif()
+
+# Option to build Play variant (with Google Play Billing) instead of OSS
+# When ON, adds target android_play_apk: cmake --build . --target android_play_apk
+option(ANDROID_BUILD_PLAY "Add android_play_apk target for Google Play Billing build" OFF)
 set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
     "The minimum API level supported by the application or library" FORCE)
 
@@ -78,3 +82,18 @@ if(APP_ANDROID_MAX_SDK)
 endif()
 
 set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${APP_ANDROID_PACKAGE_SOURCE_DIR})
+
+if(ANDROID_BUILD_PLAY)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_gradle_suffix "Debug")
+    else()
+        set(_gradle_suffix "Release")
+    endif()
+    set(_android_build_dir "${CMAKE_CURRENT_BINARY_DIR}/android-build-${PROJECT}")
+    add_custom_target(android_play_apk
+        COMMAND ./gradlew assemblePlay${_gradle_suffix} -DexplicitRun=1
+        WORKING_DIRECTORY "${_android_build_dir}"
+        COMMENT "Building Android Play variant (assemblePlay${_gradle_suffix})"
+        DEPENDS ${PROJECT}
+    )
+endif()
