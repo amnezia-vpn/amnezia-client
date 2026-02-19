@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt.labs.settings 1.1
 
 import SortFilterProxyModel 0.2
 
@@ -19,6 +20,7 @@ PageType {
     property var processedServer
     property var groupedRegions: []
     property string searchText: ""
+    property var regionsExpanded: ({})
 
     readonly property var regionDefinitions: [
         {
@@ -88,8 +90,37 @@ PageType {
         return countryName.toString().trim().toLowerCase();
     }
 
+    function loadRegionExpansionState() {
+        try {
+            const parsed = JSON.parse(regionExpansionSettings.regionsExpandedJson);
+            regionsExpanded = parsed && typeof parsed === "object" ? parsed : ({});
+        } catch (error) {
+            regionsExpanded = ({});
+        }
+    }
+
+    function saveRegionExpansionState() {
+        regionExpansionSettings.regionsExpandedJson = JSON.stringify(regionsExpanded);
+    }
+
+    function isRegionExpanded(regionName) {
+        if (regionsExpanded[regionName] === undefined) {
+            return true;
+        }
+        return regionsExpanded[regionName];
+    }
+
+    function setRegionExpanded(regionName, isExpanded) {
+        let updated = Object.assign({}, regionsExpanded);
+        updated[regionName] = isExpanded;
+        regionsExpanded = updated;
+        saveRegionExpansionState();
+    }
+
     function normalizeSearchComparableText(textValue) {
-        const normalizedText = normalizeCountryName(textValue);
+        const normalizedText = normalizeCountryName(textValue)
+            .replace(/[ё]/g, "е")
+            .replace(/[й]/g, "и");
         let result = "";
 
         for (let i = 0; i < normalizedText.length; ++i) {
@@ -286,6 +317,12 @@ PageType {
         sourceModel: ApiCountryModel
     }
 
+    Settings {
+        id: regionExpansionSettings
+        category: "PageSettingsApiAvailableCountries"
+        property string regionsExpandedJson: "{}"
+    }
+
     ListViewType {
         id: menuContent
 
@@ -472,22 +509,46 @@ PageType {
             height: regionContent.implicitHeight
             spacing: 0
 
-            CaptionTextType {
+            Item {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 12
                 Layout.bottomMargin: 8
 
-                color: AmneziaStyle.color.mutedGray
+                implicitHeight: 24
 
-                text: regionData.regionName
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
+                RowLayout {
+                    anchors.fill: parent
+                    spacing: 8
+
+                    CaptionTextType {
+                        Layout.fillWidth: true
+                        color: AmneziaStyle.color.mutedGray
+
+                        text: regionData.regionName
+                        horizontalAlignment: Text.AlignLeft
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    Image {
+                        source: root.isRegionExpanded(regionData.regionName)
+                                ? "qrc:/images/controls/chevron-up.svg"
+                                : "qrc:/images/controls/chevron-down.svg"
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        root.setRegionExpanded(regionData.regionName, !root.isRegionExpanded(regionData.regionName))
+                    }
+                }
             }
 
             Repeater {
-                model: regionData.countries
+                model: root.isRegionExpanded(regionData.regionName) ? regionData.countries : []
 
                 delegate: ColumnLayout {
                     property var countryData: modelData
@@ -563,5 +624,9 @@ PageType {
                 }
             }
         }
+    }
+
+    Component.onCompleted: {
+        loadRegionExpansionState()
     }
 }
