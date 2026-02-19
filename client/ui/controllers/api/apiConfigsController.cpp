@@ -11,9 +11,14 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QEventLoop>
+#include <QFutureWatcher>
 #include <QSet>
+#include <QtConcurrent>
 
 #include "platforms/ios/ios_controller.h"
+#ifdef Q_OS_ANDROID
+#include "platforms/android/android_controller.h"
+#endif
 
 namespace
 {
@@ -425,6 +430,86 @@ bool ApiConfigsController::fillAvailableServices()
             }
         }
     }
+#elif defined(Q_OS_ANDROID)
+    // Get price from Google Play Billing
+    auto androidController = AndroidController::instance();
+    QJsonObject plansResult = androidController->getSubscriptionPlans();
+    int responseCode = plansResult.value("responseCode").toInt(-1);
+    
+    if (responseCode == 0) {
+        QJsonArray products = plansResult.value("products").toArray();
+        QString formattedPrice;
+        int billingPeriodDays = 180;
+        for (const QJsonValue &productValue : products) {
+            QJsonObject product = productValue.toObject();
+            if (product.value("productId").toString() == "premium") {
+                QJsonArray offers = product.value("offers").toArray();
+                if (!offers.isEmpty()) {
+                    QJsonObject firstOffer = offers.at(0).toObject();
+                    QJsonArray pricingPhases = firstOffer.value("pricingPhases").toArray();
+                    if (!pricingPhases.isEmpty()) {
+                        QJsonObject pricingPhase = pricingPhases.at(0).toObject();
+                        formattedPrice = pricingPhase.value("formatedPrice").toString();
+                        QString billingPeriod = pricingPhase.value("billingPeriod").toString();
+                        if (billingPeriod.contains("D")) {
+                            int idx = billingPeriod.indexOf("D");
+                            billingPeriodDays = billingPeriod.mid(1, idx - 1).toInt();
+                        } else if (billingPeriod.contains("M")) {
+                            int idx = billingPeriod.indexOf("M");
+                            int months = billingPeriod.mid(1, idx - 1).toInt();
+                            if (months > 0) billingPeriodDays = months * 30;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        if (!formattedPrice.isEmpty()) {
+            QJsonArray services = data.value("services").toArray();
+            bool premiumFound = false;
+            for (int i = 0; i < services.size(); ++i) {
+                QJsonObject service = services[i].toObject();
+                if (service.value(configKey::serviceType).toString() == serviceType::amneziaPremium) {
+                    QJsonObject serviceInfo = service.value(configKey::serviceInfo).toObject();
+                    serviceInfo["price"] = formattedPrice;
+                    service[configKey::serviceInfo] = serviceInfo;
+                    services[i] = service;
+                    data["services"] = services;
+                    premiumFound = true;
+                    qInfo() << "[Billing] Updated premium service price in data:" << formattedPrice;
+                    break;
+                }
+            }
+            if (!premiumFound) {
+                // Gateway did not return premium; add it from billing data
+                QString region = data.value(configKey::userCountryCode).toString();
+                QJsonObject serviceInfo;
+                serviceInfo["name"] = tr("Amnezia Premium");
+                serviceInfo["price"] = formattedPrice;
+                serviceInfo["region"] = region;
+                serviceInfo["speed"] = "200";
+                serviceInfo["timelimit"] = QString::number(billingPeriodDays);
+                QJsonObject serviceDescription;
+                serviceDescription["card_description"] = tr("Amnezia Premium is classic VPN for seamless work, downloading large files, and watching videos.");
+                serviceDescription["description"] = serviceDescription["card_description"];
+                serviceDescription["features"] = "";
+                QJsonObject premiumService;
+                premiumService[configKey::serviceType] = serviceType::amneziaPremium;
+                premiumService[configKey::serviceProtocol] = "amnezia-premium";
+                premiumService[configKey::serviceInfo] = serviceInfo;
+                premiumService["service_description"] = serviceDescription;
+                premiumService["available_countries"] = QJsonArray();
+                premiumService["is_available"] = true;
+                premiumService["store_endpoint"] = "";
+                premiumService["subscription"] = QJsonObject();
+                services.prepend(premiumService);
+                data["services"] = services;
+                qInfo() << "[Billing] Added premium service from billing (gateway did not return it)";
+            }
+        }
+    } else {
+        qWarning() << "[Billing] Failed to fetch product price, responseCode:" << responseCode;
+    }
 #endif
     
     m_apiServicesModel->updateModel(data);
@@ -436,25 +521,19 @@ bool ApiConfigsController::fillAvailableServices()
 
 bool ApiConfigsController::importService()
 {
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    bool isIosOrMacOsNe = true;
-#else
-    bool isIosOrMacOsNe = false;
-#endif
-
     if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaPremium) {
-        if (isIosOrMacOsNe) {
-            importSerivceFromAppStore();
-            return true;
-        }
-    } else {
-        importServiceFromGateway();
+#if defined(Q_OS_IOS) || defined(MACOS_NE) || defined(Q_OS_ANDROID)
+        importSerivceFromPaymentMarket();
         return true;
+#else
+        return false; // premium only via App Store / Play
+#endif
     }
-    return false;
+    importServiceFromGateway();
+    return true;
 }
 
-bool ApiConfigsController::importSerivceFromAppStore()
+bool ApiConfigsController::importSerivceFromPaymentMarket()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     bool purchaseOk = false;
@@ -512,11 +591,111 @@ bool ApiConfigsController::importSerivceFromAppStore()
     }
 
     emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+#elif defined(Q_OS_ANDROID)
+    auto androidController = AndroidController::instance();
+    QString purchaseToken;
+    bool purchaseOk = false;
+
+    QFutureWatcher<QPair<bool, QString>> watcher;
+    QEventLoop waitLoop;
+    connect(&watcher, &QFutureWatcher<QPair<bool, QString>>::finished, &waitLoop, &QEventLoop::quit);
+
+    QFuture<QPair<bool, QString>> future = QtConcurrent::run([androidController]() {
+        QJsonObject plansResult = androidController->getSubscriptionPlans();
+        int responseCode = plansResult.value("responseCode").toInt(-1);
+        if (responseCode != 0) {
+            qWarning() << "[Billing] Failed to get subscription plans, responseCode:" << responseCode;
+            return qMakePair(false, QString());
+        }
+        QJsonArray products = plansResult.value("products").toArray();
+        QString offerToken;
+        for (const QJsonValue &productValue : products) {
+            QJsonObject product = productValue.toObject();
+            if (product.value("productId").toString() == "premium") {
+                QJsonArray offers = product.value("offers").toArray();
+                if (!offers.isEmpty()) {
+                    QJsonObject firstOffer = offers.at(0).toObject();
+                    offerToken = firstOffer.value("offerToken").toString();
+                    qInfo() << "[Billing] Found offer token:" << offerToken;
+                    break;
+                }
+            }
+        }
+        if (offerToken.isEmpty()) {
+            qWarning() << "[Billing] No offer token found for premium subscription";
+            return qMakePair(false, QString());
+        }
+        QJsonObject purchaseResult = androidController->purchaseSubscription(offerToken);
+        responseCode = purchaseResult.value("responseCode").toInt(-1);
+        if (responseCode != 0) {
+            qWarning() << "[Billing] Purchase failed, responseCode:" << responseCode;
+            return qMakePair(false, QString());
+        }
+        QJsonArray purchases = purchaseResult.value("purchases").toArray();
+        if (purchases.isEmpty()) {
+            qWarning() << "[Billing] Purchase succeeded but no purchases returned";
+            return qMakePair(false, QString());
+        }
+        QJsonObject purchase = purchases.at(0).toObject();
+        QString token = purchase.value("purchaseToken").toString();
+        bool isAcknowledged = purchase.value("isAcknowledged").toBool();
+        qInfo() << "[Billing] Purchase success. purchaseToken:" << token << "isAcknowledged:" << isAcknowledged;
+        if (!isAcknowledged) {
+            QJsonObject ackResult = androidController->acknowledgePurchase(token);
+            if (ackResult.value("responseCode").toInt(-1) != 0) {
+                qWarning() << "[Billing] Acknowledge failed";
+            } else {
+                qInfo() << "[Billing] Purchase acknowledged successfully";
+            }
+        }
+        return qMakePair(true, token);
+    });
+
+    watcher.setFuture(future);
+    waitLoop.exec();
+
+    purchaseOk = watcher.result().first;
+    purchaseToken = watcher.result().second;
+
+    if (!purchaseOk || purchaseToken.isEmpty()) {
+        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        return false;
+    }
+    
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
+                                            m_settings->getInstallationUuid(true),
+                                            m_apiServicesModel->getCountryCode(),
+                                            "",
+                                            m_apiServicesModel->getSelectedServiceType(),
+                                            m_apiServicesModel->getSelectedServiceProtocol(),
+                                            QJsonObject() };
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    apiPayload[apiDefs::key::transactionId] = purchaseToken;
+    bool isTestPurchase = false; // TODO: detect if this is a test purchase
+
+    ErrorCode errorCode;
+    QByteArray responseBody;
+    errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody, isTestPurchase);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return false;
+    }
+
+    errorCode = importServiceFromBilling(responseBody, isTestPurchase);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return false;
+    }
+
+    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
 #endif
     return true;
 }
 
-bool ApiConfigsController::restoreSerivceFromAppStore()
+bool ApiConfigsController::restoreSerivceFromPaymentMarket()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     const QString premiumServiceType = QStringLiteral("amnezia-premium");
@@ -639,6 +818,131 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
         qInfo().noquote() << "[IAP] Skipped" << duplicateCount
                           << "duplicate restored transactions for original transaction IDs already processed";
     }
+#elif defined(Q_OS_ANDROID)
+    // Android Google Play Billing restore implementation
+    const QString premiumServiceType = QStringLiteral("amnezia-premium");
+
+    if (!fillAvailableServices()) {
+        qWarning() << "[Billing] Unable to fetch services list before restore";
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+
+    if (m_apiServicesModel->rowCount() <= 0) {
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+
+    // Ensure we have a valid premium selection for gateway requests
+    bool premiumSelected = false;
+    for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
+        m_apiServicesModel->setServiceIndex(i);
+        if (m_apiServicesModel->getSelectedServiceType() == premiumServiceType) {
+            premiumSelected = true;
+            break;
+        }
+    }
+
+    if (!premiumSelected) {
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+
+    auto androidController = AndroidController::instance();
+    
+    // Query existing purchases
+    QJsonObject purchasesResult = androidController->queryPurchases();
+    int responseCode = purchasesResult.value("responseCode").toInt(-1);
+    
+    if (responseCode != 0) {
+        qWarning() << "[Billing] Failed to query purchases, responseCode:" << responseCode;
+        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        return false;
+    }
+    
+    QJsonArray purchases = purchasesResult.value("purchases").toArray();
+    
+    if (purchases.isEmpty()) {
+        qInfo() << "[Billing] No purchases found to restore";
+        emit errorOccurred(ErrorCode::ApiNoPurchasesToRestore);
+        return false;
+    }
+    
+    bool hasInstalledConfig = false;
+    bool duplicateConfigAlreadyPresent = false;
+    QSet<QString> processedTokens;
+    
+    for (const QJsonValue &purchaseValue : purchases) {
+        QJsonObject purchase = purchaseValue.toObject();
+        QString purchaseToken = purchase.value("purchaseToken").toString();
+        bool isAcknowledged = purchase.value("isAcknowledged").toBool();
+        
+        if (purchaseToken.isEmpty()) {
+            qWarning() << "[Billing] Skipping purchase without token";
+            continue;
+        }
+        
+        if (processedTokens.contains(purchaseToken)) {
+            continue;
+        }
+        processedTokens.insert(purchaseToken);
+        
+        qInfo() << "[Billing] Restoring purchase. purchaseToken:" << purchaseToken
+                << "isAcknowledged:" << isAcknowledged;
+        
+        // Acknowledge purchase if needed
+        if (!isAcknowledged) {
+            QJsonObject ackResult = androidController->acknowledgePurchase(purchaseToken);
+            int ackResponseCode = ackResult.value("responseCode").toInt(-1);
+            if (ackResponseCode != 0) {
+                qWarning() << "[Billing] Acknowledge failed, responseCode:" << ackResponseCode;
+            } else {
+                qInfo() << "[Billing] Purchase acknowledged successfully";
+            }
+        }
+        
+        // Send purchase token to gateway
+        GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                                QString(APP_VERSION),
+                                                m_settings->getAppLanguage().name().split("_").first(),
+                                                m_settings->getInstallationUuid(true),
+                                                m_apiServicesModel->getCountryCode(),
+                                                "",
+                                                m_apiServicesModel->getSelectedServiceType(),
+                                                m_apiServicesModel->getSelectedServiceProtocol(),
+                                                QJsonObject() };
+
+        QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+        apiPayload[apiDefs::key::transactionId] = purchaseToken;
+        bool isTestPurchase = false; // TODO: detect if this is a test purchase
+        
+        QByteArray responseBody;
+        ErrorCode errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody, isTestPurchase);
+        if (errorCode != ErrorCode::NoError) {
+            qWarning() << "[Billing] Failed to restore purchase" << purchaseToken
+                      << "errorCode =" << static_cast<int>(errorCode);
+            continue;
+        }
+
+        ErrorCode installError = importServiceFromBilling(responseBody, isTestPurchase);
+        if (installError == ErrorCode::ApiConfigAlreadyAdded) {
+            duplicateConfigAlreadyPresent = true;
+            qInfo() << "[Billing] Skipping restored purchase" << purchaseToken
+                   << "because subscription config with the same vpn_key already exists";
+        } else if (installError != ErrorCode::NoError) {
+            qWarning() << "[Billing] Failed to process restored subscription response for purchase" << purchaseToken;
+        } else {
+            hasInstalledConfig = true;
+        }
+    }
+    
+    if (!hasInstalledConfig) {
+        const ErrorCode restoreError = duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiPurchaseError;
+        emit errorOccurred(restoreError);
+        return false;
+    }
+
+    emit installServerFromApiFinished(tr("Subscription restored successfully."));
 #endif
     return true;
 }
@@ -944,16 +1248,16 @@ QString ApiConfigsController::getVpnKey()
 
 ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase)
 {
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
     QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
     QString key = responseObject.value(QStringLiteral("key")).toString();
     if (key.isEmpty()) {
-        qWarning().noquote() << "[IAP] Subscription response does not contain a key field";
+        qWarning().noquote() << "[IAP/Billing] Subscription response does not contain a key field";
         return ErrorCode::ApiPurchaseError;
     }
 
     if (m_serversModel->hasServerWithVpnKey(key)) {
-        qInfo().noquote() << "[IAP] Subscription config with the same vpn_key already exists";
+        qInfo().noquote() << "[IAP/Billing] Subscription config with the same vpn_key already exists";
         return ErrorCode::ApiConfigAlreadyAdded;
     }
 
@@ -967,7 +1271,7 @@ ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &respo
     }
 
     if (configString.isEmpty()) {
-        qWarning().noquote() << "[IAP] Subscription response config payload is empty";
+        qWarning().noquote() << "[IAP/Billing] Subscription response config payload is empty";
         return ErrorCode::ApiPurchaseError;
     }
 

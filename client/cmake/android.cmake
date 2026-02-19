@@ -1,5 +1,9 @@
 message("Client android ${CMAKE_ANDROID_ARCH_ABI} build")
 
+# Option to build Play variant (with Google Play Billing) instead of OSS
+# When ON, adds target android_play_apk: cmake --build . --target android_play_apk
+option(ANDROID_BUILD_PLAY "Add android_play_apk target for Google Play Billing build" OFF)
+
 set(APP_ANDROID_MIN_SDK 28)
 set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
     "The minimum API level supported by the application or library" FORCE)
@@ -57,3 +61,22 @@ endforeach()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/xray/android/libxray.aar
         DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray)
+
+# Custom target to build Play variant (with Google Play Billing)
+# Enable with: cmake -DANDROID_BUILD_PLAY=ON ...
+# Then run: cmake --build <build_dir> --target android_play_apk
+# Note: Do a normal build first so androiddeployqt creates the android-build folder
+if(ANDROID_BUILD_PLAY)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_gradle_suffix "Debug")
+    else()
+        set(_gradle_suffix "Release")
+    endif()
+    set(_android_build_dir "${CMAKE_CURRENT_BINARY_DIR}/android-build-${PROJECT}")
+    add_custom_target(android_play_apk
+        COMMAND ./gradlew assemblePlay${_gradle_suffix} -DexplicitRun=1
+        WORKING_DIRECTORY "${_android_build_dir}"
+        COMMENT "Building Android Play variant (assemblePlay${_gradle_suffix})"
+        DEPENDS ${PROJECT}
+    )
+endif()

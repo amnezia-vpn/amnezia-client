@@ -358,10 +358,10 @@ PageType {
         property string title: qsTr("Restore purchases")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/refresh-cw.svg"
-        property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild
+        property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild || Qt.platform.os === "android"
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            ApiConfigsController.restoreSerivceFromAppStore()
+            ApiConfigsController.restoreSerivceFromPaymentMarket()
             PageController.showBusyIndicator(false)
         }
     }

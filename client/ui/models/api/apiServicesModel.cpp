@@ -114,6 +114,8 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         }
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
         return tr("%1 $").arg(price);
+#elif defined(Q_OS_ANDROID)
+        return price;
 #else
         return tr("%1 $/month").arg(price);
 #endif

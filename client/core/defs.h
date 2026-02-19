@@ -123,6 +123,7 @@ namespace amnezia
         ApiUpdateRequestError = 1111,
         ApiSubscriptionExpiredError = 1112,
         ApiPurchaseError = 1113,
+        ApiNoPurchasesToRestore = 1114,
 
         // QFile errors
         OpenError = 1200,

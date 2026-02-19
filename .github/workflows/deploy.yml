@@ -662,13 +662,55 @@ jobs:
       shell: bash
       run: ./deploy/build_android.sh --aab --play --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
+    - name: 'Build OSS AAB (in-app purchase)'
+      env:
+        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
+        ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
+        ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+        ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+      shell: bash
+      run: ./deploy/build_android.sh --aab --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+
+    - name: 'Upload OSS x86_64 apk'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN-android-x86_64
+        path: deploy/build/AmneziaVPN-oss-x86_64-release.apk
+        compression-level: 0
+        retention-days: 7
+
+    - name: 'Upload OSS x86 apk'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN-android-x86
+        path: deploy/build/AmneziaVPN-oss-x86-release.apk
+        compression-level: 0
+        retention-days: 7
+
+    - name: 'Upload OSS arm64-v8a apk'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN-android-arm64-v8a
+        path: deploy/build/AmneziaVPN-oss-arm64-v8a-release.apk
+        compression-level: 0
+        retention-days: 7
+
+    - name: 'Upload OSS armeabi-v7a apk'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN-android-armeabi-v7a
+        path: deploy/build/AmneziaVPN-oss-armeabi-v7a-release.apk
+        compression-level: 0
+        retention-days: 7
+
     - name: 'Rename Android APKs'
       run: |
         cd deploy/build
-        mv AmneziaVPN-x86_64-release.apk AmneziaVPN_${VERSION}_android9+_x86_64.apk
-        mv AmneziaVPN-x86-release.apk AmneziaVPN_${VERSION}_android9+_x86.apk
-        mv AmneziaVPN-arm64-v8a-release.apk AmneziaVPN_${VERSION}_android9+_arm64-v8a.apk
-        mv AmneziaVPN-armeabi-v7a-release.apk AmneziaVPN_${VERSION}_android9+_armeabi-v7a.apk
+        mv AmneziaVPN-oss-x86_64-release.apk AmneziaVPN_${VERSION}_android9+_x86_64.apk
+        mv AmneziaVPN-oss-x86-release.apk AmneziaVPN_${VERSION}_android9+_x86.apk
+        mv AmneziaVPN-oss-arm64-v8a-release.apk AmneziaVPN_${VERSION}_android9+_arm64-v8a.apk
+        mv AmneziaVPN-oss-armeabi-v7a-release.apk AmneziaVPN_${VERSION}_android9+_armeabi-v7a.apk
         cd ../..
 
     - name: 'Upload x86_64 apk'
@@ -703,11 +745,19 @@ jobs:
         compression-level: 0
         retention-days: 7
 
-    - name: 'Upload aab'
+    - name: 'Upload Play AAB'
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN-android
         path: deploy/build/AmneziaVPN-play-release.aab
+        compression-level: 0
+        retention-days: 7
+
+    - name: 'Upload OSS AAB (in-app purchase)'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN-android-oss-aab
+        path: deploy/build/AmneziaVPN-oss-release.aab
         compression-level: 0
         retention-days: 7
 

@@ -80,6 +80,15 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiUpdateRequestError): errorMessage = QObject::tr("Please update the application to use this feature"); break;
     case (ErrorCode::ApiSubscriptionExpiredError): errorMessage = QObject::tr("Your Amnezia Premium subscription has expired.\n Please check your email for renewal instructions.\n If you haven't received an email, please contact our support."); break;
     case (ErrorCode::ApiPurchaseError): errorMessage = QObject::tr("Unable to process purchase"); break;
+    case (ErrorCode::ApiNoPurchasesToRestore):
+#if defined(Q_OS_ANDROID)
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Google account used for the purchase.");
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Apple ID used for the purchase.");
+#else
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same account used for the purchase.");
+#endif
+        break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
