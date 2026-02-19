@@ -3,6 +3,7 @@
 #include "../client/3rd/QSimpleCrypto/src/include/QAead.h"
 #include "../client/3rd/QSimpleCrypto/src/include/QBlockCipher.h"
 #include "utilities.h"
+#include "core/api/apiDefs.h"
 #include "protocols/protocols_defs.h"
 #include <QDataStream>
 #include <QDebug>
@@ -17,11 +18,19 @@
 
 using namespace QKeychain;
 using namespace amnezia;
+using namespace apiDefs;
 
 namespace {
     constexpr const char *settingsKeyTag = "settingsKeyTag";
     constexpr const char *settingsIvTag = "settingsIvTag";
     constexpr const char *keyChainName = "AmneziaVPN-Keychain";
+
+    namespace configKey {
+        constexpr char apiConfig[] = "api_config";
+        constexpr char userCountryCode[] = "user_country_code";
+        constexpr char serviceType[] = "service_type";
+        constexpr char serviceProtocol[] = "service_protocol";
+    }
 }
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent)
@@ -157,20 +166,29 @@ QByteArray SecureQSettings::backupAppConfig() const
         }
 
         if (key == QLatin1String("Servers/serversList")) {
-            const QVariant rawValue = value(key);
-            const QByteArray rawJson = rawValue.toByteArray();
-
-            QJsonArray serversArray = QJsonDocument::fromJson(rawJson).array();
+            QJsonArray serversArray = QJsonDocument::fromJson(value(key).toByteArray()).array();
             QJsonArray sanitizedServersArray;
 
             for (const QJsonValue &serverValue : serversArray) {
                 QJsonObject serverObject = serverValue.toObject();
 
                 if (serverObject.contains(QLatin1String("api_config"))) {
+                    QJsonObject apiConfig = serverObject.value(configKey::apiConfig).toObject();
+
                     serverObject.remove(config_key::dns1);
                     serverObject.remove(config_key::dns2);
                     serverObject.remove(config_key::hostName);
                     serverObject.remove(config_key::containers);
+
+                    const QSet<QString> allowedKeys = { QLatin1String(configKey::userCountryCode),
+                                                        QLatin1String(configKey::serviceType),
+                                                        QLatin1String(configKey::serviceProtocol) };
+
+                    for (const QString &key : apiConfig.keys())
+                        if (!allowedKeys.contains(key))
+                            apiConfig.remove(key);
+
+                    serverObject.insert(QLatin1String(configKey::apiConfig), apiConfig);
                 }
 
                 sanitizedServersArray.append(serverObject);
