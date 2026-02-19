@@ -24,46 +24,46 @@ PageType {
         {
             "regionName": "Europe",
             "countries": [
-                { "code": "BE", "name": "Belgium" },
-                { "code": "EE", "name": "Estonia" },
-                { "code": "FI", "name": "Finland" },
-                { "code": "FR", "name": "France" },
-                { "code": "GE", "name": "Georgia" },
-                { "code": "DE", "name": "Germany" },
-                { "code": "NL", "name": "Netherlands" },
-                { "code": "PL", "name": "Poland" },
-                { "code": "RU", "name": "Russia" },
-                { "code": "ES", "name": "Spain" },
-                { "code": "SE", "name": "Sweden" },
-                { "code": "CH", "name": "Switzerland" },
-                { "code": "TR", "name": "Turkey" }
+                { "code": "BE", "name": "Belgium", "ruName": "Бельгия" },
+                { "code": "EE", "name": "Estonia", "ruName": "Эстония" },
+                { "code": "FI", "name": "Finland", "ruName": "Финляндия" },
+                { "code": "FR", "name": "France", "ruName": "Франция" },
+                { "code": "GE", "name": "Georgia", "ruName": "Грузия" },
+                { "code": "DE", "name": "Germany", "ruName": "Германия" },
+                { "code": "NL", "name": "Netherlands", "ruName": "Нидерланды" },
+                { "code": "PL", "name": "Poland", "ruName": "Польша" },
+                { "code": "RU", "name": "Russia", "ruName": "Россия" },
+                { "code": "ES", "name": "Spain", "ruName": "Испания" },
+                { "code": "SE", "name": "Sweden", "ruName": "Швеция" },
+                { "code": "CH", "name": "Switzerland", "ruName": "Швейцария" },
+                { "code": "TR", "name": "Turkey", "ruName": "Турция" }
             ]
         },
         {
             "regionName": "America",
             "countries": [
-                { "code": "BR", "name": "Brazil" },
-                { "code": "CA", "name": "Canada East" },
-                { "code": "US", "name": "USA East" },
-                { "code": "US", "name": "USA West" }
+                { "code": "BR", "name": "Brazil", "ruName": "Бразилия" },
+                { "code": "CA", "name": "Canada East", "ruName": "Канада" },
+                { "code": "US", "name": "USA East", "ruName": "США" },
+                { "code": "US", "name": "USA West", "ruName": "США" }
             ]
         },
         {
             "regionName": "Asia",
             "countries": [
-                { "code": "AE", "name": "UAE" },
-                { "code": "JP", "name": "Japan" },
-                { "code": "KZ", "name": "Kazakhstan" },
-                { "code": "KR", "name": "South Korea" },
-                { "code": "SG", "name": "Singapore" }
+                { "code": "AE", "name": "UAE", "ruName": "ОАЭ" },
+                { "code": "JP", "name": "Japan", "ruName": "Япония" },
+                { "code": "KZ", "name": "Kazakhstan", "ruName": "Казахстан" },
+                { "code": "KR", "name": "South Korea", "ruName": "Южная Корея" },
+                { "code": "SG", "name": "Singapore", "ruName": "Сингапур" }
             ]
         },
         {
             "regionName": "Oceania and Africa",
             "countries": [
-                { "code": "AU", "name": "Australia" },
-                { "code": "NZ", "name": "New Zealand" },
-                { "code": "ZA", "name": "South Africa" }
+                { "code": "AU", "name": "Australia", "ruName": "Австралия" },
+                { "code": "NZ", "name": "New Zealand", "ruName": "Новая Зеландия" },
+                { "code": "ZA", "name": "South Africa", "ruName": "Южная Африка" }
             ]
         }
     ]
@@ -113,21 +113,23 @@ PageType {
         return result;
     }
 
-    function isCountryMatchingSearch(countryName, regionCountryCode, sourceCountryCode) {
+    function isCountryMatchingSearch(countryName, regionCountryCode, sourceCountryCode, ruCountryName) {
         const normalizedSearchText = normalizeSearchComparableText(searchText);
         if (normalizedSearchText === "") {
             return true;
         }
 
         const normalizedCountryName = normalizeSearchComparableText(countryName);
+        const normalizedRuCountryName = normalizeSearchComparableText(ruCountryName);
         const normalizedRegionCountryCode = normalizeCountryCode(regionCountryCode).toLowerCase();
         const normalizedSourceCountryCode = normalizeCountryCode(sourceCountryCode).toLowerCase();
 
         const nameMatch = normalizedCountryName.startsWith(normalizedSearchText);
+        const ruNameMatch = normalizedRuCountryName.startsWith(normalizedSearchText);
         const regionCodeMatch = normalizedRegionCountryCode.startsWith(normalizedSearchText);
         const sourceCodeMatch = normalizedSourceCountryCode.startsWith(normalizedSearchText);
 
-        return nameMatch || regionCodeMatch || sourceCodeMatch;
+        return nameMatch || ruNameMatch || regionCodeMatch || sourceCodeMatch;
     }
 
     function getDisplayCountryName(countryName) {
@@ -186,7 +188,7 @@ PageType {
                 const sourceIndex = findCountryIndexByRef(countryRef, usedIndices);
 
                 if (sourceIndex < 0) {
-                    if (isCountryMatchingSearch(countryRef.name, countryRef.code, countryRef.code)) {
+                    if (isCountryMatchingSearch(countryRef.name, countryRef.code, countryRef.code, countryRef.ruName)) {
                         regions[regionDefIndex].countries.push({
                             "sourceIndex": -1,
                             "countryName": getDisplayCountryName(countryRef.name),
@@ -205,7 +207,7 @@ PageType {
                 }
 
                 const displayCountryName = getDisplayCountryName(sourceCountry.countryName);
-                if (!isCountryMatchingSearch(displayCountryName, countryRef.code, sourceCountry.countryCode)) {
+                if (!isCountryMatchingSearch(displayCountryName, countryRef.code, sourceCountry.countryCode, countryRef.ruName)) {
                     continue;
                 }
 
