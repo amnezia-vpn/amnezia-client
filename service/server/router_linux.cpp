@@ -170,8 +170,13 @@ bool RouterLinux::flushDns()
         qDebug() << "Restarting nscd.service";
         p.start("systemctl", { "restart", "nscd" });
     } else if (isServiceActive("systemd-resolved.service")) {
-        qDebug() << "Restarting systemd-resolved.service";
-        p.start("systemctl", { "restart", "systemd-resolved" });
+        qDebug() << "Flushing systemd-resolved caches";
+        p.start("resolvectl", { "flush-caches" });
+        p.waitForFinished();
+        if (p.exitCode() != 0) {
+            qDebug() << "resolvectl not available, restarting systemd-resolved";
+            p.start("systemctl", { "restart", "systemd-resolved" });
+        }
     } else {
         qDebug() << "No suitable DNS manager found.";
         return false;
@@ -182,7 +187,7 @@ bool RouterLinux::flushDns()
     if (output.isEmpty())
         qDebug().noquote() << "Flush dns completed";
     else
-        qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
+        qDebug().noquote() << "OUTPUT flush dns: " + output;
 
     return true;
 }
