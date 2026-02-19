@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
 
 import SortFilterProxyModel 0.2
 
@@ -114,15 +113,21 @@ PageType {
         return result;
     }
 
-    function isCountryMatchingSearch(countryName) {
+    function isCountryMatchingSearch(countryName, regionCountryCode, sourceCountryCode) {
         const normalizedSearchText = normalizeSearchComparableText(searchText);
         if (normalizedSearchText === "") {
             return true;
         }
 
         const normalizedCountryName = normalizeSearchComparableText(countryName);
-        const searchRegexp = new RegExp("^" + normalizedSearchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-        return searchRegexp.test(normalizedCountryName);
+        const normalizedRegionCountryCode = normalizeCountryCode(regionCountryCode).toLowerCase();
+        const normalizedSourceCountryCode = normalizeCountryCode(sourceCountryCode).toLowerCase();
+
+        const nameMatch = normalizedCountryName.startsWith(normalizedSearchText);
+        const regionCodeMatch = normalizedRegionCountryCode.startsWith(normalizedSearchText);
+        const sourceCodeMatch = normalizedSourceCountryCode.startsWith(normalizedSearchText);
+
+        return nameMatch || regionCodeMatch || sourceCodeMatch;
     }
 
     function getDisplayCountryName(countryName) {
@@ -149,12 +154,13 @@ PageType {
             }
 
             const modelCode = normalizeCountryCode(country.countryCode);
+            const modelIsoCode = extractCountryIsoCode(country.countryCode);
             const modelName = normalizeCountryName(country.countryName);
 
             if (expectedName !== "" && modelName === expectedName) {
                 return i;
             }
-            if (expectedCode !== "" && modelCode === expectedCode) {
+            if (expectedCode !== "" && (modelCode === expectedCode || modelIsoCode === expectedCode)) {
                 return i;
             }
         }
@@ -165,21 +171,31 @@ PageType {
     function rebuildRegionModel() {
         let regions = [];
 
-        for (let regionIndex = 0; regionIndex < regionDefinitions.length; ++regionIndex) {
+        for (let regionNameIndex = 0; regionNameIndex < regionDefinitions.length; ++regionNameIndex) {
             regions.push({
-                "regionName": regionDefinitions[regionIndex].regionName,
+                "regionName": regionDefinitions[regionNameIndex].regionName,
                 "countries": []
             });
         }
 
         let usedIndices = {};
-        for (let regionIndex = 0; regionIndex < regionDefinitions.length; ++regionIndex) {
-            const regionDefinition = regionDefinitions[regionIndex];
+        for (let regionDefIndex = 0; regionDefIndex < regionDefinitions.length; ++regionDefIndex) {
+            const regionDefinition = regionDefinitions[regionDefIndex];
             for (let countryIndex = 0; countryIndex < regionDefinition.countries.length; ++countryIndex) {
                 const countryRef = regionDefinition.countries[countryIndex];
                 const sourceIndex = findCountryIndexByRef(countryRef, usedIndices);
 
                 if (sourceIndex < 0) {
+                    if (isCountryMatchingSearch(countryRef.name, countryRef.code, countryRef.code)) {
+                        regions[regionDefIndex].countries.push({
+                            "sourceIndex": -1,
+                            "countryName": getDisplayCountryName(countryRef.name),
+                            "sourceCountryName": countryRef.name,
+                            "countryCode": countryRef.code,
+                            "countryImageCode": extractCountryIsoCode(countryRef.code),
+                            "isAvailable": false
+                        });
+                    }
                     continue;
                 }
 
@@ -189,16 +205,17 @@ PageType {
                 }
 
                 const displayCountryName = getDisplayCountryName(sourceCountry.countryName);
-                if (!isCountryMatchingSearch(displayCountryName)) {
+                if (!isCountryMatchingSearch(displayCountryName, countryRef.code, sourceCountry.countryCode)) {
                     continue;
                 }
 
-                regions[regionIndex].countries.push({
+                regions[regionDefIndex].countries.push({
                     "sourceIndex": sourceIndex,
                     "countryName": displayCountryName,
                     "sourceCountryName": sourceCountry.countryName,
                     "countryCode": sourceCountry.countryCode,
-                    "countryImageCode": extractCountryIsoCode(sourceCountry.countryImageCode)
+                    "countryImageCode": extractCountryIsoCode(sourceCountry.countryImageCode),
+                    "isAvailable": true
                 });
                 usedIndices[sourceIndex] = true;
             }
@@ -489,10 +506,13 @@ PageType {
 
                             imageSource: "qrc:/images/controls/download.svg"
 
-                            checked: countryData.sourceIndex === ApiCountryModel.currentIndex
-                            checkable: !ConnectionController.isConnected
+                            checked: countryData.sourceIndex >= 0 && countryData.sourceIndex === ApiCountryModel.currentIndex
+                            checkable: countryData.isAvailable && !ConnectionController.isConnected
 
                             onClicked: {
+                                if (!countryData.isAvailable) {
+                                    return
+                                }
                                 if (ConnectionController.isConnectionInProgress) {
                                     PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
                                     return
