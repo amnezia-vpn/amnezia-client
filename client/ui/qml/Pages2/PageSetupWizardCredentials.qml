@@ -79,7 +79,7 @@ PageType {
                 }
 
                 textField.onTextChanged: {
-                    if (headerText == qsTr("Password or SSH private key")) {
+                    if (headerText === qsTr("Password or SSH private key")) {
                         buttonImageSource = textField.text !== "" ? imageSource : ""
                     }
                 }
