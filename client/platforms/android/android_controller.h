@@ -56,6 +56,7 @@ public:
     bool requestAuthentication();
     void sendTouch(float x, float y);
     bool isPlay();
+    bool isTestPurchaseEnvironment();
     QJsonObject getSubscriptionPlans();
     QJsonObject purchaseSubscription(const QString &offerToken);
     QJsonObject upgradeSubscription(const QString &offerToken, const QString &oldPurchaseToken);
