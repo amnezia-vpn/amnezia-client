@@ -92,13 +92,13 @@ func (c *Client) Login() error {
 	defer resp.Body.Close()
 
 	var result struct {
-		Success bool   `json:"success"`
-		Msg     string `json:"msg"`
+		Success interface{} `json:"success"`
+		Msg     string      `json:"msg"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return fmt.Errorf("failed to parse login response: %w", err)
 	}
-	if !result.Success {
+	if !isSuccess(result.Success) {
 		return fmt.Errorf("login failed: %s", result.Msg)
 	}
 
@@ -127,13 +127,13 @@ func (c *Client) GetInbound(inboundID int) (*InboundInfo, error) {
 	defer resp.Body.Close()
 
 	var result struct {
-		Success bool        `json:"success"`
+		Success interface{} `json:"success"`
 		Obj     InboundInfo `json:"obj"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
-	if !result.Success {
+	if !isSuccess(result.Success) {
 		return nil, fmt.Errorf("failed to get inbound %d", inboundID)
 	}
 	return &result.Obj, nil
@@ -258,14 +258,28 @@ func (c *Client) checkResponse(resp *http.Response) error {
 	}
 
 	var result struct {
-		Success bool   `json:"success"`
-		Msg     string `json:"msg"`
+		Success interface{} `json:"success"`
+		Msg     string      `json:"msg"`
 	}
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil // Non-JSON response, assume OK
 	}
-	if !result.Success {
+	if !isSuccess(result.Success) {
 		return fmt.Errorf("3x-ui error: %s", result.Msg)
 	}
 	return nil
+}
+
+// isSuccess checks whether the API returned success=true or success=1
+func isSuccess(val interface{}) bool {
+	switch v := val.(type) {
+	case bool:
+		return v
+	case float64:
+		return v == 1
+	case int:
+		return v == 1
+	default:
+		return false
+	}
 }
