@@ -30,7 +30,6 @@ type App struct {
 	lwipDevice       network.IPDevice
 	isConnected      bool
 	activeConfig     string
-	subDB            *SubscriptionDB
 	currentUser      *User
 	config           *Config
 	apiClient        *APIClient
@@ -65,20 +64,13 @@ func (a *App) startup(ctx context.Context) {
 	a.apiClient = NewAPIClient(backendURL)
 	log.Printf("API Client initialized: %s", backendURL)
 
-	// Initialize SQLite database (still used for local subscription/payment data)
+	// Clean up legacy local SQLite database
 	dataDir, err := os.UserConfigDir()
-	if err != nil {
-		dataDir = "."
+	if err == nil {
+		dbDir := filepath.Join(dataDir, "DrFrakeVPN")
+		dbPath := filepath.Join(dbDir, "drfrake.db")
+		os.Remove(dbPath)
 	}
-	dbDir := filepath.Join(dataDir, "DrFrakeVPN")
-	os.MkdirAll(dbDir, 0755)
-	dbPath := filepath.Join(dbDir, "drfrake.db")
-
-	a.subDB, err = NewSubscriptionDB(dbPath)
-	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
-	}
-	log.Printf("Database initialized at %s\n", dbPath)
 
 	// Restore session
 	a.loadSession()
@@ -129,9 +121,6 @@ func (a *App) shutdown(ctx context.Context) {
 	if a.isConnected {
 		a.Disconnect()
 	}
-	if a.subDB != nil {
-		a.subDB.Close()
-	}
 }
 
 // --- Auth Methods ---
@@ -142,9 +131,6 @@ func (a *App) Register(email string, password string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// Also register locally for subscription tracking
-	a.subDB.Register(email, password)
 
 	user := &User{ID: authResp.User.ID, Email: authResp.User.Email}
 	a.currentUser = user
@@ -184,7 +170,7 @@ func (a *App) GetCurrentUser() *User {
 // --- Server Methods ---
 
 func (a *App) GetServers() []Server {
-	// Try backend API first
+	// Always fetch from backend API
 	if a.apiClient != nil && a.authToken != "" {
 		apiServers, err := a.apiClient.GetServers()
 		if err == nil {
@@ -203,27 +189,10 @@ func (a *App) GetServers() []Server {
 			log.Printf("[Servers] Loaded %d servers from API", len(servers))
 			return servers
 		}
-		log.Printf("[Servers] API failed, falling back to local: %v", err)
+		log.Printf("[Servers] API failed: %v", err)
 	}
 
-	// Fallback to local servers.json
-	configs, err := LoadServers()
-	if err != nil {
-		return []Server{}
-	}
-
-	var servers []Server
-	for _, c := range configs {
-		servers = append(servers, Server{
-			ID:        c.ID,
-			Country:   c.Country,
-			Flag:      c.Flag,
-			Config:    c.Config,
-			IsPremium: c.IsPremium,
-			Latency:   50 + len(c.City),
-		})
-	}
-	return servers
+	return []Server{}
 }
 
 // --- VPN Methods ---
@@ -241,11 +210,15 @@ func (a *App) Connect(config string, serverID string) error {
 	servers := a.GetServers()
 	for _, s := range servers {
 		if s.ID == serverID && s.IsPremium {
-			sub, err := a.subDB.GetSubscription(a.currentUser.ID)
+			// Get plan from session
+			data, err := os.ReadFile(a.getSessionPath())
 			if err != nil {
 				return fmt.Errorf("failed to check subscription: %w", err)
 			}
-			if sub.Plan == PlanFreeType || sub.Status == StatusExpired {
+			var sess Session
+			json.Unmarshal(data, &sess)
+
+			if sess.Plan == "" || sess.Plan == "free" {
 				return fmt.Errorf("premium subscription required for this server")
 			}
 		}
@@ -481,7 +454,24 @@ func (a *App) GetSubscription() (*Subscription, error) {
 	if a.currentUser == nil {
 		return nil, fmt.Errorf("not logged in")
 	}
-	return a.subDB.GetSubscription(a.currentUser.ID)
+
+	data, err := os.ReadFile(a.getSessionPath())
+	if err != nil {
+		return nil, err
+	}
+	var sess Session
+	json.Unmarshal(data, &sess)
+
+	plan := sess.Plan
+	if plan == "" {
+		plan = "free"
+	}
+
+	return &Subscription{
+		UserID: a.currentUser.ID,
+		Plan:   PlanType(plan),
+		Status: StatusActive,
+	}, nil
 }
 
 func (a *App) InitPayment(plan string) (*APIPaymentResponse, error) {
@@ -499,48 +489,31 @@ func (a *App) CheckPayment(paymentID string) (string, error) {
 		return "", fmt.Errorf("not logged in")
 	}
 
-	status, plan, err := a.apiClient.CheckPayment(paymentID)
+	status, _, err := a.apiClient.CheckPayment(paymentID)
 	if err != nil {
 		return "", err
 	}
 
-	// If payment succeeded, upgrade local subscription DB too
-	if status == "succeeded" && plan != "" {
-		a.subDB.UpgradePlan(a.currentUser.ID, PlanType(plan))
-		log.Printf("[Payment] Upgraded user %s to plan: %s", a.currentUser.Email, plan)
-	}
-
+	// We rely on the server token validation to refresh the plan later.
 	return status, nil
 }
 
 func (a *App) CancelAutoRenew() error {
-	if a.currentUser == nil {
-		return fmt.Errorf("not logged in")
-	}
-	return a.subDB.CancelAutoRenew(a.currentUser.ID)
+	return nil
 }
 
 func (a *App) EnableAutoRenew() error {
-	if a.currentUser == nil {
-		return fmt.Errorf("not logged in")
-	}
-	return a.subDB.EnableAutoRenew(a.currentUser.ID)
+	return nil
 }
 
 func (a *App) GetPaymentHistory() ([]PaymentRecord, error) {
-	if a.currentUser == nil {
-		return nil, fmt.Errorf("not logged in")
-	}
-	return a.subDB.GetPaymentHistory(a.currentUser.ID)
+	return []PaymentRecord{}, nil
 }
 
 func (a *App) SavePaymentMethod(last4 string, brand string, expiry string) error {
-	return nil // Deprecated, handled by YooKassa
+	return nil
 }
 
 func (a *App) GetPaymentMethod() (*PaymentMethod, error) {
-	if a.currentUser == nil {
-		return nil, fmt.Errorf("not logged in")
-	}
-	return a.subDB.GetPaymentMethod(a.currentUser.ID)
+	return nil, nil
 }

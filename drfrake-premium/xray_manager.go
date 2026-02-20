@@ -271,6 +271,7 @@ func (m *XrayManager) buildStreamSettings(params *VLESSParams) map[string]interf
 
 	if params.Security == "reality" {
 		rs := map[string]interface{}{
+			"show":        false,
 			"serverName":  params.SNI,
 			"fingerprint": params.Fingerprint,
 			"publicKey":   params.PublicKey,

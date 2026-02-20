@@ -22,9 +22,10 @@ type Client struct {
 }
 
 type InboundClient struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
-	Flow  string `json:"flow"`
+	ID     string `json:"id"`
+	Email  string `json:"email"`
+	Flow   string `json:"flow"`
+	Enable bool   `json:"enable"`
 }
 
 type InboundInfo struct {
@@ -177,9 +178,10 @@ func (c *Client) AddClient(inboundID int, clientUUID, email string) error {
 	}
 
 	client := InboundClient{
-		ID:    clientUUID,
-		Email: email,
-		Flow:  "xtls-rprx-vision",
+		ID:     clientUUID,
+		Email:  email,
+		Flow:   "xtls-rprx-vision",
+		Enable: true,
 	}
 	clientsJSON, _ := json.Marshal([]InboundClient{client})
 
