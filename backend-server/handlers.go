@@ -276,8 +276,8 @@ func (s *Server) handleInitPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Store payment in DB
-	s.DB.Exec("INSERT INTO payments (id, user_id, yookassa_id, amount, status) VALUES (?, ?, ?, ?, ?)",
-		payResp.ID, token, payResp.ID, amount, payResp.Status)
+	s.DB.Exec("INSERT INTO payments (id, user_id, yookassa_id, amount, plan, status) VALUES (?, ?, ?, ?, ?, ?)",
+		payResp.ID, token, payResp.ID, amount, req.Plan, payResp.Status)
 
 	// Return confirmation URL to client
 	json.NewEncoder(w).Encode(map[string]string{

@@ -489,12 +489,17 @@ func (a *App) CheckPayment(paymentID string) (string, error) {
 		return "", fmt.Errorf("not logged in")
 	}
 
-	status, _, err := a.apiClient.CheckPayment(paymentID)
+	status, plan, err := a.apiClient.CheckPayment(paymentID)
 	if err != nil {
 		return "", err
 	}
 
-	// We rely on the server token validation to refresh the plan later.
+	// If payment succeeded, update the local session plan
+	if status == "succeeded" && plan != "" {
+		a.saveSession(a.authToken, a.currentUser.Email, plan)
+		log.Printf("[Payment] Upgraded user %s to plan: %s", a.currentUser.Email, plan)
+	}
+
 	return status, nil
 }
 
