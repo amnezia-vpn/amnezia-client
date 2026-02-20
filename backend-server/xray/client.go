@@ -89,17 +89,22 @@ func (c *Client) Login() error {
 	if err != nil {
 		return fmt.Errorf("login request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
 
-	var result struct {
-		Success interface{} `json:"success"`
-		Msg     string      `json:"msg"`
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		// Maybe it returned a raw boolean or number
+		if string(body) == "true" || string(body) == "1" || string(body) == "{\"success\":true}" {
+			c.loggedIn = true
+			return nil
+		}
+		return fmt.Errorf("failed to parse login response. Raw body: %s", string(body))
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return fmt.Errorf("failed to parse login response: %w", err)
-	}
-	if !isSuccess(result.Success) {
-		return fmt.Errorf("login failed: %s", result.Msg)
+
+	successRaw, exists := result["success"]
+	if !exists || !isSuccess(successRaw) {
+		msg, _ := result["msg"].(string)
+		return fmt.Errorf("login failed: %s (Raw body: %s)", msg, string(body))
 	}
 
 	c.loggedIn = true
@@ -257,15 +262,19 @@ func (c *Client) checkResponse(resp *http.Response) error {
 		return fmt.Errorf("3x-ui api error %d: %s", resp.StatusCode, string(body))
 	}
 
-	var result struct {
-		Success interface{} `json:"success"`
-		Msg     string      `json:"msg"`
-	}
+	var result map[string]interface{}
 	if err := json.Unmarshal(body, &result); err != nil {
-		return nil // Non-JSON response, assume OK
+		// fallback for raw success
+		if string(body) == "true" || string(body) == "1" {
+			return nil
+		}
+		return fmt.Errorf("3x-ui non-json response: %s", string(body))
 	}
-	if !isSuccess(result.Success) {
-		return fmt.Errorf("3x-ui error: %s", result.Msg)
+
+	successRaw, exists := result["success"]
+	if exists && !isSuccess(successRaw) {
+		msg, _ := result["msg"].(string)
+		return fmt.Errorf("3x-ui error: %s (Raw body: %s)", msg, string(body))
 	}
 	return nil
 }
