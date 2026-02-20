@@ -83,29 +83,38 @@ func (c *Client) Login() error {
 	params.Set("username", c.Username)
 	params.Set("password", c.Password)
 
-	// Create request with x-www-form-urlencoded body (required by 3x-ui)
-	req, err := http.NewRequest("POST", c.BaseURL+"/login", strings.NewReader(params.Encode()))
-	if err != nil {
-		return fmt.Errorf("failed to create login request: %w", err)
+	pathsToTry := []string{
+		"/login",
+		"/panel/login",
+		"/api/login",
+		"/api/admin/login",
 	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("login request failed: %w", err)
-	}
-	body, _ := io.ReadAll(resp.Body)
-	resp.Body.Close()
+	var resp *http.Response
+	var body []byte
+	var err error
 
-	// Fallback to /panel/login if 404
-	if resp.StatusCode == 404 {
-		req, _ = http.NewRequest("POST", c.BaseURL+"/panel/login", strings.NewReader(params.Encode()))
+	for _, p := range pathsToTry {
+		req, _ := http.NewRequest("POST", c.BaseURL+p, strings.NewReader(params.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
 		resp, err = c.httpClient.Do(req)
-		if err == nil {
-			body, _ = io.ReadAll(resp.Body)
-			resp.Body.Close()
+		if err != nil {
+			continue // network error, try next (unlikely to help, but safe)
 		}
+
+		body, _ = io.ReadAll(resp.Body)
+		resp.Body.Close()
+
+		// If it's not a 404, we assume we found the right endpoint, even if it's a 401 Unauthorized
+		// Some panels might return 405 Method Not Allowed if login is elsewhere, but mostly 404.
+		if resp.StatusCode != 404 && resp.StatusCode != 405 {
+			break
+		}
+	}
+
+	if err != nil || resp == nil {
+		return fmt.Errorf("login failed: unable to reach any 3x-ui login endpoint")
 	}
 
 	var result map[string]interface{}
