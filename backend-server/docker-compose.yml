@@ -1,0 +1,25 @@
+services:
+  backend:
+    build: .
+    container_name: drfrake-backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - drfrake-data:/data
+    environment:
+      - PORT=:8080
+      - DB_PATH=/data/server.db
+      - YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID:-}
+      - YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY:-}
+      - YOOKASSA_RETURN_URL=${YOOKASSA_RETURN_URL:-https://google.com}
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8080/servers" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  drfrake-data:
+    driver: local

@@ -1,0 +1,427 @@
+:root {
+  --bg-dark: #050a14;
+  --bg-sidebar: #0a0f1a;
+  --primary: #00d7ff;
+  --primary-glow: rgba(0, 215, 255, 0.4);
+  --accent: #00b5e2;
+  --text: #ffffff;
+  --text-dim: #a0a0a0;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text);
+  overflow: hidden;
+}
+
+#App {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+.sidebar {
+  width: 240px;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1rem;
+}
+
+.logo-area {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 3rem;
+  text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nav-item {
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  background-color: var(--card-bg);
+  color: var(--text);
+}
+
+.nav-item.active {
+  color: var(--primary);
+  box-shadow: inset 0 0 10px rgba(0, 215, 255, 0.1);
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.connect-hub {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.connect-hub.connected {
+  box-shadow: 0 0 50px var(--primary-glow);
+}
+
+.outer-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--card-border);
+  border-radius: 50%;
+  animation: rotate 10s linear infinite;
+}
+
+.inner-circle {
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, var(--accent) 0%, var(--bg-sidebar) 100%);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.inner-circle:hover {
+  transform: scale(1.05);
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #ff4d4d;
+  border-radius: 50%;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
+}
+
+.status-dot.online {
+  background-color: #00ff88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.server-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.server-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  padding: 1.5rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.server-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-5px);
+}
+
+.badge {
+  background-color: var(--primary);
+  color: var(--bg-dark);
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-left: 0.5rem;
+}
+
+/* --- Selected Server --- */
+.server-card.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+/* --- Grace Period Banner --- */
+.grace-banner {
+  background: rgba(255, 107, 107, 0.15);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* --- Pricing Cards --- */
+.pricing-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 2rem;
+  width: 260px;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.pricing-card.featured {
+  border-color: var(--primary);
+  box-shadow: 0 0 30px var(--primary-glow);
+  transform: scale(1.05);
+}
+
+.pricing-card:hover {
+  transform: translateY(-5px);
+}
+
+.pricing-card.featured:hover {
+  transform: scale(1.05) translateY(-5px);
+}
+
+.popular-tag {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary);
+  color: var(--bg-dark);
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 3px 14px;
+  border-radius: 20px;
+}
+
+.price {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 1rem 0;
+  color: var(--text);
+}
+
+.price span {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+  margin: 1.5rem 0;
+}
+
+.features li {
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--bg-dark);
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* --- Account Page --- */
+.account-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 600px;
+}
+
+.account-card h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--primary);
+}
+
+.account-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.account-row:last-child {
+  border-bottom: none;
+}
+
+/* --- Status Badges --- */
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.status-badge.active,
+.status-badge.success {
+  background: rgba(0, 255, 136, 0.15);
+  color: #00ff88;
+}
+
+.status-badge.expired,
+.status-badge.failed {
+  background: rgba(255, 77, 77, 0.15);
+  color: #ff4d4d;
+}
+
+.status-badge.grace {
+  background: rgba(255, 170, 0, 0.15);
+  color: #ffaa00;
+}
+
+.status-badge.canceled {
+  background: rgba(160, 160, 160, 0.15);
+  color: #a0a0a0;
+}
+
+/* --- Toggle Switch --- */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle input:checked+.slider {
+  background-color: var(--primary);
+}
+
+.toggle input:checked+.slider:before {
+  transform: translateX(20px);
+}
+
+/* --- Payment History Table --- */
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.payment-table th {
+  text-align: left;
+  padding: 0.5rem;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.payment-table td {
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}

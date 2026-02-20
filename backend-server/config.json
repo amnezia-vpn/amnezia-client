@@ -1,0 +1,6 @@
+{
+    "Port": ":8080",
+    "YookassaShopID": "1251600",
+    "YookassaSecretKey": "test_9m4ACEDwvVDWvI2OTxsQLT0-aMxPotU0P5b_oexSfGA",
+    "YookassaReturnURL": "https://google.com"
+}
