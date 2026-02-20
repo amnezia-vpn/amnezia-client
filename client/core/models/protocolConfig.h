@@ -57,8 +57,6 @@ struct ProtocolConfig {
     
     QString port() const;
     QString transportProto() const;
-    QString portWithDefault(Proto protocol) const;
-    QString transportProtoWithDefault(Proto protocol) const;
     
     bool hasClientConfig() const;
     QString clientId() const;

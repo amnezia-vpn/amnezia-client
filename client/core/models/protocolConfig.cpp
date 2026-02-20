@@ -93,24 +93,6 @@ QString ProtocolConfig::transportProto() const
     }, data);
 }
 
-QString ProtocolConfig::portWithDefault(Proto protocol) const
-{
-    QString portValue = port();
-    if (portValue.isEmpty()) {
-        return QString::number(ProtocolUtils::defaultPort(protocol));
-    }
-    return portValue;
-}
-
-QString ProtocolConfig::transportProtoWithDefault(Proto protocol) const
-{
-    QString transportProtoValue = transportProto();
-    if (transportProtoValue.isEmpty()) {
-        return ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(protocol), protocol);
-    }
-    return transportProtoValue;
-}
-
 bool ProtocolConfig::hasClientConfig() const
 {
     return std::visit([](auto&& arg) -> bool {

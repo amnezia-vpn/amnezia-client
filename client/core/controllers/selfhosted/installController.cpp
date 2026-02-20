@@ -377,8 +377,11 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
     const Proto protocol = ContainerUtils::defaultProtocol(container);
     QStringList fixedPorts = ContainerUtils::fixedPortsForContainer(container);
 
-    QString port = config.protocolConfig.portWithDefault(protocol);
-    QString transportProto = config.protocolConfig.transportProtoWithDefault(protocol);
+    QString port = config.protocolConfig.port();
+    if (port.isEmpty()) {
+        port = QString::number(ProtocolUtils::defaultPort(protocol));
+    }
+    QString transportProto = config.protocolConfig.transportProto();
     if (transportProto.isEmpty()) {
         transportProto = ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(protocol), protocol);
     }
