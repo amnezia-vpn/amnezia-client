@@ -674,7 +674,7 @@ bool ApiConfigsController::importSerivceFromPaymentMarket()
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     apiPayload[apiDefs::key::transactionId] = purchaseToken;
-    bool isTestPurchase = false; // TODO: detect if this is a test purchase
+    bool isTestPurchase = m_settings->isDevGatewayEnv(false) || androidController->isTestPurchaseEnvironment();
 
     ErrorCode errorCode;
     QByteArray responseBody;
@@ -914,8 +914,8 @@ bool ApiConfigsController::restoreSerivceFromPaymentMarket()
 
         QJsonObject apiPayload = gatewayRequestData.toJsonObject();
         apiPayload[apiDefs::key::transactionId] = purchaseToken;
-        bool isTestPurchase = false; // TODO: detect if this is a test purchase
-        
+        bool isTestPurchase = m_settings->isDevGatewayEnv(false) || androidController->isTestPurchaseEnvironment();
+
         QByteArray responseBody;
         ErrorCode errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody, isTestPurchase);
         if (errorCode != ErrorCode::NoError) {

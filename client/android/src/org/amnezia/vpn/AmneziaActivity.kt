@@ -1110,6 +1110,13 @@ class AmneziaActivity : QtActivity() {
     fun isPlay(): Boolean = BuildConfig.FLAVOR == "play"
 
     @Suppress("unused")
+    fun isTestPurchaseEnvironment(): Boolean {
+        if (BuildConfig.DEBUG) return true
+        val appInfo = packageManager.getApplicationInfo(packageName, 0)
+        return (appInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    }
+
+    @Suppress("unused")
     fun getCountryCode(): String {
         Log.v(TAG, "Get country code")
         return blockingCall { billingRepository.getCountryCode() }
