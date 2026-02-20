@@ -1,7 +1,7 @@
 {
-    "country": "Germany",
-    "city": "Frankfurt",
-    "flag": "🇩🇪",
+    "country": "Netherlands",
+    "city": "Amsterdam",
+    "flag": "🇳🇱",
     "is_premium": true,
     "type": "xray",
     "server_host": "138.124.101.69",
