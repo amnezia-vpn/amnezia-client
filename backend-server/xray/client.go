@@ -79,17 +79,34 @@ func NewClient(baseURL, username, password string) *Client {
 
 // Login authenticates with the 3X-UI panel.
 func (c *Client) Login() error {
-	payload := map[string]string{
-		"username": c.Username,
-		"password": c.Password,
-	}
-	data, _ := json.Marshal(payload)
+	params := url.Values{}
+	params.Set("username", c.Username)
+	params.Set("password", c.Password)
 
-	resp, err := c.httpClient.Post(c.BaseURL+"/login", "application/json", bytes.NewBuffer(data))
+	// Create request with x-www-form-urlencoded body (required by 3x-ui)
+	req, err := http.NewRequest("POST", c.BaseURL+"/login", strings.NewReader(params.Encode()))
+	if err != nil {
+		return fmt.Errorf("failed to create login request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("login request failed: %w", err)
 	}
 	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	// Fallback to /panel/login if 404
+	if resp.StatusCode == 404 {
+		req, _ = http.NewRequest("POST", c.BaseURL+"/panel/login", strings.NewReader(params.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		resp, err = c.httpClient.Do(req)
+		if err == nil {
+			body, _ = io.ReadAll(resp.Body)
+			resp.Body.Close()
+		}
+	}
 
 	var result map[string]interface{}
 	if err := json.Unmarshal(body, &result); err != nil {
