@@ -7,12 +7,14 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"golang.getoutline.org/sdk/network"
 	"golang.getoutline.org/sdk/network/lwip2transport"
 	"golang.getoutline.org/sdk/x/configurl"
+	"golang.org/x/sys/windows"
 )
 
 type Session struct {
@@ -23,17 +25,19 @@ type Session struct {
 
 // App struct
 type App struct {
-	ctx          context.Context
-	tunDevice    *WindowsTUN
-	lwipDevice   network.IPDevice
-	isConnected  bool
-	activeConfig string
-	subDB        *SubscriptionDB
-	currentUser  *User
-	config       *Config
-	apiClient    *APIClient
-	authToken    string
-	xrayManager  *XrayManager
+	ctx              context.Context
+	tunDevice        *WindowsTUN
+	lwipDevice       network.IPDevice
+	isConnected      bool
+	activeConfig     string
+	subDB            *SubscriptionDB
+	currentUser      *User
+	config           *Config
+	apiClient        *APIClient
+	authToken        string
+	xrayManager      *XrayManager
+	tun2socksManager *Tun2SocksManager
+	vlessServerIP    string
 }
 
 // NewApp creates a new App application struct
@@ -247,67 +251,99 @@ func (a *App) Connect(config string, serverID string) error {
 		}
 	}
 
+	// Mark connected early to prevent double-clicks
+	a.isConnected = true
+
 	log.Printf("[VPN] Connecting with config: %s", config)
 
-	// Detect protocol and prepare config for Outline SDK
-	var serverHost string
-	var dialerConfig string
-
+	var err error
 	if strings.HasPrefix(config, "vless://") {
-		// VLESS: start xray-core subprocess, use SOCKS5 bridge
-		log.Printf("[VPN] Detected VLESS protocol, starting xray-core...")
-
-		// Parse VLESS URI to get server host for routing
-		vlessParams, err := ParseVLESSURI(config)
-		if err != nil {
-			return fmt.Errorf("failed to parse VLESS config: %w", err)
-		}
-		serverHost = vlessParams.Host
-
-		// Start xray-core
-		if a.xrayManager == nil {
-			a.xrayManager = NewXrayManager()
-		}
-		if err := a.xrayManager.Start(config); err != nil {
-			return fmt.Errorf("failed to start xray-core: %w", err)
-		}
-
-		// Use SOCKS5 proxy as the dialer config
-		dialerConfig = a.xrayManager.GetSOCKS5Config()
-		log.Printf("[VPN] Using SOCKS5 bridge: %s", dialerConfig)
+		err = a.connectVLESS(config)
 	} else {
-		// Shadowsocks or other protocol supported by Outline SDK
-		dialerConfig = config
-		if cfg, err := configurl.ParseConfig(config); err == nil {
-			serverHost = cfg.URL.Hostname()
-		}
+		err = a.connectShadowsocks(config)
 	}
+
+	if err != nil {
+		a.isConnected = false
+	}
+	return err
+}
+
+// connectVLESS connects via xray-core (SOCKS5) + tun2socks (TUN tunneling).
+func (a *App) connectVLESS(config string) error {
+	log.Printf("[VPN] Detected VLESS protocol, starting xray-core...")
+
+	// Parse VLESS URI to get server host for routing
+	vlessParams, err := ParseVLESSURI(config)
+	if err != nil {
+		return fmt.Errorf("failed to parse VLESS config: %w", err)
+	}
+	a.vlessServerIP = vlessParams.Host
+
+	// 1. Start xray-core → SOCKS5 proxy
+	if a.xrayManager == nil {
+		a.xrayManager = NewXrayManager()
+	}
+	if err := a.xrayManager.Start(config); err != nil {
+		return fmt.Errorf("failed to start xray-core: %w", err)
+	}
+
+	socksAddr := fmt.Sprintf("127.0.0.1:%d", a.xrayManager.socksPort)
+
+	// 2. Start tun2socks → TUN adapter bridged to SOCKS5
+	a.tun2socksManager = NewTun2SocksManager()
+	if err := a.tun2socksManager.Start(socksAddr); err != nil {
+		a.stopXray()
+		return fmt.Errorf("failed to start tun2socks: %w", err)
+	}
+
+	// 3. Configure TUN adapter IP
+	tunIP := "10.0.85.2"
+	if err := a.tun2socksManager.ConfigureAdapter(tunIP); err != nil {
+		a.tun2socksManager.Stop()
+		a.stopXray()
+		return fmt.Errorf("failed to configure TUN: %w", err)
+	}
+
+	// 4. Setup routes: bypass server IP + DNS, route all via TUN
+	if err := a.tun2socksManager.SetupRoutes(vlessParams.Host, tunIP); err != nil {
+		a.tun2socksManager.Stop()
+		a.stopXray()
+		return fmt.Errorf("failed to setup routes: %w", err)
+	}
+
+	log.Printf("[VPN] VLESS connected via TUN (xray SOCKS5: %s)", socksAddr)
+	a.activeConfig = config
+	return nil
+}
+
+// connectShadowsocks connects via TUN + LWIP + Outline SDK (original flow).
+func (a *App) connectShadowsocks(config string) error {
+	var serverHost string
+	if cfg, err := configurl.ParseConfig(config); err == nil {
+		serverHost = cfg.URL.Hostname()
+	}
+
 	// 1. Create Dialers
 	providers := configurl.NewDefaultProviders()
-	sd, err := providers.NewStreamDialer(context.Background(), dialerConfig)
+	sd, err := providers.NewStreamDialer(context.Background(), config)
 	if err != nil {
-		a.stopXray() // Clean up on failure
 		return fmt.Errorf("failed to create stream dialer: %w", err)
 	}
-	pl, err := providers.NewPacketListener(context.Background(), dialerConfig)
+	pl, err := providers.NewPacketListener(context.Background(), config)
 	if err != nil {
-		a.stopXray()
 		return fmt.Errorf("failed to create packet listener: %w", err)
 	}
 	pp, err := network.NewPacketProxyFromPacketListener(pl)
 	if err != nil {
-		a.stopXray()
 		return fmt.Errorf("failed to create packet proxy: %w", err)
 	}
 
 	// 2. Create & Configure TUN
 	tun, err := NewWindowsTUN()
 	if err != nil {
-		a.stopXray()
 		return fmt.Errorf("failed to create TUN device: %w", err)
 	}
-	// Use a fixed IP for now. Ideally should be configurable or determined by server.
-	// But Outline usually doesn't push IP. We use a private IP.
 	tunIP := "10.0.85.2"
 	if err := tun.Configure(tunIP); err != nil {
 		tun.Close()
@@ -319,7 +355,6 @@ func (a *App) Connect(config string, serverID string) error {
 	if err := tun.SetupRoutes(serverHost, tunIP); err != nil {
 		log.Printf("[VPN] Routing setup failed: %v", err)
 		tun.Close()
-		a.stopXray()
 		return fmt.Errorf("failed to setup routes: %w", err)
 	}
 
@@ -346,13 +381,23 @@ func (a *App) Connect(config string, serverID string) error {
 	}()
 
 	log.Println("[VPN] TUN Device started. Routing traffic...")
-
 	a.isConnected = true
 	a.activeConfig = config
 	return nil
 }
 
 func (a *App) Disconnect() error {
+	// Stop tun2socks first (removes TUN adapter)
+	if a.tun2socksManager != nil {
+		a.tun2socksManager.CleanupRoutes(a.vlessServerIP)
+		a.tun2socksManager.Stop()
+		a.tun2socksManager = nil
+	}
+
+	// Remove system proxy
+	unsetSystemProxy()
+
+	// Stop Shadowsocks TUN/LWIP if active
 	if a.tunDevice != nil {
 		a.tunDevice.Close()
 		a.tunDevice = nil
@@ -363,6 +408,8 @@ func (a *App) Disconnect() error {
 	}
 	a.stopXray()
 	a.isConnected = false
+	a.vlessServerIP = ""
+	log.Println("[VPN] Disconnected.")
 	return nil
 }
 
@@ -373,6 +420,55 @@ func (a *App) stopXray() {
 			log.Printf("[VPN] Error stopping xray-core: %v", err)
 		}
 	}
+}
+
+// setSystemProxy sets Windows system-wide proxy to route traffic through xray.
+func setSystemProxy(host string, port int) error {
+	proxy := fmt.Sprintf("%s:%d", host, port)
+	psCmd := fmt.Sprintf(`
+		$regPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
+		Set-ItemProperty -Path $regPath -Name ProxyEnable -Value 1
+		Set-ItemProperty -Path $regPath -Name ProxyServer -Value '%s'
+		Set-ItemProperty -Path $regPath -Name ProxyOverride -Value '<local>;127.0.0.1;localhost'
+
+		# Notify WinInet so browsers pick up the change immediately
+		$sig = '[DllImport("wininet.dll", SetLastError=true)] public static extern bool InternetSetOption(IntPtr h, int o, IntPtr b, int l);'
+		$t = Add-Type -MemberDefinition $sig -Name WinInet -Namespace Proxy -PassThru
+		$t::InternetSetOption(0, 39, 0, 0)  # INTERNET_OPTION_SETTINGS_CHANGED
+		$t::InternetSetOption(0, 37, 0, 0)  # INTERNET_OPTION_REFRESH
+	`, proxy)
+
+	log.Printf("[Proxy] Setting system proxy to %s", proxy)
+	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", psCmd)
+	cmd.SysProcAttr = &windows.SysProcAttr{HideWindow: true}
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("failed to set proxy: %v, output: %s", err, string(out))
+	}
+	log.Println("[Proxy] System proxy set and browsers notified.")
+	return nil
+}
+
+// unsetSystemProxy removes Windows system-wide proxy.
+func unsetSystemProxy() {
+	psCmd := `
+		$regPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
+		Set-ItemProperty -Path $regPath -Name ProxyEnable -Value 0
+		Remove-ItemProperty -Path $regPath -Name ProxyServer -ErrorAction SilentlyContinue
+
+		# Notify WinInet so browsers pick up the change immediately
+		$sig = '[DllImport("wininet.dll", SetLastError=true)] public static extern bool InternetSetOption(IntPtr h, int o, IntPtr b, int l);'
+		$t = Add-Type -MemberDefinition $sig -Name WinInet2 -Namespace Proxy -PassThru
+		$t::InternetSetOption(0, 39, 0, 0)
+		$t::InternetSetOption(0, 37, 0, 0)
+	`
+
+	log.Println("[Proxy] Removing system proxy...")
+	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", psCmd)
+	cmd.SysProcAttr = &windows.SysProcAttr{HideWindow: true}
+	if out, err := cmd.CombinedOutput(); err != nil {
+		log.Printf("[Proxy] Warning removing proxy: %v, output: %s", err, string(out))
+	}
+	log.Println("[Proxy] System proxy removed.")
 }
 
 func (a *App) IsConnected() bool {

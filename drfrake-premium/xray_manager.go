@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -36,6 +37,8 @@ type VLESSParams struct {
 	SpiderX     string
 	Flow        string
 	Network     string
+	Encryption  string // PQ encryption key (mlkem768x25519plus)
+	PQV         string // PQ verification value (mldsa65)
 }
 
 // NewXrayManager creates a new manager for xray-core subprocess.
@@ -176,9 +179,22 @@ func (m *XrayManager) findXrayBinary() string {
 
 // generateConfig creates an xray-core JSON config for a VLESS+Reality connection.
 func (m *XrayManager) generateConfig(params *VLESSParams) string {
+	httpPort := m.socksPort + 1 // 10809
+
+	// Port must be integer for xray config
+	port, _ := strconv.Atoi(params.Port)
+	if port == 0 {
+		port = 2083
+	}
 	config := map[string]interface{}{
 		"log": map[string]interface{}{
 			"loglevel": "warning",
+		},
+		"dns": map[string]interface{}{
+			"servers": []interface{}{
+				"1.1.1.1",
+				"8.8.8.8",
+			},
 		},
 		"inbounds": []map[string]interface{}{
 			{
@@ -189,6 +205,19 @@ func (m *XrayManager) generateConfig(params *VLESSParams) string {
 				"settings": map[string]interface{}{
 					"auth": "noauth",
 					"udp":  true,
+				},
+				"sniffing": map[string]interface{}{
+					"enabled":      true,
+					"destOverride": []string{"http", "tls", "quic"},
+				},
+			},
+			{
+				"tag":      "http-in",
+				"port":     httpPort,
+				"listen":   "127.0.0.1",
+				"protocol": "http",
+				"settings": map[string]interface{}{
+					"allowTransparent": false,
 				},
 				"sniffing": map[string]interface{}{
 					"enabled":      true,
@@ -204,12 +233,12 @@ func (m *XrayManager) generateConfig(params *VLESSParams) string {
 					"vnext": []map[string]interface{}{
 						{
 							"address": params.Host,
-							"port":    params.Port,
+							"port":    port,
 							"users": []map[string]interface{}{
 								{
 									"id":         params.UUID,
 									"flow":       params.Flow,
-									"encryption": "none",
+									"encryption": params.Encryption,
 								},
 							},
 						},
@@ -241,13 +270,17 @@ func (m *XrayManager) buildStreamSettings(params *VLESSParams) map[string]interf
 	}
 
 	if params.Security == "reality" {
-		ss["realitySettings"] = map[string]interface{}{
+		rs := map[string]interface{}{
 			"serverName":  params.SNI,
 			"fingerprint": params.Fingerprint,
 			"publicKey":   params.PublicKey,
 			"shortId":     params.ShortID,
 			"spiderX":     params.SpiderX,
 		}
+		if params.PQV != "" {
+			rs["pqv"] = params.PQV
+		}
+		ss["realitySettings"] = rs
 	} else if params.Security == "tls" {
 		ss["tlsSettings"] = map[string]interface{}{
 			"serverName":  params.SNI,
@@ -285,6 +318,8 @@ func ParseVLESSURI(uri string) (*VLESSParams, error) {
 	params.SpiderX = q.Get("spx")
 	params.Flow = q.Get("flow")
 	params.Network = q.Get("type")
+	params.Encryption = q.Get("encryption")
+	params.PQV = q.Get("pqv")
 
 	if params.Flow == "" {
 		params.Flow = "xtls-rprx-vision"
@@ -294,6 +329,9 @@ func ParseVLESSURI(uri string) (*VLESSParams, error) {
 	}
 	if params.Fingerprint == "" {
 		params.Fingerprint = "chrome"
+	}
+	if params.Encryption == "" {
+		params.Encryption = "none"
 	}
 
 	return params, nil

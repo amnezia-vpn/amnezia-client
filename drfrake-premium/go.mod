@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/wailsapp/wails/v2 v2.11.0
 	golang.getoutline.org/sdk v0.0.21
-	golang.getoutline.org/sdk/x v0.0.0-00010101000000-000000000000
+	golang.getoutline.org/sdk/x v0.1.0
 	golang.org/x/sys v0.37.0
 	golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2
 	modernc.org/sqlite v1.45.0
@@ -48,9 +48,3 @@ require (
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )
-
-// replace github.com/wailsapp/wails/v2 v2.11.0 => C:\Users\PC\go\pkg\mod
-
-replace golang.getoutline.org/sdk => ../../../
-
-replace golang.getoutline.org/sdk/x => ../../

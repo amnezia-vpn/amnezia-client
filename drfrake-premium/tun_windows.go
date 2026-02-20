@@ -18,8 +18,10 @@ const (
 )
 
 type WindowsTUN struct {
-	adapter *wintun.Adapter
-	session wintun.Session
+	adapter  *wintun.Adapter
+	session  wintun.Session
+	serverIP string // stored for route cleanup
+	tunIP    string // stored for route cleanup
 }
 
 func NewWindowsTUN() (*WindowsTUN, error) {
@@ -81,6 +83,12 @@ func (t *WindowsTUN) Write(p []byte) (int, error) {
 }
 
 func (t *WindowsTUN) Close() error {
+	// Clean up routes before closing adapter
+	if t.serverIP != "" {
+		if err := t.CleanupRoutes(); err != nil {
+			log.Printf("[Wintun] Route cleanup error: %v", err)
+		}
+	}
 	t.session.End()
 	return t.adapter.Close()
 }
@@ -146,10 +154,15 @@ func (t *WindowsTUN) Configure(localIP string) error {
 }
 
 func (t *WindowsTUN) SetupRoutes(serverIP string, localTUNIP string) error {
+	// Store for cleanup
+	t.serverIP = serverIP
+	t.tunIP = localTUNIP
+
 	// PowerShell script to setup routing:
 	// 1. Find Default Gateway
 	// 2. Add route to VPN Server via Default Gateway (Loop prevention)
 	// 3. Add 0.0.0.0/1 and 128.0.0.0/1 via TUN (Redirect traffic)
+	// 4. Set DNS on TUN adapter
 
 	psCmd := fmt.Sprintf(`
 		$ErrorActionPreference = "Stop";
@@ -169,6 +182,14 @@ func (t *WindowsTUN) SetupRoutes(serverIP string, localTUNIP string) error {
 			}
 		}
 
+		# 2.5 DNS Bypass: Route DNS servers via old gateway (not through TUN)
+		# This ensures DNS resolves correctly even if UDP doesn't work through SOCKS5
+		foreach ($dns in @("1.1.1.1", "8.8.8.8")) {
+			if (!(Get-NetRoute -DestinationPrefix "$dns/32" -ErrorAction SilentlyContinue)) {
+				New-NetRoute -DestinationPrefix "$dns/32" -NextHop $gw -InterfaceIndex $ifIndex -RouteMetric 1
+			}
+		}
+
 		# 3. Route Traffic via TUN
 		$tunIf = Get-NetIPAddress -IPAddress $tunIP
 		if (!$tunIf) { Write-Error "TUN Interface not found"; exit 1 }
@@ -183,6 +204,9 @@ func (t *WindowsTUN) SetupRoutes(serverIP string, localTUNIP string) error {
 		
 		Add-Route "0.0.0.0/1" $tunIdx
 		Add-Route "128.0.0.0/1" $tunIdx
+
+		# 4. Set DNS on TUN adapter (queries go via bypass routes above)
+		Set-DnsClientServerAddress -InterfaceIndex $tunIdx -ServerAddresses ("1.1.1.1","8.8.8.8")
 	`, serverIP, localTUNIP)
 
 	log.Printf("[Routing] Configuring routes for Server: %s, TUN: %s...", serverIP, localTUNIP)
@@ -193,5 +217,37 @@ func (t *WindowsTUN) SetupRoutes(serverIP string, localTUNIP string) error {
 		return fmt.Errorf("failed to setup routes: %v, output: %s", err, string(out))
 	}
 	log.Println("[Routing] Routes configured successfully.")
+	return nil
+}
+
+// CleanupRoutes removes all VPN routes to restore normal networking.
+func (t *WindowsTUN) CleanupRoutes() error {
+	psCmd := fmt.Sprintf(`
+		$ErrorActionPreference = "SilentlyContinue";
+		$serverIP = "%s";
+
+		# Remove VPN traffic routes
+		Remove-NetRoute -DestinationPrefix "0.0.0.0/1" -Confirm:$false
+		Remove-NetRoute -DestinationPrefix "128.0.0.0/1" -Confirm:$false
+
+		# Remove DNS bypass routes
+		Remove-NetRoute -DestinationPrefix "1.1.1.1/32" -Confirm:$false
+		Remove-NetRoute -DestinationPrefix "8.8.8.8/32" -Confirm:$false
+
+		# Remove server bypass route
+		if ($serverIP -ne "") {
+			Remove-NetRoute -DestinationPrefix "$serverIP/32" -Confirm:$false
+		}
+	`, t.serverIP)
+
+	log.Println("[Routing] Cleaning up VPN routes...")
+	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", psCmd)
+	cmd.SysProcAttr = &windows.SysProcAttr{HideWindow: true}
+
+	if out, err := cmd.CombinedOutput(); err != nil {
+		log.Printf("[Routing] Cleanup warning: %v, output: %s", err, string(out))
+		return err
+	}
+	log.Println("[Routing] Routes cleaned up successfully.")
 	return nil
 }

@@ -56,6 +56,8 @@ type VLESSConfig struct {
 	PublicKey   string
 	ShortID     string
 	SpiderX     string
+	Encryption  string
+	PQV         string
 }
 
 // NewClient creates a 3X-UI API client.
@@ -235,6 +237,12 @@ func BuildVLESSURI(cfg VLESSConfig) string {
 		}
 		if cfg.SpiderX != "" {
 			params.Set("spx", cfg.SpiderX)
+		}
+		if cfg.Encryption != "" && cfg.Encryption != "none" {
+			params.Set("encryption", cfg.Encryption)
+		}
+		if cfg.PQV != "" {
+			params.Set("pqv", cfg.PQV)
 		}
 	}
 

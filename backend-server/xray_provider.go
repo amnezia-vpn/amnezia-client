@@ -28,6 +28,8 @@ type XrayServerSettings struct {
 	PublicKey   string `json:"public_key"`
 	ShortID     string `json:"short_id"`
 	SpiderX     string `json:"spider_x"`
+	Encryption  string `json:"encryption"`
+	PQV         string `json:"pqv"`
 }
 
 // NewXrayProvider creates a provider backed by a 3X-UI panel.
@@ -117,5 +119,7 @@ func (p *XrayProvider) buildVLESSURI(uuid string) string {
 		PublicKey:   p.settings.PublicKey,
 		ShortID:     p.settings.ShortID,
 		SpiderX:     p.settings.SpiderX,
+		Encryption:  p.settings.Encryption,
+		PQV:         p.settings.PQV,
 	})
 }
