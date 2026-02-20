@@ -464,7 +464,7 @@ void VpnConnection::disconnectFromVpn()
     *connection = connect(AndroidController::instance(), &AndroidController::vpnStateChanged, this,
                           [this, connection](AndroidController::ConnectionState state) {
                               if (state == AndroidController::ConnectionState::DISCONNECTED) {
-                                  onConnectionStateChanged(Vpn::ConnectionState::Disconnected);
+                                  setConnectionState(Vpn::ConnectionState::Disconnected);
                                   disconnect(*connection);
                                   delete connection;
                               }
