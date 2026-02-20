@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt.labs.settings 1.1
 
 import SortFilterProxyModel 0.2
 
@@ -18,277 +17,12 @@ PageType {
     id: root
 
     property var processedServer
-    property var groupedRegions: []
-    property string searchText: ""
-    property var regionsExpanded: ({})
-
-    readonly property var regionDefinitions: [
-        {
-            "regionName": "Europe",
-            "countries": [
-                { "code": "BE", "name": "Belgium", "ruName": "Бельгия" },
-                { "code": "EE", "name": "Estonia", "ruName": "Эстония" },
-                { "code": "FI", "name": "Finland", "ruName": "Финляндия" },
-                { "code": "FR", "name": "France", "ruName": "Франция" },
-                { "code": "GE", "name": "Georgia", "ruName": "Грузия" },
-                { "code": "DE", "name": "Germany", "ruName": "Германия" },
-                { "code": "NL", "name": "Netherlands", "ruName": "Нидерланды" },
-                { "code": "PL", "name": "Poland", "ruName": "Польша" },
-                { "code": "RU", "name": "Russia", "ruName": "Россия" },
-                { "code": "ES", "name": "Spain", "ruName": "Испания" },
-                { "code": "SE", "name": "Sweden", "ruName": "Швеция" },
-                { "code": "CH", "name": "Switzerland", "ruName": "Швейцария" },
-                { "code": "TR", "name": "Turkey", "ruName": "Турция" }
-            ]
-        },
-        {
-            "regionName": "America",
-            "countries": [
-                { "code": "BR", "name": "Brazil", "ruName": "Бразилия" },
-                { "code": "CA", "name": "Canada East", "ruName": "Канада" },
-                { "code": "US", "name": "USA East", "ruName": "США" },
-                { "code": "US", "name": "USA West", "ruName": "США" }
-            ]
-        },
-        {
-            "regionName": "Asia",
-            "countries": [
-                { "code": "AE", "name": "UAE", "ruName": "ОАЭ" },
-                { "code": "JP", "name": "Japan", "ruName": "Япония" },
-                { "code": "KZ", "name": "Kazakhstan", "ruName": "Казахстан" },
-                { "code": "KR", "name": "South Korea", "ruName": "Южная Корея" },
-                { "code": "SG", "name": "Singapore", "ruName": "Сингапур" }
-            ]
-        },
-        {
-            "regionName": "Oceania and Africa",
-            "countries": [
-                { "code": "AU", "name": "Australia", "ruName": "Австралия" },
-                { "code": "NZ", "name": "New Zealand", "ruName": "Новая Зеландия" },
-                { "code": "ZA", "name": "South Africa", "ruName": "Южная Африка" }
-            ]
-        }
-    ]
-
-    function normalizeCountryCode(countryCode) {
-        if (!countryCode) {
-            return "";
-        }
-        return countryCode.toString().trim().toUpperCase();
-    }
-
-    function extractCountryIsoCode(countryCode) {
-        const normalizedCode = normalizeCountryCode(countryCode);
-        const match = normalizedCode.match(/[A-Z]{2}/);
-        return match ? match[0] : normalizedCode;
-    }
-
-    function normalizeCountryName(countryName) {
-        if (!countryName) {
-            return "";
-        }
-        return countryName.toString().trim().toLowerCase();
-    }
-
-    function loadRegionExpansionState() {
-        try {
-            const parsed = JSON.parse(regionExpansionSettings.regionsExpandedJson);
-            regionsExpanded = parsed && typeof parsed === "object" ? parsed : ({});
-        } catch (error) {
-            regionsExpanded = ({});
-        }
-    }
-
-    function saveRegionExpansionState() {
-        regionExpansionSettings.regionsExpandedJson = JSON.stringify(regionsExpanded);
-    }
-
-    function isRegionExpanded(regionName) {
-        if (regionsExpanded[regionName] === undefined) {
-            return true;
-        }
-        return regionsExpanded[regionName];
-    }
-
-    function setRegionExpanded(regionName, isExpanded) {
-        let updated = Object.assign({}, regionsExpanded);
-        updated[regionName] = isExpanded;
-        regionsExpanded = updated;
-        saveRegionExpansionState();
-    }
-
-    function normalizeSearchComparableText(textValue) {
-        const normalizedText = normalizeCountryName(textValue)
-            .replace(/[ё]/g, "е")
-            .replace(/[й]/g, "и");
-        let result = "";
-
-        for (let i = 0; i < normalizedText.length; ++i) {
-            const currentChar = normalizedText[i];
-            const isSeparator = currentChar === "." || currentChar === "-";
-
-            if (!isSeparator) {
-                result += currentChar;
-                continue;
-            }
-
-            const prevChar = i > 0 ? normalizedText[i - 1] : "";
-            const nextChar = i + 1 < normalizedText.length ? normalizedText[i + 1] : "";
-            const hasSeparatorNeighbor = prevChar === "." || prevChar === "-" || nextChar === "." || nextChar === "-";
-
-            if (hasSeparatorNeighbor) {
-                result += currentChar;
-            }
-        }
-
-        return result;
-    }
-
-    function isCountryMatchingSearch(countryName, regionCountryCode, sourceCountryCode, ruCountryName) {
-        const normalizedSearchText = normalizeSearchComparableText(searchText);
-        if (normalizedSearchText === "") {
-            return true;
-        }
-
-        const normalizedCountryName = normalizeSearchComparableText(countryName);
-        const normalizedRuCountryName = normalizeSearchComparableText(ruCountryName);
-        const normalizedRegionCountryCode = normalizeCountryCode(regionCountryCode).toLowerCase();
-        const normalizedSourceCountryCode = normalizeCountryCode(sourceCountryCode).toLowerCase();
-
-        const nameMatch = normalizedCountryName.startsWith(normalizedSearchText);
-        const ruNameMatch = normalizedRuCountryName.startsWith(normalizedSearchText);
-        const regionCodeMatch = normalizedRegionCountryCode.startsWith(normalizedSearchText);
-        const sourceCodeMatch = normalizedSourceCountryCode.startsWith(normalizedSearchText);
-
-        return nameMatch || ruNameMatch || regionCodeMatch || sourceCodeMatch;
-    }
-
-    function getDisplayCountryName(countryName) {
-        const p2pPostfix = "[P2P] ";
-        if (countryName && countryName.indexOf(p2pPostfix) === 0) {
-            return countryName.slice(p2pPostfix.length) + " " + p2pPostfix;
-        }
-        return countryName;
-    }
-
-    function findCountryIndexByRef(countryRef, usedIndices) {
-        const expectedCode = normalizeCountryCode(countryRef.code);
-        const expectedName = normalizeCountryName(countryRef.name);
-        const countriesCount = proxyCountriesModel.count !== undefined ? proxyCountriesModel.count : 0;
-
-        for (let i = 0; i < countriesCount; ++i) {
-            if (usedIndices[i]) {
-                continue;
-            }
-
-            const country = proxyCountriesModel.get(i);
-            if (!country || country.countryCode === undefined || country.countryName === undefined) {
-                continue;
-            }
-
-            const modelCode = normalizeCountryCode(country.countryCode);
-            const modelIsoCode = extractCountryIsoCode(country.countryCode);
-            const modelName = normalizeCountryName(country.countryName);
-
-            if (expectedName !== "" && modelName === expectedName) {
-                return i;
-            }
-            if (expectedCode !== "" && (modelCode === expectedCode || modelIsoCode === expectedCode)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    function rebuildRegionModel() {
-        let regions = [];
-
-        for (let regionNameIndex = 0; regionNameIndex < regionDefinitions.length; ++regionNameIndex) {
-            regions.push({
-                "regionName": regionDefinitions[regionNameIndex].regionName,
-                "countries": []
-            });
-        }
-
-        let usedIndices = {};
-        for (let regionDefIndex = 0; regionDefIndex < regionDefinitions.length; ++regionDefIndex) {
-            const regionDefinition = regionDefinitions[regionDefIndex];
-            for (let countryIndex = 0; countryIndex < regionDefinition.countries.length; ++countryIndex) {
-                const countryRef = regionDefinition.countries[countryIndex];
-                const sourceIndex = findCountryIndexByRef(countryRef, usedIndices);
-
-                if (sourceIndex < 0) {
-                    if (isCountryMatchingSearch(countryRef.name, countryRef.code, countryRef.code, countryRef.ruName)) {
-                        regions[regionDefIndex].countries.push({
-                            "sourceIndex": -1,
-                            "countryName": getDisplayCountryName(countryRef.name),
-                            "sourceCountryName": countryRef.name,
-                            "countryCode": countryRef.code,
-                            "countryImageCode": extractCountryIsoCode(countryRef.code),
-                            "isAvailable": false
-                        });
-                    }
-                    continue;
-                }
-
-                const sourceCountry = proxyCountriesModel.get(sourceIndex);
-                if (!sourceCountry || sourceCountry.countryCode === undefined || sourceCountry.countryName === undefined) {
-                    continue;
-                }
-
-                const displayCountryName = getDisplayCountryName(sourceCountry.countryName);
-                if (!isCountryMatchingSearch(displayCountryName, countryRef.code, sourceCountry.countryCode, countryRef.ruName)) {
-                    continue;
-                }
-
-                regions[regionDefIndex].countries.push({
-                    "sourceIndex": sourceIndex,
-                    "countryName": displayCountryName,
-                    "sourceCountryName": sourceCountry.countryName,
-                    "countryCode": sourceCountry.countryCode,
-                    "countryImageCode": extractCountryIsoCode(sourceCountry.countryImageCode),
-                    "isAvailable": true
-                });
-                usedIndices[sourceIndex] = true;
-            }
-        }
-
-        let visibleRegions = [];
-        for (let regionIndex = 0; regionIndex < regions.length; ++regionIndex) {
-            if (regions[regionIndex].countries.length > 0) {
-                visibleRegions.push(regions[regionIndex]);
-            }
-        }
-
-        groupedRegions = visibleRegions;
-    }
 
     Connections {
         target: ServersModel
 
         function onProcessedServerChanged() {
             root.processedServer = proxyServersModel.get(0)
-        }
-    }
-
-    Connections {
-        target: ApiCountryModel
-
-        function onModelReset() {
-            root.rebuildRegionModel()
-        }
-
-        function onRowsInserted() {
-            root.rebuildRegionModel()
-        }
-
-        function onRowsRemoved() {
-            root.rebuildRegionModel()
-        }
-
-        function onDataChanged() {
-            root.rebuildRegionModel()
         }
     }
 
@@ -306,21 +40,7 @@ PageType {
 
         Component.onCompleted: {
             root.processedServer = proxyServersModel.get(0)
-            root.rebuildRegionModel()
         }
-    }
-
-    SortFilterProxyModel {
-        id: proxyCountriesModel
-        objectName: "proxyCountriesModel"
-
-        sourceModel: ApiCountryModel
-    }
-
-    Settings {
-        id: regionExpansionSettings
-        category: "PageSettingsApiAvailableCountries"
-        property string regionsExpandedJson: "{}"
     }
 
     ListViewType {
@@ -328,7 +48,7 @@ PageType {
 
         anchors.fill: parent
 
-        model: root.groupedRegions
+        model: ApiCountriesRegionModel
 
         currentIndex: 0
 
@@ -432,8 +152,7 @@ PageType {
                             const shouldRestoreFocus = activeFocus
                             const previousCursorPosition = cursorPosition
 
-                            root.searchText = text
-                            root.rebuildRegionModel()
+                            ApiCountriesRegionModel.searchText = text
 
                             if (shouldRestoreFocus) {
                                 Qt.callLater(function() {
@@ -478,7 +197,7 @@ PageType {
 
         footer: Item {
             width: menuContent.width
-            height: groupedRegions.length === 0 ? emptyStateText.implicitHeight + 32 : 0
+            height: ApiCountriesRegionModel.count === 0 ? emptyStateText.implicitHeight + 32 : 0
 
             CaptionTextType {
                 id: emptyStateText
@@ -490,7 +209,7 @@ PageType {
                 anchors.top: parent.top
                 anchors.topMargin: 16
 
-                visible: groupedRegions.length === 0
+                visible: ApiCountriesRegionModel.count === 0
                 color: AmneziaStyle.color.mutedGray
 
                 font.pixelSize: 15
@@ -502,8 +221,6 @@ PageType {
 
         delegate: ColumnLayout {
             id: regionContent
-
-            property var regionData: modelData
 
             width: menuContent.width
             height: regionContent.implicitHeight
@@ -526,13 +243,13 @@ PageType {
                         Layout.fillWidth: true
                         color: AmneziaStyle.color.mutedGray
 
-                        text: regionData.regionName
+                        text: regionName
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
                     }
 
                     Image {
-                        source: root.isRegionExpanded(regionData.regionName)
+                        source: ApiCountriesRegionModel.isRegionExpanded(regionName)
                                 ? "qrc:/images/controls/chevron-up.svg"
                                 : "qrc:/images/controls/chevron-down.svg"
                     }
@@ -542,13 +259,13 @@ PageType {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        root.setRegionExpanded(regionData.regionName, !root.isRegionExpanded(regionData.regionName))
+                        ApiCountriesRegionModel.toggleRegionExpanded(regionName)
                     }
                 }
             }
 
             Repeater {
-                model: root.isRegionExpanded(regionData.regionName) ? regionData.countries : []
+                model: ApiCountriesRegionModel.isRegionExpanded(regionName) ? countries : []
 
                 delegate: ColumnLayout {
                     property var countryData: modelData
@@ -626,7 +343,4 @@ PageType {
         }
     }
 
-    Component.onCompleted: {
-        loadRegionExpansionState()
-    }
 }
