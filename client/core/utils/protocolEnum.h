@@ -18,12 +18,11 @@ namespace amnezia
         Q_ENUM_NS(TransportProto)
 
         enum Proto {
-            Any = 0,
+            Unknown = 0,
             OpenVpn,
             WireGuard,
             Awg,
             Ikev2,
-            L2tp,
             Xray,
             SSXray,
 

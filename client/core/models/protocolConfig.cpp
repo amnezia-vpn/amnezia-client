@@ -39,7 +39,7 @@ Proto ProtocolConfig::type() const
         } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
             return Proto::Dns;
         }
-        return Proto::Any;
+        return Proto::Unknown;
     }, data);
 }
 

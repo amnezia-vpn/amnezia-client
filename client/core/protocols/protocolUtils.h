@@ -18,7 +18,7 @@ namespace amnezia
 
         // spelling may differ for various protocols - TCP for OpenVPN, tcp for others
         TransportProto transportProtoFromString(QString p);
-        QString transportProtoToString(TransportProto proto, Proto p = Proto::Any);
+        QString transportProtoToString(TransportProto proto, Proto p = Proto::Unknown);
 
         Proto protoFromString(QString p);
         QString protoToString(Proto p);

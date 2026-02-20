@@ -184,7 +184,7 @@ ServiceType ContainerUtils::containerService(DockerContainer c)
 Proto ContainerUtils::defaultProtocol(DockerContainer c)
 {
     switch (c) {
-    case DockerContainer::None: return Proto::Any;
+    case DockerContainer::None: return Proto::Unknown;
     case DockerContainer::OpenVpn: return Proto::OpenVpn;
     case DockerContainer::WireGuard: return Proto::WireGuard;
     case DockerContainer::Awg2: return Proto::Awg;
@@ -197,7 +197,7 @@ Proto ContainerUtils::defaultProtocol(DockerContainer c)
     case DockerContainer::Dns: return Proto::Dns;
     case DockerContainer::Sftp: return Proto::Sftp;
     case DockerContainer::Socks5Proxy: return Proto::Socks5Proxy;
-    default: return Proto::Any;
+    default: return Proto::Unknown;
     }
 }
 

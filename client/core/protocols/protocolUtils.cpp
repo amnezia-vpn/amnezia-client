@@ -43,12 +43,12 @@ Proto ProtocolUtils::protoFromString(QString proto)
         if (proto == protoToString(p))
             return p;
     }
-    return Proto::Any;
+    return Proto::Unknown;
 }
 
 QString ProtocolUtils::protoToString(Proto p)
 {
-    if (p == Proto::Any)
+    if (p == Proto::Unknown)
         return "";
 
     QMetaEnum metaEnum = QMetaEnum::fromType<Proto>();
@@ -62,7 +62,6 @@ QMap<Proto, QString> ProtocolUtils::protocolHumanNames()
              { Proto::WireGuard, "WireGuard" },
              { Proto::Awg, "AmneziaWG" },
              { Proto::Ikev2, "IKEv2" },
-             { Proto::L2tp, "L2TP" },
              { Proto::Xray, "XRay" },
              { Proto::SSXray, "Shadowsocks"},
 
@@ -80,7 +79,7 @@ QMap<Proto, QString> ProtocolUtils::protocolDescriptions()
 ServiceType ProtocolUtils::protocolService(Proto p)
 {
     switch (p) {
-    case Proto::Any: return ServiceType::None;
+    case Proto::Unknown: return ServiceType::None;
     case Proto::SSXray: return ServiceType::None;
 
     case Proto::OpenVpn: return ServiceType::Vpn;
@@ -113,13 +112,12 @@ int ProtocolUtils::getPortForInstall(Proto p)
 int ProtocolUtils::defaultPort(Proto p)
 {
     switch (p) {
-    case Proto::Any: return -1;
+    case Proto::Unknown: return -1;
     case Proto::OpenVpn: return QString(protocols::openvpn::defaultPort).toInt();
     case Proto::WireGuard: return QString(protocols::wireguard::defaultPort).toInt();
     case Proto::Awg: return QString(protocols::awg::defaultPort).toInt();
     case Proto::Xray: return QString(protocols::xray::defaultPort).toInt();
     case Proto::Ikev2: return -1;
-    case Proto::L2tp: return -1;
 
     case Proto::TorWebSite: return -1;
     case Proto::Dns: return 53;
@@ -132,12 +130,11 @@ int ProtocolUtils::defaultPort(Proto p)
 bool ProtocolUtils::defaultPortChangeable(Proto p)
 {
     switch (p) {
-    case Proto::Any: return false;
+    case Proto::Unknown: return false;
     case Proto::OpenVpn: return true;
     case Proto::WireGuard: return true;
     case Proto::Awg: return true;
     case Proto::Ikev2: return false;
-    case Proto::L2tp: return false;
     case Proto::Xray: return true;
 
     case Proto::TorWebSite: return false;
@@ -151,12 +148,11 @@ bool ProtocolUtils::defaultPortChangeable(Proto p)
 TransportProto ProtocolUtils::defaultTransportProto(Proto p)
 {
     switch (p) {
-    case Proto::Any: return TransportProto::Udp;
+    case Proto::Unknown: return TransportProto::Udp;
     case Proto::OpenVpn: return TransportProto::Udp;
     case Proto::WireGuard: return TransportProto::Udp;
     case Proto::Awg: return TransportProto::Udp;
     case Proto::Ikev2: return TransportProto::Udp;
-    case Proto::L2tp: return TransportProto::Udp;
     case Proto::Xray: return TransportProto::Tcp;
     case Proto::SSXray: return TransportProto::Tcp;
 
@@ -172,12 +168,11 @@ TransportProto ProtocolUtils::defaultTransportProto(Proto p)
 bool ProtocolUtils::defaultTransportProtoChangeable(Proto p)
 {
     switch (p) {
-    case Proto::Any: return false;
+    case Proto::Unknown: return false;
     case Proto::OpenVpn: return true;
     case Proto::WireGuard: return false;
     case Proto::Awg: return false;
     case Proto::Ikev2: return false;
-    case Proto::L2tp: return false;
     case Proto::Xray: return false;
 
     // non-vpn
