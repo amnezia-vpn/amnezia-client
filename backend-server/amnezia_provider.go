@@ -84,7 +84,7 @@ func (p *AmneziaProvider) executeCommand(client *ssh.Client, cmd string) (string
 // getAmneziaWGConfig fetches the AmneziaWG config file via SSH.
 func (p *AmneziaProvider) getAmneziaWGConfig(client *ssh.Client) (string, error) {
 	const configPath = "/opt/amnezia/awg/wg0.conf"
-	out, err := p.executeCommand(client, "docker exec amnezia-awg cat "+configPath)
+	out, err := p.executeCommand(client, "docker exec amnezia-awg2 cat "+configPath)
 	if err != nil {
 		return "", fmt.Errorf("failed to read AWG config: %w", err)
 	}
@@ -96,7 +96,7 @@ func (p *AmneziaProvider) writeAmneziaWGConfig(client *ssh.Client, config string
 	const configPath = "/opt/amnezia/awg/wg0.conf"
 
 	// Pass config safely to docker container
-	cmd := fmt.Sprintf("cat << 'EOF' | docker exec -i amnezia-awg sh -c 'cat > %s'\n%s\nEOF\ndocker exec amnezia-awg wg-quick down wg0; docker exec amnezia-awg wg-quick up wg0", configPath, config)
+	cmd := fmt.Sprintf("cat << 'EOF' | docker exec -i amnezia-awg2 sh -c 'cat > %s'\n%s\nEOF\ndocker exec amnezia-awg2 wg-quick down wg0; docker exec amnezia-awg2 wg-quick up wg0", configPath, config)
 
 	_, err := p.executeCommand(client, cmd)
 	if err != nil {
@@ -115,19 +115,19 @@ func (p *AmneziaProvider) CreateKey(userID string) (string, string, error) {
 	defer client.Close()
 
 	// 1. Generate new keys using standard `wg / awg` command on the server
-	privKey, err := p.executeCommand(client, "docker exec amnezia-awg awg genkey")
+	privKey, err := p.executeCommand(client, "docker exec amnezia-awg2 awg genkey")
 	if err != nil {
 		return "", "", fmt.Errorf("failed to generate privkey: %w", err)
 	}
 	privKey = strings.TrimSpace(privKey)
 
-	pubKey, err := p.executeCommand(client, fmt.Sprintf("echo '%s' | docker exec -i amnezia-awg awg pubkey", privKey))
+	pubKey, err := p.executeCommand(client, fmt.Sprintf("echo '%s' | docker exec -i amnezia-awg2 awg pubkey", privKey))
 	if err != nil {
 		return "", "", fmt.Errorf("failed to generate pubkey: %w", err)
 	}
 	pubKey = strings.TrimSpace(pubKey)
 
-	psk, err := p.executeCommand(client, "docker exec amnezia-awg awg genpsk")
+	psk, err := p.executeCommand(client, "docker exec amnezia-awg2 awg genpsk")
 	if err != nil {
 		return "", "", fmt.Errorf("failed to generate psk: %w", err)
 	}
@@ -178,7 +178,7 @@ func (p *AmneziaProvider) CreateKey(userID string) (string, string, error) {
 			parts := strings.Split(line, "=")
 			if len(parts) == 2 {
 				serverPriv := strings.TrimSpace(parts[1])
-				sp, _ := p.executeCommand(client, fmt.Sprintf("echo '%s' | docker exec -i amnezia-awg awg pubkey", serverPriv))
+				sp, _ := p.executeCommand(client, fmt.Sprintf("echo '%s' | docker exec -i amnezia-awg2 awg pubkey", serverPriv))
 				serverPubKey = strings.TrimSpace(sp)
 				break
 			}
