@@ -99,7 +99,11 @@ func (m *Tun2SocksManager) ConfigureAdapter(tunIP string) error {
 		# Set new IP
 		New-NetIPAddress -InterfaceIndex $ifIndex -IPAddress $tunIP -PrefixLength 24 -ErrorAction SilentlyContinue
 
-		# Do NOT set DNS on TUN — DNS goes via bypass routes to physical adapter
+		# Force highest priority metric so Windows prefers TUN over physical interface
+		Set-NetIPInterface -InterfaceIndex $ifIndex -InterfaceMetric 1 -NlMtuBytes 1350 -ErrorAction SilentlyContinue
+
+		# Set DNS on TUN so all DNS goes through the VPN
+		Set-DnsClientServerAddress -InterfaceIndex $ifIndex -ServerAddresses ("1.1.1.1", "8.8.8.8")
 	`, m.tunName, tunIP)
 
 	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", psCmd)
@@ -134,12 +138,8 @@ func (m *Tun2SocksManager) SetupRoutes(serverIP, tunIP string) error {
 			}
 		}
 
-		# 3. DNS bypass: route DNS via old gateway
-		foreach ($dns in @("1.1.1.1", "8.8.8.8")) {
-			if (!(Get-NetRoute -DestinationPrefix "$dns/32" -ErrorAction SilentlyContinue)) {
-				New-NetRoute -DestinationPrefix "$dns/32" -NextHop $gw -InterfaceIndex $ifIndex -RouteMetric 1
-			}
-		}
+		# (DNS bypass removed so DNS correctly falls into the TUN routes)
+
 
 		# 4. Route all traffic via TUN
 		$tunIf = Get-NetAdapter -Name $adapterName
@@ -151,8 +151,13 @@ func (m *Tun2SocksManager) SetupRoutes(serverIP, tunIP string) error {
 			}
 		}
 
+		Add-RouteIfMissing "1.1.1.1/32" $tunIdx
+		Add-RouteIfMissing "8.8.8.8/32" $tunIdx
 		Add-RouteIfMissing "0.0.0.0/1" $tunIdx
 		Add-RouteIfMissing "128.0.0.0/1" $tunIdx
+
+		# Flush DNS cache to force Windows to use the TUN adapter immediately
+		Clear-DnsClientCache -ErrorAction SilentlyContinue
 	`, serverIP, tunIP, m.tunName)
 
 	log.Printf("[Tun2Socks] Setting up routes: server=%s, tun=%s...", serverIP, tunIP)
@@ -169,10 +174,10 @@ func (m *Tun2SocksManager) SetupRoutes(serverIP, tunIP string) error {
 func (m *Tun2SocksManager) CleanupRoutes(serverIP string) {
 	psCmd := fmt.Sprintf(`
 		$ErrorActionPreference = "SilentlyContinue";
-		Remove-NetRoute -DestinationPrefix "0.0.0.0/1" -Confirm:$false
-		Remove-NetRoute -DestinationPrefix "128.0.0.0/1" -Confirm:$false
 		Remove-NetRoute -DestinationPrefix "1.1.1.1/32" -Confirm:$false
 		Remove-NetRoute -DestinationPrefix "8.8.8.8/32" -Confirm:$false
+		Remove-NetRoute -DestinationPrefix "0.0.0.0/1" -Confirm:$false
+		Remove-NetRoute -DestinationPrefix "128.0.0.0/1" -Confirm:$false
 		if ("%s" -ne "") {
 			Remove-NetRoute -DestinationPrefix "%s/32" -Confirm:$false
 		}

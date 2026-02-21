@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -50,13 +51,6 @@ func NewXrayManager() *XrayManager {
 
 // Start launches xray-core with a generated config for the given VLESS URI.
 func (m *XrayManager) Start(vlessURI string) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if m.running {
-		return fmt.Errorf("xray-core is already running")
-	}
-
 	// Parse VLESS URI
 	params, err := ParseVLESSURI(vlessURI)
 	if err != nil {
@@ -65,6 +59,18 @@ func (m *XrayManager) Start(vlessURI string) error {
 
 	// Generate xray config
 	config := m.generateConfig(params)
+
+	return m.StartWithConfig(config)
+}
+
+// StartWithConfig launches xray-core with a prepared JSON config string.
+func (m *XrayManager) StartWithConfig(configStr string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if m.running {
+		return fmt.Errorf("xray-core is already running")
+	}
 
 	// Write config to temp file
 	configDir, err := os.UserConfigDir()
@@ -75,7 +81,7 @@ func (m *XrayManager) Start(vlessURI string) error {
 	os.MkdirAll(configDir, 0755)
 
 	m.configPath = filepath.Join(configDir, "xray_config.json")
-	if err := os.WriteFile(m.configPath, []byte(config), 0600); err != nil {
+	if err := os.WriteFile(m.configPath, []byte(configStr), 0600); err != nil {
 		return fmt.Errorf("failed to write xray config: %w", err)
 	}
 
@@ -103,6 +109,169 @@ func (m *XrayManager) Start(vlessURI string) error {
 	return nil
 }
 
+// ParseAmneziaConfig parses an Amnezia vpn:// URI or raw JSON into an Xray config and extracts the server IP.
+func (m *XrayManager) ParseAmneziaConfig(configStr string) (string, string, error) {
+	var rawJSON string
+
+	if strings.HasPrefix(configStr, "vpn://") || strings.HasPrefix(configStr, "amnezia://") {
+		b64 := configStr
+		if strings.HasPrefix(configStr, "vpn://") {
+			b64 = strings.TrimPrefix(configStr, "vpn://")
+		} else {
+			b64 = strings.TrimPrefix(configStr, "amnezia://")
+		}
+
+		data, err := base64.StdEncoding.DecodeString(b64)
+		if err != nil {
+			data, err = base64.RawStdEncoding.DecodeString(b64)
+			if err != nil {
+				data, err = base64.URLEncoding.DecodeString(b64)
+				if err != nil {
+					data, err = base64.RawURLEncoding.DecodeString(b64)
+					if err != nil {
+						return "", "", fmt.Errorf("failed to decode Amnezia base64: %v", err)
+					}
+				}
+			}
+		}
+		rawJSON = string(data)
+	} else if strings.HasPrefix(strings.TrimSpace(configStr), "{") {
+		rawJSON = strings.TrimSpace(configStr)
+	} else {
+		return "", "", fmt.Errorf("unrecognized config format")
+	}
+
+	var cfg map[string]interface{}
+	if err := json.Unmarshal([]byte(rawJSON), &cfg); err != nil {
+		return "", "", fmt.Errorf("failed to parse config JSON: %v", err)
+	}
+
+	if containers, ok := cfg["containers"].([]interface{}); ok {
+		for _, c := range containers {
+			cmap, ok := c.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if name, _ := cmap["container"].(string); name == "amnezia-xray" {
+				clientCfg, _ := cmap["client_config"].(map[string]interface{})
+				if clientCfg != nil {
+					cfg = clientCfg
+					break
+				}
+			}
+		}
+	} else if clientCfg, ok := cfg["client_config"].(map[string]interface{}); ok {
+		cfg = clientCfg
+	}
+
+	var serverIP string
+	outbounds, ok := cfg["outbounds"].([]interface{})
+	if ok && len(outbounds) > 0 {
+		firstOutbound, ok := outbounds[0].(map[string]interface{})
+		if ok {
+			settings, _ := firstOutbound["settings"].(map[string]interface{})
+			if settings != nil {
+				vnext, _ := settings["vnext"].([]interface{})
+				if len(vnext) > 0 {
+					vn, _ := vnext[0].(map[string]interface{})
+					if vn != nil {
+						if addr, ok := vn["address"].(string); ok {
+							serverIP = addr
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if serverIP == "" {
+		return "", "", fmt.Errorf("failed to extract server IP from Xray config")
+	}
+
+	httpPort := m.socksPort + 1
+	cfg["inbounds"] = []map[string]interface{}{
+		{
+			"tag":      "socks-in",
+			"port":     m.socksPort,
+			"listen":   "127.0.0.1",
+			"protocol": "socks",
+			"settings": map[string]interface{}{
+				"auth": "noauth",
+				"udp":  true,
+			},
+			"sniffing": map[string]interface{}{
+				"enabled": true,
+			},
+		},
+		{
+			"tag":      "http-in",
+			"port":     httpPort,
+			"listen":   "127.0.0.1",
+			"protocol": "http",
+			"settings": map[string]interface{}{
+				"allowTransparent": false,
+			},
+			"sniffing": map[string]interface{}{
+				"enabled": true,
+			},
+		},
+	}
+
+	routing, ok := cfg["routing"].(map[string]interface{})
+	if ok {
+		rules, _ := routing["rules"].([]interface{})
+		hasDirect := false
+		for _, r := range rules {
+			rule, _ := r.(map[string]interface{})
+			if tag, _ := rule["outboundTag"].(string); tag == "direct" {
+				hasDirect = true
+				break
+			}
+		}
+		if !hasDirect {
+			rules = append([]interface{}{
+				map[string]interface{}{
+					"type":        "field",
+					"outboundTag": "direct",
+					"ip":          []string{serverIP},
+				},
+			}, rules...)
+			routing["rules"] = rules
+		}
+	} else {
+		cfg["routing"] = map[string]interface{}{
+			"domainStrategy": "AsIs",
+			"rules": []map[string]interface{}{
+				{
+					"type":        "field",
+					"outboundTag": "direct",
+					"ip":          []string{serverIP},
+				},
+			},
+		}
+	}
+
+	if outbounds, ok := cfg["outbounds"].([]interface{}); ok {
+		hasDirectOut := false
+		for _, out := range outbounds {
+			o, _ := out.(map[string]interface{})
+			if tag, _ := o["tag"].(string); tag == "direct" {
+				hasDirectOut = true
+				break
+			}
+		}
+		if !hasDirectOut {
+			cfg["outbounds"] = append(outbounds, map[string]interface{}{
+				"tag":      "direct",
+				"protocol": "freedom",
+			})
+		}
+	}
+
+	finalConfigBytes, _ := json.MarshalIndent(cfg, "", "  ")
+	return string(finalConfigBytes), serverIP, nil
+}
+
 // Stop terminates the xray-core subprocess.
 func (m *XrayManager) Stop() error {
 	m.mu.Lock()
@@ -124,7 +293,7 @@ func (m *XrayManager) Stop() error {
 
 	// Clean up config file
 	if m.configPath != "" {
-		os.Remove(m.configPath)
+		// os.Remove(m.configPath) // TEMPORARILY DISABLED FOR DEBUGGING
 	}
 
 	return nil
@@ -188,7 +357,7 @@ func (m *XrayManager) generateConfig(params *VLESSParams) string {
 	}
 	config := map[string]interface{}{
 		"log": map[string]interface{}{
-			"loglevel": "warning",
+			"loglevel": "debug",
 		},
 		"dns": map[string]interface{}{
 			"servers": []interface{}{
@@ -207,8 +376,7 @@ func (m *XrayManager) generateConfig(params *VLESSParams) string {
 					"udp":  true,
 				},
 				"sniffing": map[string]interface{}{
-					"enabled":      true,
-					"destOverride": []string{"http", "tls", "quic"},
+					"enabled": true,
 				},
 			},
 			{
@@ -220,8 +388,17 @@ func (m *XrayManager) generateConfig(params *VLESSParams) string {
 					"allowTransparent": false,
 				},
 				"sniffing": map[string]interface{}{
-					"enabled":      true,
-					"destOverride": []string{"http", "tls"},
+					"enabled": true,
+				},
+			},
+		},
+		"routing": map[string]interface{}{
+			"domainStrategy": "AsIs",
+			"rules": []map[string]interface{}{
+				{
+					"type":        "field",
+					"outboundTag": "direct",
+					"ip":          []string{params.Host},
 				},
 			},
 		},
@@ -331,6 +508,7 @@ func ParseVLESSURI(uri string) (*VLESSParams, error) {
 	if params.Fingerprint == "" {
 		params.Fingerprint = "chrome"
 	}
+
 	if params.Encryption == "" {
 		params.Encryption = "none"
 	}

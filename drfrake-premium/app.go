@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"golang.getoutline.org/sdk/network"
 	"golang.getoutline.org/sdk/network/lwip2transport"
@@ -230,10 +231,11 @@ func (a *App) Connect(config string, serverID string) error {
 	log.Printf("[VPN] Connecting with config: %s", config)
 
 	var err error
-	if strings.HasPrefix(config, "vless://") {
-		err = a.connectVLESS(config)
+	configTrimmed := strings.TrimSpace(config)
+	if strings.HasPrefix(configTrimmed, "vless://") || strings.HasPrefix(configTrimmed, "vpn://") || strings.HasPrefix(configTrimmed, "amnezia://") || strings.HasPrefix(configTrimmed, "{") {
+		err = a.connectVLESS(configTrimmed)
 	} else {
-		err = a.connectShadowsocks(config)
+		err = a.connectShadowsocks(configTrimmed)
 	}
 
 	if err != nil {
@@ -244,22 +246,37 @@ func (a *App) Connect(config string, serverID string) error {
 
 // connectVLESS connects via xray-core (SOCKS5) + tun2socks (TUN tunneling).
 func (a *App) connectVLESS(config string) error {
-	log.Printf("[VPN] Detected VLESS protocol, starting xray-core...")
+	log.Printf("[VPN] Detected VLESS/Xray protocol, starting xray-core...")
 
-	// Parse VLESS URI to get server host for routing
-	vlessParams, err := ParseVLESSURI(config)
-	if err != nil {
-		return fmt.Errorf("failed to parse VLESS config: %w", err)
-	}
-	a.vlessServerIP = vlessParams.Host
-
-	// 1. Start xray-core → SOCKS5 proxy
 	if a.xrayManager == nil {
 		a.xrayManager = NewXrayManager()
 	}
-	if err := a.xrayManager.Start(config); err != nil {
-		return fmt.Errorf("failed to start xray-core: %w", err)
+
+	var serverIP string
+
+	if strings.HasPrefix(config, "vless://") {
+		// Parse VLESS URI to get server host for routing
+		vlessParams, err := ParseVLESSURI(config)
+		if err != nil {
+			return fmt.Errorf("failed to parse VLESS config: %w", err)
+		}
+		serverIP = vlessParams.Host
+		if err := a.xrayManager.Start(config); err != nil {
+			return fmt.Errorf("failed to start xray-core: %w", err)
+		}
+	} else {
+		// Parse Amnezia/Xray JSON
+		finalConfig, ip, err := a.xrayManager.ParseAmneziaConfig(config)
+		if err != nil {
+			return fmt.Errorf("failed to parse Amnezia/Xray config: %w", err)
+		}
+		serverIP = ip
+		if err := a.xrayManager.StartWithConfig(finalConfig); err != nil {
+			return fmt.Errorf("failed to start xray-core: %w", err)
+		}
 	}
+
+	a.vlessServerIP = serverIP
 
 	socksAddr := fmt.Sprintf("127.0.0.1:%d", a.xrayManager.socksPort)
 
@@ -279,7 +296,7 @@ func (a *App) connectVLESS(config string) error {
 	}
 
 	// 4. Setup routes: bypass server IP + DNS, route all via TUN
-	if err := a.tun2socksManager.SetupRoutes(vlessParams.Host, tunIP); err != nil {
+	if err := a.tun2socksManager.SetupRoutes(serverIP, tunIP); err != nil {
 		a.tun2socksManager.Stop()
 		a.stopXray()
 		return fmt.Errorf("failed to setup routes: %w", err)
@@ -366,9 +383,6 @@ func (a *App) Disconnect() error {
 		a.tun2socksManager.Stop()
 		a.tun2socksManager = nil
 	}
-
-	// Remove system proxy
-	unsetSystemProxy()
 
 	// Stop Shadowsocks TUN/LWIP if active
 	if a.tunDevice != nil {
@@ -467,10 +481,21 @@ func (a *App) GetSubscription() (*Subscription, error) {
 		plan = "free"
 	}
 
+	var expiryDate time.Time
+	now := time.Now()
+	if plan == "monthly" {
+		expiryDate = now.AddDate(0, 1, 0)
+	} else if plan == "yearly" {
+		expiryDate = now.AddDate(1, 0, 0)
+	} else {
+		expiryDate = now.AddDate(10, 0, 0) // Free gets arbitrary far future
+	}
+
 	return &Subscription{
-		UserID: a.currentUser.ID,
-		Plan:   PlanType(plan),
-		Status: StatusActive,
+		UserID:     a.currentUser.ID,
+		Plan:       PlanType(plan),
+		Status:     StatusActive,
+		ExpiryDate: expiryDate,
 	}, nil
 }
 

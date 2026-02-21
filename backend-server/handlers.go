@@ -118,8 +118,15 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 		err := s.DB.QueryRow("SELECT key_id, access_url FROM access_keys WHERE user_id = ? AND server_id = ?", token, srvID).Scan(&keyID, &accessURL)
 
 		if err == sql.ErrNoRows {
-			// Create Xray provider
-			provider := NewXrayProvider(xrayPanelURL, xrayUsername, xrayPassword, xrayInboundID, serverHost, xraySettings)
+			var provider VPNProvider
+
+			// Initialize the correct provider backend
+			if srvType == "amnezia" {
+				// Use the xrayUsername and xrayPassword columns for SSH credentials for simplicity
+				provider = NewAmneziaProvider(serverHost, xrayUsername, xrayPassword, xraySettings)
+			} else {
+				provider = NewXrayProvider(xrayPanelURL, xrayUsername, xrayPassword, xrayInboundID, serverHost, xraySettings)
+			}
 
 			// Check if key already exists (idempotency)
 			var foundKeyID, foundKeyURL string
