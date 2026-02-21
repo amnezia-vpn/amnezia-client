@@ -14,7 +14,7 @@ services:
       - YOOKASSA_RETURN_URL=${YOOKASSA_RETURN_URL:-https://google.com}
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8080/servers" ]
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8080/health" ]
       interval: 30s
       timeout: 5s
       retries: 3

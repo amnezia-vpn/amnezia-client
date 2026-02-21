@@ -64,6 +64,10 @@ func main() {
 	mux.HandleFunc("/payment/check", srv.handleCheckPayment)
 	mux.HandleFunc("/payment/webhook", srv.handleWebhook)
 	mux.HandleFunc("/admin/add-server", srv.handleAdminAddServer)
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
 
 	log.Printf("Server starting on %s...", cfg.Port)
 	log.Fatal(http.ListenAndServe(cfg.Port, mux))
