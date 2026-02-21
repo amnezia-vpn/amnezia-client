@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -235,7 +236,15 @@ func (a *App) Connect(config string, serverID string) error {
 
 	var err error
 	configTrimmed := strings.TrimSpace(config)
-	if strings.HasPrefix(configTrimmed, "[Interface]") || strings.HasPrefix(configTrimmed, "[Peer]") {
+	if strings.HasPrefix(configTrimmed, "amneziawg://") {
+		b64 := strings.TrimPrefix(configTrimmed, "amneziawg://")
+		decoded, err := base64.StdEncoding.DecodeString(b64)
+		if err != nil {
+			a.isConnected = false
+			return fmt.Errorf("invalid amneziawg config format: %w", err)
+		}
+		err = a.connectAmneziaWG(string(decoded))
+	} else if strings.HasPrefix(configTrimmed, "[Interface]") || strings.HasPrefix(configTrimmed, "[Peer]") {
 		err = a.connectAmneziaWG(configTrimmed)
 	} else if strings.HasPrefix(configTrimmed, "vless://") || strings.HasPrefix(configTrimmed, "vpn://") || strings.HasPrefix(configTrimmed, "amnezia://") || strings.HasPrefix(configTrimmed, "{") {
 		err = a.connectVLESS(configTrimmed)
