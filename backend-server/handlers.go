@@ -98,28 +98,42 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Database error", 500)
 		return
 	}
-	defer rows.Close()
 
-	var servers []map[string]interface{}
+	type serverData struct {
+		srvID      string
+		country    string
+		city       string
+		flag       string
+		isPremium  bool
+		srvType    string
+		serverHost string
+		sshUser    string
+		sshPass    string
+		settings   string
+	}
+	var serverList []serverData
 
 	for rows.Next() {
-		var srvID, country, city, flag string
-		var isPremium bool
-		var srvType, serverHost, sshUser, sshPass, settings string
-
-		if err := rows.Scan(&srvID, &country, &city, &flag, &isPremium,
-			&srvType, &serverHost, &sshUser, &sshPass, &settings); err != nil {
+		var sd serverData
+		if err := rows.Scan(&sd.srvID, &sd.country, &sd.city, &sd.flag, &sd.isPremium,
+			&sd.srvType, &sd.serverHost, &sd.sshUser, &sd.sshPass, &sd.settings); err != nil {
 			log.Printf("Error scanning server row: %v", err)
 			continue
 		}
+		serverList = append(serverList, sd)
+	}
+	rows.Close() // Explicitly close the rows to free the read lock!
 
+	var servers []map[string]interface{}
+
+	for _, sd := range serverList {
 		// Check/Create Access Key
 		var keyID, accessURL string
-		err := s.DB.QueryRow("SELECT key_id, access_url FROM access_keys WHERE user_id = ? AND server_id = ?", token, srvID).Scan(&keyID, &accessURL)
+		err := s.DB.QueryRow("SELECT key_id, access_url FROM access_keys WHERE user_id = ? AND server_id = ?", token, sd.srvID).Scan(&keyID, &accessURL)
 
 		if err == sql.ErrNoRows {
 			// Initialize the Amnezia provider
-			provider := NewAmneziaProvider(serverHost, sshUser, sshPass, settings)
+			provider := NewAmneziaProvider(sd.serverHost, sd.sshUser, sd.sshPass, sd.settings)
 
 			// Check if key already exists (idempotency)
 			var foundKeyID, foundKeyURL string
@@ -138,7 +152,7 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 			if foundKeyID == "" {
 				newID, newURL, createErr := provider.CreateKey(token)
 				if createErr != nil {
-					log.Printf("Failed to create key for user %s on server %s (%s): %v", token, srvID, srvType, createErr)
+					log.Printf("Failed to create key for user %s on server %s (%s): %v", token, sd.srvID, sd.srvType, createErr)
 					continue
 				}
 				foundKeyID = newID
@@ -147,7 +161,7 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 
 			// Save to DB
 			_, dbErr := s.DB.Exec("INSERT INTO access_keys (user_id, server_id, key_id, access_url) VALUES (?, ?, ?, ?)",
-				token, srvID, foundKeyID, foundKeyURL)
+				token, sd.srvID, foundKeyID, foundKeyURL)
 			if dbErr != nil {
 				log.Printf("DB Insert Warning (Key might exist): %v", dbErr)
 			}
@@ -160,13 +174,13 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 
 		// Add to response
 		servers = append(servers, map[string]interface{}{
-			"id":        srvID,
-			"country":   country,
-			"city":      city,
-			"flag":      flag,
+			"id":        sd.srvID,
+			"country":   sd.country,
+			"city":      sd.city,
+			"flag":      sd.flag,
 			"config":    accessURL,
-			"isPremium": isPremium,
-			"type":      srvType,
+			"isPremium": sd.isPremium,
+			"type":      sd.srvType,
 		})
 	}
 

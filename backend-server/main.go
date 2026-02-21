@@ -40,6 +40,12 @@ func main() {
 	log.Printf("Database: %s", dbPath)
 	defer db.Close()
 
+	// Enable WAL mode to prevent Database is Locked errors
+	_, err = db.Exec("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;")
+	if err != nil {
+		log.Printf("Warning: Failed to set WAL mode: %v", err)
+	}
+
 	// Create tables
 	initDB(db)
 
