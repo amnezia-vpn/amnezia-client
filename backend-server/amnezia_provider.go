@@ -83,7 +83,7 @@ func (p *AmneziaProvider) executeCommand(client *ssh.Client, cmd string) (string
 
 // getAmneziaWGConfig fetches the AmneziaWG config file via SSH.
 func (p *AmneziaProvider) getAmneziaWGConfig(client *ssh.Client) (string, error) {
-	const configPath = "/opt/amnezia/awg/wg0.conf"
+	const configPath = "/opt/amnezia/awg/awg0.conf"
 	out, err := p.executeCommand(client, "docker exec amnezia-awg2 cat "+configPath)
 	if err != nil {
 		return "", fmt.Errorf("failed to read AWG config: %w", err)
@@ -93,10 +93,10 @@ func (p *AmneziaProvider) getAmneziaWGConfig(client *ssh.Client) (string, error)
 
 // writeAmneziaWGConfig writes it back to the server and restarts the container.
 func (p *AmneziaProvider) writeAmneziaWGConfig(client *ssh.Client, config string) error {
-	const configPath = "/opt/amnezia/awg/wg0.conf"
+	const configPath = "/opt/amnezia/awg/awg0.conf"
 
 	// Pass config safely to docker container
-	cmd := fmt.Sprintf("cat << 'EOF' | docker exec -i amnezia-awg2 sh -c 'cat > %s'\n%s\nEOF\ndocker exec amnezia-awg2 wg-quick down wg0; docker exec amnezia-awg2 wg-quick up wg0", configPath, config)
+	cmd := fmt.Sprintf("cat << 'EOF' | docker exec -i amnezia-awg2 sh -c 'cat > %s'\n%s\nEOF\ndocker exec amnezia-awg2 awg-quick down awg0; docker exec amnezia-awg2 awg-quick up awg0", configPath, config)
 
 	_, err := p.executeCommand(client, cmd)
 	if err != nil {
