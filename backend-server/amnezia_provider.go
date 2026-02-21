@@ -96,7 +96,7 @@ func (p *AmneziaProvider) writeAmneziaWGConfig(client *ssh.Client, config string
 	const configPath = "/opt/amnezia/awg/awg0.conf"
 
 	// Pass config safely to docker container
-	cmd := fmt.Sprintf("cat << 'EOF' | docker exec -i amnezia-awg2 sh -c 'cat > %s'\n%s\nEOF\ndocker exec amnezia-awg2 awg-quick down awg0; docker exec amnezia-awg2 awg-quick up awg0", configPath, config)
+	cmd := fmt.Sprintf("cat << 'EOF' | docker exec -i amnezia-awg2 sh -c 'cat > %s'\n%s\nEOF\ndocker exec amnezia-awg2 awg-quick down %s; docker exec amnezia-awg2 awg-quick up %s", configPath, config, configPath, configPath)
 
 	_, err := p.executeCommand(client, cmd)
 	if err != nil {
