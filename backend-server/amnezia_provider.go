@@ -12,6 +12,20 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// XrayServerSettings holds server-specific VLESS+Reality parameters.
+type XrayServerSettings struct {
+	Port        int    `json:"port"`
+	Flow        string `json:"flow"`
+	Security    string `json:"security"`    // "reality"
+	SNI         string `json:"sni"`         // e.g. "google.com"
+	Fingerprint string `json:"fingerprint"` // e.g. "chrome"
+	PublicKey   string `json:"public_key"`
+	ShortID     string `json:"short_id"`
+	SpiderX     string `json:"spider_x"`
+	Encryption  string `json:"encryption"`
+	PQV         string `json:"pqv"`
+}
+
 // AmneziaProvider connects to an AmneziaVPN server via SSH, manipulates the Xray config,
 // and manages docker container to provision clients.
 type AmneziaProvider struct {

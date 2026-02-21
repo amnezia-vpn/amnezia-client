@@ -128,13 +128,11 @@ func initDB(db *sql.DB) {
 			city TEXT,
 			flag TEXT,
 			is_premium BOOLEAN,
-			type TEXT DEFAULT 'xray',
+			type TEXT DEFAULT 'amnezia',
 			server_host TEXT DEFAULT '',
-			xray_inbound_id INTEGER DEFAULT 0,
-			xray_panel_url TEXT DEFAULT '',
-			xray_username TEXT DEFAULT '',
-			xray_password TEXT DEFAULT '',
-			xray_settings TEXT DEFAULT '{}'
+			ssh_user TEXT DEFAULT '',
+			ssh_pass TEXT DEFAULT '',
+			settings TEXT DEFAULT '{}'
 		);`,
 		`CREATE TABLE IF NOT EXISTS access_keys (
 			user_id TEXT,
@@ -155,13 +153,11 @@ func initDB(db *sql.DB) {
 
 	// Migrations for existing databases
 	migrations := []string{
-		`ALTER TABLE servers ADD COLUMN type TEXT DEFAULT 'xray';`,
+		`ALTER TABLE servers ADD COLUMN type TEXT DEFAULT 'amnezia';`,
 		`ALTER TABLE servers ADD COLUMN server_host TEXT DEFAULT '';`,
-		`ALTER TABLE servers ADD COLUMN xray_inbound_id INTEGER DEFAULT 0;`,
-		`ALTER TABLE servers ADD COLUMN xray_panel_url TEXT DEFAULT '';`,
-		`ALTER TABLE servers ADD COLUMN xray_username TEXT DEFAULT '';`,
-		`ALTER TABLE servers ADD COLUMN xray_password TEXT DEFAULT '';`,
-		`ALTER TABLE servers ADD COLUMN xray_settings TEXT DEFAULT '{}';`,
+		`ALTER TABLE servers ADD COLUMN ssh_user TEXT DEFAULT '';`,
+		`ALTER TABLE servers ADD COLUMN ssh_pass TEXT DEFAULT '';`,
+		`ALTER TABLE servers ADD COLUMN settings TEXT DEFAULT '{}';`,
 	}
 	for _, m := range migrations {
 		db.Exec(m) // Ignore errors (column already exists)

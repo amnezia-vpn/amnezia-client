@@ -92,7 +92,7 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 
 	// Get all active servers
 	rows, err := s.DB.Query(`SELECT id, country, city, flag, is_premium,
-		type, server_host, xray_inbound_id, xray_panel_url, xray_username, xray_password, xray_settings
+		type, server_host, ssh_user, ssh_pass, settings
 		FROM servers`)
 	if err != nil {
 		http.Error(w, "Database error", 500)
@@ -105,10 +105,10 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var srvID, country, city, flag string
 		var isPremium bool
-		var srvType, serverHost, xrayPanelURL, xrayUsername, xrayPassword, xraySettings string
-		var xrayInboundID int
+		var srvType, serverHost, sshUser, sshPass, settings string
+
 		if err := rows.Scan(&srvID, &country, &city, &flag, &isPremium,
-			&srvType, &serverHost, &xrayInboundID, &xrayPanelURL, &xrayUsername, &xrayPassword, &xraySettings); err != nil {
+			&srvType, &serverHost, &sshUser, &sshPass, &settings); err != nil {
 			log.Printf("Error scanning server row: %v", err)
 			continue
 		}
@@ -118,15 +118,8 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 		err := s.DB.QueryRow("SELECT key_id, access_url FROM access_keys WHERE user_id = ? AND server_id = ?", token, srvID).Scan(&keyID, &accessURL)
 
 		if err == sql.ErrNoRows {
-			var provider VPNProvider
-
-			// Initialize the correct provider backend
-			if srvType == "amnezia" {
-				// Use the xrayUsername and xrayPassword columns for SSH credentials for simplicity
-				provider = NewAmneziaProvider(serverHost, xrayUsername, xrayPassword, xraySettings)
-			} else {
-				provider = NewXrayProvider(xrayPanelURL, xrayUsername, xrayPassword, xrayInboundID, serverHost, xraySettings)
-			}
+			// Initialize the Amnezia provider
+			provider := NewAmneziaProvider(serverHost, sshUser, sshPass, settings)
 
 			// Check if key already exists (idempotency)
 			var foundKeyID, foundKeyURL string
@@ -186,17 +179,15 @@ func (s *Server) handleGetServers(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleAdminAddServer(w http.ResponseWriter, r *http.Request) {
 	// Simple validation - strictly for local/trusted usage now
 	var req struct {
-		Country       string `json:"country"`
-		City          string `json:"city"`
-		Flag          string `json:"flag"`
-		IsPremium     bool   `json:"is_premium"`
-		Type          string `json:"type"` // "xray" (default)
-		ServerHost    string `json:"server_host"`
-		XrayPanelURL  string `json:"xray_panel_url"`
-		XrayUsername  string `json:"xray_username"`
-		XrayPassword  string `json:"xray_password"`
-		XrayInboundID int    `json:"xray_inbound_id"`
-		XraySettings  string `json:"xray_settings"` // JSON string with Reality params
+		Country    string `json:"country"`
+		City       string `json:"city"`
+		Flag       string `json:"flag"`
+		IsPremium  bool   `json:"is_premium"`
+		Type       string `json:"type"` // "amnezia" (default)
+		ServerHost string `json:"server_host"`
+		SSHUser    string `json:"ssh_user"`
+		SSHPass    string `json:"ssh_pass"`
+		Settings   string `json:"settings"` // JSON string with Reality params
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Bad request", 400)
@@ -205,20 +196,19 @@ func (s *Server) handleAdminAddServer(w http.ResponseWriter, r *http.Request) {
 
 	// Defaults
 	if req.Type == "" {
-		req.Type = "xray"
+		req.Type = "amnezia"
 	}
-	if req.XraySettings == "" {
-		req.XraySettings = "{}"
+	if req.Settings == "" {
+		req.Settings = "{}"
 	}
 
 	id := uuid.New().String()
 	_, err := s.DB.Exec(`INSERT INTO servers
 		(id, country, city, flag, is_premium, type, server_host,
-		 xray_inbound_id, xray_panel_url, xray_username, xray_password, xray_settings)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		 ssh_user, ssh_pass, settings)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		id, req.Country, req.City, req.Flag, req.IsPremium,
-		req.Type, req.ServerHost, req.XrayInboundID, req.XrayPanelURL,
-		req.XrayUsername, req.XrayPassword, req.XraySettings)
+		req.Type, req.ServerHost, req.SSHUser, req.SSHPass, req.Settings)
 
 	if err != nil {
 		http.Error(w, "Database error: "+err.Error(), 500)
