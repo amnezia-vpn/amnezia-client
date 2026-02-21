@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strings"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/ssh"
@@ -94,8 +93,8 @@ func (p *AmneziaProvider) executeCommand(client *ssh.Client, cmd string) (string
 
 // getAmneziaConfig fetches and parses the Amnezia Xray config file via SSH.
 func (p *AmneziaProvider) getAmneziaConfig(client *ssh.Client) (map[string]interface{}, error) {
-	const configPath = "/opt/amnezia/xray/config.json"
-	out, err := p.executeCommand(client, "cat "+configPath)
+	const configPath = "/opt/amnezia/xray/server.json"
+	out, err := p.executeCommand(client, "docker exec amnezia-xray cat "+configPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read Xray config: %w", err)
 	}
@@ -115,10 +114,10 @@ func (p *AmneziaProvider) writeAmneziaConfig(client *ssh.Client, config map[stri
 		return fmt.Errorf("failed to marshal modified config: %w", err)
 	}
 
-	const configPath = "/opt/amnezia/xray/config.json"
-	// Write carefully avoiding quote escaping issues
-	escapedConfig := strings.ReplaceAll(string(configBytes), "'", "'\\''")
-	cmd := fmt.Sprintf("echo '%s' > %s && docker restart amnezia-xray", escapedConfig, configPath)
+	const configPath = "/opt/amnezia/xray/server.json"
+
+	// Pass JSON safely to docker container via stdin and heredoc
+	cmd := fmt.Sprintf("cat << 'EOF' | docker exec -i amnezia-xray sh -c 'cat > %s'\n%s\nEOF\ndocker restart amnezia-xray", configPath, string(configBytes))
 
 	_, err = p.executeCommand(client, cmd)
 	if err != nil {
