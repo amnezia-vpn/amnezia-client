@@ -116,11 +116,12 @@ func (m *Tun2SocksManager) ConfigureAdapter(tunIP string) error {
 }
 
 // SetupRoutes configures routing to send traffic through the TUN.
-func (m *Tun2SocksManager) SetupRoutes(serverIP, tunIP string) error {
+func (m *Tun2SocksManager) SetupRoutes(serverIP, tunIP, apiHostIP string) error {
 	psCmd := fmt.Sprintf(`
 		$ErrorActionPreference = "Stop";
 		$serverIP = "%s";
 		$tunIP = "%s";
+		$apiHostIP = "%s";
 		$adapterName = "%s";
 
 		# 1. Find Default Gateway
@@ -135,6 +136,13 @@ func (m *Tun2SocksManager) SetupRoutes(serverIP, tunIP string) error {
 		if ($serverIP -ne "") {
 			if (!(Get-NetRoute -DestinationPrefix "$serverIP/32" -ErrorAction SilentlyContinue)) {
 				New-NetRoute -DestinationPrefix "$serverIP/32" -NextHop $gw -InterfaceIndex $ifIndex -RouteMetric 1
+			}
+		}
+
+		# 3. API Bypass: route Backend API via old gateway
+		if ($apiHostIP -ne "" -and $apiHostIP -ne $serverIP) {
+			if (!(Get-NetRoute -DestinationPrefix "$apiHostIP/32" -ErrorAction SilentlyContinue)) {
+				New-NetRoute -DestinationPrefix "$apiHostIP/32" -NextHop $gw -InterfaceIndex $ifIndex -RouteMetric 1
 			}
 		}
 
@@ -158,7 +166,7 @@ func (m *Tun2SocksManager) SetupRoutes(serverIP, tunIP string) error {
 
 		# Flush DNS cache to force Windows to use the TUN adapter immediately
 		Clear-DnsClientCache -ErrorAction SilentlyContinue
-	`, serverIP, tunIP, m.tunName)
+	`, serverIP, tunIP, apiHostIP, m.tunName)
 
 	log.Printf("[Tun2Socks] Setting up routes: server=%s, tun=%s...", serverIP, tunIP)
 	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", psCmd)

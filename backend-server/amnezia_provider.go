@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -183,7 +184,7 @@ func (p *AmneziaProvider) CreateKey(userID string) (string, string, error) {
 			if e, _ := clientMap["email"].(string); e == email {
 				id, _ := clientMap["id"].(string)
 				log.Printf("User %s already exists on Amnezia, reusing key", userID)
-				return id, p.buildVLESSURI(id), nil
+				return id, p.buildAmneziaURI(config, id), nil
 			}
 		}
 	}
@@ -202,7 +203,7 @@ func (p *AmneziaProvider) CreateKey(userID string) (string, string, error) {
 		return "", "", err
 	}
 
-	return newID, p.buildVLESSURI(newID), nil
+	return newID, p.buildAmneziaURI(config, newID), nil
 }
 
 // GetKeys fetches all current clients from the remote config.
@@ -234,7 +235,7 @@ func (p *AmneziaProvider) GetKeys() ([]VPNKey, error) {
 				keys = append(keys, VPNKey{
 					ID:        id,
 					Name:      email,
-					AccessURL: p.buildVLESSURI(id),
+					AccessURL: p.buildAmneziaURI(config, id),
 				})
 			}
 		}
@@ -291,9 +292,94 @@ func (p *AmneziaProvider) SetName(keyID string, name string) error {
 	return nil // No-op, email is immutable mostly and tracked by DB
 }
 
-func (p *AmneziaProvider) buildVLESSURI(uuid string) string {
-	// Reusing the xray pkg logic to build URI
-	return fmt.Sprintf("vless://%s@%s:%d?encryption=%s&security=%s&flow=%s&sni=%s&fp=%s&pbk=%s&sid=%s&spx=%s#Amnezia",
-		uuid, p.serverHost, p.settings.Port, p.settings.Encryption, p.settings.Security, p.settings.Flow,
-		p.settings.SNI, p.settings.Fingerprint, p.settings.PublicKey, p.settings.ShortID, p.settings.SpiderX)
+func (p *AmneziaProvider) buildAmneziaURI(fullConfig map[string]interface{}, uuid string) string {
+	// Deep copy the config to avoid mutating the original
+	configBytes, _ := json.Marshal(fullConfig)
+	var clientConfig map[string]interface{}
+	json.Unmarshal(configBytes, &clientConfig)
+
+	// Keep only this user in the inbounds
+	if settings, err := findInbound(clientConfig); err == nil {
+		if clients, ok := settings["clients"].([]interface{}); ok {
+			for _, c := range clients {
+				if cmap, ok := c.(map[string]interface{}); ok {
+					if id, _ := cmap["id"].(string); id == uuid {
+						settings["clients"] = []interface{}{cmap}
+						break
+					}
+				}
+			}
+		}
+	}
+
+	// For the client, the inbound listen address is usually 127.0.0.1, but Amnezia's client
+	// parser looks for the server IP in outbounds. The server config we just read is for the server itself.
+	// We need to convert this *server* config into a *client* config.
+	// Actually, the Amnezia client exporter expects an "amnezia-xray" container payload or a standard client config.
+	// Let's generate a raw xray client config.
+
+	clientPort := p.settings.Port
+	if clientPort == 0 {
+		clientPort = 443
+	}
+
+	clientPayload := map[string]interface{}{
+		"log": map[string]interface{}{
+			"loglevel": "warning",
+		},
+		"inbounds": []map[string]interface{}{
+			{
+				"tag":      "socks-in",
+				"port":     10808,
+				"listen":   "127.0.0.1",
+				"protocol": "socks",
+				"settings": map[string]interface{}{"auth": "noauth", "udp": true},
+			},
+		},
+		"outbounds": []map[string]interface{}{
+			{
+				"protocol": "vless",
+				"settings": map[string]interface{}{
+					"vnext": []map[string]interface{}{
+						{
+							"address": p.serverHost,
+							"port":    clientPort,
+							"users": []map[string]interface{}{
+								{
+									"id":         uuid,
+									"encryption": p.settings.Encryption,
+									"flow":       p.settings.Flow,
+								},
+							},
+						},
+					},
+				},
+				"streamSettings": map[string]interface{}{
+					"network":  "tcp",
+					"security": "reality",
+					"realitySettings": map[string]interface{}{
+						"serverName":  p.settings.SNI,
+						"fingerprint": p.settings.Fingerprint,
+						"publicKey":   p.settings.PublicKey,
+						"shortId":     p.settings.ShortID,
+						"spiderX":     p.settings.SpiderX,
+					},
+				},
+			},
+		},
+	}
+
+	// Wrap it in amnezia format so the Desktop client's ParseAmneziaConfig is happy
+	wrap := map[string]interface{}{
+		"containers": []map[string]interface{}{
+			{
+				"container":     "amnezia-xray",
+				"client_config": clientPayload,
+			},
+		},
+	}
+
+	data, _ := json.Marshal(wrap)
+	b64 := base64.StdEncoding.EncodeToString(data)
+	return "amnezia://" + b64
 }

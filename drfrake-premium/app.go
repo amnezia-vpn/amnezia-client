@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -295,8 +297,24 @@ func (a *App) connectVLESS(config string) error {
 		return fmt.Errorf("failed to configure TUN: %w", err)
 	}
 
-	// 4. Setup routes: bypass server IP + DNS, route all via TUN
-	if err := a.tun2socksManager.SetupRoutes(serverIP, tunIP); err != nil {
+	// Extract API Host IP to bypass
+	var apiHostIP string
+	if a.apiClient != nil && a.apiClient.BaseURL != "" {
+		if u, err := url.Parse(a.apiClient.BaseURL); err == nil {
+			if host, _, err := net.SplitHostPort(u.Host); err == nil {
+				apiHostIP = host
+			} else {
+				apiHostIP = u.Host // No port
+			}
+			// Resolve to IP if domain
+			if ips, err := net.LookupIP(apiHostIP); err == nil && len(ips) > 0 {
+				apiHostIP = ips[0].String()
+			}
+		}
+	}
+
+	// 4. Setup routes: bypass server IP + API Host + DNS, route all via TUN
+	if err := a.tun2socksManager.SetupRoutes(serverIP, tunIP, apiHostIP); err != nil {
 		a.tun2socksManager.Stop()
 		a.stopXray()
 		return fmt.Errorf("failed to setup routes: %w", err)
