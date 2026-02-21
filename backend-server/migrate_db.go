@@ -17,7 +17,8 @@ func main() {
 		dbPath = "server.db"
 	}
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		log.Fatalf("Database %s not found. Please set DB_PATH to the correct sqlite database file, or run this where server.db is located.", dbPath)
+		log.Printf("Database %s not found. Skipping migrations so the main app can create it.", dbPath)
+		return
 	}
 
 	db, err := sql.Open("sqlite", dbPath)
