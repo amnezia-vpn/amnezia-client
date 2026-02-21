@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/ssh"
@@ -14,20 +15,13 @@ import (
 
 // XrayServerSettings holds server-specific VLESS+Reality parameters.
 type XrayServerSettings struct {
-	Port        int    `json:"port"`
-	Flow        string `json:"flow"`
-	Security    string `json:"security"`    // "reality"
-	SNI         string `json:"sni"`         // e.g. "google.com"
-	Fingerprint string `json:"fingerprint"` // e.g. "chrome"
-	PublicKey   string `json:"public_key"`
-	ShortID     string `json:"short_id"`
-	SpiderX     string `json:"spider_x"`
-	Encryption  string `json:"encryption"`
-	PQV         string `json:"pqv"`
+	Port int `json:"port"`
+	// Additional Xray settings ignored for AWG
 }
 
-// AmneziaProvider connects to an AmneziaVPN server via SSH, manipulates the Xray config,
-// and manages docker container to provision clients.
+// VPNKey is defined in provider.go
+
+// AmneziaProvider implementations SSH provisioning directly to Amnezia VPN nodes.
 type AmneziaProvider struct {
 	serverHost string
 	sshUser    string
@@ -35,17 +29,12 @@ type AmneziaProvider struct {
 	settings   XrayServerSettings // Used for generating the vless:// URI
 }
 
-// NewAmneziaProvider creates a new Amnezia provider.
 func NewAmneziaProvider(serverHost, sshUser, sshPass, settingsJSON string) *AmneziaProvider {
 	var settings XrayServerSettings
 	if err := json.Unmarshal([]byte(settingsJSON), &settings); err != nil {
 		log.Printf("Warning: failed to parse amnezia xray settings: %v", err)
 		settings = XrayServerSettings{
-			Port:        443,
-			Flow:        "xtls-rprx-vision",
-			Security:    "reality",
-			SNI:         "google.com",
-			Fingerprint: "chrome",
+			Port: 443,
 		}
 	}
 
@@ -92,121 +81,137 @@ func (p *AmneziaProvider) executeCommand(client *ssh.Client, cmd string) (string
 	return stdoutBuf.String(), nil
 }
 
-// getAmneziaConfig fetches and parses the Amnezia Xray config file via SSH.
-func (p *AmneziaProvider) getAmneziaConfig(client *ssh.Client) (map[string]interface{}, error) {
-	const configPath = "/opt/amnezia/xray/server.json"
-	out, err := p.executeCommand(client, "docker exec amnezia-xray cat "+configPath)
+// getAmneziaWGConfig fetches the AmneziaWG config file via SSH.
+func (p *AmneziaProvider) getAmneziaWGConfig(client *ssh.Client) (string, error) {
+	const configPath = "/opt/amnezia/awg/wg0.conf"
+	out, err := p.executeCommand(client, "docker exec amnezia-awg cat "+configPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read Xray config: %w", err)
+		return "", fmt.Errorf("failed to read AWG config: %w", err)
 	}
-
-	var config map[string]interface{}
-	if err := json.Unmarshal([]byte(out), &config); err != nil {
-		return nil, fmt.Errorf("failed to parse Xray config JSON: %w", err)
-	}
-
-	return config, nil
+	return out, nil
 }
 
-// writeAmneziaConfig marshals the config and writes it back to the server, then restarts the container.
-func (p *AmneziaProvider) writeAmneziaConfig(client *ssh.Client, config map[string]interface{}) error {
-	configBytes, err := json.MarshalIndent(config, "", "  ")
+// writeAmneziaWGConfig writes it back to the server and restarts the container.
+func (p *AmneziaProvider) writeAmneziaWGConfig(client *ssh.Client, config string) error {
+	const configPath = "/opt/amnezia/awg/wg0.conf"
+
+	// Pass config safely to docker container
+	cmd := fmt.Sprintf("cat << 'EOF' | docker exec -i amnezia-awg sh -c 'cat > %s'\n%s\nEOF\ndocker exec amnezia-awg wg-quick down wg0; docker exec amnezia-awg wg-quick up wg0", configPath, config)
+
+	_, err := p.executeCommand(client, cmd)
 	if err != nil {
-		return fmt.Errorf("failed to marshal modified config: %w", err)
-	}
-
-	const configPath = "/opt/amnezia/xray/server.json"
-
-	// Pass JSON safely to docker container via stdin and heredoc
-	cmd := fmt.Sprintf("cat << 'EOF' | docker exec -i amnezia-xray sh -c 'cat > %s'\n%s\nEOF\ndocker restart amnezia-xray", configPath, string(configBytes))
-
-	_, err = p.executeCommand(client, cmd)
-	if err != nil {
-		return fmt.Errorf("failed to update config and restart container: %w", err)
+		return fmt.Errorf("failed to update config and restart awg: %w", err)
 	}
 
 	return nil
 }
 
-// findInbound finds the first inbound suitable for adding clients (usually VLESS).
-func findInbound(config map[string]interface{}) (map[string]interface{}, error) {
-	inbounds, ok := config["inbounds"].([]interface{})
-	if !ok || len(inbounds) == 0 {
-		return nil, fmt.Errorf("no inbounds array found in config")
-	}
-
-	for _, ib := range inbounds {
-		inbound, ok := ib.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		// Looking for protocol vless
-		protocol, _ := inbound["protocol"].(string)
-		if protocol == "vless" {
-			settings, ok := inbound["settings"].(map[string]interface{})
-			if !ok {
-				settings = map[string]interface{}{}
-				inbound["settings"] = settings
-			}
-			return settings, nil
-		}
-	}
-
-	return nil, fmt.Errorf("no vless inbound found")
-}
-
-// CreateKey connects via SSH, injects a new client to the config.json, and restarts Xray.
+// CreateKey connects via SSH, injects a new PEER to wg0.conf.
 func (p *AmneziaProvider) CreateKey(userID string) (string, string, error) {
-	email := fmt.Sprintf("user-%s", userID)
-
 	client, err := p.connectSSH()
 	if err != nil {
 		return "", "", fmt.Errorf("SSH connection failed: %w", err)
 	}
 	defer client.Close()
 
-	config, err := p.getAmneziaConfig(client)
+	// 1. Generate new keys using standard `wg / awg` command on the server
+	privKey, err := p.executeCommand(client, "docker exec amnezia-awg awg genkey")
+	if err != nil {
+		return "", "", fmt.Errorf("failed to generate privkey: %w", err)
+	}
+	privKey = strings.TrimSpace(privKey)
+
+	pubKey, err := p.executeCommand(client, fmt.Sprintf("echo '%s' | docker exec -i amnezia-awg awg pubkey", privKey))
+	if err != nil {
+		return "", "", fmt.Errorf("failed to generate pubkey: %w", err)
+	}
+	pubKey = strings.TrimSpace(pubKey)
+
+	psk, err := p.executeCommand(client, "docker exec amnezia-awg awg genpsk")
+	if err != nil {
+		return "", "", fmt.Errorf("failed to generate psk: %w", err)
+	}
+	psk = strings.TrimSpace(psk)
+
+	// 2. Fetch existing config to find the next available IP
+	config, err := p.getAmneziaWGConfig(client)
 	if err != nil {
 		return "", "", err
 	}
 
-	settings, err := findInbound(config)
-	if err != nil {
+	// Simple IP allocation (find max IP 10.8.1.X and add 1)
+	nextIP := 2
+	lines := strings.Split(config, "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "AllowedIPs") {
+			parts := strings.Split(line, "=")
+			if len(parts) == 2 {
+				ip := strings.TrimSpace(strings.Split(parts[1], "/")[0])
+				var a, b, c, d int
+				fmt.Sscanf(ip, "%d.%d.%d.%d", &a, &b, &c, &d)
+				if d >= nextIP {
+					nextIP = d + 1
+				}
+			}
+		}
+	}
+	if nextIP > 254 {
+		return "", "", fmt.Errorf("IP pool exhausted")
+	}
+
+	clientIP := fmt.Sprintf("10.8.1.%d", nextIP)
+	uuidID := uuid.New().String()
+
+	// 3. Append to wg0.conf
+	newPeer := fmt.Sprintf("\n# User: %s\n# ID: %s\n[Peer]\nPublicKey = %s\nPresharedKey = %s\nAllowedIPs = %s/32\n", userID, uuidID, pubKey, psk, clientIP)
+	config += newPeer
+
+	if err := p.writeAmneziaWGConfig(client, config); err != nil {
 		return "", "", err
 	}
 
-	clients, _ := settings["clients"].([]interface{})
-
-	// Check if exists
-	for _, c := range clients {
-		clientMap, ok := c.(map[string]interface{})
-		if ok {
-			if e, _ := clientMap["email"].(string); e == email {
-				id, _ := clientMap["id"].(string)
-				log.Printf("User %s already exists on Amnezia, reusing key", userID)
-				return id, p.buildAmneziaURI(config, id), nil
+	// 4. Generate client URI
+	// We need the server's public key from the [Interface] section to build the client config
+	serverPubKey := ""
+	for _, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "PrivateKey") {
+			parts := strings.Split(line, "=")
+			if len(parts) == 2 {
+				serverPriv := strings.TrimSpace(parts[1])
+				sp, _ := p.executeCommand(client, fmt.Sprintf("echo '%s' | docker exec -i amnezia-awg awg pubkey", serverPriv))
+				serverPubKey = strings.TrimSpace(sp)
+				break
 			}
 		}
 	}
 
-	newID := uuid.New().String()
-	newClient := map[string]interface{}{
-		"id":    newID,
-		"flow":  p.settings.Flow,
-		"email": email,
-	}
+	clientConf := fmt.Sprintf(`[Interface]
+Address = %s/32
+DNS = 1.1.1.1, 8.8.8.8
+PrivateKey = %s
+Jc = 4
+Jmin = 40
+Jmax = 70
+S1 = 0
+S2 = 0
+H1 = 1
+H2 = 2
+H3 = 3
+H4 = 4
 
-	settings["clients"] = append(clients, newClient)
+[Peer]
+PublicKey = %s
+PresharedKey = %s
+AllowedIPs = 0.0.0.0/0, ::/0
+Endpoint = %s:%d
+PersistentKeepalive = 25
+`, clientIP, privKey, serverPubKey, psk, p.serverHost, p.settings.Port)
 
-	// Write changes
-	if err := p.writeAmneziaConfig(client, config); err != nil {
-		return "", "", err
-	}
-
-	return newID, p.buildAmneziaURI(config, newID), nil
+	uri := "amneziawg://" + base64.StdEncoding.EncodeToString([]byte(clientConf))
+	return uuidID, uri, nil
 }
 
-// GetKeys fetches all current clients from the remote config.
+// GetKeys fetches all current clients from wg0.conf.
 func (p *AmneziaProvider) GetKeys() ([]VPNKey, error) {
 	client, err := p.connectSSH()
 	if err != nil {
@@ -214,28 +219,32 @@ func (p *AmneziaProvider) GetKeys() ([]VPNKey, error) {
 	}
 	defer client.Close()
 
-	config, err := p.getAmneziaConfig(client)
-	if err != nil {
-		return nil, err
-	}
-
-	settings, err := findInbound(config)
+	config, err := p.getAmneziaWGConfig(client)
 	if err != nil {
 		return nil, err
 	}
 
 	var keys []VPNKey
-	clients, _ := settings["clients"].([]interface{})
-	for _, c := range clients {
-		clientMap, ok := c.(map[string]interface{})
-		if ok {
-			id, _ := clientMap["id"].(string)
-			email, _ := clientMap["email"].(string)
-			if id != "" {
+
+	// Scan wg0.conf for "# ID: <uuid>"
+	lines := strings.Split(config, "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "# ID:") {
+			parts := strings.Split(line, ":")
+			if len(parts) == 2 {
+				id := strings.TrimSpace(parts[1])
+
+				// We can't trivially reconstruct the exact client URI here because we don't store
+				// the client's PrivateKey on the server (only the public key in wg0.conf).
+				// We rely on the App DB `access_keys.access_url` to persist the original URI.
+				// However, GetKeys is only used by handlers.go to avoid re-creating a key
+				// if `access_keys` is wiped.
+				// If access_keys is wiped, the user's private key is permanently lost.
+				// For the sake of matching, we'll return a placeholder URL.
 				keys = append(keys, VPNKey{
 					ID:        id,
-					Name:      email,
-					AccessURL: p.buildAmneziaURI(config, id),
+					Name:      id,
+					AccessURL: "lost-private-key",
 				})
 			}
 		}
@@ -244,7 +253,7 @@ func (p *AmneziaProvider) GetKeys() ([]VPNKey, error) {
 	return keys, nil
 }
 
-// DeleteKey removes the client with the matching id and restarts the Xray container.
+// DeleteKey removes the peer from wg0.conf and restarts AWG.
 func (p *AmneziaProvider) DeleteKey(keyID string) error {
 	client, err := p.connectSSH()
 	if err != nil {
@@ -252,134 +261,44 @@ func (p *AmneziaProvider) DeleteKey(keyID string) error {
 	}
 	defer client.Close()
 
-	config, err := p.getAmneziaConfig(client)
+	config, err := p.getAmneziaWGConfig(client)
 	if err != nil {
 		return err
 	}
 
-	settings, err := findInbound(config)
-	if err != nil {
-		return err
-	}
+	lines := strings.Split(config, "\n")
+	var newLines []string
+	skip := false
 
-	clients, _ := settings["clients"].([]interface{})
-	var newClients []interface{}
-	found := false
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
 
-	for _, c := range clients {
-		clientMap, ok := c.(map[string]interface{})
-		if ok {
-			id, _ := clientMap["id"].(string)
-			if id == keyID {
-				found = true
-				continue // skip this one
+		// Start of a peer definition
+		if strings.HasPrefix(line, "# ID: "+keyID) {
+			skip = true // Skip this line and subsequent lines until the next peer or EOF
+			// also remove the previous line if it was `# User: ...`
+			if len(newLines) > 0 && strings.HasPrefix(newLines[len(newLines)-1], "# User:") {
+				newLines = newLines[:len(newLines)-1]
+			}
+			continue
+		}
+
+		if skip {
+			if strings.HasPrefix(line, "# User:") || (strings.HasPrefix(line, "[") && !strings.Contains(line, "[Peer]")) {
+				skip = false // Hit the next block, stop skipping
+			} else {
+				continue
 			}
 		}
-		newClients = append(newClients, c)
+
+		newLines = append(newLines, line)
 	}
 
-	if !found {
-		return nil // Nothing to delete
-	}
+	newConfig := strings.Join(newLines, "\n")
 
-	settings["clients"] = newClients
-
-	// Write changes
-	return p.writeAmneziaConfig(client, config)
+	return p.writeAmneziaWGConfig(client, newConfig)
 }
 
 func (p *AmneziaProvider) SetName(keyID string, name string) error {
-	return nil // No-op, email is immutable mostly and tracked by DB
-}
-
-func (p *AmneziaProvider) buildAmneziaURI(fullConfig map[string]interface{}, uuid string) string {
-	// Deep copy the config to avoid mutating the original
-	configBytes, _ := json.Marshal(fullConfig)
-	var clientConfig map[string]interface{}
-	json.Unmarshal(configBytes, &clientConfig)
-
-	// Keep only this user in the inbounds
-	if settings, err := findInbound(clientConfig); err == nil {
-		if clients, ok := settings["clients"].([]interface{}); ok {
-			for _, c := range clients {
-				if cmap, ok := c.(map[string]interface{}); ok {
-					if id, _ := cmap["id"].(string); id == uuid {
-						settings["clients"] = []interface{}{cmap}
-						break
-					}
-				}
-			}
-		}
-	}
-
-	// For the client, the inbound listen address is usually 127.0.0.1, but Amnezia's client
-	// parser looks for the server IP in outbounds. The server config we just read is for the server itself.
-	// We need to convert this *server* config into a *client* config.
-	// Actually, the Amnezia client exporter expects an "amnezia-xray" container payload or a standard client config.
-	// Let's generate a raw xray client config.
-
-	clientPort := p.settings.Port
-	if clientPort == 0 {
-		clientPort = 443
-	}
-
-	clientPayload := map[string]interface{}{
-		"log": map[string]interface{}{
-			"loglevel": "warning",
-		},
-		"inbounds": []map[string]interface{}{
-			{
-				"tag":      "socks-in",
-				"port":     10808,
-				"listen":   "127.0.0.1",
-				"protocol": "socks",
-				"settings": map[string]interface{}{"auth": "noauth", "udp": true},
-			},
-		},
-		"outbounds": []map[string]interface{}{
-			{
-				"protocol": "vless",
-				"settings": map[string]interface{}{
-					"vnext": []map[string]interface{}{
-						{
-							"address": p.serverHost,
-							"port":    clientPort,
-							"users": []map[string]interface{}{
-								{
-									"id":         uuid,
-									"encryption": p.settings.Encryption,
-									"flow":       p.settings.Flow,
-								},
-							},
-						},
-					},
-				},
-				"streamSettings": map[string]interface{}{
-					"network":  "tcp",
-					"security": "reality",
-					"realitySettings": map[string]interface{}{
-						"serverName":  p.settings.SNI,
-						"fingerprint": p.settings.Fingerprint,
-						"publicKey":   p.settings.PublicKey,
-						"shortId":     p.settings.ShortID,
-						"spiderX":     p.settings.SpiderX,
-					},
-				},
-			},
-		},
-	}
-
-	// Wrap it in amnezia format so the Desktop client's ParseAmneziaConfig is happy
-	wrap := map[string]interface{}{
-		"containers": []map[string]interface{}{
-			{
-				"container":     "amnezia-xray",
-				"client_config": clientPayload,
-			},
-		},
-	}
-
-	data, _ := json.Marshal(wrap)
-	b64 := base64.StdEncoding.EncodeToString(data)
-	return "amnezia://" + b64
+	return nil // No-op
 }

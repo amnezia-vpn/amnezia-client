@@ -39,6 +39,7 @@ type App struct {
 	authToken        string
 	xrayManager      *XrayManager
 	tun2socksManager *Tun2SocksManager
+	awgManager       *AWGManager
 	vlessServerIP    string
 }
 
@@ -234,7 +235,9 @@ func (a *App) Connect(config string, serverID string) error {
 
 	var err error
 	configTrimmed := strings.TrimSpace(config)
-	if strings.HasPrefix(configTrimmed, "vless://") || strings.HasPrefix(configTrimmed, "vpn://") || strings.HasPrefix(configTrimmed, "amnezia://") || strings.HasPrefix(configTrimmed, "{") {
+	if strings.HasPrefix(configTrimmed, "[Interface]") || strings.HasPrefix(configTrimmed, "[Peer]") {
+		err = a.connectAmneziaWG(configTrimmed)
+	} else if strings.HasPrefix(configTrimmed, "vless://") || strings.HasPrefix(configTrimmed, "vpn://") || strings.HasPrefix(configTrimmed, "amnezia://") || strings.HasPrefix(configTrimmed, "{") {
 		err = a.connectVLESS(configTrimmed)
 	} else {
 		err = a.connectShadowsocks(configTrimmed)
@@ -244,6 +247,41 @@ func (a *App) Connect(config string, serverID string) error {
 		a.isConnected = false
 	}
 	return err
+}
+
+func (a *App) getAPIHostIP() string {
+	if a.apiClient != nil && a.apiClient.BaseURL != "" {
+		if u, err := url.Parse(a.apiClient.BaseURL); err == nil {
+			host, _, err := net.SplitHostPort(u.Host)
+			if err != nil {
+				host = u.Host // No port
+			}
+			// Resolve to IP if domain
+			if ips, err := net.LookupIP(host); err == nil && len(ips) > 0 {
+				return ips[0].String()
+			}
+			return host // maybe it's already an IP
+		}
+	}
+	return ""
+}
+
+// connectAmneziaWG connects via amneziawg-go using native userspace Wireguard over tun.
+func (a *App) connectAmneziaWG(config string) error {
+	log.Printf("[VPN] Detected AmneziaWG protocol, starting awg-go via Wintun...")
+
+	if a.awgManager == nil {
+		a.awgManager = NewAWGManager()
+	}
+
+	apiHostIP := a.getAPIHostIP()
+
+	if err := a.awgManager.Start(config, apiHostIP); err != nil {
+		return fmt.Errorf("failed to start amneziawg: %w", err)
+	}
+
+	log.Printf("[VPN] AmneziaWG connected via TUN")
+	return nil
 }
 
 // connectVLESS connects via xray-core (SOCKS5) + tun2socks (TUN tunneling).
@@ -400,6 +438,11 @@ func (a *App) Disconnect() error {
 		a.tun2socksManager.CleanupRoutes(a.vlessServerIP)
 		a.tun2socksManager.Stop()
 		a.tun2socksManager = nil
+	}
+
+	if a.awgManager != nil {
+		a.awgManager.Stop(a.getAPIHostIP())
+		a.awgManager = nil
 	}
 
 	// Stop Shadowsocks TUN/LWIP if active
