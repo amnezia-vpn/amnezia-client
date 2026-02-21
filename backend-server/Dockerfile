@@ -15,6 +15,9 @@ COPY . .
 # Build static binary (modernc.org/sqlite is pure Go, no CGo needed)
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /build/drfrake-backend .
 
+# Build migration script
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /build/migrate_db ./migrate_db.go
+
 # ======================
 # Stage 2: Runtime
 # ======================
@@ -25,8 +28,13 @@ RUN apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
 
-# Copy built binary
+# Copy built binaries
 COPY --from=builder /build/drfrake-backend /app/drfrake-backend
+COPY --from=builder /build/migrate_db /app/migrate_db
+
+# Copy entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 # Create data directory for SQLite
 RUN mkdir -p /data
@@ -39,4 +47,4 @@ EXPOSE 8080
 
 VOLUME ["/data"]
 
-ENTRYPOINT ["/app/drfrake-backend"]
+ENTRYPOINT ["/app/entrypoint.sh"]

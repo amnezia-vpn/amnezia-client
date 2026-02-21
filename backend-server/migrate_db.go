@@ -12,9 +12,12 @@ import (
 )
 
 func main() {
-	dbPath := "server.db"
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = "server.db"
+	}
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		log.Fatal("server.db not found. Run this from the backend-server folder.")
+		log.Fatalf("Database %s not found. Please set DB_PATH to the correct sqlite database file, or run this where server.db is located.", dbPath)
 	}
 
 	db, err := sql.Open("sqlite", dbPath)
