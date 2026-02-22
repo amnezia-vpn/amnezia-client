@@ -9,25 +9,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 REQUIRED COMPONENTS DBus Core Network Widgets RemoteObjects Core5Compat Concurrent)
 qt_standard_project_setup()
 
+find_package(amnezia-xray-bindings REQUIRED)
 
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
-
-set(AMNEZIA_XRAY_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../client/3rd-prebuilt/3rd-prebuilt/amnezia_xray")
-if(WIN32)
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64/amnezia_xray.lib")
-        set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64")
-    else()
-        set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86/amnezia_xray.lib")
-        set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86")
-    endif()
-elseif(APPLE AND NOT IOS)
-    set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/macos/x86_64/amnezia_xray.a")
-    set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/macos/x86_64")
-elseif(LINUX)
-    set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/linux/x86_64/amnezia_xray.a")
-    set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/linux/x86_64")
-endif()
 
 set(QSIMPLECRYPTO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../client/3rd/QSimpleCrypto/src)
 
@@ -63,7 +47,6 @@ endif()
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 
 include_directories(
-    ${AMNEZIA_XRAY_INCLUDE_DIR}
     ${OPENSSL_INCLUDE_DIR}
     ${QSIMPLECRYPTO_DIR}
 )
@@ -240,7 +223,6 @@ if(WIN32)
         gdi32
         Advapi32
         Kernel32
-        ${AMNEZIA_XRAY_LIB_PATH}
         ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
     )
@@ -290,7 +272,6 @@ if(APPLE)
 
     set(LIBS
         resolv
-        ${AMNEZIA_XRAY_LIB_PATH}
         ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
     )
@@ -329,7 +310,6 @@ if(LINUX)
     )
 
     set(LIBS
-        ${AMNEZIA_XRAY_LIB_PATH}    
         ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
         -static-libstdc++
@@ -352,6 +332,7 @@ include_directories(
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES})
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::DBus Qt6::Concurrent ${LIBS})
+target_link_libraries(${PROJECT} PRIVATE amnezia::xray-bindings)
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

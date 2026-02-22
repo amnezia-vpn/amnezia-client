@@ -3,6 +3,19 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 set(AMNEZIAVPN_VERSION 4.8.15.4)
 
+include(cmake/conan_bootstrap.cmake)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/cmake/cmake-conan/conan_provider.cmake)
+
+if(APPLE)
+    if(IOS)
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
+    elseif(MACOS_NE)
+        set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+    else()
+        set(CMAKE_OSX_ARCHITECTURES "x86_64")
+    endif()
+endif()
+
 project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         DESCRIPTION "AmneziaVPN"
         HOMEPAGE_URL "https://amnezia.org/"
@@ -31,16 +44,6 @@ endif()
 set(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if(APPLE)
-    if(IOS)
-        set(CMAKE_OSX_ARCHITECTURES "arm64")
-    elseif(MACOS_NE)
-        set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
-    else()
-        set(CMAKE_OSX_ARCHITECTURES "x86_64")
-    endif()
-endif()
 
 add_subdirectory(client)
 
