@@ -71,7 +71,6 @@ bool KillSwitch::isStrictKillSwitchEnabled()
                              + "\\" + QString(APPLICATION_NAME), QSettings::NativeFormat);
     return RegHLM.value("strictKillSwitchEnabled", false).toBool();
 #endif
-    m_appSettigns->sync();
     return m_appSettigns->value("Conf/strictKillSwitchEnabled", false).toBool();
 }
 
