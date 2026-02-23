@@ -5,22 +5,24 @@
 #include <utility>
 
 #include "core/api/apiDefs.h"
+#include "logger.h"
 
 namespace
 {
-constexpr QLatin1String countryConfig("country_config");
+    Logger logger("ApiCountryModel");
+    constexpr QLatin1String countryConfig("country_config");
 
-struct RegionRowData
-{
-    bool isRegionHeader = false;
-    QString regionName;
-    bool isExpanded = true;
-    int sourceIndex = -1;
-    QString countryName;
-    QString sourceCountryName;
-    QString countryCode;
-    QString countryImageCode;
-};
+    struct RegionRowData
+    {
+        bool isRegionHeader = false;
+        QString regionName;
+        bool isExpanded = true;
+        int sourceIndex = -1;
+        QString countryName;
+        QString sourceCountryName;
+        QString countryCode;
+        QString countryImageCode;
+    };
 }
 
 class ApiCountryModel::RegionRowsModel : public QAbstractListModel
