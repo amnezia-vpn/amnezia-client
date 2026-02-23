@@ -94,9 +94,6 @@ void CoreController::initModels()
     m_apiCountryModel.reset(new ApiCountryModel(this));
     m_engine->rootContext()->setContextProperty("ApiCountryModel", m_apiCountryModel.get());
 
-    m_apiCountriesRegionModel.reset(new ApiCountriesRegionModel(m_apiCountryModel.get(), this));
-    m_engine->rootContext()->setContextProperty("ApiCountriesRegionModel", m_apiCountriesRegionModel.get());
-
     m_apiAccountInfoModel.reset(new ApiAccountInfoModel(this));
     m_engine->rootContext()->setContextProperty("ApiAccountInfoModel", m_apiAccountInfoModel.get());
 

@@ -48,7 +48,7 @@ PageType {
 
         anchors.fill: parent
 
-        model: ApiCountriesRegionModel
+        model: ApiCountryModel.regionRowsModel
 
         currentIndex: 0
 
@@ -152,7 +152,7 @@ PageType {
                             const shouldRestoreFocus = activeFocus
                             const previousCursorPosition = cursorPosition
 
-                            ApiCountriesRegionModel.searchText = text
+                            ApiCountryModel.searchText = text
 
                             if (shouldRestoreFocus) {
                                 Qt.callLater(function() {
@@ -197,7 +197,7 @@ PageType {
 
         footer: Item {
             width: menuContent.width
-            height: ApiCountriesRegionModel.count === 0 ? emptyStateText.implicitHeight + 32 : 0
+            height: ApiCountryModel.hasVisibleRegions ? 0 : emptyStateText.implicitHeight + 32
 
             CaptionTextType {
                 id: emptyStateText
@@ -209,7 +209,7 @@ PageType {
                 anchors.top: parent.top
                 anchors.topMargin: 16
 
-                visible: ApiCountriesRegionModel.count === 0
+                visible: !ApiCountryModel.hasVisibleRegions
                 color: AmneziaStyle.color.mutedGray
 
                 font.pixelSize: 15
@@ -219,39 +219,33 @@ PageType {
             }
         }
 
-        delegate: ColumnLayout {
-            id: regionContent
-
+        delegate: Item {
             width: menuContent.width
-            height: regionContent.implicitHeight
-            spacing: 0
+            implicitHeight: rowType === "region" ? 44 : 88
 
             Item {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 12
-                Layout.bottomMargin: 8
-
-                implicitHeight: 24
+                anchors.fill: parent
+                visible: rowType === "region"
 
                 RowLayout {
                     anchors.fill: parent
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
+                    anchors.topMargin: 12
+                    anchors.bottomMargin: 8
                     spacing: 8
 
                     CaptionTextType {
                         Layout.fillWidth: true
                         color: AmneziaStyle.color.mutedGray
-
                         text: regionName
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
                     }
 
                     Image {
-                        source: ApiCountriesRegionModel.isRegionExpanded(regionName)
-                                ? "qrc:/images/controls/chevron-up.svg"
-                                : "qrc:/images/controls/chevron-down.svg"
+                        source: isExpanded ? "qrc:/images/controls/chevron-up.svg"
+                                           : "qrc:/images/controls/chevron-down.svg"
                     }
                 }
 
@@ -259,85 +253,75 @@ PageType {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        ApiCountriesRegionModel.toggleRegionExpanded(regionName)
+                        ApiCountryModel.toggleRegionExpanded(regionName)
                     }
                 }
             }
 
-            Repeater {
-                model: ApiCountriesRegionModel.isRegionExpanded(regionName) ? countries : []
+            ColumnLayout {
+                anchors.fill: parent
+                visible: rowType === "country"
+                spacing: 0
 
-                delegate: ColumnLayout {
-                    property var countryData: modelData
+                RowLayout {
+                    Layout.fillWidth: true
 
-                    width: menuContent.width
-                    spacing: 0
-
-                    RowLayout {
-                        VerticalRadioButton {
-                            id: containerRadioButton
-
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-
-                            text: countryData.countryName
-
-                            ButtonGroup.group: containersRadioButtonGroup
-
-                            imageSource: "qrc:/images/controls/download.svg"
-
-                            checked: countryData.sourceIndex >= 0 && countryData.sourceIndex === ApiCountryModel.currentIndex
-                            checkable: countryData.isAvailable && !ConnectionController.isConnected
-
-                            onClicked: {
-                                if (!countryData.isAvailable) {
-                                    return
-                                }
-                                if (ConnectionController.isConnectionInProgress) {
-                                    PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
-                                    return
-                                }
-                                if (ConnectionController.isConnected) {
-                                    PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
-                                    return
-                                }
-
-                                if (countryData.sourceIndex !== ApiCountryModel.currentIndex) {
-                                    PageController.showBusyIndicator(true)
-                                    var prevIndex = ApiCountryModel.currentIndex
-                                    ApiCountryModel.currentIndex = countryData.sourceIndex
-                                    if (!ApiConfigsController.updateServiceFromGateway(ServersModel.defaultIndex, countryData.countryCode, countryData.sourceCountryName)) {
-                                        ApiCountryModel.currentIndex = prevIndex
-                                    }
-                                    PageController.showBusyIndicator(false)
-                                }
-                            }
-
-                            Keys.onEnterPressed: {
-                                if (checkable) {
-                                    checked = true
-                                }
-                                containerRadioButton.clicked()
-                            }
-                            Keys.onReturnPressed: {
-                                if (checkable) {
-                                    checked = true
-                                }
-                                containerRadioButton.clicked()
-                            }
-                        }
-
-                        Image {
-                            Layout.rightMargin: 32
-                            Layout.alignment: Qt.AlignRight
-
-                            source: "qrc:/countriesFlags/images/flagKit/" + countryData.countryImageCode + ".svg"
-                        }
-                    }
-
-                    DividerType {
+                    VerticalRadioButton {
+                        id: containerRadioButton
                         Layout.fillWidth: true
+                        Layout.leftMargin: 16
+
+                        text: countryName
+                        ButtonGroup.group: containersRadioButtonGroup
+                        imageSource: "qrc:/images/controls/download.svg"
+
+                        checked: sourceIndex >= 0 && sourceIndex === ApiCountryModel.currentIndex
+                        checkable: !ConnectionController.isConnected
+
+                        onClicked: {
+                            if (ConnectionController.isConnectionInProgress) {
+                                PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
+                                return
+                            }
+                            if (ConnectionController.isConnected) {
+                                PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
+                                return
+                            }
+
+                            if (sourceIndex !== ApiCountryModel.currentIndex) {
+                                PageController.showBusyIndicator(true)
+                                var prevIndex = ApiCountryModel.currentIndex
+                                ApiCountryModel.currentIndex = sourceIndex
+                                if (!ApiConfigsController.updateServiceFromGateway(ServersModel.defaultIndex, countryCode, sourceCountryName)) {
+                                    ApiCountryModel.currentIndex = prevIndex
+                                }
+                                PageController.showBusyIndicator(false)
+                            }
+                        }
+
+                        Keys.onEnterPressed: {
+                            if (checkable) {
+                                checked = true
+                            }
+                            containerRadioButton.clicked()
+                        }
+                        Keys.onReturnPressed: {
+                            if (checkable) {
+                                checked = true
+                            }
+                            containerRadioButton.clicked()
+                        }
                     }
+
+                    Image {
+                        Layout.rightMargin: 32
+                        Layout.alignment: Qt.AlignRight
+                        source: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
+                    }
+                }
+
+                DividerType {
+                    Layout.fillWidth: true
                 }
             }
         }
