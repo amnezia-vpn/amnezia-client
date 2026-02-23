@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"net"
@@ -35,6 +37,8 @@ func NewAWGManager() *AWGManager {
 func (m *AWGManager) Start(configText string, apiHostIP string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+
+	log.Printf("[AWG] Using NEW b64-to-hex manager v2")
 
 	if m.running {
 		return fmt.Errorf("AWG already running")
@@ -189,6 +193,18 @@ func (m *AWGManager) cleanupRoutes(apiHostIP string) {
 	cmd.Run()
 }
 
+// b64ToHex converts a standard Wireguard base64 key into a hex string for UAPI.
+func b64ToHex(b64 string) string {
+	decoded, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		log.Printf("[AWG] B64 DECODE ERROR for '%s': %v", b64, err)
+		return b64 // fall back to raw string if not valid base64
+	}
+	encoded := hex.EncodeToString(decoded)
+	log.Printf("[AWG] Successfully decoded B64 to Hex")
+	return encoded
+}
+
 // Parse Amnezia Config to wireguard-go UAPI string format
 func parseAmneziaConfigToUAPI(conf string) (string, string, string, error) {
 	scanner := bufio.NewScanner(strings.NewReader(conf))
@@ -222,7 +238,7 @@ func parseAmneziaConfigToUAPI(conf string) (string, string, string, error) {
 		if section == "[interface]" {
 			switch strings.ToLower(key) {
 			case "privatekey":
-				uapi.WriteString("private_key=" + val + "\n")
+				uapi.WriteString("private_key=" + b64ToHex(val) + "\n")
 			case "address":
 				tunIP = val
 			// AmneziaWG specific fields:
@@ -250,9 +266,9 @@ func parseAmneziaConfigToUAPI(conf string) (string, string, string, error) {
 			case "publickey":
 				// Already wrote key prefix when section started. Overwrite to ensure it's set right before other peer props
 				// UAPI allows multiple peers by separating them with public_key=...
-				uapi.WriteString(val + "\n")
+				uapi.WriteString(b64ToHex(val) + "\n")
 			case "presharedkey":
-				uapi.WriteString("preshared_key=" + val + "\n")
+				uapi.WriteString("preshared_key=" + b64ToHex(val) + "\n")
 			case "allowedips":
 				ips := strings.Split(val, ",")
 				for _, ip := range ips {

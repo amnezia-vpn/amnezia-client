@@ -170,20 +170,23 @@ func (p *AmneziaProvider) CreateKey(userID string) (string, string, error) {
 		return "", "", err
 	}
 
-	// 4. Generate client URI
 	// We need the server's public key from the [Interface] section to build the client config
-	serverPubKey := ""
-	for _, line := range lines {
-		if strings.HasPrefix(strings.TrimSpace(line), "PrivateKey") {
-			parts := strings.Split(line, "=")
-			if len(parts) == 2 {
-				serverPriv := strings.TrimSpace(parts[1])
-				sp, _ := p.executeCommand(client, fmt.Sprintf("echo '%s' | docker exec -i amnezia-awg2 awg pubkey", serverPriv))
-				serverPubKey = strings.TrimSpace(sp)
-				break
+	serverPubKey, err := p.executeCommand(client, "docker exec amnezia-awg2 awg show awg0 public-key")
+	if err != nil {
+		log.Printf("[AWG] Warning: fallback to parsing privkey due to awg show error: %v", err)
+		for _, line := range lines {
+			if strings.HasPrefix(strings.TrimSpace(line), "PrivateKey") {
+				parts := strings.Split(line, "=")
+				if len(parts) == 2 {
+					serverPriv := strings.TrimSpace(parts[1])
+					sp, _ := p.executeCommand(client, fmt.Sprintf("echo '%s' | docker exec -i amnezia-awg2 awg pubkey", serverPriv))
+					serverPubKey = strings.TrimSpace(sp)
+					break
+				}
 			}
 		}
 	}
+	serverPubKey = strings.TrimSpace(serverPubKey)
 
 	clientConf := fmt.Sprintf(`[Interface]
 Address = %s/32
