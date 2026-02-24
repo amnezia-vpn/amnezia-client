@@ -1,0 +1,6 @@
+Chain FORWARD (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+34317   53M ACCEPT     0    --  awg0   *       0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     0    --  awg0   eth0    10.8.1.0/24          0.0.0.0/0           
+    0     0 ACCEPT     0    --  awg0   eth1    10.8.1.0/24          0.0.0.0/0           
+3705K 2388M ACCEPT     0    --  *      *       0.0.0.0/0            0.0.0.0/0            state RELATED,ESTABLISHED

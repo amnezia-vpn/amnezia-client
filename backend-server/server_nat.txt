@@ -1,0 +1,5 @@
+Chain POSTROUTING (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 DOCKER_POSTROUTING  0    --  *      *       0.0.0.0/0            127.0.0.11          
+    0     0 MASQUERADE  0    --  *      eth0    10.8.1.0/24          0.0.0.0/0           
+  329 63247 MASQUERADE  0    --  *      eth1    10.8.1.0/24          0.0.0.0/0           

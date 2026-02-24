@@ -164,8 +164,10 @@ func (p *AmneziaProvider) CreateKey(userID string) (string, string, error) {
 
 	// 3. Extract the server's public key BEFORE we restart the awg0 interface!
 	serverPubKey, err := p.executeCommand(client, "docker exec amnezia-awg2 awg show awg0 public-key")
-	if err != nil || strings.TrimSpace(serverPubKey) == "" {
-		log.Printf("[AWG] Warning: fallback to parsing privkey due to awg show error: %v", err)
+	serverPubKey = strings.TrimSpace(serverPubKey)
+
+	if err != nil || serverPubKey == "" {
+		log.Printf("[AWG] Warning: fallback to parsing privkey due to awg show error or empty key")
 		for _, line := range lines {
 			if strings.HasPrefix(strings.TrimSpace(line), "PrivateKey") {
 				parts := strings.Split(line, "=")
@@ -178,7 +180,6 @@ func (p *AmneziaProvider) CreateKey(userID string) (string, string, error) {
 			}
 		}
 	}
-	serverPubKey = strings.TrimSpace(serverPubKey)
 
 	// 4. Append to wg0.conf
 	newPeer := fmt.Sprintf("\n# User: %s\n# ID: %s\n[Peer]\nPublicKey = %s\nPresharedKey = %s\nAllowedIPs = %s/32\n", userID, uuidID, pubKey, psk, clientIP)

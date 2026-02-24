@@ -137,9 +137,12 @@ func (m *AWGManager) setupAdapterAndRoutes(apiHostIP string) error {
 		$tunIf = Get-NetAdapter -Name $adapterName
 		$tunIdx = $tunIf.InterfaceIndex
 		Remove-NetIPAddress -InterfaceIndex $tunIdx -Confirm:$false -ErrorAction SilentlyContinue
-		New-NetIPAddress -InterfaceIndex $tunIdx -IPAddress $ipOnly -PrefixLength 24 -ErrorAction SilentlyContinue
+		New-NetIPAddress -InterfaceIndex $tunIdx -IPAddress $ipOnly -PrefixLength 24 -DefaultGateway $ipOnly -ErrorAction SilentlyContinue
 		Set-NetIPInterface -InterfaceIndex $tunIdx -InterfaceMetric 1 -NlMtuBytes 1280 -ErrorAction SilentlyContinue
 		Set-DnsClientServerAddress -InterfaceIndex $tunIdx -ServerAddresses ("1.1.1.1", "8.8.8.8")
+		
+		# Force Network Profile to Private to allow TCP
+		Set-NetConnectionProfile -InterfaceIndex $tunIdx -NetworkCategory Private -ErrorAction SilentlyContinue
 
 		# Bypass Server
 		if ($serverIP -ne "") {
@@ -156,6 +159,8 @@ func (m *AWGManager) setupAdapterAndRoutes(apiHostIP string) error {
 		}
 
 		# Route all through VPN
+		# Because we set a DefaultGateway above, Windows creates 0.0.0.0/0 route automatically.
+		# We just ensure the DNS servers are explicitly routed down the TUN so UDP 53 uses Wintun IP.
 		function Add-RouteIfMissing($prefix, $idx) {
 			if (!(Get-NetRoute -DestinationPrefix $prefix -InterfaceIndex $idx -ErrorAction SilentlyContinue)) {
 				New-NetRoute -DestinationPrefix $prefix -InterfaceIndex $idx -RouteMetric 1
@@ -163,8 +168,6 @@ func (m *AWGManager) setupAdapterAndRoutes(apiHostIP string) error {
 		}
 		Add-RouteIfMissing "1.1.1.1/32" $tunIdx
 		Add-RouteIfMissing "8.8.8.8/32" $tunIdx
-		Add-RouteIfMissing "0.0.0.0/1" $tunIdx
-		Add-RouteIfMissing "128.0.0.0/1" $tunIdx
 
 		Clear-DnsClientCache -ErrorAction SilentlyContinue
 	`, m.tunName, m.tunIP, m.serverIP, apiHostIP)
