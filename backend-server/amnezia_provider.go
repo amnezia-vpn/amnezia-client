@@ -189,20 +189,54 @@ func (p *AmneziaProvider) CreateKey(userID string) (string, string, error) {
 		return "", "", err
 	}
 
-	// 5. Generate client URI
+	// 5. Parse exact Amnezia obfuscation parameters from awg0.conf
+	jc, jmin, jmax := "4", "40", "70"
+	s1, s2 := "0", "0"
+	h1, h2, h3, h4 := "1", "2", "3", "4"
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			k := strings.TrimSpace(parts[0])
+			v := strings.TrimSpace(parts[1])
+			switch k {
+			case "Jc":
+				jc = v
+			case "Jmin":
+				jmin = v
+			case "Jmax":
+				jmax = v
+			case "S1":
+				s1 = v
+			case "S2":
+				s2 = v
+			case "H1":
+				h1 = v
+			case "H2":
+				h2 = v
+			case "H3":
+				h3 = v
+			case "H4":
+				h4 = v
+			}
+		}
+	}
+
+	// 6. Generate client URI
 	clientConf := fmt.Sprintf(`[Interface]
 Address = %s/32
 DNS = 1.1.1.1, 8.8.8.8
 PrivateKey = %s
-Jc = 4
-Jmin = 40
-Jmax = 70
-S1 = 0
-S2 = 0
-H1 = 1
-H2 = 2
-H3 = 3
-H4 = 4
+Jc = %s
+Jmin = %s
+Jmax = %s
+S1 = %s
+S2 = %s
+H1 = %s
+H2 = %s
+H3 = %s
+H4 = %s
 
 [Peer]
 PublicKey = %s
@@ -210,7 +244,7 @@ PresharedKey = %s
 AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = %s:%d
 PersistentKeepalive = 25
-`, clientIP, privKey, serverPubKey, psk, p.serverHost, p.settings.Port)
+`, clientIP, privKey, jc, jmin, jmax, s1, s2, h1, h2, h3, h4, serverPubKey, psk, p.serverHost, p.settings.Port)
 
 	uri := "amneziawg://" + base64.StdEncoding.EncodeToString([]byte(clientConf))
 	return uuidID, uri, nil

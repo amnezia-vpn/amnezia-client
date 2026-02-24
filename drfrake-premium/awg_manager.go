@@ -7,15 +7,22 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/netip"
 	"os/exec"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/amnezia-vpn/amneziawg-go/conn"
 	"github.com/amnezia-vpn/amneziawg-go/device"
 	"github.com/amnezia-vpn/amneziawg-go/tun"
 	"golang.org/x/sys/windows"
+	"golang.zx2c4.com/wireguard/windows/tunnel/winipcfg"
 )
+
+type luidGetter interface {
+	LUID() uint64
+}
 
 type AWGManager struct {
 	mu        sync.Mutex
@@ -54,8 +61,8 @@ func (m *AWGManager) Start(configText string, apiHostIP string) error {
 	m.tunIP = tunIP
 
 	// 2. Create TUN
-	log.Printf("[AWG] Creating Wintun adapter: %s", m.tunName)
-	tunDev, err := tun.CreateTUN(m.tunName, 0)
+	log.Printf("[AWG] Creating Wintun adapter: %s (MTU 1280)", m.tunName)
+	tunDev, err := tun.CreateTUN(m.tunName, 1280)
 	if err != nil {
 		return fmt.Errorf("failed to create TUN device: %w", err)
 	}
@@ -85,6 +92,42 @@ func (m *AWGManager) Start(configText string, apiHostIP string) error {
 	}
 
 	m.running = true
+
+	// DIAGNOSTIC LOGGER: Dump actual Tunnel statistics to verify if Handshake is succeeding
+	go func() {
+		for {
+			time.Sleep(3 * time.Second)
+			m.mu.Lock()
+			isRunning := m.running
+			m.mu.Unlock()
+			if !isRunning {
+				return
+			}
+			out, err := m.device.IpcGet()
+			if err != nil {
+				log.Printf("[AWG-Stats] Error reading stats: %v", err)
+			} else {
+				rx := "0"
+				tx := "0"
+				hs := "0"
+				for _, line := range strings.Split(out, "\n") {
+					if strings.HasPrefix(line, "rx_bytes=") {
+						rx = strings.TrimPrefix(line, "rx_bytes=")
+					} else if strings.HasPrefix(line, "tx_bytes=") {
+						tx = strings.TrimPrefix(line, "tx_bytes=")
+					} else if strings.HasPrefix(line, "last_handshake_time_sec=") {
+						hs = strings.TrimPrefix(line, "last_handshake_time_sec=")
+					}
+				}
+				if hs != "0" && hs != "" {
+					log.Printf("[AWG-Stats] TX: %s bytes | RX: %s bytes | Handshake SEC: %s", tx, rx, hs)
+				} else {
+					log.Printf("[AWG-Stats] TX: %s bytes | RX: %s bytes | (No Handshake yet)", tx, rx)
+				}
+			}
+		}
+	}()
+
 	return nil
 }
 
@@ -111,21 +154,73 @@ func (m *AWGManager) Stop(apiHostIP string) error {
 	return nil
 }
 
-// Configure adapter and bypass routes via PowerShell
 func (m *AWGManager) setupAdapterAndRoutes(apiHostIP string) error {
-	log.Printf("[AWG] Configuring Adapter: %s IP: %s (Bypass: %s, %s)", m.tunName, m.tunIP, m.serverIP, apiHostIP)
+	log.Printf("[AWG] Configuring Adapter natively via WinIPCfg: %s IP: %s (Bypass: %s, %s)", m.tunName, m.tunIP, m.serverIP, apiHostIP)
 
+	var luid winipcfg.LUID
+
+	// Fast Path: Extract LUID directly from amnezia tun.NativeTun
+	if getter, ok := m.tunDevice.(luidGetter); ok {
+		luid = winipcfg.LUID(getter.LUID())
+		log.Printf("[AWG] Natively recovered Wintun LUID: %d", luid)
+	}
+
+	// Fallback Path: Iterate NDIS tree using the requested Device alias
+	if luid == 0 {
+		aas, err := winipcfg.GetAdaptersAddresses(windows.AF_UNSPEC, winipcfg.GAAFlagIncludePrefix)
+		if err == nil {
+			for _, aa := range aas {
+				if aa.FriendlyName() == m.tunName {
+					luid = aa.LUID
+					break
+				}
+			}
+		}
+	}
+
+	if luid == 0 {
+		return fmt.Errorf("could not find LUID for adapter %s", m.tunName)
+	}
+
+	// 1. Set IP Address (This natively configures NDIS correctly)
+	ip, err := netip.ParsePrefix(m.tunIP)
+	if err != nil {
+		return fmt.Errorf("invalid tun IP %s: %v", m.tunIP, err)
+	}
+	err = luid.SetIPAddresses([]netip.Prefix{ip})
+	if err != nil {
+		return fmt.Errorf("failed to set IP address: %w", err)
+	}
+
+	// 2. Set MTU explicitly for Windows networking stack to match Amnezia WG packet padding (1280)
+	// Wintun natively inherits the 1280 MTU passed into tun.CreateTUN above.
+
+	// 3. Set DNS
+	dns1, _ := netip.ParseAddr("1.1.1.1")
+	dns2, _ := netip.ParseAddr("8.8.8.8")
+	err = luid.SetDNS(windows.AF_INET, []netip.Addr{dns1, dns2}, []string{})
+	if err != nil {
+		return fmt.Errorf("failed to set DNS: %w", err)
+	}
+
+	// 4. Set Routes (Standard Wireguard equivalent of 0.0.0.0/0)
+	routes := []*winipcfg.RouteData{
+		{Destination: netip.MustParsePrefix("0.0.0.0/1"), NextHop: netip.IPv4Unspecified(), Metric: 0},
+		{Destination: netip.MustParsePrefix("128.0.0.0/1"), NextHop: netip.IPv4Unspecified(), Metric: 0},
+	}
+	err = luid.AddRoutes(routes)
+	if err != nil {
+		return fmt.Errorf("failed to add default route: %w", err)
+	}
+
+	// 5. Bypass physical routes for VPN server and API via powershell
 	psCmd := fmt.Sprintf(`
 		$ErrorActionPreference = "Stop";
 		$adapterName = "%s";
-		$tunIP = "%s";
 		$serverIP = "%s";
 		$apiHostIP = "%s";
 
-		# Strip CIDR from TUN IP for NetIPAddress
-		$ipOnly = $tunIP -replace "/.*",""
-
-		# Find Default Gateway
+		# Find Default Gateway on non-vpn adapters
 		$defRoute = Get-NetRoute -DestinationPrefix "0.0.0.0/0" |
 			Where-Object { $_.InterfaceAlias -ne $adapterName } |
 			Sort-Object -Property RouteMetric | Select-Object -First 1
@@ -133,49 +228,32 @@ func (m *AWGManager) setupAdapterAndRoutes(apiHostIP string) error {
 		$gw = $defRoute.NextHop
 		$ifIndex = $defRoute.InterfaceIndex
 
-		# Configure TUN
-		$tunIf = Get-NetAdapter -Name $adapterName
-		$tunIdx = $tunIf.InterfaceIndex
-		Remove-NetIPAddress -InterfaceIndex $tunIdx -Confirm:$false -ErrorAction SilentlyContinue
-		New-NetIPAddress -InterfaceIndex $tunIdx -IPAddress $ipOnly -PrefixLength 24 -DefaultGateway $ipOnly -ErrorAction SilentlyContinue
-		Set-NetIPInterface -InterfaceIndex $tunIdx -InterfaceMetric 1 -NlMtuBytes 1280 -ErrorAction SilentlyContinue
-		Set-DnsClientServerAddress -InterfaceIndex $tunIdx -ServerAddresses ("1.1.1.1", "8.8.8.8")
-		
-		# Force Network Profile to Private to allow TCP
-		Set-NetConnectionProfile -InterfaceIndex $tunIdx -NetworkCategory Private -ErrorAction SilentlyContinue
-
-		# Bypass Server
 		if ($serverIP -ne "") {
 			if (!(Get-NetRoute -DestinationPrefix "$serverIP/32" -ErrorAction SilentlyContinue)) {
 				New-NetRoute -DestinationPrefix "$serverIP/32" -NextHop $gw -InterfaceIndex $ifIndex -RouteMetric 1
 			}
 		}
 
-		# Bypass API
 		if ($apiHostIP -ne "" -and $apiHostIP -ne $serverIP) {
 			if (!(Get-NetRoute -DestinationPrefix "$apiHostIP/32" -ErrorAction SilentlyContinue)) {
 				New-NetRoute -DestinationPrefix "$apiHostIP/32" -NextHop $gw -InterfaceIndex $ifIndex -RouteMetric 1
 			}
 		}
 
-		# Route all through VPN
-		# Because we set a DefaultGateway above, Windows creates 0.0.0.0/0 route automatically.
-		# We just ensure the DNS servers are explicitly routed down the TUN so UDP 53 uses Wintun IP.
-		function Add-RouteIfMissing($prefix, $idx) {
-			if (!(Get-NetRoute -DestinationPrefix $prefix -InterfaceIndex $idx -ErrorAction SilentlyContinue)) {
-				New-NetRoute -DestinationPrefix $prefix -InterfaceIndex $idx -RouteMetric 1
-			}
+		# Allow TCP traffic by explicitly marking as Private Network
+		Start-Sleep -Milliseconds 500
+		$tunIf = Get-NetAdapter -Name $adapterName -ErrorAction SilentlyContinue
+		if ($tunIf) {
+			Set-NetConnectionProfile -InterfaceIndex $tunIf.InterfaceIndex -NetworkCategory Private -ErrorAction SilentlyContinue
 		}
-		Add-RouteIfMissing "1.1.1.1/32" $tunIdx
-		Add-RouteIfMissing "8.8.8.8/32" $tunIdx
-
+		
 		Clear-DnsClientCache -ErrorAction SilentlyContinue
-	`, m.tunName, m.tunIP, m.serverIP, apiHostIP)
+	`, m.tunName, m.serverIP, apiHostIP)
 
 	cmd := exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", psCmd)
 	cmd.SysProcAttr = &windows.SysProcAttr{HideWindow: true}
 	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("powershell routing failed: %v, out: %s", err, string(out))
+		return fmt.Errorf("powershell bypass routing failed: %v, out: %s", err, string(out))
 	}
 	return nil
 }
