@@ -323,24 +323,11 @@ func parseAmneziaConfigToUAPI(conf string) (string, string, string, error) {
 			case "address":
 				tunIP = val
 			// AmneziaWG specific fields:
-			case "jc":
-				uapi.WriteString("jc=" + val + "\n")
-			case "jmin":
-				uapi.WriteString("jmin=" + val + "\n")
-			case "jmax":
-				uapi.WriteString("jmax=" + val + "\n")
-			case "s1":
-				uapi.WriteString("s1=" + val + "\n")
-			case "s2":
-				uapi.WriteString("s2=" + val + "\n")
-			case "h1":
-				uapi.WriteString("h1=" + val + "\n")
-			case "h2":
-				uapi.WriteString("h2=" + val + "\n")
-			case "h3":
-				uapi.WriteString("h3=" + val + "\n")
-			case "h4":
-				uapi.WriteString("h4=" + val + "\n")
+			case "jc", "jmin", "jmax", "s1", "s2", "h1", "h2", "h3", "h4":
+				// AmneziaWG servers often define Magic Headers (H1-H4) as a range (e.g. 946085831-1504219533)
+				// The amneziawg-go UAPI parser strictly requires a single uint32. We take the base value.
+				baseVal := strings.Split(val, "-")[0]
+				uapi.WriteString(strings.ToLower(key) + "=" + baseVal + "\n")
 			}
 		} else if section == "[peer]" {
 			switch strings.ToLower(key) {
