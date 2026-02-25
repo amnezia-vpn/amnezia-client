@@ -19,6 +19,8 @@ import "../Components"
 PageType {
     id: root
 
+    property var containersDropDownRef: null
+
     Connections {
         target: Qt.application
 
@@ -41,8 +43,8 @@ PageType {
 
         function onRestorePageHomeState(isContainerInstalled) {
             drawer.openTriggered()
-            if (isContainerInstalled) {
-                containersDropDown.rootButtonClickedFunction()
+            if (isContainerInstalled && root.containersDropDownRef) {
+                root.containersDropDownRef.rootButtonClickedFunction()
             }
         }
     }
@@ -382,6 +384,8 @@ PageType {
                     DropDownType {
                         id: containersDropDown
                         objectName: "containersDropDown"
+
+                        Component.onCompleted: root.containersDropDownRef = containersDropDown
 
                         rootButtonImageColor: AmneziaStyle.color.midnightBlack
                         rootButtonBackgroundColor: AmneziaStyle.color.paleGray

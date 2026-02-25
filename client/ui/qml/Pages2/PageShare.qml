@@ -475,7 +475,9 @@ PageType {
                             exportTypeSelector.currentIndex = 0
                         }
                         selectedIndex = exportTypeSelector.currentIndex
-                        exportTypeSelector.text = selectedText
+                        exportTypeSelector.text = (selectedText !== undefined && selectedText !== null)
+                            ? selectedText
+                            : (model.length > 0 ? model[exportTypeSelector.currentIndex].name : "")
                     }
 
                     rootWidth: root.width
