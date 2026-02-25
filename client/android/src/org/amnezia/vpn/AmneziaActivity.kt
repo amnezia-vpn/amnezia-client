@@ -303,8 +303,41 @@ class AmneziaActivity : QtActivity() {
                 KeyEvent.KEYCODE_BUTTON_X,
                 KeyEvent.KEYCODE_BUTTON_Y,
                 KeyEvent.KEYCODE_BUTTON_START,
-                KeyEvent.KEYCODE_BUTTON_SELECT,
+                KeyEvent.KEYCODE_BUTTON_SELECT -> {
+                    nativeGamepadKeyEvent(0, keyCode, true)
+                    nativeGamepadKeyEvent(0, keyCode, false)
+                    return true
+                }
                 KeyEvent.KEYCODE_DPAD_CENTER -> {
+                    if (isOnTv()) {
+                        val down = KeyEvent(
+                            event.downTime,
+                            event.eventTime,
+                            KeyEvent.ACTION_DOWN,
+                            KeyEvent.KEYCODE_ENTER,
+                            0,
+                            event.metaState,
+                            0,
+                            event.scanCode,
+                            event.flags,
+                            event.source
+                        )
+                        val up = KeyEvent(
+                            event.downTime,
+                            event.eventTime,
+                            KeyEvent.ACTION_UP,
+                            KeyEvent.KEYCODE_ENTER,
+                            0,
+                            event.metaState,
+                            0,
+                            event.scanCode,
+                            event.flags,
+                            event.source
+                        )
+                        super.dispatchKeyEvent(down)
+                        super.dispatchKeyEvent(up)
+                        return true
+                    }
                     nativeGamepadKeyEvent(0, keyCode, true)
                     nativeGamepadKeyEvent(0, keyCode, false)
                     return true
