@@ -375,6 +375,7 @@ bool ApiConfigsController::fillAvailableServices()
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
+    qDebug().noquote() << "[Billing] gateway response v1/services responseBody:" << responseBody;
     if (errorCode == ErrorCode::NoError) {
         if (!responseBody.contains("services")) {
             errorCode = ErrorCode::ApiServicesMissingError;
@@ -435,14 +436,18 @@ bool ApiConfigsController::fillAvailableServices()
     auto androidController = AndroidController::instance();
     QJsonObject plansResult = androidController->getSubscriptionPlans();
     int responseCode = plansResult.value("responseCode").toInt(-1);
-    
+    qDebug().noquote() << "[Billing] getSubscriptionPlans plansResult:" << QJsonDocument(plansResult).toJson(QJsonDocument::Compact);
+    qDebug() << "[Billing] getSubscriptionPlans responseCode:" << responseCode;
+
     if (responseCode == 0) {
         QJsonArray products = plansResult.value("products").toArray();
         QString formattedPrice;
         int billingPeriodDays = 180;
         for (const QJsonValue &productValue : products) {
             QJsonObject product = productValue.toObject();
-            if (product.value("productId").toString() == "premium") {
+            const QString productId = product.value("productId").toString();
+            const bool isPremium = (productId == "premium") || productId.contains("premium");
+            if (isPremium) {
                 QJsonArray offers = product.value("offers").toArray();
                 if (!offers.isEmpty()) {
                     QJsonObject firstOffer = offers.at(0).toObject();
@@ -450,14 +455,21 @@ bool ApiConfigsController::fillAvailableServices()
                     if (!pricingPhases.isEmpty()) {
                         QJsonObject pricingPhase = pricingPhases.at(0).toObject();
                         formattedPrice = pricingPhase.value("formatedPrice").toString();
+                        if (formattedPrice.isEmpty()) {
+                            formattedPrice = pricingPhase.value("formattedPrice").toString();
+                        }
                         QString billingPeriod = pricingPhase.value("billingPeriod").toString();
-                        if (billingPeriod.contains("D")) {
-                            int idx = billingPeriod.indexOf("D");
-                            billingPeriodDays = billingPeriod.mid(1, idx - 1).toInt();
+                        if (billingPeriod.contains("Y")) {
+                            int idx = billingPeriod.indexOf("Y");
+                            int years = billingPeriod.mid(1, idx - 1).toInt();
+                            if (years > 0) billingPeriodDays = years * 365;
                         } else if (billingPeriod.contains("M")) {
                             int idx = billingPeriod.indexOf("M");
                             int months = billingPeriod.mid(1, idx - 1).toInt();
                             if (months > 0) billingPeriodDays = months * 30;
+                        } else if (billingPeriod.contains("D")) {
+                            int idx = billingPeriod.indexOf("D");
+                            billingPeriodDays = billingPeriod.mid(1, idx - 1).toInt();
                         }
                     }
                 }
@@ -480,7 +492,7 @@ bool ApiConfigsController::fillAvailableServices()
                     break;
                 }
             }
-            if (!premiumFound) {
+         /*   if (!premiumFound) {
                 // Gateway did not return premium; add it from billing data
                 QString region = data.value(configKey::userCountryCode).toString();
                 QJsonObject serviceInfo;
@@ -505,7 +517,7 @@ bool ApiConfigsController::fillAvailableServices()
                 services.prepend(premiumService);
                 data["services"] = services;
                 qInfo() << "[Billing] Added premium service from billing (gateway did not return it)";
-            }
+            }*/
         }
     } else {
         qWarning() << "[Billing] Failed to fetch product price, responseCode:" << responseCode;
@@ -523,7 +535,7 @@ bool ApiConfigsController::importService()
 {
     if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaPremium) {
 #if defined(Q_OS_IOS) || defined(MACOS_NE) || defined(Q_OS_ANDROID)
-        importSerivceFromPaymentMarket();
+        importServiceFromPaymentMarket();
         return true;
 #else
         return false; // premium only via App Store / Play
@@ -533,7 +545,7 @@ bool ApiConfigsController::importService()
     return true;
 }
 
-bool ApiConfigsController::importSerivceFromPaymentMarket()
+bool ApiConfigsController::importServiceFromPaymentMarket()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     bool purchaseOk = false;
@@ -603,6 +615,8 @@ bool ApiConfigsController::importSerivceFromPaymentMarket()
     QFuture<QPair<bool, QString>> future = QtConcurrent::run([androidController]() {
         QJsonObject plansResult = androidController->getSubscriptionPlans();
         int responseCode = plansResult.value("responseCode").toInt(-1);
+        qDebug().noquote() << "[Billing] importService getSubscriptionPlans plansResult:" << QJsonDocument(plansResult).toJson(QJsonDocument::Compact);
+        qDebug() << "[Billing] importService getSubscriptionPlans responseCode:" << responseCode;
         if (responseCode != 0) {
             qWarning() << "[Billing] Failed to get subscription plans, responseCode:" << responseCode;
             return qMakePair(false, QString());
@@ -611,7 +625,9 @@ bool ApiConfigsController::importSerivceFromPaymentMarket()
         QString offerToken;
         for (const QJsonValue &productValue : products) {
             QJsonObject product = productValue.toObject();
-            if (product.value("productId").toString() == "premium") {
+            const QString productId = product.value("productId").toString();
+            const bool isPremium = (productId == "premium") || productId.contains("premium");
+            if (isPremium) {
                 QJsonArray offers = product.value("offers").toArray();
                 if (!offers.isEmpty()) {
                     QJsonObject firstOffer = offers.at(0).toObject();
@@ -695,7 +711,7 @@ bool ApiConfigsController::importSerivceFromPaymentMarket()
     return true;
 }
 
-bool ApiConfigsController::restoreSerivceFromPaymentMarket()
+bool ApiConfigsController::restoreServiceFromPaymentMarket()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     const QString premiumServiceType = QStringLiteral("amnezia-premium");

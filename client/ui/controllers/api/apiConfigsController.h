@@ -27,8 +27,8 @@ public slots:
 
     bool fillAvailableServices();
     bool importService();
-    bool importSerivceFromPaymentMarket();
-    bool restoreSerivceFromPaymentMarket();
+    bool importServiceFromPaymentMarket();
+    bool restoreServiceFromPaymentMarket();
     bool importServiceFromGateway();
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
