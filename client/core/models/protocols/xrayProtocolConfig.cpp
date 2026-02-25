@@ -10,8 +10,6 @@
 
 using namespace amnezia;
 using namespace ProtocolUtils;
-using namespace config_key;
-
 namespace amnezia
 {
 
@@ -20,20 +18,20 @@ QJsonObject XrayServerConfig::toJson() const
     QJsonObject obj;
     
     if (!port.isEmpty()) {
-        obj[config_key::port] = port;
+        obj[configKey::port] = port;
     }
     if (!transportProto.isEmpty()) {
-        obj[config_key::transport_proto] = transportProto;
+        obj[configKey::transportProto] = transportProto;
     }
     if (!subnetAddress.isEmpty()) {
-        obj[config_key::subnet_address] = subnetAddress;
+        obj[configKey::subnetAddress] = subnetAddress;
     }
     if (!site.isEmpty()) {
-        obj[config_key::site] = site;
+        obj[configKey::site] = site;
     }
     
     if (isThirdPartyConfig) {
-        obj[config_key::isThirdPartyConfig] = isThirdPartyConfig;
+        obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
     }
     
     return obj;
@@ -43,12 +41,12 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject& json)
 {
     XrayServerConfig config;
     
-    config.port = json.value(config_key::port).toString();
-    config.transportProto = json.value(config_key::transport_proto).toString();
-    config.subnetAddress = json.value(config_key::subnet_address).toString();
-    config.site = json.value(config_key::site).toString();
+    config.port = json.value(configKey::port).toString();
+    config.transportProto = json.value(configKey::transportProto).toString();
+    config.subnetAddress = json.value(configKey::subnetAddress).toString();
+    config.site = json.value(configKey::site).toString();
     
-    config.isThirdPartyConfig = json.value(config_key::isThirdPartyConfig).toBool(false);
+    config.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
     
     return config;
 }
@@ -63,13 +61,13 @@ QJsonObject XrayClientConfig::toJson() const
     QJsonObject obj;
     
     if (!nativeConfig.isEmpty()) {
-        obj[config_key::config] = nativeConfig;
+        obj[configKey::config] = nativeConfig;
     }
     if (!localPort.isEmpty()) {
-        obj[config_key::local_port] = localPort;
+        obj[configKey::localPort] = localPort;
     }
     if (!id.isEmpty()) {
-        obj[config_key::clientId] = id;
+        obj[configKey::clientId] = id;
     }
     
     return obj;
@@ -79,30 +77,30 @@ XrayClientConfig XrayClientConfig::fromJson(const QJsonObject& json)
 {
     XrayClientConfig config;
     
-    config.nativeConfig = json.value(config_key::config).toString();
-    config.localPort = json.value(config_key::local_port).toString();
-    config.id = json.value(config_key::clientId).toString();
+    config.nativeConfig = json.value(configKey::config).toString();
+    config.localPort = json.value(configKey::localPort).toString();
+    config.id = json.value(configKey::clientId).toString();
     
     if (config.id.isEmpty() && !config.nativeConfig.isEmpty()) {
         QJsonDocument doc = QJsonDocument::fromJson(config.nativeConfig.toUtf8());
         if (!doc.isNull() && doc.isObject()) {
             QJsonObject configObj = doc.object();
-            if (configObj.contains("outbounds")) {
-                QJsonArray outbounds = configObj.value("outbounds").toArray();
+            if (configObj.contains(protocols::xray::outbounds)) {
+                QJsonArray outbounds = configObj.value(protocols::xray::outbounds).toArray();
                 if (!outbounds.isEmpty()) {
                     QJsonObject outbound = outbounds[0].toObject();
-                    if (outbound.contains("settings")) {
-                        QJsonObject settings = outbound["settings"].toObject();
-                        if (settings.contains("vnext")) {
-                            QJsonArray vnext = settings["vnext"].toArray();
+                    if (outbound.contains(protocols::xray::settings)) {
+                        QJsonObject settings = outbound[protocols::xray::settings].toObject();
+                        if (settings.contains(protocols::xray::vnext)) {
+                            QJsonArray vnext = settings[protocols::xray::vnext].toArray();
                             if (!vnext.isEmpty()) {
                                 QJsonObject vnextObj = vnext[0].toObject();
-                                if (vnextObj.contains("users")) {
-                                    QJsonArray users = vnextObj["users"].toArray();
+                                if (vnextObj.contains(protocols::xray::users)) {
+                                    QJsonArray users = vnextObj[protocols::xray::users].toArray();
                                     if (!users.isEmpty()) {
                                         QJsonObject user = users[0].toObject();
-                                        if (user.contains("id")) {
-                                            config.id = user["id"].toString();
+                                        if (user.contains(protocols::xray::id)) {
+                                            config.id = user[protocols::xray::id].toString();
                                         }
                                     }
                                 }
@@ -124,12 +122,12 @@ QJsonObject XrayProtocolConfig::toJson() const
     if (clientConfig.has_value()) {
         // Third-party import: nativeConfig is raw Xray JSON (inbounds/outbounds)
         QJsonDocument doc = QJsonDocument::fromJson(clientConfig->nativeConfig.toUtf8());
-        if (!doc.isNull() && doc.isObject() && doc.object().contains("outbounds")
-                && !doc.object().contains(config_key::config)) {
-            obj[config_key::last_config] = clientConfig->nativeConfig;
+        if (!doc.isNull() && doc.isObject() && doc.object().contains(protocols::xray::outbounds)
+                && !doc.object().contains(configKey::config)) {
+            obj[configKey::lastConfig] = clientConfig->nativeConfig;
         } else {
             QJsonObject clientJson = clientConfig->toJson();
-            obj[config_key::last_config] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
+            obj[configKey::lastConfig] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
         }
     }
     
@@ -142,21 +140,21 @@ XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject& json)
     
     config.serverConfig = XrayServerConfig::fromJson(json);
     
-    QString lastConfigStr = json.value(config_key::last_config).toString();
+    QString lastConfigStr = json.value(configKey::lastConfig).toString();
     if (!lastConfigStr.isEmpty()) {
         QJsonDocument doc = QJsonDocument::fromJson(lastConfigStr.toUtf8());
         if (doc.isObject()) {
             QJsonObject parsed = doc.object();
             // Third-party import stores raw Xray config (inbounds/outbounds) directly
-            if (parsed.contains("outbounds") && !parsed.contains(config_key::config)) {
+            if (parsed.contains(protocols::xray::outbounds) && !parsed.contains(configKey::config)) {
                 XrayClientConfig clientCfg;
                 clientCfg.nativeConfig = lastConfigStr;
-                if (parsed.contains("inbounds")) {
-                    QJsonArray inbounds = parsed.value("inbounds").toArray();
+                if (parsed.contains(protocols::xray::inbounds)) {
+                    QJsonArray inbounds = parsed.value(protocols::xray::inbounds).toArray();
                     if (!inbounds.isEmpty()) {
                         QJsonObject inbound = inbounds[0].toObject();
-                        if (inbound.contains("port")) {
-                            clientCfg.localPort = QString::number(inbound.value("port").toInt());
+                        if (inbound.contains(protocols::xray::port)) {
+                            clientCfg.localPort = QString::number(inbound.value(protocols::xray::port).toInt());
                         }
                     }
                 }

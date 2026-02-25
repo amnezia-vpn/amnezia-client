@@ -34,58 +34,58 @@ private:
     QJsonObject createAwg2Config()
     {
         QJsonObject clientConfig;
-        clientConfig[config_key::mtu] = protocols::awg::defaultMtu;
-        clientConfig[config_key::junkPacketCount] = protocols::awg::defaultJunkPacketCount;
-        clientConfig[config_key::junkPacketMinSize] = protocols::awg::defaultJunkPacketMinSize;
-        clientConfig[config_key::junkPacketMaxSize] = protocols::awg::defaultJunkPacketMaxSize;
-        clientConfig[config_key::specialJunk1] = protocols::awg::defaultSpecialJunk1;
-        clientConfig[config_key::specialJunk2] = protocols::awg::defaultSpecialJunk2;
-        clientConfig[config_key::specialJunk3] = protocols::awg::defaultSpecialJunk3;
-        clientConfig[config_key::specialJunk4] = protocols::awg::defaultSpecialJunk4;
-        clientConfig[config_key::specialJunk5] = protocols::awg::defaultSpecialJunk5;
-        clientConfig[config_key::client_priv_key] = "test_client_private_key";
-        clientConfig[config_key::client_pub_key] = "test_client_public_key";
-        clientConfig[config_key::server_pub_key] = "test_server_public_key";
-        clientConfig[config_key::psk_key] = "test_psk_key";
-        clientConfig[config_key::client_ip] = "10.8.1.2";
-        clientConfig[config_key::allowed_ips] = QJsonArray::fromStringList({"0.0.0.0/0"});
+        clientConfig[configKey::mtu] = protocols::awg::defaultMtu;
+        clientConfig[configKey::junkPacketCount] = protocols::awg::defaultJunkPacketCount;
+        clientConfig[configKey::junkPacketMinSize] = protocols::awg::defaultJunkPacketMinSize;
+        clientConfig[configKey::junkPacketMaxSize] = protocols::awg::defaultJunkPacketMaxSize;
+        clientConfig[configKey::specialJunk1] = protocols::awg::defaultSpecialJunk1;
+        clientConfig[configKey::specialJunk2] = protocols::awg::defaultSpecialJunk2;
+        clientConfig[configKey::specialJunk3] = protocols::awg::defaultSpecialJunk3;
+        clientConfig[configKey::specialJunk4] = protocols::awg::defaultSpecialJunk4;
+        clientConfig[configKey::specialJunk5] = protocols::awg::defaultSpecialJunk5;
+        clientConfig[configKey::clientPrivKey] = "test_client_private_key";
+        clientConfig[configKey::clientPubKey] = "test_client_public_key";
+        clientConfig[configKey::serverPubKey] = "test_server_public_key";
+        clientConfig[configKey::pskKey] = "test_psk_key";
+        clientConfig[configKey::clientIp] = "10.8.1.2";
+        clientConfig[configKey::allowedIps] = QJsonArray::fromStringList({"0.0.0.0/0"});
 
         QJsonObject awgConfig;
-        awgConfig[config_key::last_config] = QString(QJsonDocument(clientConfig).toJson());
-        awgConfig[config_key::port] = protocols::awg::defaultPort;
-        awgConfig[config_key::transport_proto] = "udp";
-        awgConfig[config_key::protocolVersion] = protocols::awg::awgV2;
-        awgConfig[config_key::subnet_address] = protocols::wireguard::defaultSubnetAddress;
-        awgConfig[config_key::junkPacketCount] = protocols::awg::defaultJunkPacketCount;
-        awgConfig[config_key::junkPacketMinSize] = protocols::awg::defaultJunkPacketMinSize;
-        awgConfig[config_key::junkPacketMaxSize] = protocols::awg::defaultJunkPacketMaxSize;
-        awgConfig[config_key::initPacketJunkSize] = protocols::awg::defaultInitPacketJunkSize;
-        awgConfig[config_key::responsePacketJunkSize] = protocols::awg::defaultResponsePacketJunkSize;
-        awgConfig[config_key::cookieReplyPacketJunkSize] = protocols::awg::defaultCookieReplyPacketJunkSize;
-        awgConfig[config_key::transportPacketJunkSize] = protocols::awg::defaultTransportPacketJunkSize;
-        awgConfig[config_key::initPacketMagicHeader] = protocols::awg::defaultInitPacketMagicHeader;
-        awgConfig[config_key::responsePacketMagicHeader] = protocols::awg::defaultResponsePacketMagicHeader;
-        awgConfig[config_key::underloadPacketMagicHeader] = protocols::awg::defaultUnderloadPacketMagicHeader;
-        awgConfig[config_key::transportPacketMagicHeader] = protocols::awg::defaultTransportPacketMagicHeader;
-        awgConfig[config_key::specialJunk1] = protocols::awg::defaultSpecialJunk1;
-        awgConfig[config_key::specialJunk2] = protocols::awg::defaultSpecialJunk2;
-        awgConfig[config_key::specialJunk3] = protocols::awg::defaultSpecialJunk3;
-        awgConfig[config_key::specialJunk4] = protocols::awg::defaultSpecialJunk4;
-        awgConfig[config_key::specialJunk5] = protocols::awg::defaultSpecialJunk5;
-        awgConfig[config_key::isThirdPartyConfig] = true;
+        awgConfig[configKey::lastConfig] = QString(QJsonDocument(clientConfig).toJson());
+        awgConfig[configKey::port] = protocols::awg::defaultPort;
+        awgConfig[configKey::transportProto] = "udp";
+        awgConfig[configKey::protocolVersion] = protocols::awg::awgV2;
+        awgConfig[configKey::subnetAddress] = protocols::wireguard::defaultSubnetAddress;
+        awgConfig[configKey::junkPacketCount] = protocols::awg::defaultJunkPacketCount;
+        awgConfig[configKey::junkPacketMinSize] = protocols::awg::defaultJunkPacketMinSize;
+        awgConfig[configKey::junkPacketMaxSize] = protocols::awg::defaultJunkPacketMaxSize;
+        awgConfig[configKey::initPacketJunkSize] = protocols::awg::defaultInitPacketJunkSize;
+        awgConfig[configKey::responsePacketJunkSize] = protocols::awg::defaultResponsePacketJunkSize;
+        awgConfig[configKey::cookieReplyPacketJunkSize] = protocols::awg::defaultCookieReplyPacketJunkSize;
+        awgConfig[configKey::transportPacketJunkSize] = protocols::awg::defaultTransportPacketJunkSize;
+        awgConfig[configKey::initPacketMagicHeader] = protocols::awg::defaultInitPacketMagicHeader;
+        awgConfig[configKey::responsePacketMagicHeader] = protocols::awg::defaultResponsePacketMagicHeader;
+        awgConfig[configKey::underloadPacketMagicHeader] = protocols::awg::defaultUnderloadPacketMagicHeader;
+        awgConfig[configKey::transportPacketMagicHeader] = protocols::awg::defaultTransportPacketMagicHeader;
+        awgConfig[configKey::specialJunk1] = protocols::awg::defaultSpecialJunk1;
+        awgConfig[configKey::specialJunk2] = protocols::awg::defaultSpecialJunk2;
+        awgConfig[configKey::specialJunk3] = protocols::awg::defaultSpecialJunk3;
+        awgConfig[configKey::specialJunk4] = protocols::awg::defaultSpecialJunk4;
+        awgConfig[configKey::specialJunk5] = protocols::awg::defaultSpecialJunk5;
+        awgConfig[configKey::isThirdPartyConfig] = true;
 
         QJsonObject container;
-        container[config_key::container] = "amnezia-awg";
-        container[config_key::awg] = awgConfig;
+        container[configKey::container] = "amnezia-awg";
+        container[configKey::awg] = awgConfig;
 
         QJsonArray containers;
         containers.append(container);
 
         QJsonObject config;
-        config[config_key::containers] = containers;
-        config[config_key::defaultContainer] = "amnezia-awg";
-        config[config_key::description] = "AWG2 Test Server";
-        config[config_key::hostName] = "test.example.com";
+        config[configKey::containers] = containers;
+        config[configKey::defaultContainer] = "amnezia-awg";
+        config[configKey::description] = "AWG2 Test Server";
+        config[configKey::hostName] = "test.example.com";
 
         return config;
     }
@@ -219,18 +219,18 @@ private slots:
             
             QJsonObject containerConfig = m_coreController->m_containersModel->data(containerModelIndex, ContainersModel::ConfigRole).toJsonObject();
             QVERIFY2(!containerConfig.isEmpty(), "Container config should not be empty");
-            QVERIFY2(containerConfig.value(config_key::container).toString() == "amnezia-awg", "Container config should have correct container type");
+            QVERIFY2(containerConfig.value(configKey::container).toString() == "amnezia-awg", "Container config should have correct container type");
             
-            QJsonObject awgProtocolConfig = containerConfig.value(config_key::awg).toObject();
+            QJsonObject awgProtocolConfig = containerConfig.value(configKey::awg).toObject();
             QVERIFY2(!awgProtocolConfig.isEmpty(), "AWG protocol config should not be empty");
             
-            QString protocolVersion = awgProtocolConfig.value(config_key::protocolVersion).toString();
+            QString protocolVersion = awgProtocolConfig.value(configKey::protocolVersion).toString();
             QVERIFY2(protocolVersion == protocols::awg::awgV2, QString("Protocol version should be '%1', got '%2'").arg(protocols::awg::awgV2, protocolVersion).toUtf8().constData());
             
-            QString port = awgProtocolConfig.value(config_key::port).toString();
+            QString port = awgProtocolConfig.value(configKey::port).toString();
             QVERIFY2(port == protocols::awg::defaultPort, QString("Port should be '%1', got '%2'").arg(protocols::awg::defaultPort, port).toUtf8().constData());
             
-            QString subnetAddress = awgProtocolConfig.value(config_key::subnet_address).toString();
+            QString subnetAddress = awgProtocolConfig.value(configKey::subnetAddress).toString();
             QVERIFY2(subnetAddress == protocols::wireguard::defaultSubnetAddress, QString("Subnet address should be '%1', got '%2'").arg(protocols::wireguard::defaultSubnetAddress, subnetAddress).toUtf8().constData());
             
             bool isThirdParty = m_coreController->m_containersModel->data(containerModelIndex, ContainersModel::IsThirdPartyConfigRole).toBool();

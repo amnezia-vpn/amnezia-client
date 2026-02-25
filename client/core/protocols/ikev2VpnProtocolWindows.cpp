@@ -178,7 +178,7 @@ void Ikev2Protocol::readIkev2Configuration(const QJsonObject &configuration)
 
 ErrorCode Ikev2Protocol::start()
 {
-    QByteArray cert = QByteArray::fromBase64(m_config[config_key::cert].toString().toUtf8());
+    QByteArray cert = QByteArray::fromBase64(m_config[configKey::cert].toString().toUtf8());
     setConnectionState(Vpn::ConnectionState::Connecting);
 
     QTemporaryFile * certFile = new QTemporaryFile;
@@ -205,7 +205,7 @@ ErrorCode Ikev2Protocol::start()
         }
         certInstallProcess->setProgram(PermittedProcess::CertUtil);
 
-        QStringList arguments({"-f", "-importpfx", "-p", m_config[config_key::password].toString(),
+        QStringList arguments({"-f", "-importpfx", "-p", m_config[configKey::password].toString(),
             QDir::toNativeSeparators(m_filename), "NoExport"
         });
 
@@ -224,7 +224,7 @@ ErrorCode Ikev2Protocol::start()
 
     {
      {
-      if ( !create_new_vpn(tunnelName(), m_config[config_key::hostName].toString())){
+      if ( !create_new_vpn(tunnelName(), m_config[configKey::hostName].toString())){
                                                                                     qDebug() <<"Can't create the VPN connect";
 }
 }

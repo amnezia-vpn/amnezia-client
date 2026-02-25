@@ -467,7 +467,7 @@ QString SecureAppSettingsRepository::nextAvailableServerName() const
         nameExist = false;
         QJsonArray servers = QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
         for (const QJsonValue &server : servers) {
-            if (server.toObject().value(config_key::description).toString() == QString("Server") + " " + QString::number(i)) {
+            if (server.toObject().value(configKey::description).toString() == QString("Server") + " " + QString::number(i)) {
                 nameExist = true;
                 break;
             }

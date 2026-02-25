@@ -40,7 +40,7 @@ WireguardConfigurator::WireguardConfigurator(SshSession* sshSession, bool isAwg,
             m_isAwg ? amnezia::protocols::awg::serverPskKeyPath : amnezia::protocols::wireguard::serverPskKeyPath;
     m_configTemplate = m_isAwg ? ProtocolScriptType::awg_template : ProtocolScriptType::wireguard_template;
 
-    m_protocolName = m_isAwg ? config_key::awg : config_key::wireguard;
+    m_protocolName = m_isAwg ? configKey::awg : configKey::wireguard;
     m_defaultPort = m_isAwg ? protocols::wireguard::defaultPort : protocols::awg::defaultPort;
 }
 

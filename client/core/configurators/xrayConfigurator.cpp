@@ -56,13 +56,13 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     QJsonObject serverConfig = doc.object();
     
     // Validate server config structure
-    if (!serverConfig.contains("inbounds")) {
+    if (!serverConfig.contains(amnezia::protocols::xray::inbounds)) {
         logger.error() << "Server config missing 'inbounds' field";
         errorCode = ErrorCode::InternalError;
         return "";
     }
 
-    QJsonArray inbounds = serverConfig["inbounds"].toArray();
+    QJsonArray inbounds = serverConfig[amnezia::protocols::xray::inbounds].toArray();
     if (inbounds.isEmpty()) {
         logger.error() << "Server config has empty 'inbounds' array";
         errorCode = ErrorCode::InternalError;
@@ -70,34 +70,34 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     }
     
     QJsonObject inbound = inbounds[0].toObject();
-    if (!inbound.contains("settings")) {
+    if (!inbound.contains(amnezia::protocols::xray::settings)) {
         logger.error() << "Inbound missing 'settings' field";
         errorCode = ErrorCode::InternalError;
         return "";
     }
 
-    QJsonObject settings = inbound["settings"].toObject();
-    if (!settings.contains("clients")) {
+    QJsonObject settings = inbound[amnezia::protocols::xray::settings].toObject();
+    if (!settings.contains(amnezia::protocols::xray::clients)) {
         logger.error() << "Settings missing 'clients' field";
         errorCode = ErrorCode::InternalError;
         return "";
     }
 
-    QJsonArray clients = settings["clients"].toArray();
+    QJsonArray clients = settings[amnezia::protocols::xray::clients].toArray();
     
     // Create configuration for new client
     QJsonObject clientConfig {
-        {"id", clientId},
-        {"flow", "xtls-rprx-vision"}
+        {amnezia::protocols::xray::id, clientId},
+        {amnezia::protocols::xray::flow, "xtls-rprx-vision"}
     };
     
     clients.append(clientConfig);
     
     // Update config
-    settings["clients"] = clients;
-    inbound["settings"] = settings;
+    settings[amnezia::protocols::xray::clients] = clients;
+    inbound[amnezia::protocols::xray::settings] = settings;
     inbounds[0] = inbound;
-    serverConfig["inbounds"] = inbounds;
+    serverConfig[amnezia::protocols::xray::inbounds] = inbounds;
     
     // Save updated config to server
     QString updatedConfig = QJsonDocument(serverConfig).toJson();

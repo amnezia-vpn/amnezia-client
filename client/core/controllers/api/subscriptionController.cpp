@@ -35,35 +35,6 @@
 
 using namespace amnezia;
 
-namespace
-{
-    namespace configKey
-    {
-        constexpr char awg[] = "awg";
-        constexpr char vless[] = "vless";
-
-        constexpr char osVersion[] = "os_version";
-        constexpr char appVersion[] = "app_version";
-        constexpr char uuid[] = "installation_uuid";
-        constexpr char userCountryCode[] = "user_country_code";
-        constexpr char serverCountryCode[] = "server_country_code";
-        constexpr char serviceType[] = "service_type";
-        constexpr char serviceProtocol[] = "service_protocol";
-        constexpr char authData[] = "auth_data";
-        constexpr char subscription[] = "subscription";
-        constexpr char endDate[] = "end_date";
-        constexpr char isConnectEvent[] = "is_connect_event";
-        constexpr char config[] = "config";
-        constexpr char certificate[] = "certificate";
-        constexpr char publicKey[] = "public_key";
-        constexpr char apiConfig[] = "api_config";
-        constexpr char accessToken[] = "api_key";
-        constexpr char apiEndpoint[] = "api_endpoint";
-        constexpr char protocol[] = "protocol";
-        constexpr char publicKeyInfo[] = "public_key";
-        constexpr char expiresAt[] = "expires_at";
-    }
-}
 
 SubscriptionController::SubscriptionController(SecureServersRepository* serversRepository,
                                                SecureAppSettingsRepository* appSettingsRepository)
@@ -75,31 +46,31 @@ QJsonObject SubscriptionController::GatewayRequestData::toJsonObject() const
 {
     QJsonObject obj;
     if (!osVersion.isEmpty()) {
-        obj[configKey::osVersion] = osVersion;
+        obj[apiDefs::key::osVersion] = osVersion;
     }
     if (!appVersion.isEmpty()) {
-        obj[configKey::appVersion] = appVersion;
+        obj[apiDefs::key::appVersion] = appVersion;
     }
     if (!appLanguage.isEmpty()) {
         obj[apiDefs::key::appLanguage] = appLanguage;
     }
     if (!installationUuid.isEmpty()) {
-        obj[configKey::uuid] = installationUuid;
+        obj[apiDefs::key::uuid] = installationUuid;
     }
     if (!userCountryCode.isEmpty()) {
-        obj[configKey::userCountryCode] = userCountryCode;
+        obj[apiDefs::key::userCountryCode] = userCountryCode;
     }
     if (!serverCountryCode.isEmpty()) {
-        obj[configKey::serverCountryCode] = serverCountryCode;
+        obj[apiDefs::key::serverCountryCode] = serverCountryCode;
     }
     if (!serviceType.isEmpty()) {
-        obj[configKey::serviceType] = serviceType;
+        obj[apiDefs::key::serviceType] = serviceType;
     }
     if (!serviceProtocol.isEmpty()) {
-        obj[configKey::serviceProtocol] = serviceProtocol;
+        obj[apiDefs::key::serviceProtocol] = serviceProtocol;
     }
     if (!authData.isEmpty()) {
-        obj[configKey::authData] = authData;
+        obj[apiDefs::key::authData] = authData;
     }
     return obj;
 }
@@ -121,16 +92,16 @@ SubscriptionController::ProtocolData SubscriptionController::generateProtocolDat
 void SubscriptionController::appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload)
 {
     if (protocol == configKey::awg) {
-        apiPayload[configKey::publicKey] = protocolData.wireGuardClientPubKey;
+        apiPayload[apiDefs::key::publicKey] = protocolData.wireGuardClientPubKey;
     } else if (protocol == configKey::vless) {
-        apiPayload[configKey::publicKey] = protocolData.xrayUuid;
+        apiPayload[apiDefs::key::publicKey] = protocolData.xrayUuid;
     }
 }
 
 ErrorCode SubscriptionController::extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol, 
                                                                         const ProtocolData &protocolData, QJsonObject &serverConfigJson)
 {
-    QString data = QJsonDocument::fromJson(apiResponseBody).object().value(config_key::config).toString();
+    QString data = QJsonDocument::fromJson(apiResponseBody).object().value(configKey::config).toString();
 
     data.replace("vpn://", "");
     QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
@@ -149,7 +120,7 @@ ErrorCode SubscriptionController::extractServerConfigJsonFromResponse(const QByt
     if (protocol == configKey::awg) {
         configStr.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", protocolData.wireGuardClientPrivKey);
         auto newServerConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
-        auto containers = newServerConfig.value(config_key::containers).toArray();
+        auto containers = newServerConfig.value(configKey::containers).toArray();
         if (containers.isEmpty()) {
             qDebug() << "missing containers field";
             return ErrorCode::ApiConfigEmptyError;
@@ -158,33 +129,33 @@ ErrorCode SubscriptionController::extractServerConfigJsonFromResponse(const QByt
         QString containerName = ContainerUtils::containerTypeToString(DockerContainer::Awg);
         auto serverProtocolConfig = container.value(containerName).toObject();
         auto clientProtocolConfig =
-                QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
+                QJsonDocument::fromJson(serverProtocolConfig.value(configKey::lastConfig).toString().toUtf8()).object();
 
         // TODO looks like this block can be removed after v1 configs EOL
 
-        serverProtocolConfig[config_key::junkPacketCount] = clientProtocolConfig.value(config_key::junkPacketCount);
-        serverProtocolConfig[config_key::junkPacketMinSize] = clientProtocolConfig.value(config_key::junkPacketMinSize);
-        serverProtocolConfig[config_key::junkPacketMaxSize] = clientProtocolConfig.value(config_key::junkPacketMaxSize);
-        serverProtocolConfig[config_key::initPacketJunkSize] = clientProtocolConfig.value(config_key::initPacketJunkSize);
-        serverProtocolConfig[config_key::responsePacketJunkSize] = clientProtocolConfig.value(config_key::responsePacketJunkSize);
-        serverProtocolConfig[config_key::initPacketMagicHeader] = clientProtocolConfig.value(config_key::initPacketMagicHeader);
-        serverProtocolConfig[config_key::responsePacketMagicHeader] = clientProtocolConfig.value(config_key::responsePacketMagicHeader);
-        serverProtocolConfig[config_key::underloadPacketMagicHeader] = clientProtocolConfig.value(config_key::underloadPacketMagicHeader);
-        serverProtocolConfig[config_key::transportPacketMagicHeader] = clientProtocolConfig.value(config_key::transportPacketMagicHeader);
+        serverProtocolConfig[configKey::junkPacketCount] = clientProtocolConfig.value(configKey::junkPacketCount);
+        serverProtocolConfig[configKey::junkPacketMinSize] = clientProtocolConfig.value(configKey::junkPacketMinSize);
+        serverProtocolConfig[configKey::junkPacketMaxSize] = clientProtocolConfig.value(configKey::junkPacketMaxSize);
+        serverProtocolConfig[configKey::initPacketJunkSize] = clientProtocolConfig.value(configKey::initPacketJunkSize);
+        serverProtocolConfig[configKey::responsePacketJunkSize] = clientProtocolConfig.value(configKey::responsePacketJunkSize);
+        serverProtocolConfig[configKey::initPacketMagicHeader] = clientProtocolConfig.value(configKey::initPacketMagicHeader);
+        serverProtocolConfig[configKey::responsePacketMagicHeader] = clientProtocolConfig.value(configKey::responsePacketMagicHeader);
+        serverProtocolConfig[configKey::underloadPacketMagicHeader] = clientProtocolConfig.value(configKey::underloadPacketMagicHeader);
+        serverProtocolConfig[configKey::transportPacketMagicHeader] = clientProtocolConfig.value(configKey::transportPacketMagicHeader);
 
-        serverProtocolConfig[config_key::cookieReplyPacketJunkSize] = clientProtocolConfig.value(config_key::cookieReplyPacketJunkSize);
-        serverProtocolConfig[config_key::transportPacketJunkSize] = clientProtocolConfig.value(config_key::transportPacketJunkSize);
-        serverProtocolConfig[config_key::specialJunk1] = clientProtocolConfig.value(config_key::specialJunk1);
-        serverProtocolConfig[config_key::specialJunk2] = clientProtocolConfig.value(config_key::specialJunk2);
-        serverProtocolConfig[config_key::specialJunk3] = clientProtocolConfig.value(config_key::specialJunk3);
-        serverProtocolConfig[config_key::specialJunk4] = clientProtocolConfig.value(config_key::specialJunk4);
-        serverProtocolConfig[config_key::specialJunk5] = clientProtocolConfig.value(config_key::specialJunk5);
+        serverProtocolConfig[configKey::cookieReplyPacketJunkSize] = clientProtocolConfig.value(configKey::cookieReplyPacketJunkSize);
+        serverProtocolConfig[configKey::transportPacketJunkSize] = clientProtocolConfig.value(configKey::transportPacketJunkSize);
+        serverProtocolConfig[configKey::specialJunk1] = clientProtocolConfig.value(configKey::specialJunk1);
+        serverProtocolConfig[configKey::specialJunk2] = clientProtocolConfig.value(configKey::specialJunk2);
+        serverProtocolConfig[configKey::specialJunk3] = clientProtocolConfig.value(configKey::specialJunk3);
+        serverProtocolConfig[configKey::specialJunk4] = clientProtocolConfig.value(configKey::specialJunk4);
+        serverProtocolConfig[configKey::specialJunk5] = clientProtocolConfig.value(configKey::specialJunk5);
 
         //
 
         container[containerName] = serverProtocolConfig;
         containers.replace(0, container);
-        newServerConfig[config_key::containers] = containers;
+        newServerConfig[configKey::containers] = containers;
         configStr = QString(QJsonDocument(newServerConfig).toJson());
     }
 
@@ -196,13 +167,13 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
                                                     const QString &serviceProtocol, const QString &userCountryCode,
                                                     const QByteArray &apiResponseBody)
 {
-    QJsonObject apiConfig = serverConfigJson.value(configKey::apiConfig).toObject();
+    QJsonObject apiConfig = serverConfigJson.value(apiDefs::key::apiConfig).toObject();
     
     apiConfig[apiDefs::key::serviceType] = serviceType;
-    apiConfig[configKey::serviceProtocol] = serviceProtocol;
-    apiConfig[configKey::userCountryCode] = userCountryCode;
+    apiConfig[apiDefs::key::serviceProtocol] = serviceProtocol;
+    apiConfig[apiDefs::key::userCountryCode] = userCountryCode;
     
-    if (serverConfigJson.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+    if (serverConfigJson.value(configKey::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
         QJsonObject responseObj = QJsonDocument::fromJson(apiResponseBody).object();
         if (responseObj.contains(apiDefs::key::supportedProtocols)) {
             apiConfig.insert(apiDefs::key::supportedProtocols, responseObj.value(apiDefs::key::supportedProtocols).toArray());
@@ -212,7 +183,7 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
         }
     }
     
-    serverConfigJson[configKey::apiConfig] = apiConfig;
+    serverConfigJson[apiDefs::key::apiConfig] = apiConfig;
 }
 
 ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
@@ -387,7 +358,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
 
     if (isConnectEvent) {
-        apiPayload[configKey::isConnectEvent] = true;
+        apiPayload[apiDefs::key::isConnectEvent] = true;
     }
 
     QByteArray responseBody;
@@ -616,11 +587,11 @@ ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex)
 
     QJsonObject apiPayload;
     appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
-    apiPayload[configKey::uuid] = installationUuid;
-    apiPayload[configKey::osVersion] = QSysInfo::productType();
-    apiPayload[configKey::appVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::uuid] = installationUuid;
+    apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
+    apiPayload[apiDefs::key::appVersion] = QString(APP_VERSION);
     apiPayload[configKey::accessToken] = apiV1->apiKey;
-    apiPayload[configKey::apiEndpoint] = apiV1->apiEndpoint;
+    apiPayload[apiDefs::key::apiEndpoint] = apiV1->apiEndpoint;
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/proxy_config"), apiPayload, responseBody);

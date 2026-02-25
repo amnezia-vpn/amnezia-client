@@ -7,8 +7,6 @@
 
 using namespace amnezia;
 using namespace ProtocolUtils;
-using namespace config_key;
-
 namespace amnezia
 {
 
@@ -17,13 +15,13 @@ QJsonObject Socks5ProxyProtocolConfig::toJson() const
     QJsonObject obj;
     
     if (!port.isEmpty()) {
-        obj[config_key::port] = port;
+        obj[configKey::port] = port;
     }
     if (!userName.isEmpty()) {
-        obj[config_key::userName] = userName;
+        obj[configKey::userName] = userName;
     }
     if (!password.isEmpty()) {
-        obj[config_key::password] = password;
+        obj[configKey::password] = password;
     }
     
     return obj;
@@ -33,9 +31,9 @@ Socks5ProxyProtocolConfig Socks5ProxyProtocolConfig::fromJson(const QJsonObject&
 {
     Socks5ProxyProtocolConfig config;
     
-    config.port = json.value(config_key::port).toString();
-    config.userName = json.value(config_key::userName).toString();
-    config.password = json.value(config_key::password).toString();
+    config.port = json.value(configKey::port).toString();
+    config.userName = json.value(configKey::userName).toString();
+    config.password = json.value(configKey::password).toString();
     
     return config;
 }

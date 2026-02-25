@@ -2,6 +2,7 @@
 
 #include <QJsonObject>
 
+#include "core/utils/constants/apiKeys.h"
 #include "logger.h"
 
 namespace
@@ -240,7 +241,7 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     auto availableCountries = data.value(configKey::availableCountries).toArray();
     auto serviceDescription = data.value(configKey::serviceDescription).toObject();
 
-    auto subscriptionObject = data.value(configKey::subscription).toObject();
+    auto subscriptionObject = data.value(apiDefs::key::subscription).toObject();
 
     ApiServicesData serviceData;
     serviceData.serviceInfo.name = serviceInfo.value(configKey::name).toString();
@@ -267,7 +268,7 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.serviceInfo.object = serviceInfo;
     serviceData.availableCountries = availableCountries;
 
-    serviceData.subscription.endDate = subscriptionObject.value(configKey::endDate).toString();
+    serviceData.subscription.endDate = subscriptionObject.value(apiDefs::key::endDate).toString();
 
     return serviceData;
 }

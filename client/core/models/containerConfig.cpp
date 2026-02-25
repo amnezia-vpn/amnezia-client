@@ -26,7 +26,7 @@ QJsonObject ContainerConfig::toJson() const
 {
     QJsonObject obj;
     
-    obj[config_key::container] = ContainerUtils::containerToString(container);
+    obj[configKey::container] = ContainerUtils::containerToString(container);
     
     Proto protoType = getProtocolType();
     QString protoName = ProtocolUtils::protoToString(protoType);
@@ -40,7 +40,7 @@ ContainerConfig ContainerConfig::fromJson(const QJsonObject& json)
 {
     ContainerConfig config;
     
-    QString containerStr = json.value(config_key::container).toString();
+    QString containerStr = json.value(configKey::container).toString();
     config.container = ContainerUtils::containerFromString(containerStr);
     
     Proto protoType = ContainerUtils::defaultProtocol(config.container);

@@ -97,10 +97,10 @@ ProtocolConfig Ikev2Configurator::createConfig(const ServerCredentials &credenti
 QString Ikev2Configurator::genIkev2Config(const ConnectionData &connData)
 {
     QJsonObject config;
-    config[config_key::hostName] = connData.host;
-    config[config_key::userName] = connData.clientId;
-    config[config_key::cert] = QString(connData.clientCert.toBase64());
-    config[config_key::password] = connData.password;
+    config[configKey::hostName] = connData.host;
+    config[configKey::userName] = connData.clientId;
+    config[configKey::cert] = QString(connData.clientCert.toBase64());
+    config[configKey::password] = connData.password;
 
     return QJsonDocument(config).toJson();
 }

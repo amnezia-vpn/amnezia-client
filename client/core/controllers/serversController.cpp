@@ -14,17 +14,6 @@
     #include <AmneziaVPN-Swift.h>
 #endif
 
-namespace
-{
-    namespace configKey
-    {
-        constexpr char apiConfig[] = "api_config";
-        constexpr char publicKeyInfo[] = "public_key";
-        constexpr char expiresAt[] = "expires_at";
-        constexpr char userCountryCode[] = "user_country_code";
-        constexpr char serviceType[] = "service_type";
-    }
-}
 
 ServersController::ServersController(SecureServersRepository* serversRepository, 
                                       SecureAppSettingsRepository* appSettingsRepository,
@@ -170,13 +159,13 @@ QJsonObject ServersController::GatewayStacks::toJson() const
     for (const QString &code : userCountryCodes) {
         userCountryCodesArray.append(code);
     }
-    json["user_country_code"] = userCountryCodesArray;
+    json[apiDefs::key::userCountryCode] = userCountryCodesArray;
     
     QJsonArray serviceTypesArray;
     for (const QString &type : serviceTypes) {
         serviceTypesArray.append(type);
     }
-    json["service_type"] = serviceTypesArray;
+    json[apiDefs::key::serviceType] = serviceTypesArray;
     
     return json;
 }

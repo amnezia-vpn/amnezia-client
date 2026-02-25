@@ -81,24 +81,24 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
     }
     newClientConfig.mtu = mtu;
     
-    newClientConfig.junkPacketCount = configMap.value(config_key::junkPacketCount);
-    newClientConfig.junkPacketMinSize = configMap.value(config_key::junkPacketMinSize);
-    newClientConfig.junkPacketMaxSize = configMap.value(config_key::junkPacketMaxSize);
-    newClientConfig.initPacketJunkSize = configMap.value(config_key::initPacketJunkSize);
-    newClientConfig.responsePacketJunkSize = configMap.value(config_key::responsePacketJunkSize);
-    newClientConfig.initPacketMagicHeader = configMap.value(config_key::initPacketMagicHeader);
-    newClientConfig.responsePacketMagicHeader = configMap.value(config_key::responsePacketMagicHeader);
-    newClientConfig.underloadPacketMagicHeader = configMap.value(config_key::underloadPacketMagicHeader);
-    newClientConfig.transportPacketMagicHeader = configMap.value(config_key::transportPacketMagicHeader);
-    newClientConfig.specialJunk1 = configMap.value(config_key::specialJunk1);
-    newClientConfig.specialJunk2 = configMap.value(config_key::specialJunk2);
-    newClientConfig.specialJunk3 = configMap.value(config_key::specialJunk3);
-    newClientConfig.specialJunk4 = configMap.value(config_key::specialJunk4);
-    newClientConfig.specialJunk5 = configMap.value(config_key::specialJunk5);
+    newClientConfig.junkPacketCount = configMap.value(configKey::junkPacketCount);
+    newClientConfig.junkPacketMinSize = configMap.value(configKey::junkPacketMinSize);
+    newClientConfig.junkPacketMaxSize = configMap.value(configKey::junkPacketMaxSize);
+    newClientConfig.initPacketJunkSize = configMap.value(configKey::initPacketJunkSize);
+    newClientConfig.responsePacketJunkSize = configMap.value(configKey::responsePacketJunkSize);
+    newClientConfig.initPacketMagicHeader = configMap.value(configKey::initPacketMagicHeader);
+    newClientConfig.responsePacketMagicHeader = configMap.value(configKey::responsePacketMagicHeader);
+    newClientConfig.underloadPacketMagicHeader = configMap.value(configKey::underloadPacketMagicHeader);
+    newClientConfig.transportPacketMagicHeader = configMap.value(configKey::transportPacketMagicHeader);
+    newClientConfig.specialJunk1 = configMap.value(configKey::specialJunk1);
+    newClientConfig.specialJunk2 = configMap.value(configKey::specialJunk2);
+    newClientConfig.specialJunk3 = configMap.value(configKey::specialJunk3);
+    newClientConfig.specialJunk4 = configMap.value(configKey::specialJunk4);
+    newClientConfig.specialJunk5 = configMap.value(configKey::specialJunk5);
     
     if (container == DockerContainer::Awg2) {
-        newClientConfig.cookieReplyPacketJunkSize = configMap.value(config_key::cookieReplyPacketJunkSize);
-        newClientConfig.transportPacketJunkSize = configMap.value(config_key::transportPacketJunkSize);
+        newClientConfig.cookieReplyPacketJunkSize = configMap.value(configKey::cookieReplyPacketJunkSize);
+        newClientConfig.transportPacketJunkSize = configMap.value(configKey::transportPacketJunkSize);
     }
     
     newClientConfig.isObfuscationEnabled = false;

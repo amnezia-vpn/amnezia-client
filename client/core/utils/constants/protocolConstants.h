@@ -57,6 +57,31 @@ namespace amnezia
             constexpr char defaultPort[] = "443";
             constexpr char defaultLocalProxyPort[] = "10808";
             constexpr char defaultLocalAddr[] = "10.33.0.2";
+
+            constexpr char outbounds[] = "outbounds";
+            constexpr char inbounds[] = "inbounds";
+            constexpr char settings[] = "settings";
+            constexpr char streamSettings[] = "streamSettings";
+            constexpr char vnext[] = "vnext";
+            constexpr char users[] = "users";
+            constexpr char servers[] = "servers";
+            constexpr char clients[] = "clients";
+            constexpr char id[] = "id";
+            constexpr char port[] = "port";
+            constexpr char address[] = "address";
+            constexpr char flow[] = "flow";
+            constexpr char encryption[] = "encryption";
+            constexpr char network[] = "network";
+            constexpr char security[] = "security";
+            constexpr char realitySettings[] = "realitySettings";
+            constexpr char serverNames[] = "serverNames";
+            constexpr char serverName[] = "serverName";
+            constexpr char publicKey[] = "publicKey";
+            constexpr char shortId[] = "shortId";
+            constexpr char fingerprint[] = "fingerprint";
+            constexpr char spiderX[] = "spiderX";
+            constexpr char user[] = "user";
+            constexpr char pass[] = "pass";
         }
 
         namespace cloak
@@ -71,6 +96,17 @@ namespace amnezia
 
         namespace wireguard
         {
+            // Config file keys ([Interface] / [Peer] sections) - case-sensitive
+            constexpr char PrivateKey[] = "PrivateKey";
+            constexpr char Address[] = "Address";
+            constexpr char PublicKey[] = "PublicKey";
+            constexpr char PresharedKey[] = "PresharedKey";
+            constexpr char PreSharedKey[] = "PreSharedKey";
+            constexpr char AllowedIPs[] = "AllowedIPs";
+            constexpr char Endpoint[] = "Endpoint";
+            constexpr char PersistentKeepalive[] = "PersistentKeepalive";
+            constexpr char MTU[] = "MTU";
+
             constexpr char defaultSubnetAddress[] = "10.8.1.0";
             constexpr char defaultSubnetMask[] = "255.255.255.0";
             constexpr char defaultSubnetCidr[] = "24";

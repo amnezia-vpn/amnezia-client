@@ -152,7 +152,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
     processConfigWithDnsSettings(dns, protocolConfigString);
 
     QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-    QString config = json[config_key::config].toString();
+    QString config = json[configKey::config].toString();
 
     if (!isApiConfig) {
         QRegularExpression regex("redirect-gateway.*");
@@ -192,7 +192,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
     config.append(dnsConf);
 #endif
 
-    json[config_key::config] = config;
+    json[configKey::config] = config;
     return QJsonDocument(json).toJson();
 }
 
@@ -202,7 +202,7 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString
     processConfigWithDnsSettings(dns, protocolConfigString);
 
     QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-    QString config = json[config_key::config].toString();
+    QString config = json[configKey::config].toString();
 
     QRegularExpression regex("redirect-gateway.*");
     config.replace(regex, "");
@@ -221,7 +221,7 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString
     // remove block-outside-dns for all exported configs
     config.replace("block-outside-dns", "");
 
-    json[config_key::config] = config;
+    json[configKey::config] = config;
     return QJsonDocument(json).toJson();
 }
 

@@ -2,19 +2,9 @@
 
 #include <QJsonObject>
 
-namespace
-{
-    namespace configKey
-    {
-        constexpr char userData[] = "userData";
-        constexpr char clientName[] = "clientName";
-        constexpr char creationDate[] = "creationDate";
-        constexpr char latestHandshake[] = "latestHandshake";
-        constexpr char dataReceived[] = "dataReceived";
-        constexpr char dataSent[] = "dataSent";
-        constexpr char allowedIps[] = "allowedIps";
-    }
-}
+#include "core/utils/constants/configKeys.h"
+
+using namespace amnezia;
 
 ClientManagementModel::ClientManagementModel(QObject *parent)
     : QAbstractListModel(parent)

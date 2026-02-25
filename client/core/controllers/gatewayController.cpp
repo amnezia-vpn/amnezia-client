@@ -17,6 +17,7 @@
 
 #include "amneziaApplication.h"
 #include "core/utils/api/apiUtils.h"
+#include "core/utils/constants/apiKeys.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/utilities.h"
 
@@ -26,16 +27,6 @@
 
 namespace
 {
-    namespace configKey
-    {
-        constexpr char aesKey[] = "aes_key";
-        constexpr char aesIv[] = "aes_iv";
-        constexpr char aesSalt[] = "aes_salt";
-
-        constexpr char apiPayload[] = "api_payload";
-        constexpr char keyPayload[] = "key_payload";
-    }
-
     constexpr QLatin1String errorResponsePattern1("No active configuration found for");
     constexpr QLatin1String errorResponsePattern2("No non-revoked public key found for");
     constexpr QLatin1String errorResponsePattern3("Account not found.");
@@ -94,9 +85,9 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     encRequestData.salt = blockCipher.generatePrivateSalt(8);
 
     QJsonObject keyPayload;
-    keyPayload[configKey::aesKey] = QString(encRequestData.key.toBase64());
-    keyPayload[configKey::aesIv] = QString(encRequestData.iv.toBase64());
-    keyPayload[configKey::aesSalt] = QString(encRequestData.salt.toBase64());
+    keyPayload[apiDefs::key::aesKey] = QString(encRequestData.key.toBase64());
+    keyPayload[apiDefs::key::aesIv] = QString(encRequestData.iv.toBase64());
+    keyPayload[apiDefs::key::aesSalt] = QString(encRequestData.salt.toBase64());
 
     QByteArray encryptedKeyPayload;
     QByteArray encryptedApiPayload;
@@ -128,8 +119,8 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     }
 
     QJsonObject requestBody;
-    requestBody[configKey::keyPayload] = QString(encryptedKeyPayload.toBase64());
-    requestBody[configKey::apiPayload] = QString(encryptedApiPayload.toBase64());
+    requestBody[apiDefs::key::keyPayload] = QString(encryptedKeyPayload.toBase64());
+    requestBody[apiDefs::key::apiPayload] = QString(encryptedApiPayload.toBase64());
 
     encRequestData.requestBody = QJsonDocument(requestBody).toJson();
     return encRequestData;

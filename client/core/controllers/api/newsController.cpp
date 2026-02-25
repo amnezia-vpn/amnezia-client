@@ -4,19 +4,13 @@
 #include "core/utils/api/apiEnums.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
+#include "core/utils/constants/configKeys.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSharedPointer>
 
-namespace
-{
-    namespace configKey
-    {
-        constexpr char userCountryCode[] = "user_country_code";
-        constexpr char serviceType[] = "service_type";
-    }
-}
+using namespace amnezia;
 
 NewsController::NewsController(SecureAppSettingsRepository* appSettingsRepository,
                                ServersController* serversController)
@@ -47,11 +41,11 @@ QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
     payload.insert("locale", m_appSettingsRepository->getAppLanguage().name().split("_").first());
 
     const QJsonObject stacksJson = stacks.toJson();
-    if (stacksJson.contains(configKey::userCountryCode)) {
-        payload.insert(configKey::userCountryCode, stacksJson.value(configKey::userCountryCode));
+    if (stacksJson.contains(apiDefs::key::userCountryCode)) {
+        payload.insert(apiDefs::key::userCountryCode, stacksJson.value(apiDefs::key::userCountryCode));
     }
-    if (stacksJson.contains(configKey::serviceType)) {
-        payload.insert(configKey::serviceType, stacksJson.value(configKey::serviceType));
+    if (stacksJson.contains(apiDefs::key::serviceType)) {
+        payload.insert(apiDefs::key::serviceType, stacksJson.value(apiDefs::key::serviceType));
     }
 
     auto future = gatewayController->postAsync(QString("%1v1/news"), payload);

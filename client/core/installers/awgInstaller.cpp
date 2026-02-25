@@ -165,28 +165,28 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
 
     if (auto* awgConfig = config.getAwgProtocolConfig()) {
         awgConfig->serverConfig.subnetAddress = serverConfigMap.value("Address").remove("/24");
-        awgConfig->serverConfig.junkPacketCount = serverConfigMap.value(config_key::junkPacketCount);
-        awgConfig->serverConfig.junkPacketMinSize = serverConfigMap.value(config_key::junkPacketMinSize);
-        awgConfig->serverConfig.junkPacketMaxSize = serverConfigMap.value(config_key::junkPacketMaxSize);
-        awgConfig->serverConfig.initPacketJunkSize = serverConfigMap.value(config_key::initPacketJunkSize);
-        awgConfig->serverConfig.responsePacketJunkSize = serverConfigMap.value(config_key::responsePacketJunkSize);
-        awgConfig->serverConfig.initPacketMagicHeader = serverConfigMap.value(config_key::initPacketMagicHeader);
-        awgConfig->serverConfig.responsePacketMagicHeader = serverConfigMap.value(config_key::responsePacketMagicHeader);
-        awgConfig->serverConfig.underloadPacketMagicHeader = serverConfigMap.value(config_key::underloadPacketMagicHeader);
-        awgConfig->serverConfig.transportPacketMagicHeader = serverConfigMap.value(config_key::transportPacketMagicHeader);
+        awgConfig->serverConfig.junkPacketCount = serverConfigMap.value(configKey::junkPacketCount);
+        awgConfig->serverConfig.junkPacketMinSize = serverConfigMap.value(configKey::junkPacketMinSize);
+        awgConfig->serverConfig.junkPacketMaxSize = serverConfigMap.value(configKey::junkPacketMaxSize);
+        awgConfig->serverConfig.initPacketJunkSize = serverConfigMap.value(configKey::initPacketJunkSize);
+        awgConfig->serverConfig.responsePacketJunkSize = serverConfigMap.value(configKey::responsePacketJunkSize);
+        awgConfig->serverConfig.initPacketMagicHeader = serverConfigMap.value(configKey::initPacketMagicHeader);
+        awgConfig->serverConfig.responsePacketMagicHeader = serverConfigMap.value(configKey::responsePacketMagicHeader);
+        awgConfig->serverConfig.underloadPacketMagicHeader = serverConfigMap.value(configKey::underloadPacketMagicHeader);
+        awgConfig->serverConfig.transportPacketMagicHeader = serverConfigMap.value(configKey::transportPacketMagicHeader);
 
         // hack to parse i1-i5 from commented lines in server config
-        awgConfig->serverConfig.specialJunk1 = serverConfigMap.value(QString("# ") + config_key::specialJunk1);
-        awgConfig->serverConfig.specialJunk2 = serverConfigMap.value(QString("# ") + config_key::specialJunk2);
-        awgConfig->serverConfig.specialJunk3 = serverConfigMap.value(QString("# ") + config_key::specialJunk3);
-        awgConfig->serverConfig.specialJunk4 = serverConfigMap.value(QString("# ") + config_key::specialJunk4);
-        awgConfig->serverConfig.specialJunk5 = serverConfigMap.value(QString("# ") + config_key::specialJunk5);
+        awgConfig->serverConfig.specialJunk1 = serverConfigMap.value(QString("# ") + configKey::specialJunk1);
+        awgConfig->serverConfig.specialJunk2 = serverConfigMap.value(QString("# ") + configKey::specialJunk2);
+        awgConfig->serverConfig.specialJunk3 = serverConfigMap.value(QString("# ") + configKey::specialJunk3);
+        awgConfig->serverConfig.specialJunk4 = serverConfigMap.value(QString("# ") + configKey::specialJunk4);
+        awgConfig->serverConfig.specialJunk5 = serverConfigMap.value(QString("# ") + configKey::specialJunk5);
 
         // AWG 2.0 specific fields
         if (container == DockerContainer::Awg2) {
             awgConfig->serverConfig.protocolVersion = "2";
-            awgConfig->serverConfig.cookieReplyPacketJunkSize = serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
-            awgConfig->serverConfig.transportPacketJunkSize = serverConfigMap.value(config_key::transportPacketJunkSize);
+            awgConfig->serverConfig.cookieReplyPacketJunkSize = serverConfigMap.value(configKey::cookieReplyPacketJunkSize);
+            awgConfig->serverConfig.transportPacketJunkSize = serverConfigMap.value(configKey::transportPacketJunkSize);
         }
     }
     

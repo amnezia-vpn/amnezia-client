@@ -60,10 +60,10 @@ QJsonObject SelfHostedServerConfig::toJson() const
     QJsonObject obj;
     
     if (!description.isEmpty()) {
-        obj[config_key::description] = this->description;
+        obj[configKey::description] = this->description;
     }
     if (!hostName.isEmpty()) {
-        obj[config_key::hostName] = hostName;
+        obj[configKey::hostName] = hostName;
     }
     
     QJsonArray containersArray;
@@ -72,28 +72,28 @@ QJsonObject SelfHostedServerConfig::toJson() const
         containersArray.append(containerObj);
     }
     if (!containersArray.isEmpty()) {
-        obj[config_key::containers] = containersArray;
+        obj[configKey::containers] = containersArray;
     }
     
     if (defaultContainer != DockerContainer::None) {
-        obj[config_key::defaultContainer] = ContainerUtils::containerToString(defaultContainer);
+        obj[configKey::defaultContainer] = ContainerUtils::containerToString(defaultContainer);
     }
     
     if (!dns1.isEmpty()) {
-        obj[config_key::dns1] = dns1;
+        obj[configKey::dns1] = dns1;
     }
     if (!dns2.isEmpty()) {
-        obj[config_key::dns2] = dns2;
+        obj[configKey::dns2] = dns2;
     }
     
     if (userName.has_value()) {
-        obj[config_key::userName] = userName.value();
+        obj[configKey::userName] = userName.value();
     }
     if (password.has_value()) {
-        obj[config_key::password] = password.value();
+        obj[configKey::password] = password.value();
     }
     if (port.has_value()) {
-        obj[config_key::port] = port.value();
+        obj[configKey::port] = port.value();
     }
     
     return obj;
@@ -103,34 +103,34 @@ SelfHostedServerConfig SelfHostedServerConfig::fromJson(const QJsonObject& json)
 {
     SelfHostedServerConfig config;
     
-    config.description = json.value(config_key::description).toString();
-    config.hostName = json.value(config_key::hostName).toString();
+    config.description = json.value(configKey::description).toString();
+    config.hostName = json.value(configKey::hostName).toString();
     
-    QJsonArray containersArray = json.value(config_key::containers).toArray();
+    QJsonArray containersArray = json.value(configKey::containers).toArray();
     for (const QJsonValue& val : containersArray) {
         QJsonObject containerObj = val.toObject();
         ContainerConfig containerConfig = ContainerConfig::fromJson(containerObj);
         
-        QString containerStr = containerObj.value(config_key::container).toString();
+        QString containerStr = containerObj.value(configKey::container).toString();
         DockerContainer container = ContainerUtils::containerFromString(containerStr);
         
         config.containers.insert(container, containerConfig);
     }
     
-    QString defaultContainerStr = json.value(config_key::defaultContainer).toString();
+    QString defaultContainerStr = json.value(configKey::defaultContainer).toString();
     config.defaultContainer = ContainerUtils::containerFromString(defaultContainerStr);
     
-    config.dns1 = json.value(config_key::dns1).toString();
-    config.dns2 = json.value(config_key::dns2).toString();
+    config.dns1 = json.value(configKey::dns1).toString();
+    config.dns2 = json.value(configKey::dns2).toString();
     
-    if (json.contains(config_key::userName)) {
-        config.userName = json.value(config_key::userName).toString();
+    if (json.contains(configKey::userName)) {
+        config.userName = json.value(configKey::userName).toString();
     }
-    if (json.contains(config_key::password)) {
-        config.password = json.value(config_key::password).toString();
+    if (json.contains(configKey::password)) {
+        config.password = json.value(configKey::password).toString();
     }
-    if (json.contains(config_key::port)) {
-        config.port = json.value(config_key::port).toInt();
+    if (json.contains(configKey::port)) {
+        config.port = json.value(configKey::port).toInt();
     }
     
     return config;

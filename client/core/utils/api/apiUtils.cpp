@@ -1,8 +1,11 @@
 #include "apiUtils.h"
 
+#include "core/utils/constants/configKeys.h"
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QJsonObject>
+
+using namespace amnezia;
 
 namespace
 {
@@ -31,7 +34,7 @@ bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
 
 bool apiUtils::isServerFromApi(const QJsonObject &serverConfigObject)
 {
-    auto configVersion = serverConfigObject.value(apiDefs::key::configVersion).toInt();
+    auto configVersion = serverConfigObject.value(configKey::configVersion).toInt();
     switch (configVersion) {
     case apiDefs::ConfigSource::Telegram: return true;
     case apiDefs::ConfigSource::AmneziaGateway: return true;
@@ -41,7 +44,7 @@ bool apiUtils::isServerFromApi(const QJsonObject &serverConfigObject)
 
 apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObject)
 {
-    auto configVersion = serverConfigObject.value(apiDefs::key::configVersion).toInt();
+    auto configVersion = serverConfigObject.value(configKey::configVersion).toInt();
 
     switch (configVersion) {
     case apiDefs::ConfigSource::Telegram: {
@@ -80,7 +83,7 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
 
 apiDefs::ConfigSource apiUtils::getConfigSource(const QJsonObject &serverConfigObject)
 {
-    return static_cast<apiDefs::ConfigSource>(serverConfigObject.value(apiDefs::key::configVersion).toInt());
+    return static_cast<apiDefs::ConfigSource>(serverConfigObject.value(configKey::configVersion).toInt());
 }
 
 amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
@@ -144,9 +147,9 @@ QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
     }
 
     QList<QPair<QString, QVariant>> orderedFields;
-    orderedFields.append(qMakePair(apiDefs::key::name, serverConfigObject[apiDefs::key::name].toString()));
-    orderedFields.append(qMakePair(apiDefs::key::description, serverConfigObject[apiDefs::key::description].toString()));
-    orderedFields.append(qMakePair(apiDefs::key::configVersion, serverConfigObject[apiDefs::key::configVersion].toDouble()));
+    orderedFields.append(qMakePair(configKey::name, serverConfigObject[configKey::name].toString()));
+    orderedFields.append(qMakePair(configKey::description, serverConfigObject[configKey::description].toString()));
+    orderedFields.append(qMakePair(configKey::configVersion, serverConfigObject[configKey::configVersion].toDouble()));
     orderedFields.append(qMakePair(apiDefs::key::protocol, serverConfigObject[apiDefs::key::protocol].toString()));
     orderedFields.append(qMakePair(apiDefs::key::apiEndpoint, serverConfigObject[apiDefs::key::apiEndpoint].toString()));
     orderedFields.append(qMakePair(apiDefs::key::apiKey, serverConfigObject[apiDefs::key::apiKey].toString()));
@@ -186,9 +189,9 @@ QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
     auto apiConfig = serverConfigObject.value(apiDefs::key::apiConfig).toObject();
     auto authData = serverConfigObject.value(QLatin1String("auth_data")).toObject();
 
-    const QString name = serverConfigObject.value(apiDefs::key::name).toString();
-    const QString description = serverConfigObject.value(apiDefs::key::description).toString();
-    const double configVersion = serverConfigObject.value(apiDefs::key::configVersion).toDouble();
+    const QString name = serverConfigObject.value(configKey::name).toString();
+    const QString description = serverConfigObject.value(configKey::description).toString();
+    const double configVersion = serverConfigObject.value(configKey::configVersion).toDouble();
 
     const QString serviceType = apiConfig.value(apiDefs::key::serviceType).toString();
     const QString serviceProtocol = apiConfig.value(QLatin1String("service_protocol")).toString();
@@ -197,9 +200,9 @@ QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
     const QString apiKey = authData.value(apiDefs::key::apiKey).toString();
 
     QString vpnKeyStr = "{";
-    vpnKeyStr += "\"" + QString(apiDefs::key::name) + "\": \"" + name + "\", ";
-    vpnKeyStr += "\"" + QString(apiDefs::key::description) + "\": \"" + description + "\", ";
-    vpnKeyStr += "\"" + QString(apiDefs::key::configVersion) + "\": " + QString::number(static_cast<int>(configVersion)) + ", ";
+    vpnKeyStr += "\"" + QString(configKey::name) + "\": \"" + name + "\", ";
+    vpnKeyStr += "\"" + QString(configKey::description) + "\": \"" + description + "\", ";
+    vpnKeyStr += "\"" + QString(configKey::configVersion) + "\": " + QString::number(static_cast<int>(configVersion)) + ", ";
 
     vpnKeyStr += "\"" + QString(apiDefs::key::apiConfig) + "\": {";
     vpnKeyStr += "\"" + QString(apiDefs::key::serviceType) + "\": \"" + serviceType + "\", ";

@@ -331,7 +331,7 @@ QJsonObject ContainerUtils::getProtocolConfigFromContainer(const Proto protocol,
 {
     QString protocolConfigString = containerConfig.value(ProtocolUtils::protoToString(protocol))
     .toObject()
-            .value(config_key::last_config)
+            .value(configKey::lastConfig)
             .toString();
 
     return QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();

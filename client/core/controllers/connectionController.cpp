@@ -99,7 +99,7 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     Proto proto = ContainerUtils::defaultProtocol(container);
 
     QJsonObject protocolConfigJson = containerConfig.protocolConfig.toJson();
-    QString protocolConfigString = protocolConfigJson.value(config_key::last_config).toString();
+    QString protocolConfigString = protocolConfigJson.value(configKey::lastConfig).toString();
 
     SplitTunnelingSettings splitTunneling = {
         m_appSettingsRepository->isSitesSplitTunnelingEnabled(),
@@ -111,23 +111,23 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
 
     QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
     if (ContainerUtils::isAwgContainer(container) || container == DockerContainer::WireGuard) {
-        if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
-            vpnConfigData[config_key::mtu] =
+        if (vpnConfigData[configKey::mtu].toString().isEmpty()) {
+            vpnConfigData[configKey::mtu] =
                     ContainerUtils::isAwgContainer(container) ? protocols::awg::defaultMtu :
                     protocols::wireguard::defaultMtu;
         }
     }
 
     vpnConfiguration.insert(ProtocolUtils::key_proto_config_data(proto), vpnConfigData);
-    vpnConfiguration[config_key::vpnproto] = ProtocolUtils::protoToString(proto);
+    vpnConfiguration[configKey::vpnProto] = ProtocolUtils::protoToString(proto);
 
-    vpnConfiguration[config_key::dns1] = dns.first;
-    vpnConfiguration[config_key::dns2] = dns.second;
+    vpnConfiguration[configKey::dns1] = dns.first;
+    vpnConfiguration[configKey::dns2] = dns.second;
 
-    vpnConfiguration[config_key::hostName] = serverConfig.hostName();
-    vpnConfiguration[config_key::description] = serverConfig.description();
+    vpnConfiguration[configKey::hostName] = serverConfig.hostName();
+    vpnConfiguration[configKey::description] = serverConfig.description();
 
-    vpnConfiguration[config_key::configVersion] = serverConfig.configVersion();
+    vpnConfiguration[configKey::configVersion] = serverConfig.configVersion();
 
     return vpnConfiguration;
 }

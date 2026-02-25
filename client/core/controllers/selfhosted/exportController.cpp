@@ -170,7 +170,7 @@ ExportController::ExportResult ExportController::generateOpenVpnConfig(int serve
         return result;
     }
 
-    QStringList lines = nativeResult.jsonNativeConfig.value(config_key::config).toString().replace("\r", "").split("\n");
+    QStringList lines = nativeResult.jsonNativeConfig.value(configKey::config).toString().replace("\r", "").split("\n");
     for (const QString &line : std::as_const(lines)) {
         result.config.append(line + "\n");
     }
@@ -191,7 +191,7 @@ ExportController::ExportResult ExportController::generateWireGuardConfig(int ser
         return result;
     }
 
-    QStringList lines = nativeResult.jsonNativeConfig.value(config_key::config).toString().replace("\r", "").split("\n");
+    QStringList lines = nativeResult.jsonNativeConfig.value(configKey::config).toString().replace("\r", "").split("\n");
     for (const QString &line : std::as_const(lines)) {
         result.config.append(line + "\n");
     }
@@ -213,7 +213,7 @@ ExportController::ExportResult ExportController::generateAwgConfig(int serverInd
         return result;
     }
 
-    QStringList lines = nativeResult.jsonNativeConfig.value(config_key::config).toString().replace("\r", "").split("\n");
+    QStringList lines = nativeResult.jsonNativeConfig.value(configKey::config).toString().replace("\r", "").split("\n");
     for (const QString &line : std::as_const(lines)) {
         result.config.append(line + "\n");
     }
@@ -242,7 +242,7 @@ ExportController::ExportResult ExportController::generateXrayConfig(int serverIn
 
     // Parse the Xray data to extract VLESS parameters and generate string
     QJsonObject xrayConfig = nativeResult.jsonNativeConfig;
-    QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    QJsonArray outbounds = xrayConfig.value(amnezia::protocols::xray::outbounds).toArray();
 
     if (outbounds.isEmpty()) {
         result.errorCode = ErrorCode::InternalError;
@@ -250,17 +250,17 @@ ExportController::ExportResult ExportController::generateXrayConfig(int serverIn
     }
 
     QJsonObject outbound = outbounds[0].toObject();
-    QJsonObject settings = outbound.value("settings").toObject();
-    QJsonObject streamSettings = outbound.value("streamSettings").toObject();
+    QJsonObject settings = outbound.value(amnezia::protocols::xray::settings).toObject();
+    QJsonObject streamSettings = outbound.value(amnezia::protocols::xray::streamSettings).toObject();
 
-    QJsonArray vnext = settings.value("vnext").toArray();
+    QJsonArray vnext = settings.value(amnezia::protocols::xray::vnext).toArray();
     if (vnext.isEmpty()) {
         result.errorCode = ErrorCode::InternalError;
         return result;
     }
 
     QJsonObject server = vnext[0].toObject();
-    QJsonArray users = server.value("users").toArray();
+    QJsonArray users = server.value(amnezia::protocols::xray::users).toArray();
     if (users.isEmpty()) {
         result.errorCode = ErrorCode::InternalError;
         return result;
@@ -269,22 +269,22 @@ ExportController::ExportResult ExportController::generateXrayConfig(int serverIn
     QJsonObject user = users[0].toObject();
 
     amnezia::serialization::VlessServerObject vlessServer;
-    vlessServer.address = server.value("address").toString();
-    vlessServer.port = server.value("port").toInt();
-    vlessServer.id = user.value("id").toString();
-    vlessServer.flow = user.value("flow").toString("xtls-rprx-vision");
-    vlessServer.encryption = user.value("encryption").toString("none");
+    vlessServer.address = server.value(amnezia::protocols::xray::address).toString();
+    vlessServer.port = server.value(amnezia::protocols::xray::port).toInt();
+    vlessServer.id = user.value(amnezia::protocols::xray::id).toString();
+    vlessServer.flow = user.value(amnezia::protocols::xray::flow).toString("xtls-rprx-vision");
+    vlessServer.encryption = user.value(amnezia::protocols::xray::encryption).toString("none");
 
-    vlessServer.network = streamSettings.value("network").toString("tcp");
-    vlessServer.security = streamSettings.value("security").toString("reality");
+    vlessServer.network = streamSettings.value(amnezia::protocols::xray::network).toString("tcp");
+    vlessServer.security = streamSettings.value(amnezia::protocols::xray::security).toString("reality");
 
     if (vlessServer.security == "reality") {
-        QJsonObject realitySettings = streamSettings.value("realitySettings").toObject();
-        vlessServer.serverName = realitySettings.value("serverName").toString();
-        vlessServer.publicKey = realitySettings.value("publicKey").toString();
-        vlessServer.shortId = realitySettings.value("shortId").toString();
-        vlessServer.fingerprint = realitySettings.value("fingerprint").toString("chrome");
-        vlessServer.spiderX = realitySettings.value("spiderX").toString("");
+        QJsonObject realitySettings = streamSettings.value(amnezia::protocols::xray::realitySettings).toObject();
+        vlessServer.serverName = realitySettings.value(amnezia::protocols::xray::serverName).toString();
+        vlessServer.publicKey = realitySettings.value(amnezia::protocols::xray::publicKey).toString();
+        vlessServer.shortId = realitySettings.value(amnezia::protocols::xray::shortId).toString();
+        vlessServer.fingerprint = realitySettings.value(amnezia::protocols::xray::fingerprint).toString("chrome");
+        vlessServer.spiderX = realitySettings.value(amnezia::protocols::xray::spiderX).toString("");
     }
 
     result.nativeConfigString = amnezia::serialization::vless::Serialize(vlessServer, "AmneziaVPN");

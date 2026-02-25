@@ -27,13 +27,13 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_routeGateway = NetworkUtilities::getGatewayAndIface().first;
 
-    m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
-    m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::config_key::hostName).toString());
+    m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::configKey::splitTunnelType).toInt());
+    m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::configKey::hostName).toString());
 
-    const QString primaryDns = configuration.value(amnezia::config_key::dns1).toString();
+    const QString primaryDns = configuration.value(amnezia::configKey::dns1).toString();
     m_dnsServers.push_back(QHostAddress(primaryDns));
     if (primaryDns != amnezia::protocols::dns::amneziaDnsIp) {
-        const QString secondaryDns = configuration.value(amnezia::config_key::dns2).toString();
+        const QString secondaryDns = configuration.value(amnezia::configKey::dns2).toString();
         m_dnsServers.push_back(QHostAddress(secondaryDns));
     }
 
@@ -194,7 +194,7 @@ ErrorCode XrayProtocol::setupRouting() {
 #else
         static const int vpnAdapterIndex = 0;
 #endif
-        const bool killSwitchEnabled = QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool();
+        const bool killSwitchEnabled = QVariant(m_rawConfig.value(configKey::killSwitchOption).toString()).toBool();
         if (killSwitchEnabled) {
             if (vpnAdapterIndex != -1) {
                 QJsonObject config = m_rawConfig;

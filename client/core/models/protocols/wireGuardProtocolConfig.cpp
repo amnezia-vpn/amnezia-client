@@ -10,8 +10,6 @@
 
 using namespace amnezia;
 using namespace ProtocolUtils;
-using namespace config_key;
-
 namespace amnezia
 {
 
@@ -20,23 +18,23 @@ QJsonObject WireGuardServerConfig::toJson() const
     QJsonObject obj;
     
     if (!port.isEmpty()) {
-        obj[config_key::port] = port;
+        obj[configKey::port] = port;
     }
     if (!transportProto.isEmpty()) {
-        obj[config_key::transport_proto] = transportProto;
+        obj[configKey::transportProto] = transportProto;
     }
     if (!subnetAddress.isEmpty()) {
-        obj[config_key::subnet_address] = subnetAddress;
+        obj[configKey::subnetAddress] = subnetAddress;
     }
     if (!subnetMask.isEmpty()) {
-        obj[config_key::subnet_mask] = subnetMask;
+        obj[configKey::subnetMask] = subnetMask;
     }
     if (!subnetCidr.isEmpty()) {
-        obj[config_key::subnet_cidr] = subnetCidr;
+        obj[configKey::subnetCidr] = subnetCidr;
     }
     
     if (isThirdPartyConfig) {
-        obj[config_key::isThirdPartyConfig] = isThirdPartyConfig;
+        obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
     }
     
     return obj;
@@ -46,13 +44,13 @@ WireGuardServerConfig WireGuardServerConfig::fromJson(const QJsonObject& json)
 {
     WireGuardServerConfig config;
     
-    config.port = json.value(config_key::port).toString();
-    config.transportProto = json.value(config_key::transport_proto).toString();
-    config.subnetAddress = json.value(config_key::subnet_address).toString();
-    config.subnetMask = json.value(config_key::subnet_mask).toString();
-    config.subnetCidr = json.value(config_key::subnet_cidr).toString();
+    config.port = json.value(configKey::port).toString();
+    config.transportProto = json.value(configKey::transportProto).toString();
+    config.subnetAddress = json.value(configKey::subnetAddress).toString();
+    config.subnetMask = json.value(configKey::subnetMask).toString();
+    config.subnetCidr = json.value(configKey::subnetCidr).toString();
     
-    config.isThirdPartyConfig = json.value(config_key::isThirdPartyConfig).toBool(false);
+    config.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
     
     return config;
 }
@@ -67,31 +65,31 @@ QJsonObject WireGuardClientConfig::toJson() const
     QJsonObject obj;
     
     if (!nativeConfig.isEmpty()) {
-        obj[config_key::config] = nativeConfig;
+        obj[configKey::config] = nativeConfig;
     }
     if (!hostName.isEmpty()) {
-        obj[config_key::hostName] = hostName;
+        obj[configKey::hostName] = hostName;
     }
     if (port > 0) {
-        obj[config_key::port] = port;
+        obj[configKey::port] = port;
     }
     if (!clientIp.isEmpty()) {
-        obj[config_key::client_ip] = clientIp;
+        obj[configKey::clientIp] = clientIp;
     }
     if (!clientPrivateKey.isEmpty()) {
-        obj[config_key::client_priv_key] = clientPrivateKey;
+        obj[configKey::clientPrivKey] = clientPrivateKey;
     }
     if (!clientPublicKey.isEmpty()) {
-        obj[config_key::client_pub_key] = clientPublicKey;
+        obj[configKey::clientPubKey] = clientPublicKey;
     }
     if (!serverPublicKey.isEmpty()) {
-        obj[config_key::server_pub_key] = serverPublicKey;
+        obj[configKey::serverPubKey] = serverPublicKey;
     }
     if (!presharedKey.isEmpty()) {
-        obj[config_key::psk_key] = presharedKey;
+        obj[configKey::pskKey] = presharedKey;
     }
     if (!clientId.isEmpty()) {
-        obj[config_key::clientId] = clientId;
+        obj[configKey::clientId] = clientId;
     }
     
     if (!allowedIps.isEmpty()) {
@@ -99,17 +97,17 @@ QJsonObject WireGuardClientConfig::toJson() const
         for (const QString& ip : allowedIps) {
             arr.append(ip);
         }
-        obj[config_key::allowed_ips] = arr;
+        obj[configKey::allowedIps] = arr;
     }
     if (!persistentKeepAlive.isEmpty()) {
-        obj[config_key::persistent_keep_alive] = persistentKeepAlive;
+        obj[configKey::persistentKeepAlive] = persistentKeepAlive;
     }
     if (!mtu.isEmpty()) {
-        obj[config_key::mtu] = mtu;
+        obj[configKey::mtu] = mtu;
     }
     
     if (isObfuscationEnabled) {
-        obj[config_key::isObfuscationEnabled] = isObfuscationEnabled;
+        obj[configKey::isObfuscationEnabled] = isObfuscationEnabled;
     }
     
     return obj;
@@ -119,24 +117,24 @@ WireGuardClientConfig WireGuardClientConfig::fromJson(const QJsonObject& json)
 {
     WireGuardClientConfig config;
     
-    config.nativeConfig = json.value(config_key::config).toString();
-    config.hostName = json.value(config_key::hostName).toString();
-    config.port = json.value(config_key::port).toInt(0);
-    config.clientIp = json.value(config_key::client_ip).toString();
-    config.clientPrivateKey = json.value(config_key::client_priv_key).toString();
-    config.clientPublicKey = json.value(config_key::client_pub_key).toString();
-    config.serverPublicKey = json.value(config_key::server_pub_key).toString();
-    config.presharedKey = json.value(config_key::psk_key).toString();
-    config.clientId = json.value(config_key::clientId).toString();
+    config.nativeConfig = json.value(configKey::config).toString();
+    config.hostName = json.value(configKey::hostName).toString();
+    config.port = json.value(configKey::port).toInt(0);
+    config.clientIp = json.value(configKey::clientIp).toString();
+    config.clientPrivateKey = json.value(configKey::clientPrivKey).toString();
+    config.clientPublicKey = json.value(configKey::clientPubKey).toString();
+    config.serverPublicKey = json.value(configKey::serverPubKey).toString();
+    config.presharedKey = json.value(configKey::pskKey).toString();
+    config.clientId = json.value(configKey::clientId).toString();
     
-    QJsonArray allowedIpsArr = json.value(config_key::allowed_ips).toArray();
+    QJsonArray allowedIpsArr = json.value(configKey::allowedIps).toArray();
     for (const QJsonValue& val : allowedIpsArr) {
         config.allowedIps.append(val.toString());
     }
-    config.persistentKeepAlive = json.value(config_key::persistent_keep_alive).toString();
-    config.mtu = json.value(config_key::mtu).toString();
+    config.persistentKeepAlive = json.value(configKey::persistentKeepAlive).toString();
+    config.mtu = json.value(configKey::mtu).toString();
     
-    config.isObfuscationEnabled = json.value(config_key::isObfuscationEnabled).toBool(false);
+    config.isObfuscationEnabled = json.value(configKey::isObfuscationEnabled).toBool(false);
     
     return config;
 }
@@ -147,7 +145,7 @@ QJsonObject WireGuardProtocolConfig::toJson() const
     
     if (clientConfig.has_value()) {
         QJsonObject clientJson = clientConfig->toJson();
-        obj[config_key::last_config] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
+        obj[configKey::lastConfig] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
     }
     
     return obj;
@@ -159,7 +157,7 @@ WireGuardProtocolConfig WireGuardProtocolConfig::fromJson(const QJsonObject& jso
     
     config.serverConfig = WireGuardServerConfig::fromJson(json);
     
-    QString lastConfigStr = json.value(config_key::last_config).toString();
+    QString lastConfigStr = json.value(configKey::lastConfig).toString();
     if (!lastConfigStr.isEmpty()) {
         QJsonDocument doc = QJsonDocument::fromJson(lastConfigStr.toUtf8());
         if (doc.isObject()) {

@@ -4,6 +4,7 @@
 #include <QDateTime>
 
 #include "core/utils/api/apiUtils.h"
+#include "core/utils/constants/apiKeys.h"
 
 namespace amnezia
 {
@@ -12,7 +13,7 @@ QJsonObject ApiConfig::Subscription::toJson() const
 {
     QJsonObject obj;
     if (!endDate.isEmpty()) {
-        obj[QLatin1String("end_date")] = endDate;
+        obj[apiDefs::key::endDate] = endDate;
     }
     return obj;
 }
@@ -20,7 +21,7 @@ QJsonObject ApiConfig::Subscription::toJson() const
 ApiConfig::Subscription ApiConfig::Subscription::fromJson(const QJsonObject& json)
 {
     Subscription sub;
-    sub.endDate = json.value(QLatin1String("end_date")).toString();
+    sub.endDate = json.value(apiDefs::key::endDate).toString();
     return sub;
 }
 
@@ -54,7 +55,7 @@ QJsonObject ApiConfig::PublicKeyInfo::toJson() const
 {
     QJsonObject obj;
     if (!expiresAt.isEmpty()) {
-        obj[QLatin1String("expires_at")] = expiresAt;
+        obj[apiDefs::key::expiresAt] = expiresAt;
     }
     return obj;
 }
@@ -62,7 +63,7 @@ QJsonObject ApiConfig::PublicKeyInfo::toJson() const
 ApiConfig::PublicKeyInfo ApiConfig::PublicKeyInfo::fromJson(const QJsonObject& json)
 {
     PublicKeyInfo info;
-    info.expiresAt = json.value(QLatin1String("expires_at")).toString();
+    info.expiresAt = json.value(apiDefs::key::expiresAt).toString();
     return info;
 }
 
@@ -124,7 +125,7 @@ QJsonObject ApiConfig::toJson() const
     
     QJsonObject subscriptionObj = subscription.toJson();
     if (!subscriptionObj.isEmpty()) {
-        obj[QLatin1String("subscription")] = subscriptionObj;
+        obj[apiDefs::key::subscription] = subscriptionObj;
     }
     
     if (activeDeviceCount > 0) {
@@ -152,7 +153,7 @@ QJsonObject ApiConfig::toJson() const
     
     QJsonObject publicKeyObj = publicKey.toJson();
     if (!publicKeyObj.isEmpty()) {
-        obj[QLatin1String("public_key")] = publicKeyObj;
+        obj[apiDefs::key::publicKey] = publicKeyObj;
     }
     
     if (!stackType.isEmpty()) {
@@ -179,7 +180,7 @@ ApiConfig ApiConfig::fromJson(const QJsonObject& json)
     config.serverCountryName = json.value(apiDefs::key::serverCountryName).toString();
     config.vpnKey = json.value(apiDefs::key::vpnKey).toString();
     
-    QJsonObject subscriptionObj = json.value(QLatin1String("subscription")).toObject();
+    QJsonObject subscriptionObj = json.value(apiDefs::key::subscription).toObject();
     if (!subscriptionObj.isEmpty()) {
         config.subscription = Subscription::fromJson(subscriptionObj);
     }
@@ -196,7 +197,7 @@ ApiConfig ApiConfig::fromJson(const QJsonObject& json)
         config.serviceInfo = ServiceInfo::fromJson(serviceInfoObj);
     }
     
-    QJsonObject publicKeyObj = json.value(QLatin1String("public_key")).toObject();
+    QJsonObject publicKeyObj = json.value(apiDefs::key::publicKey).toObject();
     if (!publicKeyObj.isEmpty()) {
         config.publicKey = PublicKeyInfo::fromJson(publicKeyObj);
     }

@@ -45,31 +45,31 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
     }
     QJsonObject serverConfig = doc.object();
 
-    if (!serverConfig.contains("inbounds")) {
+    if (!serverConfig.contains(protocols::xray::inbounds)) {
         logger.error() << "Server config missing 'inbounds' field";
         return ErrorCode::InternalError;
     }
 
-    QJsonArray inbounds = serverConfig["inbounds"].toArray();
+    QJsonArray inbounds = serverConfig[protocols::xray::inbounds].toArray();
     if (inbounds.isEmpty()) {
         logger.error() << "Server config has empty 'inbounds' array";
         return ErrorCode::InternalError;
     }
 
     QJsonObject inbound = inbounds[0].toObject();
-    if (!inbound.contains("streamSettings")) {
+    if (!inbound.contains(protocols::xray::streamSettings)) {
         logger.error() << "Inbound missing 'streamSettings' field";
         return ErrorCode::InternalError;
     }
 
-    QJsonObject streamSettings = inbound["streamSettings"].toObject();
-    QJsonObject realitySettings = streamSettings["realitySettings"].toObject();
-    if (!realitySettings.contains("serverNames")) {
+    QJsonObject streamSettings = inbound[protocols::xray::streamSettings].toObject();
+    QJsonObject realitySettings = streamSettings[protocols::xray::realitySettings].toObject();
+    if (!realitySettings.contains(protocols::xray::serverNames)) {
         logger.error() << "Settings missing 'serverNames' field";
         return ErrorCode::InternalError;
     }
 
-    QString siteName = realitySettings["serverNames"][0].toString();
+    QString siteName = realitySettings[protocols::xray::serverNames][0].toString();
 
     if (auto* xrayConfig = config.getXrayProtocolConfig()) {
         xrayConfig->serverConfig.site = siteName;

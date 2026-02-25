@@ -9,8 +9,6 @@
 
 using namespace amnezia;
 using namespace ProtocolUtils;
-using namespace config_key;
-
 namespace amnezia
 {
 
@@ -19,41 +17,41 @@ QJsonObject OpenVpnServerConfig::toJson() const
     QJsonObject obj;
     
     if (!port.isEmpty()) {
-        obj[config_key::port] = port;
+        obj[configKey::port] = port;
     }
     if (!transportProto.isEmpty()) {
-        obj[config_key::transport_proto] = transportProto;
+        obj[configKey::transportProto] = transportProto;
     }
     if (!subnetAddress.isEmpty()) {
-        obj[config_key::subnet_address] = subnetAddress;
+        obj[configKey::subnetAddress] = subnetAddress;
     }
     if (!subnetMask.isEmpty()) {
-        obj[config_key::subnet_mask] = subnetMask;
+        obj[configKey::subnetMask] = subnetMask;
     }
     if (!subnetCidr.isEmpty()) {
-        obj[config_key::subnet_cidr] = subnetCidr;
+        obj[configKey::subnetCidr] = subnetCidr;
     }
     if (!cipher.isEmpty()) {
-        obj[config_key::cipher] = cipher;
+        obj[configKey::cipher] = cipher;
     }
     if (!hash.isEmpty()) {
-        obj[config_key::hash] = hash;
+        obj[configKey::hash] = hash;
     }
     if (ncpDisable != false) {
-        obj[config_key::ncp_disable] = ncpDisable;
+        obj[configKey::ncpDisable] = ncpDisable;
     }
     if (tlsAuth != true) {
-        obj[config_key::tls_auth] = tlsAuth;
+        obj[configKey::tlsAuth] = tlsAuth;
     }
     if (!additionalClientConfig.isEmpty()) {
-        obj[config_key::additional_client_config] = additionalClientConfig;
+        obj[configKey::additionalClientConfig] = additionalClientConfig;
     }
     if (!additionalServerConfig.isEmpty()) {
-        obj[config_key::additional_server_config] = additionalServerConfig;
+        obj[configKey::additionalServerConfig] = additionalServerConfig;
     }
     
     if (isThirdPartyConfig) {
-        obj[config_key::isThirdPartyConfig] = isThirdPartyConfig;
+        obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
     }
     
     return obj;
@@ -63,19 +61,19 @@ OpenVpnServerConfig OpenVpnServerConfig::fromJson(const QJsonObject& json)
 {
     OpenVpnServerConfig config;
     
-    config.port = json.value(config_key::port).toString();
-    config.transportProto = json.value(config_key::transport_proto).toString();
-    config.subnetAddress = json.value(config_key::subnet_address).toString();
-    config.subnetMask = json.value(config_key::subnet_mask).toString();
-    config.subnetCidr = json.value(config_key::subnet_cidr).toString();
-    config.cipher = json.value(config_key::cipher).toString();
-    config.hash = json.value(config_key::hash).toString();
-    config.ncpDisable = json.value(config_key::ncp_disable).toBool(false);
-    config.tlsAuth = json.value(config_key::tls_auth).toBool(true);
-    config.additionalClientConfig = json.value(config_key::additional_client_config).toString();
-    config.additionalServerConfig = json.value(config_key::additional_server_config).toString();
+    config.port = json.value(configKey::port).toString();
+    config.transportProto = json.value(configKey::transportProto).toString();
+    config.subnetAddress = json.value(configKey::subnetAddress).toString();
+    config.subnetMask = json.value(configKey::subnetMask).toString();
+    config.subnetCidr = json.value(configKey::subnetCidr).toString();
+    config.cipher = json.value(configKey::cipher).toString();
+    config.hash = json.value(configKey::hash).toString();
+    config.ncpDisable = json.value(configKey::ncpDisable).toBool(false);
+    config.tlsAuth = json.value(configKey::tlsAuth).toBool(true);
+    config.additionalClientConfig = json.value(configKey::additionalClientConfig).toString();
+    config.additionalServerConfig = json.value(configKey::additionalServerConfig).toString();
     
-    config.isThirdPartyConfig = json.value(config_key::isThirdPartyConfig).toBool(false);
+    config.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
     
     return config;
 }
@@ -97,12 +95,12 @@ QJsonObject OpenVpnClientConfig::toJson() const
     QJsonObject obj;
     
     if (!nativeConfig.isEmpty()) {
-        obj[config_key::config] = nativeConfig;
+        obj[configKey::config] = nativeConfig;
     }
     if (!clientId.isEmpty()) {
-        obj[config_key::clientId] = clientId;
+        obj[configKey::clientId] = clientId;
     }
-    obj[config_key::block_outside_dns] = blockOutsideDns;
+    obj[configKey::blockOutsideDns] = blockOutsideDns;
     
     return obj;
 }
@@ -111,9 +109,9 @@ OpenVpnClientConfig OpenVpnClientConfig::fromJson(const QJsonObject& json)
 {
     OpenVpnClientConfig config;
     
-    config.nativeConfig = json.value(config_key::config).toString();
-    config.clientId = json.value(config_key::clientId).toString();
-    config.blockOutsideDns = json.value(config_key::block_outside_dns).toBool(false);
+    config.nativeConfig = json.value(configKey::config).toString();
+    config.clientId = json.value(configKey::clientId).toString();
+    config.blockOutsideDns = json.value(configKey::blockOutsideDns).toBool(false);
     
     return config;
 }
@@ -124,7 +122,7 @@ QJsonObject OpenVpnProtocolConfig::toJson() const
     
     if (clientConfig.has_value()) {
         QJsonObject clientJson = clientConfig->toJson();
-        obj[config_key::last_config] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
+        obj[configKey::lastConfig] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
     }
     
     return obj;
@@ -136,7 +134,7 @@ OpenVpnProtocolConfig OpenVpnProtocolConfig::fromJson(const QJsonObject& json)
     
     config.serverConfig = OpenVpnServerConfig::fromJson(json);
     
-    QString lastConfigStr = json.value(config_key::last_config).toString();
+    QString lastConfigStr = json.value(configKey::lastConfig).toString();
     if (!lastConfigStr.isEmpty()) {
         QJsonDocument doc = QJsonDocument::fromJson(lastConfigStr.toUtf8());
         if (doc.isObject()) {

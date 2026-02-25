@@ -17,14 +17,6 @@
 
 namespace
 {
-    constexpr char osVersion[] = "os_version";
-    
-    namespace configKey
-    {
-        constexpr char serviceType[] = "service_type";
-        constexpr char serviceInfo[] = "service_info";
-    }
-
     namespace serviceType
     {
         constexpr char amneziaPremium[] = "amnezia-premium";
@@ -39,13 +31,13 @@ ServicesCatalogController::ServicesCatalogController(SecureAppSettingsRepository
 ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &servicesData)
 {
     QJsonObject apiPayload;
-    apiPayload[osVersion] = QSysInfo::productType();
+    apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
     apiPayload[apiDefs::key::appLanguage] = m_appSettingsRepository->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
     if (errorCode == ErrorCode::NoError) {
-        if (!responseBody.contains("services")) {
+        if (!responseBody.contains(apiDefs::key::services.data())) {
             errorCode = ErrorCode::ApiServicesMissingError;
         }
     }
@@ -80,19 +72,19 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
     waitProducts.exec();
     
     if (productsFetched && !productPrice.isEmpty()) {
-        QJsonArray services = servicesData.value("services").toArray();
+        QJsonArray services = servicesData.value(apiDefs::key::services).toArray();
         for (int i = 0; i < services.size(); ++i) {
             QJsonObject service = services[i].toObject();
-            if (service.value(configKey::serviceType).toString() == serviceType::amneziaPremium) {
-                QJsonObject serviceInfo = service.value(configKey::serviceInfo).toObject();
+            if (service.value(apiDefs::key::serviceType).toString() == serviceType::amneziaPremium) {
+                QJsonObject serviceInfo = service.value(apiDefs::key::serviceInfo).toObject();
                 QString formattedPrice = productPrice;
                 if (!productCurrency.isEmpty()) {
                     formattedPrice += " " + productCurrency;
                 }
                 serviceInfo["price"] = formattedPrice;
-                service[configKey::serviceInfo] = serviceInfo;
+                service[apiDefs::key::serviceInfo] = serviceInfo;
                 services[i] = service;
-                servicesData["services"] = services;
+                servicesData[apiDefs::key::services] = services;
                 qInfo().noquote() << "[IAP] Updated premium service price in data:" << formattedPrice;
                 break;
             }

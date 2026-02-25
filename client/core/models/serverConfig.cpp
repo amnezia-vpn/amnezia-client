@@ -132,15 +132,15 @@ ServerConfig ServerConfig::fromJson(const QJsonObject& json)
     switch (configType) {
     case apiDefs::ConfigType::SelfHosted: {
         bool hasThirdPartyConfig = false;
-        QJsonArray containersArray = json.value(config_key::containers).toArray();
+        QJsonArray containersArray = json.value(configKey::containers).toArray();
         for (const QJsonValue& val : containersArray) {
             QJsonObject containerObj = val.toObject();
             for (auto it = containerObj.begin(); it != containerObj.end(); ++it) {
                 QString key = it.key();
-                if (key != config_key::container) {
+                if (key != configKey::container) {
                     QJsonObject protocolObj = it.value().toObject();
-                    if (protocolObj.contains(config_key::isThirdPartyConfig) && 
-                        protocolObj.value(config_key::isThirdPartyConfig).toBool()) {
+                    if (protocolObj.contains(configKey::isThirdPartyConfig) && 
+                        protocolObj.value(configKey::isThirdPartyConfig).toBool()) {
                         hasThirdPartyConfig = true;
                         break;
                     }
@@ -167,16 +167,16 @@ ServerConfig ServerConfig::fromJson(const QJsonObject& json)
     default: {
         // Check if any container has isThirdPartyConfig
         bool hasThirdPartyConfig = false;
-        QJsonArray containersArray = json.value(config_key::containers).toArray();
+        QJsonArray containersArray = json.value(configKey::containers).toArray();
         for (const QJsonValue& val : containersArray) {
             QJsonObject containerObj = val.toObject();
             // Check all protocol keys in the container object
             for (auto it = containerObj.begin(); it != containerObj.end(); ++it) {
                 QString key = it.key();
-                if (key != config_key::container) {
+                if (key != configKey::container) {
                     QJsonObject protocolObj = it.value().toObject();
-                    if (protocolObj.contains(config_key::isThirdPartyConfig) && 
-                        protocolObj.value(config_key::isThirdPartyConfig).toBool()) {
+                    if (protocolObj.contains(configKey::isThirdPartyConfig) && 
+                        protocolObj.value(configKey::isThirdPartyConfig).toBool()) {
                         hasThirdPartyConfig = true;
                         break;
                     }

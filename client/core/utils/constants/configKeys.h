@@ -1,116 +1,127 @@
 #ifndef CONFIGKEYS_H
 #define CONFIGKEYS_H
 
+#include <QLatin1String>
+
 namespace amnezia
 {
-    namespace config_key
+    namespace configKey
     {
+        constexpr QLatin1String hostName("hostName");
+        constexpr QLatin1String userName("userName");
+        constexpr QLatin1String password("password");
+        constexpr QLatin1String port("port");
+        constexpr QLatin1String localPort("local_port");
 
-        // Json config strings
-        constexpr char hostName[] = "hostName";
-        constexpr char userName[] = "userName";
-        constexpr char password[] = "password";
-        constexpr char port[] = "port";
-        constexpr char local_port[] = "local_port";
+        constexpr QLatin1String dns1("dns1");
+        constexpr QLatin1String dns2("dns2");
 
-        constexpr char dns1[] = "dns1";
-        constexpr char dns2[] = "dns2";
+        constexpr QLatin1String serverIndex("serverIndex");
+        constexpr QLatin1String description("description");
+        constexpr QLatin1String name("name");
+        constexpr QLatin1String cert("cert");
+        constexpr QLatin1String accessToken("api_key");
+        constexpr QLatin1String config("config");
+        constexpr QLatin1String configVersion("config_version");
 
-        constexpr char serverIndex[] = "serverIndex";
-        constexpr char description[] = "description";
-        constexpr char name[] = "name";
-        constexpr char cert[] = "cert";
-        constexpr char config[] = "config";
+        constexpr QLatin1String containers("containers");
+        constexpr QLatin1String container("container");
+        constexpr QLatin1String defaultContainer("defaultContainer");
 
-        constexpr char containers[] = "containers";
-        constexpr char container[] = "container";
-        constexpr char defaultContainer[] = "defaultContainer";
+        constexpr QLatin1String vpnProto("protocol");
+        constexpr QLatin1String protocol("protocol");
+        constexpr QLatin1String protocols("protocols");
 
-        constexpr char vpnproto[] = "protocol";
-        constexpr char protocols[] = "protocols";
+        constexpr QLatin1String remote("remote");
+        constexpr QLatin1String transportProto("transport_proto");
+        constexpr QLatin1String cipher("cipher");
+        constexpr QLatin1String hash("hash");
+        constexpr QLatin1String ncpDisable("ncp_disable");
+        constexpr QLatin1String tlsAuth("tls_auth");
 
-        constexpr char remote[] = "remote";
-        constexpr char transport_proto[] = "transport_proto";
-        constexpr char cipher[] = "cipher";
-        constexpr char hash[] = "hash";
-        constexpr char ncp_disable[] = "ncp_disable";
-        constexpr char tls_auth[] = "tls_auth";
+        constexpr QLatin1String clientPrivKey("client_priv_key");
+        constexpr QLatin1String clientPubKey("client_pub_key");
+        constexpr QLatin1String serverPrivKey("server_priv_key");
+        constexpr QLatin1String serverPubKey("server_pub_key");
+        constexpr QLatin1String pskKey("psk_key");
+        constexpr QLatin1String mtu("mtu");
+        constexpr QLatin1String allowedIps("allowed_ips");
+        constexpr QLatin1String persistentKeepAlive("persistent_keep_alive");
 
-        constexpr char client_priv_key[] = "client_priv_key";
-        constexpr char client_pub_key[] = "client_pub_key";
-        constexpr char server_priv_key[] = "server_priv_key";
-        constexpr char server_pub_key[] = "server_pub_key";
-        constexpr char psk_key[] = "psk_key";
-        constexpr char mtu[] = "mtu";
-        constexpr char allowed_ips[] = "allowed_ips";
-        constexpr char persistent_keep_alive[] = "persistent_keep_alive";
+        constexpr QLatin1String clientIp("client_ip");
 
-        constexpr char client_ip[] = "client_ip"; // internal ip address
+        constexpr QLatin1String site("site");
+        constexpr QLatin1String blockOutsideDns("block_outside_dns");
 
-        constexpr char site[] = "site";
-        constexpr char block_outside_dns[] = "block_outside_dns";
+        constexpr QLatin1String subnetAddress("subnet_address");
+        constexpr QLatin1String subnetMask("subnet_mask");
+        constexpr QLatin1String subnetCidr("subnet_cidr");
 
-        constexpr char subnet_address[] = "subnet_address";
-        constexpr char subnet_mask[] = "subnet_mask";
-        constexpr char subnet_cidr[] = "subnet_cidr";
+        constexpr QLatin1String additionalClientConfig("additional_client_config");
+        constexpr QLatin1String additionalServerConfig("additional_server_config");
 
-        constexpr char additional_client_config[] = "additional_client_config";
-        constexpr char additional_server_config[] = "additional_server_config";
+        constexpr QLatin1String lastConfig("last_config");
 
-        // proto config keys
-        constexpr char last_config[] = "last_config";
+        constexpr QLatin1String isThirdPartyConfig("isThirdPartyConfig");
+        constexpr QLatin1String isObfuscationEnabled("isObfuscationEnabled");
 
-        constexpr char isThirdPartyConfig[] = "isThirdPartyConfig";
-        constexpr char isObfuscationEnabled[] = "isObfuscationEnabled";
+        constexpr QLatin1String junkPacketCount("Jc");
+        constexpr QLatin1String junkPacketMinSize("Jmin");
+        constexpr QLatin1String junkPacketMaxSize("Jmax");
+        constexpr QLatin1String initPacketJunkSize("S1");
+        constexpr QLatin1String responsePacketJunkSize("S2");
+        constexpr QLatin1String cookieReplyPacketJunkSize("S3");
+        constexpr QLatin1String transportPacketJunkSize("S4");
+        constexpr QLatin1String initPacketMagicHeader("H1");
+        constexpr QLatin1String responsePacketMagicHeader("H2");
+        constexpr QLatin1String underloadPacketMagicHeader("H3");
+        constexpr QLatin1String transportPacketMagicHeader("H4");
+        constexpr QLatin1String specialJunk1("I1");
+        constexpr QLatin1String specialJunk2("I2");
+        constexpr QLatin1String specialJunk3("I3");
+        constexpr QLatin1String specialJunk4("I4");
+        constexpr QLatin1String specialJunk5("I5");
 
-        constexpr char junkPacketCount[] = "Jc";
-        constexpr char junkPacketMinSize[] = "Jmin";
-        constexpr char junkPacketMaxSize[] = "Jmax";
-        constexpr char initPacketJunkSize[] = "S1";
-        constexpr char responsePacketJunkSize[] = "S2";
-        constexpr char cookieReplyPacketJunkSize[] = "S3";
-        constexpr char transportPacketJunkSize[] = "S4";
-        constexpr char initPacketMagicHeader[] = "H1";
-        constexpr char responsePacketMagicHeader[] = "H2";
-        constexpr char underloadPacketMagicHeader[] = "H3";
-        constexpr char transportPacketMagicHeader[] = "H4";
-        constexpr char specialJunk1[] = "I1";
-        constexpr char specialJunk2[] = "I2";
-        constexpr char specialJunk3[] = "I3";
-        constexpr char specialJunk4[] = "I4";
-        constexpr char specialJunk5[] = "I5";
+        constexpr QLatin1String protocolVersion("protocol_version");
 
-        constexpr char protocolVersion[] = "protocol_version";
+        constexpr QLatin1String openvpn("openvpn");
+        constexpr QLatin1String wireguard("wireguard");
+        constexpr QLatin1String sftp("sftp");
+        constexpr QLatin1String awg("awg");
+        constexpr QLatin1String vless("vless");
+        constexpr QLatin1String xray("xray");
+        constexpr QLatin1String ssxray("ssxray");
+        constexpr QLatin1String socks5proxy("socks5proxy");
 
-        constexpr char openvpn[] = "openvpn";
-        constexpr char wireguard[] = "wireguard";
-        constexpr char sftp[] = "sftp";
-        constexpr char awg[] = "awg";
-        constexpr char xray[] = "xray";
-        constexpr char ssxray[] = "ssxray";
-        constexpr char socks5proxy[] = "socks5proxy";
+        constexpr QLatin1String splitTunnelSites("splitTunnelSites");
+        constexpr QLatin1String splitTunnelType("splitTunnelType");
 
-        constexpr char configVersion[] = "config_version";
+        constexpr QLatin1String splitTunnelApps("splitTunnelApps");
+        constexpr QLatin1String appSplitTunnelType("appSplitTunnelType");
 
-        constexpr char splitTunnelSites[] = "splitTunnelSites";
-        constexpr char splitTunnelType[] = "splitTunnelType";
+        constexpr QLatin1String allowedDnsServers("allowedDnsServers");
 
-        constexpr char splitTunnelApps[] = "splitTunnelApps";
-        constexpr char appSplitTunnelType[] = "appSplitTunnelType";
+        constexpr QLatin1String killSwitchOption("killSwitchOption");
 
-        constexpr char allowedDnsServers[] = "allowedDnsServers";
+        constexpr QLatin1String crc("crc");
 
-        constexpr char killSwitchOption[] = "killSwitchOption";
+        constexpr QLatin1String clientId("clientId");
 
-        constexpr char crc[] = "crc";
+        constexpr QLatin1String nameOverriddenByUser("nameOverriddenByUser");
 
-        constexpr char clientId[] = "clientId";
+        constexpr QLatin1String amneziaOpenvpn("amnezia-openvpn");
+        constexpr QLatin1String amneziaWireguard("amnezia-wireguard");
+        constexpr QLatin1String amneziaAwg("amnezia-awg");
+        constexpr QLatin1String amneziaXray("amnezia-xray");
+        constexpr QLatin1String amneziaSsxray("amnezia-ssxray");
 
-        constexpr char nameOverriddenByUser[] = "nameOverriddenByUser";
-
+        constexpr QLatin1String clientName("clientName");
+        constexpr QLatin1String userData("userData");
+        constexpr QLatin1String creationDate("creationDate");
+        constexpr QLatin1String latestHandshake("latestHandshake");
+        constexpr QLatin1String dataReceived("dataReceived");
+        constexpr QLatin1String dataSent("dataSent");
     }
 }
 
-#endif // CONFIGKEYS_H
-
-
+#endif

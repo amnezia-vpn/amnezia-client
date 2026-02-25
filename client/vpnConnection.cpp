@@ -80,8 +80,8 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 
             if (!ContainerUtils::isAwgContainer(container) && 
                 container != DockerContainer::WireGuard) {
-                QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
-                QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
+                QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
+                QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
 
                 iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 
@@ -312,8 +312,8 @@ void VpnConnection::createProtocolConnections()
 
 void VpnConnection::appendKillSwitchConfig()
 {
-    m_vpnConfiguration.insert(config_key::killSwitchOption, QVariant(m_appSettingsRepository->isKillSwitchEnabled()).toString());
-    m_vpnConfiguration.insert(config_key::allowedDnsServers, QVariant(m_appSettingsRepository->getAllowedDnsServers()).toJsonValue());
+    m_vpnConfiguration.insert(configKey::killSwitchOption, QVariant(m_appSettingsRepository->isKillSwitchEnabled()).toString());
+    m_vpnConfiguration.insert(configKey::allowedDnsServers, QVariant(m_appSettingsRepository->getAllowedDnsServers()).toJsonValue());
 }
 
 void VpnConnection::appendSplitTunnelingConfig()
@@ -321,16 +321,16 @@ void VpnConnection::appendSplitTunnelingConfig()
     bool allowSiteBasedSplitTunneling = true;
 
     // this block is for old native configs and for old self-hosted configs
-    auto protocolName = m_vpnConfiguration.value(config_key::vpnproto).toString();
+    auto protocolName = m_vpnConfiguration.value(configKey::vpnProto).toString();
     if (protocolName == ProtocolUtils::protoToString(Proto::Awg) || protocolName == ProtocolUtils::protoToString(Proto::WireGuard)) {
         allowSiteBasedSplitTunneling = false;
         auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
-        if (configData.value(config_key::allowed_ips).isString()) {
-            QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value(config_key::allowed_ips).toString().split(", "));
-            configData.insert(config_key::allowed_ips, allowedIpsJsonArray);
+        if (configData.value(configKey::allowedIps).isString()) {
+            QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value(configKey::allowedIps).toString().split(", "));
+            configData.insert(configKey::allowedIps, allowedIpsJsonArray);
             m_vpnConfiguration.insert(protocolName + "_config_data", configData);
-        } else if (configData.value(config_key::allowed_ips).isUndefined()) {
-            auto nativeConfig = configData.value(config_key::config).toString();
+        } else if (configData.value(configKey::allowedIps).isUndefined()) {
+            auto nativeConfig = configData.value(configKey::config).toString();
             auto nativeConfigLines = nativeConfig.split("\n");
             for (auto &line : nativeConfigLines) {
                 if (line.contains("AllowedIPs")) {
@@ -339,15 +339,15 @@ void VpnConnection::appendSplitTunnelingConfig()
                         break;
                     }
                     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIpsString.at(1).split(", "));
-                    configData.insert(config_key::allowed_ips, allowedIpsJsonArray);
+                    configData.insert(configKey::allowedIps, allowedIpsJsonArray);
                     m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     break;
                 }
             }
         }
 
-        if (configData.value(config_key::persistent_keep_alive).isUndefined()) {
-            auto nativeConfig = configData.value(config_key::config).toString();
+        if (configData.value(configKey::persistentKeepAlive).isUndefined()) {
+            auto nativeConfig = configData.value(configKey::config).toString();
             auto nativeConfigLines = nativeConfig.split("\n");
             for (auto &line : nativeConfigLines) {
                 if (line.contains("PersistentKeepalive")) {
@@ -355,14 +355,14 @@ void VpnConnection::appendSplitTunnelingConfig()
                     if (persistentKeepaliveString.size() < 1) {
                         break;
                     }
-                    configData.insert(config_key::persistent_keep_alive, persistentKeepaliveString.at(1));
+                    configData.insert(configKey::persistentKeepAlive, persistentKeepaliveString.at(1));
                     m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     break;
                 }
             }
         }
 
-        QJsonArray allowedIpsJsonArray = configData.value(config_key::allowed_ips).toArray();
+        QJsonArray allowedIpsJsonArray = configData.value(configKey::allowedIps).toArray();
         if (allowedIpsJsonArray.contains("0.0.0.0/0") && allowedIpsJsonArray.contains("::/0")) {
             allowSiteBasedSplitTunneling = true;
         }
@@ -392,14 +392,14 @@ void VpnConnection::appendSplitTunnelingConfig()
                 routeMode = amnezia::RouteMode::VpnAllSites;
             } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                 // Allow traffic to Amnezia DNS
-                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
-                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
+                sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns1).toString());
+                sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns2).toString());
             }
         }
     }
 
-    m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
-    m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
+    m_vpnConfiguration.insert(configKey::splitTunnelType, routeMode);
+    m_vpnConfiguration.insert(configKey::splitTunnelSites, sitesJsonArray);
 
     amnezia::AppsRouteMode appsRouteMode = amnezia::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;
@@ -416,8 +416,8 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
     }
 
-    m_vpnConfiguration.insert(config_key::appSplitTunnelType, appsRouteMode);
-    m_vpnConfiguration.insert(config_key::splitTunnelApps, appsJsonArray);
+    m_vpnConfiguration.insert(configKey::appSplitTunnelType, appsRouteMode);
+    m_vpnConfiguration.insert(configKey::splitTunnelApps, appsJsonArray);
 
     qDebug() << QString("Site split tunneling is %1, route mode is %2")
                         .arg(m_appSettingsRepository->isSitesSplitTunnelingEnabled() ? "enabled" : "disabled")

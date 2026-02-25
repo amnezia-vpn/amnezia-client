@@ -58,9 +58,9 @@ ErrorCode WireguardProtocol::startMzImpl()
 {
     QString protocolName = m_rawConfig.value("protocol").toString();
     QJsonObject vpnConfigData = m_rawConfig.value(protocolName + "_config_data").toObject();
-    vpnConfigData[config_key::hostName] = NetworkUtilities::getIPAddress(vpnConfigData.value(config_key::hostName).toString());
+    vpnConfigData[configKey::hostName] = NetworkUtilities::getIPAddress(vpnConfigData.value(configKey::hostName).toString());
     m_rawConfig.insert(protocolName + "_config_data", vpnConfigData);
-    m_rawConfig[config_key::hostName] = NetworkUtilities::getIPAddress(m_rawConfig[config_key::hostName].toString());
+    m_rawConfig[configKey::hostName] = NetworkUtilities::getIPAddress(m_rawConfig[configKey::hostName].toString());
 
     m_impl->activate(m_rawConfig);
     return ErrorCode::NoError;

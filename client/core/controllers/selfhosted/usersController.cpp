@@ -22,19 +22,6 @@ using namespace amnezia;
 namespace
 {
     Logger logger("UsersController");
-
-    namespace configKey
-    {
-        constexpr char clientId[] = "clientId";
-        constexpr char clientName[] = "clientName";
-        constexpr char container[] = "container";
-        constexpr char userData[] = "userData";
-        constexpr char creationDate[] = "creationDate";
-        constexpr char latestHandshake[] = "latestHandshake";
-        constexpr char dataReceived[] = "dataReceived";
-        constexpr char dataSent[] = "dataSent";
-        constexpr char allowedIps[] = "allowedIps";
-    }
 }
 
 UsersController::UsersController(SecureServersRepository* serversRepository, QObject *parent)
@@ -260,31 +247,31 @@ ErrorCode UsersController::getXrayClients(const DockerContainer container, const
         return ErrorCode::InternalError;
     }
 
-    if (!serverConfig.object().contains("inbounds") || serverConfig.object()["inbounds"].toArray().isEmpty()) {
+    if (!serverConfig.object().contains(protocols::xray::inbounds) || serverConfig.object()[protocols::xray::inbounds].toArray().isEmpty()) {
         logger.error() << "Invalid xray server config structure";
         return ErrorCode::InternalError;
     }
 
-    const QJsonObject inbound = serverConfig.object()["inbounds"].toArray()[0].toObject();
-    if (!inbound.contains("settings")) {
+    const QJsonObject inbound = serverConfig.object()[protocols::xray::inbounds].toArray()[0].toObject();
+    if (!inbound.contains(protocols::xray::settings)) {
         logger.error() << "Missing settings in xray inbound config";
         return ErrorCode::InternalError;
     }
 
-    const QJsonObject settings = inbound["settings"].toObject();
-    if (!settings.contains("clients")) {
+    const QJsonObject settings = inbound[protocols::xray::settings].toObject();
+    if (!settings.contains(protocols::xray::clients)) {
         logger.error() << "Missing clients in xray settings config"; 
         return ErrorCode::InternalError;
     }
 
-    const QJsonArray clients = settings["clients"].toArray();
+    const QJsonArray clients = settings[protocols::xray::clients].toArray();
     for (const auto &clientValue : clients) {
         const QJsonObject clientObj = clientValue.toObject();
-        if (!clientObj.contains("id")) {
+        if (!clientObj.contains(protocols::xray::id)) {
             logger.error() << "Missing id in xray client config";
             continue;
         }
-        QString clientId = clientObj["id"].toString();
+        QString clientId = clientObj[protocols::xray::id].toString();
         
         QString xrayDefaultUuid = sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::uuidPath, error);
         xrayDefaultUuid.replace("\n", "");
@@ -622,30 +609,30 @@ ErrorCode UsersController::revokeXray(const int row,
     QString clientId = client.value(configKey::clientId).toString();
 
     QJsonObject configObj = serverConfig.object();
-    if (!configObj.contains("inbounds")) {
+    if (!configObj.contains(protocols::xray::inbounds)) {
         logger.error() << "Missing inbounds in xray config";
         return ErrorCode::InternalError;
     }
 
-    QJsonArray inbounds = configObj["inbounds"].toArray();
+    QJsonArray inbounds = configObj[protocols::xray::inbounds].toArray();
     if (inbounds.isEmpty()) {
         logger.error() << "Empty inbounds array in xray config";
         return ErrorCode::InternalError;
     }
 
     QJsonObject inbound = inbounds[0].toObject();
-    if (!inbound.contains("settings")) {
+    if (!inbound.contains(protocols::xray::settings)) {
         logger.error() << "Missing settings in xray inbound config";
         return ErrorCode::InternalError;
     }
 
-    QJsonObject settings = inbound["settings"].toObject();
-    if (!settings.contains("clients")) {
+    QJsonObject settings = inbound[protocols::xray::settings].toObject();
+    if (!settings.contains(protocols::xray::clients)) {
         logger.error() << "Missing clients in xray settings";
         return ErrorCode::InternalError;
     }
 
-    QJsonArray clients = settings["clients"].toArray();
+    QJsonArray clients = settings[protocols::xray::clients].toArray();
     if (clients.isEmpty()) {
         logger.error() << "Empty clients array in xray config";
         return ErrorCode::InternalError;
@@ -653,16 +640,16 @@ ErrorCode UsersController::revokeXray(const int row,
 
     for (int i = 0; i < clients.size(); ++i) {
         QJsonObject clientObj = clients[i].toObject();
-        if (clientObj.contains("id") && clientObj["id"].toString() == clientId) {
+        if (clientObj.contains(protocols::xray::id) && clientObj[protocols::xray::id].toString() == clientId) {
             clients.removeAt(i);
             break;
         }
     }
 
-    settings["clients"] = clients;
-    inbound["settings"] = settings;
+    settings[protocols::xray::clients] = clients;
+    inbound[protocols::xray::settings] = settings;
     inbounds[0] = inbound;
-    configObj["inbounds"] = inbounds;
+    configObj[protocols::xray::inbounds] = inbounds;
 
     error = sshSession->uploadTextFileToContainer(
         container, 

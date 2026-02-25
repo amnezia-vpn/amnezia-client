@@ -197,7 +197,7 @@ QString ProtocolUtils::key_proto_config_path(Proto p)
 
 QString ProtocolUtils::getProtocolVersion(const QJsonObject &protocolConfig)
 {
-    return protocolConfig.value(config_key::protocolVersion).toString();
+    return protocolConfig.value(configKey::protocolVersion).toString();
 }
 
 QString ProtocolUtils::getProtocolVersionString(const QJsonObject &protocolConfig)
