@@ -17,6 +17,7 @@
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
 
+using namespace amnezia;
 using namespace ProtocolUtils;
 
 ConnectionController::ConnectionController(SecureServersRepository* serversRepository,
@@ -95,21 +96,22 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
         return vpnConfiguration;
     }
 
-    bool isApiConfig = serverConfig.isApiConfig();
     Proto proto = ContainerUtils::defaultProtocol(container);
 
-    QJsonObject protocolConfigJson = containerConfig.protocolConfig.toJson();
-    QString protocolConfigString = protocolConfigJson.value(configKey::lastConfig).toString();
-
-    SplitTunnelingSettings splitTunneling = {
-        m_appSettingsRepository->isSitesSplitTunnelingEnabled(),
-        m_appSettingsRepository->routeMode()
+    ConnectionSettings connectionSettings = {
+        { dns.first, dns.second },
+        serverConfig.isApiConfig(),
+        {
+            m_appSettingsRepository->isSitesSplitTunnelingEnabled(),
+            m_appSettingsRepository->routeMode()
+        }
     };
 
     auto configurator = ConfiguratorBase::create(proto, nullptr);
-    protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, splitTunneling, protocolConfigString);
+    ProtocolConfig processedConfig = configurator->processConfigWithLocalSettings(connectionSettings,
+                                                                                  containerConfig.protocolConfig);
 
-    QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+    QJsonObject vpnConfigData = processedConfig.getClientConfigJson();
     if (ContainerUtils::isAwgContainer(container) || container == DockerContainer::WireGuard) {
         if (vpnConfigData[configKey::mtu].toString().isEmpty()) {
             vpnConfigData[configKey::mtu] =

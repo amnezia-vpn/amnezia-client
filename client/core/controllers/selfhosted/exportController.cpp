@@ -16,6 +16,8 @@
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
 
+using namespace amnezia;
+
 ExportController::ExportController(SecureServersRepository* serversRepository,
                                    SecureAppSettingsRepository* appSettingsRepository,
                                    QObject *parent)
@@ -142,14 +144,14 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     if (result.errorCode != ErrorCode::NoError) {
         return result;
     }
-    
-    QString protocolConfigString = newProtocolConfig.nativeConfig();
-    protocolConfigString = configurator->processConfigWithExportSettings(dns, protocolConfigString);
+
+    ExportSettings exportSettings = { { dns.first, dns.second } };
+    ProtocolConfig processedConfig = configurator->processConfigWithExportSettings(exportSettings, newProtocolConfig);
 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg) {
-        result.jsonNativeConfig[configKey::config] = protocolConfigString;
+        result.jsonNativeConfig[configKey::config] = processedConfig.nativeConfig();
     } else {
-        result.jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+        result.jsonNativeConfig = QJsonDocument::fromJson(processedConfig.nativeConfig().toUtf8()).object();
     }
 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg || protocol == Proto::Xray) {

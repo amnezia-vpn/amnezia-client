@@ -65,7 +65,8 @@ struct ProtocolConfig {
     void clearClientConfig();
     
     QString nativeConfig() const;
-    
+    void setNativeConfig(const QString &config);
+
     bool isThirdPartyConfig() const;
     
     QJsonObject toJson() const;

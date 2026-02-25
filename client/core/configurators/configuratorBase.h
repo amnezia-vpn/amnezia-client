@@ -29,15 +29,13 @@ public:
                                         const amnezia::DnsSettings &dnsSettings,
                                         amnezia::ErrorCode &errorCode) = 0;
 
-    virtual QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, 
-                                                   const bool isApiConfig,
-                                                   const amnezia::SplitTunnelingSettings &splitTunneling,
-                                                   QString &protocolConfigString);
-    virtual QString processConfigWithExportSettings(const QPair<QString, QString> &dns,
-                                                    QString &protocolConfigString);
+    virtual amnezia::ProtocolConfig processConfigWithLocalSettings(const amnezia::ConnectionSettings &settings,
+                                                                   amnezia::ProtocolConfig protocolConfig);
+    virtual amnezia::ProtocolConfig processConfigWithExportSettings(const amnezia::ExportSettings &settings,
+                                                                     amnezia::ProtocolConfig protocolConfig);
 
 protected:
-    void processConfigWithDnsSettings(const QPair<QString, QString> &dns, QString &protocolConfigString);
+    void applyDnsToNativeConfig(const amnezia::DnsSettings &dns, amnezia::ProtocolConfig &protocolConfig);
 
     SshSession* m_sshSession;
 };

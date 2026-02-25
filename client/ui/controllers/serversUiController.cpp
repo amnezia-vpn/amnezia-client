@@ -390,7 +390,7 @@ bool ServersUiController::hasServersFromGatewayApi() const
 {
     QVector<ServerConfig> servers = m_serversController->getServers();
     for (const ServerConfig &server : servers) {
-        if (server.configVersion() == apiDefs::ConfigSource::AmneziaGateway) {
+        if (server.isApiV2()) {
             return true;
         }
     }

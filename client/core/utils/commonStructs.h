@@ -44,6 +44,18 @@ namespace amnezia
         bool isSitesSplitTunnelingEnabled;
         RouteMode routeMode;
     };
+
+    struct ConnectionSettings
+    {
+        DnsSettings dns;
+        bool isApiConfig;
+        SplitTunnelingSettings splitTunneling;
+    };
+
+    struct ExportSettings
+    {
+        DnsSettings dns;
+    };
 }
 
 #endif // COMMONSTRUCTS_H

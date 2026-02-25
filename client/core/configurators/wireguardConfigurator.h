@@ -34,11 +34,10 @@ public:
                                 const amnezia::DnsSettings &dnsSettings,
                                 amnezia::ErrorCode &errorCode) override;
 
-    QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                           const amnezia::SplitTunnelingSettings &splitTunneling,
-                                           QString &protocolConfigString) override;
-    QString processConfigWithExportSettings(const QPair<QString, QString> &dns,
-                                            QString &protocolConfigString) override;
+    amnezia::ProtocolConfig processConfigWithLocalSettings(const amnezia::ConnectionSettings &settings,
+                                                           amnezia::ProtocolConfig protocolConfig) override;
+    amnezia::ProtocolConfig processConfigWithExportSettings(const amnezia::ExportSettings &settings,
+                                                            amnezia::ProtocolConfig protocolConfig) override;
 
     static ConnectionData genClientKeys();
 

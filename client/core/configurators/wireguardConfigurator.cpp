@@ -28,6 +28,8 @@
 #include "core/models/protocols/awgProtocolConfig.h"
 #include <QJsonArray>
 
+using namespace amnezia;
+
 WireguardConfigurator::WireguardConfigurator(SshSession* sshSession, bool isAwg,
                                              QObject *parent)
     : ConfiguratorBase(sshSession, parent), m_isAwg(isAwg)
@@ -273,21 +275,14 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
     return protocolConfig;
 }
 
-QString WireguardConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns,
-                                                              const bool isApiConfig,
-                                                              const SplitTunnelingSettings &splitTunneling,
-                                                              QString &protocolConfigString)
+ProtocolConfig WireguardConfigurator::processConfigWithLocalSettings(const ConnectionSettings &settings,
+                                                                     ProtocolConfig protocolConfig)
 {
-    Q_UNUSED(splitTunneling);
-    processConfigWithDnsSettings(dns, protocolConfigString);
-
-    return protocolConfigString;
+    return ConfiguratorBase::processConfigWithLocalSettings(settings, protocolConfig);
 }
 
-QString WireguardConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns,
-                                                               QString &protocolConfigString)
+ProtocolConfig WireguardConfigurator::processConfigWithExportSettings(const ExportSettings &settings,
+                                                                      ProtocolConfig protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
-
-    return protocolConfigString;
+    return ConfiguratorBase::processConfigWithExportSettings(settings, protocolConfig);
 }

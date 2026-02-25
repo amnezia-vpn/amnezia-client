@@ -27,25 +27,24 @@ QScopedPointer<ConfiguratorBase> ConfiguratorBase::create(Proto protocol,
     }
 }
 
-QString ConfiguratorBase::processConfigWithLocalSettings(const QPair<QString, QString> &dns, 
-                                                         const bool isApiConfig,
-                                                         const SplitTunnelingSettings &splitTunneling,
-                                                         QString &protocolConfigString)
+ProtocolConfig ConfiguratorBase::processConfigWithLocalSettings(const ConnectionSettings &settings,
+                                                                 ProtocolConfig protocolConfig)
 {
-    Q_UNUSED(splitTunneling);
-    processConfigWithDnsSettings(dns, protocolConfigString);
-    return protocolConfigString;
+    applyDnsToNativeConfig(settings.dns, protocolConfig);
+    return protocolConfig;
 }
 
-QString ConfiguratorBase::processConfigWithExportSettings(const QPair<QString, QString> &dns,
-                                                          QString &protocolConfigString)
+ProtocolConfig ConfiguratorBase::processConfigWithExportSettings(const ExportSettings &settings,
+                                                                 ProtocolConfig protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
-    return protocolConfigString;
+    applyDnsToNativeConfig(settings.dns, protocolConfig);
+    return protocolConfig;
 }
 
-void ConfiguratorBase::processConfigWithDnsSettings(const QPair<QString, QString> &dns, QString &protocolConfigString)
+void ConfiguratorBase::applyDnsToNativeConfig(const DnsSettings &dns, ProtocolConfig &protocolConfig)
 {
-    protocolConfigString.replace("$PRIMARY_DNS", dns.first);
-    protocolConfigString.replace("$SECONDARY_DNS", dns.second);
+    QString config = protocolConfig.nativeConfig();
+    config.replace("$PRIMARY_DNS", dns.primaryDns);
+    config.replace("$SECONDARY_DNS", dns.secondaryDns);
+    protocolConfig.setNativeConfig(config);
 }

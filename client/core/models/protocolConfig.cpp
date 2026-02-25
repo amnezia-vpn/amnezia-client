@@ -227,6 +227,34 @@ QString ProtocolConfig::nativeConfig() const
     }, data);
 }
 
+void ProtocolConfig::setNativeConfig(const QString &config)
+{
+    std::visit([&config](auto&& arg) {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, AwgProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                arg.clientConfig->nativeConfig = config;
+            }
+        } else if constexpr (std::is_same_v<T, WireGuardProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                arg.clientConfig->nativeConfig = config;
+            }
+        } else if constexpr (std::is_same_v<T, OpenVpnProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                arg.clientConfig->nativeConfig = config;
+            }
+        } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                arg.clientConfig->nativeConfig = config;
+            }
+        } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                arg.clientConfig->nativeConfig = config;
+            }
+        }
+    }, data);
+}
+
 bool ProtocolConfig::isThirdPartyConfig() const
 {
     return std::visit([](auto&& arg) -> bool {
