@@ -120,6 +120,12 @@ void CoreSignalHandlers::initInstallControllerHandler()
     connect(m_coreController->m_installUiController, &InstallUiController::cancelInstallation, m_coreController->m_installController, &InstallController::cancelInstallation);
     connect(m_coreController->m_installUiController, &InstallUiController::currentContainerUpdated, m_coreController->m_connectionUiController,
             &ConnectionUiController::onCurrentContainerUpdated);
+    connect(m_coreController->m_serversUiController, &ServersUiController::processedServerIndexChanged,
+        m_coreController->m_installUiController, [this](int index) {
+        if (index >= 0) {
+            m_coreController->m_installUiController->clearProcessedServerCredentials();
+        }
+    });
 }
 
 void CoreSignalHandlers::initExportControllerHandler()

@@ -96,19 +96,14 @@ InstallUiController::~InstallUiController()
 
 void InstallUiController::install(DockerContainer container, int port, TransportProto transportProto, int serverIndex)
 {
-    bool isNewServer = false;
-    
-    if (!m_processedServerCredentials.hostName.isEmpty() && 
-        !m_processedServerCredentials.userName.isEmpty() && 
-        !m_processedServerCredentials.secretData.isEmpty()) {
-        isNewServer = true;
-    }
+    const bool isNewServer = serverIndex < 0;
     
     ServerCredentials serverCredentials;
     if (isNewServer) {
         serverCredentials = m_processedServerCredentials;
     } else {
         serverCredentials = m_serversController->getServerCredentials(serverIndex);
+        m_processedServerCredentials = ServerCredentials();
     }
 
     QMap<DockerContainer, QJsonObject> preparedContainers;
@@ -333,6 +328,11 @@ void InstallUiController::clearCachedProfile(int serverIndex, int containerIndex
 QRegularExpression InstallUiController::ipAddressRegExp()
 {
     return NetworkUtilities::ipAddressRegExp();
+}
+
+void InstallUiController::clearProcessedServerCredentials()
+{
+    m_processedServerCredentials = ServerCredentials();
 }
 
 void InstallUiController::setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)

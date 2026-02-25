@@ -100,9 +100,7 @@ void ServersUiController::toggleAmneziaDns(bool enabled)
 
 void ServersUiController::onDefaultServerChanged(int index)
 {
-    if (m_processedServerIndex == -1 || m_processedServerIndex >= m_serversController->getServersCount()) {
-        setProcessedServerIndex(index);
-    }
+    setProcessedServerIndex(index);
     updateModel();
     updateDefaultServerContainersModel();
     emit defaultServerIndexChanged(index);
