@@ -146,7 +146,11 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     QString protocolConfigString = newProtocolConfig.nativeConfig();
     protocolConfigString = configurator->processConfigWithExportSettings(dns, protocolConfigString);
 
-    result.jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+    if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg) {
+        result.jsonNativeConfig[configKey::config] = protocolConfigString;
+    } else {
+        result.jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+    }
 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg || protocol == Proto::Xray) {
         QString clientId = newProtocolConfig.clientId();
