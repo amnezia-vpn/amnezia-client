@@ -14,10 +14,11 @@ sc stop AmneziaVPN-service
 sc delete AmneziaVPN-service
 sc stop AmneziaWGTunnel$AmneziaVPN
 sc delete AmneziaWGTunnel$AmneziaVPN
-sc stop AmneziaVPNSplitTunnel
-sc delete AmneziaVPNSplitTunnel
 taskkill /IM "AmneziaVPN-service.exe" /F
 taskkill /IM "AmneziaVPN.exe" /F
+timeout /t 3
+sc stop AmneziaVPNSplitTunnel
+sc delete AmneziaVPNSplitTunnel
 
 rem Delete the service log file under ProgramData
 if exist "%SYS_LOG_FILE%" del /F /Q "%SYS_LOG_FILE%"
