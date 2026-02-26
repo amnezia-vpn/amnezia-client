@@ -1070,7 +1070,7 @@ bool InstallController::isUpdateDockerContainerRequired(const DockerContainer co
     const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
     const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
 
-    if (container == DockerContainer::Awg2) {
+    if (ContainerProps::isAwgContainer(container)) {
         const AwgConfig oldConfig(oldProtoConfig);
         const AwgConfig newConfig(newProtoConfig);
 
