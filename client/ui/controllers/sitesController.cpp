@@ -7,10 +7,8 @@
 #include "systemController.h"
 #include "core/networkUtilities.h"
 
-SitesController::SitesController(const std::shared_ptr<Settings> &settings,
-                                 const QSharedPointer<VpnConnection> &vpnConnection,
-                                 const QSharedPointer<SitesModel> &sitesModel, QObject *parent)
-    : QObject(parent), m_settings(settings), m_vpnConnection(vpnConnection), m_sitesModel(sitesModel)
+SitesController::SitesController(const std::shared_ptr<Settings> &settings, const QSharedPointer<SitesModel> &sitesModel, QObject *parent)
+    : QObject(parent), m_settings(settings), m_sitesModel(sitesModel)
 {
 }
 
@@ -34,32 +32,20 @@ void SitesController::addSite(QString hostname)
         hostname = hostname.split("/", Qt::SkipEmptyParts).first();
     }
 
-    const auto &processSite = [this](const QString &hostname, const QString &ip) {
-        m_sitesModel->addSite(hostname, ip);
-
-        if (!ip.isEmpty()) {
-            QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
-                                      Q_ARG(QStringList, QStringList() << ip));
-        } else if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
-            QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
-                                      Q_ARG(QStringList, QStringList() << hostname));
-        }
-    };
-
-    const auto &resolveCallback = [this, processSite](const QHostInfo &hostInfo) {
+    const auto &resolveCallback = [this](const QHostInfo &hostInfo) {
         const QList<QHostAddress> &addresses = hostInfo.addresses();
         for (const QHostAddress &addr : hostInfo.addresses()) {
             if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-                processSite(hostInfo.hostName(), addr.toString());
+                m_sitesModel->addSite(hostInfo.hostName(), addr.toString());
                 break;
             }
         }
     };
 
     if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
-        processSite(hostname, "");
+        m_sitesModel->addSite(hostname, "");
     } else {
-        processSite(hostname, "");
+        m_sitesModel->addSite(hostname, "");
         QHostInfo::lookupHost(hostname, this, resolveCallback);
     }
 
@@ -71,9 +57,6 @@ void SitesController::removeSite(int index)
     auto modelIndex = m_sitesModel->index(index);
     auto hostname = m_sitesModel->data(modelIndex, SitesModel::Roles::UrlRole).toString();
     m_sitesModel->removeSite(modelIndex);
-
-    QMetaObject::invokeMethod(m_vpnConnection.get(), "deleteRoutes", Qt::QueuedConnection,
-                              Q_ARG(QStringList, QStringList() << hostname));
 
     emit finished(tr("Site removed: %1").arg(hostname));
 }
@@ -127,8 +110,6 @@ void SitesController::importSites(const QString &fileName, bool replaceExisting)
     }
 
     m_sitesModel->addSites(sites, replaceExisting);
-
-    QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection, Q_ARG(QStringList, ips));
 
     emit finished(tr("Import completed"));
 }
