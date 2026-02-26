@@ -97,12 +97,12 @@ void InstallController::install(DockerContainer container, int port, TransportPr
 
                 while (usedValues.contains(s3) || s1 + AwgConstant::messageInitiationSize == s3 + AwgConstant::messageCookieReplySize
                        || s2 + AwgConstant::messageResponseSize == s3 + AwgConstant::messageCookieReplySize) {
-                    s3 = QRandomGenerator::global()->bounded(0, 64);
+                    s3 = QRandomGenerator::global()->bounded(1, 64);
                 }
                 usedValues.insert(s3);
 
                 while (usedValues.contains(s4)) {
-                    s4 = QRandomGenerator::global()->bounded(0, 20);
+                    s4 = QRandomGenerator::global()->bounded(1, 20);
                 }
 
                 QString initPacketJunkSize = QString::number(s1);
