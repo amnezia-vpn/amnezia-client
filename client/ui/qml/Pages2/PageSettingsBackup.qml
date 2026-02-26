@@ -169,6 +169,27 @@ PageType {
         var noButtonFunction = function() {
         }
 
-        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        var showDialog = function() {
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+
+        if (GC.isMobile() && Qt.platform.os === "android") {
+            restoreBackupDelayTimer.dialogCallback = showDialog
+            restoreBackupDelayTimer.restart()
+        } else {
+            showDialog()
+        }
+    }
+
+    Timer {
+        id: restoreBackupDelayTimer
+        interval: 500
+        repeat: false
+        property var dialogCallback
+        onTriggered: {
+            if (dialogCallback && typeof dialogCallback === "function") {
+                dialogCallback()
+            }
+        }
     }
 }
