@@ -132,8 +132,13 @@ bool Daemon::activate(const InterfaceConfig& config) {
   }
 
   // Configure routing for excluded addresses.
+  // These routes bypass the VPN tunnel for specific IPs (e.g., the VPN server itself).
+  // If these fail, VPN server traffic gets routed into the tunnel, causing a routing loop.
   for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
+    if (!addExclusionRoute(IPAddress(i))) {
+      logger.warning() << "Failed to add exclusion route for" << i
+                       << "- this may cause a routing loop";
+    }
   }
 
   // Add the peer to this interface.

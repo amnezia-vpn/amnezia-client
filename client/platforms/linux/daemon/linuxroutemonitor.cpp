@@ -164,8 +164,27 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
     }
 
     if (rtm->rtm_type == RTN_THROW) {
+    auto gwInfo = NetworkUtilities::getGatewayAndIface();
+    QString gwString = gwInfo.first;
+
+    if (gwString.isEmpty()) {
+        logger.error() << "Cannot create exclusion route for" << prefix.toString()
+                       << "- no default gateway detected."
+                       << "VPN server traffic may loop through the tunnel.";
+        return false;
+    }
+
     struct in_addr ip4;
-    inet_pton(AF_INET, NetworkUtilities::getGatewayAndIface().first.toUtf8(), &ip4);
+    if (inet_pton(AF_INET, gwString.toUtf8(), &ip4) != 1) {
+        logger.error() << "Cannot create exclusion route for" << prefix.toString()
+                       << "- invalid gateway address:" << gwString;
+        return false;
+    }
+
+    logger.debug() << "Exclusion route for" << prefix.toString()
+                   << "via gateway" << gwString
+                   << "dev" << gwInfo.second.name();
+
     nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
     nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
     rtm->rtm_type = RTN_UNICAST;
@@ -217,7 +236,10 @@ void LinuxRouteMonitor::nlsockReady() {
     }
     struct nlmsgerr* err = static_cast<struct nlmsgerr*>(NLMSG_DATA(nlmsg));
     if (err->error != 0) {
-        logger.debug() << "Netlink request failed:" << strerror(-err->error);
+        // Log at warning level — route failures (especially "Network is unreachable")
+        // can cause VPN routing loops if the server exclusion route was affected
+        logger.warning() << "Netlink route request failed:" << strerror(-err->error)
+                         << "(seq=" << err->msg.nlmsg_seq << ")";
     }
     nlmsg = NLMSG_NEXT(nlmsg, len);
     }
