@@ -342,8 +342,10 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         SitesController.exportSites(fileName)
-                        moreActionsDrawer.closeTriggered()
-                        PageController.showBusyIndicator(false)
+                        ResumeHelper.runWhenActive(function() {
+                            moreActionsDrawer.closeTriggered()
+                            PageController.showBusyIndicator(false)
+                        })
                     }
                 }
             }

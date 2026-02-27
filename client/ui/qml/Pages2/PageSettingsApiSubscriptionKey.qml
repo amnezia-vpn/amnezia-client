@@ -120,7 +120,9 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         ApiConfigsController.exportVpnKey(fileName)
-                        PageController.showBusyIndicator(false)
+                        ResumeHelper.runWhenActive(function() {
+                            PageController.showBusyIndicator(false)
+                        })
                     }
                 }
             }

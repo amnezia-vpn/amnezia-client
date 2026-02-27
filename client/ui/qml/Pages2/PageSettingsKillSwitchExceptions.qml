@@ -201,8 +201,10 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         AllowedDnsController.exportDns(fileName)
-                        moreActionsDrawer.closeTriggered()
-                        PageController.showBusyIndicator(false)
+                        ResumeHelper.runWhenActive(function() {
+                            moreActionsDrawer.closeTriggered()
+                            PageController.showBusyIndicator(false)
+                        })
                     }
                 }
             }

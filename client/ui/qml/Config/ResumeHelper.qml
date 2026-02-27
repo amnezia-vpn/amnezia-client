@@ -3,7 +3,7 @@ import QtQuick
 
 import QtCore
 
-QtObject {
+Item {
     id: root
 
     property var pendingCallback: null

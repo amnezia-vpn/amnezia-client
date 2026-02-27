@@ -108,7 +108,9 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         ExportController.exportConfig(fileName)
-                        PageController.showBusyIndicator(false)
+                        ResumeHelper.runWhenActive(function() {
+                            PageController.showBusyIndicator(false)
+                        })
                     }
                 }
             }

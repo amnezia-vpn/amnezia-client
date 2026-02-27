@@ -117,8 +117,10 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         SettingsController.backupAppConfig(fileName)
-                        PageController.showBusyIndicator(false)
-                        PageController.showNotificationMessage(qsTr("Backup file saved"))
+                        ResumeHelper.runWhenActive(function() {
+                            PageController.showBusyIndicator(false)
+                            PageController.showNotificationMessage(qsTr("Backup file saved"))
+                        })
                     }
                 }
             }
