@@ -12,6 +12,7 @@ androidx-datastore = "1.1.1"
 kotlinx-coroutines = "1.8.1"
 kotlinx-serialization = "1.6.3"
 google-mlkit = "17.3.0"
+google-play-review = "2.0.2"
 
 [libraries]
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
@@ -28,6 +29,7 @@ androidx-datastore = { module = "androidx.datastore:datastore-preferences", vers
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "kotlinx-serialization" }
 google-mlkit = { module = "com.google.mlkit:barcode-scanning", version.ref = "google-mlkit" }
+google-play-review = { module = "com.google.android.play:review-ktx", version.ref = "google-play-review" }
 
 [bundles]
 androidx-camera = [
