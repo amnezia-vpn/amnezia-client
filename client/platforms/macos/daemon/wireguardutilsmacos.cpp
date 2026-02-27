@@ -167,6 +167,20 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
               params.blockAddrs.append(net.toString());
           }
       }
+
+      // Only block IPv6 outside the tunnel when the VPN has no IPv6 routes.
+      // When AllowedIPs includes IPv6 ranges (e.g. ::/0), IPv6 traffic goes
+      // through the tunnel and is already allowed by 200.allowVPN (quick).
+      // Unconditionally blocking IPv6 caused Chrome ERR_SOCKET_NOT_CONNECTED
+      // due to Happy Eyeballs / QUIC fallback delays (see #945).
+      params.blockIPv6 = true;
+      for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
+          if (ip.type() == QAbstractSocket::IPv6Protocol) {
+              params.blockIPv6 = false;
+              break;
+          }
+      }
+
       applyFirewallRules(params);
     }
   }
@@ -482,7 +496,7 @@ void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
                                 QStringLiteral("blocknets"), params.blockAddrs);
 
   MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), params.blockIPv6);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
