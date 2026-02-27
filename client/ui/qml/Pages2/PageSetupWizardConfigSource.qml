@@ -115,10 +115,8 @@ PageType {
                                 if (fileName !== "") {
                                     PageController.showBusyIndicator(true)
                                     SettingsController.exportLogsFile(fileName)
-                                    ResumeHelper.runWhenActive(function() {
-                                        PageController.showBusyIndicator(false)
-                                        PageController.showNotificationMessage(qsTr("Logs file saved"))
-                                    })
+                                    PageController.showBusyIndicator(false)
+                                    PageController.showNotificationMessage(qsTr("Logs file saved"))
                                 }
                             }
                         }
@@ -313,11 +311,9 @@ PageType {
             var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                         qsTr("Backup files (*.backup)"))
             if (filePath !== "") {
-                ResumeHelper.runWhenActive(function() {
-                    PageController.showBusyIndicator(true)
-                    SettingsController.restoreAppConfig(filePath)
-                    PageController.showBusyIndicator(false)
-                })
+                PageController.showBusyIndicator(true)
+                SettingsController.restoreAppConfig(filePath)
+                PageController.showBusyIndicator(false)
             }
         }
     }
@@ -334,11 +330,9 @@ PageType {
                                                                "Config files (*.vpn *.ovpn *.conf *.json)"
             var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
             if (fileName !== "") {
-                ResumeHelper.runWhenActive(function() {
-                    if (ImportController.extractConfigFromFile(fileName)) {
-                        PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-                    }
-                })
+                if (ImportController.extractConfigFromFile(fileName)) {
+                    PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                }
             }
         }
     }

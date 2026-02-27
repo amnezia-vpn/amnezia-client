@@ -1,2 +1,1 @@
 singleton GC 1.0 GlobalConfig.qml
-singleton ResumeHelper 1.0 ResumeHelper.qml

@@ -192,15 +192,14 @@ PageType {
         if (fileName !== "") {
             PageController.showBusyIndicator(true)
             let result = ApiConfigsController.exportNativeConfig(countryCode, fileName)
-            ResumeHelper.runWhenActive(function() {
-                if (result) {
-                    ApiSettingsController.getAccountInfo(true)
-                }
-                PageController.showBusyIndicator(false)
-                if (result) {
-                    PageController.showNotificationMessage(qsTr("Config file saved"))
-                }
-            })
+            if (result) {
+                ApiSettingsController.getAccountInfo(true)
+            }
+
+            PageController.showBusyIndicator(false)
+            if (result) {
+                PageController.showNotificationMessage(qsTr("Config file saved"))
+            }
         }
     }
 

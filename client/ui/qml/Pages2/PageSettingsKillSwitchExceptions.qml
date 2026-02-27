@@ -201,10 +201,8 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         AllowedDnsController.exportDns(fileName)
-                        ResumeHelper.runWhenActive(function() {
-                            moreActionsDrawer.closeTriggered()
-                            PageController.showBusyIndicator(false)
-                        })
+                        moreActionsDrawer.closeTriggered()
+                        PageController.showBusyIndicator(false)
                     }
                 }
             }
@@ -267,9 +265,7 @@ PageType {
                             var fileName = SystemController.getFileName(qsTr("Open address file"),
                                                                         qsTr("Address files (*.json)"))
                             if (fileName !== "") {
-                                ResumeHelper.runWhenActive(function() {
-                                    importSitesDrawerContent.importSites(fileName, true)
-                                })
+                                importSitesDrawerContent.importSites(fileName, true)
                             }
                         }
                     }
@@ -285,9 +281,7 @@ PageType {
                             var fileName = SystemController.getFileName(qsTr("Open address file"),
                                                                         qsTr("Address files (*.json)"))
                             if (fileName !== "") {
-                                ResumeHelper.runWhenActive(function() {
-                                    importSitesDrawerContent.importSites(fileName, false)
-                                })
+                                importSitesDrawerContent.importSites(fileName, false)
                             }
                         }
                     }

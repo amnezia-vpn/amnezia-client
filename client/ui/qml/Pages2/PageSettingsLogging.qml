@@ -198,10 +198,8 @@ PageType {
             if (fileName !== "") {
                 PageController.showBusyIndicator(true)
                 SettingsController.exportLogsFile(fileName)
-                ResumeHelper.runWhenActive(function() {
-                    PageController.showBusyIndicator(false)
-                    PageController.showNotificationMessage(qsTr("Logs file saved"))
-                })
+                PageController.showBusyIndicator(false)
+                PageController.showNotificationMessage(qsTr("Logs file saved"))
             }
         }
     }
@@ -225,10 +223,8 @@ PageType {
             if (fileName !== "") {
                 PageController.showBusyIndicator(true)
                 SettingsController.exportServiceLogsFile(fileName)
-                ResumeHelper.runWhenActive(function() {
-                    PageController.showBusyIndicator(false)
-                    PageController.showNotificationMessage(qsTr("Logs file saved"))
-                })
+                PageController.showBusyIndicator(false)
+                PageController.showNotificationMessage(qsTr("Logs file saved"))
             }
         }
     }

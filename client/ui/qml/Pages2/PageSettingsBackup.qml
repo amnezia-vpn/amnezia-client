@@ -117,10 +117,8 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         SettingsController.backupAppConfig(fileName)
-                        ResumeHelper.runWhenActive(function() {
-                            PageController.showBusyIndicator(false)
-                            PageController.showNotificationMessage(qsTr("Backup file saved"))
-                        })
+                        PageController.showBusyIndicator(false)
+                        PageController.showNotificationMessage(qsTr("Backup file saved"))
                     }
                 }
             }
@@ -155,7 +153,7 @@ PageType {
 
     function restoreBackup(filePath) {
         var headerText = qsTr("Import settings from a backup file?")
-        var descriptionText = qsTr("All current settings will be reset")
+        var descriptionText = qsTr("All current settings will be reset");
         var yesButtonText = qsTr("Continue")
         var noButtonText = qsTr("Cancel")
 
@@ -168,12 +166,9 @@ PageType {
                 PageController.showBusyIndicator(false)
             }
         }
-        var noButtonFunction = function() {}
-
-        var showDialog = function() {
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        var noButtonFunction = function() {
         }
 
-        ResumeHelper.runWhenActive(showDialog)
+        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 }

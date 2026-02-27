@@ -342,10 +342,8 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         SitesController.exportSites(fileName)
-                        ResumeHelper.runWhenActive(function() {
-                            moreActionsDrawer.closeTriggered()
-                            PageController.showBusyIndicator(false)
-                        })
+                        moreActionsDrawer.closeTriggered()
+                        PageController.showBusyIndicator(false)
                     }
                 }
             }
@@ -464,9 +462,7 @@ PageType {
             var fileName = SystemController.getFileName(qsTr("Open sites file"),
                                                         qsTr("Sites files (*.json)"))
             if (fileName !== "") {
-                ResumeHelper.runWhenActive(function() {
-                    root.importSites(fileName, true)
-                })
+                root.importSites(fileName, true)
             }
         }
     }
@@ -479,9 +475,7 @@ PageType {
             var fileName = SystemController.getFileName(qsTr("Open sites file"),
                                                         qsTr("Sites files (*.json)"))
             if (fileName !== "") {
-                ResumeHelper.runWhenActive(function() {
-                    root.importSites(fileName, false)
-                })
+                root.importSites(fileName, false)
             }
         }
     }
