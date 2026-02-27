@@ -11,6 +11,11 @@ namespace
 {
     Logger logger("ApiCountryModel");
     constexpr QLatin1String countryConfig("country_config");
+    constexpr QLatin1String regionEurope("Europe");
+    constexpr QLatin1String regionAmerica("America");
+    constexpr QLatin1String regionAsia("Asia");
+    constexpr QLatin1String regionOceaniaAfrica("Oceania and Africa");
+    constexpr QLatin1String regionOther("Other");
 
     struct RegionRowData
     {
@@ -23,6 +28,38 @@ namespace
         QString countryCode;
         QString countryImageCode;
     };
+
+    QString resolveRegionByIsoCode(const QString &isoCode)
+    {
+        static const QHash<QString, QString> isoToRegion = {
+            {"BE", regionEurope},
+            {"EE", regionEurope},
+            {"FI", regionEurope},
+            {"FR", regionEurope},
+            {"GE", regionEurope},
+            {"DE", regionEurope},
+            {"NL", regionEurope},
+            {"PL", regionEurope},
+            {"RU", regionEurope},
+            {"ES", regionEurope},
+            {"SE", regionEurope},
+            {"CH", regionEurope},
+            {"TR", regionEurope},
+            {"BR", regionAmerica},
+            {"CA", regionAmerica},
+            {"US", regionAmerica},
+            {"AE", regionAsia},
+            {"JP", regionAsia},
+            {"KZ", regionAsia},
+            {"KR", regionAsia},
+            {"SG", regionAsia},
+            {"AU", regionOceaniaAfrica},
+            {"NZ", regionOceaniaAfrica},
+            {"ZA", regionOceaniaAfrica},
+        };
+
+        return isoToRegion.value(isoCode, regionOther);
+    }
 }
 
 class ApiCountryModel::RegionRowsModel : public QAbstractListModel
@@ -104,53 +141,6 @@ private:
 ApiCountryModel::ApiCountryModel(QObject *parent)
     : QAbstractListModel(parent), m_regionRowsModel(std::make_unique<RegionRowsModel>(this))
 {
-    m_regionDefinitions = {
-        {
-            "Europe",
-            {
-                {"BE", "Belgium", "Бельгия"},
-                {"EE", "Estonia", "Эстония"},
-                {"FI", "Finland", "Финляндия"},
-                {"FR", "France", "Франция"},
-                {"GE", "Georgia", "Грузия"},
-                {"DE", "Germany", "Германия"},
-                {"NL", "Netherlands", "Нидерланды"},
-                {"PL", "Poland", "Польша"},
-                {"RU", "Russia", "Россия"},
-                {"ES", "Spain", "Испания"},
-                {"SE", "Sweden", "Швеция"},
-                {"CH", "Switzerland", "Швейцария"},
-                {"TR", "Turkey", "Турция"},
-            },
-        },
-        {
-            "America",
-            {
-                {"BR", "Brazil", "Бразилия"},
-                {"CA", "Canada East", "Канада"},
-                {"US", "USA East", "США"},
-            },
-        },
-        {
-            "Asia",
-            {
-                {"AE", "UAE", "ОАЭ"},
-                {"JP", "Japan", "Япония"},
-                {"KZ", "Kazakhstan", "Казахстан"},
-                {"KR", "South Korea", "Южная Корея"},
-                {"SG", "Singapore", "Сингапур"},
-            },
-        },
-        {
-            "Oceania and Africa",
-            {
-                {"AU", "Australia", "Австралия"},
-                {"NZ", "New Zealand", "Новая Зеландия"},
-                {"ZA", "South Africa", "Южная Африка"},
-            },
-        },
-    };
-
     loadRegionExpansionState();
     rebuildGroupedRegions();
 }
@@ -356,8 +346,7 @@ QString ApiCountryModel::normalizeSearchComparableText(const QString &textValue)
     return result;
 }
 
-bool ApiCountryModel::isCountryMatchingSearch(const QString &countryName, const QString &regionCountryCode,
-                                              const QString &sourceCountryCode, const QString &ruCountryName,
+bool ApiCountryModel::isCountryMatchingSearch(const QString &countryName, const QString &sourceCountryCode,
                                               const QString &normalizedSearchText) const
 {
     if (normalizedSearchText.isEmpty()) {
@@ -365,13 +354,9 @@ bool ApiCountryModel::isCountryMatchingSearch(const QString &countryName, const 
     }
 
     const QString normalizedCountryName = normalizeSearchComparableText(countryName);
-    const QString normalizedRuCountryName = normalizeSearchComparableText(ruCountryName);
-    const QString normalizedRegionCountryCode = normalizeCountryCode(regionCountryCode).toLower();
     const QString normalizedSourceCountryCode = normalizeCountryCode(sourceCountryCode).toLower();
 
-    return normalizedCountryName.startsWith(normalizedSearchText) || normalizedRuCountryName.startsWith(normalizedSearchText) ||
-           normalizedRegionCountryCode.startsWith(normalizedSearchText) ||
-           normalizedSourceCountryCode.startsWith(normalizedSearchText);
+    return normalizedCountryName.startsWith(normalizedSearchText) || normalizedSourceCountryCode.startsWith(normalizedSearchText);
 }
 
 QString ApiCountryModel::getDisplayCountryName(const QString &countryName) const
@@ -383,83 +368,55 @@ QString ApiCountryModel::getDisplayCountryName(const QString &countryName) const
     return countryName;
 }
 
-int ApiCountryModel::findCountryIndexByRef(const CountryRef &countryRef, const QHash<int, bool> &usedIndices) const
-{
-    const QString expectedCode = normalizeCountryCode(countryRef.code);
-    const QString expectedName = normalizeCountryName(countryRef.name);
-    const int countriesCount = m_countries.size();
-
-    for (int i = 0; i < countriesCount; ++i) {
-        if (usedIndices.value(i)) {
-            continue;
-        }
-
-        const CountryInfo &country = m_countries.at(i);
-        const QString modelCode = normalizeCountryCode(country.countryCode);
-        const QString modelIsoCode = extractCountryIsoCode(country.countryCode);
-        const QString modelName = normalizeCountryName(country.countryName);
-
-        if (!expectedName.isEmpty() && modelName == expectedName) {
-            return i;
-        }
-        if (!expectedCode.isEmpty() && (modelCode == expectedCode || modelIsoCode == expectedCode)) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
 void ApiCountryModel::rebuildGroupedRegions()
 {
     QVector<RegionRowData> rows;
-    QHash<int, bool> usedIndices;
     const QString normalizedSearchText = normalizeSearchComparableText(m_searchText);
+    const QStringList orderedRegions = {
+        regionEurope,
+        regionAmerica,
+        regionAsia,
+        regionOceaniaAfrica,
+        regionOther,
+    };
 
-    for (int regionIndex = 0; regionIndex < m_regionDefinitions.size(); ++regionIndex) {
-        const RegionDefinition &regionDefinition = m_regionDefinitions.at(regionIndex);
-        QVector<RegionRowData> countries;
-
-        const auto &countryRefs = std::as_const(regionDefinition.countries);
-        for (const CountryRef &countryRef : countryRefs) {
-            const int sourceIndex = findCountryIndexByRef(countryRef, usedIndices);
-            if (sourceIndex < 0) {
-                continue;
-            }
-
-            const CountryInfo &sourceCountry = m_countries.at(sourceIndex);
-            const QString displayCountryName = getDisplayCountryName(sourceCountry.countryName);
-            if (!isCountryMatchingSearch(displayCountryName, countryRef.code, sourceCountry.countryCode, countryRef.ruName,
-                                         normalizedSearchText)) {
-                continue;
-            }
-
-            RegionRowData countryRow;
-            countryRow.isRegionHeader = false;
-            countryRow.regionName = regionDefinition.regionName;
-            countryRow.sourceIndex = sourceIndex;
-            countryRow.countryName = displayCountryName;
-            countryRow.sourceCountryName = sourceCountry.countryName;
-            countryRow.countryCode = sourceCountry.countryCode;
-            countryRow.countryImageCode = extractCountryIsoCode(sourceCountry.countryCode);
-            countries.push_back(std::move(countryRow));
-            usedIndices.insert(sourceIndex, true);
+    QHash<QString, QVector<RegionRowData>> groupedCountries;
+    for (int sourceIndex = 0; sourceIndex < m_countries.size(); ++sourceIndex) {
+        const CountryInfo &sourceCountry = m_countries.at(sourceIndex);
+        if (!isCountryMatchingSearch(sourceCountry.countryName, sourceCountry.countryCode, normalizedSearchText)) {
+            continue;
         }
 
-        if (!countries.isEmpty()) {
-            const bool expanded = isRegionExpanded(regionDefinition.regionName);
+        const QString regionName = resolveRegionByIsoCode(extractCountryIsoCode(sourceCountry.countryCode));
+        RegionRowData countryRow;
+        countryRow.isRegionHeader = false;
+        countryRow.regionName = regionName;
+        countryRow.sourceIndex = sourceIndex;
+        countryRow.countryName = getDisplayCountryName(sourceCountry.countryName);
+        countryRow.sourceCountryName = sourceCountry.countryName;
+        countryRow.countryCode = sourceCountry.countryCode;
+        countryRow.countryImageCode = extractCountryIsoCode(sourceCountry.countryCode);
+        groupedCountries[regionName].push_back(std::move(countryRow));
+    }
 
-            RegionRowData headerRow;
-            headerRow.isRegionHeader = true;
-            headerRow.regionName = regionDefinition.regionName;
-            headerRow.isExpanded = expanded;
-            rows.push_back(std::move(headerRow));
+    for (const QString &regionName : orderedRegions) {
+        QVector<RegionRowData> countries = groupedCountries.value(regionName);
+        if (countries.isEmpty()) {
+            continue;
+        }
 
-            if (expanded) {
-                for (RegionRowData &countryRow : countries) {
-                    countryRow.isExpanded = expanded;
-                    rows.push_back(std::move(countryRow));
-                }
+        const bool expanded = isRegionExpanded(regionName);
+
+        RegionRowData headerRow;
+        headerRow.isRegionHeader = true;
+        headerRow.regionName = regionName;
+        headerRow.isExpanded = expanded;
+        rows.push_back(std::move(headerRow));
+
+        if (expanded) {
+            for (RegionRowData &countryRow : countries) {
+                countryRow.isExpanded = expanded;
+                rows.push_back(std::move(countryRow));
             }
         }
     }

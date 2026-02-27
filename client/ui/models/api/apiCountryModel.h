@@ -68,24 +68,10 @@ private:
         QString countryCode;
     };
 
-    struct CountryRef
-    {
-        QString code;
-        QString name;
-        QString ruName;
-    };
-
-    struct RegionDefinition
-    {
-        QString regionName;
-        QVector<CountryRef> countries;
-    };
-
     QVector<CountryInfo> m_countries;
     QHash<QString, IssuedConfigInfo> m_issuedConfigs;
     int m_currentIndex = -1;
     QString m_searchText;
-    QVector<RegionDefinition> m_regionDefinitions;
     QHash<QString, bool> m_regionsExpanded;
     class RegionRowsModel;
     std::unique_ptr<RegionRowsModel> m_regionRowsModel;
@@ -94,10 +80,9 @@ private:
     QString extractCountryIsoCode(const QString &countryCode) const;
     QString normalizeCountryName(const QString &countryName) const;
     QString normalizeSearchComparableText(const QString &textValue) const;
-    bool isCountryMatchingSearch(const QString &countryName, const QString &regionCountryCode, const QString &sourceCountryCode,
-                                 const QString &ruCountryName, const QString &normalizedSearchText) const;
+    bool isCountryMatchingSearch(const QString &countryName, const QString &sourceCountryCode,
+                                 const QString &normalizedSearchText) const;
     QString getDisplayCountryName(const QString &countryName) const;
-    int findCountryIndexByRef(const CountryRef &countryRef, const QHash<int, bool> &usedIndices) const;
     void rebuildGroupedRegions();
     void loadRegionExpansionState();
     void saveRegionExpansionState() const;
