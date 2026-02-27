@@ -2276,8 +2276,8 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="181"/>
-        <source>Show notification icon when has unread news</source>
-        <translation>Показывать значок уведомления при наличии непрочитанных новостей</translation>
+        <source>Show a notification icon for unread news</source>
+        <translation>Показывать значок уведомления, если есть непрочитанные новости</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
