@@ -265,7 +265,9 @@ PageType {
                             var fileName = SystemController.getFileName(qsTr("Open address file"),
                                                                         qsTr("Address files (*.json)"))
                             if (fileName !== "") {
-                                importSitesDrawerContent.importSites(fileName, true)
+                                ResumeHelper.runWhenActive(function() {
+                                    importSitesDrawerContent.importSites(fileName, true)
+                                })
                             }
                         }
                     }
@@ -281,7 +283,9 @@ PageType {
                             var fileName = SystemController.getFileName(qsTr("Open address file"),
                                                                         qsTr("Address files (*.json)"))
                             if (fileName !== "") {
-                                importSitesDrawerContent.importSites(fileName, false)
+                                ResumeHelper.runWhenActive(function() {
+                                    importSitesDrawerContent.importSites(fileName, false)
+                                })
                             }
                         }
                     }

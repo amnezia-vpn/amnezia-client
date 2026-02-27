@@ -462,7 +462,9 @@ PageType {
             var fileName = SystemController.getFileName(qsTr("Open sites file"),
                                                         qsTr("Sites files (*.json)"))
             if (fileName !== "") {
-                root.importSites(fileName, true)
+                ResumeHelper.runWhenActive(function() {
+                    root.importSites(fileName, true)
+                })
             }
         }
     }
@@ -475,7 +477,9 @@ PageType {
             var fileName = SystemController.getFileName(qsTr("Open sites file"),
                                                         qsTr("Sites files (*.json)"))
             if (fileName !== "") {
-                root.importSites(fileName, false)
+                ResumeHelper.runWhenActive(function() {
+                    root.importSites(fileName, false)
+                })
             }
         }
     }

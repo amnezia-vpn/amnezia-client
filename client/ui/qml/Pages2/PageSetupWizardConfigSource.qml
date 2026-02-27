@@ -311,9 +311,11 @@ PageType {
             var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                         qsTr("Backup files (*.backup)"))
             if (filePath !== "") {
-                PageController.showBusyIndicator(true)
-                SettingsController.restoreAppConfig(filePath)
-                PageController.showBusyIndicator(false)
+                ResumeHelper.runWhenActive(function() {
+                    PageController.showBusyIndicator(true)
+                    SettingsController.restoreAppConfig(filePath)
+                    PageController.showBusyIndicator(false)
+                })
             }
         }
     }
@@ -330,9 +332,11 @@ PageType {
                                                                "Config files (*.vpn *.ovpn *.conf *.json)"
             var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
             if (fileName !== "") {
-                if (ImportController.extractConfigFromFile(fileName)) {
-                    PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-                }
+                ResumeHelper.runWhenActive(function() {
+                    if (ImportController.extractConfigFromFile(fileName)) {
+                        PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                    }
+                })
             }
         }
     }

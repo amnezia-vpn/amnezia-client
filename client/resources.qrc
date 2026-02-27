@@ -140,6 +140,7 @@
         <file>ui/qml/Components/TransportProtoSelector.qml</file>
         <file>ui/qml/Components/AddSitePanel.qml</file>
         <file>ui/qml/Config/GlobalConfig.qml</file>
+        <file>ui/qml/Config/ResumeHelper.qml</file>
         <file>ui/qml/Config/qmldir</file>
         <file>ui/qml/Controls2/BackButtonType.qml</file>
         <file>ui/qml/Controls2/BasicButtonType.qml</file>
