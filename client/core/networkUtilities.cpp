@@ -333,7 +333,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 
     // Only request IPv4 routes — we only need the IPv4 default gateway
     // and this significantly reduces the response size
-    struct rtmsg *reqRtm = (struct rtmsg *)NLMSG_DATA(nlmsg);
+    auto *reqRtm = reinterpret_cast<struct rtmsg *>(NLMSG_DATA(nlmsg));
     reqRtm->rtm_family = AF_INET;
 
     /* 1 Sec Timeout to avoid stall */
@@ -378,7 +378,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
             return {};
         }
         if (nlh->nlmsg_type == NLMSG_ERROR) {
-            struct nlmsgerr *err = (struct nlmsgerr *)NLMSG_DATA(nlh);
+            auto *err = reinterpret_cast<struct nlmsgerr *>(NLMSG_DATA(nlh));
             qWarning() << "getGatewayAndIface: netlink error response:"
                        << strerror(-err->error);
             close(sock);
@@ -419,13 +419,13 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         if (nlh->nlmsg_type == NLMSG_DONE)
             break;
 
-        route_entry = (struct rtmsg *)NLMSG_DATA(nlh);
+        route_entry = reinterpret_cast<struct rtmsg *>(NLMSG_DATA(nlh));
 
         // We are just interested in the main routing table
         if (route_entry->rtm_table != RT_TABLE_MAIN)
             continue;
 
-        route_attribute = (struct rtattr *)RTM_RTA(route_entry);
+        route_attribute = reinterpret_cast<struct rtattr *>(RTM_RTA(route_entry));
         route_attribute_len = RTM_PAYLOAD(nlh);
 
         // Use per-route temporaries to avoid mixing attributes from different routes
@@ -437,7 +437,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         {
             switch(route_attribute->rta_type) {
             case RTA_OIF:
-                if_indextoname(*(int *)RTA_DATA(route_attribute), route_if);
+                if_indextoname(*reinterpret_cast<int *>(RTA_DATA(route_attribute)), route_if);
                 break;
             case RTA_GATEWAY:
                 inet_ntop(AF_INET, RTA_DATA(route_attribute),
@@ -450,8 +450,8 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 
         if ((*route_gw) && (*route_if)) {
             qDebug() << "Gateway" << route_gw << "for interface" << route_if;
-            strncpy(gateway_address, route_gw, sizeof(gateway_address) - 1);
-            strncpy(interface, route_if, sizeof(interface) - 1);
+            snprintf(gateway_address, sizeof(gateway_address), "%s", route_gw);
+            snprintf(interface, sizeof(interface), "%s", route_if);
             break;
         }
     }
