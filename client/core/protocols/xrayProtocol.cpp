@@ -53,7 +53,6 @@ XrayProtocol::~XrayProtocol()
 ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
-    setConnectionState(Vpn::ConnectionState::Connecting);
 
     return IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         auto xrayStart = iface->xrayStart(QJsonDocument(m_xrayConfig).toJson());
@@ -70,7 +69,6 @@ ErrorCode XrayProtocol::start()
 void XrayProtocol::stop()
 {
     qDebug() << "XrayProtocol::stop()";
-    setConnectionState(Vpn::ConnectionState::Disconnecting);
 
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
         auto disableKillSwitch = iface->disableKillSwitch();

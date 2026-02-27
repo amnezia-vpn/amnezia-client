@@ -278,6 +278,9 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
             } else {
                 baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
             }
+            std::random_device randomDevice;
+            std::mt19937 generator(randomDevice());
+            std::shuffle(baseUrls.begin(), baseUrls.end(), generator);
 
             QStringList proxyStorageUrls;
             if (!serviceType.isEmpty()) {
@@ -328,6 +331,9 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
     } else {
         baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
     }
+    std::random_device randomDevice;
+    std::mt19937 generator(randomDevice());
+    std::shuffle(baseUrls.begin(), baseUrls.end(), generator);
 
     QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
 

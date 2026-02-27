@@ -68,7 +68,6 @@ bool SitesController::removeSite(const QString &hostname)
         if (m_sites[i].first == hostname) {
             m_appSettingsRepository->removeVpnSite(m_currentRouteMode, hostname);
             m_sites.removeAt(i);
-            deleteRoutes(QStringList() << hostname);
             return true;
         }
     }
@@ -117,20 +116,6 @@ void SitesController::fillSites()
     }
 }
 
-void SitesController::addRoutes(const QStringList& ips)
-{
-    if (m_vpnConnection) {
-        QMetaObject::invokeMethod(m_vpnConnection, "addRoutes", Qt::QueuedConnection, Q_ARG(QStringList, ips));
-    }
-}
-
-void SitesController::deleteRoutes(const QStringList& ips)
-{
-    if (m_vpnConnection) {
-        QMetaObject::invokeMethod(m_vpnConnection, "deleteRoutes", Qt::QueuedConnection, Q_ARG(QStringList, ips));
-    }
-}
-
 QString SitesController::normalizeHostname(const QString &hostname) const
 {
     QString normalized = hostname;
@@ -172,9 +157,6 @@ void SitesController::processSiteAfterResolve(const QString &hostname, const QSt
         if (m_sites[i].first == hostname && m_sites[i].second.isEmpty()) {
             m_sites[i].second = ip;
             m_appSettingsRepository->addVpnSite(m_currentRouteMode, hostname, ip);
-            if (!ip.isEmpty()) {
-                addRoutes(QStringList() << ip);
-            }
             break;
         }
     }
@@ -182,13 +164,7 @@ void SitesController::processSiteAfterResolve(const QString &hostname, const QSt
 
 void SitesController::processSite(const QString &hostname, const QString &ip)
 {
-    if (addSiteInternal(hostname, ip)) {
-        if (!ip.isEmpty()) {
-            addRoutes(QStringList() << ip);
-        } else if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
-            addRoutes(QStringList() << hostname);
-        }
-    }
+    addSiteInternal(hostname, ip);
 }
 
 bool SitesController::importSitesFromJson(const QByteArray& jsonData, bool replaceExisting, QString &errorMessage)
@@ -208,7 +184,6 @@ bool SitesController::importSitesFromJson(const QByteArray& jsonData, bool repla
     
     QJsonArray jsonArray = jsonDocument.array();
     QMap<QString, QString> sites;
-    QStringList ips;
     
     for (auto jsonValue : jsonArray) {
         QJsonObject jsonObject = jsonValue.toObject();
@@ -222,16 +197,10 @@ bool SitesController::importSitesFromJson(const QByteArray& jsonData, bool repla
             continue;
         }
         
-        if (ip.isEmpty()) {
-            ips.append(normalizedHostname);
-        } else {
-            ips.append(ip);
-        }
         sites.insert(normalizedHostname, ip);
     }
     
     addSites(sites, replaceExisting);
-    addRoutes(ips);
     
     return true;
 }

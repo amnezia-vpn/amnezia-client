@@ -33,7 +33,10 @@ class TvFilePicker : ComponentActivity() {
             return intent
         }
     }) {
-        setResult(RESULT_OK, Intent().apply { data = it })
+        setResult(RESULT_OK, Intent().apply {
+            data = it
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        })
         finish()
     }
 

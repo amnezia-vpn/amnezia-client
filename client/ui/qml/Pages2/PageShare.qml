@@ -475,9 +475,13 @@ PageType {
                             exportTypeSelector.currentIndex = 0
                         }
                         selectedIndex = exportTypeSelector.currentIndex
-                        exportTypeSelector.text = (selectedText !== undefined && selectedText !== null)
-                            ? selectedText
-                            : (model.length > 0 ? model[exportTypeSelector.currentIndex].name : "")
+                        if (model.length > 0 && model[selectedIndex] && model[selectedIndex].name !== undefined) {
+                            exportTypeSelectorListView.selectedText = model[selectedIndex].name
+                            exportTypeSelector.text = model[selectedIndex].name
+                        } else {
+                            exportTypeSelectorListView.selectedText = ""
+                            exportTypeSelector.text = ""
+                        }
                     }
 
                     rootWidth: root.width

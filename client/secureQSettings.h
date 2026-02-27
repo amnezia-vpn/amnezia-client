@@ -3,6 +3,7 @@
 
 #include <QMutex>
 #include <QMutexLocker>
+#include <QRecursiveMutex>
 #include <QObject>
 #include <QSettings>
 
@@ -16,14 +17,16 @@ public:
     explicit SecureQSettings(const QString &organization, const QString &application = QString(),
                              QObject *parent = nullptr, bool enableEncryption = true);
 
-    Q_INVOKABLE QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
-    Q_INVOKABLE void setValue(const QString &key, const QVariant &value);
+    QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void setValue(const QString &key, const QVariant &value);
     void remove(const QString &key);
-    void sync();
 
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &json);
 
+    void clearSettings();
+
+private:
     QByteArray encryptText(const QByteArray &value) const;
     QByteArray decryptText(const QByteArray &ba) const;
 
@@ -35,9 +38,6 @@ public:
     static QByteArray getSecTag(const QString &tag);
     static void setSecTag(const QString &tag, const QByteArray &data);
 
-    void clearSettings();
-
-private:
     QSettings m_settings;
 
     mutable QHash<QString, QVariant> m_cache;
@@ -55,7 +55,7 @@ private:
 
     bool m_encryptionEnabled;
 
-    mutable QMutex mutex;
+    mutable QRecursiveMutex m_mutex;
 };
 
 #endif // SECUREQSETTINGS_H

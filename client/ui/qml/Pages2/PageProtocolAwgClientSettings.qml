@@ -330,6 +330,8 @@ PageType {
             AwgTextField {
                 id: cookieReplyPacketJunkSizeTextField
 
+                visible: isAwg2
+
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -341,6 +343,8 @@ PageType {
 
             AwgTextField {
                 id: transportPacketJunkSizeTextField
+
+                visible: isAwg2
 
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16

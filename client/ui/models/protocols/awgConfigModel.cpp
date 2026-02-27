@@ -122,9 +122,9 @@ void AwgConfigModel::updateModel(amnezia::DockerContainer container, const amnez
         m_protocolConfig.clientConfig = amnezia::AwgClientConfig{};
     }
     applyDefaultsToClientConfig(m_protocolConfig.clientConfig.value());
-    
+
     m_originalProtocolConfig = m_protocolConfig;
-    
+
     endResetModel();
 }
 
@@ -155,11 +155,13 @@ void AwgConfigModel::applyDefaultsToServerConfig(amnezia::AwgServerConfig& confi
     if (config.responsePacketJunkSize.isEmpty()) {
         config.responsePacketJunkSize = protocols::awg::defaultResponsePacketJunkSize;
     }
-    if (config.cookieReplyPacketJunkSize.isEmpty()) {
-        config.cookieReplyPacketJunkSize = protocols::awg::defaultCookieReplyPacketJunkSize;
-    }
-    if (config.transportPacketJunkSize.isEmpty()) {
-        config.transportPacketJunkSize = protocols::awg::defaultTransportPacketJunkSize;
+    if (config.protocolVersion == protocols::awg::awgV2) {
+        if (config.cookieReplyPacketJunkSize.isEmpty()) {
+            config.cookieReplyPacketJunkSize = protocols::awg::defaultCookieReplyPacketJunkSize;
+        }
+        if (config.transportPacketJunkSize.isEmpty()) {
+            config.transportPacketJunkSize = protocols::awg::defaultTransportPacketJunkSize;
+        }
     }
     if (config.initPacketMagicHeader.isEmpty()) {
         config.initPacketMagicHeader = protocols::awg::defaultInitPacketMagicHeader;

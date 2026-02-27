@@ -37,9 +37,6 @@ public:
     bool isSplitTunnelingEnabled() const;
     QVector<QPair<QString, QString>> getCurrentSites() const;
 
-    void addRoutes(const QStringList& ips);
-    void deleteRoutes(const QStringList& ips);
-
     bool importSitesFromJson(const QByteArray& jsonData, bool replaceExisting, QString &errorMessage);
     QByteArray exportSitesToJson() const;
 
