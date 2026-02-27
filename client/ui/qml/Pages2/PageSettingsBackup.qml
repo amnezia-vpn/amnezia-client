@@ -151,9 +151,22 @@ PageType {
         }
     }
 
+    property var pendingRestoreDialog: null
+
+    Connections {
+        target: Qt.application
+        function onStateChanged() {
+            if (pendingRestoreDialog && Qt.application.state === Qt.ApplicationActive) {
+                var cb = pendingRestoreDialog
+                pendingRestoreDialog = null
+                Qt.callLater(cb)
+            }
+        }
+    }
+
     function restoreBackup(filePath) {
         var headerText = qsTr("Import settings from a backup file?")
-        var descriptionText = qsTr("All current settings will be reset");
+        var descriptionText = qsTr("All current settings will be reset")
         var yesButtonText = qsTr("Continue")
         var noButtonText = qsTr("Cancel")
 
@@ -166,9 +179,20 @@ PageType {
                 PageController.showBusyIndicator(false)
             }
         }
-        var noButtonFunction = function() {
+        var noButtonFunction = function() {}
+
+        var showDialog = function() {
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
 
-        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        if (GC.isMobile() && Qt.platform.os === "android") {
+            if (Qt.application.state === Qt.ApplicationActive) {
+                Qt.callLater(showDialog)
+            } else {
+                pendingRestoreDialog = showDialog
+            }
+        } else {
+            showDialog()
+        }
     }
 }
