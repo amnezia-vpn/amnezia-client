@@ -75,6 +75,8 @@ private const val OPEN_FILE_ACTION_CODE = 3
 private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
 
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
+private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
+private const val KEY_PENDING_OPEN_FILE_URI = "pending_open_file_uri"
 
 class AmneziaActivity : QtActivity() {
 
@@ -94,6 +96,8 @@ class AmneziaActivity : QtActivity() {
     private var isActivityResumed = false
     private var hasWindowFocus = false
     private val resumeHandler = Handler(Looper.getMainLooper())
+    private var pendingOpenFileUri: String? = null
+    private var openFileDeliveryScheduled = false
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -196,9 +200,16 @@ class AmneziaActivity : QtActivity() {
                 doBindService()
             }
         )
+        pendingOpenFileUri = savedInstanceState?.getString(KEY_PENDING_OPEN_FILE_URI)
+        openFileDeliveryScheduled = false
         registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        pendingOpenFileUri?.let { outState.putString(KEY_PENDING_OPEN_FILE_URI, it) }
     }
 
     private fun loadLibs() {
@@ -270,6 +281,7 @@ class AmneziaActivity : QtActivity() {
         hasWindowFocus = false
         // Cancel all pending operations when activity stops
         resumeHandler.removeCallbacksAndMessages(null)
+        openFileDeliveryScheduled = false
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
         mainScope.launch {
@@ -366,6 +378,7 @@ class AmneziaActivity : QtActivity() {
         isActivityResumed = false
         // Cancel all pending operations when activity pauses
         resumeHandler.removeCallbacksAndMessages(null)
+        openFileDeliveryScheduled = false
         Log.d(TAG, "Pause Amnezia activity")
     }
 
@@ -373,6 +386,21 @@ class AmneziaActivity : QtActivity() {
         super.onResume()
         isActivityResumed = true
         Log.d(TAG, "Resume Amnezia activity")
+
+        if (pendingOpenFileUri != null && !openFileDeliveryScheduled) {
+            val uri = pendingOpenFileUri!!
+            openFileDeliveryScheduled = true
+            resumeHandler.postDelayed({
+                if (!isFinishing && !isDestroyed) {
+                    pendingOpenFileUri = null
+                    openFileDeliveryScheduled = false
+                    mainScope.launch {
+                        qtInitialized.await()
+                        QtAndroidController.onFileOpened(uri)
+                    }
+                }
+            }, OPEN_FILE_AFTER_RESUME_DELAY_MS)
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             window.decorView.apply {
@@ -790,9 +818,13 @@ class AmneziaActivity : QtActivity() {
                             grantUriPermission(packageName, this, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }?.toString() ?: ""
                         Log.v(TAG, "Open file: $uri")
-                        mainScope.launch {
-                            qtInitialized.await()
-                            QtAndroidController.onFileOpened(uri)
+                        if (uri.isNotEmpty()) {
+                            pendingOpenFileUri = uri
+                        } else {
+                            mainScope.launch {
+                                qtInitialized.await()
+                                QtAndroidController.onFileOpened(uri)
+                            }
                         }
                     }
                 ))

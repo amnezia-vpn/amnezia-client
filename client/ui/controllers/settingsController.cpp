@@ -178,12 +178,11 @@ void SettingsController::backupAppConfig(const QString &fileName)
 
 void SettingsController::restoreAppConfig(const QString &fileName)
 {
-    QFile file(fileName);
-
-    file.open(QIODevice::ReadOnly);
-
-    QByteArray data = file.readAll();
-
+    QByteArray data;
+    if (!SystemController::readFile(fileName, data)) {
+        emit changeSettingsErrorOccurred(tr("Can't open file: %1").arg(fileName));
+        return;
+    }
     restoreAppConfigFromData(data);
 }
 
