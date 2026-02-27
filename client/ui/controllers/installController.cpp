@@ -83,8 +83,8 @@ void InstallController::install(DockerContainer container, int port, TransportPr
 
                 int s1 = QRandomGenerator::global()->bounded(15, 150);
                 int s2 = QRandomGenerator::global()->bounded(15, 150);
-                int s3 = QRandomGenerator::global()->bounded(0, 64);
-                int s4 = QRandomGenerator::global()->bounded(0, 20);
+                int s3 = QRandomGenerator::global()->bounded(1, 64);
+                int s4 = QRandomGenerator::global()->bounded(1, 20);
 
                 // Ensure all values are unique and don't create equal packet sizes
                 QSet<int> usedValues;
