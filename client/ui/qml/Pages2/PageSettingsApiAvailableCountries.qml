@@ -17,6 +17,7 @@ PageType {
     id: root
 
     property var processedServer
+    readonly property int topBarHeight: 20 + SettingsController.safeAreaTopMargin + backButton.implicitHeight + 12
 
     Connections {
         target: ServersModel
@@ -43,6 +44,32 @@ PageType {
         }
     }
 
+    Rectangle {
+        id: topBar
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: root.topBarHeight
+        color: "black"
+        z: 10
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+        }
+
+        BackButtonType {
+            id: backButton
+            objectName: "backButton"
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+            anchors.leftMargin: 16
+            z: 1
+        }
+    }
+
     ListViewType {
         id: menuContent
 
@@ -61,13 +88,6 @@ PageType {
 
             spacing: 4
 
-            BackButtonType {
-                id: backButton
-                objectName: "backButton"
-
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
-            }
-
             HeaderTypeWithButton {
                 id: headerContent
                 objectName: "headerContent"
@@ -75,6 +95,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.topMargin: topBar.height + 4
                 Layout.bottomMargin: 10
 
                 actionButtonImage: "qrc:/images/controls/settings.svg"
