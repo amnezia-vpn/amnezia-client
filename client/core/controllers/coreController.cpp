@@ -116,7 +116,7 @@ void CoreController::initModels()
     m_apiDevicesModel = new ApiDevicesModel(this);
     setQmlContextProperty("ApiDevicesModel", m_apiDevicesModel);
 
-    m_newsModel = new NewsModel(m_settings, this);
+    m_newsModel = new NewsModel(m_appSettingsRepository, this);
     setQmlContextProperty("NewsModel", m_newsModel);
 }
 
@@ -137,7 +137,7 @@ void CoreController::initCoreControllers()
     m_serversController = new ServersController(m_serversRepository, m_appSettingsRepository, this);
     m_appSplitTunnelingController = new AppSplitTunnelingController(m_appSettingsRepository);
     m_usersController = new UsersController(m_serversRepository, this);
-    m_sitesController = new SitesController(m_appSettingsRepository, m_vpnConnection.get(), this);
+    m_sitesController = new SitesController(m_appSettingsRepository, this);
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);

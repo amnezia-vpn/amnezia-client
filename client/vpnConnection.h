@@ -36,6 +36,7 @@ public:
     static QString bytesPerSecToText(quint64 bytes);
 
     ErrorCode lastError() const;
+    Vpn::ConnectionState connectionState() const;
 
     QSharedPointer<VpnProtocol> vpnProtocol() const;
 
@@ -55,6 +56,8 @@ public slots:
     void onKillSwitchModeChanged(bool enabled);
     void disconnectSlots();
 
+    void setConnectionState(Vpn::ConnectionState state);
+
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(Vpn::ConnectionState state);
@@ -65,8 +68,6 @@ signals:
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(Vpn::ConnectionState state);
-
-    void setConnectionState(Vpn::ConnectionState state);
 
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;

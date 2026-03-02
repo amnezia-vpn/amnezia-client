@@ -59,7 +59,6 @@ QLocale SecureAppSettingsRepository::getAppLanguage() const
 void SecureAppSettingsRepository::setAppLanguage(QLocale locale)
 {
     setValue("Conf/appLanguage", locale.name());
-    m_settings->sync();
     emit appLanguageChanged(locale);
 }
 
@@ -71,7 +70,6 @@ bool SecureAppSettingsRepository::useAmneziaDns() const
 void SecureAppSettingsRepository::setUseAmneziaDns(bool enabled)
 {
     setValue("Conf/useAmneziaDns", enabled);
-    m_settings->sync();
     emit useAmneziaDnsChanged(enabled);
 }
 
@@ -83,7 +81,6 @@ QStringList SecureAppSettingsRepository::getAllowedDnsServers() const
 void SecureAppSettingsRepository::setAllowedDnsServers(const QStringList &servers)
 {
     setValue("Conf/allowedDnsServers", servers);
-    m_settings->sync();
     emit allowedDnsServersChanged(servers);
 }
 
@@ -96,7 +93,6 @@ QString SecureAppSettingsRepository::primaryDns() const
 void SecureAppSettingsRepository::setPrimaryDns(const QString &dns)
 {
     setValue("Conf/primaryDns", dns);
-    m_settings->sync();
 }
 
 QString SecureAppSettingsRepository::secondaryDns() const
@@ -108,7 +104,6 @@ QString SecureAppSettingsRepository::secondaryDns() const
 void SecureAppSettingsRepository::setSecondaryDns(const QString &dns)
 {
     setValue("Conf/secondaryDns", dns);
-    m_settings->sync();
 }
 
 namespace {
@@ -130,7 +125,6 @@ RouteMode SecureAppSettingsRepository::routeMode() const
 void SecureAppSettingsRepository::setRouteMode(RouteMode mode)
 {
     setValue("Conf/routeMode", static_cast<int>(mode));
-    m_settings->sync();
     emit routeModeChanged(mode);
 }
 
@@ -142,7 +136,6 @@ QVariantMap SecureAppSettingsRepository::vpnSites(RouteMode mode) const
 void SecureAppSettingsRepository::setVpnSites(RouteMode mode, const QVariantMap &sites)
 {
     setValue("Conf/" + routeModeString(mode), sites);
-    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
@@ -199,7 +192,6 @@ bool SecureAppSettingsRepository::isSitesSplitTunnelingEnabled() const
 void SecureAppSettingsRepository::setSitesSplitTunnelingEnabled(bool enabled)
 {
     setValue("Conf/sitesSplitTunnelingEnabled", enabled);
-    m_settings->sync();
     emit sitesSplitTunnelingEnabledChanged(enabled);
 }
 
@@ -222,7 +214,6 @@ AppsRouteMode SecureAppSettingsRepository::appsRouteMode() const
 void SecureAppSettingsRepository::setAppsRouteMode(AppsRouteMode mode)
 {
     setValue("Conf/appsRouteMode", static_cast<int>(mode));
-    m_settings->sync();
     emit appsRouteModeChanged(mode);
 }
 
@@ -252,7 +243,6 @@ void SecureAppSettingsRepository::setVpnApps(AppsRouteMode mode, const QVector<I
         appsArray.push_back(appInfo);
     }
     setValue("Conf/" + appsRouteModeString(mode), appsArray);
-    m_settings->sync();
     emit appsChanged(mode);
 }
 
@@ -264,7 +254,6 @@ bool SecureAppSettingsRepository::isAppsSplitTunnelingEnabled() const
 void SecureAppSettingsRepository::setAppsSplitTunnelingEnabled(bool enabled)
 {
     setValue("Conf/appsSplitTunnelingEnabled", enabled);
-    m_settings->sync();
     emit appsSplitTunnelingEnabledChanged(enabled);
 }
 
@@ -280,21 +269,18 @@ void SecureAppSettingsRepository::setGatewayEndpoint(const QString &endpoint)
 {
     m_gatewayEndpoint = endpoint;
     setValue("Conf/gatewayEndpoint", endpoint);
-    m_settings->sync();
 }
 
 void SecureAppSettingsRepository::resetGatewayEndpoint()
 {
     m_gatewayEndpoint = gatewayEndpoint;
     setValue("Conf/gatewayEndpoint", gatewayEndpoint);
-    m_settings->sync();
 }
 
 void SecureAppSettingsRepository::setDevGatewayEndpoint()
 {
     m_gatewayEndpoint = QString(DEV_AGW_ENDPOINT);
     setValue("Conf/gatewayEndpoint", DEV_AGW_ENDPOINT);
-    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isDevGatewayEnv(bool isTestPurchase) const
@@ -305,7 +291,6 @@ bool SecureAppSettingsRepository::isDevGatewayEnv(bool isTestPurchase) const
 void SecureAppSettingsRepository::toggleDevGatewayEnv(bool enabled)
 {
     setValue("Conf/devGatewayEnv", enabled);
-    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isKillSwitchEnabled() const
@@ -316,7 +301,6 @@ bool SecureAppSettingsRepository::isKillSwitchEnabled() const
 void SecureAppSettingsRepository::setKillSwitchEnabled(bool enabled)
 {
     setValue("Conf/killSwitchEnabled", enabled);
-    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isStrictKillSwitchEnabled() const
@@ -327,7 +311,6 @@ bool SecureAppSettingsRepository::isStrictKillSwitchEnabled() const
 void SecureAppSettingsRepository::setStrictKillSwitchEnabled(bool enabled)
 {
     setValue("Conf/strictKillSwitchEnabled", enabled);
-    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isAutoConnect() const
@@ -338,7 +321,6 @@ bool SecureAppSettingsRepository::isAutoConnect() const
 void SecureAppSettingsRepository::setAutoConnect(bool enabled)
 {
     setValue("Conf/autoConnect", enabled);
-    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isStartMinimized() const
@@ -349,7 +331,6 @@ bool SecureAppSettingsRepository::isStartMinimized() const
 void SecureAppSettingsRepository::setStartMinimized(bool enabled)
 {
     setValue("Conf/startMinimized", enabled);
-    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isScreenshotsEnabled() const
@@ -360,7 +341,6 @@ bool SecureAppSettingsRepository::isScreenshotsEnabled() const
 void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
 {
     setValue("Conf/screenshotsEnabled", enabled);
-    m_settings->sync();
     emit screenshotsEnabledChanged(enabled);
 }
 
@@ -372,7 +352,6 @@ bool SecureAppSettingsRepository::isNewsNotifications() const
 void SecureAppSettingsRepository::setNewsNotifications(bool enabled)
 {
     setValue("Conf/newsNotifications", enabled);
-    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isSaveLogs() const
@@ -383,7 +362,6 @@ bool SecureAppSettingsRepository::isSaveLogs() const
 void SecureAppSettingsRepository::setSaveLogs(bool enabled)
 {
     setValue("Conf/saveLogs", enabled);
-    m_settings->sync();
     emit saveLogsChanged(enabled);
 }
 
@@ -395,7 +373,6 @@ QDateTime SecureAppSettingsRepository::getLogEnableDate() const
 void SecureAppSettingsRepository::setLogEnableDate(const QDateTime &date)
 {
     setValue("Conf/logEnableDate", date);
-    m_settings->sync();
 }
 
 QString SecureAppSettingsRepository::getInstallationUuid(bool createIfNotExists) const
@@ -406,14 +383,22 @@ QString SecureAppSettingsRepository::getInstallationUuid(bool createIfNotExists)
         uuid.remove(0, 1);
         uuid.chop(1);
         const_cast<SecureAppSettingsRepository*>(this)->setValue("Conf/installationUuid", uuid);
-        m_settings->sync();
     } else if (uuid.contains("{") && uuid.contains("}")) {
         uuid.remove(0, 1);
         uuid.chop(1);
         const_cast<SecureAppSettingsRepository*>(this)->setValue("Conf/installationUuid", uuid);
-        m_settings->sync();
     }
     return uuid;
+}
+
+QStringList SecureAppSettingsRepository::getReadNewsIds() const
+{
+    return value("News/readIds").toStringList();
+}
+
+void SecureAppSettingsRepository::setReadNewsIds(const QStringList &ids)
+{
+    setValue("News/readIds", ids);
 }
 
 bool SecureAppSettingsRepository::isHomeAdLabelVisible() const
@@ -424,7 +409,6 @@ bool SecureAppSettingsRepository::isHomeAdLabelVisible() const
 void SecureAppSettingsRepository::disableHomeAdLabel()
 {
     setValue("Conf/homeAdLabelVisible", false);
-    m_settings->sync();
 }
 
 bool SecureAppSettingsRepository::isPremV1MigrationReminderActive() const
@@ -435,7 +419,6 @@ bool SecureAppSettingsRepository::isPremV1MigrationReminderActive() const
 void SecureAppSettingsRepository::disablePremV1MigrationReminder()
 {
     setValue("Conf/premV1MigrationReminderActive", false);
-    m_settings->sync();
 }
 
 QByteArray SecureAppSettingsRepository::backupAppConfig() const
@@ -453,7 +436,6 @@ void SecureAppSettingsRepository::clearSettings()
     auto uuid = getInstallationUuid(false);
     m_settings->clearSettings();
     m_settings->setValue("Conf/installationUuid", uuid);
-    m_settings->sync();
     emit settingsCleared();
 }
 
@@ -480,7 +462,6 @@ QString SecureAppSettingsRepository::nextAvailableServerName() const
 void SecureAppSettingsRepository::setInstallationUuid(const QString &uuid)
 {
     m_settings->setValue("Conf/installationUuid", uuid);
-    m_settings->sync();
 }
 
 

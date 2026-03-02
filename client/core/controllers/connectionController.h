@@ -39,7 +39,16 @@ public:
 
     void disconnectFromVpn();
 
+#ifdef Q_OS_ANDROID
+    void restoreConnection();
+#endif
+
+    void onKillSwitchModeChanged(bool enabled);
+
     ErrorCode lastError() const;
+
+    bool isConnected() const;
+    void setConnectionState(Vpn::ConnectionState state);
 
     QJsonObject createConnectionConfiguration(const QPair<QString, QString> &dns,
                                              const ServerConfig &serverConfig,

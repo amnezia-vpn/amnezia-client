@@ -32,6 +32,18 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
     connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::connectionStateChanged);
 }
 
+bool ConnectionController::isConnected() const
+{
+    return m_vpnConnection && m_vpnConnection->connectionState() == Vpn::ConnectionState::Connected;
+}
+
+void ConnectionController::setConnectionState(Vpn::ConnectionState state)
+{
+    if (m_vpnConnection) {
+        m_vpnConnection->setConnectionState(state);
+    }
+}
+
 ErrorCode ConnectionController::prepareConnection(int serverIndex,
                                                  QJsonObject& vpnConfiguration,
                                                  ServerCredentials& credentials,
@@ -78,6 +90,22 @@ ErrorCode ConnectionController::connectToVpn(int serverIndex)
 void ConnectionController::disconnectFromVpn()
 {
     m_vpnConnection->disconnectFromVpn();
+}
+
+#ifdef Q_OS_ANDROID
+void ConnectionController::restoreConnection()
+{
+    if (m_vpnConnection) {
+        m_vpnConnection->restoreConnection();
+    }
+}
+#endif
+
+void ConnectionController::onKillSwitchModeChanged(bool enabled)
+{
+    if (m_vpnConnection) {
+        m_vpnConnection->onKillSwitchModeChanged(enabled);
+    }
 }
 
 ErrorCode ConnectionController::lastError() const

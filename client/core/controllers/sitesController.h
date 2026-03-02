@@ -15,8 +15,6 @@
 #include "core/utils/commonStructs.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 
-class VpnConnection;
-
 using namespace amnezia;
 
 class SitesController : public QObject
@@ -24,7 +22,7 @@ class SitesController : public QObject
     Q_OBJECT
 
 public:
-    explicit SitesController(SecureAppSettingsRepository* appSettingsRepository, VpnConnection* vpnConnection = nullptr, QObject* parent = nullptr);
+    explicit SitesController(SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
 
     bool addSite(const QString &hostname);
     void addSites(const QMap<QString, QString> &sites, bool replaceExisting);
@@ -52,7 +50,6 @@ private:
     void processSite(const QString &hostname, const QString &ip);
 
     SecureAppSettingsRepository* m_appSettingsRepository;
-    VpnConnection* m_vpnConnection;
     RouteMode m_currentRouteMode;
     QVector<QPair<QString, QString>> m_sites;
 };

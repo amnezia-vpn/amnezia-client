@@ -1,4 +1,5 @@
 #include "ui/models/newsModel.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -9,7 +10,8 @@
 #include <QStandardPaths>
 #include <algorithm>
 
-NewsModel::NewsModel(SecureQSettings* settings, QObject *parent) : QAbstractListModel(parent), m_settings(settings)
+NewsModel::NewsModel(SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
+    : QAbstractListModel(parent), m_appSettingsRepository(appSettingsRepository)
 {
     loadReadIds();
 }
@@ -114,12 +116,11 @@ bool NewsModel::hasUnread() const
 
 void NewsModel::loadReadIds()
 {
-    QStringList ids = m_settings->value("News/readIds").toStringList();
+    QStringList ids = m_appSettingsRepository->getReadNewsIds();
     m_readIds = QSet<QString>(ids.begin(), ids.end());
 }
 
 void NewsModel::saveReadIds() const
 {
-    m_settings->setValue("News/readIds", QStringList(m_readIds.begin(), m_readIds.end()));
-    m_settings->sync();
+    m_appSettingsRepository->setReadNewsIds(QStringList(m_readIds.begin(), m_readIds.end()));
 }

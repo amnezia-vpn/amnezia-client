@@ -79,6 +79,9 @@ public:
     void setLogEnableDate(const QDateTime &date);
     
     QString getInstallationUuid(bool createIfNotExists) const;
+    QStringList getReadNewsIds() const;
+    void setReadNewsIds(const QStringList &ids);
+
     bool isHomeAdLabelVisible() const;
     void disableHomeAdLabel();
     bool isPremV1MigrationReminderActive() const;

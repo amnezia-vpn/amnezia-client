@@ -54,7 +54,6 @@ void SecureServersRepository::syncToStorage()
         arr.append(cfg.toJson());
     }
     setValue("Servers/serversList", QJsonDocument(arr).toJson());
-    m_settings->sync();
 }
 
 void SecureServersRepository::invalidateCache()
@@ -151,7 +150,6 @@ void SecureServersRepository::setDefaultServer(int index)
     }
     m_defaultServerIndex = index;
     setValue("Servers/defaultServerIndex", index);
-    m_settings->sync();
     emit defaultServerChanged(index);
 }
 

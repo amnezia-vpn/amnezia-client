@@ -88,7 +88,7 @@ void CoreSignalHandlers::initErrorMessagesHandler()
 {
     connect(m_coreController->m_connectionUiController, &ConnectionUiController::connectionErrorOccurred, this, [this](ErrorCode errorCode) {
         emit m_coreController->m_pageController->showErrorMessage(errorCode);
-        emit m_coreController->m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+        m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
     });
 
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::errorOccurred, m_coreController->m_pageController,
@@ -151,7 +151,7 @@ void CoreSignalHandlers::initExportControllerHandler()
 void CoreSignalHandlers::initImportControllerHandler()
 {
     connect(m_coreController->m_importCoreController, &ImportController::importFinished, this, [this]() {
-        if (!m_coreController->m_vpnConnection || !m_coreController->m_vpnConnection->isConnected()) {
+        if (!m_coreController->m_connectionController->isConnected()) {
             int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
             m_coreController->m_serversController->setDefaultServerIndex(newServerIndex);
             if (m_coreController->m_serversUiController) {
@@ -292,15 +292,15 @@ void CoreSignalHandlers::initAppSplitTunnelingModelUpdateHandler()
 void CoreSignalHandlers::initPrepareConfigHandler()
 {
     connect(m_coreController->m_connectionUiController, &ConnectionUiController::prepareConfig, this, [this]() {
-        emit m_coreController->m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
+        m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Preparing);
 
         if (!m_coreController->m_subscriptionUiController->isConfigValid()) {
-            emit m_coreController->m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
             return;
         }
 
         if (!m_coreController->m_installUiController->isConfigValid()) {
-            emit m_coreController->m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
             return;
         }
 
@@ -310,8 +310,8 @@ void CoreSignalHandlers::initPrepareConfigHandler()
 
 void CoreSignalHandlers::initStrictKillSwitchHandler()
 {
-    connect(m_coreController->m_settingsUiController, &SettingsUiController::strictKillSwitchEnabledChanged, m_coreController->m_vpnConnection.get(),
-            &VpnConnection::onKillSwitchModeChanged);
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::strictKillSwitchEnabledChanged, m_coreController->m_connectionController,
+            &ConnectionController::onKillSwitchModeChanged);
 }
 
 void CoreSignalHandlers::initAndroidSettingsHandler()
@@ -329,8 +329,7 @@ void CoreSignalHandlers::initAndroidConnectionHandler()
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this, [this](Vpn::ConnectionState state) {
         m_coreController->m_connectionUiController->onConnectionStateChanged(state);
-        if (m_coreController->m_vpnConnection)
-            m_coreController->m_vpnConnection->restoreConnection();
+        m_coreController->m_connectionController->restoreConnection();
     });
     connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, this, [this](QString data) {
         emit m_coreController->m_pageController->goToPageHome();
@@ -369,7 +368,7 @@ void CoreSignalHandlers::initNotificationHandler()
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     m_coreController->m_notificationHandler = NotificationHandler::create(m_coreController);
 
-    connect(m_coreController->m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_coreController->m_notificationHandler,
+    connect(m_coreController->m_connectionController, &ConnectionController::connectionStateChanged, m_coreController->m_notificationHandler,
             &NotificationHandler::setConnectionState);
 
     connect(m_coreController->m_notificationHandler, &NotificationHandler::raiseRequested, m_coreController->m_pageController, &PageController::raiseMainWindow);

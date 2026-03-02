@@ -223,6 +223,11 @@ ErrorCode VpnConnection::lastError() const
     return m_vpnProtocol.data()->lastError();
 }
 
+Vpn::ConnectionState VpnConnection::connectionState() const
+{
+    return m_connectionState;
+}
+
 void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &vpnConfiguration)
 {

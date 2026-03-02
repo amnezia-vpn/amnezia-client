@@ -1,11 +1,10 @@
 #include "sitesController.h"
-#include "vpnConnection.h"
 #include "core/utils/networkUtilities.h"
+#include <QJsonObject>
 
-SitesController::SitesController(SecureAppSettingsRepository* appSettingsRepository, VpnConnection* vpnConnection, QObject* parent)
+SitesController::SitesController(SecureAppSettingsRepository* appSettingsRepository, QObject* parent)
     : QObject(parent),
-      m_appSettingsRepository(appSettingsRepository),
-      m_vpnConnection(vpnConnection)
+      m_appSettingsRepository(appSettingsRepository)
 {
     m_currentRouteMode = m_appSettingsRepository->routeMode();
     if (m_currentRouteMode == RouteMode::VpnAllSites) { // for old split tunneling configs

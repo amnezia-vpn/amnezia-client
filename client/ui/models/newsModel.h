@@ -1,7 +1,6 @@
 #ifndef NEWSMODEL_H
 #define NEWSMODEL_H
 
-#include "secureQSettings.h"
 #include <QAbstractListModel>
 #include <QDateTime>
 #include <QJsonArray>
@@ -30,7 +29,7 @@ public:
         IsReadRole,
         IsProcessedRole
     };
-    explicit NewsModel(SecureQSettings* settings, QObject *parent = nullptr);
+    explicit NewsModel(class SecureAppSettingsRepository* appSettingsRepository, QObject *parent = nullptr);
     Q_INVOKABLE void markAsRead(int index);
 
     Q_PROPERTY(int processedIndex READ processedIndex WRITE setProcessedIndex NOTIFY processedIndexChanged)
@@ -52,7 +51,7 @@ signals:
 private:
     QVector<NewsItem> m_items;
     int m_processedIndex = -1;
-    SecureQSettings* m_settings;
+    class SecureAppSettingsRepository* m_appSettingsRepository;
     QSet<QString> m_readIds;
     void loadReadIds();
     void saveReadIds() const;
