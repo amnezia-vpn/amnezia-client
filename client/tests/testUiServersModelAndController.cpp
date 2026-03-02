@@ -90,6 +90,16 @@ private:
         return config;
     }
 
+    QJsonObject createServerDescriptionTestConfig(bool withAmneziaDns)
+    {
+        QJsonObject config = createAwg2Config();
+        config[configKey::description] = "Server 1";
+        if (withAmneziaDns) {
+            config[configKey::dns1] = protocols::dns::amneziaDnsIp;
+        }
+        return config;
+    }
+
 private slots:
     void initTestCase() {
         QString testOrg = "AmneziaVPN-Test-" + QUuid::createUuid().toString();
@@ -164,12 +174,12 @@ private slots:
             QString hostName = "test.example.com";
             
             QString collapsedDescription = m_coreController->m_serversUiController->getDefaultServerDescriptionCollapsed();
-            QString expectedCollapsed = actualServerName + " " + containerName + " | " + hostName;
+            QString expectedCollapsed = "AmneziaWG (version 2) | " + hostName;
             QVERIFY2(collapsedDescription == expectedCollapsed, 
                      QString("Collapsed description should be '%1', got '%2'").arg(expectedCollapsed, collapsedDescription).toUtf8().constData());
             
             QString expandedDescription = m_coreController->m_serversUiController->getDefaultServerDescriptionExpanded();
-            QString expectedExpanded = actualServerName + hostName;
+            QString expectedExpanded = hostName;
             QVERIFY2(expandedDescription == expectedExpanded, 
                      QString("Expanded description should be '%1', got '%2'").arg(expectedExpanded, expandedDescription).toUtf8().constData());
         }
@@ -242,6 +252,41 @@ private slots:
             QString containerString = m_coreController->m_containersModel->data(containerModelIndex, ContainersModel::ContainerStringRole).toString();
             QVERIFY2(containerString == "amnezia-awg", "Container string should be amnezia-awg");
         }
+    }
+
+    void testServerDescriptionFormat() {
+        QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
+
+        QJsonObject configNoDns = createServerDescriptionTestConfig(false);
+        m_coreController->m_importCoreController->importConfig(configNoDns);
+        QVERIFY2(importFinishedSpy.count() == 1, "importFinished should be emitted");
+        m_coreController->m_appSettingsRepository->setUseAmneziaDns(false);
+        m_coreController->m_serversModel->updateModel(
+            m_coreController->m_serversRepository->servers(),
+            m_coreController->m_serversRepository->defaultServerIndex(),
+            m_coreController->m_appSettingsRepository->useAmneziaDns());
+
+        QString descNoDns = m_coreController->m_serversModel->data(
+            m_coreController->m_serversModel->index(0, 0), ServersModel::ServerDescriptionRole).toString();
+        QVERIFY2(descNoDns == "test.example.com",
+                 QString("Without Amnezia DNS expected 'test.example.com', got '%1'").arg(descNoDns).toUtf8().constData());
+
+        m_coreController->m_serversRepository->setServersArray(QJsonArray());
+        m_coreController->m_serversRepository->setDefaultServer(0);
+
+        QJsonObject configWithDns = createServerDescriptionTestConfig(true);
+        m_coreController->m_importCoreController->importConfig(configWithDns);
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "Server should be imported");
+        m_coreController->m_appSettingsRepository->setUseAmneziaDns(true);
+        m_coreController->m_serversModel->updateModel(
+            m_coreController->m_serversRepository->servers(),
+            m_coreController->m_serversRepository->defaultServerIndex(),
+            m_coreController->m_appSettingsRepository->useAmneziaDns());
+
+        QString descWithDns = m_coreController->m_serversModel->data(
+            m_coreController->m_serversModel->index(0, 0), ServersModel::ServerDescriptionRole).toString();
+        QVERIFY2(descWithDns == "Amnezia DNS | test.example.com",
+                 QString("With Amnezia DNS expected 'Amnezia DNS | test.example.com', got '%1'").arg(descWithDns).toUtf8().constData());
     }
 };
 

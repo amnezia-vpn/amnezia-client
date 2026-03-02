@@ -36,6 +36,7 @@ private slots:
 
     void init() {
         m_settings->clearSettings();
+        m_coreController->m_serversRepository->invalidateCache();
         if (m_coreController->m_serversModel) {
             m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
         }

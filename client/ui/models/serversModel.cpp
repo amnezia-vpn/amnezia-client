@@ -221,8 +221,6 @@ QString ServersModel::getServerDescription(const ServerConfig &server, const int
             description += "Amnezia DNS | ";
         }
     }
-    
-    description += server.description();
     return description;
 }
 

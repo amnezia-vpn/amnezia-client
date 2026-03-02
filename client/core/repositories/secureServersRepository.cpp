@@ -139,6 +139,9 @@ int SecureServersRepository::defaultServerIndex() const
 
 void SecureServersRepository::setDefaultServer(int index)
 {
+    if (index < 0) {
+        return;
+    }
     if (m_servers.size() > 0 && index >= m_servers.size()) {
         return;
     }
