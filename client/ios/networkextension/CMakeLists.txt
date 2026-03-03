@@ -97,8 +97,10 @@ target_sources(networkextension PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+WireGuard.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPN.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Xray.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Hysteria2.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/WGConfig.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/XrayConfig.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/Hysteria2Config.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
 )
 
@@ -128,3 +130,7 @@ target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
 
 target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework)
+
+# Hysteria2 client library — pre-built from client/3rd/hysteria2-apple using gomobile
+# Build: cd client/3rd/hysteria2-apple && ./build-ios.sh
+target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/hysteria2/Hysteria2.xcframework)

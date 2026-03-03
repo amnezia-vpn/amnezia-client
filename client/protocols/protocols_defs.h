@@ -95,6 +95,7 @@ namespace amnezia
         constexpr char xray[] = "xray";
         constexpr char ssxray[] = "ssxray";
         constexpr char socks5proxy[] = "socks5proxy";
+        constexpr char hysteria2[] = "hysteria2";
 
         constexpr char configVersion[] = "config_version";
 
@@ -251,6 +252,24 @@ namespace amnezia
             constexpr char proxyConfigPath[] = "/usr/local/3proxy/conf/3proxy.cfg";
         }
 
+        namespace hysteria2
+        {
+            constexpr char defaultPort[] = "443";
+            constexpr char defaultLocalProxyPort[] = "10808";
+            constexpr char defaultLocalAddr[] = "10.33.0.2";
+            constexpr char defaultUpMbps[] = "20";
+            constexpr char defaultDownMbps[] = "100";
+
+            // Hysteria2-specific config keys
+            constexpr char password[] = "password";
+            constexpr char obfs[] = "obfs";
+            constexpr char obfsPassword[] = "obfs_password";
+            constexpr char sni[] = "sni";
+            constexpr char insecure[] = "insecure";
+            constexpr char upMbps[] = "up_mbps";
+            constexpr char downMbps[] = "down_mbps";
+        }
+
     } // namespace protocols
 
     namespace ProtocolEnumNS
@@ -275,6 +294,7 @@ namespace amnezia
             L2tp,
             Xray,
             SSXray,
+            Hysteria2,
 
             // non-vpn
             TorWebSite,

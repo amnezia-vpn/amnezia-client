@@ -313,6 +313,9 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     if (proto == amnezia::Proto::SSXray) {
         return setupSSXray();
     }
+    if (proto == amnezia::Proto::Hysteria2) {
+        return setupHysteria2();
+    }
 
     return false;
 }
@@ -708,6 +711,51 @@ bool IosController::setupSSXray()
     QString finalConfigStr(finalConfigDoc.toJson(QJsonDocument::Compact));
 
     return startXray(finalConfigStr);
+}
+
+bool IosController::setupHysteria2()
+{
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Hysteria2)].toObject();
+
+    QJsonObject finalConfig;
+    finalConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1].toString());
+    finalConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2].toString());
+    finalConfig.insert(config_key::hostName, config[config_key::hostName]);
+    finalConfig.insert(config_key::port, config[config_key::port]);
+    finalConfig.insert(protocols::hysteria2::password, config[protocols::hysteria2::password]);
+
+    if (config.contains(protocols::hysteria2::obfs))
+        finalConfig.insert(protocols::hysteria2::obfs, config[protocols::hysteria2::obfs]);
+    if (config.contains(protocols::hysteria2::obfsPassword))
+        finalConfig.insert(protocols::hysteria2::obfsPassword, config[protocols::hysteria2::obfsPassword]);
+    if (config.contains(protocols::hysteria2::sni))
+        finalConfig.insert(protocols::hysteria2::sni, config[protocols::hysteria2::sni]);
+    if (config.contains(protocols::hysteria2::insecure))
+        finalConfig.insert(protocols::hysteria2::insecure, config[protocols::hysteria2::insecure]);
+    if (config.contains(protocols::hysteria2::upMbps))
+        finalConfig.insert(protocols::hysteria2::upMbps, config[protocols::hysteria2::upMbps]);
+    if (config.contains(protocols::hysteria2::downMbps))
+        finalConfig.insert(protocols::hysteria2::downMbps, config[protocols::hysteria2::downMbps]);
+
+    QJsonDocument finalConfigDoc(finalConfig);
+    QString finalConfigStr(finalConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startHysteria2(finalConfigStr);
+}
+
+bool IosController::startHysteria2(const QString &config)
+{
+    qDebug() << "IosController::startHysteria2";
+
+    NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
+    tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
+    tunnelProtocol.providerConfiguration = @{@"hysteria2": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    tunnelProtocol.serverAddress = m_serverAddress;
+
+    m_currentTunnel.protocolConfiguration = tunnelProtocol;
+
+    startTunnel();
+    return true;
 }
 
 bool IosController::setupAwg()

@@ -5,6 +5,7 @@ private let subsystemIdentifier = Bundle.main.bundleIdentifier ?? "org.amnezia.A
 private let wireGuardSystemLogger = Logger(subsystem: subsystemIdentifier, category: "WireGuard")
 private let openVPNSystemLogger = Logger(subsystem: subsystemIdentifier, category: "OpenVPN")
 private let xraySystemLogger = Logger(subsystem: subsystemIdentifier, category: "Xray")
+private let hysteria2SystemLogger = Logger(subsystem: subsystemIdentifier, category: "Hysteria2")
 private let networkExtensionLogger = Logger(subsystem: subsystemIdentifier, category: "NetworkExtension")
 
 private func logToSystem(_ logger: Logger, type: OSLogType, prefix: String, title: String, message: String) {
@@ -68,6 +69,11 @@ public func ovpnLog(_ type: OSLogType, title: String = "", message: String) {
 public func xrayLog(_ type: OSLogType, title: String = "", message: String) {
     logToSystem(xraySystemLogger, type: type, prefix: "XRAY", title: title, message: message)
     neLog(type, title: "XRAY: \(title)", message: message)
+}
+
+public func hysteria2Log(_ type: OSLogType, title: String = "", message: String) {
+    logToSystem(hysteria2SystemLogger, type: type, prefix: "HY2", title: title, message: message)
+    neLog(type, title: "HY2: \(title)", message: message)
 }
 
 public func neLog(_ type: OSLogType, title: String = "", message: String) {

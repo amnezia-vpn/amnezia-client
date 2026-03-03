@@ -19,3 +19,9 @@ bool key_from_hex(uint8_t key[WG_KEY_LEN], const char* hex);
 bool key_eq(const uint8_t key1[WG_KEY_LEN], const uint8_t key2[WG_KEY_LEN]);
 
 void write_msg_to_log(const char* tag, const char* msg);
+
+// Hysteria2 client library — built from client/3rd/hysteria2-apple as Hysteria2.xcframework
+typedef void (*libhysteria2_sockcallback)(uintptr_t fd, void* ctx);
+void LibHysteria2SetSockCallback(libhysteria2_sockcallback cb, void* ctx);
+void LibHysteria2RunClient(const char* configPath);
+void LibHysteria2StopClient(void);

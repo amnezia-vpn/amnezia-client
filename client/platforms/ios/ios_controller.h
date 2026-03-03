@@ -99,10 +99,12 @@ private:
     bool setupAwg();
     bool setupXray();
     bool setupSSXray();
+    bool setupHysteria2();
 
     bool startOpenVPN(const QString &config);
     bool startWireGuard(const QString &jsonConfig);
     bool startXray(const QString &jsonConfig);
+    bool startHysteria2(const QString &jsonConfig);
 
     void startTunnel();
     void emitConnectionStateIfChanged(Vpn::ConnectionState state);
