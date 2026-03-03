@@ -23,20 +23,22 @@ class AwgApple(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
-        if self.settings.os != "Windows":
+        if self.settings.os == "Windows":
+            self.tool_requires("mingw-builds/15.1.0")
+        else:
             self.build_requires("make/4.4.1")
 
-    def validate(self):
-        os = str(self.settings.os)
-        if os not in self._os_map:
+    def configure(self):
+        self._goos = self._os_map.get(str(self.settings.os))
+        if not self._goos:
             raise ConanInvalidConfiguration(
-                f"{self.name} v{self.version} does not support {os}"
+                f"{self.name} v{self.version} does not support {self._goos}"
             )
         
-        arch = str(self.settings.arch)
-        if arch not in self._arch_map:
+        self._goarch = self._arch_map.get(str(self.settings.arch))
+        if not self._goarch:
             raise ConanInvalidConfiguration(
-                f"{self.name} v{self.version} does not support {arch}"
+                f"{self.name} v{self.version} does not support {self._goarch}"
             )
 
     def layout(self):
@@ -48,10 +50,7 @@ class AwgApple(ConanFile):
         )
 
     def build(self):
-        os = self._os_map.get(str(self.settings.os))
-        arch = self._arch_map.get(str(self.settings.arch))
-
-        self.run(f"ARCHS={arch} PLATFORM_NAME={os} make")
+        self.run(f"ARCHS={self._goarch} PLATFORM_NAME={self._goos} make")
 
     def package(self):
         copy(self, "wireguard.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"))

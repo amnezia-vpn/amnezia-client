@@ -18,7 +18,6 @@ class AmneziaXrayBindings(ConanFile):
         "Macos": "macos",
         "Windows": "windows"
     }
-
     _arch_map = {
         "x86": "386",
         "x86_64": "amd64",
@@ -26,24 +25,26 @@ class AmneziaXrayBindings(ConanFile):
     }
 
     def validate(self):
-        os = str(self.settings.os)
-        if os not in self._os_map:
+        self._goos = self._os_map.get(str(self.settings.os))
+        if not self._goos:
             raise ConanInvalidConfiguration(
-                f"{self.name} v{self.version} does not support {os}"
+                f"{self.name} v{self.version} does not support {self._goos}"
             )
         
-        arch = str(self.settings.arch)
-        if arch not in self._arch_map:
+        self._goarch = self._arch_map.get(str(self.settings.arch))
+        if not self._goarch:
             raise ConanInvalidConfiguration(
-                f"{self.name} v{self.version} does not support {arch}"
+                f"{self.name} v{self.version} does not support {self._goarch}"
             )
 
     def layout(self):
-        basic_layout(self, build_folder=os.path.join(self.folders.source, "build"))
+        basic_layout(self, build_folder=".")
 
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
-        if self.settings.os != "Windows":
+        if self.settings.os == "Windows":
+            self.tool_requires("mingw-builds/15.1.0")
+        else:
             self.build_requires("make/4.4.1")
 
     def source(self):
@@ -51,17 +52,9 @@ class AmneziaXrayBindings(ConanFile):
             sha256="6ea768ec7002cedd422a39aea17704b888acaf794432aa5937cfc92fb6d80eb5", strip_root=True)
 
     def build(self):
-        os = self._os_map.get(str(self.settings.os))
-        arch = self._arch_map.get(str(self.settings.arch))
+        self.run(f"ARCH={self._goarch} OS={self._goos} make -C {self.source_folder}")
 
-        self.run(f"ARCH={arch} OS={os} make -C {self.source_folder}")
-
-    def package(self):        
-        copy(self, "*.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"))
-        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-
+    def _rename_libs(self):
         # workaround of bad naming strategy in amnezia-xray-bindings
         # TODO: change it and kick out the code below
         lib_dir = os.path.join(self.package_folder, "lib")
@@ -70,6 +63,13 @@ class AmneziaXrayBindings(ConanFile):
                 src = os.path.join(lib_dir, fname)
                 dst = os.path.join(lib_dir, "lib" + fname)
                 os.rename(src, dst)
+
+    def package(self):
+        copy(self, "*.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"), keep_path=False)
+        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        self._rename_libs()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::xray-bindings")

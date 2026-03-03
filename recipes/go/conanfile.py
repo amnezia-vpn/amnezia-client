@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.files import get, copy
-from conan.tools.cmake import cmake_layout
 
 import os
 
@@ -9,10 +8,6 @@ class Golang(ConanFile):
     version = "1.26.0"
     
     settings = "os", "arch"
-
-    def build_requirements(self):
-        if self.settings.os == "Windows":
-            self.tool_requires("mingw-builds/15.1.0")
     
     def build(self):
         get(self, **self.conan_data["sources"][str(self.version)][str(self.settings.os)][str(self.settings.arch)])
