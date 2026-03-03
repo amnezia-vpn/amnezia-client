@@ -368,7 +368,11 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
-        if (!m_installController->isConfigValid()) {
+        m_installController->validateConfig();
+    });
+
+    connect(m_installController.get(), &InstallController::configValidated, this, [this](bool isValid) {
+        if (!isValid) {
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }
