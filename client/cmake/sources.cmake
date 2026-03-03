@@ -187,6 +187,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/protocols/shadowsocksvpnprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.h
+        ${CLIENT_ROOT_DIR}/protocols/hysteria2protocol.h
         ${CLIENT_ROOT_DIR}/protocols/awgprotocol.h
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.h
     )
@@ -200,6 +201,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/protocols/shadowsocksvpnprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.cpp
+        ${CLIENT_ROOT_DIR}/protocols/hysteria2protocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/awgprotocol.cpp
     )
 endif()

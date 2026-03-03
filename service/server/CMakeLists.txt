@@ -29,6 +29,23 @@ elseif(LINUX)
     set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/linux/x86_64")
 endif()
 
+set(AMNEZIA_HYSTERIA2_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../client/3rd-prebuilt/3rd-prebuilt/amnezia_hysteria2")
+if(WIN32)
+    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(AMNEZIA_HYSTERIA2_LIB_PATH "${AMNEZIA_HYSTERIA2_ROOT_DIR}/windows/x86_64/amnezia_hysteria2.lib")
+        set(AMNEZIA_HYSTERIA2_INCLUDE_DIR "${AMNEZIA_HYSTERIA2_ROOT_DIR}/windows/x86_64")
+    else()
+        set(AMNEZIA_HYSTERIA2_LIB_PATH "${AMNEZIA_HYSTERIA2_ROOT_DIR}/windows/x86/amnezia_hysteria2.lib")
+        set(AMNEZIA_HYSTERIA2_INCLUDE_DIR "${AMNEZIA_HYSTERIA2_ROOT_DIR}/windows/x86")
+    endif()
+elseif(APPLE AND NOT IOS)
+    set(AMNEZIA_HYSTERIA2_LIB_PATH "${AMNEZIA_HYSTERIA2_ROOT_DIR}/macos/x86_64/amnezia_hysteria2.a")
+    set(AMNEZIA_HYSTERIA2_INCLUDE_DIR "${AMNEZIA_HYSTERIA2_ROOT_DIR}/macos/x86_64")
+elseif(LINUX)
+    set(AMNEZIA_HYSTERIA2_LIB_PATH "${AMNEZIA_HYSTERIA2_ROOT_DIR}/linux/x86_64/amnezia_hysteria2.a")
+    set(AMNEZIA_HYSTERIA2_INCLUDE_DIR "${AMNEZIA_HYSTERIA2_ROOT_DIR}/linux/x86_64")
+endif()
+
 set(QSIMPLECRYPTO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../client/3rd/QSimpleCrypto/src)
 
 
@@ -64,6 +81,7 @@ set(OPENSSL_USE_STATIC_LIBS TRUE)
 
 include_directories(
     ${AMNEZIA_XRAY_INCLUDE_DIR}
+    ${AMNEZIA_HYSTERIA2_INCLUDE_DIR}
     ${OPENSSL_INCLUDE_DIR}
     ${QSIMPLECRYPTO_DIR}
 )
@@ -81,6 +99,7 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/killswitch.h
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
     ${CMAKE_CURRENT_LIST_DIR}/xray.h
+    ${CMAKE_CURRENT_LIST_DIR}/hysteria2_service.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${QSIMPLECRYPTO_DIR}/include/QAead.h
     ${QSIMPLECRYPTO_DIR}/include/QBlockCipher.h
@@ -103,6 +122,7 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/killswitch.cpp
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xray.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hysteria2_service.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QAead.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QBlockCipher.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QRsa.cpp
@@ -241,6 +261,7 @@ if(WIN32)
         Advapi32
         Kernel32
         ${AMNEZIA_XRAY_LIB_PATH}
+        ${AMNEZIA_HYSTERIA2_LIB_PATH}
         ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
     )
@@ -291,6 +312,7 @@ if(APPLE)
     set(LIBS
         resolv
         ${AMNEZIA_XRAY_LIB_PATH}
+        ${AMNEZIA_HYSTERIA2_LIB_PATH}
         ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
     )
@@ -329,7 +351,8 @@ if(LINUX)
     )
 
     set(LIBS
-        ${AMNEZIA_XRAY_LIB_PATH}    
+        ${AMNEZIA_XRAY_LIB_PATH}
+        ${AMNEZIA_HYSTERIA2_LIB_PATH}
         ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
         -static-libstdc++

@@ -17,6 +17,7 @@
 #include "router.h"
 #include "killswitch.h"
 #include "xray.h"
+#include "hysteria2_service.h"
 
 #ifdef Q_OS_WIN
     #include "tapcontroller_win.h"
@@ -320,4 +321,22 @@ bool IpcServer::xrayStop()
 #endif
 
     return Xray::getInstance().stopXray();
+}
+
+bool IpcServer::hysteria2Start(const QString& cfg)
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::hysteria2Start";
+#endif
+
+    return Hysteria2Service::getInstance().start(cfg);
+}
+
+bool IpcServer::hysteria2Stop()
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::hysteria2Stop";
+#endif
+
+    return Hysteria2Service::getInstance().stop();
 }

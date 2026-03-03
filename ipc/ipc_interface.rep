@@ -41,6 +41,9 @@ class IpcInterface
     SLOT(bool xrayStart(const QString &config));
     SLOT(bool xrayStop());
 
+    SLOT(bool hysteria2Start(const QString &config));
+    SLOT(bool hysteria2Stop());
+
     SLOT( bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) );
     SLOT( bool stopNetworkCheck() );
 

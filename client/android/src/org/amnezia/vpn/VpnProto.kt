@@ -5,6 +5,7 @@ import org.amnezia.vpn.protocol.awg.Awg
 import org.amnezia.vpn.protocol.cloak.Cloak
 import org.amnezia.vpn.protocol.openvpn.OpenVpn
 import org.amnezia.vpn.protocol.wireguard.Wireguard
+import org.amnezia.vpn.protocol.hysteria2.Hysteria2
 import org.amnezia.vpn.protocol.xray.Xray
 
 enum class VpnProto(
@@ -58,6 +59,14 @@ enum class VpnProto(
         XrayService::class.java
     ) {
         override fun createProtocol(): Protocol = Xray.instance
+    },
+
+    HYSTERIA2(
+        "Hysteria2",
+        "org.amnezia.vpn:amneziaHysteria2Service",
+        Hysteria2Service::class.java
+    ) {
+        override fun createProtocol(): Protocol = Hysteria2.instance
     };
 
     private var _protocol: Protocol? = null

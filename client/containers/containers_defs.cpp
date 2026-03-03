@@ -71,6 +71,8 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
 
     case DockerContainer::SSXray: return { Proto::SSXray };
 
+    case DockerContainer::Hysteria2: return { Proto::Hysteria2 };
+
     case DockerContainer::Dns: return { Proto::Dns };
 
     case DockerContainer::Sftp: return { Proto::Sftp };
@@ -106,6 +108,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
              { DockerContainer::SSXray, "Shadowsocks"},
+             { DockerContainer::Hysteria2, "Hysteria2" },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
              { DockerContainer::Dns, QObject::tr("AmneziaDNS") },
@@ -135,6 +138,10 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::Xray,
                QObject::tr("XRay with REALITY masks VPN traffic as web traffic and protects against active probing. "
                            "It is highly resistant to detection and offers high speed.") },
+             { DockerContainer::Hysteria2,
+               QObject::tr("Hysteria2 is a powerful censorship-resistant VPN protocol based on QUIC. "
+                           "It provides high speed and low latency, is resistant to DPI detection, "
+                           "and supports obfuscation to disguise traffic.") },
              { DockerContainer::Ipsec,
                QObject::tr("IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
@@ -206,6 +213,17 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Minimal settings required\n"
                       "* Undetectable by traffic analysis systems (DPI)\n"
                       "* Operates over UDP protocol") },
+        { DockerContainer::Hysteria2,
+          QObject::tr("Hysteria2 is a modern VPN protocol based on the QUIC transport. "
+                      "It is specifically designed to operate in heavily censored and high packet-loss environments. "
+                      "Hysteria2 supports optional Salamander obfuscation to disguise QUIC traffic as random UDP traffic, "
+                      "making it extremely difficult to detect and block.\n"
+                      "\nFeatures:\n"
+                      "* Available on all AmneziaVPN platforms\n"
+                      "* Excellent performance in high-latency or lossy networks\n"
+                      "* Tunable upload/download bandwidth for optimal performance\n"
+                      "* Undetectable by DPI systems when using obfuscation\n"
+                      "* Operates over UDP protocol (QUIC)") },
         { DockerContainer::Xray,
           QObject::tr("REALITY is an innovative protocol developed by the creators of XRay, designed specifically to combat high levels of internet censorship. "
                       "REALITY identifies censorship systems during the TLS handshake, "
@@ -259,6 +277,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::Xray: return Proto::Xray;
     case DockerContainer::Ipsec: return Proto::Ikev2;
     case DockerContainer::SSXray: return Proto::SSXray;
+    case DockerContainer::Hysteria2: return Proto::Hysteria2;
 
     case DockerContainer::TorWebSite: return Proto::TorWebSite;
     case DockerContainer::Dns: return Proto::Dns;
@@ -292,6 +311,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Xray: return true;
     case DockerContainer::Cloak: return true;
     case DockerContainer::SSXray: return true;
+    case DockerContainer::Hysteria2: return true;
         //    case DockerContainer::ShadowSocks: return true;
     default:
         return false;
@@ -305,6 +325,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
+    case DockerContainer::Hysteria2: return true;
     case DockerContainer::OpenVpn:
     case DockerContainer::Cloak:
     case DockerContainer::ShadowSocks:
@@ -329,6 +350,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Cloak: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
+    case DockerContainer::Hysteria2: return true;
     default: return false;
     }
 
@@ -422,6 +444,7 @@ int ContainerProps::installPageOrder(DockerContainer container)
     case DockerContainer::Xray: return 3;
     case DockerContainer::Ipsec: return 7;
     case DockerContainer::SSXray: return 8;
+    case DockerContainer::Hysteria2: return 9;
     default: return 0;
     }
 }

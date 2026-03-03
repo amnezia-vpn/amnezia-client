@@ -38,6 +38,8 @@ include(":openvpn")
 include(":cloak")
 include(":xray")
 include(":xray:libXray")
+include(":hysteria2")
+include(":hysteria2:libHysteria2")
 
 // get values from gradle or local properties
 val androidBuildToolsVersion: String by gradleProperties

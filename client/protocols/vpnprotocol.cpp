@@ -10,6 +10,7 @@
     #include "shadowsocksvpnprotocol.h"
     #include "wireguardprotocol.h"
     #include "xrayprotocol.h"
+    #include "hysteria2protocol.h"
 #endif
 
 #ifdef Q_OS_WINDOWS
@@ -123,6 +124,7 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &
     case DockerContainer::Awg: return new WireguardProtocol(configuration);
     case DockerContainer::Xray: return new XrayProtocol(configuration);
     case DockerContainer::SSXray: return new XrayProtocol(configuration);
+    case DockerContainer::Hysteria2: return new Hysteria2Protocol(configuration);
 #endif
     default: return nullptr;
     }
