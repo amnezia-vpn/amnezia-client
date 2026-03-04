@@ -303,91 +303,31 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val deviceId = event.deviceId
         val keyCode = event.keyCode
         val pressed = event.action == KeyEvent.ACTION_DOWN
-        val source = event.source
 
-        if (deviceId < 0 && pressed) {
-             when (keyCode) {
-                 KeyEvent.KEYCODE_BUTTON_A,
-                 KeyEvent.KEYCODE_BUTTON_B,
-                 KeyEvent.KEYCODE_BUTTON_X,
-                 KeyEvent.KEYCODE_BUTTON_Y,
-                 KeyEvent.KEYCODE_BUTTON_START,
-                 KeyEvent.KEYCODE_BUTTON_SELECT -> {
-                     nativeGamepadKeyEvent(0, keyCode, true)
-                     nativeGamepadKeyEvent(0, keyCode, false)
-                     return true
-                 }
-                 KeyEvent.KEYCODE_DPAD_CENTER -> {
-                     if (isOnTv()) {
-                         val down = KeyEvent(
-                             event.downTime,
-                             event.eventTime,
-                             KeyEvent.ACTION_DOWN,
-                             KeyEvent.KEYCODE_ENTER,
-                             0,
-                             event.metaState,
-                             0,
-                             event.scanCode,
-                             event.flags,
-                             event.source
-                         )
-                         val up = KeyEvent(
-                             event.downTime,
-                             event.eventTime,
-                             KeyEvent.ACTION_UP,
-                             KeyEvent.KEYCODE_ENTER,
-                             0,
-                             event.metaState,
-                             0,
-                             event.scanCode,
-                             event.flags,
-                             event.source
-                         )
-                         super.dispatchKeyEvent(down)
-                         super.dispatchKeyEvent(up)
-                         return true
-                     }
-                     nativeGamepadKeyEvent(0, keyCode, true)
-                     nativeGamepadKeyEvent(0, keyCode, false)
-                     return true
-                 }
-             }
-        }
-
-        // Real devices (remotes and gamepads) have deviceId >= 0.
-        if (deviceId >= 0) {
-            val isGamepad = (source and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
-            val isJoystick = (source and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
-            val isDpad = (source and InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
-
-            if (isGamepad || isJoystick || isDpad) {
-                when (keyCode) {
-                    KeyEvent.KEYCODE_BUTTON_A,
-                    KeyEvent.KEYCODE_BUTTON_B,
-                    KeyEvent.KEYCODE_BUTTON_X,
-                    KeyEvent.KEYCODE_BUTTON_Y,
-                    KeyEvent.KEYCODE_BUTTON_START,
-                    KeyEvent.KEYCODE_BUTTON_SELECT,
-                    KeyEvent.KEYCODE_DPAD_CENTER -> {
-                        nativeGamepadKeyEvent(0, keyCode, pressed)
-                        return true
-                    }
-                    KeyEvent.KEYCODE_DPAD_UP,
-                    KeyEvent.KEYCODE_DPAD_DOWN,
-                    KeyEvent.KEYCODE_DPAD_LEFT,
-                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                        val synthetic = KeyEvent(
-                            event.downTime, event.eventTime, event.action, event.keyCode,
-                            event.repeatCount, event.metaState, -1, event.scanCode,
-                            event.flags, InputDevice.SOURCE_KEYBOARD
-                        )
-                        return super.dispatchKeyEvent(synthetic)
-                    }
-                }
-                return super.dispatchKeyEvent(event)
+        when (keyCode) {
+            KeyEvent.KEYCODE_BUTTON_A,
+            KeyEvent.KEYCODE_BUTTON_B,
+            KeyEvent.KEYCODE_BUTTON_X,
+            KeyEvent.KEYCODE_BUTTON_Y,
+            KeyEvent.KEYCODE_BUTTON_START,
+            KeyEvent.KEYCODE_BUTTON_SELECT -> {
+                nativeGamepadKeyEvent(0, keyCode, pressed)
+                return true
+            }
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_DPAD_UP,
+            KeyEvent.KEYCODE_DPAD_DOWN,
+            KeyEvent.KEYCODE_DPAD_LEFT,
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                val syntheticKeyCode = if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) KeyEvent.KEYCODE_ENTER else keyCode
+                val synthetic = KeyEvent(
+                    event.downTime, event.eventTime, event.action, syntheticKeyCode,
+                    event.repeatCount, event.metaState, -1, event.scanCode,
+                    event.flags, InputDevice.SOURCE_KEYBOARD
+                )
+                return super.dispatchKeyEvent(synthetic)
             }
         }
 
