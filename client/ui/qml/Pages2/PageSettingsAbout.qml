@@ -40,50 +40,112 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
-            Image {
-                id: image
-                source: "qrc:/images/amneziaBigLogo.png"
-
-                Layout.alignment: Qt.AlignCenter
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.preferredWidth: 291
-                Layout.preferredHeight: 224
-            }
-
-            Header2TextType {
+            // Dr.Frake VPN Brand Header
+            Rectangle {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                height: 120
+                radius: 20
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0.0; color: "#2D1EB3" }
+                    GradientStop { position: 1.0; color: "#5B4DFF" }
+                }
 
-                text: qsTr("Support Amnezia")
-                horizontalAlignment: Text.AlignHCenter
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 24
+                    spacing: 16
+
+                    // Shield Icon
+                    Rectangle {
+                        width: 60
+                        height: 60
+                        radius: 14
+                        color: Qt.rgba(1, 1, 1, 0.15)
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "🔒"
+                            font.pixelSize: 28
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
+                        Text {
+                            text: "Dr.Frake VPN"
+                            font.pixelSize: 24
+                            font.weight: Font.Bold
+                            color: "#FFFFFF"
+                        }
+
+                        Text {
+                            text: qsTr("Надёжная защита в интернете")
+                            font.pixelSize: 13
+                            color: Qt.rgba(1, 1, 1, 0.75)
+                        }
+                    }
+                }
             }
 
+            // Version
+            CaptionTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                horizontalAlignment: Text.AlignHCenter
+                text: qsTr("Версия %1").arg(SettingsController.getAppVersion())
+                color: AmneziaStyle.color.mutedGray
+
+                MouseArea {
+                    property int clickCount: 0
+                    anchors.fill: parent
+                    onClicked: {
+                        if (clickCount > 10) {
+                            SettingsController.enableDevMode()
+                        } else {
+                            clickCount++
+                        }
+                    }
+                }
+            }
+
+            // About text
             ParagraphTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 20
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 horizontalAlignment: Text.AlignHCenter
-
-                height: 20
                 font.pixelSize: 14
+                wrapMode: Text.WordWrap
 
-                text: qsTr("Amnezia is a free and open-source application. You can support the developers if you like it.")
+                text: qsTr("Dr.Frake VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.\n\nПриложение создано на основе открытого проекта AmneziaVPN (amnezia-vpn.org), распространяемого по лицензии GNU GPL v3.")
                 color: AmneziaStyle.color.paleGray
             }
 
-            ParagraphTextType {
+            // Divider
+            Rectangle {
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                height: 1
+                color: "#2A2A30"
+            }
 
-                text: qsTr("Contacts")
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 20
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                text: qsTr("Контакты и поддержка")
+                font.weight: Font.Medium
             }
         }
 
@@ -104,126 +166,72 @@ PageType {
             }
 
             DividerType {}
-
         }
 
         footer: ColumnLayout {
             width: listView.width
 
-            CaptionTextType {
+            // Open source notice
+            Rectangle {
                 Layout.fillWidth: true
-                Layout.topMargin: 40
+                Layout.topMargin: 20
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
+                height: openSourceText.implicitHeight + 24
+                radius: 12
+                color: "#1C1C22"
+                border.color: "#333340"
+                border.width: 1
 
-                horizontalAlignment: Text.AlignHCenter
+                Text {
+                    id: openSourceText
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        top: parent.top
+                        margins: 12
+                    }
+                    text: qsTr("🏛 Основано на AmneziaVPN (GNU GPL v3)\nИсходный код: github.com/amnezia-vpn")
+                    font.pixelSize: 12
+                    color: "#8A8A8E"
+                    wrapMode: Text.WordWrap
+                    horizontalAlignment: Text.AlignHCenter
 
-                text: qsTr("Software version: %1").arg(SettingsController.getAppVersion())
-                color: AmneziaStyle.color.mutedGray
-
-                MouseArea {
-                    property int clickCount: 0
-                    anchors.fill: parent
-                    onClicked: {
-                        if (clickCount > 10) {
-                            SettingsController.enableDevMode()
-                        } else {
-                            clickCount++
-                        }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Qt.openUrlExternally("https://github.com/amnezia-vpn/amnezia-client")
                     }
                 }
             }
-
-            BasicButtonType {
-                id: checkUpdatesButton
-
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 8
-                Layout.bottomMargin: 16
-                implicitHeight: 32
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
-
-                text: qsTr("Check for updates")
-
-                clickedFunc: function() {
-                    Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
-                }
-            }
-
-            BasicButtonType {
-                id: privacyPolicyButton
-
-                Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 16
-                Layout.topMargin: -15
-                implicitHeight: 25
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
-
-                text: qsTr("Privacy Policy")
-
-                clickedFunc: function() {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl("policy"))
-                }
-            }
         }
     }
-    
+
     property list<QtObject> contacts: [
-        telegramGroup,
-        mail,
-        github,
-        website
+        telegramSupport,
+        mailSupport
     ]
 
     QtObject {
-        id: telegramGroup
+        id: telegramSupport
 
-        readonly property string title: qsTr("Telegram group")
-        readonly property string description: qsTr("To discuss features")
+        readonly property string title: qsTr("Telegram поддержка")
+        readonly property string description: qsTr("Задайте вопрос нашей команде")
         readonly property string imageSource: "qrc:/images/controls/telegram.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("https://t.me/amnezia_vpn_en"))
+            Qt.openUrlExternally("https://t.me/drfrake_vpn")
         }
     }
 
     QtObject {
-        id: mail
+        id: mailSupport
 
-        readonly property string title: qsTr("support@amnezia.org")
-        readonly property string description: qsTr("For reviews and bug reports")
+        readonly property string title: qsTr("support@drfrake.vpn")
+        readonly property string description: qsTr("По вопросам и жалобам")
         readonly property string imageSource: "qrc:/images/controls/mail.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("mailto:support@amnezia.org"))
-        }
-    }
-
-    QtObject {
-        id: github
-
-        readonly property string title: qsTr("GitHub")
-        readonly property string description: qsTr("Discover the source code")
-        readonly property string imageSource: "qrc:/images/controls/github.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client"))
-        }
-    }
-
-    QtObject {
-        id: website
-
-        readonly property string title: qsTr("Website")
-        readonly property string description: qsTr("Visit official website")
-        readonly property string imageSource: "qrc:/images/controls/amnezia.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+            Qt.openUrlExternally("mailto:support@drfrake.vpn")
         }
     }
 }

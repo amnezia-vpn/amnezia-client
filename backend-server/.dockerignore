@@ -1,8 +1,0 @@
-server.db
-*.db
-.git
-.gitignore
-*.md
-docker-compose.yml
-.env
-.env.*

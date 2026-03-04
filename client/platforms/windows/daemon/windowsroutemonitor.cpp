@@ -316,7 +316,7 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
     data->ValidLifetime = 0xffffffff;
     data->PreferredLifetime = 0xffffffff;
     data->Metric = 0;
-    data->Protocol = MIB_IPPROTO_NETMGMT;
+    data->Protocol = (NL_ROUTE_PROTOCOL)MIB_IPPROTO_NETMGMT;
     data->Loopback = false;
     data->AutoconfigureAddress = false;
     data->Publish = false;
@@ -402,7 +402,7 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
   data->ValidLifetime = 0xffffffff;
   data->PreferredLifetime = 0xffffffff;
   data->Metric = EXCLUSION_ROUTE_METRIC;
-  data->Protocol = MIB_IPPROTO_NETMGMT;
+  data->Protocol = (NL_ROUTE_PROTOCOL)MIB_IPPROTO_NETMGMT;
   data->Loopback = false;
   data->AutoconfigureAddress = false;
   data->Publish = false;

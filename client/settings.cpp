@@ -203,21 +203,7 @@ bool Settings::haveAuthData(int serverIndex) const
 
 QString Settings::nextAvailableServerName() const
 {
-    int i = 0;
-    bool nameExist = false;
-
-    do {
-        i++;
-        nameExist = false;
-        for (const QJsonValue &server : serversArray()) {
-            if (server.toObject().value(config_key::description).toString() == tr("Server") + " " + QString::number(i)) {
-                nameExist = true;
-                break;
-            }
-        }
-    } while (nameExist);
-
-    return tr("Server") + " " + QString::number(i);
+    return tr("Dr.Frake VPN");
 }
 
 void Settings::setSaveLogs(bool enabled)

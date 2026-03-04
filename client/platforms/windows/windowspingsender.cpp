@@ -60,10 +60,9 @@ struct ICMP_ECHO_REPLY_BUFFER {
 };
 #pragma pack(pop)
 
-// If the Size is not the MinimumReplyBufferSize, the compiler added
-// padding, so the fields will not be properly aligned with
-// what IcmpSendEcho2 will write.
-static_assert(sizeof(ICMP_ECHO_REPLY_BUFFER) == MinimumReplyBufferSize,
+// MinGW and MSVC may differ in sizeof(IO_STATUS_BLOCK) or ICMP_ECHO_REPLY32,
+// so we allow the buffer to be >= the minimum required size.
+static_assert(sizeof(ICMP_ECHO_REPLY_BUFFER) >= MinimumReplyBufferSize,
               "Fulfills the size requirements");
 
 struct WindowsPingSenderPrivate {

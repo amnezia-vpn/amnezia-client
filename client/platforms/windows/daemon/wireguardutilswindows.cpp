@@ -244,7 +244,7 @@ void WireguardUtilsWindows::buildMibForwardRow(const IPAddress& prefix,
   entry->ValidLifetime = 0xffffffff;
   entry->PreferredLifetime = 0xffffffff;
   entry->Metric = 0;
-  entry->Protocol = MIB_IPPROTO_NETMGMT;
+  entry->Protocol = (NL_ROUTE_PROTOCOL)MIB_IPPROTO_NETMGMT;
   entry->Loopback = false;
   entry->AutoconfigureAddress = false;
   entry->Publish = false;

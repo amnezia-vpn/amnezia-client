@@ -1,0 +1,153 @@
+# Production VPN Service — Архитектурный план
+
+Превращаем AmneziaVPN в коммерческий VPN-сервис с собственным бэкендом, управлением пользователями, подписками и платежами через ЮKassa.
+
+## Общая архитектура
+
+```mermaid
+graph TD
+    Client["Клиент (AmneziaVPN fork)"] -->|REST API| Backend["Backend (Go)"]
+    Backend --> DB[(SQLite)]
+    Backend --> Cache[(Redis)]
+    Backend --> VPNServer["VPN-сервер (AmneziaWG)"]
+    Backend --> YooKassa["ЮKassa API"]
+    Admin["Веб-панель (Next.js)"] -->|REST API| Backend
+    YooKassa -->|Webhook| Backend
+```
+
+---
+
+## Компоненты системы
+
+### 1. Backend (Go) — NEW `vpn-backend/`
+
+Единый Go-сервис на `gin` + `gorm`.
+
+#### Модули
+
+| Модуль | Описание |
+|--------|----------|
+| `auth` | Регистрация, логин, JWT refresh-tokens |
+| `users` | Профиль, план подписки |
+| `subscriptions` | Сроки, продления, статусы |
+| `vpn_keys` | Генерация WireGuard-конфигов, выдача, отзыв |
+| `servers` | Пул VPN-серверов, балансировка |
+| `payments` | ЮKassa: создание платежа, вебхук |
+| `admin` | Admin API: просмотр/управление всем |
+
+#### Схема БД (PostgreSQL)
+
+```sql
+users:         id, email, password_hash, created_at, role
+subscriptions: id, user_id, plan, status, expires_at, created_at
+vpn_servers:   id, name, host, public_key, max_peers, region, active
+vpn_keys:      id, user_id, server_id, public_key, config_text, issued_at, revoked_at
+payments:      id, user_id, yookassa_id, amount, status, plan, created_at, confirmed_at
+```
+
+> SQLite хранится в файле `data/vpn.db` внутри контейнера (монтируется как volume).
+
+#### API endpoints
+
+```
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+
+GET  /api/v1/me
+GET  /api/v1/me/subscription
+GET  /api/v1/me/config         ← WG-конфиг для клиента
+POST /api/v1/me/config/revoke
+
+POST /api/v1/payments/create   ← создать платёж ЮKassa
+POST /api/v1/payments/webhook  ← вебхук от ЮKassa (подпись HMAC)
+
+GET  /api/v1/admin/users
+GET  /api/v1/admin/servers
+POST /api/v1/admin/servers
+```
+
+#### Стек
+- **Go 1.22** + `gin-gonic/gin` + `GORM`
+- **SQLite** — основная БД (`gorm.io/driver/sqlite`), файл `data/vpn.db`
+- **Redis** — кэш сессий, rate-limit
+- **JWT** — `golang-jwt/jwt` (access + refresh tokens)
+- **ЮKassa** — прямые HTTP-запросы + HMAC-верификация вебхука
+
+---
+
+### 2. VPN-сервер — AmneziaWG
+
+На каждом VPN-сервере запускается AmneziaWG. Бэкенд управляет пирами через SSH + `wg` CLI.
+
+**Выдача ключа при оплате:**
+1. Генерируем приватный/публичный ключ на бэкенде
+2. Через SSH добавляем pubkey как peer на VPN-сервере
+3. Формируем `.conf` и возвращаем клиенту (приватный ключ НЕ сохраняем)
+
+---
+
+### 3. Клиент — форк AmneziaVPN — MODIFY `client/`
+
+| Что | Файлы | Изменение |
+|-----|-------|-----------|
+| Брендинг | `client/`, ресурсы | Название, иконки, цвета |
+| Auth screen | QML | Экран логин/регистрация |
+| API endpoint | конфиг/CMake | URL вашего бэкенда |
+| Авто-конфиг | `vpnconnection` | GET `/api/v1/me/config` → применить |
+
+Платформы: Windows (готово), macOS, Linux, Android, iOS.
+
+---
+
+### 4. Веб-панель — NEW `vpn-admin/`
+
+**Стек:** Next.js или чистый HTML+JS
+
+**Страницы:**
+- `/users` — список пользователей, подписок
+- `/servers` — пул VPN-серверов
+- `/payments` — история платежей
+- `/stats` — онлайн, трафик
+
+---
+
+### 5. Деплой — NEW `deploy/`
+
+```yaml
+# docker-compose.yml
+services:
+  backend:   # Go API (порт 8080), SQLite volume: ./data:/app/data
+  redis:     # Кэш (порт 6379)
+  nginx:     # Reverse proxy + TLS (Let's Encrypt)
+  admin:     # Веб-панель (порт 3000)
+volumes:
+  db_data:   # SQLite файл
+```
+
+SQLite не требует отдельного контейнера БД — проще деплой, достаточно для тысяч пользователей. При необходимости миграция на PostgreSQL через GORM занимает 5 минут.
+
+Каждый VPN-сервер — отдельная VPS с AmneziaWG.
+
+---
+
+## Очерёдность реализации
+
+1. **Бэкенд** — auth + БД + выдача ключей (MVP, ~1 неделя)
+2. **Клиент** — авторизация + авто-получение конфига
+3. **ЮKassa** — платежи + вебхук
+4. **Веб-панель** — admin UI
+5. **Кластер** — пул серверов, балансировка по регионам
+
+---
+
+## Важные решения
+
+> [!IMPORTANT]
+> **Приватные ключи:** генерируем на бэкенде, выдаём клиенту один раз, **не храним plaintext**. Альтернатива: клиент генерирует сам и отправляет только pubkey — безопаснее.
+
+> [!WARNING]
+> **ЮKassa:** требует договор (ИП или ООО). Тестовый режим доступен сразу без документов — начинаем с него.
+
+> [!TIP]
+> **Масштаб:** архитектура stateless бэкенда + Redis позволяет горизонтальное масштабирование через k8s/Nomad без переделки кода.

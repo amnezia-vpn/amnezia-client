@@ -33,9 +33,15 @@ Logger logger("WindowsDaemon");
 WindowsDaemon::WindowsDaemon() : Daemon(nullptr) {
   MZ_COUNT_CTOR(WindowsDaemon);
   m_firewallManager = WindowsFirewall::create(this);
-  Q_ASSERT(m_firewallManager != nullptr);
+  if (m_firewallManager == nullptr) {
+    logger.error() << "Failed to create WindowsFirewall manager. Make sure you are running as Administrator.";
+  }
 
   m_wgutils = WireguardUtilsWindows::create(m_firewallManager, this);
+  if (m_wgutils == nullptr) {
+    logger.error() << "Failed to create WireguardUtilsWindows. Check firewall permissions.";
+  }
+
   m_dnsutils = new DnsUtilsWindows(this);
   m_splitTunnelManager = WindowsSplitTunnel::create(m_firewallManager);
 

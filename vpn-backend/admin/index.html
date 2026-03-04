@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dr.Frake VPN — Admin Panel</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg-dark: #0a0a0f;
+      --bg-gradient: linear-gradient(135deg, #0a0a0f, #161525, #0a0a0f);
+      --glass-bg: rgba(26, 26, 36, 0.4);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+      --accent: #6C5CE7;
+      --accent-hover: #8072FF;
+      --accent-gradient: linear-gradient(135deg, #6C5CE7, #a29bfe);
+      --danger: #ff4757;
+      --success: #2ed573;
+      --text: #F8F8FF;
+      --muted: #a4b0be;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-dark);
+      background-image: radial-gradient(circle at 50% 0%, rgba(108, 92, 231, 0.15) 0%, transparent 70%);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: 'Outfit', system-ui, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Glassmorphism Utilities */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 20px;
+    }
+
+    /* Page Transitions */
+    .fade-in {
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Login screen */
+    #loginScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      position: relative;
+    }
+
+    #loginScreen::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: rgba(108, 92, 231, 0.2);
+      filter: blur(100px);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+      animation: pulse 6s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.5;
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.8;
+      }
+    }
+
+    #loginScreen h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    #loginScreen p {
+      color: var(--muted);
+      margin-bottom: 32px;
+      font-size: 16px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 40px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .field {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+
+    .field input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .field input:focus {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: skewX(-20deg);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% {
+        left: -100%;
+      }
+
+      20% {
+        left: 200%;
+      }
+
+      100% {
+        left: 200%;
+      }
+    }
+
+    .btn-danger {
+      background: rgba(255, 71, 87, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(255, 71, 87, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 71, 87, 0.2);
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    /* Main layout */
+    #app {
+      display: none;
+      flex-direction: row;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      padding: 30px 20px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      border-radius: 0;
+      border-left: none;
+      border-top: none;
+      border-bottom: none;
+      background: rgba(15, 15, 20, 0.6);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--glass-border);
+      z-index: 10;
+    }
+
+    .sidebar .logo {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 40px;
+      padding: 0 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar .logo span {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+      background: var(--accent-gradient);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2);
+    }
+
+    .content {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    /* Stats cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      padding: 24px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 100px;
+      height: 100px;
+      background: var(--accent-gradient);
+      filter: blur(40px);
+      opacity: 0.15;
+      border-radius: 50%;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-card .label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card .value {
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-card .value.accent {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Tables */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .section-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .table-container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--glass-shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      padding: 16px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    td {
+      padding: 16px 20px;
+      font-size: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      transition: background 0.2s;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+    }
+
+    .badge-success {
+      background: rgba(46, 213, 115, 0.15);
+      color: #2ed573;
+      border: 1px solid rgba(46, 213, 115, 0.3);
+    }
+
+    .badge-danger {
+      background: rgba(255, 71, 87, 0.15);
+      color: #ff4757;
+      border: 1px solid rgba(255, 71, 87, 0.3);
+    }
+
+    .badge-info {
+      background: rgba(108, 92, 231, 0.15);
+      color: #a29bfe;
+      border: 1px solid rgba(108, 92, 231, 0.3);
+    }
+
+    .error-msg {
+      background: rgba(255, 71, 87, 0.1);
+      border: 1px solid rgba(255, 71, 87, 0.3);
+      color: #ff4757;
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 440px;
+      padding: 32px;
+    }
+
+    .modal-card h3 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Login Screen -->
+  <div id="loginScreen" class="fade-in">
+    <h1>⚡ Dr.Frake VPN</h1>
+    <p>Admin Dashboard Control Panel</p>
+    <div class="login-card glass">
+      <div id="loginError" class="error-msg"></div>
+      <div class="field">
+        <label>Administrator Email</label>
+        <input type="email" id="loginEmail" placeholder="admin@drfrake.vpn" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Secret Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()" style="margin-top:10px">
+        Access Control Panel
+      </button>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app">
+    <aside class="sidebar">
+      <div class="logo">Dr.Frake <span>VPN</span></div>
+      <div class="nav-item active" onclick="showPage('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showPage('users')">👥 Users</div>
+      <div class="nav-item" onclick="showPage('servers')">🖥️ Servers</div>
+      <div class="nav-item" onclick="showPage('payments')">💳 Payments</div>
+      <div style="flex:1"></div>
+      <div class="nav-item" onclick="logout()" style="margin-top:auto">🚪 Logout</div>
+    </aside>
+
+    <main class="content">
+      <!-- Dashboard -->
+      <div id="page-dashboard" class="page active">
+        <h1 style="font-size:32px;font-weight:700;margin-bottom:32px;letter-spacing:-0.5px">Dashboard Overview</h1>
+        <div class="stats-grid">
+          <div class="stat-card glass">
+            <div class="label">Total Users</div>
+            <div class="value accent" id="stat-users">—</div>
+          </div>
+          <div class="stat-card glass">
+            <div class="label">Active Subscriptions</div>
+            <div class="value" id="stat-subs">—</div>
+          </div>
+          <div class="stat-card glass">
+            <div class="label">Active VPN Keys</div>
+            <div class="value" id="stat-keys">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div id="page-users" class="page">
+        <div class="section-header">
+          <h2>User Management</h2>
+          <button class="btn btn-primary" onclick="loadUsers()">
+            <span style="font-size: 18px;">⟳</span> Refresh Data
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Plan</th>
+                <th>Status</th>
+                <th>Registered</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr>
+                <td colspan="7" class="empty-state">Loading user data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Servers -->
+      <div id="page-servers" class="page">
+        <div class="section-header">
+          <h2>VPN Servers Cluster</h2>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-primary" onclick="loadServers()">
+              <span style="font-size: 18px;">⟳</span> Refresh Nodes
+            </button>
+            <button class="btn btn-primary"
+              style="background: var(--success); box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);"
+              onclick="openAddServerModal()">
+              + Add Node
+            </button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Регион</th>
+                <th>Host IP</th>
+                <th>Endpoint</th>
+                <th>Пиры</th>
+                <th>Статус</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="servers-tbody">
+              <tr>
+                <td colspan="7" class="empty-state">Loading server nodes...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Payments -->
+      <div id="page-payments" class="page">
+        <div class="section-header">
+          <h2>Transaction History</h2>
+          <button class="btn btn-primary" onclick="loadPayments()">
+            <span style="font-size: 18px;">⟳</span> Sync Payments
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>User Email</th>
+                <th>Amount</th>
+                <th>Plan</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="payments-tbody">
+              <tr>
+                <td colspan="7" class="empty-state">Loading transactions...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  </div>
+  </main>
+
+  <div id="addServerModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card glass fade-in" style="max-width:520px;">
+      <h3>🖥️ Добавить VPN-сервер</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field">
+          <label>Название сервера</label>
+          <input type="text" id="addServerName" placeholder="EU-Frankfurt-1">
+        </div>
+        <div class="field">
+          <label>🌍 Регион (отображается в клиенте)</label>
+          <input type="text" id="addServerRegion" placeholder="Германия">
+        </div>
+        <div class="field">
+          <label>Host IP (для SSH)</label>
+          <input type="text" id="addServerHost" placeholder="192.168.1.1">
+        </div>
+        <div class="field">
+          <label>Endpoint (IP:порт для клиентов)</label>
+          <input type="text" id="addServerEndpoint" placeholder="1.2.3.4:51820">
+        </div>
+        <div class="field">
+          <label>Root SSH Пароль</label>
+          <input type="password" id="addServerPassword" placeholder="••••••••">
+        </div>
+        <div class="field">
+          <label>AWG Порт</label>
+          <input type="number" id="addServerAwgPort" placeholder="51820" value="51820">
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:8px 0 16px;">⚠️ Регион отображается в клиентском приложении как
+        название сервера (например: «🇩🇪 Германия»)</p>
+      <div style="display: flex; gap: 12px; margin-top: 8px;">
+        <button class="btn btn-primary btn-full" onclick="addServer()">Добавить сервер</button>
+        <button class="btn btn-danger btn-full" onclick="closeAddServerModal()">Отмена</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    const API = '';  // same origin or set to 'https://yourvpn.app'
+    let token = localStorage.getItem('drfrake_admin_token') || '';
+
+    function api(path, opts = {}) {
+      return fetch(API + path, {
+        ...opts,
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', ...(opts.headers || {}) }
+      });
+    }
+
+    async function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errEl = document.getElementById('loginError');
+      errEl.style.display = 'none';
+
+      const res = await fetch(API + '/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error || 'Login failed'; errEl.style.display = 'block'; return; }
+
+      token = data.access_token;
+
+      // Проверяем admin доступ через защищённый endpoint
+      const checkRes = await api('/api/v1/admin/stats');
+      if (checkRes.status === 403 || checkRes.status === 401) {
+        token = '';
+        errEl.textContent = 'Access denied: admin role required';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      localStorage.setItem('drfrake_admin_token', token);
+      showApp();
+    }
+
+    function logout() {
+      localStorage.removeItem('drfrake_admin_token');
+      token = '';
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+
+    function showApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      loadStats();
+    }
+
+    function showPage(name) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('page-' + name).classList.add('active');
+      event.currentTarget.classList.add('active');
+      if (name === 'users') loadUsers();
+      if (name === 'servers') loadServers();
+      if (name === 'payments') loadPayments();
+    }
+
+    async function loadStats() {
+      const res = await api('/api/v1/admin/stats');
+      if (!res.ok) return;
+      const d = await res.json();
+      document.getElementById('stat-users').textContent = d.total_users;
+      document.getElementById('stat-subs').textContent = d.active_subscriptions;
+      document.getElementById('stat-keys').textContent = d.active_vpn_keys;
+    }
+
+    async function loadUsers() {
+      const tbody = document.getElementById('users-tbody');
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading...</td></tr>';
+      const res = await api('/api/v1/admin/users');
+      if (!res.ok) return;
+      const d = await res.json();
+      if (!d.users.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No users</td></tr>'; return; }
+      tbody.innerHTML = d.users.map(u => `
+    <tr>
+      <td>${u.id}</td>
+      <td>${u.email}</td>
+      <td><span class="badge ${u.role === 'admin' ? 'badge-info' : 'badge-success'}">${u.role}</span></td>
+      <td>${u.subscription?.plan || '—'}</td>
+      <td><span class="badge ${u.subscription?.status === 'active' ? 'badge-success' : 'badge-danger'}">${u.subscription?.status || 'none'}</span></td>
+      <td>${new Date(u.created_at).toLocaleDateString('ru')}</td>
+      <td>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="upgradeUser('${u.id}')">⭐ Premium</button>
+          <button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="revokeUserKeys('${u.id}')">Сбросить ключи</button>
+          <button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(255, 71, 87, 0.2); border:1px solid #ff4757; color:#ff4757;" onclick="deleteUser('${u.id}')">Удалить</button>
+        </div>
+      </td>
+    </tr>`).join('');
+    }
+
+    async function loadServers() {
+      const tbody = document.getElementById('servers-tbody');
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading...</td></tr>';
+      const res = await api('/api/v1/admin/servers');
+      if (!res.ok) return;
+      const d = await res.json();
+      if (!d.servers.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Серверов нет</td></tr>'; return; }
+      tbody.innerHTML = d.servers.map(s => `
+    <tr>
+      <td>${s.id}</td>
+      <td>${s.name}</td>
+      <td><span class="badge badge-info" style="font-size:14px;">${s.region || '—'}</span></td>
+      <td>${s.host}</td>
+      <td>${s.endpoint || s.host}</td>
+      <td>${s.active_keys || 0} / ${s.max_peers}</td>
+      <td><span class="badge ${s.active ? 'badge-success' : 'badge-danger'}">${s.active ? 'Online' : 'Offline'}</span></td>
+      <td>
+        <div style="display:flex; gap:8px;">
+          <button class="btn ${s.active ? 'btn-danger' : 'btn-primary'}" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="toggleServer('${s.id}')">
+            ${s.active ? 'Отключить' : 'Включить'}
+          </button>
+          <button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(255, 71, 87, 0.2); border:1px solid #ff4757; color:#ff4757;" onclick="deleteServer('${s.id}')">Удалить</button>
+        </div>
+      </td>
+    </tr>`).join('');
+    }
+
+    async function loadPayments() {
+      const tbody = document.getElementById('payments-tbody');
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading...</td></tr>';
+      const res = await api('/api/v1/admin/payments');
+      if (!res.ok) return;
+      const d = await res.json();
+      if (!d.payments.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No payments</td></tr>'; return; }
+      tbody.innerHTML = d.payments.map(p => `
+    <tr>
+      <td>${p.id}</td>
+      <td>${p.user_email}</td>
+      <td>${p.amount} ₽</td>
+      <td>${p.plan}</td>
+      <td><span class="badge ${p.status === 'succeeded' ? 'badge-success' : p.status === 'pending' ? 'badge-info' : 'badge-danger'}">${p.status}</span></td>
+      <td>${new Date(p.created_at).toLocaleDateString('ru')}</td>
+      <td>
+        ${p.status !== 'succeeded' ? `<button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="approvePayment('${p.id}')">Approve</button>` : '—'}
+      </td>
+    </tr>`).join('');
+    }
+
+    // Action Functions
+    async function upgradeUser(id) {
+      if (!confirm('Manually upgrade this user to Premium for 1 month?')) return;
+      await api('/api/v1/admin/users/' + id + '/upgrade', { method: 'POST' });
+      loadUsers();
+    }
+
+    async function revokeUserKeys(id) {
+      if (!confirm('Revoke all VPN config keys for this user? This will disconnect their devices.')) return;
+      await api('/api/v1/admin/users/' + id + '/revoke', { method: 'POST' });
+      loadUsers();
+    }
+
+    async function deleteUser(id) {
+      if (!confirm('ВНИМАНИЕ! Полностью удалить пользователя, его ключи с серверов, подписки и платежи? Это действие необратимо.')) return;
+      await api('/api/v1/admin/users/' + id, { method: 'DELETE' });
+      loadUsers();
+    }
+
+    async function toggleServer(id) {
+      if (!confirm('Toggle this server status? If offline, it will not accept new connections.')) return;
+      await api('/api/v1/admin/servers/' + id + '/toggle', { method: 'POST' });
+      loadServers();
+    }
+
+    async function deleteServer(id) {
+      if (!confirm('ВНИМАНИЕ! Полностью удалить сервер и сбросить все ключи пользователей подключённых к нему? Это действие необратимо.')) return;
+      await api('/api/v1/admin/servers/' + id, { method: 'DELETE' });
+      loadServers();
+    }
+
+    async function approvePayment(id) {
+      if (!confirm('Manually approve this payment and issue premium?')) return;
+      await api('/api/v1/admin/payments/' + id + '/approve', { method: 'POST' });
+      loadPayments();
+      // wait a moment so payment and subscription data is updated before reloading users
+      setTimeout(() => loadUsers(), 500);
+    }
+
+    // Auto-login if token exists
+    if (token) {
+      api('/api/v1/admin/stats').then(r => {
+        if (r.ok) showApp();
+        else { localStorage.removeItem('drfrake_admin_token'); token = ''; }
+      });
+    }
+
+    document.getElementById('loginPassword').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    function openAddServerModal() {
+      document.getElementById('addServerModal').style.display = 'flex';
+    }
+
+    function closeAddServerModal() {
+      document.getElementById('addServerModal').style.display = 'none';
+      document.getElementById('addServerName').value = '';
+      document.getElementById('addServerRegion').value = '';
+      document.getElementById('addServerHost').value = '';
+      document.getElementById('addServerEndpoint').value = '';
+      document.getElementById('addServerPassword').value = '';
+      document.getElementById('addServerAwgPort').value = '51820';
+    }
+
+    async function addServer() {
+      const name = document.getElementById('addServerName').value.trim();
+      const region = document.getElementById('addServerRegion').value.trim();
+      const host = document.getElementById('addServerHost').value.trim();
+      const endpoint = document.getElementById('addServerEndpoint').value.trim();
+      const rootPassword = document.getElementById('addServerPassword').value;
+      const awgPort = parseInt(document.getElementById('addServerAwgPort').value) || 51820;
+
+      if (!name || !host) {
+        alert('Название и Host IP обязательны');
+        return;
+      }
+      if (!region) {
+        alert('Укажите регион — он отображается как название сервера в приложении!');
+        return;
+      }
+
+      const body = { name, host, region, root_password: rootPassword, awg_port: awgPort };
+      if (endpoint) body.endpoint = endpoint;
+
+      const res = await api('/api/v1/admin/servers', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        closeAddServerModal();
+        loadServers();
+      } else {
+        const d = await res.json();
+        alert('Ошибка добавления сервера: ' + (d.error || 'Unknown error'));
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -45,7 +45,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Settings")
+                headerText: qsTr("Настройки")
             }
         }
 
@@ -82,7 +82,7 @@ PageType {
                 visible: GC.isDesktop()
                 Layout.fillWidth: true
 
-                text: qsTr("Close application")
+                text: qsTr("Закрыть приложение")
                 leftImageSource: "qrc:/images/controls/x-circle.svg"
                 isLeftImageHoverEnabled: false
 
@@ -102,30 +102,19 @@ PageType {
     }
 
     property list<QtObject> settingsEntries: [
-        servers,
         connection,
         application,
         news,
-        backup,
         about,
         devConsole
     ]
 
-    QtObject {
-        id: servers
 
-        property string title: qsTr("Servers")
-        readonly property string leftImagePath: "qrc:/images/controls/server.svg"
-        property bool isVisible: true
-        readonly property var clickedHandler: function() {
-            PageController.goToPage(PageEnum.PageSettingsServersList)
-        }
-    }
 
     QtObject {
         id: connection
 
-        property string title: qsTr("Connection")
+        property string title: qsTr("Подключение")
         readonly property string leftImagePath: "qrc:/images/controls/radio.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
@@ -136,7 +125,7 @@ PageType {
     QtObject {
         id: application
 
-        property string title: qsTr("Application")
+        property string title: qsTr("Приложение")
         readonly property string leftImagePath: "qrc:/images/controls/app.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
@@ -147,7 +136,7 @@ PageType {
     QtObject {
         id: news
 
-        property string title: qsTr("News & Notifications")
+        property string title: qsTr("Новости и уведомления")
         readonly property string leftImagePath: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled() ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
         property bool isVisible: ServersModel.hasServersFromGatewayApi
         readonly property var clickedHandler: function() {
@@ -160,21 +149,12 @@ PageType {
         }
     }
 
-    QtObject {
-        id: backup
 
-        property string title: qsTr("Backup")
-        readonly property string leftImagePath: "qrc:/images/controls/save.svg"
-        property bool isVisible: true
-        readonly property var clickedHandler: function() {
-            PageController.goToPage(PageEnum.PageSettingsBackup)
-        }
-    }
 
     QtObject {
         id: about
 
-        property string title: qsTr("About AmneziaVPN")
+        property string title: qsTr("About Dr.Frake VPN")
         readonly property string leftImagePath: "qrc:/images/controls/amnezia.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
@@ -185,7 +165,7 @@ PageType {
     QtObject {
         id: devConsole
 
-        property string title: qsTr("Dev console")
+        property string title: qsTr("Консоль разработчика")
         readonly property string leftImagePath: "qrc:/images/controls/bug.svg"
         property bool isVisible: SettingsController.isDevModeEnabled
         readonly property var clickedHandler: function() {

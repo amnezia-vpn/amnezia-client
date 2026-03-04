@@ -56,7 +56,7 @@ Window  {
         PageController.closeWindow()
     }
 
-    title: "AmneziaVPN"
+    title: "Dr.Frake VPN"
 
     Item { // This item is needed for focus handling
         id: defaultFocusItem

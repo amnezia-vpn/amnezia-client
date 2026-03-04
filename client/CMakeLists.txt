@@ -145,7 +145,12 @@ if(WIN32)
         gdi32
     )
 
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+    if(MSVC)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+    else()
+        # MinGW: -mwindows sets Windows subsystem (no console window), equivalent to /SUBSYSTEM:WINDOWS
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows")
+    endif()
 endif()
 
 if(APPLE)

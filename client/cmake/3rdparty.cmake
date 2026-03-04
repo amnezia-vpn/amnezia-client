@@ -18,8 +18,15 @@ if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/windows/x86_64/ssh.lib")
         set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/windows/x86_64")
-        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libssl.lib")
-        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
+        if(MINGW)
+            # Use MinGW-compatible OpenSSL from Qt Tools (MSVC .lib is ABI-incompatible)
+            set(OPENSSL_INCLUDE_DIR "C:/Qt/Tools/mingw1310_64/opt/include")
+            set(OPENSSL_LIB_SSL_PATH "C:/Qt/Tools/mingw1310_64/opt/lib/libssl.a")
+            set(OPENSSL_LIB_CRYPTO_PATH "C:/Qt/Tools/mingw1310_64/opt/lib/libcrypto.a")
+        else()
+            set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libssl.lib")
+            set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
+        endif()
     else()
         set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/windows/x86/ssh.lib")
         set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/windows/x86")
@@ -63,8 +70,12 @@ elseif(LINUX)
     set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libcrypto.a")
 endif()
 
-file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
-        DESTINATION ${OPENSSL_LIBRARIES_DIR})
+# Only copy pre-built OpenSSL libs to the lib dir if they are MSVC .lib files
+# (not needed for MinGW .a files from Qt Tools)
+if(NOT (WIN32 AND MINGW))
+    file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
+            DESTINATION ${OPENSSL_LIBRARIES_DIR})
+endif()
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
   
@@ -77,6 +88,12 @@ set(LIBS ${LIBS}
     ${OPENSSL_LIB_SSL_PATH}
     ${OPENSSL_LIB_CRYPTO_PATH}
 )
+
+# MinGW OpenSSL (libcrypto) requires zlib
+if(WIN32 AND MINGW)
+    set(LIBS ${LIBS} z)
+endif()
+
 
 add_compile_definitions(_WINSOCKAPI_)
 

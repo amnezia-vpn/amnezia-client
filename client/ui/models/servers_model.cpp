@@ -124,7 +124,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     }
     case ServerDescriptionRole: {
         auto description = getServerDescription(server, index.row());
-        return configVersion ? description : description + server.value(config_key::hostName).toString();
+        return description;
     }
     case HostNameRole: return server.value(config_key::hostName).toString();
     case CredentialsRole: return QVariant::fromValue(serverCredentials(index.row()));
@@ -265,7 +265,7 @@ const QString ServersModel::getDefaultServerDescriptionCollapsed()
         }
     }
 
-    return description += containerName + protocolVersion + " | " + serverConfig.value(config_key::hostName).toString();
+    return description += containerName + protocolVersion;
 }
 
 const QString ServersModel::getDefaultServerDescriptionExpanded()
@@ -277,7 +277,7 @@ const QString ServersModel::getDefaultServerDescriptionExpanded()
         return description;
     }
 
-    return description += server.value(config_key::hostName).toString();
+    return description;
 }
 
 const int ServersModel::getServersCount()

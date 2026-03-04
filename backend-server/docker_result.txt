@@ -1,1 +1,0 @@
-/opt/amnezia/awg/awg0.conf

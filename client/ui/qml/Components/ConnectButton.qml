@@ -11,9 +11,9 @@ import Style 1.0
 Button {
     id: root
 
-    property string defaultButtonColor: AmneziaStyle.color.paleGray
-    property string progressButtonColor: AmneziaStyle.color.paleGray
-    property string connectedButtonColor: AmneziaStyle.color.goldenApricot
+    property string defaultButtonColor: "#5B4DFF"
+    property string progressButtonColor: "#7065FF"
+    property string connectedButtonColor: "#10B981"
     property bool buttonActiveFocus: activeFocus && (Qt.platform.os !== "android" || SettingsController.isOnTv())
 
     property bool isFocusable: true
@@ -51,7 +51,7 @@ Button {
         target: ConnectionController
 
         function onPreparingConfig() {
-            PageController.showNotificationMessage(qsTr("Unable to disconnect during configuration preparation"))
+            PageController.showNotificationMessage(qsTr("Невозможно отключиться во время подготовки конфигурации"))
         }
     }
 
@@ -83,7 +83,7 @@ Button {
 
             ShapePath {
                 fillColor: AmneziaStyle.color.transparent
-                strokeColor: AmneziaStyle.color.paleGray
+                strokeColor: root.defaultButtonColor
                 strokeWidth: root.buttonActiveFocus ? 1 : 0
                 capStyle: ShapePath.RoundCap
 
@@ -142,7 +142,7 @@ Button {
 
             ShapePath {
                 fillColor: AmneziaStyle.color.transparent
-                strokeColor: AmneziaStyle.color.paleGray
+                strokeColor: root.progressButtonColor
                 strokeWidth: 3
                 capStyle: ShapePath.RoundCap
 

@@ -19,6 +19,12 @@ namespace {
 Logger logger("WindowsNetworkWatcher");
 }
 
+// MinGW wlanapi.h does not define WLAN_NOTIFICATION_MSM enum values.
+// wlan_notification_msm_connected == 10 per Windows SDK documentation.
+#ifndef wlan_notification_msm_connected
+#define wlan_notification_msm_connected 10
+#endif
+
 WindowsNetworkWatcher::WindowsNetworkWatcher(QObject* parent)
     : NetworkWatcherImpl(parent) {
   MZ_COUNT_CTOR(WindowsNetworkWatcher);

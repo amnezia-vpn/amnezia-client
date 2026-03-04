@@ -12,6 +12,7 @@
 #include <windows.h>
 #include <fwpmu.h>
 // clang-format on
+#include "mingw_compat.h"
 
 #include <QByteArray>
 #include <QHostAddress>

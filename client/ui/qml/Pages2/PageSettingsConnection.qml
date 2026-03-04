@@ -46,7 +46,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                headerText: qsTr("Connection")
+                headerText: qsTr("Подключение")
             }
         }
 
@@ -56,32 +56,15 @@ PageType {
 
             width: listView.width
 
-            SwitcherType {
-                id: amneziaDnsSwitch
 
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                text: qsTr("Use AmneziaDNS")
-                descriptionText: qsTr("If AmneziaDNS is installed on the server")
-
-                checked: SettingsController.isAmneziaDnsEnabled()
-                onToggled: function() {
-                    if (checked !== SettingsController.isAmneziaDnsEnabled()) {
-                        SettingsController.toggleAmneziaDns(checked)
-                    }
-                }
-            }
-
-            DividerType {}
 
             LabelWithButtonType {
                 id: dnsServersButton
 
                 Layout.fillWidth: true
 
-                text: qsTr("DNS servers")
-                descriptionText: qsTr("When AmneziaDNS is not used or installed")
+                text: qsTr("DNS-серверы")
+                descriptionText: qsTr("Настройка DNS для разрешения доменных имён")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -96,8 +79,8 @@ PageType {
 
                 Layout.fillWidth: true
 
-                text: qsTr("Site-based split tunneling")
-                descriptionText: qsTr("Allows you to select which sites you want to access through the VPN")
+                text: qsTr("Раздельное туннелирование (сайты)")
+                descriptionText: qsTr("Выбор сайтов, которые работают через VPN")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -120,8 +103,8 @@ PageType {
 
                 Layout.fillWidth: true
 
-                text: qsTr("App-based split tunneling")
-                descriptionText: qsTr("Allows you to use the VPN only for certain Apps")
+                text: qsTr("Раздельное туннелирование (приложения)")
+                descriptionText: qsTr("Выбор приложений, работающих через VPN")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -140,7 +123,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("KillSwitch")
-                descriptionText: qsTr("Blocks network connections without VPN")
+                descriptionText: qsTr("Блокирует сеть при отключении VPN")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

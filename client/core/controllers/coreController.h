@@ -12,6 +12,7 @@
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiNewsController.h"
+#include "ui/controllers/api/drfrake_controller.h"
 #include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/controllers/allowedDnsController.h"
 #include "ui/controllers/connectionController.h"
@@ -120,6 +121,7 @@ private:
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
     QScopedPointer<ApiNewsController> m_apiNewsController;
+    QScopedPointer<DrFrakeController> m_drFrakeController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;

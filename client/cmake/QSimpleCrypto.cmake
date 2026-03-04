@@ -1,6 +1,10 @@
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 set(QSIMPLECRYPTO_DIR ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/src)
 
+# When compiling QSimpleCrypto sources directly (not as a DLL),
+# define QSIMPLECRYPTO_LIBRARY so symbols use Q_DECL_EXPORT instead of Q_DECL_IMPORT
+add_compile_definitions(QSIMPLECRYPTO_LIBRARY)
+
 include_directories(${QSIMPLECRYPTO_DIR})
 
 set(HEADERS ${HEADERS}

@@ -1,1 +1,0 @@
-/root/.amnezia-wg-easy/wg0.conf

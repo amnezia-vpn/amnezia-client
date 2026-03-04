@@ -8,7 +8,7 @@
 #include <d3d11.h>
 #include <dxgi.h>
 #include <iphlpapi.h>
-#include <shlobj_core.h>
+#include <shlobj.h>
 
 #include <QDir>
 #include <QHostAddress>

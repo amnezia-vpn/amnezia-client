@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  backend:
+    build: .
+    container_name: vpn-backend
+    restart: always
+    ports:
+      - "8081:8081" # PORT в .env = 8081
+    env_file:
+      - .env
+    volumes:
+      - db_data:/app/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: vpn-redis
+    restart: always
+    volumes:
+      - redis_data:/data
+
+volumes:
+  db_data:
+  redis_data:

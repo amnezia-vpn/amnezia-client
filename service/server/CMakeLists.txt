@@ -45,12 +45,25 @@ else()
 endif()
 
 
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+
 if(WIN32)
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
+    if(MINGW)
+        # MSVC prebuilt .lib files are NOT compatible with MinGW.
+        # Use the MinGW-built static OpenSSL bundled with Qt Tools.
+        set(MINGW_OPT_DIR "C:/Qt/Tools/mingw1310_64/opt")
+        set(OPENSSL_INCLUDE_DIR "${MINGW_OPT_DIR}/include")
+        set(OPENSSL_LIB_CRYPTO_PATH "${MINGW_OPT_DIR}/lib/libcrypto.a")
+        set(OPENSSL_LIB_SSL_PATH    "${MINGW_OPT_DIR}/lib/libssl.a")
     else()
-        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
+        if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+            set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
+            set(OPENSSL_LIB_SSL_PATH    "${OPENSSL_ROOT_DIR}/windows/win64/libssl.lib")
+        else()
+            set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
+            set(OPENSSL_LIB_SSL_PATH    "${OPENSSL_ROOT_DIR}/windows/win32/libssl.lib")
+        endif()
     endif()
 elseif(APPLE AND NOT IOS)
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/macos/include")
@@ -240,12 +253,18 @@ if(WIN32)
         gdi32
         Advapi32
         Kernel32
+        fwpuclnt
+        wlanapi
+        dnsapi
+        d3d11
+        dxgi
+        z
         ${AMNEZIA_XRAY_LIB_PATH}
         ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
     )
 
-    add_compile_definitions(_WINSOCKAPI_)
+    add_compile_definitions(QSIMPLECRYPTO_LIBRARY)
 endif()
 
 if(APPLE)

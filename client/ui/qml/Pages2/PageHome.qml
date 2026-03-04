@@ -62,113 +62,12 @@ PageType {
             anchors.topMargin: 12 + SettingsController.safeAreaTopMargin
             anchors.bottomMargin: 16
 
-            BasicButtonType {
-                id: loggingButton
-                objectName: "loggingButton"
-
-                property bool isLoggingEnabled: SettingsController.isLoggingEnabled
-
-                Layout.alignment: Qt.AlignHCenter
-
-                implicitHeight: 36
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.mutedGray
-                borderWidth: 0
-
-                visible: isLoggingEnabled ? true : false
-                text: qsTr("Logging enabled")
-
-                Keys.onEnterPressed: this.clicked()
-                Keys.onReturnPressed: this.clicked()
-
-                onClicked: {
-                    PageController.goToPage(PageEnum.PageSettingsLogging)
-                }
-            }
-
-            BasicButtonType {
-                id: devGatewayButton
-                objectName: "devGatewayButton"
-
-                property bool isDevGatewayEnabled: SettingsController.isDevGatewayEnv
-
-                Layout.alignment: Qt.AlignHCenter
-
-                implicitHeight: 36
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.mutedGray
-                borderWidth: 0
-
-                visible: SettingsController.isDevModeEnabled && isDevGatewayEnabled
-                text: qsTr("Dev gateway enabled")
-
-                Keys.onEnterPressed: this.clicked()
-                Keys.onReturnPressed: this.clicked()
-
-                onClicked: {
-                    PageController.goToPage(PageEnum.PageDevMenu)
-                }
-            }
-
             ConnectButton {
                 id: connectButton
                 objectName: "connectButton"
 
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignCenter
-            }
-
-            BasicButtonType {
-                id: splitTunnelingButton
-                objectName: "splitTunnelingButton"
-
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                leftPadding: 16
-                rightPadding: 16
-
-                implicitHeight: 36
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.mutedGray
-                borderWidth: 0
-
-                buttonTextLabel.lineHeight: 20
-                buttonTextLabel.font.pixelSize: 14
-                buttonTextLabel.font.weight: 500
-
-                property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
-                                                       ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
-
-                text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
-
-                leftImageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
-                leftImageColor: ""
-                rightImageSource: "qrc:/images/controls/chevron-down.svg"
-
-                Keys.onEnterPressed: this.clicked()
-                Keys.onReturnPressed: this.clicked()
-
-                onClicked: {
-                    homeSplitTunnelingDrawer.openTriggered()
-                }
-
-                HomeSplitTunnelingDrawer {
-                    id: homeSplitTunnelingDrawer
-                    objectName: "homeSplitTunnelingDrawer"
-
-                    parent: root
-                }
             }
 
             AdLabel {
@@ -209,157 +108,79 @@ PageType {
                     drawer.collapsedHeight = collapsed.implicitHeight
                 }
 
-                DividerType {
-                    Layout.topMargin: 10
-                    Layout.fillWidth: false
-                    Layout.preferredWidth: 20
-                    Layout.preferredHeight: 2
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                }
+                // Modern Location Picker Card
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.margins: 16
+                    Layout.topMargin: drawer.isCollapsedStateActive ? 16 : 8
+                    Layout.bottomMargin: drawer.isCollapsedStateActive ? 48 + SettingsController.safeAreaBottomMargin : 16
+                    height: 64
 
-                RowLayout {
-                    objectName: "rowLayout"
+                    color: locationMouseArea.pressed ? "#1F1F24" : (locationMouseArea.containsMouse ? "#2A2A30" : "#24242A")
+                    radius: 16
+                    border.color: "#333333"
+                    border.width: 1
 
-                    Layout.topMargin: 14
-                    Layout.leftMargin: 24
-                    Layout.rightMargin: 24
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                    Behavior on color { ColorAnimation { duration: 150 } }
 
-                    spacing: 0
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        spacing: 12
 
-                    Connections {
-                        objectName: "drawerConnections"
+                        // Location Icon / Flag
+                        Image {
+                            Layout.alignment: Qt.AlignVCenter
+                            source: ServersModel.defaultServerImagePathCollapsed !== "" ? ServersModel.defaultServerImagePathCollapsed : "qrc:/images/controls/map-pin.svg"
+                            sourceSize: Qt.size(24, 24)
+                            fillMode: Image.PreserveAspectFit
+                        }
 
-                        target: drawer
-                        function onCursorEntered() {
-                            if (drawer.isCollapsedStateActive) {
-                                collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
-                                collapsedButtonHeader.opacity = 0.8
-                            } else {
-                                collapsedButtonHeader.opacity = 1
+                        // Server Name & Status
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            spacing: 2
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: ServersModel.defaultServerName !== "" ? ServersModel.defaultServerName : qsTr("Выбрать локацию")
+                                font.pixelSize: 16
+                                font.weight: 600
+                                color: "#FFFFFF"
+                                elide: Text.ElideRight
+                            }
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: ConnectionController.isConnected ? qsTr("Подключено") : qsTr("Нажмите для смены региона")
+                                font.pixelSize: 13
+                                color: ConnectionController.isConnected ? "#10B981" : "#8A8A8E"
+                                elide: Text.ElideRight
                             }
                         }
 
-                        function onCursorExited() {
-                            if (drawer.isCollapsedStateActive) {
-                                collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
-                                collapsedButtonHeader.opacity = 1
-                            } else {
-                                collapsedButtonHeader.opacity = 1
-                            }
-                        }
-
-                        function onPressed(pressed, entered) {
-                            if (drawer.isCollapsedStateActive) {
-                                collapsedButtonChevron.backgroundColor = pressed ? collapsedButtonChevron.pressedColor : entered ? collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
-                                collapsedButtonHeader.opacity = 0.7
-                            } else {
-                                collapsedButtonHeader.opacity = 1
-                            }
+                        // Chevron
+                        Image {
+                            Layout.alignment: Qt.AlignVCenter
+                            source: "qrc:/images/controls/chevron-up.svg"
+                            sourceSize: Qt.size(20, 20)
+                            rotation: drawer.isCollapsedStateActive ? 0 : 180
+                            Behavior on rotation { NumberAnimation { duration: 200 } }
                         }
                     }
 
-                    Header1TextType {
-                        id: collapsedButtonHeader
-                        objectName: "collapsedButtonHeader"
-
-                        Layout.maximumWidth: drawer.width - 48 - 18 - 12
-
-                        maximumLineCount: 2
-                        elide: Qt.ElideRight
-
-                        text: ServersModel.defaultServerName
-                        horizontalAlignment: Qt.AlignHCenter
-
-                        Behavior on opacity {
-                            PropertyAnimation { duration: 200 }
-                        }
-                    }
-
-                    ImageButtonType {
-                        id: collapsedButtonChevron
-                        objectName: "collapsedButtonChevron"
-
-                        Layout.leftMargin: 8
-
-                        visible: drawer.isCollapsedStateActive()
-
-                        hoverEnabled: false
-                        image: "qrc:/images/controls/chevron-down.svg"
-                        imageColor: AmneziaStyle.color.paleGray
-
-                        icon.width: 18
-                        icon.height: 18
-                        backgroundRadius: 16
-                        horizontalPadding: 4
-                        topPadding: 4
-                        bottomPadding: 3
-
-                        Keys.onEnterPressed: this.clicked()
-                        Keys.onReturnPressed: this.clicked()
-
+                    MouseArea {
+                        id: locationMouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (drawer.isCollapsedStateActive()) {
+                            if (drawer.isCollapsedStateActive) {
                                 drawer.openTriggered()
-                            }
-                        }
-                    }
-                }
-
-                RowLayout {
-                    objectName: "rowLayoutLabel"
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    Layout.topMargin: 8
-                    Layout.bottomMargin: drawer.isCollapsedStateActive ? 44 : ServersModel.isDefaultServerFromApi ? 61 : 16
-                    spacing: 0
-
-                    BasicButtonType {
-                        enabled: (ServersModel.defaultServerImagePathCollapsed !== "") && drawer.isCollapsedStateActive
-                        hoverEnabled: enabled
-
-                        implicitHeight: 36
-
-                        leftPadding: 16
-                        rightPadding: 16
-
-                        defaultColor: AmneziaStyle.color.transparent
-                        hoveredColor: AmneziaStyle.color.translucentWhite
-                        pressedColor: AmneziaStyle.color.sheerWhite
-                        disabledColor: AmneziaStyle.color.transparent
-                        textColor: AmneziaStyle.color.mutedGray
-
-                        buttonTextLabel.lineHeight: 16
-                        buttonTextLabel.font.pixelSize: 13
-                        buttonTextLabel.font.weight: 400
-
-                        text: drawer.isCollapsedStateActive ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
-                        leftImageSource: ServersModel.defaultServerImagePathCollapsed
-                        leftImageColor: ""
-                        changeLeftImageSize: false
-
-                        rightImageSource: hoverEnabled ? "qrc:/images/controls/chevron-down.svg" : ""
-
-                        Keys.onEnterPressed: this.clicked()
-                        Keys.onReturnPressed: this.clicked()
-
-                        onClicked: {
-                            ServersModel.processedIndex = ServersModel.defaultIndex
-
-                            if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
-                                if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
-                                    PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
-                                } else {
-                                    PageController.showBusyIndicator(true)
-                                    let result = ApiSettingsController.getAccountInfo(false)
-                                    PageController.showBusyIndicator(false)
-                                    if (!result) {
-                                        return
-                                    }
-
-                                    PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
-                                }
                             } else {
-                                PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                                drawer.closeTriggered()
                             }
                         }
                     }
@@ -374,89 +195,14 @@ PageType {
                 anchors.right: parent.right
                 anchors.left: parent.left
 
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    spacing: 8
-
-                    visible: !ServersModel.isDefaultServerFromApi
-
-                    DropDownType {
-                        id: containersDropDown
-                        objectName: "containersDropDown"
-
-                        rootButtonImageColor: AmneziaStyle.color.midnightBlack
-                        rootButtonBackgroundColor: AmneziaStyle.color.paleGray
-                        rootButtonBackgroundHoveredColor: AmneziaStyle.color.mistyGray
-                        rootButtonBackgroundPressedColor: AmneziaStyle.color.cloudyGray
-                        rootButtonHoveredBorderColor: AmneziaStyle.color.transparent
-                        rootButtonDefaultBorderColor: AmneziaStyle.color.transparent
-                        rootButtonTextTopMargin: 8
-                        rootButtonTextBottomMargin: 8
-
-                        enabled: drawer.isOpened
-
-                        text: ServersModel.defaultServerDefaultContainerName
-                        textColor: AmneziaStyle.color.midnightBlack
-                        headerText: qsTr("VPN protocol")
-                        headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
-
-                        rootButtonClickedFunction: function() {
-                            containersDropDown.openTriggered()
-                        }
-
-                        drawerParent: root
-
-                        listView: HomeContainersListView {
-                            id: containersListView
-                            objectName: "containersListView"
-
-                            rootWidth: root.width
-
-                            Connections {
-                                objectName: "rowLayoutConnections"
-
-                                target: ServersModel
-
-                                function onDefaultServerIndexChanged() {
-                                    updateContainersModelFilters()
-                                }
-                            }
-
-                            function updateContainersModelFilters() {
-                                if (ServersModel.isDefaultServerHasWriteAccess()) {
-                                    proxyDefaultServerContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
-                                } else {
-                                    proxyDefaultServerContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
-                                }
-                            }
-
-                            model: SortFilterProxyModel {
-                                id: proxyDefaultServerContainersModel
-                                sourceModel: DefaultServerContainersModel
-
-                                sorters: [
-                                    RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
-                                ]
-                            }
-
-                            Component.onCompleted: updateContainersModelFilters()
-                        }
-                    }
-                }
-
                 Header2Type {
                     Layout.fillWidth: true
-                    Layout.topMargin: 48
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                    Layout.topMargin: 24
+                    Layout.leftMargin: 24
+                    Layout.rightMargin: 24
 
-                    headerText: qsTr("Servers")
+                    headerText: qsTr("Выбрать локацию")
                 }
-            }
-
-            ButtonGroup {
-                id: serversRadioButtonGroup
-                objectName: "serversRadioButtonGroup"
             }
 
             ServersListView {

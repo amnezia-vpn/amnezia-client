@@ -54,7 +54,10 @@ Daemon* Daemon::instance() {
 }
 
 bool Daemon::activate(const InterfaceConfig& config) {
-  Q_ASSERT(wgutils() != nullptr);
+  if (wgutils() == nullptr) {
+    logger.error() << "wgutils is null in activate. Cannot proceed.";
+    return false;
+  }
 
   // There are 3 possible scenarios in which this method is called:
   //
@@ -166,6 +169,9 @@ bool Daemon::activate(const InterfaceConfig& config) {
 }
 
 bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
+  if (wgutils() == nullptr) {
+    return false;
+  }
   if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
       (config.m_hopType == InterfaceConfig::SingleHop)) {
     QList<QHostAddress> resolvers;
@@ -210,6 +216,9 @@ bool Daemon::parseStringList(const QJsonObject& obj, const QString& name,
 }
 
 bool Daemon::addExclusionRoute(const IPAddress& prefix) {
+  if (wgutils() == nullptr) {
+    return false;
+  }
   if (m_excludedAddrSet.contains(prefix)) {
     m_excludedAddrSet[prefix]++;
     return true;
@@ -222,6 +231,9 @@ bool Daemon::addExclusionRoute(const IPAddress& prefix) {
 }
 
 bool Daemon::delExclusionRoute(const IPAddress& prefix) {
+  if (wgutils() == nullptr) {
+    return false;
+  }
   Q_ASSERT(m_excludedAddrSet.contains(prefix));
   if (m_excludedAddrSet[prefix] > 1) {
     m_excludedAddrSet[prefix]--;
@@ -445,7 +457,10 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
 }
 
 bool Daemon::deactivate(bool emitSignals) {
-  Q_ASSERT(wgutils() != nullptr);
+  if (wgutils() == nullptr) {
+    logger.error() << "wgutils is null in deactivate";
+    return false;
+  }
 
   // Deactivate the main interface.
   if (!m_connections.isEmpty()) {
@@ -507,7 +522,10 @@ bool Daemon::supportServerSwitching(const InterfaceConfig& config) const {
 }
 
 bool Daemon::switchServer(const InterfaceConfig& config) {
-  Q_ASSERT(wgutils() != nullptr);
+  if (wgutils() == nullptr) {
+    logger.error() << "wgutils is null in switchServer";
+    return false;
+  }
 
   logger.debug() << "Switching server for" << config.m_hopType;
 
@@ -554,7 +572,12 @@ bool Daemon::switchServer(const InterfaceConfig& config) {
 }
 
 QJsonObject Daemon::getStatus() {
-  Q_ASSERT(wgutils() != nullptr);
+  if (wgutils() == nullptr) {
+    logger.error() << "wgutils is null in getStatus";
+    QJsonObject json;
+    json.insert("connected", QJsonValue(false));
+    return json;
+  }
   QJsonObject json;
   logger.debug() << "Status request";
 
@@ -585,7 +608,9 @@ QJsonObject Daemon::getStatus() {
 }
 
 void Daemon::checkHandshake() {
-  Q_ASSERT(wgutils() != nullptr);
+  if (wgutils() == nullptr) {
+    return;
+  }
 
   logger.debug() << "Checking for handshake...";
 

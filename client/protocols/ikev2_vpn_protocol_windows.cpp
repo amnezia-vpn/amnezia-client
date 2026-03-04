@@ -10,6 +10,9 @@
 #include "logger.h"
 #include "ikev2_vpn_protocol_windows.h"
 #include "utilities.h"
+#ifdef _WIN32
+#include "platforms/windows/daemon/mingw_compat.h"
+#endif
 
 
 static Ikev2Protocol* self = nullptr;
@@ -300,7 +303,7 @@ bool Ikev2Protocol::connect_to_vpn(const QString & vpn_name){
     RasDialParams.dwSize = sizeof(RASDIALPARAMS);
     wcscpy_s(RasDialParams.szEntryName, vpn_name.toStdWString().c_str());
     auto ret = RasDial(NULL, NULL, &RasDialParams, 0,
-                       &RasDialFuncCallback,
+                       reinterpret_cast<LPVOID>(&RasDialFuncCallback),
                        &hRasConn);
 
     if (ret == ERROR_SUCCESS){

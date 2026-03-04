@@ -48,6 +48,9 @@ namespace PageLoader
         PageServiceDnsSettings,
         PageServiceSocksProxySettings,
 
+        PageDrFrakeLogin,
+        PageDrFrakeRegister,
+
         PageSetupWizardStart,
         PageSetupWizardCredentials,
         PageSetupWizardProtocols,

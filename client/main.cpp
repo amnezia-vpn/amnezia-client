@@ -10,6 +10,7 @@
 
 #ifdef Q_OS_WIN
     #include "Windows.h"
+    #include "shellapi.h"
 #endif
 
 #if defined(Q_OS_IOS)
@@ -35,6 +36,34 @@ int main(int argc, char *argv[])
     migrationsManager.doMigrations();
 
 #ifdef Q_OS_WIN
+    // Check for administrator privileges
+    BOOL isAdmin = FALSE;
+    PSID administratorsGroup = NULL;
+    SID_IDENTIFIER_AUTHORITY ntAuthority = SECURITY_NT_AUTHORITY;
+    if (AllocateAndInitializeSid(&ntAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &administratorsGroup)) {
+        CheckTokenMembership(NULL, administratorsGroup, &isAdmin);
+        FreeSid(administratorsGroup);
+    }
+    
+    // Relaunch with elevated privileges if not admin
+    if (!isAdmin) {
+        qDebug() << "Application is not running as administrator. Relaunching with UAC prompt...";
+        wchar_t szPath[MAX_PATH];
+        if (GetModuleFileNameW(NULL, szPath, ARRAYSIZE(szPath))) {
+            SHELLEXECUTEINFOW sei = { sizeof(sei) };
+            sei.lpVerb = L"runas";
+            sei.lpFile = szPath;
+            sei.hwnd = NULL;
+            sei.nShow = SW_NORMAL;
+            if (ShellExecuteExW(&sei)) {
+                // Successfully started the elevated process, exit the current one.
+                return 0;
+            } else {
+                qWarning() << "Failed to elevate privileges. The application may not function correctly.";
+            }
+        }
+    }
+
     AllowSetForegroundWindow(ASFW_ANY);
 #endif
 

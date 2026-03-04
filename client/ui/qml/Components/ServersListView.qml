@@ -40,96 +40,86 @@ ListViewType {
         objectName: "menuContentDelegate"
 
         property variant delegateData: model
-        property VerticalRadioButton serverRadioButtonProperty: serverRadioButton
 
         implicitWidth: root.width
-        implicitHeight: serverRadioButtonContent.implicitHeight
+        implicitHeight: 76 // 64 for card + 12 for spacing
 
-        ColumnLayout {
-            id: serverRadioButtonContent
-            objectName: "serverRadioButtonContent"
-
-            anchors.fill: parent
+        Rectangle {
+            id: serverCard
+            
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             anchors.rightMargin: 16
             anchors.leftMargin: 16
+            height: 64
+            
+            radius: 12
+            color: index === root.selectedIndex ? "#1F1F24" : (mouseArea.pressed ? "#2A2A30" : "transparent")
+            border.color: index === root.selectedIndex ? "#5B4DFF" : "transparent"
+            border.width: index === root.selectedIndex ? 2 : 0
 
-            spacing: 0
+            Behavior on color { ColorAnimation { duration: 150 } }
 
             RowLayout {
-                objectName: "serverRadioButtonRowLayout"
+                anchors.fill: parent
+                anchors.margins: 16
+                spacing: 16
 
-                Layout.fillWidth: true
-
-                VerticalRadioButton {
-                    id: serverRadioButton
-                    objectName: "serverRadioButton"
-
-                    Layout.fillWidth: true
-
-                    text: name
-                    descriptionText: serverDescription
-
-                    checked: index === root.selectedIndex
-                    checkable: !ConnectionController.isConnected
-
-                    ButtonGroup.group: serversRadioButtonGroup
-
-                    onClicked: {
-                        if (ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
-                            return
-                        }
-
-                        root.selectedIndex = index
-
-                        ServersModel.defaultIndex = index
-                    }
-
-                    Keys.onEnterPressed: serverRadioButton.clicked()
-                    Keys.onReturnPressed: serverRadioButton.clicked()
+                // Location Icon
+                Image {
+                    Layout.alignment: Qt.AlignVCenter
+                    source: "qrc:/images/controls/map-pin.svg"
+                    sourceSize: Qt.size(24, 24)
                 }
 
-                ImageButtonType {
-                    id: serverInfoButton
-                    objectName: "serverInfoButton"
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    spacing: 4
 
-                    image: "qrc:/images/controls/settings.svg"
-                    imageColor: AmneziaStyle.color.paleGray
-
-                    implicitWidth: 56
-                    implicitHeight: 56
-
-                    z: 1
-
-                    onClicked: function() {
-                        ServersModel.processedIndex = index
-
-                        if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
-                            if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
-                                PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
-                            } else {
-                                PageController.showBusyIndicator(true)
-                                let result = ApiSettingsController.getAccountInfo(false)
-                                PageController.showBusyIndicator(false)
-                                if (!result) {
-                                    return
-                                }
-
-                                PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
-                            }
-                        } else {
-                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                        }
-
-                        drawer.closeTriggered()
+                    LabelTextType {
+                        Layout.fillWidth: true
+                        text: name
+                        font.pixelSize: 16
+                        font.weight: index === root.selectedIndex ? 600 : 400
+                        color: index === root.selectedIndex ? "#FFFFFF" : "#EBEBF5"
+                        elide: Text.ElideRight
                     }
+
+                    LabelTextType {
+                        Layout.fillWidth: true
+                        text: serverDescription
+                        font.pixelSize: 13
+                        color: index === root.selectedIndex ? "#5B4DFF" : "#8A8A8E"
+                        visible: serverDescription !== "" && serverDescription !== name
+                        elide: Text.ElideRight
+                    }
+                }
+
+                // Checkmark for selected item
+                Image {
+                    Layout.alignment: Qt.AlignVCenter
+                    source: "qrc:/images/controls/check.svg" // Assumes standard check icon exists
+                    sourceSize: Qt.size(20, 20)
+                    visible: index === root.selectedIndex
                 }
             }
 
-            DividerType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 0
-                Layout.rightMargin: 0
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    if (ConnectionController.isConnected) {
+                        PageController.showNotificationMessage(qsTr("Нельзя менять сервер во время активного подключения"))
+                        return
+                    }
+                    root.selectedIndex = index
+                    ServersModel.defaultIndex = index
+                    drawer.closeTriggered()
+                }
             }
         }
     }

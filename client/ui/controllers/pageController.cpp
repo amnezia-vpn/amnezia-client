@@ -41,8 +41,16 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
     m_isTriggeredByConnectButton = false;
 }
 
+#include <QSettings>
+
 bool PageController::isStartPageVisible()
 {
+    // Dr.Frake VPN: Force login if there is no auth token
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "DrFrakeVPN", "DrFrakeVPN");
+    if (qSettings.value("authToken", "").toString().isEmpty()) {
+        return true;
+    }
+
     if (m_serversModel->getServersCount()) {
         if (m_serversModel->getDefaultServerIndex() < 0) {
             auto defaultServerIndex = m_serversModel->index(0);

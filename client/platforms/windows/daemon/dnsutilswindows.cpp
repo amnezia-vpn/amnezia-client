@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2ipdef.h>
+#include "mingw_compat.h"
 
 #include <QProcess>
 #include <QTextStream>

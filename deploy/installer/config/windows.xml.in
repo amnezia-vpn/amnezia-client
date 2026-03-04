@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
-    <Name>AmneziaVPN</Name>
+    <Name>DrFrakeVPN</Name>
     <Version>@CMAKE_PROJECT_VERSION@</Version>
-    <Title>AmneziaVPN</Title>
-    <Publisher>AmneziaVPN</Publisher>
-    <StartMenuDir>AmneziaVPN</StartMenuDir>
-    <TargetDir>@RootDir@/Program Files/AmneziaVPN</TargetDir>
+    <Title>Dr.Frake VPN</Title>
+    <Publisher>Dr.Frake VPN</Publisher>
+    <StartMenuDir>Dr.Frake VPN</StartMenuDir>
+    <TargetDir>@RootDir@/Program Files/Dr.Frake VPN</TargetDir>
     <WizardDefaultWidth>600</WizardDefaultWidth>
     <WizardDefaultHeight>380</WizardDefaultHeight>
     <WizardStyle>Modern</WizardStyle>

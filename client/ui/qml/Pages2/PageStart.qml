@@ -26,7 +26,7 @@ PageType {
         function onGoToPageHome() {
             if (PageController.isStartPageVisible()) {
                 tabBar.visible = false
-                tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardStart)
+                tabBarStackView.goToTabBarPage(PageEnum.PageDrFrakeLogin)
             } else {
                 tabBar.visible = true
                 tabBar.setCurrentIndex(0)
@@ -267,7 +267,7 @@ PageType {
             var pagePath
             if (PageController.isStartPageVisible()) {
                 tabBar.visible = false
-                pagePath = PageController.getPagePath(PageEnum.PageSetupWizardStart)
+                pagePath = PageController.getPagePath(PageEnum.PageDrFrakeLogin)
             } else {
                 tabBar.visible = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
@@ -351,32 +351,7 @@ PageType {
             }
         }
 
-        TabImageButtonType {
-            id: shareTabButton
-            objectName: "shareTabButton"
 
-            Connections {
-                target: ServersModel
-
-                function onModelReset() {
-                    if (!SettingsController.isOnTv()) {
-                        var hasServerWithWriteAccess = ServersModel.hasServerWithWriteAccess()
-                        shareTabButton.visible = hasServerWithWriteAccess
-                        shareTabButton.width = hasServerWithWriteAccess ? undefined : 0
-                    }
-                }
-            }
-
-            visible: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess()
-            width: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess() ? undefined : 0
-
-            isSelected: tabBar.currentIndex === 1
-            image: "qrc:/images/controls/share-2.svg"
-            clickedFunc: function () {
-                tabBarStackView.goToTabBarPage(PageEnum.PageShare)
-                tabBar.currentIndex = 1
-            }
-        }
 
         TabImageButtonType {
             id: settingsTabButton
@@ -396,16 +371,6 @@ PageType {
             }
         }
 
-        TabImageButtonType {
-            id: plusTabButton
-            objectName: "plusTabButton"
 
-            isSelected: tabBar.currentIndex === 3
-            image: "qrc:/images/controls/plus.svg"
-            clickedFunc: function () {
-                tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardConfigSource)
-                tabBar.currentIndex = 3
-            }
-        }
     }
 }

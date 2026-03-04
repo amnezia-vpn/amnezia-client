@@ -235,6 +235,8 @@
         <file>ui/qml/Pages2/PageSetupWizardProtocolSettings.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardQrReader.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardStart.qml</file>
+        <file>ui/qml/Pages2/PageDrFrakeLogin.qml</file>
+        <file>ui/qml/Pages2/PageDrFrakeRegister.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardTextKey.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardViewConfig.qml</file>
         <file>ui/qml/Pages2/PageShare.qml</file>

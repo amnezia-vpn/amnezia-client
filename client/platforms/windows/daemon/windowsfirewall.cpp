@@ -15,6 +15,7 @@
 #include <windows.h>
 #include <Ws2tcpip.h>
 #include "winsock.h"
+#include "mingw_compat.h"
 
 #include <QApplication>
 #include <QFileInfo>
@@ -337,7 +338,7 @@ bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
     for (const QString& i : config.m_excludedAddresses) {
       logger.debug() << "excludedAddresses range: " << i;
 
-      if (!allowTrafficTo(i, HIGH_WEIGHT,
+      if (!allowTrafficTo(IPAddress(i), HIGH_WEIGHT,
                           "Allow Ecxlude route", config.m_serverPublicKey)) {
         return false;
       }

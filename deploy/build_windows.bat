@@ -29,10 +29,10 @@ set PROJECT_DIR=%cd%
 set SCRIPT_DIR=%PROJECT_DIR:"=%\deploy
 
 set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
-set APP_NAME=AmneziaVPN
+set APP_NAME=DrFrakeVPN
 set APP_FILENAME=%APP_NAME:"=%.exe
 set SERVICE_FILENAME=%APP_NAME:"=%-service.exe
-set APP_DOMAIN=org.amneziavpn.package
+set APP_DOMAIN=org.drfrakevpn.package
 set OUT_APP_DIR=%WORK_DIR:"=%\client\release
 set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
 set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
@@ -79,7 +79,7 @@ mkdir "%OUT_APP_DIR%"
 copy "%WORK_DIR%\service\server\release\%SERVICE_FILENAME%" "%OUT_APP_DIR%"
 rem copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
 
-copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\AmneziaVPN.ico" >nul
+copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\DrFrakeVPN.ico" >nul
 
 echo "Signing exe"
 cd %OUT_APP_DIR%
