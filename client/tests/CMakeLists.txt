@@ -5,7 +5,9 @@ project(AmneziaVPN_Tests)
 find_package(Qt6 REQUIRED COMPONENTS Test)
 
 
+set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 qt6_add_resources(TEST_QRC
     ${CLIENT_ROOT_DIR}/server_scripts/serverScripts.qrc
