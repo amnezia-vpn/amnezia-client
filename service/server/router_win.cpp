@@ -3,6 +3,7 @@
 #include <string>
 #include <tlhelp32.h>
 #include <tchar.h>
+#include <winternl.h>
 
 #include <QProcess>
 #include <QtConcurrent>
