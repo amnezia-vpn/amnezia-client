@@ -37,7 +37,7 @@ PageType {
     }
 
     Connections {
-        target: SitesController
+        target: IpSplitTunnelingController
 
         function onFinished(message) {
             PageController.showNotificationMessage(message)
@@ -72,7 +72,7 @@ PageType {
     }
 
     function getRouteModesModelIndex() {
-        var currentRouteMode = SitesController.routeMode
+        var currentRouteMode = IpSplitTunnelingController.routeMode
         if ((routeMode.onlyForwardSites === currentRouteMode) || (routeMode.allSites === currentRouteMode)) {
             return 0
         } else if (routeMode.allExceptSites === currentRouteMode) {
@@ -103,11 +103,11 @@ PageType {
             enabled: root.pageEnabled
             showSwitcher: true
             switcher {
-                checked: SitesController.isTunnelingEnabled
+                checked: IpSplitTunnelingController.isTunnelingEnabled
                 enabled: root.pageEnabled
             }
             switcherFunction: function(checked) {
-                SitesController.toggleSplitTunneling(checked)
+                IpSplitTunnelingController.toggleSplitTunneling(checked)
                 selector.text = root.routeModesModel[getRouteModesModelIndex()].name
             }
         }
@@ -137,13 +137,13 @@ PageType {
                 clickedFunction: function() {
                     selector.text = selectedText
                     selector.closeTriggered()
-                    if (SitesController.routeMode !== root.routeModesModel[selectedIndex].type) {
-                        SitesController.routeMode = root.routeModesModel[selectedIndex].type
+                    if (IpSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
+                        IpSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
                     }
                 }
 
                 Component.onCompleted: {
-                    if (root.routeModesModel[selectedIndex].type === SitesController.routeMode) {
+                    if (root.routeModesModel[selectedIndex].type === IpSplitTunnelingController.routeMode) {
                         selector.text = selectedText
                     } else {
                         selector.text = root.routeModesModel[0].name
@@ -151,7 +151,7 @@ PageType {
                 }
 
                 Connections {
-                    target: SitesController
+                    target: IpSplitTunnelingController
                     function onRouteModeChanged() {
                         selectedIndex = getRouteModesModelIndex()
                     }
@@ -176,8 +176,8 @@ PageType {
         clip: true
 
         model: SortFilterProxyModel {
-            id: proxySitesModel
-            sourceModel: SitesModel
+            id: proxyIpSplitTunnelingModel
+            sourceModel: IpSplitTunnelingModel
             filters: [
                 AnyOf {
                     RegExpFilter {
@@ -212,7 +212,7 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        SitesController.removeSite(proxySitesModel.mapToSource(index))
+                        IpSplitTunnelingController.removeSite(proxyIpSplitTunnelingModel.mapToSource(index))
                         if (!GC.isMobile()) {
                             site.rightButton.forceActiveFocus()
                         }
@@ -264,7 +264,7 @@ PageType {
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
-                    SitesController.addSite(textField.text)
+                    IpSplitTunnelingController.addSite(textField.text)
                     textField.text = ""
                     PageController.showBusyIndicator(false)
                 }
@@ -340,7 +340,7 @@ PageType {
                     }
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        SitesController.exportSites(fileName)
+                        IpSplitTunnelingController.exportSites(fileName)
                         moreActionsDrawer.closeTriggered()
                         PageController.showBusyIndicator(false)
                     }
@@ -363,7 +363,7 @@ PageType {
 
                     var yesButtonFunction = function() {
                         PageController.showBusyIndicator(true)
-                        SitesController.removeSites()
+                        IpSplitTunnelingController.removeSites()
                         PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {
@@ -481,7 +481,7 @@ PageType {
 
     function importSites(fileName, replaceExistingSites) {
         PageController.showBusyIndicator(true)
-        SitesController.importSites(fileName, replaceExistingSites)
+        IpSplitTunnelingController.importSites(fileName, replaceExistingSites)
         PageController.showBusyIndicator(false)
         importSitesDrawer.closeTriggered()
         moreActionsDrawer.closeTriggered()

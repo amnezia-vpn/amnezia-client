@@ -1,17 +1,17 @@
-#include "sitesModel.h"
+#include "ipSplitTunnelingModel.h"
 
-SitesModel::SitesModel(QObject *parent)
+IpSplitTunnelingModel::IpSplitTunnelingModel(QObject *parent)
     : QAbstractListModel(parent)
 {
 }
 
-int SitesModel::rowCount(const QModelIndex &parent) const
+int IpSplitTunnelingModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
     return m_sites.size();
 }
 
-QVariant SitesModel::data(const QModelIndex &index, int role) const
+QVariant IpSplitTunnelingModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(rowCount()))
         return QVariant();
@@ -33,14 +33,14 @@ QVariant SitesModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void SitesModel::updateModel(const QVector<QPair<QString, QString>> &sites)
+void IpSplitTunnelingModel::updateModel(const QVector<QPair<QString, QString>> &sites)
 {
     beginResetModel();
     m_sites = sites;
     endResetModel();
 }
 
-QHash<int, QByteArray> SitesModel::roleNames() const
+QHash<int, QByteArray> IpSplitTunnelingModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles[UrlRole] = "url";

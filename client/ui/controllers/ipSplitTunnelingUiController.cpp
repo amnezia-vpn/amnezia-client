@@ -1,42 +1,42 @@
-#include "sitesUiController.h"
+#include "ipSplitTunnelingUiController.h"
 
 #include "systemController.h"
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 
-SitesUiController::SitesUiController(SitesController* sitesController,
-                                      SitesModel* sitesModel, QObject *parent)
+IpSplitTunnelingUiController::IpSplitTunnelingUiController(IpSplitTunnelingController* ipSplitTunnelingController,
+                                                          IpSplitTunnelingModel* ipSplitTunnelingModel, QObject *parent)
     : QObject(parent),
-      m_sitesController(sitesController),
-      m_sitesModel(sitesModel)
+      m_ipSplitTunnelingController(ipSplitTunnelingController),
+      m_ipSplitTunnelingModel(ipSplitTunnelingModel)
 {
-    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
+    m_ipSplitTunnelingModel->updateModel(m_ipSplitTunnelingController->getCurrentSites());
 }
 
-void SitesUiController::addSite(QString hostname)
+void IpSplitTunnelingUiController::addSite(QString hostname)
 {
-    if (m_sitesController->addSite(hostname)) {
+    if (m_ipSplitTunnelingController->addSite(hostname)) {
         emit finished(tr("New site added: %1").arg(hostname));
     }
 }
 
-void SitesUiController::removeSite(int index)
+void IpSplitTunnelingUiController::removeSite(int index)
 {
-    auto modelIndex = m_sitesModel->index(index);
-    auto hostname = m_sitesModel->data(modelIndex, SitesModel::Roles::UrlRole).toString();
-    if (m_sitesController->removeSite(hostname)) {
+    auto modelIndex = m_ipSplitTunnelingModel->index(index);
+    auto hostname = m_ipSplitTunnelingModel->data(modelIndex, IpSplitTunnelingModel::Roles::UrlRole).toString();
+    if (m_ipSplitTunnelingController->removeSite(hostname)) {
         emit finished(tr("Site removed: %1").arg(hostname));
     }
 }
 
-void SitesUiController::removeSites()
+void IpSplitTunnelingUiController::removeSites()
 {
-    m_sitesController->removeSites();
+    m_ipSplitTunnelingController->removeSites();
     emit finished(tr("Site list cleared!"));
 }
 
-void SitesUiController::importSites(const QString &fileName, bool replaceExisting)
+void IpSplitTunnelingUiController::importSites(const QString &fileName, bool replaceExisting)
 {
     QByteArray jsonData;
     if (!SystemController::readFile(fileName, jsonData)) {
@@ -45,43 +45,43 @@ void SitesUiController::importSites(const QString &fileName, bool replaceExistin
     }
 
     QString errorMessage;
-    if (m_sitesController->importSitesFromJson(jsonData, replaceExisting, errorMessage)) {
+    if (m_ipSplitTunnelingController->importSitesFromJson(jsonData, replaceExisting, errorMessage)) {
         emit finished(tr("Import completed"));
     } else {
         emit errorOccurred(errorMessage);
     }
 }
 
-void SitesUiController::exportSites(const QString &fileName)
+void IpSplitTunnelingUiController::exportSites(const QString &fileName)
 {
-    QByteArray jsonData = m_sitesController->exportSitesToJson();
+    QByteArray jsonData = m_ipSplitTunnelingController->exportSitesToJson();
     SystemController::saveFile(fileName, QString::fromUtf8(jsonData));
     emit finished(tr("Export completed"));
 }
 
-void SitesUiController::toggleSplitTunneling(bool enabled)
+void IpSplitTunnelingUiController::toggleSplitTunneling(bool enabled)
 {
-    m_sitesController->toggleSplitTunneling(enabled);
+    m_ipSplitTunnelingController->toggleSplitTunneling(enabled);
     emit isTunnelingEnabledChanged();
 }
 
-void SitesUiController::setRouteMode(int routeMode)
+void IpSplitTunnelingUiController::setRouteMode(int routeMode)
 {
-    m_sitesController->setRouteMode(static_cast<amnezia::RouteMode>(routeMode));
+    m_ipSplitTunnelingController->setRouteMode(static_cast<amnezia::RouteMode>(routeMode));
     emit routeModeChanged();
 }
 
-int SitesUiController::getRouteMode() const
+int IpSplitTunnelingUiController::getRouteMode() const
 {
-    return static_cast<int>(m_sitesController->getRouteMode());
+    return static_cast<int>(m_ipSplitTunnelingController->getRouteMode());
 }
 
-bool SitesUiController::isTunnelingEnabled() const
+bool IpSplitTunnelingUiController::isTunnelingEnabled() const
 {
-    return m_sitesController->isSplitTunnelingEnabled();
+    return m_ipSplitTunnelingController->isSplitTunnelingEnabled();
 }
 
-void SitesUiController::updateModel()
+void IpSplitTunnelingUiController::updateModel()
 {
-    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
+    m_ipSplitTunnelingModel->updateModel(m_ipSplitTunnelingController->getCurrentSites());
 }

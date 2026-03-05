@@ -23,7 +23,7 @@
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/settingsUiController.h"
 #include "ui/controllers/serversUiController.h"
-#include "ui/controllers/sitesUiController.h"
+#include "ui/controllers/ipSplitTunnelingUiController.h"
 #include "ui/controllers/systemController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/allowedDnsUiController.h"
@@ -33,7 +33,7 @@
 #include "core/controllers/serversController.h"
 #include "core/controllers/selfhosted/usersController.h"
 #include "core/controllers/appSplitTunnelingController.h"
-#include "core/controllers/sitesController.h"
+#include "core/controllers/ipSplitTunnelingController.h"
 #include "core/controllers/allowedDnsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
@@ -68,7 +68,7 @@
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/services/torConfigModel.h"
-#include "ui/models/sitesModel.h"
+#include "ui/models/ipSplitTunnelingModel.h"
 #include "ui/models/newsModel.h"
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
@@ -155,7 +155,7 @@ private:
     ExportUiController* m_exportUiController;
     SettingsUiController* m_settingsUiController;
     ServersUiController* m_serversUiController;
-    SitesUiController* m_sitesUiController;
+    IpSplitTunnelingUiController* m_ipSplitTunnelingUiController;
     SystemController* m_systemController;
     AppSplitTunnelingUiController* m_appSplitTunnelingUiController;
     AllowedDnsUiController* m_allowedDnsUiController;
@@ -169,7 +169,7 @@ private:
     ServersController* m_serversController;
     UsersController* m_usersController;
     AppSplitTunnelingController* m_appSplitTunnelingController;
-    SitesController* m_sitesController;
+    IpSplitTunnelingController* m_ipSplitTunnelingController;
     AllowedDnsController* m_allowedDnsController;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
@@ -184,7 +184,7 @@ private:
     ServersModel* m_serversModel;
     LanguageModel* m_languageModel;
     ProtocolsModel* m_protocolsModel;
-    SitesModel* m_sitesModel;
+    IpSplitTunnelingModel* m_ipSplitTunnelingModel;
     NewsModel* m_newsModel;
     AllowedDnsModel* m_allowedDnsModel;
     AppSplitTunnelingModel* m_appSplitTunnelingModel;

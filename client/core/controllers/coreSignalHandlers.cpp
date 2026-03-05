@@ -13,7 +13,7 @@
 #include "ui/controllers/connectionUiController.h"
 #include "ui/controllers/settingsUiController.h"
 #include "ui/controllers/serversUiController.h"
-#include "ui/controllers/sitesUiController.h"
+#include "ui/controllers/ipSplitTunnelingUiController.h"
 #include "ui/controllers/allowedDnsUiController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/languageUiController.h"
@@ -22,7 +22,7 @@
 #include "ui/controllers/api/subscriptionUiController.h"
 #include "ui/models/serversModel.h"
 #include "core/controllers/serversController.h"
-#include "core/controllers/sitesController.h"
+#include "core/controllers/ipSplitTunnelingController.h"
 #include "core/controllers/appSplitTunnelingController.h"
 #include "core/controllers/selfhosted/usersController.h"
 #include "core/controllers/settingsController.h"
@@ -98,10 +98,10 @@ void CoreSignalHandlers::initErrorMessagesHandler()
 void CoreSignalHandlers::initSettingsSplitTunnelingHandler()
 {
     connect(m_coreController->m_settingsController, &SettingsController::siteSplitTunnelingRouteModeChanged, this, [this](RouteMode mode) {
-        m_coreController->m_sitesController->setRouteMode(mode);
+        m_coreController->m_ipSplitTunnelingController->setRouteMode(mode);
     });
     connect(m_coreController->m_settingsController, &SettingsController::siteSplitTunnelingToggled, this, [this](bool enabled) {
-        m_coreController->m_sitesController->toggleSplitTunneling(enabled);
+        m_coreController->m_ipSplitTunnelingController->toggleSplitTunneling(enabled);
     });
     connect(m_coreController->m_settingsController, &SettingsController::appSplitTunnelingRouteModeChanged, this, [this](AppsRouteMode mode) {
         m_coreController->m_appSplitTunnelingController->setRouteMode(mode);
@@ -272,9 +272,9 @@ void CoreSignalHandlers::initClientManagementModelUpdateHandler()
 
 void CoreSignalHandlers::initSitesModelUpdateHandler()
 {
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesChanged, m_coreController->m_sitesUiController, &SitesUiController::updateModel);
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesSplitTunnelingEnabledChanged, m_coreController->m_sitesUiController, &SitesUiController::updateModel);
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::routeModeChanged, m_coreController->m_sitesUiController, &SitesUiController::updateModel);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesChanged, m_coreController->m_ipSplitTunnelingUiController, &IpSplitTunnelingUiController::updateModel);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesSplitTunnelingEnabledChanged, m_coreController->m_ipSplitTunnelingUiController, &IpSplitTunnelingUiController::updateModel);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::routeModeChanged, m_coreController->m_ipSplitTunnelingUiController, &IpSplitTunnelingUiController::updateModel);
 }
 
 void CoreSignalHandlers::initAllowedDnsModelUpdateHandler()

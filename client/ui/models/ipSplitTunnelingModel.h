@@ -1,11 +1,11 @@
-#ifndef SITESMODEL_H
-#define SITESMODEL_H
+#ifndef IPSPLITTUNNELINGMODEL_H
+#define IPSPLITTUNNELINGMODEL_H
 
 #include <QAbstractListModel>
 #include <QVector>
 #include <QPair>
 
-class SitesModel : public QAbstractListModel
+class IpSplitTunnelingModel : public QAbstractListModel
 {
     Q_OBJECT
 
@@ -15,7 +15,7 @@ public:
         IpRole
     };
 
-    explicit SitesModel(QObject *parent = nullptr);
+    explicit IpSplitTunnelingModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -31,4 +31,4 @@ private:
     QVector<QPair<QString, QString>> m_sites;
 };
 
-#endif // SITESMODEL_H
+#endif // IPSPLITTUNNELINGMODEL_H

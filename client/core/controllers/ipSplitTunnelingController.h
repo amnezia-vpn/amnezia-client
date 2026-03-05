@@ -1,5 +1,5 @@
-#ifndef SITESCONTROLLER_H
-#define SITESCONTROLLER_H
+#ifndef IPSPLITTUNNELINGCONTROLLER_H
+#define IPSPLITTUNNELINGCONTROLLER_H
 
 #include <QObject>
 #include <QVector>
@@ -17,12 +17,12 @@
 
 using namespace amnezia;
 
-class SitesController : public QObject
+class IpSplitTunnelingController : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit SitesController(SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
+    explicit IpSplitTunnelingController(SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
 
     bool addSite(const QString &hostname);
     void addSites(const QMap<QString, QString> &sites, bool replaceExisting);
@@ -54,5 +54,5 @@ private:
     QVector<QPair<QString, QString>> m_sites;
 };
 
-#endif // SITESCONTROLLER_H
+#endif // IPSPLITTUNNELINGCONTROLLER_H
 

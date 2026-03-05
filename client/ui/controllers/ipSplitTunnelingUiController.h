@@ -1,12 +1,12 @@
-#ifndef SITESUICONTROLLER_H
-#define SITESUICONTROLLER_H
+#ifndef IPSPLITTUNNELINGUICONTROLLER_H
+#define IPSPLITTUNNELINGUICONTROLLER_H
 
 #include <QObject>
 
-#include "core/controllers/sitesController.h"
-#include "ui/models/sitesModel.h"
+#include "core/controllers/ipSplitTunnelingController.h"
+#include "ui/models/ipSplitTunnelingModel.h"
 
-class SitesUiController : public QObject
+class IpSplitTunnelingUiController : public QObject
 {
     Q_OBJECT
 
@@ -14,8 +14,8 @@ class SitesUiController : public QObject
     Q_PROPERTY(bool isTunnelingEnabled READ isTunnelingEnabled NOTIFY isTunnelingEnabledChanged)
 
 public:
-    explicit SitesUiController(SitesController* sitesController,
-                                SitesModel* sitesModel, QObject *parent = nullptr);
+    explicit IpSplitTunnelingUiController(IpSplitTunnelingController* ipSplitTunnelingController,
+                                         IpSplitTunnelingModel* ipSplitTunnelingModel, QObject *parent = nullptr);
 
 public slots:
     void addSite(QString hostname);
@@ -39,8 +39,8 @@ signals:
     void saveFile(const QString &fileName, const QString &data);
 
 private:
-    SitesController* m_sitesController;
-    SitesModel* m_sitesModel;
+    IpSplitTunnelingController* m_ipSplitTunnelingController;
+    IpSplitTunnelingModel* m_ipSplitTunnelingModel;
 };
 
-#endif // SITESUICONTROLLER_H
+#endif // IPSPLITTUNNELINGUICONTROLLER_H

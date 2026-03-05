@@ -63,8 +63,8 @@ void CoreController::initModels()
     m_languageModel = new LanguageModel(this);
     setQmlContextProperty("LanguageModel", m_languageModel);
 
-    m_sitesModel = new SitesModel(this);
-    setQmlContextProperty("SitesModel", m_sitesModel);
+    m_ipSplitTunnelingModel = new IpSplitTunnelingModel(this);
+    setQmlContextProperty("IpSplitTunnelingModel", m_ipSplitTunnelingModel);
 
     m_allowedDnsModel = new AllowedDnsModel(this);
     setQmlContextProperty("AllowedDnsModel", m_allowedDnsModel);
@@ -137,7 +137,7 @@ void CoreController::initCoreControllers()
     m_serversController = new ServersController(m_serversRepository, m_appSettingsRepository, this);
     m_appSplitTunnelingController = new AppSplitTunnelingController(m_appSettingsRepository);
     m_usersController = new UsersController(m_serversRepository, this);
-    m_sitesController = new SitesController(m_appSettingsRepository, this);
+    m_ipSplitTunnelingController = new IpSplitTunnelingController(m_appSettingsRepository, this);
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
@@ -186,8 +186,8 @@ void CoreController::initControllers()
     m_serversUiController = new ServersUiController(m_serversController, m_settingsController, m_serversModel, m_containersModel, m_defaultServerContainersModel, this);
     setQmlContextProperty("ServersUiController", m_serversUiController);
 
-    m_sitesUiController = new SitesUiController(m_sitesController, m_sitesModel, this);
-    setQmlContextProperty("SitesController", m_sitesUiController);
+    m_ipSplitTunnelingUiController = new IpSplitTunnelingUiController(m_ipSplitTunnelingController, m_ipSplitTunnelingModel, this);
+    setQmlContextProperty("IpSplitTunnelingController", m_ipSplitTunnelingUiController);
 
     m_allowedDnsUiController = new AllowedDnsUiController(m_allowedDnsController, m_allowedDnsModel, this);
     setQmlContextProperty("AllowedDnsController", m_allowedDnsUiController);

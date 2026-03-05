@@ -10,7 +10,7 @@
 #include "ui/controllers/settingsUiController.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/models/allowedDnsModel.h"
-#include "ui/models/sitesModel.h"
+#include "ui/models/ipSplitTunnelingModel.h"
 #include "ui/models/appSplitTunnelingModel.h"
 #include "ui/models/languageModel.h"
 #include "vpnConnection.h"
@@ -215,10 +215,10 @@ private slots:
         QSignalSpy sitesChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesChanged);
         QSignalSpy appsChangedSpy(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsChanged);
 
-        bool initialSitesSplitTunneling = m_coreController->m_sitesController->isSplitTunnelingEnabled();
-        m_coreController->m_sitesController->toggleSplitTunneling(!initialSitesSplitTunneling);
+        bool initialSitesSplitTunneling = m_coreController->m_ipSplitTunnelingController->isSplitTunnelingEnabled();
+        m_coreController->m_ipSplitTunnelingController->toggleSplitTunneling(!initialSitesSplitTunneling);
         QVERIFY2(sitesSplitTunnelingEnabledChangedSpy.count() == 1, "sitesSplitTunnelingEnabledChanged signal should be emitted");
-        QVERIFY2(m_coreController->m_sitesController->isSplitTunnelingEnabled() == !initialSitesSplitTunneling, "Sites split tunneling should be updated in SitesController");
+        QVERIFY2(m_coreController->m_ipSplitTunnelingController->isSplitTunnelingEnabled() == !initialSitesSplitTunneling, "Sites split tunneling should be updated in IpSplitTunnelingController");
         QVERIFY2(m_coreController->m_appSettingsRepository->isSitesSplitTunnelingEnabled() == !initialSitesSplitTunneling, "Sites split tunneling should be available in SecureAppSettingsRepository");
 
         bool initialAppsSplitTunneling = m_coreController->m_appSplitTunnelingController->isSplitTunnelingEnabled();
@@ -227,13 +227,13 @@ private slots:
         QVERIFY2(m_coreController->m_appSplitTunnelingController->isSplitTunnelingEnabled() == !initialAppsSplitTunneling, "Apps split tunneling should be updated in AppSplitTunnelingController");
         QVERIFY2(m_coreController->m_appSettingsRepository->isAppsSplitTunnelingEnabled() == !initialAppsSplitTunneling, "Apps split tunneling should be available in SecureAppSettingsRepository");
 
-        RouteMode initialRouteMode = m_coreController->m_sitesController->getRouteMode();
+        RouteMode initialRouteMode = m_coreController->m_ipSplitTunnelingController->getRouteMode();
         RouteMode newRouteMode = (initialRouteMode == RouteMode::VpnOnlyForwardSites) 
                                  ? RouteMode::VpnAllExceptSites 
                                  : RouteMode::VpnOnlyForwardSites;
-        m_coreController->m_sitesController->setRouteMode(newRouteMode);
+        m_coreController->m_ipSplitTunnelingController->setRouteMode(newRouteMode);
         QVERIFY2(routeModeChangedSpy.count() == 1, "routeModeChanged signal should be emitted");
-        QVERIFY2(m_coreController->m_sitesController->getRouteMode() == newRouteMode, "Route mode should be updated in SitesController");
+        QVERIFY2(m_coreController->m_ipSplitTunnelingController->getRouteMode() == newRouteMode, "Route mode should be updated in IpSplitTunnelingController");
         QVERIFY2(m_coreController->m_appSettingsRepository->routeMode() == newRouteMode, "Route mode should be available in SecureAppSettingsRepository");
 
         AppsRouteMode initialAppsRouteMode = m_coreController->m_appSplitTunnelingController->getRouteMode();
@@ -246,18 +246,18 @@ private slots:
         QVERIFY2(m_coreController->m_appSettingsRepository->appsRouteMode() == newAppsRouteMode, "Apps route mode should be available in SecureAppSettingsRepository");
 
         QMap<QString, QString> sitesMap{{"example.com", "1.2.3.4"}};
-        m_coreController->m_sitesController->addSites(sitesMap, true);
+        m_coreController->m_ipSplitTunnelingController->addSites(sitesMap, true);
         QVERIFY2(sitesChangedSpy.count() >= 1, "sitesChanged signal should be emitted");
-        QVector<QPair<QString, QString>> currentSites = m_coreController->m_sitesController->getCurrentSites();
-        QVERIFY2(currentSites.size() >= 1, "Sites should be available in SitesController");
+        QVector<QPair<QString, QString>> currentSites = m_coreController->m_ipSplitTunnelingController->getCurrentSites();
+        QVERIFY2(currentSites.size() >= 1, "Sites should be available in IpSplitTunnelingController");
         
-        QVERIFY2(m_coreController->m_sitesUiController != nullptr, "SitesUiController should exist");
-        QVERIFY2(m_coreController->m_sitesModel != nullptr, "SitesModel should exist");
+        QVERIFY2(m_coreController->m_ipSplitTunnelingUiController != nullptr, "IpSplitTunnelingUiController should exist");
+        QVERIFY2(m_coreController->m_ipSplitTunnelingModel != nullptr, "IpSplitTunnelingModel should exist");
         
-        m_coreController->m_sitesUiController->updateModel();
-        QVERIFY2(m_coreController->m_sitesModel->rowCount() >= 1, "Sites should be available in SitesModel");
-        QString modelUrl = m_coreController->m_sitesModel->data(m_coreController->m_sitesModel->index(0, 0), SitesModel::UrlRole).toString();
-        QVERIFY2(modelUrl == "example.com", "Site URL should be available in SitesModel");
+        m_coreController->m_ipSplitTunnelingUiController->updateModel();
+        QVERIFY2(m_coreController->m_ipSplitTunnelingModel->rowCount() >= 1, "Sites should be available in IpSplitTunnelingModel");
+        QString modelUrl = m_coreController->m_ipSplitTunnelingModel->data(m_coreController->m_ipSplitTunnelingModel->index(0, 0), IpSplitTunnelingModel::UrlRole).toString();
+        QVERIFY2(modelUrl == "example.com", "Site URL should be available in IpSplitTunnelingModel");
     }
 };
 
