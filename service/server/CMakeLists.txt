@@ -243,6 +243,8 @@ if(WIN32)
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn-service.rc
     )
 
+    find_package(ZLIB REQUIRED)
+
     set(LIBS
         user32
         rasapi32
@@ -258,7 +260,7 @@ if(WIN32)
         dnsapi
         d3d11
         dxgi
-        z
+        ZLIB::ZLIB
         ${AMNEZIA_XRAY_LIB_PATH}
         ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
