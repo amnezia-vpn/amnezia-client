@@ -46,7 +46,6 @@ void ConnectionController::setConnectionState(Vpn::ConnectionState state)
 
 ErrorCode ConnectionController::prepareConnection(int serverIndex,
                                                  QJsonObject& vpnConfiguration,
-                                                 ServerCredentials& credentials,
                                                  DockerContainer& container)
 {
     if (!isServiceReady()) {
@@ -61,7 +60,6 @@ ErrorCode ConnectionController::prepareConnection(int serverIndex,
     }
 
     ContainerConfig containerConfigModel = m_serversRepository->containerConfig(serverIndex, container);
-    credentials = m_serversRepository->serverCredentials(serverIndex);
 
     auto dns = serverConfigModel.getDnsPair(m_appSettingsRepository->useAmneziaDns(),
                                             m_appSettingsRepository->primaryDns(),
@@ -75,15 +73,14 @@ ErrorCode ConnectionController::prepareConnection(int serverIndex,
 ErrorCode ConnectionController::connectToVpn(int serverIndex)
 {
     QJsonObject vpnConfiguration;
-    ServerCredentials credentials;
     DockerContainer container;
 
-    ErrorCode errorCode = prepareConnection(serverIndex, vpnConfiguration, credentials, container);
+    ErrorCode errorCode = prepareConnection(serverIndex, vpnConfiguration, container);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
 
-    m_vpnConnection->connectToVpn(serverIndex, credentials, container, vpnConfiguration);
+    m_vpnConnection->connectToVpn(serverIndex, container, vpnConfiguration);
     return ErrorCode::NoError;
 }
 

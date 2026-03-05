@@ -1,5 +1,6 @@
 #include "xrayProtocol.h"
 
+#include "core/utils/constants/configKeys.h"
 #include "core/utils/ipcClient.h"
 #include "core/utils/utilities.h"
 #include "core/utils/networkUtilities.h"
@@ -54,8 +55,14 @@ ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
 
+    QString xrayConfigStr = m_xrayConfig.value(amnezia::configKey::config).toString();
+    if (xrayConfigStr.isEmpty()) {
+        qCritical() << "Xray config is empty";
+        return ErrorCode::XrayExecutableCrashed;
+    }
+
     return IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        auto xrayStart = iface->xrayStart(QJsonDocument(m_xrayConfig).toJson());
+        auto xrayStart = iface->xrayStart(xrayConfigStr);
         if (!xrayStart.waitForFinished() || !xrayStart.returnValue()) {
             qCritical() << "Failed to start xray";
             return ErrorCode::XrayExecutableCrashed;

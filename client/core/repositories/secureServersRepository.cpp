@@ -2,8 +2,6 @@
 
 #include <QJsonDocument>
 #include <QJsonArray>
-#include <QThread>
-#include <QCoreApplication>
 
 #include "core/utils/api/apiEnums.h"
 #include "core/utils/constants/apiKeys.h"
@@ -27,24 +25,12 @@ SecureServersRepository::SecureServersRepository(SecureQSettings* settings, QObj
 
 QVariant SecureServersRepository::value(const QString &key, const QVariant &defaultValue) const
 {
-    QVariant returnValue;
-    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
-        returnValue = m_settings->value(key, defaultValue);
-    } else {
-        QMetaObject::invokeMethod(m_settings, "value", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, returnValue),
-                                  Q_ARG(const QString &, key), Q_ARG(const QVariant &, defaultValue));
-    }
-    return returnValue;
+    return m_settings->value(key, defaultValue);
 }
 
 void SecureServersRepository::setValue(const QString &key, const QVariant &value)
 {
-    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
-        m_settings->setValue(key, value);
-    } else {
-        QMetaObject::invokeMethod(m_settings, "setValue", Qt::BlockingQueuedConnection, Q_ARG(const QString &, key),
-                                  Q_ARG(const QVariant &, value));
-    }
+    m_settings->setValue(key, value);
 }
 
 void SecureServersRepository::syncToStorage()

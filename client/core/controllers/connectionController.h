@@ -32,7 +32,6 @@ public:
 
     ErrorCode prepareConnection(int serverIndex,
                                QJsonObject& vpnConfiguration,
-                               ServerCredentials& credentials,
                                DockerContainer& container);
 
     ErrorCode connectToVpn(int serverIndex);

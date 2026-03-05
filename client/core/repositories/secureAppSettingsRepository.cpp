@@ -3,8 +3,6 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QUuid>
-#include <QCoreApplication>
-#include <QThread>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
@@ -30,24 +28,12 @@ SecureAppSettingsRepository::SecureAppSettingsRepository(SecureQSettings* settin
 
 QVariant SecureAppSettingsRepository::value(const QString &key, const QVariant &defaultValue) const
 {
-    QVariant returnValue;
-    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
-        returnValue = m_settings->value(key, defaultValue);
-    } else {
-        QMetaObject::invokeMethod(m_settings, "value", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, returnValue),
-                                  Q_ARG(const QString &, key), Q_ARG(const QVariant &, defaultValue));
-    }
-    return returnValue;
+    return m_settings->value(key, defaultValue);
 }
 
 void SecureAppSettingsRepository::setValue(const QString &key, const QVariant &value)
 {
-    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
-        m_settings->setValue(key, value);
-    } else {
-        QMetaObject::invokeMethod(m_settings, "setValue", Qt::BlockingQueuedConnection, Q_ARG(const QString &, key),
-                                  Q_ARG(const QVariant &, value));
-    }
+    m_settings->setValue(key, value);
 }
 
 QLocale SecureAppSettingsRepository::getAppLanguage() const

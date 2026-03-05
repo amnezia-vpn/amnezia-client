@@ -617,9 +617,7 @@ bool IosController::setupWireGuard()
 bool IosController::setupXray()
 {
     QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::Xray)].toObject();
-    QJsonDocument xrayConfigDoc(config);
-
-    QString xrayConfigStr(xrayConfigDoc.toJson(QJsonDocument::Compact));
+    QString xrayConfigStr = config.value(configKey::config).toString();
 
     QJsonObject finalConfig;
     finalConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1].toString());
@@ -635,9 +633,7 @@ bool IosController::setupXray()
 bool IosController::setupSSXray()
 {
     QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::SSXray)].toObject();
-    QJsonDocument ssXrayConfigDoc(config);
-
-    QString ssXrayConfigStr(ssXrayConfigDoc.toJson(QJsonDocument::Compact));
+    QString ssXrayConfigStr = config.value(configKey::config).toString();
 
     QJsonObject finalConfig;
     finalConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1]);

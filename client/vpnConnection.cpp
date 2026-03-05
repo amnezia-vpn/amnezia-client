@@ -228,15 +228,14 @@ Vpn::ConnectionState VpnConnection::connectionState() const
     return m_connectionState;
 }
 
-void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
-                                 const QJsonObject &vpnConfiguration)
+void VpnConnection::connectToVpn(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration)
 {
     qDebug() << QString("Trying to connect to VPN, server index is %1, container is %2, route mode is")
                         .arg(serverIndex)
                         .arg(ContainerUtils::containerToString(container))
              << m_appSettingsRepository->routeMode();
 
-    m_remoteAddress = NetworkUtilities::getIPAddress(credentials.hostName);
+    m_remoteAddress = NetworkUtilities::getIPAddress(vpnConfiguration.value(configKey::hostName).toString());
     setConnectionState(Vpn::ConnectionState::Connecting);
 
     m_vpnConfiguration = vpnConfiguration;
