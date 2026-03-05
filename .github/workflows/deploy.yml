@@ -159,6 +159,15 @@ jobs:
         $wixBinDir = Join-Path $env:USERPROFILE ".dotnet\tools"
         echo "WIX_BIN_DIR=$wixBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
+    - name: 'Install zlib via vcpkg'
+      shell: powershell
+      run: |
+        vcpkg install zlib:x64-windows
+        $zlibRoot = "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows"
+        echo "ZLIB_ROOT=$zlibRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "ZLIB_INCLUDE_DIR=$zlibRoot\include" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "ZLIB_LIBRARY=$zlibRoot\lib\zlib.lib" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
     - name: 'Build project'
       shell: cmd
       run: |

@@ -67,7 +67,7 @@ call "%QT_BIN_DIR:"=%\qt-cmake" --version
 cmake --version
 
 cd %PROJECT_DIR%
-call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%"
+call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%" "-DZLIB_ROOT=%ZLIB_ROOT%"
 
 cd %WORK_DIR%
 cmake --build . --config release -- /p:UseMultiToolTask=true /m
