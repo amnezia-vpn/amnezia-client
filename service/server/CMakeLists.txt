@@ -265,6 +265,7 @@ if(WIN32)
     )
 
     add_compile_definitions(QSIMPLECRYPTO_LIBRARY)
+    add_compile_definitions(WIN32_LEAN_AND_MEAN NOMINMAX _WINSOCKAPI_)
 endif()
 
 if(APPLE)
