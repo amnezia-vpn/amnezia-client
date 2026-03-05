@@ -5,11 +5,11 @@
 #ifndef WINDOWSROUTEMONITOR_H
 #define WINDOWSROUTEMONITOR_H
 
+#include <winsock2.h>
 #include <WS2tcpip.h>
+#include <ws2ipdef.h>
 #include <iphlpapi.h>
 #include <windows.h>
-#include <winsock2.h>
-#include <ws2ipdef.h>
 
 #include <QHash>
 #include <QMap>

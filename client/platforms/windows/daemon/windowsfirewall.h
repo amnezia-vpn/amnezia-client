@@ -7,8 +7,9 @@
 
 #pragma comment(lib, "Fwpuclnt")
 
-// Note: The windows.h import needs to come before the fwpmu.h import.
+// Note: winsock2.h must come before windows.h to prevent old winsock.h conflicts.
 // clang-format off
+#include <winsock2.h>
 #include <windows.h>
 #include <fwpmu.h>
 // clang-format on
