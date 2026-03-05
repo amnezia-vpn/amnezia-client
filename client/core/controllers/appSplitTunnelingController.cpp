@@ -5,10 +5,12 @@ AppSplitTunnelingController::AppSplitTunnelingController(SecureAppSettingsReposi
 {
     m_currentRouteMode = m_appSettingsRepository->appsRouteMode();
     if (m_currentRouteMode == AppsRouteMode::VpnAllApps) { // for old split tunneling configs
-        m_appSettingsRepository->setAppsRouteMode(AppsRouteMode::VpnAllExceptApps);
         m_currentRouteMode = AppsRouteMode::VpnAllExceptApps;
+        m_apps = m_appSettingsRepository->vpnApps(m_currentRouteMode);
+        m_appSettingsRepository->setAppsRouteMode(AppsRouteMode::VpnAllExceptApps);
+    } else {
+        m_apps = m_appSettingsRepository->vpnApps(m_currentRouteMode);
     }
-    m_apps = m_appSettingsRepository->vpnApps(m_currentRouteMode);
 }
 
 bool AppSplitTunnelingController::addApp(const amnezia::InstalledAppInfo &appInfo)
@@ -41,9 +43,9 @@ void AppSplitTunnelingController::clearAppsList()
 
 void AppSplitTunnelingController::setRouteMode(AppsRouteMode routeMode)
 {
-    m_appSettingsRepository->setAppsRouteMode(routeMode);
-    m_currentRouteMode = m_appSettingsRepository->appsRouteMode();
+    m_currentRouteMode = routeMode;
     m_apps = m_appSettingsRepository->vpnApps(m_currentRouteMode);
+    m_appSettingsRepository->setAppsRouteMode(routeMode);
 }
 
 void AppSplitTunnelingController::toggleSplitTunneling(bool enabled)

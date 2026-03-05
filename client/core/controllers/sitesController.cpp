@@ -16,28 +16,51 @@ SitesController::SitesController(SecureAppSettingsRepository* appSettingsReposit
 
 bool SitesController::addSiteInternal(const QString &hostname, const QString &ip)
 {
-    if (!m_appSettingsRepository->addVpnSite(m_currentRouteMode, hostname, ip)) {
+    QVariantMap existing = m_appSettingsRepository->vpnSites(m_currentRouteMode);
+    if (existing.contains(hostname) && ip.isEmpty()) {
         return false;
     }
+
     for (int i = 0; i < m_sites.size(); i++) {
         if (m_sites[i].first == hostname && (m_sites[i].second.isEmpty() && !ip.isEmpty())) {
             m_sites[i].second = ip;
+            m_appSettingsRepository->addVpnSite(m_currentRouteMode, hostname, ip);
             return true;
         } else if (m_sites[i].first == hostname && (m_sites[i].second == ip)) {
             return false;
         }
     }
     m_sites.append(qMakePair(hostname, ip));
+    m_appSettingsRepository->addVpnSite(m_currentRouteMode, hostname, ip);
     return true;
 }
 
 void SitesController::addSites(const QMap<QString, QString> &sites, bool replaceExisting)
 {
     if (replaceExisting) {
+        m_sites.clear();
+    }
+    for (auto it = sites.constBegin(); it != sites.constEnd(); ++it) {
+        const QString &hostname = it.key();
+        const QString &ip = it.value();
+        bool found = false;
+        for (int i = 0; i < m_sites.size(); i++) {
+            if (m_sites[i].first == hostname) {
+                if (!ip.isEmpty()) {
+                    m_sites[i].second = ip;
+                }
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            m_sites.append(qMakePair(hostname, ip));
+        }
+    }
+    if (replaceExisting) {
         m_appSettingsRepository->removeAllVpnSites(m_currentRouteMode);
     }
     m_appSettingsRepository->addVpnSites(m_currentRouteMode, sites);
-    fillSites();
 }
 
 bool SitesController::addSite(const QString &hostname)
@@ -65,8 +88,8 @@ bool SitesController::removeSite(const QString &hostname)
 {
     for (int i = 0; i < m_sites.size(); i++) {
         if (m_sites[i].first == hostname) {
-            m_appSettingsRepository->removeVpnSite(m_currentRouteMode, hostname);
             m_sites.removeAt(i);
+            m_appSettingsRepository->removeVpnSite(m_currentRouteMode, hostname);
             return true;
         }
     }
@@ -75,15 +98,15 @@ bool SitesController::removeSite(const QString &hostname)
 
 void SitesController::removeSites()
 {
+    m_sites.clear();
     m_appSettingsRepository->removeAllVpnSites(m_currentRouteMode);
-    fillSites();
 }
 
 void SitesController::setRouteMode(RouteMode routeMode)
 {
-    m_appSettingsRepository->setRouteMode(routeMode);
-    m_currentRouteMode = m_appSettingsRepository->routeMode();
+    m_currentRouteMode = routeMode;
     fillSites();
+    m_appSettingsRepository->setRouteMode(routeMode);
 }
 
 void SitesController::toggleSplitTunneling(bool enabled)
