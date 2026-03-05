@@ -83,12 +83,12 @@ copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\DrFrakeVPN.ico" >nu
 
 echo "Signing exe"
 cd %OUT_APP_DIR%
-signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe
+signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe || echo "Signing skipped (no certificate)"
 
 "%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations --force-openssl "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
 "%QT_BIN_DIR:"=%\windeployqt" --release "%OUT_APP_DIR:"=%\%SERVICE_FILENAME:"=%"
 
-signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll
+signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll || echo "Signing skipped (no certificate)"
 
 echo "Copying deploy data..."
 xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
@@ -112,7 +112,7 @@ echo "Creating installer..."
 timeout 5
 
 cd %PROJECT_DIR%
-signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%"
+signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%" || echo "Signing skipped (no certificate)"
 
 echo "Preparing staging directory for MSI..."
 rmdir /Q /S "%STAGE_DIR%"
@@ -145,7 +145,7 @@ copy /Y "%GENERATED_MSI%" "%TARGET_MSI_FILENAME%"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 cd %PROJECT_DIR%
-signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_MSI_FILENAME%"
+signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_MSI_FILENAME%" || echo "Signing skipped (no certificate)"
 
 echo "Finished, see %TARGET_FILENAME% and %TARGET_MSI_FILENAME%"
 exit 0
