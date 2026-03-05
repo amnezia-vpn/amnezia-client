@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CPackWiXPatch>
-    <CPackWiXFragment Id="CM_CP_AmneziaVPN_service.exe">
+    <CPackWiXFragment Id="CM_CP_DrFrakeVPN_service.exe">
         <ServiceInstall
-                Id="AmneziaServiceInstall"
-                Name="AmneziaVPN-service"
-                DisplayName="AmneziaVPN Service"
-                Description="Service for AmneziaVPN"
+                Id="DrFrakeServiceInstall"
+                Name="DrFrakeVPN-service"
+                DisplayName="Dr.Frake VPN Service"
+                Description="Service for Dr.Frake VPN"
                 Start="auto"
                 Type="ownProcess"
                 ErrorControl="normal"
@@ -14,8 +14,8 @@
             <ServiceDependency Id="nsi" />
         </ServiceInstall>
         <ServiceControl
-                Id="AmneziaServiceControl"
-                Name="AmneziaVPN-service"
+                Id="DrFrakeServiceControl"
+                Name="DrFrakeVPN-service"
                 Start="install"
                 Stop="both"
                 Remove="uninstall"
