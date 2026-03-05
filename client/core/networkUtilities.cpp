@@ -3,13 +3,13 @@
 #include <cstddef>
 
 #ifdef Q_OS_WIN
-    #include <WinSock2.h>
+    #include <winsock2.h>
     #include <windows.h>
-    #include <Ipexport.h>
     #include <Ws2tcpip.h>
     #include <ws2ipdef.h>
     #include <Iphlpapi.h>
     #include <Iptypes.h>
+    #include <Ipexport.h>
     #include <QNetworkInterface>
     #include "qendian.h"
     #include <QSettings>
