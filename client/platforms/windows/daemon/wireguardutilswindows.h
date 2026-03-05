@@ -5,6 +5,7 @@
 #ifndef WIREGUARDUTILSWINDOWS_H
 #define WIREGUARDUTILSWINDOWS_H
 
+#define _WINSOCKAPI_
 #include <windows.h>
 
 #include <QHostAddress>

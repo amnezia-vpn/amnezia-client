@@ -122,8 +122,12 @@ MINGW_DEFINE_GUID(FWPM_CONDITION_L2_FLAGS,
 // -----------------------------------------------------------------------
 // DNS_INTERFACE_SETTINGS - added in Windows SDK 10.0.19041 (missing in MinGW)
 // -----------------------------------------------------------------------
+#ifndef _DNS_INTERFACE_SETTINGS_DEFINED
+#define _DNS_INTERFACE_SETTINGS_DEFINED
+
 #ifndef DNS_INTERFACE_SETTINGS_VERSION1
 #define DNS_INTERFACE_SETTINGS_VERSION1 1
+#endif
 
 #ifndef DNS_SETTING_NAMESERVER
 #define DNS_SETTING_NAMESERVER    0x0008
@@ -148,7 +152,7 @@ typedef struct _DNS_INTERFACE_SETTINGS {
     PWSTR    ProfileNameServer;
 } DNS_INTERFACE_SETTINGS;
 
-#endif  // DNS_INTERFACE_SETTINGS_VERSION1
+#endif  // _DNS_INTERFACE_SETTINGS_DEFINED
 
 // -----------------------------------------------------------------------
 // IKEv2 / RAS constants missing from older MinGW ras.h
