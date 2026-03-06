@@ -50,7 +50,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         height: root.topBarHeight
-        color: "black"
+        color: AmneziaStyle.color.midnightBlack
         z: 10
 
         MouseArea {
