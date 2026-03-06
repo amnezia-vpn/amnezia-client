@@ -155,6 +155,7 @@ PageType {
                 id: switcher
 
                 readonly property bool isVlessProtocol: ApiConfigsController.isVlessProtocol()
+                readonly property bool isProtocolSwitchBlocked: ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
@@ -162,6 +163,7 @@ PageType {
                 Layout.leftMargin: 16
 
                 visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
+                enabled: !switcher.isProtocolSwitchBlocked
 
                 text: qsTr("Use VLESS protocol")
                 checked: switcher.isVlessProtocol
