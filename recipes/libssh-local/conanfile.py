@@ -85,6 +85,7 @@ class LibsshLocal(ConanFile):
         if self.settings.os == "Android":
             if Version(self.settings.get_safe("os.api_level")) < 24:
                 tc.cache_variables["HAVE_IFADDRS_H"] = False
+            tc.cache_variables["HAVE_GLOB_H"] = False
             tc.preprocessor_definitions["S_IWRITE"] = "S_IRUSR"
             tc.preprocessor_definitions["S_IWRITE"] = "S_IWUSR"
             tc.preprocessor_definitions["S_IEXEC"] = "S_IXUSR"
