@@ -711,6 +711,134 @@ jobs:
         compression-level: 0
         retention-days: 7
 
+  Build-Android-Gamepad:
+    runs-on: android-runner
+
+    env:
+      ANDROID_BUILD_PLATFORM: android-36
+      QT_VERSION: 6.10.1
+      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+
+    steps:
+    - name: 'Install desktop Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'desktop'
+        arch: 'linux_gcc_64'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install android_armv7 Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_armv7'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install android_arm64_v8a Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_arm64_v8a'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Grant execute permission for qt-cmake'
+      shell: bash
+      run: |
+        chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a/bin/qt-cmake
+
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+
+    - name: 'Get version from CMakeLists.txt'
+      id: get_version
+      run: |
+        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version: $VERSION"
+
+    - name: 'Enable gamepad support'
+      run: |
+        sed -i 's/private const val GAMEPAD_ENABLED = false/private const val GAMEPAD_ENABLED = true/' \
+          client/android/src/org/amnezia/vpn/AmneziaActivity.kt
+
+    - name: 'Setup Java'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: 'Setup Android NDK'
+      id: setup-ndk
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: 'r26b'
+
+    - name: 'Decode keystore secret to file'
+      env:
+        KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+      shell: bash
+      run: |
+        echo $KEYSTORE_BASE64 | base64 --decode > android.keystore
+
+    - name: 'Build project'
+      env:
+        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
+        ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
+        ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+        ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+      shell: bash
+      run: ./deploy/build_android.sh --apk "arm64-v8a;armeabi-v7a" --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+
+    - name: 'Rename Android APKs'
+      run: |
+        cd deploy/build
+        mv AmneziaVPN-arm64-v8a-release.apk AmneziaVPN_${VERSION}_gamepad_arm64-v8a.apk
+        mv AmneziaVPN-armeabi-v7a-release.apk AmneziaVPN_${VERSION}_gamepad_armeabi-v7a.apk
+        cd ../..
+
+    - name: 'Upload arm64-v8a apk'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_${{ env.VERSION }}_gamepad_arm64-v8a.apk
+        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_gamepad_arm64-v8a.apk
+        compression-level: 0
+        retention-days: 7
+
+    - name: 'Upload armeabi-v7a apk'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_${{ env.VERSION }}_gamepad_armeabi-v7a.apk
+        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_gamepad_armeabi-v7a.apk
+        compression-level: 0
+        retention-days: 7
+
+# ------------------------------------------------------
+
   Extra:
     runs-on: ubuntu-latest
     steps:
