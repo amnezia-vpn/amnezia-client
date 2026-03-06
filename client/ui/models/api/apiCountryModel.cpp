@@ -328,6 +328,15 @@ QString ApiCountryModel::normalizeSearchComparableText(const QString &textValue)
     result.reserve(normalizedText.size());
     for (int i = 0; i < normalizedText.size(); ++i) {
         const QChar currentChar = normalizedText.at(i);
+        if (currentChar.isSpace()) {
+            const QChar prevChar = i > 0 ? normalizedText.at(i - 1) : QChar();
+            const QChar nextChar = i + 1 < normalizedText.size() ? normalizedText.at(i + 1) : QChar();
+            const bool hasSpaceNeighbor = prevChar.isSpace() || nextChar.isSpace();
+            if (hasSpaceNeighbor) {
+                result.append(currentChar);
+            }
+            continue;
+        }
         const bool isSeparator = currentChar == '.' || currentChar == '-';
 
         if (!isSeparator) {
