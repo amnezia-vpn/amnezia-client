@@ -68,7 +68,7 @@ PageType {
                 break
             }
             case PageShare.ConfigType.Awg: {
-                ExportController.generateAwgConfig(serverIndex, clientNameTextField.textField.text)
+                ExportController.generateAwgConfig(serverIndex, containerIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save AmneziaWG config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_awg"

@@ -38,8 +38,8 @@ public slots:
 
     bool fillAvailableServices();
     bool importService();
-    bool importSerivceFromAppStore();
-    bool restoreSerivceFromAppStore();
+    bool importServiceFromAppStore();
+    bool restoreServiceFromAppStore();
     bool importServiceFromGateway();
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);

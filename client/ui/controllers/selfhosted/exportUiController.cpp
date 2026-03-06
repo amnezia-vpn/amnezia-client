@@ -36,10 +36,10 @@ void ExportUiController::generateWireGuardConfig(int serverIndex, const QString 
     applyExportResult(result);
 }
 
-void ExportUiController::generateAwgConfig(int serverIndex, const QString &clientName)
+void ExportUiController::generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateAwgConfig(serverIndex, clientName);
+    auto result = m_exportController->generateAwgConfig(serverIndex, containerIndex, clientName);
     applyExportResult(result);
 }
 

@@ -41,7 +41,7 @@ public:
     ExportResult generateConnectionConfig(int serverIndex, int containerIndex, const QString &clientName);
     ExportResult generateOpenVpnConfig(int serverIndex, const QString &clientName);
     ExportResult generateWireGuardConfig(int serverIndex, const QString &clientName);
-    ExportResult generateAwgConfig(int serverIndex, const QString &clientName);
+    ExportResult generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName);
     ExportResult generateXrayConfig(int serverIndex, const QString &clientName);
 
 signals:

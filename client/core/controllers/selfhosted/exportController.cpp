@@ -206,11 +206,15 @@ ExportController::ExportResult ExportController::generateWireGuardConfig(int ser
     return result;
 }
 
-ExportController::ExportResult ExportController::generateAwgConfig(int serverIndex, const QString &clientName)
+ExportController::ExportResult ExportController::generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName)
 {
     ExportResult result;
 
-    DockerContainer container = DockerContainer::Awg2;
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    if (container != DockerContainer::Awg && container != DockerContainer::Awg2) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
     ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
 
     auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName);

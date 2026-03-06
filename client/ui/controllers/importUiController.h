@@ -51,7 +51,6 @@ signals:
 private:
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();
-    void applyImportResult(const ImportController::ImportResult &result);
 #endif
 
     ImportController* m_importController;

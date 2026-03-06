@@ -599,9 +599,9 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
     return config;
 }
 
-void ImportController::checkForMaliciousStrings(QJsonObject &serverConfig, QString &warningText) const
+void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig, QString &warningText) const
 {
-    const QJsonArray &containers = serverConfig[configKey::containers].toArray();
+    const QJsonArray &containers = serverConfig.value(configKey::containers).toArray();
     for (const QJsonValue &container : containers) {
         auto containerConfig = container.toObject();
         auto containerName = containerConfig[configKey::container].toString();

@@ -62,7 +62,7 @@ private:
     QJsonObject extractOpenVpnConfig(const QString &data) const;
     QJsonObject extractWireGuardConfig(const QString &data, ConfigTypes &configType) const;
     QJsonObject extractXrayConfig(const QString &data, ConfigTypes configType, const QString &description = "") const;
-    void checkForMaliciousStrings(QJsonObject &serverConfig, QString &warningText) const;
+    void checkForMaliciousStrings(const QJsonObject &serverConfig, QString &warningText) const;
     void processAmneziaConfig(QJsonObject &config) const;
 
     SecureServersRepository* m_serversRepository;

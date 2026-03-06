@@ -21,7 +21,7 @@ public slots:
     void generateConnectionConfig(int serverIndex, int containerIndex, const QString &clientName);
     void generateOpenVpnConfig(int serverIndex, const QString &clientName);
     void generateWireGuardConfig(int serverIndex, const QString &clientName);
-    void generateAwgConfig(int serverIndex, const QString &clientName);
+    void generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName);
     void generateXrayConfig(int serverIndex, const QString &clientName);
 
     QString getConfig();
