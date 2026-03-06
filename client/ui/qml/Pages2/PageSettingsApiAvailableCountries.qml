@@ -132,7 +132,7 @@ PageType {
                             PageController.showBusyIndicator(true)
                             var prevIndex = ApiCountryModel.currentIndex
                             ApiCountryModel.currentIndex = index
-                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.defaultIndex, countryCode, countryName)) {
+                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.getProcessedServerIndex(), countryCode, countryName)) {
                                 ApiCountryModel.currentIndex = prevIndex
                             }
                             PageController.showBusyIndicator(false)

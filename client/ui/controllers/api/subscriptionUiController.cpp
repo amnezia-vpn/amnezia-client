@@ -333,25 +333,8 @@ bool SubscriptionUiController::deactivateDevice(int serverIndex, const bool isRe
     return true;
 }
 
-bool SubscriptionUiController::deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode)
+bool SubscriptionUiController::deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode)
 {
-    // Need to find server index by country code
-    int serverIndex = -1;
-    for (int i = 0; i < m_serversController->getServersCount(); i++) {
-        ServerConfig config = m_serversController->getServerConfig(i);
-        if (config.isApiV2()) {
-            const ApiV2ServerConfig* apiV2 = config.as<ApiV2ServerConfig>();
-            if (apiV2 && apiV2->apiConfig.serverCountryCode == serverCountryCode) {
-                serverIndex = i;
-                break;
-            }
-        }
-    }
-    if (serverIndex < 0) {
-        emit errorOccurred(ErrorCode::ApiNotFoundError);
-        return false;
-    }
-
     ErrorCode errorCode = m_subscriptionController->revokeExternalDevice(serverIndex, uuid, serverCountryCode);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);

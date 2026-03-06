@@ -45,7 +45,7 @@ public slots:
                                   bool reloadServiceConfig = false);
     bool updateServiceFromTelegram(const int serverIndex);
     bool deactivateDevice(int serverIndex, const bool isRemoveEvent);
-    bool deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode);
+    bool deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode);
 
     bool isConfigValid();
 
