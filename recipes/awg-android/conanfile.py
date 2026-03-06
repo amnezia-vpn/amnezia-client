@@ -10,8 +10,8 @@ import platform
 class AwgAndroid(ConanFile):
     name = "awg-android"
     version = "1.1.7"
-    source_buildenv = True
     settings = "os", "arch", "build_type", "compiler"
+    package_type = "shared-library"
 
     def layout(self):
         cmake_layout(self)

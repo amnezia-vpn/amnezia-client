@@ -53,7 +53,7 @@ open class Wireguard : Protocol() {
         }
 
     override fun internalInit() {
-        if (!isInitialized) loadSharedLibrary(context, "wg-go")
+//        if (!isInitialized) loadSharedLibrary(context, "wg-go")
         if (this::scope.isInitialized) {
             scope.cancel()
         }
