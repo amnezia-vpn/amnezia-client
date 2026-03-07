@@ -52,7 +52,7 @@ private:
 
     const QByteArray magicString { "EncData" }; // Magic keyword used for mark encrypted QByteArray
 
-    mutable QRecursiveMutex m_mutex;
+    mutable QMutex m_mutex;
 };
 
 #endif // SECUREQSETTINGS_H

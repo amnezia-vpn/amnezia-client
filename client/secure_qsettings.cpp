@@ -49,10 +49,10 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
     if (!m_settings.contains(key))
         return defaultValue;
 
-    QVariant retVal;
-
     // check if value is not encrypted, v. < 2.0.x
-    retVal = m_settings.value(key);
+    QVariant retVal = m_settings.value(key);
+    QVariant initVal = retVal;
+    locker.unlock();
     if (retVal.isValid()) {
         if (retVal.userType() == QMetaType::QByteArray && retVal.toByteArray().mid(0, magicString.size()) == magicString) {
 
@@ -78,13 +78,19 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
         retVal = QVariant();
     }
 
-    m_cache.insert(key, retVal);
+    locker.relock();
+    if (initVal == m_settings.value(key)) {
+        // If the value hasn't changed while we were reading
+        m_cache.insert(key, retVal);
+    }
+
     return retVal;
 }
 
 void SecureQSettings::setValue(const QString &key, const QVariant &value)
 {
     QMutexLocker locker(&m_mutex);
+    locker.unlock();
 
     if (encryptionRequired() && encryptedKeys.contains(key)) {
         if (!getEncKey().isEmpty() && !getEncIv().isEmpty()) {
@@ -95,13 +101,14 @@ void SecureQSettings::setValue(const QString &key, const QVariant &value)
             }
 
             QByteArray encryptedValue = encryptText(decryptedValue);
+            locker.relock();
             m_settings.setValue(key, magicString + encryptedValue);
         } else {
             qCritical() << "SecureQSettings::setValue Encryption required, but key is empty";
             return;
         }
-
     } else {
+        locker.relock();
         m_settings.setValue(key, value);
     }
 
