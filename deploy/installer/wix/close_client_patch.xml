@@ -4,7 +4,7 @@
         <!-- Требует расширение WixToolset.Util.wixext и xmlns util -->
         <util:CloseApplication
                 Id="CloseDrFrakeClient"
-                Target="DrFrakeVPN.exe"
+                Target="AmneziaVPN.exe"
                 Description="Closing Dr.Frake VPN client"
                 TerminateProcess="1"
                 RebootPrompt="no" />
