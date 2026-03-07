@@ -85,8 +85,12 @@ Component.prototype.createOperations = function()
         }
 
         let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"
+        
+        // Stop and delete service if it already exists, ignoring errors by returning 0
+        component.addElevatedOperation("Execute", "cmd", "/c", "net stop " + serviceName() + " & sc delete " + serviceName() + " & exit 0");
+
         component.addElevatedOperation("Execute",
-                                       ["sc", "create", serviceName(), "binpath=", pu_path + serviceName() + ".exe",
+                                       ["sc", "create", serviceName(), "binpath=", "\"" + pu_path + serviceName() + ".exe\"",
                                         "start=", "auto", "depend=", "BFE/nsi"],
                                         "UNDOEXECUTE", "cmd", "/c", pu_path + "post_uninstall.cmd");
 										
