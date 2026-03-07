@@ -141,7 +141,7 @@ QString Logger::getLogFile()
     QFile file(userLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
-    QString qtLog = file.readAll();
+    (void)file.readAll(); // Cast to void if not used, or just read into a var
 
 #ifdef Q_OS_IOS
     return QString().fromStdString(AmneziaVPN::swiftUpdateLogData(qtLog.toStdString()));
@@ -156,7 +156,7 @@ QString Logger::getServiceLogFile()
     QFile file(serviceLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
-    QString qtLog = file.readAll();
+    (void)file.readAll();
 
 #ifdef Q_OS_IOS
     return QString().fromStdString(AmneziaVPN::swiftUpdateLogData(qtLog.toStdString()));

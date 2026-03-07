@@ -369,6 +369,7 @@ QString Settings::appsRouteModeString(AppsRouteMode mode) const
     case VpnOnlyForwardApps: return "ForwardApps";
     case VpnAllExceptApps: return "ExceptApps";
     }
+    return "";
 }
 
 Settings::AppsRouteMode Settings::getAppsRouteMode() const

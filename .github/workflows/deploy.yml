@@ -660,7 +660,7 @@ jobs:
         KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
       shell: bash
       run: |
-        echo $KEYSTORE_BASE64 | base64 --decode > android.keystore
+        printf "%s" "$KEYSTORE_BASE64" | base64 --decode > android.keystore
 
     - name: 'Build project'
       env:
