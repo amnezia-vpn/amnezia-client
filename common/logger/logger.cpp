@@ -140,8 +140,10 @@ QString Logger::getLogFile()
     m_file.flush();
     QFile file(userLogsFilePath());
 
-    file.open(QIODevice::ReadOnly);
-    (void)file.readAll(); // Cast to void if not used, or just read into a var
+    if (!file.open(QIODevice::ReadOnly)) {
+        return "";
+    }
+    QString qtLog = file.readAll();
 
 #ifdef Q_OS_IOS
     return QString().fromStdString(AmneziaVPN::swiftUpdateLogData(qtLog.toStdString()));
@@ -155,8 +157,10 @@ QString Logger::getServiceLogFile()
     m_file.flush();
     QFile file(serviceLogsFilePath());
 
-    file.open(QIODevice::ReadOnly);
-    (void)file.readAll();
+    if (!file.open(QIODevice::ReadOnly)) {
+        return "";
+    }
+    QString qtLog = file.readAll();
 
 #ifdef Q_OS_IOS
     return QString().fromStdString(AmneziaVPN::swiftUpdateLogData(qtLog.toStdString()));
@@ -185,9 +189,10 @@ void Logger::clearLogs(bool isServiceLogger)
 
     QFile file(isServiceLogger ? serviceLogsFilePath() : userLogsFilePath());
 
-    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    file.resize(0);
-    file.close();
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        file.resize(0);
+        file.close();
+    }
 
 #ifdef Q_OS_IOS
     AmneziaVPN::swiftDeleteLog();

@@ -58,7 +58,7 @@ QString Autostart::appPath() {
     return QCoreApplication::applicationFilePath() + " --autostart";
 }
 
-#elif defined Q_OS_MACX
+#elif defined Q_OS_MACOS
 
 bool Autostart::isAutostart() {
     QProcess process;

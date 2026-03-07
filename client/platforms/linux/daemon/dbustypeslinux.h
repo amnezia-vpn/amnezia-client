@@ -46,7 +46,7 @@ class DnsResolver : public QHostAddress {
     args.endStructure();
     if (family == AF_INET6) {
       ip.setAddress(data.constData());
-    } else if (data.count() >= 4) {
+    } else if (data.size() >= 4) {
       quint32 addrv4 = 0;
       addrv4 |= (data[0] << 24);
       addrv4 |= (data[1] << 16);

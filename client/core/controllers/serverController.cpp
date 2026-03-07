@@ -198,7 +198,9 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     }
 
     QTemporaryFile localFile;
-    localFile.open();
+    if (!localFile.open()) {
+        return ErrorCode::OpenError;
+    }
     localFile.write(data);
     localFile.close();
 
