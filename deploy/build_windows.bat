@@ -30,8 +30,8 @@ set SCRIPT_DIR=%PROJECT_DIR:"=%\deploy
 
 set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
 set APP_NAME=DrFrakeVPN
-set APP_FILENAME=%APP_NAME:"=%.exe
-set SERVICE_FILENAME=%APP_NAME:"=%-service.exe
+set APP_FILENAME=AmneziaVPN.exe
+set SERVICE_FILENAME=AmneziaVPN-service.exe
 set APP_DOMAIN=org.drfrakevpn.package
 set OUT_APP_DIR=%WORK_DIR:"=%\client\release
 set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt\windows\x%BUILD_ARCH:"=%

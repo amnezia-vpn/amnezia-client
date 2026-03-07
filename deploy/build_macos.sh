@@ -144,14 +144,20 @@ if [ -n "${MAC_APP_CERT_PW-}" ]; then
   mkdir -p "$BUNDLE_DIR/Contents/Resources"
   cp "$DEPLOY_DATA_DIR/$PLIST_NAME" "$BUNDLE_DIR/Contents/Resources/$PLIST_NAME"
 
+if [ -n "${MAC_APP_CERT_PW-}" ] && [ -n "${MAC_SIGNER_ID-}" ]; then
   # Show available signing identities (useful for debugging)
   security find-identity -p codesigning || true
 
-  echo "Signing App bundle..."
-  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --keychain "$KEYCHAIN_PATH" --sign "$MAC_SIGNER_ID" "$BUNDLE_DIR"
-  /usr/bin/codesign --verify -vvvv "$BUNDLE_DIR" || true
-  spctl -a -vvvv "$BUNDLE_DIR" || true
-
+  if security find-identity -v -p codesigning | grep -q "$MAC_SIGNER_ID"; then
+    echo "Signing App bundle..."
+    /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --keychain "$KEYCHAIN_PATH" --sign "$MAC_SIGNER_ID" "$BUNDLE_DIR" || echo "Codesign failed but proceeding..."
+    /usr/bin/codesign --verify -vvvv "$BUNDLE_DIR" || true
+    spctl -a -vvvv "$BUNDLE_DIR" || true
+  else
+    echo "Valid identity $MAC_SIGNER_ID not found in keychain, skipping codesign."
+  fi
+else
+  echo "MAC_APP_CERT_PW or MAC_SIGNER_ID not provided, skipping codesign."
 fi
 
 echo "Packaging installer..."
@@ -170,9 +176,11 @@ mkdir -p "$PKG_ROOT/Applications" "$SCRIPTS_DIR" "$RESOURCES_DIR" "$UNINSTALL_SC
 
 cp -R "$BUNDLE_DIR" "$PKG_ROOT/Applications"
 # launchd plist is already inside the bundle; no need to add it again after signing
-if [ -n "${MAC_APP_CERT_PW-}" ]; then
-  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --keychain "$KEYCHAIN_PATH" --sign "$MAC_SIGNER_ID" "$PKG_ROOT/Applications/$APP_FILENAME"
-  /usr/bin/codesign --verify --deep --strict --verbose=4 "$PKG_ROOT/Applications/$APP_FILENAME" || true
+if [ -n "${MAC_APP_CERT_PW-}" ] && [ -n "${MAC_SIGNER_ID-}" ]; then
+  if security find-identity -v -p codesigning | grep -q "$MAC_SIGNER_ID"; then
+    /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --keychain "$KEYCHAIN_PATH" --sign "$MAC_SIGNER_ID" "$PKG_ROOT/Applications/$APP_FILENAME" || true
+    /usr/bin/codesign --verify --deep --strict --verbose=4 "$PKG_ROOT/Applications/$APP_FILENAME" || true
+  fi
 fi
 cp "$DEPLOY_DATA_DIR/post_install.sh" "$SCRIPTS_DIR/post_install.sh"
 cp "$DEPLOY_DATA_DIR/post_uninstall.sh" "$UNINSTALL_SCRIPTS_DIR/postinstall"
@@ -217,29 +225,42 @@ done
 
 # Now build the real payload package with the edited plist so that the final
 # PackageInfo contains relocatable="false".
-SIGN_ARGS=()
 if [ -n "${MAC_INSTALL_CERT_PW-}" ] && [ -n "${MAC_INSTALLER_SIGNER_ID-}" ]; then
-  SIGN_ARGS=(--sign "$MAC_INSTALLER_SIGNER_ID")
+  pkgbuild --root "$PKG_ROOT" \
+           --identifier "$APP_DOMAIN" \
+           --version "$APP_VERSION" \
+           --install-location "/" \
+           --scripts "$SCRIPTS_DIR" \
+           --component-plist "$COMPONENT_PLIST" \
+           --sign "$MAC_INSTALLER_SIGNER_ID" \
+           "$INSTALL_PKG"
+else
+  pkgbuild --root "$PKG_ROOT" \
+           --identifier "$APP_DOMAIN" \
+           --version "$APP_VERSION" \
+           --install-location "/" \
+           --scripts "$SCRIPTS_DIR" \
+           --component-plist "$COMPONENT_PLIST" \
+           "$INSTALL_PKG"
 fi
-
-pkgbuild --root "$PKG_ROOT" \
-         --identifier "$APP_DOMAIN" \
-         --version "$APP_VERSION" \
-         --install-location "/" \
-         --scripts "$SCRIPTS_DIR" \
-         --component-plist "$COMPONENT_PLIST" \
-         "${SIGN_ARGS[@]}" \
-         "$INSTALL_PKG"
 
 # Build uninstaller component package
 UNINSTALL_COMPONENT_PKG=$PKG_DIR/${APP_NAME}_uninstall_component.pkg
 echo "Building uninstaller component package $UNINSTALL_COMPONENT_PKG ..."
-pkgbuild --nopayload \
-         --identifier "$APP_DOMAIN.uninstall" \
-         --version "$APP_VERSION" \
-         --scripts "$UNINSTALL_SCRIPTS_DIR" \
-         "${SIGN_ARGS[@]}" \
-         "$UNINSTALL_COMPONENT_PKG"
+if [ -n "${MAC_INSTALL_CERT_PW-}" ] && [ -n "${MAC_INSTALLER_SIGNER_ID-}" ]; then
+  pkgbuild --nopayload \
+           --identifier "$APP_DOMAIN.uninstall" \
+           --version "$APP_VERSION" \
+           --scripts "$UNINSTALL_SCRIPTS_DIR" \
+           --sign "$MAC_INSTALLER_SIGNER_ID" \
+           "$UNINSTALL_COMPONENT_PKG"
+else
+  pkgbuild --nopayload \
+           --identifier "$APP_DOMAIN.uninstall" \
+           --version "$APP_VERSION" \
+           --scripts "$UNINSTALL_SCRIPTS_DIR" \
+           "$UNINSTALL_COMPONENT_PKG"
+fi
 
 # Wrap uninstaller component in a distribution package for clearer UI
 echo "Building uninstaller distribution package $UNINSTALL_PKG ..."
@@ -248,21 +269,36 @@ rm -rf "$UNINSTALL_RESOURCES"
 mkdir -p "$UNINSTALL_RESOURCES"
 cp "$DEPLOY_DATA_DIR/uninstall_welcome.html" "$UNINSTALL_RESOURCES"
 cp "$DEPLOY_DATA_DIR/uninstall_conclusion.html" "$UNINSTALL_RESOURCES"
-productbuild \
-  --distribution "$DEPLOY_DATA_DIR/distribution_uninstall.xml" \
-  --package-path "$PKG_DIR" \
-  --resources "$UNINSTALL_RESOURCES" \
-  "${SIGN_ARGS[@]}" \
-  "$UNINSTALL_PKG"
+if [ -n "${MAC_INSTALL_CERT_PW-}" ] && [ -n "${MAC_INSTALLER_SIGNER_ID-}" ]; then
+  productbuild \
+    --distribution "$DEPLOY_DATA_DIR/distribution_uninstall.xml" \
+    --package-path "$PKG_DIR" \
+    --resources "$UNINSTALL_RESOURCES" \
+    --sign "$MAC_INSTALLER_SIGNER_ID" \
+    "$UNINSTALL_PKG"
+else
+  productbuild \
+    --distribution "$DEPLOY_DATA_DIR/distribution_uninstall.xml" \
+    --package-path "$PKG_DIR" \
+    --resources "$UNINSTALL_RESOURCES" \
+    "$UNINSTALL_PKG"
+fi
 
 cp "$PROJECT_DIR/deploy/data/macos/distribution.xml" "$PKG_DIR/distribution.xml"
 
 echo "Creating final installer $FINAL_PKG ..."
-productbuild --distribution "$PKG_DIR/distribution.xml" \
-             --package-path "$PKG_DIR" \
-             --resources "$RESOURCES_DIR" \
-             "${SIGN_ARGS[@]}" \
-             "$FINAL_PKG"
+if [ -n "${MAC_INSTALL_CERT_PW-}" ] && [ -n "${MAC_INSTALLER_SIGNER_ID-}" ]; then
+  productbuild --distribution "$PKG_DIR/distribution.xml" \
+               --package-path "$PKG_DIR" \
+               --resources "$RESOURCES_DIR" \
+               --sign "$MAC_INSTALLER_SIGNER_ID" \
+               "$FINAL_PKG"
+else
+  productbuild --distribution "$PKG_DIR/distribution.xml" \
+               --package-path "$PKG_DIR" \
+               --resources "$RESOURCES_DIR" \
+               "$FINAL_PKG"
+fi
 
 if [ -n "${MAC_INSTALL_CERT_PW-}" ] && [ -n "${NOTARIZE_APP-}" ]; then
   echo "Notarizing installer package..."
@@ -283,9 +319,11 @@ if [ -n "${MAC_INSTALL_CERT_PW-}" ]; then
 fi
 
 # Sign app bundle
-if [ -n "${MAC_APP_CERT_PW-}" ]; then
-  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --keychain "$KEYCHAIN_PATH" --sign "$MAC_SIGNER_ID" "$BUNDLE_DIR"
-  spctl -a -vvvv "$BUNDLE_DIR" || true
+if [ -n "${MAC_APP_CERT_PW-}" ] && [ -n "${MAC_SIGNER_ID-}" ]; then
+  if security find-identity -v -p codesigning | grep -q "$MAC_SIGNER_ID"; then
+    /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --keychain "$KEYCHAIN_PATH" --sign "$MAC_SIGNER_ID" "$BUNDLE_DIR" || true
+    spctl -a -vvvv "$BUNDLE_DIR" || true
+  fi
 fi
 
 # Restore login keychain as the only user keychain and delete the temporary keychain

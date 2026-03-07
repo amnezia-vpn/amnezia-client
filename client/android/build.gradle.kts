@@ -67,7 +67,12 @@ android {
             packaging {
                 resources.excludes += "DebugProbesKt.bin"
             }
-            signingConfig = signingConfigs["release"]
+            val keystorePath = providers.environmentVariable("ANDROID_KEYSTORE_PATH").orNull
+            if (keystorePath != null && file(keystorePath).exists() && file(keystorePath).length() > 0) {
+                signingConfig = signingConfigs["release"]
+            } else {
+                signingConfig = null
+            }
         }
 
         create("fdroid") {
