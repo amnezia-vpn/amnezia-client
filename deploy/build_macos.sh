@@ -200,7 +200,7 @@ chmod +x "$UNINSTALL_SCRIPTS_DIR"/*
 chmod +x "$RESOURCES_DIR/scripts"/*
 cp "$PROJECT_DIR/LICENSE" "$RESOURCES_DIR/LICENSE"
 
-APP_VERSION=$(grep -m1 -E 'project\(' "$PROJECT_DIR/CMakeLists.txt" | sed -E 's/.*VERSION ([0-9.]+).*/\1/')
+APP_VERSION=$(grep 'set(AMNEZIAVPN_VERSION' "$PROJECT_DIR/CMakeLists.txt" | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9.]+).*/\1/')
 echo "Building component package $INSTALL_PKG ..."
 
 # Disable bundle relocation so the app always ends up in /Applications even if

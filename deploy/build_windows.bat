@@ -129,7 +129,10 @@ if exist "%WORK_DIR%\_CPack_Packages\win64\WIX\wix.log" (
     type "%WORK_DIR%\_CPack_Packages\win64\WIX\wix.log"
     echo ---------------------------------------------
 )
-if %errorlevel% neq 0 exit /b %errorlevel%
+if %errorlevel% neq 0 (
+    echo "CPack WIX failed, skipping MSI to preserve exe installer"
+    goto :FINISH
+)
 
 set GENERATED_MSI=
 for /f "delims=" %%i in ('dir /b /a:-d /o:-d "%WORK_DIR%\*.msi"') do (
@@ -138,14 +141,18 @@ for /f "delims=" %%i in ('dir /b /a:-d /o:-d "%WORK_DIR%\*.msi"') do (
 
 if "%GENERATED_MSI%"=="" (
     echo "Failed to locate generated MSI package"
-    exit /b 1
+    goto :FINISH
 )
 
 copy /Y "%GENERATED_MSI%" "%TARGET_MSI_FILENAME%"
-if %errorlevel% neq 0 exit /b %errorlevel%
+if %errorlevel% neq 0 (
+    echo "Failed to copy MSI package"
+    goto :FINISH
+)
 
 cd %PROJECT_DIR%
 signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_MSI_FILENAME%" || echo "Signing skipped (no certificate)"
 
-echo "Finished, see %TARGET_FILENAME% and %TARGET_MSI_FILENAME%"
-exit 0
+:FINISH
+echo "Finished, verify artifacts in workflow."
+exit /b 0
