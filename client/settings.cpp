@@ -243,6 +243,7 @@ QString Settings::routeModeString(RouteMode mode) const
     case VpnOnlyForwardSites: return "ForwardSites";
     case VpnAllExceptSites: return "ExceptSites";
     }
+    return "";
 }
 
 Settings::RouteMode Settings::routeMode() const
