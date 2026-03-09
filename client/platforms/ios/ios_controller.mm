@@ -684,6 +684,15 @@ bool IosController::setupXray()
     QJsonObject finalConfig;
     finalConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1].toString());
     finalConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2].toString());
+    finalConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    finalConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
     finalConfig.insert(config_key::config, xrayConfigStr);
 
     QJsonDocument finalConfigDoc(finalConfig);
