@@ -1,0 +1,74 @@
+from conan import ConanFile
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.files import copy
+from conan.tools.scm import Git
+from conan.errors import ConanInvalidConfiguration
+
+import os
+
+
+class OpenvpnPtAndroid(ConanFile):
+    name = "openvpn-pt-android"
+    version = "1.0.0"
+    package_type = "shared-library"
+
+    settings = "os", "arch", "build_type", "compiler"
+
+    # Conan arch → Android ABI
+    _arch_map = {
+        "armv8":   "arm64-v8a",
+        "armv7":   "armeabi-v7a",
+        "x86":     "x86",
+        "x86_64":  "x86_64",
+    }
+
+    def layout(self):
+        cmake_layout(self)
+
+    def build_requirements(self):
+        self.tool_requires("swig/4.1.1")
+        self.tool_requires("go/1.26.0")
+
+    def validate(self):
+        if self.settings.os != "Android":
+            raise ConanInvalidConfiguration(f"{self.name} only supports Android, got {self.settings.os}")
+        if str(self.settings.arch) not in self._arch_map:
+            raise ConanInvalidConfiguration(f"{self.name} does not support arch {self.settings.arch}")
+
+    def _android_abi(self):
+        return self._arch_map[str(self.settings.arch)]
+
+    def source(self):
+        git = Git(self)
+        git.clone(
+            url="https://github.com/amnezia-vpn/openvpn-pt-android.git",
+            target=".",
+            args=["--recurse-submodules", "--branch", "update-ovpn3"]
+        )
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ANDROID_PACKAGE_NAME"] = "org.amnezia.vpn"
+        tc.variables["ANDROID_PLATFORM"] = 24
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build(target=["ck_ovpn_plugin_go", "ovpn3", "ovpnutil", "rsapss"])
+
+    def package(self):
+        build_dir = self.build_folder
+        copy(self, "libck-ovpn-plugin.so", src=build_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        for binary in ("ovpn3", "ovpnutil", "rsapss"):
+            copy(self, f"lib{binary}.so", src=build_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_target_name", "amnezia::openvpn-pt-android")
+        self.cpp_info.libs = ["ck-ovpn-plugin", "ovpn3", "ovpnutil", "rsapss"]
+        self.cpp_info.set_property("cmake_extra_variables", {
+            "AMNEZIA_ANDROID_CK_OVPN_PLUGIN_PATH": os.path.join(self.package_folder, "lib", "libck-ovpn-plugin.so"),
+            "AMNEZIA_ANDROID_OVPN3_PATH":           os.path.join(self.package_folder, "lib", "libovpn3.so"),
+            "AMNEZIA_ANDROID_OVPNUTIL_PATH":        os.path.join(self.package_folder, "lib", "libovpnutil.so"),
+            "AMNEZIA_ANDROID_RSAPSS_PATH":          os.path.join(self.package_folder, "lib", "librsapss.so"),
+        })
