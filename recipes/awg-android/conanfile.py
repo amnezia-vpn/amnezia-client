@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.files import copy, collect_libs, replace_in_file
+from conan.tools.files import copy, replace_in_file
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Git
 
@@ -65,8 +65,14 @@ class AwgAndroid(ConanFile):
 
     def package(self):
         copy(self, "libwg-go.h", src=os.path.join(self.build_folder, "out"), dst=os.path.join(self.package_folder, "include"))
-        copy(self, "libwg*.so", src=os.path.join(self.build_folder, "out"), dst=os.path.join(self.package_folder, "lib"))
+        copy(self, "libwg-go.so", src=os.path.join(self.build_folder, "out"), dst=os.path.join(self.package_folder, "lib"))
+        copy(self, "libwg.so", src=os.path.join(self.build_folder, "out"), dst=os.path.join(self.package_folder, "bin"))
+        copy(self, "libwg-quick.so", src=os.path.join(self.build_folder, "out"), dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::awg-android")
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = [ "wg-go" ]
+        self.cpp_info.set_property("cmake_extra_variables", {
+            "AMNEZIA_ANDROID_LIBWG_PATH": os.path.join(self.package_folder, "bin", "libwg.so"),
+            "AMNEZIA_ANDROID_LIBWG_QUICK_PATH": os.path.join(self.package_folder, "bin", "libwg-quick.so"),
+        })
