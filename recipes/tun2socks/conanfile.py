@@ -34,7 +34,6 @@ class Tun2Socks(ConanFile):
         get(self, f"https://github.com/xjasonlyu/tun2socks/archive/refs/tags/v{self.version}.zip",
             sha256="a7ef9cec1c30dfe9971af89a8aac767fd3d2a4df833e92b635642c2f0204c701", strip_root=True
         )
-        
 
     def configure(self):
         self._goos = self._os_map.get(str(self.settings.os))

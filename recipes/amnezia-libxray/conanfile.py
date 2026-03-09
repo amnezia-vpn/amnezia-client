@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
 
 import os
 import stat
@@ -28,9 +27,6 @@ class AmneziaLibxray(ConanFile):
             sha256="0c50c5acd5063a9fc3cfbb5b3e11481d30cfa3762b3cb1d72130248ff498e9df", strip_root=True
         )
 
-    def generate(self):
-        env = VirtualBuildEnv(self)
-
     def _patch_sources(self):
         build_path = os.path.join(self.build_folder, "build.sh")
         build_stat = os.stat(build_path)
@@ -44,4 +40,6 @@ class AmneziaLibxray(ConanFile):
         copy(self, "libxray.aar", src=self.build_folder, dst=os.path.join(self.package_folder, "aar"))
 
     def package_info(self):
-        self.env_info["AMNEZIA_LIBXRAY_PATH"] = os.path.join(self.package_folder, "aar", "libxray.aar")
+        self.cpp_info.set_property("cmake_extra_variables", {
+            "AMNEZIA_LIBXRAY_PATH": os.path.join(self.package_folder, "aar", "libxray.aar"),
+        })
