@@ -27,6 +27,7 @@ class AmneziaVPN(ConanFile):
         if os == "Android":
             self.requires("amnezia-libxray/1.0.0")
             self.requires("awg-android/1.1.7")
+            self.requires("openvpn-pt-android/1.0.0")
 
         self.requires("libssh-local/0.11.3")
         self.requires("openssl/3.5.5")
