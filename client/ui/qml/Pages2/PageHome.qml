@@ -177,7 +177,7 @@ PageType {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (drawer.isCollapsedStateActive) {
+                            if (drawer.isCollapsedStateActive()) {
                                 drawer.openTriggered()
                             } else {
                                 drawer.closeTriggered()

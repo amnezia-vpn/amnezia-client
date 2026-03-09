@@ -6,13 +6,13 @@ function appName()
 
 function serviceName()
 {
-    return ("AmneziaVPN-service")
+    return (appName() + "-service")
 }
 
 function appExecutableFileName()
 {
     if (runningOnWindows()) {
-        return "AmneziaVPN.exe";
+        return appName() + ".exe";
     } else {
         return appName();
     }
