@@ -74,9 +74,6 @@ private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
 private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
 
-private const val GAMEPAD_ENABLED = false
-private const val DPAD_SYNTHETIC_ENABLED = GAMEPAD_ENABLED
-
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
 private const val KEY_PENDING_OPEN_FILE_URI = "pending_open_file_uri"
@@ -316,17 +313,14 @@ class AmneziaActivity : QtActivity() {
             KeyEvent.KEYCODE_BUTTON_Y,
             KeyEvent.KEYCODE_BUTTON_START,
             KeyEvent.KEYCODE_BUTTON_SELECT -> {
-                if (GAMEPAD_ENABLED) {
                     nativeGamepadKeyEvent(0, keyCode, pressed)
                     return true
-                }
             }
             KeyEvent.KEYCODE_DPAD_CENTER,
             KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_DPAD_DOWN,
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (DPAD_SYNTHETIC_ENABLED) {
                     val syntheticKeyCode = if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) KeyEvent.KEYCODE_ENTER else keyCode
                     val synthetic = KeyEvent(
                         event.downTime, event.eventTime, event.action, syntheticKeyCode,
@@ -334,14 +328,11 @@ class AmneziaActivity : QtActivity() {
                         event.flags, InputDevice.SOURCE_KEYBOARD
                     )
                     return super.dispatchKeyEvent(synthetic)
-                }
             }
         }
 
         return super.dispatchKeyEvent(event)
     }
-
-
 
     private external fun nativeGamepadKeyEvent(deviceId: Int, keyCode: Int, pressed: Boolean)
 
