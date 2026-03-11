@@ -157,7 +157,7 @@ void CoreController::initControllers()
     m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
     m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
 
-    m_drFrakeController.reset(new DrFrakeController(m_importController.get(), m_settings, this));
+    m_drFrakeController.reset(new DrFrakeController(m_importController.get(), m_settings, m_serversModel.get(), this));
     m_engine->rootContext()->setContextProperty("DrFrakeController", m_drFrakeController.get());
     
     // Автоматическая загрузка профиля Dr.Frake VPN при старте клиента (если залогинен)

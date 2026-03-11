@@ -71,23 +71,23 @@
 <context>
     <name>ApiConfigsController</name>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="514"/>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="690"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="515"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="732"/>
         <source>%1 installed successfully.</source>
         <translation type="unfinished">%1 ခုကို အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="637"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="638"/>
         <source>Subscription restored successfully.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="751"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="793"/>
         <source>API config reloaded</source>
         <translation type="unfinished">API config ကို ပြန်လည်စတင်လိုက်ပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="755"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="797"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation type="unfinished">ချိတ်ဆက်မှုနိုင်ငံကို %1 သို့ အောင်မြင်စွာ ပြောင်းလဲလိုက်ပါပြီ</translation>
     </message>
@@ -175,8 +175,29 @@
         <translation type="vanished">Configuration ပြင်ဆင်ခြင်းလုပ်ဆောင်နေချိန်အတွင်း ချိတ်ဆက်မှုဖြတ်တောက်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="54"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="57"/>
+        <source>Premium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="64"/>
         <source>Невозможно отключиться во время подготовки конфигурации</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="74"/>
+        <source>Connect</source>
+        <translation type="unfinished">ချိတ်ဆက်မည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="176"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="295"/>
+        <source>Требуется активная подписка для подключения</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="282"/>
+        <source>Нужна подписка</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -284,43 +305,55 @@
 <context>
     <name>DrFrakeController</name>
     <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="24"/>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="30"/>
         <source>Email and password cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="54"/>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="63"/>
         <source>Invalid response format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="59"/>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="68"/>
         <source>Network Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="72"/>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="91"/>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="244"/>
         <source>Не выполнен вход в систему</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="101"/>
-        <source>Не удалось прочитать конфигурацию</source>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="171"/>
+        <source>Внутренняя ошибка: Контроллеры не инициализированы</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="104"/>
-        <source>Внутренняя ошибка: ImportController не инициализирован</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="107"/>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="174"/>
         <source>Сервер не вернул конфигурацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="112"/>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="179"/>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="272"/>
         <source>Ошибка сети: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="202"/>
+        <source>Необходимо войти в аккаунт</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="230"/>
+        <source>Сессия истекла, войдите снова</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="234"/>
+        <source>Ошибка создания платежа: </source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -646,100 +679,242 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageDrFrakeRegister</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="57"/>
         <source>Создание аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="42"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="58"/>
         <source>Зарегистрируйтесь в сервисе Dr.Frake VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="83"/>
         <source>Email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="77"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="93"/>
         <source>Пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="105"/>
         <source>Подтвердите пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="119"/>
         <source>Уже есть аккаунт?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="108"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="124"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="133"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="149"/>
         <source>Создание...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="133"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="149"/>
         <source>Создать аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="158"/>
         <source>Пожалуйста, заполните все поля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="162"/>
         <source>Пароли не совпадают</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="150"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="166"/>
         <source>Пароль должен быть не менее 8 символов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="171"/>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="187"/>
         <source>Ошибка подключения (сервер недоступен)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="175"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="191"/>
         <source>Ошибка регистрации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="177"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="193"/>
         <source>Ошибка подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="185"/>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="225"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="201"/>
         <source>Ошибка сети (сервер недоступен)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="212"/>
-        <source>Удалось получить конфигурацию</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="217"/>
-        <source>Аккаунт создан! Войдите чтобы получить вашу конфигурацию.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Password</source>
         <translation type="obsolete">စကားဝှက်</translation>
+    </message>
+</context>
+<context>
+    <name>PageDrFrakeSubscription</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="43"/>
+        <source>Время ожидания истекло. Если вы оплатили — нажмите «Проверить вручную».</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="56"/>
+        <source>Базовый</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="56"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="57"/>
+        <source>/ 30 дней</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="57"/>
+        <source>Премиум</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="57"/>
+        <source>ЛУЧШИЙ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="57"/>
+        <source>Максимальная скорость и приоритет</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="62"/>
+        <source>Безлимитный трафик</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="63"/>
+        <source>10+ стран и регионов</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="64"/>
+        <source>До 5 устройств одновременно</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="65"/>
+        <source>Kill Switch защита</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="66"/>
+        <source>Быстрые серверы без логов</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="133"/>
+        <source>Dr.Frake VPN Premium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="142"/>
+        <source>Полный доступ без ограничений</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="221"/>
+        <source>АКТИВНА</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="297"/>
+        <source>Что входит в подписку</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="393"/>
+        <source>Ожидаем подтверждение оплаты...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="401"/>
+        <source>Проверка %1 из %2. Это займёт до 2 минут.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="424"/>
+        <source>Проверить вручную</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="451"/>
+        <source>Создание платежа...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="453"/>
+        <source>Уже активна</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="455"/>
+        <source>Оплатить 199 ₽ / Basic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="456"/>
+        <source>Оплатить 499 ₽ / Premium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="485"/>
+        <source>Страница оплаты открыта. Ожидаем подтверждение...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="487"/>
+        <source>Не удалось получить ссылку на оплату</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="501"/>
+        <source>Подписка активирована! Добро пожаловать в Premium.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="544"/>
+        <source>Premium подписка активна</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="545"/>
+        <source>Basic подписка активна</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="552"/>
+        <source>Действует до: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="569"/>
+        <source>Условия использования</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="587"/>
+        <source>Политика конфиденциальности</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -773,18 +948,33 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete">ချိတ်ဆက်ပြီးသွားပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="148"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="105"/>
+        <source>Получить Premium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="106"/>
+        <source>Войти</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="153"/>
+        <source>Premium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="291"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="361"/>
         <source>Выбрать локацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="300"/>
         <source>Подключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="300"/>
         <source>Нажмите для смены региона</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1752,32 +1942,52 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="85"/>
-        <source>Закрыть приложение</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
+        <source>Premium аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="118"/>
+        <source>Basic аккаунт</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="119"/>
+        <source>Бесплатный аккаунт</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="127"/>
+        <source>Действует до: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="161"/>
+        <source>Выйти из аккаунта</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="204"/>
         <source>Подключение</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="215"/>
         <source>Приложение</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="226"/>
         <source>Новости и уведомления</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="244"/>
         <source>About Dr.Frake VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="255"/>
         <source>Консоль разработчика</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1883,28 +2093,53 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="195"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="211"/>
+        <source>Premium аккаунт</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="212"/>
+        <source>Basic аккаунт</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="213"/>
+        <source>Бесплатный аккаунт</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="221"/>
+        <source>Действует до: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="255"/>
+        <source>Выйти из аккаунта</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="296"/>
         <source>🏛 Основано на AmneziaVPN (GNU GPL v3)
 Исходный код: github.com/amnezia-vpn</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="219"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="320"/>
         <source>Telegram поддержка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="220"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="321"/>
         <source>Задайте вопрос нашей команде</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="230"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="331"/>
         <source>support@drfrake.vpn</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="231"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="332"/>
         <source>По вопросам и жалобам</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2179,6 +2414,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="29"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="159"/>
         <source>Subscription Status</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2193,116 +2429,136 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="189"/>
+        <source>Valid Until: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="256"/>
+        <source>Active Connections: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="329"/>
+        <source>Renew Subscription</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="340"/>
+        <source>Failed to initiate payment. Please try again later.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="368"/>
         <source>Use VLESS protocol</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="372"/>
         <source>Cannot change protocol during active connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="392"/>
         <source>Configurations have been updated for some countries. Download and install the updated configuration files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="413"/>
         <source>Subscription Key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="233"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="435"/>
         <source>Configuration Files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="437"/>
         <source>Manage configuration files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="253"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="455"/>
         <source>Active Devices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="255"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="457"/>
         <source>Manage currently connected devices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="272"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="474"/>
         <source>Support</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="287"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="489"/>
         <source>How to connect on another device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="312"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="514"/>
         <source>Reload API config</source>
         <translation>API config ကို ပြန်လည်စတင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="315"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="517"/>
         <source>Reload API config?</source>
         <translation>API config ကို ပြန်လည်စတင်မည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="316"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="354"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="391"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="518"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="556"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="593"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="317"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="355"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="392"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="519"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="557"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="594"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="321"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="523"/>
         <source>Cannot reload API config during active connection</source>
         <translation>ချိတ်ဆက်မှုရှိနေချိန်အတွင်း API config ကို ပြန်လည်စတင်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="349"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="551"/>
         <source>Unlink this device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="352"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="554"/>
         <source>Are you sure you want to unlink this device?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="353"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="555"/>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="561"/>
         <source>Cannot unlink device during active connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="387"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="589"/>
         <source>Remove from application</source>
         <translation>အပလီကေးရှင်းမှဖယ်ရှားမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="390"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="592"/>
         <source>Remove from application?</source>
         <translation>အပလီကေးရှင်းမှဖယ်ရှားမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="396"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="598"/>
         <source>Cannot remove server during active connection</source>
         <translation>ချိတ်ဆက်မှုရှိနေချိန်အတွင်း ဆာဗာကို ဖယ်ရှား၍မရပါ</translation>
     </message>
@@ -3830,13 +4086,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">စတင်လိုက်ကြရအောင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="49"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="50"/>
         <source>Войти в Dr.Frake VPN</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="71"/>
-        <source>Настроить вручную</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4215,17 +4466,17 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageStart</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="200"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="205"/>
         <source>Logging was disabled after 14 days, log files were deleted</source>
         <translation>၁၄ ရက်အကြာတွင် Logging ကို ပိတ်ခဲ့သည်၊ မှတ်တမ်းဖိုင်များကို ဖျက်ပစ်လိုက်ပြီဖြစ်သည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="209"/>
         <source>Settings restored from backup file</source>
         <translation>ဆက်တင်များကို အရံဖိုင်မှ ပြန်လည်ရယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="210"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="215"/>
         <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5157,12 +5408,12 @@ For more detailed information, you can
         <translation>SOCKS5 proxy ဆာဗာ</translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="231"/>
+        <location filename="../protocols/protocols_defs.cpp" line="232"/>
         <source> (version 2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="232"/>
+        <location filename="../protocols/protocols_defs.cpp" line="233"/>
         <source> (version 1.5)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5498,6 +5749,39 @@ For more detailed information, you can
         <location filename="../ui/controllers/sitesController.cpp" line="152"/>
         <source>Export completed</source>
         <translation>ထုတ်ယူခြင်းပြီးဆုံးသွားပါပြီ</translation>
+    </message>
+</context>
+<context>
+    <name>SubscriptionBanner</name>
+    <message>
+        <location filename="../ui/qml/Components/SubscriptionBanner.qml" line="141"/>
+        <source>Активируйте Premium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SubscriptionBanner.qml" line="142"/>
+        <source>Войдите или создайте аккаунт</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SubscriptionBanner.qml" line="150"/>
+        <source>Безлимитный доступ ко всем серверам от 199 ₽/мес</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SubscriptionBanner.qml" line="151"/>
+        <source>Получите VPN-доступ к 10+ странам за 199 ₽/мес</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SubscriptionBanner.qml" line="178"/>
+        <source>Подключить Premium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SubscriptionBanner.qml" line="179"/>
+        <source>Войти / Зарегистрироваться</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

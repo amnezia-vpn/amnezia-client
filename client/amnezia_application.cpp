@@ -62,18 +62,22 @@ AmneziaApplication::~AmneziaApplication()
 {
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnConnection && m_vpnConnectionThread.isRunning()) {
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::BlockingQueuedConnection);
-        
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::BlockingQueuedConnection);
+        // Use QueuedConnection so the main thread doesn't block waiting for the
+        // VPN thread — BlockingQueuedConnection can deadlock when the main event
+        // loop has already exited (e.g. quit from system tray).
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::QueuedConnection);
     }
 #endif
 
     m_vpnConnectionThread.requestInterruption();
     m_vpnConnectionThread.quit();
 
-    if (!m_vpnConnectionThread.wait(3000)) {
+    // Give the VPN thread up to 5 s to finish its disconnect cleanup,
+    // then force-terminate so the app never hangs on exit.
+    if (!m_vpnConnectionThread.wait(5000)) {
         m_vpnConnectionThread.terminate();
-        m_vpnConnectionThread.wait(500);
+        m_vpnConnectionThread.wait(1000);
     }
 
     if (m_engine) {

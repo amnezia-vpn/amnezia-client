@@ -33,17 +33,18 @@ PageType {
 
         Item { Layout.fillHeight: true }
 
-        // Dr.Frake VPN — primary login button
+        // Dr.Frake VPN — only login button
         BasicButtonType {
             id: drFrakeLoginButton
             Layout.fillWidth: true
             Layout.topMargin: 8
             Layout.leftMargin: 16
             Layout.rightMargin: 16
+            Layout.bottomMargin: 48 + SettingsController.safeAreaBottomMargin
 
-            defaultColor: "#5B4DFF"
-            hoveredColor: "#7065FF"
-            pressedColor: "#4338CC"
+            defaultColor: "#00C8FF"
+            hoveredColor: "#33D4FF"
+            pressedColor: "#0099BB"
             textColor: AmneziaStyle.color.paleGray
 
             text: qsTr("Войти в Dr.Frake VPN")
@@ -53,26 +54,5 @@ PageType {
             }
         }
 
-        // Manual setup — secondary button
-        BasicButtonType {
-            id: startButton
-            Layout.fillWidth: true
-            Layout.bottomMargin: 48 + SettingsController.safeAreaBottomMargin
-            Layout.topMargin: 8
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            defaultColor: AmneziaStyle.color.transparent
-            hoveredColor: AmneziaStyle.color.translucentWhite
-            pressedColor: AmneziaStyle.color.sheerWhite
-            textColor: AmneziaStyle.color.paleGray
-            borderWidth: 1
-
-            text: qsTr("Настроить вручную")
-
-            clickedFunc: function() {
-                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
-            }
-        }
     }
 }

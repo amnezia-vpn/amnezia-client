@@ -14,9 +14,25 @@ import "../Components"
 PageType {
     id: root
 
-    property string apiBase: "http://31.135.65.188:8081"
+    property string apiBase: "https://srv.frakebit.com"
     property string errorMessage: ""
     property bool isLoading: false
+
+    Connections {
+        target: DrFrakeController
+
+        function onConfigFetched() {
+            root.isLoading = false
+            PageController.showBusyIndicator(false)
+            PageController.goToPageHome()
+        }
+
+        function onConfigError(message) {
+            root.isLoading = false
+            PageController.showBusyIndicator(false)
+            root.errorMessage = message
+        }
+    }
 
     BackButtonType {
         id: backButton
@@ -123,9 +139,9 @@ PageType {
             Layout.fillWidth: true
             Layout.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
 
-            defaultColor: "#5B4DFF"
-            hoveredColor: "#7065FF"
-            pressedColor: "#4338CC"
+            defaultColor: "#00C8FF"
+            hoveredColor: "#33D4FF"
+            pressedColor: "#0099BB"
             disabledColor: AmneziaStyle.color.mutedGray
             textColor: AmneziaStyle.color.paleGray
 
@@ -165,8 +181,8 @@ PageType {
                     if (xhr.status === 201 || xhr.status === 200) {
                         var resp = JSON.parse(xhr.responseText)
                         var token = resp.access_token
-                        // Auto-fetch config after registration
-                        fetchConfig(token)
+                        // Save token and fetch config+subscription via controller
+                        DrFrakeController.loginWithToken(token)
                     } else if (xhr.status === 0) {
                         root.errorMessage = qsTr("Ошибка подключения (сервер недоступен)")
                     } else {
@@ -190,41 +206,4 @@ PageType {
         }
     }
 
-    function fetchConfig(token) {
-        root.isLoading = true
-        PageController.showBusyIndicator(true)
-        var xhr = new XMLHttpRequest()
-        xhr.open("GET", root.apiBase + "/api/v1/me/config")
-        xhr.setRequestHeader("Authorization", "Bearer " + token)
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState !== XMLHttpRequest.DONE) return
-            
-            root.isLoading = false
-            PageController.showBusyIndicator(false)
-            if (xhr.status === 200) {
-                var resp = JSON.parse(xhr.responseText)
-                var configString = resp.config // The JSON string we get from Go backend
-                // Import AWG2 config
-                if (ImportController.extractConfigFromData(configString)) {
-                    ImportController.importConfig()
-                    PageController.goToPageHome()
-                } else {
-                    root.errorMessage = qsTr("Удалось получить конфигурацию")
-                }
-            } else if (xhr.status === 0) {
-                root.errorMessage = qsTr("Ошибка подключения (сервер недоступен)")
-            } else {
-                root.errorMessage = qsTr("Аккаунт создан! Войдите чтобы получить вашу конфигурацию.")
-                PageController.goToPage(PageEnum.PageDrFrakeLogin)
-            }
-        }
-        
-        xhr.onerror = function() {
-            root.isLoading = false
-            PageController.showBusyIndicator(false)
-            root.errorMessage = qsTr("Ошибка сети (сервер недоступен)")
-        }
-        
-        xhr.send()
-    }
 }

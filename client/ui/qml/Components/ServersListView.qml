@@ -56,7 +56,7 @@ ListViewType {
             
             radius: 12
             color: index === root.selectedIndex ? "#1F1F24" : (mouseArea.pressed ? "#2A2A30" : "transparent")
-            border.color: index === root.selectedIndex ? "#5B4DFF" : "transparent"
+            border.color: index === root.selectedIndex ? "#00C8FF" : "transparent"
             border.width: index === root.selectedIndex ? 2 : 0
 
             Behavior on color { ColorAnimation { duration: 150 } }
@@ -91,7 +91,7 @@ ListViewType {
                         Layout.fillWidth: true
                         text: serverDescription
                         font.pixelSize: 13
-                        color: index === root.selectedIndex ? "#5B4DFF" : "#8A8A8E"
+                        color: index === root.selectedIndex ? "#00C8FF" : "#8A8A8E"
                         visible: serverDescription !== "" && serverDescription !== name
                         elide: Text.ElideRight
                     }

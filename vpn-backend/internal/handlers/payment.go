@@ -121,7 +121,7 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 		return
 	}
 
-	eventType, _ := event["type"].(string)
+	eventType, _ := event["event"].(string)
 	if eventType != "payment.succeeded" {
 		c.JSON(http.StatusOK, gin.H{"status": "ignored"})
 		return

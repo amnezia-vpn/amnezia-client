@@ -243,15 +243,26 @@ if(WIN32)
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn-service.rc
     )
 
+    if(MINGW)
+        # Point to the ZLIB provided by Qt MinGW toolchain
+        set(ZLIB_LIBRARY "C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/lib/libz.a")
+        set(ZLIB_INCLUDE_DIR "C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include")
+    endif()
     find_package(ZLIB REQUIRED)
 
     set(LIBS
+        ${AMNEZIA_XRAY_LIB_PATH}
+        ${OPENSSL_LIB_CRYPTO_PATH}
+        qt6keychain
+        ZLIB::ZLIB
+        userenv
+        bcrypt
+        crypt32
         user32
         rasapi32
         shlwapi
         iphlpapi
         ws2_32
-        iphlpapi
         gdi32
         Advapi32
         Kernel32
@@ -260,10 +271,6 @@ if(WIN32)
         dnsapi
         d3d11
         dxgi
-        ZLIB::ZLIB
-        ${AMNEZIA_XRAY_LIB_PATH}
-        ${OPENSSL_LIB_CRYPTO_PATH}
-        qt6keychain
     )
 
     add_compile_definitions(QSIMPLECRYPTO_LIBRARY)

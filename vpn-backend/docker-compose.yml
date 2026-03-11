@@ -11,6 +11,9 @@ services:
       - .env
     volumes:
       - db_data:/app/data
+    networks:
+      - default
+      - bot-network
 
   redis:
     image: redis:7-alpine
@@ -22,3 +25,8 @@ services:
 volumes:
   db_data:
   redis_data:
+
+networks:
+  bot-network:
+    external: true
+    name: replitbot_bot-network

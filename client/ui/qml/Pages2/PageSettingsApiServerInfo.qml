@@ -79,20 +79,18 @@ PageType {
 
     ListViewType {
         id: listView
-
         anchors.fill: parent
 
-        model: labelsModel
+        // Оставляем пустую модель, так как мы перемещаем данные подписки прямо в красивую карточку в header
+        model: 0
 
         header: ColumnLayout {
             width: listView.width
-
-            spacing: 4
+            spacing: 16
 
             BackButtonType {
                 id: backButton
                 objectName: "backButton"
-
                 Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
             }
 
@@ -103,7 +101,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: 8
 
                 actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
@@ -114,32 +112,236 @@ PageType {
                     serverNameEditDrawer.openTriggered()
                 }
             }
-        }
 
-        delegate: ColumnLayout {
-            width: listView.width
-            spacing: 0
-
-            Connections {
-                target: ApiAccountInfoModel
-
-                function onModelReset() {
-                    delegateItem.rightText = ApiAccountInfoModel.data(contentKey)
-                }
-            }
-
-            LabelWithImageType {
-                id: delegateItem
-
+            // PREMIUM SUBSCRIPTION CARD
+            Rectangle {
                 Layout.fillWidth: true
                 Layout.margins: 16
+                implicitHeight: 180
+                radius: 16
 
-                imageSource: objectImageSource
-                leftText: title
-                rightText: ApiAccountInfoModel.data(contentKey)
-                rightTextFormat: isRichText ? Text.RichText : Text.PlainText
+                // Градиентный фон карточки (золотой/темный в зависимости от статуса)
+                gradient: Gradient {
+                    GradientStop { 
+                        position: 0.0
+                        color: ApiAccountInfoModel.data("subscriptionStatus") !== "Expired" ? 
+                               AmneziaStyle.color.translucentRichBrown : AmneziaStyle.color.translucentSlateGray
+                    }
+                    GradientStop { 
+                        position: 1.0
+                        color: AmneziaStyle.color.translucentOnyxBlack 
+                    }
+                }
 
-                visible: rightText !== ""
+                border.width: 1
+                border.color: ApiAccountInfoModel.data("subscriptionStatus") !== "Expired" ? 
+                              AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 20
+                    spacing: 12
+
+                    // Верхняя строка: Иконка и Статус
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+
+                        Image {
+                            source: ApiAccountInfoModel.data("subscriptionStatus") !== "Expired" ? 
+                                    "qrc:/images/controls/shield-tick.svg" : "qrc:/images/controls/info.svg"
+                            sourceSize: Qt.size(28, 28)
+                        }
+
+                        ColumnLayout {
+                            spacing: 2
+                            Label {
+                                text: qsTr("Subscription Status")
+                                font.pixelSize: 12
+                                color: AmneziaStyle.color.mutedGray
+                            }
+                            Label {
+                                text: ApiAccountInfoModel.data("subscriptionStatus")
+                                font.pixelSize: 20
+                                font.bold: true
+                                color: ApiAccountInfoModel.data("subscriptionStatus") !== "Expired" ? 
+                                       AmneziaStyle.color.goldenApricot : AmneziaStyle.color.vibrantRed
+                            }
+                        }
+                    }
+
+                    // Средняя строка: Дата окончания
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 12
+
+                            Image {
+                                source: "qrc:/images/controls/history.svg"
+                                sourceSize: Qt.size(20, 20)
+                                opacity: 0.7
+                            }
+
+                            Label {
+                                text: qsTr("Valid Until: ") + ApiAccountInfoModel.data("endDate")
+                                font.pixelSize: 14
+                                color: AmneziaStyle.color.lightGray
+                                Layout.fillWidth: true
+                            }
+                        }
+
+                        // Тонкий прогресс-бар времени подписки
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 32 // align with text
+                            height: 4
+                            radius: 2
+                            color: Qt.rgba(255, 255, 255, 0.1)
+                            visible: ApiAccountInfoModel.data("subscriptionStatus") !== "Expired"
+
+                            Rectangle {
+                                id: timeProgressBar
+                                height: parent.height
+                                radius: 2
+                                color: {
+                                    var pct = width / parent.width
+                                    if (pct > 0.8) return AmneziaStyle.color.vibrantRed
+                                    if (pct > 0.5) return AmneziaStyle.color.goldenApricot
+                                    return "#10B981"
+                                }
+                                
+                                width: {
+                                    if (parent.width === 0) return 0
+                                    var endStr = ApiAccountInfoModel.data("endDate")
+                                    if (!endStr) return parent.width * 0.5
+                                    
+                                    var endDate = new Date(endStr)
+                                    if (isNaN(endDate.getTime())) {
+                                        var parts = endStr.split('.')
+                                        if (parts.length === 3) {
+                                            endDate = new Date(parts[2], parts[1]-1, parts[0])
+                                        }
+                                    }
+                                    
+                                    if (isNaN(endDate.getTime())) return parent.width * 0.5
+                                    
+                                    var now = new Date()
+                                    var diff = endDate - now
+                                    var daysLeft = Math.max(0, diff / (1000 * 60 * 60 * 24))
+                                    var totalDays = 30 // assume 1 month
+                                    var pct = Math.max(0.05, Math.min(1.0, (totalDays - daysLeft) / totalDays))
+                                    return parent.width * pct
+                                }
+                                
+                                Behavior on width { NumberAnimation { duration: 1000; easing.type: Easing.OutCubic } }
+                            }
+                        }
+                    }
+
+                    // Нижняя строка: Устройства
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+
+                        Image {
+                            source: "qrc:/images/controls/monitor.svg"
+                            sourceSize: Qt.size(20, 20)
+                            opacity: 0.7
+                        }
+
+                        Label {
+                            text: qsTr("Active Connections: ")
+                            font.pixelSize: 14
+                            color: AmneziaStyle.color.lightGray
+                        }
+
+                        // Чипы устройств
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+                            
+                            Repeater {
+                                model: {
+                                    // Parse the number of connections from the string, fallback to 0 if not parsable
+                                    var countStr = ApiAccountInfoModel.data("connectedDevices")
+                                    // The format might be something like "1/5" or just "1"
+                                    var currentCount = 0
+                                    if (countStr) {
+                                        var parts = countStr.split("/");
+                                        currentCount = parseInt(parts[0], 10) || 0;
+                                    }
+                                    return Math.min(currentCount, 5); // display up to 5 icons max to avoid overflow
+                                }
+                                
+                                Rectangle {
+                                    width: 14
+                                    height: 14
+                                    radius: 7
+                                    color: AmneziaStyle.color.goldenApricot
+                                    
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: 6
+                                        height: 6
+                                        radius: 3
+                                        color: AmneziaStyle.color.onyxBlack
+                                    }
+                                }
+                            }
+                            
+                            // If more than 5 devices, show a + count indicator
+                            Label {
+                                visible: {
+                                    var countStr = ApiAccountInfoModel.data("connectedDevices")
+                                    var currentCount = 0
+                                    if (countStr) {
+                                        var parts = countStr.split("/");
+                                        currentCount = parseInt(parts[0], 10) || 0;
+                                        return currentCount > 5;
+                                    }
+                                    return false;
+                                }
+                                text: {
+                                    var countStr = ApiAccountInfoModel.data("connectedDevices")
+                                    if (countStr) {
+                                        var parts = countStr.split("/");
+                                        var currentCount = parseInt(parts[0], 10) || 0;
+                                        return "+" + (currentCount - 5);
+                                    }
+                                    return ""
+                                }
+                                font.pixelSize: 12
+                                color: AmneziaStyle.color.goldenApricot
+                            }
+                            
+                            Item { Layout.fillWidth: true } // spacer
+                        }
+                    }
+
+                    // Кнопка продления подписки (YooKassa)
+                    BasicButtonType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 8
+                        
+                        text: qsTr("Renew Subscription")
+                        defaultColor: AmneziaStyle.color.goldenApricot
+                        hoveredColor: Qt.lighter(AmneziaStyle.color.goldenApricot, 1.1)
+                        pressedColor: Qt.darker(AmneziaStyle.color.goldenApricot, 1.1)
+                        textColor: AmneziaStyle.color.midnightBlack
+                        
+                        clickedFunc: function() {
+                            PageController.showBusyIndicator(true)
+                            var success = ApiConfigsController.renewYookassaSubscription("premium")
+                            PageController.showBusyIndicator(false)
+                            if (!success) {
+                                PageController.showNotificationMessage(qsTr("Failed to initiate payment. Please try again later."))
+                            }
+                        }
+                    }
+                }
             }
         }
 

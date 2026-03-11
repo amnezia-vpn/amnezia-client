@@ -9,6 +9,7 @@
 #include "ui/controllers/systemController.h"
 #include "version.h"
 #include <QClipboard>
+#include <QDesktopServices>
 #include <QDebug>
 #include <QEventLoop>
 #include <QSet>
@@ -641,6 +642,47 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
     }
 #endif
     return true;
+}
+
+bool ApiConfigsController::renewYookassaSubscription(const QString &plan)
+{
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
+                                            m_settings->getInstallationUuid(true),
+                                            m_apiServicesModel->getCountryCode(),
+                                            "",
+                                            m_apiServicesModel->getSelectedServiceType(),
+                                            m_apiServicesModel->getSelectedServiceProtocol(),
+                                            QJsonObject() };
+
+    QJsonObject apiPayload;
+    apiPayload["plan"] = plan;
+
+    QByteArray responseBody;
+    // Replace Gateway Endpoint with YooKassa specific endpoint if it differs, or use the dev gateway logic if appropriate
+    // For now, assuming Dr.Frake-VPN backend is served at the gateway root URL 
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
+                                        apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
+                                        
+    ErrorCode errorCode = gatewayController.post("/api/v1/payments/create", apiPayload, responseBody);
+
+    if (errorCode != ErrorCode::NoError) {
+        qWarning().noquote() << "Failed to call YooKassa endpoint" << errorCode;
+        emit errorOccurred(errorCode);
+        return false;
+    }
+
+    QJsonObject responseObj = QJsonDocument::fromJson(responseBody).object();
+    QString confirmationUrl = responseObj.value("confirmation_url").toString();
+
+    if (!confirmationUrl.isEmpty()) {
+        QDesktopServices::openUrl(QUrl(confirmationUrl));
+        return true;
+    }
+
+    emit errorOccurred(ErrorCode::ApiPurchaseError);
+    return false;
 }
 
 bool ApiConfigsController::importServiceFromGateway()

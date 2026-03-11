@@ -547,19 +547,19 @@
   <!-- Login Screen -->
   <div id="loginScreen" class="fade-in">
     <h1>⚡ Dr.Frake VPN</h1>
-    <p>Admin Dashboard Control Panel</p>
+    <p>Панель управления администратора</p>
     <div class="login-card glass">
       <div id="loginError" class="error-msg"></div>
       <div class="field">
-        <label>Administrator Email</label>
+        <label>Email администратора</label>
         <input type="email" id="loginEmail" placeholder="admin@drfrake.vpn" autocomplete="username">
       </div>
       <div class="field">
-        <label>Secret Password</label>
+        <label>Пароль</label>
         <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
       </div>
       <button class="btn btn-primary btn-full" onclick="doLogin()" style="margin-top:10px">
-        Access Control Panel
+        Войти
       </button>
     </div>
   </div>
@@ -568,29 +568,29 @@
   <div id="app">
     <aside class="sidebar">
       <div class="logo">Dr.Frake <span>VPN</span></div>
-      <div class="nav-item active" onclick="showPage('dashboard')">📊 Dashboard</div>
-      <div class="nav-item" onclick="showPage('users')">👥 Users</div>
-      <div class="nav-item" onclick="showPage('servers')">🖥️ Servers</div>
-      <div class="nav-item" onclick="showPage('payments')">💳 Payments</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">📊 Дашборд</div>
+      <div class="nav-item" onclick="showPage('users')">👥 Пользователи</div>
+      <div class="nav-item" onclick="showPage('servers')">🖥️ Серверы</div>
+      <div class="nav-item" onclick="showPage('payments')">💳 Платежи</div>
       <div style="flex:1"></div>
-      <div class="nav-item" onclick="logout()" style="margin-top:auto">🚪 Logout</div>
+      <div class="nav-item" onclick="logout()" style="margin-top:auto">🚪 Выйти</div>
     </aside>
 
     <main class="content">
       <!-- Dashboard -->
       <div id="page-dashboard" class="page active">
-        <h1 style="font-size:32px;font-weight:700;margin-bottom:32px;letter-spacing:-0.5px">Dashboard Overview</h1>
+        <h1 style="font-size:32px;font-weight:700;margin-bottom:32px;letter-spacing:-0.5px">Обзор</h1>
         <div class="stats-grid">
           <div class="stat-card glass">
-            <div class="label">Total Users</div>
+            <div class="label">Всего пользователей</div>
             <div class="value accent" id="stat-users">—</div>
           </div>
           <div class="stat-card glass">
-            <div class="label">Active Subscriptions</div>
+            <div class="label">Активные подписки</div>
             <div class="value" id="stat-subs">—</div>
           </div>
           <div class="stat-card glass">
-            <div class="label">Active VPN Keys</div>
+            <div class="label">Активные ключи VPN</div>
             <div class="value" id="stat-keys">—</div>
           </div>
         </div>
@@ -599,9 +599,9 @@
       <!-- Users -->
       <div id="page-users" class="page">
         <div class="section-header">
-          <h2>User Management</h2>
+          <h2>Пользователи</h2>
           <button class="btn btn-primary" onclick="loadUsers()">
-            <span style="font-size: 18px;">⟳</span> Refresh Data
+            <span style="font-size: 18px;">⟳</span> Обновить данные
           </button>
         </div>
         <div class="table-container">
@@ -610,16 +610,16 @@
               <tr>
                 <th>ID</th>
                 <th>Email</th>
-                <th>Role</th>
-                <th>Plan</th>
-                <th>Status</th>
-                <th>Registered</th>
-                <th>Actions</th>
+                <th>Роль</th>
+                <th>Тариф</th>
+                <th>Статус</th>
+                <th>Зарегистрирован</th>
+                <th>Действия</th>
               </tr>
             </thead>
             <tbody id="users-tbody">
               <tr>
-                <td colspan="7" class="empty-state">Loading user data...</td>
+                <td colspan="7" class="empty-state">Загрузка данных пользователей...</td>
               </tr>
             </tbody>
           </table>
@@ -629,15 +629,15 @@
       <!-- Servers -->
       <div id="page-servers" class="page">
         <div class="section-header">
-          <h2>VPN Servers Cluster</h2>
+          <h2>Кластер серверов</h2>
           <div style="display: flex; gap: 12px;">
             <button class="btn btn-primary" onclick="loadServers()">
-              <span style="font-size: 18px;">⟳</span> Refresh Nodes
+              <span style="font-size: 18px;">⟳</span> Обновить список
             </button>
             <button class="btn btn-primary"
               style="background: var(--success); box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);"
               onclick="openAddServerModal()">
-              + Add Node
+              + Добавить сервер
             </button>
           </div>
         </div>
@@ -657,7 +657,7 @@
             </thead>
             <tbody id="servers-tbody">
               <tr>
-                <td colspan="7" class="empty-state">Loading server nodes...</td>
+                <td colspan="7" class="empty-state">Загрузка серверов...</td>
               </tr>
             </tbody>
           </table>
@@ -667,27 +667,27 @@
       <!-- Payments -->
       <div id="page-payments" class="page">
         <div class="section-header">
-          <h2>Transaction History</h2>
+          <h2>История платежей</h2>
           <button class="btn btn-primary" onclick="loadPayments()">
-            <span style="font-size: 18px;">⟳</span> Sync Payments
+            <span style="font-size: 18px;">⟳</span> Синхронизировать
           </button>
         </div>
         <div class="table-container">
           <table>
             <thead>
               <tr>
-                <th>Transaction ID</th>
-                <th>User Email</th>
-                <th>Amount</th>
-                <th>Plan</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th>ID Транзакции</th>
+                <th>Email пользователя</th>
+                <th>Сумма</th>
+                <th>Тариф</th>
+                <th>Статус</th>
+                <th>Дата</th>
+                <th>Действия</th>
               </tr>
             </thead>
             <tbody id="payments-tbody">
               <tr>
-                <td colspan="7" class="empty-state">Loading transactions...</td>
+                <td colspan="7" class="empty-state">Загрузка транзакций...</td>
               </tr>
             </tbody>
           </table>
@@ -758,7 +758,7 @@
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (!res.ok) { errEl.textContent = data.error || 'Login failed'; errEl.style.display = 'block'; return; }
+      if (!res.ok) { errEl.textContent = data.error || 'Ошибка авторизации'; errEl.style.display = 'block'; return; }
 
       token = data.access_token;
 
@@ -766,7 +766,7 @@
       const checkRes = await api('/api/v1/admin/stats');
       if (checkRes.status === 403 || checkRes.status === 401) {
         token = '';
-        errEl.textContent = 'Access denied: admin role required';
+        errEl.textContent = 'Доступ запрещен: требуются права администратора';
         errEl.style.display = 'block';
         return;
       }
@@ -809,18 +809,18 @@
 
     async function loadUsers() {
       const tbody = document.getElementById('users-tbody');
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Загрузка...</td></tr>';
       const res = await api('/api/v1/admin/users');
       if (!res.ok) return;
       const d = await res.json();
-      if (!d.users.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No users</td></tr>'; return; }
+      if (!d.users.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет пользователей</td></tr>'; return; }
       tbody.innerHTML = d.users.map(u => `
     <tr>
       <td>${u.id}</td>
       <td>${u.email}</td>
       <td><span class="badge ${u.role === 'admin' ? 'badge-info' : 'badge-success'}">${u.role}</span></td>
       <td>${u.subscription?.plan || '—'}</td>
-      <td><span class="badge ${u.subscription?.status === 'active' ? 'badge-success' : 'badge-danger'}">${u.subscription?.status || 'none'}</span></td>
+      <td><span class="badge ${u.subscription?.status === 'active' ? 'badge-success' : 'badge-danger'}">${u.subscription?.status === 'active' ? 'Активна' : (u.subscription?.status || 'Нет')}</span></td>
       <td>${new Date(u.created_at).toLocaleDateString('ru')}</td>
       <td>
         <div style="display:flex; gap:8px;">
@@ -834,7 +834,7 @@
 
     async function loadServers() {
       const tbody = document.getElementById('servers-tbody');
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Загрузка...</td></tr>';
       const res = await api('/api/v1/admin/servers');
       if (!res.ok) return;
       const d = await res.json();
@@ -847,7 +847,7 @@
       <td>${s.host}</td>
       <td>${s.endpoint || s.host}</td>
       <td>${s.active_keys || 0} / ${s.max_peers}</td>
-      <td><span class="badge ${s.active ? 'badge-success' : 'badge-danger'}">${s.active ? 'Online' : 'Offline'}</span></td>
+      <td><span class="badge ${s.active ? 'badge-success' : 'badge-danger'}">${s.active ? 'Онлайн' : 'Офлайн'}</span></td>
       <td>
         <div style="display:flex; gap:8px;">
           <button class="btn ${s.active ? 'btn-danger' : 'btn-primary'}" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="toggleServer('${s.id}')">
@@ -861,34 +861,34 @@
 
     async function loadPayments() {
       const tbody = document.getElementById('payments-tbody');
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Загрузка...</td></tr>';
       const res = await api('/api/v1/admin/payments');
       if (!res.ok) return;
       const d = await res.json();
-      if (!d.payments.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No payments</td></tr>'; return; }
+      if (!d.payments.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет платежей</td></tr>'; return; }
       tbody.innerHTML = d.payments.map(p => `
     <tr>
       <td>${p.id}</td>
       <td>${p.user_email}</td>
       <td>${p.amount} ₽</td>
       <td>${p.plan}</td>
-      <td><span class="badge ${p.status === 'succeeded' ? 'badge-success' : p.status === 'pending' ? 'badge-info' : 'badge-danger'}">${p.status}</span></td>
+      <td><span class="badge ${p.status === 'succeeded' ? 'badge-success' : p.status === 'pending' ? 'badge-info' : 'badge-danger'}">${p.status === 'succeeded' ? 'Успешно' : p.status === 'pending' ? 'Ожидание' : 'Ошибка'}</span></td>
       <td>${new Date(p.created_at).toLocaleDateString('ru')}</td>
       <td>
-        ${p.status !== 'succeeded' ? `<button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="approvePayment('${p.id}')">Approve</button>` : '—'}
+        ${p.status !== 'succeeded' ? `<button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="approvePayment('${p.id}')">Подтвердить</button>` : '—'}
       </td>
     </tr>`).join('');
     }
 
     // Action Functions
     async function upgradeUser(id) {
-      if (!confirm('Manually upgrade this user to Premium for 1 month?')) return;
+      if (!confirm('Выдать Premium на 1 месяц этому пользователю?')) return;
       await api('/api/v1/admin/users/' + id + '/upgrade', { method: 'POST' });
       loadUsers();
     }
 
     async function revokeUserKeys(id) {
-      if (!confirm('Revoke all VPN config keys for this user? This will disconnect their devices.')) return;
+      if (!confirm('Отозвать все ключи VPN у этого пользователя? Это отключит его устройства.')) return;
       await api('/api/v1/admin/users/' + id + '/revoke', { method: 'POST' });
       loadUsers();
     }
@@ -900,7 +900,7 @@
     }
 
     async function toggleServer(id) {
-      if (!confirm('Toggle this server status? If offline, it will not accept new connections.')) return;
+      if (!confirm('Изменить статус сервера? Отключенный сервер не принимает новые подключения.')) return;
       await api('/api/v1/admin/servers/' + id + '/toggle', { method: 'POST' });
       loadServers();
     }
@@ -912,7 +912,7 @@
     }
 
     async function approvePayment(id) {
-      if (!confirm('Manually approve this payment and issue premium?')) return;
+      if (!confirm('Подтвердить этот платеж и выдать Premium вручную?')) return;
       await api('/api/v1/admin/payments/' + id + '/approve', { method: 'POST' });
       loadPayments();
       // wait a moment so payment and subscription data is updated before reloading users

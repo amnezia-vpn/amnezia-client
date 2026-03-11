@@ -1,0 +1,607 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+
+import PageEnum 1.0
+import Style 1.0
+
+import "./"
+import "../Controls2"
+import "../Controls2/TextTypes"
+import "../Config"
+import "../Components"
+
+PageType {
+    id: root
+
+    // 0 = basic, 1 = premium
+    property int selectedPlan: 0
+    property bool isLoading: false
+    property string errorMessage: ""
+    property bool isWaitingForPayment: false
+    property int pollCount: 0
+    readonly property int maxPolls: 24  // 24 × 5 s = 2 min
+
+    // -1 = no paid plan, 0 = basic, 1 = premium
+    readonly property int currentPlanLevel: {
+        if (DrFrakeController.subscriptionPlan === "premium") return 1
+        if (DrFrakeController.subscriptionPlan === "basic")   return 0
+        return -1
+    }
+
+    Timer {
+        id: pollTimer
+        interval: 5000
+        repeat: true
+        running: false
+        onTriggered: {
+            root.pollCount++
+            if (root.pollCount >= root.maxPolls) {
+                pollTimer.stop()
+                root.isWaitingForPayment = false
+                root.errorMessage = qsTr("Время ожидания истекло. Если вы оплатили — нажмите «Проверить вручную».")
+                return
+            }
+            if (DrFrakeController.isLoggedIn) {
+                DrFrakeController.fetchSubscription()
+            }
+        }
+    }
+
+    readonly property string apiBase: "https://srv.frakebit.com"
+
+    // Plans match backend: plan values must be "basic" or "premium"
+    readonly property var plans: [
+        { id: "basic",   title: qsTr("Базовый"),    price: "199 ₽", period: qsTr("/ 30 дней"), badge: "",               saving: "" },
+        { id: "premium", title: qsTr("Премиум"),    price: "499 ₽", period: qsTr("/ 30 дней"), badge: qsTr("ЛУЧШИЙ"),   saving: qsTr("Максимальная скорость и приоритет") }
+    ]
+
+    // Features list
+    readonly property var features: [
+        { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Безлимитный трафик") },
+        { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("10+ стран и регионов") },
+        { icon: "qrc:/images/controls/monitor.svg",     text: qsTr("До 5 устройств одновременно") },
+        { icon: "qrc:/images/controls/info.svg",        text: qsTr("Kill Switch защита") },
+        { icon: "qrc:/images/controls/history.svg",     text: qsTr("Быстрые серверы без логов") }
+    ]
+
+    Flickable {
+        anchors.fill: parent
+        contentHeight: mainColumn.implicitHeight + 32
+        clip: true
+
+        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+        ColumnLayout {
+            id: mainColumn
+            width: parent.width
+            spacing: 0
+
+            // Back button
+            BackButtonType {
+                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.leftMargin: 4
+            }
+
+            // ── Hero section ──────────────────────────────────────
+            Item {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                implicitHeight: heroColumn.implicitHeight
+
+                // Glow behind shield
+                Rectangle {
+                    anchors.centerIn: heroColumn
+                    width: 120; height: 120
+                    radius: 60
+                    color: "#00C8FF"
+                    opacity: 0.18
+
+                    layer.enabled: true
+                    layer.effect: DropShadow {
+                        color: "#00C8FF"
+                        radius: 40; samples: 81; spread: 0.05
+                        transparentBorder: true
+                    }
+                }
+
+                ColumnLayout {
+                    id: heroColumn
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 12
+
+                    // Shield icon
+                    Image {
+                        Layout.alignment: Qt.AlignHCenter
+                        source: "qrc:/images/controls/shield-tick.svg"
+                        sourceSize: Qt.size(64, 64)
+
+                        layer.enabled: true
+                        layer.effect: ColorOverlay { color: "#00C8FF" }
+
+                        SequentialAnimation on scale {
+                            loops: Animation.Infinite
+                            PropertyAnimation { to: 1.04; duration: 1800; easing.type: Easing.InOutSine }
+                            PropertyAnimation { to: 1.0;  duration: 1800; easing.type: Easing.InOutSine }
+                        }
+                    }
+
+                    // Title
+                    LabelTextType {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Dr.Frake VPN Premium")
+                        font.pixelSize: 24
+                        font.weight: 700
+                        color: AmneziaStyle.color.paleGray
+                    }
+
+                    // Subtitle
+                    LabelTextType {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Полный доступ без ограничений")
+                        font.pixelSize: 14
+                        color: AmneziaStyle.color.mutedGray
+                    }
+                }
+            }
+
+            // ── Plan cards ────────────────────────────────────────
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 28
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                spacing: 12
+
+                Repeater {
+                    model: root.plans
+
+                    delegate: Rectangle {
+                        id: planCard
+                        Layout.fillWidth: true
+                        implicitHeight: cardContent.implicitHeight + 28
+                        radius: 16
+
+                        property bool isSelected: root.selectedPlan === index
+                        property bool isCurrentPlan: DrFrakeController.isSubscribed && DrFrakeController.subscriptionPlan === modelData.id
+                        property bool isBlocked: DrFrakeController.isSubscribed && index <= root.currentPlanLevel
+
+                        // Gradient fill
+                        gradient: Gradient {
+                            GradientStop {
+                                position: 0.0
+                                color: planCard.isCurrentPlan
+                                    ? Qt.rgba(16/255, 185/255, 129/255, 0.18)
+                                    : (planCard.isSelected
+                                        ? Qt.rgba(0, 200/255, 255/255, 0.22)
+                                        : Qt.rgba(36/255, 36/255, 42/255, 1.0))
+                            }
+                            GradientStop {
+                                position: 1.0
+                                color: Qt.rgba(28/255, 29/255, 33/255, 1.0)
+                            }
+                        }
+
+                        border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 2 : 1
+                        border.color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#00C8FF" : AmneziaStyle.color.slateGray)
+
+                        opacity: (planCard.isBlocked && !planCard.isCurrentPlan) ? 0.45 : 1.0
+
+                        Behavior on border.width { NumberAnimation { duration: 150 } }
+
+                        ColumnLayout {
+                            id: cardContent
+                            anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
+                            anchors.leftMargin: 20; anchors.rightMargin: 20
+                            spacing: 4
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                LabelTextType {
+                                    text: modelData.title
+                                    font.pixelSize: 15
+                                    font.weight: 600
+                                    color: planCard.isSelected ? AmneziaStyle.color.paleGray : AmneziaStyle.color.lightGray
+                                }
+
+                                // Badge: "АКТИВНА" overrides normal badge
+                                Rectangle {
+                                    visible: planCard.isCurrentPlan || modelData.badge !== ""
+                                    height: 20
+                                    width: activeBadgeText.implicitWidth + 12
+                                    radius: 10
+                                    color: planCard.isCurrentPlan ? "#10B981" : "#00C8FF"
+
+                                    LabelTextType {
+                                        id: activeBadgeText
+                                        anchors.centerIn: parent
+                                        text: planCard.isCurrentPlan ? qsTr("АКТИВНА") : modelData.badge
+                                        font.pixelSize: 10
+                                        font.weight: 700
+                                        color: "#FFFFFF"
+                                    }
+                                }
+
+                                Item { Layout.fillWidth: true }
+
+                                // Radio / checkmark indicator
+                                Rectangle {
+                                    width: 22; height: 22
+                                    radius: 11
+                                    border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 0 : 2
+                                    border.color: AmneziaStyle.color.slateGray
+                                    color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#00C8FF" : "transparent")
+
+                                    Behavior on color { ColorAnimation { duration: 150 } }
+
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: 8; height: 8
+                                        radius: 4
+                                        color: "white"
+                                        visible: planCard.isSelected || planCard.isCurrentPlan
+                                    }
+                                }
+                            }
+
+                            // Price row
+                            RowLayout {
+                                spacing: 4
+
+                                LabelTextType {
+                                    text: modelData.price
+                                    font.pixelSize: 26
+                                    font.weight: 700
+                                    color: planCard.isSelected ? "#00C8FF" : AmneziaStyle.color.mutedGray
+                                }
+
+                                LabelTextType {
+                                    text: modelData.period
+                                    font.pixelSize: 14
+                                    color: AmneziaStyle.color.mutedGray
+                                    Layout.alignment: Qt.AlignBottom
+                                    Layout.bottomMargin: 3
+                                }
+                            }
+
+                            // Saving hint
+                            LabelTextType {
+                                visible: modelData.saving !== ""
+                                text: modelData.saving
+                                font.pixelSize: 12
+                                color: "#10B981"
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: planCard.isBlocked ? Qt.ForbiddenCursor : Qt.PointingHandCursor
+                            onClicked: if (!planCard.isBlocked) root.selectedPlan = index
+                        }
+                    }
+                }
+            }
+
+            // ── Features ──────────────────────────────────────────
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 28
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                spacing: 0
+
+                LabelTextType {
+                    text: qsTr("Что входит в подписку")
+                    font.pixelSize: 13
+                    font.weight: 600
+                    color: AmneziaStyle.color.mutedGray
+                    Layout.bottomMargin: 12
+                }
+
+                Repeater {
+                    model: root.features
+
+                    delegate: RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+                        Layout.bottomMargin: 10
+
+                        // Check circle
+                        Rectangle {
+                            width: 28; height: 28
+                            radius: 14
+                            color: Qt.rgba(16/255, 185/255, 129/255, 0.15)
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/shield-tick.svg"
+                                sourceSize: Qt.size(14, 14)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: "#10B981" }
+                            }
+                        }
+
+                        LabelTextType {
+                            text: modelData.text
+                            font.pixelSize: 14
+                            color: AmneziaStyle.color.lightGray
+                            Layout.fillWidth: true
+                        }
+                    }
+                }
+            }
+
+            // ── Error message ─────────────────────────────────────
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                height: errText.implicitHeight + 16
+                color: "#3D1515"
+                radius: 8
+                visible: root.errorMessage !== ""
+
+                LabelTextType {
+                    id: errText
+                    anchors.centerIn: parent
+                    width: parent.width - 24
+                    text: root.errorMessage
+                    color: "#FF6B6B"
+                    wrapMode: Text.WordWrap
+                    font.pixelSize: 13
+                }
+            }
+
+            // ── Waiting for payment confirmation ──────────────────
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                visible: root.isWaitingForPayment
+                color: Qt.rgba(0, 200/255, 255/255, 0.1)
+                border.color: Qt.rgba(0, 200/255, 255/255, 0.35)
+                border.width: 1
+                radius: 12
+                implicitHeight: waitingCol.implicitHeight + 24
+
+                ColumnLayout {
+                    id: waitingCol
+                    anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
+                    anchors.leftMargin: 16; anchors.rightMargin: 16
+                    spacing: 6
+
+                    RowLayout {
+                        spacing: 8
+
+                        // Spinner dot animation
+                        Rectangle {
+                            width: 8; height: 8; radius: 4
+                            color: "#00C8FF"
+                            SequentialAnimation on opacity {
+                                loops: Animation.Infinite
+                                PropertyAnimation { to: 0.2; duration: 600 }
+                                PropertyAnimation { to: 1.0; duration: 600 }
+                            }
+                        }
+
+                        LabelTextType {
+                            text: qsTr("Ожидаем подтверждение оплаты...")
+                            font.pixelSize: 13
+                            font.weight: 600
+                            color: "#80D8FF"
+                        }
+                    }
+
+                    LabelTextType {
+                        text: qsTr("Проверка %1 из %2. Это займёт до 2 минут.").arg(root.pollCount).arg(root.maxPolls)
+                        font.pixelSize: 11
+                        color: AmneziaStyle.color.mutedGray
+                    }
+                }
+            }
+
+            // Manual check button (always visible when waiting or after timeout)
+            BasicButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                implicitHeight: 44
+                visible: root.isWaitingForPayment || root.errorMessage !== ""
+
+                defaultColor: "transparent"
+                hoveredColor: Qt.rgba(0, 200/255, 255/255, 0.12)
+                pressedColor: Qt.rgba(0, 200/255, 255/255, 0.2)
+                textColor: "#80D8FF"
+                borderColor: Qt.rgba(0, 200/255, 255/255, 0.5)
+                borderWidth: 1
+
+                text: qsTr("Проверить вручную")
+
+                clickedFunc: function() {
+                    if (DrFrakeController.isLoggedIn) {
+                        DrFrakeController.fetchSubscription()
+                    }
+                }
+            }
+
+            // ── CTA Button ────────────────────────────────────────
+            BasicButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: root.errorMessage !== "" ? 12 : 28
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                implicitHeight: 56
+
+                visible: !root.isWaitingForPayment
+                enabled: !root.isLoading && root.selectedPlan > root.currentPlanLevel
+
+                defaultColor: root.selectedPlan > root.currentPlanLevel ? "#00C8FF" : AmneziaStyle.color.charcoalGray
+                hoveredColor: "#33D4FF"
+                pressedColor: "#0099BB"
+                disabledColor: AmneziaStyle.color.charcoalGray
+                textColor: "#FFFFFF"
+
+                text: root.isLoading
+                    ? qsTr("Создание платежа...")
+                    : (root.selectedPlan <= root.currentPlanLevel
+                        ? qsTr("Уже активна")
+                        : (root.selectedPlan === 0
+                            ? qsTr("Оплатить 199 ₽ / Basic")
+                            : qsTr("Оплатить 499 ₽ / Premium")))
+
+                clickedFunc: function() {
+                    root.errorMessage = ""
+
+                    if (!DrFrakeController.isLoggedIn) {
+                        PageController.goToPage(PageEnum.PageDrFrakeLogin)
+                        return
+                    }
+
+                    root.isLoading = true
+                    PageController.showBusyIndicator(true)
+                    DrFrakeController.createPayment(root.plans[root.selectedPlan].id)
+                }
+            }
+
+            // Connections handle payment result from C++
+            Connections {
+                target: DrFrakeController
+
+                function onPaymentCreated(confirmationUrl) {
+                    root.isLoading = false
+                    PageController.showBusyIndicator(false)
+                    if (confirmationUrl !== "") {
+                        Qt.openUrlExternally(confirmationUrl)
+                        root.isWaitingForPayment = true
+                        root.pollCount = 0
+                        pollTimer.start()
+                        PageController.showNotificationMessage(
+                            qsTr("Страница оплаты открыта. Ожидаем подтверждение..."))
+                    } else {
+                        root.errorMessage = qsTr("Не удалось получить ссылку на оплату")
+                    }
+                }
+
+                function onPaymentError(errorMessage) {
+                    root.isLoading = false
+                    PageController.showBusyIndicator(false)
+                    root.errorMessage = errorMessage
+                }
+
+                function onSubscriptionChanged() {
+                    if (DrFrakeController.isSubscribed && root.isWaitingForPayment) {
+                        pollTimer.stop()
+                        root.isWaitingForPayment = false
+                        PageController.showNotificationMessage(qsTr("Подписка активирована! Добро пожаловать в Premium."))
+                        DrFrakeController.fetchConfig()
+                        PageController.goToPageHome()
+                    }
+                }
+            }
+
+            // Already subscribed — status display
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 8
+                spacing: 4
+                visible: DrFrakeController.isSubscribed
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: activeSubRow.implicitHeight + 20
+                    radius: 12
+                    color: Qt.rgba(16/255, 185/255, 129/255, 0.1)
+                    border.color: Qt.rgba(16/255, 185/255, 129/255, 0.3)
+                    border.width: 1
+
+                    RowLayout {
+                        id: activeSubRow
+                        anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
+                        anchors.leftMargin: 16; anchors.rightMargin: 16
+                        spacing: 12
+
+                        Image {
+                            source: "qrc:/images/controls/shield-tick.svg"
+                            sourceSize: Qt.size(20, 20)
+                            layer.enabled: true
+                            layer.effect: ColorOverlay { color: "#10B981" }
+                        }
+
+                        ColumnLayout {
+                            spacing: 1
+
+                            LabelTextType {
+                                text: DrFrakeController.subscriptionPlan === "premium"
+                                    ? qsTr("Premium подписка активна")
+                                    : qsTr("Basic подписка активна")
+                                font.pixelSize: 13
+                                font.weight: 600
+                                color: "#10B981"
+                            }
+
+                            LabelTextType {
+                                text: qsTr("Действует до: ") + DrFrakeController.subscriptionEndDate
+                                font.pixelSize: 12
+                                color: AmneziaStyle.color.mutedGray
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── Footer links ──────────────────────────────────────
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 16
+                Layout.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
+                spacing: 4
+
+                ButtonTextType {
+                    text: qsTr("Условия использования")
+                    font.pixelSize: 12
+                    color: AmneziaStyle.color.mutedGray
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Qt.openUrlExternally("https://drfrake.ru/terms")
+                    }
+                }
+
+                LabelTextType {
+                    text: "·"
+                    color: AmneziaStyle.color.charcoalGray
+                    font.pixelSize: 12
+                }
+
+                ButtonTextType {
+                    text: qsTr("Политика конфиденциальности")
+                    font.pixelSize: 12
+                    color: AmneziaStyle.color.mutedGray
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Qt.openUrlExternally("https://drfrake.ru/privacy")
+                    }
+                }
+            }
+        }
+    }
+
+    // Refresh subscription status when page opens
+    Component.onCompleted: {
+        if (DrFrakeController.isLoggedIn) {
+            DrFrakeController.fetchSubscription()
+        }
+    }
+}

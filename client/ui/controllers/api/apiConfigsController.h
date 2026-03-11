@@ -36,6 +36,8 @@ public slots:
     bool deactivateDevice(const bool isRemoveEvent);
     bool deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode);
 
+    Q_INVOKABLE bool renewYookassaSubscription(const QString &plan);
+
     bool isConfigValid();
 
     void setCurrentProtocol(const QString &protocolName);

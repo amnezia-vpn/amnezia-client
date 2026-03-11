@@ -156,11 +156,16 @@ PageType {
         }
 
         function onNoInstalledContainers() {
-            PageController.setTriggeredByConnectButton(true)
-
-            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
-            InstallController.setShouldCreateServer(false)
-            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+            // Adding servers manually is disabled — redirect to login/subscription
+            if (!DrFrakeController.isLoggedIn) {
+                tabBarStackView.goToTabBarPage(PageEnum.PageDrFrakeLogin)
+                tabBar.visible = false
+            } else if (!DrFrakeController.isSubscribed) {
+                PageController.goToPage(PageEnum.PageDrFrakeSubscription)
+            } else {
+                // Logged in with subscription but no containers: fetch fresh config
+                DrFrakeController.fetchConfig()
+            }
         }
     }
 

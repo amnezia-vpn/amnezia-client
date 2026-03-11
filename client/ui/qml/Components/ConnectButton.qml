@@ -11,41 +11,51 @@ import Style 1.0
 Button {
     id: root
 
-    property string defaultButtonColor: "#5B4DFF"
-    property string progressButtonColor: "#7065FF"
+    property string defaultButtonColor: "#00C8FF"
+    property string progressButtonColor: "#33D4FF"
     property string connectedButtonColor: "#10B981"
     property bool buttonActiveFocus: activeFocus && (Qt.platform.os !== "android" || SettingsController.isOnTv())
 
     property bool isFocusable: true
-    
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
+
+    // ── Subscription gate ────────────────────────────────────────
+    // Block connect when user is logged in as DrFrake but has no active subscription
+    readonly property bool isSubscriptionRequired:
+        DrFrakeController.isLoggedIn && !DrFrakeController.isSubscribed
+
+    readonly property string lockedButtonColor: "#6B7280"
+
+    // ── Shake animation for errors / locked tap ──────────────────
+    property bool isErrorState: false
+    Timer {
+        id: errorResetTimer
+        interval: 1500
+        onTriggered: root.isErrorState = false
     }
 
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
+    SequentialAnimation {
+        id: errorShakeAnim
+        NumberAnimation { target: shakeTranslate; property: "x"; from: 0; to: -15; duration: 60; easing.type: Easing.OutSine }
+        NumberAnimation { target: shakeTranslate; property: "x"; from: -15; to: 15; duration: 60; easing.type: Easing.InOutSine }
+        NumberAnimation { target: shakeTranslate; property: "x"; from: 15; to: -15; duration: 60; easing.type: Easing.InOutSine }
+        NumberAnimation { target: shakeTranslate; property: "x"; from: -15; to: 15; duration: 60; easing.type: Easing.InOutSine }
+        NumberAnimation { target: shakeTranslate; property: "x"; from: 15; to: 0; duration: 60; easing.type: Easing.InSine }
     }
 
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-    
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-    
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
+    Keys.onTabPressed:      FocusController.nextKeyTabItem()
+    Keys.onBacktabPressed:  FocusController.previousKeyTabItem()
+    Keys.onUpPressed:       FocusController.nextKeyUpItem()
+    Keys.onDownPressed:     FocusController.nextKeyDownItem()
+    Keys.onLeftPressed:     FocusController.nextKeyLeftItem()
+    Keys.onRightPressed:    FocusController.nextKeyRightItem()
 
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
-        
     implicitWidth: 190
     implicitHeight: 190
+    padding: 0
 
-    text: ConnectionController.connectionStateText
+    text: root.isSubscriptionRequired
+        ? qsTr("Premium")
+        : ConnectionController.connectionStateText
 
     Connections {
         target: ConnectionController
@@ -53,139 +63,243 @@ Button {
         function onPreparingConfig() {
             PageController.showNotificationMessage(qsTr("Невозможно отключиться во время подготовки конфигурации"))
         }
+
+        function onConnectionErrorOccurred(errorCode) {
+            root.isErrorState = true
+            errorResetTimer.restart()
+            errorShakeAnim.restart()
+        }
+
+        function onConnectionStateChanged() {
+            if (ConnectionController.connectionStateText === qsTr("Connect") &&
+                ConnectionController.getLastConnectionError &&
+                ConnectionController.getLastConnectionError() !== 0) {
+                root.isErrorState = true
+                errorResetTimer.restart()
+                errorShakeAnim.restart()
+            }
+        }
     }
 
-//    enabled: !ConnectionController.isConnectionInProgress
+    // ── Resolved accent color (single source of truth) ───────────
+    readonly property color accentColor: {
+        if (root.isSubscriptionRequired) return root.lockedButtonColor
+        if (root.isErrorState)           return "#EF4444"
+        if (ConnectionController.isConnectionInProgress) return root.progressButtonColor
+        if (ConnectionController.isConnected)            return root.connectedButtonColor
+        return root.defaultButtonColor
+    }
 
     background: Item {
+        id: bgItem
+        transform: Translate { id: shakeTranslate }
         implicitWidth: parent.width
         implicitHeight: parent.height
         transformOrigin: Item.Center
 
-        Shape {
-            id: backgroundCircle
-            width: parent.implicitWidth
-            height: parent.implicitHeight
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
+        // ── Outer glow ───────────────────────────────────────────
+        Rectangle {
+            id: outerGlow
+            anchors.centerIn: parent
+            width: parent.width
+            height: parent.height
+            radius: width / 2
+            color: "transparent"
+
             layer.enabled: true
-            layer.samples: 4
-            layer.smooth: true
             layer.effect: DropShadow {
-                anchors.fill: backgroundCircle
-                horizontalOffset: 0
-                verticalOffset: 0
-                radius: 10
-                samples: 25
-                color: root.buttonActiveFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.goldenApricot
-                source: backgroundCircle
+                transparentBorder: true
+                color: root.accentColor
+                radius: 30
+                samples: 61
+                spread: 0.1
+                opacity: ConnectionController.isConnectionInProgress ? 0.7 : 0.3
             }
 
-            ShapePath {
-                fillColor: AmneziaStyle.color.transparent
-                strokeColor: root.defaultButtonColor
-                strokeWidth: root.buttonActiveFocus ? 1 : 0
-                capStyle: ShapePath.RoundCap
+            SequentialAnimation on scale {
+                running: ConnectionController.isConnectionInProgress
+                loops: Animation.Infinite
+                PropertyAnimation { to: 1.05; duration: 1000; easing.type: Easing.InOutSine }
+                PropertyAnimation { to: 0.98; duration: 1000; easing.type: Easing.InOutSine }
+            }
+        }
 
-                PathAngleArc {
-                    centerX: backgroundCircle.width / 2
-                    centerY: backgroundCircle.height / 2
-                    radiusX: 94
-                    radiusY: 94
-                    startAngle: 0
-                    sweepAngle: 360
+        // ── Main circle ──────────────────────────────────────────
+        Rectangle {
+            id: mainCircle
+            anchors.fill: parent
+            radius: width / 2
+
+            gradient: Gradient {
+                GradientStop {
+                    position: 0.0
+                    color: Qt.lighter(root.accentColor, 1.1)
                 }
+                GradientStop { position: 1.0; color: AmneziaStyle.color.midnightBlack }
             }
 
-            ShapePath {
-                fillColor: AmneziaStyle.color.transparent
-                strokeColor: {
-                    if (ConnectionController.isConnectionInProgress) {
-                        return AmneziaStyle.color.darkCharcoal
-                    } else if (ConnectionController.isConnected) {
-                        return connectedButtonColor
-                    } else {
-                        return defaultButtonColor
-                    }
-                }
-                strokeWidth: root.buttonActiveFocus ? 2 : 3
-                capStyle: ShapePath.RoundCap
+            border.width: root.buttonActiveFocus ? 2 : 1
+            border.color: root.accentColor
 
-                PathAngleArc {
-                    centerX: backgroundCircle.width / 2
-                    centerY: backgroundCircle.height / 2
-                    radiusX: 93 - (root.buttonActiveFocus ? 2 : 0)
-                    radiusY: 93 - (root.buttonActiveFocus ? 2 : 0)
-                    startAngle: 0
-                    sweepAngle: 360
+            // ── Ripple ───────────────────────────────────────────
+            Rectangle {
+                id: ripple
+                anchors.centerIn: parent
+                width: 0; height: 0
+                radius: width / 2
+                color: Qt.rgba(255, 255, 255, 0.2)
+                opacity: 0
+            }
+
+            ParallelAnimation {
+                id: rippleAnim
+                NumberAnimation { target: ripple; property: "width";   from: 0; to: mainCircle.width  * 1.5; duration: 400; easing.type: Easing.OutQuad }
+                NumberAnimation { target: ripple; property: "height";  from: 0; to: mainCircle.height * 1.5; duration: 400; easing.type: Easing.OutQuad }
+                SequentialAnimation {
+                    NumberAnimation { target: ripple; property: "opacity"; from: 0.5; to: 0; duration: 400 }
                 }
             }
 
             MouseArea {
+                id: buttonMouseArea
                 anchors.fill: parent
-
                 cursorShape: Qt.PointingHandCursor
-                enabled: false
+                hoverEnabled: true
+
+                onClicked: {
+                    rippleAnim.restart()
+
+                    if (root.isSubscriptionRequired) {
+                        // User is logged in but has no subscription — redirect
+                        errorShakeAnim.restart()
+                        PageController.showNotificationMessage(
+                            qsTr("Требуется активная подписка для подключения"))
+                        PageController.goToPage(PageEnum.PageDrFrakeSubscription)
+                        return
+                    }
+
+                    ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
+                    ConnectionController.connectButtonClicked()
+                }
+            }
+
+            scale: buttonMouseArea.containsMouse && !buttonMouseArea.pressed ? 1.02 : (buttonMouseArea.pressed ? 0.95 : 1.0)
+            Behavior on scale {
+                NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
             }
         }
 
+        // ── Lock icon overlay (when subscription required) ───────
+        Rectangle {
+            id: lockOverlay
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.bottomMargin: 10
+            anchors.rightMargin: 10
+            width: 36; height: 36
+            radius: 18
+            color: "#1C1D21"
+            border.color: root.lockedButtonColor
+            border.width: 1.5
+            visible: root.isSubscriptionRequired
+
+            opacity: root.isSubscriptionRequired ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 250 } }
+
+            Image {
+                anchors.centerIn: parent
+                source: "qrc:/images/controls/info.svg"
+                sourceSize: Qt.size(18, 18)
+                layer.enabled: true
+                layer.effect: ColorOverlay { color: root.lockedButtonColor }
+            }
+        }
+
+        // ── Spinner (connecting) ─────────────────────────────────
         Shape {
             id: shape
             width: parent.implicitWidth
             height: parent.implicitHeight
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
+            anchors.centerIn: parent
             layer.enabled: true
             layer.samples: 4
-
             visible: ConnectionController.isConnectionInProgress
 
             ShapePath {
-                fillColor: AmneziaStyle.color.transparent
+                fillColor: "transparent"
                 strokeColor: root.progressButtonColor
-                strokeWidth: 3
+                strokeWidth: 4
                 capStyle: ShapePath.RoundCap
 
                 PathAngleArc {
                     centerX: shape.width / 2
                     centerY: shape.height / 2
-                    radiusX: 93
-                    radiusY: 93
-                    startAngle: 245
-                    sweepAngle: -180
+                    radiusX: 93; radiusY: 93
+                    startAngle: 0; sweepAngle: 90
                 }
             }
 
             RotationAnimator {
                 target: shape
                 running: ConnectionController.isConnectionInProgress
-                from: 0
-                to: 360
+                from: 0; to: 360
                 loops: Animation.Infinite
                 duration: 1000
             }
         }
     }
 
-    contentItem: Text {
-        height: 24
+    contentItem: Item {
+        Column {
+            spacing: 4
+            anchors.centerIn: parent
 
-        font.family: "PT Root UI VF"
-        font.weight: 700
-        font.pixelSize: 20
+            // ── Label ─────────────────────────────────────────────────
+            Text {
+                width: root.implicitWidth - 40
+                anchors.horizontalCenter: parent.horizontalCenter
 
-        color: ConnectionController.isConnected ? connectedButtonColor : defaultButtonColor
-        text: root.text
+                font.family: "PT Root UI VF"
+                font.weight: 700
+                font.pixelSize: root.isSubscriptionRequired ? 16 : 20
 
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+                transform: Translate { x: shakeTranslate.x }
+
+                color: root.isSubscriptionRequired
+                    ? root.lockedButtonColor
+                    : (root.isErrorState ? "#EF4444" : (ConnectionController.isConnected ? root.connectedButtonColor : root.defaultButtonColor))
+
+                text: root.text
+
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            // Sub-label when locked
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: root.isSubscriptionRequired
+                text: qsTr("Нужна подписка")
+                font.family: "PT Root UI VF"
+                font.pixelSize: 11
+                color: Qt.rgba(107/255, 114/255, 128/255, 0.8)
+                horizontalAlignment: Text.AlignHCenter
+            }
+        }
     }
 
     onClicked: {
+        if (root.isSubscriptionRequired) {
+            errorShakeAnim.restart()
+            PageController.showNotificationMessage(
+                qsTr("Требуется активная подписка для подключения"))
+            PageController.goToPage(PageEnum.PageDrFrakeSubscription)
+            return
+        }
         ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
         ConnectionController.connectButtonClicked()
     }
 
-    Keys.onEnterPressed: this.clicked()
+    Keys.onEnterPressed:  this.clicked()
     Keys.onReturnPressed: this.clicked()
 }

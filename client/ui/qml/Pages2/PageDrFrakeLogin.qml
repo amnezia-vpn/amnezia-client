@@ -116,9 +116,9 @@ PageType {
             Layout.fillWidth: true
             Layout.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
 
-            defaultColor: "#5B4DFF"
-            hoveredColor: "#7065FF"
-            pressedColor: "#4338CC"
+            defaultColor: "#00C8FF"
+            hoveredColor: "#33D4FF"
+            pressedColor: "#0099BB"
             disabledColor: AmneziaStyle.color.mutedGray
             textColor: AmneziaStyle.color.paleGray
 

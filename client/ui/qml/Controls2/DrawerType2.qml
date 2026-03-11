@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -195,7 +196,27 @@ Item {
         color: root.isCollapsedStateActive() ? AmneziaStyle.color.transparent : AmneziaStyle.color.translucentMidnightBlack
 
         Behavior on color {
-            PropertyAnimation { duration: 200 }
+            PropertyAnimation { duration: 300; easing.type: Easing.OutQuart }
+        }
+    }
+
+    Item {
+        id: blurSourceItem
+        anchors.fill: parent
+        visible: false // Hidden because FastBlur uses it as source
+    }
+
+    FastBlur {
+        id: backgroundBlur
+        anchors.fill: background
+        source: background // Blur everything behind the popup (which is drawn underneath parent when z index is low, or grab background)
+        // Note: For a true glassmorphism, we'd ideally capture the parent page. 
+        // Here we apply a subtle blur to the dimming background itself to smooth out content behind it
+        radius: root.isCollapsedStateActive() ? 0 : 32
+        transparentBorder: true
+        
+        Behavior on radius {
+            NumberAnimation { duration: 300; easing.type: Easing.OutQuart }
         }
     }
 
@@ -258,9 +279,11 @@ Item {
         anchors { left: drawerContent.left; right: drawerContent.right; top: drawerContent.top }
         height: root.height
         radius: 16
-        color: root.defaultColor
-        border.color: root.borderColor
-        border.width: 1
+        color: root.isCollapsedStateActive() ? root.defaultColor : Qt.rgba(28/255, 29/255, 33/255, 0.85) // transparent-ish background when expanded
+        border.color: root.isCollapsedStateActive() ? root.borderColor : AmneziaStyle.color.slateGray 
+        border.width: root.isCollapsedStateActive() ? 1 : 1.5 // slightly thicker border when glassmorphic
+
+        Behavior on color { ColorAnimation { duration: 300 } }
 
         Rectangle {
             width: parent.radius
@@ -348,26 +371,30 @@ Item {
             Transition {
                 from: root.drawerCollapsedStateName
                 to: root.drawerExpandedStateName
-                PropertyAnimation {
+                SpringAnimation {
                     target: drawerContent
                     properties: "y"
-                    duration: 200
+                    spring: 3.0
+                    damping: 0.25
+                    epsilon: 0.1
                 }
             },
             Transition {
                 from: root.drawerExpandedStateName
                 to: root.drawerCollapsedStateName
-                PropertyAnimation {
+                SpringAnimation {
                     target: drawerContent
                     properties: "y"
-                    duration: 200
+                    spring: 3.0
+                    damping: 0.25
+                    epsilon: 0.1
                 }
             }
         ]
 
         Loader {
             id: collapsedLoader
-
+            z: 2
             sourceComponent: root.collapsedStateContent
 
             anchors.right: parent.right

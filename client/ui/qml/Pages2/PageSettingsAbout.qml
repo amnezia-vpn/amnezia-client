@@ -50,8 +50,8 @@ PageType {
                 radius: 20
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: "#2D1EB3" }
-                    GradientStop { position: 1.0; color: "#5B4DFF" }
+                    GradientStop { position: 0.0; color: "#005A80" }
+                    GradientStop { position: 1.0; color: "#00C8FF" }
                 }
 
                 RowLayout {
@@ -170,6 +170,107 @@ PageType {
 
         footer: ColumnLayout {
             width: listView.width
+
+            // ── Account section ───────────────────────────────────
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 20
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                spacing: 8
+                visible: DrFrakeController.isLoggedIn
+
+                // Account info
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: accountRow.implicitHeight + 20
+                    radius: 12
+                    color: Qt.rgba(0, 200/255, 255/255, 0.07)
+                    border.color: Qt.rgba(0, 200/255, 255/255, 0.2)
+                    border.width: 1
+
+                    RowLayout {
+                        id: accountRow
+                        anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
+                        anchors.leftMargin: 16; anchors.rightMargin: 16
+                        spacing: 10
+
+                        Rectangle {
+                            width: 32; height: 32; radius: 16
+                            color: Qt.rgba(0, 200/255, 255/255, 0.15)
+                            Text { anchors.centerIn: parent; text: "👤"; font.pixelSize: 15 }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 1
+
+                            Text {
+                                text: DrFrakeController.isSubscribed
+                                    ? (DrFrakeController.subscriptionPlan === "premium"
+                                        ? qsTr("Premium аккаунт")
+                                        : qsTr("Basic аккаунт"))
+                                    : qsTr("Бесплатный аккаунт")
+                                font.pixelSize: 13
+                                font.weight: Font.Medium
+                                color: "#FFFFFF"
+                            }
+
+                            Text {
+                                visible: DrFrakeController.isSubscribed
+                                text: qsTr("Действует до: ") + DrFrakeController.subscriptionEndDate
+                                font.pixelSize: 11
+                                color: Qt.rgba(1, 1, 1, 0.5)
+                            }
+                        }
+                    }
+                }
+
+                // Logout button
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 48
+                    radius: 12
+                    color: logoutMouse.pressed
+                        ? Qt.rgba(239/255, 68/255, 68/255, 0.25)
+                        : (logoutMouse.containsMouse
+                            ? Qt.rgba(239/255, 68/255, 68/255, 0.15)
+                            : Qt.rgba(239/255, 68/255, 68/255, 0.08))
+                    border.color: Qt.rgba(239/255, 68/255, 68/255, 0.4)
+                    border.width: 1
+
+                    Behavior on color { ColorAnimation { duration: 120 } }
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 8
+
+                        Text {
+                            text: "→"
+                            font.pixelSize: 16
+                            color: "#EF4444"
+                        }
+
+                        Text {
+                            text: qsTr("Выйти из аккаунта")
+                            font.pixelSize: 14
+                            font.weight: Font.Medium
+                            color: "#EF4444"
+                        }
+                    }
+
+                    MouseArea {
+                        id: logoutMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            DrFrakeController.logout()
+                            PageController.goToPageHome()
+                        }
+                    }
+                }
+            }
 
             // Open source notice
             Rectangle {

@@ -164,8 +164,11 @@ $OUT_APP_DIR/android-build/gradlew \
 if [[ -v CI || -v MOVE_RESULT ]]; then
   echo "Moving APK/AAB..."
   if [ -v AAB ]; then
-    mv -u $OUT_APP_DIR/android-build/build/outputs/bundle/$BUILD_TYPE/AmneziaVPN-$BUILD_TYPE.aab \
-       $PROJECT_DIR/deploy/build/
+    AAB_FILE=$OUT_APP_DIR/android-build/build/outputs/bundle/$BUILD_TYPE/AmneziaVPN-$BUILD_TYPE.aab
+    if [ ! -f "$AAB_FILE" ]; then
+      AAB_FILE=$(find "$OUT_APP_DIR/android-build" -type f -name "*.aab" 2>/dev/null | head -1)
+    fi
+    mv -u "$AAB_FILE" $PROJECT_DIR/deploy/build/AmneziaVPN-$BUILD_TYPE.aab
   fi
 
   if [ -v ABIS ]; then
@@ -178,11 +181,38 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
       suffix+="-unsigned"
     fi
 
+    APK_OUT_DIR=$OUT_APP_DIR/android-build/build/outputs/apk/$BUILD_TYPE
+
+    # Qt 6.7+ with QT_ANDROID_BUILD_ALL_ABIS=ON produces a single universal APK
+    # instead of separate per-ABI files.  Detect which naming convention was used.
+    UNIVERSAL_APK=$APK_OUT_DIR/AmneziaVPN-$suffix.apk
+
     IFS=';' read -r -a abi_array <<< "$ABIS"
     for ABI in "${abi_array[@]}"
     do
-      mv -u $OUT_APP_DIR/android-build/build/outputs/apk/$BUILD_TYPE/AmneziaVPN-$ABI-$suffix.apk \
-       $PROJECT_DIR/deploy/build/
+      PER_ABI_APK=$APK_OUT_DIR/AmneziaVPN-$ABI-$suffix.apk
+
+      if [ -f "$PER_ABI_APK" ]; then
+        # Standard per-ABI APK (Qt < 6.7 behaviour)
+        mv -u "$PER_ABI_APK" $PROJECT_DIR/deploy/build/
+      else
+        # Try a broader find in case Qt placed the APK in a sub-directory
+        FOUND=$(find "$OUT_APP_DIR" -type f -name "*${ABI}*${suffix}.apk" 2>/dev/null | head -1)
+        if [ -n "$FOUND" ]; then
+          mv -u "$FOUND" $PROJECT_DIR/deploy/build/AmneziaVPN-$ABI-$suffix.apk
+        elif [ -f "$UNIVERSAL_APK" ]; then
+          # Qt 6.7+ universal APK: copy it once per requested ABI so the
+          # downstream rename/upload steps keep working as before.
+          cp "$UNIVERSAL_APK" $PROJECT_DIR/deploy/build/AmneziaVPN-$ABI-$suffix.apk
+        else
+          echo "ERROR: APK not found for ABI=$ABI (tried $PER_ABI_APK and $UNIVERSAL_APK)"
+          echo "Contents of $APK_OUT_DIR:"
+          ls -la "$APK_OUT_DIR" 2>/dev/null || echo "(directory does not exist)"
+          echo "All APKs under android-build:"
+          find "$OUT_APP_DIR/android-build" -name "*.apk" 2>/dev/null || true
+          exit 1
+        fi
+      fi
     done
   fi
 fi

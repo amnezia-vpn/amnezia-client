@@ -50,6 +50,7 @@ namespace PageLoader
 
         PageDrFrakeLogin,
         PageDrFrakeRegister,
+        PageDrFrakeSubscription,
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,

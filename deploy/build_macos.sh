@@ -159,6 +159,7 @@ if [ -n "${MAC_APP_CERT_PW-}" ] && [ -n "${MAC_SIGNER_ID-}" ]; then
 else
   echo "MAC_APP_CERT_PW or MAC_SIGNER_ID not provided, skipping codesign."
 fi
+fi
 
 echo "Packaging installer..."
 PKG_DIR=$BUILD_DIR/pkg

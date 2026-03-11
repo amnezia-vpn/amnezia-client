@@ -30,8 +30,10 @@ set SCRIPT_DIR=%PROJECT_DIR:"=%\deploy
 
 set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
 set APP_NAME=DrFrakeVPN
-set APP_FILENAME=AmneziaVPN.exe
-set SERVICE_FILENAME=AmneziaVPN-service.exe
+set APP_FILENAME=%APP_NAME:"=%.exe
+set SERVICE_FILENAME=%APP_NAME:"=%-service.exe
+set CMAKEOUT_APP_FILENAME=AmneziaVPN.exe
+set CMAKEOUT_SERVICE_FILENAME=AmneziaVPN-service.exe
 set APP_DOMAIN=org.drfrakevpn.package
 set OUT_APP_DIR=%WORK_DIR:"=%\client\release
 set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
@@ -76,8 +78,8 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 echo "Deploying..."
 
 mkdir "%OUT_APP_DIR%"
-copy "%WORK_DIR%\service\server\release\%SERVICE_FILENAME%" "%OUT_APP_DIR%"
-rem copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
+copy "%WORK_DIR%\service\server\release\%CMAKEOUT_SERVICE_FILENAME%" "%OUT_APP_DIR%\%SERVICE_FILENAME%"
+copy "%WORK_DIR%\client\release\%CMAKEOUT_APP_FILENAME%" "%OUT_APP_DIR%\%APP_FILENAME%"
 
 copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\DrFrakeVPN.ico" >nul
 
