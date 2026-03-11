@@ -297,7 +297,10 @@ class AmneziaActivity : QtActivity() {
         Log.d(TAG, "Window focus changed: hasFocus=$hasFocus")
 
         // Cancel pending operations if window loses focus
-        if (!hasFocus) {
+        if (hasFocus) {
+            ReviewManager.onWindowFocusGained(this, mainScope)
+        } else {
+            // Cancel pending operations if window loses focus
             resumeHandler.removeCallbacksAndMessages(null)
         }
     }
@@ -349,6 +352,8 @@ class AmneziaActivity : QtActivity() {
         super.onResume()
         isActivityResumed = true
         Log.d(TAG, "Resume Amnezia activity")
+
+        ReviewManager.onActivityResumed(mainScope)
 
         if (pendingOpenFileUri != null && !openFileDeliveryScheduled) {
             val uri = pendingOpenFileUri!!
