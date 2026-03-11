@@ -3,7 +3,7 @@
     <CPackWiXFragment Id="CM_CP_AmneziaVPN_service.exe">
         <ServiceInstall
                 Id="DrFrakeServiceInstall"
-                Name="DrFrakeVPN-service"
+                Name="AmneziaVPN-service"
                 DisplayName="Dr.Frake VPN Service"
                 Description="Service for Dr.Frake VPN"
                 Start="auto"
@@ -15,7 +15,7 @@
         </ServiceInstall>
         <ServiceControl
                 Id="DrFrakeServiceControl"
-                Name="DrFrakeVPN-service"
+                Name="AmneziaVPN-service"
                 Start="install"
                 Stop="both"
                 Remove="uninstall"

@@ -6,7 +6,9 @@ function appName()
 
 function serviceName()
 {
-    return (appName() + "-service")
+    // The service binary is compiled with SERVICE_NAME = "AmneziaVPN-service".
+    // StartServiceCtrlDispatcher must match this name exactly.
+    return "AmneziaVPN-service"
 }
 
 function appExecutableFileName()

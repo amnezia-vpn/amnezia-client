@@ -196,8 +196,11 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
         # Standard per-ABI APK (Qt < 6.7 behaviour)
         mv -u "$PER_ABI_APK" $PROJECT_DIR/deploy/build/
       else
-        # Try a broader find in case Qt placed the APK in a sub-directory
-        FOUND=$(find "$OUT_APP_DIR" -type f -name "*${ABI}*${suffix}.apk" 2>/dev/null | head -1)
+        # Try a broader find: ABI in filename OR in directory path (Qt 6.3+ sub-projects)
+        FOUND=$(find "$OUT_APP_DIR" -type f \( \
+                  -name "*${ABI}*${suffix}.apk" -o \
+                  \( -name "*${suffix}.apk" -path "*${ABI}*" \) \
+                \) 2>/dev/null | head -1)
         if [ -n "$FOUND" ]; then
           mv -u "$FOUND" $PROJECT_DIR/deploy/build/AmneziaVPN-$ABI-$suffix.apk
         elif [ -f "$UNIVERSAL_APK" ]; then
