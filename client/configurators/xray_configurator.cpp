@@ -73,10 +73,10 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     }
 
     QJsonArray clients = settings["clients"].toArray();
-    
-    // Determine transport type from container config
-    const QJsonObject &xrayProtoConfig = containerConfig.value(config_key::xray).toObject();
-    QString transport = xrayProtoConfig.value(config_key::transport_proto).toString(protocols::xray::defaultTransport);
+
+    // Detect transport type from actual server config (source of truth)
+    QJsonObject streamSettings = inbound.value("streamSettings").toObject();
+    QString transport = streamSettings.value("network").toString("tcp");
 
     // Create configuration for new client
     // XHTTP is incompatible with flow xtls-rprx-vision; flow must be empty
@@ -133,11 +133,24 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
         return "";
     }
 
-    // Select template based on transport type
-    const QJsonObject &xrayProtoConfig = containerConfig.value(config_key::xray).toObject();
-    QString transport = xrayProtoConfig.value(config_key::transport_proto).toString(protocols::xray::defaultTransport);
+    // Read server config to auto-detect transport (server config is source of truth)
+    QString serverConfigStr = m_serverController->getTextFileFromContainer(
+        container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
+    if (errorCode != ErrorCode::NoError) {
+        logger.error() << "Failed to read server config for transport detection";
+        return "";
+    }
+
+    QJsonDocument serverDoc = QJsonDocument::fromJson(serverConfigStr.toUtf8());
+    QJsonObject serverConfig = serverDoc.object();
+    QJsonObject inbound = serverConfig.value("inbounds").toArray().first().toObject();
+    QJsonObject streamSettings = inbound.value("streamSettings").toObject();
+    QString transport = streamSettings.value("network").toString("tcp");
     bool isXhttp = (transport == "xhttp");
 
+    logger.info() << "Auto-detected server transport:" << transport;
+
+    // Select template based on detected transport
     ProtocolScriptType templateType = isXhttp ? ProtocolScriptType::xray_template_xhttp : ProtocolScriptType::xray_template;
 
     QString config = m_serverController->replaceVars(amnezia::scriptData(templateType, container),
@@ -167,16 +180,15 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
     }
     xrayShortId.replace("\n", "");
 
-    // For XHTTP, fetch the path from the server
+    // For XHTTP, extract path from server config's xhttpSettings
     if (isXhttp) {
-        QString xhttpPath =
-                m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::xhttpPathFile, errorCode);
-        if (errorCode != ErrorCode::NoError || xhttpPath.isEmpty()) {
-            logger.error() << "Failed to get XHTTP path";
+        QJsonObject xhttpSettings = streamSettings.value("xhttpSettings").toObject();
+        QString xhttpPath = xhttpSettings.value("path").toString();
+        if (xhttpPath.isEmpty()) {
+            logger.error() << "Server config missing xhttpSettings.path";
             errorCode = ErrorCode::InternalError;
             return "";
         }
-        xhttpPath.replace("\n", "");
         config.replace("$XRAY_XHTTP_PATH", xhttpPath);
     }
 
