@@ -26,9 +26,10 @@ object ReviewManager {
     fun onActivityResumed(scope: CoroutineScope) {
         scope.launch(Dispatchers.IO) {
             val openCount = Prefs.load<Int>(PREFS_REVIEW_OPEN_COUNT) + 1
-            Prefs.save(PREFS_REVIEW_OPEN_COUNT, openCount)
+            val shouldRequest = openCount >= REVIEW_REQUEST_OPEN_INTERVAL
+            Prefs.save(PREFS_REVIEW_OPEN_COUNT, if (shouldRequest) 0 else openCount)
 
-            shouldRequestReviewOnFocus = openCount > 0 && openCount % REVIEW_REQUEST_OPEN_INTERVAL == 0
+            shouldRequestReviewOnFocus = shouldRequest
             Log.i(TAG, "onActivityResumed: openCount=$openCount, shouldRequestReview=$shouldRequestReviewOnFocus")
         }
     }
