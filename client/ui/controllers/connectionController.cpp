@@ -9,6 +9,7 @@
 #include "utilities.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "version.h"
+#include <QFileInfo>
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
@@ -34,7 +35,12 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 void ConnectionController::openConnection()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
+    // Check for AmneziaVPN-service OR the service named after the running EXE (e.g. DrFrakeVPN-service)
+    const QString altServiceName = QFileInfo(QCoreApplication::applicationFilePath()).baseName() + "-service";
+    const bool serviceRunning =
+        Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true) ||
+        Utils::processIsRunning(Utils::executable(altServiceName, false), true);
+    if (!serviceRunning)
     {
         emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
         return;
