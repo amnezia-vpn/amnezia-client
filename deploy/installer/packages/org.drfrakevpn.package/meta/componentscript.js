@@ -11,6 +11,13 @@ function serviceName()
     return "AmneziaVPN-service"
 }
 
+function serviceExecutableFileName()
+{
+    // The actual file on disk is named after the app (DrFrakeVPN-service.exe),
+    // which differs from the internal service name above.
+    return appName() + "-service.exe"
+}
+
 function appExecutableFileName()
 {
     if (runningOnWindows()) {
@@ -92,9 +99,10 @@ Component.prototype.createOperations = function()
         component.addElevatedOperation("Execute", "cmd", "/c", "net stop " + serviceName() + " & sc delete " + serviceName() + " & exit 0");
 
         component.addElevatedOperation("Execute",
-                                       ["sc", "create", serviceName(), "binpath=", "\"" + pu_path + serviceName() + ".exe\"",
-                                        "start=", "auto", "depend=", "BFE/nsi"],
-                                        "UNDOEXECUTE", "cmd", "/c", pu_path + "post_uninstall.cmd");
+                                       "sc", "create", serviceName(),
+                                       "binpath=", "\"" + pu_path + serviceExecutableFileName() + "\"",
+                                       "start=", "auto", "depend=", "BFE/nsi",
+                                       "UNDOEXECUTE", "cmd", "/c", pu_path + "post_uninstall.cmd");
 										
         component.addElevatedOperation("Execute", "cmd", "/c", pu_path + "post_install.cmd");
     } else if (runningOnMacOS()) {

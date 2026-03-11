@@ -80,6 +80,8 @@ echo "Deploying..."
 mkdir "%OUT_APP_DIR%"
 copy "%WORK_DIR%\service\server\release\%CMAKEOUT_SERVICE_FILENAME%" "%OUT_APP_DIR%\%SERVICE_FILENAME%"
 copy "%WORK_DIR%\client\release\%CMAKEOUT_APP_FILENAME%" "%OUT_APP_DIR%\%APP_FILENAME%"
+del "%OUT_APP_DIR%\%CMAKEOUT_APP_FILENAME%"
+del "%OUT_APP_DIR%\%CMAKEOUT_SERVICE_FILENAME%" 2>nul
 
 copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\DrFrakeVPN.ico" >nul
 
