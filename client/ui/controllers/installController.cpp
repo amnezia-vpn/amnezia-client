@@ -151,6 +151,9 @@ void InstallController::install(DockerContainer container, int port, TransportPr
             } else if (container == DockerContainer::Socks5Proxy) {
                 containerConfig.insert(config_key::userName, protocols::socks5Proxy::defaultUserName);
                 containerConfig.insert(config_key::password, Utils::getRandomString(16));
+            } else if (container == DockerContainer::Mtproxy) {
+                containerConfig.insert(config_key::secret, "");
+                containerConfig.insert(config_key::tag, "");
             }
 
             config.insert(config_key::container, ContainerProps::containerToString(container));

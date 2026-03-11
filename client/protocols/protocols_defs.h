@@ -96,6 +96,10 @@ namespace amnezia
         constexpr char ssxray[] = "ssxray";
         constexpr char socks5proxy[] = "socks5proxy";
 
+        constexpr char mtproxy[] = "mtproxy";
+        constexpr char secret[] = "secret";
+        constexpr char tag[] = "tag";
+
         constexpr char configVersion[] = "config_version";
 
         constexpr char splitTunnelSites[] = "splitTunnelSites";
@@ -251,6 +255,11 @@ namespace amnezia
             constexpr char proxyConfigPath[] = "/usr/local/3proxy/conf/3proxy.cfg";
         }
 
+        namespace mtproxy
+        {
+            constexpr char defaultPort[] = "443";
+        }
+
     } // namespace protocols
 
     namespace ProtocolEnumNS
@@ -280,7 +289,8 @@ namespace amnezia
             TorWebSite,
             Dns,
             Sftp,
-            Socks5Proxy
+            Socks5Proxy,
+            Mtproxy
         };
         Q_ENUM_NS(Proto)
 

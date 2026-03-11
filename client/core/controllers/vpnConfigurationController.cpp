@@ -1,5 +1,7 @@
 #include "vpnConfigurationController.h"
 
+#include <QRegularExpression>
+
 #include "configurators/awg_configurator.h"
 #include "configurators/cloak_configurator.h"
 #include "configurators/ikev2_configurator.h"
@@ -141,6 +143,19 @@ void VpnConfigurationsController::updateContainerConfigAfterInstallation(const D
         onion.replace("\n", "");
         protocol.insert(config_key::site, onion);
 
+        containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
+    } else if (container == DockerContainer::Mtproxy) {
+        QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+        const QRegularExpression secretRe(QStringLiteral("MTPROXY_SECRET=([0-9a-f]{32})"), QRegularExpression::CaseInsensitiveOption);
+        const QRegularExpression tagRe(QStringLiteral("MTPROXY_TAG=([0-9a-f]{32})"), QRegularExpression::CaseInsensitiveOption);
+        const auto secretMatch = secretRe.match(stdOut);
+        if (secretMatch.hasMatch()) {
+            protocol.insert(config_key::secret, secretMatch.captured(1).toLower());
+        }
+        const auto tagMatch = tagRe.match(stdOut);
+        if (tagMatch.hasMatch()) {
+            protocol.insert(config_key::tag, tagMatch.captured(1).toLower());
+        }
         containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
     }
 }

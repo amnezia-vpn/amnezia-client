@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  mtproxy:
+    image: telegrammessenger/proxy:latest
+    container_name: amnezia-mtproxy
+    restart: always
+    ports:
+      - "443:443/tcp"
+    environment:
+      # MTProxy secret (32 hex characters). If empty, it will be generated at runtime.
+      - MTPROXY_SECRET=${MTPROXY_SECRET:-}
+      # Optional advertising tag (32 hex characters).
+      - MTPROXY_TAG=${MTPROXY_TAG:-}
+    volumes:
+      - ./data:/data
+    # Ensure the container starts using the clinging (fake-TLS / ee) protocol.
+    # The default image behavior uses MTProxy protocol with TLS obfuscation.

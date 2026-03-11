@@ -45,6 +45,7 @@
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/services/sftpConfigModel.h"
+#include "ui/models/services/mtproxyConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/sites_model.h"
 #include "ui/models/newsModel.h"
@@ -148,6 +149,7 @@ private:
 #endif
     QScopedPointer<SftpConfigModel> m_sftpConfigModel;
     QScopedPointer<Socks5ProxyConfigModel> m_socks5ConfigModel;
+    QScopedPointer<MtproxyConfigModel> m_mtproxyConfigModel;
 };
 
 #endif // CORECONTROLLER_H

@@ -30,7 +30,8 @@ namespace amnezia
             TorWebSite,
             Dns,
             Sftp,
-            Socks5Proxy
+            Socks5Proxy,
+            Mtproxy
         };
         Q_ENUM_NS(DockerContainer)
     } // namespace ContainerEnumNS

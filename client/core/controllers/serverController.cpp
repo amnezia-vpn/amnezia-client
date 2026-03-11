@@ -104,8 +104,9 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     if (e)
         return e;
 
+    const bool shouldUseSh = (container == DockerContainer::Socks5Proxy) || (container == DockerContainer::Mtproxy);
     QString runner =
-            QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, (container == DockerContainer::Socks5Proxy ? "sh" : "bash"));
+            QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, (shouldUseSh ? "sh" : "bash"));
     e = runScript(credentials, replaceVars(runner, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
 
     QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
@@ -198,7 +199,9 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     }
 
     QTemporaryFile localFile;
-    localFile.open();
+    if (!localFile.open()) {
+        return ErrorCode::InternalError;
+    }
     localFile.write(data);
     localFile.close();
 
@@ -306,6 +309,28 @@ ErrorCode ServerController::updateContainer(const ServerCredentials &credentials
     qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
 
     if (reinstallRequired) {
+        if (container == DockerContainer::Mtproxy) {
+            QString stdOut;
+            auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+                stdOut += data + "\n";
+                return ErrorCode::NoError;
+            };
+            auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+                stdOut += data + "\n";
+                return ErrorCode::NoError;
+            };
+
+            QString script = QString("sudo docker exec -i $CONTAINER_NAME sh -c 'cat /data/secret 2>/dev/null || true'");
+            ErrorCode errorCode = runScript(credentials, replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+            if (errorCode == ErrorCode::NoError) {
+                QString secret = stdOut.trimmed();
+                if (!secret.isEmpty()) {
+                    QJsonObject protocol = newConfig.value(ProtocolProps::protoToString(Proto::Mtproxy)).toObject();
+                    protocol.insert(config_key::secret, secret.left(32).toLower());
+                    newConfig.insert(ProtocolProps::protoToString(Proto::Mtproxy), protocol);
+                }
+            }
+        }
         return setupContainer(credentials, container, newConfig, true);
     } else {
         ErrorCode e = configureContainerWorker(credentials, container, newConfig);
@@ -384,7 +409,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
             return true;
     }
 
-    if (container == DockerContainer::Socks5Proxy) {
+    if (container == DockerContainer::Socks5Proxy || container == DockerContainer::Mtproxy) {
         return true;
     }
 
@@ -558,6 +583,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &xrayConfig = config.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
     const QJsonObject &socks5ProxyConfig = config.value(ProtocolProps::protoToString(Proto::Socks5Proxy)).toObject();
+    const QJsonObject &mtproxyConfig = config.value(ProtocolProps::protoToString(Proto::Mtproxy)).toObject();
 
     Vars vars;
 
@@ -673,6 +699,10 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     QString socks5user = (!username.isEmpty() && !password.isEmpty()) ? QString("users %1:CL:%2").arg(username, password) : "";
     vars.append({ { "$SOCKS5_USER", socks5user } });
     vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
+
+    vars.append({ { "$MTPROXY_PORT",   mtproxyConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::Mtproxy))) } });
+    vars.append({ { "$MTPROXY_SECRET", mtproxyConfig.value(config_key::secret).toString() } });
+    vars.append({ { "$MTPROXY_TAG",    mtproxyConfig.value(config_key::tag).toString() } });
 
     QString serverIp = (!ContainerProps::isAwgContainer(container) && 
         container != DockerContainer::WireGuard && container != DockerContainer::Xray)

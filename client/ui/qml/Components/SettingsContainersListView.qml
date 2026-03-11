@@ -49,6 +49,11 @@ ListViewType {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
                         break
                     }
+                    case ContainerEnum.Mtproxy: {
+                        MtproxyConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceMtproxySettings)
+                        break
+                    }
                     default: {
                         ProtocolsModel.updateModel(config)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
