@@ -74,10 +74,15 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
 
     QJsonArray clients = settings["clients"].toArray();
     
+    // Determine transport type from container config
+    const QJsonObject &xrayProtoConfig = containerConfig.value(config_key::xray).toObject();
+    QString transport = xrayProtoConfig.value(config_key::transport_proto).toString(protocols::xray::defaultTransport);
+
     // Create configuration for new client
+    // XHTTP is incompatible with flow xtls-rprx-vision; flow must be empty
     QJsonObject clientConfig {
         {"id", clientId},
-        {"flow", "xtls-rprx-vision"}
+        {"flow", transport == "xhttp" ? QString("") : QString("xtls-rprx-vision")}
     };
     
     clients.append(clientConfig);
@@ -128,9 +133,16 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
         return "";
     }
 
-    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container),
+    // Select template based on transport type
+    const QJsonObject &xrayProtoConfig = containerConfig.value(config_key::xray).toObject();
+    QString transport = xrayProtoConfig.value(config_key::transport_proto).toString(protocols::xray::defaultTransport);
+    bool isXhttp = (transport == "xhttp");
+
+    ProtocolScriptType templateType = isXhttp ? ProtocolScriptType::xray_template_xhttp : ProtocolScriptType::xray_template;
+
+    QString config = m_serverController->replaceVars(amnezia::scriptData(templateType, container),
                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
-    
+
     if (config.isEmpty()) {
         logger.error() << "Failed to get config template";
         errorCode = ErrorCode::InternalError;
@@ -145,7 +157,7 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
         return "";
     }
     xrayPublicKey.replace("\n", "");
-    
+
     QString xrayShortId =
             m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::shortidPath, errorCode);
     if (errorCode != ErrorCode::NoError || xrayShortId.isEmpty()) {
@@ -154,6 +166,19 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
         return "";
     }
     xrayShortId.replace("\n", "");
+
+    // For XHTTP, fetch the path from the server
+    if (isXhttp) {
+        QString xhttpPath =
+                m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::xhttpPathFile, errorCode);
+        if (errorCode != ErrorCode::NoError || xhttpPath.isEmpty()) {
+            logger.error() << "Failed to get XHTTP path";
+            errorCode = ErrorCode::InternalError;
+            return "";
+        }
+        xhttpPath.replace("\n", "");
+        config.replace("$XRAY_XHTTP_PATH", xhttpPath);
+    }
 
     // Validate all required variables are present
     if (!config.contains("$XRAY_CLIENT_ID") || !config.contains("$XRAY_PUBLIC_KEY") || !config.contains("$XRAY_SHORT_ID")) {

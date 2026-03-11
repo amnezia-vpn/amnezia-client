@@ -56,8 +56,9 @@ struct VlessServerObject
     QString shortId;
     QString fingerprint = "chrome";
     QString spiderX = "";
+    QString xhttpPath = "";
     JSONSTRUCT_COMPARE(VlessServerObject, address, id, port, flow, encryption)
-    JSONSTRUCT_REGISTER(VlessServerObject, F(address, id, port, flow, encryption, network, security, serverName, publicKey, shortId, fingerprint, spiderX))
+    JSONSTRUCT_REGISTER(VlessServerObject, F(address, id, port, flow, encryption, network, security, serverName, publicKey, shortId, fingerprint, spiderX, xhttpPath))
 };
 
 

@@ -21,6 +21,60 @@ XRAY_PUBLIC_KEY=$(echo $XRAY_PUBLIC_KEY | tr -d ' ')
 echo $XRAY_PUBLIC_KEY > /opt/amnezia/xray/xray_public.key
 echo $XRAY_PRIVATE_KEY > /opt/amnezia/xray/xray_private.key
 
+# Default to tcp if XRAY_TRANSPORT is not set
+XRAY_TRANSPORT=${XRAY_TRANSPORT:-tcp}
+
+if [ "$XRAY_TRANSPORT" = "xhttp" ]; then
+    XRAY_XHTTP_PATH="/$(openssl rand -hex 16)"
+    echo $XRAY_XHTTP_PATH > /opt/amnezia/xray/xray_xhttp_path.key
+
+cat > /opt/amnezia/xray/server.json <<EOF
+{
+    "log": {
+        "loglevel": "error"
+    },
+    "inbounds": [
+        {
+            "port": $XRAY_SERVER_PORT,
+            "protocol": "vless",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "$XRAY_CLIENT_ID",
+                        "flow": ""
+                    }
+                ],
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "xhttp",
+                "xhttpSettings": {
+                    "path": "$XRAY_XHTTP_PATH",
+                    "mode": "auto"
+                },
+                "security": "reality",
+                "realitySettings": {
+                    "dest": "$XRAY_SITE_NAME:443",
+                    "serverNames": [
+                        "$XRAY_SITE_NAME"
+                    ],
+                    "privateKey": "$XRAY_PRIVATE_KEY",
+                    "shortIds": [
+                        "$XRAY_SHORT_ID"
+                    ]
+                }
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "freedom"
+        }
+    ]
+}
+EOF
+
+else
 
 cat > /opt/amnezia/xray/server.json <<EOF
 {
@@ -63,5 +117,7 @@ cat > /opt/amnezia/xray/server.json <<EOF
     ]
 }
 EOF
+
+fi
 
 

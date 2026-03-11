@@ -184,6 +184,13 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
             QJsonIO::SetValue(stream, multiMode, { "grpcSettings", "multiMode" });
         }
     }
+    else if (type == "xhttp")
+    {
+        const auto hasPath = query.hasQueryItem("path");
+        const auto path = hasPath ? QUrl::fromPercentEncoding(query.queryItemValue("path").toUtf8()) : "/";
+        QJsonIO::SetValue(stream, path, { "xhttpSettings", "path" });
+        QJsonIO::SetValue(stream, QString("auto"), { "xhttpSettings", "mode" });
+    }
 
     // tls-wise settings
     const auto hasSecurity = query.hasQueryItem("security");
@@ -269,7 +276,11 @@ const QString Serialize(const VlessServerObject &server, const QString &alias)
     if (!server.network.isEmpty() && server.network != "tcp") {
         query.addQueryItem("type", server.network);
     }
-    
+
+    if (server.network == "xhttp" && !server.xhttpPath.isEmpty()) {
+        query.addQueryItem("path", server.xhttpPath);
+    }
+
     if (!server.encryption.isEmpty()) {
         query.addQueryItem("encryption", server.encryption);
     }
