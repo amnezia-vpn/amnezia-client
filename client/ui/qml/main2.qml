@@ -21,10 +21,14 @@ Window  {
         function onStateChanged() {
             if (Qt.platform.os === "android") {
                 if (Qt.application.state === Qt.ApplicationActive) {
+                    root.visible = true
                     refreshTimer.restart()
-                } else if (Qt.application.state === Qt.ApplicationSuspended || 
-                          Qt.application.state === Qt.ApplicationInactive) {
-                    console.log("QML: Application going to background, state:", Qt.application.state)
+                } else if (Qt.application.state === Qt.ApplicationSuspended) {
+                    // Hide window to stop the Qt render loop and prevent
+                    // eglSwapBuffers from being called on a lost EGL context.
+                    // NOTE: Do NOT hide on ApplicationInactive — that fires on any
+                    // focus change (IME, notifications) and would blank the screen.
+                    root.visible = false
                 }
             }
         }

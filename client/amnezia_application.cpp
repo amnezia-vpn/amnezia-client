@@ -109,6 +109,16 @@ void AmneziaApplication::init()
             // install filter on main window
             if (auto win = qobject_cast<QQuickWindow*>(obj)) {
                 win->installEventFilter(this);
+#ifdef Q_OS_ANDROID
+                QObject::connect(win, &QQuickWindow::sceneGraphError,
+                    [](QQuickWindow::SceneGraphError, const QString &msg) {
+                        qWarning() << "Scene graph error (suppressed):" << msg;
+                    });
+                // Keep graphics context alive across hide/show cycles to avoid
+                // eglSwapBuffers/makeCurrent being called on a context Android has reclaimed.
+                win->setPersistentSceneGraph(true);
+                win->setPersistentGraphics(true);
+#endif
                 win->show();
             }
         },
