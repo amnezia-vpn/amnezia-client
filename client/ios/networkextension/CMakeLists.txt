@@ -1,6 +1,13 @@
 enable_language(Swift)
 
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+set(AMNEZIA_IOS_APPLETV ${AMNEZIA_IOS_ENABLE_APPLETV_TARGET})
+
+if(AMNEZIA_IOS_APPLETV)
+    message("Network Extension tvOS mode is ON")
+else()
+    message("Network Extension tvOS mode is OFF")
+endif()
 
 add_executable(networkextension)
 set_target_properties(networkextension PROPERTIES
@@ -28,6 +35,23 @@ set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../Frameworks"
 )
 
+if(AMNEZIA_IOS_APPLETV)
+    set_target_properties(networkextension PROPERTIES
+        XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "appletvos appletvsimulator"
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "3"
+        XCODE_ATTRIBUTE_TVOS_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}"
+        XCODE_ATTRIBUTE_SDKROOT "appletvos"
+        XCODE_ATTRIBUTE_SDKROOT[sdk=appletvos*] "appletvos"
+        XCODE_ATTRIBUTE_SDKROOT[sdk=appletvsimulator*] "appletvsimulator"
+        XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS "$(inherited) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)"
+        XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS[sdk=appletvos*] "$(inherited) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)"
+        XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS[sdk=appletvsimulator*] "$(inherited) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)"
+        XCODE_ATTRIBUTE_EXCLUDED_LIBRARY_SEARCH_PATHS "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk/usr/lib/swift"
+        XCODE_ATTRIBUTE_EXCLUDED_FRAMEWORK_SEARCH_PATHS "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk/System/Library/Frameworks"
+        LINKER_LANGUAGE Swift
+    )
+endif()
+
 if(DEPLOY)
     set_target_properties(networkextension PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
@@ -45,38 +69,49 @@ endif()
 set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
     XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
-    XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/WireGuardNetworkExtension-Bridging-Header.h"
     XCODE_ATTRIBUTE_SWIFT_OPTIMIZATION_LEVEL "-Onone"
     XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
+)
+
+set_target_properties(networkextension PROPERTIES
+    XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/WireGuardNetworkExtension-Bridging-Header.h"
 )
 
 set_target_properties("networkextension" PROPERTIES
     XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
 )
 
-find_library(FW_ASSETS_LIBRARY AssetsLibrary)
-find_library(FW_MOBILE_CORE MobileCoreServices)
 find_library(FW_UI_KIT UIKit)
 find_library(FW_LIBRESOLV libresolv.9.tbd)
 
-target_link_libraries(networkextension PRIVATE ${FW_ASSETS_LIBRARY})
-target_link_libraries(networkextension PRIVATE ${FW_MOBILE_CORE})
-target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
-target_link_libraries(networkextension PRIVATE ${FW_LIBRESOLV})
+if(NOT AMNEZIA_IOS_APPLETV)
+    target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
+    target_link_libraries(networkextension PRIVATE ${FW_LIBRESOLV})
+else()
+    target_link_libraries(networkextension PRIVATE -lresolv)
+endif()
 
 target_compile_options(networkextension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(networkextension PRIVATE -DNETWORK_EXTENSION=1)
 
 set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources)
 
-target_sources(networkextension PRIVATE
+set(NE_COMMON_SOURCES
+    ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
+)
+
+set(NE_WIREGUARD_SOURCES
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/WireGuardAdapter.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PacketTunnelSettingsGenerator.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/DNSResolver.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardNetworkExtension/ErrorNotifier.swift
     ${WG_APPLE_SOURCE_DIR}/Shared/Keychain.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
+    ${WG_APPLE_SOURCE_DIR}/Shared/FileManager+Extension.swift
     ${WG_APPLE_SOURCE_DIR}/Shared/Model/NETunnelProviderProtocol+Extension.swift
+    ${WG_APPLE_SOURCE_DIR}/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
     ${WG_APPLE_SOURCE_DIR}/Shared/Model/String+ArrayConversion.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/TunnelConfiguration.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddressRange.swift
@@ -84,23 +119,49 @@ target_sources(networkextension PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/DNSServer.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/InterfaceConfiguration.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PeerConfiguration.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/FileManager+Extension.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Array+ConcurrentMap.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddress+AddrInfo.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/HevSocksTunnel.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+WireGuard.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPN.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Xray.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/WGConfig.swift
+)
+
+set(NE_XRAY_SOURCES
+    ${CLIENT_ROOT_DIR}/platforms/ios/HevSocksTunnel.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Xray.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/XrayConfig.swift
+)
+
+set(NE_OPENVPN_SOURCES
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPN.swift
+)
+
+set(NE_APPLE_GLUE_SOURCES
     ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
 )
+
+if(AMNEZIA_IOS_APPLETV)
+    list(APPEND NE_APPLE_GLUE_SOURCES
+        ${CLIENT_ROOT_DIR}/platforms/ios/tvos_cgo_stubs.c
+    )
+endif()
+
+target_sources(networkextension PRIVATE ${NE_COMMON_SOURCES})
+
+if(NOT AMNEZIA_IOS_APPLETV)
+    target_sources(networkextension PRIVATE
+        ${NE_WIREGUARD_SOURCES}
+        ${NE_OPENVPN_SOURCES}
+        ${NE_XRAY_SOURCES}
+        ${NE_APPLE_GLUE_SOURCES}
+    )
+else()
+    target_sources(networkextension PRIVATE
+        ${NE_WIREGUARD_SOURCES}
+        ${NE_APPLE_GLUE_SOURCES}
+    )
+endif()
 
 target_sources(networkextension PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
@@ -113,7 +174,7 @@ set_property(TARGET networkextension APPEND PROPERTY RESOURCE
 ## Build wireguard-go-version.h
 execute_process(
     COMMAND go list -m golang.zx2c4.com/wireguard
-    WORKING_DIRECTORY ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo
+    WORKING_DIRECTORY ${WG_APPLE_SOURCE_DIR}/WireGuardKitGo
     OUTPUT_VARIABLE WG_VERSION_FULL
 )
 string(REGEX REPLACE ".*v\([0-9.]*\).*" "\\1" WG_VERSION_STRING 1.1.1)
@@ -122,9 +183,46 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/wireguard-go-version.h.in
 target_sources(networkextension PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
 
+if(AMNEZIA_IOS_APPLETV)
+    set(WG_TVOS_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/WireGuardKitGo-appletvos)
+    set(WG_TVOS_TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/WireGuardKitGo-appletvos-tmp)
+    execute_process(
+        COMMAND make clean
+        WORKING_DIRECTORY ${WG_APPLE_SOURCE_DIR}/WireGuardKitGo
+        OUTPUT_QUIET
+        ERROR_QUIET
+    )
+    execute_process(
+        COMMAND make build
+            PLATFORM_NAME=appletvos
+            GOOS_appletvos=ios
+            GOFLAGS=-tags=netgo
+            ARCHS=arm64
+            DEPLOYMENT_TARGET_CLANG_FLAG_NAME=mtvos-version-min
+            DEPLOYMENT_TARGET_CLANG_ENV_NAME=TVOS_DEPLOYMENT_TARGET
+            TVOS_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
+            CONFIGURATION_BUILD_DIR=${WG_TVOS_LIB_DIR}
+            CONFIGURATION_TEMP_DIR=${WG_TVOS_TMP_DIR}
+        WORKING_DIRECTORY ${WG_APPLE_SOURCE_DIR}/WireGuardKitGo
+        RESULT_VARIABLE WG_TVOS_BUILD_RESULT
+    )
+    if(NOT WG_TVOS_BUILD_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to build tvOS WireGuard Go bridge (libwg-go.a)")
+    endif()
+endif()
+
 target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
-
-target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework)
+if(NOT AMNEZIA_IOS_APPLETV)
+    target_link_directories(networkextension PRIVATE
+        ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64
+    )
+    target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
+    target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework)
+else()
+    target_link_directories(networkextension PRIVATE
+        ${WG_TVOS_LIB_DIR}
+    )
+    target_link_libraries(networkextension PRIVATE ${WG_TVOS_LIB_DIR}/libwg-go.a)
+endif()
