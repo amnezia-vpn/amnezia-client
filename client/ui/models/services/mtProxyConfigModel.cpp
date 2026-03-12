@@ -22,8 +22,8 @@ bool MtProxyConfigModel::setData(const QModelIndex &index, const QVariant &value
 
     switch (role) {
     case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
-    case Roles::SecretRole: m_protocolConfig.insert(protocols::mtProxy::mtproxySecret, value.toString()); break;
-    case Roles::TagRole: m_protocolConfig.insert(protocols::mtProxy::mtproxyTag, value.toString()); break;
+    case Roles::SecretRole: m_protocolConfig.insert(protocols::mtProxy::secretKey, value.toString()); break;
+    case Roles::TagRole: m_protocolConfig.insert(protocols::mtProxy::tagKey, value.toString()); break;
     default: return false;
     }
 
@@ -39,10 +39,10 @@ QVariant MtProxyConfigModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::mtProxy::defaultPort);
-    case Roles::SecretRole: return m_protocolConfig.value(protocols::mtProxy::mtproxySecret).toString();
-    case Roles::TagRole: return m_protocolConfig.value(protocols::mtProxy::mtproxyTag).toString();
-    case Roles::TgLinkRole: return m_protocolConfig.value(protocols::mtProxy::mtproxyTgLink).toString();
-    case Roles::TmeLinkRole: return m_protocolConfig.value(protocols::mtProxy::mtproxyTmeLink).toString();
+    case Roles::SecretRole: return m_protocolConfig.value(protocols::mtProxy::secretKey).toString();
+    case Roles::TagRole: return m_protocolConfig.value(protocols::mtProxy::tagKey).toString();
+    case Roles::TgLinkRole: return m_protocolConfig.value(protocols::mtProxy::tgLinkKey).toString();
+    case Roles::TmeLinkRole: return m_protocolConfig.value(protocols::mtProxy::tmeLinkKey).toString();
     }
 
     return QVariant();
@@ -57,14 +57,14 @@ void MtProxyConfigModel::updateModel(const QJsonObject &config)
 
     m_protocolConfig.insert(config_key::port,
                             protocolConfig.value(config_key::port).toString(protocols::mtProxy::defaultPort));
-    m_protocolConfig.insert(protocols::mtProxy::mtproxySecret,
-                            protocolConfig.value(protocols::mtProxy::mtproxySecret).toString());
-    m_protocolConfig.insert(protocols::mtProxy::mtproxyTag,
-                            protocolConfig.value(protocols::mtProxy::mtproxyTag).toString());
-    m_protocolConfig.insert(protocols::mtProxy::mtproxyTgLink,
-                            protocolConfig.value(protocols::mtProxy::mtproxyTgLink).toString());
-    m_protocolConfig.insert(protocols::mtProxy::mtproxyTmeLink,
-                            protocolConfig.value(protocols::mtProxy::mtproxyTmeLink).toString());
+    m_protocolConfig.insert(protocols::mtProxy::secretKey,
+                            protocolConfig.value(protocols::mtProxy::secretKey).toString());
+    m_protocolConfig.insert(protocols::mtProxy::tagKey,
+                            protocolConfig.value(protocols::mtProxy::tagKey).toString());
+    m_protocolConfig.insert(protocols::mtProxy::tgLinkKey,
+                            protocolConfig.value(protocols::mtProxy::tgLinkKey).toString());
+    m_protocolConfig.insert(protocols::mtProxy::tmeLinkKey,
+                            protocolConfig.value(protocols::mtProxy::tmeLinkKey).toString());
 
     endResetModel();
 }

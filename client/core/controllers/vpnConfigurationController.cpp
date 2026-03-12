@@ -159,13 +159,13 @@ void VpnConfigurationsController::updateContainerConfigAfterInstallation(const D
         QRegularExpressionMatch mTmeLink = reTmeLink.match(stdOut);
 
         if (mSecret.hasMatch()) {
-            protocol.insert(protocols::mtProxy::mtproxySecret, mSecret.captured(1));
+            protocol.insert(protocols::mtProxy::secretKey, mSecret.captured(1));
         }
         if (mTgLink.hasMatch()) {
-            protocol.insert(protocols::mtProxy::mtproxyTgLink, mTgLink.captured(1));
+            protocol.insert(protocols::mtProxy::tgLinkKey, mTgLink.captured(1));
         }
         if (mTmeLink.hasMatch()) {
-            protocol.insert(protocols::mtProxy::mtproxyTmeLink, mTmeLink.captured(1));
+            protocol.insert(protocols::mtProxy::tmeLinkKey, mTmeLink.captured(1));
         }
 
         containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);

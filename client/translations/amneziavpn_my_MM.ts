@@ -372,71 +372,71 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="195"/>
+        <location filename="../ui/controllers/installController.cpp" line="193"/>
         <source>%1 installed successfully. </source>
         <translation>%1 ကို အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="195"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 ကို ဆာဗာတွင် ထည့်သွင်းပြီးဖြစ်သည်. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="217"/>
+        <location filename="../ui/controllers/installController.cpp" line="215"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 ဆာဗာတွင် ထည့်သွင်းပြီးသား ကွန်တိန်နာများကို ပေါင်းထည့်ပြီးပါပြီ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="297"/>
+        <location filename="../ui/controllers/installController.cpp" line="295"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 ထည့်သွင်းပြီးသား ကွန်တိန်နာများကို ဆာဗာပေါ်တွင် တွေ့ရှိခဲ့သည်။ ထည့်သွင်းထားသည့် ကွန်တိန်နာအားလုံးကို အပလီကေးရှင်းထဲသို့ ပေါင်းထည့်ပြီးပါပြီ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="752"/>
+        <location filename="../ui/controllers/installController.cpp" line="749"/>
         <source>Settings updated successfully</source>
         <translation>ဆက်တင်များကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ပြီးပါပြီ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="769"/>
+        <location filename="../ui/controllers/installController.cpp" line="766"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>ဆာဗာ &apos;%1&apos; ကို ပြန်လည်စတင်ခဲ့သည်။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="781"/>
+        <location filename="../ui/controllers/installController.cpp" line="778"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>ဆာဗာ &apos;%1&apos; ကို ဖယ်ရှားခဲ့သည်။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="792"/>
+        <location filename="../ui/controllers/installController.cpp" line="789"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>ဆာဗာ &apos;%1&apos; မှ ကွန်တိန်နာအားလုံးကို ဖယ်ရှားလိုက်ပါပြီ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="810"/>
+        <location filename="../ui/controllers/installController.cpp" line="807"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 ကို ဆာဗာ &apos;%2&apos; မှ ဖယ်ရှားလိုက်ပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="819"/>
+        <location filename="../ui/controllers/installController.cpp" line="816"/>
         <source>Api config removed</source>
         <translation>Api config ကိုဖယ်ရှားလိုက်သည်</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="841"/>
+        <location filename="../ui/controllers/installController.cpp" line="838"/>
         <source>%1 cached profile cleared</source>
         <translation>ကက်ရှ်လုပ်ထားတဲ့ ပရိုဖိုင် %1 ခုကို ရှင်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="982"/>
+        <location filename="../ui/controllers/installController.cpp" line="979"/>
         <source>Please login as the user</source>
         <translation>အသုံးပြုသူအဖြစ် log in ဝင်ရောက်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="1010"/>
+        <location filename="../ui/controllers/installController.cpp" line="1007"/>
         <source>Server added successfully</source>
         <translation>ဆာဗာကို အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ</translation>
     </message>
@@ -1399,100 +1399,100 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="66"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="63"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="228"/>
         <source>MTProxy settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="64"/>
         <source>Telegram MTProto proxy. Share the link below with users to connect through your server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="73"/>
         <source>Host</source>
         <translation type="unfinished">Host</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="88"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="109"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="134"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="157"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="181"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="82"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="163"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="184"/>
         <source>Copied</source>
         <translation type="unfinished">ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="100"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="264"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="240"/>
         <source>Port</source>
         <translation type="unfinished">Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="109"/>
         <source>Secret</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="133"/>
         <source>Tag</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="153"/>
         <source>Telegram link (tg://)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="195"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="174"/>
         <source>Telegram link (t.me)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="288"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="263"/>
         <source>Tag (optional, from @MTProxybot)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="289"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="264"/>
         <source>leave empty if not needed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="309"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="341"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="284"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="313"/>
         <source>Change connection settings</source>
         <translation type="unfinished">ချက်ဆက်မှုဆက်တင်များကို ပြောင်းလဲမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="313"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="288"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation type="unfinished">Port သည် 1 မှ 65535 အတွင်း ဖြစ်ရမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="362"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="331"/>
         <source>Remove </source>
         <translation type="unfinished">ဖယ်ရှားမည် </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="366"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="335"/>
         <source>Remove %1 from server?</source>
         <translation type="unfinished">%1 ကို ဆာဗာမှ ဖယ်ရှားမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="367"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="336"/>
         <source>The proxy will be stopped and all users will lose access.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="368"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="337"/>
         <source>Continue</source>
         <translation type="unfinished">ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="369"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="338"/>
         <source>Cancel</source>
         <translation type="unfinished">ပယ်ဖျက်မည်</translation>
     </message>
@@ -3708,7 +3708,7 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSetupWizardStart</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="42"/>
         <source>Let&apos;s get started</source>
         <translation>စတင်လိုက်ကြရအောင်</translation>
     </message>
@@ -5511,12 +5511,12 @@ For more detailed information, you can
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="230"/>
+        <location filename="../ui/qml/main2.qml" line="235"/>
         <source>Private key passphrase</source>
         <translation>ကိုယ်ပိုင် key စကားဝှက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="251"/>
+        <location filename="../ui/qml/main2.qml" line="256"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>

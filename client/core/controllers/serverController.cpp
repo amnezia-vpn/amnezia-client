@@ -686,8 +686,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
 
     vars.append({ { "$MTPROXY_PORT",    mtProxyConfig.value(config_key::port).toString(protocols::mtProxy::defaultPort) } });
-    vars.append({ { "$MTPROXY_SECRET",  mtProxyConfig.value(protocols::mtProxy::mtproxySecret).toString("") } });
-    vars.append({ { "$MTPROXY_TAG",     mtProxyConfig.value(protocols::mtProxy::mtproxyTag).toString("") } });
+    vars.append({ { "$MTPROXY_SECRET",  mtProxyConfig.value(protocols::mtProxy::secretKey).toString("") } });
+    vars.append({ { "$MTPROXY_TAG",     mtProxyConfig.value(protocols::mtProxy::tagKey).toString("") } });
 
     QString serverIp = (!ContainerProps::isAwgContainer(container) &&
         container != DockerContainer::WireGuard && container != DockerContainer::Xray)

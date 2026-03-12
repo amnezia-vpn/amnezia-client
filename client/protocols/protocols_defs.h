@@ -254,11 +254,10 @@ namespace amnezia
 
         namespace mtProxy
         {
-            // MTProxy specific keys
-            constexpr char mtproxySecret[]   = "mtproxy_secret";
-            constexpr char mtproxyTag[]      = "mtproxy_tag";
-            constexpr char mtproxyTgLink[]   = "mtproxy_tg_link";
-            constexpr char mtproxyTmeLink[]  = "mtproxy_tme_link";
+            constexpr char secretKey[]   = "mtproxy_secret";
+            constexpr char tagKey[]      = "mtproxy_tag";
+            constexpr char tgLinkKey[]   = "mtproxy_tg_link";
+            constexpr char tmeLinkKey[]  = "mtproxy_tme_link";
 
             constexpr char defaultPort[] = "443";
         }

@@ -529,13 +529,13 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         auto mTmeLink = reTmeLink.match(stdOut);
 
                         if (mSecret.hasMatch()) {
-                            containerConfig.insert(protocols::mtProxy::mtproxySecret, mSecret.captured(1));
+                            containerConfig.insert(protocols::mtProxy::secretKey, mSecret.captured(1));
                         }
                         if (mTgLink.hasMatch()) {
-                            containerConfig.insert(protocols::mtProxy::mtproxyTgLink, mTgLink.captured(1));
+                            containerConfig.insert(protocols::mtProxy::tgLinkKey, mTgLink.captured(1));
                         }
                         if (mTmeLink.hasMatch()) {
-                            containerConfig.insert(protocols::mtProxy::mtproxyTmeLink, mTmeLink.captured(1));
+                            containerConfig.insert(protocols::mtProxy::tmeLinkKey, mTmeLink.captured(1));
                         }
                     } else if (protocol == Proto::Xray) {
                         QString currentConfig = serverController->getTextFileFromContainer(

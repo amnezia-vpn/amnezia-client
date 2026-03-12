@@ -403,70 +403,70 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="195"/>
+        <location filename="../ui/controllers/installController.cpp" line="193"/>
         <source>%1 installed successfully. </source>
         <translation>%1 встановлено. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="195"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 вже встановлено на сервері. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="217"/>
+        <location filename="../ui/controllers/installController.cpp" line="215"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>Додані сервіси і протоколи, які були раніше встановлені на сервері</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="297"/>
+        <location filename="../ui/controllers/installController.cpp" line="295"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 На сервері знайдені сервіси та протоколи, всі вони додані в застосунок</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="752"/>
+        <location filename="../ui/controllers/installController.cpp" line="749"/>
         <source>Settings updated successfully</source>
         <translation>Налаштування оновлено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="769"/>
+        <location filename="../ui/controllers/installController.cpp" line="766"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>Сервер &apos;%1&apos; перезавантажено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="781"/>
+        <location filename="../ui/controllers/installController.cpp" line="778"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Сервер &apos;%1&apos; був видалений</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="792"/>
+        <location filename="../ui/controllers/installController.cpp" line="789"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>Всі сервіси та протоколи були видалені з сервера &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="810"/>
+        <location filename="../ui/controllers/installController.cpp" line="807"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 був видалений з сервера &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="819"/>
+        <location filename="../ui/controllers/installController.cpp" line="816"/>
         <source>Api config removed</source>
         <translation>Конфігурацію API видалено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="841"/>
+        <location filename="../ui/controllers/installController.cpp" line="838"/>
         <source>%1 cached profile cleared</source>
         <translation>Кешований профіль %1 очищено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="982"/>
+        <location filename="../ui/controllers/installController.cpp" line="979"/>
         <source>Please login as the user</source>
         <translation>Буль-ласка, увійдіть в систему від імені користувача</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="1010"/>
+        <location filename="../ui/controllers/installController.cpp" line="1007"/>
         <source>Server added successfully</source>
         <translation>Сервер додано</translation>
     </message>
@@ -1488,100 +1488,100 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="66"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="63"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="228"/>
         <source>MTProxy settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="64"/>
         <source>Telegram MTProto proxy. Share the link below with users to connect through your server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="73"/>
         <source>Host</source>
         <translation type="unfinished">Хост</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="88"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="109"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="134"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="157"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="181"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="82"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="163"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="184"/>
         <source>Copied</source>
         <translation type="unfinished">Скопійовано</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="100"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="264"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="240"/>
         <source>Port</source>
         <translation type="unfinished">Порт</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="109"/>
         <source>Secret</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="133"/>
         <source>Tag</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="153"/>
         <source>Telegram link (tg://)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="195"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="174"/>
         <source>Telegram link (t.me)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="288"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="263"/>
         <source>Tag (optional, from @MTProxybot)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="289"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="264"/>
         <source>leave empty if not needed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="309"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="341"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="284"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="313"/>
         <source>Change connection settings</source>
         <translation type="unfinished">Змінити налаштування підключення</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="313"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="288"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation type="unfinished">Порт повинен бути в межах від 1 до 65535</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="362"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="331"/>
         <source>Remove </source>
         <translation type="unfinished">Видалити </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="366"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="335"/>
         <source>Remove %1 from server?</source>
         <translation type="unfinished">Видалити %1 з сервера?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="367"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="336"/>
         <source>The proxy will be stopped and all users will lose access.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="368"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="337"/>
         <source>Continue</source>
         <translation type="unfinished">Продовжити</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="369"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="338"/>
         <source>Cancel</source>
         <translation type="unfinished">Відмінити</translation>
     </message>
@@ -4026,7 +4026,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">У мене нічого нема</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="42"/>
         <source>Let&apos;s get started</source>
         <translation>Почнемо</translation>
     </message>
@@ -6014,12 +6014,12 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="230"/>
+        <location filename="../ui/qml/main2.qml" line="235"/>
         <source>Private key passphrase</source>
         <translation>Пароль для особистого ключа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="251"/>
+        <location filename="../ui/qml/main2.qml" line="256"/>
         <source>Save</source>
         <translation>Зберегти</translation>
     </message>

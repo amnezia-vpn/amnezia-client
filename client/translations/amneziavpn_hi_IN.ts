@@ -348,71 +348,71 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="195"/>
+        <location filename="../ui/controllers/installController.cpp" line="193"/>
         <source>%1 installed successfully. </source>
         <translation>%1 सफलतापूर्वक स्थापित हुआ. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="195"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 पहले से ही सर्वर पर स्थापित है. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="217"/>
+        <location filename="../ui/controllers/installController.cpp" line="215"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 सर्वर पर पहले से स्थापित कंटेनर जोड़े गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="297"/>
+        <location filename="../ui/controllers/installController.cpp" line="295"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 सर्वर पर पहले से स्थापित कंटेनर पाए गए। सभी स्थापित कंटेनरों को एप्लिकेशन में जोड़ दिया गया है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="752"/>
+        <location filename="../ui/controllers/installController.cpp" line="749"/>
         <source>Settings updated successfully</source>
         <translation>सेटिंग्स सफलतापूर्वक अपडेट हो गईं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="769"/>
+        <location filename="../ui/controllers/installController.cpp" line="766"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>सर्वर &apos;%1&apos; रीबूट किया गया था</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="781"/>
+        <location filename="../ui/controllers/installController.cpp" line="778"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>सर्वर &apos;%1&apos; रीबूट किया गया था</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="792"/>
+        <location filename="../ui/controllers/installController.cpp" line="789"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>सर्वर &apos;%1&apos; से सभी कंटेनर हटा दिए गए हैं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="810"/>
+        <location filename="../ui/controllers/installController.cpp" line="807"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 को सर्वर &apos;%2&apos; से हटा दिया गया है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="819"/>
+        <location filename="../ui/controllers/installController.cpp" line="816"/>
         <source>Api config removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="841"/>
+        <location filename="../ui/controllers/installController.cpp" line="838"/>
         <source>%1 cached profile cleared</source>
         <translation>%1 कैश्ड प्रोफ़ाइल साफ़ की गई</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="982"/>
+        <location filename="../ui/controllers/installController.cpp" line="979"/>
         <source>Please login as the user</source>
         <translation>कृपया उपयोगकर्ता के रूप में लॉगिन करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="1010"/>
+        <location filename="../ui/controllers/installController.cpp" line="1007"/>
         <source>Server added successfully</source>
         <translation>सर्वर सफलतापूर्वक जोड़ा गया</translation>
     </message>
@@ -1339,100 +1339,100 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished">सेटिंग्स सफलतापूर्वक अपडेट हो गईं</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="66"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="63"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="228"/>
         <source>MTProxy settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="64"/>
         <source>Telegram MTProto proxy. Share the link below with users to connect through your server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="73"/>
         <source>Host</source>
         <translation type="unfinished">मेज़बान</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="88"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="109"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="134"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="157"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="181"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="82"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="163"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="184"/>
         <source>Copied</source>
         <translation type="unfinished">कॉपी किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="100"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="264"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="240"/>
         <source>Port</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="109"/>
         <source>Secret</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="133"/>
         <source>Tag</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="153"/>
         <source>Telegram link (tg://)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="195"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="174"/>
         <source>Telegram link (t.me)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="288"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="263"/>
         <source>Tag (optional, from @MTProxybot)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="289"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="264"/>
         <source>leave empty if not needed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="309"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="341"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="284"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="313"/>
         <source>Change connection settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="313"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="288"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="362"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="331"/>
         <source>Remove </source>
         <translation type="unfinished">निकालना </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="366"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="335"/>
         <source>Remove %1 from server?</source>
         <translation type="unfinished">सर्वर से %1 हटाएँ?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="367"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="336"/>
         <source>The proxy will be stopped and all users will lose access.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="368"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="337"/>
         <source>Continue</source>
         <translation type="unfinished">जारी रखना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="369"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="338"/>
         <source>Cancel</source>
         <translation type="unfinished">रद्द करना</translation>
     </message>
@@ -3707,7 +3707,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">मेरे पास कुछ नहीं है</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="42"/>
         <source>Let&apos;s get started</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5530,12 +5530,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="230"/>
+        <location filename="../ui/qml/main2.qml" line="235"/>
         <source>Private key passphrase</source>
         <translation>निजी कुंजी पासफ़्रेज़</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="251"/>
+        <location filename="../ui/qml/main2.qml" line="256"/>
         <source>Save</source>
         <translation>सहेजें</translation>
     </message>
