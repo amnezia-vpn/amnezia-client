@@ -303,9 +303,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Xray: return true;
     case DockerContainer::Cloak: return true;
     case DockerContainer::SSXray: return true;
-    // TODO
-    /// надо ли на мобилках?
-    // case DockerContainer::MtProxy: return true;
+    case DockerContainer::MtProxy: return true;
         //    case DockerContainer::ShadowSocks: return true;
     default:
         return false;
@@ -343,9 +341,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Cloak: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
-    // TODO
-    /// надо ли на мобилках?
-    // case DockerContainer::MtProxy: return true;
+    case DockerContainer::MtProxy: return true;
     default: return false;
     }
 
