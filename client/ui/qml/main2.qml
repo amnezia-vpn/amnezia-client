@@ -56,6 +56,11 @@ Window  {
         PageController.closeWindow()
     }
 
+    onSceneGraphError: function(error, message) {
+        // Prevent qFatal crash on Android when EGL context is lost
+        console.warn("Scene graph error:", error, message)
+    }
+
     title: "AmneziaVPN"
 
     Item { // This item is needed for focus handling
