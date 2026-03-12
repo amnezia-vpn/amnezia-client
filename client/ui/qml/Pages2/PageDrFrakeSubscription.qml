@@ -21,6 +21,8 @@ PageType {
     property string errorMessage: ""
     property bool isWaitingForPayment: false
     property int pollCount: 0
+    property string mgmtError: ""
+    property bool confirmDeleteCard: false
     readonly property int maxPolls: 24  // 24 × 5 s = 2 min
 
     // -1 = no paid plan, 0 = basic, 1 = premium
@@ -146,10 +148,132 @@ PageType {
                 }
             }
 
+            // ── Trial banner ──────────────────────────────────────
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                visible: DrFrakeController.trialAvailable && !DrFrakeController.isSubscribed
+                implicitHeight: trialCol.implicitHeight + 24
+                radius: 16
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Qt.rgba(16/255, 185/255, 129/255, 0.22) }
+                    GradientStop { position: 1.0; color: Qt.rgba(28/255, 29/255, 33/255, 1.0) }
+                }
+                border.color: Qt.rgba(16/255, 185/255, 129/255, 0.5)
+                border.width: 2
+
+                ColumnLayout {
+                    id: trialCol
+                    anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
+                    anchors.leftMargin: 20; anchors.rightMargin: 20
+                    spacing: 10
+
+                    RowLayout {
+                        spacing: 10
+
+                        // Spark icon
+                        Rectangle {
+                            width: 36; height: 36; radius: 10
+                            color: Qt.rgba(16/255, 185/255, 129/255, 0.2)
+
+                            LabelTextType {
+                                anchors.centerIn: parent
+                                text: "✦"
+                                font.pixelSize: 18
+                                color: "#10B981"
+                            }
+                        }
+
+                        ColumnLayout {
+                            spacing: 2
+                            Layout.fillWidth: true
+
+                            LabelTextType {
+                                text: qsTr("Пробный период — 7 дней")
+                                font.pixelSize: 15
+                                font.weight: 700
+                                color: "#10B981"
+                            }
+
+                            LabelTextType {
+                                text: qsTr("Полный доступ ко всем функциям")
+                                font.pixelSize: 12
+                                color: AmneziaStyle.color.mutedGray
+                            }
+                        }
+
+                        // Price badge
+                        Rectangle {
+                            height: 32
+                            width: priceLabel.implicitWidth + 16
+                            radius: 10
+                            color: "#10B981"
+
+                            LabelTextType {
+                                id: priceLabel
+                                anchors.centerIn: parent
+                                text: "5 ₽"
+                                font.pixelSize: 14
+                                font.weight: 700
+                                color: "white"
+                            }
+                        }
+                    }
+
+                    // CTA button
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 44
+                        radius: 12
+                        color: trialBtnMouse.pressed
+                            ? Qt.rgba(16/255, 185/255, 129/255, 0.7)
+                            : Qt.rgba(16/255, 185/255, 129/255, 0.9)
+
+                        LabelTextType {
+                            anchors.centerIn: parent
+                            text: root.isLoading
+                                ? qsTr("Создание платежа...")
+                                : qsTr("Попробовать за 5 ₽")
+                            font.pixelSize: 14
+                            font.weight: 700
+                            color: "white"
+                        }
+
+                        MouseArea {
+                            id: trialBtnMouse
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            enabled: !root.isLoading
+                            onClicked: {
+                                root.errorMessage = ""
+                                if (!DrFrakeController.isLoggedIn) {
+                                    PageController.goToPage(PageEnum.PageDrFrakeLogin)
+                                    return
+                                }
+                                root.isLoading = true
+                                PageController.showBusyIndicator(true)
+                                DrFrakeController.createPayment("trial")
+                            }
+                        }
+                    }
+
+                    LabelTextType {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: qsTr("Только для новых пользователей • Карта сохраняется")
+                        font.pixelSize: 10
+                        color: AmneziaStyle.color.mutedGray
+                        Layout.bottomMargin: 2
+                    }
+                }
+            }
+
             // ── Plan cards ────────────────────────────────────────
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 28
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 spacing: 12
@@ -505,16 +629,17 @@ PageType {
                 }
             }
 
-            // Already subscribed — status display
+            // Already subscribed — status + management
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 8
-                spacing: 4
+                spacing: 10
                 visible: DrFrakeController.isSubscribed
 
+                // ── Active subscription status ────────────────────
                 Rectangle {
                     Layout.fillWidth: true
                     height: activeSubRow.implicitHeight + 20
@@ -538,6 +663,7 @@ PageType {
 
                         ColumnLayout {
                             spacing: 1
+                            Layout.fillWidth: true
 
                             LabelTextType {
                                 text: DrFrakeController.subscriptionPlan === "premium"
@@ -549,11 +675,282 @@ PageType {
                             }
 
                             LabelTextType {
-                                text: qsTr("Действует до: ") + DrFrakeController.subscriptionEndDate
+                                text: qsTr("Действует до: ") + Qt.formatDate(new Date(DrFrakeController.subscriptionEndDate.slice(0, 10)), "d MMMM yyyy")
                                 font.pixelSize: 12
                                 color: AmneziaStyle.color.mutedGray
                             }
                         }
+                    }
+                }
+
+                // ── Management panel ──────────────────────────────
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: mgmtCol.implicitHeight + 28
+                    radius: 14
+                    color: Qt.rgba(36/255, 36/255, 42/255, 1.0)
+                    border.color: Qt.rgba(255, 255, 255, 0.07)
+                    border.width: 1
+
+                    ColumnLayout {
+                        id: mgmtCol
+                        anchors { left: parent.left; right: parent.right; top: parent.top; topMargin: 14 }
+                        anchors.leftMargin: 16; anchors.rightMargin: 16
+                        spacing: 0
+
+                        // Auto-renew row
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 12
+
+                            ColumnLayout {
+                                spacing: 3
+                                Layout.fillWidth: true
+
+                                LabelTextType {
+                                    text: qsTr("Автопродление")
+                                    font.pixelSize: 14
+                                    font.weight: 600
+                                    color: AmneziaStyle.color.paleGray
+                                }
+
+                                LabelTextType {
+                                    text: DrFrakeController.autoRenew
+                                        ? qsTr("Спишем автоматически в день истечения")
+                                        : qsTr("Подписка не продлится сама")
+                                    font.pixelSize: 11
+                                    color: AmneziaStyle.color.mutedGray
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+                            }
+
+                            // Toggle
+                            Rectangle {
+                                width: 46; height: 26; radius: 13
+                                color: DrFrakeController.autoRenew
+                                    ? "#10B981"
+                                    : Qt.rgba(255, 255, 255, 0.12)
+                                Behavior on color { ColorAnimation { duration: 180 } }
+
+                                Rectangle {
+                                    width: 20; height: 20; radius: 10
+                                    color: "white"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: DrFrakeController.autoRenew ? parent.width - width - 3 : 3
+                                    Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: DrFrakeController.setAutoRenew(!DrFrakeController.autoRenew)
+                                }
+                            }
+                        }
+
+                        // Divider
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 1
+                            color: Qt.rgba(255, 255, 255, 0.07)
+                            Layout.topMargin: 14
+                            Layout.bottomMargin: 14
+                        }
+
+                        // Card row
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.bottomMargin: 0
+                            spacing: 12
+
+                            Rectangle {
+                                width: 36; height: 36; radius: 10
+                                color: DrFrakeController.cardSaved
+                                    ? Qt.rgba(16/255, 185/255, 129/255, 0.15)
+                                    : Qt.rgba(255, 255, 255, 0.06)
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    source: "qrc:/images/controls/info.svg"
+                                    sourceSize: Qt.size(18, 18)
+                                    layer.enabled: true
+                                    layer.effect: ColorOverlay {
+                                        color: DrFrakeController.cardSaved
+                                            ? "#10B981"
+                                            : AmneziaStyle.color.mutedGray
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                spacing: 3
+                                Layout.fillWidth: true
+
+                                LabelTextType {
+                                    text: qsTr("Способ оплаты")
+                                    font.pixelSize: 14
+                                    font.weight: 600
+                                    color: AmneziaStyle.color.paleGray
+                                }
+
+                                LabelTextType {
+                                    text: DrFrakeController.cardSaved
+                                        ? qsTr("Карта привязана ✓")
+                                        : qsTr("Сохранится при следующей оплате")
+                                    font.pixelSize: 11
+                                    color: DrFrakeController.cardSaved
+                                        ? "#10B981"
+                                        : AmneziaStyle.color.mutedGray
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+                            }
+
+                            Rectangle {
+                                visible: DrFrakeController.cardSaved
+                                width: 70; height: 30; radius: 8
+                                color: deleteCardMouse.pressed
+                                    ? Qt.rgba(239/255, 68/255, 68/255, 0.25)
+                                    : Qt.rgba(239/255, 68/255, 68/255, 0.1)
+                                border.color: Qt.rgba(239/255, 68/255, 68/255, 0.4)
+                                border.width: 1
+
+                                LabelTextType {
+                                    anchors.centerIn: parent
+                                    text: qsTr("Удалить")
+                                    font.pixelSize: 11
+                                    font.weight: 600
+                                    color: "#EF4444"
+                                }
+
+                                MouseArea {
+                                    id: deleteCardMouse
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.confirmDeleteCard = true
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Confirm delete card dialog
+                Rectangle {
+                    Layout.fillWidth: true
+                    visible: root.confirmDeleteCard
+                    implicitHeight: confirmCol.implicitHeight + 24
+                    radius: 12
+                    color: Qt.rgba(60/255, 20/255, 20/255, 1.0)
+                    border.color: Qt.rgba(239/255, 68/255, 68/255, 0.4)
+                    border.width: 1
+
+                    ColumnLayout {
+                        id: confirmCol
+                        anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
+                        anchors.leftMargin: 16; anchors.rightMargin: 16
+                        spacing: 12
+
+                        LabelTextType {
+                            text: qsTr("Удалить привязанную карту и отключить автосписание?")
+                            font.pixelSize: 13
+                            font.weight: 600
+                            color: "#FF6B6B"
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                height: 36; radius: 8
+                                color: cancelMouse.pressed
+                                    ? Qt.rgba(255,255,255,0.12)
+                                    : Qt.rgba(255,255,255,0.07)
+                                border.color: Qt.rgba(255,255,255,0.15)
+                                border.width: 1
+
+                                LabelTextType {
+                                    anchors.centerIn: parent
+                                    text: qsTr("Отмена")
+                                    font.pixelSize: 13
+                                    color: AmneziaStyle.color.lightGray
+                                }
+                                MouseArea {
+                                    id: cancelMouse
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.confirmDeleteCard = false
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                height: 36; radius: 8
+                                color: confirmMouse.pressed
+                                    ? Qt.rgba(239/255, 68/255, 68/255, 0.5)
+                                    : Qt.rgba(239/255, 68/255, 68/255, 0.25)
+                                border.color: Qt.rgba(239/255, 68/255, 68/255, 0.6)
+                                border.width: 1
+
+                                LabelTextType {
+                                    anchors.centerIn: parent
+                                    text: qsTr("Удалить")
+                                    font.pixelSize: 13
+                                    font.weight: 600
+                                    color: "#EF4444"
+                                }
+                                MouseArea {
+                                    id: confirmMouse
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        root.confirmDeleteCard = false
+                                        DrFrakeController.deleteCard()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Error message for management actions
+                Rectangle {
+                    Layout.fillWidth: true
+                    visible: root.mgmtError !== ""
+                    height: mgmtErrText.implicitHeight + 16
+                    color: "#3D1515"
+                    radius: 8
+
+                    LabelTextType {
+                        id: mgmtErrText
+                        anchors.centerIn: parent
+                        width: parent.width - 24
+                        text: root.mgmtError
+                        color: "#FF6B6B"
+                        wrapMode: Text.WordWrap
+                        font.pixelSize: 12
+                    }
+                }
+
+                // Connections for management actions
+                Connections {
+                    target: DrFrakeController
+
+                    function onCardDeleted() {
+                        root.mgmtError = ""
+                        PageController.showNotificationMessage(qsTr("Карта удалена, автосписание отключено"))
+                    }
+
+                    function onAutoRenewChanged(enabled) {
+                        root.mgmtError = ""
+                    }
+
+                    function onRequestError(errorMessage) {
+                        root.mgmtError = errorMessage
                     }
                 }
             }

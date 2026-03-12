@@ -242,7 +242,7 @@ PageType {
         id: about
 
         property string title: qsTr("About Dr.Frake VPN")
-        readonly property string leftImagePath: "qrc:/images/controls/amnezia.svg"
+        readonly property string leftImagePath: "qrc:/images/controls/info.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {
             PageController.goToPage(PageEnum.PageSettingsAbout)

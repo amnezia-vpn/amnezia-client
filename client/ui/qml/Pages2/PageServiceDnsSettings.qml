@@ -48,7 +48,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 24
 
-                headerText: "AmneziaDNS"
+                headerText: "DNS Service"
                 descriptionText: qsTr("A DNS service is installed on your server, and it is only accessible via VPN.\n") +
                                  qsTr("The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.")
             }
@@ -75,7 +75,7 @@ PageType {
                     var yesButtonFunction = function() {
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
                                 && SettingsController.isAmneziaDnsEnabled()) {
-                            PageController.showNotificationMessage(qsTr("Cannot remove AmneziaDNS from running server"))
+                            PageController.showNotificationMessage(qsTr("Cannot remove DNS service from running server"))
                         } else {
                             PageController.goToPage(PageEnum.PageDeinstalling)
                             InstallController.removeProcessedContainer()

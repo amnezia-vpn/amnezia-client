@@ -579,7 +579,13 @@
     <main class="content">
       <!-- Dashboard -->
       <div id="page-dashboard" class="page active">
-        <h1 style="font-size:32px;font-weight:700;margin-bottom:32px;letter-spacing:-0.5px">Обзор</h1>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
+          <h1 style="font-size:32px;font-weight:700;letter-spacing:-0.5px">Обзор</h1>
+          <button class="btn btn-primary" id="backupBtn" onclick="triggerBackup()" style="background:rgba(108,92,231,0.2);border:1px solid rgba(108,92,231,0.4);color:#a29bfe;box-shadow:none;">
+            💾 Отправить бэкап сейчас
+          </button>
+        </div>
+        <div id="backupStatus" style="display:none;margin-bottom:16px;"></div>
         <div class="stats-grid">
           <div class="stat-card glass">
             <div class="label">Всего пользователей</div>
@@ -823,8 +829,12 @@
       <td><span class="badge ${u.subscription?.status === 'active' ? 'badge-success' : 'badge-danger'}">${u.subscription?.status === 'active' ? 'Активна' : (u.subscription?.status || 'Нет')}</span></td>
       <td>${new Date(u.created_at).toLocaleDateString('ru')}</td>
       <td>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="upgradeUser('${u.id}')">⭐ Premium</button>
+          ${u.role === 'admin'
+            ? `<button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="setUserRole('${u.id}', 'user')">👤 Снять админа</button>`
+            : `<button class="btn" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(108,92,231,0.15); border:1px solid rgba(108,92,231,0.4); color:#a29bfe;" onclick="setUserRole('${u.id}', 'admin')">🛡️ Сделать админом</button>`
+          }
           <button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="revokeUserKeys('${u.id}')">Сбросить ключи</button>
           <button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(255, 71, 87, 0.2); border:1px solid #ff4757; color:#ff4757;" onclick="deleteUser('${u.id}')">Удалить</button>
         </div>
@@ -884,6 +894,43 @@
     async function upgradeUser(id) {
       if (!confirm('Выдать Premium на 1 месяц этому пользователю?')) return;
       await api('/api/v1/admin/users/' + id + '/upgrade', { method: 'POST' });
+      loadUsers();
+    }
+
+    async function triggerBackup() {
+      const btn = document.getElementById('backupBtn');
+      const statusEl = document.getElementById('backupStatus');
+      btn.disabled = true;
+      btn.textContent = '⏳ Отправка...';
+      statusEl.style.display = 'none';
+
+      const res = await api('/api/v1/admin/backup/send', { method: 'POST' });
+      const d = await res.json();
+
+      btn.disabled = false;
+      btn.textContent = '💾 Отправить бэкап сейчас';
+
+      if (res.ok) {
+        statusEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;background:rgba(46,213,115,0.1);border:1px solid rgba(46,213,115,0.3);color:#2ed573;font-size:14px;margin-bottom:16px;';
+        statusEl.textContent = '✓ ' + d.message;
+      } else {
+        statusEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.3);color:#ff4757;font-size:14px;margin-bottom:16px;';
+        statusEl.textContent = '✗ Ошибка: ' + (d.error || 'Unknown error');
+      }
+    }
+
+    async function setUserRole(id, role) {
+      const label = role === 'admin' ? 'администратора' : 'обычного пользователя';
+      if (!confirm(`Назначить этому пользователю роль ${label}?`)) return;
+      const res = await api('/api/v1/admin/users/' + id + '/set-role', {
+        method: 'POST',
+        body: JSON.stringify({ role })
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        alert('Ошибка: ' + (d.error || 'Unknown error'));
+        return;
+      }
       loadUsers();
     }
 

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find c:/Users/PC/Documents/Dr.Frake-VPN/client/images -iname *amnezia* -o -iname *amnesia*)",
+      "Bash(grep -rn \"AmneziaVPN\\\\|AmneziaWG\\\\|Amnezia\" c:/Users/PC/Documents/Dr.Frake-VPN/client/ui/qml/Pages2/*.qml)",
+      "Bash(grep -n \"AmneziaVPN\\\\|AmneziaWG\" c:/Users/PC/Documents/Dr.Frake-VPN/client/translations/*.ts)",
+      "Bash(grep -rn \"AmneziaStyle\\\\|amnezia\" c:/Users/PC/Documents/Dr.Frake-VPN/client/ui/qml/*.qml c:/Users/PC/Documents/Dr.Frake-VPN/client/ui/qml/*/*.qml)"
+    ]
+  }
+}

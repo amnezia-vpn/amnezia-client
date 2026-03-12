@@ -20,7 +20,7 @@ PageType {
     id: root
 
     property string configExtension: ".conf"
-    property string configCaption: qsTr("Save AmneziaVPN config")
+    property string configCaption: qsTr("Save Dr.Frake VPN config")
 
     BackButtonType {
         id: backButton
@@ -58,7 +58,7 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Configuration Files")
-                descriptionText: qsTr("For router setup or the AmneziaWG app")
+                descriptionText: qsTr("For router setup or the AWG app")
             }
         }
 

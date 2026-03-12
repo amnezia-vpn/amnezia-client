@@ -24,13 +24,14 @@ func NewPaymentHandler(db *gorm.DB, shopID, key string) *PaymentHandler {
 }
 
 type createPaymentRequest struct {
-	Plan string `json:"plan" binding:"required,oneof=basic premium"`
+	Plan string `json:"plan" binding:"required,oneof=trial basic premium"`
 }
 
 var planPrices = map[models.PlanType]struct {
 	Amount       float64
 	DurationDays int
 }{
+	models.PlanTrial:   {Amount: 5.00, DurationDays: 7},
 	models.PlanBasic:   {Amount: 199.00, DurationDays: 30},
 	models.PlanPremium: {Amount: 499.00, DurationDays: 30},
 }
@@ -46,6 +47,19 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 	}
 
 	plan := models.PlanType(req.Plan)
+
+	// Пробный период — только один раз на аккаунт
+	if plan == models.PlanTrial {
+		var trialCount int64
+		h.db.Model(&models.Payment{}).
+			Where("user_id = ? AND plan = ?", userID, models.PlanTrial).
+			Count(&trialCount)
+		if trialCount > 0 {
+			c.JSON(http.StatusConflict, gin.H{"error": "Пробный период уже был использован"})
+			return
+		}
+	}
+
 	priceInfo := planPrices[plan]
 
 	// Создаём платёж в ЮKassa
@@ -59,8 +73,9 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 			"type":       "redirect",
 			"return_url": "https://yourvpn.app/payment/success",
 		},
-		"capture":     true,
-		"description": fmt.Sprintf("VPN план: %s", plan),
+		"capture":             true,
+		"save_payment_method": true, // сохраняем карту для автосписания
+		"description":         fmt.Sprintf("Dr.Frake VPN — %s", planLabel(plan)),
 		"metadata": map[string]interface{}{
 			"user_id": userID,
 			"plan":    plan,
@@ -149,31 +164,61 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 		"confirmed_at": now,
 	})
 
-	// Обновляем или продлеваем подписку
+	// Извлекаем payment_method_id из вебхука (если карта сохранена)
+	paymentMethodID := ""
+	if pm, ok := obj["payment_method"].(map[string]interface{}); ok {
+		if saved, _ := pm["saved"].(bool); saved {
+			paymentMethodID, _ = pm["id"].(string)
+		}
+	}
+
+	// Обновляем или создаём подписку
 	priceInfo := planPrices[payment.Plan]
 	newExpiry := now.AddDate(0, 0, priceInfo.DurationDays)
 
+	// Пробный период не автопродлевается
+	autoRenew := payment.Plan != models.PlanTrial
+
 	var sub models.Subscription
 	if err := h.db.Where("user_id = ?", payment.UserID).First(&sub).Error; err != nil {
-		// Создаём новую
 		sub = models.Subscription{
-			UserID:    payment.UserID,
-			Plan:      payment.Plan,
-			Status:    models.SubActive,
-			ExpiresAt: newExpiry,
+			UserID:          payment.UserID,
+			Plan:            payment.Plan,
+			Status:          models.SubActive,
+			ExpiresAt:       newExpiry,
+			AutoRenew:       autoRenew,
+			PaymentMethodID: paymentMethodID,
 		}
 		h.db.Create(&sub)
 	} else {
-		// Продлеваем
-		if sub.ExpiresAt.After(now) {
+		// Для trial всегда считаем от сегодня (не суммируем с остатком)
+		if payment.Plan != models.PlanTrial && sub.ExpiresAt.After(now) {
 			newExpiry = sub.ExpiresAt.AddDate(0, 0, priceInfo.DurationDays)
 		}
-		h.db.Model(&sub).Updates(map[string]interface{}{
+		updates := map[string]interface{}{
 			"plan":       payment.Plan,
 			"status":     models.SubActive,
 			"expires_at": newExpiry,
-		})
+			"auto_renew": autoRenew,
+		}
+		if paymentMethodID != "" {
+			updates["payment_method_id"] = paymentMethodID
+		}
+		h.db.Model(&sub).Updates(updates)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func planLabel(plan models.PlanType) string {
+	switch plan {
+	case models.PlanTrial:
+		return "Пробный период (7 дней)"
+	case models.PlanBasic:
+		return "Базовый (30 дней)"
+	case models.PlanPremium:
+		return "Премиум (30 дней)"
+	default:
+		return string(plan)
+	}
 }

@@ -104,11 +104,11 @@ PageType {
                             clickedFunction: function() {
                                 var fileName = ""
                                 if (GC.isMobile()) {
-                                    fileName = "AmneziaVPN.log"
+                                    fileName = "DrFrakeVPN.log"
                                 } else {
                                     fileName = SystemController.getFileName(qsTr("Save"),
                                                                             qsTr("Logs files (*.log)"),
-                                                                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/DrFrakeVPN",
                                                                             true,
                                                                             ".log")
                                 }
@@ -250,7 +250,7 @@ PageType {
                 disabledColor: AmneziaStyle.color.mutedGray
                 textColor: AmneziaStyle.color.goldenApricot
 
-                text: qsTr("Site Amnezia")
+                text: qsTr("Dr.Frake VPN")
 
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
@@ -274,9 +274,9 @@ PageType {
     QtObject {
         id: amneziaVpn
 
-        property string title: qsTr("VPN by Amnezia")
-        property string description: qsTr("Connect to classic paid and free VPN services from Amnezia")
-        property string imageSource: "qrc:/images/controls/amnezia.svg"
+        property string title: qsTr("VPN Service")
+        property string description: qsTr("Connect to classic paid and free VPN services")
+        property string imageSource: "qrc:/images/controls/server.svg"
         property bool isVisible: true
         property var handler: function() {
             PageController.showBusyIndicator(true)
@@ -292,7 +292,7 @@ PageType {
         id: selfHostVpn
 
         property string title: qsTr("Self-hosted VPN")
-        property string description: qsTr("Configure Amnezia VPN on your own server")
+        property string description: qsTr("Configure VPN on your own server")
         property string imageSource: "qrc:/images/controls/server.svg"
         property bool isVisible: true
         property var handler: function() {

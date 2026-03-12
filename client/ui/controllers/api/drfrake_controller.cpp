@@ -259,11 +259,14 @@ void DrFrakeController::fetchSubscription()
             QJsonDocument doc = QJsonDocument::fromJson(responseData);
             QJsonObject obj = doc.object();
 
-            QString status = obj.value("status").toString("inactive");
-            QString plan   = obj.value("plan").toString("");
-            QString endDate = obj.value("expires_at").toString("");
+            QString status        = obj.value("status").toString("inactive");
+            QString plan          = obj.value("plan").toString("");
+            QString endDate       = obj.value("expires_at").toString("");
+            bool autoRenew        = obj.value("auto_renew").toBool(true);
+            bool cardSaved        = obj.value("card_saved").toBool(false);
+            bool trialAvailable   = obj.value("trial_available").toBool(false);
 
-            saveSubscriptionInfo(status, plan, endDate);
+            saveSubscriptionInfo(status, plan, endDate, autoRenew, cardSaved, trialAvailable);
             emit subscriptionChanged();
             emit subscriptionFetched();
         } else {
@@ -329,13 +332,96 @@ QString DrFrakeController::subscriptionEndDate() const
     return qSettings.value("subscriptionEndDate", "").toString();
 }
 
-void DrFrakeController::saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate)
+void DrFrakeController::saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,
+                                             bool autoRenew, bool cardSaved, bool trialAvailable)
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "DrFrakeVPN", "DrFrakeVPN");
     qSettings.setValue("subscriptionStatus", status);
     qSettings.setValue("subscriptionPlan", plan);
     qSettings.setValue("subscriptionEndDate", endDate);
+    qSettings.setValue("subscriptionAutoRenew", autoRenew);
+    qSettings.setValue("subscriptionCardSaved", cardSaved);
+    qSettings.setValue("subscriptionTrialAvailable", trialAvailable);
     qSettings.sync();
+}
+
+bool DrFrakeController::autoRenew() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "DrFrakeVPN", "DrFrakeVPN");
+    return qSettings.value("subscriptionAutoRenew", true).toBool();
+}
+
+bool DrFrakeController::cardSaved() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "DrFrakeVPN", "DrFrakeVPN");
+    return qSettings.value("subscriptionCardSaved", false).toBool();
+}
+
+bool DrFrakeController::trialAvailable() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "DrFrakeVPN", "DrFrakeVPN");
+    return qSettings.value("subscriptionTrialAvailable", false).toBool();
+}
+
+void DrFrakeController::setAutoRenew(bool enabled)
+{
+    QString token = getJwtToken();
+    if (token.isEmpty()) return;
+
+    QUrl url(m_apiUrl + "/me/subscription/auto-renew");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+
+    QJsonObject json;
+    json["enabled"] = enabled;
+
+    QNetworkReply *reply = m_nam->sendCustomRequest(request, "PATCH", QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, enabled]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "DrFrakeVPN", "DrFrakeVPN");
+            qSettings.setValue("subscriptionAutoRenew", enabled);
+            qSettings.sync();
+            emit autoRenewChanged(enabled);
+            emit subscriptionChanged();
+        } else {
+            QByteArray data = reply->readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            QString errStr = doc.object().value("error").toString(reply->errorString());
+            emit requestError(errStr);
+        }
+    });
+}
+
+void DrFrakeController::deleteCard()
+{
+    QString token = getJwtToken();
+    if (token.isEmpty()) return;
+
+    QUrl url(m_apiUrl + "/me/card");
+    QNetworkRequest request(url);
+    request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+
+    QNetworkReply *reply = m_nam->deleteResource(request);
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "DrFrakeVPN", "DrFrakeVPN");
+            qSettings.setValue("subscriptionCardSaved", false);
+            qSettings.setValue("subscriptionAutoRenew", false);
+            qSettings.sync();
+            emit cardDeleted();
+            emit subscriptionChanged();
+        } else {
+            QByteArray data = reply->readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            QString errStr = doc.object().value("error").toString(reply->errorString());
+            emit requestError(errStr);
+        }
+    });
 }
 
 void DrFrakeController::saveJwtToken(const QString &token)

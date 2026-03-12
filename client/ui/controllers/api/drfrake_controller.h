@@ -21,6 +21,9 @@ class DrFrakeController : public QObject
     Q_PROPERTY(bool isSubscribed READ isSubscribed NOTIFY subscriptionChanged)
     Q_PROPERTY(QString subscriptionPlan READ subscriptionPlan NOTIFY subscriptionChanged)
     Q_PROPERTY(QString subscriptionEndDate READ subscriptionEndDate NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool autoRenew READ autoRenew NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool cardSaved READ cardSaved NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool trialAvailable READ trialAvailable NOTIFY subscriptionChanged)
 
 public:
     explicit DrFrakeController(ImportController *importController, const std::shared_ptr<Settings> &settings,
@@ -31,12 +34,17 @@ public:
     Q_INVOKABLE void fetchConfig();
     Q_INVOKABLE void fetchSubscription();
     Q_INVOKABLE void createPayment(const QString &plan);
+    Q_INVOKABLE void setAutoRenew(bool enabled);
+    Q_INVOKABLE void deleteCard();
     Q_INVOKABLE void logout();
 
     bool isLoggedIn() const;
     bool isSubscribed() const;
     QString subscriptionPlan() const;
     QString subscriptionEndDate() const;
+    bool autoRenew() const;
+    bool cardSaved() const;
+    bool trialAvailable() const;
 
 signals:
     void loginSuccess();
@@ -49,6 +57,9 @@ signals:
     void subscriptionError(const QString &errorMessage);
     void paymentCreated(const QString &confirmationUrl);
     void paymentError(const QString &errorMessage);
+    void autoRenewChanged(bool enabled);
+    void cardDeleted();
+    void requestError(const QString &errorMessage);
 
 private:
     QNetworkAccessManager *m_nam;
@@ -60,7 +71,8 @@ private:
 
     void saveJwtToken(const QString &token);
     QString getJwtToken() const;
-    void saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate);
+    void saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,
+                              bool autoRenew = true, bool cardSaved = false, bool trialAvailable = true);
     void clearExistingDrFrakeServers();
 };
 

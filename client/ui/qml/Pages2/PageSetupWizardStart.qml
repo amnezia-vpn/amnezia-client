@@ -22,7 +22,7 @@ PageType {
 
         Image {
             id: image
-            source: "qrc:/images/amneziaBigLogo.png"
+            source: ""
 
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             Layout.topMargin: 32 + SettingsController.safeAreaTopMargin

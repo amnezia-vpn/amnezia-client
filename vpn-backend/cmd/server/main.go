@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"vpn-backend/internal/backup"
 	"vpn-backend/internal/config"
 	"vpn-backend/internal/database"
 	"vpn-backend/internal/handlers"
@@ -16,6 +17,12 @@ func main() {
 
 	// Автоматическая проверка и синхронизация конфигов серверов
 	go handlers.SyncAllServers(db)
+
+	// Периодический бэкап БД с отправкой на email всем администраторам
+	go backup.RunScheduler(db, cfg)
+
+	// Автосписание подписок за 3 дня до истечения
+	go handlers.RunAutoRenewalScheduler(db, cfg.YooKassaShopID, cfg.YooKassaKey)
 
 	r := router.New(db, cfg)
 

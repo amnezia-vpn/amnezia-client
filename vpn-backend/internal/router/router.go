@@ -29,7 +29,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	userH := handlers.NewUserHandler(db)
 	vpnH := handlers.NewVPNHandler(db)
 	payH := handlers.NewPaymentHandler(db, cfg.YooKassaShopID, cfg.YooKassaKey)
-	adminH := handlers.NewAdminHandler(db)
+	adminH := handlers.NewAdminHandler(db, cfg)
 
 	auth := middleware.AuthRequired(cfg.JWTSecret)
 	admin := middleware.AdminRequired()
@@ -47,6 +47,8 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		{
 			me.GET("", userH.GetMe)
 			me.GET("/subscription", userH.GetSubscription)
+			me.PATCH("/subscription/auto-renew", userH.SetAutoRenew)
+			me.DELETE("/card", userH.DeleteCard)
 			me.GET("/config", vpnH.GetConfig)
 			me.POST("/config/revoke", vpnH.RevokeConfig)
 		}
@@ -62,6 +64,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			adminGrp.GET("/users", adminH.GetUsers)
 			adminGrp.POST("/users/:id/upgrade", adminH.UpgradeUser)
 			adminGrp.POST("/users/:id/revoke", adminH.RevokeUserKeys)
+			adminGrp.POST("/users/:id/set-role", adminH.SetUserRole)
 			adminGrp.DELETE("/users/:id", adminH.DeleteUser)
 			adminGrp.GET("/servers", adminH.GetServers)
 			adminGrp.POST("/servers", adminH.AddServer)
@@ -70,6 +73,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			adminGrp.GET("/payments", adminH.GetPayments)
 			adminGrp.POST("/payments/:id/approve", adminH.ApprovePayment)
 			adminGrp.GET("/stats", adminH.GetStats)
+			adminGrp.POST("/backup/send", adminH.TriggerBackup)
 		}
 	}
 

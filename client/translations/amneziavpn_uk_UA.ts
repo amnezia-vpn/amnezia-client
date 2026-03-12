@@ -208,18 +208,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="74"/>
         <source>Connect</source>
-        <translation type="unfinished">Підключитись</translation>
+        <translation type="obsolete">Підключитись</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="176"/>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="295"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="166"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="285"/>
         <source>Требуется активная подписка для подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="282"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="272"/>
         <source>Нужна подписка</source>
         <translation type="unfinished"></translation>
     </message>
@@ -237,27 +236,27 @@
         <translation type="vanished">Неможливо створити конфігурацію</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="81"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="87"/>
         <source>Connecting...</source>
         <translation>Підключення...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="86"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
         <source>Connected</source>
         <translation>Підключено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="110"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="116"/>
         <source>Preparing...</source>
         <translation>Підготовка...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="132"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="138"/>
         <source>Settings updated successfully, reconnnection...</source>
         <translation>Налаштування оновлено, підключення...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="135"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="141"/>
         <source>Settings updated successfully</source>
         <translation>Налаштування оновлено</translation>
     </message>
@@ -266,20 +265,20 @@
         <translation type="vanished">Вибраний протокол не підтримується на цьому пристрої</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="95"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="101"/>
         <source>Reconnecting...</source>
         <translation>Перепідключення...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="70"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="100"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="115"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="106"/>
         <location filename="../ui/controllers/connectionController.cpp" line="121"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="127"/>
         <source>Connect</source>
         <translation>Підключитись</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="105"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="111"/>
         <source>Disconnecting...</source>
         <translation>Відключаємось...</translation>
     </message>
@@ -360,7 +359,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/api/drfrake_controller.cpp" line="179"/>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="272"/>
+        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="275"/>
         <source>Ошибка сети: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -796,153 +795,225 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageDrFrakeSubscription</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="43"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="45"/>
         <source>Время ожидания истекло. Если вы оплатили — нажмите «Проверить вручную».</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="56"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="58"/>
         <source>Базовый</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="56"/>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="58"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="59"/>
         <source>/ 30 дней</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="59"/>
         <source>Премиум</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="59"/>
         <source>ЛУЧШИЙ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="59"/>
         <source>Максимальная скорость и приоритет</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="62"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="64"/>
         <source>Безлимитный трафик</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="63"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="65"/>
         <source>10+ стран и регионов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="64"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="66"/>
         <source>До 5 устройств одновременно</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="65"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="67"/>
         <source>Kill Switch защита</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="68"/>
         <source>Быстрые серверы без логов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="133"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="135"/>
         <source>Dr.Frake VPN Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="144"/>
         <source>Полный доступ без ограничений</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="195"/>
+        <source>Пробный период — 7 дней</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="202"/>
+        <source>Полный доступ ко всем функциям</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="239"/>
+        <source>Попробовать за 5 ₽</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="265"/>
+        <source>Только для новых пользователей • Карта сохраняется</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="345"/>
         <source>АКТИВНА</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="297"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="421"/>
         <source>Что входит в подписку</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="393"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="517"/>
         <source>Ожидаем подтверждение оплаты...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="401"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="525"/>
         <source>Проверка %1 из %2. Это займёт до 2 минут.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="424"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="548"/>
         <source>Проверить вручную</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="451"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="238"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="575"/>
         <source>Создание платежа...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="453"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="577"/>
         <source>Уже активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="455"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="579"/>
         <source>Оплатить 199 ₽ / Basic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="456"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="580"/>
         <source>Оплатить 499 ₽ / Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="485"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="609"/>
         <source>Страница оплаты открыта. Ожидаем подтверждение...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="487"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="611"/>
         <source>Не удалось получить ссылку на оплату</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="501"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="625"/>
         <source>Подписка активирована! Добро пожаловать в Premium.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="544"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="670"/>
         <source>Premium подписка активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="545"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="671"/>
         <source>Basic подписка активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="552"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="678"/>
         <source>Действует до: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="569"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="711"/>
+        <source>Автопродление</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="719"/>
+        <source>Спишем автоматически в день истечения</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="720"/>
+        <source>Подписка не продлится сама</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="791"/>
+        <source>Способ оплаты</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="799"/>
+        <source>Карта привязана ✓</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="800"/>
+        <source>Сохранится при следующей оплате</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="821"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="901"/>
+        <source>Удалить</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="855"/>
+        <source>Удалить привязанную карту и отключить автосписание?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="878"/>
+        <source>Отмена</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="945"/>
+        <source>Карта удалена, автосписание отключено</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="966"/>
         <source>Условия использования</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="587"/>
+        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="984"/>
         <source>Политика конфиденциальности</source>
         <translation type="unfinished"></translation>
     </message>

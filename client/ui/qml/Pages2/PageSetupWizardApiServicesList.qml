@@ -49,7 +49,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 24
 
-                headerText: qsTr("VPN by Amnezia")
+                headerText: qsTr("VPN Service")
                 descriptionText: qsTr("Choose a VPN service that suits your needs.")
             }
         }

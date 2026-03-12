@@ -28,6 +28,7 @@ type PlanType string
 
 const (
 	PlanFree    PlanType = "free"
+	PlanTrial   PlanType = "trial"
 	PlanBasic   PlanType = "basic"
 	PlanPremium PlanType = "premium"
 )
@@ -42,10 +43,12 @@ const (
 
 type Subscription struct {
 	gorm.Model
-	UserID    uint               `gorm:"uniqueIndex;not null"`
-	Plan      PlanType           `gorm:"default:free"`
-	Status    SubscriptionStatus `gorm:"default:active"`
-	ExpiresAt time.Time
+	UserID          uint               `gorm:"uniqueIndex;not null"`
+	Plan            PlanType           `gorm:"default:free"`
+	Status          SubscriptionStatus `gorm:"default:active"`
+	ExpiresAt       time.Time
+	AutoRenew       bool   `gorm:"default:true"`
+	PaymentMethodID string `gorm:"default:''"` // YooKassa payment_method_id для автосписания
 }
 
 type VPNServer struct {

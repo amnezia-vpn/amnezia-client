@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"vpn-backend/internal/backup"
+	"vpn-backend/internal/config"
 	"vpn-backend/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -11,11 +13,25 @@ import (
 )
 
 type AdminHandler struct {
-	db *gorm.DB
+	db  *gorm.DB
+	cfg *config.Config
 }
 
-func NewAdminHandler(db *gorm.DB) *AdminHandler {
-	return &AdminHandler{db: db}
+func NewAdminHandler(db *gorm.DB, cfg *config.Config) *AdminHandler {
+	return &AdminHandler{db: db, cfg: cfg}
+}
+
+// POST /api/v1/admin/backup/send — ручной запуск бэкапа
+func (h *AdminHandler) TriggerBackup(c *gin.Context) {
+	if h.cfg.SMTPHost == "" {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "SMTP не настроен (SMTP_HOST пустой)"})
+		return
+	}
+	if err := backup.DoBackup(h.db, h.cfg); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Бэкап успешно отправлен на email всех администраторов"})
 }
 
 // GET /api/v1/admin/users
@@ -350,6 +366,38 @@ func (h *AdminHandler) RevokeUserKeys(c *gin.Context) {
 	// Mark all keys as revoked
 	h.db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", userId).Update("revoked_at", &now)
 	c.JSON(http.StatusOK, gin.H{"message": "all user keys revoked"})
+}
+
+// POST /api/v1/admin/users/:id/set-role
+func (h *AdminHandler) SetUserRole(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Role string `json:"role" binding:"required,oneof=user admin"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Prevent removing the last admin
+	if req.Role == "user" {
+		var adminCount int64
+		h.db.Model(&models.User{}).Where("role = ?", models.RoleAdmin).Count(&adminCount)
+		if adminCount <= 1 {
+			c.JSON(http.StatusConflict, gin.H{"error": "Нельзя снять роль с последнего администратора"})
+			return
+		}
+	}
+
+	var u models.User
+	if err := h.db.First(&u, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	h.db.Model(&u).Update("role", req.Role)
+	c.JSON(http.StatusOK, gin.H{"id": u.ID, "role": req.Role})
 }
 
 // POST /api/v1/admin/servers/:id/toggle

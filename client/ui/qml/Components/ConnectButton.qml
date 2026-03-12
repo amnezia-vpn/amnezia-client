@@ -69,16 +69,6 @@ Button {
             errorResetTimer.restart()
             errorShakeAnim.restart()
         }
-
-        function onConnectionStateChanged() {
-            if (ConnectionController.connectionStateText === qsTr("Connect") &&
-                ConnectionController.getLastConnectionError &&
-                ConnectionController.getLastConnectionError() !== 0) {
-                root.isErrorState = true
-                errorResetTimer.restart()
-                errorShakeAnim.restart()
-            }
-        }
     }
 
     // ── Resolved accent color (single source of truth) ───────────

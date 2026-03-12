@@ -107,7 +107,7 @@ PageType {
         id: check
 
         property bool isVisible: root.isServerWithWriteAccess
-        readonly property string title: qsTr("Check the server for previously installed Amnezia services")
+        readonly property string title: qsTr("Check the server for previously installed VPN services")
         readonly property string description: qsTr("Add them to the application if they were not displayed")
         readonly property var tColor: AmneziaStyle.color.paleGray
         readonly property var clickedHandler: function() {
@@ -156,7 +156,7 @@ PageType {
         readonly property var tColor: AmneziaStyle.color.vibrantRed
         readonly property var clickedHandler: function() {
             var headerText = qsTr("Do you want to remove the server from application?")
-            var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
+            var descriptionText = qsTr("All installed VPN services will still remain on the server.")
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
 
@@ -181,18 +181,18 @@ PageType {
         id: clear
 
         property bool isVisible: root.isServerWithWriteAccess
-        readonly property string title: qsTr("Clear server from Amnezia software")
+        readonly property string title: qsTr("Clear server from VPN software")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
         readonly property var clickedHandler: function() {
-            var headerText = qsTr("Do you want to clear server from Amnezia software?")
+            var headerText = qsTr("Do you want to clear server from VPN software?")
             var descriptionText = qsTr("All users whom you shared a connection with will no longer be able to connect to it.")
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
 
             var yesButtonFunction = function() {
                 if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                    PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
+                    PageController.showNotificationMessage(qsTr("Cannot clear server from VPN software during active connection"))
                 } else {
                     PageController.goToPage(PageEnum.PageDeinstalling)
                     InstallController.removeAllContainers()

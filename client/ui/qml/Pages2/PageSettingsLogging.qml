@@ -179,7 +179,7 @@ PageType {
         id: clientLogs
 
         readonly property string title: qsTr("Client logs")
-        readonly property string description: qsTr("AmneziaVPN logs")
+        readonly property string description: qsTr("Dr.Frake VPN logs")
         readonly property bool isVisible: true
         readonly property var openLogsHandler: function() {
             SettingsController.openLogsFolder()
@@ -187,11 +187,11 @@ PageType {
         readonly property var exportLogsHandler: function() {
             var fileName = ""
             if (GC.isMobile()) {
-                fileName = "AmneziaVPN.log"
+                fileName = "DrFrakeVPN.log"
             } else {
                 fileName = SystemController.getFileName(qsTr("Save"),
                                                         qsTr("Logs files (*.log)"),
-                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/DrFrakeVPN",
                                                         true,
                                                         ".log")
             }
@@ -208,7 +208,7 @@ PageType {
         id: serviceLogs
 
         readonly property string title: qsTr("Service logs")
-        readonly property string description: qsTr("AmneziaVPN-service logs")
+        readonly property string description: qsTr("Dr.Frake VPN-service logs")
         readonly property bool isVisible: !GC.isMobile() && !IsMacOsNeBuild
         readonly property var openLogsHandler: function() {
             SettingsController.openServiceLogsFolder()
