@@ -143,4 +143,31 @@ void VpnConfigurationsController::updateContainerConfigAfterInstallation(const D
 
         containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
     }
+
+    if (container == DockerContainer::MtProxy) {
+        QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+
+        qDebug() << "amnezia-mtproxy configure stdout" << stdOut;
+
+        static const QRegularExpression reSecret(R"(\[\*\] Secret:\s+([0-9a-fA-F]{32}))",
+                                                 QRegularExpression::CaseInsensitiveOption);
+        static const QRegularExpression reTgLink(R"(\[\*\] tg://\s+link:\s+(tg://proxy\?[^\s]+))");
+        static const QRegularExpression reTmeLink(R"(\[\*\] t\.me\s+link:\s+(https://t\.me/proxy\?[^\s]+))");
+
+        QRegularExpressionMatch mSecret = reSecret.match(stdOut);
+        QRegularExpressionMatch mTgLink = reTgLink.match(stdOut);
+        QRegularExpressionMatch mTmeLink = reTmeLink.match(stdOut);
+
+        if (mSecret.hasMatch()) {
+            protocol.insert(protocols::mtProxy::mtproxySecret, mSecret.captured(1));
+        }
+        if (mTgLink.hasMatch()) {
+            protocol.insert(protocols::mtProxy::mtproxyTgLink, mTgLink.captured(1));
+        }
+        if (mTmeLink.hasMatch()) {
+            protocol.insert(protocols::mtProxy::mtproxyTmeLink, mTmeLink.captured(1));
+        }
+
+        containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
+    }
 }

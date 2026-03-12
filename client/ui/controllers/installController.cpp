@@ -517,6 +517,26 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                             containerConfig.insert(config_key::userName, userName);
                             containerConfig.insert(config_key::password, password);
                         }
+                    }  else if (protocol == Proto::MtProxy) {
+                        static const QRegularExpression reSecret(R"(\[\*\]\s+Secret:\s+([0-9a-f]{32}))",
+                                                                 QRegularExpression::CaseInsensitiveOption);
+                        static const QRegularExpression reTgLink(R"(\[\*\]\s+tg://\s+link:\s+(tg://proxy\?[^\s]+))");
+                        static const QRegularExpression reTmeLink(
+                                R"(\[\*\]\s+t\.me\s+link:\s+(https://t\.me/proxy\?[^\s]+))");
+
+                        auto mSecret = reSecret.match(stdOut);
+                        auto mTgLink = reTgLink.match(stdOut);
+                        auto mTmeLink = reTmeLink.match(stdOut);
+
+                        if (mSecret.hasMatch()) {
+                            containerConfig.insert(protocols::mtProxy::mtproxySecret, mSecret.captured(1));
+                        }
+                        if (mTgLink.hasMatch()) {
+                            containerConfig.insert(protocols::mtProxy::mtproxyTgLink, mTgLink.captured(1));
+                        }
+                        if (mTmeLink.hasMatch()) {
+                            containerConfig.insert(protocols::mtProxy::mtproxyTmeLink, mTmeLink.captured(1));
+                        }
                     } else if (protocol == Proto::Xray) {
                         QString currentConfig = serverController->getTextFileFromContainer(
                                 container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);

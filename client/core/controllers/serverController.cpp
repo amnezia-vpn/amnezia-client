@@ -105,7 +105,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
         return e;
 
     QString runner =
-            QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, (container == DockerContainer::Socks5Proxy ? "sh" : "bash"));
+            QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, (container == DockerContainer::Socks5Proxy || container == DockerContainer::MtProxy ? "sh" : "bash"));
     e = runScript(credentials, replaceVars(runner, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
 
     QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
@@ -388,6 +388,16 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
         return true;
     }
 
+    if (container == DockerContainer::MtProxy) {
+        const QJsonObject &oldProto = oldConfig.value(ProtocolProps::protoToString(Proto::MtProxy)).toObject();
+        const QJsonObject &newProto = newConfig.value(ProtocolProps::protoToString(Proto::MtProxy)).toObject();
+        if (oldProto.value(config_key::port).toString(protocols::mtProxy::defaultPort)
+            != newProto.value(config_key::port).toString(protocols::mtProxy::defaultPort)) {
+            return true;
+        }
+        return false;
+    }
+
     if (container == DockerContainer::Xray) {
         if (oldProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort)
             != newProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort)) {
@@ -558,6 +568,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &xrayConfig = config.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
     const QJsonObject &socks5ProxyConfig = config.value(ProtocolProps::protoToString(Proto::Socks5Proxy)).toObject();
+    const QJsonObject &mtProxyConfig = config.value(ProtocolProps::protoToString(Proto::MtProxy)).toObject();
 
     Vars vars;
 
@@ -674,7 +685,11 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$SOCKS5_USER", socks5user } });
     vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
 
-    QString serverIp = (!ContainerProps::isAwgContainer(container) && 
+    vars.append({ { "$MTPROXY_PORT",    mtProxyConfig.value(config_key::port).toString(protocols::mtProxy::defaultPort) } });
+    vars.append({ { "$MTPROXY_SECRET",  mtProxyConfig.value(protocols::mtProxy::mtproxySecret).toString("") } });
+    vars.append({ { "$MTPROXY_TAG",     mtProxyConfig.value(protocols::mtProxy::mtproxyTag).toString("") } });
+
+    QString serverIp = (!ContainerProps::isAwgContainer(container) &&
         container != DockerContainer::WireGuard && container != DockerContainer::Xray)
             ? NetworkUtilities::getIPAddress(credentials.hostName)
             : credentials.hostName;

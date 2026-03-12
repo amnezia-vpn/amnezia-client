@@ -85,6 +85,9 @@ void CoreController::initModels()
     m_socks5ConfigModel.reset(new Socks5ProxyConfigModel(this));
     m_engine->rootContext()->setContextProperty("Socks5ProxyConfigModel", m_socks5ConfigModel.get());
 
+    m_mtProxyConfigModel.reset(new MtProxyConfigModel(this));
+    m_engine->rootContext()->setContextProperty("MtProxyConfigModel", m_mtProxyConfigModel.get());
+
     m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
 

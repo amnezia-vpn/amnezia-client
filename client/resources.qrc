@@ -113,6 +113,10 @@
         <file>server_scripts/socks5_proxy/Dockerfile</file>
         <file>server_scripts/socks5_proxy/run_container.sh</file>
         <file>server_scripts/socks5_proxy/start.sh</file>
+        <file>server_scripts/mtproxy/configure_container.sh</file>
+        <file>server_scripts/mtproxy/Dockerfile</file>
+        <file>server_scripts/mtproxy/run_container.sh</file>
+        <file>server_scripts/mtproxy/start.sh</file>
         <file>server_scripts/website_tor/configure_container.sh</file>
         <file>server_scripts/website_tor/Dockerfile</file>
         <file>server_scripts/website_tor/run_container.sh</file>
@@ -201,6 +205,7 @@
         <file>ui/qml/Pages2/PageServiceDnsSettings.qml</file>
         <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
         <file>ui/qml/Pages2/PageServiceSocksProxySettings.qml</file>
+        <file>ui/qml/Pages2/PageServiceMtProxySettings.qml</file>
         <file>ui/qml/Pages2/PageServiceTorWebsiteSettings.qml</file>
         <file>ui/qml/Pages2/PageSettings.qml</file>
         <file>ui/qml/Pages2/PageSettingsAbout.qml</file>
