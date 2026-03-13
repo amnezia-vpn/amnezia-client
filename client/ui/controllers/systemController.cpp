@@ -143,38 +143,38 @@ static bool deriveKey(const QByteArray &password, const QByteArray &salt, QByteA
 
 static bool aesCrypt(const QByteArray &in, const QByteArray &key, const QByteArray &iv, QByteArray &out, bool encrypt)
 {
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    std::unique_ptr<EVP_CIPHER_CTX, void (*)(EVP_CIPHER_CTX *)> ctx { EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free };
+
     if (!ctx) {
         qDebug() << "EVP_CIPHER_CTX_new failed";
         return false;
     }
+
     const EVP_CIPHER *cipher = EVP_aes_256_cbc();
-    if (1
-        != EVP_CipherInit_ex(ctx, cipher, nullptr, reinterpret_cast<const unsigned char *>(key.constData()),
-                             reinterpret_cast<const unsigned char *>(iv.constData()), encrypt ? 1 : 0)) {
+
+    if (1 != EVP_CipherInit_ex(ctx.get(), cipher, nullptr, reinterpret_cast<const unsigned char *>(key.constData()),
+                               reinterpret_cast<const unsigned char *>(iv.constData()), encrypt ? 1 : 0)) {
         qDebug() << opensslErrString();
-        EVP_CIPHER_CTX_free(ctx);
         return false;
     }
 
     out.clear();
     out.resize(in.size() + EVP_CIPHER_block_size(cipher));
+
     int outlen1 = 0;
-    if (1
-        != EVP_CipherUpdate(ctx, reinterpret_cast<unsigned char *>(out.data()), &outlen1,
-                            reinterpret_cast<const unsigned char *>(in.constData()), in.size())) {
+    if (1 != EVP_CipherUpdate(ctx.get(), reinterpret_cast<unsigned char *>(out.data()), &outlen1,
+                              reinterpret_cast<const unsigned char *>(in.constData()), in.size())) {
         qDebug() << opensslErrString();
-        EVP_CIPHER_CTX_free(ctx);
         return false;
     }
+
     int outlen2 = 0;
-    if (1 != EVP_CipherFinal_ex(ctx, reinterpret_cast<unsigned char *>(out.data()) + outlen1, &outlen2)) {
+    if (1 != EVP_CipherFinal_ex(ctx.get(), reinterpret_cast<unsigned char *>(out.data()) + outlen1, &outlen2)) {
         qDebug() << opensslErrString();
-        EVP_CIPHER_CTX_free(ctx);
         return false;
     }
+
     out.resize(outlen1 + outlen2);
-    EVP_CIPHER_CTX_free(ctx);
     return true;
 }
 
@@ -319,6 +319,9 @@ bool SystemController::isPasswordValid(const QString &filePath, const QString &p
 
 QString SystemController::readHint(const QString &filePath)
 {
+    if (filePath.isEmpty())
+        return "";
+
     QByteArray data;
     readFile(filePath, data);
 
