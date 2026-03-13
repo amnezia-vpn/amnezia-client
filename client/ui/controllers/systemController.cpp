@@ -409,6 +409,9 @@ QString SystemController::readHint(const QString &filePath)
 
 QString SystemController::readHint(const QString &filePath)
 {
+    if (filePath.isEmpty())
+        return "";
+
     QByteArray data;
     readFile(filePath, data);
 
