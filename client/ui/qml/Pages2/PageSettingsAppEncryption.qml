@@ -72,7 +72,7 @@ PageType {
 
             BasicButtonType {
                 Layout.leftMargin: 8
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 32
                 implicitHeight: 16
 
                 defaultColor: AmneziaStyle.color.transparent
@@ -166,7 +166,7 @@ PageType {
             width: listView.width
             CaptionTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 32
 
                 horizontalAlignment: Text.AlignHCenter
                 textFormat: Text.RichText
