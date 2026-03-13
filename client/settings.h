@@ -232,6 +232,10 @@ public:
     void setGatewayEndpoint(const QString &endpoint);
     void setDevGatewayEndpoint();
     QString getGatewayEndpoint(bool isTestPurchase = false);
+    QString getDevProxyStorageEndpoint() const;
+    void setDevProxyStorageEndpoint(const QString &endpoint);
+    QString getDevProxyUrl() const;
+    void setDevProxyUrl(const QString &url);
     bool isDevGatewayEnv(bool isTestPurchase = false);
     void toggleDevGatewayEnv(bool enabled);
 

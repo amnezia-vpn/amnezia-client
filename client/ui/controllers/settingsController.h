@@ -30,6 +30,9 @@ public:
     Q_PROPERTY(bool isDevModeEnabled READ isDevModeEnabled NOTIFY devModeEnabled)
     Q_PROPERTY(QString gatewayEndpoint READ getGatewayEndpoint WRITE setGatewayEndpoint NOTIFY gatewayEndpointChanged)
     Q_PROPERTY(bool isDevGatewayEnv READ isDevGatewayEnv WRITE toggleDevGatewayEnv NOTIFY devGatewayEnvChanged)
+    Q_PROPERTY(QString devProxyStorageEndpoint READ getDevProxyStorageEndpoint WRITE setDevProxyStorageEndpoint NOTIFY
+                       devProxyStorageEndpointChanged)
+    Q_PROPERTY(QString devProxyUrl READ getDevProxyUrl WRITE setDevProxyUrl NOTIFY devProxyUrlChanged)
 
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
@@ -98,6 +101,10 @@ public slots:
     void resetGatewayEndpoint();
     void setGatewayEndpoint(const QString &endpoint);
     QString getGatewayEndpoint();
+    void setDevProxyStorageEndpoint(const QString &endpoint);
+    QString getDevProxyStorageEndpoint();
+    void setDevProxyUrl(const QString &url);
+    QString getDevProxyUrl();
     bool isDevGatewayEnv();
     void toggleDevGatewayEnv(bool enabled);
 
@@ -136,6 +143,8 @@ signals:
     void devModeEnabled();
     void gatewayEndpointChanged(const QString &endpoint);
     void devGatewayEnvChanged(bool enabled);
+    void devProxyStorageEndpointChanged(const QString &endpoint);
+    void devProxyUrlChanged(const QString &url);
     
     void imeHeightChanged(int height);
     void safeAreaTopMarginChanged();

@@ -769,7 +769,8 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
 #endif
 
     GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+                                        m_settings->isStrictKillSwitchEnabled(), m_settings->getDevProxyStorageEndpoint(),
+                                        m_settings->getDevProxyUrl());
 
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto installationUuid = m_settings->getInstallationUuid(true);
@@ -994,6 +995,7 @@ ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJ
                                                bool isTestPurchase)
 {
     GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), m_settings->isDevGatewayEnv(isTestPurchase),
-                                        apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
+                                        apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled(),
+                                        m_settings->getDevProxyStorageEndpoint(), m_settings->getDevProxyUrl());
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }

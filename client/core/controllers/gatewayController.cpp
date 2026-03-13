@@ -46,12 +46,25 @@ namespace
     constexpr int httpStatusCodeConflict = 409;
 
     constexpr int httpStatusCodeNotImplemented = 501;
+
+    QStringList splitUrls(const QString &urls)
+    {
+        QStringList parsedUrls = urls.split(",", Qt::SkipEmptyParts);
+        for (QString &url : parsedUrls) {
+            url = url.trimmed();
+        }
+        parsedUrls.removeAll("");
+        return parsedUrls;
+    }
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                                     const bool isStrictKillSwitchEnabled, QObject *parent)
+                                     const bool isStrictKillSwitchEnabled, const QString &proxyStorageOverride,
+                                     const QString &proxyUrlOverride, QObject *parent)
     : QObject(parent),
       m_gatewayEndpoint(gatewayEndpoint),
+      m_proxyStorageOverride(proxyStorageOverride),
+      m_proxyUrlOverride(proxyUrlOverride),
       m_isDevEnvironment(isDevEnvironment),
       m_requestTimeoutMsecs(requestTimeoutMsecs),
       m_isStrictKillSwitchEnabled(isStrictKillSwitchEnabled)
@@ -71,7 +84,8 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     encRequestData.request.setTransferTimeout(m_requestTimeoutMsecs);
     encRequestData.request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     encRequestData.request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
-    encRequestData.request.setUrl(endpoint.arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
+    QString selectedProxyUrl = m_proxyUrlOverride.isEmpty() ? m_proxyUrl : m_proxyUrlOverride;
+    encRequestData.request.setUrl(endpoint.arg(selectedProxyUrl.isEmpty() ? m_gatewayEndpoint : selectedProxyUrl));
 
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
@@ -283,9 +297,9 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 
             QStringList baseUrls;
             if (m_isDevEnvironment) {
-                baseUrls = QString(DEV_S3_ENDPOINT).split(", ");
+                baseUrls = m_proxyStorageOverride.isEmpty() ? splitUrls(DEV_S3_ENDPOINT) : splitUrls(m_proxyStorageOverride);
             } else {
-                baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
+                baseUrls = splitUrls(PROD_S3_ENDPOINT);
             }
 
             QStringList proxyStorageUrls;
@@ -333,9 +347,9 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
 
     QStringList baseUrls;
     if (m_isDevEnvironment) {
-        baseUrls = QString(DEV_S3_ENDPOINT).split(", ");
+        baseUrls = m_proxyStorageOverride.isEmpty() ? splitUrls(DEV_S3_ENDPOINT) : splitUrls(m_proxyStorageOverride);
     } else {
-        baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
+        baseUrls = splitUrls(PROD_S3_ENDPOINT);
     }
     std::random_device randomDevice;
     std::mt19937 generator(randomDevice());
@@ -487,7 +501,9 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
         return result;
     };
 
-    if (m_proxyUrl.isEmpty()) {
+    QString selectedProxyUrl = m_proxyUrlOverride.isEmpty() ? m_proxyUrl : m_proxyUrlOverride;
+
+    if (selectedProxyUrl.isEmpty()) {
         QNetworkRequest request;
         request.setTransferTimeout(1000);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -509,6 +525,7 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
 
                 m_proxyUrl = proxyUrl;
                 if (!m_proxyUrl.isEmpty()) {
+                    selectedProxyUrl = m_proxyUrl;
                     break;
                 }
             } else {
@@ -517,8 +534,8 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
         }
     }
 
-    if (!m_proxyUrl.isEmpty()) {
-        if (bypassFunction(endpoint, m_proxyUrl, requestFunction, replyProcessingFunction)) {
+    if (!selectedProxyUrl.isEmpty()) {
+        if (bypassFunction(endpoint, selectedProxyUrl, requestFunction, replyProcessingFunction)) {
             return;
         }
     }
@@ -604,6 +621,11 @@ void GatewayController::getProxyUrlsAsync(const QStringList proxyStorageUrls, co
 void GatewayController::getProxyUrlAsync(const QStringList proxyUrls, const int currentProxyIndex,
                                          std::function<void(const QString &)> onComplete)
 {
+    if (!m_proxyUrlOverride.isEmpty()) {
+        onComplete(m_proxyUrlOverride);
+        return;
+    }
+
     if (currentProxyIndex >= proxyUrls.size()) {
         onComplete("");
         return;
