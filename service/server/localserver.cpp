@@ -12,6 +12,7 @@
 #include "ipc.h"
 #include "killswitch.h"
 #include "logger.h"
+#include "xray.h"
 
 #ifdef Q_OS_WIN
     #include "tapcontroller_win.h"
@@ -75,6 +76,22 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
 LocalServer::~LocalServer()
 {
+    qDebug() << "Local server stopping, cleaning up...";
+
+    // Stop Xray if running
+    Xray::getInstance().stopXray();
+
+    // Deactivate daemon to restore network settings, DNS, firewall rules
+    daemon.deactivate();
+
+    // Disable kill switch to restore normal traffic
+    KillSwitch::instance()->disableKillSwitch();
+
+    // Close the local server to stop accepting new connections
+    if (m_server) {
+        m_server->close();
+    }
+
     qDebug() << "Local server stopped";
 }
 

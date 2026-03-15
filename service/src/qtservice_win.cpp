@@ -608,16 +608,17 @@ void WINAPI QtServiceSysPrivate::handler( DWORD code )
     instance->mutex.lock();
     switch (code) {
     case QTSERVICE_STARTUP: // QtService startup (called from WinMain when started)
+        instance->status.dwWaitHint = 20000;
         instance->setStatus(SERVICE_START_PENDING);
         QCoreApplication::postEvent(instance->controllerHandler, new QEvent(QEvent::Type(QEvent::User + code)));
-        instance->condition.wait(&instance->mutex);
+        instance->condition.wait(&instance->mutex, 20000);
         instance->setStatus(SERVICE_RUNNING);
         break;
     case SERVICE_CONTROL_STOP: // 1
+        instance->status.dwWaitHint = 15000;
         instance->setStatus(SERVICE_STOP_PENDING);
         QCoreApplication::postEvent(instance->controllerHandler, new QEvent(QEvent::Type(QEvent::User + code)));
-        instance->condition.wait(&instance->mutex);
-        // status will be reported as stopped by start() when qapp::exec returns
+        instance->condition.wait(&instance->mutex, 12000);
         break;
 
     case SERVICE_CONTROL_PAUSE: // 2
@@ -638,10 +639,10 @@ void WINAPI QtServiceSysPrivate::handler( DWORD code )
         break;
 
     case SERVICE_CONTROL_SHUTDOWN: // 5
-        // Don't waste time with reporting stop pending, just do it
+        instance->status.dwWaitHint = 10000;
+        instance->setStatus(SERVICE_STOP_PENDING);
         QCoreApplication::postEvent(instance->controllerHandler, new QEvent(QEvent::Type(QEvent::User + SERVICE_CONTROL_STOP)));
-        instance->condition.wait(&instance->mutex);
-        // status will be reported as stopped by start() when qapp::exec returns
+        instance->condition.wait(&instance->mutex, 8000);
         break;
 
     default:
@@ -743,7 +744,7 @@ public:
 bool QtServiceAppEventFilter::nativeEventFilter(const QByteArray &, void *message, qintptr *result)
 {
     MSG *winMessage = (MSG*)message;
-    if (winMessage->message == WM_ENDSESSION && (winMessage->lParam & ENDSESSION_LOGOFF)) {
+    if (winMessage->message == WM_ENDSESSION) {
         *result = TRUE;
         return true;
     }
