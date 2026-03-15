@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dr.Frake VPN — Admin Panel</title>
+  <title>FBLink VPN — Admin Panel</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
@@ -546,13 +546,13 @@
 
   <!-- Login Screen -->
   <div id="loginScreen" class="fade-in">
-    <h1>⚡ Dr.Frake VPN</h1>
+    <h1>⚡ FBLink VPN</h1>
     <p>Панель управления администратора</p>
     <div class="login-card glass">
       <div id="loginError" class="error-msg"></div>
       <div class="field">
         <label>Email администратора</label>
-        <input type="email" id="loginEmail" placeholder="admin@drfrake.vpn" autocomplete="username">
+        <input type="email" id="loginEmail" placeholder="admin@fblink.com" autocomplete="username">
       </div>
       <div class="field">
         <label>Пароль</label>
@@ -567,7 +567,7 @@
   <!-- Main App -->
   <div id="app">
     <aside class="sidebar">
-      <div class="logo">Dr.Frake <span>VPN</span></div>
+      <div class="logo">FBLink <span>VPN</span></div>
       <div class="nav-item active" onclick="showPage('dashboard')">📊 Дашборд</div>
       <div class="nav-item" onclick="showPage('users')">👥 Пользователи</div>
       <div class="nav-item" onclick="showPage('servers')">🖥️ Серверы</div>
@@ -743,7 +743,7 @@
 
   <script>
     const API = '';  // same origin or set to 'https://yourvpn.app'
-    let token = localStorage.getItem('drfrake_admin_token') || '';
+    let token = localStorage.getItem('fblink_admin_token') || '';
 
     function api(path, opts = {}) {
       return fetch(API + path, {
@@ -777,12 +777,12 @@
         return;
       }
 
-      localStorage.setItem('drfrake_admin_token', token);
+      localStorage.setItem('fblink_admin_token', token);
       showApp();
     }
 
     function logout() {
-      localStorage.removeItem('drfrake_admin_token');
+      localStorage.removeItem('fblink_admin_token');
       token = '';
       document.getElementById('app').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'flex';
@@ -970,7 +970,7 @@
     if (token) {
       api('/api/v1/admin/stats').then(r => {
         if (r.ok) showApp();
-        else { localStorage.removeItem('drfrake_admin_token'); token = ''; }
+        else { localStorage.removeItem('fblink_admin_token'); token = ''; }
       });
     }
 
