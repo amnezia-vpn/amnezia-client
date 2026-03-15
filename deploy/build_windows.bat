@@ -29,12 +29,12 @@ set PROJECT_DIR=%cd%
 set SCRIPT_DIR=%PROJECT_DIR:"=%\deploy
 
 set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
-set APP_NAME=DrFrakeVPN
+set APP_NAME=FBLinkVPN
 set APP_FILENAME=%APP_NAME:"=%.exe
 set SERVICE_FILENAME=%APP_NAME:"=%-service.exe
 set CMAKEOUT_APP_FILENAME=AmneziaVPN.exe
 set CMAKEOUT_SERVICE_FILENAME=AmneziaVPN-service.exe
-set APP_DOMAIN=org.drfrakevpn.package
+set APP_DOMAIN=org.fblinkvpn.package
 set OUT_APP_DIR=%WORK_DIR:"=%\client\release
 set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
 set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
@@ -83,7 +83,7 @@ copy "%WORK_DIR%\client\release\%CMAKEOUT_APP_FILENAME%" "%OUT_APP_DIR%\%APP_FIL
 del "%OUT_APP_DIR%\%CMAKEOUT_APP_FILENAME%"
 del "%OUT_APP_DIR%\%CMAKEOUT_SERVICE_FILENAME%" 2>nul
 
-copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\DrFrakeVPN.ico" >nul
+copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\FBLinkVPN.ico" >nul
 
 echo "Signing exe"
 cd %OUT_APP_DIR%
