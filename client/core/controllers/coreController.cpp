@@ -157,11 +157,11 @@ void CoreController::initControllers()
     m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
     m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
 
-    m_drFrakeController.reset(new DrFrakeController(m_importController.get(), m_settings, m_serversModel.get(), this));
-    m_engine->rootContext()->setContextProperty("DrFrakeController", m_drFrakeController.get());
+    m_fbLinkController.reset(new FBLinkController(m_importController.get(), m_settings, m_serversModel.get(), this));
+    m_engine->rootContext()->setContextProperty("FBLinkController", m_fbLinkController.get());
     
-    // Автоматическая загрузка профиля Dr.Frake VPN при старте клиента (если залогинен)
-    m_drFrakeController->fetchConfig();
+    // Автоматическая загрузка профиля FBLink VPN при старте клиента (если залогинен)
+    m_fbLinkController->fetchConfig();
 }
 
 void CoreController::initAndroidController()

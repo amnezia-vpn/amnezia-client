@@ -235,9 +235,9 @@
         <file>ui/qml/Pages2/PageSetupWizardProtocolSettings.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardQrReader.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardStart.qml</file>
-        <file>ui/qml/Pages2/PageDrFrakeLogin.qml</file>
-        <file>ui/qml/Pages2/PageDrFrakeRegister.qml</file>
-        <file>ui/qml/Pages2/PageDrFrakeSubscription.qml</file>
+        <file>ui/qml/Pages2/PageFBLinkLogin.qml</file>
+        <file>ui/qml/Pages2/PageFBLinkRegister.qml</file>
+        <file>ui/qml/Pages2/PageFBLinkSubscription.qml</file>
         <file>ui/qml/Components/SubscriptionBanner.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardTextKey.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardViewConfig.qml</file>
