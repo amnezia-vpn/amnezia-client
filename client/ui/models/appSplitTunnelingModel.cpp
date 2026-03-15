@@ -27,7 +27,8 @@ QVariant AppSplitTunnelingModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
         case AppPathRole: {
-            return m_apps.at(index.row()).appName;
+            const auto& app = m_apps.at(index.row());
+            return app.appPath.isEmpty() ? app.appName : app.appPath;
         }
         default: {
             return true;

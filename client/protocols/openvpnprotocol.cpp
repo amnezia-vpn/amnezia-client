@@ -348,23 +348,36 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
 #ifdef Q_OS_WIN
                 QThread::msleep(300);
                 IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+                    int vpnAdapterIndex = -1;
                     QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
                     for (int i = 0; i < netInterfaces.size(); i++) {
-                        for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
-                        {
-                            // killSwitch toggle
+                        for (int j = 0; j < netInterfaces.at(i).addressEntries().size(); j++) {
                             if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
-                                if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
-                                    iface->enableKillSwitch(m_configData, netInterfaces.at(i).index());
-                                }
-                                m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
-                                m_configData.insert("vpnGateway", m_vpnGateway);
-                                m_configData.insert("vpnServer",
-                                                    NetworkUtilities::getIPAddress(m_configData.value(amnezia::config_key::hostName).toString()));
-                                iface->enablePeerTraffic(m_configData);
+                                vpnAdapterIndex = netInterfaces.at(i).index();
+                                break;
                             }
                         }
+                        if (vpnAdapterIndex != -1) break;
                     }
+
+                    if (vpnAdapterIndex == -1) {
+                        qWarning() << "Failed to find VPN adapter for address" << m_vpnLocalAddress;
+                        return;
+                    }
+
+                    if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                        iface->enableKillSwitch(m_configData, vpnAdapterIndex);
+                    }
+
+                    m_configData.insert("vpnAdapterIndex", vpnAdapterIndex);
+                    const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(
+                        QHostAddress(NetworkUtilities::getIPAddress(
+                            m_configData.value(amnezia::config_key::hostName).toString())));
+                    m_configData.insert("inetAdapterIndex", inetAdapterIndex);
+                    m_configData.insert("vpnGateway", m_vpnGateway);
+                    m_configData.insert("vpnServer",
+                                        NetworkUtilities::getIPAddress(m_configData.value(amnezia::config_key::hostName).toString()));
+                    iface->enablePeerTraffic(m_configData);
                 });
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)

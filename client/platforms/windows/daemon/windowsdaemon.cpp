@@ -62,12 +62,24 @@ void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAda
 }
 
 void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex) {
-    if (m_splitTunnelManager == nullptr)
+    if (m_splitTunnelManager == nullptr) {
+        if (config.m_vpnDisabledApps.length() > 0) {
+            logger.error() << "Split tunnel manager not initialized, cannot exclude apps";
+        }
         return;
+    }
 
   if (config.m_vpnDisabledApps.length() > 0) {
-      m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex);
-      m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps);
+      logger.debug() << "Activating split tunnel for" << config.m_vpnDisabledApps.length() << "apps"
+                     << "inetAdapter:" << m_inetAdapterIndex
+                     << "vpnAdapter:" << vpnAdapterIndex;
+      if (!m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex)) {
+          logger.error() << "Failed to start split tunnel driver";
+          return;
+      }
+      if (!m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps)) {
+          logger.error() << "Failed to set split tunnel app exclusion rules";
+      }
   } else {
       m_splitTunnelManager->stop();
   }

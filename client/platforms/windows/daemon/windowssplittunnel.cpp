@@ -287,6 +287,10 @@ bool WindowsSplitTunnel::excludeApps(const QStringList& appPaths) {
 
   logger.debug() << "Pushing new Ruleset for Split-Tunnel " << state;
   auto config = generateAppConfiguration(appPaths);
+  if (config.empty()) {
+    logger.error() << "Failed to generate app configuration - no valid app paths";
+    return false;
+  }
 
   DWORD bytesReturned;
   auto ok = DeviceIoControl(m_driver, IOCTL_SET_CONFIGURATION, &config[0],
@@ -323,6 +327,10 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   if (getState() == STATE_INITIALIZED) {
     logger.debug() << "State is Init, requires process config";
     auto config = generateProcessBlob();
+    if (config.empty()) {
+      logger.error() << "Failed to generate process blob";
+      return false;
+    }
     auto ok = DeviceIoControl(m_driver, IOCTL_REGISTER_PROCESSES, &config[0],
                               (DWORD)config.size(), nullptr, 0, &bytesReturned,
                               nullptr);
@@ -340,6 +348,12 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   logger.debug() << "Driver is  ready || new State:" << stateString();
 
   auto config = generateIPConfiguration(inetAdapterIndex, vpnAdapterIndex);
+  if (config.empty()) {
+    logger.error() << "Failed to generate IP configuration"
+                   << "inetAdapterIndex:" << inetAdapterIndex
+                   << "vpnAdapterIndex:" << vpnAdapterIndex;
+    return false;
+  }
   auto ok = DeviceIoControl(m_driver, IOCTL_REGISTER_IP_ADDRESSES, &config[0],
                             (DWORD)config.size(), nullptr, 0, &bytesReturned,
                             nullptr);
@@ -640,10 +654,14 @@ bool WindowsSplitTunnel::isInstalled() {
 }
 
 QString WindowsSplitTunnel::convertPath(const QString& path) {
-  auto parts = path.split("/");
+  // Normalize backslashes to forward slashes before splitting
+  QString normalizedPath = path;
+  normalizedPath.replace("\\", "/");
+  auto parts = normalizedPath.split("/");
   QString driveLetter = parts.takeFirst();
   if (!driveLetter.contains(":") || parts.size() == 0) {
     // device should contain : for e.g C:
+    logger.warning() << "Invalid path format for split tunnel:" << path;
     return "";
   }
   QByteArray buffer(2048, 0xFFu);
