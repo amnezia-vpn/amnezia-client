@@ -180,26 +180,26 @@ jobs:
     - name: 'Rename Windows installer'
       shell: cmd
       run: |
-        copy DrFrakeVPN_x${{ env.BUILD_ARCH }}.exe DrFrakeVPN_%VERSION%_x64.exe
+        copy FBLinkVPN_x${{ env.BUILD_ARCH }}.exe FBLinkVPN_%VERSION%_x64.exe
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: DrFrakeVPN_${{ env.VERSION }}_x64.exe
-        path: DrFrakeVPN_${{ env.VERSION }}_x64.exe
+        name: FBLinkVPN_${{ env.VERSION }}_x64.exe
+        path: FBLinkVPN_${{ env.VERSION }}_x64.exe
         retention-days: 7
 
     - name: 'Upload MSI installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: DrFrakeVPN_Windows_MSI_installer
-        path: DrFrakeVPN_x${{ env.BUILD_ARCH }}.msi
+        name: FBLinkVPN_Windows_MSI_installer
+        path: FBLinkVPN_x${{ env.BUILD_ARCH }}.msi
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: DrFrakeVPN_Windows_unpacked
+        name: FBLinkVPN_Windows_unpacked
         path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
         retention-days: 7
 
