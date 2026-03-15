@@ -54,24 +54,6 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
     connect(&m_networkWatcher, &NetworkWatcher::networkChanged, &m_ipcServer, &IpcServer::networkChanged);
     connect(&m_networkWatcher, &NetworkWatcher::wakeup, &m_ipcServer, &IpcServer::wakeup);
     KillSwitch::instance()->init();
-
-#ifdef Q_OS_LINUX
-    // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { LinuxDaemon::instance()->deactivate(); });
-#endif
-
-#ifdef Q_OS_MAC
-    // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { MacOSDaemon::instance()->deactivate(); });
-#endif
-
-#ifdef Q_OS_WIN
-    // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { WindowsDaemon::instance()->deactivate(); });
-#endif
 }
 
 LocalServer::~LocalServer()
