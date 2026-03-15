@@ -45,7 +45,7 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
 
 bool PageController::isStartPageVisible()
 {
-    // Mr.Frake VPN: Force login if there is no auth token
+    // FBLink VPN: Force login if there is no auth token
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
     if (qSettings.value("authToken", "").toString().isEmpty()) {
         return true;

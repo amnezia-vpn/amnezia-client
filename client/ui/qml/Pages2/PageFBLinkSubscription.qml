@@ -132,7 +132,7 @@ PageType {
                     // Title
                     LabelTextType {
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Mr.Frake VPN Premium")
+                        text: qsTr("FBLink VPN Premium")
                         font.pixelSize: 24
                         font.weight: 700
                         color: AmneziaStyle.color.paleGray

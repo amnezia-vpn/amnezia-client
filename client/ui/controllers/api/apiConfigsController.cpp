@@ -661,7 +661,7 @@ bool ApiConfigsController::renewYookassaSubscription(const QString &plan)
 
     QByteArray responseBody;
     // Replace Gateway Endpoint with YooKassa specific endpoint if it differs, or use the dev gateway logic if appropriate
-    // For now, assuming Dr.Frake-VPN backend is served at the gateway root URL 
+    // For now, assuming FBLink backend is served at the gateway root URL 
     GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
                                         apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
                                         

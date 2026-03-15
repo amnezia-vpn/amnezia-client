@@ -203,7 +203,7 @@ bool Settings::haveAuthData(int serverIndex) const
 
 QString Settings::nextAvailableServerName() const
 {
-    return tr("Dr.Frake VPN");
+    return tr("FBLink VPN");
 }
 
 void Settings::setSaveLogs(bool enabled)

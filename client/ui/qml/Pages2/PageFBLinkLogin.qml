@@ -39,7 +39,7 @@ PageType {
         BaseHeaderType {
             Layout.fillWidth: true
             headerText: qsTr("Вход")
-            descriptionText: qsTr("Введите данные аккаунта Mr.Frake VPN")
+            descriptionText: qsTr("Введите данные аккаунта FBLink VPN")
         }
 
         // Error message

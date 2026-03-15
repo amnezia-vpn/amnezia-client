@@ -20,7 +20,7 @@ PageType {
     id: root
 
     property string configExtension: ".conf"
-    property string configCaption: qsTr("Save Dr.Frake VPN config")
+    property string configCaption: qsTr("Save FBLink VPN config")
 
     BackButtonType {
         id: backButton

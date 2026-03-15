@@ -55,7 +55,7 @@ PageType {
         BaseHeaderType {
             Layout.fillWidth: true
             headerText: qsTr("Создание аккаунта")
-            descriptionText: qsTr("Зарегистрируйтесь в сервисе Mr.Frake VPN")
+            descriptionText: qsTr("Зарегистрируйтесь в сервисе FBLink VPN")
         }
 
         Rectangle {

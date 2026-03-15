@@ -110,7 +110,7 @@ PageType {
                     var fileName = GC.isMobile()
                         ? root.processedServer.name.toLowerCase().replace(/\s+/g, "_") + "_key.vpn"
                         : SystemController.getFileName(
-                            qsTr("Save Dr.Frake VPN config"),
+                            qsTr("Save FBLink VPN config"),
                             qsTr("Config files (*.vpn)"),
                             StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + root.processedServer.name.toLowerCase().replace(/\s+/g, "_") + "_key",
                             true,
@@ -177,7 +177,7 @@ PageType {
                 Layout.rightMargin: 16
                 visible: ApiConfigsController.qrCodesCount > 0
                 horizontalAlignment: Text.AlignHCenter
-                text: qsTr("To read the QR code in the Dr.Frake VPN app, tap + in the main menu → 'QR code'")
+                text: qsTr("To read the QR code in the FBLink VPN app, tap + in the main menu → 'QR code'")
             }
         }
     }

@@ -2,10 +2,10 @@
 <Installer>
     <Name>FBLinkVPN</Name>
     <Version>@CMAKE_PROJECT_VERSION@</Version>
-    <Title>Mr.Frake VPN</Title>
-    <Publisher>Mr.Frake VPN</Publisher>
-    <StartMenuDir>Mr.Frake VPN</StartMenuDir>
-    <TargetDir>@RootDir@/Program Files/Mr.Frake VPN</TargetDir>
+    <Title>FBLink VPN</Title>
+    <Publisher>FBLink VPN</Publisher>
+    <StartMenuDir>FBLink VPN</StartMenuDir>
+    <TargetDir>@RootDir@/Program Files/FBLink VPN</TargetDir>
     <WizardDefaultWidth>600</WizardDefaultWidth>
     <WizardDefaultHeight>380</WizardDefaultHeight>
     <WizardStyle>Modern</WizardStyle>
