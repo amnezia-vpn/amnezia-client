@@ -160,7 +160,7 @@ PageType {
 
                     PageController.showBusyIndicator(false)
                     
-                    PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", ".vpn", "drfrake_config")
+                    PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", ".vpn", "fblink_config")
                 }
             }
         }

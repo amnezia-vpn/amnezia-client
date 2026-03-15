@@ -19,9 +19,9 @@ Button {
     property bool isFocusable: true
 
     // ── Subscription gate ────────────────────────────────────────
-    // Block connect when user is logged in as DrFrake but has no active subscription
+    // Block connect when user is logged in as FBLink but has no active subscription
     readonly property bool isSubscriptionRequired:
-        DrFrakeController.isLoggedIn && !DrFrakeController.isSubscribed
+        FBLinkController.isLoggedIn && !FBLinkController.isSubscribed
 
     readonly property string lockedButtonColor: "#6B7280"
 
@@ -158,18 +158,7 @@ Button {
 
                 onClicked: {
                     rippleAnim.restart()
-
-                    if (root.isSubscriptionRequired) {
-                        // User is logged in but has no subscription — redirect
-                        errorShakeAnim.restart()
-                        PageController.showNotificationMessage(
-                            qsTr("Требуется активная подписка для подключения"))
-                        PageController.goToPage(PageEnum.PageDrFrakeSubscription)
-                        return
-                    }
-
-                    ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
-                    ConnectionController.connectButtonClicked()
+                    root.handleConnectClick()
                 }
             }
 
@@ -278,18 +267,18 @@ Button {
         }
     }
 
-    onClicked: {
+    function handleConnectClick() {
         if (root.isSubscriptionRequired) {
             errorShakeAnim.restart()
             PageController.showNotificationMessage(
                 qsTr("Требуется активная подписка для подключения"))
-            PageController.goToPage(PageEnum.PageDrFrakeSubscription)
+            PageController.goToPage(PageEnum.PageFBLinkSubscription)
             return
         }
         ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
         ConnectionController.connectButtonClicked()
     }
 
-    Keys.onEnterPressed:  this.clicked()
-    Keys.onReturnPressed: this.clicked()
+    Keys.onEnterPressed:  { rippleAnim.restart(); handleConnectClick() }
+    Keys.onReturnPressed: { rippleAnim.restart(); handleConnectClick() }
 }

@@ -190,11 +190,11 @@ PageType {
                 clickedFunction: function() {
                     var fileName = ""
                     if (GC.isMobile()) {
-                        fileName = "drfrake_killswitch_exceptions.json"
+                        fileName = "fblink_killswitch_exceptions.json"
                     } else {
                         fileName = SystemController.getFileName(qsTr("Save addresses"),
                                                                 qsTr("Address files (*.json)"),
-                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/drfrake_killswitch_exceptions",
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/fblink_killswitch_exceptions",
                                                                 true,
                                                                 ".json")
                     }

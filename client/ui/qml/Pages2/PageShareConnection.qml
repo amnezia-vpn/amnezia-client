@@ -27,13 +27,13 @@ PageType {
     property bool isSelfHostedConfig: true
 
     property string configExtension: ".vpn"
-    property string configCaption: qsTr("Save Dr.Frake VPN config")
-    property string configFileName: "drfrake_config"
+    property string configCaption: qsTr("Save FBLink VPN config")
+    property string configFileName: "fblink_config"
 
     // onVisibleChanged: {
     //     configExtension = ".vpn"
-    //     configCaption = qsTr("Save Dr.Frake VPN config")
-    //     configFileName = "drfrake_config"
+    //     configCaption = qsTr("Save FBLink VPN config")
+    //     configFileName = "fblink_config"
 
     //     if (visible) {
     //         var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"

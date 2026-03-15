@@ -26,7 +26,7 @@ PageType {
         function onGoToPageHome() {
             if (PageController.isStartPageVisible()) {
                 tabBar.visible = false
-                tabBarStackView.goToTabBarPage(PageEnum.PageDrFrakeLogin)
+                tabBarStackView.goToTabBarPage(PageEnum.PageFBLinkLogin)
             } else {
                 tabBar.visible = true
                 tabBar.setCurrentIndex(0)
@@ -157,14 +157,14 @@ PageType {
 
         function onNoInstalledContainers() {
             // Adding servers manually is disabled — redirect to login/subscription
-            if (!DrFrakeController.isLoggedIn) {
-                tabBarStackView.goToTabBarPage(PageEnum.PageDrFrakeLogin)
+            if (!FBLinkController.isLoggedIn) {
+                tabBarStackView.goToTabBarPage(PageEnum.PageFBLinkLogin)
                 tabBar.visible = false
-            } else if (!DrFrakeController.isSubscribed) {
-                PageController.goToPage(PageEnum.PageDrFrakeSubscription)
+            } else if (!FBLinkController.isSubscribed) {
+                PageController.goToPage(PageEnum.PageFBLinkSubscription)
             } else {
                 // Logged in with subscription but no containers: fetch fresh config
-                DrFrakeController.fetchConfig()
+                FBLinkController.fetchConfig()
             }
         }
     }
@@ -272,7 +272,7 @@ PageType {
             var pagePath
             if (PageController.isStartPageVisible()) {
                 tabBar.visible = false
-                pagePath = PageController.getPagePath(PageEnum.PageDrFrakeLogin)
+                pagePath = PageController.getPagePath(PageEnum.PageFBLinkLogin)
             } else {
                 tabBar.visible = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)

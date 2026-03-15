@@ -15,7 +15,7 @@ Item {
     id: root
 
     // Show when not logged in OR logged in but no active subscription
-    readonly property bool shouldShow: !DrFrakeController.isLoggedIn || !DrFrakeController.isSubscribed
+    readonly property bool shouldShow: !FBLinkController.isLoggedIn || !FBLinkController.isSubscribed
 
     // Allow parent to dismiss permanently for this session
     property bool dismissed: false
@@ -137,7 +137,7 @@ Item {
                 spacing: 3
 
                 LabelTextType {
-                    text: DrFrakeController.isLoggedIn
+                    text: FBLinkController.isLoggedIn
                         ? qsTr("Активируйте Premium")
                         : qsTr("Войдите или создайте аккаунт")
                     font.pixelSize: 15
@@ -146,7 +146,7 @@ Item {
                 }
 
                 LabelTextType {
-                    text: DrFrakeController.isLoggedIn
+                    text: FBLinkController.isLoggedIn
                         ? qsTr("Безлимитный доступ ко всем серверам от 199 ₽/мес")
                         : qsTr("Получите VPN-доступ к 10+ странам за 199 ₽/мес")
                     font.pixelSize: 12
@@ -174,7 +174,7 @@ Item {
                     LabelTextType {
                         id: ctaText
                         anchors.centerIn: parent
-                        text: DrFrakeController.isLoggedIn
+                        text: FBLinkController.isLoggedIn
                             ? qsTr("Подключить Premium")
                             : qsTr("Войти / Зарегистрироваться")
                         font.pixelSize: 13
@@ -188,10 +188,10 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (DrFrakeController.isLoggedIn) {
-                                PageController.goToPage(PageEnum.PageDrFrakeSubscription)
+                            if (FBLinkController.isLoggedIn) {
+                                PageController.goToPage(PageEnum.PageFBLinkSubscription)
                             } else {
-                                PageController.goToPage(PageEnum.PageDrFrakeLogin)
+                                PageController.goToPage(PageEnum.PageFBLinkLogin)
                             }
                         }
                     }
@@ -209,7 +209,7 @@ Item {
 
     // Reset dismiss if user logs in/out
     Connections {
-        target: DrFrakeController
+        target: FBLinkController
         function onLoginStateChanged() { root.dismissed = false }
         function onSubscriptionChanged() { root.dismissed = false }
     }

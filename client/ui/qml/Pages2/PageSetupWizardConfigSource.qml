@@ -104,11 +104,11 @@ PageType {
                             clickedFunction: function() {
                                 var fileName = ""
                                 if (GC.isMobile()) {
-                                    fileName = "DrFrakeVPN.log"
+                                    fileName = "FBLinkVPN.log"
                                 } else {
                                     fileName = SystemController.getFileName(qsTr("Save"),
                                                                             qsTr("Logs files (*.log)"),
-                                                                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/DrFrakeVPN",
+                                                                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/FBLinkVPN",
                                                                             true,
                                                                             ".log")
                                 }
@@ -250,7 +250,7 @@ PageType {
                 disabledColor: AmneziaStyle.color.mutedGray
                 textColor: AmneziaStyle.color.goldenApricot
 
-                text: qsTr("Dr.Frake VPN")
+                text: qsTr("FBLink VPN")
 
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 

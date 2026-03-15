@@ -74,7 +74,7 @@ PageType {
                 height: 34
                 radius: 17
 
-                visible: !DrFrakeController.isSubscribed
+                visible: !FBLinkController.isSubscribed
 
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
@@ -101,7 +101,7 @@ PageType {
                     }
 
                     LabelTextType {
-                        text: DrFrakeController.isLoggedIn
+                        text: FBLinkController.isLoggedIn
                             ? qsTr("Получить Premium")
                             : qsTr("Войти")
                         font.pixelSize: 13
@@ -116,10 +116,10 @@ PageType {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if (DrFrakeController.isLoggedIn) {
-                            PageController.goToPage(PageEnum.PageDrFrakeSubscription)
+                        if (FBLinkController.isLoggedIn) {
+                            PageController.goToPage(PageEnum.PageFBLinkSubscription)
                         } else {
-                            PageController.goToPage(PageEnum.PageDrFrakeLogin)
+                            PageController.goToPage(PageEnum.PageFBLinkLogin)
                         }
                     }
                 }
@@ -131,7 +131,7 @@ PageType {
                 height: 34
                 radius: 17
 
-                visible: DrFrakeController.isSubscribed
+                visible: FBLinkController.isSubscribed
 
                 color: Qt.rgba(16/255, 185/255, 129/255, 0.18)
                 border.color: Qt.rgba(16/255, 185/255, 129/255, 0.4)
@@ -160,7 +160,7 @@ PageType {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: PageController.goToPage(PageEnum.PageDrFrakeSubscription)
+                    onClicked: PageController.goToPage(PageEnum.PageFBLinkSubscription)
                 }
             }
         }

@@ -106,11 +106,11 @@ PageType {
                 clickedFunc: function() {
                     var fileName = ""
                     if (GC.isMobile()) {
-                        fileName = "DrFrakeVPN.backup"
+                        fileName = "FBLinkVPN.backup"
                     } else {
                         fileName = SystemController.getFileName(qsTr("Save backup file"),
                                                                 qsTr("Backup files (*.backup)"),
-                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/DrFrakeVPN",
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/FBLinkVPN",
                                                                 true,
                                                                 ".backup")
                     }

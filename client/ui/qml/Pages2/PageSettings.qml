@@ -84,7 +84,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 8
                 spacing: 8
-                visible: DrFrakeController.isLoggedIn
+                visible: FBLinkController.isLoggedIn
 
                 // Account info card
                 Rectangle {
@@ -112,8 +112,8 @@ PageType {
                             spacing: 1
 
                             Text {
-                                text: DrFrakeController.isSubscribed
-                                    ? (DrFrakeController.subscriptionPlan === "premium"
+                                text: FBLinkController.isSubscribed
+                                    ? (FBLinkController.subscriptionPlan === "premium"
                                         ? qsTr("Premium аккаунт")
                                         : qsTr("Basic аккаунт"))
                                     : qsTr("Бесплатный аккаунт")
@@ -123,8 +123,8 @@ PageType {
                             }
 
                             Text {
-                                visible: DrFrakeController.isSubscribed
-                                text: qsTr("Действует до: ") + DrFrakeController.subscriptionEndDate
+                                visible: FBLinkController.isSubscribed
+                                text: qsTr("Действует до: ") + FBLinkController.subscriptionEndDate
                                 font.pixelSize: 11
                                 color: Qt.rgba(1, 1, 1, 0.5)
                             }
@@ -171,7 +171,7 @@ PageType {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            DrFrakeController.logout()
+                            FBLinkController.logout()
                             PageController.goToPageHome()
                         }
                     }
@@ -182,7 +182,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: DrFrakeController.isLoggedIn
+                visible: FBLinkController.isLoggedIn
             }
 
         }
@@ -241,7 +241,7 @@ PageType {
     QtObject {
         id: about
 
-        property string title: qsTr("About Dr.Frake VPN")
+        property string title: qsTr("About FBLink VPN")
         readonly property string leftImagePath: "qrc:/images/controls/info.svg"
         property bool isVisible: true
         readonly property var clickedHandler: function() {

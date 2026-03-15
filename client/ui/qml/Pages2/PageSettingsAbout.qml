@@ -40,7 +40,7 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
-            // Dr.Frake VPN Brand Header
+            // FBLink VPN Brand Header
             Rectangle {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -78,7 +78,7 @@ PageType {
                         spacing: 4
 
                         Text {
-                            text: "Dr.Frake VPN"
+                            text: "FBLink VPN"
                             font.pixelSize: 24
                             font.weight: Font.Bold
                             color: "#FFFFFF"
@@ -125,7 +125,7 @@ PageType {
                 font.pixelSize: 14
                 wrapMode: Text.WordWrap
 
-                text: qsTr("Dr.Frake VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.\n\nПриложение создано на основе открытого проекта AmneziaVPN (amnezia-vpn.org), распространяемого по лицензии GNU GPL v3.")
+                text: qsTr("FBLink VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.\n\nПриложение создано на основе открытого проекта AmneziaVPN (amnezia-vpn.org), распространяемого по лицензии GNU GPL v3.")
                 color: AmneziaStyle.color.paleGray
             }
 
@@ -178,7 +178,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 spacing: 8
-                visible: DrFrakeController.isLoggedIn
+                visible: FBLinkController.isLoggedIn
 
                 // Account info
                 Rectangle {
@@ -206,8 +206,8 @@ PageType {
                             spacing: 1
 
                             Text {
-                                text: DrFrakeController.isSubscribed
-                                    ? (DrFrakeController.subscriptionPlan === "premium"
+                                text: FBLinkController.isSubscribed
+                                    ? (FBLinkController.subscriptionPlan === "premium"
                                         ? qsTr("Premium аккаунт")
                                         : qsTr("Basic аккаунт"))
                                     : qsTr("Бесплатный аккаунт")
@@ -217,8 +217,8 @@ PageType {
                             }
 
                             Text {
-                                visible: DrFrakeController.isSubscribed
-                                text: qsTr("Действует до: ") + DrFrakeController.subscriptionEndDate
+                                visible: FBLinkController.isSubscribed
+                                text: qsTr("Действует до: ") + FBLinkController.subscriptionEndDate
                                 font.pixelSize: 11
                                 color: Qt.rgba(1, 1, 1, 0.5)
                             }
@@ -265,7 +265,7 @@ PageType {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            DrFrakeController.logout()
+                            FBLinkController.logout()
                             PageController.goToPageHome()
                         }
                     }
@@ -321,18 +321,18 @@ PageType {
         readonly property string description: qsTr("Задайте вопрос нашей команде")
         readonly property string imageSource: "qrc:/images/controls/telegram.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally("https://t.me/drfrake_vpn")
+            Qt.openUrlExternally("https://t.me/fblink_vpn")
         }
     }
 
     QtObject {
         id: mailSupport
 
-        readonly property string title: qsTr("support@drfrake.vpn")
+        readonly property string title: qsTr("support@fblink.com")
         readonly property string description: qsTr("По вопросам и жалобам")
         readonly property string imageSource: "qrc:/images/controls/mail.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally("mailto:support@drfrake.vpn")
+            Qt.openUrlExternally("mailto:support@fblink.com")
         }
     }
 }

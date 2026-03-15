@@ -15,6 +15,7 @@ import "Pages2"
 Window  {
     id: root
     objectName: "mainWindow"
+    title: "FBLink VPN"
 
     Connections {
         target: Qt.application
@@ -56,7 +57,7 @@ Window  {
         PageController.closeWindow()
     }
 
-    title: "Dr.Frake VPN"
+    title: "Mr.Frake VPN"
 
     Item { // This item is needed for focus handling
         id: defaultFocusItem

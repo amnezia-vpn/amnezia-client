@@ -33,7 +33,7 @@ PageType {
 
         Item { Layout.fillHeight: true }
 
-        // Dr.Frake VPN — only login button
+        // Mr.Frake VPN — only login button
         BasicButtonType {
             id: drFrakeLoginButton
             Layout.fillWidth: true
@@ -47,10 +47,10 @@ PageType {
             pressedColor: "#0099BB"
             textColor: AmneziaStyle.color.paleGray
 
-            text: qsTr("Войти в Dr.Frake VPN")
+            text: qsTr("Войти в Mr.Frake VPN")
 
             clickedFunc: function() {
-                PageController.goToPage(PageEnum.PageDrFrakeLogin)
+                PageController.goToPage(PageEnum.PageFBLinkLogin)
             }
         }
 

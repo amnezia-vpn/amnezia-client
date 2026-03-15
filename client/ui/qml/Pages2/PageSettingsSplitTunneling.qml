@@ -331,11 +331,11 @@ PageType {
                 clickedFunction: function() {
                     var fileName = ""
                     if (GC.isMobile()) {
-                        fileName = "drfrake_sites.json"
+                        fileName = "fblink_sites.json"
                     } else {
                         fileName = SystemController.getFileName(qsTr("Save sites"),
                                                                 qsTr("Sites files (*.json)"),
-                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/drfrake_sites",
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/fblink_sites",
                                                                 true,
                                                                 ".json")
                     }
