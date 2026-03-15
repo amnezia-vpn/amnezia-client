@@ -18,6 +18,6 @@ elseif(LINUX)
 endif()
 
 configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/packages/org.drfrakevpn.package/meta/package.xml.in
-    ${CMAKE_BINARY_DIR}/installer/packages/org.drfrakevpn.package/meta/package.xml
+    ${CMAKE_CURRENT_LIST_DIR}/packages/org.fblinkvpn.package/meta/package.xml.in
+    ${CMAKE_BINARY_DIR}/installer/packages/org.fblinkvpn.package/meta/package.xml
 )

@@ -2,10 +2,10 @@
 <CPackWiXPatch>
     <CPackWiXFragment Id="CM_CP_AmneziaVPN_service.exe">
         <ServiceInstall
-                Id="DrFrakeServiceInstall"
+                Id="FBLinkServiceInstall"
                 Name="AmneziaVPN-service"
-                DisplayName="Dr.Frake VPN Service"
-                Description="Service for Dr.Frake VPN"
+                DisplayName="FBLink VPN Service"
+                Description="Service for FBLink VPN"
                 Start="auto"
                 Type="ownProcess"
                 ErrorControl="normal"
@@ -14,7 +14,7 @@
             <ServiceDependency Id="nsi" />
         </ServiceInstall>
         <ServiceControl
-                Id="DrFrakeServiceControl"
+                Id="FBLinkServiceControl"
                 Name="AmneziaVPN-service"
                 Start="install"
                 Stop="both"

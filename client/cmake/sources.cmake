@@ -140,12 +140,12 @@ file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
 file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.h
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.h
-    ${CLIENT_ROOT_DIR}/ui/controllers/api/drfrake_controller.h
+    ${CLIENT_ROOT_DIR}/ui/controllers/api/fblink_controller.h
 )
 file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.cpp
-    ${CLIENT_ROOT_DIR}/ui/controllers/api/drfrake_controller.cpp
+    ${CLIENT_ROOT_DIR}/ui/controllers/api/fblink_controller.cpp
 )
 
 set(HEADERS ${HEADERS}

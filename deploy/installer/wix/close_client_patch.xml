@@ -3,9 +3,9 @@
     <CPackWiXFragment Id="#PRODUCT">
         <!-- Требует расширение WixToolset.Util.wixext и xmlns util -->
         <util:CloseApplication
-                Id="CloseDrFrakeClient"
+                Id="CloseFBLinkClient"
                 Target="AmneziaVPN.exe"
-                Description="Closing Dr.Frake VPN client"
+                Description="Closing FBLink VPN client"
                 TerminateProcess="1"
                 RebootPrompt="no" />
     </CPackWiXFragment>

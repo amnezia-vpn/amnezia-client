@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
-    <Name>DrFrakeVPN</Name>
+    <Name>FBLinkVPN</Name>
     <Version>@CMAKE_PROJECT_VERSION@</Version>
-    <Title>Dr.Frake VPN</Title>
-    <Publisher>Dr.Frake VPN</Publisher>
-    <StartMenuDir>Dr.Frake VPN</StartMenuDir>
-    <TargetDir>@RootDir@/Program Files/Dr.Frake VPN</TargetDir>
+    <Title>Mr.Frake VPN</Title>
+    <Publisher>Mr.Frake VPN</Publisher>
+    <StartMenuDir>Mr.Frake VPN</StartMenuDir>
+    <TargetDir>@RootDir@/Program Files/Mr.Frake VPN</TargetDir>
     <WizardDefaultWidth>600</WizardDefaultWidth>
     <WizardDefaultHeight>380</WizardDefaultHeight>
     <WizardStyle>Modern</WizardStyle>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>FBLink VPN</DisplayName>
+    <Description>Installation package for FBLink VPN</Description>
+    <Version>@CMAKE_PROJECT_VERSION@</Version>
+    <ReleaseDate>@RELEASE_DATE@</ReleaseDate>
+    <Default>true</Default>
+    <ForcedInstallation>true</ForcedInstallation>
+    <RequiresAdminRights>true</RequiresAdminRights>
+    <Script>componentscript.js</Script>
+</Package>
