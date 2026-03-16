@@ -244,7 +244,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'ios'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qtquick3d'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
