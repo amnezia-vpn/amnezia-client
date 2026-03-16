@@ -18,6 +18,3 @@
 	path = client/3rd/qtgamepad
 	url = https://github.com/amnezia-vpn/qtgamepad.git
 	branch = 6.6
-[submodule "cmake/cmake-conan"]
-	path = cmake/cmake-conan
-	url = https://github.com/conan-io/cmake-conan.git

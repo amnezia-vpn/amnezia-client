@@ -10,9 +10,10 @@ import os
 required_conan_version = ">=2.21"
 
 
-class LibsshLocal(ConanFile):
-    name = "libssh-local"
+class LibSSHRecipe(ConanFile):
+    name = "libssh"
     version = "0.11.3"
+    user = "amnezia"
     license = "LGPL-2.1"
     homepage = "https://www.libssh.org/"
     description = "multiplatform C library implementing the SSHv2 protocol on client and server side"
