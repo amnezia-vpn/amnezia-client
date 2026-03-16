@@ -91,7 +91,7 @@ ARCHIVE_PATH=$BUILD_DIR/AmneziaVPN.xcarchive
 IPA_DIR=$BUILD_DIR/ipa
 EXPORT_OPTIONS=$BUILD_DIR/ExportOptions.plist
 
-# Create ExportOptions.plist for App Store distribution
+# Create ExportOptions.plist
 cat > $EXPORT_OPTIONS <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -102,6 +102,8 @@ cat > $EXPORT_OPTIONS <<EOF
     <key>uploadSymbols</key>
     <true/>
     <key>compileBitcode</key>
+    <false/>
+    <key>manageVersionAndBuildNumber</key>
     <false/>
 </dict>
 </plist>
@@ -117,12 +119,26 @@ xcodebuild \
 -archivePath $ARCHIVE_PATH \
 archive
 
+# Write App Store Connect private key to file if available
+AUTH_FLAGS=""
+if [ -n "${APPSTORE_CONNECT_PRIVATE_KEY:-}" ] && \
+   [ -n "${APPSTORE_CONNECT_KEY_ID:-}" ] && \
+   [ -n "${APPSTORE_CONNECT_ISSUER_ID:-}" ]; then
+  AUTH_KEY_PATH=$BUILD_DIR/AuthKey.p8
+  echo "$APPSTORE_CONNECT_PRIVATE_KEY" > "$AUTH_KEY_PATH"
+  AUTH_FLAGS="-authenticationKeyPath $AUTH_KEY_PATH \
+    -authenticationKeyID $APPSTORE_CONNECT_KEY_ID \
+    -authenticationKeyIssuerID $APPSTORE_CONNECT_ISSUER_ID \
+    -allowProvisioningUpdates"
+fi
+
 # Export IPA from archive
 xcodebuild \
 -exportArchive \
 -archivePath $ARCHIVE_PATH \
 -exportOptionsPlist $EXPORT_OPTIONS \
--exportPath $IPA_DIR
+-exportPath $IPA_DIR \
+$AUTH_FLAGS
 
 # Copy IPA to deploy output directory
 mkdir -p $PROJECT_DIR/deploy/build
