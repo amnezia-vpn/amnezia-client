@@ -125,10 +125,17 @@ extension PacketTunnelProvider {
             ovpnLog(.info, message: "Implement login with user credentials")
         }
 
+        #if os(iOS)
         vpnReachability.startTracking { [weak self] status in
-            guard status == .reachableViaWiFi else { return }
-            self?.ovpnAdapter?.reconnect(afterTimeInterval: 5)
+            switch status {
+            case .reachableViaWiFi, .reachableViaWWAN:
+                ovpnLog(.info, message: "Reachability changed, reconnecting OpenVPN session")
+                self?.ovpnAdapter?.reconnect(afterTimeInterval: 1)
+            default:
+                break
+            }
         }
+        #endif
 
         startHandler = completionHandler
         ovpnAdapter?.connect(using: openVPNPacketFlow())

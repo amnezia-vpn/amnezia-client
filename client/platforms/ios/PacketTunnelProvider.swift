@@ -41,10 +41,13 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     var ovpnAdapter: OpenVPNAdapter?
     private lazy var openVPNPacketFlowAdapter = PacketTunnelFlowAdapter(flow: packetFlow)
     private let pathMonitorQueue = DispatchQueue(label: Constants.processQueueName + ".path-monitor")
+    private let networkChangeQueue = DispatchQueue(label: Constants.processQueueName + ".network-change")
     private let pathMonitor = NWPathMonitor()
     private var didReceiveInitialPathUpdate = false
     private var currentPath: Network.NWPath?
     private var currentPathSignature: String?
+    private var pendingNetworkChangeWorkItem: DispatchWorkItem?
+    private var isApplyingNetworkChange = false
 
     var splitTunnelType: Int?
     var splitTunnelSites: [String]?
@@ -78,14 +81,13 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
             guard hasMeaningfulChange, let proto = self.protoType else { return }
 
-            // WireGuard/AWG manages network changes internally; avoid restarting the tunnel here.
-            if proto == .wireguard {
+            // OpenVPN and WireGuard/AWG handle network changes internally.
+            // Restarting them here can race their own reconnect logic and break tunnel setup.
+            if proto == .wireguard || proto == .openvpn {
                 return
             }
 
-            DispatchQueue.main.async {
-                self.handle(networkChange: path) { _ in }
-            }
+            self.scheduleNetworkChangeHandling(for: proto, path: path)
         }
         pathMonitor.start(queue: pathMonitorQueue)
 
@@ -259,9 +261,47 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
   
     private func handle(networkChange changePath: Network.NWPath, completion: @escaping (Error?) -> Void) {
+        guard protoType == .xray else {
+            updateActiveInterfaceIndex(for: changePath)
+            completion(nil)
+            return
+        }
+
         updateActiveInterfaceIndex(for: changePath)
-        wg_log(.info, message: "Tunnel restarted.")
-        startTunnel(options: nil, completionHandler: completion)
+        reasserting = true
+        xrayLog(.info, message: "Applying network change to xray tunnel")
+        stopXray { }
+        startXray { [weak self] error in
+            self?.reasserting = false
+            completion(error)
+        }
+    }
+
+    private func scheduleNetworkChangeHandling(for proto: TunnelProtoType, path: Network.NWPath) {
+        guard proto == .xray else { return }
+
+        pendingNetworkChangeWorkItem?.cancel()
+
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+
+            if self.isApplyingNetworkChange {
+                xrayLog(.debug, message: "Skipping network change while restart is already in progress")
+                return
+            }
+
+            self.isApplyingNetworkChange = true
+            DispatchQueue.main.async {
+                self.handle(networkChange: path) { [weak self] _ in
+                    self?.networkChangeQueue.async {
+                        self?.isApplyingNetworkChange = false
+                    }
+                }
+            }
+        }
+
+        pendingNetworkChangeWorkItem = workItem
+        networkChangeQueue.asyncAfter(deadline: .now() + 1.0, execute: workItem)
     }
 }
 
