@@ -33,22 +33,30 @@ func RunAutoRenewalScheduler(db *gorm.DB, shopID, key string) {
 
 func processAutoRenewals(db *gorm.DB, shopID, key string) {
 	now := time.Now()
-	// Подписки, которые уже истекли (expires_at <= now)
+
+	// 1. Автосписание для подписок с картой и включённым auto_renew
 	var subs []models.Subscription
 	db.Where(
 		"auto_renew = true AND payment_method_id != '' AND status = ? AND expires_at <= ?",
 		models.SubActive, now,
 	).Find(&subs)
 
-	if len(subs) == 0 {
-		return
+	if len(subs) > 0 {
+		log.Printf("[renewal] Найдено %d истёкших подписок к автосписанию", len(subs))
+		for _, sub := range subs {
+			if err := chargeAutoRenewal(db, shopID, key, sub); err != nil {
+				log.Printf("[renewal] Ошибка списания user_id=%d: %v", sub.UserID, err)
+			}
+		}
 	}
 
-	log.Printf("[renewal] Найдено %d истёкших подписок к автосписанию", len(subs))
-	for _, sub := range subs {
-		if err := chargeAutoRenewal(db, shopID, key, sub); err != nil {
-			log.Printf("[renewal] Ошибка списания user_id=%d: %v", sub.UserID, err)
-		}
+	// 2. Пометить как expired все оставшиеся просроченные активные подписки
+	//    (без карты, с отключённым auto_renew, или у кого списание не прошло)
+	result := db.Model(&models.Subscription{}).
+		Where("status = ? AND expires_at <= ?", models.SubActive, now).
+		Update("status", models.SubExpired)
+	if result.RowsAffected > 0 {
+		log.Printf("[renewal] Помечено как expired: %d подписок", result.RowsAffected)
 	}
 }
 

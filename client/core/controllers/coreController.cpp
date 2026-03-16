@@ -367,18 +367,24 @@ void CoreController::initAmneziaDnsToggledHandler()
 void CoreController::initPrepareConfigHandler()
 {
     connect(m_connectionController.get(), &ConnectionController::prepareConfig, this, [this]() {
+        qDebug() << "[FBLink] prepareConfig: defaultServerIndex =" << m_serversModel->getDefaultServerIndex();
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
         if (!m_apiConfigsController->isConfigValid()) {
+            qDebug() << "[FBLink] prepareConfig: apiConfigsController->isConfigValid() = false";
+            emit m_pageController->showNotificationMessage(tr("Ошибка: конфигурация API недействительна"));
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }
 
         if (!m_installController->isConfigValid()) {
+            qDebug() << "[FBLink] prepareConfig: installController->isConfigValid() = false";
+            emit m_pageController->showNotificationMessage(tr("Ошибка: нет установленных контейнеров. Войдите в FBLink и получите конфигурацию."));
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }
 
+        qDebug() << "[FBLink] prepareConfig: both valid, calling openConnection()";
         m_connectionController->openConnection();
     });
 }

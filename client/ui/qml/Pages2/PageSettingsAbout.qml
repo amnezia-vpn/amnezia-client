@@ -59,17 +59,20 @@ PageType {
                     anchors.margins: 24
                     spacing: 16
 
-                    // Shield Icon
+                    // Logo
                     Rectangle {
                         width: 60
                         height: 60
                         radius: 14
-                        color: Qt.rgba(1, 1, 1, 0.15)
+                        color: "transparent"
+                        clip: true
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: "🔒"
-                            font.pixelSize: 28
+                        Image {
+                            anchors.fill: parent
+                            source: "qrc:/images/fblink_logo.png"
+                            fillMode: Image.PreserveAspectFit
+                            sourceSize.width: 60
+                            sourceSize.height: 60
                         }
                     }
 

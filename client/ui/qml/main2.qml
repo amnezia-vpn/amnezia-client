@@ -57,8 +57,6 @@ Window  {
         PageController.closeWindow()
     }
 
-    title: "FBLink VPN"
-
     Item { // This item is needed for focus handling
         id: defaultFocusItem
         objectName: "defaultFocusItem"

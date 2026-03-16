@@ -156,13 +156,12 @@ Button {
                 cursorShape: Qt.PointingHandCursor
                 hoverEnabled: true
 
-                onClicked: {
-                    rippleAnim.restart()
-                    root.handleConnectClick()
-                }
+                // Let Button's AbstractButton handle the actual click;
+                // this MouseArea only provides hover state for visual effects.
+                onPressed: function(mouse) { mouse.accepted = false }
             }
 
-            scale: buttonMouseArea.containsMouse && !buttonMouseArea.pressed ? 1.02 : (buttonMouseArea.pressed ? 0.95 : 1.0)
+            scale: (root.hovered || buttonMouseArea.containsMouse) && !root.pressed ? 1.02 : (root.pressed ? 0.95 : 1.0)
             Behavior on scale {
                 NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
             }
@@ -277,6 +276,11 @@ Button {
         }
         ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
         ConnectionController.connectButtonClicked()
+    }
+
+    onClicked: {
+        rippleAnim.restart()
+        handleConnectClick()
     }
 
     Keys.onEnterPressed:  { rippleAnim.restart(); handleConnectClick() }

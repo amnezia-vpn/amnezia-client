@@ -186,20 +186,29 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
     # Qt 6.7+ with QT_ANDROID_BUILD_ALL_ABIS=ON produces a single universal APK
     # instead of separate per-ABI files.  Detect which naming convention was used.
     UNIVERSAL_APK=$APK_OUT_DIR/AmneziaVPN-$suffix.apk
+    UNIVERSAL_APK_UNSIGNED=$APK_OUT_DIR/AmneziaVPN-$suffix-unsigned.apk
+    # resolve: prefer signed, fall back to unsigned
+    if [ ! -f "$UNIVERSAL_APK" ] && [ -f "$UNIVERSAL_APK_UNSIGNED" ]; then
+      UNIVERSAL_APK=$UNIVERSAL_APK_UNSIGNED
+    fi
 
     IFS=';' read -r -a abi_array <<< "$ABIS"
     for ABI in "${abi_array[@]}"
     do
       PER_ABI_APK=$APK_OUT_DIR/AmneziaVPN-$ABI-$suffix.apk
+      PER_ABI_APK_UNSIGNED=$APK_OUT_DIR/AmneziaVPN-$ABI-$suffix-unsigned.apk
 
       if [ -f "$PER_ABI_APK" ]; then
         # Standard per-ABI APK (Qt < 6.7 behaviour)
         mv -u "$PER_ABI_APK" $PROJECT_DIR/deploy/build/
+      elif [ -f "$PER_ABI_APK_UNSIGNED" ]; then
+        # Unsigned APK (no signing key configured)
+        mv -u "$PER_ABI_APK_UNSIGNED" $PROJECT_DIR/deploy/build/AmneziaVPN-$ABI-$suffix.apk
       else
         # Try a broader find: ABI in filename OR in directory path (Qt 6.3+ sub-projects)
         FOUND=$(find "$OUT_APP_DIR" -type f \( \
-                  -name "*${ABI}*${suffix}.apk" -o \
-                  \( -name "*${suffix}.apk" -path "*${ABI}*" \) \
+                  -name "*${ABI}*${suffix}*.apk" -o \
+                  \( -name "*${suffix}*.apk" -path "*${ABI}*" \) \
                 \) 2>/dev/null | head -1)
         if [ -n "$FOUND" ]; then
           mv -u "$FOUND" $PROJECT_DIR/deploy/build/AmneziaVPN-$ABI-$suffix.apk

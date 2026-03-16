@@ -27,6 +27,7 @@ PageType {
 
     // -1 = no paid plan, 0 = basic, 1 = premium
     readonly property int currentPlanLevel: {
+        if (!FBLinkController.isSubscribed) return -1  // expired — allow buying any plan
         if (FBLinkController.subscriptionPlan === "premium") return 1
         if (FBLinkController.subscriptionPlan === "basic")   return 0
         return -1

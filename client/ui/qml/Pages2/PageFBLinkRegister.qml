@@ -52,6 +52,16 @@ PageType {
         anchors.rightMargin: 16
         spacing: 16
 
+        // Logo
+        Image {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: 8
+            source: "qrc:/images/fblink_logo.png"
+            width: 120
+            height: 120
+            fillMode: Image.PreserveAspectFit
+        }
+
         BaseHeaderType {
             Layout.fillWidth: true
             headerText: qsTr("Создание аккаунта")

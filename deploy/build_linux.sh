@@ -25,7 +25,7 @@ echo "Build dir: ${BUILD_DIR}"
 
 APP_NAME=AmneziaVPN
 APP_FILENAME=$APP_NAME.app
-APP_DOMAIN=org.drfrakevpn.package
+APP_DOMAIN=org.mrfrakevpn.package
 
 DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/linux
 PREBUILT_DEPLOY_DATA_DIR=$PROJECT_DIR/client/3rd-prebuilt/deploy-prebuilt/linux/client/bin

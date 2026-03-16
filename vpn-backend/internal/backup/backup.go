@@ -105,7 +105,7 @@ func DoBackup(db *gorm.DB, cfg *config.Config) error {
 		attachments[f.name] = f.data
 	}
 
-	subject := fmt.Sprintf("Dr.Frake VPN — резервная копия БД (%s)", ts)
+	subject := fmt.Sprintf("Mr.Frake VPN — резервная копия БД (%s)", ts)
 	body := fmt.Sprintf(
 		"Автоматический бэкап базы данных от %s.\n\nАдминистраторы получателей: %v\n\nВложения:\n"+
 			"  • vpn_backup_%s.db — полная копия SQLite\n"+

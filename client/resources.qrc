@@ -3,6 +3,7 @@
         <file>fonts/pt-root-ui_vf.ttf</file>
         <file>images/amneziaBigLogo.png</file>
         <file>images/AmneziaVPN.png</file>
+        <file alias="images/fblink_logo.png">images/Лого впн отрисованный.png</file>
         <file>images/controls/alert-circle.svg</file>
         <file>images/controls/amnezia.svg</file>
         <file>images/controls/app.svg</file>
@@ -54,6 +55,7 @@
         <file>images/controls/settings.svg</file>
         <file>images/controls/settings-news.svg</file>
         <file>images/controls/share-2.svg</file>
+        <file>images/controls/shield-tick.svg</file>
         <file>images/controls/split-tunneling.svg</file>
         <file>images/controls/tag.svg</file>
         <file>images/controls/telegram.svg</file>

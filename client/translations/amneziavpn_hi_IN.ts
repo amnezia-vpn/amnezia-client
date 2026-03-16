@@ -169,13 +169,12 @@
         <translation type="obsolete">कनेक्ट</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="166"/>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="285"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="273"/>
         <source>Требуется активная подписка для подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="272"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="260"/>
         <source>Нужна подписка</source>
         <translation type="unfinished"></translation>
     </message>
@@ -282,57 +281,15 @@
     </message>
 </context>
 <context>
-    <name>DrFrakeController</name>
+    <name>CoreController</name>
     <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="30"/>
-        <source>Email and password cannot be empty</source>
+        <location filename="../core/controllers/coreController.cpp" line="375"/>
+        <source>Ошибка: конфигурация API недействительна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="63"/>
-        <source>Invalid response format</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="68"/>
-        <source>Network Error: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="91"/>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="244"/>
-        <source>Не выполнен вход в систему</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="171"/>
-        <source>Внутренняя ошибка: Контроллеры не инициализированы</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="174"/>
-        <source>Сервер не вернул конфигурацию</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="179"/>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="275"/>
-        <source>Ошибка сети: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="202"/>
-        <source>Необходимо войти в аккаунт</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="230"/>
-        <source>Сессия истекла, войдите снова</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/drfrake_controller.cpp" line="234"/>
-        <source>Ошибка создания платежа: </source>
+        <location filename="../core/controllers/coreController.cpp" line="382"/>
+        <source>Ошибка: нет установленных контейнеров. Войдите в FBLink и получите конфигурацию.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -341,6 +298,61 @@
     <message>
         <source>Access error!</source>
         <translation type="vanished">प्रवेश त्रुटि!</translation>
+    </message>
+</context>
+<context>
+    <name>FBLinkController</name>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="30"/>
+        <source>Email and password cannot be empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="63"/>
+        <source>Invalid response format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="68"/>
+        <source>Network Error: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="91"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="261"/>
+        <source>Не выполнен вход в систему</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="188"/>
+        <source>Внутренняя ошибка: Контроллеры не инициализированы</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="191"/>
+        <source>Сервер не вернул конфигурацию</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="196"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="292"/>
+        <source>Ошибка сети: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="219"/>
+        <source>Необходимо войти в аккаунт</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="247"/>
+        <source>Сессия истекла, войдите снова</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="251"/>
+        <source>Ошибка создания платежа: </source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -588,366 +600,358 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
-    <name>PageDrFrakeLogin</name>
+    <name>PageFBLinkLogin</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeLogin.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="51"/>
         <source>Вход</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeLogin.qml" line="42"/>
-        <source>Введите данные аккаунта Dr.Frake VPN</source>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="52"/>
+        <source>Введите данные аккаунта FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeLogin.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="79"/>
         <source>Email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeLogin.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="90"/>
         <source>Пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeLogin.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="105"/>
         <source>Нет аккаунта?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeLogin.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="110"/>
         <source>Зарегистрироваться</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeLogin.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="136"/>
         <source>Вход...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeLogin.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="136"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeLogin.qml" line="134"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="144"/>
         <source>Пожалуйста, заполните все поля</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Password</source>
-        <translation type="obsolete">पासवर्ड</translation>
-    </message>
 </context>
 <context>
-    <name>PageDrFrakeRegister</name>
+    <name>PageFBLinkRegister</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="67"/>
         <source>Создание аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="58"/>
-        <source>Зарегистрируйтесь в сервисе Dr.Frake VPN</source>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="68"/>
+        <source>Зарегистрируйтесь в сервисе FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="83"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="93"/>
         <source>Email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="103"/>
         <source>Пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="115"/>
         <source>Подтвердите пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="129"/>
         <source>Уже есть аккаунт?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="134"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="159"/>
         <source>Создание...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="159"/>
         <source>Создать аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="158"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="168"/>
         <source>Пожалуйста, заполните все поля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="162"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="172"/>
         <source>Пароли не совпадают</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="176"/>
         <source>Пароль должен быть не менее 8 символов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="187"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="197"/>
         <source>Ошибка подключения (сервер недоступен)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="191"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="201"/>
         <source>Ошибка регистрации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="193"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="203"/>
         <source>Ошибка подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeRegister.qml" line="201"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="211"/>
         <source>Ошибка сети (сервер недоступен)</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Password</source>
-        <translation type="obsolete">पासवर्ड</translation>
-    </message>
 </context>
 <context>
-    <name>PageDrFrakeSubscription</name>
+    <name>PageFBLinkSubscription</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="45"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="46"/>
         <source>Время ожидания истекло. Если вы оплатили — нажмите «Проверить вручную».</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="58"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="59"/>
         <source>Базовый</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="58"/>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="59"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="59"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="60"/>
         <source>/ 30 дней</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="59"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="60"/>
         <source>Премиум</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="59"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="60"/>
         <source>ЛУЧШИЙ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="59"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="60"/>
         <source>Максимальная скорость и приоритет</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="64"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="65"/>
         <source>Безлимитный трафик</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="65"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="66"/>
         <source>10+ стран и регионов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="67"/>
         <source>До 5 устройств одновременно</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="68"/>
         <source>Kill Switch защита</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="69"/>
         <source>Быстрые серверы без логов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="135"/>
-        <source>Dr.Frake VPN Premium</source>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="136"/>
+        <source>FBLink VPN Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="145"/>
         <source>Полный доступ без ограничений</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="195"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="196"/>
         <source>Пробный период — 7 дней</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="202"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="203"/>
         <source>Полный доступ ко всем функциям</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="239"/>
-        <source>Попробовать за 5 ₽</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="265"/>
-        <source>Только для новых пользователей • Карта сохраняется</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="345"/>
-        <source>АКТИВНА</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="421"/>
-        <source>Что входит в подписку</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="517"/>
-        <source>Ожидаем подтверждение оплаты...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="525"/>
-        <source>Проверка %1 из %2. Это займёт до 2 минут.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="548"/>
-        <source>Проверить вручную</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="238"/>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="575"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="239"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="576"/>
         <source>Создание платежа...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="577"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="240"/>
+        <source>Попробовать за 5 ₽</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="266"/>
+        <source>Только для новых пользователей • Карта сохраняется</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="346"/>
+        <source>АКТИВНА</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="422"/>
+        <source>Что входит в подписку</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="518"/>
+        <source>Ожидаем подтверждение оплаты...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="526"/>
+        <source>Проверка %1 из %2. Это займёт до 2 минут.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="549"/>
+        <source>Проверить вручную</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="578"/>
         <source>Уже активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="579"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="580"/>
         <source>Оплатить 199 ₽ / Basic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="580"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="581"/>
         <source>Оплатить 499 ₽ / Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="609"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="610"/>
         <source>Страница оплаты открыта. Ожидаем подтверждение...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="611"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="612"/>
         <source>Не удалось получить ссылку на оплату</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="625"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="626"/>
         <source>Подписка активирована! Добро пожаловать в Premium.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="670"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="671"/>
         <source>Premium подписка активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="671"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="672"/>
         <source>Basic подписка активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="678"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="679"/>
         <source>Действует до: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="711"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="712"/>
         <source>Автопродление</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="719"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="720"/>
         <source>Спишем автоматически в день истечения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="720"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="721"/>
         <source>Подписка не продлится сама</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="791"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="792"/>
         <source>Способ оплаты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="799"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="800"/>
         <source>Карта привязана ✓</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="800"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="801"/>
         <source>Сохранится при следующей оплате</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="821"/>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="901"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="822"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="902"/>
         <source>Удалить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="855"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="856"/>
         <source>Удалить привязанную карту и отключить автосписание?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="878"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="879"/>
         <source>Отмена</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="945"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="946"/>
         <source>Карта удалена, автосписание отключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="966"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="967"/>
         <source>Условия использования</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDrFrakeSubscription.qml" line="984"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="985"/>
         <source>Политика конфиденциальности</source>
         <translation type="unfinished"></translation>
     </message>
@@ -983,43 +987,61 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete">जुड़ा हुआ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="102"/>
         <source>Получить Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="103"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="150"/>
         <source>Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="291"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="361"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="289"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="359"/>
         <source>Выбрать локацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="300"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="298"/>
         <source>Подключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="300"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="298"/>
         <source>Нажмите для смены региона</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
+    <name>PageMrFrakeLogin</name>
+    <message>
+        <source>Password</source>
+        <translation type="obsolete">पासवर्ड</translation>
+    </message>
+</context>
+<context>
+    <name>PageMrFrakeRegister</name>
+    <message>
+        <source>Password</source>
+        <translation type="obsolete">पासवर्ड</translation>
+    </message>
+</context>
+<context>
     <name>PageProtocolAwgClientSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="55"/>
         <source>AmneziaWG settings</source>
-        <translation type="unfinished">Amneziaडब्ल्यूजी सेटिंग्स</translation>
+        <translation type="obsolete">Amneziaडब्ल्यूजी सेटिंग्स</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="55"/>
+        <source>AWG settings</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="79"/>
@@ -1095,9 +1117,8 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="67"/>
         <source>AmneziaWG settings</source>
-        <translation>Amneziaडब्ल्यूजी सेटिंग्स</translation>
+        <translation type="vanished">Amneziaडब्ल्यूजी सेटिंग्स</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="80"/>
@@ -1166,6 +1187,11 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="341"/>
         <source>H3 - Underload packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="67"/>
+        <source>AWG settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1773,8 +1799,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="78"/>
+        <source>Cannot remove DNS service from running server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Cannot remove AmneziaDNS from running server</source>
-        <translation>चल रहे सर्वर से एम्नेज़िया डीएनएस को नहीं हटाया जा सकता</translation>
+        <translation type="vanished">चल रहे सर्वर से एम्नेज़िया डीएनएस को नहीं हटाया जा सकता</translation>
     </message>
 </context>
 <context>
@@ -2050,7 +2080,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="244"/>
-        <source>About Dr.Frake VPN</source>
+        <source>About FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2130,75 +2160,75 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">गोपनीयता नीति</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
         <source>Надёжная защита в интернете</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="95"/>
         <source>Версия %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="128"/>
-        <source>Dr.Frake VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="122"/>
+        <source>FBLink VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.
 
 Приложение создано на основе открытого проекта AmneziaVPN (amnezia-vpn.org), распространяемого по лицензии GNU GPL v3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="141"/>
         <source>Контакты и поддержка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="205"/>
         <source>Premium аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="212"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="206"/>
         <source>Basic аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="213"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="207"/>
         <source>Бесплатный аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="215"/>
         <source>Действует до: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="255"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="249"/>
         <source>Выйти из аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="296"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="290"/>
         <source>🏛 Основано на AmneziaVPN (GNU GPL v3)
 Исходный код: github.com/amnezia-vpn</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="320"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="314"/>
         <source>Telegram поддержка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="321"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="315"/>
         <source>Задайте вопрос нашей команде</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="331"/>
-        <source>support@drfrake.vpn</source>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="325"/>
+        <source>support@fblink.com</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="332"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="326"/>
         <source>По вопросам и жалобам</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2358,16 +2388,15 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="102"/>
-        <source>Setup guides on the Amnezia website</source>
+        <source>Setup guides</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>PageSettingsApiNativeConfigs</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="23"/>
         <source>Save AmneziaVPN config</source>
-        <translation type="unfinished">AmneziaVPN कॉन्फ़िगरेशन सहेजें</translation>
+        <translation type="obsolete">AmneziaVPN कॉन्फ़िगरेशन सहेजें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="60"/>
@@ -2375,8 +2404,13 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="23"/>
+        <source>Save FBLink VPN config</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="61"/>
-        <source>For router setup or the AmneziaWG app</source>
+        <source>For router setup or the AWG app</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2621,8 +2655,17 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="113"/>
+        <source>Save FBLink VPN config</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="180"/>
+        <source>To read the QR code in the FBLink VPN app, tap + in the main menu → &apos;QR code&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Save AmneziaVPN config</source>
-        <translation type="unfinished">AmneziaVPN कॉन्फ़िगरेशन सहेजें</translation>
+        <translation type="obsolete">AmneziaVPN कॉन्फ़िगरेशन सहेजें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="114"/>
@@ -2632,11 +2675,6 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="139"/>
         <source>Show key text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="180"/>
-        <source>To read the QR code in the Amnezia app, tap + in the main menu → &apos;QR code&apos;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2802,6 +2840,11 @@ Already installed containers were found on the server. All installed containers 
         <translation>स्टार्ट को मिनिमाइज किया गया</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
+        <source>All settings will be reset to default. All installed VPN services will still remain on the server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Launch application minimized</source>
         <translation type="vanished">लॉन्च एप्लिकेशन को न्यूनतम किया गया</translation>
     </message>
@@ -2851,9 +2894,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>सेटिंग्स रीसेट करें और एप्लिकेशन से सभी डेटा हटा दें?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>सभी सेटिंग्स डिफ़ॉल्ट पर रीसेट हो जाएंगी. सभी स्थापित AmneziaVPN सेवाएँ अभी भी सर्वर पर रहेंगी।.</translation>
+        <translation type="vanished">सभी सेटिंग्स डिफ़ॉल्ट पर रीसेट हो जाएंगी. सभी स्थापित AmneziaVPN सेवाएँ अभी भी सर्वर पर रहेंगी।.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="244"/>
@@ -3055,9 +3097,13 @@ Already installed containers were found on the server. All installed containers 
         <translation>DNS सर्वर</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="67"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>यदि AmneziaDNS का उपयोग या स्थापित नहीं किया गया है</translation>
+        <translation type="vanished">यदि AmneziaDNS का उपयोग या स्थापित नहीं किया गया है</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="67"/>
+        <source>If DNS service is not used or installed</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="84"/>
@@ -3331,8 +3377,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="182"/>
-        <source>AmneziaVPN logs</source>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="211"/>
+        <source>FBLink VPN-service logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3346,13 +3392,13 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="210"/>
-        <source>Service logs</source>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="182"/>
+        <source>FBLink VPN logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="211"/>
-        <source>AmneziaVPN-service logs</source>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="210"/>
+        <source>Service logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3382,14 +3428,18 @@ Already installed containers were found on the server. All installed containers 
         <translation>कोई नया स्थापित कंटेनर नहीं मिला</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="110"/>
+        <source>Check the server for previously installed VPN services</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="128"/>
         <source>Do you want to reboot the server?</source>
         <translation>क्या आप सर्वर को रीबूट करना चाहते हैं?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="188"/>
         <source>Do you want to clear server from Amnezia software?</source>
-        <translation>क्या आप एमनेज़िया सॉफ़्टवेयर से सर्वर साफ़ करना चाहते हैं?</translation>
+        <translation type="vanished">क्या आप एमनेज़िया सॉफ़्टवेयर से सर्वर साफ़ करना चाहते हैं?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="130"/>
@@ -3408,9 +3458,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>रद्द करना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="110"/>
         <source>Check the server for previously installed Amnezia services</source>
-        <translation>पहले से स्थापित एमनेज़िया सेवाओं के लिए सर्वर की जाँच करें</translation>
+        <translation type="vanished">पहले से स्थापित एमनेज़िया सेवाओं के लिए सर्वर की जाँच करें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="111"/>
@@ -3443,9 +3492,24 @@ Already installed containers were found on the server. All installed containers 
         <translation>क्या आप एप्लिकेशन से सर्वर हटाना चाहते हैं?</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="159"/>
+        <source>All installed VPN services will still remain on the server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="165"/>
         <source>Cannot remove server during active connection</source>
         <translation>सक्रिय कनेक्शन के दौरान सर्वर को हटाया नहीं जा सकता</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="184"/>
+        <source>Clear server from VPN software</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="188"/>
+        <source>Do you want to clear server from VPN software?</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="189"/>
@@ -3454,8 +3518,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="195"/>
+        <source>Cannot clear server from VPN software during active connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Cannot clear server from Amnezia software during active connection</source>
-        <translation>सक्रिय कनेक्शन के दौरान एमनेज़िया सॉफ़्टवेयर से सर्वर साफ़ नहीं किया जा सकता</translation>
+        <translation type="vanished">सक्रिय कनेक्शन के दौरान एमनेज़िया सॉफ़्टवेयर से सर्वर साफ़ नहीं किया जा सकता</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="213"/>
@@ -3473,14 +3541,12 @@ Already installed containers were found on the server. All installed containers 
         <translation>सक्रिय कनेक्शन के दौरान एपीआई कॉन्फिगरेशन को रीसेट नहीं किया जा सकता</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="159"/>
         <source>All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>सभी स्थापित AmneziaVPN सेवाएँ अभी भी सर्वर पर रहेंगी.</translation>
+        <translation type="vanished">सभी स्थापित AmneziaVPN सेवाएँ अभी भी सर्वर पर रहेंगी.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="184"/>
         <source>Clear server from Amnezia software</source>
-        <translation>एमनेज़िया सॉफ़्टवेयर से सर्वर साफ़ करें</translation>
+        <translation type="vanished">एमनेज़िया सॉफ़्टवेयर से सर्वर साफ़ करें</translation>
     </message>
 </context>
 <context>
@@ -3770,7 +3836,7 @@ Already installed containers were found on the server. All installed containers 
     <name>PageSetupWizardApiServicesList</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="52"/>
-        <source>VPN by Amnezia</source>
+        <source>VPN Service</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3869,7 +3935,22 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="253"/>
-        <source>Site Amnezia</source>
+        <source>FBLink VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="277"/>
+        <source>VPN Service</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="278"/>
+        <source>Connect to classic paid and free VPN services</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="295"/>
+        <source>Configure VPN on your own server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3878,23 +3959,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>खरीदारी पुनर्स्थापित करें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="277"/>
-        <source>VPN by Amnezia</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="278"/>
-        <source>Connect to classic paid and free VPN services from Amnezia</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="294"/>
         <source>Self-hosted VPN</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="295"/>
-        <source>Configure Amnezia VPN on your own server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3964,9 +4030,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>जारी रखना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="132"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation>आपके द्वारा दर्ज किया गया सभी डेटा पूरी तरह से गोपनीय रहेगा और एमनेज़िया या किसी तीसरे पक्ष को साझा या प्रकट नहीं किया जाएगा</translation>
+        <translation type="vanished">आपके द्वारा दर्ज किया गया सभी डेटा पूरी तरह से गोपनीय रहेगा और एमनेज़िया या किसी तीसरे पक्ष को साझा या प्रकट नहीं किया जाएगा</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="195"/>
@@ -3983,6 +4048,11 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="212"/>
         <source>Password or SSH private key</source>
         <translation>पासवर्ड या SSH निजी कुंजी</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="132"/>
+        <source>All data you enter will remain strictly confidential and will not be shared or disclosed to any third parties</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="143"/>
@@ -4061,14 +4131,12 @@ Already installed containers were found on the server. All installed containers 
         <translation>सर्वर को पहले ही एप्लिकेशन में जोड़ा जा चुका है</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="69"/>
         <source>Amnezia has detected that your server is currently </source>
-        <translation>Amnezia ने पता लगाया है कि आपका सर्वर वर्तमान में है </translation>
+        <translation type="vanished">Amnezia ने पता लगाया है कि आपका सर्वर वर्तमान में है </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="70"/>
         <source>busy installing other software. Amnezia installation </source>
-        <translation>अन्य सॉफ़्टवेयर स्थापित करने में व्यस्त। भूलने की बीमारी की स्थापना </translation>
+        <translation type="vanished">अन्य सॉफ़्टवेयर स्थापित करने में व्यस्त। भूलने की बीमारी की स्थापना </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="156"/>
@@ -4079,6 +4147,16 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="71"/>
         <source>will pause until the server finishes installing other software</source>
         <translation>जब तक सर्वर अन्य सॉफ़्टवेयर इंस्टॉल करना समाप्त नहीं कर लेता तब तक रुकेगा</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="69"/>
+        <source>The system has detected that your server is currently </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="70"/>
+        <source>busy installing other software. Installation </source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="110"/>
@@ -4169,7 +4247,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="50"/>
-        <source>Войти в Dr.Frake VPN</source>
+        <source>Войти в FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4247,9 +4325,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>वायरगार्ड कॉन्फ़िगरेशन सहेजें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="71"/>
         <source>Save AmneziaWG config</source>
-        <translation>AmneziaWG कॉन्फ़िगरेशन सहेजें</translation>
+        <translation type="vanished">AmneziaWG कॉन्फ़िगरेशन सहेजें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="78"/>
@@ -4267,9 +4344,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>एक्सरे कॉन्फिगरेशन सहेजें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="120"/>
         <source>For the AmneziaVPN app</source>
-        <translation>AmneziaVPN ऐप के लिए</translation>
+        <translation type="vanished">AmneziaVPN ऐप के लिए</translation>
     </message>
     <message>
         <source>OpenVpn native format</source>
@@ -4281,9 +4357,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>वायरगार्ड मूल प्रारूप</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="135"/>
         <source>AmneziaWG native format</source>
-        <translation>AmneziaWG मूल प्रारूप</translation>
+        <translation type="vanished">AmneziaWG मूल प्रारूप</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="140"/>
@@ -4406,6 +4481,26 @@ Already installed containers were found on the server. All installed containers 
         <translation>कनेक्शन</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="50"/>
+        <source>Save FBLink VPN config</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="71"/>
+        <source>Save AWG config</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="120"/>
+        <source>For the FBLink VPN app</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="135"/>
+        <source>AWG native format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="323"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="324"/>
         <source>Server</source>
@@ -4433,9 +4528,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>कॉन्फ़िगरेशन निरस्त कर दिया गया</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="50"/>
         <source>Save AmneziaVPN config</source>
-        <translation type="unfinished">AmneziaVPN कॉन्फ़िगरेशन सहेजें</translation>
+        <translation type="obsolete">AmneziaVPN कॉन्फ़िगरेशन सहेजें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="125"/>
@@ -4473,9 +4567,13 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished">कॉपी</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="30"/>
         <source>Save AmneziaVPN config</source>
-        <translation type="unfinished">AmneziaVPN कॉन्फ़िगरेशन सहेजें</translation>
+        <translation type="obsolete">AmneziaVPN कॉन्फ़िगरेशन सहेजें</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="30"/>
+        <source>Save FBLink VPN config</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="150"/>
@@ -4495,8 +4593,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="323"/>
+        <source>To read the QR code, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>To read the QR code in the Amnezia app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
-        <translation type="unfinished">एमनेज़िया ऐप में क्यूआर कोड पढ़ने के लिए, &quot;सर्वर जोड़ें&quot; → &quot;मेरे पास कनेक्ट करने के लिए डेटा है&quot; → &quot;क्यूआर कोड, कुंजी या सेटिंग्स फ़ाइल&quot; चुनें।</translation>
+        <translation type="obsolete">एमनेज़िया ऐप में क्यूआर कोड पढ़ने के लिए, &quot;सर्वर जोड़ें&quot; → &quot;मेरे पास कनेक्ट करने के लिए डेटा है&quot; → &quot;क्यूआर कोड, कुंजी या सेटिंग्स फ़ाइल&quot; चुनें।</translation>
     </message>
 </context>
 <context>
@@ -5745,7 +5847,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../settings.cpp" line="206"/>
-        <source>Dr.Frake VPN</source>
+        <source>FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5922,7 +6024,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="423"/>
+        <location filename="../vpnconnection.cpp" line="425"/>
         <source>Mbps</source>
         <translation></translation>
     </message>
@@ -6248,12 +6350,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="230"/>
+        <location filename="../ui/qml/main2.qml" line="229"/>
         <source>Private key passphrase</source>
         <translation>निजी कुंजी पासफ़्रेज़</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="251"/>
+        <location filename="../ui/qml/main2.qml" line="250"/>
         <source>Save</source>
         <translation>सहेजें</translation>
     </message>

@@ -75,7 +75,7 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 		},
 		"capture":             true,
 		"save_payment_method": true, // сохраняем карту для автосписания
-		"description":         fmt.Sprintf("Dr.Frake VPN — %s", planLabel(plan)),
+		"description":         fmt.Sprintf("Mr.Frake VPN — %s", planLabel(plan)),
 		"metadata": map[string]interface{}{
 			"user_id": userID,
 			"plan":    plan,

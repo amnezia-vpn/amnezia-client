@@ -230,7 +230,7 @@ PersistentKeepalive = 25
 	return map[string]interface{}{
 		"containers":       []interface{}{container},
 		"defaultContainer": "amnezia-awg",
-		"description":      "Dr.Frake VPN - " + server.Region,
+		"description":      "FBLink VPN - " + server.Region,
 		"dns1":             "1.1.1.1",
 		"dns2":             "8.8.8.8",
 		"hostName":         server.Host,

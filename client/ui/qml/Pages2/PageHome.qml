@@ -28,9 +28,6 @@ PageType {
                 if (drawer.isOpened) {
                     drawer.closeTriggered()
                 }
-                if (homeSplitTunnelingDrawer.isOpened) {
-                    homeSplitTunnelingDrawer.closeTriggered()
-                }
             }
         }
     }
@@ -170,6 +167,7 @@ PageType {
             id: connectButton
             objectName: "connectButton"
 
+            z: 99
             anchors.centerIn: parent
             // Shift down by half topBar's height so button is centered
             // in the visual space below the top bar, not the whole Item

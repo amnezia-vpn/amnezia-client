@@ -108,18 +108,20 @@ void FBLinkController::fetchConfig()
 
             if (obj.contains("config")) {
                 QString configDataStr = obj["config"].toString();
+                QString region = obj["region"].toString();
                 QStringList configStrings = configDataStr.split('\n', Qt::SkipEmptyParts);
 
                 if (m_importController && m_settings && m_serversModel) {
                     QJsonArray servers = m_settings->serversArray();
                     QList<int> existingFBLinkServerIndices;
 
-                    // Locate all existing FBLink VPN servers
+                    // Locate all existing FBLink VPN servers by description prefix or fblink_server marker
                     for (int i = 0; i < servers.size(); ++i) {
                         QJsonObject server = servers.at(i).toObject();
                         QString desc = server.value("description").toString();
                         QString name = server.value("name").toString();
-                        if (desc.startsWith("FBLink VPN") || name.startsWith("FBLink VPN")) {
+                        if (desc.startsWith("FBLink VPN") || name.startsWith("FBLink VPN")
+                            || server.value("fblink_server").toBool()) {
                             existingFBLinkServerIndices.append(i);
                         }
                     }
@@ -127,18 +129,27 @@ void FBLinkController::fetchConfig()
                     // For each new config, we'll try to find an exact match to update in-place
                     QList<int> updatedIndices;
 
+                    // Build display name: prefer region, fall back to hostname
+                    auto makeDescription = [&region](const QString &hostName) -> QString {
+                        if (!region.isEmpty())
+                            return "FBLink VPN - " + region;
+                        return "FBLink VPN - " + hostName;
+                    };
+
                     for (const QString &configData : configStrings) {
                         if (m_importController->extractConfigFromData(configData)) {
                             QJsonObject newConfig = QJsonDocument::fromJson(m_importController->getConfig().toUtf8()).object();
                             QString newHostName = newConfig.value("hostName").toString();
+                            QString description = makeDescription(newHostName);
 
                             bool found = false;
                             for (int i : existingFBLinkServerIndices) {
-                                if (updatedIndices.contains(i)) continue; // Already updated this one
+                                if (updatedIndices.contains(i)) continue;
 
                                 QJsonObject existingServer = servers.at(i).toObject();
                                 if (existingServer.value("hostName").toString() == newHostName) {
-                                    // Found a match! Update it in-place
+                                    newConfig["description"] = description;
+                                    newConfig["fblink_server"] = true;
                                     m_serversModel->editServer(newConfig, i);
                                     updatedIndices.append(i);
                                     found = true;
@@ -147,12 +158,18 @@ void FBLinkController::fetchConfig()
                             }
 
                             if (!found) {
-                                // Not found, so add it as a new server
+                                int countBefore = m_serversModel->getServersCount();
                                 m_importController->importConfig();
+                                // Tag the newly added server so future fetchConfig() calls can find it
+                                if (m_serversModel->getServersCount() > countBefore) {
+                                    int newIdx = m_serversModel->getServersCount() - 1;
+                                    QJsonObject added = m_settings->serversArray().at(newIdx).toObject();
+                                    added["description"] = description;
+                                    added["fblink_server"] = true;
+                                    m_serversModel->editServer(added, newIdx);
+                                }
                             } else {
-                                // We handled it manually, clear the import controller's pending state
                                 m_importController->clearConfigFileName();
-                                // We can't clear getConfig() directly but it's safe to ignore it until next extract
                             }
                         }
                     }
@@ -304,18 +321,13 @@ bool FBLinkController::isSubscribed() const
     QString plan = qSettings.value("subscriptionPlan", "").toString();
     if (plan == "free" || plan.isEmpty()) return false;
 
-    // Check expiry date — backend may return full ISO datetime or date-only
+    // Check expiry date — backend returns full ISO datetime with nanoseconds (e.g. "2026-03-19T15:40:15.778881751Z")
+    // Qt cannot parse 9-decimal nanoseconds, so extract only the date part (YYYY-MM-DD)
     QString endDateStr = qSettings.value("subscriptionEndDate", "").toString();
     if (endDateStr.isEmpty()) return false;
 
-    // Try date-only first (YYYY-MM-DD), then full datetime
-    QDate endDate = QDate::fromString(endDateStr, Qt::ISODate);
-    if (!endDate.isValid()) {
-        QDateTime dt = QDateTime::fromString(endDateStr, Qt::ISODateWithMs);
-        if (!dt.isValid())
-            dt = QDateTime::fromString(endDateStr, Qt::ISODate);
-        endDate = dt.date();
-    }
+    QString dateOnly = endDateStr.contains('T') ? endDateStr.left(10) : endDateStr;
+    QDate endDate = QDate::fromString(dateOnly, Qt::ISODate);
     if (!endDate.isValid()) return false;
     return QDate::currentDate() <= endDate;
 }
