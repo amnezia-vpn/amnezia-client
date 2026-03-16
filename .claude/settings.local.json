@@ -44,7 +44,11 @@
       "Bash(convert --version)",
       "Bash(python -c \"from PIL import Image; print\\(''PIL available''\\)\")",
       "Bash(python3 -c \"from PIL import Image; print\\(''PIL available''\\)\")",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(find c:/Users/PC/Documents/Dr.Frake-VPN/deploy -name post_install* -o -name post_uninstall*)",
+      "Bash(grep -rn \"SecureQSettings\\\\|QSettings\\\\|AmneziaVPN\" c:/Users/PC/Documents/Dr.Frake-VPN/client/ --include=*.cpp -l)",
+      "Bash(grep -rn \"ORGANIZATION_NAME\\\\|APPLICATION_NAME\\\\|setOrganizationName\\\\|setApplicationName\" c:/Users/PC/Documents/Dr.Frake-VPN/client/ c:/Users/PC/Documents/Dr.Frake-VPN/service/ --include=*.cpp --include=*.h)",
+      "Bash(find c:/Users/PC/Documents/Dr.Frake-VPN -name exportOptions* -o -name ExportOptions*)"
     ]
   }
 }

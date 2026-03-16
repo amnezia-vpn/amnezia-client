@@ -16,8 +16,8 @@ sc stop AmneziaWGTunnel$AmneziaVPN
 sc delete AmneziaWGTunnel$AmneziaVPN
 sc stop AmneziaVPNSplitTunnel
 sc delete AmneziaVPNSplitTunnel
-taskkill /IM "AmneziaVPN-service.exe" /F
-taskkill /IM "AmneziaVPN.exe" /F
+taskkill /IM "FBLinkVPN-service.exe" /F
+taskkill /IM "FBLinkVPN.exe" /F
 
 rem Delete the service log file under ProgramData
 if exist "%SYS_LOG_FILE%" del /F /Q "%SYS_LOG_FILE%"

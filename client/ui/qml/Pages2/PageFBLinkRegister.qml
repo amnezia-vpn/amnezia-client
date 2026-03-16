@@ -56,10 +56,12 @@ PageType {
         Image {
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: 8
-            source: "qrc:/images/fblink_logo.png"
-            width: 120
-            height: 120
+            Layout.preferredWidth: 120
+            Layout.preferredHeight: 120
             fillMode: Image.PreserveAspectFit
+            sourceSize.width: 120
+            sourceSize.height: 120
+            source: "qrc:/images/fblink_logo.png"
         }
 
         BaseHeaderType {

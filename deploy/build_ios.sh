@@ -87,13 +87,53 @@ else
   exit 1
 fi
 
-# Build project
+ARCHIVE_PATH=$BUILD_DIR/AmneziaVPN.xcarchive
+IPA_DIR=$BUILD_DIR/ipa
+EXPORT_OPTIONS=$BUILD_DIR/ExportOptions.plist
+
+# Create ExportOptions.plist for App Store distribution
+cat > $EXPORT_OPTIONS <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>app-store</string>
+    <key>uploadSymbols</key>
+    <true/>
+    <key>compileBitcode</key>
+    <false/>
+</dict>
+</plist>
+EOF
+
+# Archive project
 xcodebuild \
 "OTHER_CODE_SIGN_FLAGS=--keychain '$KEYCHAIN_FILE'" \
 -configuration Release \
 -scheme AmneziaVPN \
--destination "generic/platform=iOS,name=Any iOS'" \
--project $BUILD_DIR/AmneziaVPN.xcodeproj
+-destination "generic/platform=iOS" \
+-project $BUILD_DIR/AmneziaVPN.xcodeproj \
+-archivePath $ARCHIVE_PATH \
+archive
+
+# Export IPA from archive
+xcodebuild \
+-exportArchive \
+-archivePath $ARCHIVE_PATH \
+-exportOptionsPlist $EXPORT_OPTIONS \
+-exportPath $IPA_DIR
+
+# Copy IPA to deploy output directory
+mkdir -p $PROJECT_DIR/deploy/build
+IPA_FILE=$(find $IPA_DIR -name "*.ipa" | head -1)
+if [ -z "$IPA_FILE" ]; then
+  echo "ERROR: IPA not found after export"
+  ls -la $IPA_DIR 2>/dev/null || echo "(IPA dir does not exist)"
+  exit 1
+fi
+cp "$IPA_FILE" $PROJECT_DIR/deploy/build/FBLinkVPN.ipa
+echo "IPA saved to $PROJECT_DIR/deploy/build/FBLinkVPN.ipa"
 
 # restore keychain
 security default-keychain -s login.keychain
