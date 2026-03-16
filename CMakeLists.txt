@@ -8,6 +8,8 @@ project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         HOMEPAGE_URL "https://amnezia.org/"
 )
 
+include(CTest)
+
 string(TIMESTAMP CURRENT_DATE "%Y-%m-%d")
 set(RELEASE_DATE "${CURRENT_DATE}")
 
@@ -43,6 +45,10 @@ if(APPLE)
 endif()
 
 add_subdirectory(client)
+
+if(BUILD_TESTING)
+    add_subdirectory(client/tests)
+endif()
 
 if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_subdirectory(service)

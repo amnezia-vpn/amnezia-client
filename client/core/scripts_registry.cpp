@@ -4,6 +4,29 @@
 #include <QFile>
 #include <QObject>
 
+namespace
+{
+QString protocolScriptPath(amnezia::ProtocolScriptType type, amnezia::DockerContainer container)
+{
+    return QString(":/server_scripts/%1/%2").arg(amnezia::scriptFolder(container), amnezia::scriptName(type));
+}
+
+QString readProtocolScript(const QString &fileName, bool warnIfMissing)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        if (warnIfMissing) {
+            qDebug() << "Warning: script missing" << fileName;
+        }
+        return {};
+    }
+
+    QByteArray data = file.readAll();
+    data.replace("\r", "");
+    return QString::fromUtf8(data);
+}
+} // namespace
+
 QString amnezia::scriptFolder(amnezia::DockerContainer container)
 {
     switch (container) {
@@ -72,13 +95,10 @@ QString amnezia::scriptData(amnezia::SharedScriptType type)
 
 QString amnezia::scriptData(amnezia::ProtocolScriptType type, DockerContainer container)
 {
-    QString fileName = QString(":/server_scripts/%1/%2").arg(amnezia::scriptFolder(container), amnezia::scriptName(type));
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "Warning: script missing" << fileName;
-        return "";
-    }
-    QByteArray data = file.readAll();
-    data.replace("\r", "");
-    return data;
+    return readProtocolScript(protocolScriptPath(type, container), true);
+}
+
+QString amnezia::scriptDataIfExists(amnezia::ProtocolScriptType type, DockerContainer container)
+{
+    return readProtocolScript(protocolScriptPath(type, container), false);
 }

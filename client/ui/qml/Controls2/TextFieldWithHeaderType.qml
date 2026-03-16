@@ -20,6 +20,7 @@ Item {
     property string buttonText
     property string buttonImageSource
     property var clickedFunc
+    readonly property bool hasRightButtonAction: (buttonText !== "") || (buttonImageSource !== "")
 
     property alias textField: textField
     property string textFieldTextColor: AmneziaStyle.color.paleGray
@@ -181,7 +182,7 @@ Item {
     }
 
     BasicButtonType {
-        visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
+        visible: root.hasRightButtonAction
 
         focusPolicy: Qt.NoFocus
         text: root.buttonText
@@ -207,7 +208,8 @@ Item {
     }
 
     Keys.onEnterPressed: {
-        if (root.rightButtonClickedOnEnter && root.clickedFunc && typeof root.clickedFunc === "function") {
+        if (root.rightButtonClickedOnEnter && root.hasRightButtonAction
+                && root.clickedFunc && typeof root.clickedFunc === "function") {
             clickedFunc()
         }
 
@@ -217,7 +219,8 @@ Item {
     }
 
     Keys.onReturnPressed: {
-        if (root.rightButtonClickedOnEnter &&root.clickedFunc && typeof root.clickedFunc === "function") {
+        if (root.rightButtonClickedOnEnter && root.hasRightButtonAction
+                && root.clickedFunc && typeof root.clickedFunc === "function") {
             clickedFunc()
         }
 

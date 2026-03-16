@@ -39,6 +39,7 @@ QString scriptName(ProtocolScriptType type);
 
 QString scriptData(SharedScriptType type);
 QString scriptData(ProtocolScriptType type, DockerContainer container);
+QString scriptDataIfExists(ProtocolScriptType type, DockerContainer container);
 }
 
 #endif // SCRIPTS_REGISTRY_H
