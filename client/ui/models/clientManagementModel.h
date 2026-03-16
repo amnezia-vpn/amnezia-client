@@ -25,6 +25,7 @@ public:
 
 public slots:
     void updateModel(const QJsonArray &clients);
+    void updateClientName(int row, const QString &newName);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

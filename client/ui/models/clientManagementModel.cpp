@@ -45,6 +45,20 @@ void ClientManagementModel::updateModel(const QJsonArray &clients)
     endResetModel();
 }
 
+void ClientManagementModel::updateClientName(int row, const QString &newName)
+{
+    if (row < 0 || row >= m_clientsTable.size()) {
+        return;
+    }
+    QJsonObject client = m_clientsTable.at(row).toObject();
+    QJsonObject userData = client.value(configKey::userData).toObject();
+    userData[configKey::clientName] = newName;
+    client[configKey::userData] = userData;
+    m_clientsTable.replace(row, client);
+    const QModelIndex idx = index(row);
+    emit dataChanged(idx, idx, { ClientNameRole });
+}
+
 QHash<int, QByteArray> ClientManagementModel::roleNames() const
 {
     QHash<int, QByteArray> roles;

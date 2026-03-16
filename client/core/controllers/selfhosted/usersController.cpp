@@ -461,8 +461,11 @@ ErrorCode UsersController::renameClient(int serverIndex, const int row, const QS
         return error;
     }
 
-    emit clientRenamed(row, clientName);
-    emit clientsUpdated(m_clientsTable);
+    if (addTimeStamp) {
+        emit clientsUpdated(m_clientsTable);
+    } else {
+        emit clientRenamed(row, clientName);
+    }
     return error;
 }
 

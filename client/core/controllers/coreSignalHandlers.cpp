@@ -268,6 +268,8 @@ void CoreSignalHandlers::initClientManagementModelUpdateHandler()
 {
     connect(m_coreController->m_usersController, &UsersController::clientsUpdated,
             m_coreController->m_clientManagementModel, &ClientManagementModel::updateModel);
+    connect(m_coreController->m_usersController, &UsersController::clientRenamed,
+            m_coreController->m_clientManagementModel, &ClientManagementModel::updateClientName);
 }
 
 void CoreSignalHandlers::initSitesModelUpdateHandler()
