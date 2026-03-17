@@ -54,8 +54,11 @@ class LibSSHRecipe(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.crypto_backend =="openssl":
-            self.requires("openssl/[>=1.1 <4]")
+        if self.options.crypto_backend == "openssl":
+            if self.settings.os == "Android":
+                self.requires("android-openssl/3.5.5")
+            else:
+                self.requires("openssl/[>=1.1 <4]")
         elif self.options.crypto_backend == "gcrypt":
             self.requires("libgcrypt/[>=1.8.4 <2]")
         elif self.options.crypto_backend == "mbedtls":
@@ -93,7 +96,8 @@ class LibSSHRecipe(ConanFile):
             tc.preprocessor_definitions["S_IWRITE"] = "S_IWUSR"
             tc.preprocessor_definitions["S_IEXEC"] = "S_IXUSR"
             if self.options.page_16k:
-                tc.extra_ldflags = ["-Wl,-z,max-page-size=16384"]
+                tc.cache_variables["CMAKE_SHARED_LINKER_FLAGS"] = "-Wl,-z,max-page-size=16384"
+                tc.cache_variables["CMAKE_MODULE_LINKER_FLAGS"] = "-Wl,-z,max-page-size=16384"
         tc.generate()
 
         deps = CMakeDeps(self)

@@ -41,7 +41,14 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
 )
 
-find_package(openssl REQUIRED)
+if(ANDROID)
+    find_package(android-openssl REQUIRED)
+    # CMakeConfigDeps doesn't propagate include dirs onto IMPORTED targets;
+    # use the legacy variable that IS correctly populated by the config file.
+    include_directories(${android-openssl_INCLUDE_DIRS})
+else()
+    find_package(openssl REQUIRED)
+endif()
 list(APPEND LIBS OpenSSL::SSL OpenSSL::Crypto)
 
 find_package(libssh REQUIRED)

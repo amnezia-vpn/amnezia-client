@@ -39,12 +39,15 @@ class AwgAndroid(ConanFile):
         tc.variables["GRADLE_USER_HOME"] = os.path.join(self.build_folder, "gradle_user_home")
         tc.variables["CMAKE_LIBRARY_OUTPUT_DIRECTORY"] = os.path.join(self.build_folder, "out")
         if self.options.page_16k:
-            tc.extra_ldflags = ["-Wl,-z,max-page-size=16384"]
+            # Use cache_variables to override NDK toolchain defaults (extra_ldflags sets _INIT
+            # variants which the NDK toolchain can override). CMAKE_SHARED_LINKER_FLAGS is passed
+            # directly to the Go Makefile as LDFLAGS, which flows into CGO_LDFLAGS.
+            page_flag = "-Wl,-z,max-page-size=16384"
+            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = page_flag
+            tc.cache_variables["CMAKE_SHARED_LINKER_FLAGS"] = page_flag
         tc.generate()
 
         vbe = VirtualBuildEnv(self)
-        if self.options.page_16k:
-            vbe.environment().define("CGO_LDFLAGS", "-Wl,-z,max-page-size=16384")
         vbe.generate()
 
     def _patch_sources(self):

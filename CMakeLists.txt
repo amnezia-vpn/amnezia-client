@@ -24,6 +24,14 @@ if(APPLE)
     endif()
 endif()
 
+if(ANDROID)
+    set(CONAN_INSTALL_ARGS
+        "--build=missing"
+        "-o=*:page_16k=True"
+        "-e=*:LDFLAGS=-Wl,-z,max-page-size=16384"
+        CACHE STRING "" FORCE)
+endif()
+
 project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         DESCRIPTION "AmneziaVPN"
         HOMEPAGE_URL "https://amnezia.org/"
