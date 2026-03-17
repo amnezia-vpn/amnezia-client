@@ -315,6 +315,9 @@ QHash<int, QByteArray> ServersModel::roleNames() const
 
 ServerCredentials ServersModel::serverCredentials(int index) const
 {
+    if (index < 0 || index >= m_servers.size()) {
+        return ServerCredentials();
+    }
     const ServerConfig &server = m_servers.at(index);
     
     if (server.isSelfHosted()) {

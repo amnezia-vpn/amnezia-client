@@ -110,10 +110,11 @@ void ServersUiController::updateModel()
 {
     int defaultIndex = m_serversController->getDefaultServerIndex();
     bool wasEmpty = !hasServersFromGatewayApi();
-    
-    if (m_processedServerIndex < 0 || m_processedServerIndex >= m_serversController->getServersCount()) {
+    int serversCount = m_serversController->getServersCount();
+
+    if (m_processedServerIndex >= serversCount) {
         setProcessedServerIndex(defaultIndex);
-    } else {
+    } else if (m_processedServerIndex >= 0) {
         setProcessedServerIndex(m_processedServerIndex);
     }
     
@@ -292,26 +293,29 @@ void ServersUiController::setProcessedContainerIndex(int index)
 
 void ServersUiController::setProcessedServerIndex(int index)
 {
-    if (index < 0 || index >= m_serversController->getServersCount()) {
+    if (index >= m_serversController->getServersCount()) {
         return;
     }
-    
+
     if (m_processedServerIndex != index) {
         m_processedServerIndex = index;
         m_serversModel->setProcessedServerIndex(index);
-        updateContainersModel();
 
-        ServerConfig server = m_serversController->getServerConfig(index);
-        setProcessedContainerIndex(static_cast<int>(server.defaultContainer()));
+        if (index >= 0) {
+            updateContainersModel();
 
-        if (server.isApiV2()) {
-            const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-            if (apiV2 && !apiV2->apiConfig.availableCountries.isEmpty()) {
-                emit updateApiCountryModel();
+            ServerConfig server = m_serversController->getServerConfig(index);
+            setProcessedContainerIndex(static_cast<int>(server.defaultContainer()));
+
+            if (server.isApiV2()) {
+                const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
+                if (apiV2 && !apiV2->apiConfig.availableCountries.isEmpty()) {
+                    emit updateApiCountryModel();
+                }
+                emit updateApiServicesModel();
             }
-            emit updateApiServicesModel();
         }
-        
+
         emit processedServerIndexChanged(m_processedServerIndex);
     }
 }
