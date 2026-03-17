@@ -6,7 +6,6 @@ from conan.internal.model.pkg_type import PackageType
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.apple import is_apple_os
 
-import platform
 import os
 import shutil
 
