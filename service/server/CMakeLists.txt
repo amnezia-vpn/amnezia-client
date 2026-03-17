@@ -358,13 +358,6 @@ add_custom_command(
     $<TARGET_FILE_DIR:${PROJECT}>
     COMMAND_EXPAND_LISTS
 )
-# add_custom_command(
-#     TARGET ${PROJECT} POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-#     ${CMAKE_SOURCE_DIR}/client/3rd-prebuilt/deploy-prebuilt/${DEPLOY_PLATFORM_PATH}
-#     $<TARGET_FILE_DIR:${PROJECT}>
-#     COMMAND_EXPAND_LISTS
-# )
 
 if(NOT WIN32)
     find_package(awg-go REQUIRED)
