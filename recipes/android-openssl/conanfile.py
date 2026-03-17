@@ -51,10 +51,11 @@ class AndroidOpenSSL(ConanFile):
         host = "linux-x86_64" if platform.system() == "Linux" else "darwin-x86_64"
         return os.path.join(self._ndk(), "toolchains", "llvm", "prebuilt", host, "bin")
 
-    def _patch_makefile(self, makefile_path):
+    def _patch_makefile(self, makefile_path, page_16k=False):
         """Rename libcrypto.so → libcrypto_3.so and libssl.so → libssl_3.so
         throughout the generated Makefile so the built files already carry the
-        correct names and sonames — no patchelf required."""
+        correct names and sonames — no patchelf required.
+        Optionally append the 16KB page-size linker flag to LDFLAGS."""
         with open(makefile_path, "r") as f:
             content = f.read()
 
@@ -62,6 +63,15 @@ class AndroidOpenSSL(ConanFile):
         # \b word-boundary keeps us from matching libcrypto.so.3 style names.
         content = re.sub(r"\blibcrypto\.so\b", "libcrypto_3.so", content)
         content = re.sub(r"\blibssl\.so\b",    "libssl_3.so",    content)
+
+        if page_16k:
+            page_flag = "-Wl,-z,max-page-size=16384"
+            content = re.sub(
+                r"^(LDFLAGS\s*=)(.*?)$",
+                lambda m: m.group(0) + " " + page_flag if page_flag not in m.group(0) else m.group(0),
+                content,
+                flags=re.MULTILINE,
+            )
 
         with open(makefile_path, "w") as f:
             f.write(content)
@@ -79,15 +89,13 @@ class AndroidOpenSSL(ConanFile):
             f"./Configure {target} shared no-tests"
             f" -D__ANDROID_API__={api_level}"
         )
-        if self.options.page_16k:
-            configure_cmd += " -Wl,-z,max-page-size=16384"
 
         self.run(f"{env_prefix} {configure_cmd}", cwd=self.source_folder)
 
-        # Bake the _3 names into the Makefile before building so the output
-        # files are already libcrypto_3.so / libssl_3.so with correct sonames
-        # and DT_NEEDED entries — no patchelf step required.
-        self._patch_makefile(os.path.join(self.source_folder, "Makefile"))
+        self._patch_makefile(
+            os.path.join(self.source_folder, "Makefile"),
+            page_16k=bool(self.options.page_16k),
+        )
 
         self.run(
             f"{env_prefix} make -j{jobs} SHLIB_VERSION_NUMBER= build_libs",
