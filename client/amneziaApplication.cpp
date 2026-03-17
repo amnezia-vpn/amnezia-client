@@ -18,6 +18,7 @@
 #include <QtQuick/QQuickWindow>  
 #include <QWindow>     
 
+#include "core/protocols/qmlRegisterProtocols.h"
 #include "logger.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/models/installedAppsModel.h"
@@ -204,6 +205,7 @@ void AmneziaApplication::registerTypes()
 
     qmlRegisterType<InstalledAppsModel>("InstalledAppsModel", 1, 0, "InstalledAppsModel");
 
+    amnezia::declareQmlProtocolEnum();
     Vpn::declareQmlVpnConnectionStateEnum();
     PageLoader::declareQmlPageEnum();
 }
