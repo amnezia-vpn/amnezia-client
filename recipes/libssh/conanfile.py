@@ -26,6 +26,7 @@ class LibSSHRecipe(ConanFile):
         "with_zlib": [True, False],
         "crypto_backend": ["openssl", "gcrypt", "mbedtls"],
         "with_symbol_versioning": [True, False],
+        "page_16k": [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,6 +34,7 @@ class LibSSHRecipe(ConanFile):
         "with_zlib": True,
         "crypto_backend": "openssl",
         "with_symbol_versioning": True,
+        "page_16k": True,
     }
 
     def config_options(self):
@@ -90,6 +92,8 @@ class LibSSHRecipe(ConanFile):
             tc.preprocessor_definitions["S_IWRITE"] = "S_IRUSR"
             tc.preprocessor_definitions["S_IWRITE"] = "S_IWUSR"
             tc.preprocessor_definitions["S_IEXEC"] = "S_IXUSR"
+            if self.options.page_16k:
+                tc.extra_ldflags = ["-Wl,-z,max-page-size=16384"]
         tc.generate()
 
         deps = CMakeDeps(self)

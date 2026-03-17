@@ -11,6 +11,8 @@ class AmneziaLibxray(ConanFile):
     version = "1.0.0"
 
     settings = "os", "arch"
+    options = {"page_16k": [True, False]}
+    default_options = {"page_16k": True}
 
     def layout(self):
         basic_layout(self, build_folder=".")
@@ -34,7 +36,8 @@ class AmneziaLibxray(ConanFile):
 
     def build(self):
         self._patch_sources()
-        self.run("./build.sh android")
+        cgo_ldflags = 'CGO_LDFLAGS="-Wl,-z,max-page-size=16384" ' if self.options.page_16k else ""
+        self.run(f'{cgo_ldflags}./build.sh android')
 
     def package(self):
         copy(self, "libxray.aar", src=self.build_folder, dst=os.path.join(self.package_folder, "aar"))

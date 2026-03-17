@@ -51,6 +51,13 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
 endif()
 
 qt_standard_project_setup()
+
+# 16KB page size support for Android 15+ / Google Play
+# Must be set before any targets are defined so it applies to all compiled-from-source libraries
+if(ANDROID)
+    add_link_options("-Wl,-z,max-page-size=16384")
+endif()
+
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
 target_include_directories(${PROJECT} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>

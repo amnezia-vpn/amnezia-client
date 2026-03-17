@@ -11,6 +11,8 @@ class OpenvpnPtAndroid(ConanFile):
     version = "1.0.0"
     package_type = "shared-library"
     settings = "os", "arch", "build_type", "compiler"
+    options = {"page_16k": [True, False]}
+    default_options = {"page_16k": True}
 
     def layout(self):
         cmake_layout(self)
@@ -36,6 +38,8 @@ class OpenvpnPtAndroid(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["ANDROID_PACKAGE_NAME"] = "org.amnezia.vpn"
         tc.variables["ANDROID_PLATFORM"] = 24
+        if self.options.page_16k:
+            tc.extra_ldflags = ["-Wl,-z,max-page-size=16384"]
         tc.generate()
 
     def build(self):

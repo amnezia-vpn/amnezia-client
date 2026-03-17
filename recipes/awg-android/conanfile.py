@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, replace_in_file
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Git
@@ -12,6 +13,8 @@ class AwgAndroid(ConanFile):
     version = "1.1.7"
     settings = "os", "arch", "build_type", "compiler"
     package_type = "shared-library"
+    options = {"page_16k": [True, False]}
+    default_options = {"page_16k": True}
 
     def layout(self):
         cmake_layout(self)
@@ -35,7 +38,14 @@ class AwgAndroid(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["GRADLE_USER_HOME"] = os.path.join(self.build_folder, "gradle_user_home")
         tc.variables["CMAKE_LIBRARY_OUTPUT_DIRECTORY"] = os.path.join(self.build_folder, "out")
+        if self.options.page_16k:
+            tc.extra_ldflags = ["-Wl,-z,max-page-size=16384"]
         tc.generate()
+
+        vbe = VirtualBuildEnv(self)
+        if self.options.page_16k:
+            vbe.environment().define("CGO_LDFLAGS", "-Wl,-z,max-page-size=16384")
+        vbe.generate()
 
     def _patch_sources(self):
         if platform.system() == 'Darwin':
