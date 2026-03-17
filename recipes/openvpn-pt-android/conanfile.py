@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, collect_libs
+from conan.tools.files import copy
 from conan.tools.scm import Git
 from conan.errors import ConanInvalidConfiguration
 
@@ -40,9 +40,9 @@ class OpenvpnPtAndroid(ConanFile):
         tc.variables["ANDROID_PACKAGE_NAME"] = "org.amnezia.vpn"
         tc.variables["ANDROID_PLATFORM"] = 24
         if self.options.page_16k:
-            tc.extra_ldflags = ["-Wl,-z,max-page-size=16384"]
-            tc.cache_variables["CMAKE_SHARED_LINKER_FLAGS"] = "-Wl,-z,max-page-size=16384"
-            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = "-Wl,-z,max-page-size=16384"
+            page_flag = "-Wl,-z,max-page-size=16384"
+            tc.cache_variables["CMAKE_SHARED_LINKER_FLAGS"] = page_flag
+            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = page_flag
         tc.generate()
 
         vbe = VirtualBuildEnv(self)
@@ -61,4 +61,7 @@ class OpenvpnPtAndroid(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::openvpn-pt-android")
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["ovpn3", "ovpnutil", "rsapss"]
+        self.cpp_info.set_property("cmake_extra_variables", {
+            "OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH": os.path.join(self.package_folder, "lib", "libck-ovpn-plugin.so"),
+        })
