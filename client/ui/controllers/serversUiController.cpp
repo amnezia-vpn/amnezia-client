@@ -328,7 +328,7 @@ bool ServersUiController::processedServerIsPremium() const
         return apiV1 ? apiV1->isPremium() : false;
     } else if (server.isApiV2()) {
         const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-        return apiV2 ? apiV2->isPremium() : false;
+        return apiV2 ? (apiV2->isPremium() || apiV2->isExternalPremium()) : false;
     }
     return false;
 }

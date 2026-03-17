@@ -39,6 +39,4 @@ void declareQmlProtocolEnum() {
 
 } // namespace amnezia
 
-QDebug operator<<(QDebug debug, const amnezia::Proto &p);
-
 #endif // QML_REGISTER_PROTOCOLS_H

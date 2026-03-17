@@ -413,7 +413,7 @@ ErrorCode SubscriptionController::revokeServiceFromGateway(int serverIndex, bool
         return ErrorCode::NoError;
     }
     
-    if (!apiV2->isPremium()) {
+    if (!apiV2->isPremium() && !apiV2->isExternalPremium()) {
         return ErrorCode::NoError;
     }
 
@@ -456,7 +456,7 @@ ErrorCode SubscriptionController::revokeExternalDevice(int serverIndex, const QS
         return ErrorCode::NoError;
     }
     
-    if (!apiV2->isPremium()) {
+    if (!apiV2->isPremium() && !apiV2->isExternalPremium()) {
         return ErrorCode::NoError;
     }
 
