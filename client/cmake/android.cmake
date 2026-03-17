@@ -51,9 +51,4 @@ find_package(amnezia-libxray REQUIRED)
 file(COPY ${AMNEZIA_LIBXRAY_PATH} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray)
 
 find_package(openvpn-pt-android REQUIRED)
-set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS
-    ${AMNEZIA_ANDROID_CK_OVPN_PLUGIN_PATH}
-    ${AMNEZIA_ANDROID_OVPN3_PATH}
-    ${AMNEZIA_ANDROID_OVPNUTIL_PATH}
-    ${AMNEZIA_ANDROID_RSAPSS_PATH}
-)
+set(LIBS ${LIBS} amnezia::openvpn-pt-android)
