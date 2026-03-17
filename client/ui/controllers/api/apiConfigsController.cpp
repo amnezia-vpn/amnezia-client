@@ -447,7 +447,7 @@ bool ApiConfigsController::importService()
             importSerivceFromAppStore();
             return true;
         }
-    } else {
+    } else if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaFree) {
         importServiceFromGateway();
         return true;
     }

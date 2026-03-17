@@ -122,7 +122,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: ApiServicesModel.getSelectedServiceType() === "amnezia-premium" ? qsTr("Subscribe Now") : qsTr("Connect")
+                text: ApiServicesModel.getSelectedServiceType() === "amnezia-premium" ? qsTr("Subscribe Now") : (ApiServicesModel.getSelectedServiceType() === "amnezia-trial" ? qsTr("Try Trial") : qsTr("Connect"))
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)

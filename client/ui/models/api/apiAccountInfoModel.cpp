@@ -52,6 +52,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     }
     case IsComponentVisibleRole: {
         return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
+                || m_accountInfoData.configType == apiDefs::ConfigType::AmneziaTrialV2
                 || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium;
     }
     case HasExpiredWorkerRole: {
