@@ -15,13 +15,16 @@ class OpenVPNAdapter(ConanFile):
     settings = "os", "build_type"
 
     @property
+    def _sdk(self):
+        return str(self.settings.get_safe("os.sdk", "macosx"))
+
+    @property
     def _platform(self):
-        sdk = self.settings.get_safe("os.sdk", "macosx")
         return {
             "macosx": "macOS",
             "iphoneos": "iOS",
             "iphonesimulator": "iOS Simulator"
-        }.get(sdk)
+        }.get(self._sdk)
     
     @property
     def _configuration(self):
@@ -45,14 +48,13 @@ class OpenVPNAdapter(ConanFile):
         )
 
     def build(self):
-        sdk = self.settings.get_safe("os.sdk", "macosx")
         with chdir(self, self.source_folder):
             self.run("xcrun xcodebuild"
                 " -project OpenVPNAdapter.xcodeproj"
                 " -scheme OpenVPNAdapter"
                 " -configuration Release"
                 f" -destination 'generic/platform={self._platform}'"
-                f" -sdk {sdk}"
+                f" -sdk {self._sdk}"
                 f' "CONFIGURATION_BUILD_DIR={self.build_folder}"'
                 f' "BUILT_PRODUCTS_DIR={self.build_folder}"'
                 " BUILD_LIBRARY_FOR_DISTRIBUTION=YES"

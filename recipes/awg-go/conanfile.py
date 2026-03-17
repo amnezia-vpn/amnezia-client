@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.env import Environment
 
 import os
 
@@ -9,38 +11,31 @@ class AwgGo(ConanFile):
     name = "awg-go"
     version = "0.2.16"
     package_type = "application"
-
     settings = "os", "arch"
 
-    _os_map = {
-        "Linux": "linux",
-        "Macos": "darwin",
-        "Windows": "windows"
-    }
-    _arch_map = {
-        "x86": "386",
-        "x86_64": "amd64",
-        "armv8": "arm64",
-    }
+    @property
+    def _goos(self):
+        return {
+            "Linux": "linux",
+            "Macos": "darwin",
+            "Windows": "windows"
+        }.get(str(self.settings.os))
+
+    @property
+    def _goarch(self):
+        return {
+            "x86": "386",
+            "x86_64": "amd64",
+            "armv8": "arm64"
+        }.get(str(self.settings.arch))
 
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
-        if self.settings.os == "Windows":
-            self.tool_requires("mingw-builds/15.1.0")
-        else:
-            self.build_requires("make/4.4.1")
 
     def validate(self):
-        os = str(self.settings.os)
-        if os not in self._os_map:
+        if not self._goos or not self._goarch:
             raise ConanInvalidConfiguration(
-                f"{self.name} v{self.version} does not support {os}"
-            )
-
-        arch = str(self.settings.arch)
-        if arch not in self._arch_map:
-            raise ConanInvalidConfiguration(
-                f"{self.name} v{self.version} does not support {arch}"
+                f"{self.name} v{self.version} does not support {self.settings.os} {self.settings.arch}"
             )
 
     def source(self):
@@ -51,11 +46,16 @@ class AwgGo(ConanFile):
     def layout(self):
         basic_layout(self, build_folder=".")
 
-    def build(self):
-        os = self._os_map[str(self.settings.os)]
-        arch = self._arch_map[str(self.settings.arch)]
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        env = Environment()
+        env.define("GOOS", self._goos)
+        env.define("GOARCH", self._goarch)
+        tc.generate(env)
 
-        self.run(f"GOOS={os} GOARCH={arch} make")
+    def build(self):
+        at = Autotools(self)
+        at.make()
 
     def package(self):
         copy(self, "amneziawg-go", src=self.build_folder, dst=self.package_folder)
@@ -63,5 +63,4 @@ class AwgGo(ConanFile):
     def package_info(self):
         self.cpp_info.exe = True
         self.cpp_info.location = os.path.join(self.package_folder, "amneziawg-go")
-
         self.cpp_info.set_property("cmake_target_name", "amnezia::awg-go")

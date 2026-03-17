@@ -7,12 +7,9 @@ from conan.tools.gnu import AutotoolsToolchain, Autotools
 
 import os
 
-_uniarch_separator = "|"
-
 class AwgApple(ConanFile):
     name = "awg-apple"
     version = "2.0.1"
-
     settings = "os", "arch"
     options = {
         "as_framework": [True, False]
@@ -22,12 +19,12 @@ class AwgApple(ConanFile):
     }
 
     @property
-    def goarch(self):
+    def _goarch(self):
         arch_map = {
             "armv8": "arm64",
             "x86_64": "x86_64",
         }
-        archs = str(self.settings.arch).split(_uniarch_separator)
+        archs = str(self.settings.arch).split("|")
         return " ".join(arch_map.get(arch, arch) for arch in archs)
 
     def build_requirements(self):
@@ -51,7 +48,7 @@ class AwgApple(ConanFile):
         tc = AutotoolsToolchain(self)
         sdk = self.settings.get_safe("os.sdk", "macosx")
         tc.make_args = [
-            f"ARCHS={self.goarch}",
+            f"ARCHS={self._goarch}",
             f"PLATFORM_NAME={sdk}"
         ]
         tc.generate()

@@ -9,7 +9,6 @@ class Openvpn(ConanFile):
     name = "openvpn"
     version = "2.7.0"
     package_type = "application"
-
     settings = "os", "build_type", "arch"
 
     def layout(self):
