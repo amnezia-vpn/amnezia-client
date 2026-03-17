@@ -189,6 +189,7 @@ void ServersModel::updateModel(const QVector<ServerConfig> &servers, int default
     m_isAmneziaDnsEnabled = isAmneziaDnsEnabled;
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
+    emit processedServerChanged();
 }
 
 const int ServersModel::getDefaultServerIndex()
