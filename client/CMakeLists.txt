@@ -217,13 +217,6 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
         $<TARGET_FILE_DIR:${PROJECT}>
         COMMAND_EXPAND_LISTS
     )
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-        ${CMAKE_SOURCE_DIR}/client/3rd-prebuilt/deploy-prebuilt/${DEPLOY_PLATFORM_PATH}
-        $<TARGET_FILE_DIR:${PROJECT}>
-        COMMAND_EXPAND_LISTS
-    )
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
