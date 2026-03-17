@@ -16,6 +16,9 @@ class AwgAndroid(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.4.1 <4]")
+
     def validate(self):
         if self.settings.os != "Android":
             raise ConanInvalidConfiguration(f"{self.name} v{self.version} does not support {self.settings.os}")
