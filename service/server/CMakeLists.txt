@@ -381,3 +381,15 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         $<TARGET_FILE:xjasonlyu::tun2socks>
         $<TARGET_FILE_DIR:${PROJECT}>
 )
+
+find_package(v2ray-rules-dat REQUIRED)
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${GEOSITE_DAT_PATH}
+        $<TARGET_FILE_DIR:${PROJECT}>
+)
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${GEOIP_DAT_PATH}
+        $<TARGET_FILE_DIR:${PROJECT}>
+)
