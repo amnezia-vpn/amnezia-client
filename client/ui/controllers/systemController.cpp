@@ -23,6 +23,9 @@ namespace
     constexpr int TAG_LEN = 16;
     constexpr int PBKDF2_ITER = 100000;
 
+    constexpr int IV_LEN_GCM = 16;
+    constexpr int TAG_LEN = 16;
+
     const QByteArray magicString { "EncData" };
 }
 
@@ -406,14 +409,6 @@ QString SystemController::readHint(const QString &filePath)
         qDebug() << "Not an encrypted file";
         return {};
     }
-
-QString SystemController::readHint(const QString &filePath)
-{
-    if (filePath.isEmpty())
-        return "";
-
-    QByteArray data;
-    readFile(filePath, data);
 
     int pos = magicString.size();
 
