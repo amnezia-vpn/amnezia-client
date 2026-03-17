@@ -49,4 +49,7 @@ class OpenvpnPtAndroid(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::openvpn-pt-android")
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = [ "ovpn3", "ovpnutil", "rsapss" ]
+        self.cpp_info.set_property("cmake_extra_variables", {
+            "OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH": os.path.join(self.package_folder, "lib", "libck-ovpn-plugin.so")
+        })
