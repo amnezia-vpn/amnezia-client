@@ -8,6 +8,7 @@
 #include <QUrl>
 #include <QDate>
 #include <QDateTime>
+#include <QTimer>
 
 // Backend API URL
 const QString BACKEND_URL = "https://srv.frakebit.com/api/v1";
@@ -22,6 +23,14 @@ FBLinkController::FBLinkController(ImportController *importController,
 {
     m_nam = new QNetworkAccessManager(this);
     m_apiUrl = BACKEND_URL;
+
+    // Lazy sync at startup: если пользователь уже залогинен — синхронизировать конфиги
+    if (isLoggedIn()) {
+        QTimer::singleShot(0, this, [this]() {
+            fetchConfig();
+            fetchSubscription();
+        });
+    }
 }
 
 void FBLinkController::login(const QString &email, const QString &password)
@@ -257,7 +266,11 @@ void FBLinkController::fetchConfig()
                         if (m_importController->extractConfigFromData(configData)) {
                             QJsonObject newConfig = QJsonDocument::fromJson(m_importController->getConfig().toUtf8()).object();
                             QString newHostName = newConfig.value("hostName").toString();
-                            QString description = makeDescription(newHostName);
+                            // Берём description из самого конфига (содержит region конкретного сервера)
+                            // Fallback на makeDescription только если description отсутствует
+                            QString description = newConfig.value("description").toString();
+                            if (description.isEmpty())
+                                description = makeDescription(newHostName);
 
                             bool found = false;
                             for (int i : existingFBLinkServerIndices) {

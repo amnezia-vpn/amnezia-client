@@ -298,79 +298,79 @@
 <context>
     <name>FBLinkController</name>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="30"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="39"/>
         <source>Email and password cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="63"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="72"/>
         <source>Invalid response format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="68"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="77"/>
         <source>Network Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="96"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="105"/>
         <source>Ошибка регистрации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="132"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="141"/>
         <source>Неверный ответ сервера</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="137"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="146"/>
         <source>Неверный код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="161"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="170"/>
         <source>Ошибка отправки кода</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="186"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="195"/>
         <source>Ошибка сброса пароля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="208"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="378"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="217"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="391"/>
         <source>Не выполнен вход в систему</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="305"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="318"/>
         <source>Внутренняя ошибка: Контроллеры не инициализированы</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="308"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="321"/>
         <source>Сервер не вернул конфигурацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="313"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="409"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="326"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="422"/>
         <source>Ошибка сети: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="336"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="349"/>
         <source>Необходимо войти в аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="364"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="377"/>
         <source>Сессия истекла, войдите снова</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="368"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="381"/>
         <source>Ошибка создания платежа: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -623,113 +623,118 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageFBLinkForgotPassword</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="43"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="53"/>
         <source>Пароль успешно изменён! Войдите с новым паролем.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="97"/>
         <source>Восстановление пароля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="98"/>
         <source>Введите код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="89"/>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="99"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="176"/>
         <source>Новый пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="100"/>
         <source>Готово</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="103"/>
         <source>Введите email вашего аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="104"/>
         <source>Код отправлен на </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="105"/>
         <source>Введите новый пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="154"/>
         <source>Email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="164"/>
         <source>Код подтверждения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="178"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="188"/>
         <source>Подтвердите пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="195"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="206"/>
+        <source>Отправить повторно (%1 сек)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="207"/>
         <source>Отправить код повторно</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="217"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="231"/>
         <source>Вернуться к входу</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="256"/>
         <source>Отправка...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="244"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="258"/>
         <source>Отправить код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="245"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="259"/>
         <source>Далее</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="246"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="260"/>
         <source>Сменить пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="255"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="269"/>
         <source>Введите email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="265"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="279"/>
         <source>Введите 6-значный код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="275"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="289"/>
         <source>Пожалуйста, заполните все поля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="279"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="293"/>
         <source>Пароли не совпадают</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="283"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkForgotPassword.qml" line="297"/>
         <source>Пароль должен быть не менее 8 символов</source>
         <translation type="unfinished"></translation>
     </message>
@@ -790,97 +795,102 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageFBLinkRegister</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="104"/>
         <source>Создание аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="104"/>
         <source>Подтверждение email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="106"/>
         <source>Введите код, отправленный на </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="97"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="107"/>
         <source>Зарегистрируйтесь в сервисе FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="134"/>
         <source>Email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="134"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="144"/>
         <source>Пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="156"/>
         <source>Подтвердите пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="158"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="168"/>
         <source>Код подтверждения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="174"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="184"/>
         <source>Уже есть аккаунт?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="189"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="196"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="207"/>
+        <source>Отправить повторно (%1 сек)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="208"/>
         <source>Отправить код повторно</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="237"/>
         <source>Проверка...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="237"/>
         <source>Отправка...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="238"/>
         <source>Создать аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="238"/>
         <source>Подтвердить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="233"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="247"/>
         <source>Введите 6-значный код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="246"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="260"/>
         <source>Пожалуйста, заполните все поля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="250"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="264"/>
         <source>Пароли не совпадают</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="254"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="268"/>
         <source>Пароль должен быть не менее 8 символов</source>
         <translation type="unfinished"></translation>
     </message>
@@ -888,225 +898,209 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageFBLinkSubscription</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="46"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="44"/>
         <source>Время ожидания истекло. Если вы оплатили — нажмите «Проверить вручную».</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="59"/>
-        <source>Базовый</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="59"/>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="56"/>
         <source>/ 30 дней</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="60"/>
-        <source>Премиум</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="56"/>
         <source>ЛУЧШИЙ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="56"/>
         <source>Максимальная скорость и приоритет</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="65"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="56"/>
+        <source>Premium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="61"/>
         <source>Безлимитный трафик</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="62"/>
         <source>10+ стран и регионов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="63"/>
         <source>До 5 устройств одновременно</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="64"/>
         <source>Kill Switch защита</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="65"/>
         <source>Быстрые серверы без логов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="132"/>
         <source>FBLink VPN Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="141"/>
         <source>Полный доступ без ограничений</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="196"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="192"/>
         <source>Пробный период — 7 дней</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="203"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="199"/>
         <source>Полный доступ ко всем функциям</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="239"/>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="576"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="572"/>
         <source>Создание платежа...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="240"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="236"/>
         <source>Попробовать за 5 ₽</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="266"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="262"/>
         <source>Только для новых пользователей • Карта сохраняется</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="346"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="342"/>
         <source>АКТИВНА</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="422"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="418"/>
         <source>Что входит в подписку</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="518"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="514"/>
         <source>Ожидаем подтверждение оплаты...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="526"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="522"/>
         <source>Проверка %1 из %2. Это займёт до 2 минут.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="549"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="545"/>
         <source>Проверить вручную</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="578"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="574"/>
         <source>Уже активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="580"/>
-        <source>Оплатить 199 ₽ / Basic</source>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="575"/>
+        <source>Оплатить 199 ₽ / Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="581"/>
-        <source>Оплатить 499 ₽ / Premium</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="610"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="604"/>
         <source>Страница оплаты открыта. Ожидаем подтверждение...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="612"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="606"/>
         <source>Не удалось получить ссылку на оплату</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="626"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="620"/>
         <source>Подписка активирована! Добро пожаловать в Premium.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="671"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="664"/>
         <source>Premium подписка активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="672"/>
-        <source>Basic подписка активна</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="679"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="671"/>
         <source>Действует до: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="712"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="704"/>
         <source>Автопродление</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="720"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="712"/>
         <source>Спишем автоматически в день истечения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="721"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="713"/>
         <source>Подписка не продлится сама</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="792"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="784"/>
         <source>Способ оплаты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="800"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="792"/>
         <source>Карта привязана ✓</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="801"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="793"/>
         <source>Сохранится при следующей оплате</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="822"/>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="902"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="814"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="894"/>
         <source>Удалить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="856"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="848"/>
         <source>Удалить привязанную карту и отключить автосписание?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="879"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="871"/>
         <source>Отмена</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="946"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="938"/>
         <source>Карта удалена, автосписание отключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="967"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="959"/>
         <source>Условия использования</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="985"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="977"/>
         <source>Политика конфиденциальности</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2194,52 +2188,47 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="116"/>
         <source>Premium аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="118"/>
-        <source>Basic аккаунт</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
         <source>Бесплатный аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="127"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="125"/>
         <source>Действует до: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="161"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="159"/>
         <source>Выйти из аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="202"/>
         <source>Подключение</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="213"/>
         <source>Приложение</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="226"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="224"/>
         <source>Новости и уведомления</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="244"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="242"/>
         <source>About FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="255"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="253"/>
         <source>Консоль разработчика</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2333,53 +2322,48 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="213"/>
         <source>Premium аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="215"/>
-        <source>Basic аккаунт</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="216"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="214"/>
         <source>Бесплатный аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="222"/>
         <source>Действует до: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="258"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="256"/>
         <source>Выйти из аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="299"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="297"/>
         <source>🏛 Основано на AmneziaVPN (GNU GPL v3)
 Исходный код: github.com/amnezia-vpn</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="323"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="321"/>
         <source>Telegram поддержка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="324"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="322"/>
         <source>Задайте вопрос нашей команде</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="334"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="332"/>
         <source>support@fblink.com</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="335"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="333"/>
         <source>По вопросам и жалобам</source>
         <translation type="unfinished"></translation>
     </message>

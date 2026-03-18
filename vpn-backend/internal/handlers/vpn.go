@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"strconv"
 	"time"
 	"vpn-backend/internal/models"
@@ -128,8 +129,19 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		return
 	}
 
-	// Возвращаем только первый попавшийся конфиг, чтобы старый/текущий десктопный клиент мог его распарсить
-	c.JSON(http.StatusOK, responseConfigs[0])
+	// Возвращаем все конфиги через \n — Qt клиент split('\n') парсит каждый отдельно
+	var configLines []string
+	var region string
+	for _, rc := range responseConfigs {
+		configLines = append(configLines, rc["config"].(string))
+		if region == "" {
+			region, _ = rc["region"].(string)
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"config": strings.Join(configLines, "\n"),
+		"region": region,
+	})
 }
 
 // buildAWG2Config формирует JSON-конфиг для AmneziaVPN клиента (AWG2 формат)
