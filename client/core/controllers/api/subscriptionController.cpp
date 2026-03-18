@@ -859,7 +859,7 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
                           << "originalTransactionId =" << originalTransactionId << "productId =" << transactionProductId;
 
         ProtocolData protocolData = generateProtocolData(serviceProtocol);
-        QJsonObject serverConfig;
+        ServerConfig serverConfig;
         ErrorCode errorCode = importServiceFromAppStore(userCountryCode, serviceType, serviceProtocol, protocolData,
                                                         originalTransactionId, isTestPurchase, serverConfig);
 

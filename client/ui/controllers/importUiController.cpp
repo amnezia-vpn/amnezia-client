@@ -4,10 +4,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QMutex>
-#include <QDataStream>
 #include <QJsonDocument>
 
-#include "core/utils/qrCodeUtils.h"
 #include "systemController.h"
 
 #ifdef Q_OS_ANDROID
@@ -147,13 +145,7 @@ void ImportUiController::clearConfigFileName()
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
 void ImportUiController::startDecodingQr()
 {
-    m_qrCodeChunks.clear();
-    m_totalQrCodeChunksCount = 0;
-    m_receivedQrCodeChunksCount = 0;
-
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    m_isQrCodeProcessed = true;
-#endif
+    m_importController->startQrDecoding();
 #if defined Q_OS_ANDROID
     AndroidController::instance()->startQrReaderActivity();
 #endif
@@ -166,72 +158,31 @@ void ImportUiController::stopDecodingQr()
 
 bool ImportUiController::parseQrCodeChunk(const QString &code)
 {
-    if (!m_isQrCodeProcessed)
-        return false;
-
-    // check if chunk received
-    QByteArray ba = QByteArray::fromBase64(code.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    QDataStream s(&ba, QIODevice::ReadOnly);
-    qint16 magic;
-    s >> magic;
-
-    if (magic == qrCodeUtils::qrMagicCode) {
-        quint8 chunksCount;
-        s >> chunksCount;
-        if (m_totalQrCodeChunksCount != chunksCount) {
-            m_qrCodeChunks.clear();
-        }
-
-        m_totalQrCodeChunksCount = chunksCount;
-
-        quint8 chunkId;
-        s >> chunkId;
-        s >> m_qrCodeChunks[chunkId];
-        m_receivedQrCodeChunksCount = m_qrCodeChunks.size();
-
-        if (m_qrCodeChunks.size() == m_totalQrCodeChunksCount) {
-            QByteArray data;
-
-            for (int i = 0; i < m_totalQrCodeChunksCount; ++i) {
-                data.append(m_qrCodeChunks.value(i));
-            }
-
-            bool ok = extractConfigFromQr(data);
-            if (ok) {
-                m_isQrCodeProcessed = false;
-                qDebug() << "stopDecodingQr";
-                stopDecodingQr();
-                return true;
-            } else {
-                qDebug() << "error while extracting data from qr";
-                m_qrCodeChunks.clear();
-                m_totalQrCodeChunksCount = 0;
-                m_receivedQrCodeChunksCount = 0;
-            }
-        }
-    } else {
-        bool ok = extractConfigFromQr(ba);
-        if (ok) {
-            m_isQrCodeProcessed = false;
-            qDebug() << "stopDecodingQr";
-            stopDecodingQr();
-            return true;
-        }
+    auto parseResult = m_importController->processQrCodeContent(code);
+    if (parseResult.success) {
+        m_config = parseResult.importResult.config;
+        m_configFileName = parseResult.importResult.configFileName;
+        m_maliciousWarningText = parseResult.importResult.maliciousWarningText;
+        m_isNativeWireGuardConfig = parseResult.importResult.isNativeWireGuardConfig;
+        emit importConfigChanged();
+        stopDecodingQr();
+        return true;
     }
     return false;
 }
 
 double ImportUiController::getQrCodeScanProgressBarValue()
 {
-    if (m_totalQrCodeChunksCount == 0) {
+    const int total = m_importController->qrChunksTotal();
+    if (total == 0) {
         return 0.0;
     }
-    return (1.0 / m_totalQrCodeChunksCount) * m_receivedQrCodeChunksCount;
+    return (1.0 / total) * m_importController->qrChunksReceived();
 }
 
 QString ImportUiController::getQrCodeScanProgressString()
 {
-    return tr("Scanned %1 of %2.").arg(m_receivedQrCodeChunksCount).arg(m_totalQrCodeChunksCount);
+    return tr("Scanned %1 of %2.").arg(m_importController->qrChunksReceived()).arg(m_importController->qrChunksTotal());
 }
 #endif
 
@@ -244,11 +195,8 @@ bool ImportUiController::decodeQrCode(const QString &code)
         return false;
     }
 
-    if (!mInstance->m_isQrCodeProcessed) {
-        mInstance->m_qrCodeChunks.clear();
-        mInstance->m_isQrCodeProcessed = true;
-        mInstance->m_totalQrCodeChunksCount = 0;
-        mInstance->m_receivedQrCodeChunksCount = 0;
+    if (!mInstance->m_importController->isQrDecodingActive()) {
+        mInstance->m_importController->startQrDecoding();
     }
     return mInstance->parseQrCodeChunk(code);
 }

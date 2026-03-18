@@ -60,13 +60,6 @@ private:
     QString m_maliciousWarningText;
     bool m_isNativeWireGuardConfig;
 
-#if defined Q_OS_ANDROID || defined Q_OS_IOS
-    QMap<int, QByteArray> m_qrCodeChunks;
-    bool m_isQrCodeProcessed;
-    int m_totalQrCodeChunksCount;
-    int m_receivedQrCodeChunksCount;
-#endif
-
 #if defined Q_OS_ANDROID
     static ImportUiController* mInstance;
 #endif

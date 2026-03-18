@@ -1,5 +1,6 @@
 #include "importController.h"
 
+#include <QDataStream>
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -25,6 +26,7 @@
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
+#include "core/utils/qrCodeUtils.h"
 #include "core/models/serverConfig.h"
 
 using namespace amnezia;
@@ -245,6 +247,12 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
 {
     ImportResult result;
 
+    QString dataStr = QString::fromUtf8(data);
+    ConfigTypes configType = checkConfigFormat(dataStr);
+    if (configType != ConfigTypes::Invalid) {
+        return extractConfigFromData(dataStr, "");
+    }
+
     QJsonObject dataObj = QJsonDocument::fromJson(data).object();
     if (!dataObj.isEmpty()) {
         result.config = dataObj;
@@ -259,24 +267,107 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
         return result;
     }
 
-    ConfigTypes configType = checkConfigFormat(data);
-    if (configType == ConfigTypes::Invalid) {
-        QByteArray ba = QByteArray::fromBase64(data, QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-        QByteArray baUncompressed = qUncompress(ba);
+    QByteArray ba = QByteArray::fromBase64(data, QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QByteArray baUncompressed = qUncompress(ba);
 
-        if (!baUncompressed.isEmpty()) {
-            ba = baUncompressed;
-        }
+    if (!baUncompressed.isEmpty()) {
+        ba = baUncompressed;
+    }
 
-        if (!ba.isEmpty()) {
-            result.config = QJsonDocument::fromJson(ba).object();
-            result.configType = ConfigTypes::Amnezia;
-            return result;
-        }
+    if (!ba.isEmpty()) {
+        result.config = QJsonDocument::fromJson(ba).object();
+        result.configType = ConfigTypes::Amnezia;
+        return result;
     }
 
     result.errorCode = ErrorCode::ImportInvalidConfigError;
     return result;
+}
+
+void ImportController::startQrDecoding()
+{
+    m_qrCodeChunks.clear();
+    m_totalQrCodeChunksCount = 0;
+    m_receivedQrCodeChunksCount = 0;
+    m_isQrCodeProcessed = true;
+}
+
+ImportController::QrParseResult ImportController::processQrCodeContent(const QString &code)
+{
+    QrParseResult parseResult;
+    parseResult.chunksReceived = m_receivedQrCodeChunksCount;
+    parseResult.chunksTotal = m_totalQrCodeChunksCount;
+
+    if (!m_isQrCodeProcessed) {
+        return parseResult;
+    }
+
+    QByteArray ba = QByteArray::fromBase64(code.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QDataStream s(&ba, QIODevice::ReadOnly);
+    qint16 magic;
+    s >> magic;
+
+    if (magic == qrCodeUtils::qrMagicCode) {
+        quint8 chunksCount;
+        s >> chunksCount;
+        if (m_totalQrCodeChunksCount != chunksCount) {
+            m_qrCodeChunks.clear();
+        }
+
+        m_totalQrCodeChunksCount = chunksCount;
+
+        quint8 chunkId;
+        s >> chunkId;
+        s >> m_qrCodeChunks[chunkId];
+        m_receivedQrCodeChunksCount = m_qrCodeChunks.size();
+        parseResult.chunksReceived = m_receivedQrCodeChunksCount;
+        parseResult.chunksTotal = m_totalQrCodeChunksCount;
+
+        if (m_qrCodeChunks.size() == m_totalQrCodeChunksCount) {
+            QByteArray data;
+            for (int i = 0; i < m_totalQrCodeChunksCount; ++i) {
+                data.append(m_qrCodeChunks.value(i));
+            }
+
+            ImportResult result = extractConfigFromQr(data);
+            if (result.errorCode == ErrorCode::NoError) {
+                parseResult.success = true;
+                parseResult.importResult = result;
+                m_isQrCodeProcessed = false;
+            } else {
+                m_qrCodeChunks.clear();
+                m_totalQrCodeChunksCount = 0;
+                m_receivedQrCodeChunksCount = 0;
+            }
+        }
+    } else {
+        ImportResult result = extractConfigFromQr(code.toUtf8());
+        if (result.errorCode != ErrorCode::NoError) {
+            result = extractConfigFromQr(ba);
+        }
+        if (result.errorCode == ErrorCode::NoError) {
+            parseResult.success = true;
+            parseResult.importResult = result;
+            m_isQrCodeProcessed = false;
+        }
+    }
+
+    return parseResult;
+}
+
+bool ImportController::isQrDecodingActive() const
+{
+    return m_isQrCodeProcessed;
+}
+
+int ImportController::qrChunksReceived() const
+{
+    return m_receivedQrCodeChunksCount;
+}
+
+int ImportController::qrChunksTotal() const
+{
+    return m_totalQrCodeChunksCount;
 }
 
 void ImportController::importConfig(const QJsonObject &config)
