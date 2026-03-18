@@ -239,6 +239,7 @@
         <file>ui/qml/Pages2/PageSetupWizardStart.qml</file>
         <file>ui/qml/Pages2/PageFBLinkLogin.qml</file>
         <file>ui/qml/Pages2/PageFBLinkRegister.qml</file>
+        <file>ui/qml/Pages2/PageFBLinkForgotPassword.qml</file>
         <file>ui/qml/Pages2/PageFBLinkSubscription.qml</file>
         <file>ui/qml/Components/SubscriptionBanner.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardTextKey.qml</file>

@@ -25,11 +25,9 @@ PageType {
     property bool confirmDeleteCard: false
     readonly property int maxPolls: 24  // 24 × 5 s = 2 min
 
-    // -1 = no paid plan, 0 = basic, 1 = premium
     readonly property int currentPlanLevel: {
-        if (!FBLinkController.isSubscribed) return -1  // expired — allow buying any plan
-        if (FBLinkController.subscriptionPlan === "premium") return 1
-        if (FBLinkController.subscriptionPlan === "basic")   return 0
+        if (!FBLinkController.isSubscribed) return -1
+        if (FBLinkController.subscriptionPlan === "basic") return 0
         return -1
     }
 
@@ -54,10 +52,8 @@ PageType {
 
     readonly property string apiBase: "https://srv.frakebit.com"
 
-    // Plans match backend: plan values must be "basic" or "premium"
     readonly property var plans: [
-        { id: "basic",   title: qsTr("Базовый"),    price: "199 ₽", period: qsTr("/ 30 дней"), badge: "",               saving: "" },
-        { id: "premium", title: qsTr("Премиум"),    price: "499 ₽", period: qsTr("/ 30 дней"), badge: qsTr("ЛУЧШИЙ"),   saving: qsTr("Максимальная скорость и приоритет") }
+        { id: "basic", title: qsTr("Premium"), price: "199 ₽", period: qsTr("/ 30 дней"), badge: qsTr("ЛУЧШИЙ"), saving: qsTr("Максимальная скорость и приоритет") }
     ]
 
     // Features list
@@ -576,9 +572,7 @@ PageType {
                     ? qsTr("Создание платежа...")
                     : (root.selectedPlan <= root.currentPlanLevel
                         ? qsTr("Уже активна")
-                        : (root.selectedPlan === 0
-                            ? qsTr("Оплатить 199 ₽ / Basic")
-                            : qsTr("Оплатить 499 ₽ / Premium")))
+                        : qsTr("Оплатить 199 ₽ / Premium"))
 
                 clickedFunc: function() {
                     root.errorMessage = ""
@@ -667,9 +661,7 @@ PageType {
                             Layout.fillWidth: true
 
                             LabelTextType {
-                                text: FBLinkController.subscriptionPlan === "premium"
-                                    ? qsTr("Premium подписка активна")
-                                    : qsTr("Basic подписка активна")
+                                text: qsTr("Premium подписка активна")
                                 font.pixelSize: 13
                                 font.weight: 600
                                 color: "#10B981"

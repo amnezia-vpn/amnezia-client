@@ -27,10 +27,9 @@ type User struct {
 type PlanType string
 
 const (
-	PlanFree    PlanType = "free"
-	PlanTrial   PlanType = "trial"
-	PlanBasic   PlanType = "basic"
-	PlanPremium PlanType = "premium"
+	PlanFree  PlanType = "free"
+	PlanTrial PlanType = "trial"
+	PlanBasic PlanType = "basic"
 )
 
 type SubscriptionStatus string
@@ -126,4 +125,13 @@ type Payment struct {
 	ConfirmedAt *time.Time
 
 	User User
+}
+
+type VerificationCode struct {
+	gorm.Model
+	Email     string    `gorm:"not null;index"`
+	Code      string    `gorm:"not null"`
+	Purpose   string    `gorm:"not null"` // "verify" | "reset"
+	ExpiresAt time.Time `gorm:"not null"`
+	Used      bool      `gorm:"default:false"`
 }

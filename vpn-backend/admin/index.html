@@ -830,7 +830,7 @@
       <td>${new Date(u.created_at).toLocaleDateString('ru')}</td>
       <td>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="upgradeUser('${u.id}')">⭐ Premium</button>
+          <button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="upgradeUser('${u.id}')">⭐ Выдать Basic</button>
           ${u.role === 'admin'
             ? `<button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="setUserRole('${u.id}', 'user')">👤 Снять админа</button>`
             : `<button class="btn" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(108,92,231,0.15); border:1px solid rgba(108,92,231,0.4); color:#a29bfe;" onclick="setUserRole('${u.id}', 'admin')">🛡️ Сделать админом</button>`
@@ -892,7 +892,7 @@
 
     // Action Functions
     async function upgradeUser(id) {
-      if (!confirm('Выдать Premium на 1 месяц этому пользователю?')) return;
+      if (!confirm('Выдать Basic на 1 месяц этому пользователю?')) return;
       await api('/api/v1/admin/users/' + id + '/upgrade', { method: 'POST' });
       loadUsers();
     }
@@ -959,7 +959,7 @@
     }
 
     async function approvePayment(id) {
-      if (!confirm('Подтвердить этот платеж и выдать Premium вручную?')) return;
+      if (!confirm('Подтвердить этот платеж и выдать Basic вручную?')) return;
       await api('/api/v1/admin/payments/' + id + '/approve', { method: 'POST' });
       loadPayments();
       // wait a moment so payment and subscription data is updated before reloading users

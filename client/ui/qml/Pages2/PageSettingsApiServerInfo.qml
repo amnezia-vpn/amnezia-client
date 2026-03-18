@@ -334,7 +334,7 @@ PageType {
                         
                         clickedFunc: function() {
                             PageController.showBusyIndicator(true)
-                            var success = ApiConfigsController.renewYookassaSubscription("premium")
+                            var success = ApiConfigsController.renewYookassaSubscription("basic")
                             PageController.showBusyIndicator(false)
                             if (!success) {
                                 PageController.showNotificationMessage(qsTr("Failed to initiate payment. Please try again later."))

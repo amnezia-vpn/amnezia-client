@@ -1,6 +1,10 @@
 package router
 
 import (
+	"net"
+	"net/http"
+	"strings"
+	"time"
 	"vpn-backend/internal/config"
 	"vpn-backend/internal/handlers"
 	"vpn-backend/internal/middleware"
@@ -9,13 +13,53 @@ import (
 	"gorm.io/gorm"
 )
 
+// YooKassa IP ranges для проверки webhook
+var yooKassaCIDRs = []string{
+	"185.71.76.0/27",
+	"185.71.77.0/27",
+	"77.75.153.0/24",
+	"77.75.156.0/24",
+}
+
+func isYooKassaIP(ip string) bool {
+	parsed := net.ParseIP(ip)
+	if parsed == nil {
+		return false
+	}
+	for _, cidr := range yooKassaCIDRs {
+		_, network, err := net.ParseCIDR(cidr)
+		if err != nil {
+			continue
+		}
+		if network.Contains(parsed) {
+			return true
+		}
+	}
+	return false
+}
+
 func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	r := gin.Default()
 
-	// CORS для веб-панели
+	// CORS — configurable origins
+	allowedOrigins := cfg.AllowedOrigins
 	r.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+		origin := c.GetHeader("Origin")
+		if allowedOrigins == "*" {
+			c.Header("Access-Control-Allow-Origin", "*")
+		} else {
+			for _, allowed := range strings.Split(allowedOrigins, ",") {
+				if strings.TrimSpace(allowed) == origin {
+					c.Header("Access-Control-Allow-Origin", origin)
+					break
+				}
+			}
+		}
+		// Vary: Origin нужен когда origin-specific (не "*"), чтобы CDN/Caddy не кешировали неправильно
+		if allowedOrigins != "*" {
+			c.Header("Vary", "Origin")
+		}
+		c.Header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Authorization,Content-Type")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
@@ -24,8 +68,12 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		c.Next()
 	})
 
+	// Rate limiters
+	authLimiter := middleware.NewRateLimiter(10, 1*time.Minute)
+	webhookLimiter := middleware.NewRateLimiter(30, 1*time.Minute)
+
 	// Handlers
-	authH := handlers.NewAuthHandler(db, cfg.JWTSecret)
+	authH := handlers.NewAuthHandler(db, cfg)
 	userH := handlers.NewUserHandler(db)
 	vpnH := handlers.NewVPNHandler(db)
 	payH := handlers.NewPaymentHandler(db, cfg.YooKassaShopID, cfg.YooKassaKey)
@@ -36,11 +84,29 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	api := r.Group("/api/v1")
 	{
-		// Public
-		api.POST("/auth/register", authH.Register)
-		api.POST("/auth/login", authH.Login)
-		api.POST("/auth/refresh", authH.Refresh)
-		api.POST("/payments/webhook", payH.Webhook)
+		// Public (rate limited)
+		authGroup := api.Group("/auth", middleware.RateLimit(authLimiter))
+		{
+			authGroup.POST("/register", authH.Register)
+			authGroup.POST("/verify", authH.VerifyEmail)
+			authGroup.POST("/login", authH.Login)
+			authGroup.POST("/refresh", authH.Refresh)
+			authGroup.POST("/forgot-password", authH.ForgotPassword)
+			authGroup.POST("/reset-password", authH.ResetPassword)
+		}
+
+		// Webhook — IP whitelist + rate limit
+		api.POST("/payments/webhook",
+			middleware.RateLimit(webhookLimiter),
+			func(c *gin.Context) {
+				if !isYooKassaIP(c.ClientIP()) {
+					c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+					return
+				}
+				c.Next()
+			},
+			payH.Webhook,
+		)
 
 		// Authenticated
 		me := api.Group("/me", auth)

@@ -26,6 +26,9 @@ func RunAutoRenewalScheduler(db *gorm.DB, shopID, key string) {
 	ticker := time.NewTicker(1 * time.Hour)
 	defer ticker.Stop()
 
+	// Запускаем сразу при старте, чтобы не ждать первый запуск
+	processAutoRenewals(db, shopID, key)
+
 	for range ticker.C {
 		processAutoRenewals(db, shopID, key)
 	}
@@ -57,6 +60,27 @@ func processAutoRenewals(db *gorm.DB, shopID, key string) {
 		Update("status", models.SubExpired)
 	if result.RowsAffected > 0 {
 		log.Printf("[renewal] Помечено как expired: %d подписок", result.RowsAffected)
+
+		// Найдём все эти истекшие подписки и отзовём активные ключи их пользователей
+		var expiredSubs []models.Subscription
+		db.Where("status = ? AND expires_at <= ?", models.SubExpired, now).Find(&expiredSubs)
+
+		for _, s := range expiredSubs {
+			var keys []models.VPNKey
+			// Ищем активные ключи этого пользователя (revoked_at IS NULL)
+			if err := db.Where("user_id = ? AND revoked_at IS NULL", s.UserID).Preload("Server").Find(&keys).Error; err == nil && len(keys) > 0 {
+				for _, k := range keys {
+					if k.PublicKey != "" {
+						if err := removeAWGPeer(&k.Server, k.PublicKey); err != nil {
+							log.Printf("[renewal] Ошибка удаления ключа (user_id=%d) с сервера %s: %v", s.UserID, k.Server.Name, err)
+						}
+					}
+				}
+				// Помечаем их как отозванные в БД
+				db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", s.UserID).Update("revoked_at", now)
+				log.Printf("[renewal] Отозваны VPN ключи для пользователя %d (подписка истекла)", s.UserID)
+			}
+		}
 	}
 }
 

@@ -113,9 +113,7 @@ PageType {
 
                             Text {
                                 text: FBLinkController.isSubscribed
-                                    ? (FBLinkController.subscriptionPlan === "premium"
-                                        ? qsTr("Premium аккаунт")
-                                        : qsTr("Basic аккаунт"))
+                                    ? qsTr("Premium аккаунт")
                                     : qsTr("Бесплатный аккаунт")
                                 font.pixelSize: 13
                                 font.weight: Font.Medium

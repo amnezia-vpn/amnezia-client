@@ -34,6 +34,7 @@ func AutoMigrate(db *gorm.DB) {
 		&models.VPNServer{},
 		&models.VPNKey{},
 		&models.Payment{},
+		&models.VerificationCode{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)

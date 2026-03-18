@@ -143,3 +143,6 @@ macos-with-sign-build.sh
 DeveloperIdApplicationCertificate.p12
 DeveloperIdInstallerCertificate.p12
 
+# Backend secrets
+vpn-backend/.env
+

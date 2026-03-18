@@ -297,12 +297,12 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 	}
 
 	// 2. Удаляем все связанные данные из БД
-	h.db.Where("user_id = ?", id).Delete(&models.VPNKey{})
-	h.db.Where("user_id = ?", id).Delete(&models.Subscription{})
-	h.db.Where("user_id = ?", id).Delete(&models.Payment{})
+	h.db.Unscoped().Where("user_id = ?", id).Delete(&models.VPNKey{})
+	h.db.Unscoped().Where("user_id = ?", id).Delete(&models.Subscription{})
+	h.db.Unscoped().Where("user_id = ?", id).Delete(&models.Payment{})
 
 	// 3. Удаляем пользователя
-	h.db.Delete(&u)
+	h.db.Unscoped().Delete(&u)
 
 	c.JSON(http.StatusOK, gin.H{"message": "user and all associated data deleted permanently"})
 }
@@ -353,10 +353,10 @@ func (h *AdminHandler) UpgradeUser(c *gin.Context) {
 	var sub models.Subscription
 	h.db.Where("user_id = ?", user.ID).FirstOrInit(&sub, models.Subscription{UserID: user.ID})
 	sub.Status = models.SubActive
-	sub.Plan = "premium"
+	sub.Plan = "basic"
 	sub.ExpiresAt = time.Now().AddDate(0, 1, 0) // +1 month
 	h.db.Save(&sub)
-	c.JSON(http.StatusOK, gin.H{"message": "user upgraded to premium"})
+	c.JSON(http.StatusOK, gin.H{"message": "user upgraded to basic"})
 }
 
 // POST /api/v1/admin/users/:id/revoke
@@ -364,6 +364,17 @@ func (h *AdminHandler) RevokeUserKeys(c *gin.Context) {
 	userId := c.Param("id")
 	now := time.Now()
 	// Mark all keys as revoked
+	var keys []models.VPNKey
+	h.db.Where("user_id = ? AND revoked_at IS NULL", userId).Preload("Server").Find(&keys)
+
+	for _, k := range keys {
+		if k.PublicKey != "" {
+			if err := removeAWGPeer(&k.Server, k.PublicKey); err != nil {
+				fmt.Printf("[WARN] Admin RevokeUserKeys SSH failed for %s: %v\n", k.Server.Name, err)
+			}
+		}
+	}
+
 	h.db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", userId).Update("revoked_at", &now)
 	c.JSON(http.StatusOK, gin.H{"message": "all user keys revoked"})
 }
@@ -429,9 +440,23 @@ func (h *AdminHandler) ApprovePayment(c *gin.Context) {
 	// Upgrade user subscription immediately
 	var sub models.Subscription
 	h.db.Where("user_id = ?", p.UserID).FirstOrInit(&sub, models.Subscription{UserID: p.UserID})
+	
+	now = time.Now()
+	var durationDays int
+	if p.Plan == models.PlanTrial {
+		durationDays = 7
+	} else {
+		durationDays = 30 // для Basic
+	}
+	
+	newExpiry := now.AddDate(0, 0, durationDays)
+	if p.Plan != models.PlanTrial && sub.ExpiresAt.After(now) && sub.Plan != models.PlanFree {
+		newExpiry = sub.ExpiresAt.AddDate(0, 0, durationDays)
+	}
+
 	sub.Status = models.SubActive
 	sub.Plan = p.Plan
-	sub.ExpiresAt = time.Now().AddDate(0, 1, 0)
+	sub.ExpiresAt = newExpiry
 	h.db.Save(&sub)
 
 	c.JSON(http.StatusOK, gin.H{"message": "payment manually approved and subscription issued"})

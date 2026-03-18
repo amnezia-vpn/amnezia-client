@@ -19,5 +19,5 @@ COPY --from=builder /app/admin ./admin
 RUN mkdir -p data
 VOLUME ["/app/data"]
 
-EXPOSE 8080
+EXPOSE 8081
 CMD ["./server"]

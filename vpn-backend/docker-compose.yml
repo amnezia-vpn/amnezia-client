@@ -21,6 +21,9 @@ services:
     restart: always
     volumes:
       - redis_data:/data
+    networks:
+      - default
+      - bot-network
 
 volumes:
   db_data:

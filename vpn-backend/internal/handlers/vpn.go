@@ -94,6 +94,12 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 			continue
 		}
 
+		// Сначала добавляем peer через SSH
+		if err := addAWGPeer(server, publicKey, presharedKey, clientIP); err != nil {
+			fmt.Printf("[WARN] SSH addAWGPeer failed for server %s: %v\n", server.Name, err)
+			continue // Если SSH упал, ключ в БД не пишем!
+		}
+
 		now := time.Now()
 		key := models.VPNKey{
 			UserID:       userID,
@@ -105,17 +111,15 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		}
 
 		if err := h.db.Create(&key).Error; err == nil {
-			// Добавляем peer через SSH
-			if err := addAWGPeer(server, publicKey, presharedKey, clientIP); err != nil {
-				fmt.Printf("[WARN] SSH addAWGPeer failed for server %s: %v\n", server.Name, err)
-			}
-
 			responseConfigs = append(responseConfigs, map[string]interface{}{
 				"config":    string(configJSON),
 				"server":    server.Name,
 				"region":    server.Region,
 				"issued_at": now,
 			})
+		} else {
+			// Если БД упала (что редкость), удаляем только что добавленный пир на сервере
+			removeAWGPeer(server, publicKey)
 		}
 	}
 
@@ -241,8 +245,21 @@ PersistentKeepalive = 25
 func (h *VPNHandler) RevokeConfig(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
-	var revokedKey models.VPNKey
-	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server").First(&revokedKey)
+	var keysToRevoke []models.VPNKey
+	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server").Find(&keysToRevoke)
+
+	if len(keysToRevoke) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active key found"})
+		return
+	}
+
+	for _, k := range keysToRevoke {
+		if k.PublicKey != "" {
+			if err := removeAWGPeer(&k.Server, k.PublicKey); err != nil {
+				fmt.Printf("[WARN] SSH removeAWGPeer failed for server %s: %v\n", k.Server.Name, err)
+			}
+		}
+	}
 
 	now := time.Now()
 	result := h.db.Model(&models.VPNKey{}).
@@ -250,19 +267,8 @@ func (h *VPNHandler) RevokeConfig(c *gin.Context) {
 		Update("revoked_at", now)
 
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to revoke key"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to revoke key in DB"})
 		return
-	}
-	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "no active key found"})
-		return
-	}
-
-	// Автоматически удаляем peer с AWG сервера через SSH
-	if revokedKey.PublicKey != "" {
-		if err := removeAWGPeer(&revokedKey.Server, revokedKey.PublicKey); err != nil {
-			fmt.Printf("[WARN] SSH removeAWGPeer failed: %v\n", err)
-		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "key revoked successfully"})

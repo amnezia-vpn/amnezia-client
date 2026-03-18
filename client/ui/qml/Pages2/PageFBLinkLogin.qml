@@ -96,6 +96,23 @@ PageType {
             clickedFunc: function() { hidePassword = !hidePassword }
         }
 
+        // Forgot password link
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignRight
+
+            ButtonTextType {
+                text: qsTr("Забыли пароль?")
+                font.pixelSize: 13
+                color: AmneziaStyle.color.mutedGray
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: PageController.goToPage(PageEnum.PageFBLinkForgotPassword)
+                }
+            }
+        }
+
         Item { Layout.fillHeight: true }
 
         // Register link

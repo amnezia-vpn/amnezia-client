@@ -24,16 +24,15 @@ func NewPaymentHandler(db *gorm.DB, shopID, key string) *PaymentHandler {
 }
 
 type createPaymentRequest struct {
-	Plan string `json:"plan" binding:"required,oneof=trial basic premium"`
+	Plan string `json:"plan" binding:"required,oneof=trial basic"`
 }
 
 var planPrices = map[models.PlanType]struct {
 	Amount       float64
 	DurationDays int
 }{
-	models.PlanTrial:   {Amount: 5.00, DurationDays: 7},
-	models.PlanBasic:   {Amount: 199.00, DurationDays: 30},
-	models.PlanPremium: {Amount: 499.00, DurationDays: 30},
+	models.PlanTrial: {Amount: 5.00, DurationDays: 7},
+	models.PlanBasic: {Amount: 199.00, DurationDays: 30},
 }
 
 // POST /api/v1/payments/create
@@ -48,11 +47,11 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 
 	plan := models.PlanType(req.Plan)
 
-	// Пробный период — только один раз на аккаунт
+	// Пробный период — только если не было успешных trial оплат
 	if plan == models.PlanTrial {
 		var trialCount int64
 		h.db.Model(&models.Payment{}).
-			Where("user_id = ? AND plan = ?", userID, models.PlanTrial).
+			Where("user_id = ? AND plan = ? AND status = ?", userID, models.PlanTrial, models.PaymentSucceeded).
 			Count(&trialCount)
 		if trialCount > 0 {
 			c.JSON(http.StatusConflict, gin.H{"error": "Пробный период уже был использован"})
@@ -145,56 +144,53 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 	obj, _ := event["object"].(map[string]interface{})
 	ykPaymentID, _ := obj["id"].(string)
 
-	// Находим платёж
-	var payment models.Payment
-	if err := h.db.Where("yoo_kassa_id = ?", ykPaymentID).First(&payment).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "payment not found"})
-		return
-	}
-
-	if payment.Status == models.PaymentSucceeded {
-		c.JSON(http.StatusOK, gin.H{"status": "already processed"})
-		return
-	}
-
-	// Обновляем статус платежа
-	now := time.Now()
-	h.db.Model(&payment).Updates(map[string]interface{}{
-		"status":       models.PaymentSucceeded,
-		"confirmed_at": now,
-	})
-
-	// Извлекаем payment_method_id из вебхука (если карта сохранена)
-	paymentMethodID := ""
-	if pm, ok := obj["payment_method"].(map[string]interface{}); ok {
-		if saved, _ := pm["saved"].(bool); saved {
-			paymentMethodID, _ = pm["id"].(string)
+	err := h.db.Transaction(func(tx *gorm.DB) error {
+		var payment models.Payment
+		if err := tx.Where("yoo_kassa_id = ?", ykPaymentID).First(&payment).Error; err != nil {
+			return err
 		}
-	}
 
-	// Обновляем или создаём подписку
-	priceInfo := planPrices[payment.Plan]
-	newExpiry := now.AddDate(0, 0, priceInfo.DurationDays)
-
-	// Пробный период не автопродлевается
-	autoRenew := payment.Plan != models.PlanTrial
-
-	var sub models.Subscription
-	if err := h.db.Where("user_id = ?", payment.UserID).First(&sub).Error; err != nil {
-		sub = models.Subscription{
-			UserID:          payment.UserID,
-			Plan:            payment.Plan,
-			Status:          models.SubActive,
-			ExpiresAt:       newExpiry,
-			AutoRenew:       autoRenew,
-			PaymentMethodID: paymentMethodID,
+		if payment.Status == models.PaymentSucceeded {
+			return nil // Уже обработано
 		}
-		h.db.Create(&sub)
-	} else {
-		// Для trial всегда считаем от сегодня (не суммируем с остатком)
-		if payment.Plan != models.PlanTrial && sub.ExpiresAt.After(now) {
+
+		now := time.Now()
+		tx.Model(&payment).Updates(map[string]interface{}{
+			"status":       models.PaymentSucceeded,
+			"confirmed_at": now,
+		})
+
+		paymentMethodID := ""
+		if pm, ok := obj["payment_method"].(map[string]interface{}); ok {
+			if saved, _ := pm["saved"].(bool); saved {
+				paymentMethodID, _ = pm["id"].(string)
+			}
+		}
+
+		priceInfo := planPrices[payment.Plan]
+		autoRenew := payment.Plan != models.PlanTrial
+
+		var sub models.Subscription
+		if err := tx.Where("user_id = ?", payment.UserID).First(&sub).Error; err != nil {
+			sub = models.Subscription{
+				UserID:          payment.UserID,
+				Plan:            payment.Plan,
+				Status:          models.SubActive,
+				ExpiresAt:       now.AddDate(0, 0, priceInfo.DurationDays),
+				AutoRenew:       autoRenew,
+				PaymentMethodID: paymentMethodID,
+			}
+			return tx.Create(&sub).Error
+		}
+
+		// Логика расчета новой даты. Игнорируем остаток, если план был Free
+		var newExpiry time.Time
+		if payment.Plan != models.PlanTrial && sub.ExpiresAt.After(now) && sub.Plan != models.PlanFree {
 			newExpiry = sub.ExpiresAt.AddDate(0, 0, priceInfo.DurationDays)
+		} else {
+			newExpiry = now.AddDate(0, 0, priceInfo.DurationDays)
 		}
+
 		updates := map[string]interface{}{
 			"plan":       payment.Plan,
 			"status":     models.SubActive,
@@ -204,7 +200,12 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 		if paymentMethodID != "" {
 			updates["payment_method_id"] = paymentMethodID
 		}
-		h.db.Model(&sub).Updates(updates)
+		return tx.Model(&sub).Updates(updates).Error
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "webhook processing failed"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
@@ -216,8 +217,6 @@ func planLabel(plan models.PlanType) string {
 		return "Пробный период (7 дней)"
 	case models.PlanBasic:
 		return "Базовый (30 дней)"
-	case models.PlanPremium:
-		return "Премиум (30 дней)"
 	default:
 		return string(plan)
 	}

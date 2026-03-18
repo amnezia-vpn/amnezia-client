@@ -33,6 +33,11 @@ func RunScheduler(db *gorm.DB, cfg *config.Config) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
+	// Выполняем бэкап сразу при старте, затем по расписанию
+	if err := DoBackup(db, cfg); err != nil {
+		log.Printf("[backup] Ошибка бэкапа: %v", err)
+	}
+
 	for range ticker.C {
 		if err := DoBackup(db, cfg); err != nil {
 			log.Printf("[backup] Ошибка бэкапа: %v", err)

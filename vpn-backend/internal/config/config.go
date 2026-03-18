@@ -12,22 +12,27 @@ type Config struct {
 	Port           string
 	DBPath         string
 	JWTSecret      string
-	RedisAddr      string
+	AllowedOrigins string // CORS: "*" или "https://example.com,https://app.example.com"
 	YooKassaShopID string
 	YooKassaKey    string
 
-	// SMTP для бэкапов
+	// SMTP для email
 	SMTPHost            string
 	SMTPPort            int
 	SMTPUser            string
 	SMTPPassword        string
-	SMTPFrom            string // если пусто — берётся SMTPUser
-	BackupIntervalHours int    // интервал бэкапа в часах (по умолчанию 24)
+	SMTPFrom            string
+	BackupIntervalHours int
 }
 
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")
+	}
+
+	secret := getEnv("JWT_SECRET", "")
+	if secret == "" || secret == "change-me-in-production" {
+		log.Fatal("[FATAL] JWT_SECRET не задан или использует дефолтное значение. Укажите безопасный секрет в .env")
 	}
 
 	smtpPort, _ := strconv.Atoi(getEnv("SMTP_PORT", "587"))
@@ -37,10 +42,10 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Port:           getEnv("PORT", "8080"),
+		Port:           getEnv("PORT", "8081"),
 		DBPath:         getEnv("DB_PATH", "data/vpn.db"),
-		JWTSecret:      getEnv("JWT_SECRET", "change-me-in-production"),
-		RedisAddr:      getEnv("REDIS_ADDR", "localhost:6379"),
+		JWTSecret:      secret,
+		AllowedOrigins: getEnv("ALLOWED_ORIGINS", "*"),
 		YooKassaShopID: getEnv("YOOKASSA_SHOP_ID", ""),
 		YooKassaKey:    getEnv("YOOKASSA_SECRET_KEY", ""),
 

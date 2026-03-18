@@ -74,6 +74,123 @@ void FBLinkController::login(const QString &email, const QString &password)
     });
 }
 
+void FBLinkController::registerUser(const QString &email, const QString &password)
+{
+    QUrl url(m_apiUrl + "/auth/register");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QJsonObject json;
+    json["email"] = email;
+    json["password"] = password;
+
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            emit registerCodeSent();
+        } else {
+            QByteArray data = reply->readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            QString errStr = tr("Ошибка регистрации");
+            if (!doc.isNull() && doc.object().contains("error"))
+                errStr = doc.object()["error"].toString();
+            emit registerError(errStr);
+        }
+    });
+}
+
+void FBLinkController::verifyEmail(const QString &email, const QString &code)
+{
+    QUrl url(m_apiUrl + "/auth/verify");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QJsonObject json;
+    json["email"] = email;
+    json["code"] = code;
+
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            QByteArray data = reply->readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            QJsonObject obj = doc.object();
+
+            if (obj.contains("access_token")) {
+                saveJwtToken(obj["access_token"].toString());
+                saveSubscriptionInfo("", "", "");
+                emit verifySuccess();
+                emit loginStateChanged();
+                emit subscriptionChanged();
+                fetchConfig();
+                fetchSubscription();
+            } else {
+                emit verifyError(tr("Неверный ответ сервера"));
+            }
+        } else {
+            QByteArray data = reply->readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            QString errStr = tr("Неверный код");
+            if (!doc.isNull() && doc.object().contains("error"))
+                errStr = doc.object()["error"].toString();
+            emit verifyError(errStr);
+        }
+    });
+}
+
+void FBLinkController::forgotPassword(const QString &email)
+{
+    QUrl url(m_apiUrl + "/auth/forgot-password");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QJsonObject json;
+    json["email"] = email;
+
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            emit forgotPasswordSent();
+        } else {
+            emit forgotPasswordError(tr("Ошибка отправки кода"));
+        }
+    });
+}
+
+void FBLinkController::resetPassword(const QString &email, const QString &code, const QString &newPassword)
+{
+    QUrl url(m_apiUrl + "/auth/reset-password");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QJsonObject json;
+    json["email"] = email;
+    json["code"] = code;
+    json["new_password"] = newPassword;
+
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            emit resetPasswordSuccess();
+        } else {
+            QByteArray data = reply->readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            QString errStr = tr("Ошибка сброса пароля");
+            if (!doc.isNull() && doc.object().contains("error"))
+                errStr = doc.object()["error"].toString();
+            emit resetPasswordError(errStr);
+        }
+    });
+}
+
 void FBLinkController::loginWithToken(const QString &token)
 {
     saveJwtToken(token);

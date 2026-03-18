@@ -2,12 +2,25 @@ package main
 
 import (
 	"log"
+	"time"
 	"vpn-backend/internal/backup"
 	"vpn-backend/internal/config"
 	"vpn-backend/internal/database"
 	"vpn-backend/internal/handlers"
+	"vpn-backend/internal/models"
 	"vpn-backend/internal/router"
 )
+
+func safeGo(name string, fn func()) {
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("[PANIC] goroutine %s: %v", name, r)
+			}
+		}()
+		fn()
+	}()
+}
 
 func main() {
 	cfg := config.Load()
@@ -15,14 +28,19 @@ func main() {
 	db := database.Init(cfg.DBPath)
 	database.AutoMigrate(db)
 
-	// Автоматическая проверка и синхронизация конфигов серверов
-	go handlers.SyncAllServers(db)
-
-	// Периодический бэкап БД с отправкой на email всем администраторам
-	go backup.RunScheduler(db, cfg)
-
-	// Автосписание подписок за 3 дня до истечения
-	go handlers.RunAutoRenewalScheduler(db, cfg.YooKassaShopID, cfg.YooKassaKey)
+	safeGo("sync-servers", func() { handlers.SyncAllServers(db) })
+	safeGo("backup-scheduler", func() { backup.RunScheduler(db, cfg) })
+	safeGo("renewal-scheduler", func() {
+		handlers.RunAutoRenewalScheduler(db, cfg.YooKassaShopID, cfg.YooKassaKey)
+	})
+	// Очистка истёкших кодов подтверждения раз в час
+	safeGo("code-cleanup", func() {
+		for {
+			time.Sleep(1 * time.Hour)
+			db.Where("expires_at < ? OR used = true", time.Now().Add(-24*time.Hour)).
+				Delete(&models.VerificationCode{})
+		}
+	})
 
 	r := router.New(db, cfg)
 

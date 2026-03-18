@@ -30,6 +30,10 @@ public:
                                ServersModel *serversModel = nullptr, QObject *parent = nullptr);
 
     Q_INVOKABLE void login(const QString &email, const QString &password);
+    Q_INVOKABLE void registerUser(const QString &email, const QString &password);
+    Q_INVOKABLE void verifyEmail(const QString &email, const QString &code);
+    Q_INVOKABLE void forgotPassword(const QString &email);
+    Q_INVOKABLE void resetPassword(const QString &email, const QString &code, const QString &newPassword);
     Q_INVOKABLE void loginWithToken(const QString &token);
     Q_INVOKABLE void fetchConfig();
     Q_INVOKABLE void fetchSubscription();
@@ -49,6 +53,14 @@ public:
 signals:
     void loginSuccess();
     void loginError(const QString &errorMessage);
+    void registerCodeSent();
+    void registerError(const QString &errorMessage);
+    void verifySuccess();
+    void verifyError(const QString &errorMessage);
+    void forgotPasswordSent();
+    void forgotPasswordError(const QString &errorMessage);
+    void resetPasswordSuccess();
+    void resetPasswordError(const QString &errorMessage);
     void configFetched();
     void configError(const QString &errorMessage);
     void loginStateChanged();

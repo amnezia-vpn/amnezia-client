@@ -1,8 +1,15 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"crypto/subtle"
+	"fmt"
+	"math/big"
 	"net/http"
+	"strings"
 	"time"
+
+	"vpn-backend/internal/config"
 	"vpn-backend/internal/middleware"
 	"vpn-backend/internal/models"
 
@@ -14,11 +21,12 @@ import (
 
 type AuthHandler struct {
 	db        *gorm.DB
+	cfg       *config.Config
 	jwtSecret string
 }
 
-func NewAuthHandler(db *gorm.DB, jwtSecret string) *AuthHandler {
-	return &AuthHandler{db: db, jwtSecret: jwtSecret}
+func NewAuthHandler(db *gorm.DB, cfg *config.Config) *AuthHandler {
+	return &AuthHandler{db: db, cfg: cfg, jwtSecret: cfg.JWTSecret}
 }
 
 type registerRequest struct {
@@ -36,6 +44,11 @@ type tokenResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+func generateCode() string {
+	n, _ := rand.Int(rand.Reader, big.NewInt(900000))
+	return fmt.Sprintf("%06d", n.Int64()+100000)
+}
+
 // POST /api/v1/auth/register
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req registerRequest
@@ -44,26 +57,83 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	// Проверить, что email не занят
 	var existing models.User
-	if result := h.db.Where("email = ?", req.Email).First(&existing); result.Error == nil {
+	if h.db.Where("email = ?", req.Email).First(&existing).Error == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "email already registered"})
 		return
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+	// Проверить cooldown: не отправлять код чаще раза в 60 секунд
+	var recent models.VerificationCode
+	cooldown := time.Now().Add(-60 * time.Second)
+	if h.db.Where("email = ? AND purpose = ? AND created_at > ? AND used = false", req.Email, "verify", cooldown).
+		First(&recent).Error == nil {
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": "code already sent, wait 60 seconds before retrying"})
 		return
 	}
 
-	user := models.User{
-		Email:        req.Email,
-		PasswordHash: string(hash),
-		Role:         models.RoleUser,
+	// Инвалидировать старые коды
+	h.db.Where("email = ? AND purpose = ? AND used = false", req.Email, "verify").
+		Update("used", true)
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		return
 	}
 
+	code := generateCode()
+	vc := models.VerificationCode{
+		Email:     req.Email,
+		Code:      code + "|" + string(hash), // code|bcrypt_hash
+		Purpose:   "verify",
+		ExpiresAt: time.Now().Add(10 * time.Minute),
+	}
+	h.db.Create(&vc)
+
+	sendVerificationEmailAsync(h.cfg, req.Email, code, "verify")
+	c.JSON(http.StatusOK, gin.H{"message": "verification code sent to email"})
+}
+
+type verifyRequest struct {
+	Email string `json:"email" binding:"required,email"`
+	Code  string `json:"code" binding:"required"`
+}
+
+// POST /api/v1/auth/verify
+func (h *AuthHandler) VerifyEmail(c *gin.Context) {
+	var req verifyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var vc models.VerificationCode
+	if err := h.db.Where("email = ? AND purpose = ? AND used = false AND expires_at > ?",
+		req.Email, "verify", time.Now()).First(&vc).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid or expired code"})
+		return
+	}
+
+	// Парсим code|hash
+	parts := strings.SplitN(vc.Code, "|", 2)
+	if len(parts) != 2 || subtle.ConstantTimeCompare([]byte(parts[0]), []byte(req.Code)) != 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid or expired code"})
+		return
+	}
+
+	// Помечаем код использованным
+	h.db.Model(&vc).Update("used", true)
+
+	// Создаём юзера
+	user := models.User{
+		Email:        req.Email,
+		PasswordHash: parts[1],
+		Role:         models.RoleUser,
+	}
 	if err := h.db.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+		c.JSON(http.StatusConflict, gin.H{"error": "email already registered"})
 		return
 	}
 
@@ -77,11 +147,92 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	tokens, err := h.generateTokens(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate tokens"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
 	}
 
 	c.JSON(http.StatusCreated, tokens)
+}
+
+type forgotPasswordRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+// POST /api/v1/auth/forgot-password
+func (h *AuthHandler) ForgotPassword(c *gin.Context) {
+	var req forgotPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+	if h.db.Where("email = ?", req.Email).First(&user).Error != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "if this email is registered, a code will be sent"})
+		return
+	}
+
+	var recent models.VerificationCode
+	cooldown := time.Now().Add(-60 * time.Second)
+	if h.db.Where("email = ? AND purpose = ? AND created_at > ? AND used = false", req.Email, "reset", cooldown).
+		First(&recent).Error == nil {
+		c.JSON(http.StatusOK, gin.H{"message": "if this email is registered, a code will be sent"})
+		return
+	}
+
+	h.db.Where("email = ? AND purpose = ? AND used = false", req.Email, "reset").
+		Update("used", true)
+
+	code := generateCode()
+	vc := models.VerificationCode{
+		Email:     req.Email,
+		Code:      code,
+		Purpose:   "reset",
+		ExpiresAt: time.Now().Add(10 * time.Minute),
+	}
+	h.db.Create(&vc)
+
+	sendVerificationEmailAsync(h.cfg, req.Email, code, "reset")
+	c.JSON(http.StatusOK, gin.H{"message": "if this email is registered, a code will be sent"})
+}
+
+type resetPasswordRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Code     string `json:"code" binding:"required"`
+	Password string `json:"new_password" binding:"required,min=8"`
+}
+
+// POST /api/v1/auth/reset-password
+func (h *AuthHandler) ResetPassword(c *gin.Context) {
+	var req resetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var vc models.VerificationCode
+	if err := h.db.Where("email = ? AND purpose = ? AND code = ? AND used = false AND expires_at > ?",
+		req.Email, "reset", req.Code, time.Now()).First(&vc).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid or expired code"})
+		return
+	}
+
+	h.db.Model(&vc).Update("used", true)
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		return
+	}
+
+	result := h.db.Model(&models.User{}).Where("email = ?", req.Email).
+		Update("password_hash", string(hash))
+	if result.Error != nil || result.RowsAffected == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "password updated successfully"})
 }
 
 // POST /api/v1/auth/login

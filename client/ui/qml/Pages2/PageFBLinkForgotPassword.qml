@@ -15,8 +15,9 @@ PageType {
     id: root
 
     property string errorMessage: ""
+    property string successMessage: ""
     property bool isLoading: false
-    property bool codeSent: false
+    property int step: 1 // 1=email, 2=code, 3=new password
     property string pendingEmail: ""
     property int resendCooldown: 0
 
@@ -31,38 +32,29 @@ PageType {
     Connections {
         target: FBLinkController
 
-        function onRegisterCodeSent() {
+        function onForgotPasswordSent() {
             root.isLoading = false
             PageController.showBusyIndicator(false)
-            root.codeSent = true
             root.errorMessage = ""
+            root.step = 2
             root.resendCooldown = 60
         }
 
-        function onRegisterError(message) {
+        function onForgotPasswordError(message) {
             root.isLoading = false
             PageController.showBusyIndicator(false)
             root.errorMessage = message
         }
 
-        function onVerifySuccess() {
+        function onResetPasswordSuccess() {
             root.isLoading = false
             PageController.showBusyIndicator(false)
+            root.errorMessage = ""
+            root.successMessage = qsTr("Пароль успешно изменён! Войдите с новым паролем.")
+            root.step = 0
         }
 
-        function onVerifyError(message) {
-            root.isLoading = false
-            PageController.showBusyIndicator(false)
-            root.errorMessage = message
-        }
-
-        function onConfigFetched() {
-            root.isLoading = false
-            PageController.showBusyIndicator(false)
-            PageController.goToPageHome()
-        }
-
-        function onConfigError(message) {
+        function onResetPasswordError(message) {
             root.isLoading = false
             PageController.showBusyIndicator(false)
             root.errorMessage = message
@@ -101,10 +93,18 @@ PageType {
 
         BaseHeaderType {
             Layout.fillWidth: true
-            headerText: root.codeSent ? qsTr("Подтверждение email") : qsTr("Создание аккаунта")
-            descriptionText: root.codeSent
-                ? qsTr("Введите код, отправленный на ") + root.pendingEmail
-                : qsTr("Зарегистрируйтесь в сервисе FBLink VPN")
+            headerText: {
+                if (root.step === 1) return qsTr("Восстановление пароля")
+                if (root.step === 2) return qsTr("Введите код")
+                if (root.step === 3) return qsTr("Новый пароль")
+                return qsTr("Готово")
+            }
+            descriptionText: {
+                if (root.step === 1) return qsTr("Введите email вашего аккаунта")
+                if (root.step === 2) return qsTr("Код отправлен на ") + root.pendingEmail
+                if (root.step === 3) return qsTr("Введите новый пароль")
+                return ""
+            }
         }
 
         // Error
@@ -127,26 +127,58 @@ PageType {
             }
         }
 
-        // Step 1: Email + Password
+        // Success
+        Rectangle {
+            Layout.fillWidth: true
+            height: successText.implicitHeight + 16
+            color: "#153D1F"
+            radius: 8
+            visible: root.successMessage !== ""
+
+            LabelTextType {
+                id: successText
+                anchors.centerIn: parent
+                anchors.margins: 8
+                width: parent.width - 16
+                text: root.successMessage
+                color: "#6BFF8A"
+                wrapMode: Text.WordWrap
+                font.pixelSize: 13
+            }
+        }
+
+        // Step 1: Email
         TextFieldWithHeaderType {
             id: emailField
             Layout.fillWidth: true
             headerText: qsTr("Email")
             textField.placeholderText: "you@example.com"
             textField.inputMethodHints: Qt.ImhEmailCharactersOnly
-            visible: !root.codeSent
+            visible: root.step === 1
         }
 
+        // Step 2: Code
         TextFieldWithHeaderType {
-            id: passwordField
+            id: codeField
+            Layout.fillWidth: true
+            headerText: qsTr("Код подтверждения")
+            textField.placeholderText: "000000"
+            textField.inputMethodHints: Qt.ImhDigitsOnly
+            textField.maximumLength: 6
+            visible: root.step === 2
+        }
+
+        // Step 3: New password
+        TextFieldWithHeaderType {
+            id: newPasswordField
             property bool hidePassword: true
             Layout.fillWidth: true
-            headerText: qsTr("Пароль")
+            headerText: qsTr("Новый пароль")
             textField.placeholderText: "••••••••"
             textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
             buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
             clickedFunc: function() { hidePassword = !hidePassword }
-            visible: !root.codeSent
+            visible: root.step === 3
         }
 
         TextFieldWithHeaderType {
@@ -158,49 +190,16 @@ PageType {
             textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
             buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
             clickedFunc: function() { hidePassword = !hidePassword }
-            visible: !root.codeSent
-        }
-
-        // Step 2: Verification code
-        TextFieldWithHeaderType {
-            id: codeField
-            Layout.fillWidth: true
-            headerText: qsTr("Код подтверждения")
-            textField.placeholderText: "000000"
-            textField.inputMethodHints: Qt.ImhDigitsOnly
-            textField.maximumLength: 6
-            visible: root.codeSent
+            visible: root.step === 3
         }
 
         Item { Layout.fillHeight: true }
-
-        // Login link
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
-            visible: !root.codeSent
-
-            LabelTextType {
-                text: qsTr("Уже есть аккаунт?")
-                color: AmneziaStyle.color.mutedGray
-                font.pixelSize: 14
-            }
-            ButtonTextType {
-                text: qsTr("Войти")
-                font.pixelSize: 14
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: PageController.goToPage(PageEnum.PageFBLinkLogin)
-                }
-            }
-        }
 
         // Resend code link
         RowLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
-            visible: root.codeSent
+            visible: root.step === 2
 
             ButtonTextType {
                 text: root.resendCooldown > 0
@@ -216,8 +215,25 @@ PageType {
                         root.errorMessage = ""
                         root.isLoading = true
                         PageController.showBusyIndicator(true)
-                        FBLinkController.registerUser(root.pendingEmail, passwordField.textField.text)
+                        FBLinkController.forgotPassword(root.pendingEmail)
                     }
+                }
+            }
+        }
+
+        // Back to login link (shown on success)
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter
+            visible: root.step === 0
+
+            ButtonTextType {
+                text: qsTr("Вернуться к входу")
+                font.pixelSize: 14
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: PageController.goToPage(PageEnum.PageFBLinkLogin)
                 }
             }
         }
@@ -233,30 +249,43 @@ PageType {
             textColor: AmneziaStyle.color.paleGray
 
             enabled: !root.isLoading
-            text: root.isLoading
-                ? (root.codeSent ? qsTr("Проверка...") : qsTr("Отправка..."))
-                : (root.codeSent ? qsTr("Подтвердить") : qsTr("Создать аккаунт"))
+            visible: root.step > 0
+
+            text: {
+                if (root.isLoading) {
+                    return qsTr("Отправка...")
+                }
+                if (root.step === 1) return qsTr("Отправить код")
+                if (root.step === 2) return qsTr("Далее")
+                return qsTr("Сменить пароль")
+            }
 
             clickedFunc: function() {
                 root.errorMessage = ""
 
-                if (root.codeSent) {
-                    // Step 2: verify code
+                if (root.step === 1) {
+                    var email = emailField.textField.text.trim()
+                    if (email === "") {
+                        root.errorMessage = qsTr("Введите email")
+                        return
+                    }
+                    root.pendingEmail = email
+                    root.isLoading = true
+                    PageController.showBusyIndicator(true)
+                    FBLinkController.forgotPassword(email)
+                } else if (root.step === 2) {
                     var code = codeField.textField.text.trim()
                     if (code.length !== 6) {
                         root.errorMessage = qsTr("Введите 6-значный код")
                         return
                     }
-                    root.isLoading = true
-                    PageController.showBusyIndicator(true)
-                    FBLinkController.verifyEmail(root.pendingEmail, code)
-                } else {
-                    // Step 1: send code
-                    var email = emailField.textField.text.trim()
-                    var password = passwordField.textField.text
+                    // Move to step 3 (enter new password)
+                    root.step = 3
+                } else if (root.step === 3) {
+                    var password = newPasswordField.textField.text
                     var confirmPassword = confirmPasswordField.textField.text
 
-                    if (email === "" || password === "" || confirmPassword === "") {
+                    if (password === "" || confirmPassword === "") {
                         root.errorMessage = qsTr("Пожалуйста, заполните все поля")
                         return
                     }
@@ -269,10 +298,9 @@ PageType {
                         return
                     }
 
-                    root.pendingEmail = email
                     root.isLoading = true
                     PageController.showBusyIndicator(true)
-                    FBLinkController.registerUser(email, password)
+                    FBLinkController.resetPassword(root.pendingEmail, codeField.textField.text.trim(), password)
                 }
             }
         }

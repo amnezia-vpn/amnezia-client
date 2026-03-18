@@ -50,6 +50,7 @@ namespace PageLoader
 
         PageFBLinkLogin,
         PageFBLinkRegister,
+        PageFBLinkForgotPassword,
         PageFBLinkSubscription,
 
         PageSetupWizardStart,
