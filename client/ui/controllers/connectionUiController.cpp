@@ -26,7 +26,7 @@ void ConnectionUiController::openConnection()
 {
     int serverIndex = m_serversController->getDefaultServerIndex();
 
-    ErrorCode errorCode = m_connectionController->connectToVpn(serverIndex);
+    ErrorCode errorCode = m_connectionController->openConnection(serverIndex);
 
     if (errorCode != ErrorCode::NoError) {
         emit connectionErrorOccurred(errorCode);
@@ -36,12 +36,12 @@ void ConnectionUiController::openConnection()
 
 void ConnectionUiController::closeConnection()
 {
-    m_connectionController->disconnectFromVpn();
+    m_connectionController->closeConnection();
 }
 
 ErrorCode ConnectionUiController::getLastConnectionError()
 {
-    return m_connectionController->lastError();
+    return m_connectionController->lastConnectionError();
 }
 
 void ConnectionUiController::onConnectionStateChanged(Vpn::ConnectionState state)
@@ -100,7 +100,7 @@ void ConnectionUiController::onConnectionStateChanged(Vpn::ConnectionState state
 void ConnectionUiController::onCurrentContainerUpdated()
 {
     if (m_isConnected || m_isConnectionInProgress) {
-        emit reconnectWithUpdatedContainer(tr("Settings updated successfully, reconnnection..."));
+        emit reconnectWithUpdatedContainer(tr("Settings updated successfully, reconnection..."));
         openConnection();
     } else {
         emit reconnectWithUpdatedContainer(tr("Settings updated successfully"));

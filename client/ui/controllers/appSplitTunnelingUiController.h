@@ -15,7 +15,7 @@ class AppSplitTunnelingUiController : public QObject
     Q_OBJECT
 
     Q_PROPERTY(int routeMode READ getRouteMode WRITE setRouteMode NOTIFY routeModeChanged)
-    Q_PROPERTY(bool isTunnelingEnabled READ isTunnelingEnabled NOTIFY isTunnelingEnabledChanged)
+    Q_PROPERTY(bool isSplitTunnelingEnabled READ isSplitTunnelingEnabled NOTIFY isSplitTunnelingEnabledChanged)
 
 public:
     explicit AppSplitTunnelingUiController(AppSplitTunnelingController* appSplitTunnelingController,
@@ -30,13 +30,13 @@ public slots:
     void setRouteMode(int routeMode);
 
     int getRouteMode() const;
-    bool isTunnelingEnabled() const;
+    bool isSplitTunnelingEnabled() const;
 
     void updateModel();
 
 signals:
     void routeModeChanged();
-    void isTunnelingEnabledChanged();
+    void isSplitTunnelingEnabledChanged();
     void errorOccurred(const QString &errorMessage);
     void finished(const QString &message);
 

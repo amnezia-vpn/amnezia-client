@@ -35,13 +35,13 @@ class ServersController : public QObject
     Q_OBJECT
     
 public:
-    struct GatewayStacks
+    struct GatewayStacksData
     {
         QSet<QString> userCountryCodes;
         QSet<QString> serviceTypes;
 
         bool isEmpty() const { return userCountryCodes.isEmpty() && serviceTypes.isEmpty(); }
-        bool operator==(const GatewayStacks &other) const;
+        bool operator==(const GatewayStacksData &other) const;
         QJsonObject toJson() const;
     };
     
@@ -74,7 +74,7 @@ public:
     ContainerConfig getContainerConfig(int serverIndex, DockerContainer container) const;
     QPair<QString, QString> getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const;
     
-    GatewayStacks gatewayStacks() const;
+    GatewayStacksData gatewayStacks() const;
 
     // Validation
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol) const;
@@ -89,7 +89,7 @@ public slots:
 private:
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
-    GatewayStacks m_gatewayStacks;
+    GatewayStacksData m_gatewayStacks;
 };
 
 #endif // SERVERSCONTROLLER_H

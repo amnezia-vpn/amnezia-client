@@ -34,9 +34,9 @@ public:
                                QJsonObject& vpnConfiguration,
                                DockerContainer& container);
 
-    ErrorCode connectToVpn(int serverIndex);
+    ErrorCode openConnection(int serverIndex);
 
-    void disconnectFromVpn();
+    void closeConnection();
 
 #ifdef Q_OS_ANDROID
     void restoreConnection();
@@ -44,7 +44,7 @@ public:
 
     void onKillSwitchModeChanged(bool enabled);
 
-    ErrorCode lastError() const;
+    ErrorCode lastConnectionError() const;
 
     bool isConnected() const;
     void setConnectionState(Vpn::ConnectionState state);
@@ -60,6 +60,7 @@ public:
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
+    void openConnectionRequested(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration);
 
 private:
     SecureServersRepository* m_serversRepository;

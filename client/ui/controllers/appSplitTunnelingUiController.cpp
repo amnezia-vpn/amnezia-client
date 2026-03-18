@@ -53,7 +53,7 @@ void AppSplitTunnelingUiController::removeApp(const int index)
 void AppSplitTunnelingUiController::toggleSplitTunneling(bool enabled)
 {
     m_appSplitTunnelingController->toggleSplitTunneling(enabled);
-    emit isTunnelingEnabledChanged();
+    emit isSplitTunnelingEnabledChanged();
 }
 
 void AppSplitTunnelingUiController::setRouteMode(int routeMode)
@@ -67,7 +67,7 @@ int AppSplitTunnelingUiController::getRouteMode() const
     return static_cast<int>(m_appSplitTunnelingController->getRouteMode());
 }
 
-bool AppSplitTunnelingUiController::isTunnelingEnabled() const
+bool AppSplitTunnelingUiController::isSplitTunnelingEnabled() const
 {
     return m_appSplitTunnelingController->isSplitTunnelingEnabled();
 }

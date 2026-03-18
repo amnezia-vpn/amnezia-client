@@ -103,7 +103,7 @@ PageType {
             enabled: root.pageEnabled
             showSwitcher: true
             switcher {
-                checked: IpSplitTunnelingController.isTunnelingEnabled
+                checked: IpSplitTunnelingController.isSplitTunnelingEnabled
                 enabled: root.pageEnabled
             }
             switcherFunction: function(checked) {

@@ -321,7 +321,7 @@ bool SubscriptionUiController::updateServiceFromTelegram(const int serverIndex)
 bool SubscriptionUiController::deactivateDevice(int serverIndex, const bool isRemoveEvent)
 {
 
-    ErrorCode errorCode = m_subscriptionController->revokeServiceFromGateway(serverIndex, isRemoveEvent);
+    ErrorCode errorCode = m_subscriptionController->deactivateDevice(serverIndex, isRemoveEvent);
     if (errorCode != ErrorCode::NoError) {
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError && isRemoveEvent) {
             return true;
@@ -335,7 +335,7 @@ bool SubscriptionUiController::deactivateDevice(int serverIndex, const bool isRe
 
 bool SubscriptionUiController::deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode)
 {
-    ErrorCode errorCode = m_subscriptionController->revokeExternalDevice(serverIndex, uuid, serverCountryCode);
+    ErrorCode errorCode = m_subscriptionController->deactivateExternalDevice(serverIndex, uuid, serverCountryCode);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -360,12 +360,12 @@ bool SubscriptionUiController::isConfigValid()
 
 void SubscriptionUiController::setCurrentProtocol(int serverIndex, const QString &protocolName)
 {
-    m_subscriptionController->setApiServiceProtocol(serverIndex, protocolName);
+    m_subscriptionController->setCurrentProtocol(serverIndex, protocolName);
 }
 
 bool SubscriptionUiController::isVlessProtocol(int serverIndex)
 {
-    return m_subscriptionController->isApiServiceProtocolVless(serverIndex);
+    return m_subscriptionController->isVlessProtocol(serverIndex);
 }
 
 void SubscriptionUiController::removeApiConfig(int serverIndex)

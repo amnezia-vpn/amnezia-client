@@ -62,7 +62,7 @@ DrawerType2 {
             Layout.topMargin: 16
 
             text: qsTr("Site-based split tunneling")
-            descriptionText: enabled && IpSplitTunnelingController.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            descriptionText: enabled && IpSplitTunnelingController.isSplitTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
@@ -81,7 +81,7 @@ DrawerType2 {
             Layout.fillWidth: true
 
             text: qsTr("App-based split tunneling")
-            descriptionText: AppSplitTunnelingController.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            descriptionText: AppSplitTunnelingController.isSplitTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {

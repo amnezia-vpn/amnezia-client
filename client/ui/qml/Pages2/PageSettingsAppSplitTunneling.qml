@@ -89,7 +89,7 @@ PageType {
             enabled: root.pageEnabled
             showSwitcher: true
             switcher {
-                checked: AppSplitTunnelingController.isTunnelingEnabled
+                checked: AppSplitTunnelingController.isSplitTunnelingEnabled
                 enabled: root.pageEnabled
             }
             switcherFunction: function(checked) {

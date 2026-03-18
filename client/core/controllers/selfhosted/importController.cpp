@@ -284,7 +284,7 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
     return result;
 }
 
-void ImportController::startQrDecoding()
+void ImportController::startDecodingQr()
 {
     m_qrCodeChunks.clear();
     m_totalQrCodeChunksCount = 0;
@@ -292,7 +292,7 @@ void ImportController::startQrDecoding()
     m_isQrCodeProcessed = true;
 }
 
-ImportController::QrParseResult ImportController::processQrCodeContent(const QString &code)
+ImportController::QrParseResult ImportController::parseQrCodeChunk(const QString &code)
 {
     QrParseResult parseResult;
     parseResult.chunksReceived = m_receivedQrCodeChunksCount;

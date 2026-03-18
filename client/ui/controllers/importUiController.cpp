@@ -145,7 +145,7 @@ void ImportUiController::clearConfigFileName()
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
 void ImportUiController::startDecodingQr()
 {
-    m_importController->startQrDecoding();
+    m_importController->startDecodingQr();
 #if defined Q_OS_ANDROID
     AndroidController::instance()->startQrReaderActivity();
 #endif
@@ -158,7 +158,7 @@ void ImportUiController::stopDecodingQr()
 
 bool ImportUiController::parseQrCodeChunk(const QString &code)
 {
-    auto parseResult = m_importController->processQrCodeContent(code);
+    auto parseResult = m_importController->parseQrCodeChunk(code);
     if (parseResult.success) {
         m_config = parseResult.importResult.config;
         m_configFileName = parseResult.importResult.configFileName;
@@ -196,7 +196,7 @@ bool ImportUiController::decodeQrCode(const QString &code)
     }
 
     if (!mInstance->m_importController->isQrDecodingActive()) {
-        mInstance->m_importController->startQrDecoding();
+        mInstance->m_importController->startDecodingQr();
     }
     return mInstance->parseQrCodeChunk(code);
 }

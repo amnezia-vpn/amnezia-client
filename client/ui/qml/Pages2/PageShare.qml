@@ -30,7 +30,7 @@ PageType {
     Connections {
         target: ExportController
 
-        function onRevokeConfigCompleted() {
+        function onRevokeConfigFinished() {
             PageController.showBusyIndicator(false)
             PageController.showNotificationMessage(qsTr("Config revoked"))
         }

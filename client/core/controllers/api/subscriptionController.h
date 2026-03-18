@@ -60,9 +60,9 @@ public:
 
     ErrorCode updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent);
 
-    ErrorCode revokeServiceFromGateway(int serverIndex, bool isRemoveEvent);
+    ErrorCode deactivateDevice(int serverIndex, bool isRemoveEvent);
 
-    ErrorCode revokeExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode);
+    ErrorCode deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode);
 
     ErrorCode exportNativeConfig(int serverIndex, const QString &serverCountryCode, QString &nativeConfig);
 
@@ -76,8 +76,8 @@ public:
 
     void removeApiConfig(int serverIndex);
 
-    void setApiServiceProtocol(int serverIndex, const QString &protocolName);
-    bool isApiServiceProtocolVless(int serverIndex) const;
+    void setCurrentProtocol(int serverIndex, const QString &protocolName);
+    bool isVlessProtocol(int serverIndex) const;
 
     ErrorCode getAccountInfo(int serverIndex, QJsonObject &accountInfo);
 

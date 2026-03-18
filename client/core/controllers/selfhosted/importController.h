@@ -57,8 +57,8 @@ public:
     ImportResult extractConfigFromData(const QString &data, const QString &configFileName = "");
     ImportResult extractConfigFromQr(const QByteArray &data);
 
-    void startQrDecoding();
-    QrParseResult processQrCodeContent(const QString &code);
+    void startDecodingQr();
+    QrParseResult parseQrCodeChunk(const QString &code);
     bool isQrDecodingActive() const;
     int qrChunksReceived() const;
     int qrChunksTotal() const;

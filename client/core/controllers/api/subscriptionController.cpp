@@ -400,7 +400,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::revokeServiceFromGateway(int serverIndex, bool isRemoveEvent)
+ErrorCode SubscriptionController::deactivateDevice(int serverIndex, bool isRemoveEvent)
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
@@ -443,7 +443,7 @@ ErrorCode SubscriptionController::revokeServiceFromGateway(int serverIndex, bool
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::revokeExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode)
+ErrorCode SubscriptionController::deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode)
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     
@@ -738,7 +738,7 @@ bool SubscriptionController::isApiKeyExpired(int serverIndex) const
     return false;
 }
 
-void SubscriptionController::setApiServiceProtocol(int serverIndex, const QString &protocolName)
+void SubscriptionController::setCurrentProtocol(int serverIndex, const QString &protocolName)
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     if (serverConfigModel.isApiV2()) {
@@ -750,7 +750,7 @@ void SubscriptionController::setApiServiceProtocol(int serverIndex, const QStrin
     }
 }
 
-bool SubscriptionController::isApiServiceProtocolVless(int serverIndex) const
+bool SubscriptionController::isVlessProtocol(int serverIndex) const
 {
     ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
     if (serverConfigModel.isApiV2()) {

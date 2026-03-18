@@ -30,6 +30,7 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
       m_vpnConnection(vpnConnection)
 {
     connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::connectionStateChanged);
+    connect(this, &ConnectionController::openConnectionRequested, m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
 }
 
 bool ConnectionController::isConnected() const
@@ -70,7 +71,7 @@ ErrorCode ConnectionController::prepareConnection(int serverIndex,
     return ErrorCode::NoError;
 }
 
-ErrorCode ConnectionController::connectToVpn(int serverIndex)
+ErrorCode ConnectionController::openConnection(int serverIndex)
 {
     QJsonObject vpnConfiguration;
     DockerContainer container;
@@ -80,11 +81,11 @@ ErrorCode ConnectionController::connectToVpn(int serverIndex)
         return errorCode;
     }
 
-    m_vpnConnection->connectToVpn(serverIndex, container, vpnConfiguration);
+    emit openConnectionRequested(serverIndex, container, vpnConfiguration);
     return ErrorCode::NoError;
 }
 
-void ConnectionController::disconnectFromVpn()
+void ConnectionController::closeConnection()
 {
     m_vpnConnection->disconnectFromVpn();
 }
@@ -105,7 +106,7 @@ void ConnectionController::onKillSwitchModeChanged(bool enabled)
     }
 }
 
-ErrorCode ConnectionController::lastError() const
+ErrorCode ConnectionController::lastConnectionError() const
 {
     return m_vpnConnection->lastError();
 }

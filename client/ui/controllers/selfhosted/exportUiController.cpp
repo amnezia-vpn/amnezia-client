@@ -79,7 +79,7 @@ void ExportUiController::updateClientManagementModel(int serverIndex, int contai
 void ExportUiController::revokeConfig(int row, int serverIndex, int containerIndex)
 {
     m_exportController->revokeConfig(row, serverIndex, containerIndex);
-    emit revokeConfigCompleted();
+    emit revokeConfigFinished();
 }
 
 void ExportUiController::renameClient(int row, const QString &clientName, int serverIndex, int containerIndex)

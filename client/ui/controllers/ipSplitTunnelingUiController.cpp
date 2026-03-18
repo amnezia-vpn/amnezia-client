@@ -62,7 +62,7 @@ void IpSplitTunnelingUiController::exportSites(const QString &fileName)
 void IpSplitTunnelingUiController::toggleSplitTunneling(bool enabled)
 {
     m_ipSplitTunnelingController->toggleSplitTunneling(enabled);
-    emit isTunnelingEnabledChanged();
+    emit isSplitTunnelingEnabledChanged();
 }
 
 void IpSplitTunnelingUiController::setRouteMode(int routeMode)
@@ -76,7 +76,7 @@ int IpSplitTunnelingUiController::getRouteMode() const
     return static_cast<int>(m_ipSplitTunnelingController->getRouteMode());
 }
 
-bool IpSplitTunnelingUiController::isTunnelingEnabled() const
+bool IpSplitTunnelingUiController::isSplitTunnelingEnabled() const
 {
     return m_ipSplitTunnelingController->isSplitTunnelingEnabled();
 }

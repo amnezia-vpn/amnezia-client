@@ -106,14 +106,14 @@ QPair<QString, QString> ServersController::getDnsPair(int serverIndex, bool isAm
                                    m_appSettingsRepository->secondaryDns());
 }
 
-ServersController::GatewayStacks ServersController::gatewayStacks() const
+ServersController::GatewayStacksData ServersController::gatewayStacks() const
 {
     return m_gatewayStacks;
 }
 
 void ServersController::recomputeGatewayStacks()
 {
-    GatewayStacks computed;
+    GatewayStacksData computed;
     bool hasNewTags = false;
     QVector<ServerConfig> servers = m_serversRepository->servers();
 
@@ -146,12 +146,12 @@ void ServersController::recomputeGatewayStacks()
     }
 }
 
-bool ServersController::GatewayStacks::operator==(const GatewayStacks &other) const
+bool ServersController::GatewayStacksData::operator==(const GatewayStacksData &other) const
 {
     return userCountryCodes == other.userCountryCodes && serviceTypes == other.serviceTypes;
 }
 
-QJsonObject ServersController::GatewayStacks::toJson() const
+QJsonObject ServersController::GatewayStacksData::toJson() const
 {
     QJsonObject json;
     
