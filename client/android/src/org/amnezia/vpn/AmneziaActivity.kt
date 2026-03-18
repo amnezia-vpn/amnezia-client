@@ -92,7 +92,7 @@ class AmneziaActivity : QtActivity() {
 
     private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
     private val permissionRequestHandlers = mutableMapOf<Int, PermissionRequestHandler>()
-    
+
     private var isActivityResumed = false
     private var hasWindowFocus = false
     private val resumeHandler = Handler(Looper.getMainLooper())
@@ -295,7 +295,7 @@ class AmneziaActivity : QtActivity() {
         super.onWindowFocusChanged(hasFocus)
         hasWindowFocus = hasFocus
         Log.d(TAG, "Window focus changed: hasFocus=$hasFocus")
-        
+
         // Cancel pending operations if window loses focus
         if (!hasFocus) {
             resumeHandler.removeCallbacksAndMessages(null)
@@ -303,68 +303,31 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val deviceId = event.deviceId
         val keyCode = event.keyCode
         val pressed = event.action == KeyEvent.ACTION_DOWN
-        val source = event.source
 
-        if (deviceId < 0 && pressed) {
-            when (keyCode) {
-                KeyEvent.KEYCODE_BUTTON_A,
-                KeyEvent.KEYCODE_BUTTON_B,
-                KeyEvent.KEYCODE_BUTTON_X,
-                KeyEvent.KEYCODE_BUTTON_Y,
-                KeyEvent.KEYCODE_BUTTON_START,
-                KeyEvent.KEYCODE_BUTTON_SELECT -> {
-                    nativeGamepadKeyEvent(0, keyCode, true)
-                    nativeGamepadKeyEvent(0, keyCode, false)
+        when (keyCode) {
+            KeyEvent.KEYCODE_BUTTON_A,
+            KeyEvent.KEYCODE_BUTTON_B,
+            KeyEvent.KEYCODE_BUTTON_X,
+            KeyEvent.KEYCODE_BUTTON_Y,
+            KeyEvent.KEYCODE_BUTTON_START,
+            KeyEvent.KEYCODE_BUTTON_SELECT -> {
+                    nativeGamepadKeyEvent(0, keyCode, pressed)
                     return true
-                }
-                KeyEvent.KEYCODE_DPAD_CENTER -> {
-                    if (isOnTv()) {
-                        val down = KeyEvent(
-                            event.downTime,
-                            event.eventTime,
-                            KeyEvent.ACTION_DOWN,
-                            KeyEvent.KEYCODE_ENTER,
-                            0,
-                            event.metaState,
-                            0,
-                            event.scanCode,
-                            event.flags,
-                            event.source
-                        )
-                        val up = KeyEvent(
-                            event.downTime,
-                            event.eventTime,
-                            KeyEvent.ACTION_UP,
-                            KeyEvent.KEYCODE_ENTER,
-                            0,
-                            event.metaState,
-                            0,
-                            event.scanCode,
-                            event.flags,
-                            event.source
-                        )
-                        super.dispatchKeyEvent(down)
-                        super.dispatchKeyEvent(up)
-                        return true
-                    }
-                    nativeGamepadKeyEvent(0, keyCode, true)
-                    nativeGamepadKeyEvent(0, keyCode, false)
-                    return true
-                }
             }
-        }
-
-        // Real gamepad events (deviceId >= 0)
-        if (deviceId >= 0) {
-            val isGamepad = (source and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
-            val isJoystick = (source and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
-            val isDpad = (source and InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
-            if (isGamepad || isJoystick || isDpad) {
-                nativeGamepadKeyEvent(deviceId, keyCode, pressed)
-                return true
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_DPAD_UP,
+            KeyEvent.KEYCODE_DPAD_DOWN,
+            KeyEvent.KEYCODE_DPAD_LEFT,
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    val syntheticKeyCode = if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) KeyEvent.KEYCODE_ENTER else keyCode
+                    val synthetic = KeyEvent(
+                        event.downTime, event.eventTime, event.action, syntheticKeyCode,
+                        event.repeatCount, event.metaState, -1, event.scanCode,
+                        event.flags, InputDevice.SOURCE_KEYBOARD
+                    )
+                    return super.dispatchKeyEvent(synthetic)
             }
         }
 
@@ -412,13 +375,13 @@ class AmneziaActivity : QtActivity() {
                         sendTouch(1f, 1f)
                     }
                 }, 100)
-                
+
                 resumeHandler.postDelayed({
                     if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
                         sendTouch(2f, 2f)
                     }
                 }, 200)
-                
+
                 resumeHandler.postDelayed({
                     if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
                         requestLayout()
@@ -464,25 +427,25 @@ class AmneziaActivity : QtActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
             val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
             val imeVisible = windowInsets.isVisible(WindowInsetsCompat.Type.ime())
-            
+
             val imeHeight = if (imeVisible) imeInsets.bottom else 0
 
             val density = resources.displayMetrics.density
             val imeHeightDp = (imeHeight / density).toInt()
-            
+
             // Also track system bars (navigation bar, status bar) changes
             val systemBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             val navBarHeight = systemBarsInsets.bottom
             val navBarHeightDp = (navBarHeight / density).toInt()
             val statusBarHeight = systemBarsInsets.top
             val statusBarHeightDp = (statusBarHeight / density).toInt()
-            
+
             mainScope.launch {
                 qtInitialized.await()
                 QtAndroidController.onImeInsetsChanged(imeHeightDp)
                 QtAndroidController.onSystemBarsInsetsChanged(navBarHeightDp, statusBarHeightDp)
             }
-            
+
             // Return windowInsets instead of CONSUMED to allow proper handling
             windowInsets
         }

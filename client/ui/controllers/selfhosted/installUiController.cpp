@@ -6,7 +6,6 @@
 #include <QJsonObject>
 #include <QRandomGenerator>
 #include <QStandardPaths>
-#include <QtConcurrent>
 
 #include "core/utils/api/apiUtils.h"
 #include "core/controllers/selfhosted/installController.h"
@@ -88,6 +87,14 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_sftpConfigModel(sftpConfigModel),
       m_socks5ConfigModel(socks5ConfigModel)
 {
+    connect(m_installController, &InstallController::configValidated, this, &InstallUiController::configValidated);
+    connect(m_installController, &InstallController::validationErrorOccurred, this, [this](ErrorCode errorCode) {
+        if (errorCode == ErrorCode::NoInstalledContainersError) {
+            emit noInstalledContainers();
+        } else {
+            emit installationErrorOccurred(errorCode);
+        }
+    });
 }
 
 InstallUiController::~InstallUiController()
@@ -403,44 +410,10 @@ void InstallUiController::addEmptyServer()
     emit installServerFinished(tr("Server added successfully"));
 }
 
-bool InstallUiController::isConfigValid()
+void InstallUiController::validateConfig()
 {
     int serverIndex = m_serversController->getDefaultServerIndex();
-    ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
-    QJsonObject serverConfigObject = serverConfig.toJson();
-
-    if (apiUtils::isServerFromApi(serverConfigObject)) {
-        return true;
-    }
-
-    if (!m_serversController->hasInstalledContainers(serverIndex)) {
-        emit noInstalledContainers();
-        return false;
-    }
-
-    QFutureWatcher<ErrorCode> watcher;
-    QFuture<ErrorCode> future = QtConcurrent::run([this, serverIndex]() {
-        return m_installController->validateAndPrepareConfig(serverIndex);
-    });
-
-    QEventLoop wait;
-    connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
-    watcher.setFuture(future);
-    wait.exec();
-
-    ErrorCode errorCode = watcher.result();
-
-    if (errorCode == ErrorCode::NoInstalledContainersError) {
-        emit installationErrorOccurred(errorCode);
-        return false;
-    }
-
-    if (errorCode != ErrorCode::NoError) {
-        emit installationErrorOccurred(errorCode);
-        return false;
-    }
-
-    return true;
+    m_installController->validateConfig(serverIndex);
 }
 
 void InstallUiController::updateProtocols(int serverIndex, int containerIndex)

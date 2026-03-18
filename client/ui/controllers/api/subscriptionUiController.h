@@ -47,7 +47,7 @@ public slots:
     bool deactivateDevice(int serverIndex, const bool isRemoveEvent);
     bool deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode);
 
-    bool isConfigValid();
+    void validateConfig();
 
     void setCurrentProtocol(int serverIndex, const QString &protocolName);
     bool isVlessProtocol(int serverIndex);
@@ -59,6 +59,7 @@ public slots:
     void updateApiDevicesModel();
 
 signals:
+    void configValidated(bool isValid);
     void errorOccurred(ErrorCode errorCode);
 
     void installServerFromApiFinished(const QString &message);

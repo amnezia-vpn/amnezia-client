@@ -77,7 +77,7 @@ public slots:
 
     void addEmptyServer();
 
-    bool isConfigValid();
+    void validateConfig();
     
     Q_INVOKABLE void updateProtocols(int serverIndex, int containerIndex);
     
@@ -120,6 +120,7 @@ signals:
     void apiConfigRemoved(const QString &message);
 
     void noInstalledContainers();
+    void configValidated(bool isValid);
 
 private:
 

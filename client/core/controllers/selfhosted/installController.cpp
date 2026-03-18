@@ -215,6 +215,28 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
     return ErrorCode::NoError;
 }
 
+void InstallController::validateConfig(int serverIndex)
+{
+    QFuture<ErrorCode> future = QtConcurrent::run([this, serverIndex]() {
+        return validateAndPrepareConfig(serverIndex);
+    });
+
+    auto *watcher = new QFutureWatcher<ErrorCode>(this);
+    connect(watcher, &QFutureWatcher<ErrorCode>::finished, this, [this, watcher]() {
+        ErrorCode errorCode = watcher->result();
+        watcher->deleteLater();
+
+        if (errorCode == ErrorCode::NoError) {
+            emit configValidated(true);
+            return;
+        }
+
+        emit validationErrorOccurred(errorCode);
+        emit configValidated(false);
+    });
+    watcher->setFuture(future);
+}
+
 ErrorCode InstallController::prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, ContainerConfig &containerConfig, SshSession &sshSession)
 {
     if (!ContainerUtils::isSupportedByCurrentPlatform(container)) {

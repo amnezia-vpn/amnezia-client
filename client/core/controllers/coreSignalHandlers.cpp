@@ -296,12 +296,20 @@ void CoreSignalHandlers::initPrepareConfigHandler()
     connect(m_coreController->m_connectionUiController, &ConnectionUiController::prepareConfig, this, [this]() {
         m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Preparing);
 
-        if (!m_coreController->m_subscriptionUiController->isConfigValid()) {
+        m_coreController->m_subscriptionUiController->validateConfig();
+    });
+
+    connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::configValidated, this, [this](bool isValid) {
+        if (!isValid) {
             m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
             return;
         }
 
-        if (!m_coreController->m_installUiController->isConfigValid()) {
+        m_coreController->m_installUiController->validateConfig();
+    });
+
+    connect(m_coreController->m_installUiController, &InstallUiController::configValidated, this, [this](bool isValid) {
+        if (!isValid) {
             m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
             return;
         }

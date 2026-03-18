@@ -66,7 +66,12 @@ public:
 
     ErrorCode validateAndPrepareConfig(int serverIndex);
 
+    void validateConfig(int serverIndex);
+
 signals:
+    void configValidated(bool isValid);
+    void validationErrorOccurred(ErrorCode errorCode);
+
     void serverIsBusy(const bool isBusy);
     void cancelInstallationRequested();
     void clientRevocationRequested(int serverIndex, const ContainerConfig &containerConfig, DockerContainer container);

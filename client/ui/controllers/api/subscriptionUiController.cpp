@@ -344,18 +344,19 @@ bool SubscriptionUiController::deactivateExternalDevice(int serverIndex, const Q
     return true;
 }
 
-bool SubscriptionUiController::isConfigValid()
+void SubscriptionUiController::validateConfig()
 {
     int serverIndex = m_serversController->getDefaultServerIndex();
     bool hasInstalledContainers = m_serversController->hasInstalledContainers(serverIndex);
-    
+
     ErrorCode errorCode = m_subscriptionController->validateAndUpdateConfig(serverIndex, hasInstalledContainers);
-    
+
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
-        return false;
+        emit configValidated(false);
+        return;
     }
-    return true;
+    emit configValidated(true);
 }
 
 void SubscriptionUiController::setCurrentProtocol(int serverIndex, const QString &protocolName)

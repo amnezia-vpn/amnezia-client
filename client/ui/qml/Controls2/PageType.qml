@@ -8,9 +8,10 @@ Item {
     id: root
 
     property StackView stackView: StackView.view
+    property bool enableTimer: true
 
     onVisibleChanged: {
-        if (visible) {
+        if (visible && enableTimer) {
             timer.start()
         }
     }
@@ -24,6 +25,6 @@ Item {
             FocusController.setFocusOnDefaultItem()
         }
         repeat: false // Stop the timer after one trigger
-        running: true // Start the timer
+        running: enableTimer // Start the timer
     }
 }
