@@ -30,6 +30,8 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
     if (!m_server->listen(amnezia::getIpcServiceUrl())) {
         qDebug() << QString("Unable to start the server: %1.").arg(m_server->errorString());
+        QCoreApplication::exit(1);
+        ::exit(1);
         return;
     }
 
