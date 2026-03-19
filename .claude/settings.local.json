@@ -49,7 +49,18 @@
       "Bash(grep -rn \"SecureQSettings\\\\|QSettings\\\\|AmneziaVPN\" c:/Users/PC/Documents/Dr.Frake-VPN/client/ --include=*.cpp -l)",
       "Bash(grep -rn \"ORGANIZATION_NAME\\\\|APPLICATION_NAME\\\\|setOrganizationName\\\\|setApplicationName\" c:/Users/PC/Documents/Dr.Frake-VPN/client/ c:/Users/PC/Documents/Dr.Frake-VPN/service/ --include=*.cpp --include=*.h)",
       "Bash(find c:/Users/PC/Documents/Dr.Frake-VPN -name exportOptions* -o -name ExportOptions*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(find C:/build/fblink-android/client/android-build-AmneziaVPN -name *.apk)",
+      "Bash(python3 -c \":*)",
+      "Read(//c/tmp/**)",
+      "Bash(cp \"C:/build/fblink-android/client/android-build-AmneziaVPN/build/outputs/apk/debug/AmneziaVPN-x86_64-debug.apk\" ./test.apk)",
+      "Bash(unzip -l test.apk)",
+      "Bash(unzip -p test.apk classes.dex)",
+      "Bash(unzip -p test.apk AndroidManifest.xml)",
+      "Bash(C:/Users/PC/AppData/Local/Android/Sdk/build-tools/36.0.0/aapt.exe dump:*)",
+      "Bash(\"C:/Users/PC/AppData/Local/Android/Sdk/platform-tools/adb.exe\" shell:*)",
+      "Bash(\"C:/Users/PC/AppData/Local/Android/Sdk/platform-tools/adb.exe\" install:*)",
+      "Bash(grep -v \"//.*Disconnecting\")"
     ]
   }
 }

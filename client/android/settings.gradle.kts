@@ -53,9 +53,10 @@ configure<SettingsExtension> {
     ndkVersion = androidNdkVersion
 }
 
-// stop Gradle running by androiddeployqt
+// stop Gradle running by androiddeployqt (only in CI — local Qt Creator builds run normally)
 gradle.taskGraph.whenReady {
     if (providers.environmentVariable("ANDROIDDEPLOYQT_RUN").isPresent
+        && providers.environmentVariable("CI").isPresent
         && !providers.systemProperty("explicitRun").isPresent) {
         allTasks.forEach { it.enabled = false }
     }
