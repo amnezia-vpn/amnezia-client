@@ -54,14 +54,14 @@ void NotificationHandler::setConnectionState(Vpn::ConnectionState state)
     case Vpn::ConnectionState::Connected:
         m_connected = true;
 
-        title = tr("AmneziaVPN");
+        title = tr("FBLink VPN");
         message = tr("VPN Connected");
         break;
 
     case Vpn::ConnectionState::Disconnected:
         if (m_connected) {
             m_connected = false;
-            title = tr("AmneziaVPN");
+            title = tr("FBLink VPN");
             message = tr("VPN Disconnected");
         }
         break;

@@ -66,11 +66,14 @@ ListViewType {
                 anchors.margins: 16
                 spacing: 16
 
-                // Location Icon
+                // Flag or location icon
                 Image {
                     Layout.alignment: Qt.AlignVCenter
-                    source: "qrc:/images/controls/map-pin.svg"
-                    sourceSize: Qt.size(24, 24)
+                    source: apiServerCountryCode !== ""
+                            ? "qrc:/countriesFlags/images/flagKit/" + apiServerCountryCode + ".svg"
+                            : "qrc:/images/controls/map-pin.svg"
+                    sourceSize: apiServerCountryCode !== "" ? Qt.size(32, 22) : Qt.size(24, 24)
+                    fillMode: Image.PreserveAspectFit
                 }
 
                 ColumnLayout {

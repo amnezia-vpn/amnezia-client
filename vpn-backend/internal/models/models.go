@@ -56,8 +56,9 @@ type VPNServer struct {
 	Host      string `gorm:"not null"`
 	PublicKey string `gorm:"not null"`
 	MaxPeers  int    `gorm:"default:100"`
-	Region    string
-	Active    bool `gorm:"default:true"`
+	Region      string
+	CountryCode string `gorm:"default:''"` // ISO 3166-1 alpha-2, e.g. "RU", "US", "DE"
+	Active      bool   `gorm:"default:true"`
 
 	// AmneziaWG 2 параметры (обфускация)
 	AWGPort  int    `gorm:"default:51820"`

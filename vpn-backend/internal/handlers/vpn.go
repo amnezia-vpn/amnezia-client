@@ -65,8 +65,17 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 
 		// Если для этого сервера уже есть ключ, используем его
 		if existingKey, ok := keyMap[server.ID]; ok {
+			// Инжектируем актуальный country_code в уже сохранённый конфиг
+			configText := existingKey.ConfigText
+			configMap := map[string]interface{}{}
+			if err := json.Unmarshal([]byte(configText), &configMap); err == nil {
+				configMap["country_code"] = existingKey.Server.CountryCode
+				if modified, err := json.Marshal(configMap); err == nil {
+					configText = string(modified)
+				}
+			}
 			responseConfigs = append(responseConfigs, map[string]interface{}{
-				"config":    existingKey.ConfigText,
+				"config":    configText,
 				"server":    existingKey.Server.Name,
 				"region":    existingKey.Server.Region,
 				"issued_at": existingKey.IssuedAt,
@@ -247,6 +256,7 @@ PersistentKeepalive = 25
 		"containers":       []interface{}{container},
 		"defaultContainer": "amnezia-awg",
 		"description":      "FBLink VPN - " + server.Region,
+		"country_code":     server.CountryCode,
 		"dns1":             "1.1.1.1",
 		"dns2":             "8.8.8.8",
 		"hostName":         server.Host,

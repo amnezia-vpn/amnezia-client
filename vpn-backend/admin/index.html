@@ -715,6 +715,10 @@
           <input type="text" id="addServerRegion" placeholder="Германия">
         </div>
         <div class="field">
+          <label>🏳️ Код страны (ISO, напр. DE, RU, US)</label>
+          <input type="text" id="addServerCountryCode" placeholder="DE" maxlength="2" style="text-transform:uppercase;">
+        </div>
+        <div class="field">
           <label>Host IP (для SSH)</label>
           <input type="text" id="addServerHost" placeholder="192.168.1.1">
         </div>
@@ -739,6 +743,46 @@
       </div>
     </div>
   </div>
+  </div>
+
+  <div id="editServerModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card glass fade-in" style="max-width:520px;">
+      <h3>✏️ Редактировать сервер</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field">
+          <label>Название сервера</label>
+          <input type="text" id="editServerName" placeholder="EU-Frankfurt-1">
+        </div>
+        <div class="field">
+          <label>🌍 Регион</label>
+          <input type="text" id="editServerRegion" placeholder="Германия">
+        </div>
+        <div class="field">
+          <label>🏳️ Код страны (ISO, напр. DE)</label>
+          <input type="text" id="editServerCountryCode" placeholder="DE" maxlength="2" style="text-transform:uppercase;">
+        </div>
+        <div class="field">
+          <label>Endpoint (IP:порт для клиентов)</label>
+          <input type="text" id="editServerEndpoint" placeholder="1.2.3.4:51820">
+        </div>
+        <div class="field">
+          <label>Макс. пиров</label>
+          <input type="number" id="editServerMaxPeers" placeholder="100">
+        </div>
+        <div class="field">
+          <label>AWG Порт</label>
+          <input type="number" id="editServerAwgPort" placeholder="51820">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label>SSH Пароль (оставьте пустым чтобы не менять)</label>
+          <input type="password" id="editServerPassword" placeholder="••••••••">
+        </div>
+      </div>
+      <div style="display: flex; gap: 12px; margin-top: 16px;">
+        <button class="btn btn-primary btn-full" onclick="saveServer()">Сохранить</button>
+        <button class="btn btn-danger btn-full" onclick="closeEditServerModal()">Отмена</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -842,6 +886,8 @@
     </tr>`).join('');
     }
 
+    let _serversCache = {};
+
     async function loadServers() {
       const tbody = document.getElementById('servers-tbody');
       tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Загрузка...</td></tr>';
@@ -849,17 +895,20 @@
       if (!res.ok) return;
       const d = await res.json();
       if (!d.servers.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Серверов нет</td></tr>'; return; }
+      _serversCache = {};
+      d.servers.forEach(s => { _serversCache[s.id] = s; });
       tbody.innerHTML = d.servers.map(s => `
     <tr>
       <td>${s.id}</td>
       <td>${s.name}</td>
-      <td><span class="badge badge-info" style="font-size:14px;">${s.region || '—'}</span></td>
+      <td><span class="badge badge-info" style="font-size:14px;">${s.country_code ? `<img src="https://flagcdn.com/16x12/${s.country_code.toLowerCase()}.png" style="vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">` : ''}${s.region || '—'}</span></td>
       <td>${s.host}</td>
       <td>${s.endpoint || s.host}</td>
       <td>${s.active_keys || 0} / ${s.max_peers}</td>
       <td><span class="badge ${s.active ? 'badge-success' : 'badge-danger'}">${s.active ? 'Онлайн' : 'Офлайн'}</span></td>
       <td>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(0,200,255,0.15); border:1px solid #00c8ff; color:#00c8ff;" onclick="openEditServerModal(${s.id})">✏️ Изменить</button>
           <button class="btn ${s.active ? 'btn-danger' : 'btn-primary'}" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="toggleServer('${s.id}')">
             ${s.active ? 'Отключить' : 'Включить'}
           </button>
@@ -986,6 +1035,7 @@
       document.getElementById('addServerModal').style.display = 'none';
       document.getElementById('addServerName').value = '';
       document.getElementById('addServerRegion').value = '';
+      document.getElementById('addServerCountryCode').value = '';
       document.getElementById('addServerHost').value = '';
       document.getElementById('addServerEndpoint').value = '';
       document.getElementById('addServerPassword').value = '';
@@ -1009,7 +1059,8 @@
         return;
       }
 
-      const body = { name, host, region, root_password: rootPassword, awg_port: awgPort };
+      const countryCode = document.getElementById('addServerCountryCode').value.trim().toUpperCase();
+      const body = { name, host, region, country_code: countryCode, root_password: rootPassword, awg_port: awgPort };
       if (endpoint) body.endpoint = endpoint;
 
       const res = await api('/api/v1/admin/servers', {
@@ -1023,6 +1074,51 @@
       } else {
         const d = await res.json();
         alert('Ошибка добавления сервера: ' + (d.error || 'Unknown error'));
+      }
+    }
+
+    let editingServerId = null;
+
+    function openEditServerModal(id) {
+      const s = _serversCache[id];
+      if (!s) return;
+      editingServerId = id;
+      document.getElementById('editServerName').value = s.name || '';
+      document.getElementById('editServerRegion').value = s.region || '';
+      document.getElementById('editServerCountryCode').value = s.country_code || '';
+      document.getElementById('editServerEndpoint').value = s.endpoint || '';
+      document.getElementById('editServerMaxPeers').value = s.max_peers || 100;
+      document.getElementById('editServerAwgPort').value = s.awg_port || 51820;
+      document.getElementById('editServerPassword').value = '';
+      document.getElementById('editServerModal').style.display = 'flex';
+    }
+
+    function closeEditServerModal() {
+      editingServerId = null;
+      document.getElementById('editServerModal').style.display = 'none';
+    }
+
+    async function saveServer() {
+      if (!editingServerId) return;
+      const body = {
+        name: document.getElementById('editServerName').value.trim(),
+        region: document.getElementById('editServerRegion').value.trim(),
+        country_code: document.getElementById('editServerCountryCode').value.trim().toUpperCase(),
+        endpoint: document.getElementById('editServerEndpoint').value.trim(),
+        max_peers: parseInt(document.getElementById('editServerMaxPeers').value) || 0,
+        awg_port: parseInt(document.getElementById('editServerAwgPort').value) || 0,
+        ssh_password: document.getElementById('editServerPassword').value,
+      };
+      const res = await api('/api/v1/admin/servers/' + editingServerId, {
+        method: 'PUT',
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        closeEditServerModal();
+        loadServers();
+      } else {
+        const d = await res.json();
+        alert('Ошибка: ' + (d.error || 'Unknown error'));
       }
     }
   </script>

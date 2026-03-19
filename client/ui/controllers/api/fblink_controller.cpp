@@ -272,6 +272,9 @@ void FBLinkController::fetchConfig()
                             if (description.isEmpty())
                                 description = makeDescription(newHostName);
 
+                            // Код страны для отображения флага
+                            QString countryCode = newConfig.value("country_code").toString().toUpper();
+
                             bool found = false;
                             for (int i : existingFBLinkServerIndices) {
                                 if (updatedIndices.contains(i)) continue;
@@ -280,6 +283,8 @@ void FBLinkController::fetchConfig()
                                 if (existingServer.value("hostName").toString() == newHostName) {
                                     newConfig["description"] = description;
                                     newConfig["fblink_server"] = true;
+                                    if (!countryCode.isEmpty())
+                                        newConfig["server_country_code"] = countryCode;
                                     m_serversModel->editServer(newConfig, i);
                                     updatedIndices.append(i);
                                     found = true;
@@ -296,6 +301,8 @@ void FBLinkController::fetchConfig()
                                     QJsonObject added = m_settings->serversArray().at(newIdx).toObject();
                                     added["description"] = description;
                                     added["fblink_server"] = true;
+                                    if (!countryCode.isEmpty())
+                                        added["server_country_code"] = countryCode;
                                     m_serversModel->editServer(added, newIdx);
                                 }
                             } else {

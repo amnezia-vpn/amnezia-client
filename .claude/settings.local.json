@@ -60,7 +60,8 @@
       "Bash(C:/Users/PC/AppData/Local/Android/Sdk/build-tools/36.0.0/aapt.exe dump:*)",
       "Bash(\"C:/Users/PC/AppData/Local/Android/Sdk/platform-tools/adb.exe\" shell:*)",
       "Bash(\"C:/Users/PC/AppData/Local/Android/Sdk/platform-tools/adb.exe\" install:*)",
-      "Bash(grep -v \"//.*Disconnecting\")"
+      "Bash(grep -v \"//.*Disconnecting\")",
+      "Bash(grep -v \"//\")"
     ]
   }
 }

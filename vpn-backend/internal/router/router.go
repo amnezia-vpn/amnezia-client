@@ -134,6 +134,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			adminGrp.DELETE("/users/:id", adminH.DeleteUser)
 			adminGrp.GET("/servers", adminH.GetServers)
 			adminGrp.POST("/servers", adminH.AddServer)
+			adminGrp.PUT("/servers/:id", adminH.UpdateServer)
 			adminGrp.POST("/servers/:id/toggle", adminH.ToggleServer)
 			adminGrp.DELETE("/servers/:id", adminH.DeleteServer)
 			adminGrp.GET("/payments", adminH.GetPayments)

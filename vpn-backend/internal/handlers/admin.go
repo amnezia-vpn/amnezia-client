@@ -71,14 +71,16 @@ func (h *AdminHandler) GetServers(c *gin.Context) {
 		var peersCount int64
 		h.db.Model(&models.VPNKey{}).Where("server_id = ? AND revoked_at IS NULL", s.ID).Count(&peersCount)
 		result = append(result, gin.H{
-			"id":          s.ID,
-			"name":        s.Name,
-			"host":        s.Host,
-			"endpoint":    s.Endpoint,
-			"region":      s.Region,
-			"active":      s.Active,
-			"max_peers":   s.MaxPeers,
-			"active_keys": peersCount,
+			"id":           s.ID,
+			"name":         s.Name,
+			"host":         s.Host,
+			"endpoint":     s.Endpoint,
+			"region":       s.Region,
+			"country_code": s.CountryCode,
+			"active":       s.Active,
+			"max_peers":    s.MaxPeers,
+			"active_keys":  peersCount,
+			"awg_port":     s.AWGPort,
 		})
 	}
 
@@ -86,12 +88,13 @@ func (h *AdminHandler) GetServers(c *gin.Context) {
 }
 
 type addServerRequest struct {
-	Name      string `json:"name" binding:"required"`
-	Host      string `json:"host" binding:"required"`
-	Endpoint  string `json:"endpoint"` // IP:port для клиентов
-	PublicKey string `json:"public_key"`
-	Region    string `json:"region"`
-	MaxPeers  int    `json:"max_peers"`
+	Name        string `json:"name" binding:"required"`
+	Host        string `json:"host" binding:"required"`
+	Endpoint    string `json:"endpoint"` // IP:port для клиентов
+	PublicKey   string `json:"public_key"`
+	Region      string `json:"region"`
+	CountryCode string `json:"country_code"` // ISO 3166-1 alpha-2, e.g. "RU"
+	MaxPeers    int    `json:"max_peers"`
 	AWGPort   int    `json:"awg_port"`
 	MTU       string `json:"mtu"`
 	// SSH доступ для управления peers
@@ -192,6 +195,7 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 		Endpoint:     req.Endpoint,
 		PublicKey:    req.PublicKey,
 		Region:       req.Region,
+		CountryCode:  req.CountryCode,
 		MaxPeers:     maxPeers,
 		Active:       true,
 		AWGPort:      awgPort,
@@ -240,6 +244,58 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, server)
+}
+
+// PUT /api/v1/admin/servers/:id
+func (h *AdminHandler) UpdateServer(c *gin.Context) {
+	id := c.Param("id")
+	var s models.VPNServer
+	if err := h.db.First(&s, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "server not found"})
+		return
+	}
+
+	var req struct {
+		Name        string `json:"name"`
+		Region      string `json:"region"`
+		CountryCode string `json:"country_code"`
+		Endpoint    string `json:"endpoint"`
+		MaxPeers    int    `json:"max_peers"`
+		SSHPassword string `json:"ssh_password"`
+		AWGPort     int    `json:"awg_port"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updates := map[string]interface{}{}
+	if req.Name != "" {
+		updates["name"] = req.Name
+	}
+	if req.Region != "" {
+		updates["region"] = req.Region
+	}
+	updates["country_code"] = req.CountryCode // разрешаем очищать
+	if req.Endpoint != "" {
+		updates["endpoint"] = req.Endpoint
+	}
+	if req.MaxPeers > 0 {
+		updates["max_peers"] = req.MaxPeers
+	}
+	if req.SSHPassword != "" {
+		updates["ssh_password"] = req.SSHPassword
+	}
+	if req.AWGPort > 0 {
+		updates["awg_port"] = req.AWGPort
+	}
+
+	if err := h.db.Model(&s).Updates(updates).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update server"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "server updated"})
 }
 
 // DELETE /api/v1/admin/servers/:id
