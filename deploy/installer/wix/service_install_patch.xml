@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CPackWiXPatch>
-    <CPackWiXFragment Id="CM_CP_AmneziaVPN_service.exe">
+    <CPackWiXFragment Id="CM_CP_FBLinkVPN_service.exe">
         <ServiceInstall
                 Id="FBLinkServiceInstall"
-                Name="AmneziaVPN-service"
+                Name="FBLinkVPN-service"
                 DisplayName="FBLink VPN Service"
                 Description="Service for FBLink VPN"
                 Start="auto"
@@ -15,7 +15,7 @@
         </ServiceInstall>
         <ServiceControl
                 Id="FBLinkServiceControl"
-                Name="AmneziaVPN-service"
+                Name="FBLinkVPN-service"
                 Start="install"
                 Stop="both"
                 Remove="uninstall"

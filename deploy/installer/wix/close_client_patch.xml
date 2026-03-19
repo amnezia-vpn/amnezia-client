@@ -4,7 +4,7 @@
         <!-- Требует расширение WixToolset.Util.wixext и xmlns util -->
         <util:CloseApplication
                 Id="CloseFBLinkClient"
-                Target="AmneziaVPN.exe"
+                Target="FBLinkVPN.exe"
                 Description="Closing FBLink VPN client"
                 TerminateProcess="1"
                 RebootPrompt="no" />
