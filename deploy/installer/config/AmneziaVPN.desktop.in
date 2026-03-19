@@ -1,9 +1,9 @@
 #!/usr/bin/env xdg-open
 [Desktop Entry]
 Type=Application
-Name=AmneziaVPN
+Name=FBLink VPN
 Version=1.0
-Comment=Client of your self-hosted VPN
+Comment=FBLink VPN Client
 Exec=AmneziaVPN
 Icon=/usr/share/pixmaps/AmneziaVPN.png
 Categories=Network;Qt;Security;

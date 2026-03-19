@@ -83,6 +83,12 @@ fi
 $CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/client/AmneziaVPN -qmake $QT_BIN_DIR/qmake -qmlDir $PROJECT_DIR/client/ui/qml/ -targetDir $APP_DIR/client/
 $CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/service/server/AmneziaVPN-service -qmake $QT_BIN_DIR/qmake -targetDir $APP_DIR/service/
 
+# Rename launcher to FBLink branding
+if [ -f $APP_DIR/client/AmneziaVPN.sh ]; then
+  sed -i 's|CQT_RUN_FILE=.*|CQT_RUN_FILE="$BASE_DIR/FBLinkVPN.sh"|' $APP_DIR/client/AmneziaVPN.sh
+  mv $APP_DIR/client/AmneziaVPN.sh $APP_DIR/client/FBLinkVPN.sh
+fi
+
 rm -f $INSTALLER_DATA_DIR/data.7z
 
 7z a $INSTALLER_DATA_DIR/data.7z $APP_DIR/*
@@ -91,4 +97,4 @@ ldd $CQTDEPLOYER_DIR/bin/binarycreator
 
 cp -r $PROJECT_DIR/deploy/installer $BUILD_DIR
 
-$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer.bin
+$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/FBLinkVPN_Linux_Installer.bin

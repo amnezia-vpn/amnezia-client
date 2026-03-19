@@ -18,10 +18,11 @@ Button {
 
     property bool isFocusable: true
 
-    // ── Subscription gate ────────────────────────────────────────
-    // Block connect when user is logged in as FBLink but has no active subscription
+    // ── Auth / subscription gate ─────────────────────────────────
+    // Block connect when not logged in, or logged in without active subscription
+    readonly property bool isNotLoggedIn: !FBLinkController.isLoggedIn
     readonly property bool isSubscriptionRequired:
-        FBLinkController.isLoggedIn && !FBLinkController.isSubscribed
+        !FBLinkController.isLoggedIn || !FBLinkController.isSubscribed
 
     readonly property string lockedButtonColor: "#6B7280"
 
@@ -53,9 +54,9 @@ Button {
     implicitHeight: 190
     padding: 0
 
-    text: root.isSubscriptionRequired
-        ? qsTr("Premium")
-        : ConnectionController.connectionStateText
+    text: root.isNotLoggedIn
+        ? qsTr("Войти")
+        : (root.isSubscriptionRequired ? qsTr("Premium") : ConnectionController.connectionStateText)
 
     Connections {
         target: ConnectionController
@@ -257,7 +258,7 @@ Button {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: root.isSubscriptionRequired
-                text: qsTr("Нужна подписка")
+                text: root.isNotLoggedIn ? qsTr("Требуется вход") : qsTr("Нужна подписка")
                 font.family: "PT Root UI VF"
                 font.pixelSize: 11
                 color: Qt.rgba(107/255, 114/255, 128/255, 0.8)
@@ -267,6 +268,12 @@ Button {
     }
 
     function handleConnectClick() {
+        if (root.isNotLoggedIn) {
+            errorShakeAnim.restart()
+            PageController.showNotificationMessage(qsTr("Войдите в аккаунт для подключения"))
+            PageController.goToPage(PageEnum.PageFBLinkLogin)
+            return
+        }
         if (root.isSubscriptionRequired) {
             errorShakeAnim.restart()
             PageController.showNotificationMessage(
