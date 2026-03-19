@@ -816,7 +816,7 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun getFd(fileName: String): Int {
         Log.v(TAG, "Get fd for $fileName")
-        return blockingCall {
+        return blockingCall(Dispatchers.IO) {
             try {
                 pfd = contentResolver.openFileDescriptor(Uri.parse(fileName), "r")
                 pfd?.fd ?: -1
