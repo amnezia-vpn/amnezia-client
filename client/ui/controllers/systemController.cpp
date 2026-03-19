@@ -23,9 +23,6 @@ namespace
     constexpr int TAG_LEN = 16;
     constexpr int PBKDF2_ITER = 100000;
 
-    constexpr int IV_LEN_GCM = 16;
-    constexpr int TAG_LEN = 16;
-
     const QByteArray magicString { "EncData" };
 }
 
