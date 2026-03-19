@@ -125,7 +125,6 @@ extension PacketTunnelProvider {
             ovpnLog(.info, message: "Implement login with user credentials")
         }
 
-        #if os(iOS)
         vpnReachability.startTracking { [weak self] status in
             switch status {
             case .reachableViaWiFi, .reachableViaWWAN:
@@ -135,7 +134,6 @@ extension PacketTunnelProvider {
                 break
             }
         }
-        #endif
 
         startHandler = completionHandler
         ovpnAdapter?.connect(using: openVPNPacketFlow())
