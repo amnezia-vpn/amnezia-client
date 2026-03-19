@@ -151,7 +151,7 @@ PageType {
                                                                 qsTr("Backup files (*.backup)"))
                     if (filePath !== "") {
                         passwordDrawer.fileName = filePath
-                        SystemController.isFileEncrypted(filePath) ? passwordDrawer.openTriggered() : restoreBackup(filePath)
+                        SystemController.isFileEncrypted(filePath) ? passwordDrawer.restoreSecuredBackup() : restoreBackup(filePath)
                     }
                 }
             }
@@ -163,10 +163,6 @@ PageType {
 
                 anchors.fill: parent
                 expandedHeight: root.height * 0.45
-
-                securedFunc: function() {
-                    passwordDrawer.restoreSecuredBackup()
-                }
             }
         }
     }
