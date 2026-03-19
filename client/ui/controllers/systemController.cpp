@@ -17,12 +17,10 @@
 namespace
 {
     constexpr int SALT_LEN = 16;
-    constexpr int IV_LEN = 16;
+    constexpr int IV_LEN = 12;
     constexpr int KEY_LEN = 32;
-    constexpr int PBKDF2_ITER = 100000;
-
-    constexpr int IV_LEN_GCM = 16;
     constexpr int TAG_LEN = 16;
+    constexpr int PBKDF2_ITER = 100000;
 
     const QByteArray magicString { "EncData" };
 }
