@@ -12,8 +12,8 @@ public:
         return instance;
     }
 
-    void startXray(const QString& cfg);
-    void stopXray();
+    bool startXray(const QString& cfg);
+    bool stopXray();
 
 private:
     static void ctxSockCallback(uintptr_t fd, void* ctx) {

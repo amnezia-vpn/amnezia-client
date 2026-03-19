@@ -200,7 +200,7 @@ void LinuxNetworkWatcherWorker::checkDevices() {
 void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 {
   if (state == NM_STATE_ASLEEP) {
-    emit sleepMode();
+    emit wakeup();
   }
 
   logger.debug() << "NMStateChanged " << state;

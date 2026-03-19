@@ -141,10 +141,12 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
             serverProtocolConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
     m_serverProtocolConfig[config_key::responsePacketJunkSize] =
             serverProtocolConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
-    m_serverProtocolConfig[config_key::cookieReplyPacketJunkSize] =
-            serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize);
-    m_serverProtocolConfig[config_key::transportPacketJunkSize] =
-            serverProtocolConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize);
+    if (protocolVersion == protocols::awg::awgV2) {
+        m_serverProtocolConfig[config_key::cookieReplyPacketJunkSize] =
+                serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize);
+        m_serverProtocolConfig[config_key::transportPacketJunkSize] =
+                serverProtocolConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize);
+    }
     m_serverProtocolConfig[config_key::initPacketMagicHeader] =
             serverProtocolConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader);
     m_serverProtocolConfig[config_key::responsePacketMagicHeader] =

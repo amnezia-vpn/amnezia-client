@@ -304,7 +304,7 @@ bool IpcServer::refreshKillSwitch(bool enabled)
     return KillSwitch::instance()->refresh(enabled);
 }
 
-void IpcServer::xrayStart(const QString& cfg)
+bool IpcServer::xrayStart(const QString& cfg)
 {
 #ifdef MZ_DEBUG
     qDebug() << "IpcServer::xrayStart";
@@ -313,7 +313,7 @@ void IpcServer::xrayStart(const QString& cfg)
     return Xray::getInstance().startXray(cfg);
 }
 
-void IpcServer::xrayStop()
+bool IpcServer::xrayStop()
 {
 #ifdef MZ_DEBUG
     qDebug() << "IpcServer::xrayStop";

@@ -112,7 +112,11 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         if (price == "free") {
             return tr("Free");
         }
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+        return tr("%1 $").arg(price);
+#else
         return tr("%1 $/month").arg(price);
+#endif
     }
     case EndDateRole: {
         return QDateTime::fromString(apiServiceData.subscription.endDate, Qt::ISODate).toLocalTime().toString("d MMM yyyy");

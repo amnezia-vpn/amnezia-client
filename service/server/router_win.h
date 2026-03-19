@@ -45,6 +45,7 @@ public:
     bool StartRoutingIpv6();
     bool StopRoutingIpv6();
 
+    bool createTun(const QString &dev, const QString &subnet);
     void suspendWcmSvc(bool suspend);
     bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
     bool restoreResolvers();
