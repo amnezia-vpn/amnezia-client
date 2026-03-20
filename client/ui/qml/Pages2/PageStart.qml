@@ -278,7 +278,6 @@ PageType {
         }
 
         Keys.onPressed: function(event) {
-            console.debug(">>>> ", event.key, " Event is caught by StartPage")
             switch (event.key) {
             case Qt.Key_Tab:
             case Qt.Key_Down:
@@ -304,7 +303,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        
+
         // Also adjust TabBar position when keyboard appears (Android 14+ workaround)
         anchors.bottomMargin: SettingsController.imeHeight
 

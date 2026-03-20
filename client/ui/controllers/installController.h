@@ -50,9 +50,10 @@ public slots:
 
     void addEmptyServer();
 
-    bool isConfigValid();
+    void validateConfig();
 
 signals:
+    void configValidated(bool isValid);
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
     void installServerFinished(const QString &finishMessage);
 

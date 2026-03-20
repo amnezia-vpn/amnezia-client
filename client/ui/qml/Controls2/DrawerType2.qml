@@ -49,8 +49,27 @@ Item {
         return drawerContent.state === stateName
     }
 
+    function isDrawerType2(obj) {
+        return obj && typeof obj.drawerExpandedStateName !== "undefined" && 
+               typeof obj.drawerCollapsedStateName !== "undefined"
+    }
+
+    function isDescendantOfDrawer(obj) {
+        var current = obj
+        while (current && current !== root.parent) {
+            if (isDrawerType2(current)) {
+                return true
+            }
+            current = current.parent
+        }
+        return false
+    }
+
     function findComponent(obj, typeCtor) {
         if (!obj)
+            return null
+
+        if (isDrawerType2(obj) || isDescendantOfDrawer(obj))
             return null
 
         if (obj instanceof typeCtor)

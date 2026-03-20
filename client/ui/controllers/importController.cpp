@@ -291,6 +291,8 @@ void ImportController::processNativeWireGuardConfig()
         clientProtocolConfig[config_key::cookieReplyPacketJunkSize] = "0";
         clientProtocolConfig[config_key::transportPacketJunkSize] = "0";
 
+        clientProtocolConfig[config_key::specialJunk1] = protocols::awg::defaultSpecialJunk1;
+
         clientProtocolConfig[config_key::isObfuscationEnabled] = true;
 
         serverProtocolConfig[config_key::last_config] = QString(QJsonDocument(clientProtocolConfig).toJson());
