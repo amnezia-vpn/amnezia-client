@@ -96,29 +96,29 @@ public:
 
     bool isFileEncryption() const
     {
-        return value("Sec/fileEncryption", false).toBool();
+        return m_settings.value("Sec/fileEncryption", false).toBool();
     }
     void setFileEncryption(bool enabled)
     {
-        setValue("Sec/fileEncryption", enabled);
+        m_settings.setValue("Sec/fileEncryption", enabled);
     }
 
     QString getPassword() const
     {
-        return value("Sec/password", "").toString();
+        return m_settings.value("Sec/password", "").toString();
     }
     void setPassword(const QString &pwd)
     {
-        setValue("Sec/password", pwd);
+        m_settings.setValue("Sec/password", pwd);
     }
 
     QString getHint() const
     {
-        return value("Sec/hint", "").toString();
+        return m_settings.value("Sec/hint", "").toString();
     }
     void setHint(const QString &hint)
     {
-        setValue("Sec/hint", hint);
+        m_settings.setValue("Sec/hint", hint);
     }
     
     bool isNewsNotifications() const
