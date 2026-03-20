@@ -45,7 +45,7 @@ private:
     QStringList encryptedKeys; // encode only key listed here
     // only this fields need for backup
     QStringList m_fieldsToBackup = {
-        "Conf/", "Servers/",
+        "Conf/", "Servers/", "Sec/",
     };
 
     mutable QByteArray m_key;
