@@ -71,6 +71,7 @@ namespace amnezia
 
         // import and install errors
         ImportInvalidConfigError = 900,
+        ImportBackupFileUseRestoreInstead = 903,
         ImportOpenConfigError = 901,
         NoInstalledContainersError = 902,
 

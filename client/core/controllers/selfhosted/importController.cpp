@@ -223,14 +223,8 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
         return result;
     }
     case ConfigTypes::Backup: {
-        if (m_serversRepository->serversCount() == 0) {
-            emit restoreAppConfig(config.toUtf8());
-            result.errorCode = ErrorCode::NoError;
-            return result;
-        } else {
-            result.errorCode = ErrorCode::ImportInvalidConfigError;
-            return result;
-        }
+        result.errorCode = ErrorCode::ImportBackupFileUseRestoreInstead;
+        return result;
     }
     case ConfigTypes::Invalid: {
         result.errorCode = ErrorCode::ImportInvalidConfigError;
