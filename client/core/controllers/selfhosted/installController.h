@@ -93,6 +93,13 @@ private:
 
     ErrorCode prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, ContainerConfig &containerConfig, SshSession &sshSession);
 
+    ErrorCode processContainerForAdmin(DockerContainer container, ContainerConfig &containerConfig,
+                                       const ServerCredentials &credentials, SshSession &sshSession,
+                                       int serverIndex, const QString &clientName);
+
+    void adminAppendRequested(int serverIndex, DockerContainer container,
+                              const ContainerConfig &containerConfig, const QString &clientName);
+
     static void updateContainerConfigAfterInstallation(DockerContainer container, ContainerConfig &containerConfig, const QString &stdOut);
 
     QScopedPointer<InstallerBase> createInstaller(DockerContainer container);

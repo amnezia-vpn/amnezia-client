@@ -43,6 +43,7 @@
 #include <QProcess>
 #include <QStandardPaths>
 #include <QUrl>
+#include <QSysInfo>
 #ifdef Q_OS_WINDOWS
     #include <windows.h>
 #endif
@@ -198,18 +199,12 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
     };
 
     if (!isProtocolConfigExists(containerConfig, container)) {
-        ErrorCode errorCode = prepareContainerConfig(container, credentials, containerConfig, sshSession);
+        QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
+        ErrorCode errorCode = processContainerForAdmin(container, containerConfig, credentials, sshSession, serverIndex, clientName);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
-        
         m_serversRepository->setContainerConfig(serverIndex, container, containerConfig);
-        QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
-        
-        QString clientId = containerConfig.protocolConfig.clientId();
-        if (!clientId.isEmpty()) {
-            emit clientAppendRequested(serverIndex, clientId, clientName, container);
-        }
     }
 
     return ErrorCode::NoError;
@@ -261,6 +256,33 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
         containerConfig.protocolConfig = newProtocolConfig;
     }
 
+    return ErrorCode::NoError;
+}
+
+void InstallController::adminAppendRequested(int serverIndex, DockerContainer container,
+                                             const ContainerConfig &containerConfig, const QString &clientName)
+{
+    if (ContainerUtils::containerService(container) == ServiceType::Other
+        || !containerConfig.protocolConfig.hasClientConfig()) {
+        return;
+    }
+    QString clientId = containerConfig.protocolConfig.clientId();
+    if (!clientId.isEmpty()) {
+        emit clientAppendRequested(serverIndex, clientId, clientName, container);
+    }
+}
+
+ErrorCode InstallController::processContainerForAdmin(DockerContainer container, ContainerConfig &containerConfig,
+                                                      const ServerCredentials &credentials, SshSession &sshSession,
+                                                      int serverIndex, const QString &clientName)
+{
+    if (ContainerUtils::isSupportedByCurrentPlatform(container)) {
+        ErrorCode errorCode = prepareContainerConfig(container, credentials, containerConfig, sshSession);
+        if (errorCode != ErrorCode::NoError) {
+            return errorCode;
+        }
+    }
+    adminAppendRequested(serverIndex, container, containerConfig, clientName);
     return ErrorCode::NoError;
 }
 
@@ -806,17 +828,15 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
     QMap<DockerContainer, ContainerConfig> containers = serverConfigModel.containers();
     bool hasNewContainers = false;
 
+    QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
         if (!containers.contains(iterator.key())) {
             ContainerConfig containerConfig = iterator.value();
-
-            if (ContainerUtils::isSupportedByCurrentPlatform(iterator.key())) {
-                errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig, sshSession);
-                if (errorCode != ErrorCode::NoError) {
-                    return errorCode;
-                }
+            errorCode = processContainerForAdmin(iterator.key(), containerConfig, credentials, sshSession,
+                                                 serverIndex, clientName);
+            if (errorCode != ErrorCode::NoError) {
+                return errorCode;
             }
-            
             containers.insert(iterator.key(), containerConfig);
             hasNewContainers = true;
 
@@ -874,7 +894,6 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
                 return errorCode;
             }
         }
-
         preparedContainers.insert(container, containerConfig);
     }
 
@@ -892,6 +911,12 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
     serverConfig.defaultContainer = container;
 
     m_serversRepository->addServer(ServerConfig(serverConfig));
+
+    int serverIndex = m_serversRepository->serversCount() - 1;
+    QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
+    for (auto iterator = preparedContainers.begin(); iterator != preparedContainers.end(); iterator++) {
+        adminAppendRequested(serverIndex, iterator.key(), iterator.value(), clientName);
+    }
 
     return ErrorCode::NoError;
 }
@@ -920,20 +945,17 @@ ErrorCode InstallController::installContainer(int serverIndex, DockerContainer c
         wasContainerInstalled = true;
     }
 
+    QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
         ContainerConfig existingConfigModel = m_serversRepository->containerConfig(serverIndex, iterator.key());
         if (existingConfigModel.container == DockerContainer::None) {
             ContainerConfig containerConfig = iterator.value();
-            
-            if (ContainerUtils::isSupportedByCurrentPlatform(iterator.key())) {
-                errorCode = prepareContainerConfig(iterator.key(), credentials, containerConfig, sshSession);
-                if (errorCode != ErrorCode::NoError) {
-                    return errorCode;
-                }
+            errorCode = processContainerForAdmin(iterator.key(), containerConfig, credentials, sshSession,
+                                                 serverIndex, clientName);
+            if (errorCode != ErrorCode::NoError) {
+                return errorCode;
             }
-            
-            ContainerConfig containerConfigModel = containerConfig;
-            m_serversRepository->setContainerConfig(serverIndex, iterator.key(), containerConfigModel);
+            m_serversRepository->setContainerConfig(serverIndex, iterator.key(), containerConfig);
         }
     }
 
