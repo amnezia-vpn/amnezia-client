@@ -43,6 +43,7 @@ public slots:
 
 signals:
     void errorOccurred(ErrorCode errorCode);
+    void subscriptionExpiredOnServer();
 
     void installServerFromApiFinished(const QString &message);
     void changeApiCountryFinished(const QString &message);

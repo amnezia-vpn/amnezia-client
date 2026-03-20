@@ -90,6 +90,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     const int httpStatusCodeConflict = 409;
     const int httpStatusCodeNotFound = 404;
     const int httpStatusCodeNotImplemented = 501;
+    const int httpStatusCodeUnprocessableEntity = 422;
 
     if (!sslErrors.empty()) {
         qDebug().noquote() << sslErrors;
@@ -122,6 +123,8 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
             return amnezia::ErrorCode::ApiNotFoundError;
         } else if (httpStatusFromBody == httpStatusCodeNotImplemented) {
             return amnezia::ErrorCode::ApiUpdateRequestError;
+        } else if (httpStatusFromBody == httpStatusCodeUnprocessableEntity || httpStatusCode == httpStatusCodeUnprocessableEntity) {
+            return amnezia::ErrorCode::ApiSubscriptionExpiredError;
         }
         return amnezia::ErrorCode::ApiConfigDownloadError;
     }

@@ -281,6 +281,34 @@ Window  {
     }
 
     Item {
+        objectName: "subscriptionExpiredDrawerItem"
+
+        anchors.fill: parent
+
+        SubscriptionExpiredDrawer {
+            id: subscriptionExpiredDrawer
+
+            anchors.fill: parent
+        }
+    }
+
+    Connections {
+        target: ApiConfigsController
+
+        function onSubscriptionExpiredOnServer() {
+            subscriptionExpiredDrawer.openTriggered()
+        }
+    }
+
+    Connections {
+        target: ApiSettingsController
+
+        function onRenewalLinkReceived(url) {
+            Qt.openUrlExternally(url)
+        }
+    }
+
+    Item {
         objectName: "busyIndicatorItem"
 
         anchors.fill: parent

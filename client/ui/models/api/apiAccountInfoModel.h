@@ -19,7 +19,9 @@ public:
         EndDateRole,
         IsComponentVisibleRole,
         HasExpiredWorkerRole,
-        IsProtocolSelectionSupportedRole
+        IsProtocolSelectionSupportedRole,
+        IsSubscriptionExpiredRole,
+        IsSubscriptionExpiringSoonRole
     };
 
     explicit ApiAccountInfoModel(QObject *parent = nullptr);
@@ -31,6 +33,7 @@ public:
 public slots:
     void updateModel(const QJsonObject &accountInfoObject, const QJsonObject &serverConfig);
     QVariant data(const QString &roleString);
+    void setSubscriptionExpiredByServer();
 
     QJsonArray getAvailableCountries();
     QJsonArray getIssuedConfigsInfo();
@@ -59,6 +62,7 @@ private:
     };
 
     AccountInfoData m_accountInfoData;
+    bool m_isSubscriptionExpiredByServer = false;
     QJsonArray m_availableCountries;
     QJsonArray m_issuedConfigsInfo;
     QJsonObject m_supportInfo;
