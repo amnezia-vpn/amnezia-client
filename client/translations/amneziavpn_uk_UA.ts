@@ -2436,6 +2436,84 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
+    <name>PageSettingsKillSwitch</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="40"/>
+        <source>KillSwitch</source>
+        <translation>KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="41"/>
+        <source>Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops</source>
+        <translation>Увімкніть, щоб весь мережевий трафік проходив лише через захищений VPN-тунель, запобігаючи випадковому розкриттю вашої IP-адреси та DNS-запитів у разі розриву з&apos;єднання</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="52"/>
+        <source>KillSwitch settings cannot be changed during an active connection</source>
+        <translation>Налаштування KillSwitch не можна змінити під час активного підключення</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
+        <source>Soft KillSwitch</source>
+        <translation>Soft KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
+        <source>Internet access is blocked if the VPN disconnects unexpectedly</source>
+        <translation>Доступ до інтернету блокується при несподіваному розриві VPN-з&apos;єднання</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
+        <source>Strict KillSwitch</source>
+        <translation>Strict KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
+        <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
+        <translation>Доступ до інтернету блокується, навіть якщо VPN вимкнено вручну або не було запущено</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="96"/>
+        <source>Just a little heads-up</source>
+        <translation>Невелике попередження</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="97"/>
+        <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
+        <translation>Якщо VPN відключиться або з&apos;єднання перерветься при увімкненому Strict KillSwitch, доступ до інтернету буде заблоковано. Щоб відновити доступ, підключіться до VPN знову або вимкніть (змініть) режим KillSwitch.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="98"/>
+        <source>Continue</source>
+        <translation>Продовжити</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="99"/>
+        <source>Cancel</source>
+        <translation>Скасувати</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="127"/>
+        <source>Allow LAN access</source>
+        <translation>Дозволити доступ до локальної мережі</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="128"/>
+        <source>Allow access to local network devices and DNS servers when KillSwitch is active</source>
+        <translation>Дозволити доступ до пристроїв локальної мережі та DNS-серверів при активному KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="145"/>
+        <source>DNS Exceptions</source>
+        <translation>Винятки для DNS</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="146"/>
+        <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
+        <translation>DNS-сервери з цього списку залишаться доступними при активному KillSwitch.</translation>
+    </message>
+</context>
+<context>
     <name>PageSettingsDns</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="38"/>

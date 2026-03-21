@@ -154,6 +154,8 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
             if (!config.m_secondaryDnsServer.isEmpty()) {
                 params.dnsServers.append(config.m_secondaryDnsServer);
             }
+            params.dnsServers.append(config.m_allowedDnsServers);
+            params.allowLAN = config.m_killSwitchAllowLan;
             if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
                 params.blockAll = true;
                 if (config.m_excludedAddresses.size()) {
@@ -480,7 +482,7 @@ void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
-    LinuxFirewall::updateDNSServers(params.dnsServers);
+    LinuxFirewall::updateDNSServers(params.dnsServers, params.allowLAN);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
 }

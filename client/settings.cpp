@@ -452,6 +452,16 @@ void Settings::setStrictKillSwitchEnabled(bool enabled)
     m_settings.setValue("Conf/strictKillSwitchEnabled", enabled);
 }
 
+bool Settings::isKillSwitchAllowLanEnabled() const
+{
+    return m_settings.value("Conf/killSwitchAllowLan", false).toBool();
+}
+
+void Settings::setKillSwitchAllowLanEnabled(bool enabled)
+{
+    m_settings.setValue("Conf/killSwitchAllowLan", enabled);
+}
+
 QString Settings::getInstallationUuid(const bool needCreate)
 {
     auto uuid = m_settings.value("Conf/installationUuid", "").toString();

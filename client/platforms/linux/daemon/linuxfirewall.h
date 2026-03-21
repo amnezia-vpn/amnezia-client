@@ -79,7 +79,7 @@ private:
     static int unlinkChain(IPVersion ip, const QString& chain, const QString& parent, const QString& tableName = kFilterTable);
     static void installAnchor(IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName = kFilterTable, const FilterCallbackFunc& enableFunc = {}, const FilterCallbackFunc& disableFunc = {});
     static void uninstallAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
-    static QStringList getDNSRules(const QStringList& servers);
+    static QStringList getDNSRules(const QStringList& servers, bool allowLanDNS = false);
     static QStringList getAllowRule(const QStringList& servers);
     static QStringList getBlockRule(const QStringList& servers);
     static void setupTrafficSplitting();
@@ -99,7 +99,7 @@ public:
     static bool isAnchorEnabled(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
     static void setAnchorEnabled(IPVersion ip, const QString& anchor, bool enabled, const QString& tableName = kFilterTable);
     static void replaceAnchor(LinuxFirewall::IPVersion ip, const QString &anchor, const QString &newRule, const QString& tableName);
-    static void updateDNSServers(const QStringList& servers);
+    static void updateDNSServers(const QStringList& servers, bool allowLanDNS = false);
     static void updateAllowNets(const QStringList& servers);
     static void updateBlockNets(const QStringList& servers);
 };

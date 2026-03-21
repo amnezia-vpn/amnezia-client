@@ -187,7 +187,7 @@ void LinuxFirewall::uninstallAnchor(LinuxFirewall::IPVersion ip, const QString& 
     deleteChain(ip, actualChain, tableName);
 }
 
-QStringList LinuxFirewall::getDNSRules(const QStringList& servers)
+QStringList LinuxFirewall::getDNSRules(const QStringList& servers, bool allowLanDNS)
 {
     QStringList result;
     for (const QString& server : servers)
@@ -198,6 +198,12 @@ QStringList LinuxFirewall::getDNSRules(const QStringList& servers)
         result << QStringLiteral("-o tun0+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
         result << QStringLiteral("-o tun2+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
         result << QStringLiteral("-o tun2+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
+    }
+    if (allowLanDNS) {
+        for (const QString& net : {QStringLiteral("10.0.0.0/8"), QStringLiteral("172.16.0.0/12"), QStringLiteral("192.168.0.0/16")}) {
+            result << QStringLiteral("-d %1 -p udp --dport 53 -j ACCEPT").arg(net);
+            result << QStringLiteral("-d %1 -p tcp --dport 53 -j ACCEPT").arg(net);
+        }
     }
     return result;
 }
@@ -443,13 +449,13 @@ void LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPVersion ip, const QString 
     }
 }
 
-void LinuxFirewall::updateDNSServers(const QStringList& servers)
+void LinuxFirewall::updateDNSServers(const QStringList& servers, bool allowLanDNS)
 {
     static QStringList existingServers {};
 
     existingServers = servers;
     execute(QStringLiteral("iptables -F %1.320.allowDNS").arg(kAnchorName));
-    for (const QString& rule : getDNSRules(servers))
+    for (const QString& rule : getDNSRules(servers, allowLanDNS))
         execute(QStringLiteral("iptables -A %1.320.allowDNS %2").arg(kAnchorName, rule));
 }
 

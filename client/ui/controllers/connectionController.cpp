@@ -54,7 +54,7 @@ void ConnectionController::openConnection()
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
 
-    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    QJsonObject containerConfig = m_settings->containerConfig(serverIndex, container);
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     auto dns = m_serversModel->getDnsPair(serverIndex);

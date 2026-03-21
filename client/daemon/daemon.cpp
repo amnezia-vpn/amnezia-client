@@ -389,6 +389,7 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   }
 
   config.m_killSwitchEnabled = QVariant(obj.value("killSwitchOption").toString()).toBool();
+  config.m_killSwitchAllowLan = QVariant(obj.value("killSwitchAllowLan").toString()).toBool();
 
   if (!obj.value("Jc").isNull()) {
     config.m_junkPacketCount = obj.value("Jc").toString();

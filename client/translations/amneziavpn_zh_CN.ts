@@ -2319,6 +2319,84 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
 </context>
 <context>
+    <name>PageSettingsKillSwitch</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="40"/>
+        <source>KillSwitch</source>
+        <translation>KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="41"/>
+        <source>Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops</source>
+        <translation>启用以确保网络流量通过安全的VPN隧道传输，防止在连接中断时意外暴露您的IP和DNS查询</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="52"/>
+        <source>KillSwitch settings cannot be changed during an active connection</source>
+        <translation>在活动连接期间无法更改KillSwitch设置</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
+        <source>Soft KillSwitch</source>
+        <translation>Soft KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
+        <source>Internet access is blocked if the VPN disconnects unexpectedly</source>
+        <translation>如果VPN意外断开，互联网访问将被阻止</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
+        <source>Strict KillSwitch</source>
+        <translation>Strict KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
+        <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
+        <translation>即使手动关闭VPN或VPN未启动，互联网连接也会被阻止</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="96"/>
+        <source>Just a little heads-up</source>
+        <translation>温馨提示</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="97"/>
+        <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
+        <translation>如果在启用Strict KillSwitch时VPN断开或掉线，互联网访问将被阻止。要恢复访问，请重新连接VPN或禁用/更改KillSwitch。</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="98"/>
+        <source>Continue</source>
+        <translation>继续</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="99"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="127"/>
+        <source>Allow LAN access</source>
+        <translation>允许局域网访问</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="128"/>
+        <source>Allow access to local network devices and DNS servers when KillSwitch is active</source>
+        <translation>在KillSwitch激活时允许访问本地网络设备和DNS服务器</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="145"/>
+        <source>DNS Exceptions</source>
+        <translation>DNS例外</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="146"/>
+        <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
+        <translation>此处列出的DNS服务器在KillSwitch激活时仍可访问。</translation>
+    </message>
+</context>
+<context>
     <name>PageSettingsDns</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="38"/>

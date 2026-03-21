@@ -226,6 +226,9 @@ public:
     bool isStrictKillSwitchEnabled() const;
     void setStrictKillSwitchEnabled(bool enabled);
 
+    bool isKillSwitchAllowLanEnabled() const;
+    void setKillSwitchAllowLanEnabled(bool enabled);
+
     QString getInstallationUuid(const bool needCreate);
 
     void resetGatewayEndpoint();

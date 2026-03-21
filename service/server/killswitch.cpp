@@ -334,7 +334,9 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
         dnsServers.append(dns.toString());
     }
     
-    LinuxFirewall::updateDNSServers(dnsServers);
+    bool allowLanDNS = QVariant(configStr.value(amnezia::config_key::killSwitchAllowLan).toString()).toBool();
+
+    LinuxFirewall::updateDNSServers(dnsServers, allowLanDNS);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
 #endif

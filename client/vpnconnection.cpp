@@ -288,6 +288,7 @@ void VpnConnection::appendKillSwitchConfig()
 {
     m_vpnConfiguration.insert(config_key::killSwitchOption, QVariant(m_settings->isKillSwitchEnabled()).toString());
     m_vpnConfiguration.insert(config_key::allowedDnsServers, QVariant(m_settings->allowedDnsServers()).toJsonValue());
+    m_vpnConfiguration.insert(config_key::killSwitchAllowLan, QVariant(m_settings->isKillSwitchAllowLanEnabled()).toString());
 }
 
 void VpnConnection::appendSplitTunnelingConfig()
@@ -353,7 +354,7 @@ void VpnConnection::appendSplitTunnelingConfig()
                 sitesJsonArray.append(site);
             }
 
-            if (sitesJsonArray.isEmpty()) {
+            if (sitesJsonArray.isEmpty() && routeMode == Settings::VpnOnlyForwardSites) {
                 routeMode = Settings::RouteMode::VpnAllSites;
             } else if (routeMode == Settings::VpnOnlyForwardSites) {
                 // Allow traffic to Amnezia DNS
