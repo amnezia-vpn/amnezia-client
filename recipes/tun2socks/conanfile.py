@@ -48,6 +48,15 @@ class Tun2Socks(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
+        if self._is_windows:
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+            self.tool_requires("mingw-builds/15.1.0")
+
+    def requirements(self):
+        if self._is_windows:
+            self.requires("wintun/[*]")
 
     def source(self):
         get(self, f"https://github.com/xjasonlyu/tun2socks/archive/refs/tags/v{self.version}.zip",

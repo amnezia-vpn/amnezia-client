@@ -1,21 +1,21 @@
 from conan import ConanFile
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, copy
 
 import os
 
-class PackageConan(ConanFile):
-    name = "wintun"
-    version = "0.14.1"
+class TapWindows6(ConanFile):
+    name = "tap-windows6"
+    version = "9.27.0"
     settings = "os", "arch"
 
     @property
     def _arch(self):
         return {
+            "x86": "i386",
             "x86_64": "amd64",
-            "armv8": "arm64",
-            "x86": "x86"
+            "armv8": "arm64"
         }.get(str(self.settings.arch))
 
     def layout(self):
@@ -24,22 +24,21 @@ class PackageConan(ConanFile):
     def validate(self):
         if not str(self.settings.os).startswith("Windows"):
             raise ConanInvalidConfiguration(
-                f"{self.name} v{self.version} is supposed to be run on Windows only"
+                f"{self.name} v{self.version} does only support Windows"
             )
-        
+
         if not self._arch:
             raise ConanInvalidConfiguration(
                 f"{self.name} v{self.version} does not support {self.settings.arch}"
             )
 
     def source(self):
-        get(self, f"https://www.wintun.net/builds/wintun-{self.version}.zip",
-            sha256="07c256185d6ee3652e09fa55c0b673e2624b565e02c4b9091c79ca7d2f24ef51", strip_root=True)
+        get(self, f"https://github.com/OpenVPN/tap-windows6/releases/download/{self.version}/dist.win10.zip",
+            sha256="36e2609b7ceefedcb978ce5c48caf9e0e5af83423717c4e2e3c1d7ebca8f62a5", strip_root=True)
 
     def package(self):
-        copy(self, "*.dll", src=os.path.join(self.source_folder, "bin", self._arch), dst=os.path.join(self.package_folder, "bin"))
         copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*", src=os.path.join(self.source_folder, self._arch), dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_target_name", "zx2c4::wintun")
-        self.cpp_info.libs = [ "wintun" ]
+        self.cpp_info.set_property("cmake_target_name", "openvpn::tap-windows6")

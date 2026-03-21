@@ -4,7 +4,7 @@ set(PROJECT AmneziaVPN)
 set(AMNEZIAVPN_VERSION 4.8.15.4)
 
 include(cmake/conan_bootstrap.cmake)
-set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/cmake/conan_provider.cmake)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/cmake/conan_provider.cmake CACHE STRING "" FORCE)
 
 if(APPLE)
     get_property(generator_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)

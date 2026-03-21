@@ -393,3 +393,11 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         ${GEOIP_DAT_PATH}
         $<TARGET_FILE_DIR:${PROJECT}>
 )
+
+if (WIN32)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:zx2c4::wintun>
+            $<TARGET_FILE_DIR:${PROJECT}>
+    )
+endif()
