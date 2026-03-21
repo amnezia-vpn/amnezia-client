@@ -19,7 +19,7 @@ class AmneziaVPN(ConanFile):
 
         if has_service:
             if os == "Windows":
-                self.requires("awg-windows/1.0.0")
+                self.requires("awg-windows/0.1.8")
             else:
                 self.requires("awg-go/0.2.16")
 
@@ -39,4 +39,4 @@ class AmneziaVPN(ConanFile):
             self.requires("openvpn-pt-android/1.0.0")
 
         self.requires("libssh/0.11.3@amnezia")
-        self.requires("openssl/3.5.5")
+        self.requires("openssl/3.6.1")

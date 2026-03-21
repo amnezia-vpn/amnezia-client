@@ -296,7 +296,7 @@ QString Utils::certUtilPath()
 QString Utils::tun2socksPath()
 {
 #ifdef Q_OS_WIN
-    return Utils::executable("xray/tun2socks", true);
+    return Utils::executable("tun2socks", true);
 #elif defined Q_OS_LINUX
     // We have service that runs OpenVPN on Linux. We need to make same
     // path for client and service.

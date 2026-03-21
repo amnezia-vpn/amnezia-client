@@ -24,6 +24,6 @@ class V2rayRulesDat(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "Loyalsoldier::v2ray-rules-dat")
         self.cpp_info.set_property("cmake_extra_variables", {
-            "GEOSITE_DAT_PATH": os.path.join(self.package_folder, "geosite.dat"),
-            "GEOIP_DAT_PATH": os.path.join(self.package_folder, "geoip.dat")
+            "GEOSITE_DAT_PATH": os.path.join(self.package_folder, "geosite.dat").replace("\\", "/"),
+            "GEOIP_DAT_PATH": os.path.join(self.package_folder, "geoip.dat").replace("\\", "/")
         })

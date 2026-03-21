@@ -1,6 +1,6 @@
 # conanfile.py
 from conan import ConanFile
-from conan.tools.files import get, copy, collect_libs, chdir
+from conan.tools.files import get, copy, collect_libs, chdir, rename
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -11,7 +11,6 @@ import os
 class AmneziaXrayBindings(ConanFile):
     name = "amnezia-xray-bindings"
     version = "1.1.0"
-
     settings = "os", "arch"
 
     @property
@@ -35,6 +34,9 @@ class AmneziaXrayBindings(ConanFile):
     def _is_windows(self):
         return str(self.settings.os).startswith("Windows")
 
+    def config_options(self):
+        self.package_type = "shared-library" if self._is_windows else "static-library"
+
     def validate(self):
         if not self._goos or not self._goarch:
             raise ConanInvalidConfiguration(
@@ -46,6 +48,11 @@ class AmneziaXrayBindings(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
+        if self._is_windows:
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+            self.tool_requires("mingw-builds/15.1.0")
 
     def source(self):
         get(self, "https://github.com/amnezia-vpn/amnezia-xray-bindings/archive/v1.1.0.zip",
@@ -53,6 +60,9 @@ class AmneziaXrayBindings(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        tc.make_args = [
+            "LIB_ARC=libamnezia_xray.a"
+        ]
         env = Environment()
         env.define("ARCH", self._goarch)
         env.define("GOARCH", self._goarch)
@@ -68,6 +78,11 @@ class AmneziaXrayBindings(ConanFile):
             autotools = Autotools(self)
             autotools.make()
 
+    def _rename_header(self):
+        if not self._is_windows:
+            rename(self, os.path.join(self.package_folder, "include", "libamnezia_xray.h"),
+                    os.path.join(self.package_folder, "include", "amnezia_xray.h"))
+
     def _rename_libs(self):
         # workaround of bad naming strategy in amnezia-xray-bindings
         # TODO: change it and kick out the code below
@@ -81,9 +96,9 @@ class AmneziaXrayBindings(ConanFile):
     def package(self):
         copy(self, "*.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"))
         copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
         copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
-        self._rename_libs()
+        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
+        self._rename_header()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::xray-bindings")
