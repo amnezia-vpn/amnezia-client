@@ -1,4 +1,4 @@
-#include "fblink_application.h"
+#include "FBLink_application.h"
 
 #include <QClipboard>
 #include <QFontDatabase>

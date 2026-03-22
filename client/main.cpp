@@ -1,7 +1,7 @@
 #include <QDebug>
 #include <QTimer>
 
-#include "fblink_application.h"
+#include "FBLink_application.h"
 #include "core/osSignalHandler.h"
 #include "migrations.h"
 #include "version.h"

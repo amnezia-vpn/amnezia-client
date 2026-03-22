@@ -67,14 +67,14 @@ qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 set(CMAKE_AUTORCC ON)
 
 set(AMNEZIAVPN_TS_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/translations/fblink_ru_RU.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/fblink_zh_CN.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/fblink_fa_IR.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/fblink_ar_EG.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/fblink_my_MM.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/fblink_uk_UA.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/fblink_ur_PK.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/fblink_hi_IN.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/FBLink_ru_RU.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/FBLink_zh_CN.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/FBLink_fa_IR.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/FBLink_ar_EG.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/FBLink_my_MM.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/FBLink_uk_UA.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/FBLink_ur_PK.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/FBLink_hi_IN.ts
 )
 
 file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
@@ -132,7 +132,7 @@ endif()
 
 if(WIN32)
     configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/fblink.rc.in
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/FBLink.rc.in
         ${CMAKE_CURRENT_BINARY_DIR}/fblink.rc
     )
 

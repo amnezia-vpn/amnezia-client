@@ -6,7 +6,7 @@
 #include "logger.h"
 #include "systemController.h"
 #include "ui/qautostart.h"
-#include "fblink_application.h"
+#include "FBLink_application.h"
 #include "version.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"

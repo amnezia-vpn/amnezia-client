@@ -15,7 +15,7 @@
 #include "QBlockCipher.h"
 #include "QRsa.h"
 
-#include "fblink_application.h"
+#include "FBLink_application.h"
 #include "core/api/apiUtils.h"
 #include "core/networkUtilities.h"
 #include "utilities.h"

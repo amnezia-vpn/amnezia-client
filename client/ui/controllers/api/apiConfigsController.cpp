@@ -1,6 +1,6 @@
 #include "apiConfigsController.h"
 
-#include "fblink_application.h"
+#include "FBLink_application.h"
 #include "configurators/wireguard_configurator.h"
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"

@@ -4,7 +4,7 @@
 #include <QMetaObject>
 #include <QSocketNotifier>
 
-#include "../fblink_application.h"
+#include "../FBLink_application.h"
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     #include <pthread.h>

@@ -3,7 +3,7 @@ set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/migrations.h
     ${CLIENT_ROOT_DIR}/../ipc/ipc.h
-    ${CLIENT_ROOT_DIR}/fblink_application.h
+    ${CLIENT_ROOT_DIR}/FBLink_application.h
     ${CLIENT_ROOT_DIR}/containers/containers_defs.h
     ${CLIENT_ROOT_DIR}/core/defs.h
     ${CLIENT_ROOT_DIR}/core/errorstrings.h
@@ -53,7 +53,7 @@ endif()
 
 set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/migrations.cpp
-    ${CLIENT_ROOT_DIR}/fblink_application.cpp
+    ${CLIENT_ROOT_DIR}/FBLink_application.cpp
     ${CLIENT_ROOT_DIR}/containers/containers_defs.cpp
     ${CLIENT_ROOT_DIR}/core/errorstrings.cpp
     ${CLIENT_ROOT_DIR}/core/scripts_registry.cpp
