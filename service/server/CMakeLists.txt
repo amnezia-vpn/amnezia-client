@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-set(PROJECT AmneziaVPN-service)
+set(PROJECT FBLink-service)
 project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION})
 
 set(CMAKE_CXX_STANDARD 20)
@@ -12,20 +12,20 @@ qt_standard_project_setup()
 
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
-set(AMNEZIA_XRAY_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../client/3rd-prebuilt/3rd-prebuilt/amnezia_xray")
+set(AMNEZIA_XRAY_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../client/3rd-prebuilt/3rd-prebuilt/fblink_xray")
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64/amnezia_xray.lib")
+        set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64/fblink_xray.lib")
         set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64")
     else()
-        set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86/amnezia_xray.lib")
+        set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86/fblink_xray.lib")
         set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86")
     endif()
 elseif(APPLE AND NOT IOS)
-    set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/macos/x86_64/amnezia_xray.a")
+    set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/macos/x86_64/fblink_xray.a")
     set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/macos/x86_64")
 elseif(LINUX)
-    set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/linux/x86_64/amnezia_xray.a")
+    set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/linux/x86_64/fblink_xray.a")
     set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/linux/x86_64")
 endif()
 
@@ -195,8 +195,8 @@ set(RESOURCES)
 
 if(WIN32)
     configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/amneziavpn-service.rc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn-service.rc
+        ${CMAKE_CURRENT_LIST_DIR}/fblink-service.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/fblink-service.rc
     )
 
     set(HEADERS ${HEADERS}
@@ -240,7 +240,7 @@ if(WIN32)
     )
 
     set(RESOURCES ${RESOURCES}
-        ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn-service.rc
+        ${CMAKE_CURRENT_BINARY_DIR}/fblink-service.rc
     )
 
     if(MINGW)

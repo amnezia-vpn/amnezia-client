@@ -196,11 +196,11 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 #ifdef Q_OS_WIN
     InterfaceConfig config;
 
-    config.m_primaryDnsServer = configStr.value(amnezia::config_key::dns1).toString();
+    config.m_primaryDnsServer = configStr.value(fblink::config_key::dns1).toString();
 
-    // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!config.m_primaryDnsServer.contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        config.m_secondaryDnsServer = configStr.value(amnezia::config_key::dns2).toString();
+    // We don't use secondary DNS if primary DNS is FBLinkDNS
+    if (!config.m_primaryDnsServer.contains(fblink::protocols::dns::fblinkDnsIp)) {
+        config.m_secondaryDnsServer = configStr.value(fblink::config_key::dns2).toString();
     }
 
     config.m_serverPublicKey = "openvpn";
@@ -238,14 +238,14 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
         }
     }
 
-    for (const QJsonValue &i : configStr.value(amnezia::config_key::splitTunnelApps).toArray()) {
+    for (const QJsonValue &i : configStr.value(fblink::config_key::splitTunnelApps).toArray()) {
         if (!i.isString()) {
             break;
         }
         config.m_vpnDisabledApps.append(i.toString());
     }
 
-    for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
+    for (auto dns : configStr.value(fblink::config_key::allowedDnsServers).toArray()) {
         if (!dns.isString()) {
             break;
         }
@@ -253,7 +253,7 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
     }
 
     // killSwitch toggle
-    if (QVariant(configStr.value(amnezia::config_key::killSwitchOption).toString()).toBool()) {
+    if (QVariant(configStr.value(fblink::config_key::killSwitchOption).toString()).toBool()) {
         WindowsFirewall::create(this)->enablePeerTraffic(config);
     }
 
@@ -318,17 +318,17 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
     QStringList dnsServers;
 
-    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
+    dnsServers.append(configStr.value(fblink::config_key::dns1).toString());
 
-    // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!configStr.value(amnezia::config_key::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    // We don't use secondary DNS if primary DNS is FBLinkDNS
+    if (!configStr.value(fblink::config_key::dns1).toString().contains(fblink::protocols::dns::fblinkDnsIp)) {
+        dnsServers.append(configStr.value(fblink::config_key::dns2).toString());
     }
 
     dnsServers.append("127.0.0.1");
     dnsServers.append("127.0.0.53");
     
-    for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
+    for (auto dns : configStr.value(fblink::config_key::allowedDnsServers).toArray()) {
         if (!dns.isString()) {
             break;
         }
@@ -360,14 +360,14 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
 
     QStringList dnsServers;
-    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
+    dnsServers.append(configStr.value(fblink::config_key::dns1).toString());
 
-    // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!configStr.value(amnezia::config_key::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    // We don't use secondary DNS if primary DNS is FBLinkDNS
+    if (!configStr.value(fblink::config_key::dns1).toString().contains(fblink::protocols::dns::fblinkDnsIp)) {
+        dnsServers.append(configStr.value(fblink::config_key::dns2).toString());
     }
     
-    for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
+    for (auto dns : configStr.value(fblink::config_key::allowedDnsServers).toArray()) {
         if (!dns.isString()) {
             break;
         }

@@ -28,7 +28,7 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
     m_server = QSharedPointer<QLocalServer>(new QLocalServer(this));
     m_server->setSocketOptions(QLocalServer::WorldAccessOption);
 
-    if (!m_server->listen(amnezia::getIpcServiceUrl())) {
+    if (!m_server->listen(fblink::getIpcServiceUrl())) {
         qDebug() << QString("Unable to start the server: %1.").arg(m_server->errorString());
         QCoreApplication::exit(1);
         ::exit(1);

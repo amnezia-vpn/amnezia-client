@@ -60,7 +60,7 @@ type VPNServer struct {
 	CountryCode string `gorm:"default:''"` // ISO 3166-1 alpha-2, e.g. "RU", "US", "DE"
 	Active      bool   `gorm:"default:true"`
 
-	// AmneziaWG 2 параметры (обфускация)
+	// FBLinkWG 2 параметры (обфускация)
 	AWGPort  int    `gorm:"default:51820"`
 	Endpoint string // host:port для клиентов (может отличаться от Host)
 	MTU      string `gorm:"default:1280"`
@@ -86,7 +86,7 @@ type VPNServer struct {
 	SSHPort      int    `gorm:"default:22"`
 	SSHUser      string `gorm:"default:'root'"`
 	SSHPassword  string // пароль SSH (ili private key)
-	AWGContainer string `gorm:"default:'amnezia-awg2'"`
+	AWGContainer string `gorm:"default:'fblink-awg2'"`
 	AWGInterface string `gorm:"default:'awg0'"`
 
 	VPNKeys []VPNKey `gorm:"foreignKey:ServerID"`

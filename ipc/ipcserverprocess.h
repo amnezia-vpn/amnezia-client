@@ -38,7 +38,7 @@ public:
 signals:
 
 private:
-    amnezia::PermittedProcess m_program = amnezia::PermittedProcess::Invalid;
+    fblink::PermittedProcess m_program = fblink::PermittedProcess::Invalid;
     QSharedPointer<QProcess> m_process;
 };
 

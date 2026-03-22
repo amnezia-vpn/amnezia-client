@@ -55,7 +55,7 @@ void IpcServerProcess::close()
 
 void IpcServerProcess::setArguments(const QStringList &arguments)
 {
-    m_process->setArguments(amnezia::sanitizeArguments(m_program, arguments));
+    m_process->setArguments(fblink::sanitizeArguments(m_program, arguments));
 }
 
 void IpcServerProcess::setInputChannelMode(QProcess::InputChannelMode mode)
@@ -77,8 +77,8 @@ void IpcServerProcess::setProcessChannelMode(QProcess::ProcessChannelMode mode)
 
 void IpcServerProcess::setProgram(int programId)
 {
-    m_program = static_cast<amnezia::PermittedProcess>(programId);
-    m_process->setProgram(amnezia::permittedProcessPath(m_program));
+    m_program = static_cast<fblink::PermittedProcess>(programId);
+    m_process->setProgram(fblink::permittedProcessPath(m_program));
     m_process->setArguments({});
 }
 

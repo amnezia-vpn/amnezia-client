@@ -25,7 +25,7 @@ func NewVPNHandler(db *gorm.DB) *VPNHandler {
 	return &VPNHandler{db: db}
 }
 
-// GET /api/v1/me/config — получить AmneziaWG2 конфиг совместимый с клиентом
+// GET /api/v1/me/config — получить FBLinkWG2 конфиг совместимый с клиентом
 func (h *VPNHandler) GetConfig(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
@@ -156,7 +156,7 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 	})
 }
 
-// buildAWG2Config формирует JSON-конфиг для AmneziaVPN клиента (AWG2 формат)
+// buildAWG2Config формирует JSON-конфиг для FBLink клиента (AWG2 формат)
 func buildAWG2Config(privateKey, clientPublicKey, presharedKey, clientIP, endpoint string, server *models.VPNServer) map[string]interface{} {
 	awgConf := fmt.Sprintf(`[Interface]
 PrivateKey = %s
@@ -242,9 +242,9 @@ PersistentKeepalive = 25
 
 	protocolConfigJSON, _ := json.Marshal(protocolConfig)
 
-	// Формируем контейнер-обертку, которую ожидает клиент AmneziaVPN
+	// Формируем контейнер-обертку, которую ожидает клиент FBLink
 	container := map[string]interface{}{
-		"container": "amnezia-awg",
+		"container": "fblink-awg",
 		"awg": map[string]interface{}{
 			"last_config":        string(protocolConfigJSON),
 			"isThirdPartyConfig": true,
@@ -257,7 +257,7 @@ PersistentKeepalive = 25
 	// Итоговый JSON конфиг
 	return map[string]interface{}{
 		"containers":       []interface{}{container},
-		"defaultContainer": "amnezia-awg",
+		"defaultContainer": "fblink-awg",
 		"description":      "FBLink VPN - " + server.Region,
 		"country_code":     server.CountryCode,
 		"dns1":             "1.1.1.1",
