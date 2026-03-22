@@ -34,7 +34,7 @@ bool apiUtils::isServerFromApi(const QJsonObject &serverConfigObject)
     auto configVersion = serverConfigObject.value(apiDefs::key::configVersion).toInt();
     switch (configVersion) {
     case apiDefs::ConfigSource::Telegram: return true;
-    case apiDefs::ConfigSource::AmneziaGateway: return true;
+    case apiDefs::ConfigSource::FBLinkGateway: return true;
     default: return false;
     }
 }
@@ -51,23 +51,23 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
         auto apiEndpoint = serverConfigObject.value(apiDefs::key::apiEndpoint).toString();
 
         if (apiEndpoint.contains(premiumV1Endpoint)) {
-            return apiDefs::ConfigType::AmneziaPremiumV1;
+            return apiDefs::ConfigType::FBLinkPremiumV1;
         } else if (apiEndpoint.contains(freeV2Endpoint)) {
-            return apiDefs::ConfigType::AmneziaFreeV2;
+            return apiDefs::ConfigType::FBLinkFreeV2;
         }
     };
-    case apiDefs::ConfigSource::AmneziaGateway: {
-        constexpr QLatin1String servicePremium("amnezia-premium");
-        constexpr QLatin1String serviceFree("amnezia-free");
+    case apiDefs::ConfigSource::FBLinkGateway: {
+        constexpr QLatin1String servicePremium("fblink-premium");
+        constexpr QLatin1String serviceFree("fblink-free");
         constexpr QLatin1String serviceExternalPremium("external-premium");
 
         auto apiConfigObject = serverConfigObject.value(apiDefs::key::apiConfig).toObject();
         auto serviceType = apiConfigObject.value(apiDefs::key::serviceType).toString();
 
         if (serviceType == servicePremium) {
-            return apiDefs::ConfigType::AmneziaPremiumV2;
+            return apiDefs::ConfigType::FBLinkPremiumV2;
         } else if (serviceType == serviceFree) {
-            return apiDefs::ConfigType::AmneziaFreeV3;
+            return apiDefs::ConfigType::FBLinkFreeV3;
         } else if (serviceType == serviceExternalPremium) {
             return apiDefs::ConfigType::ExternalPremium;
         }
@@ -83,7 +83,7 @@ apiDefs::ConfigSource apiUtils::getConfigSource(const QJsonObject &serverConfigO
     return static_cast<apiDefs::ConfigSource>(serverConfigObject.value(apiDefs::key::configVersion).toInt());
 }
 
-amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
+fblink::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
                                                      const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
                                                      const QByteArray &responseBody)
 {
@@ -93,16 +93,16 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
 
     if (!sslErrors.empty()) {
         qDebug().noquote() << sslErrors;
-        return amnezia::ErrorCode::ApiConfigSslError;
+        return fblink::ErrorCode::ApiConfigSslError;
     } else if (replyError == QNetworkReply::NoError) {
-        return amnezia::ErrorCode::NoError;
+        return fblink::ErrorCode::NoError;
     } else if (replyError == QNetworkReply::NetworkError::OperationCanceledError
                || replyError == QNetworkReply::NetworkError::TimeoutError) {
         qDebug() << replyError;
-        return amnezia::ErrorCode::ApiConfigTimeoutError;
+        return fblink::ErrorCode::ApiConfigTimeoutError;
     } else if (replyError == QNetworkReply::NetworkError::OperationNotImplementedError) {
         qDebug() << replyError;
-        return amnezia::ErrorCode::ApiUpdateRequestError;
+        return fblink::ErrorCode::ApiUpdateRequestError;
     } else {
         qDebug() << QString::fromUtf8(responseBody);
         qDebug() << replyError;
@@ -117,29 +117,29 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         }
 
         if (httpStatusFromBody == httpStatusCodeConflict) {
-            return amnezia::ErrorCode::ApiConfigLimitError;
+            return fblink::ErrorCode::ApiConfigLimitError;
         } else if (httpStatusFromBody == httpStatusCodeNotFound) {
-            return amnezia::ErrorCode::ApiNotFoundError;
+            return fblink::ErrorCode::ApiNotFoundError;
         } else if (httpStatusFromBody == httpStatusCodeNotImplemented) {
-            return amnezia::ErrorCode::ApiUpdateRequestError;
+            return fblink::ErrorCode::ApiUpdateRequestError;
         }
-        return amnezia::ErrorCode::ApiConfigDownloadError;
+        return fblink::ErrorCode::ApiConfigDownloadError;
     }
 
     qDebug() << "something went wrong";
-    return amnezia::ErrorCode::InternalError;
+    return fblink::ErrorCode::InternalError;
 }
 
 bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)
 {
-    static const QSet<apiDefs::ConfigType> premiumTypes = { apiDefs::ConfigType::AmneziaPremiumV1, apiDefs::ConfigType::AmneziaPremiumV2,
+    static const QSet<apiDefs::ConfigType> premiumTypes = { apiDefs::ConfigType::FBLinkPremiumV1, apiDefs::ConfigType::FBLinkPremiumV2,
                                                             apiDefs::ConfigType::ExternalPremium };
     return premiumTypes.contains(getConfigType(serverConfigObject));
 }
 
 QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
 {
-    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV1) {
+    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::FBLinkPremiumV1) {
         return {};
     }
 
@@ -177,7 +177,7 @@ QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
 
 QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
 {
-    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV2) {
+    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::FBLinkPremiumV2) {
         return {};
     }
 

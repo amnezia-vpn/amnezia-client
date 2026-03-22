@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Copyright (c) 2024 AmneziaVPN
-// This file has been modified for AmneziaVPN
+// Copyright (c) 2024 FBLink
+// This file has been modified for FBLink
 //
 // This file is based on the work of the Qv2ray VPN client.
 // The original code of the Qv2ray, A Qt frontend for V2Ray. Written in C++ and licensed under GPL3.
@@ -38,7 +38,7 @@
 #define OUTBOUND_TAG_PROXY "PROXY"
 #define JADD(...) FOR_EACH(JADDEx, __VA_ARGS__)
 
-namespace amnezia::serialization::ss
+namespace fblink::serialization::ss
 {
 QJsonObject Deserialize(const QString &ssUri, QString *alias, QString *errMessage)
 {
@@ -138,5 +138,5 @@ const QString Serialize(const ShadowSocksServerObject &server, const QString &al
     url.setFragment(alias);
     return url.toString(QUrl::ComponentFormattingOption::FullyEncoded);
 }
-} // namespace amnezia::serialization::ss
+} // namespace fblink::serialization::ss
 

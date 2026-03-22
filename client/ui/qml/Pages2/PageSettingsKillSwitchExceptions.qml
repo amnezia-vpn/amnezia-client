@@ -100,7 +100,7 @@ PageType {
 
                 text: ip
                 rightImageSource: "qrc:/images/controls/trash.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     var headerText = qsTr("Delete ") + ip + "?"

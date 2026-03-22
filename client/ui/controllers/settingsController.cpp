@@ -6,14 +6,14 @@
 #include "logger.h"
 #include "systemController.h"
 #include "ui/qautostart.h"
-#include "amnezia_application.h"
+#include "fblink_application.h"
 #include "version.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    #include <AmneziaVPN-Swift.h>
+    #include <FBLink-Swift.h>
 #endif
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
@@ -68,15 +68,15 @@ QString getPlatformName()
 #endif
 }
 
-void SettingsController::toggleAmneziaDns(bool enable)
+void SettingsController::toggleFBLinkDns(bool enable)
 {
-    m_settings->setUseAmneziaDns(enable);
-    emit amneziaDnsToggled(enable);
+    m_settings->setUseFBLinkDns(enable);
+    emit fblinkDnsToggled(enable);
 }
 
-bool SettingsController::isAmneziaDnsEnabled()
+bool SettingsController::isFBLinkDnsEnabled()
 {
-    return m_settings->useAmneziaDns();
+    return m_settings->useFBLinkDns();
 }
 
 QString SettingsController::getPrimaryDns()
@@ -110,7 +110,7 @@ void SettingsController::toggleLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
 #if defined(Q_OS_IOS)
-    AmneziaVPN::toggleLogging(enable);
+    FBLink::toggleLogging(enable);
 #endif
     if (enable == true) {
         qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
@@ -171,7 +171,7 @@ void SettingsController::backupAppConfig(const QString &fileName)
     config["Conf/autoStart"] = Autostart::isAutostart();
     config["Conf/killSwitchEnabled"] = isKillSwitchEnabled();
     config["Conf/strictKillSwitchEnabled"] = isStrictKillSwitchEnabled();
-    config["Conf/useAmneziaDns"] = isAmneziaDnsEnabled();
+    config["Conf/useFBLinkDns"] = isFBLinkDnsEnabled();
 
     SystemController::saveFile(fileName, QJsonDocument(config).toJson());
 }
@@ -237,10 +237,10 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         m_settings->setStrictKillSwitchEnabled(false);
 #endif
 
-        bool amneziaDnsEnabled = newConfigData.contains("Conf/useAmneziaDns")
-                                     ? newConfigData.value("Conf/useAmneziaDns").toBool()
-                                     : m_settings->useAmneziaDns();
-        emit amneziaDnsToggled(amneziaDnsEnabled);
+        bool fblinkDnsEnabled = newConfigData.contains("Conf/useFBLinkDns")
+                                     ? newConfigData.value("Conf/useFBLinkDns").toBool()
+                                     : m_settings->useFBLinkDns();
+        emit fblinkDnsToggled(fblinkDnsEnabled);
 
         emit restoreBackupFinished();
     } else {
@@ -270,7 +270,7 @@ void SettingsController::clearSettings()
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    AmneziaVPN::clearSettings();
+    FBLink::clearSettings();
 #endif
 }
 

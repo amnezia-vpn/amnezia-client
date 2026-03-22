@@ -568,8 +568,8 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/notificationhandler.cpp" line="57"/>
         <location filename="../ui/notificationhandler.cpp" line="64"/>
-        <source>AmneziaVPN</source>
-        <translation>The translation of &quot;AmneziaVPN&quot; in Urdu would be:
+        <source>FBLink</source>
+        <translation>The translation of &quot;FBLink&quot; in Urdu would be:
 
 امنیزیا وی پی ای</translation>
     </message>
@@ -585,7 +585,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="88"/>
-        <source>AmneziaVPN notification</source>
+        <source>FBLink notification</source>
         <translation>امنیزیا وی پی این کی اطلاعات</translation>
     </message>
     <message>
@@ -1180,7 +1180,7 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolAwgClientSettings</name>
     <message>
-        <source>AmneziaWG settings</source>
+        <source>FBLinkWG settings</source>
         <translation type="obsolete">امنیزیا وی جی کی ترتیبات</translation>
     </message>
     <message>
@@ -1262,7 +1262,7 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
-        <source>AmneziaWG settings</source>
+        <source>FBLinkWG settings</source>
         <translation type="vanished">امنیزیا وی جی کی ترتیبات</translation>
     </message>
     <message>
@@ -1938,7 +1938,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Cannot remove AmneziaDNS from running server</source>
+        <source>Cannot remove FBLinkDNS from running server</source>
         <translation type="vanished">آمنیزیا ڈی این ایس کو چل رہے سرور سے ہٹا نہیں سکتے</translation>
     </message>
     <message>
@@ -2237,8 +2237,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">بیک اپ</translation>
     </message>
     <message>
-        <source>About AmneziaVPN</source>
-        <translation type="vanished">AmneziaVPN کے بارے میں</translation>
+        <source>About FBLink</source>
+        <translation type="vanished">FBLink کے بارے میں</translation>
     </message>
     <message>
         <source>Close application</source>
@@ -2248,11 +2248,11 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <source>Support Amnezia</source>
-        <translation type="vanished">Amnezia کی حمایت کریں</translation>
+        <source>Support FBLink</source>
+        <translation type="vanished">FBLink کی حمایت کریں</translation>
     </message>
     <message>
-        <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
+        <source>FBLink is a free and open-source application. You can support the developers if you like it.</source>
         <translation type="vanished">ایمنیزیا ایک مفت اور آزاد سورس ایپلیکیشن ہے۔ آپ اگر اسے پسند کریں تو ڈویلپرز کی حمایت کرسکتے ہیں.</translation>
     </message>
     <message>
@@ -2280,8 +2280,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">گِٹ ہَب</translation>
     </message>
     <message>
-        <source>https://github.com/amnezia-vpn/amnezia-client</source>
-        <translation type="vanished">https://github.com/amnezia-vpn/amnezia-client</translation>
+        <source>https://github.com/fblink-vpn/fblink-client</source>
+        <translation type="vanished">https://github.com/fblink-vpn/fblink-client</translation>
     </message>
     <message>
         <source>Website</source>
@@ -2313,7 +2313,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="131"/>
         <source>FBLink VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.
 
-Приложение создано на основе открытого проекта AmneziaVPN (amnezia-vpn.org), распространяемого по лицензии GNU GPL v3.</source>
+Приложение создано на основе открытого проекта FBLink (fblink-vpn.org), распространяемого по лицензии GNU GPL v3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2343,8 +2343,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="297"/>
-        <source>🏛 Основано на AmneziaVPN (GNU GPL v3)
-Исходный код: github.com/amnezia-vpn</source>
+        <source>🏛 Основано на FBLink (GNU GPL v3)
+Исходный код: github.com/fblink-vpn</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2483,17 +2483,17 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="23"/>
-        <source>documentation/instructions/connect-amnezia-premium#windows</source>
+        <source>documentation/instructions/connect-fblink-premium#windows</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="30"/>
-        <source>documentation/instructions/connect-amnezia-premium#macos</source>
+        <source>documentation/instructions/connect-fblink-premium#macos</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="37"/>
-        <source>documentation/instructions/connect-amnezia-premium#android</source>
+        <source>documentation/instructions/connect-fblink-premium#android</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2503,17 +2503,17 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="51"/>
-        <source>documentation/instructions/connect-amnezia-premium#ios</source>
+        <source>documentation/instructions/connect-fblink-premium#ios</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="58"/>
-        <source>documentation/instructions/connect-amnezia-premium#linux</source>
+        <source>documentation/instructions/connect-fblink-premium#linux</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="65"/>
-        <source>documentation/instructions/connect-amnezia-premium#routers</source>
+        <source>documentation/instructions/connect-fblink-premium#routers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2530,8 +2530,8 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsApiNativeConfigs</name>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="obsolete">AmneziaVPN ترتیب کو محفوظ کریں</translation>
+        <source>Save FBLink config</source>
+        <translation type="obsolete">FBLink ترتیب کو محفوظ کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="60"/>
@@ -2795,8 +2795,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="obsolete">AmneziaVPN ترتیب کو محفوظ کریں</translation>
+        <source>Save FBLink config</source>
+        <translation type="obsolete">FBLink ترتیب کو محفوظ کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="114"/>
@@ -3025,7 +3025,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>ترتیبات کو دوبارہ ترتیب دیں اور ایپلیکیشن سے تمام ڈیٹا کو ہٹا دیں؟</translation>
     </message>
     <message>
-        <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
+        <source>All settings will be reset to default. All installed FBLink services will still remain on the server.</source>
         <translation type="vanished">تمام ترتیبات کو معمولی حالت پر لوٹایا جائے گا۔ سب انسٹال کیے گئے امنیزیا وی پی این سروسزسرورپرموجودرہیںگی.</translation>
     </message>
     <message>
@@ -3063,8 +3063,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="90"/>
-        <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
-        <translation>بیک اپ میں آپ کے تمام سرورز جنہیں AmneziaVPN میں شامل کیا گیا ہے، ان کے پاسورڈ اور نجی کلید شامل ہوں گے۔ اس معلومات کو ایک محفوظ جگہ میں محفوظ رکھیں.</translation>
+        <source>The backup will contain your passwords and private keys for all servers added to FBLink. Keep this information in a secure place.</source>
+        <translation>بیک اپ میں آپ کے تمام سرورز جنہیں FBLink میں شامل کیا گیا ہے، ان کے پاسورڈ اور نجی کلید شامل ہوں گے۔ اس معلومات کو ایک محفوظ جگہ میں محفوظ رکھیں.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="104"/>
@@ -3130,7 +3130,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">کنکشن</translation>
     </message>
     <message>
-        <source>When AmneziaDNS is not used or installed</source>
+        <source>When FBLinkDNS is not used or installed</source>
         <translation type="vanished">ایمنیزیا ڈی این ایس کو استعمال نہیں کیا گیا ہو یا اسے انسٹال نہیں کیا گیاہے</translation>
     </message>
     <message>
@@ -3138,12 +3138,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">آپ کو صرف مخصوص ایپلیکیشنز کے لئے وی پی این استعمال کرنے کی اجازت دیتا ہے</translation>
     </message>
     <message>
-        <source>Use AmneziaDNS</source>
-        <translation type="vanished">AmneziaDNS استعمال کریں</translation>
+        <source>Use FBLinkDNS</source>
+        <translation type="vanished">FBLinkDNS استعمال کریں</translation>
     </message>
     <message>
-        <source>If AmneziaDNS is installed on the server</source>
-        <translation type="vanished">اگر سرور پر AmneziaDNS انسٹال کیا گیا ہو تو</translation>
+        <source>If FBLinkDNS is installed on the server</source>
+        <translation type="vanished">اگر سرور پر FBLinkDNS انسٹال کیا گیا ہو تو</translation>
     </message>
     <message>
         <source>DNS servers</source>
@@ -3220,8 +3220,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>ڈی این ایس سرور</translation>
     </message>
     <message>
-        <source>If AmneziaDNS is not used or installed</source>
-        <translation type="vanished">اگر AmneziaDNS استعمال نہیں کیا گیا ہو یا انسٹال نہیں کیا گیا ہو تو</translation>
+        <source>If FBLinkDNS is not used or installed</source>
+        <translation type="vanished">اگر FBLinkDNS استعمال نہیں کیا گیا ہو یا انسٹال نہیں کیا گیا ہو تو</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="67"/>
@@ -3561,8 +3561,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>کیا آپ سرور کو دوبارہ چالو کرنا چاہتے ہیں؟</translation>
     </message>
     <message>
-        <source>Do you want to clear server from Amnezia software?</source>
-        <translation type="vanished">هل تريد حذف الخادم من Amnezia?کیا آپ سرور کو Amnezia سافٹ ویئر سے صاف کرنا چاہتے ہیں؟</translation>
+        <source>Do you want to clear server from FBLink software?</source>
+        <translation type="vanished">هل تريد حذف الخادم من FBLink?کیا آپ سرور کو FBLink سافٹ ویئر سے صاف کرنا چاہتے ہیں؟</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="130"/>
@@ -3581,8 +3581,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>منسوخ</translation>
     </message>
     <message>
-        <source>Check the server for previously installed Amnezia services</source>
-        <translation type="vanished">سرور پر پہلے سے انسٹال کی گئی Amnezia سروسز کو چیک کریں</translation>
+        <source>Check the server for previously installed FBLink services</source>
+        <translation type="vanished">سرور پر پہلے سے انسٹال کی گئی FBLink سروسز کو چیک کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="111"/>
@@ -3645,7 +3645,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Cannot clear server from Amnezia software during active connection</source>
+        <source>Cannot clear server from FBLink software during active connection</source>
         <translation type="vanished">چالو کنکشن کے دوران سرور کو ایمنیزیا سافٹ ویئر سے صاف کرنا ممکن نہیں</translation>
     </message>
     <message>
@@ -3664,12 +3664,12 @@ Already installed containers were found on the server. All installed containers 
         <translation>چالو کنکشن کے دوران API ترتیبات کو دوبارہ ترتیب نہیں دی جا سکتی</translation>
     </message>
     <message>
-        <source>All installed AmneziaVPN services will still remain on the server.</source>
-        <translation type="vanished">سرور پر تمام انسٹال شدہ AmneziaVPN سروسز محفوظ رہیں گے.</translation>
+        <source>All installed FBLink services will still remain on the server.</source>
+        <translation type="vanished">سرور پر تمام انسٹال شدہ FBLink سروسز محفوظ رہیں گے.</translation>
     </message>
     <message>
-        <source>Clear server from Amnezia software</source>
-        <translation type="vanished">Amnezia سافٹ ویئر کو سرور سے صاف کریں</translation>
+        <source>Clear server from FBLink software</source>
+        <translation type="vanished">FBLink سافٹ ویئر کو سرور سے صاف کریں</translation>
     </message>
 </context>
 <context>
@@ -4153,7 +4153,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>براہ کرم جاری رکھیں</translation>
     </message>
     <message>
-        <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
+        <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the FBLink or any third parties</source>
         <translation type="vanished">آپ جو ڈیٹا داخل کریں گے وہ بالکل خفیہ رہے گا اور نہ تو امنیزیا یا کسی تیسری شخصیت کے ساتھ اشتراک کیا جائے گا</translation>
     </message>
     <message>
@@ -4254,11 +4254,11 @@ Already installed containers were found on the server. All installed containers 
         <translation>سرور پہلے ہی ایپلیکیشن میں شامل کر دیا گیا ہے</translation>
     </message>
     <message>
-        <source>Amnezia has detected that your server is currently </source>
+        <source>FBLink has detected that your server is currently </source>
         <translation type="vanished">ایمنیزیا نے دریافت کیا ہے کہ آپ کا سرور موجودہ </translation>
     </message>
     <message>
-        <source>busy installing other software. Amnezia installation </source>
+        <source>busy installing other software. FBLink installation </source>
         <translation type="vanished">مصروف ہے اور دوسرے سافٹ ویئر کی انسٹالیشن کر رہا ہے </translation>
     </message>
     <message>
@@ -4448,7 +4448,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>وائر گارڈ کی ترتیبات کو محفوظ کریں</translation>
     </message>
     <message>
-        <source>Save AmneziaWG config</source>
+        <source>Save FBLinkWG config</source>
         <translation type="vanished">ایمنیزیا ڈبلیو جی کی ترتیبات کو محفوظ کریں</translation>
     </message>
     <message>
@@ -4467,8 +4467,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>&quot;XRay کنفیگ کو محفوظ کریں</translation>
     </message>
     <message>
-        <source>For the AmneziaVPN app</source>
-        <translation type="vanished">AmneziaVPN ایپ کے لئے</translation>
+        <source>For the FBLink app</source>
+        <translation type="vanished">FBLink ایپ کے لئے</translation>
     </message>
     <message>
         <source>OpenVpn native format</source>
@@ -4480,7 +4480,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>وائر گارڈ کا اصل فارمیٹ</translation>
     </message>
     <message>
-        <source>AmneziaWG native format</source>
+        <source>FBLinkWG native format</source>
         <translation type="vanished">ایمنیزیا ڈبلیو جی کا اصل فارمیٹ</translation>
     </message>
     <message>
@@ -4651,8 +4651,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>کنفیگ منسوخ</translation>
     </message>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="obsolete">AmneziaVPN ترتیب کو محفوظ کریں</translation>
+        <source>Save FBLink config</source>
+        <translation type="obsolete">FBLink ترتیب کو محفوظ کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="125"/>
@@ -4690,8 +4690,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished">کاپی</translation>
     </message>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="obsolete">AmneziaVPN ترتیب کو محفوظ کریں</translation>
+        <source>Save FBLink config</source>
+        <translation type="obsolete">FBLink ترتیب کو محفوظ کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="30"/>
@@ -4720,7 +4720,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>To read the QR code in the Amnezia app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
+        <source>To read the QR code in the FBLink app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
         <translation type="obsolete">ایمنیزیا ایپ میں QR کوڈ پڑھنے کے لیے، &quot;سرور شامل کریں&quot; → &quot;میرے پاس جوڑنے کے لیے ڈیٹا ہے&quot; → &quot;QR کوڈ، کلید یا سیٹنگ فائل&quot; کو منتخب کریں</translation>
     </message>
 </context>
@@ -5247,7 +5247,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="53"/>
-        <source>Amnezia helper service error</source>
+        <source>FBLink helper service error</source>
         <translation>ایمنیزیا مددگار سروس کی خرابی</translation>
     </message>
     <message>
@@ -5333,7 +5333,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="81"/>
-        <source>Your Amnezia Premium subscription has expired.
+        <source>Your FBLink Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
         <translation type="unfinished"></translation>
@@ -5391,7 +5391,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="111"/>
-        <source>AmneziaDNS</source>
+        <source>FBLinkDNS</source>
         <translation>ایمنیزیا ڈی این ایس</translation>
     </message>
     <message>
@@ -5422,7 +5422,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../containers/containers_defs.cpp" line="130"/>
         <location filename="../containers/containers_defs.cpp" line="133"/>
-        <source>AmneziaWG is a special protocol from Amnezia based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
+        <source>FBLinkWG is a special protocol from FBLink based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5440,7 +5440,7 @@ Already installed containers were found on the server. All installed containers 
         <source>OpenVPN is one of the most popular and reliable VPN protocols. It uses SSL/TLS encryption, supports a wide variety of devices and operating systems, and is continuously improved by the community due to its open-source nature. It provides a good balance between speed and security but is easily recognized by DPI systems, making it susceptible to blocking.
 
 Features:
-* Available on all AmneziaVPN platforms
+* Available on all FBLink platforms
 * Normal battery consumption on mobile devices
 * Flexible customization for various devices and OS
 * Operates over both TCP and UDP protocols</source>
@@ -5448,10 +5448,10 @@ Features:
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="166"/>
-        <source>Shadowsocks is based on the SOCKS5 protocol and encrypts connections using AEAD cipher. Although designed to be discreet, it doesn&apos;t mimic a standard HTTPS connection and can be detected by some DPI systems. Due to limited support in Amnezia, we recommend using the AmneziaWG protocol.
+        <source>Shadowsocks is based on the SOCKS5 protocol and encrypts connections using AEAD cipher. Although designed to be discreet, it doesn&apos;t mimic a standard HTTPS connection and can be detected by some DPI systems. Due to limited support in FBLink, we recommend using the FBLinkWG protocol.
 
 Features:
-* Available in AmneziaVPN only on desktop platforms
+* Available in FBLink only on desktop platforms
 * Customizable encryption protocol
 * Detectable by some DPI systems
 * Operates over TCP protocol
@@ -5469,7 +5469,7 @@ The Cloak plugin further protects the connection from DPI detection. It modifies
 In regions with heavy internet censorship, we strongly recommend using OpenVPN with Cloak from your first connection.
 
 Features:
-* Available on all AmneziaVPN platforms
+* Available on all FBLink platforms
 * High power consumption on mobile devices
 * Flexible configuration options
 * Undetectable by DPI systems
@@ -5481,7 +5481,7 @@ Features:
         <source>WireGuard is a modern, streamlined VPN protocol offering stable connectivity and excellent performance across all devices. It uses fixed encryption settings, delivering lower latency and higher data transfer speeds compared to OpenVPN. However, WireGuard is easily identifiable by DPI systems due to its distinctive packet signatures, making it susceptible to blocking.
 
 Features:
-* Available on all AmneziaVPN platforms
+* Available on all FBLink platforms
 * Low power consumption on mobile devices
 * Minimal configuration required
 * Easily detected by DPI systems (susceptible to blocking)
@@ -5490,12 +5490,12 @@ Features:
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="198"/>
-        <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
+        <source>FBLinkWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
 
-AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
+FBLinkWG is an excellent choice for those seeking a fast, stealthy VPN connection.
 
 Features:
-* Available on all AmneziaVPN platforms
+* Available on all FBLink platforms
 * Low battery consumption on mobile devices
 * Minimal settings required
 * Undetectable by traffic analysis systems (DPI)
@@ -5520,7 +5520,7 @@ Features:
         <source>IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. While it provides good security and speed, it&apos;s easily recognized by DPI systems and susceptible to blocking.
 
 Features:
-* Available in AmneziaVPN only on Windows
+* Available in FBLink only on Windows
 * Low battery consumption on mobile devices
 * Minimal configuration required
 * Detectable by DPI analysis systems(easily blocked)
@@ -5562,7 +5562,7 @@ Immediately after receiving the first data packet, Cloak authenticates the incom
 
 If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * High power consumption on mobile devices
 * Flexible settings
 * Not recognised by DPI analysis systems
@@ -5576,7 +5576,7 @@ If there is a extreme level of Internet censorship in your region, we advise you
 WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * Low power consumption
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
@@ -5596,7 +5596,7 @@ Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REAL
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="236"/>
-        <source>After installation, Amnezia will create a
+        <source>After installation, FBLink will create a
 
  file storage on your server. You will be able to access it using
  FileZilla or other SFTP clients, as well as mount the disk on your device to access
@@ -5611,8 +5611,8 @@ For more detailed information, you can
         <translation type="vanished">وائر گارڈ - اعلی کارکردگی، تیز رفتار اور کم بجلی کی کھپت کے ساتھ نیا مقبول VPN پروٹوکول۔ سنسرشپ کی کم سطح والے علاقوں کے لیے تجویز کردہ.</translation>
     </message>
     <message>
-        <source>AmneziaWG - Special protocol from Amnezia, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
-        <translation type="vanished">AmneziaWG - Amnezia سے خصوصی پروٹوکول، WireGuard پر مبنی۔ یہ وائر گارڈ کی طرح تیز ہے، لیکن رکاوٹوں کے خلاف بہت مزاحم ہے۔ اعلی درجے کی سنسر شپ والے خطوں کے لیے تجویز کردہ۔</translation>
+        <source>FBLinkWG - Special protocol from FBLink, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
+        <translation type="vanished">FBLinkWG - FBLink سے خصوصی پروٹوکول، WireGuard پر مبنی۔ یہ وائر گارڈ کی طرح تیز ہے، لیکن رکاوٹوں کے خلاف بہت مزاحم ہے۔ اعلی درجے کی سنسر شپ والے خطوں کے لیے تجویز کردہ۔</translation>
     </message>
     <message>
         <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
@@ -5632,28 +5632,28 @@ For more detailed information, you can
         <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
 It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * Normal power consumption on mobile devices
 * Flexible customisation to suit user needs to work with different operating systems and devices
 * Recognised by DPI analysis systems and therefore susceptible to blocking
 * Can operate over both TCP and UDP network protocols.</source>
-        <translation type="vanished">OpenVPN دستیاب سب سے زیادہ مقبول اور وقتی آزمائشی VPN پروٹوکولز میں سے ایک ہے۔ یہ انکرپشن اور کلیدی تبادلے کے لیے SSL/TLS کی طاقت کا فائدہ اٹھاتے ہوئے اپنا منفرد سیکیورٹی پروٹوکول استعمال کرتا ہے۔ مزید برآں، توثیق کے بہت سے طریقوں کے لیے OpenVPN کی حمایت اسے ورسٹائل اور قابل موافق بناتی ہے، جو آلات اور آپریٹنگ سسٹم کی ایک وسیع رینج کو پورا کرتی ہے۔ اوپن سورس کی نوعیت کی وجہ سے، اوپن وی پی این کو عالمی برادری کی طرف سے وسیع جانچ سے فائدہ ہوتا ہے، جو اس کی سلامتی کو مسلسل تقویت دیتا ہے۔ کارکردگی، سیکورٹی اور مطابقت کے مضبوط توازن کے ساتھ، OpenVPN رازداری کے بارے میں شعور رکھنے والے افراد اور کاروباروں کے لیے یکساں انتخاب ہے۔ * تمام پلیٹ فارمز پر AmneziaVPN میں دستیاب ہے * موبائل آلات پر بجلی کی عام کھپت * صارف کو مختلف آپریٹنگ سسٹمز اور ڈیوائسز کے ساتھ کام کرنے کی ضرورت کے مطابق لچکدار تخصیص * DPI تجزیہ سسٹمز کے ذریعہ پہچانا جاتا ہے اور اس وجہ سے بلاک کرنے کا خطرہ ہوتا ہے * TCP اور UDP دونوں نیٹ ورک پر کام کر سکتا ہے۔ پروٹوکول</translation>
+        <translation type="vanished">OpenVPN دستیاب سب سے زیادہ مقبول اور وقتی آزمائشی VPN پروٹوکولز میں سے ایک ہے۔ یہ انکرپشن اور کلیدی تبادلے کے لیے SSL/TLS کی طاقت کا فائدہ اٹھاتے ہوئے اپنا منفرد سیکیورٹی پروٹوکول استعمال کرتا ہے۔ مزید برآں، توثیق کے بہت سے طریقوں کے لیے OpenVPN کی حمایت اسے ورسٹائل اور قابل موافق بناتی ہے، جو آلات اور آپریٹنگ سسٹم کی ایک وسیع رینج کو پورا کرتی ہے۔ اوپن سورس کی نوعیت کی وجہ سے، اوپن وی پی این کو عالمی برادری کی طرف سے وسیع جانچ سے فائدہ ہوتا ہے، جو اس کی سلامتی کو مسلسل تقویت دیتا ہے۔ کارکردگی، سیکورٹی اور مطابقت کے مضبوط توازن کے ساتھ، OpenVPN رازداری کے بارے میں شعور رکھنے والے افراد اور کاروباروں کے لیے یکساں انتخاب ہے۔ * تمام پلیٹ فارمز پر FBLink میں دستیاب ہے * موبائل آلات پر بجلی کی عام کھپت * صارف کو مختلف آپریٹنگ سسٹمز اور ڈیوائسز کے ساتھ کام کرنے کی ضرورت کے مطابق لچکدار تخصیص * DPI تجزیہ سسٹمز کے ذریعہ پہچانا جاتا ہے اور اس وجہ سے بلاک کرنے کا خطرہ ہوتا ہے * TCP اور UDP دونوں نیٹ ورک پر کام کر سکتا ہے۔ پروٹوکول</translation>
     </message>
     <message>
-        <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
+        <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in FBLink, it&apos;s recommended to use FBLinkWG protocol.
 
-* Available in the AmneziaVPN only on desktop platforms
+* Available in the FBLink only on desktop platforms
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
-        <translation type="vanished">شیڈو ساکس، SOCKS5 پروٹوکول سے متاثر، AEAD سائفر کا استعمال کرتے ہوئے کنکشن کی حفاظت کرتا ہے۔ اگرچہ شیڈو ساکس کو سمجھدار اور شناخت کرنے کے لیے چیلنج کرنے کے لیے ڈیزائن کیا گیا ہے، لیکن یہ معیاری HTTPS کنکشن سے مماثل نہیں ہے۔ تاہم، کچھ ٹریفک تجزیہ نظام اب بھی شیڈو ساکس کنکشن کا پتہ لگا سکتے ہیں۔ Amnezia میں محدود تعاون کی وجہ سے، AmneziaWG پروٹوکول استعمال کرنے کی سفارش کی جاتی ہے۔ * صرف ڈیسک ٹاپ پلیٹ فارمز پر AmneziaVPN میں دستیاب ہے * قابل ترتیب انکرپشن پروٹوکول * کچھ DPI سسٹمز کے ذریعے قابل شناخت * TCP نیٹ ورک پروٹوکول پر کام کرتا ہے.</translation>
+        <translation type="vanished">شیڈو ساکس، SOCKS5 پروٹوکول سے متاثر، AEAD سائفر کا استعمال کرتے ہوئے کنکشن کی حفاظت کرتا ہے۔ اگرچہ شیڈو ساکس کو سمجھدار اور شناخت کرنے کے لیے چیلنج کرنے کے لیے ڈیزائن کیا گیا ہے، لیکن یہ معیاری HTTPS کنکشن سے مماثل نہیں ہے۔ تاہم، کچھ ٹریفک تجزیہ نظام اب بھی شیڈو ساکس کنکشن کا پتہ لگا سکتے ہیں۔ FBLink میں محدود تعاون کی وجہ سے، FBLinkWG پروٹوکول استعمال کرنے کی سفارش کی جاتی ہے۔ * صرف ڈیسک ٹاپ پلیٹ فارمز پر FBLink میں دستیاب ہے * قابل ترتیب انکرپشن پروٹوکول * کچھ DPI سسٹمز کے ذریعے قابل شناخت * TCP نیٹ ورک پروٹوکول پر کام کرتا ہے.</translation>
     </message>
     <message>
-        <source>A modern iteration of the popular VPN protocol, AmneziaWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
-While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
-This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
+        <source>A modern iteration of the popular VPN protocol, FBLinkWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
+While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. FBLinkWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
+This means that FBLinkWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * Low power consumption
 * Minimum number of settings
 * Not recognised by DPI analysis systems, resistant to blocking
@@ -5665,12 +5665,12 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
-* Available in the AmneziaVPN only on Windows
+* Available in the FBLink only on Windows
 * Low power consumption, on mobile devices
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="vanished">IKEv2، IPSec انکرپشن پرت کے ساتھ جوڑا، ایک جدید اور مستحکم VPN پروٹوکول کے طور پر کھڑا ہے۔ اس کی امتیازی خصوصیات میں سے ایک نیٹ ورکس اور ڈیوائسز کے درمیان تیزی سے سوئچ کرنے کی صلاحیت ہے، جو اسے متحرک نیٹ ورک کے ماحول میں خاص طور پر موافق بناتی ہے۔ اگرچہ یہ سیکیورٹی، استحکام اور رفتار کا امتزاج پیش کرتا ہے، لیکن یہ نوٹ کرنا ضروری ہے کہ IKEv2 کا آسانی سے پتہ لگایا جا سکتا ہے اور یہ بلاک کرنے کے لیے حساس ہے۔ * صرف ونڈوز پر AmneziaVPN میں دستیاب ہے * کم بجلی کی کھپت، موبائل ڈیوائسز پر * کم سے کم کنفیگریشن * DPI تجزیہ سسٹمز کے ذریعے پہچانا جاتا ہے * UDP نیٹ ورک پروٹوکول، پورٹ 500 اور 4500 پر کام .کرتا ہے</translation>
+        <translation type="vanished">IKEv2، IPSec انکرپشن پرت کے ساتھ جوڑا، ایک جدید اور مستحکم VPN پروٹوکول کے طور پر کھڑا ہے۔ اس کی امتیازی خصوصیات میں سے ایک نیٹ ورکس اور ڈیوائسز کے درمیان تیزی سے سوئچ کرنے کی صلاحیت ہے، جو اسے متحرک نیٹ ورک کے ماحول میں خاص طور پر موافق بناتی ہے۔ اگرچہ یہ سیکیورٹی، استحکام اور رفتار کا امتزاج پیش کرتا ہے، لیکن یہ نوٹ کرنا ضروری ہے کہ IKEv2 کا آسانی سے پتہ لگایا جا سکتا ہے اور یہ بلاک کرنے کے لیے حساس ہے۔ * صرف ونڈوز پر FBLink میں دستیاب ہے * کم بجلی کی کھپت، موبائل ڈیوائسز پر * کم سے کم کنفیگریشن * DPI تجزیہ سسٹمز کے ذریعے پہچانا جاتا ہے * UDP نیٹ ورک پروٹوکول، پورٹ 500 اور 4500 پر کام .کرتا ہے</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="234"/>
@@ -5865,7 +5865,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../ui/models/containers_model.cpp" line="34"/>
-        <source>AmneziaWG Legacy is a outdated version of AmneziaWG protocol. To upgrade, install AmneziaWG and recreate users.</source>
+        <source>FBLinkWG Legacy is a outdated version of FBLinkWG protocol. To upgrade, install FBLinkWG and recreate users.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5935,8 +5935,8 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>ShareConnectionDrawer</name>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="vanished">AmneziaVPN ترتیب کو محفوظ کریں</translation>
+        <source>Save FBLink config</source>
+        <translation type="vanished">FBLink ترتیب کو محفوظ کریں</translation>
     </message>
     <message>
         <source>Share</source>
@@ -5959,7 +5959,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation type="vanished">کنکشن کی ترتیبات دکھائیں</translation>
     </message>
     <message>
-        <source>To read the QR code in the Amnezia app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
+        <source>To read the QR code in the FBLink app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
         <translation type="vanished">ایمنیزیا ایپ میں QR کوڈ پڑھنے کے لیے، &quot;سرور شامل کریں&quot; → &quot;میرے پاس جوڑنے کے لیے ڈیٹا ہے&quot; → &quot;QR کوڈ، کلید یا سیٹنگ فائل&quot; کو منتخب کریں</translation>
     </message>
 </context>
@@ -6137,7 +6137,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
 </context>
 <context>
-    <name>amnezia::ContainerProps</name>
+    <name>fblink::ContainerProps</name>
     <message>
         <source>Low</source>
         <translation type="vanished">کم</translation>
@@ -6169,7 +6169,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="373"/>
-        <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
+        <source>FBLinkWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

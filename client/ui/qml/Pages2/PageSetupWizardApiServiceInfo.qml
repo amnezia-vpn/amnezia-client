@@ -103,11 +103,11 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild) && ApiServicesModel.getSelectedServiceType() === "amnezia-premium"
+                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild) && ApiServicesModel.getSelectedServiceType() === "fblink-premium"
 
                 horizontalAlignment: Text.AlignHCenter
                 textFormat: Text.PlainText
-                color: AmneziaStyle.color.mutedGray
+                color: FBLinkStyle.color.mutedGray
                 font.pixelSize: 12
 
                 text: qsTr("Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.")
@@ -122,7 +122,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: ApiServicesModel.getSelectedServiceType() === "amnezia-premium" ? qsTr("Subscribe Now") : qsTr("Connect")
+                text: ApiServicesModel.getSelectedServiceType() === "fblink-premium" ? qsTr("Subscribe Now") : qsTr("Connect")
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
@@ -145,11 +145,11 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 32
 
-                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild) && ApiServicesModel.getSelectedServiceType() === "amnezia-premium"
+                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild) && ApiServicesModel.getSelectedServiceType() === "fblink-premium"
 
                 horizontalAlignment: Text.AlignHCenter
                 textFormat: Text.RichText
-                color: AmneziaStyle.color.mutedGray
+                color: FBLinkStyle.color.mutedGray
                 font.pixelSize: 12
 
                 text: {

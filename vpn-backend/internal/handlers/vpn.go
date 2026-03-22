@@ -56,7 +56,10 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		keyMap[existingKeys[i].ServerID] = &existingKeys[i]
 	}
 
-	clientIP := fmt.Sprintf("10.8.%d.%d", (userID/253)%254+1, userID%253+2)
+	// Линейный IP-маппинг без коллизий: user_id → 10.8.X.Y
+	// Пример: user_id=1 → 10.8.1.2, user_id=253 → 10.8.1.254, user_id=254 → 10.8.2.2
+	// Поддерживает до 64*253 ≈ 16 192 уникальных пользователей
+	clientIP := fmt.Sprintf("10.8.%d.%d", (userID-1)/253+1, (userID-1)%253+2)
 
 	var responseConfigs []map[string]interface{}
 

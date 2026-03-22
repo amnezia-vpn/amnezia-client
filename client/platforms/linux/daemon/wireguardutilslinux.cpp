@@ -20,7 +20,7 @@
 #include "killswitch.h"
 
 constexpr const int WG_TUN_PROC_TIMEOUT = 5000;
-constexpr const char* WG_RUNTIME_DIR = "/var/run/amneziawg";
+constexpr const char* WG_RUNTIME_DIR = "/var/run/fblinkwg";
 
 namespace {
 Logger logger("WireguardUtilsLinux");

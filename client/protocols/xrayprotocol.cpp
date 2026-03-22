@@ -22,17 +22,17 @@ static const QString tunName = "tun2";
 
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
-    m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
-    m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
+    m_vpnGateway = fblink::protocols::xray::defaultLocalAddr;
+    m_vpnLocalAddress = fblink::protocols::xray::defaultLocalAddr;
     m_routeGateway = NetworkUtilities::getGatewayAndIface().first;
 
-    m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
-    m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::config_key::hostName).toString());
+    m_routeMode = static_cast<Settings::RouteMode>(configuration.value(fblink::config_key::splitTunnelType).toInt());
+    m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(fblink::config_key::hostName).toString());
 
-    const QString primaryDns = configuration.value(amnezia::config_key::dns1).toString();
+    const QString primaryDns = configuration.value(fblink::config_key::dns1).toString();
     m_dnsServers.push_back(QHostAddress(primaryDns));
-    if (primaryDns != amnezia::protocols::dns::amneziaDnsIp) {
-        const QString secondaryDns = configuration.value(amnezia::config_key::dns2).toString();
+    if (primaryDns != fblink::protocols::dns::fblinkDnsIp) {
+        const QString secondaryDns = configuration.value(fblink::config_key::dns2).toString();
         m_dnsServers.push_back(QHostAddress(secondaryDns));
     }
 
@@ -61,7 +61,7 @@ ErrorCode XrayProtocol::start()
         }
         return startTun2Socks();
     }, [] () {
-        return ErrorCode::AmneziaServiceConnectionFailed;
+        return ErrorCode::FBLinkServiceConnectionFailed;
     });
 }
 
@@ -118,7 +118,7 @@ ErrorCode XrayProtocol::startTun2Socks()
 {
     m_tun2socksProcess = IpcClient::CreatePrivilegedProcess();
     if (!m_tun2socksProcess->waitForSource()) {
-        return ErrorCode::AmneziaServiceConnectionFailed;
+        return ErrorCode::FBLinkServiceConnectionFailed;
     }
 
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
@@ -167,7 +167,7 @@ ErrorCode XrayProtocol::setupRouting() {
 #ifdef Q_OS_WIN
         const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
 #endif
-        auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
+        auto createTun = iface->createTun(tunName, fblink::protocols::xray::defaultLocalAddr);
         if (!createTun.waitForFinished() || !createTun.returnValue()) {
             qCritical() << "Failed to assign IP address for TUN";
             return ErrorCode::InternalError;
@@ -241,6 +241,6 @@ ErrorCode XrayProtocol::setupRouting() {
         return ErrorCode::NoError;
     },
     [] () {
-        return ErrorCode::AmneziaServiceConnectionFailed;
+        return ErrorCode::FBLinkServiceConnectionFailed;
     });
 }

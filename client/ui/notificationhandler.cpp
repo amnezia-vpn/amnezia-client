@@ -85,7 +85,7 @@ void NotificationHandler::unsecuredNetworkNotification(const QString& networkNam
     qDebug() << "Unsecured network notification shown";
 
 
-    QString title = tr("AmneziaVPN notification");
+    QString title = tr("FBLink notification");
     QString message = tr("Unsecured network detected: ") + networkName;
 
     notifyInternal(UnsecuredNetwork, title, message, 2000);

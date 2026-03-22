@@ -236,7 +236,7 @@ PageType {
 
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                textColor: AmneziaStyle.color.vibrantRed
+                textColor: FBLinkStyle.color.vibrantRed
 
                 clickedFunction: function() {
                     var headerText = qsTr("Reset settings and remove all data from the application?")

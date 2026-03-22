@@ -182,7 +182,7 @@ PageType {
 
             LabelTextType {
                 text: qsTr("Уже есть аккаунт?")
-                color: AmneziaStyle.color.mutedGray
+                color: FBLinkStyle.color.mutedGray
                 font.pixelSize: 14
             }
             ButtonTextType {
@@ -229,8 +229,8 @@ PageType {
             defaultColor: "#00C8FF"
             hoveredColor: "#33D4FF"
             pressedColor: "#0099BB"
-            disabledColor: AmneziaStyle.color.mutedGray
-            textColor: AmneziaStyle.color.paleGray
+            disabledColor: FBLinkStyle.color.mutedGray
+            textColor: FBLinkStyle.color.paleGray
 
             enabled: !root.isLoading
             text: root.isLoading

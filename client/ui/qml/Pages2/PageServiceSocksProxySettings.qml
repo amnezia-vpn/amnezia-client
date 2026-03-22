@@ -75,7 +75,7 @@ PageType {
                 descriptionOnTop: true
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
@@ -94,7 +94,7 @@ PageType {
                 descriptionOnTop: true
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
@@ -113,7 +113,7 @@ PageType {
                 descriptionOnTop: true
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
@@ -132,7 +132,7 @@ PageType {
                 descriptionOnTop: true
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
 

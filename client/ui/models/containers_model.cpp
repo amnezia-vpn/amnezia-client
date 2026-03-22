@@ -25,13 +25,13 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case NameRole: {
         if (container == DockerContainer::Awg && !isThirdPartyConfig) {
-            return "AmneziaWG Legacy";
+            return "FBLinkWG Legacy";
         }
         return ContainerProps::containerHumanNames().value(container);
     }
     case DescriptionRole: {
         if (container == DockerContainer::Awg && !isThirdPartyConfig) {
-            return QObject::tr("AmneziaWG Legacy is a outdated version of AmneziaWG protocol. To upgrade, install AmneziaWG and recreate users.");
+            return QObject::tr("FBLinkWG Legacy is a outdated version of FBLinkWG protocol. To upgrade, install FBLinkWG and recreate users.");
         }
 
         return ContainerProps::containerDescriptions().value(container);
@@ -104,7 +104,7 @@ bool ContainersModel::isSupportedByCurrentPlatform(const int containerIndex)
 
 bool ContainersModel::isServiceContainer(const int containerIndex)
 {
-    return qvariant_cast<amnezia::ServiceType>(data(index(containerIndex), ServiceTypeRole) == ServiceType::Other);
+    return qvariant_cast<fblink::ServiceType>(data(index(containerIndex), ServiceTypeRole) == ServiceType::Other);
 }
 
 bool ContainersModel::hasInstalledServices()

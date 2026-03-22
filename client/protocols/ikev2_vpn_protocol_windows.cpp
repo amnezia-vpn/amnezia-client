@@ -195,15 +195,15 @@ ErrorCode Ikev2Protocol::start()
         auto certInstallProcess = IpcClient::CreatePrivilegedProcess();
 
         if (!certInstallProcess) {
-            setLastError(ErrorCode::AmneziaServiceConnectionFailed);
-            return ErrorCode::AmneziaServiceConnectionFailed;
+            setLastError(ErrorCode::FBLinkServiceConnectionFailed);
+            return ErrorCode::FBLinkServiceConnectionFailed;
         }
 
         certInstallProcess->waitForSource();
         if (!certInstallProcess->isInitialized()) {
             qWarning() << "IpcProcess replica is not connected!";
-            setLastError(ErrorCode::AmneziaServiceConnectionFailed);
-            return ErrorCode::AmneziaServiceConnectionFailed;
+            setLastError(ErrorCode::FBLinkServiceConnectionFailed);
+            return ErrorCode::FBLinkServiceConnectionFailed;
         }
         certInstallProcess->setProgram(PermittedProcess::CertUtil);
 

@@ -1,4 +1,4 @@
-package org.amnezia.vpn.protocol
+package com.fblink.vpn.protocol
 
 import android.os.Bundle
 

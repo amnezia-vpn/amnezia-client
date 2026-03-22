@@ -24,11 +24,16 @@ FBLinkController::FBLinkController(ImportController *importController,
     m_nam = new QNetworkAccessManager(this);
     m_apiUrl = BACKEND_URL;
 
-    // Lazy sync at startup: если пользователь уже залогинен — синхронизировать конфиги
+    // Lazy sync at startup: если пользователь уже залогинен — сначала обновляем токен (sliding window),
+    // потом синхронизируем конфиги. Если refresh провалится — logout().
     if (isLoggedIn()) {
+        m_isLoading = true;
+        emit loadingChanged();
         QTimer::singleShot(0, this, [this]() {
-            fetchConfig();
-            fetchSubscription();
+            refreshAccessToken([this]() {
+                fetchConfig();
+                fetchSubscription();
+            });
         });
     }
 }
@@ -60,6 +65,8 @@ void FBLinkController::login(const QString &email, const QString &password)
 
             if (obj.contains("access_token")) {
                 saveJwtToken(obj["access_token"].toString());
+                if (obj.contains("refresh_token"))
+                    saveRefreshToken(obj["refresh_token"].toString());
                 saveSubscriptionInfo("", "", "");  // Clear stale data from previous user
                 emit loginSuccess();
                 emit loginStateChanged();
@@ -131,6 +138,8 @@ void FBLinkController::verifyEmail(const QString &email, const QString &code)
 
             if (obj.contains("access_token")) {
                 saveJwtToken(obj["access_token"].toString());
+                if (obj.contains("refresh_token"))
+                    saveRefreshToken(obj["refresh_token"].toString());
                 saveSubscriptionInfo("", "", "");
                 emit verifySuccess();
                 emit loginStateChanged();
@@ -336,10 +345,13 @@ void FBLinkController::fetchConfig()
              }
              emit configError(errStr);
 
-             // If Unauthorized (401/403), logout user
+             // If Unauthorized (401), try refresh before logging out
              if (reply->error() == QNetworkReply::AuthenticationRequiredError ||
                  reply->error() == QNetworkReply::ContentAccessDenied) {
-                 logout();
+                 refreshAccessToken([this]() {
+                     fetchConfig();
+                     fetchSubscription();
+                 });
              }
         }
     });
@@ -347,6 +359,18 @@ void FBLinkController::fetchConfig()
 
 void FBLinkController::clearExistingFBLinkServers()
 {
+    if (!m_settings || !m_serversModel) return;
+    QJsonArray servers = m_settings->serversArray();
+    // Идём в обратном порядке — удаление не сдвигает индексы
+    for (int i = servers.size() - 1; i >= 0; --i) {
+        QJsonObject server = servers.at(i).toObject();
+        QString desc = server.value("description").toString();
+        QString name = server.value("name").toString();
+        if (desc.startsWith("FBLink VPN") || name.startsWith("FBLink VPN")
+            || server.value("fblink_server").toBool()) {
+            m_serversModel->removeServer(i);
+        }
+    }
 }
 
 void FBLinkController::createPayment(const QString &plan)
@@ -421,6 +445,12 @@ void FBLinkController::fetchSubscription()
             bool trialAvailable   = obj.value("trial_available").toBool(false);
 
             saveSubscriptionInfo(status, plan, endDate, autoRenew, cardSaved, trialAvailable);
+            // Сервер подтвердил статус — записываем время верификации
+            m_lastSubscriptionVerifiedAt = QDateTime::currentSecsSinceEpoch();
+            if (m_isLoading) {
+                m_isLoading = false;
+                emit loadingChanged();
+            }
             emit subscriptionChanged();
             emit subscriptionFetched();
         } else {
@@ -430,7 +460,17 @@ void FBLinkController::fetchSubscription()
             if (!doc.isNull() && doc.object().contains("error")) {
                 errStr = doc.object()["error"].toString();
             }
-            emit subscriptionError(errStr);
+            // BUG#8: если 401 — пытаемся обновить access token
+            if (reply->error() == QNetworkReply::AuthenticationRequiredError ||
+                reply->error() == QNetworkReply::ContentAccessDenied) {
+                refreshAccessToken([this]() { fetchSubscription(); });
+            } else {
+                if (m_isLoading) {
+                    m_isLoading = false;
+                    emit loadingChanged();
+                }
+                emit subscriptionError(errStr);
+            }
         }
     });
 }
@@ -438,6 +478,7 @@ void FBLinkController::fetchSubscription()
 void FBLinkController::logout()
 {
     saveJwtToken("");
+    saveRefreshToken("");
     saveSubscriptionInfo("", "", "");
     emit loginStateChanged();
     emit subscriptionChanged();
@@ -454,12 +495,23 @@ bool FBLinkController::isSubscribed() const
     QString status = qSettings.value("subscriptionStatus", "").toString();
     if (status != "active") return false;
 
-    // Free plan is not a paid subscription
+    // Free plan — не является платной подпиской
     QString plan = qSettings.value("subscriptionPlan", "").toString();
     if (plan == "free" || plan.isEmpty()) return false;
 
-    // Check expiry date — backend returns full ISO datetime with nanoseconds (e.g. "2026-03-19T15:40:15.778881751Z")
-    // Qt cannot parse 9-decimal nanoseconds, so extract only the date part (YYYY-MM-DD)
+    // Защита от обхода: если последняя серверная верификация > 24ч назад,
+    // принудительно перезапрашиваем fetchSubscription(). Предотвращает bypass
+    // через ручное редактирование Windows Registry.
+    constexpr qint64 kVerifyIntervalSecs = 24 * 3600;
+    qint64 now = QDateTime::currentSecsSinceEpoch();
+    if (isLoggedIn() && (now - m_lastSubscriptionVerifiedAt) > kVerifyIntervalSecs) {
+        // Несинхронно обновляем — не блокируем UI.
+        // Срабатывает сигнал subscriptionChanged() и обновяет QSettings.
+        const_cast<FBLinkController*>(this)->fetchSubscription();
+    }
+
+    // Проверяем дату — backend возвращает ISO дату с наносекундами
+    // Qt не парсит 9-значные наносекунды, преобразуем в YYYY-MM-DD
     QString endDateStr = qSettings.value("subscriptionEndDate", "").toString();
     if (endDateStr.isEmpty()) return false;
 
@@ -510,6 +562,11 @@ bool FBLinkController::trialAvailable() const
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
     return qSettings.value("subscriptionTrialAvailable", false).toBool();
+}
+
+bool FBLinkController::isLoading() const
+{
+    return m_isLoading;
 }
 
 void FBLinkController::setAutoRenew(bool enabled)
@@ -573,6 +630,53 @@ void FBLinkController::deleteCard()
     });
 }
 
+// Обновить пару токенов через refresh_token.
+// Если refresh провалится — автоматически вызывается logout().
+// onSuccess вызывается после успешного обновления.
+void FBLinkController::refreshAccessToken(std::function<void()> onSuccess)
+{
+    if (m_isRefreshing) return;
+
+    QString refreshToken = getRefreshToken();
+    if (refreshToken.isEmpty()) {
+        // Нет refresh-токена — сессия истекла
+        logout();
+        return;
+    }
+
+    m_isRefreshing = true;
+
+    QUrl url(m_apiUrl + "/auth/refresh");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QJsonObject json;
+    json["refresh_token"] = refreshToken;
+
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, onSuccess]() {
+        reply->deleteLater();
+        m_isRefreshing = false;
+
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            if (obj.contains("access_token")) {
+                saveJwtToken(obj["access_token"].toString());
+                if (obj.contains("refresh_token"))
+                    saveRefreshToken(obj["refresh_token"].toString());
+                emit loginStateChanged();
+                if (onSuccess) onSuccess();
+            } else {
+                logout();
+            }
+        } else {
+            // refresh провалился — токен истёк или недействителен
+            logout();
+        }
+    });
+}
+
 void FBLinkController::saveJwtToken(const QString &token)
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
@@ -584,4 +688,17 @@ QString FBLinkController::getJwtToken() const
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
     return qSettings.value("authToken", "").toString();
+}
+
+void FBLinkController::saveRefreshToken(const QString &token)
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    qSettings.setValue("refreshToken", token);
+    qSettings.sync();
+}
+
+QString FBLinkController::getRefreshToken() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    return qSettings.value("refreshToken", "").toString();
 }

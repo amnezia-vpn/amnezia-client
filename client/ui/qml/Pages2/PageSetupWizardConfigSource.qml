@@ -132,7 +132,7 @@ PageType {
                             descriptionOnTop: true
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
+                            rightImageColor: FBLinkStyle.color.paleGray
 
                             visible: SettingsController.getInstallationUuid() !== ""
                             clickedFunction: function() {
@@ -201,7 +201,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 24
 
-                color: AmneziaStyle.color.charcoalGray
+                color: FBLinkStyle.color.charcoalGray
                 text: qsTr("Other connection options")
             }
         }
@@ -244,11 +244,11 @@ PageType {
 
                 visible: Qt.platform.os !== "ios" && !IsMacOsNeBuild
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
+                defaultColor: FBLinkStyle.color.transparent
+                hoveredColor: FBLinkStyle.color.translucentWhite
+                pressedColor: FBLinkStyle.color.sheerWhite
+                disabledColor: FBLinkStyle.color.mutedGray
+                textColor: FBLinkStyle.color.goldenApricot
 
                 text: qsTr("FBLink VPN")
 
@@ -262,7 +262,7 @@ PageType {
     }
 
     property list<QtObject> variants: [
-        amneziaVpn,
+        fblinkVpn,
         selfHostVpn,
         backupRestore,
         fileOpen,
@@ -272,7 +272,7 @@ PageType {
     ]
     
     QtObject {
-        id: amneziaVpn
+        id: fblinkVpn
 
         property string title: qsTr("VPN Service")
         property string description: qsTr("Connect to classic paid and free VPN services")

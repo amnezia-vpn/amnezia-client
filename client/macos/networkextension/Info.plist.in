@@ -5,14 +5,14 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>AmneziaVPNNetworkExtension</string>
+	<string>FBLinkNetworkExtension</string>
 
 	<key>CFBundleIdentifier</key>
-	<string>org.amnezia.AmneziaVPN.network-extension</string>
+	<string>com.fblink.vpn.network-extension</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>AmneziaVPNNetworkExtension</string>
+	<string>FBLinkNetworkExtension</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
@@ -27,7 +27,7 @@
 	<string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string>
 
 	<key>CFBundleDisplayName</key>
-	<string>AmneziaVPNNetworkExtension</string>
+	<string>FBLinkNetworkExtension</string>
 
 	<key>NSExtension</key>
 	<dict>
@@ -38,9 +38,9 @@
 	</dict>
 
 	<key>com.wireguard.ios.app_group_id</key>
-	<string>group.org.amnezia.AmneziaVPN</string>
+	<string>group.com.fblink.vpn</string>
 
 	<key>com.wireguard.macos.app_group_id</key>
-	<string>${BUILD_VPN_DEVELOPMENT_TEAM}.group.org.amnezia.AmneziaVPN</string>
+	<string>${BUILD_VPN_DEVELOPMENT_TEAM}.group.com.fblink.vpn</string>
 </dict>
 </plist>

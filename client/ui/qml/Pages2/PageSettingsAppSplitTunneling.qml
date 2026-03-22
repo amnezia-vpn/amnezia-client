@@ -195,7 +195,7 @@ PageType {
 
                 text: appPath
                 rightImageSource: "qrc:/images/controls/trash.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     var headerText = qsTr("Remove ") + appPath + "?"
@@ -223,7 +223,7 @@ PageType {
         
         height: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin
         
-        color: AmneziaStyle.color.midnightBlack
+        color: FBLinkStyle.color.midnightBlack
         
         RowLayout {
             id: addAppButton
@@ -250,19 +250,17 @@ PageType {
 
                 clickedFunc: function() {
                     searchField.focus = false
-                    PageController.showBusyIndicator(true)
 
                     if (Qt.platform.os === "windows") {
                         var fileName = SystemController.getFileName(qsTr("Open executable file"),
                                                                     qsTr("Executable files (*.*)"))
                         if (fileName !== "") {
+                            PageController.showBusyIndicator(true)
                             AppSplitTunnelingController.addApp(fileName)
                         }
                     } else if (Qt.platform.os === "android"){
                         installedAppDrawer.openTriggered()
                     }
-
-                    PageController.showBusyIndicator(false)
                 }
             }
         }
@@ -272,5 +270,21 @@ PageType {
         id: installedAppDrawer
 
         anchors.fill: parent
+    }
+
+    Connections {
+        target: AppSplitTunnelingController
+
+        function onFinished(message) {
+            PageController.showBusyIndicator(false)
+            if (message !== "") {
+                PageController.showNotificationMessage(message)
+            }
+        }
+
+        function onErrorOccurred(errorMessage) {
+            PageController.showBusyIndicator(false)
+            PageController.showErrorMessage(errorMessage)
+        }
     }
 }

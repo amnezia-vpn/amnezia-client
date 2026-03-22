@@ -1,4 +1,4 @@
-package org.amnezia.vpn.protocol
+package com.fblink.vpn.protocol
 
 // keep synchronized with client/platforms/android/android_controller.h ConnectionState
 enum class ProtocolState {

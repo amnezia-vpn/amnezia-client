@@ -10,30 +10,30 @@ Switch {
     id: root
 
     property alias descriptionText: description.text
-    property string descriptionTextColor: AmneziaStyle.color.mutedGray
-    property string descriptionTextDisabledColor: AmneziaStyle.color.charcoalGray
+    property string descriptionTextColor: FBLinkStyle.color.mutedGray
+    property string descriptionTextDisabledColor: FBLinkStyle.color.charcoalGray
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string textDisabledColor: AmneziaStyle.color.mutedGray
+    property string textColor: FBLinkStyle.color.paleGray
+    property string textDisabledColor: FBLinkStyle.color.mutedGray
 
-    property string checkedIndicatorColor: AmneziaStyle.color.richBrown
-    property string defaultIndicatorColor: AmneziaStyle.color.transparent
-    property string checkedDisabledIndicatorColor: AmneziaStyle.color.deepBrown
+    property string checkedIndicatorColor: FBLinkStyle.color.richBrown
+    property string defaultIndicatorColor: FBLinkStyle.color.transparent
+    property string checkedDisabledIndicatorColor: FBLinkStyle.color.deepBrown
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property string borderFocusedColor: FBLinkStyle.color.paleGray
     property int borderFocusedWidth: 1
 
-    property string checkedIndicatorBorderColor: AmneziaStyle.color.richBrown
-    property string defaultIndicatorBorderColor: AmneziaStyle.color.charcoalGray
-    property string checkedDisabledIndicatorBorderColor: AmneziaStyle.color.deepBrown
+    property string checkedIndicatorBorderColor: FBLinkStyle.color.richBrown
+    property string defaultIndicatorBorderColor: FBLinkStyle.color.charcoalGray
+    property string checkedDisabledIndicatorBorderColor: FBLinkStyle.color.deepBrown
 
-    property string checkedInnerCircleColor: AmneziaStyle.color.goldenApricot
-    property string defaultInnerCircleColor: AmneziaStyle.color.paleGray
-    property string checkedDisabledInnerCircleColor: AmneziaStyle.color.mutedBrown
-    property string defaultDisabledInnerCircleColor: AmneziaStyle.color.charcoalGray
+    property string checkedInnerCircleColor: FBLinkStyle.color.goldenApricot
+    property string defaultInnerCircleColor: FBLinkStyle.color.paleGray
+    property string checkedDisabledInnerCircleColor: FBLinkStyle.color.mutedBrown
+    property string defaultDisabledInnerCircleColor: FBLinkStyle.color.charcoalGray
 
-    property string hoveredIndicatorBackgroundColor: AmneziaStyle.color.translucentWhite
-    property string defaultIndicatorBackgroundColor: AmneziaStyle.color.transparent
+    property string hoveredIndicatorBackgroundColor: FBLinkStyle.color.translucentWhite
+    property string defaultIndicatorBackgroundColor: FBLinkStyle.color.transparent
 
     property bool isFocusable: true
 

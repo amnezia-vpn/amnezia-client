@@ -10,8 +10,8 @@ Item {
     id: root
 
     property string headerText
-    property string headerTextDisabledColor: AmneziaStyle.color.charcoalGray
-    property string headerTextColor: AmneziaStyle.color.mutedGray
+    property string headerTextDisabledColor: FBLinkStyle.color.charcoalGray
+    property string headerTextColor: FBLinkStyle.color.mutedGray
 
     property alias errorText: errorField.text
     property bool checkEmptyText: false
@@ -22,17 +22,17 @@ Item {
     property var clickedFunc
 
     property alias textField: textField
-    property string textFieldTextColor: AmneziaStyle.color.paleGray
-    property string textFieldTextDisabledColor: AmneziaStyle.color.mutedGray
+    property string textFieldTextColor: FBLinkStyle.color.paleGray
+    property string textFieldTextDisabledColor: FBLinkStyle.color.mutedGray
 
     property bool textFieldEditable: true
 
-    property string borderColor: AmneziaStyle.color.slateGray
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property string borderColor: FBLinkStyle.color.slateGray
+    property string borderFocusedColor: FBLinkStyle.color.paleGray
 
-    property string backgroundColor: AmneziaStyle.color.onyxBlack
-    property string backgroundDisabledColor: AmneziaStyle.color.transparent
-    property string bgBorderHoveredColor: AmneziaStyle.color.charcoalGray
+    property string backgroundColor: FBLinkStyle.color.onyxBlack
+    property string backgroundDisabledColor: FBLinkStyle.color.transparent
+    property string bgBorderHoveredColor: FBLinkStyle.color.charcoalGray
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
@@ -102,10 +102,10 @@ Item {
 
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
 
-                        placeholderTextColor: AmneziaStyle.color.charcoalGray
+                        placeholderTextColor: FBLinkStyle.color.charcoalGray
 
-                        selectionColor:  AmneziaStyle.color.richBrown
-                        selectedTextColor: AmneziaStyle.color.paleGray
+                        selectionColor:  FBLinkStyle.color.richBrown
+                        selectedTextColor: FBLinkStyle.color.paleGray
 
                         font.pixelSize: 16
                         font.weight: 400
@@ -151,7 +151,7 @@ Item {
 
             text: root.errorText
             visible: root.errorText !== ""
-            color: AmneziaStyle.color.vibrantRed
+            color: FBLinkStyle.color.vibrantRed
 
             Layout.fillWidth: true
         }

@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
+	"vpn-backend/internal/config"
 	"vpn-backend/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -17,10 +19,33 @@ type PaymentHandler struct {
 	db             *gorm.DB
 	yooKassaShopID string
 	yooKassaKey    string
+	cfg            *config.Config
 }
 
-func NewPaymentHandler(db *gorm.DB, shopID, key string) *PaymentHandler {
-	return &PaymentHandler{db: db, yooKassaShopID: shopID, yooKassaKey: key}
+func NewPaymentHandler(db *gorm.DB, shopID, key string, cfg *config.Config) *PaymentHandler {
+	return &PaymentHandler{db: db, yooKassaShopID: shopID, yooKassaKey: key, cfg: cfg}
+}
+
+// verifyYooKassaPayment делает GET-запрос к YooKassa API для подтверждения
+// реального статуса платежа. Защищает webhook от подделки (forgery).
+func (h *PaymentHandler) verifyYooKassaPayment(paymentID string) (string, error) {
+	req, err := http.NewRequest("GET", "https://api.yookassa.ru/v3/payments/"+paymentID, nil)
+	if err != nil {
+		return "", err
+	}
+	req.SetBasicAuth(h.yooKassaShopID, h.yooKassaKey)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return "", err
+	}
+	status, _ := data["status"].(string)
+	return status, nil
 }
 
 type createPaymentRequest struct {
@@ -70,7 +95,7 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 		},
 		"confirmation": map[string]interface{}{
 			"type":       "redirect",
-			"return_url": "https://yourvpn.app/payment/success",
+			"return_url": h.cfg.PaymentReturnURL,
 		},
 		"capture":             true,
 		"save_payment_method": true, // сохраняем карту для автосписания
@@ -144,7 +169,19 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 	obj, _ := event["object"].(map[string]interface{})
 	ykPaymentID, _ := obj["id"].(string)
 
-	err := h.db.Transaction(func(tx *gorm.DB) error {
+	// Верификация через re-fetch к YooKassa API.
+	// Защищает от подделки webhook — злоумышленник не может активировать
+	// подписку отправив поддельный payload с чужим payment_id.
+	actualStatus, err := h.verifyYooKassaPayment(ykPaymentID)
+	if err != nil || actualStatus != "succeeded" {
+		// Логируем, но отвечаем 200 — иначе YooKassa будет повторно слать webhook
+		fmt.Printf("[webhook] Verification failed for payment %s: err=%v status=%s\n", ykPaymentID, err, actualStatus)
+		c.JSON(http.StatusOK, gin.H{"status": "verification_failed"})
+		return
+	}
+
+	var txErr error
+	txErr = h.db.Transaction(func(tx *gorm.DB) error {
 		var payment models.Payment
 		if err := tx.Where("yoo_kassa_id = ?", ykPaymentID).First(&payment).Error; err != nil {
 			return err
@@ -203,7 +240,7 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 		return tx.Model(&sub).Updates(updates).Error
 	})
 
-	if err != nil {
+	if txErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "webhook processing failed"})
 		return
 	}

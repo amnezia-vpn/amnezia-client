@@ -45,7 +45,7 @@ PageType {
             defaultColor: "#00C8FF"
             hoveredColor: "#33D4FF"
             pressedColor: "#0099BB"
-            textColor: AmneziaStyle.color.paleGray
+            textColor: FBLinkStyle.color.paleGray
 
             text: qsTr("Войти в FBLink VPN")
 

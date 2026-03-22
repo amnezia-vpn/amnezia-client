@@ -1,4 +1,4 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
 import android.app.AlertDialog
 import android.app.KeyguardManager
@@ -16,7 +16,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import org.amnezia.vpn.util.Log
+import com.fblink.vpn.util.Log
 
 private const val TAG = "VpnRequestActivity"
 const val EXTRA_PROTOCOL = "PROTOCOL"

@@ -5,7 +5,7 @@
 
 #include "defs.h"
 
-using namespace amnezia;
+using namespace fblink;
 
 QString errorString(ErrorCode code);
 

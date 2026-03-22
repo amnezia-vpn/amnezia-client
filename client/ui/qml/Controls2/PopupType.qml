@@ -25,7 +25,7 @@ Popup {
 
     Overlay.modal: Rectangle {
         visible: root.closeButtonVisible
-        color: AmneziaStyle.color.translucentMidnightBlack
+        color: FBLinkStyle.color.translucentMidnightBlack
     }
 
     onOpened: {
@@ -91,11 +91,11 @@ Popup {
                 implicitHeight: 32
 
                 defaultColor: "white"
-                hoveredColor: AmneziaStyle.color.lightGray
-                pressedColor: AmneziaStyle.color.lightGray
-                disabledColor: AmneziaStyle.color.charcoalGray
+                hoveredColor: FBLinkStyle.color.lightGray
+                pressedColor: FBLinkStyle.color.lightGray
+                disabledColor: FBLinkStyle.color.charcoalGray
 
-                textColor: AmneziaStyle.color.midnightBlack
+                textColor: FBLinkStyle.color.midnightBlack
                 borderWidth: 0
 
                 text: qsTr("Close")

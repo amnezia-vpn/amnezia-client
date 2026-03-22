@@ -9,7 +9,7 @@
 namespace
 {
     enum class ConfigTypes {
-        Amnezia,
+        FBLink,
         OpenVpn,
         WireGuard,
         Awg,
@@ -68,7 +68,7 @@ private:
 
     void checkForMaliciousStrings(const QJsonObject &protocolConfig);
 
-    void processAmneziaConfig(QJsonObject &config);
+    void processFBLinkConfig(QJsonObject &config);
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();

@@ -5,7 +5,7 @@
 #include "core/defs.h"
 #include "containers/containers_defs.h"
 
-namespace amnezia {
+namespace fblink {
 
 enum SharedScriptType {
     // General scripts

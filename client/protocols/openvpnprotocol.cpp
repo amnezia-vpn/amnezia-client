@@ -85,7 +85,7 @@ ErrorCode OpenVpnProtocol::prepare()
 
         return ErrorCode::NoError;
     }, [] () {
-        return ErrorCode::AmneziaServiceConnectionFailed;
+        return ErrorCode::FBLinkServiceConnectionFailed;
     });
 }
 
@@ -181,10 +181,10 @@ ErrorCode OpenVpnProtocol::start()
 
 #ifdef AMNEZIA_DESKTOP
     const ErrorCode res = IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        QString ip = NetworkUtilities::getIPAddress(m_configData.value(amnezia::config_key::hostName).toString());
+        QString ip = NetworkUtilities::getIPAddress(m_configData.value(fblink::config_key::hostName).toString());
         QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList(ip));
         if (!reply.waitForFinished(1000) || !reply.returnValue()) {
-            return ErrorCode::AmneziaServiceConnectionFailed;
+            return ErrorCode::FBLinkServiceConnectionFailed;
         }
         return ErrorCode::NoError;
     });
@@ -228,8 +228,8 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnProcess = IpcClient::CreatePrivilegedProcess();
 
     if (!m_openVpnProcess) {
-        setLastError(ErrorCode::AmneziaServiceConnectionFailed);
-        return ErrorCode::AmneziaServiceConnectionFailed;
+        setLastError(ErrorCode::FBLinkServiceConnectionFailed);
+        return ErrorCode::FBLinkServiceConnectionFailed;
     }
 
     m_openVpnProcess->setProgram(PermittedProcess::OpenVPN);
@@ -360,7 +360,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                                 m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                                 m_configData.insert("vpnGateway", m_vpnGateway);
                                 m_configData.insert("vpnServer",
-                                                    NetworkUtilities::getIPAddress(m_configData.value(amnezia::config_key::hostName).toString()));
+                                                    NetworkUtilities::getIPAddress(m_configData.value(fblink::config_key::hostName).toString()));
                                 iface->enablePeerTraffic(m_configData);
                             }
                         }
@@ -371,7 +371,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                 // killSwitch toggle
                 if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
                     m_configData.insert("vpnServer",
-                                        NetworkUtilities::getIPAddress(m_configData.value(amnezia::config_key::hostName).toString()));
+                                        NetworkUtilities::getIPAddress(m_configData.value(fblink::config_key::hostName).toString()));
                     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
                         QRemoteObjectPendingReply<bool> reply = iface->enableKillSwitch(m_configData, 0);
                         if (!reply.waitForFinished(1000) || !reply.returnValue()) {

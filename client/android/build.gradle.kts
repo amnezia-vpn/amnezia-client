@@ -17,7 +17,7 @@ val qtTargetAbiList: String by gradleProperties
 val outputBaseName: String by gradleProperties
 
 android {
-    namespace = "org.amnezia.vpn"
+    namespace = "com.fblink.vpn"
 
     buildFeatures {
         viewBinding = true
@@ -34,7 +34,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "org.amnezia.vpn"
+        applicationId = "com.fblink.vpn"
         targetSdk = qtTargetSdkVersion.toInt()
 
         // keeps language resources for only the locales specified below

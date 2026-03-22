@@ -102,7 +102,7 @@ PageType {
                 Layout.topMargin: 12
                 horizontalAlignment: Text.AlignHCenter
                 text: qsTr("Версия %1").arg(SettingsController.getAppVersion())
-                color: AmneziaStyle.color.mutedGray
+                color: FBLinkStyle.color.mutedGray
 
                 MouseArea {
                     property int clickCount: 0
@@ -128,8 +128,8 @@ PageType {
                 font.pixelSize: 14
                 wrapMode: Text.WordWrap
 
-                text: qsTr("FBLink VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.\n\nПриложение создано на основе открытого проекта AmneziaVPN (amnezia-vpn.org), распространяемого по лицензии GNU GPL v3.")
-                color: AmneziaStyle.color.paleGray
+                text: qsTr("FBLink VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.\n\nПриложение создано на основе открытого проекта FBLink (fblink-vpn.org), распространяемого по лицензии GNU GPL v3.")
+                color: FBLinkStyle.color.paleGray
             }
 
             // Divider
@@ -294,7 +294,7 @@ PageType {
                         top: parent.top
                         margins: 12
                     }
-                    text: qsTr("🏛 Основано на AmneziaVPN (GNU GPL v3)\nИсходный код: github.com/amnezia-vpn")
+                    text: qsTr("🏛 Основано на FBLink (GNU GPL v3)\nИсходный код: github.com/fblink-vpn")
                     font.pixelSize: 12
                     color: "#8A8A8E"
                     wrapMode: Text.WordWrap
@@ -303,7 +303,7 @@ PageType {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: Qt.openUrlExternally("https://github.com/amnezia-vpn/amnezia-client")
+                        onClicked: Qt.openUrlExternally("https://github.com/fblink-vpn/fblink-client")
                     }
                 }
             }

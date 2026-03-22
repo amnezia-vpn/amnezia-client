@@ -13,7 +13,7 @@
 #include "core/defs.h"
 #include "secure_qsettings.h"
 
-using namespace amnezia;
+using namespace fblink;
 
 class QSettings;
 
@@ -145,13 +145,13 @@ public:
     void removeVpnSites(RouteMode mode, const QStringList &sites);
     void removeAllVpnSites(RouteMode mode);
 
-    bool useAmneziaDns() const
+    bool useFBLinkDns() const
     {
-        return value("Conf/useAmneziaDns", true).toBool();
+        return value("Conf/useFBLinkDns", true).toBool();
     }
-    void setUseAmneziaDns(bool enabled)
+    void setUseFBLinkDns(bool enabled)
     {
-        setValue("Conf/useAmneziaDns", enabled);
+        setValue("Conf/useFBLinkDns", enabled);
     }
 
     QString primaryDns() const;

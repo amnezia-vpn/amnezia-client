@@ -80,10 +80,10 @@ PageType {
                 }
 
                 descriptionOnTop: true
-                textColor: AmneziaStyle.color.goldenApricot
+                textColor: FBLinkStyle.color.goldenApricot
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)

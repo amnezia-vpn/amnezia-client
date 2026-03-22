@@ -1,9 +1,9 @@
-package org.amnezia.vpn.protocol.cloak
+package com.fblink.vpn.protocol.cloak
 
 import android.util.Base64
 import net.openvpn.ovpn3.ClientAPI_Config
-import org.amnezia.vpn.protocol.openvpn.OpenVpn
-import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
+import com.fblink.vpn.protocol.openvpn.OpenVpn
+import com.fblink.vpn.util.LibraryLoader.loadSharedLibrary
 import org.json.JSONObject
 
 class Cloak : OpenVpn() {

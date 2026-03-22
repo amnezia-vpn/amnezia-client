@@ -135,7 +135,7 @@ void VpnConfigurationsController::updateContainerConfigAfterInstallation(const D
     if (container == DockerContainer::TorWebSite) {
         QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
 
-        qDebug() << "amnezia-tor onions" << stdOut;
+        qDebug() << "fblink-tor onions" << stdOut;
 
         QString onion = stdOut;
         onion.replace("\n", "");

@@ -11,26 +11,26 @@ CheckBox {
     id: root
 
     property string descriptionText
-    property string descriptionTextColor: AmneziaStyle.color.mutedGray
-    property string descriptionTextDisabledColor: AmneziaStyle.color.charcoalGray
+    property string descriptionTextColor: FBLinkStyle.color.mutedGray
+    property string descriptionTextDisabledColor: FBLinkStyle.color.charcoalGray
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string textDisabledColor: AmneziaStyle.color.mutedGray
+    property string textColor: FBLinkStyle.color.paleGray
+    property string textDisabledColor: FBLinkStyle.color.mutedGray
 
-    property string hoveredColor: AmneziaStyle.color.barelyTranslucentWhite
-    property string defaultColor: AmneziaStyle.color.transparent
-    property string pressedColor: AmneziaStyle.color.barelyTranslucentWhite
+    property string hoveredColor: FBLinkStyle.color.barelyTranslucentWhite
+    property string defaultColor: FBLinkStyle.color.transparent
+    property string pressedColor: FBLinkStyle.color.barelyTranslucentWhite
 
-    property string defaultBorderColor: AmneziaStyle.color.paleGray
-    property string checkedBorderColor: AmneziaStyle.color.goldenApricot
-    property string checkedBorderDisabledColor: AmneziaStyle.color.deepBrown
+    property string defaultBorderColor: FBLinkStyle.color.paleGray
+    property string checkedBorderColor: FBLinkStyle.color.goldenApricot
+    property string checkedBorderDisabledColor: FBLinkStyle.color.deepBrown
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property string borderFocusedColor: FBLinkStyle.color.paleGray
 
-    property string checkedImageColor: AmneziaStyle.color.goldenApricot
-    property string pressedImageColor: AmneziaStyle.color.burntOrange
-    property string defaultImageColor: AmneziaStyle.color.transparent
-    property string checkedDisabledImageColor: AmneziaStyle.color.mutedBrown
+    property string checkedImageColor: FBLinkStyle.color.goldenApricot
+    property string pressedImageColor: FBLinkStyle.color.burntOrange
+    property string defaultImageColor: FBLinkStyle.color.transparent
+    property string checkedDisabledImageColor: FBLinkStyle.color.mutedBrown
 
     property string imageSource: "qrc:/images/controls/check.svg"
 
@@ -64,8 +64,8 @@ CheckBox {
     focusPolicy: Qt.NoFocus
 
     background: Rectangle {
-        color: AmneziaStyle.color.transparent
-        border.color: root.focus ? borderFocusedColor : AmneziaStyle.color.transparent
+        color: FBLinkStyle.color.transparent
+        border.color: root.focus ? borderFocusedColor : FBLinkStyle.color.transparent
         border.width: 1
         radius: 16
     }
@@ -96,7 +96,7 @@ CheckBox {
             anchors.centerIn: parent
             width: 24
             height: 24
-            color: AmneziaStyle.color.transparent
+            color: FBLinkStyle.color.transparent
             border.color: root.checked ?
                               (root.enabled ?
                                    checkedBorderColor :

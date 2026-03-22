@@ -5,7 +5,7 @@
 #include "transfer.h"
 #include "serialization.h"
 
-namespace amnezia::serialization::inbounds
+namespace fblink::serialization::inbounds
 {
 
 //"inbounds": [
@@ -34,5 +34,5 @@ QJsonObject GenerateInboundEntry()
 }
 
 
-} // namespace amnezia::serialization::inbounds
+} // namespace fblink::serialization::inbounds
 

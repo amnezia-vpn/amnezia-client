@@ -1,4 +1,4 @@
-package org.amnezia.vpn.util
+package com.fblink.vpn.util
 
 import android.content.Context
 import android.os.Build
@@ -13,12 +13,12 @@ import java.time.format.DateTimeFormatter
 import java.time.ZonedDateTime
 import java.time.ZoneOffset
 import java.util.concurrent.locks.ReentrantLock
-import org.amnezia.vpn.util.Log.Priority.D
-import org.amnezia.vpn.util.Log.Priority.E
-import org.amnezia.vpn.util.Log.Priority.F
-import org.amnezia.vpn.util.Log.Priority.I
-import org.amnezia.vpn.util.Log.Priority.V
-import org.amnezia.vpn.util.Log.Priority.W
+import com.fblink.vpn.util.Log.Priority.D
+import com.fblink.vpn.util.Log.Priority.E
+import com.fblink.vpn.util.Log.Priority.F
+import com.fblink.vpn.util.Log.Priority.I
+import com.fblink.vpn.util.Log.Priority.V
+import com.fblink.vpn.util.Log.Priority.W
 import android.util.Log as NativeLog
 
 private const val TAG = "Log"

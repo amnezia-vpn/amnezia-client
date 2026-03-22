@@ -307,7 +307,7 @@ void ExportController::generateXrayConfig(const QString &clientName)
 
     QJsonObject user = users[0].toObject();
 
-    amnezia::serialization::VlessServerObject vlessServer;
+    fblink::serialization::VlessServerObject vlessServer;
     vlessServer.address = server.value("address").toString();
     vlessServer.port = server.value("port").toInt();
     vlessServer.id = user.value("id").toString();
@@ -326,7 +326,7 @@ void ExportController::generateXrayConfig(const QString &clientName)
         vlessServer.spiderX = realitySettings.value("spiderX").toString("");
     }
 
-    m_nativeConfigString = amnezia::serialization::vless::Serialize(vlessServer, "AmneziaVPN");
+    m_nativeConfigString = fblink::serialization::vless::Serialize(vlessServer, "FBLink");
 
     emit exportConfigChanged();
 }

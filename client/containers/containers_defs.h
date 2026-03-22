@@ -6,9 +6,9 @@
 
 #include "../protocols/protocols_defs.h"
 
-using namespace amnezia;
+using namespace fblink;
 
-namespace amnezia
+namespace fblink
 {
 
     namespace ContainerEnumNS
@@ -43,42 +43,42 @@ namespace amnezia
         Q_OBJECT
 
     public:
-        Q_INVOKABLE static amnezia::DockerContainer containerFromString(const QString &container);
-        Q_INVOKABLE static QString containerToString(amnezia::DockerContainer container);
-        Q_INVOKABLE static QString containerTypeToString(amnezia::DockerContainer c);
-        Q_INVOKABLE static QString containerTypeToProtocolString(amnezia::DockerContainer c);
+        Q_INVOKABLE static fblink::DockerContainer containerFromString(const QString &container);
+        Q_INVOKABLE static QString containerToString(fblink::DockerContainer container);
+        Q_INVOKABLE static QString containerTypeToString(fblink::DockerContainer c);
+        Q_INVOKABLE static QString containerTypeToProtocolString(fblink::DockerContainer c);
 
-        Q_INVOKABLE static QList<amnezia::DockerContainer> allContainers();
+        Q_INVOKABLE static QList<fblink::DockerContainer> allContainers();
 
-        Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerHumanNames();
-        Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerDescriptions();
-        Q_INVOKABLE static QMap<amnezia::DockerContainer, QString> containerDetailedDescriptions();
+        Q_INVOKABLE static QMap<fblink::DockerContainer, QString> containerHumanNames();
+        Q_INVOKABLE static QMap<fblink::DockerContainer, QString> containerDescriptions();
+        Q_INVOKABLE static QMap<fblink::DockerContainer, QString> containerDetailedDescriptions();
 
         // these protocols will be displayed in container settings
-        Q_INVOKABLE static QVector<amnezia::Proto> protocolsForContainer(amnezia::DockerContainer container);
+        Q_INVOKABLE static QVector<fblink::Proto> protocolsForContainer(fblink::DockerContainer container);
 
-        Q_INVOKABLE static amnezia::ServiceType containerService(amnezia::DockerContainer c);
+        Q_INVOKABLE static fblink::ServiceType containerService(fblink::DockerContainer c);
 
         // binding between Docker container and main protocol of given container
         // it may be changed fot future containers :)
-        Q_INVOKABLE static amnezia::Proto defaultProtocol(amnezia::DockerContainer c);
+        Q_INVOKABLE static fblink::Proto defaultProtocol(fblink::DockerContainer c);
 
-        Q_INVOKABLE static bool isSupportedByCurrentPlatform(amnezia::DockerContainer c);
-        Q_INVOKABLE static QStringList fixedPortsForContainer(amnezia::DockerContainer c);
+        Q_INVOKABLE static bool isSupportedByCurrentPlatform(fblink::DockerContainer c);
+        Q_INVOKABLE static QStringList fixedPortsForContainer(fblink::DockerContainer c);
 
-        static bool isEasySetupContainer(amnezia::DockerContainer container);
-        static QString easySetupHeader(amnezia::DockerContainer container);
-        static QString easySetupDescription(amnezia::DockerContainer container);
-        static int easySetupOrder(amnezia::DockerContainer container);
+        static bool isEasySetupContainer(fblink::DockerContainer container);
+        static QString easySetupHeader(fblink::DockerContainer container);
+        static QString easySetupDescription(fblink::DockerContainer container);
+        static int easySetupOrder(fblink::DockerContainer container);
 
-        static bool isShareable(amnezia::DockerContainer container);
+        static bool isShareable(fblink::DockerContainer container);
 
-        static bool isAwgContainer(amnezia::DockerContainer container);
+        static bool isAwgContainer(fblink::DockerContainer container);
 
 
-        static QJsonObject getProtocolConfigFromContainer(const amnezia::Proto protocol, const QJsonObject &containerConfig);
+        static QJsonObject getProtocolConfigFromContainer(const fblink::Proto protocol, const QJsonObject &containerConfig);
 
-        static int installPageOrder(amnezia::DockerContainer container);
+        static int installPageOrder(fblink::DockerContainer container);
     };
 
     static void declareQmlContainerEnum()
@@ -87,8 +87,8 @@ namespace amnezia
                                          "Error: only enums");
     }
 
-} // namespace amnezia
+} // namespace fblink
 
-QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c);
+QDebug operator<<(QDebug debug, const fblink::DockerContainer &c);
 
 #endif // CONTAINERS_DEFS_H

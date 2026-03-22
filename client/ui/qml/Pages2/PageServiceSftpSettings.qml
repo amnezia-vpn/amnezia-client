@@ -78,7 +78,7 @@ PageType {
                 descriptionOnTop: true
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
@@ -99,7 +99,7 @@ PageType {
                 descriptionOnTop: true
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
@@ -120,7 +120,7 @@ PageType {
                 descriptionOnTop: true
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
@@ -141,7 +141,7 @@ PageType {
                 descriptionOnTop: true
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
 
@@ -162,11 +162,11 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.paleGray
+                defaultColor: FBLinkStyle.color.transparent
+                hoveredColor: FBLinkStyle.color.translucentWhite
+                pressedColor: FBLinkStyle.color.sheerWhite
+                disabledColor: FBLinkStyle.color.mutedGray
+                textColor: FBLinkStyle.color.paleGray
                 borderWidth: 1
 
                 text: qsTr("Mount folder on device")
@@ -223,16 +223,16 @@ PageType {
                 Layout.leftMargin: 8
                 implicitHeight: 32
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
+                defaultColor: FBLinkStyle.color.transparent
+                hoveredColor: FBLinkStyle.color.translucentWhite
+                pressedColor: FBLinkStyle.color.sheerWhite
+                disabledColor: FBLinkStyle.color.mutedGray
+                textColor: FBLinkStyle.color.goldenApricot
 
                 text: qsTr("Detailed instructions")
 
                 clickedFunc: function() {
-                    // Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
+                    // Qt.openUrlExternally("https://github.com/fblink-vpn/desktop-client/releases/latest")
                 }
             }
         }

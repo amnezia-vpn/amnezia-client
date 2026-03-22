@@ -1,6 +1,6 @@
-package org.amnezia.vpn.protocol.openvpn
+package com.fblink.vpn.protocol.openvpn
 
-import org.amnezia.vpn.protocol.ProtocolConfig
+import com.fblink.vpn.protocol.ProtocolConfig
 
 private const val OPENVPN_DEFAULT_MTU = 1500
 

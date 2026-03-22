@@ -17,11 +17,11 @@ Rectangle {
 
     gradient: Gradient {
         orientation: Gradient.Horizontal
-        GradientStop { position: 0.0; color: AmneziaStyle.color.translucentSlateGray }
-        GradientStop { position: 1.0; color: AmneziaStyle.color.translucentOnyxBlack }
+        GradientStop { position: 0.0; color: FBLinkStyle.color.translucentSlateGray }
+        GradientStop { position: 1.0; color: FBLinkStyle.color.translucentOnyxBlack }
     }
     border.width: 1
-    border.color: AmneziaStyle.color.onyxBlack
+    border.color: FBLinkStyle.color.onyxBlack
     radius: 13
 
     visible: ServersModel.isAdVisible
@@ -74,7 +74,7 @@ Rectangle {
             CaptionTextType {
                 Layout.fillWidth: true
                 text: ServersModel.adHeader
-                color: AmneziaStyle.color.paleGray
+                color: FBLinkStyle.color.paleGray
                 font.pixelSize: 14
                 font.weight: 700
 
@@ -84,7 +84,7 @@ Rectangle {
             CaptionTextType {
                 Layout.fillWidth: true
                 text: ServersModel.adDescription
-                color: AmneziaStyle.color.mutedGray
+                color: FBLinkStyle.color.mutedGray
                 wrapMode: Text.WordWrap
                 lineHeight: 18
                 lineHeightMode: Text.FixedHeight
@@ -103,9 +103,9 @@ Rectangle {
                 id: chevronBackground
                 anchors.fill: parent
                 radius: 12
-                color: AmneziaStyle.color.transparent
+                color: FBLinkStyle.color.transparent
                 border.width: root.activeFocus ? 1 : 0
-                border.color: AmneziaStyle.color.paleGray
+                border.color: FBLinkStyle.color.paleGray
 
                 Behavior on color {
                     PropertyAnimation { duration: 200 }
@@ -131,15 +131,15 @@ Rectangle {
         hoverEnabled: true
 
         onEntered: {
-            chevronBackground.color = AmneziaStyle.color.slateGray
+            chevronBackground.color = FBLinkStyle.color.slateGray
         }
 
         onExited: {
-            chevronBackground.color = AmneziaStyle.color.transparent
+            chevronBackground.color = FBLinkStyle.color.transparent
         }
 
         onPressedChanged: {
-            chevronBackground.color = pressed ? AmneziaStyle.color.charcoalGray : containsMouse ? AmneziaStyle.color.slateGray : AmneziaStyle.color.transparent
+            chevronBackground.color = pressed ? FBLinkStyle.color.charcoalGray : containsMouse ? FBLinkStyle.color.slateGray : FBLinkStyle.color.transparent
         }
 
         onClicked: function() {

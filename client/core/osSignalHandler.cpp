@@ -4,7 +4,7 @@
 #include <QMetaObject>
 #include <QSocketNotifier>
 
-#include "../amnezia_application.h"
+#include "../fblink_application.h"
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     #include <pthread.h>
@@ -41,7 +41,7 @@ namespace
                 const HWND active = GetActiveWindow();
                 const HWND self = msg->hwnd;
                 if (active != self) {
-                    AmneziaApplication *app = qobject_cast<AmneziaApplication *>(QCoreApplication::instance());
+                    FBLinkApplication *app = qobject_cast<FBLinkApplication *>(QCoreApplication::instance());
                     if (app) {
                         QMetaObject::invokeMethod(app, "forceQuit", Qt::QueuedConnection);
                     }

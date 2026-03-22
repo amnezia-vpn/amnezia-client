@@ -1,4 +1,4 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -6,13 +6,13 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.RegisterReceiverFlags
-import org.amnezia.vpn.protocol.ProtocolState
-import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
-import org.amnezia.vpn.protocol.ProtocolState.CONNECTING
-import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
-import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTING
-import org.amnezia.vpn.protocol.ProtocolState.RECONNECTING
-import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
+import com.fblink.vpn.protocol.ProtocolState
+import com.fblink.vpn.protocol.ProtocolState.CONNECTED
+import com.fblink.vpn.protocol.ProtocolState.CONNECTING
+import com.fblink.vpn.protocol.ProtocolState.DISCONNECTED
+import com.fblink.vpn.protocol.ProtocolState.DISCONNECTING
+import com.fblink.vpn.protocol.ProtocolState.RECONNECTING
+import com.fblink.vpn.protocol.ProtocolState.UNKNOWN
 
 fun Context.getString(state: ProtocolState): String =
     getString(

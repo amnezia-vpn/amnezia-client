@@ -33,7 +33,7 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case ProtocolNameRole: {
-        amnezia::Proto proto = ProtocolProps::protoFromString(m_content.keys().at(index.row()));
+        fblink::Proto proto = ProtocolProps::protoFromString(m_content.keys().at(index.row()));
         return ProtocolProps::protocolHumanNames().value(proto);
     }
     case ServerProtocolPageRole:

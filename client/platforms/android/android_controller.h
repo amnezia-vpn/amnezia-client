@@ -6,7 +6,7 @@
 
 #include "protocols/vpnprotocol.h"
 
-using namespace amnezia;
+using namespace fblink;
 
 class AndroidController : public QObject
 {
@@ -18,7 +18,7 @@ public:
 
     bool initialize();
 
-    // keep synchronized with org.amnezia.vpn.protocol.ProtocolState
+    // keep synchronized with org.fblink.vpn.protocol.ProtocolState
     enum class ConnectionState
     {
         DISCONNECTED,

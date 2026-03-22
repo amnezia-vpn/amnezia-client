@@ -125,17 +125,17 @@ PageType {
                     GradientStop { 
                         position: 0.0
                         color: ApiAccountInfoModel.data("subscriptionStatus") !== "Expired" ? 
-                               AmneziaStyle.color.translucentRichBrown : AmneziaStyle.color.translucentSlateGray
+                               FBLinkStyle.color.translucentRichBrown : FBLinkStyle.color.translucentSlateGray
                     }
                     GradientStop { 
                         position: 1.0
-                        color: AmneziaStyle.color.translucentOnyxBlack 
+                        color: FBLinkStyle.color.translucentOnyxBlack 
                     }
                 }
 
                 border.width: 1
                 border.color: ApiAccountInfoModel.data("subscriptionStatus") !== "Expired" ? 
-                              AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
+                              FBLinkStyle.color.goldenApricot : FBLinkStyle.color.mutedGray
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -158,14 +158,14 @@ PageType {
                             Label {
                                 text: qsTr("Subscription Status")
                                 font.pixelSize: 12
-                                color: AmneziaStyle.color.mutedGray
+                                color: FBLinkStyle.color.mutedGray
                             }
                             Label {
                                 text: ApiAccountInfoModel.data("subscriptionStatus")
                                 font.pixelSize: 20
                                 font.bold: true
                                 color: ApiAccountInfoModel.data("subscriptionStatus") !== "Expired" ? 
-                                       AmneziaStyle.color.goldenApricot : AmneziaStyle.color.vibrantRed
+                                       FBLinkStyle.color.goldenApricot : FBLinkStyle.color.vibrantRed
                             }
                         }
                     }
@@ -188,7 +188,7 @@ PageType {
                             Label {
                                 text: qsTr("Valid Until: ") + ApiAccountInfoModel.data("endDate")
                                 font.pixelSize: 14
-                                color: AmneziaStyle.color.lightGray
+                                color: FBLinkStyle.color.lightGray
                                 Layout.fillWidth: true
                             }
                         }
@@ -208,8 +208,8 @@ PageType {
                                 radius: 2
                                 color: {
                                     var pct = width / parent.width
-                                    if (pct > 0.8) return AmneziaStyle.color.vibrantRed
-                                    if (pct > 0.5) return AmneziaStyle.color.goldenApricot
+                                    if (pct > 0.8) return FBLinkStyle.color.vibrantRed
+                                    if (pct > 0.5) return FBLinkStyle.color.goldenApricot
                                     return "#10B981"
                                 }
                                 
@@ -255,7 +255,7 @@ PageType {
                         Label {
                             text: qsTr("Active Connections: ")
                             font.pixelSize: 14
-                            color: AmneziaStyle.color.lightGray
+                            color: FBLinkStyle.color.lightGray
                         }
 
                         // Чипы устройств
@@ -280,14 +280,14 @@ PageType {
                                     width: 14
                                     height: 14
                                     radius: 7
-                                    color: AmneziaStyle.color.goldenApricot
+                                    color: FBLinkStyle.color.goldenApricot
                                     
                                     Rectangle {
                                         anchors.centerIn: parent
                                         width: 6
                                         height: 6
                                         radius: 3
-                                        color: AmneziaStyle.color.onyxBlack
+                                        color: FBLinkStyle.color.onyxBlack
                                     }
                                 }
                             }
@@ -314,7 +314,7 @@ PageType {
                                     return ""
                                 }
                                 font.pixelSize: 12
-                                color: AmneziaStyle.color.goldenApricot
+                                color: FBLinkStyle.color.goldenApricot
                             }
                             
                             Item { Layout.fillWidth: true } // spacer
@@ -327,10 +327,10 @@ PageType {
                         Layout.topMargin: 8
                         
                         text: qsTr("Renew Subscription")
-                        defaultColor: AmneziaStyle.color.goldenApricot
-                        hoveredColor: Qt.lighter(AmneziaStyle.color.goldenApricot, 1.1)
-                        pressedColor: Qt.darker(AmneziaStyle.color.goldenApricot, 1.1)
-                        textColor: AmneziaStyle.color.midnightBlack
+                        defaultColor: FBLinkStyle.color.goldenApricot
+                        hoveredColor: Qt.lighter(FBLinkStyle.color.goldenApricot, 1.1)
+                        pressedColor: Qt.darker(FBLinkStyle.color.goldenApricot, 1.1)
+                        textColor: FBLinkStyle.color.midnightBlack
                         
                         clickedFunc: function() {
                             PageController.showBusyIndicator(true)
@@ -351,7 +351,7 @@ PageType {
             width: listView.width
             spacing: 0
 
-            readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
+            readonly property bool isVisibleForFBLinkFree: ApiAccountInfoModel.data("isComponentVisible")
 
             SwitcherType {
                 id: switcher
@@ -387,7 +387,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.fillWidth: true
 
-                backGroundColor: AmneziaStyle.color.translucentRichBrown
+                backGroundColor: FBLinkStyle.color.translucentRichBrown
 
                 textString: qsTr("Configurations have been updated for some countries. Download and install the updated configuration files")
 
@@ -408,7 +408,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: warning.visible ? 16 : 32
 
-                visible: footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForFBLinkFree
 
                 text: qsTr("Subscription Key")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
@@ -424,13 +424,13 @@ PageType {
             }
 
             DividerType {
-                visible: footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForFBLinkFree
             }
 
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                visible: footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForFBLinkFree
 
                 text: qsTr("Configuration Files")
 
@@ -444,13 +444,13 @@ PageType {
             }
 
             DividerType {
-                visible: footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForFBLinkFree
             }
 
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                visible: footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForFBLinkFree
 
                 text: qsTr("Active Devices")
 
@@ -464,12 +464,12 @@ PageType {
             }
 
             DividerType {
-                visible: footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForFBLinkFree
             }
 
             LabelWithButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: footer.isVisibleForAmneziaFree ? 0 : 32
+                Layout.topMargin: footer.isVisibleForFBLinkFree ? 0 : 32
 
                 text: qsTr("Support")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
@@ -484,7 +484,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                visible: footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForFBLinkFree
 
                 text: qsTr("How to connect on another device")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
@@ -495,7 +495,7 @@ PageType {
             }
 
             DividerType {
-                visible: footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForFBLinkFree
             }
 
             BasicButtonType {
@@ -507,9 +507,9 @@ PageType {
                 implicitHeight: 32
 
                 defaultColor: "transparent"
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.vibrantRed
+                hoveredColor: FBLinkStyle.color.translucentWhite
+                pressedColor: FBLinkStyle.color.sheerWhite
+                textColor: FBLinkStyle.color.vibrantRed
 
                 text: qsTr("Reload API config")
 
@@ -541,12 +541,12 @@ PageType {
                 Layout.leftMargin: 8
                 implicitHeight: 32
 
-                visible: footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForFBLinkFree
 
                 defaultColor: "transparent"
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.vibrantRed
+                hoveredColor: FBLinkStyle.color.translucentWhite
+                pressedColor: FBLinkStyle.color.sheerWhite
+                textColor: FBLinkStyle.color.vibrantRed
 
                 text: qsTr("Unlink this device")
 
@@ -582,9 +582,9 @@ PageType {
                 implicitHeight: 32
 
                 defaultColor: "transparent"
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.vibrantRed
+                hoveredColor: FBLinkStyle.color.translucentWhite
+                pressedColor: FBLinkStyle.color.sheerWhite
+                textColor: FBLinkStyle.color.vibrantRed
 
                 text: qsTr("Remove from application")
 

@@ -62,7 +62,7 @@ Item {
             implicitHeight: 56
 
             image: "qrc:/images/controls/more-vertical.svg"
-            imageColor: AmneziaStyle.color.paleGray
+            imageColor: FBLinkStyle.color.paleGray
 
             onClicked: root.moreClicked()
 

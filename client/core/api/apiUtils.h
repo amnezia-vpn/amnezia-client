@@ -18,7 +18,7 @@ namespace apiUtils
     apiDefs::ConfigType getConfigType(const QJsonObject &serverConfigObject);
     apiDefs::ConfigSource getConfigSource(const QJsonObject &serverConfigObject);
 
-    amnezia::ErrorCode checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
+    fblink::ErrorCode checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
                                                const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
                                                const QByteArray &responseBody);
 

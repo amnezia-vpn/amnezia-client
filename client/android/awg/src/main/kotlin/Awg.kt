@@ -1,7 +1,7 @@
-package org.amnezia.vpn.protocol.awg
+package com.fblink.vpn.protocol.awg
 
-import org.amnezia.vpn.protocol.wireguard.Wireguard
-import org.amnezia.vpn.protocol.wireguard.WireguardConfig
+import com.fblink.vpn.protocol.wireguard.Wireguard
+import com.fblink.vpn.protocol.wireguard.WireguardConfig
 import org.json.JSONObject
 
 class Awg : Wireguard() {

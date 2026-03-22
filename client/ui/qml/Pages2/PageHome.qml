@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
+import QtQuick.Extras
 
 import SortFilterProxyModel 0.2
 
@@ -248,12 +249,33 @@ PageType {
 
                     Behavior on color { ColorAnimation { duration: 150 } }
 
-                    property int fakePing: 42
+                    // Кроссплатформенный TCP-пинг через C++ SystemController (работает на iOS, Android, Desktop)
+                    property int realPingMs: -1
+                    property string pingDisplay: realPingMs >= 0 ? (realPingMs + " ms") : "—"
+
+                    Connections {
+                        target: SystemController
+                        function onPingMeasured(ms) {
+                            locationCardRef.realPingMs = ms
+                        }
+                    }
+
+                    function measurePing() {
+                        var serverIp = ServersModel.defaultServerInfo
+                            ? ServersModel.defaultServerInfo["host"] || ""
+                            : ""
+                        if (serverIp === "") return
+
+                        SystemController.measurePing(serverIp)
+                    }
+
                     Timer {
-                        interval: 2500
+                        id: pingTimer
+                        interval: 5000
                         running: ConnectionController.isConnected
                         repeat: true
-                        onTriggered: locationCardRef.fakePing = 35 + Math.floor(Math.random() * 15)
+                        triggeredOnStart: true
+                        onTriggered: locationCardRef.measurePing()
                     }
 
                     RowLayout {
@@ -308,8 +330,11 @@ PageType {
                             spacing: 8
 
                             LabelTextType {
-                                text: "• " + locationCardRef.fakePing + " ms"
-                                color: "#10B981"
+                                text: "• " + locationCardRef.pingDisplay
+                                color: locationCardRef.realPingMs < 0 ? "#8A8A8E"
+                                     : locationCardRef.realPingMs < 80 ? "#10B981"
+                                     : locationCardRef.realPingMs < 150 ? "#F59E0B"
+                                     : "#EF4444"
                                 font.pixelSize: 13
                                 font.weight: 600
                                 visible: ConnectionController.isConnected

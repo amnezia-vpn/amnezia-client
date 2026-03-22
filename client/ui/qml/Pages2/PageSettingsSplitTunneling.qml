@@ -41,10 +41,12 @@ PageType {
         target: SitesController
 
         function onFinished(message) {
+            PageController.showBusyIndicator(false)
             PageController.showNotificationMessage(message)
         }
 
         function onErrorOccurred(errorMessage) {
+            PageController.showBusyIndicator(false)
             PageController.showErrorMessage(errorMessage)
         }
     }
@@ -205,7 +207,7 @@ PageType {
                 text: url
                 descriptionText: ip
                 rightImageSource: "qrc:/images/controls/trash.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                rightImageColor: FBLinkStyle.color.paleGray
 
                 clickedFunction: function() {
                     var headerText = qsTr("Remove ") + url + "?"
@@ -239,7 +241,7 @@ PageType {
         
         height: addSiteButton.implicitHeight + 48
         
-        color: AmneziaStyle.color.midnightBlack
+        color: FBLinkStyle.color.midnightBlack
         
         RowLayout {
             id: addSiteButton
@@ -267,7 +269,7 @@ PageType {
                     PageController.showBusyIndicator(true)
                     SitesController.addSite(textField.text)
                     textField.text = ""
-                    PageController.showBusyIndicator(false)
+                    // BusyIndicator скрывается в onFinished/onErrorOccurred
                 }
             }
 
@@ -277,7 +279,7 @@ PageType {
                 implicitHeight: 56
 
                 image: "qrc:/images/controls/more-vertical.svg"
-                imageColor: AmneziaStyle.color.paleGray
+                imageColor: FBLinkStyle.color.paleGray
 
                 onClicked: function () {
                     moreActionsDrawer.openTriggered()
@@ -343,7 +345,7 @@ PageType {
                         PageController.showBusyIndicator(true)
                         SitesController.exportSites(fileName)
                         moreActionsDrawer.closeTriggered()
-                        PageController.showBusyIndicator(false)
+                        // BusyIndicator скрывается в onFinished/onErrorOccurred
                     }
                 }
             }
@@ -365,7 +367,7 @@ PageType {
                     var yesButtonFunction = function() {
                         PageController.showBusyIndicator(true)
                         SitesController.removeSites()
-                        PageController.showBusyIndicator(false)
+                        // BusyIndicator скрывается в onFinished/onErrorOccurred
                     }
                     var noButtonFunction = function() {
                         
@@ -483,7 +485,7 @@ PageType {
     function importSites(fileName, replaceExistingSites) {
         PageController.showBusyIndicator(true)
         SitesController.importSites(fileName, replaceExistingSites)
-        PageController.showBusyIndicator(false)
+        // BusyIndicator скрывается в onFinished/onErrorOccurred
         importSitesDrawer.closeTriggered()
         moreActionsDrawer.closeTriggered()
     }

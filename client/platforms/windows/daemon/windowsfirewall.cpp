@@ -139,7 +139,7 @@ bool WindowsFirewall::initSublayer() {
   FWPM_SUBLAYER0 subLayer;
   memset(&subLayer, 0, sizeof(subLayer));
   subLayer.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
-  subLayer.displayData.name = (PWSTR)L"Amnezia-SplitTunnel-Sublayer";
+  subLayer.displayData.name = (PWSTR)L"FBLink-SplitTunnel-Sublayer";
   subLayer.displayData.description =
       (PWSTR)L"Filters that enforce a good baseline";
   subLayer.weight = 0xFFFF;
@@ -202,7 +202,7 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
   FW_OK(allowDHCPTraffic(MED_WEIGHT, "Allow DHCP Traffic"));
   FW_OK(allowHyperVTraffic(MAX_WEIGHT, "Allow Hyper-V Traffic"));
   FW_OK(allowTrafficForAppOnAll(getCurrentPath(), MAX_WEIGHT,
-                                "Allow all for AmneziaVPN.exe"));
+                                "Allow all for FBLink.exe"));
   FW_OK(blockTrafficOnPort(53, MED_WEIGHT, "Block all DNS"));
   FW_OK(allowLoopbackTraffic(MED_WEIGHT,
                              "Allow Loopback traffic on device %1"));

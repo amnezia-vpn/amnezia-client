@@ -132,7 +132,7 @@ PageType {
                         text: qsTr("FBLink VPN Premium")
                         font.pixelSize: 24
                         font.weight: 700
-                        color: AmneziaStyle.color.paleGray
+                        color: FBLinkStyle.color.paleGray
                     }
 
                     // Subtitle
@@ -140,7 +140,7 @@ PageType {
                         Layout.alignment: Qt.AlignHCenter
                         text: qsTr("Полный доступ без ограничений")
                         font.pixelSize: 14
-                        color: AmneziaStyle.color.mutedGray
+                        color: FBLinkStyle.color.mutedGray
                     }
                 }
             }
@@ -198,7 +198,7 @@ PageType {
                             LabelTextType {
                                 text: qsTr("Полный доступ ко всем функциям")
                                 font.pixelSize: 12
-                                color: AmneziaStyle.color.mutedGray
+                                color: FBLinkStyle.color.mutedGray
                             }
                         }
 
@@ -261,7 +261,7 @@ PageType {
                         Layout.alignment: Qt.AlignHCenter
                         text: qsTr("Только для новых пользователей • Карта сохраняется")
                         font.pixelSize: 10
-                        color: AmneziaStyle.color.mutedGray
+                        color: FBLinkStyle.color.mutedGray
                         Layout.bottomMargin: 2
                     }
                 }
@@ -305,7 +305,7 @@ PageType {
                         }
 
                         border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 2 : 1
-                        border.color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#00C8FF" : AmneziaStyle.color.slateGray)
+                        border.color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#00C8FF" : FBLinkStyle.color.slateGray)
 
                         opacity: (planCard.isBlocked && !planCard.isCurrentPlan) ? 0.45 : 1.0
 
@@ -325,7 +325,7 @@ PageType {
                                     text: modelData.title
                                     font.pixelSize: 15
                                     font.weight: 600
-                                    color: planCard.isSelected ? AmneziaStyle.color.paleGray : AmneziaStyle.color.lightGray
+                                    color: planCard.isSelected ? FBLinkStyle.color.paleGray : FBLinkStyle.color.lightGray
                                 }
 
                                 // Badge: "АКТИВНА" overrides normal badge
@@ -353,7 +353,7 @@ PageType {
                                     width: 22; height: 22
                                     radius: 11
                                     border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 0 : 2
-                                    border.color: AmneziaStyle.color.slateGray
+                                    border.color: FBLinkStyle.color.slateGray
                                     color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#00C8FF" : "transparent")
 
                                     Behavior on color { ColorAnimation { duration: 150 } }
@@ -376,13 +376,13 @@ PageType {
                                     text: modelData.price
                                     font.pixelSize: 26
                                     font.weight: 700
-                                    color: planCard.isSelected ? "#00C8FF" : AmneziaStyle.color.mutedGray
+                                    color: planCard.isSelected ? "#00C8FF" : FBLinkStyle.color.mutedGray
                                 }
 
                                 LabelTextType {
                                     text: modelData.period
                                     font.pixelSize: 14
-                                    color: AmneziaStyle.color.mutedGray
+                                    color: FBLinkStyle.color.mutedGray
                                     Layout.alignment: Qt.AlignBottom
                                     Layout.bottomMargin: 3
                                 }
@@ -418,7 +418,7 @@ PageType {
                     text: qsTr("Что входит в подписку")
                     font.pixelSize: 13
                     font.weight: 600
-                    color: AmneziaStyle.color.mutedGray
+                    color: FBLinkStyle.color.mutedGray
                     Layout.bottomMargin: 12
                 }
 
@@ -448,7 +448,7 @@ PageType {
                         LabelTextType {
                             text: modelData.text
                             font.pixelSize: 14
-                            color: AmneziaStyle.color.lightGray
+                            color: FBLinkStyle.color.lightGray
                             Layout.fillWidth: true
                         }
                     }
@@ -521,7 +521,7 @@ PageType {
                     LabelTextType {
                         text: qsTr("Проверка %1 из %2. Это займёт до 2 минут.").arg(root.pollCount).arg(root.maxPolls)
                         font.pixelSize: 11
-                        color: AmneziaStyle.color.mutedGray
+                        color: FBLinkStyle.color.mutedGray
                     }
                 }
             }
@@ -562,10 +562,10 @@ PageType {
                 visible: !root.isWaitingForPayment
                 enabled: !root.isLoading && root.selectedPlan > root.currentPlanLevel
 
-                defaultColor: root.selectedPlan > root.currentPlanLevel ? "#00C8FF" : AmneziaStyle.color.charcoalGray
+                defaultColor: root.selectedPlan > root.currentPlanLevel ? "#00C8FF" : FBLinkStyle.color.charcoalGray
                 hoveredColor: "#33D4FF"
                 pressedColor: "#0099BB"
-                disabledColor: AmneziaStyle.color.charcoalGray
+                disabledColor: FBLinkStyle.color.charcoalGray
                 textColor: "#FFFFFF"
 
                 text: root.isLoading
@@ -670,7 +670,7 @@ PageType {
                             LabelTextType {
                                 text: qsTr("Действует до: ") + Qt.formatDate(new Date(FBLinkController.subscriptionEndDate.slice(0, 10)), "d MMMM yyyy")
                                 font.pixelSize: 12
-                                color: AmneziaStyle.color.mutedGray
+                                color: FBLinkStyle.color.mutedGray
                             }
                         }
                     }
@@ -704,7 +704,7 @@ PageType {
                                     text: qsTr("Автопродление")
                                     font.pixelSize: 14
                                     font.weight: 600
-                                    color: AmneziaStyle.color.paleGray
+                                    color: FBLinkStyle.color.paleGray
                                 }
 
                                 LabelTextType {
@@ -712,7 +712,7 @@ PageType {
                                         ? qsTr("Спишем автоматически в день истечения")
                                         : qsTr("Подписка не продлится сама")
                                     font.pixelSize: 11
-                                    color: AmneziaStyle.color.mutedGray
+                                    color: FBLinkStyle.color.mutedGray
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }
@@ -771,7 +771,7 @@ PageType {
                                     layer.effect: ColorOverlay {
                                         color: FBLinkController.cardSaved
                                             ? "#10B981"
-                                            : AmneziaStyle.color.mutedGray
+                                            : FBLinkStyle.color.mutedGray
                                     }
                                 }
                             }
@@ -784,7 +784,7 @@ PageType {
                                     text: qsTr("Способ оплаты")
                                     font.pixelSize: 14
                                     font.weight: 600
-                                    color: AmneziaStyle.color.paleGray
+                                    color: FBLinkStyle.color.paleGray
                                 }
 
                                 LabelTextType {
@@ -794,7 +794,7 @@ PageType {
                                     font.pixelSize: 11
                                     color: FBLinkController.cardSaved
                                         ? "#10B981"
-                                        : AmneziaStyle.color.mutedGray
+                                        : FBLinkStyle.color.mutedGray
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }
@@ -870,7 +870,7 @@ PageType {
                                     anchors.centerIn: parent
                                     text: qsTr("Отмена")
                                     font.pixelSize: 13
-                                    color: AmneziaStyle.color.lightGray
+                                    color: FBLinkStyle.color.lightGray
                                 }
                                 MouseArea {
                                     id: cancelMouse
@@ -958,7 +958,7 @@ PageType {
                 ButtonTextType {
                     text: qsTr("Условия использования")
                     font.pixelSize: 12
-                    color: AmneziaStyle.color.mutedGray
+                    color: FBLinkStyle.color.mutedGray
 
                     MouseArea {
                         anchors.fill: parent
@@ -969,14 +969,14 @@ PageType {
 
                 LabelTextType {
                     text: "·"
-                    color: AmneziaStyle.color.charcoalGray
+                    color: FBLinkStyle.color.charcoalGray
                     font.pixelSize: 12
                 }
 
                 ButtonTextType {
                     text: qsTr("Политика конфиденциальности")
                     font.pixelSize: 12
-                    color: AmneziaStyle.color.mutedGray
+                    color: FBLinkStyle.color.mutedGray
 
                     MouseArea {
                         anchors.fill: parent

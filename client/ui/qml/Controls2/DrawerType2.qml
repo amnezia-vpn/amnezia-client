@@ -19,8 +19,8 @@ Item {
     property Component collapsedStateContent
     property Component expandedStateContent
 
-    property string defaultColor: AmneziaStyle.color.onyxBlack
-    property string borderColor: AmneziaStyle.color.slateGray
+    property string defaultColor: FBLinkStyle.color.onyxBlack
+    property string borderColor: FBLinkStyle.color.slateGray
 
     property real expandedHeight
     property real collapsedHeight: 0
@@ -193,7 +193,7 @@ Item {
         id: background
 
         anchors.fill: parent
-        color: root.isCollapsedStateActive() ? AmneziaStyle.color.transparent : AmneziaStyle.color.translucentMidnightBlack
+        color: root.isCollapsedStateActive() ? FBLinkStyle.color.transparent : FBLinkStyle.color.translucentMidnightBlack
 
         Behavior on color {
             PropertyAnimation { duration: 300; easing.type: Easing.OutQuart }
@@ -280,7 +280,7 @@ Item {
         height: root.height
         radius: 16
         color: root.isCollapsedStateActive() ? root.defaultColor : Qt.rgba(28/255, 29/255, 33/255, 0.85) // transparent-ish background when expanded
-        border.color: root.isCollapsedStateActive() ? root.borderColor : AmneziaStyle.color.slateGray 
+        border.color: root.isCollapsedStateActive() ? root.borderColor : FBLinkStyle.color.slateGray 
         border.width: root.isCollapsedStateActive() ? 1 : 1.5 // slightly thicker border when glassmorphic
 
         Behavior on color { ColorAnimation { duration: 300 } }
@@ -315,7 +315,7 @@ Item {
                 }
                 PropertyChanges {
                     target: background
-                    color: AmneziaStyle.color.transparent
+                    color: FBLinkStyle.color.transparent
                 }
                 PropertyChanges {
                     target: dragArea

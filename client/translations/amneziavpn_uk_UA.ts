@@ -50,7 +50,7 @@
     </message>
 </context>
 <context>
-    <name>AmneziaApplication</name>
+    <name>FBLinkApplication</name>
     <message>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
         <translation type="vanished">Роздільне тунелювання для &quot;Wireguard&quot; не реалізовано, опцію вимкнено</translation>
@@ -63,8 +63,8 @@
 <context>
     <name>AndroidController</name>
     <message>
-        <source>AmneziaVPN</source>
-        <translation type="vanished">AmneziaVPN</translation>
+        <source>FBLink</source>
+        <translation type="vanished">FBLink</translation>
     </message>
     <message>
         <source>VPN Connected</source>
@@ -131,12 +131,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Amnezia Premium - A classic VPN for comfortable work, downloading large files, and watching videos in high resolution. It works for all websites, even in countries with the highest level of internet censorship.</source>
-        <translation type="vanished">Amnezia Premium - звичайний VPN для комфортної роботи, завантаження великих файлів та перегляду відео у високій роздільній здатності. Працює для всіх вебсайтів, навіть у країнах з найвищим рівнем інтернет-цензури.</translation>
+        <source>FBLink Premium - A classic VPN for comfortable work, downloading large files, and watching videos in high resolution. It works for all websites, even in countries with the highest level of internet censorship.</source>
+        <translation type="vanished">FBLink Premium - звичайний VPN для комфортної роботи, завантаження великих файлів та перегляду відео у високій роздільній здатності. Працює для всіх вебсайтів, навіть у країнах з найвищим рівнем інтернет-цензури.</translation>
     </message>
     <message>
-        <source>Amnezia Free is a free VPN to bypass blocking in countries with high levels of internet censorship</source>
-        <translation type="vanished">Amnezia Free — це безкоштовний VPN для обходу блокувань у країнах з високим рівнем інтернет-цензури</translation>
+        <source>FBLink Free is a free VPN to bypass blocking in countries with high levels of internet censorship</source>
+        <translation type="vanished">FBLink Free — це безкоштовний VPN для обходу блокувань у країнах з високим рівнем інтернет-цензури</translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="95"/>
@@ -640,8 +640,8 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/notificationhandler.cpp" line="57"/>
         <location filename="../ui/notificationhandler.cpp" line="64"/>
-        <source>AmneziaVPN</source>
-        <translation>AmneziaVPN</translation>
+        <source>FBLink</source>
+        <translation>FBLink</translation>
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="58"/>
@@ -655,8 +655,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="88"/>
-        <source>AmneziaVPN notification</source>
-        <translation>Сповіщення AmneziaVPN</translation>
+        <source>FBLink notification</source>
+        <translation>Сповіщення FBLink</translation>
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="89"/>
@@ -1254,8 +1254,8 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolAwgClientSettings</name>
     <message>
-        <source>AmneziaWG settings</source>
-        <translation type="obsolete">налаштування AmneziaWG</translation>
+        <source>FBLinkWG settings</source>
+        <translation type="obsolete">налаштування FBLinkWG</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="55"/>
@@ -1336,8 +1336,8 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
-        <source>AmneziaWG settings</source>
-        <translation type="vanished">налаштування AmneziaWG</translation>
+        <source>FBLinkWG settings</source>
+        <translation type="vanished">налаштування FBLinkWG</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="80"/>
@@ -1469,12 +1469,12 @@ Already installed containers were found on the server. All installed containers 
         <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
     <message>
-        <source>Remove AmneziaWG</source>
-        <translation type="vanished">Видалити AmneziaWG</translation>
+        <source>Remove FBLinkWG</source>
+        <translation type="vanished">Видалити FBLinkWG</translation>
     </message>
     <message>
-        <source>Remove AmneziaWG from server?</source>
-        <translation type="vanished">Видалити AmneziaWG з серверу?</translation>
+        <source>Remove FBLinkWG from server?</source>
+        <translation type="vanished">Видалити FBLinkWG з серверу?</translation>
     </message>
     <message>
         <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
@@ -1495,8 +1495,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>Відмінити</translation>
     </message>
     <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">Зберегти і перезапустити Amnezia</translation>
+        <source>Save and Restart FBLink</source>
+        <translation type="vanished">Зберегти і перезапустити FBLink</translation>
     </message>
 </context>
 <context>
@@ -1553,8 +1553,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
     <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">Зберегти і перезавантажити Amnezia</translation>
+        <source>Save and Restart FBLink</source>
+        <translation type="vanished">Зберегти і перезавантажити FBLink</translation>
     </message>
 </context>
 <context>
@@ -1777,8 +1777,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>Відмінити</translation>
     </message>
     <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">Зберегти и перезапустити Amnezia</translation>
+        <source>Save and Restart FBLink</source>
+        <translation type="vanished">Зберегти и перезапустити FBLink</translation>
     </message>
 </context>
 <context>
@@ -1881,7 +1881,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
     <message>
-        <source>Save and Restart Amnezia</source>
+        <source>Save and Restart FBLink</source>
         <translation type="vanished">Зберегти і перезавантажити</translation>
     </message>
 </context>
@@ -2085,8 +2085,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Cannot remove AmneziaDNS from running server</source>
-        <translation type="vanished">Не вдається видалити AmneziaDNS з працюючого сервера</translation>
+        <source>Cannot remove FBLinkDNS from running server</source>
+        <translation type="vanished">Не вдається видалити FBLinkDNS з працюючого сервера</translation>
     </message>
 </context>
 <context>
@@ -2378,8 +2378,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Резервне копіювання</translation>
     </message>
     <message>
-        <source>About AmneziaVPN</source>
-        <translation type="vanished">Про AmneziaVPN</translation>
+        <source>About FBLink</source>
+        <translation type="vanished">Про FBLink</translation>
     </message>
     <message>
         <source>Close application</source>
@@ -2393,8 +2393,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Підтримайте проект донатом</translation>
     </message>
     <message>
-        <source>Support Amnezia</source>
-        <translation type="vanished">Підтримайте Amnezia</translation>
+        <source>Support FBLink</source>
+        <translation type="vanished">Підтримайте FBLink</translation>
     </message>
     <message>
         <source>This is a free and open source application. If you like it, support the developers with a donation. </source>
@@ -2409,16 +2409,16 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Карткою на Patreon</translation>
     </message>
     <message>
-        <source>https://www.patreon.com/amneziavpn</source>
-        <translation type="vanished">https://www.patreon.com/amneziavpn</translation>
+        <source>https://www.patreon.com/fblink</source>
+        <translation type="vanished">https://www.patreon.com/fblink</translation>
     </message>
     <message>
         <source>Show other methods on Github</source>
         <translation type="vanished">Показати інші способи на Github</translation>
     </message>
     <message>
-        <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
-        <translation type="vanished">Amnezia — це безкоштовний додаток з відкритим кодом. Якщо вам подобається цей додаток, ви можете підтримати розробників.</translation>
+        <source>FBLink is a free and open-source application. You can support the developers if you like it.</source>
+        <translation type="vanished">FBLink — це безкоштовний додаток з відкритим кодом. Якщо вам подобається цей додаток, ви можете підтримати розробників.</translation>
     </message>
     <message>
         <source>Contacts</source>
@@ -2433,8 +2433,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Для дискусій</translation>
     </message>
     <message>
-        <source>https://t.me/amnezia_vpn_en</source>
-        <translation type="vanished">https://t.me/amnezia_vpn</translation>
+        <source>https://t.me/fblink_vpn_en</source>
+        <translation type="vanished">https://t.me/fblink_vpn</translation>
     </message>
     <message>
         <source>Mail</source>
@@ -2453,16 +2453,16 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">GitHub</translation>
     </message>
     <message>
-        <source>https://github.com/amnezia-vpn/amnezia-client</source>
-        <translation type="vanished">https://github.com/amnezia-vpn/amnezia-client</translation>
+        <source>https://github.com/fblink-vpn/fblink-client</source>
+        <translation type="vanished">https://github.com/fblink-vpn/fblink-client</translation>
     </message>
     <message>
         <source>Website</source>
         <translation type="vanished">Веб-сайт</translation>
     </message>
     <message>
-        <source>https://amnezia.org</source>
-        <translation type="vanished">https://amnezia.org</translation>
+        <source>https://fblink.org</source>
+        <translation type="vanished">https://fblink.org</translation>
     </message>
     <message>
         <source>Software version: %1</source>
@@ -2490,7 +2490,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="131"/>
         <source>FBLink VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.
 
-Приложение создано на основе открытого проекта AmneziaVPN (amnezia-vpn.org), распространяемого по лицензии GNU GPL v3.</source>
+Приложение создано на основе открытого проекта FBLink (fblink-vpn.org), распространяемого по лицензии GNU GPL v3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2520,8 +2520,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="297"/>
-        <source>🏛 Основано на AmneziaVPN (GNU GPL v3)
-Исходный код: github.com/amnezia-vpn</source>
+        <source>🏛 Основано на FBLink (GNU GPL v3)
+Исходный код: github.com/fblink-vpn</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2660,17 +2660,17 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="23"/>
-        <source>documentation/instructions/connect-amnezia-premium#windows</source>
+        <source>documentation/instructions/connect-fblink-premium#windows</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="30"/>
-        <source>documentation/instructions/connect-amnezia-premium#macos</source>
+        <source>documentation/instructions/connect-fblink-premium#macos</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="37"/>
-        <source>documentation/instructions/connect-amnezia-premium#android</source>
+        <source>documentation/instructions/connect-fblink-premium#android</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2680,17 +2680,17 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="51"/>
-        <source>documentation/instructions/connect-amnezia-premium#ios</source>
+        <source>documentation/instructions/connect-fblink-premium#ios</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="58"/>
-        <source>documentation/instructions/connect-amnezia-premium#linux</source>
+        <source>documentation/instructions/connect-fblink-premium#linux</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="65"/>
-        <source>documentation/instructions/connect-amnezia-premium#routers</source>
+        <source>documentation/instructions/connect-fblink-premium#routers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2707,8 +2707,8 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsApiNativeConfigs</name>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="obsolete">Зберегти config AmneziaVPN</translation>
+        <source>Save FBLink config</source>
+        <translation type="obsolete">Зберегти config FBLink</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="60"/>
@@ -2992,8 +2992,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="obsolete">Зберегти config AmneziaVPN</translation>
+        <source>Save FBLink config</source>
+        <translation type="obsolete">Зберегти config FBLink</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="114"/>
@@ -3214,8 +3214,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>Скинути налаштування і видалити всі дані із застосунку?</translation>
     </message>
     <message>
-        <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation type="vanished">Всі дані із застосунку будуть видалені, всі встановлені сервіси AmneziaVPN залишаться на сервері.</translation>
+        <source>All settings will be reset to default. All installed FBLink services will still remain on the server.</source>
+        <translation type="vanished">Всі дані із застосунку будуть видалені, всі встановлені сервіси FBLink залишаться на сервері.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="244"/>
@@ -3260,8 +3260,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="90"/>
-        <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
-        <translation>Резервна копія міститиме ваші паролі та приватні ключі для всіх серверів, доданих до AmneziaVPN. Зберігайте цю інформацію у безпечному місці.</translation>
+        <source>The backup will contain your passwords and private keys for all servers added to FBLink. Keep this information in a secure place.</source>
+        <translation>Резервна копія міститиме ваші паролі та приватні ключі для всіх серверів, доданих до FBLink. Зберігайте цю інформацію у безпечному місці.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="104"/>
@@ -3335,11 +3335,11 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Підключення до VPN при старті застосунку</translation>
     </message>
     <message>
-        <source>Use AmneziaDNS</source>
-        <translation type="vanished">Використовувати AmneziaDNS</translation>
+        <source>Use FBLinkDNS</source>
+        <translation type="vanished">Використовувати FBLinkDNS</translation>
     </message>
     <message>
-        <source>If AmneziaDNS is installed on the server</source>
+        <source>If FBLinkDNS is installed on the server</source>
         <translation type="vanished">Якщо він встановлений на сервері</translation>
     </message>
     <message>
@@ -3347,8 +3347,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">DNS сервер</translation>
     </message>
     <message>
-        <source>When AmneziaDNS is not used or installed</source>
-        <translation type="vanished">Ці адреси будуть використовуватись коли вимкнений AmneziaDNS</translation>
+        <source>When FBLinkDNS is not used or installed</source>
+        <translation type="vanished">Ці адреси будуть використовуватись коли вимкнений FBLinkDNS</translation>
     </message>
     <message>
         <source>Allows you to use the VPN only for certain Apps</source>
@@ -3437,12 +3437,12 @@ Already installed containers were found on the server. All installed containers 
         <translation>DNS сервер</translation>
     </message>
     <message>
-        <source>When AmneziaDNS is not used or installed</source>
-        <translation type="vanished">Ці адреси будуть використовуватись, коли вимкнено або не встановлено AmneziaDNS</translation>
+        <source>When FBLinkDNS is not used or installed</source>
+        <translation type="vanished">Ці адреси будуть використовуватись, коли вимкнено або не встановлено FBLinkDNS</translation>
     </message>
     <message>
-        <source>If AmneziaDNS is not used or installed</source>
-        <translation type="vanished">Якщо AmneziaDNS вимкнено або не встановлено</translation>
+        <source>If FBLinkDNS is not used or installed</source>
+        <translation type="vanished">Якщо FBLinkDNS вимкнено або не встановлено</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="67"/>
@@ -3767,8 +3767,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>Всі встановлені протоколи та сервіси були додані в застосунок</translation>
     </message>
     <message>
-        <source>Clear Amnezia cache</source>
-        <translation type="vanished">Очистити кеш Amnezia</translation>
+        <source>Clear FBLink cache</source>
+        <translation type="vanished">Очистити кеш FBLink</translation>
     </message>
     <message>
         <source>May be needed when changing other settings</source>
@@ -3776,7 +3776,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <source>Clear cached profiles?</source>
-        <translation type="vanished">Видалити кеш Amnezia?</translation>
+        <translation type="vanished">Видалити кеш FBLink?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="31"/>
@@ -3805,8 +3805,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>Відмінити</translation>
     </message>
     <message>
-        <source>Check the server for previously installed Amnezia services</source>
-        <translation type="vanished">Проверить сервер на наличие ранее установленных сервисов Amnezia</translation>
+        <source>Check the server for previously installed FBLink services</source>
+        <translation type="vanished">Проверить сервер на наличие ранее установленных сервисов FBLink</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="111"/>
@@ -3869,12 +3869,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Clear server from Amnezia software</source>
-        <translation type="vanished">Очистити сервер від програмного забезпечення Amnezia</translation>
+        <source>Clear server from FBLink software</source>
+        <translation type="vanished">Очистити сервер від програмного забезпечення FBLink</translation>
     </message>
     <message>
-        <source>Do you want to clear server from Amnezia software?</source>
-        <translation type="vanished">Ви дійсно хочете очистити сервер від програмного забезпечення Amnezia?</translation>
+        <source>Do you want to clear server from FBLink software?</source>
+        <translation type="vanished">Ви дійсно хочете очистити сервер від програмного забезпечення FBLink?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="189"/>
@@ -3882,8 +3882,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>Усі користувачі, з якими ви поділилися підключенням, більше не зможуть підключитися до нього.</translation>
     </message>
     <message>
-        <source>Cannot clear server from Amnezia software during active connection</source>
-        <translation type="vanished">Неможливо очистити сервер від програмного забезпечення Amnezia під час активного підключення</translation>
+        <source>Cannot clear server from FBLink software during active connection</source>
+        <translation type="vanished">Неможливо очистити сервер від програмного забезпечення FBLink під час активного підключення</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="224"/>
@@ -3891,8 +3891,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>Неможливо скинути конфігурацію API під час активного підключення</translation>
     </message>
     <message>
-        <source>Do you want to clear server Amnezia-installed services?</source>
-        <translation type="obsolete">Ви хочете очистити сервер від сервісів Amnezia?</translation>
+        <source>Do you want to clear server FBLink-installed services?</source>
+        <translation type="obsolete">Ви хочете очистити сервер від сервісів FBLink?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="213"/>
@@ -3913,20 +3913,20 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Видалити сервер із застосунку?</translation>
     </message>
     <message>
-        <source>All installed AmneziaVPN services will still remain on the server.</source>
-        <translation type="vanished">Всі встановлені сервіси та протоколи Amnezia все ще залишаться на сервері.</translation>
+        <source>All installed FBLink services will still remain on the server.</source>
+        <translation type="vanished">Всі встановлені сервіси та протоколи FBLink все ще залишаться на сервері.</translation>
     </message>
     <message>
-        <source>Clear server Amnezia-installed services</source>
-        <translation type="vanished">Видалити всі сервіси і протоколи Amnezia з сервера</translation>
+        <source>Clear server FBLink-installed services</source>
+        <translation type="vanished">Видалити всі сервіси і протоколи FBLink з сервера</translation>
     </message>
     <message>
-        <source>Clear server Amnezia-installed services?</source>
-        <translation type="vanished">Видалити всі сервіси і протоколи Amnezia з сервера?</translation>
+        <source>Clear server FBLink-installed services?</source>
+        <translation type="vanished">Видалити всі сервіси і протоколи FBLink з сервера?</translation>
     </message>
     <message>
         <source>All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.</source>
-        <translation type="vanished">На сервері будуть видалені всі дані, повязані з Amnezia: протоколи, сервіси, конфігураційні файли, ключі та сертифікати.</translation>
+        <translation type="vanished">На сервері будуть видалені всі дані, повязані з FBLink: протоколи, сервіси, конфігураційні файли, ключі та сертифікати.</translation>
     </message>
 </context>
 <context>
@@ -4231,8 +4231,8 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSetupWizardApiServicesList</name>
     <message>
-        <source>VPN by Amnezia</source>
-        <translation type="vanished">VPN від Amnezia</translation>
+        <source>VPN by FBLink</source>
+        <translation type="vanished">VPN від FBLink</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="52"/>
@@ -4372,12 +4372,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>Відновити покупки</translation>
     </message>
     <message>
-        <source>VPN by Amnezia</source>
-        <translation type="vanished">VPN від Amnezia</translation>
+        <source>VPN by FBLink</source>
+        <translation type="vanished">VPN від FBLink</translation>
     </message>
     <message>
-        <source>Connect to classic paid and free VPN services from Amnezia</source>
-        <translation type="vanished">Підключайтеся до звичайних платних та безкоштовних VPN-сервісів від Amnezia</translation>
+        <source>Connect to classic paid and free VPN services from FBLink</source>
+        <translation type="vanished">Підключайтеся до звичайних платних та безкоштовних VPN-сервісів від FBLink</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="294"/>
@@ -4385,8 +4385,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>Self-hosted VPN</translation>
     </message>
     <message>
-        <source>Configure Amnezia VPN on your own server</source>
-        <translation type="vanished">Налаштуйте Amnezia VPN на власному сервері</translation>
+        <source>Configure FBLink on your own server</source>
+        <translation type="vanished">Налаштуйте FBLink на власному сервері</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="306"/>
@@ -4458,9 +4458,9 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <source>All data you enter will remain strictly confidential
-and will not be shared or disclosed to the Amnezia or any third parties</source>
+and will not be shared or disclosed to the FBLink or any third parties</source>
         <translation type="vanished">Усі введені вами дані залишатимуться суворо конфіденційними
-і не будуть передані чи розголошені Amnezia або будь-яким третім особам</translation>
+і не будуть передані чи розголошені FBLink або будь-яким третім особам</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="167"/>
@@ -4498,8 +4498,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Пароль або SSH ключ</translation>
     </message>
     <message>
-        <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation type="vanished">Усі дані, які ви вводите, залишатимуться суворо конфіденційними та не будуть передані чи розголошені Amnezia або будь-яким третім особам</translation>
+        <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the FBLink or any third parties</source>
+        <translation type="vanished">Усі дані, які ви вводите, залишатимуться суворо конфіденційними та не будуть передані чи розголошені FBLink або будь-яким третім особам</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="143"/>
@@ -4580,19 +4580,19 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <source>Amnesia has detected that your server is currently </source>
-        <translation type="vanished">Amnezia виявила, що ваш сервер зараз</translation>
+        <translation type="vanished">FBLink виявила, що ваш сервер зараз</translation>
     </message>
     <message>
         <source>busy installing other software. Amnesia installation </source>
-        <translation type="vanished">зайнятий встановленням інших протоколів та сервісів. Встановлення Amnezia </translation>
+        <translation type="vanished">зайнятий встановленням інших протоколів та сервісів. Встановлення FBLink </translation>
     </message>
     <message>
-        <source>Amnezia has detected that your server is currently </source>
-        <translation type="vanished">Amnezia виявила, що сервер </translation>
+        <source>FBLink has detected that your server is currently </source>
+        <translation type="vanished">FBLink виявила, що сервер </translation>
     </message>
     <message>
-        <source>busy installing other software. Amnezia installation </source>
-        <translation type="vanished">зайнятий встановленням інших протоколів та сервісів. Встановлення Amnezia </translation>
+        <source>busy installing other software. FBLink installation </source>
+        <translation type="vanished">зайнятий встановленням інших протоколів та сервісів. Встановлення FBLink </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="69"/>
@@ -4856,8 +4856,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Зберегти OpenVPN конфігурацію</translation>
     </message>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="obsolete">Зберегти config AmneziaVPN</translation>
+        <source>Save FBLink config</source>
+        <translation type="obsolete">Зберегти config FBLink</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="64"/>
@@ -4865,8 +4865,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Збергти WireGuard конфігурацію</translation>
     </message>
     <message>
-        <source>Save AmneziaWG config</source>
-        <translation type="vanished">Зберегти AmneziaWG конфігурацію</translation>
+        <source>Save FBLinkWG config</source>
+        <translation type="vanished">Зберегти FBLinkWG конфігурацію</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="78"/>
@@ -4884,12 +4884,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Зберегти конфігурацію XRay</translation>
     </message>
     <message>
-        <source>For the AmneziaVPN app</source>
-        <translation type="vanished">Для AmneziaVPN</translation>
+        <source>For the FBLink app</source>
+        <translation type="vanished">Для FBLink</translation>
     </message>
     <message>
-        <source>AmneziaWG native format</source>
-        <translation type="vanished">нативний формат AmneziaWG</translation>
+        <source>FBLinkWG native format</source>
+        <translation type="vanished">нативний формат FBLinkWG</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="120"/>
@@ -5057,8 +5057,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="unfinished">Скопіювати</translation>
     </message>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="obsolete">Зберегти config AmneziaVPN</translation>
+        <source>Save FBLink config</source>
+        <translation type="obsolete">Зберегти config FBLink</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="30"/>
@@ -5087,8 +5087,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>To read the QR code in the Amnezia app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
-        <translation type="obsolete">Для зчитування QR-коду в застосунку Amnezia виберіть &quot;Додати сервер&quot; → &quot;У мене є дані підключенн&quot; → &quot;QR-код, ключ чи файл налаштувань&quot;</translation>
+        <source>To read the QR code in the FBLink app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
+        <translation type="obsolete">Для зчитування QR-коду в застосунку FBLink виберіть &quot;Додати сервер&quot; → &quot;У мене є дані підключенн&quot; → &quot;QR-код, ключ чи файл налаштувань&quot;</translation>
     </message>
 </context>
 <context>
@@ -5647,8 +5647,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="53"/>
-        <source>Amnezia helper service error</source>
-        <translation>Amnezia helper service error</translation>
+        <source>FBLink helper service error</source>
+        <translation>FBLink helper service error</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="54"/>
@@ -5734,7 +5734,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="81"/>
-        <source>Your Amnezia Premium subscription has expired.
+        <source>Your FBLink Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
         <translation type="unfinished"></translation>
@@ -5815,7 +5815,7 @@ Immediately after receiving the first data packet, Cloak authenticates the incom
 
 If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * High power consumption on mobile devices
 * Flexible settings
 * Not recognised by DPI analysis systems
@@ -5833,7 +5833,7 @@ Cloak може змінювати метадані пакетів так, що �
 
 Якщо у вашому регіоні екстремальний рівень інтернет-цензури, ми радимо використовувати тільки OpenVPN через Cloak з самого початку роботи з додатком.
 
-    Доступний в AmneziaVPN на всіх платформах
+    Доступний в FBLink на всіх платформах
     Високе споживання енергії на мобільних пристроях
     Гнучкі налаштування
     Не розпізнається системами аналізу DPI
@@ -5845,7 +5845,7 @@ Cloak може змінювати метадані пакетів так, що �
 WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * Low power consumption
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
@@ -5855,7 +5855,7 @@ WireGuard забезпечує стабільне VPN-підключення т�
 
 WireGuard дуже чутливий до блокувань через свої чіткі підписи пакетів. На відміну від деяких інших VPN-протоколів, які використовують техніки обфускації, постійні шаблони підписів пакетів WireGuard легше ідентифікуються та можуть бути заблоковані просунутими системами глибокого аналізу пакетів (DPI) та іншими інструментами моніторингу мережі.
 
-* Доступний в AmneziaVPN на всіх платформах
+* Доступний в FBLink на всіх платформах
 * Низьке споживання енергії
 * Мінімальна кількість налаштувань
 * Легко розпізнається системами аналізу DPI, схильний до блокування
@@ -5876,7 +5876,7 @@ REALITY унікально ідентифікує цензорів під час
 One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
-* Available in the AmneziaVPN only on Windows
+* Available in the FBLink only on Windows
 * Low power consumption, on mobile devices
 * Minimal configuration
 * Recognised by DPI analysis systems
@@ -5885,7 +5885,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 Він може швидко переключись між мережами та пристроями, що робить його осболиво адаптованим під динамічні мережеві середовища.
 Потрібно зазначити, що незважаючи на стабільність та швидкість, IKEv2 легко розпізнається та вразливий до блокувань. 
 
-* IKEv2/IPsec в AmneziaVPN тільки для Windows.
+* IKEv2/IPsec в FBLink тільки для Windows.
 * Низьке енергоспоживання, на мобільних пристроях
 * Мінімальна конфігурація
 * Розпізнається системами DPI-анализу
@@ -5909,8 +5909,8 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="111"/>
-        <source>AmneziaDNS</source>
-        <translation>AmneziaDNS</translation>
+        <source>FBLinkDNS</source>
+        <translation>FBLinkDNS</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="119"/>
@@ -5935,7 +5935,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     <message>
         <location filename="../containers/containers_defs.cpp" line="130"/>
         <location filename="../containers/containers_defs.cpp" line="133"/>
-        <source>AmneziaWG is a special protocol from Amnezia based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
+        <source>FBLinkWG is a special protocol from FBLink based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5953,7 +5953,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <source>OpenVPN is one of the most popular and reliable VPN protocols. It uses SSL/TLS encryption, supports a wide variety of devices and operating systems, and is continuously improved by the community due to its open-source nature. It provides a good balance between speed and security but is easily recognized by DPI systems, making it susceptible to blocking.
 
 Features:
-* Available on all AmneziaVPN platforms
+* Available on all FBLink platforms
 * Normal battery consumption on mobile devices
 * Flexible customization for various devices and OS
 * Operates over both TCP and UDP protocols</source>
@@ -5961,10 +5961,10 @@ Features:
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="166"/>
-        <source>Shadowsocks is based on the SOCKS5 protocol and encrypts connections using AEAD cipher. Although designed to be discreet, it doesn&apos;t mimic a standard HTTPS connection and can be detected by some DPI systems. Due to limited support in Amnezia, we recommend using the AmneziaWG protocol.
+        <source>Shadowsocks is based on the SOCKS5 protocol and encrypts connections using AEAD cipher. Although designed to be discreet, it doesn&apos;t mimic a standard HTTPS connection and can be detected by some DPI systems. Due to limited support in FBLink, we recommend using the FBLinkWG protocol.
 
 Features:
-* Available in AmneziaVPN only on desktop platforms
+* Available in FBLink only on desktop platforms
 * Customizable encryption protocol
 * Detectable by some DPI systems
 * Operates over TCP protocol
@@ -5982,7 +5982,7 @@ The Cloak plugin further protects the connection from DPI detection. It modifies
 In regions with heavy internet censorship, we strongly recommend using OpenVPN with Cloak from your first connection.
 
 Features:
-* Available on all AmneziaVPN platforms
+* Available on all FBLink platforms
 * High power consumption on mobile devices
 * Flexible configuration options
 * Undetectable by DPI systems
@@ -5994,7 +5994,7 @@ Features:
         <source>WireGuard is a modern, streamlined VPN protocol offering stable connectivity and excellent performance across all devices. It uses fixed encryption settings, delivering lower latency and higher data transfer speeds compared to OpenVPN. However, WireGuard is easily identifiable by DPI systems due to its distinctive packet signatures, making it susceptible to blocking.
 
 Features:
-* Available on all AmneziaVPN platforms
+* Available on all FBLink platforms
 * Low power consumption on mobile devices
 * Minimal configuration required
 * Easily detected by DPI systems (susceptible to blocking)
@@ -6003,12 +6003,12 @@ Features:
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="198"/>
-        <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
+        <source>FBLinkWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
 
-AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
+FBLinkWG is an excellent choice for those seeking a fast, stealthy VPN connection.
 
 Features:
-* Available on all AmneziaVPN platforms
+* Available on all FBLink platforms
 * Low battery consumption on mobile devices
 * Minimal settings required
 * Undetectable by traffic analysis systems (DPI)
@@ -6033,7 +6033,7 @@ Features:
         <source>IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. While it provides good security and speed, it&apos;s easily recognized by DPI systems and susceptible to blocking.
 
 Features:
-* Available in AmneziaVPN only on Windows
+* Available in FBLink only on Windows
 * Low battery consumption on mobile devices
 * Minimal configuration required
 * Detectable by DPI analysis systems(easily blocked)
@@ -6045,8 +6045,8 @@ Features:
         <translation type="vanished">WireGuard - новий популярний VPN-протокол, з високою швидістю та низьким енергоспоживанням. Для регіонів з низьким рівнем цензури.</translation>
     </message>
     <message>
-        <source>AmneziaWG - Special protocol from Amnezia, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
-        <translation type="vanished">AmneziaWG - фірмовий протокол Amnezia, оснований на протоколі WireGuard. Такий же швидкий, як і WireGuard, але стійкий до блокувань. Рекомендується для регіонів з високим рівнем цензури.</translation>
+        <source>FBLinkWG - Special protocol from FBLink, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
+        <translation type="vanished">FBLinkWG - фірмовий протокол FBLink, оснований на протоколі WireGuard. Такий же швидкий, як і WireGuard, але стійкий до блокувань. Рекомендується для регіонів з високим рівнем цензури.</translation>
     </message>
     <message>
         <source>XRay with REALITY - Suitable for countries with the highest level of internet censorship. Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.</source>
@@ -6064,13 +6064,13 @@ Features:
     <message>
         <location filename="../containers/containers_defs.cpp" line="144"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
-        <translation>Замініть DNS-сервер на AmneziaDNS. Це підвищить вашу рівень захищеності в інтернеті.</translation>
+        <translation>Замініть DNS-сервер на FBLinkDNS. Це підвищить вашу рівень захищеності в інтернеті.</translation>
     </message>
     <message>
         <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
 It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * Normal power consumption on mobile devices
 * Flexible customisation to suit user needs to work with different operating systems and devices
 * Recognised by DPI analysis systems and therefore susceptible to blocking
@@ -6078,29 +6078,29 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
         <translation type="vanished">OpenVPN один із самих популярних і перевірених часом протоколів VPN.
 Він використовує власний протокол, який опирається на протокол SSL/TLS для шифрування та обміну ключами. Крім того, підтримка OpenVPN багатьох методів аутентифікації робить його універсальним і адаптованим до широкого спектру пристроїв і операційних систем. Завдяки відкритому коду, OpenVPN піддається ретельному аналізу зі сторони світової спільноти, що постійно підвищує його безпеку. Завдяки оптимальному співвідношенню продуктивності, безпеки та сумісності OpenVPN залишається найкращим вибором як для приватних осіб, так і для компаній.
 
-* Доступний в AmneziaVPN для всіх платформ
+* Доступний в FBLink для всіх платформ
 * Нормальне енергоспоживання на мобільних пристроях
 * Гнучка настройка під користувача для роботи з різними пристроями та оперційними системами
 * Розпізнається системами DPI-анализу і тому вразливий до блокувань
 * Може працювати за протоколом TCP і UDP.</translation>
     </message>
     <message>
-        <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
+        <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in FBLink, it&apos;s recommended to use FBLinkWG protocol.
 
-* Available in the AmneziaVPN only on desktop platforms
+* Available in the FBLink only on desktop platforms
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
-        <translation type="vanished">Shadowsocks, створений на основі протоколу SOCKS5, захищає з&apos;єднання AEAD шифруванням. Незважаючи на те, що протокол Shadowsocks розроблений таким чином, щоб бути незаметним і складним для ідентифікації, він не ідентичний стандартному HTTPS-з&apos;єднанню. Однак деякі системи аналізу трафіку все-таки можуть знайти підключення Shadowsocks. У зв’язку з обмеженою підтримкою в Amnezia рекомендується використовувати протокол AmneziaWG або OpenVPN через Cloak.
+        <translation type="vanished">Shadowsocks, створений на основі протоколу SOCKS5, захищає з&apos;єднання AEAD шифруванням. Незважаючи на те, що протокол Shadowsocks розроблений таким чином, щоб бути незаметним і складним для ідентифікації, він не ідентичний стандартному HTTPS-з&apos;єднанню. Однак деякі системи аналізу трафіку все-таки можуть знайти підключення Shadowsocks. У зв’язку з обмеженою підтримкою в FBLink рекомендується використовувати протокол FBLinkWG або OpenVPN через Cloak.
 
-* Доступний в AmneziaVPN тільки на ПК.
+* Доступний в FBLink тільки на ПК.
 * Гнучке налаштування протоколу шифрування
 * Розпізнається деякими DPI-системами
 * Працює по мережевому протоколу TCP.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="236"/>
-        <source>After installation, Amnezia will create a
+        <source>After installation, FBLink will create a
 
  file storage on your server. You will be able to access it using
  FileZilla or other SFTP clients, as well as mount the disk on your device to access
@@ -6108,7 +6108,7 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
-        <translation>Після встановлення Amnezia створить 
+        <translation>Після встановлення FBLink створить 
 
  файл-сховище на вашому сервері. Ви зможете отримати
  доступ до нього за допомогою FileZilla та інших SFTP-клієнтів, 
@@ -6130,7 +6130,7 @@ Immediately after receiving the first data packet, Cloak authenticates the incom
 
 If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * High power consumption on mobile devices
 * Flexible settings
 * Not recognised by DPI analysis systems
@@ -6148,7 +6148,7 @@ Cloak може замінити метаданні пакетів. Він пов
 
 Якщо в вашому регіоні екстремальний рівень цензури в Інтернеті, ми рекомендуємо відразу використовувати OpenVPN over Cloak.
 
-* Доступний в AmneziaVPN на всіх платформах
+* Доступний в FBLink на всіх платформах
 * Високе енергоспоживання на мобільних пристроях
 * Гнучке налаштування
 * Не розпізнається системами DPI-анализу
@@ -6160,7 +6160,7 @@ Cloak може замінити метаданні пакетів. Він пов
 Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * Low power consumption
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
@@ -6168,35 +6168,35 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
         <translation type="vanished">WireGuard - відносно новий та популярний VPN-протокол з простою архітектурою.
 Забезпечує стабільне VPN-з&apos;єднання, високу продуктивність на всіх пристроях. Використовує жорстко закодовані параметри шифрування. WireGuard порівняно з OpenVPN має нижчу затримку та кращу пропускну здатність передачі даних.
 WireGuard дуже вразливий до блокування. На відміну від деяких інших протоколів VPN, які використовують методи обфускації, узгоджені шаблони пакетів WireGuard можна легше ідентифікувати та, таким чином, заблокувати вдосконаленими системами Deep Packet Inspection (DPI) та іншими інструментами моніторингу мережі.
-* Доступний в AmneziaVPN для всіх платформ
+* Доступний в FBLink для всіх платформ
 * Низьке енергоспоживання
 * Мінімальна кількість налаштувань
 * Легко розпізнається системами DPI-анализу, вразливий до блокувань
 * Працює по протоколу UDP.</translation>
     </message>
     <message>
-        <source>A modern iteration of the popular VPN protocol, AmneziaWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
-While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
-This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
+        <source>A modern iteration of the popular VPN protocol, FBLinkWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
+While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. FBLinkWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
+This means that FBLinkWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the FBLink across all platforms
 * Low power consumption
 * Minimum number of settings
 * Not recognised by DPI analysis systems, resistant to blocking
 * Works over UDP network protocol.</source>
-        <translation type="vanished">Сучасна ітерація популярного протоколу VPN, AmneziaWG спирається на протокол WireGuard, зберігаючи його просту архітектуру та високопродуктивні можливості на різних пристроях.
-Незважаючи на те, що WireGuard відомий своєю ефективністю, він має проблеми з легким виявленням через чіткі підписи пакетів. AmneziaWG вирішує цю проблему, використовуючи кращі методи обфускації, завдяки чому її трафік змішується зі звичайним інтернет-трафіком.
-Це означає, що AmneziaWG зберігає швидку роботу оригінального протоколу WireGuard, додаючи додатковий рівень скритності, що робить його чудовим вибором для тих, хто бажає швидкого та непомітного VPN-з’єднання.
+        <translation type="vanished">Сучасна ітерація популярного протоколу VPN, FBLinkWG спирається на протокол WireGuard, зберігаючи його просту архітектуру та високопродуктивні можливості на різних пристроях.
+Незважаючи на те, що WireGuard відомий своєю ефективністю, він має проблеми з легким виявленням через чіткі підписи пакетів. FBLinkWG вирішує цю проблему, використовуючи кращі методи обфускації, завдяки чому її трафік змішується зі звичайним інтернет-трафіком.
+Це означає, що FBLinkWG зберігає швидку роботу оригінального протоколу WireGuard, додаючи додатковий рівень скритності, що робить його чудовим вибором для тих, хто бажає швидкого та непомітного VPN-з’єднання.
 
-* Доступно в AmneziaVPN на всіх платформах
+* Доступно в FBLink на всіх платформах
 * Низьке енергоспоживання
 * Мінімальна кількість налаштувань
 * Не розпізнається системами аналізу DPI, стійкий до блокування
 * Працює через мережевий протокол UDP.</translation>
     </message>
     <message>
-        <source>AmneziaWG container</source>
-        <translation type="vanished">AmneziaWG протокол</translation>
+        <source>FBLinkWG container</source>
+        <translation type="vanished">FBLinkWG протокол</translation>
     </message>
     <message>
         <source>Sftp file sharing service - is secure FTP service</source>
@@ -6412,7 +6412,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
     <message>
         <location filename="../ui/models/containers_model.cpp" line="34"/>
-        <source>AmneziaWG Legacy is a outdated version of AmneziaWG protocol. To upgrade, install AmneziaWG and recreate users.</source>
+        <source>FBLinkWG Legacy is a outdated version of FBLinkWG protocol. To upgrade, install FBLinkWG and recreate users.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -6486,8 +6486,8 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>ShareConnectionDrawer</name>
     <message>
-        <source>Save AmneziaVPN config</source>
-        <translation type="vanished">Зберегти config AmneziaVPN</translation>
+        <source>Save FBLink config</source>
+        <translation type="vanished">Зберегти config FBLink</translation>
     </message>
     <message>
         <source>Share</source>
@@ -6510,8 +6510,8 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation type="vanished">Показати налаштування підключення</translation>
     </message>
     <message>
-        <source>To read the QR code in the Amnezia app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
-        <translation type="vanished">Для зчитування QR-коду в застосунку Amnezia виберіть &quot;Додати сервер&quot; → &quot;У мене є дані підключенн&quot; → &quot;QR-код, ключ чи файл налаштувань&quot;</translation>
+        <source>To read the QR code in the FBLink app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
+        <translation type="vanished">Для зчитування QR-коду в застосунку FBLink виберіть &quot;Додати сервер&quot; → &quot;У мене є дані підключенн&quot; → &quot;QR-код, ключ чи файл налаштувань&quot;</translation>
     </message>
 </context>
 <context>
@@ -6688,7 +6688,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
 </context>
 <context>
-    <name>amnezia::ContainerProps</name>
+    <name>fblink::ContainerProps</name>
     <message>
         <source>Low</source>
         <translation type="vanished">Низький</translation>
@@ -6736,7 +6736,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="373"/>
-        <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
+        <source>FBLinkWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

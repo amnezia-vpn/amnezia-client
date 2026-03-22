@@ -38,8 +38,8 @@ public:
     Q_PROPERTY(int imeHeight READ getImeHeight NOTIFY imeHeightChanged)
 
 public slots:
-    void toggleAmneziaDns(bool enable);
-    bool isAmneziaDnsEnabled();
+    void toggleFBLinkDns(bool enable);
+    bool isFBLinkDnsEnabled();
 
     QString getPrimaryDns();
     void setPrimaryDns(const QString &dns);
@@ -127,7 +127,7 @@ signals:
 
     void importBackupFromOutside(QString filePath);
 
-    void amneziaDnsToggled(bool enable);
+    void fblinkDnsToggled(bool enable);
 
     void loggingDisableByWatcher();
 

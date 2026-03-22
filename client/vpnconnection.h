@@ -20,7 +20,7 @@
 #include "protocols/android_vpnprotocol.h"
 #endif
 
-using namespace amnezia;
+using namespace fblink;
 
 class VpnConnection : public QObject
 {
@@ -54,7 +54,7 @@ public slots:
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(Vpn::ConnectionState state);
-    void vpnProtocolError(amnezia::ErrorCode error);
+    void vpnProtocolError(fblink::ErrorCode error);
 
     void serviceIsNotReady();
 

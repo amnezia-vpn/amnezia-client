@@ -39,8 +39,8 @@ namespace
 
     namespace serviceType
     {
-        constexpr char amneziaFree[] = "amnezia-free";
-        constexpr char amneziaPremium[] = "amnezia-premium";
+        constexpr char fblinkFree[] = "fblink-free";
+        constexpr char fblinkPremium[] = "fblink-premium";
     }
 }
 
@@ -69,9 +69,9 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     }
     case CardDescriptionRole: {
         auto speed = apiServiceData.serviceInfo.speed;
-        if (serviceType == serviceType::amneziaPremium) {
+        if (serviceType == serviceType::fblinkPremium) {
             return apiServiceData.serviceInfo.cardDescription.arg(speed);
-        } else if (serviceType == serviceType::amneziaFree) {
+        } else if (serviceType == serviceType::fblinkFree) {
             QString description = apiServiceData.serviceInfo.cardDescription;
             if (!isServiceAvailable) {
                 description += tr("<p><a style=\"color: #EB5757;\">Not available in your region. If you have VPN enabled, disable it, "
@@ -84,7 +84,7 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         return apiServiceData.serviceInfo.description;
     }
     case IsServiceAvailableRole: {
-        if (serviceType == serviceType::amneziaFree) {
+        if (serviceType == serviceType::fblinkFree) {
             if (!isServiceAvailable) {
                 return false;
             }
@@ -122,9 +122,9 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         return QDateTime::fromString(apiServiceData.subscription.endDate, Qt::ISODate).toLocalTime().toString("d MMM yyyy");
     }
     case OrderRole: {
-        if (serviceType == serviceType::amneziaPremium) {
+        if (serviceType == serviceType::fblinkPremium) {
             return 0;
-        } else if (serviceType == serviceType::amneziaFree) {
+        } else if (serviceType == serviceType::fblinkFree) {
             return 1;
         }
     }

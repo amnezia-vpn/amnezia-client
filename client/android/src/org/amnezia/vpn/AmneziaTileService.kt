@@ -1,4 +1,4 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -19,14 +19,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.amnezia.vpn.protocol.ProtocolState
-import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
-import org.amnezia.vpn.protocol.ProtocolState.CONNECTING
-import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
-import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTING
-import org.amnezia.vpn.protocol.ProtocolState.RECONNECTING
-import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
-import org.amnezia.vpn.util.Log
+import com.fblink.vpn.protocol.ProtocolState
+import com.fblink.vpn.protocol.ProtocolState.CONNECTED
+import com.fblink.vpn.protocol.ProtocolState.CONNECTING
+import com.fblink.vpn.protocol.ProtocolState.DISCONNECTED
+import com.fblink.vpn.protocol.ProtocolState.DISCONNECTING
+import com.fblink.vpn.protocol.ProtocolState.RECONNECTING
+import com.fblink.vpn.protocol.ProtocolState.UNKNOWN
+import com.fblink.vpn.util.Log
 
 private const val TAG = "AmneziaTileService"
 private const val DEFAULT_TILE_LABEL = "AmneziaVPN"

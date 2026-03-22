@@ -5,7 +5,7 @@
 
 #include "configurator_base.h"
 
-using namespace amnezia;
+using namespace fblink;
 
 class CloakConfigurator : public ConfiguratorBase
 {

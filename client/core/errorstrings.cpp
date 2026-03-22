@@ -1,6 +1,6 @@
 #include "errorstrings.h"
 
-using namespace amnezia;
+using namespace fblink;
 
 QString errorString(ErrorCode code) {
     QString errorMessage;
@@ -11,7 +11,7 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::NoError): errorMessage = QObject::tr("No error"); break;
     case(ErrorCode::UnknownError): errorMessage = QObject::tr("Unknown error"); break;
     case(ErrorCode::NotImplementedError): errorMessage = QObject::tr("Function not implemented"); break;
-    case(ErrorCode::AmneziaServiceNotRunning): errorMessage = QObject::tr("Background service is not running"); break;
+    case(ErrorCode::FBLinkServiceNotRunning): errorMessage = QObject::tr("Background service is not running"); break;
     case(ErrorCode::NotSupportedOnThisPlatform): errorMessage = QObject::tr("The selected protocol is not supported on the current platform"); break;
 
     // Server errors
@@ -50,7 +50,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::OpenVpnExecutableMissing): errorMessage = QObject::tr("OpenVPN executable missing"); break;
     case (ErrorCode::ShadowSocksExecutableMissing): errorMessage = QObject::tr("Shadowsocks (ss-local) executable missing"); break;
     case (ErrorCode::CloakExecutableMissing): errorMessage = QObject::tr("Cloak (ck-client) executable missing"); break;
-    case (ErrorCode::AmneziaServiceConnectionFailed): errorMessage = QObject::tr("Amnezia helper service error"); break;
+    case (ErrorCode::FBLinkServiceConnectionFailed): errorMessage = QObject::tr("FBLink helper service error"); break;
     case (ErrorCode::OpenSslFailed): errorMessage = QObject::tr("OpenSSL failed"); break;
 
     // VPN errors
@@ -78,7 +78,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiNotFoundError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
     case (ErrorCode::ApiMigrationError): errorMessage = QObject::tr("A migration error has occurred. Please contact our technical support"); break;
     case (ErrorCode::ApiUpdateRequestError): errorMessage = QObject::tr("Please update the application to use this feature"); break;
-    case (ErrorCode::ApiSubscriptionExpiredError): errorMessage = QObject::tr("Your Amnezia Premium subscription has expired.\n Please check your email for renewal instructions.\n If you haven't received an email, please contact our support."); break;
+    case (ErrorCode::ApiSubscriptionExpiredError): errorMessage = QObject::tr("Your FBLink Premium subscription has expired.\n Please check your email for renewal instructions.\n If you haven't received an email, please contact our support."); break;
     case (ErrorCode::ApiPurchaseError): errorMessage = QObject::tr("Unable to process purchase"); break;
 
     // QFile errors

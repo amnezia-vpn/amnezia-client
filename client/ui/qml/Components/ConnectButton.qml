@@ -126,7 +126,7 @@ Button {
                     position: 0.0
                     color: Qt.lighter(root.accentColor, 1.1)
                 }
-                GradientStop { position: 1.0; color: AmneziaStyle.color.midnightBlack }
+                GradientStop { position: 1.0; color: FBLinkStyle.color.midnightBlack }
             }
 
             border.width: root.buttonActiveFocus ? 2 : 1

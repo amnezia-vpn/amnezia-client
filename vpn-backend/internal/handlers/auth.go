@@ -302,7 +302,8 @@ func (h *AuthHandler) generateTokens(user *models.User) (*tokenResponse, error) 
 		UserID: user.ID,
 		Role:   user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
+			// Access token: короткий TTL — 1 час (уменьшает ущерб при утечке)
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
 		},
 	}
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
@@ -315,6 +316,7 @@ func (h *AuthHandler) generateTokens(user *models.User) (*tokenResponse, error) 
 		UserID: user.ID,
 		Role:   user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
+			// Refresh token: долгий TTL — 30 дней
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
 		},
 	}

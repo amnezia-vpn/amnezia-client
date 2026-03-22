@@ -23,6 +23,9 @@ type Config struct {
 	SMTPPassword        string
 	SMTPFrom            string
 	BackupIntervalHours int
+
+	// Платежи
+	PaymentReturnURL string // URL для редиректа после оплаты
 }
 
 func Load() *Config {
@@ -55,6 +58,7 @@ func Load() *Config {
 		SMTPPassword:        getEnv("SMTP_PASSWORD", ""),
 		SMTPFrom:            getEnv("SMTP_FROM", ""),
 		BackupIntervalHours: backupInterval,
+		PaymentReturnURL:    getEnv("PAYMENT_RETURN_URL", "https://frakebit.com/payment/success"),
 	}
 }
 

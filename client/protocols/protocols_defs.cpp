@@ -3,9 +3,9 @@
 #include <QRandomGenerator>
 #include <QJsonObject>
 
-using namespace amnezia;
+using namespace fblink;
 
-QDebug operator<<(QDebug debug, const amnezia::ProtocolEnumNS::Proto &p)
+QDebug operator<<(QDebug debug, const fblink::ProtocolEnumNS::Proto &p)
 {
     QDebugStateSaver saver(debug);
     debug.nospace() << ProtocolProps::protoToString(p);
@@ -13,7 +13,7 @@ QDebug operator<<(QDebug debug, const amnezia::ProtocolEnumNS::Proto &p)
     return debug;
 }
 
-amnezia::Proto ProtocolProps::protoFromString(QString proto)
+fblink::Proto ProtocolProps::protoFromString(QString proto)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<Proto>();
     for (int i = 0; i < metaEnum.keyCount(); ++i) {
@@ -24,7 +24,7 @@ amnezia::Proto ProtocolProps::protoFromString(QString proto)
     return Proto::Any;
 }
 
-QString ProtocolProps::protoToString(amnezia::Proto p)
+QString ProtocolProps::protoToString(fblink::Proto p)
 {
     if (p == Proto::Any)
         return "";
@@ -34,7 +34,7 @@ QString ProtocolProps::protoToString(amnezia::Proto p)
     return protoKey.toLower();
 }
 
-QList<amnezia::Proto> ProtocolProps::allProtocols()
+QList<fblink::Proto> ProtocolProps::allProtocols()
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<Proto>();
     QList<Proto> all;
@@ -63,13 +63,13 @@ QString ProtocolProps::transportProtoToString(TransportProto proto, Proto p)
     return protoKey.toLower();
 }
 
-QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
+QMap<fblink::Proto, QString> ProtocolProps::protocolHumanNames()
 {
     return { { Proto::OpenVpn, "OpenVPN" },
              { Proto::ShadowSocks, "Shadowsocks" },
              { Proto::Cloak, "Cloak" },
              { Proto::WireGuard, "WireGuard" },
-             { Proto::Awg, "AmneziaWG" },
+             { Proto::Awg, "FBLinkWG" },
              { Proto::Ikev2, "IKEv2" },
              { Proto::L2tp, "L2TP" },
              { Proto::Xray, "XRay" },
@@ -82,12 +82,12 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
              { Proto::Socks5Proxy, QObject::tr("SOCKS5 proxy server") } };
 }
 
-QMap<amnezia::Proto, QString> ProtocolProps::protocolDescriptions()
+QMap<fblink::Proto, QString> ProtocolProps::protocolDescriptions()
 {
     return {};
 }
 
-amnezia::ServiceType ProtocolProps::protocolService(Proto p)
+fblink::ServiceType ProtocolProps::protocolService(Proto p)
 {
     switch (p) {
     case Proto::Any: return ServiceType::None;

@@ -38,7 +38,7 @@ Item {
             Layout.topMargin: 16
             Layout.fillWidth: true
             text: root.descriptionText
-            color: AmneziaStyle.color.mutedGray
+            color: FBLinkStyle.color.mutedGray
             visible: root.descriptionText !== ""
         }
     }

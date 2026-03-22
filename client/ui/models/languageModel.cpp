@@ -123,8 +123,8 @@ QString LanguageModel::getCurrentSiteUrl(const QString &path)
     auto language = static_cast<LanguageSettings::AvailableLanguageEnum>(getCurrentLanguageIndex());
     switch (language) {
     case LanguageSettings::AvailableLanguageEnum::Russian:
-        return "https://storage.googleapis.com/amnezia/amnezia.org" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
-    default: return QString("https://amnezia.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
+        return "https://storage.googleapis.com/fblink/fblink.org" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
+    default: return QString("https://fblink.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
     }
 }
 
@@ -133,7 +133,7 @@ QString LanguageModel::getCurrentDocsUrl(const QString &path)
     auto language = static_cast<LanguageSettings::AvailableLanguageEnum>(getCurrentLanguageIndex());
     switch (language) {
     case LanguageSettings::AvailableLanguageEnum::Russian:
-        return "https://storage.googleapis.com/amnezia/docs" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
-    default: return QString("https://docs.amnezia.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
+        return "https://storage.googleapis.com/fblink/docs" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
+    default: return QString("https://docs.fblink.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
     }
 }

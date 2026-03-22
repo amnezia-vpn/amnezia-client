@@ -89,11 +89,11 @@ void NetworkWatcher::initialize() {
     logger.error() << "Unknown exception in m_impl->start()";
   }
   m_active = true;
-  m_reportUnsecuredNetwork = false; // Disable unsecured network alerts for Amnezia
+  m_reportUnsecuredNetwork = false; // Disable unsecured network alerts for FBLink
 }
 
 void NetworkWatcher::settingsChanged() {
-  // For Amnezia: Keep NetworkWatcher always active for sleep/wake monitoring
+  // For FBLink: Keep NetworkWatcher always active for sleep/wake monitoring
   logger.debug() << "NetworkWatcher settings changed - keeping sleep monitoring active";
 }
 

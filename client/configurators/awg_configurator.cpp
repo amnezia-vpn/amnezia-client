@@ -46,11 +46,11 @@ QString AwgConfigurator::createConfig(const ServerCredentials &credentials, Dock
         jsonConfig[config_key::transportPacketJunkSize] = configMap.value(config_key::transportPacketJunkSize);
     }
 
-    jsonConfig[config_key::specialJunk1] = configMap.value(amnezia::config_key::specialJunk1);
-    jsonConfig[config_key::specialJunk2] = configMap.value(amnezia::config_key::specialJunk2);
-    jsonConfig[config_key::specialJunk3] = configMap.value(amnezia::config_key::specialJunk3);
-    jsonConfig[config_key::specialJunk4] = configMap.value(amnezia::config_key::specialJunk4);
-    jsonConfig[config_key::specialJunk5] = configMap.value(amnezia::config_key::specialJunk5);
+    jsonConfig[config_key::specialJunk1] = configMap.value(fblink::config_key::specialJunk1);
+    jsonConfig[config_key::specialJunk2] = configMap.value(fblink::config_key::specialJunk2);
+    jsonConfig[config_key::specialJunk3] = configMap.value(fblink::config_key::specialJunk3);
+    jsonConfig[config_key::specialJunk4] = configMap.value(fblink::config_key::specialJunk4);
+    jsonConfig[config_key::specialJunk5] = configMap.value(fblink::config_key::specialJunk5);
 
     jsonConfig[config_key::mtu] =
             containerConfig.value(ProtocolProps::protoToString(Proto::Awg)).toObject().value(config_key::mtu).toString(protocols::awg::defaultMtu);

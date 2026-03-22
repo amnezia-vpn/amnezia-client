@@ -14,18 +14,18 @@ Popup {
     visible: false
 
     Overlay.modal: Rectangle {
-        color: AmneziaStyle.color.translucentMidnightBlack
+        color: FBLinkStyle.color.translucentMidnightBlack
     }
 
     background: Rectangle {
-        color: AmneziaStyle.color.transparent
+        color: FBLinkStyle.color.transparent
     }
 
     ImageButtonType {
         id: button
 
         image: "qrc:/images/svg/close_black_24dp.svg"
-        imageColor: AmneziaStyle.color.paleGray
+        imageColor: FBLinkStyle.color.paleGray
 
         implicitWidth: 40
         implicitHeight: 40

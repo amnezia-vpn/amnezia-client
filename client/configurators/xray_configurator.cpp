@@ -27,7 +27,7 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     
     // Get current server config
     QString currentConfig = m_serverController->getTextFileFromContainer(
-        container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
+        container, credentials, fblink::protocols::xray::serverConfigPath, errorCode);
     
     if (errorCode != ErrorCode::NoError) {
         logger.error() << "Failed to get server config file";
@@ -94,7 +94,7 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
         container, 
         credentials, 
         updatedConfig,
-        amnezia::protocols::xray::serverConfigPath,
+        fblink::protocols::xray::serverConfigPath,
         libssh::ScpOverwriteMode::ScpOverwriteExisting
     );
     if (errorCode != ErrorCode::NoError) {
@@ -128,7 +128,7 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
         return "";
     }
 
-    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container),
+    QString config = m_serverController->replaceVars(fblink::scriptData(ProtocolScriptType::xray_template, container),
                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
     
     if (config.isEmpty()) {
@@ -138,7 +138,7 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
     }
 
     QString xrayPublicKey =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::PublicKeyPath, errorCode);
+            m_serverController->getTextFileFromContainer(container, credentials, fblink::protocols::xray::PublicKeyPath, errorCode);
     if (errorCode != ErrorCode::NoError || xrayPublicKey.isEmpty()) {
         logger.error() << "Failed to get public key";
         errorCode = ErrorCode::InternalError;
@@ -147,7 +147,7 @@ QString XrayConfigurator::createConfig(const ServerCredentials &credentials, Doc
     xrayPublicKey.replace("\n", "");
     
     QString xrayShortId =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::shortidPath, errorCode);
+            m_serverController->getTextFileFromContainer(container, credentials, fblink::protocols::xray::shortidPath, errorCode);
     if (errorCode != ErrorCode::NoError || xrayShortId.isEmpty()) {
         logger.error() << "Failed to get short ID";
         errorCode = ErrorCode::InternalError;

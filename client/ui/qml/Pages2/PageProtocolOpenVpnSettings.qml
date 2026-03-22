@@ -290,7 +290,7 @@ PageType {
                 Layout.rightMargin: 16
 
                 Layout.preferredHeight: checkboxLayout.implicitHeight
-                color: AmneziaStyle.color.onyxBlack
+                color: FBLinkStyle.color.onyxBlack
                 radius: 16
 
                 ColumnLayout {

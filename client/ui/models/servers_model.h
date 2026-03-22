@@ -35,7 +35,7 @@ public:
 
         HasWriteAccessRole,
 
-        ContainsAmneziaDnsRole,
+        ContainsFBLinkDnsRole,
 
         DefaultContainerRole,
 
@@ -52,7 +52,7 @@ public:
         AdDescriptionRole,
         AdEndpointRole,
 
-        HasAmneziaDns
+        HasFBLinkDns
     };
 
     ServersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -135,7 +135,7 @@ public slots:
 
     QStringList getAllInstalledServicesName(const int serverIndex);
 
-    void toggleAmneziaDns(bool enabled);
+    void toggleFBLinkDns(bool enabled);
     QPair<QString, QString> getDnsPair(const int serverIndex);
 
     bool isServerFromApiAlreadyExists(const quint16 crc);
@@ -187,7 +187,7 @@ private:
 
     QString getServerDescription(const QJsonObject &server, const int index) const;
 
-    bool isAmneziaDnsContainerInstalled(const int serverIndex) const;
+    bool isFBLinkDnsContainerInstalled(const int serverIndex) const;
 
     bool serverHasInstalledContainers(const int serverIndex) const;
 
@@ -198,7 +198,7 @@ private:
     int m_defaultServerIndex;
     int m_processedServerIndex;
 
-    bool m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+    bool m_isFBLinkDnsEnabled = m_settings->useFBLinkDns();
 
     GatewayStacks m_gatewayStacks;
     void recomputeGatewayStacks();

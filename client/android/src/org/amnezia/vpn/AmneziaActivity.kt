@@ -1,4 +1,4 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -56,12 +56,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.amnezia.vpn.protocol.getStatistics
-import org.amnezia.vpn.protocol.getStatus
-import org.amnezia.vpn.qt.QtAndroidController
-import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
-import org.amnezia.vpn.util.Log
-import org.amnezia.vpn.util.Prefs
+import com.fblink.vpn.protocol.getStatistics
+import com.fblink.vpn.protocol.getStatus
+import com.fblink.vpn.qt.QtAndroidController
+import com.fblink.vpn.util.LibraryLoader.loadSharedLibrary
+import com.fblink.vpn.util.Log
+import com.fblink.vpn.util.Prefs
 import org.json.JSONException
 import org.json.JSONObject
 import org.qtproject.qt.android.bindings.QtActivity

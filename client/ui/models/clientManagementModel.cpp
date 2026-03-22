@@ -81,7 +81,7 @@ ErrorCode ClientManagementModel::updateModel(const DockerContainer container, co
 
     ErrorCode error = ErrorCode::NoError;
 
-    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    QString clientsTableFile = QString("/opt/fblink/%1/clientsTable");
     if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
@@ -173,7 +173,7 @@ ErrorCode ClientManagementModel::getOpenVpnClients(const DockerContainer contain
         return ErrorCode::NoError;
     };
 
-    const QString getOpenVpnClientsList = "sudo docker exec -i $CONTAINER_NAME bash -c 'ls /opt/amnezia/openvpn/pki/issued'";
+    const QString getOpenVpnClientsList = "sudo docker exec -i $CONTAINER_NAME bash -c 'ls /opt/fblink/openvpn/pki/issued'";
     QString script = serverController->replaceVars(getOpenVpnClientsList, serverController->genVarsForScript(credentials, container));
     error = serverController->runScript(credentials, script, cbReadStdOut);
     if (error != ErrorCode::NoError) {
@@ -183,7 +183,7 @@ ErrorCode ClientManagementModel::getOpenVpnClients(const DockerContainer contain
 
     if (!stdOut.isEmpty()) {
         QStringList certsIds = stdOut.split("\n", Qt::SkipEmptyParts);
-        certsIds.removeAll("AmneziaReq.crt");
+        certsIds.removeAll("FBLinkReq.crt");
 
         for (auto &openvpnCertId : certsIds) {
             openvpnCertId.replace(".crt", "");
@@ -211,11 +211,11 @@ ErrorCode ClientManagementModel::getWireGuardClients(const DockerContainer conta
 
     QString configPath;
     if (container == DockerContainer::Awg) {
-        configPath = QString::fromLatin1(amnezia::protocols::awg::serverLegacyConfigPath);
+        configPath = QString::fromLatin1(fblink::protocols::awg::serverLegacyConfigPath);
     } else if (container == DockerContainer::Awg2) {
-        configPath = QString::fromLatin1(amnezia::protocols::awg::serverConfigPath);
+        configPath = QString::fromLatin1(fblink::protocols::awg::serverConfigPath);
     } else {
-        configPath = QString::fromLatin1(amnezia::protocols::wireguard::serverConfigPath);
+        configPath = QString::fromLatin1(fblink::protocols::wireguard::serverConfigPath);
     }
     const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, configPath, error);
     if (error != ErrorCode::NoError) {
@@ -253,7 +253,7 @@ ErrorCode ClientManagementModel::getXrayClients(const DockerContainer container,
 {
     ErrorCode error = ErrorCode::NoError;
 
-    const QString serverConfigPath = amnezia::protocols::xray::serverConfigPath;
+    const QString serverConfigPath = fblink::protocols::xray::serverConfigPath;
     const QString configString = serverController->getTextFileFromContainer(container, credentials, serverConfigPath, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the xray server config file from the server";
@@ -292,7 +292,7 @@ ErrorCode ClientManagementModel::getXrayClients(const DockerContainer container,
         }
         QString clientId = clientObj["id"].toString();
         
-        QString xrayDefaultUuid = serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::uuidPath, error);
+        QString xrayDefaultUuid = serverController->getTextFileFromContainer(container, credentials, fblink::protocols::xray::uuidPath, error);
         xrayDefaultUuid.replace("\n", "");
 
         if (!isClientExists(clientId) && clientId != xrayDefaultUuid) {
@@ -494,7 +494,7 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
 
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
-    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    QString clientsTableFile = QString("/opt/fblink/%1/clientsTable");
     if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
@@ -527,7 +527,7 @@ ErrorCode ClientManagementModel::renameClient(const int row, const QString &clie
 
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
-    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    QString clientsTableFile = QString("/opt/fblink/%1/clientsTable");
     if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
@@ -717,7 +717,7 @@ ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContai
     QString clientId = client.value(configKey::clientId).toString();
 
     const QString getOpenVpnCertData = QString("sudo docker exec -i $CONTAINER_NAME bash -c '"
-                                               "cd /opt/amnezia/openvpn ;\\"
+                                               "cd /opt/fblink/openvpn ;\\"
                                                "easyrsa revoke %1 ;\\"
                                                "easyrsa gen-crl ;\\"
                                                "chmod 666 pki/crl.pem ;\\"
@@ -737,7 +737,7 @@ ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContai
 
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
-    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    QString clientsTableFile = QString("/opt/fblink/%1/clientsTable");
     clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
@@ -755,11 +755,11 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
 
     QString configPath;
     if (container == DockerContainer::Awg) {
-        configPath = QString::fromLatin1(amnezia::protocols::awg::serverLegacyConfigPath);
+        configPath = QString::fromLatin1(fblink::protocols::awg::serverLegacyConfigPath);
     } else if (container == DockerContainer::Awg2) {
-        configPath = QString::fromLatin1(amnezia::protocols::awg::serverConfigPath);
+        configPath = QString::fromLatin1(fblink::protocols::awg::serverConfigPath);
     } else {
-        configPath = QString::fromLatin1(amnezia::protocols::wireguard::serverConfigPath);
+        configPath = QString::fromLatin1(fblink::protocols::wireguard::serverConfigPath);
     }
     const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, configPath, error);
     if (error != ErrorCode::NoError) {
@@ -791,7 +791,7 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
 
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
-    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
+    QString clientsTableFile = QString("/opt/fblink/%1/clientsTable");
     if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
@@ -829,7 +829,7 @@ ErrorCode ClientManagementModel::revokeXray(const int row,
     ErrorCode error = ErrorCode::NoError;
 
     // Get server config
-    const QString serverConfigPath = amnezia::protocols::xray::serverConfigPath;
+    const QString serverConfigPath = fblink::protocols::xray::serverConfigPath;
     const QString configString = serverController->getTextFileFromContainer(container, credentials, serverConfigPath, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the xray server config file";
@@ -910,7 +910,7 @@ ErrorCode ClientManagementModel::revokeXray(const int row,
 
     // Update clients table file on server
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
-    QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable")
+    QString clientsTableFile = QString("/opt/fblink/%1/clientsTable")
         .arg(ContainerProps::containerTypeToString(container));
 
     error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);

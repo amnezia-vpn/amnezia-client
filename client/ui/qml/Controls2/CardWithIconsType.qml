@@ -13,13 +13,13 @@ Button {
     property string bodyText
     property string footerText
 
-    property string hoveredColor: AmneziaStyle.color.slateGray
-    property string defaultColor: AmneziaStyle.color.onyxBlack
+    property string hoveredColor: FBLinkStyle.color.slateGray
+    property string defaultColor: FBLinkStyle.color.onyxBlack
 
-    property string textColor: AmneziaStyle.color.midnightBlack
+    property string textColor: FBLinkStyle.color.midnightBlack
 
     property string rightImageSource
-    property string rightImageColor: AmneziaStyle.color.paleGray
+    property string rightImageColor: FBLinkStyle.color.paleGray
 
     property string leftImageSource
 
@@ -84,7 +84,7 @@ Button {
                     text: root.bodyText
                     visible: text !== ""
 
-                    color: AmneziaStyle.color.mutedGray
+                    color: FBLinkStyle.color.mutedGray
                     textFormat: Text.RichText
 
                     Layout.fillWidth: true
@@ -99,7 +99,7 @@ Button {
                     text: root.footerText
                     visible: text !== ""
 
-                    color: AmneziaStyle.color.mutedGray
+                    color: FBLinkStyle.color.mutedGray
 
                     Layout.fillWidth: true
                     Layout.rightMargin: 16

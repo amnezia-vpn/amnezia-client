@@ -6,9 +6,9 @@ import Style 1.0
 TabButton {
     id: root
 
-    property string hoveredColor: AmneziaStyle.color.richBrown
-    property string defaultColor: AmneziaStyle.color.paleGray
-    property string selectedColor: AmneziaStyle.color.goldenApricot
+    property string hoveredColor: FBLinkStyle.color.richBrown
+    property string defaultColor: FBLinkStyle.color.paleGray
+    property string selectedColor: FBLinkStyle.color.goldenApricot
 
     property string image
 
@@ -40,7 +40,7 @@ TabButton {
         FocusController.nextKeyRightItem()
     }
     
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property string borderFocusedColor: FBLinkStyle.color.paleGray
     property int borderFocusedWidth: 1
 
     property var clickedFunc
@@ -53,10 +53,10 @@ TabButton {
     background: Rectangle {
         id: background
         anchors.fill: parent
-        color: AmneziaStyle.color.transparent
+        color: FBLinkStyle.color.transparent
         radius: 10
 
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
+        border.color: root.activeFocus ? root.borderFocusedColor : FBLinkStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
     }

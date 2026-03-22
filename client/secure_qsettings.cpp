@@ -18,7 +18,7 @@ using namespace QKeychain;
 namespace {
     constexpr const char *settingsKeyTag = "settingsKeyTag";
     constexpr const char *settingsIvTag = "settingsIvTag";
-    constexpr const char *keyChainName = "AmneziaVPN-Keychain";
+    constexpr const char *keyChainName = "FBLink-Keychain";
 }
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent)

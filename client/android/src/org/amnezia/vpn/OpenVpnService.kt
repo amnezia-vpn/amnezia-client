@@ -1,3 +1,3 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
 class OpenVpnService : AmneziaVpnService()

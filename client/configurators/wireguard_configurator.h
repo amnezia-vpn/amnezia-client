@@ -46,7 +46,7 @@ private:
     QString m_serverConfigPath;
     QString m_serverPublicKeyPath;
     QString m_serverPskKeyPath;
-    amnezia::ProtocolScriptType m_configTemplate;
+    fblink::ProtocolScriptType m_configTemplate;
     QString m_protocolName;
     QString m_defaultPort;
 };

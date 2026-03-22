@@ -1,10 +1,10 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
 import androidx.camera.camera2.Camera2Config
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraXConfig
-import org.amnezia.vpn.util.Log
-import org.amnezia.vpn.util.Prefs
+import com.fblink.vpn.util.Log
+import com.fblink.vpn.util.Prefs
 import org.qtproject.qt.android.bindings.QtApplication
 
 private const val TAG = "AmneziaApplication"

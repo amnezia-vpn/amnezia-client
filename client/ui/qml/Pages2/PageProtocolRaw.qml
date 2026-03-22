@@ -143,9 +143,9 @@ PageType {
                                 padding: 0
                                 height: 24
 
-                                color: AmneziaStyle.color.paleGray
-                                selectionColor: AmneziaStyle.color.richBrown
-                                selectedTextColor: AmneziaStyle.color.paleGray
+                                color: FBLinkStyle.color.paleGray
+                                selectionColor: FBLinkStyle.color.richBrown
+                                selectedTextColor: FBLinkStyle.color.paleGray
 
                                 font.pixelSize: 16
                                 font.weight: Font.Medium
@@ -156,7 +156,7 @@ PageType {
                                 wrapMode: Text.Wrap
 
                                 background: Rectangle {
-                                    color: AmneziaStyle.color.transparent
+                                    color: FBLinkStyle.color.transparent
                                 }
                             }
                         }
@@ -176,7 +176,7 @@ PageType {
                 visible: ServersModel.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-                textColor: AmneziaStyle.color.vibrantRed
+                textColor: FBLinkStyle.color.vibrantRed
 
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())

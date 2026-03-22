@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <functional>
 #include <memory>
 
 #include "ui/controllers/importController.h"
@@ -24,6 +25,7 @@ class FBLinkController : public QObject
     Q_PROPERTY(bool autoRenew READ autoRenew NOTIFY subscriptionChanged)
     Q_PROPERTY(bool cardSaved READ cardSaved NOTIFY subscriptionChanged)
     Q_PROPERTY(bool trialAvailable READ trialAvailable NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool isLoading READ isLoading NOTIFY loadingChanged)
 
 public:
     explicit FBLinkController(ImportController *importController, const std::shared_ptr<Settings> &settings,
@@ -49,6 +51,7 @@ public:
     bool autoRenew() const;
     bool cardSaved() const;
     bool trialAvailable() const;
+    bool isLoading() const;
 
 signals:
     void loginSuccess();
@@ -72,6 +75,7 @@ signals:
     void autoRenewChanged(bool enabled);
     void cardDeleted();
     void requestError(const QString &errorMessage);
+    void loadingChanged();
 
 private:
     QNetworkAccessManager *m_nam;
@@ -83,9 +87,18 @@ private:
 
     void saveJwtToken(const QString &token);
     QString getJwtToken() const;
+    void saveRefreshToken(const QString &token);
+    QString getRefreshToken() const;
+    void refreshAccessToken(std::function<void()> onSuccess = nullptr);
     void saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,
                               bool autoRenew = true, bool cardSaved = false, bool trialAvailable = true);
     void clearExistingFBLinkServers();
+
+    bool m_isRefreshing = false;
+    bool m_isLoading = false;
+    // Защита от обхода подписки: время последней серверной верификации
+    // Если прошло > 24ч — при следующем isSubscribed() принудительно обновляем
+    qint64 m_lastSubscriptionVerifiedAt = 0;
 };
 
 #endif // FBLINKCONTROLLER_H

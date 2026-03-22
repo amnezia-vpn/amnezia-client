@@ -17,7 +17,7 @@ QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentia
                                               const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
     QString ssKey =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::shadowsocks::ssKeyPath, errorCode);
+            m_serverController->getTextFileFromContainer(container, credentials, fblink::protocols::shadowsocks::ssKeyPath, errorCode);
     ssKey.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {

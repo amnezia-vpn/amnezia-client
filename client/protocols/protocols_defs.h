@@ -5,7 +5,7 @@
 #include <QMetaEnum>
 #include <QObject>
 
-namespace amnezia
+namespace fblink
 {
     namespace config_key
     {
@@ -121,7 +121,7 @@ namespace amnezia
 
         namespace dns
         {
-            constexpr char amneziaDnsIp[] = "172.29.172.254";
+            constexpr char fblinkDnsIp[] = "172.29.172.254";
         }
 
         namespace openvpn
@@ -131,11 +131,11 @@ namespace amnezia
             constexpr char defaultSubnetCidr[] = "24";
             constexpr char defaultMtu[] = "1500";
 
-            constexpr char serverConfigPath[] = "/opt/amnezia/openvpn/server.conf";
-            constexpr char caCertPath[] = "/opt/amnezia/openvpn/pki/ca.crt";
-            constexpr char clientCertPath[] = "/opt/amnezia/openvpn/pki/issued";
-            constexpr char taKeyPath[] = "/opt/amnezia/openvpn/ta.key";
-            constexpr char clientsDirPath[] = "/opt/amnezia/openvpn/clients";
+            constexpr char serverConfigPath[] = "/opt/fblink/openvpn/server.conf";
+            constexpr char caCertPath[] = "/opt/fblink/openvpn/pki/ca.crt";
+            constexpr char clientCertPath[] = "/opt/fblink/openvpn/pki/issued";
+            constexpr char taKeyPath[] = "/opt/fblink/openvpn/ta.key";
+            constexpr char clientsDirPath[] = "/opt/fblink/openvpn/clients";
             constexpr char defaultPort[] = "1194";
             constexpr char defaultTransportProto[] = "udp";
             constexpr char defaultCipher[] = "AES-256-GCM";
@@ -144,7 +144,7 @@ namespace amnezia
             constexpr bool defaultNcpDisable = false;
             constexpr bool defaultTlsAuth = true;
             constexpr char ncpDisableString[] = "ncp-disable";
-            constexpr char tlsAuthString[] = "tls-auth /opt/amnezia/openvpn/ta.key 0";
+            constexpr char tlsAuthString[] = "tls-auth /opt/fblink/openvpn/ta.key 0";
 
             constexpr char defaultAdditionalClientConfig[] = "";
             constexpr char defaultAdditionalServerConfig[] = "";
@@ -152,7 +152,7 @@ namespace amnezia
 
         namespace shadowsocks
         {
-            constexpr char ssKeyPath[] = "/opt/amnezia/shadowsocks/shadowsocks.key";
+            constexpr char ssKeyPath[] = "/opt/fblink/shadowsocks/shadowsocks.key";
             constexpr char defaultPort[] = "6789";
             constexpr char defaultLocalProxyPort[] = "8585";
             constexpr char defaultCipher[] = "chacha20-ietf-poly1305";
@@ -160,11 +160,11 @@ namespace amnezia
 
         namespace xray
         {
-            constexpr char serverConfigPath[] = "/opt/amnezia/xray/server.json";
-            constexpr char uuidPath[] = "/opt/amnezia/xray/xray_uuid.key";
-            constexpr char PublicKeyPath[] = "/opt/amnezia/xray/xray_public.key";
-            constexpr char PrivateKeyPath[] = "/opt/amnezia/xray/xray_private.key";
-            constexpr char shortidPath[] = "/opt/amnezia/xray/xray_short_id.key";
+            constexpr char serverConfigPath[] = "/opt/fblink/xray/server.json";
+            constexpr char uuidPath[] = "/opt/fblink/xray/xray_uuid.key";
+            constexpr char PublicKeyPath[] = "/opt/fblink/xray/xray_public.key";
+            constexpr char PrivateKeyPath[] = "/opt/fblink/xray/xray_private.key";
+            constexpr char shortidPath[] = "/opt/fblink/xray/xray_short_id.key";
             constexpr char defaultSite[] = "www.googletagmanager.com";
 
             constexpr char defaultPort[] = "443";
@@ -174,9 +174,9 @@ namespace amnezia
 
         namespace cloak
         {
-            constexpr char ckPublicKeyPath[] = "/opt/amnezia/cloak/cloak_public.key";
-            constexpr char ckBypassUidKeyPath[] = "/opt/amnezia/cloak/cloak_bypass_uid.key";
-            constexpr char ckAdminKeyPath[] = "/opt/amnezia/cloak/cloak_admin_uid.key";
+            constexpr char ckPublicKeyPath[] = "/opt/fblink/cloak/cloak_public.key";
+            constexpr char ckBypassUidKeyPath[] = "/opt/fblink/cloak/cloak_bypass_uid.key";
+            constexpr char ckAdminKeyPath[] = "/opt/fblink/cloak/cloak_admin_uid.key";
             constexpr char defaultPort[] = "443";
             constexpr char defaultRedirSite[] = "tile.openstreetmap.org";
             constexpr char defaultCipher[] = "chacha20-poly1305";
@@ -195,9 +195,9 @@ namespace amnezia
 #else
             constexpr char defaultMtu[] = "1376";
 #endif
-            constexpr char serverConfigPath[] = "/opt/amnezia/wireguard/wg0.conf";
-            constexpr char serverPublicKeyPath[] = "/opt/amnezia/wireguard/wireguard_server_public_key.key";
-            constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
+            constexpr char serverConfigPath[] = "/opt/fblink/wireguard/wg0.conf";
+            constexpr char serverPublicKeyPath[] = "/opt/fblink/wireguard/wireguard_server_public_key.key";
+            constexpr char serverPskKeyPath[] = "/opt/fblink/wireguard/wireguard_psk.key";
 
         }
 
@@ -216,10 +216,10 @@ namespace amnezia
             constexpr char defaultMtu[] = "1376";
 #endif
 
-            constexpr char serverConfigPath[] = "/opt/amnezia/awg/awg0.conf";
-            constexpr char serverLegacyConfigPath[] = "/opt/amnezia/awg/wg0.conf";
-            constexpr char serverPublicKeyPath[] = "/opt/amnezia/awg/wireguard_server_public_key.key";
-            constexpr char serverPskKeyPath[] = "/opt/amnezia/awg/wireguard_psk.key";
+            constexpr char serverConfigPath[] = "/opt/fblink/awg/awg0.conf";
+            constexpr char serverLegacyConfigPath[] = "/opt/fblink/awg/wg0.conf";
+            constexpr char serverPublicKeyPath[] = "/opt/fblink/awg/wireguard_server_public_key.key";
+            constexpr char serverPskKeyPath[] = "/opt/fblink/awg/wireguard_psk.key";
 
             constexpr char defaultJunkPacketCount[] = "3";
             constexpr char defaultJunkPacketMinSize[] = "10";
@@ -327,8 +327,8 @@ namespace amnezia
         static QString getProtocolVersion(const QJsonObject &protocolConfig);
         static QString getProtocolVersionString(const QJsonObject &protocolConfig);
     };
-} // namespace amnezia
+} // namespace fblink
 
-QDebug operator<<(QDebug debug, const amnezia::Proto &p);
+QDebug operator<<(QDebug debug, const fblink::Proto &p);
 
 #endif // PROTOCOLS_DEFS_H

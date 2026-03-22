@@ -91,7 +91,7 @@ private:
     void initPassphraseRequestHandler();
     void initTranslationsUpdatedHandler();
     void initAutoConnectHandler();
-    void initAmneziaDnsToggledHandler();
+    void initFBLinkDnsToggledHandler();
     void initPrepareConfigHandler();
     void initStrictKillSwitchHandler();
 

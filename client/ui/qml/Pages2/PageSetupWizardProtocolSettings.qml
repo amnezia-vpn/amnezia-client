@@ -79,11 +79,11 @@ PageType {
 
                 implicitHeight: 32
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
+                defaultColor: FBLinkStyle.color.transparent
+                hoveredColor: FBLinkStyle.color.translucentWhite
+                pressedColor: FBLinkStyle.color.sheerWhite
+                disabledColor: FBLinkStyle.color.mutedGray
+                textColor: FBLinkStyle.color.goldenApricot
 
                 text: qsTr("More detailed")
 
@@ -158,7 +158,7 @@ PageType {
                                 Layout.leftMargin: 16
                                 Layout.rightMargin: 16
 
-                                color: AmneziaStyle.color.transparent
+                                color: FBLinkStyle.color.transparent
                             }
                         }
 
@@ -221,7 +221,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                color: AmneziaStyle.color.transparent
+                color: FBLinkStyle.color.transparent
             }
 
             BasicButtonType {

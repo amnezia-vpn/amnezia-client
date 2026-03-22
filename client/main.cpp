@@ -1,7 +1,7 @@
 #include <QDebug>
 #include <QTimer>
 
-#include "amnezia_application.h"
+#include "fblink_application.h"
 #include "core/osSignalHandler.h"
 #include "migrations.h"
 #include "version.h"
@@ -21,9 +21,9 @@
 bool isAnotherInstanceRunning()
 {
     QLocalSocket socket;
-    socket.connectToServer("AmneziaVPNInstance");
+    socket.connectToServer("FBLinkInstance");
     if (socket.waitForConnected(500)) {
-        qWarning() << "AmneziaVPN is already running";
+        qWarning() << "FBLink is already running";
         return true;
     }
     return false;
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     qputenv("ANDROID_OPENSSL_SUFFIX", "_3");
 #endif
 
-    AmneziaApplication app(argc, argv);
+    FBLinkApplication app(argc, argv);
     OsSignalHandler::setup();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)

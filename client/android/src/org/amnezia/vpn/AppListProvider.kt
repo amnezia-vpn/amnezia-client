@@ -6,7 +6,7 @@ import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Bitmap
 import android.graphics.Bitmap.Config.ARGB_8888
 import androidx.core.graphics.drawable.toBitmapOrNull
-import org.amnezia.vpn.util.Log
+import com.fblink.vpn.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 

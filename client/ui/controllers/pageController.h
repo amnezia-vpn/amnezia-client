@@ -122,7 +122,7 @@ public slots:
     int decrementDrawerDepth();
 
 private slots:
-    void onShowErrorMessage(amnezia::ErrorCode errorCode);
+    void onShowErrorMessage(fblink::ErrorCode errorCode);
 
 signals:
     void goToPage(PageLoader::PageEnum page, bool slide = true);
@@ -139,7 +139,7 @@ signals:
 
     void restorePageHomeState(bool isContainerInstalled = false);
 
-    void showErrorMessage(amnezia::ErrorCode);
+    void showErrorMessage(fblink::ErrorCode);
     void showErrorMessage(const QString &errorMessage);
     void showNotificationMessage(const QString &message);
 

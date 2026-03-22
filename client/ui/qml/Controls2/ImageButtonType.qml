@@ -9,18 +9,18 @@ Button {
 
     property string image
 
-    property string hoveredColor: AmneziaStyle.color.translucentWhite
-    property string defaultColor: AmneziaStyle.color.transparent
-    property string pressedColor: AmneziaStyle.color.sheerWhite
-    property string disableColor: AmneziaStyle.color.slateGray
+    property string hoveredColor: FBLinkStyle.color.translucentWhite
+    property string defaultColor: FBLinkStyle.color.transparent
+    property string pressedColor: FBLinkStyle.color.sheerWhite
+    property string disableColor: FBLinkStyle.color.slateGray
 
-    property string imageColor: AmneziaStyle.color.mutedGray
-    property string disableImageColor: AmneziaStyle.color.slateGray
+    property string imageColor: FBLinkStyle.color.mutedGray
+    property string disableImageColor: FBLinkStyle.color.slateGray
 
     property alias backgroundColor: background.color
     property alias backgroundRadius: background.radius
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property string borderFocusedColor: FBLinkStyle.color.paleGray
     property int borderFocusedWidth: 1
 
     hoverEnabled: true
@@ -65,7 +65,7 @@ Button {
         id: background
 
         anchors.fill: parent
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
+        border.color: root.activeFocus ? root.borderFocusedColor : FBLinkStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
         color: {

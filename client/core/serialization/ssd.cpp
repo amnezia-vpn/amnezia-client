@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Copyright (c) 2024 AmneziaVPN
-// This file has been modified for AmneziaVPN
+// Copyright (c) 2024 FBLink
+// This file has been modified for FBLink
 //
 // This file is based on the work of the Qv2ray VPN client.
 // The original code of the Qv2ray, A Qt frontend for V2Ray. Written in C++ and licensed under GPL3.
@@ -45,7 +45,7 @@
 const inline QString QV2RAY_SSD_DEFAULT_NAME_PATTERN = "%1 - %2 (rate %3)";
 #define OUTBOUND_TAG_PROXY "PROXY"
 
-namespace amnezia::serialization::ssd
+namespace fblink::serialization::ssd
 {
     // These below are super strict checking schemes, but necessary.
 #define MUST_EXIST(fieldName)                                                                                                                        \
@@ -240,5 +240,5 @@ QList<std::pair<QString, QJsonObject>> Deserialize(const QString &uri, QString *
 #undef SERVER_SHOULD_BE_OBJECT
 #undef SHOULD_EXIST
 #undef SHOULD_STRING
-} // namespace amnezia::serialization::ssd
+} // namespace fblink::serialization::ssd
 

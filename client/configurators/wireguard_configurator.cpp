@@ -26,11 +26,11 @@ WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings,
     : ConfiguratorBase(settings, serverController, parent), m_isAwg(isAwg)
 {
     m_serverConfigPath =
-            m_isAwg ? amnezia::protocols::awg::serverConfigPath : amnezia::protocols::wireguard::serverConfigPath;
+            m_isAwg ? fblink::protocols::awg::serverConfigPath : fblink::protocols::wireguard::serverConfigPath;
     m_serverPublicKeyPath =
-            m_isAwg ? amnezia::protocols::awg::serverPublicKeyPath : amnezia::protocols::wireguard::serverPublicKeyPath;
+            m_isAwg ? fblink::protocols::awg::serverPublicKeyPath : fblink::protocols::wireguard::serverPublicKeyPath;
     m_serverPskKeyPath =
-            m_isAwg ? amnezia::protocols::awg::serverPskKeyPath : amnezia::protocols::wireguard::serverPskKeyPath;
+            m_isAwg ? fblink::protocols::awg::serverPskKeyPath : fblink::protocols::wireguard::serverPskKeyPath;
     m_configTemplate = m_isAwg ? ProtocolScriptType::awg_template : ProtocolScriptType::wireguard_template;
 
     m_protocolName = m_isAwg ? config_key::awg : config_key::wireguard;
@@ -105,7 +105,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 
     QString configPath = m_serverConfigPath;
     if (container == DockerContainer::Awg) {
-        configPath = amnezia::protocols::awg::serverLegacyConfigPath;
+        configPath = fblink::protocols::awg::serverLegacyConfigPath;
     }
     QString getIpsScript = QString("cat %1 | grep AllowedIPs").arg(configPath);
     QString stdOut;
@@ -188,7 +188,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 QString WireguardConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
                                             const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
-    QString scriptData = amnezia::scriptData(m_configTemplate, container);
+    QString scriptData = fblink::scriptData(m_configTemplate, container);
     QString config = m_serverController->replaceVars(
             scriptData, m_serverController->genVarsForScript(credentials, container, containerConfig));
 

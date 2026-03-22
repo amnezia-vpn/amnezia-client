@@ -1,4 +1,4 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
@@ -40,28 +40,28 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import org.amnezia.vpn.protocol.BadConfigException
-import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
-import org.amnezia.vpn.protocol.ProtocolState.CONNECTING
-import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
-import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTING
-import org.amnezia.vpn.protocol.ProtocolState.RECONNECTING
-import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
-import org.amnezia.vpn.protocol.VpnException
-import org.amnezia.vpn.protocol.VpnStartException
-import org.amnezia.vpn.protocol.putStatus
-import org.amnezia.vpn.util.LoadLibraryException
-import org.amnezia.vpn.util.Log
-import org.amnezia.vpn.util.Prefs
-import org.amnezia.vpn.util.net.NetworkState
-import org.amnezia.vpn.util.net.TrafficStats
+import com.fblink.vpn.protocol.BadConfigException
+import com.fblink.vpn.protocol.ProtocolState.CONNECTED
+import com.fblink.vpn.protocol.ProtocolState.CONNECTING
+import com.fblink.vpn.protocol.ProtocolState.DISCONNECTED
+import com.fblink.vpn.protocol.ProtocolState.DISCONNECTING
+import com.fblink.vpn.protocol.ProtocolState.RECONNECTING
+import com.fblink.vpn.protocol.ProtocolState.UNKNOWN
+import com.fblink.vpn.protocol.VpnException
+import com.fblink.vpn.protocol.VpnStartException
+import com.fblink.vpn.protocol.putStatus
+import com.fblink.vpn.util.LoadLibraryException
+import com.fblink.vpn.util.Log
+import com.fblink.vpn.util.Prefs
+import com.fblink.vpn.util.net.NetworkState
+import com.fblink.vpn.util.net.TrafficStats
 import org.json.JSONException
 import org.json.JSONObject
 
 private const val TAG = "AmneziaVpnService"
 
-const val ACTION_DISCONNECT = "org.amnezia.vpn.action.disconnect"
-const val ACTION_CONNECT = "org.amnezia.vpn.action.connect"
+const val ACTION_DISCONNECT = "com.fblink.vpn.action.disconnect"
+const val ACTION_CONNECT = "com.fblink.vpn.action.connect"
 
 const val MSG_VPN_CONFIG = "VPN_CONFIG"
 const val MSG_ERROR = "ERROR"

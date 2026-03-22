@@ -24,8 +24,11 @@ public slots:
     bool isAuthenticated();
     void sendTouch(float x, float y);
 
+    Q_INVOKABLE void measurePing(const QString &host);
+
 signals:
     void fileDialogClosed(const bool isAccepted);
+    void pingMeasured(int ms);
 
 private:
     std::shared_ptr<Settings> m_settings;

@@ -1,4 +1,4 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
 import android.Manifest.permission
 import android.annotation.SuppressLint
@@ -14,16 +14,16 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.Action
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import org.amnezia.vpn.protocol.ProtocolState
-import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
-import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
-import org.amnezia.vpn.util.Log
-import org.amnezia.vpn.util.net.TrafficStats.TrafficData
+import com.fblink.vpn.protocol.ProtocolState
+import com.fblink.vpn.protocol.ProtocolState.CONNECTED
+import com.fblink.vpn.protocol.ProtocolState.DISCONNECTED
+import com.fblink.vpn.util.Log
+import com.fblink.vpn.util.net.TrafficStats.TrafficData
 
 private const val TAG = "ServiceNotification"
 
-private const val OLD_NOTIFICATION_CHANNEL_ID: String = "org.amnezia.vpn.notification"
-private const val NOTIFICATION_CHANNEL_ID: String = "org.amnezia.vpn.notifications"
+private const val OLD_NOTIFICATION_CHANNEL_ID: String = "com.fblink.vpn.notification"
+private const val NOTIFICATION_CHANNEL_ID: String = "com.fblink.vpn.notifications"
 const val NOTIFICATION_ID = 1337
 
 private const val GET_ACTIVITY_REQUEST_CODE = 0

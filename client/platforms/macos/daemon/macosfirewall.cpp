@@ -16,8 +16,8 @@
 // along with the Private Internet Access Desktop Client.  If not, see
 // <https://www.gnu.org/licenses/>.
 
-// Copyright (c) 2024 AmneziaVPN
-// This file has been modified for AmneziaVPN
+// Copyright (c) 2024 FBLink
+// This file has been modified for FBLink
 //
 // This file is based on the work of the Private Internet Access Desktop Client.
 // The original code of the Private Internet Access Desktop Client is copyrighted (c) 2023 Private Internet Access, Inc. and licensed under GPL3.
@@ -52,7 +52,7 @@ namespace {
 // Writable location that does NOT live inside the signed bundle.  Using a
 // constant path under /Library/Application Support keeps the signature intact
 // and is accessible to the root helper.
-#define DaemonDataDir QStringLiteral("/Library/Application Support/AmneziaVPN/pf")
+#define DaemonDataDir QStringLiteral("/Library/Application Support/FBLink/pf")
 
 #include <QProcess>
 

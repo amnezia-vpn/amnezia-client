@@ -68,11 +68,11 @@ ErrorCode ShadowSocksVpnProtocol::start()
         qDebug().noquote() << "ShadowSocksVpnProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
         setConnectionState(Vpn::ConnectionState::Disconnected);
         if (exitStatus != QProcess::NormalExit){
-            emit protocolError(amnezia::ErrorCode::ShadowSocksExecutableCrashed);
+            emit protocolError(fblink::ErrorCode::ShadowSocksExecutableCrashed);
             stop();
         }
         if (exitCode !=0 ){
-            emit protocolError(amnezia::ErrorCode::InternalError);
+            emit protocolError(fblink::ErrorCode::InternalError);
             stop();
         }
     });

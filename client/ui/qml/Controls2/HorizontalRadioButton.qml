@@ -9,19 +9,19 @@ import "TextTypes"
 RadioButton {
     id: root
 
-    property string hoveredColor: AmneziaStyle.color.barelyTranslucentWhite
-    property string defaultColor: AmneziaStyle.color.transparent
-    property string checkedColor: AmneziaStyle.color.transparent
-    property string disabledColor: AmneziaStyle.color.transparent
+    property string hoveredColor: FBLinkStyle.color.barelyTranslucentWhite
+    property string defaultColor: FBLinkStyle.color.transparent
+    property string checkedColor: FBLinkStyle.color.transparent
+    property string disabledColor: FBLinkStyle.color.transparent
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string textDisabledColor: AmneziaStyle.color.mutedGray
+    property string textColor: FBLinkStyle.color.paleGray
+    property string textDisabledColor: FBLinkStyle.color.mutedGray
 
-    property string pressedBorderColor: AmneziaStyle.color.charcoalGray
-    property string checkedBorderColor: AmneziaStyle.color.goldenApricot
-    property string defaultBodredColor: AmneziaStyle.color.transparent
-    property string checkedDisabledBorderColor: AmneziaStyle.color.mutedBrown
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property string pressedBorderColor: FBLinkStyle.color.charcoalGray
+    property string checkedBorderColor: FBLinkStyle.color.goldenApricot
+    property string defaultBodredColor: FBLinkStyle.color.transparent
+    property string checkedDisabledBorderColor: FBLinkStyle.color.mutedBrown
+    property string borderFocusedColor: FBLinkStyle.color.paleGray
     property int borderWidth: 0
 
     implicitWidth: content.implicitWidth

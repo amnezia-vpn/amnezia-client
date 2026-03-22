@@ -4,7 +4,7 @@
 #include <QFile>
 #include <QObject>
 
-QString amnezia::scriptFolder(amnezia::DockerContainer container)
+QString fblink::scriptFolder(fblink::DockerContainer container)
 {
     switch (container) {
     case DockerContainer::OpenVpn: return QLatin1String("openvpn");
@@ -24,7 +24,7 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     }
 }
 
-QString amnezia::scriptName(SharedScriptType type)
+QString fblink::scriptName(SharedScriptType type)
 {
     switch (type) {
     case SharedScriptType::prepare_host: return QLatin1String("prepare_host.sh");
@@ -40,7 +40,7 @@ QString amnezia::scriptName(SharedScriptType type)
     }
 }
 
-QString amnezia::scriptName(ProtocolScriptType type)
+QString fblink::scriptName(ProtocolScriptType type)
 {
     switch (type) {
     case ProtocolScriptType::dockerfile: return QLatin1String("Dockerfile");
@@ -55,9 +55,9 @@ QString amnezia::scriptName(ProtocolScriptType type)
     }
 }
 
-QString amnezia::scriptData(amnezia::SharedScriptType type)
+QString fblink::scriptData(fblink::SharedScriptType type)
 {
-    QString fileName = QString(":/server_scripts/%1").arg(amnezia::scriptName(type));
+    QString fileName = QString(":/server_scripts/%1").arg(fblink::scriptName(type));
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << "Warning: script missing" << fileName;
@@ -70,9 +70,9 @@ QString amnezia::scriptData(amnezia::SharedScriptType type)
     return ba;
 }
 
-QString amnezia::scriptData(amnezia::ProtocolScriptType type, DockerContainer container)
+QString fblink::scriptData(fblink::ProtocolScriptType type, DockerContainer container)
 {
-    QString fileName = QString(":/server_scripts/%1/%2").arg(amnezia::scriptFolder(container), amnezia::scriptName(type));
+    QString fileName = QString(":/server_scripts/%1/%2").arg(fblink::scriptFolder(container), fblink::scriptName(type));
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << "Warning: script missing" << fileName;

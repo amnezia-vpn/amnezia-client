@@ -10,9 +10,9 @@ import "TextTypes"
 Rectangle {
     id: root
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string backGroundColor: AmneziaStyle.color.onyxBlack
-    property string imageColor: AmneziaStyle.color.paleGray
+    property string textColor: FBLinkStyle.color.paleGray
+    property string backGroundColor: FBLinkStyle.color.onyxBlack
+    property string imageColor: FBLinkStyle.color.paleGray
     property string textString
     property int textFormat: Text.PlainText
 

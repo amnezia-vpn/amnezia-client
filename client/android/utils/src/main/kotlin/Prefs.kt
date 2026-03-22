@@ -1,4 +1,4 @@
-package org.amnezia.vpn.util
+package com.fblink.vpn.util
 
 import android.app.Application
 import android.content.Context
@@ -8,7 +8,7 @@ import androidx.security.crypto.MasterKey
 import kotlin.reflect.typeOf
 
 private const val TAG = "Prefs"
-private const val PREFS_FILE = "org.amnezia.vpn.prefs"
+private const val PREFS_FILE = "com.fblink.vpn.prefs"
 private const val SECURE_PREFS_FILE = "$PREFS_FILE.secure"
 
 object Prefs {

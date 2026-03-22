@@ -10,7 +10,7 @@
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
-    #include <AmneziaVPN-Swift.h>
+    #include <FBLink-Swift.h>
 #endif
 
 CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
@@ -216,9 +216,9 @@ void CoreController::initAppleController()
         emit m_settingsController->importBackupFromOutside(filePath);
     });
 
-    QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled()); });
+    QTimer::singleShot(0, this, [this]() { FBLink::toggleScreenshots(m_settings->isScreenshotsEnabled()); });
 
-    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
+    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) { FBLink::toggleScreenshots(enabled); });
 #endif
 }
 
@@ -232,7 +232,7 @@ void CoreController::initSignalHandlers()
     initPassphraseRequestHandler();
     initTranslationsUpdatedHandler();
     initAutoConnectHandler();
-    initAmneziaDnsToggledHandler();
+    initFBLinkDnsToggledHandler();
     initPrepareConfigHandler();
     initStrictKillSwitchHandler();
 }
@@ -264,15 +264,15 @@ void CoreController::updateTranslator(const QLocale &locale)
     }
 
     QStringList availableTranslations;
-    QDirIterator it(":/translations", QStringList("amneziavpn_*.qm"), QDir::Files);
+    QDirIterator it(":/translations", QStringList("fblink_*.qm"), QDir::Files);
     while (it.hasNext()) {
         availableTranslations << it.next();
     }
 
     // This code allow to load translation for the language only, without country code
     const QString lang = locale.name().split("_").first();
-    const QString translationFilePrefix = QString(":/translations/amneziavpn_") + lang;
-    QString strFileName = QString(":/translations/amneziavpn_%1.qm").arg(locale.name());
+    const QString translationFilePrefix = QString(":/translations/fblink_") + lang;
+    QString strFileName = QString(":/translations/fblink_%1.qm").arg(locale.name());
     for (const QString &translation : availableTranslations) {
         if (translation.contains(translationFilePrefix)) {
             strFileName = translation;
@@ -359,9 +359,9 @@ void CoreController::initAutoConnectHandler()
     }
 }
 
-void CoreController::initAmneziaDnsToggledHandler()
+void CoreController::initFBLinkDnsToggledHandler()
 {
-    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversModel.get(), &ServersModel::toggleAmneziaDns);
+    connect(m_settingsController.get(), &SettingsController::fblinkDnsToggled, m_serversModel.get(), &ServersModel::toggleFBLinkDns);
 }
 
 void CoreController::initPrepareConfigHandler()

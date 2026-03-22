@@ -24,7 +24,7 @@ FocusScope {
         ImageButtonType {
             id: backButton
             image: backButtonImage
-            imageColor: AmneziaStyle.color.paleGray
+            imageColor: FBLinkStyle.color.paleGray
 
             implicitWidth: 40
             implicitHeight: 40
@@ -42,7 +42,7 @@ FocusScope {
             id: background
             Layout.fillWidth: true
 
-            color: AmneziaStyle.color.transparent
+            color: FBLinkStyle.color.transparent
         }
     }
 

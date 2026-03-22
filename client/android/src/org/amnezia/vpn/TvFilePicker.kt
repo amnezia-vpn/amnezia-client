@@ -1,4 +1,4 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -8,7 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
-import org.amnezia.vpn.util.Log
+import com.fblink.vpn.util.Log
 
 private const val TAG = "TvFilePicker"
 

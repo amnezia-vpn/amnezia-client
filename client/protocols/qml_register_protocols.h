@@ -7,9 +7,9 @@
 #include <QDebug>
 #include <QQmlEngine>
 
-namespace amnezia {
+namespace fblink {
 
-using namespace amnezia::ProtocolEnumNS;
+using namespace fblink::ProtocolEnumNS;
 
 void declareQmlProtocolEnum() {
     qmlRegisterUncreatableMetaObject(
@@ -37,8 +37,8 @@ void declareQmlProtocolEnum() {
         );
 }
 
-} // namespace amnezia
+} // namespace fblink
 
-QDebug operator<<(QDebug debug, const amnezia::Proto &p);
+QDebug operator<<(QDebug debug, const fblink::Proto &p);
 
 #endif // QML_REGISTER_PROTOCOLS_H

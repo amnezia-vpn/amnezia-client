@@ -5,7 +5,7 @@
 
 IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
-    m_node.connectToNode(QUrl("local:" + amnezia::getIpcServiceUrl()));
+    m_node.connectToNode(QUrl("local:" + fblink::getIpcServiceUrl()));
     m_interface.reset(m_node.acquire<IpcInterfaceReplica>());
 }
 
@@ -44,7 +44,7 @@ QSharedPointer<IpcProcessInterfaceReplica> IpcClient::CreatePrivilegedProcess()
         const int pid = createPrivilegedProcess.returnValue();
 
         auto* node = new QRemoteObjectNode();
-        node->connectToNode(QUrl(QString("local:%1").arg(amnezia::getIpcProcessUrl(pid))));
+        node->connectToNode(QUrl(QString("local:%1").arg(fblink::getIpcProcessUrl(pid))));
 
         QSharedPointer<IpcProcessInterfaceReplica> rep(
             node->acquire<IpcProcessInterfaceReplica>(),

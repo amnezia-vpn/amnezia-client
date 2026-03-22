@@ -17,7 +17,7 @@
 #include "settings.h"
 #include "vpnconnection.h"
 
-#define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
+#define amnApp (static_cast<FBLinkApplication *>(QCoreApplication::instance()))
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
   #define AMNEZIA_BASE_CLASS QGuiApplication
@@ -25,12 +25,12 @@
   #define AMNEZIA_BASE_CLASS QApplication
 #endif
 
-class AmneziaApplication : public AMNEZIA_BASE_CLASS
+class FBLinkApplication : public AMNEZIA_BASE_CLASS
 {
     Q_OBJECT
 public:
-    AmneziaApplication(int &argc, char *argv[]);
-    virtual ~AmneziaApplication();
+    FBLinkApplication(int &argc, char *argv[]);
+    virtual ~FBLinkApplication();
 
     void init();
     void registerTypes();

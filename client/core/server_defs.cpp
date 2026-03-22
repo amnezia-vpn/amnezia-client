@@ -1,16 +1,16 @@
 #include "server_defs.h"
 
-//QString amnezia::containerToString(amnezia::DockerContainer container)
+//QString fblink::containerToString(fblink::DockerContainer container)
 //{
 //    switch (container) {
-//    case(DockerContainer::OpenVpn): return "amnezia-openvpn";
-//    case(DockerContainer::OpenVpnOverCloak): return "amnezia-openvpn-cloak";
-//    case(DockerContainer::OpenVpnOverShadowSocks): return "amnezia-shadowsocks";
+//    case(DockerContainer::OpenVpn): return "fblink-openvpn";
+//    case(DockerContainer::OpenVpnOverCloak): return "fblink-openvpn-cloak";
+//    case(DockerContainer::OpenVpnOverShadowSocks): return "fblink-shadowsocks";
 //    default: return "";
 //    }
 //}
 
-QString amnezia::server::getDockerfileFolder(amnezia::DockerContainer container)
+QString fblink::server::getDockerfileFolder(fblink::DockerContainer container)
 {
-    return "/opt/amnezia/" + ContainerProps::containerToString(container);
+    return "/opt/fblink/" + ContainerProps::containerToString(container);
 }

@@ -22,8 +22,8 @@ public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
-    amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
-    QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
+    fblink::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
+    QFuture<QPair<fblink::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
     struct EncryptedRequestData
@@ -33,7 +33,7 @@ private:
         QByteArray key;
         QByteArray iv;
         QByteArray salt;
-        amnezia::ErrorCode errorCode;
+        fblink::ErrorCode errorCode;
     };
 
     struct DecryptionResult

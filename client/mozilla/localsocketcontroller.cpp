@@ -100,11 +100,11 @@ void LocalSocketController::initializeInternal() {
   m_daemonState = eInitializing;
 
 #ifdef MZ_WINDOWS
-  QString path = "\\\\.\\pipe\\amneziavpn";
+  QString path = "\\\\.\\pipe\\fblink";
 #else
-  QString path = "/var/run/amneziavpn/daemon.socket";
+  QString path = "/var/run/fblink/daemon.socket";
   if (!QFileInfo::exists(path)) {
-    path = "/tmp/amneziavpn.socket";
+    path = "/tmp/fblink.socket";
   }
 #endif
 
@@ -124,18 +124,18 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
   QJsonArray splitTunnelSites = rawConfig.value("splitTunnelSites").toArray();
 
-  int appSplitTunnelType = rawConfig.value(amnezia::config_key::appSplitTunnelType).toInt();
-  QJsonArray splitTunnelApps = rawConfig.value(amnezia::config_key::splitTunnelApps).toArray();
-  QJsonArray allowedDns = rawConfig.value(amnezia::config_key::allowedDnsServers).toArray();
+  int appSplitTunnelType = rawConfig.value(fblink::config_key::appSplitTunnelType).toInt();
+  QJsonArray splitTunnelApps = rawConfig.value(fblink::config_key::splitTunnelApps).toArray();
+  QJsonArray allowedDns = rawConfig.value(fblink::config_key::allowedDnsServers).toArray();
 
   QJsonObject wgConfig = rawConfig.value(protocolName + "_config_data").toObject();
 
   QJsonObject json;
   json.insert("type", "activate");
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
-  json.insert("privateKey", wgConfig.value(amnezia::config_key::client_priv_key));
-  json.insert("deviceIpv4Address", wgConfig.value(amnezia::config_key::client_ip));
-  m_deviceIpv4 = wgConfig.value(amnezia::config_key::client_ip).toString();
+  json.insert("privateKey", wgConfig.value(fblink::config_key::client_priv_key));
+  json.insert("deviceIpv4Address", wgConfig.value(fblink::config_key::client_ip));
+  m_deviceIpv4 = wgConfig.value(fblink::config_key::client_ip).toString();
 
   // set up IPv6 unique-local-address, ULA, with "fd00::/8" prefix, not globally routable.
   // this will be default IPv6 gateway, OS recognizes that IPv6 link is local and switches to IPv4.
@@ -146,27 +146,27 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   // simply "dead::1" is globally-routable, don't use it
   json.insert("deviceIpv6Address", "fd58:baa6:dead::1");
 
-  json.insert("serverPublicKey", wgConfig.value(amnezia::config_key::server_pub_key));
-  json.insert("serverPskKey", wgConfig.value(amnezia::config_key::psk_key));
-  json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::config_key::hostName));
+  json.insert("serverPublicKey", wgConfig.value(fblink::config_key::server_pub_key));
+  json.insert("serverPskKey", wgConfig.value(fblink::config_key::psk_key));
+  json.insert("serverIpv4AddrIn", wgConfig.value(fblink::config_key::hostName));
   //  json.insert("serverIpv6AddrIn", QJsonValue(hop.m_server.ipv6AddrIn()));
-  json.insert("deviceMTU", wgConfig.value(amnezia::config_key::mtu));
+  json.insert("deviceMTU", wgConfig.value(fblink::config_key::mtu));
 
-  json.insert("serverPort", wgConfig.value(amnezia::config_key::port).toInt());
-  json.insert("serverIpv4Gateway", wgConfig.value(amnezia::config_key::hostName));
+  json.insert("serverPort", wgConfig.value(fblink::config_key::port).toInt());
+  json.insert("serverIpv4Gateway", wgConfig.value(fblink::config_key::hostName));
   //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
 
-  json.insert("primaryDnsServer", rawConfig.value(amnezia::config_key::dns1));
+  json.insert("primaryDnsServer", rawConfig.value(fblink::config_key::dns1));
 
-  // We don't use secondary DNS if primary DNS is AmneziaDNS
-  if (!rawConfig.value(amnezia::config_key::dns1).toString().
-    contains(amnezia::protocols::dns::amneziaDnsIp)) {
-    json.insert("secondaryDnsServer", rawConfig.value(amnezia::config_key::dns2));
+  // We don't use secondary DNS if primary DNS is FBLinkDNS
+  if (!rawConfig.value(fblink::config_key::dns1).toString().
+    contains(fblink::protocols::dns::fblinkDnsIp)) {
+    json.insert("secondaryDnsServer", rawConfig.value(fblink::config_key::dns2));
   }
 
   QJsonArray jsAllowedIPAddesses;
 
-  QJsonArray plainAllowedIP = wgConfig.value(amnezia::config_key::allowed_ips).toArray();
+  QJsonArray plainAllowedIP = wgConfig.value(fblink::config_key::allowed_ips).toArray();
   QJsonArray defaultAllowedIP = { "0.0.0.0/0", "::/0" };
 
   if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
@@ -227,7 +227,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("allowedIPAddressRanges", jsAllowedIPAddesses);
 
   QJsonArray jsExcludedAddresses;
-  jsExcludedAddresses.append(wgConfig.value(amnezia::config_key::hostName));
+  jsExcludedAddresses.append(wgConfig.value(fblink::config_key::hostName));
   if (splitTunnelType == 2) {
     for (auto v : splitTunnelSites) {
           QString ipRange = v.toString();
@@ -241,52 +241,52 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   json.insert("allowedDnsServers", allowedDns);
 
-  json.insert(amnezia::config_key::killSwitchOption, rawConfig.value(amnezia::config_key::killSwitchOption));
+  json.insert(fblink::config_key::killSwitchOption, rawConfig.value(fblink::config_key::killSwitchOption));
 
-  if (protocolName == amnezia::config_key::awg) {
-    json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
-    json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
-    json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));
-    json.insert(amnezia::config_key::initPacketJunkSize, wgConfig.value(amnezia::config_key::initPacketJunkSize));
-    json.insert(amnezia::config_key::responsePacketJunkSize, wgConfig.value(amnezia::config_key::responsePacketJunkSize));
-    json.insert(amnezia::config_key::cookieReplyPacketJunkSize, wgConfig.value(amnezia::config_key::cookieReplyPacketJunkSize));
-    json.insert(amnezia::config_key::transportPacketJunkSize, wgConfig.value(amnezia::config_key::transportPacketJunkSize));
-    json.insert(amnezia::config_key::initPacketMagicHeader, wgConfig.value(amnezia::config_key::initPacketMagicHeader));
-    json.insert(amnezia::config_key::responsePacketMagicHeader, wgConfig.value(amnezia::config_key::responsePacketMagicHeader));
-    json.insert(amnezia::config_key::underloadPacketMagicHeader, wgConfig.value(amnezia::config_key::underloadPacketMagicHeader));
-    json.insert(amnezia::config_key::transportPacketMagicHeader, wgConfig.value(amnezia::config_key::transportPacketMagicHeader));
-    json.insert(amnezia::config_key::specialJunk1, wgConfig.value(amnezia::config_key::specialJunk1));
-    json.insert(amnezia::config_key::specialJunk2, wgConfig.value(amnezia::config_key::specialJunk2));
-    json.insert(amnezia::config_key::specialJunk3, wgConfig.value(amnezia::config_key::specialJunk3));
-    json.insert(amnezia::config_key::specialJunk4, wgConfig.value(amnezia::config_key::specialJunk4));
-    json.insert(amnezia::config_key::specialJunk5, wgConfig.value(amnezia::config_key::specialJunk5));
-  } else if (!wgConfig.value(amnezia::config_key::junkPacketCount).isUndefined()
-             && !wgConfig.value(amnezia::config_key::junkPacketMinSize).isUndefined()
-             && !wgConfig.value(amnezia::config_key::junkPacketMaxSize).isUndefined()
-             && !wgConfig.value(amnezia::config_key::initPacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::config_key::responsePacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::config_key::cookieReplyPacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::config_key::transportPacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::config_key::initPacketMagicHeader).isUndefined()
-             && !wgConfig.value(amnezia::config_key::responsePacketMagicHeader).isUndefined()
-             && !wgConfig.value(amnezia::config_key::underloadPacketMagicHeader).isUndefined()
-             && !wgConfig.value(amnezia::config_key::transportPacketMagicHeader).isUndefined()) {
-    json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
-    json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
-    json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));
-    json.insert(amnezia::config_key::initPacketJunkSize, wgConfig.value(amnezia::config_key::initPacketJunkSize));
-    json.insert(amnezia::config_key::responsePacketJunkSize, wgConfig.value(amnezia::config_key::responsePacketJunkSize));
-    json.insert(amnezia::config_key::cookieReplyPacketJunkSize, wgConfig.value(amnezia::config_key::cookieReplyPacketJunkSize));
-    json.insert(amnezia::config_key::transportPacketJunkSize, wgConfig.value(amnezia::config_key::transportPacketJunkSize));
-    json.insert(amnezia::config_key::initPacketMagicHeader, wgConfig.value(amnezia::config_key::initPacketMagicHeader));
-    json.insert(amnezia::config_key::responsePacketMagicHeader, wgConfig.value(amnezia::config_key::responsePacketMagicHeader));
-    json.insert(amnezia::config_key::underloadPacketMagicHeader, wgConfig.value(amnezia::config_key::underloadPacketMagicHeader));
-    json.insert(amnezia::config_key::transportPacketMagicHeader, wgConfig.value(amnezia::config_key::transportPacketMagicHeader));
-    json.insert(amnezia::config_key::specialJunk1, wgConfig.value(amnezia::config_key::specialJunk1));
-    json.insert(amnezia::config_key::specialJunk2, wgConfig.value(amnezia::config_key::specialJunk2));
-    json.insert(amnezia::config_key::specialJunk3, wgConfig.value(amnezia::config_key::specialJunk3));
-    json.insert(amnezia::config_key::specialJunk4, wgConfig.value(amnezia::config_key::specialJunk4));
-    json.insert(amnezia::config_key::specialJunk5, wgConfig.value(amnezia::config_key::specialJunk5));
+  if (protocolName == fblink::config_key::awg) {
+    json.insert(fblink::config_key::junkPacketCount, wgConfig.value(fblink::config_key::junkPacketCount));
+    json.insert(fblink::config_key::junkPacketMinSize, wgConfig.value(fblink::config_key::junkPacketMinSize));
+    json.insert(fblink::config_key::junkPacketMaxSize, wgConfig.value(fblink::config_key::junkPacketMaxSize));
+    json.insert(fblink::config_key::initPacketJunkSize, wgConfig.value(fblink::config_key::initPacketJunkSize));
+    json.insert(fblink::config_key::responsePacketJunkSize, wgConfig.value(fblink::config_key::responsePacketJunkSize));
+    json.insert(fblink::config_key::cookieReplyPacketJunkSize, wgConfig.value(fblink::config_key::cookieReplyPacketJunkSize));
+    json.insert(fblink::config_key::transportPacketJunkSize, wgConfig.value(fblink::config_key::transportPacketJunkSize));
+    json.insert(fblink::config_key::initPacketMagicHeader, wgConfig.value(fblink::config_key::initPacketMagicHeader));
+    json.insert(fblink::config_key::responsePacketMagicHeader, wgConfig.value(fblink::config_key::responsePacketMagicHeader));
+    json.insert(fblink::config_key::underloadPacketMagicHeader, wgConfig.value(fblink::config_key::underloadPacketMagicHeader));
+    json.insert(fblink::config_key::transportPacketMagicHeader, wgConfig.value(fblink::config_key::transportPacketMagicHeader));
+    json.insert(fblink::config_key::specialJunk1, wgConfig.value(fblink::config_key::specialJunk1));
+    json.insert(fblink::config_key::specialJunk2, wgConfig.value(fblink::config_key::specialJunk2));
+    json.insert(fblink::config_key::specialJunk3, wgConfig.value(fblink::config_key::specialJunk3));
+    json.insert(fblink::config_key::specialJunk4, wgConfig.value(fblink::config_key::specialJunk4));
+    json.insert(fblink::config_key::specialJunk5, wgConfig.value(fblink::config_key::specialJunk5));
+  } else if (!wgConfig.value(fblink::config_key::junkPacketCount).isUndefined()
+             && !wgConfig.value(fblink::config_key::junkPacketMinSize).isUndefined()
+             && !wgConfig.value(fblink::config_key::junkPacketMaxSize).isUndefined()
+             && !wgConfig.value(fblink::config_key::initPacketJunkSize).isUndefined()
+             && !wgConfig.value(fblink::config_key::responsePacketJunkSize).isUndefined()
+             && !wgConfig.value(fblink::config_key::cookieReplyPacketJunkSize).isUndefined()
+             && !wgConfig.value(fblink::config_key::transportPacketJunkSize).isUndefined()
+             && !wgConfig.value(fblink::config_key::initPacketMagicHeader).isUndefined()
+             && !wgConfig.value(fblink::config_key::responsePacketMagicHeader).isUndefined()
+             && !wgConfig.value(fblink::config_key::underloadPacketMagicHeader).isUndefined()
+             && !wgConfig.value(fblink::config_key::transportPacketMagicHeader).isUndefined()) {
+    json.insert(fblink::config_key::junkPacketCount, wgConfig.value(fblink::config_key::junkPacketCount));
+    json.insert(fblink::config_key::junkPacketMinSize, wgConfig.value(fblink::config_key::junkPacketMinSize));
+    json.insert(fblink::config_key::junkPacketMaxSize, wgConfig.value(fblink::config_key::junkPacketMaxSize));
+    json.insert(fblink::config_key::initPacketJunkSize, wgConfig.value(fblink::config_key::initPacketJunkSize));
+    json.insert(fblink::config_key::responsePacketJunkSize, wgConfig.value(fblink::config_key::responsePacketJunkSize));
+    json.insert(fblink::config_key::cookieReplyPacketJunkSize, wgConfig.value(fblink::config_key::cookieReplyPacketJunkSize));
+    json.insert(fblink::config_key::transportPacketJunkSize, wgConfig.value(fblink::config_key::transportPacketJunkSize));
+    json.insert(fblink::config_key::initPacketMagicHeader, wgConfig.value(fblink::config_key::initPacketMagicHeader));
+    json.insert(fblink::config_key::responsePacketMagicHeader, wgConfig.value(fblink::config_key::responsePacketMagicHeader));
+    json.insert(fblink::config_key::underloadPacketMagicHeader, wgConfig.value(fblink::config_key::underloadPacketMagicHeader));
+    json.insert(fblink::config_key::transportPacketMagicHeader, wgConfig.value(fblink::config_key::transportPacketMagicHeader));
+    json.insert(fblink::config_key::specialJunk1, wgConfig.value(fblink::config_key::specialJunk1));
+    json.insert(fblink::config_key::specialJunk2, wgConfig.value(fblink::config_key::specialJunk2));
+    json.insert(fblink::config_key::specialJunk3, wgConfig.value(fblink::config_key::specialJunk3));
+    json.insert(fblink::config_key::specialJunk4, wgConfig.value(fblink::config_key::specialJunk4));
+    json.insert(fblink::config_key::specialJunk5, wgConfig.value(fblink::config_key::specialJunk5));
   }
 
   write(json);

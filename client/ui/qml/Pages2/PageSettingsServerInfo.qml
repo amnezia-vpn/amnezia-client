@@ -119,7 +119,7 @@ PageType {
                               root.pageSettingsServerData : root.pageSettingsServerProtocols
 
             background: Rectangle {
-                color: AmneziaStyle.color.transparent
+                color: FBLinkStyle.color.transparent
             }
 
 

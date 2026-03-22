@@ -98,7 +98,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
                                                const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
                                                const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
 {
-    QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
+    QString fileName = "/opt/fblink/" + Utils::getRandomString(16) + ".sh";
 
     ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
     if (e)
@@ -232,13 +232,13 @@ ErrorCode ServerController::rebootServer(const ServerCredentials &credentials)
 
 ErrorCode ServerController::removeAllContainers(const ServerCredentials &credentials)
 {
-    return runScript(credentials, amnezia::scriptData(SharedScriptType::remove_all_containers));
+    return runScript(credentials, fblink::scriptData(SharedScriptType::remove_all_containers));
 }
 
 ErrorCode ServerController::removeContainer(const ServerCredentials &credentials, DockerContainer container)
 {
     return runScript(credentials,
-                     replaceVars(amnezia::scriptData(SharedScriptType::remove_container), genVarsForScript(credentials, container)));
+                     replaceVars(fblink::scriptData(SharedScriptType::remove_container), genVarsForScript(credentials, container)));
 }
 
 ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config, bool isUpdate)
@@ -417,7 +417,7 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
     };
 
     ErrorCode error =
-            runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::install_docker), genVarsForScript(credentials)),
+            runScript(credentials, replaceVars(fblink::scriptData(SharedScriptType::install_docker), genVarsForScript(credentials)),
                       cbReadStdOut, cbReadStdErr);
 
     qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
@@ -444,18 +444,18 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
 ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     // create folder on host
-    return runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::prepare_host), genVarsForScript(credentials, container)));
+    return runScript(credentials, replaceVars(fblink::scriptData(SharedScriptType::prepare_host), genVarsForScript(credentials, container)));
 }
 
 ErrorCode ServerController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
-    QString dockerFilePath = amnezia::server::getDockerfileFolder(container) + "/Dockerfile";
+    QString dockerFilePath = fblink::server::getDockerfileFolder(container) + "/Dockerfile";
     QString scriptString = QString("sudo rm %1").arg(dockerFilePath);
     ErrorCode errorCode = runScript(credentials, replaceVars(scriptString, genVarsForScript(credentials, container)));
     if (errorCode)
         return errorCode;
 
-    errorCode = uploadFileToHost(credentials, amnezia::scriptData(ProtocolScriptType::dockerfile, container).toUtf8(), dockerFilePath);
+    errorCode = uploadFileToHost(credentials, fblink::scriptData(ProtocolScriptType::dockerfile, container).toUtf8(), dockerFilePath);
 
     if (errorCode)
         return errorCode;
@@ -472,7 +472,7 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
 
     ErrorCode error =
             runScript(credentials,
-                      replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
+                      replaceVars(fblink::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
                       cbReadStdOut, cbReadStdErr);
 
     if (stdOut.contains("doesn't work on cgroups v2"))
@@ -494,7 +494,7 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
     };
 
     ErrorCode e = runScript(credentials,
-                            replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container),
+                            replaceVars(fblink::scriptData(ProtocolScriptType::run_container, container),
                                         genVarsForScript(credentials, container, config)),
                             cbReadStdOut);
 
@@ -521,7 +521,7 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
     };
 
     ErrorCode e = runContainerScript(credentials, container,
-                                     replaceVars(amnezia::scriptData(ProtocolScriptType::configure_container, container),
+                                     replaceVars(fblink::scriptData(ProtocolScriptType::configure_container, container),
                                                  genVarsForScript(credentials, container, config)),
                                      cbReadStdOut, cbReadStdErr);
 
@@ -532,20 +532,20 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
 
 ErrorCode ServerController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
-    QString script = amnezia::scriptData(ProtocolScriptType::container_startup, container);
+    QString script = fblink::scriptData(ProtocolScriptType::container_startup, container);
 
     if (script.isEmpty()) {
         return ErrorCode::NoError;
     }
 
     ErrorCode e = uploadTextFileToContainer(container, credentials, replaceVars(script, genVarsForScript(credentials, container, config)),
-                                            "/opt/amnezia/start.sh");
+                                            "/opt/fblink/start.sh");
     if (e)
         return e;
 
     return runScript(credentials,
-                     replaceVars("sudo docker exec -d $CONTAINER_NAME sh -c \"chmod a+x /opt/amnezia/start.sh && "
-                                 "/opt/amnezia/start.sh\"",
+                     replaceVars("sudo docker exec -d $CONTAINER_NAME sh -c \"chmod a+x /opt/fblink/start.sh && "
+                                 "/opt/fblink/start.sh\"",
                                  genVarsForScript(credentials, container, config)));
 }
 
@@ -556,7 +556,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &cloakConfig = config.value(ProtocolProps::protoToString(Proto::Cloak)).toObject();
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
-    const QJsonObject &amneziaWireguarConfig = config.value(ProtocolProps::protoToString(Proto::Awg)).toObject();
+    const QJsonObject &fblinkWireguarConfig = config.value(ProtocolProps::protoToString(Proto::Awg)).toObject();
     const QJsonObject &xrayConfig = config.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
     const QJsonObject &socks5ProxyConfig = config.value(ProtocolProps::protoToString(Proto::Socks5Proxy)).toObject();
@@ -600,7 +600,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$SHADOWSOCKS_CIPHER", ssConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher) } });
 
     vars.append({ { "$CONTAINER_NAME", ContainerProps::containerToString(container) } });
-    vars.append({ { "$DOCKERFILE_FOLDER", "/opt/amnezia/" + ContainerProps::containerToString(container) } });
+    vars.append({ { "$DOCKERFILE_FOLDER", "/opt/fblink/" + ContainerProps::containerToString(container) } });
 
     // Cloak vars
     vars.append({ { "$CLOAK_SERVER_PORT", cloakConfig.value(config_key::port).toString(protocols::cloak::defaultPort) } });
@@ -645,28 +645,28 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$SFTP_USER", sftpConfig.value(config_key::userName).toString() } });
     vars.append({ { "$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() } });
 
-    // Amnezia wireguard vars
+    // FBLink wireguard vars
     vars.append({ { "$AWG_SUBNET_IP",
-                    amneziaWireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) } });
-    vars.append({ { "$AWG_SERVER_PORT", amneziaWireguarConfig.value(config_key::port).toString(protocols::awg::defaultPort) } });
+                    fblinkWireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) } });
+    vars.append({ { "$AWG_SERVER_PORT", fblinkWireguarConfig.value(config_key::port).toString(protocols::awg::defaultPort) } });
 
-    vars.append({ { "$JUNK_PACKET_COUNT", amneziaWireguarConfig.value(config_key::junkPacketCount).toString() } });
-    vars.append({ { "$JUNK_PACKET_MIN_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMinSize).toString() } });
-    vars.append({ { "$JUNK_PACKET_MAX_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMaxSize).toString() } });
-    vars.append({ { "$INIT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::initPacketJunkSize).toString() } });
-    vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::responsePacketJunkSize).toString() } });
-    vars.append({ { "$INIT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::initPacketMagicHeader).toString() } });
-    vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
-    vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
-    vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
+    vars.append({ { "$JUNK_PACKET_COUNT", fblinkWireguarConfig.value(config_key::junkPacketCount).toString() } });
+    vars.append({ { "$JUNK_PACKET_MIN_SIZE", fblinkWireguarConfig.value(config_key::junkPacketMinSize).toString() } });
+    vars.append({ { "$JUNK_PACKET_MAX_SIZE", fblinkWireguarConfig.value(config_key::junkPacketMaxSize).toString() } });
+    vars.append({ { "$INIT_PACKET_JUNK_SIZE", fblinkWireguarConfig.value(config_key::initPacketJunkSize).toString() } });
+    vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE", fblinkWireguarConfig.value(config_key::responsePacketJunkSize).toString() } });
+    vars.append({ { "$INIT_PACKET_MAGIC_HEADER", fblinkWireguarConfig.value(config_key::initPacketMagicHeader).toString() } });
+    vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER", fblinkWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
+    vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", fblinkWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
+    vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", fblinkWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
 
-    vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::cookieReplyPacketJunkSize).toString() } });
-    vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::transportPacketJunkSize).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_1", amneziaWireguarConfig.value(config_key::specialJunk1).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_2", amneziaWireguarConfig.value(config_key::specialJunk2).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_3", amneziaWireguarConfig.value(config_key::specialJunk3).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_4", amneziaWireguarConfig.value(config_key::specialJunk4).toString() } });
-    vars.append({ { "$SPECIAL_JUNK_5", amneziaWireguarConfig.value(config_key::specialJunk5).toString() } });
+    vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", fblinkWireguarConfig.value(config_key::cookieReplyPacketJunkSize).toString() } });
+    vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", fblinkWireguarConfig.value(config_key::transportPacketJunkSize).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_1", fblinkWireguarConfig.value(config_key::specialJunk1).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_2", fblinkWireguarConfig.value(config_key::specialJunk2).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_3", fblinkWireguarConfig.value(config_key::specialJunk3).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_4", fblinkWireguarConfig.value(config_key::specialJunk4).toString() } });
+    vars.append({ { "$SPECIAL_JUNK_5", fblinkWireguarConfig.value(config_key::specialJunk5).toString() } });
 
     // Socks5 proxy vars
     vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort) } });
@@ -701,7 +701,7 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
         return ErrorCode::NoError;
     };
 
-    errorCode = runScript(credentials, amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
+    errorCode = runScript(credentials, fblink::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
 
     return stdOut;
 }
@@ -713,7 +713,7 @@ void ServerController::cancelInstallation()
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
 {
-    return runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::setup_host_firewall), genVarsForScript(credentials)));
+    return runScript(credentials, replaceVars(fblink::scriptData(SharedScriptType::setup_host_firewall), genVarsForScript(credentials)));
 }
 
 QString ServerController::replaceVars(const QString &script, const Vars &vars)
@@ -811,7 +811,7 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
         return ErrorCode::NoError;
     };
 
-    const QString scriptData = amnezia::scriptData(SharedScriptType::check_user_in_sudo);
+    const QString scriptData = fblink::scriptData(SharedScriptType::check_user_in_sudo);
     ErrorCode error = runScript(credentials, replaceVars(scriptData, genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
     if (credentials.userName != "root" && stdOut.contains("sudo:") && !stdOut.contains("uname:") && stdOut.contains("not found"))
@@ -850,7 +850,7 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
                 return ErrorCode::ServerCancelInstallation;
             }
             stdOut.clear();
-            runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy), genVarsForScript(credentials)),
+            runScript(credentials, replaceVars(fblink::scriptData(SharedScriptType::check_server_is_busy), genVarsForScript(credentials)),
                       cbReadStdOut, cbReadStdErr);
 
             if (stdOut.contains("Packet manager not found"))

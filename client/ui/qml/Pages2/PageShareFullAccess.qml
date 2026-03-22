@@ -66,7 +66,7 @@ PageType {
 
                 text: qsTr("We recommend that you use full access to the server only for your own additional devices.\n") +
                       qsTr("If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. ")
-                color: AmneziaStyle.color.mutedGray
+                color: FBLinkStyle.color.mutedGray
             }
 
             DropDownType {

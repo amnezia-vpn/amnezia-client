@@ -1,4 +1,4 @@
-package org.amnezia.vpn.util.net
+package com.fblink.vpn.util.net
 
 class IpRangeSet {
 

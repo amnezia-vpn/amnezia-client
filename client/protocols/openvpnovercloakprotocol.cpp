@@ -45,7 +45,7 @@ ErrorCode OpenVpnOverCloakProtocol::start()
     m_cloakCfgFile.close();
 
     QStringList args = QStringList() << "-c" << m_cloakCfgFile.fileName()
-                                     << "-l" << amnezia::protocols::openvpn::defaultPort;
+                                     << "-l" << fblink::protocols::openvpn::defaultPort;
 
     qDebug().noquote() << "OpenVpnOverCloakProtocol::start()"
                        << cloakExecPath() << args.join(" ");
@@ -63,11 +63,11 @@ ErrorCode OpenVpnOverCloakProtocol::start()
         qDebug().noquote() << "OpenVpnOverCloakProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
         setConnectionState(Vpn::ConnectionState::Disconnected);
         if (exitStatus != QProcess::NormalExit){
-            emit protocolError(amnezia::ErrorCode::CloakExecutableCrashed);
+            emit protocolError(fblink::ErrorCode::CloakExecutableCrashed);
             stop();
         }
         if (exitCode !=0 ) {
-            emit protocolError(amnezia::ErrorCode::InternalError);
+            emit protocolError(fblink::ErrorCode::InternalError);
             stop();
         }
     });

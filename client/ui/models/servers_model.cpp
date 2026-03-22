@@ -5,7 +5,7 @@
 #include "core/networkUtilities.h"
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    #include <AmneziaVPN-Swift.h>
+    #include <FBLink-Swift.h>
 #endif
 
 #include "core/api/apiUtils.h"
@@ -39,7 +39,7 @@ namespace
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
-    m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+    m_isFBLinkDnsEnabled = m_settings->useFBLinkDns();
 
     connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerNameChanged);
 
@@ -135,9 +135,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         auto credentials = serverCredentials(index.row());
         return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
     }
-    case ContainsAmneziaDnsRole: {
+    case ContainsFBLinkDnsRole: {
         QString primaryDns = server.value(config_key::dns1).toString();
-        return primaryDns == protocols::dns::amneziaDnsIp;
+        return primaryDns == protocols::dns::fblinkDnsIp;
     }
     case DefaultContainerRole: {
         return ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
@@ -149,7 +149,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::Telegram;
     }
     case IsServerFromGatewayApiRole: {
-        return server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway;
+        return server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::FBLinkGateway;
     }
     case ApiConfigRole: {
         return apiConfig;
@@ -163,9 +163,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case ApiServerCountryCodeRole: {
         return apiConfig.value(configKey::serverCountryCode).toString();
     }
-    case HasAmneziaDns: {
+    case HasFBLinkDns: {
         QString primaryDns = server.value(config_key::dns1).toString();
-        return primaryDns == protocols::dns::amneziaDnsIp;
+        return primaryDns == protocols::dns::fblinkDnsIp;
     }
     case IsAdVisibleRole: {
         return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::isAdVisible).toBool(false);
@@ -196,7 +196,7 @@ void ServersModel::resetModel()
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
     m_processedServerIndex = m_defaultServerIndex;
-    m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+    m_isFBLinkDnsEnabled = m_settings->useFBLinkDns();
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
 }
@@ -230,12 +230,12 @@ QString ServersModel::getServerDescription(const QJsonObject &server, const int 
     } else if (configVersion) {
         return server.value(config_key::description).toString();
     } else if (data(index, HasWriteAccessRole).toBool()) {
-        if (m_isAmneziaDnsEnabled && isAmneziaDnsContainerInstalled(index)) {
-            description += "Amnezia DNS | ";
+        if (m_isFBLinkDnsEnabled && isFBLinkDnsContainerInstalled(index)) {
+            description += "FBLink DNS | ";
         }
     } else {
-        if (data(index, HasAmneziaDns).toBool()) {
-            description += "Amnezia DNS | ";
+        if (data(index, HasFBLinkDns).toBool()) {
+            description += "FBLink DNS | ";
         }
     }
     return description;
@@ -261,7 +261,7 @@ const QString ServersModel::getDefaultServerDescriptionCollapsed()
 
         auto isThirdPartyConfig = serverProtocolConfig.value(config_key::isThirdPartyConfig).toBool();
         if (container == DockerContainer::Awg && !isThirdPartyConfig) {
-            containerName = "AmneziaWG Legacy";
+            containerName = "FBLinkWG Legacy";
         }
     }
 
@@ -426,7 +426,7 @@ QHash<int, QByteArray> ServersModel::roleNames() const
 
     roles[HasWriteAccessRole] = "hasWriteAccess";
 
-    roles[ContainsAmneziaDnsRole] = "containsAmneziaDns";
+    roles[ContainsFBLinkDnsRole] = "containsFBLinkDns";
 
     roles[DefaultContainerRole] = "defaultContainer";
     roles[HasInstalledContainers] = "hasInstalledContainers";
@@ -555,7 +555,7 @@ const QString ServersModel::getDefaultServerDefaultContainerName()
 
         auto isThirdPartyConfig = serverProtocolConfig.value(config_key::isThirdPartyConfig).toBool();
         if (defaultContainer == DockerContainer::Awg && !isThirdPartyConfig) {
-            containerName = "AmneziaWG Legacy";
+            containerName = "FBLinkWG Legacy";
         }
     }
 
@@ -633,7 +633,7 @@ void ServersModel::clearCachedProfile(const DockerContainer container)
     updateContainersModel();
 }
 
-bool ServersModel::isAmneziaDnsContainerInstalled(const int serverIndex) const
+bool ServersModel::isFBLinkDnsContainerInstalled(const int serverIndex) const
 {
     QJsonObject server = m_servers.at(serverIndex).toObject();
     auto containers = server.value(config_key::containers).toArray();
@@ -662,8 +662,8 @@ QPair<QString, QString> ServersModel::getDnsPair(int serverIndex)
     dns.second = server.value(config_key::dns2).toString();
 
     if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
-        if (m_isAmneziaDnsEnabled && isDnsContainerInstalled) {
-            dns.first = protocols::dns::amneziaDnsIp;
+        if (m_isFBLinkDnsEnabled && isDnsContainerInstalled) {
+            dns.first = protocols::dns::fblinkDnsIp;
         } else
             dns.first = m_settings->primaryDns();
     }
@@ -698,9 +698,9 @@ QStringList ServersModel::getAllInstalledServicesName(const int serverIndex)
     return servicesName;
 }
 
-void ServersModel::toggleAmneziaDns(bool enabled)
+void ServersModel::toggleFBLinkDns(bool enabled)
 {
-    m_isAmneziaDnsEnabled = enabled;
+    m_isFBLinkDnsEnabled = enabled;
     emit defaultServerDescriptionChanged();
 }
 
@@ -924,7 +924,7 @@ void ServersModel::removeApiConfig(const int serverIndex)
                                .arg(serverConfig[config_key::hostName].toString())
                                .arg(serverConfig[config_key::vpnproto].toString());
 
-    AmneziaVPN::removeVPNC(vpncName.toStdString());
+    FBLink::removeVPNC(vpncName.toStdString());
 #endif
 
     serverConfig.remove(config_key::dns1);

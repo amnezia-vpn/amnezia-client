@@ -1,4 +1,4 @@
-package org.amnezia.vpn.util.net
+package com.fblink.vpn.util.net
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -13,7 +13,7 @@ import android.os.Handler
 import androidx.core.content.getSystemService
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlinx.coroutines.delay
-import org.amnezia.vpn.util.Log
+import com.fblink.vpn.util.Log
 
 private const val TAG = "NetworkState"
 

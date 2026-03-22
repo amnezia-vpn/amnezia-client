@@ -20,21 +20,21 @@ PageType {
         id: windows
 
         readonly property string title: qsTr("Windows")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#windows")
+        readonly property string link: qsTr("documentation/instructions/connect-fblink-premium#windows")
     }
 
     QtObject {
         id: macos
 
         readonly property string title: qsTr("macOS")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#macos")
+        readonly property string link: qsTr("documentation/instructions/connect-fblink-premium#macos")
     }
 
     QtObject {
         id: android
 
         readonly property string title: qsTr("Android")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#android")
+        readonly property string link: qsTr("documentation/instructions/connect-fblink-premium#android")
     }
 
     QtObject {
@@ -48,21 +48,21 @@ PageType {
         id: ios
 
         readonly property string title: qsTr("iOS")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#ios")
+        readonly property string link: qsTr("documentation/instructions/connect-fblink-premium#ios")
     }
 
     QtObject {
         id: linux
 
         readonly property string title: qsTr("Linux")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#linux")
+        readonly property string link: qsTr("documentation/instructions/connect-fblink-premium#linux")
     }
 
     QtObject {
         id: routers
 
         readonly property string title: qsTr("Routers")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#routers")
+        readonly property string link: qsTr("documentation/instructions/connect-fblink-premium#routers")
     }
 
     property list<QtObject> instructionsModel: [

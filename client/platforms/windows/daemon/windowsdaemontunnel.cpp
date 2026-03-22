@@ -33,10 +33,10 @@ int WindowsDaemonTunnel::run(QStringList& tokens) {
   logger.debug() << "Tunnel daemon service is starting";
 
   int argc = 1;
-  char *argv[] = { (char*)"AmneziaDaemon" };
+  char *argv[] = { (char*)"FBLinkDaemon" };
   QCoreApplication app(argc, argv);
 
-  QCoreApplication::setApplicationName("Amnezia VPN Tunnel");
+  QCoreApplication::setApplicationName("FBLink Tunnel");
   QCoreApplication::setApplicationVersion(Constants::versionString());
 
   if (tokens.length() != 2) {

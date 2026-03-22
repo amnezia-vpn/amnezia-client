@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Copyright (c) 2024 AmneziaVPN
-// This file has been modified for AmneziaVPN
+// Copyright (c) 2024 FBLink
+// This file has been modified for FBLink
 //
 // This file is based on the work of the Qv2ray VPN client.
 // The original code of the Qv2ray, A Qt frontend for V2Ray. Written in C++ and licensed under GPL3.
@@ -37,7 +37,7 @@
 #include "transfer.h"
 #include "serialization.h"
 
-namespace amnezia::serialization::outbounds
+namespace fblink::serialization::outbounds
 {
 QJsonObject GenerateFreedomOUT(const QString &domainStrategy, const QString &redirect)
 {
@@ -118,5 +118,5 @@ QJsonObject GenerateTrojanServerOUT(const QString &address, int port, const QStr
     return root;
 }
 
-} // namespace amnezia::serialization::outbounds
+} // namespace fblink::serialization::outbounds
 

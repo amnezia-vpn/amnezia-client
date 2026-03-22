@@ -53,11 +53,22 @@ func processAutoRenewals(db *gorm.DB, shopID, key string) {
 		}
 	}
 
-	// 2. Пометить как expired все оставшиеся просроченные активные подписки
-	//    (без карты, с отключённым auto_renew, или у кого списание не прошло)
-	result := db.Model(&models.Subscription{}).
-		Where("status = ? AND expires_at <= ?", models.SubActive, now).
-		Update("status", models.SubExpired)
+	// 2. Пометить как expired только те активные истёкшие подписки,
+	//    у которых НЕТ свежего (< 2ч) платежа в статусе pending.
+	//    Это предотвращает race condition: пользователь не теряет доступ,
+	//    пока его pending-платёж ещё обрабатывается YooKassa.
+	recentCutoff := now.Add(-2 * time.Hour)
+	var subsWithPendingPayment []uint
+	db.Model(&models.Payment{}).
+		Where("status = ? AND created_at >= ?", models.PaymentPending, recentCutoff).
+		Pluck("user_id", &subsWithPendingPayment)
+
+	expireQuery := db.Model(&models.Subscription{}).
+		Where("status = ? AND expires_at <= ?", models.SubActive, now)
+	if len(subsWithPendingPayment) > 0 {
+		expireQuery = expireQuery.Where("user_id NOT IN ?", subsWithPendingPayment)
+	}
+	result := expireQuery.Update("status", models.SubExpired)
 	if result.RowsAffected > 0 {
 		log.Printf("[renewal] Помечено как expired: %d подписок", result.RowsAffected)
 

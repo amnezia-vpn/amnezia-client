@@ -390,7 +390,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
         if (containerInfo.isEmpty()) {
             continue;
         }
-        const static QRegularExpression containerAndPortRegExp("(amnezia[-a-z0-9]*).*?:([0-9]*)->[0-9]*/(udp|tcp).*");
+        const static QRegularExpression containerAndPortRegExp("(fblink[-a-z0-9]*).*?:([0-9]*)->[0-9]*/(udp|tcp).*");
         QRegularExpressionMatch containerAndPortMatch = containerAndPortRegExp.match(containerInfo);
         if (containerAndPortMatch.hasMatch()) {
             QString name = containerAndPortMatch.captured(1);
@@ -418,9 +418,9 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                     containerConfig.insert(config_key::transport_proto, transportProto);
 
                     if (protocol == Proto::Awg) {
-                        QString configPath = amnezia::protocols::awg::serverConfigPath;
+                        QString configPath = fblink::protocols::awg::serverConfigPath;
                         if (container == DockerContainer::Awg) {
-                            configPath = amnezia::protocols::awg::serverLegacyConfigPath;
+                            configPath = fblink::protocols::awg::serverLegacyConfigPath;
                         }
                         QString serverConfig = serverController->getTextFileFromContainer(container, credentials, configPath, errorCode);
 
@@ -519,7 +519,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         }
                     } else if (protocol == Proto::Xray) {
                         QString currentConfig = serverController->getTextFileFromContainer(
-                                container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
+                                container, credentials, fblink::protocols::xray::serverConfigPath, errorCode);
 
                         QJsonDocument doc = QJsonDocument::fromJson(currentConfig.toUtf8());
                         qDebug() << doc;
@@ -612,7 +612,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         }
                     } else if (protocol == Proto::Cloak) {
                         QString cloakConfig = serverController->getTextFileFromContainer(container, credentials,
-                                                                                         "/opt/amnezia/cloak/ck-config.json", errorCode);
+                                                                                         "/opt/fblink/cloak/ck-config.json", errorCode);
 
                         QJsonDocument doc = QJsonDocument::fromJson(cloakConfig.toUtf8());
 
@@ -629,7 +629,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
                     } else if (protocol == Proto::ShadowSocks) {
                         QString shadowsocksConfig = serverController->getTextFileFromContainer(
-                                container, credentials, "/opt/amnezia/shadowsocks/ss-config.json", errorCode);
+                                container, credentials, "/opt/fblink/shadowsocks/ss-config.json", errorCode);
 
                         QJsonDocument doc = QJsonDocument::fromJson(shadowsocksConfig.toUtf8());
 
@@ -653,7 +653,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             installedContainers.insert(container, config);
         }
 
-        const static QRegularExpression torOrDnsRegExp("(amnezia-(?:torwebsite|dns)).*?([0-9]*)/(udp|tcp).*");
+        const static QRegularExpression torOrDnsRegExp("(fblink-(?:torwebsite|dns)).*?([0-9]*)/(udp|tcp).*");
         QRegularExpressionMatch torOrDnsRegMatch = torOrDnsRegExp.match(containerInfo);
         if (torOrDnsRegMatch.hasMatch()) {
             QString name = torOrDnsRegMatch.captured(1);

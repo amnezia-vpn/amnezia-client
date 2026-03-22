@@ -245,8 +245,8 @@ PageType {
             defaultColor: "#00C8FF"
             hoveredColor: "#33D4FF"
             pressedColor: "#0099BB"
-            disabledColor: AmneziaStyle.color.mutedGray
-            textColor: AmneziaStyle.color.paleGray
+            disabledColor: FBLinkStyle.color.mutedGray
+            textColor: FBLinkStyle.color.paleGray
 
             enabled: !root.isLoading
             visible: root.step > 0

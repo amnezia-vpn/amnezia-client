@@ -16,7 +16,7 @@ QString CloakConfigurator::createConfig(const ServerCredentials &credentials, Do
                                         ErrorCode &errorCode)
 {
     QString cloakPublicKey =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckPublicKeyPath, errorCode);
+            m_serverController->getTextFileFromContainer(container, credentials, fblink::protocols::cloak::ckPublicKeyPath, errorCode);
     cloakPublicKey.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
@@ -24,7 +24,7 @@ QString CloakConfigurator::createConfig(const ServerCredentials &credentials, Do
     }
 
     QString cloakBypassUid =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckBypassUidKeyPath, errorCode);
+            m_serverController->getTextFileFromContainer(container, credentials, fblink::protocols::cloak::ckBypassUidKeyPath, errorCode);
     cloakBypassUid.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {

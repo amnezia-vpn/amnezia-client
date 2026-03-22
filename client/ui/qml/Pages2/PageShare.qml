@@ -20,7 +20,7 @@ PageType {
     id: root
 
     enum ConfigType {
-        AmneziaConnection,
+        FBLinkConnection,
         OpenVpn,
         WireGuard,
         Awg,
@@ -45,7 +45,7 @@ PageType {
             var configFileName
 
             switch (type) {
-            case PageShare.ConfigType.AmneziaConnection: {
+            case PageShare.ConfigType.FBLinkConnection: {
                 ExportController.generateConnectionConfig(clientNameTextField.textField.text);
                 configCaption = qsTr("Save FBLink VPN config")
                 configExtension = ".vpn"
@@ -112,13 +112,13 @@ PageType {
     property bool showContent: false
     property bool shareButtonEnabled: true
     property list<QtObject> connectionTypesModel: [
-        amneziaConnectionFormat
+        fblinkConnectionFormat
     ]
 
     QtObject {
-        id: amneziaConnectionFormat
+        id: fblinkConnectionFormat
         readonly property string name: qsTr("For the FBLink VPN app")
-        readonly property int type: PageShare.ConfigType.AmneziaConnection
+        readonly property int type: PageShare.ConfigType.FBLinkConnection
     }
     QtObject {
         id: openVpnConnectionFormat
@@ -239,7 +239,7 @@ PageType {
                 implicitWidth: accessTypeSelectorContent.implicitWidth
                 implicitHeight: accessTypeSelectorContent.implicitHeight
 
-                color: AmneziaStyle.color.onyxBlack
+                color: FBLinkStyle.color.onyxBlack
                 radius: 16
 
                 RowLayout {
@@ -291,7 +291,7 @@ PageType {
                 visible: accessTypeSelector.currentIndex === 0
 
                 text: qsTr("Share VPN access without the ability to manage the server")
-                color: AmneziaStyle.color.mutedGray
+                color: FBLinkStyle.color.mutedGray
             }
 
             TextFieldWithHeaderType {
@@ -449,26 +449,26 @@ PageType {
                     }
 
                     function fillConnectionTypeModel() {
-                        root.connectionTypesModel = [amneziaConnectionFormat]
+                        root.connectionTypesModel = [fblinkConnectionFormat]
 
                         var index = proxyContainersModel.mapToSource(selectedIndex)
 
-                        if (index === ContainerProps.containerFromString("amnezia-openvpn")) {
+                        if (index === ContainerProps.containerFromString("fblink-openvpn")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
+                        } else if (index === ContainerProps.containerFromString("fblink-wireguard")) {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
+                        } else if (index === ContainerProps.containerFromString("fblink-awg")) {
                             root.connectionTypesModel.push(awgConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-awg2")) {
+                        } else if (index === ContainerProps.containerFromString("fblink-awg2")) {
                             root.connectionTypesModel.push(awgConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
+                        } else if (index === ContainerProps.containerFromString("fblink-shadowsocks")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-openvpn-cloak")) {
+                        } else if (index === ContainerProps.containerFromString("fblink-openvpn-cloak")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
                             root.connectionTypesModel.push(cloakConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-xray")) {
+                        } else if (index === ContainerProps.containerFromString("fblink-xray")) {
                             root.connectionTypesModel.push(xrayConnectionFormat)
                         }
                     }
@@ -600,7 +600,7 @@ PageType {
                 ImageButtonType {
                     id: closeSearchButton
                     image: "qrc:/images/controls/close.svg"
-                    imageColor: AmneziaStyle.color.paleGray
+                    imageColor: FBLinkStyle.color.paleGray
 
                     function clickedFunc() {
                         searchTextField.textField.text = ""
@@ -700,7 +700,7 @@ PageType {
                                 }
 
                                 ParagraphTextType {
-                                    color: AmneziaStyle.color.mutedGray
+                                    color: FBLinkStyle.color.mutedGray
                                     visible: creationDate
                                     Layout.maximumWidth: parent.width
 
@@ -712,7 +712,7 @@ PageType {
                                 }
 
                                 ParagraphTextType {
-                                    color: AmneziaStyle.color.mutedGray
+                                    color: FBLinkStyle.color.mutedGray
                                     visible: latestHandshake
                                     Layout.maximumWidth: parent.width
 
@@ -724,7 +724,7 @@ PageType {
                                 }
 
                                 ParagraphTextType {
-                                    color: AmneziaStyle.color.mutedGray
+                                    color: FBLinkStyle.color.mutedGray
                                     visible: dataReceived
                                     Layout.maximumWidth: parent.width
 
@@ -736,7 +736,7 @@ PageType {
                                 }
 
                                 ParagraphTextType {
-                                    color: AmneziaStyle.color.mutedGray
+                                    color: FBLinkStyle.color.mutedGray
                                     visible: dataSent
                                     Layout.maximumWidth: parent.width
 
@@ -748,7 +748,7 @@ PageType {
                                 }
 
                                 ParagraphTextType {
-                                    color: AmneziaStyle.color.mutedGray
+                                    color: FBLinkStyle.color.mutedGray
                                     visible: allowedIps
                                     Layout.maximumWidth: parent.width
 
@@ -762,11 +762,11 @@ PageType {
                                     Layout.fillWidth: true
                                     Layout.topMargin: 24
 
-                                    defaultColor: AmneziaStyle.color.transparent
-                                    hoveredColor: AmneziaStyle.color.translucentWhite
-                                    pressedColor: AmneziaStyle.color.sheerWhite
-                                    disabledColor: AmneziaStyle.color.mutedGray
-                                    textColor: AmneziaStyle.color.paleGray
+                                    defaultColor: FBLinkStyle.color.transparent
+                                    hoveredColor: FBLinkStyle.color.translucentWhite
+                                    pressedColor: FBLinkStyle.color.sheerWhite
+                                    disabledColor: FBLinkStyle.color.mutedGray
+                                    textColor: FBLinkStyle.color.paleGray
                                     borderWidth: 1
 
                                     text: qsTr("Rename")
@@ -834,11 +834,11 @@ PageType {
                                     Layout.fillWidth: true
                                     Layout.topMargin: 8
 
-                                    defaultColor: AmneziaStyle.color.transparent
-                                    hoveredColor: AmneziaStyle.color.translucentWhite
-                                    pressedColor: AmneziaStyle.color.sheerWhite
-                                    disabledColor: AmneziaStyle.color.mutedGray
-                                    textColor: AmneziaStyle.color.paleGray
+                                    defaultColor: FBLinkStyle.color.transparent
+                                    hoveredColor: FBLinkStyle.color.translucentWhite
+                                    pressedColor: FBLinkStyle.color.sheerWhite
+                                    disabledColor: FBLinkStyle.color.mutedGray
+                                    textColor: FBLinkStyle.color.paleGray
                                     borderWidth: 1
 
                                     text: qsTr("Revoke")

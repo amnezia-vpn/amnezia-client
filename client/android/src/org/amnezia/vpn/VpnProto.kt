@@ -1,11 +1,11 @@
-package org.amnezia.vpn
+package com.fblink.vpn
 
-import org.amnezia.vpn.protocol.Protocol
-import org.amnezia.vpn.protocol.awg.Awg
-import org.amnezia.vpn.protocol.cloak.Cloak
-import org.amnezia.vpn.protocol.openvpn.OpenVpn
-import org.amnezia.vpn.protocol.wireguard.Wireguard
-import org.amnezia.vpn.protocol.xray.Xray
+import com.fblink.vpn.protocol.Protocol
+import com.fblink.vpn.protocol.awg.Awg
+import com.fblink.vpn.protocol.cloak.Cloak
+import com.fblink.vpn.protocol.openvpn.OpenVpn
+import com.fblink.vpn.protocol.wireguard.Wireguard
+import com.fblink.vpn.protocol.xray.Xray
 
 enum class VpnProto(
     val label: String,
@@ -14,7 +14,7 @@ enum class VpnProto(
 ) {
     WIREGUARD(
         "WireGuard",
-        "org.amnezia.vpn:amneziaAwgService",
+        "com.fblink.vpn:amneziaAwgService",
         AwgService::class.java
     ) {
         override fun createProtocol(): Protocol = Wireguard()
@@ -22,7 +22,7 @@ enum class VpnProto(
 
     AWG(
         "AmneziaWG",
-        "org.amnezia.vpn:amneziaAwgService",
+        "com.fblink.vpn:amneziaAwgService",
         AwgService::class.java
     ) {
         override fun createProtocol(): Protocol = Awg()
@@ -30,7 +30,7 @@ enum class VpnProto(
 
     OPENVPN(
         "OpenVPN",
-        "org.amnezia.vpn:amneziaOpenVpnService",
+        "com.fblink.vpn:amneziaOpenVpnService",
         OpenVpnService::class.java
     ) {
         override fun createProtocol(): Protocol = OpenVpn()
@@ -38,7 +38,7 @@ enum class VpnProto(
 
     CLOAK(
         "Cloak",
-        "org.amnezia.vpn:amneziaOpenVpnService",
+        "com.fblink.vpn:amneziaOpenVpnService",
         OpenVpnService::class.java
     ) {
         override fun createProtocol(): Protocol = Cloak()
@@ -46,7 +46,7 @@ enum class VpnProto(
 
     XRAY(
         "XRay",
-        "org.amnezia.vpn:amneziaXrayService",
+        "com.fblink.vpn:amneziaXrayService",
         XrayService::class.java
     ) {
         override fun createProtocol(): Protocol = Xray.instance
@@ -54,7 +54,7 @@ enum class VpnProto(
 
     SSXRAY(
         "SSXRay",
-        "org.amnezia.vpn:amneziaXrayService",
+        "com.fblink.vpn:amneziaXrayService",
         XrayService::class.java
     ) {
         override fun createProtocol(): Protocol = Xray.instance

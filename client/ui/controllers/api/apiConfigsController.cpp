@@ -1,6 +1,6 @@
 #include "apiConfigsController.h"
 
-#include "amnezia_application.h"
+#include "fblink_application.h"
 #include "configurators/wireguard_configurator.h"
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
@@ -56,8 +56,8 @@ namespace
 
     namespace serviceType
     {
-        constexpr char amneziaFree[] = "amnezia-free";
-        constexpr char amneziaPremium[] = "amnezia-premium";
+        constexpr char fblinkFree[] = "fblink-free";
+        constexpr char fblinkPremium[] = "fblink-premium";
     }
 
     struct ProtocolData
@@ -217,7 +217,7 @@ namespace
         serverConfig[config_key::containers] = newServerConfig.value(config_key::containers);
         serverConfig[config_key::hostName] = newServerConfig.value(config_key::hostName);
 
-        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::FBLinkGateway) {
             serverConfig[config_key::configVersion] = newServerConfig.value(config_key::configVersion);
             serverConfig[config_key::description] = newServerConfig.value(config_key::description);
             serverConfig[config_key::name] = newServerConfig.value(config_key::name);
@@ -230,7 +230,7 @@ namespace
         map.insert(newServerConfig.value(configKey::apiConfig).toObject().toVariantMap());
         auto apiConfig = QJsonObject::fromVariantMap(map);
 
-        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::FBLinkGateway) {
             apiConfig.insert(apiDefs::key::supportedProtocols,
                              QJsonDocument::fromJson(apiResponseBody).object().value(apiDefs::key::supportedProtocols).toArray());
 
@@ -390,7 +390,7 @@ bool ApiConfigsController::fillAvailableServices()
     QString productPrice;
     QString productCurrency;
     
-    IosController::Instance()->fetchProducts(QStringList() << QStringLiteral("amnezia_premium_6_month"),
+    IosController::Instance()->fetchProducts(QStringList() << QStringLiteral("fblink_premium_6_month"),
                                              [&](const QList<QVariantMap> &products,
                                                  const QStringList &invalidIds,
                                                  const QString &errorString) {
@@ -411,7 +411,7 @@ bool ApiConfigsController::fillAvailableServices()
         QJsonArray services = data.value("services").toArray();
         for (int i = 0; i < services.size(); ++i) {
             QJsonObject service = services[i].toObject();
-            if (service.value(configKey::serviceType).toString() == serviceType::amneziaPremium) {
+            if (service.value(configKey::serviceType).toString() == serviceType::fblinkPremium) {
                 QJsonObject serviceInfo = service.value(configKey::serviceInfo).toObject();
                 QString formattedPrice = productPrice;
                 if (!productCurrency.isEmpty()) {
@@ -443,7 +443,7 @@ bool ApiConfigsController::importService()
     bool isIosOrMacOsNe = false;
 #endif
 
-    if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaPremium) {
+    if (m_apiServicesModel->getSelectedServiceType() == serviceType::fblinkPremium) {
         if (isIosOrMacOsNe) {
             importSerivceFromAppStore();
             return true;
@@ -464,7 +464,7 @@ bool ApiConfigsController::importSerivceFromAppStore()
     QString storeProductId;
     QString purchaseError;
     QEventLoop waitPurchase;
-    IosController::Instance()->purchaseProduct(QStringLiteral("amnezia_premium_6_month"),
+    IosController::Instance()->purchaseProduct(QStringLiteral("fblink_premium_6_month"),
                                                [&](bool success, const QString &txId, const QString &purchasedProductId,
                                                    const QString &originalTxId, const QString &errorString) {
                                                    purchaseOk = success;
@@ -520,7 +520,7 @@ bool ApiConfigsController::importSerivceFromAppStore()
 bool ApiConfigsController::restoreSerivceFromAppStore()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    const QString premiumServiceType = QStringLiteral("amnezia-premium");
+    const QString premiumServiceType = QStringLiteral("fblink-premium");
 
     if (!fillAvailableServices()) {
         qWarning().noquote() << "[IAP] Unable to fetch services list before restore";
@@ -929,12 +929,12 @@ bool ApiConfigsController::isConfigValid()
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         m_serversModel->removeApiConfig(serverIndex);
         return updateServiceFromTelegram(serverIndex);
-    } else if (configSource == apiDefs::ConfigSource::AmneziaGateway
+    } else if (configSource == apiDefs::ConfigSource::FBLinkGateway
                && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         return updateServiceFromGateway(serverIndex, "", "");
     } else if (configSource && m_serversModel->isApiKeyExpired(serverIndex)) {
         qDebug() << "attempt to update api config by expires_at event";
-        if (configSource == apiDefs::ConfigSource::AmneziaGateway) {
+        if (configSource == apiDefs::ConfigSource::FBLinkGateway) {
             return updateServiceFromGateway(serverIndex, "", "");
         } else {
             m_serversModel->removeApiConfig(serverIndex);

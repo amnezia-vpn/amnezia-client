@@ -314,7 +314,11 @@ void VpnConnection::appendSplitTunnelingConfig()
                     if (allowedIpsString.size() < 1) {
                         break;
                     }
-                    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIpsString.at(1).split(", "));
+                    QString allowedIpsRaw = allowedIpsString.at(1).trimmed();
+                    QJsonArray allowedIpsJsonArray;
+                    for (const QString &ip : allowedIpsRaw.split(",")) {
+                        allowedIpsJsonArray.append(ip.trimmed());
+                    }
                     configData.insert(config_key::allowed_ips, allowedIpsJsonArray);
                     m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     break;
@@ -358,7 +362,7 @@ void VpnConnection::appendSplitTunnelingConfig()
             if (sitesJsonArray.isEmpty()) {
                 routeMode = Settings::RouteMode::VpnAllSites;
             } else if (routeMode == Settings::VpnOnlyForwardSites) {
-                // Allow traffic to Amnezia DNS
+                // Allow traffic to FBLink DNS
                 sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
                 sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
             }

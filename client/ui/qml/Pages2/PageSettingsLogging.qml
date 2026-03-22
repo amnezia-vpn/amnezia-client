@@ -128,7 +128,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                color: AmneziaStyle.color.mutedGray
+                color: FBLinkStyle.color.mutedGray
 
                 text: description
             }
@@ -217,7 +217,7 @@ PageType {
             var fileName = ""
             fileName = SystemController.getFileName(qsTr("Save"),
                                                     qsTr("Logs files (*.log)"),
-                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
+                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/FBLink-service",
                                                     true,
                                                     ".log")
             if (fileName !== "") {

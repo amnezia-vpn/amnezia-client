@@ -19,7 +19,7 @@ bool OpenVpnConfigModel::setData(const QModelIndex &index, const QVariant &value
     }
 
     switch (role) {
-    case Roles::SubnetAddressRole: m_protocolConfig.insert(amnezia::config_key::subnet_address, value.toString()); break;
+    case Roles::SubnetAddressRole: m_protocolConfig.insert(fblink::config_key::subnet_address, value.toString()); break;
     case Roles::TransportProtoRole: m_protocolConfig.insert(config_key::transport_proto, value.toString()); break;
     case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
     case Roles::AutoNegotiateEncryprionRole: m_protocolConfig.insert(config_key::ncp_disable, !value.toBool()); break;
@@ -43,7 +43,7 @@ QVariant OpenVpnConfigModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Roles::SubnetAddressRole:
-        return m_protocolConfig.value(amnezia::config_key::subnet_address).toString(amnezia::protocols::openvpn::defaultSubnetAddress);
+        return m_protocolConfig.value(fblink::config_key::subnet_address).toString(fblink::protocols::openvpn::defaultSubnetAddress);
     case Roles::TransportProtoRole:
         return m_protocolConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto);
     case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::openvpn::defaultPort);
@@ -75,7 +75,7 @@ void OpenVpnConfigModel::updateModel(const QJsonObject &config)
 
     m_protocolConfig.insert(
             config_key::subnet_address,
-            protocolConfig.value(amnezia::config_key::subnet_address).toString(amnezia::protocols::openvpn::defaultSubnetAddress));
+            protocolConfig.value(fblink::config_key::subnet_address).toString(fblink::protocols::openvpn::defaultSubnetAddress));
 
     QString transportProto;
     if (m_container == DockerContainer::OpenVpn) {

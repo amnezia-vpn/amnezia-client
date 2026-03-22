@@ -56,7 +56,7 @@
             </intent-filter>
 
             <intent-filter>
-                <action android:name="org.amnezia.vpn.IMPORT_CONFIG" />
+                <action android:name="com.fblink.vpn.IMPORT_CONFIG" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
@@ -209,7 +209,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="org.amnezia.vpn.qtprovider"
+            android:authorities="com.fblink.vpn.qtprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/qtprovider_paths" />

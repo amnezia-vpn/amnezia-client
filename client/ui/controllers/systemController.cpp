@@ -9,6 +9,8 @@
 #include <QStandardPaths>
 #include <QUrl>
 #include <QtConcurrent>
+#include <QTcpSocket>
+#include <QElapsedTimer>
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
@@ -167,4 +169,32 @@ void SystemController::sendTouch(float x, float y)
 #ifdef Q_OS_ANDROID
     AndroidController::instance()->sendTouch(x, y);
 #endif
+}
+
+void SystemController::measurePing(const QString &host)
+{
+    if (host.isEmpty()) {
+        emit pingMeasured(-1);
+        return;
+    }
+
+    QTcpSocket* socket = new QTcpSocket(this);
+    QElapsedTimer* timer = new QElapsedTimer();
+
+    connect(socket, &QTcpSocket::connected, this, [this, socket, timer]() {
+        emit pingMeasured(timer->elapsed());
+        socket->disconnectFromHost();
+        socket->deleteLater();
+        delete timer;
+    });
+
+    void(QTcpSocket::*errorSignal)(QAbstractSocket::SocketError) = &QTcpSocket::errorOccurred;
+    connect(socket, errorSignal, this, [this, socket, timer](QAbstractSocket::SocketError) {
+        emit pingMeasured(-1);
+        socket->deleteLater();
+        delete timer;
+    });
+
+    timer->start();
+    socket->connectToHost(host, 22); // SSH is always open on these servers
 }

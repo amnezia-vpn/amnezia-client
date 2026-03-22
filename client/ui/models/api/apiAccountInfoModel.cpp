@@ -27,7 +27,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case SubscriptionStatusRole: {
-        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
+        if (m_accountInfoData.configType == apiDefs::ConfigType::FBLinkFreeV3) {
             return tr("Active");
         }
 
@@ -35,14 +35,14 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
                                                                                       : tr("Active");
     }
     case EndDateRole: {
-        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
+        if (m_accountInfoData.configType == apiDefs::ConfigType::FBLinkFreeV3) {
             return "";
         }
 
         return QDateTime::fromString(m_accountInfoData.subscriptionEndDate, Qt::ISODate).toLocalTime().toString("d MMM yyyy");
     }
     case ConnectedDevicesRole: {
-        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
+        if (m_accountInfoData.configType == apiDefs::ConfigType::FBLinkFreeV3) {
             return "";
         }
         return tr("%1 out of %2").arg(m_accountInfoData.activeDeviceCount).arg(m_accountInfoData.maxDeviceCount);
@@ -51,7 +51,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         return m_accountInfoData.subscriptionDescription;
     }
     case IsComponentVisibleRole: {
-        return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
+        return m_accountInfoData.configType == apiDefs::ConfigType::FBLinkPremiumV2
                 || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium;
     }
     case HasExpiredWorkerRole: {

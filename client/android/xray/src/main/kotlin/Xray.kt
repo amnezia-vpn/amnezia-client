@@ -1,24 +1,24 @@
-package org.amnezia.vpn.protocol.xray
+package com.fblink.vpn.protocol.xray
 
 import android.content.Context
 import android.net.VpnService.Builder
 import java.io.File
 import java.io.IOException
 import go.Seq
-import org.amnezia.vpn.protocol.BadConfigException
-import org.amnezia.vpn.protocol.Protocol
-import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
-import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
-import org.amnezia.vpn.protocol.Statistics
-import org.amnezia.vpn.protocol.VpnStartException
-import org.amnezia.vpn.protocol.xray.libXray.DialerController
-import org.amnezia.vpn.protocol.xray.libXray.LibXray
-import org.amnezia.vpn.protocol.xray.libXray.Logger
-import org.amnezia.vpn.protocol.xray.libXray.Tun2SocksConfig
-import org.amnezia.vpn.util.Log
-import org.amnezia.vpn.util.net.InetNetwork
-import org.amnezia.vpn.util.net.ip
-import org.amnezia.vpn.util.net.parseInetAddress
+import com.fblink.vpn.protocol.BadConfigException
+import com.fblink.vpn.protocol.Protocol
+import com.fblink.vpn.protocol.ProtocolState.CONNECTED
+import com.fblink.vpn.protocol.ProtocolState.DISCONNECTED
+import com.fblink.vpn.protocol.Statistics
+import com.fblink.vpn.protocol.VpnStartException
+import com.fblink.vpn.protocol.xray.libXray.DialerController
+import com.fblink.vpn.protocol.xray.libXray.LibXray
+import com.fblink.vpn.protocol.xray.libXray.Logger
+import com.fblink.vpn.protocol.xray.libXray.Tun2SocksConfig
+import com.fblink.vpn.util.Log
+import com.fblink.vpn.util.net.InetNetwork
+import com.fblink.vpn.util.net.ip
+import com.fblink.vpn.util.net.parseInetAddress
 import org.json.JSONObject
 
 private const val TAG = "Xray"

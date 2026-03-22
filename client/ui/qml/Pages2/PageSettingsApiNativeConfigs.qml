@@ -72,7 +72,7 @@ PageType {
                 text: countryName
                 descriptionText: isWorkerExpired ? qsTr("The configuration needs to be reissued") : ""
                 hideDescription: isWorkerExpired ? false : true
-                descriptionColor: AmneziaStyle.color.vibrantRed
+                descriptionColor: FBLinkStyle.color.vibrantRed
 
                 leftImageSource: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
                 rightImageSource: isIssued ? "qrc:/images/controls/more-vertical.svg" : "qrc:/images/controls/download.svg"

@@ -65,7 +65,7 @@ PageType {
                 Layout.rightMargin: 16
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-                textColor: AmneziaStyle.color.vibrantRed
+                textColor: FBLinkStyle.color.vibrantRed
 
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
@@ -74,7 +74,7 @@ PageType {
 
                     var yesButtonFunction = function() {
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
-                                && SettingsController.isAmneziaDnsEnabled()) {
+                                && SettingsController.isFBLinkDnsEnabled()) {
                             PageController.showNotificationMessage(qsTr("Cannot remove DNS service from running server"))
                         } else {
                             PageController.goToPage(PageEnum.PageDeinstalling)

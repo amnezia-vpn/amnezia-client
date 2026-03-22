@@ -4,7 +4,7 @@
 #include <QMetaEnum>
 #include <QObject>
 
-namespace amnezia
+namespace fblink
 {
     struct ServerCredentials
     {
@@ -43,7 +43,7 @@ namespace amnezia
         UnknownError = 100,
         InternalError = 101,
         NotImplementedError = 102,
-        AmneziaServiceNotRunning = 103,
+        FBLinkServiceNotRunning = 103,
         NotSupportedOnThisPlatform = 104,
 
         // Server errors
@@ -82,7 +82,7 @@ namespace amnezia
         OpenVpnExecutableMissing = 600,
         ShadowSocksExecutableMissing = 601,
         CloakExecutableMissing = 602,
-        AmneziaServiceConnectionFailed = 603,
+        FBLinkServiceConnectionFailed = 603,
         ExecutableMissing = 604,
         XrayExecutableMissing = 605,
         Tun2SockExecutableMissing = 606,
@@ -137,8 +137,8 @@ namespace amnezia
 
     using ErrorCode = error_code_ns::ErrorCode;
 
-} // namespace amnezia
+} // namespace fblink
 
-Q_DECLARE_METATYPE(amnezia::ErrorCode)
+Q_DECLARE_METATYPE(fblink::ErrorCode)
 
 #endif // DEFS_H

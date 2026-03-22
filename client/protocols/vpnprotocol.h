@@ -8,7 +8,7 @@
 #include "core/defs.h"
 #include "containers/containers_defs.h"
 
-using namespace amnezia;
+using namespace fblink;
 
 class QTimer;
 
@@ -65,13 +65,13 @@ public:
     QString vpnGateway() const;
     QString vpnLocalAddress() const;
 
-    static VpnProtocol* factory(amnezia::DockerContainer container, const QJsonObject &configuration);
+    static VpnProtocol* factory(fblink::DockerContainer container, const QJsonObject &configuration);
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(Vpn::ConnectionState state);
     void timeoutTimerEvent();
-    void protocolError(amnezia::ErrorCode e);
+    void protocolError(fblink::ErrorCode e);
     void tunnelAddressesUpdated(const QString& gateway, const QString& localAddress);
 
 public slots:

@@ -37,21 +37,21 @@ namespace
         const QString xrayConfigPatternInbound = "inbounds";
         const QString xrayConfigPatternOutbound = "outbounds";
 
-        const QString amneziaConfigPattern = "containers";
-        const QString amneziaConfigPatternHostName = "hostName";
-        const QString amneziaConfigPatternUserName = "userName";
-        const QString amneziaConfigPatternPassword = "password";
-        const QString amneziaFreeConfigPattern = "api_key";
-        const QString amneziaPremiumConfigPattern = "auth_data";
+        const QString fblinkConfigPattern = "containers";
+        const QString fblinkConfigPatternHostName = "hostName";
+        const QString fblinkConfigPatternUserName = "userName";
+        const QString fblinkConfigPatternPassword = "password";
+        const QString fblinkFreeConfigPattern = "api_key";
+        const QString fblinkPremiumConfigPattern = "auth_data";
         const QString backupPattern = "Servers/serversList";
 
         if (config.contains(backupPattern)) {
             return ConfigTypes::Backup;
-        } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern)
-                   || config.contains(amneziaPremiumConfigPattern)
-                   || (config.contains(amneziaConfigPatternHostName) && config.contains(amneziaConfigPatternUserName)
-                       && config.contains(amneziaConfigPatternPassword))) {
-            return ConfigTypes::Amnezia;
+        } else if (config.contains(fblinkConfigPattern) || config.contains(fblinkFreeConfigPattern)
+                   || config.contains(fblinkPremiumConfigPattern)
+                   || (config.contains(fblinkConfigPatternHostName) && config.contains(fblinkConfigPatternUserName)
+                       && config.contains(fblinkConfigPatternPassword))) {
+            return ConfigTypes::FBLink;
         } else if (config.contains(wireguardConfigPatternSectionInterface) && config.contains(wireguardConfigPatternSectionPeer)) {
             return ConfigTypes::WireGuard;
         } else if ((config.contains(xrayConfigPatternInbound)) && (config.contains(xrayConfigPatternOutbound))) {
@@ -182,7 +182,7 @@ bool ImportController::extractConfigFromData(QString data)
         m_config = extractXrayConfig(config);
         return m_config.empty() ? false : true;
     }
-    case ConfigTypes::Amnezia: {
+    case ConfigTypes::FBLink: {
         m_config = QJsonDocument::fromJson(config.toUtf8()).object();
 
         if (apiUtils::isServerFromApi(m_config)) {
@@ -191,7 +191,7 @@ bool ImportController::extractConfigFromData(QString data)
             m_config[apiDefs::key::apiConfig] = apiConfig;
         }
 
-        processAmneziaConfig(m_config);
+        processFBLinkConfig(m_config);
         if (!m_config.empty()) {
             checkForMaliciousStrings(m_config);
             return true;
@@ -349,7 +349,7 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
     lastConfig[config_key::isThirdPartyConfig] = true;
 
     QJsonObject containers;
-    containers.insert(config_key::container, QJsonValue("amnezia-openvpn"));
+    containers.insert(config_key::container, QJsonValue("fblink-openvpn"));
     containers.insert(config_key::openvpn, QJsonValue(lastConfig));
 
     QJsonArray arr;
@@ -364,7 +364,7 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
 
     QJsonObject config;
     config[config_key::containers] = arr;
-    config[config_key::defaultContainer] = "amnezia-openvpn";
+    config[config_key::defaultContainer] = "fblink-openvpn";
     config[config_key::description] = m_settings->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
@@ -512,7 +512,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     }
 
     QJsonObject containers;
-    containers.insert(config_key::container, QJsonValue("amnezia-" + protocolName));
+    containers.insert(config_key::container, QJsonValue("fblink-" + protocolName));
     containers.insert(protocolName, QJsonValue(wireguardConfig));
 
     QJsonArray arr;
@@ -520,7 +520,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
 
     QJsonObject config;
     config[config_key::containers] = arr;
-    config[config_key::defaultContainer] = "amnezia-" + protocolName;
+    config[config_key::defaultContainer] = "fblink-" + protocolName;
     config[config_key::description] = m_settings->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp(
@@ -551,9 +551,9 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, const QStri
     QJsonObject containers;
     if (m_configType == ConfigTypes::ShadowSocks) {
         containers.insert(config_key::ssxray, QJsonValue(lastConfig));
-        containers.insert(config_key::container, QJsonValue("amnezia-ssxray"));
+        containers.insert(config_key::container, QJsonValue("fblink-ssxray"));
     } else {
-        containers.insert(config_key::container, QJsonValue("amnezia-xray"));
+        containers.insert(config_key::container, QJsonValue("fblink-xray"));
         containers.insert(config_key::xray, QJsonValue(lastConfig));
     }
 
@@ -572,9 +572,9 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, const QStri
     config[config_key::containers] = arr;
 
     if (m_configType == ConfigTypes::ShadowSocks) {
-        config[config_key::defaultContainer] = "amnezia-ssxray";
+        config[config_key::defaultContainer] = "fblink-ssxray";
     } else {
-        config[config_key::defaultContainer] = "amnezia-xray";
+        config[config_key::defaultContainer] = "fblink-xray";
     }
     if (description.isEmpty()) {
         config[config_key::description] = m_settings->nextAvailableServerName();
@@ -737,7 +737,7 @@ void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig)
     }
 }
 
-void ImportController::processAmneziaConfig(QJsonObject &config)
+void ImportController::processFBLinkConfig(QJsonObject &config)
 {
     auto containers = config.value(config_key::containers).toArray();
     for (auto i = 0; i < containers.size(); i++) {

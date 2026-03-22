@@ -11,12 +11,12 @@ Rectangle {
     property alias textArea: textArea
     property alias textAreaText: textArea.text
 
-    property string borderHoveredColor: AmneziaStyle.color.charcoalGray
-    property string borderNormalColor: AmneziaStyle.color.slateGray
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property string borderHoveredColor: FBLinkStyle.color.charcoalGray
+    property string borderNormalColor: FBLinkStyle.color.slateGray
+    property string borderFocusedColor: FBLinkStyle.color.paleGray
 
     height: 148
-    color: AmneziaStyle.color.onyxBlack
+    color: FBLinkStyle.color.onyxBlack
     border.width: 1
     border.color: getBorderColor(borderNormalColor)
     radius: 16
@@ -71,10 +71,10 @@ Rectangle {
                     FocusController.nextKeyRightItem()
                 }
 
-                color: AmneziaStyle.color.paleGray
-                selectionColor:  AmneziaStyle.color.richBrown
-                selectedTextColor: AmneziaStyle.color.paleGray
-                placeholderTextColor: AmneziaStyle.color.mutedGray
+                color: FBLinkStyle.color.paleGray
+                selectionColor:  FBLinkStyle.color.richBrown
+                selectedTextColor: FBLinkStyle.color.paleGray
+                placeholderTextColor: FBLinkStyle.color.mutedGray
 
                 font.pixelSize: 16
                 font.weight: Font.Medium

@@ -1,4 +1,4 @@
-package org.amnezia.vpn.protocol.wireguard
+package com.fblink.vpn.protocol.wireguard
 
 import android.net.VpnService.Builder
 import kotlinx.coroutines.CoroutineScope
@@ -8,19 +8,19 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.amnezia.awg.GoBackend
-import org.amnezia.vpn.protocol.Protocol
-import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
-import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
-import org.amnezia.vpn.protocol.Statistics
-import org.amnezia.vpn.protocol.VpnException
-import org.amnezia.vpn.protocol.VpnStartException
-import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
-import org.amnezia.vpn.util.Log
-import org.amnezia.vpn.util.asSequence
-import org.amnezia.vpn.util.net.InetEndpoint
-import org.amnezia.vpn.util.net.InetNetwork
-import org.amnezia.vpn.util.net.parseInetAddress
-import org.amnezia.vpn.util.optStringOrNull
+import com.fblink.vpn.protocol.Protocol
+import com.fblink.vpn.protocol.ProtocolState.CONNECTED
+import com.fblink.vpn.protocol.ProtocolState.DISCONNECTED
+import com.fblink.vpn.protocol.Statistics
+import com.fblink.vpn.protocol.VpnException
+import com.fblink.vpn.protocol.VpnStartException
+import com.fblink.vpn.util.LibraryLoader.loadSharedLibrary
+import com.fblink.vpn.util.Log
+import com.fblink.vpn.util.asSequence
+import com.fblink.vpn.util.net.InetEndpoint
+import com.fblink.vpn.util.net.InetNetwork
+import com.fblink.vpn.util.net.parseInetAddress
+import com.fblink.vpn.util.optStringOrNull
 import org.json.JSONObject
 
 private const val TAG = "Wireguard"
