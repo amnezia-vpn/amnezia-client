@@ -190,7 +190,7 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
 
     ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
-    SshSession sshSession(this);
+    SshSession sshSession;
 
     auto isProtocolConfigExists = [](const ContainerConfig &cfg) {
         return cfg.protocolConfig.hasClientConfig();
