@@ -65,8 +65,8 @@ class ServiceNotification(private val context: Context) {
         Log.v(TAG, "Build notification: $serverName, $state")
 
         return notificationBuilder
-            .setSmallIcon(R.drawable.ic_amnezia_round)
-            .setContentTitle((serverName ?: "AmneziaVPN") + (protocol?.let { " $it" } ?: ""))
+            .setSmallIcon(R.drawable.ic_FBLink_round)
+            .setContentTitle((serverName ?: "FBLink") + (protocol?.let { " $it" } ?: ""))
             .setContentText(context.getString(state))
             .setSubText(speedString)
             .setWhen(System.currentTimeMillis())
@@ -158,7 +158,7 @@ class ServiceNotification(private val context: Context) {
                         .setSound(null, null)
                         .setVibrationEnabled(false)
                         .setLightsEnabled(false)
-                        .setName("AmneziaVPN")
+                        .setName("FBLink")
                         .setDescription(context.resources.getString(R.string.notificationChannelDescription))
                         .build()
                 )

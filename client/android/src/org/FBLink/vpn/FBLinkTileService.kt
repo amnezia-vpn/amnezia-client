@@ -29,7 +29,7 @@ import com.fblink.vpn.protocol.ProtocolState.UNKNOWN
 import com.fblink.vpn.util.Log
 
 private const val TAG = "AmneziaTileService"
-private const val DEFAULT_TILE_LABEL = "AmneziaVPN"
+private const val DEFAULT_TILE_LABEL = "FBLink"
 
 class AmneziaTileService : TileService() {
 

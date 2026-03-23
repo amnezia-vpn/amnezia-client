@@ -5,6 +5,6 @@ Name=FBLink VPN
 Version=1.0
 Comment=FBLink VPN Client
 Exec=AmneziaVPN
-Icon=/usr/share/pixmaps/AmneziaVPN.png
+Icon=/usr/share/pixmaps/FBLink.png
 Categories=Network;Qt;Security;
 Terminal=false

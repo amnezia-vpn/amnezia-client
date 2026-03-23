@@ -60,8 +60,8 @@ if test -f /usr/share/applications/$APP_NAME.desktop; then
 
 fi
 
-if test -f /usr/share/pixmaps/$APP_NAME.png; then
-	sudo rm -f /usr/share/pixmaps/$APP_NAME.png >> $LOG_FILE
+if test -f /usr/share/pixmaps/FBLink.png; then
+	sudo rm -f /usr/share/pixmaps/FBLink.png >> $LOG_FILE
 
 fi
 
