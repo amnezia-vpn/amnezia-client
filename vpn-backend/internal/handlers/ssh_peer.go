@@ -60,7 +60,7 @@ func sshExec(server *models.VPNServer, cmd string) (string, error) {
 }
 
 // addAWGPeer добавляет WireGuard/AWG peer на сервере через SSH
-// Работает с fblink-awg2 контейнером через docker exec
+// Работает с amnezia-awg контейнером через docker exec
 func addAWGPeer(server *models.VPNServer, clientPublicKey, presharedKey, allowedIP string) error {
 	if server.SSHPassword == "" {
 		// SSH не настроен — пропускаем, peer нужно добавить вручную
@@ -69,13 +69,13 @@ func addAWGPeer(server *models.VPNServer, clientPublicKey, presharedKey, allowed
 
 	container := server.AWGContainer
 	if container == "" {
-		container = "fblink-awg2"
+		container = "amnezia-awg"
 	}
 	iface := server.AWGInterface
 	if iface == "" {
 		iface = "awg0"
 	}
-	confPath := fmt.Sprintf("/opt/fblink/awg/%s.conf", iface)
+	confPath := fmt.Sprintf("/opt/amnezia/awg/%s.conf", iface)
 
 	// 1. Добавляем peer в память (работает сразу)
 	addCmd := fmt.Sprintf(
@@ -113,13 +113,13 @@ func removeAWGPeer(server *models.VPNServer, clientPublicKey string) error {
 
 	container := server.AWGContainer
 	if container == "" {
-		container = "fblink-awg2"
+		container = "amnezia-awg"
 	}
 	iface := server.AWGInterface
 	if iface == "" {
 		iface = "awg0"
 	}
-	confPath := fmt.Sprintf("/opt/fblink/awg/%s.conf", iface)
+	confPath := fmt.Sprintf("/opt/amnezia/awg/%s.conf", iface)
 
 	// 1. Удалить peer из памяти
 	removeCmd := fmt.Sprintf(
@@ -157,7 +157,7 @@ func fetchServerPublicKey(server *models.VPNServer) (string, error) {
 
 	container := server.AWGContainer
 	if container == "" {
-		container = "fblink-awg2"
+		container = "amnezia-awg"
 	}
 	iface := server.AWGInterface
 	if iface == "" {
@@ -185,14 +185,14 @@ func fetchServerConfigHeaders(server *models.VPNServer) error {
 
 	container := server.AWGContainer
 	if container == "" {
-		container = "fblink-awg2"
+		container = "amnezia-awg"
 	}
 	iface := server.AWGInterface
 	if iface == "" {
 		iface = "awg0"
 	}
 
-	confPath := fmt.Sprintf("/opt/fblink/awg/%s.conf", iface)
+	confPath := fmt.Sprintf("/opt/amnezia/awg/%s.conf", iface)
 	cmd := fmt.Sprintf(`docker exec %s cat %s`, container, confPath)
 	out, err := sshExec(server, cmd)
 	if err != nil {

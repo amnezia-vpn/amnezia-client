@@ -166,7 +166,7 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 	}
 	awgContainer := req.AWGContainer
 	if awgContainer == "" {
-		awgContainer = "fblink-awg2"
+		awgContainer = "amnezia-awg"
 	}
 	awgIface := req.AWGInterface
 	if awgIface == "" {

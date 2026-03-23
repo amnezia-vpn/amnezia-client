@@ -86,7 +86,7 @@ type VPNServer struct {
 	SSHPort      int    `gorm:"default:22"`
 	SSHUser      string `gorm:"default:'root'"`
 	SSHPassword  string // пароль SSH (ili private key)
-	AWGContainer string `gorm:"default:'fblink-awg2'"`
+	AWGContainer string `gorm:"default:'amnezia-awg'"`
 	AWGInterface string `gorm:"default:'awg0'"`
 
 	VPNKeys []VPNKey `gorm:"foreignKey:ServerID"`

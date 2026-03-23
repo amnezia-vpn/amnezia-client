@@ -138,7 +138,7 @@ fi
 export ANDROIDDEPLOYQT_RUN=1
 
 $QT_HOST_PATH/bin/androiddeployqt \
-  --input $OUT_APP_DIR/android-AmneziaVPN-deployment-settings.json \
+  --input $OUT_APP_DIR/android-FBLink-deployment-settings.json \
   --output $OUT_APP_DIR/android-build \
   "${deployqt_opts[@]}"
 
