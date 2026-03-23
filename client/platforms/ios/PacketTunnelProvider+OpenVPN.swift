@@ -25,6 +25,10 @@ extension PacketTunnelProvider {
         do {
             let openVPNConfig = try JSONDecoder().decode(OpenVPNConfig.self, from: openVPNConfigData)
             ovpnLog(.info, title: "config: ", message: openVPNConfig.str)
+            let wrapperPreview = String(decoding: openVPNConfigData.prefix(512), as: UTF8.self)
+            let ovpnPreview = String(openVPNConfig.config.prefix(512))
+            ovpnLog(.info, title: "config wrapper", message: "bytes=\(openVPNConfigData.count) preview=\(wrapperPreview)")
+            ovpnLog(.info, title: "config raw", message: "chars=\(openVPNConfig.config.count) preview=\(ovpnPreview)")
             let ovpnConfiguration = Data(openVPNConfig.config.utf8)
             setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
         } catch {

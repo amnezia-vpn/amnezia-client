@@ -182,6 +182,14 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         if let protocolConfiguration = protocolConfiguration as? NETunnelProviderProtocol {
             let providerConfiguration = protocolConfiguration.providerConfiguration
+            let providerKeys = providerConfiguration?.keys.sorted().joined(separator: ",") ?? ""
+            var protocolDetails = "bundleId=\(protocolConfiguration.providerBundleIdentifier ?? "") keys=[\(providerKeys)]"
+            if let ovpnData = providerConfiguration?[Constants.ovpnConfigKey] as? Data {
+                let preview = String(decoding: ovpnData.prefix(512), as: UTF8.self)
+                protocolDetails += " ovpnBytes=\(ovpnData.count) ovpnPreview=\(preview)"
+            }
+            neLog(.info, title: "Protocol", message: protocolDetails)
+
             if (providerConfiguration?[Constants.ovpnConfigKey] as? Data) != nil {
                 protoType = .openvpn
             } else if (providerConfiguration?[Constants.wireGuardConfigKey] as? Data) != nil {

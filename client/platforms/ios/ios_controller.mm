@@ -546,6 +546,16 @@ bool IosController::setupOpenVPN()
 
     QJsonDocument openVPNConfigDoc(openVPNConfig);
     QString openVPNConfigStr(openVPNConfigDoc.toJson(QJsonDocument::Compact));
+    QString openVPNConfigPreview = openVPNConfigStr.left(512);
+    QString ovpnPreview = ovpnConfig.left(512);
+
+    qDebug().noquote() << "IosController::setupOpenVPN payload"
+                       << "jsonBytes=" << openVPNConfigStr.toUtf8().size()
+                       << "ovpnChars=" << ovpnConfig.size()
+                       << "splitTunnelType=" << m_rawConfig[config_key::splitTunnelType].toInt()
+                       << "splitTunnelSites=" << splitTunnelSites;
+    qDebug().noquote() << "IosController::setupOpenVPN payload jsonPreview=" << openVPNConfigPreview;
+    qDebug().noquote() << "IosController::setupOpenVPN payload ovpnPreview=" << ovpnPreview;
 
     return startOpenVPN(openVPNConfigStr);
 }
@@ -789,6 +799,24 @@ bool IosController::startOpenVPN(const QString &config)
     tunnelProtocol.serverAddress = m_serverAddress;
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;
+
+    NETunnelProviderProtocol *appliedProtocol = (NETunnelProviderProtocol *)m_currentTunnel.protocolConfiguration;
+    NSData *ovpnPayload = appliedProtocol.providerConfiguration[@"ovpn"];
+    NSString *payloadPreview = @"";
+    if (ovpnPayload != nil) {
+        NSString *decodedPayload = [[NSString alloc] initWithData:ovpnPayload encoding:NSUTF8StringEncoding];
+        if (decodedPayload != nil) {
+            payloadPreview = [decodedPayload substringToIndex:MIN((NSUInteger)512, decodedPayload.length)];
+        }
+    }
+
+    qDebug().noquote() << "IosController::startOpenVPN protocolConfiguration"
+                       << "bundleId=" << QString::fromNSString(appliedProtocol.providerBundleIdentifier ?: @"")
+                       << "serverAddress=" << QString::fromNSString(appliedProtocol.serverAddress ?: @"")
+                       << "providerKeys=" << QString::fromNSString([[appliedProtocol.providerConfiguration.allKeys description] copy])
+                       << "ovpnBytes=" << (ovpnPayload != nil ? ovpnPayload.length : 0);
+    qDebug().noquote() << "IosController::startOpenVPN protocolConfiguration payloadPreview="
+                       << QString::fromNSString(payloadPreview);
 
     startTunnel();
 }
