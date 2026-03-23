@@ -80,8 +80,8 @@ if [ ! -f $CQTDEPLOYER_DIR/cqtdeployer.sh ]; then
 fi
 
 
-$CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/client/AmneziaVPN -qmake $QT_BIN_DIR/qmake -qmlDir $PROJECT_DIR/client/ui/qml/ -targetDir $APP_DIR/client/
-$CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/service/server/AmneziaVPN-service -qmake $QT_BIN_DIR/qmake -targetDir $APP_DIR/service/
+$CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/client/FBLink -qmake $QT_BIN_DIR/qmake -qmlDir $PROJECT_DIR/client/ui/qml/ -targetDir $APP_DIR/client/
+$CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/service/server/FBLink-service -qmake $QT_BIN_DIR/qmake -targetDir $APP_DIR/service/
 
 # Rename launcher to FBLink branding
 if [ -f $APP_DIR/client/AmneziaVPN.sh ]; then

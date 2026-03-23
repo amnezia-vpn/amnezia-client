@@ -32,8 +32,8 @@ set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
 set APP_NAME=FBLinkVPN
 set APP_FILENAME=%APP_NAME:"=%.exe
 set SERVICE_FILENAME=%APP_NAME:"=%-service.exe
-set CMAKEOUT_APP_FILENAME=AmneziaVPN.exe
-set CMAKEOUT_SERVICE_FILENAME=AmneziaVPN-service.exe
+set CMAKEOUT_APP_FILENAME=FBLink.exe
+set CMAKEOUT_SERVICE_FILENAME=FBLink-service.exe
 set APP_DOMAIN=org.fblinkvpn.package
 set OUT_APP_DIR=%WORK_DIR:"=%\client\release
 set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
