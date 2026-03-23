@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>fonts/pt-root-ui_vf.ttf</file>
-        <file>images/amneziaBigLogo.png</file>
+        <file>images/FBLinkBigLogo.png</file>
         <file>images/AmneziaVPN.png</file>
         <file alias="images/fblink_logo.png">images/Лого впн отрисованный.png</file>
         <file>images/controls/alert-circle.svg</file>

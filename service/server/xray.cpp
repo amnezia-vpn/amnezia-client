@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QNetworkInterface>
 #include <QCoreApplication>
-#include <FBLink_xray.h>
+#include <amnezia_xray.h>
 #include <qdebug.h>
 
 #ifdef Q_OS_DARWIN
@@ -38,24 +38,24 @@ bool Xray::startXray(const QString &cfg)
     m_defaultIfaceIdx = defaultIface.index();
 #endif
 
-    if (auto err = fblink_xray_setsockcallback(ctxSockCallback, this); err != nullptr) {
+    if (auto err = amnezia_xray_setsockcallback(ctxSockCallback, this); err != nullptr) {
         qDebug() << "[xray] sockopt failed: " << err;
-        fblink_xray_free(err);
+        amnezia_xray_free(err);
         return false;
     }
 
-    fblink_xray_setloghandler(ctxLogHandler, this);
+    amnezia_xray_setloghandler(ctxLogHandler, this);
 
     QByteArray bytes = cfg.toUtf8();
-    if (auto err = fblink_xray_configure(bytes.data()); err != nullptr) {
+    if (auto err = amnezia_xray_configure(bytes.data()); err != nullptr) {
         qDebug() << "[xray] configuration failed: " << err;
-        fblink_xray_free(err);
+        amnezia_xray_free(err);
         return false;
     }
 
-    if (auto err = fblink_xray_start(); err != nullptr) {
+    if (auto err = amnezia_xray_start(); err != nullptr) {
         qDebug() << "[xray] failed to start: " << err;
-        fblink_xray_free(err);
+        amnezia_xray_free(err);
         return false;
     }
 
@@ -65,9 +65,9 @@ bool Xray::startXray(const QString &cfg)
 bool Xray::stopXray()
 {
     qDebug() << "Xray::stopXray()";
-    if (auto err = fblink_xray_stop(); err != nullptr) {
+    if (auto err = amnezia_xray_stop(); err != nullptr) {
         qDebug() << "[xray] failed to stop: " << err;
-        fblink_xray_free(err);
+        amnezia_xray_free(err);
         return false;
     }
 
