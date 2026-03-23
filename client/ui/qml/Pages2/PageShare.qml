@@ -26,7 +26,8 @@ PageType {
         Awg,
         ShadowSocks,
         Cloak,
-        Xray
+        Xray,
+        AmneziaMultiConnection
     }
 
     Connections {
@@ -47,6 +48,13 @@ PageType {
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
                 ExportController.generateConnectionConfig(clientNameTextField.textField.text);
+                configCaption = qsTr("Save AmneziaVPN config")
+                configExtension = ".vpn"
+                configFileName = "amnezia_config"
+                break;
+            }
+            case PageShare.ConfigType.AmneziaMultiConnection: {
+                ExportController.generateMultiConnectionConfig(clientNameTextField.textField.text);
                 configCaption = qsTr("Save AmneziaVPN config")
                 configExtension = ".vpn"
                 configFileName = "amnezia_config"
@@ -372,6 +380,18 @@ PageType {
                 }
             }
 
+            CheckBoxType {
+                id: allProtocolsCheckBox
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+
+                visible: accessTypeSelector.currentIndex === 0
+
+                text: qsTr("Share all protocols")
+                checked: false
+            }
+
             DropDownType {
                 id: protocolSelector
 
@@ -379,6 +399,8 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
+
+                visible: !allProtocolsCheckBox.checked
 
                 drawerHeight: 0.5
                 drawerParent: root
@@ -486,7 +508,7 @@ PageType {
                 drawerHeight: 0.4375
                 drawerParent: root
 
-                visible: accessTypeSelector.currentIndex === 0
+                visible: accessTypeSelector.currentIndex === 0 && !allProtocolsCheckBox.checked
                 enabled: root.connectionTypesModel.length > 1
 
                 descriptionText: qsTr("Connection format")
@@ -556,7 +578,11 @@ PageType {
 
                 clickedFunc: function(){
                     if (clientNameTextField.textField.text !== "") {
-                        ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
+                        if (allProtocolsCheckBox.checked) {
+                            ExportController.generateConfig(PageShare.ConfigType.AmneziaMultiConnection)
+                        } else {
+                            ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
+                        }
                     }
                 }
             }

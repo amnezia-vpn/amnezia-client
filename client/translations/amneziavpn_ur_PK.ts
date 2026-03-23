@@ -3423,6 +3423,10 @@ Already installed containers were found on the server. All installed containers 
         <translation>صارف کا نام</translation>
     </message>
     <message>
+        <source>Share all protocols</source>
+        <translation>تمام پروٹوکولز کا اشتراک کریں</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="479"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="480"/>
         <source>Connection format</source>

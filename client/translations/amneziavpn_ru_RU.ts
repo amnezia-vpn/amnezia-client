@@ -3788,6 +3788,10 @@ Thank you for staying with us!</source>
         <translation>Протокол</translation>
     </message>
     <message>
+        <source>Share all protocols</source>
+        <translation>Поделиться всеми протоколами</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="492"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="493"/>
         <source>Connection format</source>

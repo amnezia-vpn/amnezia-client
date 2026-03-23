@@ -23,6 +23,7 @@ public:
 public slots:
     void generateFullAccessConfig();
     void generateConnectionConfig(const QString &clientName);
+    void generateMultiConnectionConfig(const QString &clientName);
     void generateOpenVpnConfig(const QString &clientName);
     void generateWireGuardConfig(const QString &clientName);
     void generateAwgConfig(const QString &clientName);

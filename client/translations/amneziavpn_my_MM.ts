@@ -3396,6 +3396,10 @@ Already installed containers were found on the server. All installed containers 
         <translation>ပရိုတိုကော</translation>
     </message>
     <message>
+        <source>Share all protocols</source>
+        <translation>ပရိုတိုကောအားလုံး မျှဝေမည်</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="479"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="480"/>
         <source>Connection format</source>
