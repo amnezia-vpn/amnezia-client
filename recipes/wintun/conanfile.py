@@ -37,9 +37,9 @@ class PackageConan(ConanFile):
             sha256="07c256185d6ee3652e09fa55c0b673e2624b565e02c4b9091c79ca7d2f24ef51", strip_root=True)
 
     def package(self):
-        copy(self, "*.dll", src=os.path.join(self.source_folder, "bin", self._arch), dst=os.path.join(self.package_folder, "bin"))
-        copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "wintun.dll", src=os.path.join(self.source_folder, "bin", self._arch), dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
+        self.cpp_info.exe = True
+        self.cpp_info.location = os.path.join(self.package_folder, "bin", "wintun.dll")
         self.cpp_info.set_property("cmake_target_name", "zx2c4::wintun")
-        self.cpp_info.libs = [ "wintun" ]
