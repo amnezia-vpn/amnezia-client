@@ -94,10 +94,9 @@ class AwgWindows(ConanFile):
             self.run(f'go build -buildmode c-shared -ldflags="-w -s" -trimpath -v -o "{os.path.join(self.build_folder, "tunnel.dll")}"')
 
     def package(self):
-        copy(self, "*.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"))
-        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"))
+        copy(self, "tunnel.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
+        self.cpp_info.exe = True
+        self.cpp_info.location = os.path.join(self.package_folder, "bin", "tunnel.dll")
         self.cpp_info.set_property("cmake_target_name", "amnezia::awg-windows")
-        self.cpp_info.libs = collect_libs(self)
-        

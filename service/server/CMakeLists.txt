@@ -359,45 +359,28 @@ add_custom_command(
     COMMAND_EXPAND_LISTS
 )
 
-if(NOT WIN32)
+if (WIN32)
+    find_package(awg-windows REQUIRED)
+    list(APPEND BLOBS $<TARGET_FILE:amnezia::awg-windows>)
+
+    find_package(wintun REQUIRED)
+    list(APPEND BLOBS $<TARGET_FILE:zx2c4::wintun>)
+else()
     find_package(awg-go REQUIRED)
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:amnezia::awg-go>
-            $<TARGET_FILE_DIR:${PROJECT}>
-    )
+    list(APPEND BLOBS $<TARGET_FILE:amnezia::awg-go>)
 endif()
 
 find_package(openvpn REQUIRED)
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:openvpn::openvpn>
-        $<TARGET_FILE_DIR:${PROJECT}>
-)
+list(APPEND BLOBS $<TARGET_FILE:openvpn::openvpn>)
 
 find_package(tun2socks REQUIRED)
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:xjasonlyu::tun2socks>
-        $<TARGET_FILE_DIR:${PROJECT}>
-)
+list(APPEND BLOBS $<TARGET_FILE:xjasonlyu::tun2socks>)
 
 find_package(v2ray-rules-dat REQUIRED)
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${GEOSITE_DAT_PATH}
-        $<TARGET_FILE_DIR:${PROJECT}>
-)
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${GEOIP_DAT_PATH}
-        $<TARGET_FILE_DIR:${PROJECT}>
-)
+list(APPEND BLOBS ${GEOSITE_DAT_PATH} ${GEOIP_DAT_PATH})
 
-if (WIN32)
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:zx2c4::wintun>
-            $<TARGET_FILE_DIR:${PROJECT}>
-    )
-endif()
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${BLOBS}
+        $<TARGET_FILE_DIR:${PROJECT}>
+)
