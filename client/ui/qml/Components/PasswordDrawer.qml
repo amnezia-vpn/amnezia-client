@@ -96,7 +96,7 @@ DrawerType2 {
             Layout.topMargin: 8
             Layout.bottomMargin: 16
 
-            text: fromOutside ? SystemController.readHint(fileName) : SettingsController.getHint()
+            text: qsTr("Hint: ") + (fromOutside ? SystemController.readHint(fileName) : SettingsController.getHint())
         }
 
         BasicButtonType {
