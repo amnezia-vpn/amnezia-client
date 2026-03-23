@@ -11,9 +11,8 @@ class SitesController : public QObject
 {
     Q_OBJECT
 public:
-    explicit SitesController(const std::shared_ptr<Settings> &settings,
-                             const QSharedPointer<VpnConnection> &vpnConnection,
-                             const QSharedPointer<SitesModel> &sitesModel, QObject *parent = nullptr);
+    explicit SitesController(const std::shared_ptr<Settings> &settings, const QSharedPointer<SitesModel> &sitesModel,
+                             QObject *parent = nullptr);
 
 public slots:
     void addSite(QString hostname);
@@ -31,8 +30,6 @@ signals:
 
 private:
     std::shared_ptr<Settings> m_settings;
-
-    QSharedPointer<VpnConnection> m_vpnConnection;
     QSharedPointer<SitesModel> m_sitesModel;
 };
 

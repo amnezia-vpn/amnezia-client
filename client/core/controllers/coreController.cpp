@@ -135,7 +135,7 @@ void CoreController::initControllers()
             new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
-    m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
+    m_sitesController.reset(new SitesController(m_settings, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
 
     m_allowedDnsController.reset(new AllowedDnsController(m_settings, m_allowedDnsModel));
@@ -368,7 +368,11 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
-        if (!m_installController->isConfigValid()) {
+        m_installController->validateConfig();
+    });
+
+    connect(m_installController.get(), &InstallController::configValidated, this, [this](bool isValid) {
+        if (!isValid) {
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }

@@ -29,11 +29,11 @@ public:
 
     QJsonArray serversArray() const
     {
-        return QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
+        return QJsonDocument::fromJson(m_settings.value("Servers/serversList").toByteArray()).array();
     }
     void setServersArray(const QJsonArray &servers)
     {
-        setValue("Servers/serversList", QJsonDocument(servers).toJson());
+        m_settings.setValue("Servers/serversList", QJsonDocument(servers).toJson());
     }
 
     // Servers section
@@ -45,11 +45,11 @@ public:
 
     int defaultServerIndex() const
     {
-        return value("Servers/defaultServerIndex", 0).toInt();
+        return m_settings.value("Servers/defaultServerIndex", 0).toInt();
     }
     void setDefaultServer(int index)
     {
-        setValue("Servers/defaultServerIndex", index);
+        m_settings.setValue("Servers/defaultServerIndex", index);
     }
     QJsonObject defaultServer() const
     {
@@ -78,34 +78,34 @@ public:
     // App settings section
     bool isAutoConnect() const
     {
-        return value("Conf/autoConnect", false).toBool();
+        return m_settings.value("Conf/autoConnect", false).toBool();
     }
     void setAutoConnect(bool enabled)
     {
-        setValue("Conf/autoConnect", enabled);
+        m_settings.setValue("Conf/autoConnect", enabled);
     }
 
     bool isStartMinimized() const
     {
-        return value("Conf/startMinimized", false).toBool();
+        return m_settings.value("Conf/startMinimized", false).toBool();
     }
     void setStartMinimized(bool enabled)
     {
-        setValue("Conf/startMinimized", enabled);
+        m_settings.setValue("Conf/startMinimized", enabled);
     }
 
     bool isNewsNotifications() const
     {
-        return value("Conf/newsNotifications", true).toBool();
+        return m_settings.value("Conf/newsNotifications", true).toBool();
     }
     void setNewsNotifications(bool enabled)
     {
-        setValue("Conf/newsNotifications", enabled);
+        m_settings.setValue("Conf/newsNotifications", enabled);
     }
 
     bool isSaveLogs() const
     {
-        return value("Conf/saveLogs", false).toBool();
+        return m_settings.value("Conf/saveLogs", false).toBool();
     }
     void setSaveLogs(bool enabled);
 
@@ -122,19 +122,18 @@ public:
     QString routeModeString(RouteMode mode) const;
 
     RouteMode routeMode() const;
-    void setRouteMode(RouteMode mode) { setValue("Conf/routeMode", mode); }
+    void setRouteMode(RouteMode mode) { m_settings.setValue("Conf/routeMode", mode); }
 
     bool isSitesSplitTunnelingEnabled() const;
     void setSitesSplitTunnelingEnabled(bool enabled);
 
     QVariantMap vpnSites(RouteMode mode) const
     {
-        return value("Conf/" + routeModeString(mode)).toMap();
+        return m_settings.value("Conf/" + routeModeString(mode)).toMap();
     }
     void setVpnSites(RouteMode mode, const QVariantMap &sites)
     {
-        setValue("Conf/" + routeModeString(mode), sites);
-        m_settings.sync();
+        m_settings.setValue("Conf/" + routeModeString(mode), sites);
     }
     bool addVpnSite(RouteMode mode, const QString &site, const QString &ip = "");
     void addVpnSites(RouteMode mode, const QMap<QString, QString> &sites); // map <site, ip>
@@ -147,11 +146,11 @@ public:
 
     bool useAmneziaDns() const
     {
-        return value("Conf/useAmneziaDns", true).toBool();
+        return m_settings.value("Conf/useAmneziaDns", true).toBool();
     }
     void setUseAmneziaDns(bool enabled)
     {
-        setValue("Conf/useAmneziaDns", enabled);
+        m_settings.setValue("Conf/useAmneziaDns", enabled);
     }
 
     QString primaryDns() const;
@@ -160,13 +159,13 @@ public:
     // QString primaryDns() const { return m_primaryDns; }
     void setPrimaryDns(const QString &primaryDns)
     {
-        setValue("Conf/primaryDns", primaryDns);
+        m_settings.setValue("Conf/primaryDns", primaryDns);
     }
 
     // QString secondaryDns() const { return m_secondaryDns; }
     void setSecondaryDns(const QString &secondaryDns)
     {
-        setValue("Conf/secondaryDns", secondaryDns);
+        m_settings.setValue("Conf/secondaryDns", secondaryDns);
     }
 
     //    static constexpr char openNicNs5[] = "94.103.153.176";
@@ -188,16 +187,16 @@ public:
     };
     void setAppLanguage(QLocale locale)
     {
-        setValue("Conf/appLanguage", locale.name());
+        m_settings.setValue("Conf/appLanguage", locale.name());
     };
 
     bool isScreenshotsEnabled() const
     {
-        return value("Conf/screenshotsEnabled", true).toBool();
+        return m_settings.value("Conf/screenshotsEnabled", true).toBool();
     }
     void setScreenshotsEnabled(bool enabled)
     {
-        setValue("Conf/screenshotsEnabled", enabled);
+        m_settings.setValue("Conf/screenshotsEnabled", enabled);
         emit screenshotsEnabledChanged(enabled);
     }
 
@@ -255,9 +254,6 @@ signals:
     void settingsCleared();
 
 private:
-    QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
-    void setValue(const QString &key, const QVariant &value);
-
     void setInstallationUuid(const QString &uuid);
 
     mutable SecureQSettings m_settings;

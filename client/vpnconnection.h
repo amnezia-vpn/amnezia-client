@@ -34,10 +34,6 @@ public:
 
     ErrorCode lastError() const;
 
-    bool isConnected() const;
-    bool isDisconnected() const;
-
-    Vpn::ConnectionState connectionState();
     QSharedPointer<VpnProtocol> vpnProtocol() const;
 
     const QString &remoteAddress() const;
@@ -48,14 +44,10 @@ public:
 #endif
 
 public slots:
-    void connectToVpn(int serverIndex,
-    const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
-
+    void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void reconnectToVpn();
     void disconnectFromVpn();
 
-    void addRoutes(const QStringList &ips);
-    void deleteRoutes(const QStringList &ips);
-    void flushDns();
     void onKillSwitchModeChanged(bool enabled);
     void disconnectSlots();
 
@@ -69,6 +61,8 @@ signals:
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(Vpn::ConnectionState state);
+
+    void setConnectionState(Vpn::ConnectionState state);
 
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
@@ -88,6 +82,8 @@ private:
    AndroidVpnProtocol* createDefaultAndroidVpnProtocol();
    void createAndroidConnections();
 #endif
+
+   Vpn::ConnectionState m_connectionState;
 
    void createProtocolConnections();
 

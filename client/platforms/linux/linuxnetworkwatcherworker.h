@@ -23,7 +23,7 @@ class LinuxNetworkWatcherWorker final : public QObject {
 
  signals:
   void unsecuredNetwork(const QString& networkName, const QString& networkId);
-  void sleepMode();
+  void wakeup();
 
  public slots:
   void initialize();
