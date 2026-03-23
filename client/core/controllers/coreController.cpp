@@ -264,15 +264,16 @@ void CoreController::updateTranslator(const QLocale &locale)
     }
 
     QStringList availableTranslations;
-    QDirIterator it(":/translations", QStringList("fblink_*.qm"), QDir::Files);
+    // We must use "FBLink" casing since our build scripts renamed all files
+    QDirIterator it(":/translations", QStringList("FBLink_*.qm"), QDir::Files);
     while (it.hasNext()) {
         availableTranslations << it.next();
     }
 
     // This code allow to load translation for the language only, without country code
     const QString lang = locale.name().split("_").first();
-    const QString translationFilePrefix = QString(":/translations/fblink_") + lang;
-    QString strFileName = QString(":/translations/fblink_%1.qm").arg(locale.name());
+    const QString translationFilePrefix = QString(":/translations/FBLink_") + lang;
+    QString strFileName = QString(":/translations/FBLink_%1.qm").arg(locale.name());
     for (const QString &translation : availableTranslations) {
         if (translation.contains(translationFilePrefix)) {
             strFileName = translation;
@@ -368,8 +369,8 @@ void CoreController::initPrepareConfigHandler()
 {
     connect(m_connectionController.get(), &ConnectionController::prepareConfig, this, [this]() {
         qDebug() << "[FBLink] prepareConfig: defaultServerIndex =" << m_serversModel->getDefaultServerIndex();
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
+        // 1) First check API config validity (this initiates a synchronous HTTP request if expired)
         if (!m_apiConfigsController->isConfigValid()) {
             qDebug() << "[FBLink] prepareConfig: apiConfigsController->isConfigValid() = false";
             emit m_pageController->showNotificationMessage(tr("Ошибка: конфигурация API недействительна"));
@@ -377,12 +378,18 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
+        // 2) Check if containers are installed
         if (!m_installController->isConfigValid()) {
             qDebug() << "[FBLink] prepareConfig: installController->isConfigValid() = false";
             emit m_pageController->showNotificationMessage(tr("Ошибка: нет установленных контейнеров. Войдите в FBLink и получите конфигурацию."));
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }
+
+        // 3) Only AFTER network checks succeed, emit Preparing.
+        // If we emit Preparing earlier, strict kill switches or VPN adapters might drop the internet,
+        // causing the above HTTP requests to freeze the UI and timeout.
+        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
         qDebug() << "[FBLink] prepareConfig: both valid, calling openConnection()";
         m_connectionController->openConnection();

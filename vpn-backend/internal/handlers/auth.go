@@ -64,9 +64,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Проверить cooldown: не отправлять код чаще раза в 60 секунд
+	// Проверить cooldown: не отправлять код чаще раза в 60 секунд (на бекенде даем 55 сек для компенсации таймеров клиента)
 	var recent models.VerificationCode
-	cooldown := time.Now().Add(-60 * time.Second)
+	cooldown := time.Now().Add(-55 * time.Second)
 	if h.db.Where("email = ? AND purpose = ? AND created_at > ? AND used = false", req.Email, "verify", cooldown).
 		First(&recent).Error == nil {
 		c.JSON(http.StatusTooManyRequests, gin.H{"error": "code already sent, wait 60 seconds before retrying"})
@@ -173,7 +173,7 @@ func (h *AuthHandler) ForgotPassword(c *gin.Context) {
 	}
 
 	var recent models.VerificationCode
-	cooldown := time.Now().Add(-60 * time.Second)
+	cooldown := time.Now().Add(-55 * time.Second)
 	if h.db.Where("email = ? AND purpose = ? AND created_at > ? AND used = false", req.Email, "reset", cooldown).
 		First(&recent).Error == nil {
 		c.JSON(http.StatusOK, gin.H{"message": "if this email is registered, a code will be sent"})

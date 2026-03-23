@@ -22,8 +22,7 @@ PageType {
     property bool isWaitingForPayment: false
     property int pollCount: 0
     property string mgmtError: ""
-    property bool confirmDeleteCard: false
-    readonly property int maxPolls: 24  // 24 × 5 s = 2 min
+    readonly property int maxPolls: 60  // 60 × 2 s = 2 min
 
     readonly property int currentPlanLevel: {
         if (!FBLinkController.isSubscribed) return -1
@@ -33,7 +32,7 @@ PageType {
 
     Timer {
         id: pollTimer
-        interval: 5000
+        interval: 2000
         repeat: true
         running: false
         onTriggered: {
