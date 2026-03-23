@@ -122,7 +122,7 @@ target_compile_options(${PROJECT} PRIVATE
     -DVPN_NE_BUNDLEID=\"${BUILD_IOS_APP_IDENTIFIER}.network-extension\"
 )
 
-set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/fblinkwg-apple/Sources)
+set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
 
 target_sources(${PROJECT} PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
