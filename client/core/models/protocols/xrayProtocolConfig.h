@@ -13,7 +13,7 @@ struct XrayServerConfig {
     QString transportProto;
     QString subnetAddress;
     QString site;
-    bool isThirdPartyConfig;
+    bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
     static XrayServerConfig fromJson(const QJsonObject& json);

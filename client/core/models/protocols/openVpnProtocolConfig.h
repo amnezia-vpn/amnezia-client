@@ -16,11 +16,11 @@ struct OpenVpnServerConfig {
     QString subnetCidr;
     QString cipher;
     QString hash;
-    bool ncpDisable;
-    bool tlsAuth;
+    bool ncpDisable = false;
+    bool tlsAuth = true;
     QString additionalClientConfig;
     QString additionalServerConfig;
-    bool isThirdPartyConfig;
+    bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
     static OpenVpnServerConfig fromJson(const QJsonObject& json);
@@ -31,7 +31,7 @@ struct OpenVpnServerConfig {
 struct OpenVpnClientConfig {
     QString nativeConfig;
     QString clientId;
-    bool blockOutsideDns;
+    bool blockOutsideDns = false;
     
     QJsonObject toJson() const;
     static OpenVpnClientConfig fromJson(const QJsonObject& json);

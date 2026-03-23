@@ -15,7 +15,7 @@ struct WireGuardServerConfig {
     QString subnetAddress;
     QString subnetMask;
     QString subnetCidr;
-    bool isThirdPartyConfig;
+    bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
     static WireGuardServerConfig fromJson(const QJsonObject& json);
@@ -36,7 +36,7 @@ struct WireGuardClientConfig {
     QStringList allowedIps;
     QString persistentKeepAlive;
     QString mtu;
-    bool isObfuscationEnabled;
+    bool isObfuscationEnabled = false;
     
     QJsonObject toJson() const;
     static WireGuardClientConfig fromJson(const QJsonObject& json);

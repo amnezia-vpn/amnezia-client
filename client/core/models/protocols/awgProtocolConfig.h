@@ -38,7 +38,7 @@ struct AwgServerConfig {
     QString specialJunk3;
     QString specialJunk4;
     QString specialJunk5;
-    bool isThirdPartyConfig;
+    bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
     static AwgServerConfig fromJson(const QJsonObject& json);
@@ -75,7 +75,7 @@ struct AwgClientConfig {
     QString specialJunk3;
     QString specialJunk4;
     QString specialJunk5;
-    bool isObfuscationEnabled;
+    bool isObfuscationEnabled = false;
     
     QJsonObject toJson() const;
     static AwgClientConfig fromJson(const QJsonObject& json);

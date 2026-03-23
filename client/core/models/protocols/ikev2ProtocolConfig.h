@@ -11,7 +11,7 @@ namespace amnezia
 
 struct Ikev2ServerConfig {
     QString hostName;
-    bool isThirdPartyConfig;
+    bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
     static Ikev2ServerConfig fromJson(const QJsonObject& json);
