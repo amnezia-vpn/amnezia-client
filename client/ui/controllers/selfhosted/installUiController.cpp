@@ -224,7 +224,8 @@ void InstallUiController::updateContainer(int serverIndex, int containerIndex, i
         containerConfig.protocolConfig = m_openVpnConfigModel->getProtocolConfig();
         break;
     }
-    case Proto::Xray: {
+    case Proto::Xray:
+    case Proto::SSXray: {
         containerConfig.protocolConfig = m_xrayConfigModel->getProtocolConfig();
         break;
     }

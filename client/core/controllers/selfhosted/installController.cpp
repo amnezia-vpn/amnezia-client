@@ -168,7 +168,6 @@ void InstallController::clearCachedProfile(int serverIndex, DockerContainer cont
     }
 
     ContainerConfig containerConfigModel = m_serversRepository->containerConfig(serverIndex, container);
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
 
     m_serversRepository->clearLastConnectionConfig(serverIndex, container);
 
@@ -193,12 +192,11 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
     ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
     SshSession sshSession(this);
 
-    auto isProtocolConfigExists = [](const ContainerConfig &containerConfig, const DockerContainer container) {
-        Proto protocol = ContainerUtils::defaultProtocol(container);
-        return containerConfig.protocolConfig.hasClientConfig();
+    auto isProtocolConfigExists = [](const ContainerConfig &cfg) {
+        return cfg.protocolConfig.hasClientConfig();
     };
 
-    if (!isProtocolConfigExists(containerConfig, container)) {
+    if (!isProtocolConfigExists(containerConfig)) {
         QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
         ErrorCode errorCode = processContainerForAdmin(container, containerConfig, credentials, sshSession, serverIndex, clientName);
         if (errorCode != ErrorCode::NoError) {
@@ -519,7 +517,7 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
         }
     }
 
-    if (container == DockerContainer::Xray) {
+    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
         const auto* oldXrayConfig = oldConfig.getXrayProtocolConfig();
         const auto* newXrayConfig = newConfig.getXrayProtocolConfig();
         
@@ -527,6 +525,10 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             if (oldXrayConfig->serverConfig.port != newXrayConfig->serverConfig.port)
                 return true;
         }
+    }
+
+    if (container == DockerContainer::Socks5Proxy) {
+        return true;
     }
 
     return false;
