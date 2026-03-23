@@ -68,7 +68,7 @@ target_link_libraries(FBLinkNetworkExtension PRIVATE ${FW_LIBRESOLV})
 target_compile_options(FBLinkNetworkExtension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(FBLinkNetworkExtension PRIVATE -DNETWORK_EXTENSION=1)
 
-set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/fblinkwg-apple/Sources)
+set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources)
 
 message("WG_APPLE_SOURCE_DIR is: ${WG_APPLE_SOURCE_DIR}")
 message("CLIENT_ROOT_DIR is: ${CLIENT_ROOT_DIR}")

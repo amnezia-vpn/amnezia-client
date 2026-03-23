@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QNetworkInterface>
 #include <QCoreApplication>
-#include <fblink_xray.h>
+#include <FBLink_xray.h>
 #include <qdebug.h>
 
 #ifdef Q_OS_DARWIN
