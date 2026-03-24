@@ -123,7 +123,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
             return amnezia::ErrorCode::ApiNotFoundError;
         } else if (httpStatusFromBody == httpStatusCodeNotImplemented) {
             return amnezia::ErrorCode::ApiUpdateRequestError;
-        } else if (httpStatusFromBody == httpStatusCodeUnprocessableEntity || httpStatusCode == httpStatusCodeUnprocessableEntity) {
+        } else if (httpStatusFromBody == httpStatusCodeUnprocessableEntity) {
             return amnezia::ErrorCode::ApiSubscriptionExpiredError;
         }
         return amnezia::ErrorCode::ApiConfigDownloadError;
