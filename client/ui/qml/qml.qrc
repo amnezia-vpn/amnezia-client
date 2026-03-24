@@ -78,6 +78,9 @@
         <file>Pages2/PageProtocolWireGuardSettings.qml</file>
         <file>Pages2/PageProtocolXraySettings.qml</file>
 
+        <file>Pages2/PageProtocolXrayConfigsSettings.qml</file>
+        <file>Pages2/PageProtocolXrayFlowSettings.qml</file>
+        <file>Pages2/PageProtocolXraySecuritySettings.qml</file>
         <file>Pages2/PageProtocolXrayTransportSettings.qml</file>
         <file>Pages2/PageProtocolXrayXmuxSettings.qml</file>
         <file>Pages2/PageProtocolXrayXPaddingSettings.qml</file>

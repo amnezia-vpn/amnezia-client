@@ -35,6 +35,12 @@ PageType {
     // Traffic Shaping
     property string uplinkChunkSize: "0"
     property string scMaxBufferedPosts: ""
+    property string scMaxEachPostBytesMin: "1"
+    property string scMaxEachPostBytesMax: "100"
+    property string scMinPostsIntervalMsMin: "100"
+    property string scMinPostsIntervalMsMax: "800"
+    property string scStreamUpServerSecsMin: "1"
+    property string scStreamUpServerSecsMax: "100"
     // mKCP fields
     property string mkcpTti: ""
     property string mkcpUplinkCapacity: ""
@@ -603,41 +609,64 @@ PageType {
                     textField.onEditingFinished: root.scMaxBufferedPosts = textField.text
                 }
 
-                // scMaxEachPostBytes → nav row
-                LabelWithButtonType {
+                // scMaxEachPostBytes — min/max range
+                CaptionTextType {
                     Layout.fillWidth: true
-                    Layout.topMargin: 8
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 16
+                    Layout.bottomMargin: 8
                     text: qsTr("scMaxEachPostBytes")
-                    descriptionText: qsTr("1—100")
-                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                    clickedFunction: function () { /* navigate */
-                    }
+                    color: AmneziaStyle.color.mutedGray
                 }
-                DividerType {
+                MinMaxRowType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    minValue: root.scMaxEachPostBytesMin
+                    maxValue: root.scMaxEachPostBytesMax
+                    onMinChanged: root.scMaxEachPostBytesMin = val
+                    onMaxChanged: root.scMaxEachPostBytesMax = val
                 }
 
-                // scMinPostsIntervalMs → nav row
-                LabelWithButtonType {
+                // scMinPostsIntervalMs — min/max range
+                CaptionTextType {
                     Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 16
+                    Layout.bottomMargin: 8
                     text: qsTr("scMinPostsIntervalMs")
-                    descriptionText: qsTr("100—600ms")
-                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                    clickedFunction: function () { /* navigate */
-                    }
+                    color: AmneziaStyle.color.mutedGray
                 }
-                DividerType {
+                MinMaxRowType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    minValue: root.scMinPostsIntervalMsMin
+                    maxValue: root.scMinPostsIntervalMsMax
+                    onMinChanged: root.scMinPostsIntervalMsMin = val
+                    onMaxChanged: root.scMinPostsIntervalMsMax = val
                 }
 
-                // scStreamUpServerSecs → nav row
-                LabelWithButtonType {
+                // scStreamUpServerSecs — min/max range
+                CaptionTextType {
                     Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 16
+                    Layout.bottomMargin: 8
                     text: qsTr("scStreamUpServerSecs")
-                    descriptionText: qsTr("1—100")
-                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                    clickedFunction: function () { /* navigate */
-                    }
+                    color: AmneziaStyle.color.mutedGray
                 }
-                DividerType {
+                MinMaxRowType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    minValue: root.scStreamUpServerSecsMin
+                    maxValue: root.scStreamUpServerSecsMax
+                    onMinChanged: root.scStreamUpServerSecsMin = val
+                    onMaxChanged: root.scStreamUpServerSecsMax = val
                 }
 
                 // ── Padding and multiplexing ──────────────────────────
