@@ -51,16 +51,35 @@ Rectangle {
             Layout.fillWidth: true
             Layout.leftMargin: 8
 
-            text: root.linkEnabled ? root.textString
-                                     + qsTr(" <a href=\"learnMore\" style=\"text-decoration:none; color:%1\">Learn more</a>").arg(AmneziaStyle.color.goldenApricot)
-                                   : root.textString
+            text: root.textString
             textFormat: Text.RichText
             color: root.textColor
+        }
 
-            onLinkActivated: function(link) {
-                if (link === "learnMore") {
-                    Qt.openUrlExternally("https://storage.googleapis.com/amnezia/docs?m-path=/documentation/instructions/encryption")
-                }
+        BasicButtonType {
+            visible: root.linkEnabled
+
+            hoverEnabled: false
+
+            implicitHeight: root.iconHeight
+            implicitWidth: linkText.width/2 + 8
+
+            defaultColor: AmneziaStyle.color.transparent
+
+            CaptionTextType {
+                id: linkText
+
+                leftPadding: 4
+
+                width: linkText.text.length * linkText.font.pixelSize
+
+                text: qsTr("Learn more")
+                textFormat: Text.RichText
+                color: AmneziaStyle.color.goldenApricot
+            }
+
+            clickedFunc: function() {
+                Qt.openUrlExternally("https://storage.googleapis.com/amnezia/docs?m-path=/documentation/instructions/encryption")
             }
         }
     }
