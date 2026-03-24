@@ -240,7 +240,6 @@ PageType {
         height: addSiteButton.implicitHeight + 48
         
         color: AmneziaStyle.color.midnightBlack
-        opacity: 0.8
         
         RowLayout {
             id: addSiteButton

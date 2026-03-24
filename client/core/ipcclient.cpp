@@ -7,7 +7,6 @@ IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
     m_node.connectToNode(QUrl("local:" + amnezia::getIpcServiceUrl()));
     m_interface.reset(m_node.acquire<IpcInterfaceReplica>());
-    m_tun2socks.reset(m_node.acquire<IpcProcessTun2SocksReplica>());
 }
 
 IpcClient& IpcClient::Instance()
@@ -33,68 +32,43 @@ QSharedPointer<IpcInterfaceReplica> IpcClient::Interface()
     return rep;
 }
 
-QSharedPointer<IpcProcessTun2SocksReplica> IpcClient::InterfaceTun2Socks()
+QSharedPointer<IpcProcessInterfaceReplica> IpcClient::CreatePrivilegedProcess()
 {
-    QSharedPointer<IpcProcessTun2SocksReplica> rep = Instance().m_tun2socks;
-    if (rep.isNull()) {
-        qCritical() << "IpcClient::InterfaceTun2Socks: Replica is undefined";
-        return nullptr;
-    }
-    if (!rep->waitForSource(1000)) {
-        qCritical() << "IpcClient::InterfaceTun2Socks: Failed to initialize replica";
-        return nullptr;
-    }
-    if (!rep->isReplicaValid()) {
-        qWarning() << "IpcClient::InterfaceTun2Socks(): Replica is invalid";
-    }
-    return rep;
-}
-
-QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()
-{
-    QSharedPointer<IpcInterfaceReplica> rep = Interface();
-    if (!rep) {
-        qCritical() << "IpcClient::createPrivilegedProcess: Replica is invalid";
-        return nullptr;
-    }
-
-    QRemoteObjectPendingReply<int> pidReply = rep->createPrivilegedProcess();
-    if (!pidReply.waitForFinished(5000)){
-        qCritical() << "IpcClient::createPrivilegedProcess: Failed to execute RO createPrivilegedProcess call";
-        return nullptr;
-    }
-
-    int pid = pidReply.returnValue();
-    QSharedPointer<ProcessDescriptor> pd(new ProcessDescriptor());
-
-    pd->localSocket.reset(new QLocalSocket(pd->replicaNode.data()));
-
-    connect(pd->localSocket.data(), &QLocalSocket::connected, pd->replicaNode.data(), [pd]() {
-        pd->replicaNode->addClientSideConnection(pd->localSocket.data());
-
-        IpcProcessInterfaceReplica *repl = pd->replicaNode->acquire<IpcProcessInterfaceReplica>();
-        // TODO: rework the unsafe cast below
-        PrivilegedProcess *priv = static_cast<PrivilegedProcess *>(repl);
-        pd->ipcProcess.reset(priv);
-        if (!pd->ipcProcess) {
-            qWarning() << "Acquire PrivilegedProcess failed";
-        } else {
-            pd->ipcProcess->waitForSource(1000);
-            if (!pd->ipcProcess->isReplicaValid()) {
-                qWarning() << "PrivilegedProcess replica is not connected!";
-            }
-
-            QObject::connect(pd->ipcProcess.data(), &PrivilegedProcess::destroyed, pd->ipcProcess.data(),
-                             [pd]() { pd->replicaNode->deleteLater(); });
+    return withInterface([](QSharedPointer<IpcInterfaceReplica> &iface) -> QSharedPointer<IpcProcessInterfaceReplica> {
+        auto createPrivilegedProcess = iface->createPrivilegedProcess();
+        if (!createPrivilegedProcess.waitForFinished()) {
+            qCritical() << "Failed to create privileged process";
+            return nullptr;
         }
-    });
 
-    pd->localSocket->connectToServer(amnezia::getIpcProcessUrl(pid));
-    if (!pd->localSocket->waitForConnected()) {
-        qCritical() << "IpcClient::createPrivilegedProcess: Failed to connect to process' socket";
+        const int pid = createPrivilegedProcess.returnValue();
+
+        auto* node = new QRemoteObjectNode();
+        node->connectToNode(QUrl(QString("local:%1").arg(amnezia::getIpcProcessUrl(pid))));
+
+        QSharedPointer<IpcProcessInterfaceReplica> rep(
+            node->acquire<IpcProcessInterfaceReplica>(),
+            [node] (IpcProcessInterfaceReplica *ptr) {
+                delete ptr;
+                node->deleteLater();
+            }
+        );
+        if (rep.isNull()) {
+            qCritical() << "IpcClient::CreatePrivilegedProcess(): Failed to acquire replica";
+            return nullptr;
+        }
+        if (!rep->waitForSource()) {
+            qCritical() << "IpcClient::CreatePrivilegedProcess(): Failed to initialize replica";
+            return nullptr;
+        }
+        if (!rep->isReplicaValid()) {
+            qCritical() << "IpcClient::CreatePrivilegedProcess(): Replica is invalid";
+            return nullptr;
+        }
+
+        return rep;
+    },
+    []() -> QSharedPointer<IpcProcessInterfaceReplica> {
         return nullptr;
-    }
-
-    auto processReplica = QSharedPointer<PrivilegedProcess>(pd->ipcProcess);
-    return processReplica;
+    });
 }

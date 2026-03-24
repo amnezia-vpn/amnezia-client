@@ -38,7 +38,6 @@ public:
     ~LocalServer();
     QSharedPointer<QLocalServer> m_server;
     IpcServer m_ipcServer;
-    IpcProcessTun2Socks m_tun2socks;
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;
 

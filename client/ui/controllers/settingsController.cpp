@@ -190,12 +190,11 @@ void SettingsController::backupAppConfig(const QString &fileName)
 
 void SettingsController::restoreAppConfig(const QString &fileName)
 {
-    QFile file(fileName);
-
-    file.open(QIODevice::ReadOnly);
-
-    QByteArray data = file.readAll();
-
+    QByteArray data;
+    if (!SystemController::readFile(fileName, data)) {
+        emit changeSettingsErrorOccurred(tr("Can't open file: %1").arg(fileName));
+        return;
+    }
     restoreAppConfigFromData(data);
 }
 
@@ -318,6 +317,15 @@ void SettingsController::toggleStartMinimized(bool enable)
 {
     m_settings->setStartMinimized(enable);
     emit startMinimizedChanged();
+}
+
+bool SettingsController::isNewsNotificationsEnabled()
+{
+    return m_settings->isNewsNotifications();
+}
+void SettingsController::toggleNewsNotificationsEnabled(bool enable)
+{
+    m_settings->setNewsNotifications(enable);
 }
 
 bool SettingsController::isScreenshotsEnabled()

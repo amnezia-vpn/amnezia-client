@@ -79,10 +79,22 @@ PageType {
                 }
 
                 textField.onTextChanged: {
-                    if (headerText == qsTr("Password or SSH private key")) {
+                    if (headerText === qsTr("Password or SSH private key")) {
                         buttonImageSource = textField.text !== "" ? imageSource : ""
                     }
                 }
+            }
+
+            WarningType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+
+                visible: title === qsTr("Password or SSH private key")
+                backGroundColor: AmneziaStyle.color.translucentWhite
+                iconPath: "qrc:/images/controls/alert-circle.svg"
+                textString: qsTr("SSH key requirements: supported ED25519 or RSA in PEM. Paste the private key including BEGIN/END lines. If your key doesn’t work, generate a compatible one.")
             }
         }
 

@@ -173,10 +173,10 @@ void PowerNotificationsListener::sleepWakeupCallBack(void *refParam, io_service_
 
     case kIOMessageSystemHasPoweredOn:
         /* Announces that the system and its devices have woken up. */
-        logger.debug() << "System has powered on - emitting sleepMode signal from dedicated CFRunLoop thread";
+        logger.debug() << "System has powered on - emitting wakeup signal from dedicated CFRunLoop thread";
         if (listener->m_watcher) {
             // Use QMetaObject::invokeMethod for thread-safe signal emission
-            QMetaObject::invokeMethod(listener->m_watcher, "sleepMode", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(listener->m_watcher, "wakeup", Qt::QueuedConnection);
         }
         break;
 

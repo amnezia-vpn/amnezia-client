@@ -126,8 +126,13 @@ extension PacketTunnelProvider {
         }
 
         vpnReachability.startTracking { [weak self] status in
-            guard status == .reachableViaWiFi else { return }
-            self?.ovpnAdapter?.reconnect(afterTimeInterval: 5)
+            switch status {
+            case .reachableViaWiFi, .reachableViaWWAN:
+                ovpnLog(.info, message: "Reachability changed, reconnecting OpenVPN session")
+                self?.ovpnAdapter?.reconnect(afterTimeInterval: 1)
+            default:
+                break
+            }
         }
 
         startHandler = completionHandler

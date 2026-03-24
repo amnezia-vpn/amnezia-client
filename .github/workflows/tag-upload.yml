@@ -24,7 +24,7 @@ jobs:
       - name: Verify git tag
         run: |
           TAG_NAME=${{ inputs.RELEASE_VERSION }}
-          CMAKE_TAG=$(grep 'project.*VERSION' CMakeLists.txt | sed -E 's/.* ([0-9]+.[0-9]+.[0-9]+.[0-9]+)$/\1/')
+          CMAKE_TAG=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
           if [[ "$TAG_NAME" == "$CMAKE_TAG" ]]; then
             echo "Git tag ($TAG_NAME) matches CMakeLists.txt version ($CMAKE_TAG)."
           else

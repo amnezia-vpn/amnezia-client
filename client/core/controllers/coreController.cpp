@@ -184,7 +184,7 @@ void CoreController::initControllers()
             new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
-    m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
+    m_sitesController.reset(new SitesController(m_settings, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
 
     m_allowedDnsController.reset(new AllowedDnsController(m_settings, m_allowedDnsModel));
@@ -202,9 +202,6 @@ void CoreController::initControllers()
 
     m_apiConfigsController.reset(new ApiConfigsController(m_serversModel, m_apiServicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController.get());
-
-    m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
-    m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
 
     m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
     m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
@@ -280,8 +277,6 @@ void CoreController::initSignalHandlers()
     initAutoConnectHandler();
     initAmneziaDnsToggledHandler();
     initPrepareConfigHandler();
-    initImportPremiumV2VpnKeyHandler();
-    initShowMigrationDrawerHandler();
     initStrictKillSwitchHandler();
 }
 
@@ -422,31 +417,16 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
-        if (!m_installController->isConfigValid()) {
+        m_installController->validateConfig();
+    });
+
+    connect(m_installController.get(), &InstallController::configValidated, this, [this](bool isValid) {
+        if (!isValid) {
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }
 
         m_connectionController->openConnection();
-    });
-}
-
-void CoreController::initImportPremiumV2VpnKeyHandler()
-{
-    connect(m_apiPremV1MigrationController.get(), &ApiPremV1MigrationController::importPremiumV2VpnKey, this, [this](const QString &vpnKey) {
-        m_importController->extractConfigFromData(vpnKey);
-        m_importController->importConfig();
-
-        emit m_apiPremV1MigrationController->migrationFinished();
-    });
-}
-
-void CoreController::initShowMigrationDrawerHandler()
-{
-    QTimer::singleShot(1000, this, [this]() {
-        if (m_apiPremV1MigrationController->isPremV1MigrationReminderActive() && m_apiPremV1MigrationController->hasConfigsToMigration()) {
-            m_apiPremV1MigrationController->showMigrationDrawer();
-        }
     });
 }
 

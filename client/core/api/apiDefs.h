@@ -10,8 +10,10 @@ namespace apiDefs
         AmneziaFreeV3,
         AmneziaPremiumV1,
         AmneziaPremiumV2,
+        AmneziaTrialV2,
         SelfHosted,
-        ExternalPremium
+        ExternalPremium,
+        ExternalTrial
     };
 
     enum ConfigSource {
