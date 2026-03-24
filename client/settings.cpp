@@ -604,43 +604,43 @@ void Settings::setReadNewsIds(const QStringList &ids)
 
 QString Settings::localProxyOwnerUuid() const
 {
-    return value("Conf/localProxyOwnerUuid", "").toString();
+    return m_settings.value("Conf/localProxyOwnerUuid", "").toString();
 }
 
 void Settings::setLocalProxyOwnerUuid(const QString &uuid)
 {
-    setValue("Conf/localProxyOwnerUuid", uuid);
+    m_settings.setValue("Conf/localProxyOwnerUuid", uuid);
     emit localProxySettingsChanged();
 }
 
 quint16 Settings::localProxyPort() const
 {
-    return value("Conf/localProxyPort", 10808).toUInt();
+    return m_settings.value("Conf/localProxyPort", 10808).toUInt();
 }
 
 void Settings::setLocalProxyPort(quint16 port)
 {
-    setValue("Conf/localProxyPort", port);
+    m_settings.setValue("Conf/localProxyPort", port);
     emit localProxySettingsChanged();
 }
 
 bool Settings::isLocalProxyPortUserDefined() const
 {
-    return value("Conf/localProxyPortUserDefined", false).toBool();
+    return m_settings.value("Conf/localProxyPortUserDefined", false).toBool();
 }
 
 void Settings::setLocalProxyPortUserDefined(bool userDefined)
 {
-    setValue("Conf/localProxyPortUserDefined", userDefined);
+    m_settings.setValue("Conf/localProxyPortUserDefined", userDefined);
 }
 
 bool Settings::isLocalProxyHttpEnabled() const
 {
-    return value("Conf/localProxyHttpEnabled", false).toBool();
+    return m_settings.value("Conf/localProxyHttpEnabled", false).toBool();
 }
 
 void Settings::setLocalProxyHttpEnabled(bool enabled)
 {
-    setValue("Conf/localProxyHttpEnabled", enabled);
+    m_settings.setValue("Conf/localProxyHttpEnabled", enabled);
     emit localProxySettingsChanged();
 }
