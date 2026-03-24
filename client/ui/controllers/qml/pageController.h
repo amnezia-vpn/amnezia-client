@@ -79,9 +79,12 @@ namespace PageLoader
 
         PageDevMenu,
 
+        PageProtocolXrayConfigsSettings,
         PageProtocolXrayTransportSettings,
         PageProtocolXrayXmuxSettings,
         PageProtocolXrayXPaddingSettings,
+        PageProtocolXrayFlowSettings,
+        PageProtocolXraySecuritySettings,
     };
     Q_ENUM_NS(PageEnum)
 
