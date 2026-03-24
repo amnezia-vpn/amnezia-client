@@ -179,8 +179,9 @@ bool IosController::initialize()
     [NETunnelProviderManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETunnelProviderManager *> * _Nullable managers, NSError * _Nullable error) {
         @try {
             if (error) {
-                qDebug() << "IosController::initialize : Error:" << [error.localizedDescription UTF8String];
-                emit connectionStateChanged(Vpn::ConnectionState::Error);
+                qWarning() << "IosController::initialize : loadAllFromPreferences failed:"
+                           << [error.localizedDescription UTF8String]
+                           << "domain:" << [error.domain UTF8String] << "code:" << error.code;
                 ok = false;
                 return;
             }
@@ -397,8 +398,14 @@ void IosController::vpnStatusDidChange(void *pNotification)
 {
     NETunnelProviderSession *session = (NETunnelProviderSession *)pNotification;
 
-    if (session /* && session == TunnelManager.session */ ) {
-        qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
+    if (!session) {
+        return;
+    }
+    if (!m_currentTunnel || (NETunnelProviderSession *)m_currentTunnel.connection != session) {
+        return;
+    }
+
+    qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
 
         if (session.status == NEVPNStatusDisconnected) {
             if (@available(iOS 16.0, *)) {
@@ -512,7 +519,6 @@ void IosController::vpnStatusDidChange(void *pNotification)
             m_statusRequestInFlight = false;
         }
         emitConnectionStateIfChanged(nextState);
-    }
 }
 
 void IosController::vpnConfigurationDidChange(void *pNotification)
@@ -835,39 +841,49 @@ void IosController::startTunnel()
     m_rxBytes = 0;
     m_txBytes = 0;
 
-    [m_currentTunnel setEnabled:YES];
+    NETunnelProviderManager *tunnel = m_currentTunnel;
+    [tunnel setEnabled:YES];
 
-    [m_currentTunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [tunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (saveError) {
+                    qDebug().nospace() << "IosController::startTunnel" << protocolName << ": Connect " << protocolName
+                                       << " Tunnel Save Error" << saveError.localizedDescription.UTF8String << " domain:"
+                                       << saveError.domain.UTF8String << " code:" << saveError.code;
+                    emit connectionStateChanged(Vpn::ConnectionState::Error);
+                    return;
+                }
 
-            if (saveError) {
-                qDebug().nospace() << "IosController::startTunnel" << protocolName << ": Connect " << protocolName << " Tunnel Save Error" << saveError.localizedDescription.UTF8String;
-                emit connectionStateChanged(Vpn::ConnectionState::Error);
-                return;
-            }
+                [tunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (loadError) {
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                                               << ": Connect " << protocolName << " Tunnel Load Error"
+                                               << loadError.localizedDescription.UTF8String;
+                            emit connectionStateChanged(Vpn::ConnectionState::Error);
+                            return;
+                        }
 
-            [m_currentTunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
-                    if (loadError) {
-                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << ": Connect " << protocolName << " Tunnel Load Error" << loadError.localizedDescription.UTF8String;
-                        emit connectionStateChanged(Vpn::ConnectionState::Error);
-                        return;
-                    }
+                        NSError *startError = nil;
+                        qDebug() << iosStatusToState(tunnel.connection.status);
 
-                    NSError *startError = nil;
-                    qDebug() << iosStatusToState(m_currentTunnel.connection.status);
+                        BOOL started = [tunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
 
-                    BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
-
-                    if (!started || startError) {
-                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << " : Connect " << protocolName << " Tunnel Start Error"
-                            << (startError ? startError.localizedDescription.UTF8String : "");
-                        emit connectionStateChanged(Vpn::ConnectionState::Error);
-                    } else {
-                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << " : Starting the tunnel succeeded";
-                    }
-            }];
-        });
-    }];
+                        if (!started || startError) {
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                                               << " : Connect " << protocolName << " Tunnel Start Error"
+                                               << (startError ? startError.localizedDescription.UTF8String : "");
+                            emit connectionStateChanged(Vpn::ConnectionState::Error);
+                        } else {
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                                               << " : Starting the tunnel succeeded";
+                        }
+                    });
+                }];
+            });
+        }];
+    });
 }
 
 bool IosController::isOurManager(NETunnelProviderManager* manager) {
