@@ -90,38 +90,45 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     const int httpStatusCodeConflict = 409;
     const int httpStatusCodeNotFound = 404;
     const int httpStatusCodeNotImplemented = 501;
+    const int httpStatusCodePaymentRequired = 402;
 
     if (!sslErrors.empty()) {
         qDebug().noquote() << sslErrors;
         return amnezia::ErrorCode::ApiConfigSslError;
-    } else if (replyError == QNetworkReply::NoError) {
+    }
+    if (replyError == QNetworkReply::NoError) {
         return amnezia::ErrorCode::NoError;
-    } else if (replyError == QNetworkReply::NetworkError::OperationCanceledError
-               || replyError == QNetworkReply::NetworkError::TimeoutError) {
+    }
+    if (replyError == QNetworkReply::NetworkError::OperationCanceledError
+        || replyError == QNetworkReply::NetworkError::TimeoutError) {
         qDebug() << replyError;
         return amnezia::ErrorCode::ApiConfigTimeoutError;
-    } else if (replyError == QNetworkReply::NetworkError::OperationNotImplementedError) {
+    }
+    if (replyError == QNetworkReply::NetworkError::OperationNotImplementedError) {
         qDebug() << replyError;
         return amnezia::ErrorCode::ApiUpdateRequestError;
-    } else {
-        qDebug() << QString::fromUtf8(responseBody);
-        qDebug() << replyError;
-        qDebug() << replyErrorString;
-        qDebug() << httpStatusCode;
+    }
 
-        int httpStatusFromBody = -1;
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
-        if (jsonDoc.isObject()) {
-            QJsonObject jsonObj = jsonDoc.object();
-            httpStatusFromBody = jsonObj.value("http_status").toInt(-1);
-        }
+    qDebug() << QString::fromUtf8(responseBody);
+    qDebug() << replyError;
+    qDebug() << replyErrorString;
+    qDebug() << httpStatusCode;
 
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+    if (jsonDoc.isObject()) {
+        QJsonObject jsonObj = jsonDoc.object();
+        const int httpStatusFromBody = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
         if (httpStatusFromBody == httpStatusCodeConflict) {
             return amnezia::ErrorCode::ApiConfigLimitError;
-        } else if (httpStatusFromBody == httpStatusCodeNotFound) {
+        }
+        if (httpStatusFromBody == httpStatusCodeNotFound) {
             return amnezia::ErrorCode::ApiNotFoundError;
-        } else if (httpStatusFromBody == httpStatusCodeNotImplemented) {
+        }
+        if (httpStatusFromBody == httpStatusCodeNotImplemented) {
             return amnezia::ErrorCode::ApiUpdateRequestError;
+        }
+        if (httpStatusFromBody == httpStatusCodePaymentRequired) {
+            return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
         }
         return amnezia::ErrorCode::ApiConfigDownloadError;
     }

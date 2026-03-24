@@ -44,8 +44,8 @@ namespace
 
     constexpr int httpStatusCodeNotFound = 404;
     constexpr int httpStatusCodeConflict = 409;
-
     constexpr int httpStatusCodeNotImplemented = 501;
+    constexpr int httpStatusCodePaymentRequired = 402;
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
@@ -450,6 +450,8 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
             return true;
         }
     } else if (httpStatus == httpStatusCodeConflict) {
+        return false;
+    } else if (httpStatus == httpStatusCodePaymentRequired) {
         return false;
     } else if (replyError != QNetworkReply::NetworkError::NoError) {
         qDebug() << replyError;

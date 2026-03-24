@@ -44,7 +44,7 @@ public slots:
 signals:
     void errorOccurred(ErrorCode errorCode);
 
-    void installServerFromApiFinished(const QString &message);
+    void installServerFromApiFinished(const QString &message, int preferredDefaultServerIndex = -1);
     void changeApiCountryFinished(const QString &message);
     void reloadServerFromApiFinished(const QString &message);
     void updateServerFromApiFinished();
@@ -57,7 +57,7 @@ private:
     QString getVpnKey();
 
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
-    ErrorCode importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase);
+    ErrorCode importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase, int &duplicateServerIndex);
 
     QList<QString> m_qrCodes;
     QString m_vpnKey;

@@ -727,21 +727,21 @@ bool ServersModel::isServerFromApiAlreadyExists(const QString &userCountryCode, 
     return false;
 }
 
-bool ServersModel::hasServerWithVpnKey(const QString &vpnKey) const
+int ServersModel::indexOfServerWithVpnKey(const QString &vpnKey) const
 {
     const QString normalizedInput = normalizeVpnKey(vpnKey);
     if (normalizedInput.isEmpty()) {
-        return false;
+        return -1;
     }
 
-    for (const auto &server : std::as_const(m_servers)) {
-        const auto apiConfig = server.toObject().value(configKey::apiConfig).toObject();
+    for (int i = 0; i < m_servers.size(); ++i) {
+        const auto apiConfig = m_servers.at(i).toObject().value(configKey::apiConfig).toObject();
         const QString existingKey = normalizeVpnKey(apiConfig.value(apiDefs::key::vpnKey).toString());
         if (!existingKey.isEmpty() && existingKey == normalizedInput) {
-            return true;
+            return i;
         }
     }
-    return false;
+    return -1;
 }
 
 bool ServersModel::serverHasInstalledContainers(const int serverIndex) const

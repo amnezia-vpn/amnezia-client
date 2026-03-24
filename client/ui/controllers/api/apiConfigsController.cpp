@@ -444,8 +444,7 @@ bool ApiConfigsController::importService()
 
     if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaPremium) {
         if (isIosOrMacOsNe) {
-            importSerivceFromAppStore();
-            return true;
+            return importSerivceFromAppStore();
         }
     } else {
         importServiceFromGateway();
@@ -505,13 +504,18 @@ bool ApiConfigsController::importSerivceFromAppStore()
         return false;
     }
 
-    errorCode = importServiceFromBilling(responseBody, isTestPurchase);
+    int duplicateServerIndex = -1;
+    errorCode = importServiceFromBilling(responseBody, isTestPurchase, duplicateServerIndex);
+    if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
+        emit installServerFromApiFinished(tr("This subscription is already in the app."), duplicateServerIndex);
+        return true;
+    }
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
     }
-
-    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+    emit installServerFromApiFinished(
+            tr("%1 was added to the app.").arg(m_apiServicesModel->getSelectedServiceName()));
 #endif
     return true;
 }
@@ -567,78 +571,58 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
     }
 
     if (restoredTransactions.isEmpty()) {
-        qInfo().noquote() << "[IAP] Restore completed, but no transactions were returned";
+        qInfo().noquote() << "[IAP] Restore completed, but no active entitlements found";
+        emit errorOccurred(ErrorCode::ApiNoPurchasedSubscriptionsError);
+        return false;
+    }
+
+    const QVariantMap &transaction = restoredTransactions.first();
+    const QString originalTransactionId = transaction.value(QStringLiteral("originalTransactionId")).toString();
+    const QString transactionId = transaction.value(QStringLiteral("transactionId")).toString();
+    const QString productId = transaction.value(QStringLiteral("productId")).toString();
+
+    if (originalTransactionId.isEmpty()) {
+        qWarning().noquote() << "[IAP] Active entitlement has no originalTransactionId";
         emit errorOccurred(ErrorCode::ApiPurchaseError);
         return false;
     }
 
-    bool hasInstalledConfig = false;
-    bool duplicateConfigAlreadyPresent = false;
-    int duplicateCount = 0;
-    QSet<QString> processedTransactions;
-    for (const QVariantMap &transaction : restoredTransactions) {
-        const QString originalTransactionId = transaction.value(QStringLiteral("originalTransactionId")).toString();
-        const QString transactionId = transaction.value(QStringLiteral("transactionId")).toString();
-        const QString productId = transaction.value(QStringLiteral("productId")).toString();
+    qInfo().noquote() << "[IAP] Restoring subscription. transactionId =" << transactionId
+                      << "originalTransactionId =" << originalTransactionId << "productId =" << productId;
 
-        if (originalTransactionId.isEmpty()) {
-            qWarning().noquote() << "[IAP] Skipping restored transaction without originalTransactionId" << transactionId;
-            continue;
-        }
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
+                                            m_settings->getInstallationUuid(true),
+                                            m_apiServicesModel->getCountryCode(),
+                                            "",
+                                            m_apiServicesModel->getSelectedServiceType(),
+                                            m_apiServicesModel->getSelectedServiceProtocol(),
+                                            QJsonObject() };
 
-        if (processedTransactions.contains(originalTransactionId)) {
-            duplicateCount++;
-            continue;
-        }
-        processedTransactions.insert(originalTransactionId);
-
-        qInfo().noquote() << "[IAP] Restoring subscription. transactionId =" << transactionId
-                          << "originalTransactionId =" << originalTransactionId << "productId =" << productId;
-
-        GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                                QString(APP_VERSION),
-                                                m_settings->getAppLanguage().name().split("_").first(),
-                                                m_settings->getInstallationUuid(true),
-                                                m_apiServicesModel->getCountryCode(),
-                                                "",
-                                                m_apiServicesModel->getSelectedServiceType(),
-                                                m_apiServicesModel->getSelectedServiceProtocol(),
-                                                QJsonObject() };
-
-        QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-        apiPayload[apiDefs::key::transactionId] = originalTransactionId;
-        auto isTestPurchase = IosController::Instance()->isTestFlight();
-        QByteArray responseBody;
-        ErrorCode errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody, isTestPurchase);
-        if (errorCode != ErrorCode::NoError) {
-            qWarning().noquote() << "[IAP] Failed to restore transaction" << originalTransactionId
-                                 << "errorCode =" << static_cast<int>(errorCode);
-            continue;
-        }
-
-        ErrorCode installError = importServiceFromBilling(responseBody, isTestPurchase);
-        if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
-            duplicateConfigAlreadyPresent = true;
-            qInfo().noquote() << "[IAP] Skipping restored transaction" << originalTransactionId
-                              << "because subscription config with the same vpn_key already exists";
-        } else if (errorCode != ErrorCode::NoError) {
-            qWarning().noquote() << "[IAP] Failed to process restored subscription response for transaction" << originalTransactionId;
-        } else {
-            hasInstalledConfig = true;
-        }
-    }
-
-    if (!hasInstalledConfig) {
-        const ErrorCode restoreError = duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiPurchaseError;
-        emit errorOccurred(restoreError);
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    apiPayload[apiDefs::key::transactionId] = originalTransactionId;
+    auto isTestPurchase = IosController::Instance()->isTestFlight();
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody, isTestPurchase);
+    if (errorCode != ErrorCode::NoError) {
+        qWarning().noquote() << "[IAP] Failed to restore transaction" << originalTransactionId
+                             << "errorCode =" << static_cast<int>(errorCode);
+        emit errorOccurred(errorCode);
         return false;
     }
 
-    emit installServerFromApiFinished(tr("Subscription restored successfully."));
-    if (duplicateCount > 0) {
-        qInfo().noquote() << "[IAP] Skipped" << duplicateCount
-                          << "duplicate restored transactions for original transaction IDs already processed";
+    int duplicateServerIndex = -1;
+    errorCode = importServiceFromBilling(responseBody, isTestPurchase, duplicateServerIndex);
+    if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
+        emit installServerFromApiFinished(tr("This subscription is already in the app."), duplicateServerIndex);
+        return true;
     }
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return false;
+    }
+    emit installServerFromApiFinished(tr("Subscription restored successfully."));
 #endif
     return true;
 }
@@ -942,9 +926,11 @@ QString ApiConfigsController::getVpnKey()
     return m_vpnKey;
 }
 
-ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase)
+ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase,
+                                                         int &duplicateServerIndex)
 {
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    duplicateServerIndex = -1;
     QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
     QString key = responseObject.value(QStringLiteral("key")).toString();
     if (key.isEmpty()) {
@@ -952,7 +938,8 @@ ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &respo
         return ErrorCode::ApiPurchaseError;
     }
 
-    if (m_serversModel->hasServerWithVpnKey(key)) {
+    duplicateServerIndex = m_serversModel->indexOfServerWithVpnKey(key);
+    if (duplicateServerIndex >= 0) {
         qInfo().noquote() << "[IAP] Subscription config with the same vpn_key already exists";
         return ErrorCode::ApiConfigAlreadyAdded;
     }
@@ -986,6 +973,7 @@ ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &respo
 #else
     Q_UNUSED(responseBody)
     Q_UNUSED(isTestPurchase)
+    duplicateServerIndex = -1;
     return ErrorCode::NoError;
 #endif
 }
