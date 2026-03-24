@@ -18,12 +18,37 @@ PageType {
     id: root
 
     property var processedServer
+    property bool subscriptionExpired: false
+    property bool subscriptionExpiringSoon: false
+    function updateSubscriptionState() {
+        root.subscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
+    }
+
+    Component.onCompleted: {
+        root.updateSubscriptionState()
+    }
+
+    Connections {
+        target: ApiAccountInfoModel
+        function onModelReset() {
+            root.updateSubscriptionState()
+        }
+    }
 
     Connections {
         target: ServersModel
 
         function onProcessedServerChanged() {
             root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    Connections {
+        target: ApiConfigsController
+
+        function onSubscriptionExpiredOnServer() {
+            root.subscriptionExpired = true
+            root.subscriptionExpiringSoon = false
         }
     }
 
@@ -76,12 +101,11 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: 4
 
                 actionButtonImage: "qrc:/images/controls/settings.svg"
 
                 headerText: root.processedServer.name
-                descriptionText: qsTr("Location for connection")
 
                 actionButtonFunction: function() {
                     PageController.showBusyIndicator(true)
@@ -93,6 +117,50 @@ PageType {
 
                     PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
                 }
+            }
+
+            CaptionTextType {
+                visible: root.subscriptionExpired || root.subscriptionExpiringSoon
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 4
+
+                text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
+                color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
+            }
+
+            BasicButtonType {
+                visible: root.subscriptionExpired || root.subscriptionExpiringSoon
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                Layout.bottomMargin: 4
+
+                defaultColor: AmneziaStyle.color.paleGray
+                hoveredColor: AmneziaStyle.color.lightGray
+                pressedColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.midnightBlack
+
+                text: qsTr("Renew subscription")
+
+                clickedFunc: function() {
+                    ApiSettingsController.getRenewalLink()
+                }
+            }
+
+            CaptionTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: (root.subscriptionExpired || root.subscriptionExpiringSoon) ? 8 : 4
+                Layout.bottomMargin: 8
+
+                text: qsTr("Location for connection")
+                color: AmneziaStyle.color.mutedGray
             }
         }
 

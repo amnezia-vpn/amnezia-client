@@ -37,28 +37,10 @@ DrawerType2 {
             Header2TextType {
                 id: titleText
                 anchors.left: parent.left
-                anchors.right: icon.left
-                anchors.rightMargin: 8
+                anchors.right: parent.right
 
                 text: qsTr("Amnezia Premium subscription has expired")
                 horizontalAlignment: Text.AlignLeft
-            }
-
-            Image {
-                id: icon
-                anchors.right: parent.right
-                anchors.top: parent.top
-                width: 40
-                height: 40
-                source: "qrc:/images/controls/history.svg"
-                fillMode: Image.PreserveAspectFit
-                visible: false
-            }
-
-            ColorOverlay {
-                anchors.fill: icon
-                source: icon
-                color: AmneziaStyle.color.goldenApricot
             }
         }
 
@@ -91,11 +73,11 @@ DrawerType2 {
         }
 
         BasicButtonType {
-            Layout.fillWidth: true
-            Layout.topMargin: 4
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: 8
             Layout.bottomMargin: 8
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
+
+            implicitHeight: 25
 
             defaultColor: AmneziaStyle.color.transparent
             hoveredColor: AmneziaStyle.color.translucentWhite

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -37,6 +38,7 @@ Item {
     property int borderFocusedWidth: 1
 
     property string rightImageColor: AmneziaStyle.color.paleGray
+    property string leftImageColor: ""
 
     property bool descriptionOnTop: false
     property bool hideDescription: true
@@ -140,6 +142,14 @@ Item {
 
                 anchors.centerIn: parent
                 source: leftImageSource
+                visible: leftImageColor === ""
+            }
+
+            ColorOverlay {
+                anchors.fill: leftImage
+                source: leftImage
+                color: leftImageColor
+                visible: leftImageColor !== ""
             }
         }
 

@@ -337,26 +337,26 @@ class AmneziaActivity : QtActivity() {
     private external fun nativeGamepadKeyEvent(deviceId: Int, keyCode: Int, pressed: Boolean)
 
     override fun onPause() {
+        // Notify Qt to stop rendering BEFORE super.onPause() destroys the EGL surface.
+        // Using a coroutine here would be too late — the surface is gone by the time
+        // the coroutine runs. A direct synchronous call gives Qt's render thread the
+        // best chance to process visible=false before surface destruction.
+        if (qtInitialized.isCompleted) {
+            QtAndroidController.onActivityPaused()
+        }
         super.onPause()
         isActivityResumed = false
         // Cancel all pending operations when activity pauses
         resumeHandler.removeCallbacksAndMessages(null)
         openFileDeliveryScheduled = false
         Log.d(TAG, "Pause Amnezia activity")
-        // Notify Qt to stop rendering before the EGL surface is disconnected
-        mainScope.launch {
-            qtInitialized.await()
-            QtAndroidController.onActivityPaused()
-        }
     }
 
     override fun onResume() {
         super.onResume()
         isActivityResumed = true
         Log.d(TAG, "Resume Amnezia activity")
-        // Notify Qt to resume rendering after surface reconnects
-        mainScope.launch {
-            qtInitialized.await()
+        if (qtInitialized.isCompleted) {
             QtAndroidController.onActivityResumed()
         }
 

@@ -46,6 +46,7 @@ namespace
     constexpr int httpStatusCodeConflict = 409;
 
     constexpr int httpStatusCodeNotImplemented = 501;
+    constexpr int httpStatusCodeUnprocessableEntity = 422;
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
@@ -450,6 +451,8 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
             return true;
         }
     } else if (httpStatus == httpStatusCodeConflict) {
+        return false;
+    } else if (httpStatus == httpStatusCodeUnprocessableEntity) {
         return false;
     } else if (replyError != QNetworkReply::NetworkError::NoError) {
         qDebug() << replyError;
