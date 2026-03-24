@@ -46,8 +46,10 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private var didReceiveInitialPathUpdate = false
     private var currentPath: Network.NWPath?
     private var currentPathSignature: String?
+    private var pendingOpenVPNReconnectWorkItem: DispatchWorkItem?
     private var pendingNetworkChangeWorkItem: DispatchWorkItem?
     private var isApplyingNetworkChange = false
+    private var lastOpenVPNReachabilityStatus: OpenVPNReachabilityStatus?
 
     var splitTunnelType: Int?
     var splitTunnelSites: [String]?
@@ -81,9 +83,18 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
             guard hasMeaningfulChange, let proto = self.protoType else { return }
 
-            // OpenVPN and WireGuard/AWG handle network changes internally.
-            // Restarting them here can race their own reconnect logic and break tunnel setup.
-            if proto == .wireguard || proto == .openvpn {
+            // WireGuard/AWG manages network changes internally in its own adapter.
+            if proto == .wireguard {
+                return
+            }
+
+            if proto == .openvpn {
+                self.scheduleOpenVPNReconnect(reason: "NWPath changed")
+                return
+            }
+
+            if self.isApplyingNetworkChange || self.reasserting {
+                xrayLog(.debug, message: "Ignoring path change while xray restart is in progress")
                 return
             }
 
@@ -199,6 +210,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
 
+        cancelPendingOpenVPNReconnect()
+        cancelPendingNetworkChangeHandling()
         didReceiveInitialPathUpdate = false
         updateActiveInterfaceIndexForCurrentPath()
 
@@ -217,6 +230,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
   
     override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
+        cancelPendingOpenVPNReconnect()
+        cancelPendingNetworkChangeHandling()
+
         guard let protoType else {
             completionHandler()
             return
@@ -284,8 +300,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         let workItem = DispatchWorkItem { [weak self] in
             guard let self else { return }
+            self.pendingNetworkChangeWorkItem = nil
 
-            if self.isApplyingNetworkChange {
+            if self.isApplyingNetworkChange || self.reasserting {
                 xrayLog(.debug, message: "Skipping network change while restart is already in progress")
                 return
             }
@@ -303,6 +320,69 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         pendingNetworkChangeWorkItem = workItem
         networkChangeQueue.asyncAfter(deadline: .now() + 1.0, execute: workItem)
     }
+
+    private func scheduleOpenVPNReconnect(reason: String) {
+        guard protoType == .openvpn else { return }
+
+        pendingOpenVPNReconnectWorkItem?.cancel()
+
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            self.pendingOpenVPNReconnectWorkItem = nil
+
+            guard self.protoType == .openvpn else { return }
+
+            if self.reasserting {
+                ovpnLog(.debug, message: "Skipping OpenVPN reconnect while session is already reasserting")
+                return
+            }
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                guard !self.reasserting else {
+                    ovpnLog(.debug, message: "Skipping OpenVPN reconnect while session is already reasserting")
+                    return
+                }
+
+                ovpnLog(.info, message: "\(reason), reconnecting OpenVPN session")
+                self.ovpnAdapter?.reconnect(afterTimeInterval: 1)
+            }
+        }
+
+        pendingOpenVPNReconnectWorkItem = workItem
+        networkChangeQueue.asyncAfter(deadline: .now() + 1.0, execute: workItem)
+    }
+
+    func handleOpenVPNReachabilityChange(_ status: OpenVPNReachabilityStatus) {
+        defer { lastOpenVPNReachabilityStatus = status }
+
+        guard let previousStatus = lastOpenVPNReachabilityStatus else {
+            return
+        }
+
+        guard previousStatus != status else {
+            return
+        }
+
+        switch status {
+        case .reachableViaWiFi, .reachableViaWWAN:
+            scheduleOpenVPNReconnect(reason: "Reachability changed")
+        default:
+            break
+        }
+    }
+
+    private func cancelPendingOpenVPNReconnect() {
+        pendingOpenVPNReconnectWorkItem?.cancel()
+        pendingOpenVPNReconnectWorkItem = nil
+        lastOpenVPNReachabilityStatus = nil
+    }
+
+    private func cancelPendingNetworkChangeHandling() {
+        pendingNetworkChangeWorkItem?.cancel()
+        pendingNetworkChangeWorkItem = nil
+        isApplyingNetworkChange = false
+    }
 }
 
 private extension PacketTunnelProvider {
@@ -311,8 +391,14 @@ private extension PacketTunnelProvider {
         signatureComponents.append(path.isExpensive ? "exp" : "noexp")
         signatureComponents.append(path.isConstrained ? "con" : "nocon")
 
-        let preferredTypes: [NWInterface.InterfaceType] = [.wiredEthernet, .wifi, .cellular, .loopback, .other]
-        let sortedInterfaces = path.availableInterfaces.sorted { lhs, rhs in
+        // Ignore loopback and tunnel-style `.other` interfaces so Xray does not
+        // react to its own utun lifecycle as if the physical uplink changed.
+        let preferredTypes: [NWInterface.InterfaceType] = [.wiredEthernet, .wifi, .cellular]
+        let externalInterfaces = path.availableInterfaces.filter { interface in
+            interface.type == .wiredEthernet || interface.type == .wifi || interface.type == .cellular
+        }
+
+        let sortedInterfaces = externalInterfaces.sorted { lhs, rhs in
             if lhs.type == rhs.type {
                 return lhs.index < rhs.index
             }
@@ -333,8 +419,8 @@ private extension PacketTunnelProvider {
             case .wiredEthernet: typeName = "ethernet"
             case .wifi: typeName = "wifi"
             case .cellular: typeName = "cellular"
-            case .loopback: typeName = "loopback"
-            case .other: typeName = "other"
+            case .loopback, .other:
+                continue
             @unknown default: typeName = "unknown"
             }
             signatureComponents.append("\(typeName):\(interface.index)")
