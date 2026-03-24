@@ -45,6 +45,8 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
         emit safeAreaBottomMarginChanged();
         emit safeAreaTopMarginChanged();
     });
+    connect(AndroidController::instance(), &AndroidController::activityPaused, this, &SettingsController::activityPaused);
+    connect(AndroidController::instance(), &AndroidController::activityResumed, this, &SettingsController::activityResumed);
 #endif
 
     m_isDevModeEnabled = m_settings->isDevGatewayEnv();

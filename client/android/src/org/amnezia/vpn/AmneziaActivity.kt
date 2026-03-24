@@ -343,12 +343,22 @@ class AmneziaActivity : QtActivity() {
         resumeHandler.removeCallbacksAndMessages(null)
         openFileDeliveryScheduled = false
         Log.d(TAG, "Pause Amnezia activity")
+        // Notify Qt to stop rendering before the EGL surface is disconnected
+        mainScope.launch {
+            qtInitialized.await()
+            QtAndroidController.onActivityPaused()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         isActivityResumed = true
         Log.d(TAG, "Resume Amnezia activity")
+        // Notify Qt to resume rendering after surface reconnects
+        mainScope.launch {
+            qtInitialized.await()
+            QtAndroidController.onActivityResumed()
+        }
 
         if (pendingOpenFileUri != null && !openFileDeliveryScheduled) {
             val uri = pendingOpenFileUri!!
