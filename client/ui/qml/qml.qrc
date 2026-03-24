@@ -77,6 +77,12 @@
         <file>Pages2/PageProtocolRaw.qml</file>
         <file>Pages2/PageProtocolWireGuardSettings.qml</file>
         <file>Pages2/PageProtocolXraySettings.qml</file>
+
+        <file>Pages2/PageProtocolXrayTransportSettings.qml</file>
+        <file>Pages2/PageProtocolXrayXmuxSettings.qml</file>
+        <file>Pages2/PageProtocolXrayXPaddingSettings.qml</file>
+        <file>Controls2/MinMaxRowType.qml</file>
+
         <file>Pages2/PageServiceDnsSettings.qml</file>
         <file>Pages2/PageServiceSftpSettings.qml</file>
         <file>Pages2/PageServiceSocksProxySettings.qml</file>
