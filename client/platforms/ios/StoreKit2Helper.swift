@@ -7,24 +7,47 @@ public class StoreKit2Helper: NSObject {
 
     public static let shared = StoreKit2Helper()
 
+    private struct EntitlementInfo {
+        let transactionId: UInt64
+        let originalTransactionId: UInt64
+        let productId: String
+        let purchaseDate: Date
+
+        var dictionary: NSDictionary {
+            [
+                "transactionId": String(transactionId),
+                "originalTransactionId": String(originalTransactionId),
+                "productId": productId
+            ]
+        }
+    }
+
     public func fetchCurrentEntitlements(completion: @escaping (Bool, [NSDictionary]?, NSError?) -> Void) {
-        Task {
-            var entitlements: [NSDictionary] = []
+        Task { @MainActor in
             do {
+                try await AppStore.sync()
+
+                var entitlements: [EntitlementInfo] = []
                 for await result in Transaction.currentEntitlements {
                     switch result {
                     case .verified(let transaction):
-                        let info: NSDictionary = [
-                            "transactionId": String(transaction.id),
-                            "originalTransactionId": String(transaction.originalID),
-                            "productId": transaction.productID
-                        ]
-                        entitlements.append(info)
+                        entitlements.append(EntitlementInfo(transactionId: transaction.id,
+                                                            originalTransactionId: transaction.originalID,
+                                                            productId: transaction.productID,
+                                                            purchaseDate: transaction.purchaseDate))
                     case .unverified(_, let error):
                         print("[IAP][StoreKit2] Unverified transaction skipped: \(error.localizedDescription)")
                     }
                 }
-                DispatchQueue.main.async { completion(true, entitlements, nil) }
+                let sortedEntitlements = entitlements.sorted { lhs, rhs in
+                    if lhs.purchaseDate != rhs.purchaseDate {
+                        return lhs.purchaseDate > rhs.purchaseDate
+                    }
+                    return lhs.transactionId > rhs.transactionId
+                }.map { $0.dictionary }
+                completion(true, sortedEntitlements, nil)
+            } catch {
+                completion(false, nil, error as NSError)
             }
         }
     }
