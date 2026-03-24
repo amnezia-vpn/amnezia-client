@@ -77,7 +77,11 @@ namespace PageLoader
         PageShareFullAccess,
         PageShareConnection,
 
-        PageDevMenu
+        PageDevMenu,
+
+        PageProtocolXrayTransportSettings,
+        PageProtocolXrayXmuxSettings,
+        PageProtocolXrayXPaddingSettings,
     };
     Q_ENUM_NS(PageEnum)
 
