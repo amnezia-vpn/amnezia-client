@@ -180,18 +180,26 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adEndpoint).toString();
     }
     case IsSubscriptionExpiredRole: {
-        if (configVersion != apiDefs::ConfigSource::AmneziaGateway) return false;
-        QString endDate = apiConfig.value(apiDefs::key::subscriptionEndDate).toString();
-        if (endDate.isEmpty()) return false;
+        if (configVersion != apiDefs::ConfigSource::AmneziaGateway) {
+            return false;
+        }
+        const QString endDate =
+                apiConfig.value(apiDefs::key::subscription).toObject().value(apiDefs::key::endDate).toString();
+        if (endDate.isEmpty()) {
+            return false;
+        }
         return apiUtils::isSubscriptionExpired(endDate);
     }
     case IsSubscriptionExpiringSoonRole: {
-        if (configVersion != apiDefs::ConfigSource::AmneziaGateway) return false;
-        QString endDate = apiConfig.value(apiDefs::key::subscriptionEndDate).toString();
-        if (endDate.isEmpty()) return false;
-        if (apiUtils::isSubscriptionExpired(endDate)) return false;
-        QDateTime endDateTime = QDateTime::fromString(endDate, Qt::ISODateWithMs);
-        return endDateTime <= QDateTime::currentDateTimeUtc().addDays(10);
+        if (configVersion != apiDefs::ConfigSource::AmneziaGateway) {
+            return false;
+        }
+        const QString endDate =
+                apiConfig.value(apiDefs::key::subscription).toObject().value(apiDefs::key::endDate).toString();
+        if (endDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpiringSoon(endDate);
     }
     }
 

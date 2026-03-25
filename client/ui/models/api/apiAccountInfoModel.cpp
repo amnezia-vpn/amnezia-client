@@ -77,16 +77,22 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         return false;
     }
     case IsSubscriptionExpiredRole: {
-        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) return false;
-        if (m_accountInfoData.subscriptionEndDate.isEmpty()) return false;
+        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
+            return false;
+        }
+        if (m_accountInfoData.subscriptionEndDate.isEmpty()) {
+            return false;
+        }
         return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate);
     }
     case IsSubscriptionExpiringSoonRole: {
-        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) return false;
-        if (m_accountInfoData.subscriptionEndDate.isEmpty()) return false;
-        if (apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate)) return false;
-        QDateTime endDate = QDateTime::fromString(m_accountInfoData.subscriptionEndDate, Qt::ISODateWithMs);
-        return endDate <= QDateTime::currentDateTimeUtc().addDays(10);
+        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
+            return false;
+        }
+        if (m_accountInfoData.subscriptionEndDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpiringSoon(m_accountInfoData.subscriptionEndDate);
     }
     }
 

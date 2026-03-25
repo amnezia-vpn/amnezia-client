@@ -1,7 +1,9 @@
 #include "apiServicesModel.h"
 
+#include <QDateTime>
 #include <QJsonObject>
 
+#include "core/api/apiDefs.h"
 #include "logger.h"
 
 namespace
@@ -32,9 +34,6 @@ namespace
         constexpr char storeEndpoint[] = "store_endpoint";
 
         constexpr char isAvailable[] = "is_available";
-
-        constexpr char subscription[] = "subscription";
-        constexpr char endDate[] = "end_date";
     }
 
     namespace serviceType
@@ -243,7 +242,7 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     auto availableCountries = data.value(configKey::availableCountries).toArray();
     auto serviceDescription = data.value(configKey::serviceDescription).toObject();
 
-    auto subscriptionObject = data.value(configKey::subscription).toObject();
+    auto subscriptionObject = data.value(apiDefs::key::subscription).toObject();
 
     ApiServicesData serviceData;
     serviceData.serviceInfo.name = serviceInfo.value(configKey::name).toString();
@@ -270,7 +269,7 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.serviceInfo.object = serviceInfo;
     serviceData.availableCountries = availableCountries;
 
-    serviceData.subscription.endDate = subscriptionObject.value(configKey::endDate).toString();
+    serviceData.subscription.endDate = subscriptionObject.value(apiDefs::key::endDate).toString();
 
     return serviceData;
 }

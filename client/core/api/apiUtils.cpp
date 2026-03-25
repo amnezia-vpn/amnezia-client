@@ -24,9 +24,30 @@ namespace
 
 bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
 {
-    QDateTime now = QDateTime::currentDateTimeUtc();
-    QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODateWithMs);
-    return endDate < now;
+    if (subscriptionEndDate.isEmpty()) {
+        return false;
+    }
+    const QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODate).toUTC();
+    if (!endDate.isValid()) {
+        return false;
+    }
+    return endDate < QDateTime::currentDateTimeUtc();
+}
+
+bool apiUtils::isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays)
+{
+    if (subscriptionEndDate.isEmpty()) {
+        return false;
+    }
+    const QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODate).toUTC();
+    if (!endDate.isValid()) {
+        return false;
+    }
+    const QDateTime nowUtc = QDateTime::currentDateTimeUtc();
+    if (endDate < nowUtc) {
+        return false;
+    }
+    return endDate <= nowUtc.addDays(withinDays);
 }
 
 bool apiUtils::isServerFromApi(const QJsonObject &serverConfigObject)

@@ -47,9 +47,6 @@ namespace
 
         constexpr char config[] = "config";
 
-        constexpr char subscription[] = "subscription";
-        constexpr char endDate[] = "end_date";
-
         constexpr char isConnectEvent[] = "is_connect_event";
     }
 
