@@ -135,6 +135,7 @@
         <file>ui/qml/Components/InstalledAppsDrawer.qml</file>
         <file>ui/qml/Components/QuestionDrawer.qml</file>
         <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
+        <file>ui/qml/Components/SubscriptionExpiredDrawer.qml</file>
         <file>ui/qml/Components/ServersListView.qml</file>
         <file>ui/qml/Components/SettingsContainersListView.qml</file>
         <file>ui/qml/Components/TransportProtoSelector.qml</file>

@@ -10,8 +10,10 @@ namespace apiDefs
         AmneziaFreeV3,
         AmneziaPremiumV1,
         AmneziaPremiumV2,
+        AmneziaTrialV2,
         SelfHosted,
-        ExternalPremium
+        ExternalPremium,
+        ExternalTrial
     };
 
     enum ConfigSource {
@@ -32,6 +34,7 @@ namespace apiDefs
         constexpr QLatin1String stackType("stack_type");
         constexpr QLatin1String serviceType("service_type");
         constexpr QLatin1String cliVersion("cli_version");
+        constexpr QLatin1String cliName("cli_name");
         constexpr QLatin1String supportedProtocols("supported_protocols");
 
         constexpr QLatin1String vpnKey("vpn_key");

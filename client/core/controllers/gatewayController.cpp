@@ -46,6 +46,7 @@ namespace
     constexpr int httpStatusCodeConflict = 409;
     constexpr int httpStatusCodeNotImplemented = 501;
     constexpr int httpStatusCodePaymentRequired = 402;
+    constexpr int httpStatusCodeUnprocessableEntity = 422;
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
@@ -333,9 +334,14 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
 
     QStringList baseUrls;
     if (m_isDevEnvironment) {
-        baseUrls = QString(DEV_S3_ENDPOINT).split(", ");
+        baseUrls = QString(DEV_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
     } else {
-        baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
+        baseUrls = QString(PROD_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
+    }
+
+    if (baseUrls.empty()) {
+        qDebug() << "empty storage endpoint list";
+        return {};
     }
     std::random_device randomDevice;
     std::mt19937 generator(randomDevice());
@@ -431,10 +437,12 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
         qDebug() << "timeout occurred";
         qDebug() << replyError;
         return true;
-    } else if (responseBody.contains("html")) {
+    } 
+    if (responseBody.contains("html")) {
         qDebug() << "the response contains an html tag";
         return true;
-    } else if (httpStatus == httpStatusCodeNotFound) {
+    } 
+    if (httpStatus == httpStatusCodeNotFound) {
         if (responseBody.contains(errorResponsePattern1) || responseBody.contains(errorResponsePattern2)
             || responseBody.contains(errorResponsePattern3)) {
             return false;
@@ -442,18 +450,25 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
             qDebug() << replyError;
             return true;
         }
-    } else if (httpStatus == httpStatusCodeNotImplemented) {
+    } 
+    if (httpStatus == httpStatusCodeNotImplemented) {
         if (responseBody.contains(updateRequestResponsePattern)) {
             return false;
         } else {
             qDebug() << replyError;
             return true;
         }
-    } else if (httpStatus == httpStatusCodeConflict) {
+    } 
+    if (httpStatus == httpStatusCodeConflict) {
         return false;
-    } else if (httpStatus == httpStatusCodePaymentRequired) {
+    } 
+    if (httpStatus == httpStatusCodePaymentRequired) {
         return false;
-    } else if (replyError != QNetworkReply::NetworkError::NoError) {
+    } 
+    if (httpStatus == httpStatusCodeUnprocessableEntity) {
+        return false;
+    } 
+    if (replyError != QNetworkReply::NetworkError::NoError) {
         qDebug() << replyError;
         return true;
     }

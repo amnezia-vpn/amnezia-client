@@ -366,6 +366,8 @@ bool ApiConfigsController::fillAvailableServices()
 {
     QJsonObject apiPayload;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
+    apiPayload[configKey::appVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
     apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
@@ -446,7 +448,7 @@ bool ApiConfigsController::importService()
         if (isIosOrMacOsNe) {
             return importSerivceFromAppStore();
         }
-    } else {
+    } else if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaFree) {
         importServiceFromGateway();
         return true;
     }
@@ -776,7 +778,11 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
         }
         return true;
     } else {
-        emit errorOccurred(errorCode);
+        if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
+            emit subscriptionExpiredOnServer();
+        } else {
+            emit errorOccurred(errorCode);
+        }
         return false;
     }
 }

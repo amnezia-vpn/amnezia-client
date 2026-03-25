@@ -126,8 +126,7 @@ extension PacketTunnelProvider {
         }
 
         vpnReachability.startTracking { [weak self] status in
-            guard status == .reachableViaWiFi else { return }
-            self?.ovpnAdapter?.reconnect(afterTimeInterval: 5)
+            self?.handleOpenVPNReachabilityChange(status)
         }
 
         startHandler = completionHandler

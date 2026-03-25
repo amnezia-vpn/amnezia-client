@@ -21,9 +21,11 @@ public slots:
     bool getAccountInfo(bool reload);
     void updateApiCountryModel();
     void updateApiDevicesModel();
+    void getRenewalLink();
 
 signals:
     void errorOccurred(ErrorCode errorCode);
+    void renewalLinkReceived(const QString &url);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

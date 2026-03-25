@@ -19,6 +19,15 @@ ListViewType {
     id: root
 
     property int selectedIndex: ServersModel.defaultIndex
+    property int expiredServerIndex: -1
+    property bool expiringSoon: false
+
+    Connections {
+        target: ApiAccountInfoModel
+        function onModelReset() {
+            root.expiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
+        }
+    }
 
     anchors.top: serversMenuHeader.bottom
     anchors.right: parent.right
@@ -32,6 +41,13 @@ ListViewType {
         target: ServersModel
         function onDefaultServerIndexChanged(serverIndex) {
             root.selectedIndex = serverIndex
+        }
+    }
+
+    Connections {
+        target: ApiConfigsController
+        function onSubscriptionExpiredOnServer() {
+            root.expiredServerIndex = ServersModel.defaultIndex
         }
     }
 
@@ -124,6 +140,18 @@ ListViewType {
                         drawer.closeTriggered()
                     }
                 }
+            }
+
+            CaptionTextType {
+                visible: isServerFromGatewayApi && (index === root.expiredServerIndex || (root.expiringSoon && index === root.selectedIndex && index !== root.expiredServerIndex))
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 64
+                Layout.bottomMargin: 8
+
+                text: index === root.expiredServerIndex ? qsTr("Subscription expired. Please renew.") : qsTr("Subscription expiring soon.")
+                color: index === root.expiredServerIndex ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
+                wrapMode: Text.WordWrap
             }
 
             DividerType {

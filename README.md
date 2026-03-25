@@ -179,7 +179,7 @@ You may face compiling issues in QT Creator after you've worked in Android Studi
 
 ## License
 
-GPL v3.0
+This project is licensed under the GNU General Public License v3.0 (see LICENSE) and also includes third-party components distributed under their own terms (see THIRD_PARTY_LICENSES.md).
 
 ## Donate
 

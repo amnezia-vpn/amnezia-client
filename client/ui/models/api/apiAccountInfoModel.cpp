@@ -1,5 +1,6 @@
 #include "apiAccountInfoModel.h"
 
+#include <QDateTime>
 #include <QJsonObject>
 
 #include "core/api/apiUtils.h"
@@ -32,7 +33,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         }
 
         return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate) ? tr("<p><a style=\"color: #EB5757;\">Inactive</a>")
-                                                                                      : tr("Active");
+                                                                                      : tr("<p><a style=\"color: #28c840;\">Active</a>");
     }
     case EndDateRole: {
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
@@ -52,7 +53,9 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     }
     case IsComponentVisibleRole: {
         return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
-                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium;
+                || m_accountInfoData.configType == apiDefs::ConfigType::AmneziaTrialV2
+                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium
+                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalTrial;
     }
     case HasExpiredWorkerRole: {
         for (int i = 0; i < m_issuedConfigsInfo.size(); i++) {
@@ -73,6 +76,19 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         }
         return false;
     }
+    case IsSubscriptionExpiredRole: {
+        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) return false;
+        if (m_isSubscriptionExpiredByServer) return true;
+        if (m_accountInfoData.subscriptionEndDate.isEmpty()) return false;
+        return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate);
+    }
+    case IsSubscriptionExpiringSoonRole: {
+        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) return false;
+        if (m_accountInfoData.subscriptionEndDate.isEmpty()) return false;
+        if (apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate)) return false;
+        QDateTime endDate = QDateTime::fromString(m_accountInfoData.subscriptionEndDate, Qt::ISODateWithMs);
+        return endDate <= QDateTime::currentDateTimeUtc().addDays(30);
+    }
     }
 
     return QVariant();
@@ -81,6 +97,8 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
 void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, const QJsonObject &serverConfig)
 {
     beginResetModel();
+
+    m_isSubscriptionExpiredByServer = false;
 
     AccountInfoData accountInfoData;
 
@@ -103,6 +121,13 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
 
     m_supportInfo = accountInfoObject.value(apiDefs::key::supportInfo).toObject();
 
+    endResetModel();
+}
+
+void ApiAccountInfoModel::setSubscriptionExpiredByServer()
+{
+    beginResetModel();
+    m_isSubscriptionExpiredByServer = true;
     endResetModel();
 }
 
@@ -164,6 +189,8 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[IsComponentVisibleRole] = "isComponentVisible";
     roles[HasExpiredWorkerRole] = "hasExpiredWorker";
     roles[IsProtocolSelectionSupportedRole] = "isProtocolSelectionSupported";
+    roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
+    roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
 
     return roles;
 }

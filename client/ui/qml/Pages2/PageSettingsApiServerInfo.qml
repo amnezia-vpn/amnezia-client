@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import Qt5Compat.GraphicalEffects
 
 import SortFilterProxyModel 0.2
 
@@ -51,6 +52,26 @@ PageType {
     }
 
     property var processedServer
+
+    property bool isSubscriptionExpired: false
+    property bool isSubscriptionExpiringSoon: false
+
+    function updateSubscriptionState() {
+        root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
+        root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
+    }
+
+    Component.onCompleted: {
+        root.updateSubscriptionState()
+    }
+
+    Connections {
+        target: ApiAccountInfoModel
+
+        function onModelReset() {
+            root.updateSubscriptionState()
+        }
+    }
 
     Connections {
         target: ServersModel
@@ -108,10 +129,64 @@ PageType {
                 actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
                 headerText: root.processedServer.name
-                descriptionText: ApiAccountInfoModel.data("serviceDescription")
 
                 actionButtonFunction: function() {
                     serverNameEditDrawer.openTriggered()
+                }
+            }
+
+            Text {
+                visible: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 4
+
+                text: root.isSubscriptionExpired
+                    ? qsTr("Subscription expired")
+                    : qsTr("Subscription expiring soon")
+
+                color: root.isSubscriptionExpired
+                    ? AmneziaStyle.color.vibrantRed
+                    : AmneziaStyle.color.goldenApricot
+
+                font.pixelSize: 14
+                font.weight: Font.Medium
+                wrapMode: Text.WordWrap
+            }
+
+            ParagraphTextType {
+                visible: ApiAccountInfoModel.data("serviceDescription") !== ""
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 16
+                Layout.bottomMargin: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon ? 0 : 10
+
+                text: ApiAccountInfoModel.data("serviceDescription")
+                color: AmneziaStyle.color.mutedGray
+            }
+
+            BasicButtonType {
+                visible: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                Layout.bottomMargin: 8
+
+                text: qsTr("Renew subscription")
+
+                defaultColor: AmneziaStyle.color.paleGray
+                hoveredColor: AmneziaStyle.color.lightGray
+                pressedColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.midnightBlack
+
+                clickedFunc: function() {
+                    ApiSettingsController.getRenewalLink()
                 }
             }
         }
@@ -151,6 +226,54 @@ PageType {
 
             readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
 
+            Item {
+                visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+
+                Layout.fillWidth: true
+                implicitHeight: renewRow.implicitHeight + 32
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: ApiSettingsController.getRenewalLink()
+                }
+
+                Row {
+                    id: renewRow
+                    anchors.centerIn: parent
+                    spacing: 12
+
+                    Item {
+                        width: renewIcon.implicitWidth
+                        height: renewIcon.implicitHeight
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Image {
+                            id: renewIcon
+                            source: "qrc:/images/controls/refresh-cw.svg"
+                        }
+
+                        ColorOverlay {
+                            anchors.fill: renewIcon
+                            source: renewIcon
+                            color: AmneziaStyle.color.goldenApricot
+                        }
+                    }
+
+                    Text {
+                        text: qsTr("Renew subscription")
+                        color: AmneziaStyle.color.goldenApricot
+                        font.pixelSize: 18
+                        font.weight: Font.Medium
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+
+            DividerType {
+                visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+            }
+
             SwitcherType {
                 id: switcher
 
@@ -177,10 +300,14 @@ PageType {
                 }
             }
 
+            DividerType {
+                visible: footer.isVisibleForAmneziaFree
+            }
+
             WarningType {
                 id: warning
 
-                Layout.topMargin: 32
+                Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
                 Layout.fillWidth: true
@@ -204,7 +331,7 @@ PageType {
                 id: vpnKey
 
                 Layout.fillWidth: true
-                Layout.topMargin: warning.visible ? 16 : 32
+                Layout.topMargin: warning.visible ? 16 : 0
 
                 visible: footer.isVisibleForAmneziaFree
 

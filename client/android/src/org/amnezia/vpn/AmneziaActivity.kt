@@ -337,6 +337,13 @@ class AmneziaActivity : QtActivity() {
     private external fun nativeGamepadKeyEvent(deviceId: Int, keyCode: Int, pressed: Boolean)
 
     override fun onPause() {
+        // Notify Qt to stop rendering BEFORE super.onPause() destroys the EGL surface.
+        // Using a coroutine here would be too late — the surface is gone by the time
+        // the coroutine runs. A direct synchronous call gives Qt's render thread the
+        // best chance to process visible=false before surface destruction.
+        if (qtInitialized.isCompleted) {
+            QtAndroidController.onActivityPaused()
+        }
         super.onPause()
         isActivityResumed = false
         // Cancel all pending operations when activity pauses
@@ -349,6 +356,9 @@ class AmneziaActivity : QtActivity() {
         super.onResume()
         isActivityResumed = true
         Log.d(TAG, "Resume Amnezia activity")
+        if (qtInitialized.isCompleted) {
+            QtAndroidController.onActivityResumed()
+        }
 
         if (pendingOpenFileUri != null && !openFileDeliveryScheduled) {
             val uri = pendingOpenFileUri!!
@@ -816,7 +826,7 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun getFd(fileName: String): Int {
         Log.v(TAG, "Get fd for $fileName")
-        return blockingCall {
+        return blockingCall(Dispatchers.IO) {
             try {
                 pfd = contentResolver.openFileDescriptor(Uri.parse(fileName), "r")
                 pfd?.fd ?: -1
