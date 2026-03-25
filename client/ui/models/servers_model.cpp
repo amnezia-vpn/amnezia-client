@@ -179,6 +179,20 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case AdEndpointRole: {
         return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adEndpoint).toString();
     }
+    case IsSubscriptionExpiredRole: {
+        if (configVersion != apiDefs::ConfigSource::AmneziaGateway) return false;
+        QString endDate = apiConfig.value(apiDefs::key::subscriptionEndDate).toString();
+        if (endDate.isEmpty()) return false;
+        return apiUtils::isSubscriptionExpired(endDate);
+    }
+    case IsSubscriptionExpiringSoonRole: {
+        if (configVersion != apiDefs::ConfigSource::AmneziaGateway) return false;
+        QString endDate = apiConfig.value(apiDefs::key::subscriptionEndDate).toString();
+        if (endDate.isEmpty()) return false;
+        if (apiUtils::isSubscriptionExpired(endDate)) return false;
+        QDateTime endDateTime = QDateTime::fromString(endDate, Qt::ISODateWithMs);
+        return endDateTime <= QDateTime::currentDateTimeUtc().addDays(10);
+    }
     }
 
     return QVariant();
@@ -442,6 +456,9 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[AdHeaderRole] = "adHeader";
     roles[AdDescriptionRole] = "adDescription";
     roles[AdEndpointRole] = "adEndpoint";
+
+    roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
+    roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
 
     return roles;
 }

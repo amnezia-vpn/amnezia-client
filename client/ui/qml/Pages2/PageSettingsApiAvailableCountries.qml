@@ -21,7 +21,8 @@ PageType {
     property bool subscriptionExpired: false
     property bool subscriptionExpiringSoon: false
     function updateSubscriptionState() {
-        root.subscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
+        root.subscriptionExpired = ServersModel.getProcessedServerData("isSubscriptionExpired")
+        root.subscriptionExpiringSoon = ServersModel.getProcessedServerData("isSubscriptionExpiringSoon")
     }
 
     Component.onCompleted: {
@@ -29,26 +30,11 @@ PageType {
     }
 
     Connections {
-        target: ApiAccountInfoModel
-        function onModelReset() {
-            root.updateSubscriptionState()
-        }
-    }
-
-    Connections {
         target: ServersModel
 
         function onProcessedServerChanged() {
             root.processedServer = proxyServersModel.get(0)
-        }
-    }
-
-    Connections {
-        target: ApiConfigsController
-
-        function onSubscriptionExpiredOnServer() {
-            root.subscriptionExpired = true
-            root.subscriptionExpiringSoon = false
+            root.updateSubscriptionState()
         }
     }
 

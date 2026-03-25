@@ -78,7 +78,6 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     }
     case IsSubscriptionExpiredRole: {
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) return false;
-        if (m_isSubscriptionExpiredByServer) return true;
         if (m_accountInfoData.subscriptionEndDate.isEmpty()) return false;
         return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate);
     }
@@ -87,7 +86,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         if (m_accountInfoData.subscriptionEndDate.isEmpty()) return false;
         if (apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate)) return false;
         QDateTime endDate = QDateTime::fromString(m_accountInfoData.subscriptionEndDate, Qt::ISODateWithMs);
-        return endDate <= QDateTime::currentDateTimeUtc().addDays(30);
+        return endDate <= QDateTime::currentDateTimeUtc().addDays(10);
     }
     }
 
@@ -97,8 +96,6 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
 void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, const QJsonObject &serverConfig)
 {
     beginResetModel();
-
-    m_isSubscriptionExpiredByServer = false;
 
     AccountInfoData accountInfoData;
 
@@ -121,13 +118,6 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
 
     m_supportInfo = accountInfoObject.value(apiDefs::key::supportInfo).toObject();
 
-    endResetModel();
-}
-
-void ApiAccountInfoModel::setSubscriptionExpiredByServer()
-{
-    beginResetModel();
-    m_isSubscriptionExpiredByServer = true;
     endResetModel();
 }
 

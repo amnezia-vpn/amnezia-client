@@ -78,6 +78,13 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     QJsonObject accountInfo = QJsonDocument::fromJson(responseBody).object();
     m_apiAccountInfoModel->updateModel(accountInfo, serverConfig);
 
+    QString subscriptionEndDate = accountInfo.value(apiDefs::key::subscriptionEndDate).toString();
+    if (!subscriptionEndDate.isEmpty()) {
+        apiConfig.insert(apiDefs::key::subscriptionEndDate, subscriptionEndDate);
+        serverConfig.insert(configKey::apiConfig, apiConfig);
+        m_serversModel->editServer(serverConfig, processedIndex);
+    }
+
     if (reload) {
         updateApiCountryModel();
         updateApiDevicesModel();
@@ -115,7 +122,7 @@ void ApiSettingsController::getRenewalLink()
         }
 
         QJsonObject responseJson = QJsonDocument::fromJson(responseBody).object();
-        QString url = responseJson.value("url").toString();
+        QString url = responseJson.value("renewal_url").toString();
         if (!url.isEmpty()) {
             emit renewalLinkReceived(url);
         }
