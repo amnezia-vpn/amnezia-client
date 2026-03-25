@@ -723,6 +723,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     }
 
     bool isTestPurchase = apiConfig.value(apiDefs::key::isTestPurchase).toBool(false);
+    bool wasSubscriptionExpired = m_serversModel->data(serverIndex, ServersModel::IsSubscriptionExpiredRole).toBool();
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody, isTestPurchase);
 
@@ -749,6 +750,11 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
             newServerConfig.insert(config_key::nameOverriddenByUser, true);
         }
         m_serversModel->editServer(newServerConfig, serverIndex);
+
+        if (wasSubscriptionExpired) {
+            emit subscriptionRefreshNeeded();
+        }
+
         if (reloadServiceConfig) {
             emit reloadServerFromApiFinished(tr("API config reloaded"));
         } else if (newCountryName.isEmpty()) {
