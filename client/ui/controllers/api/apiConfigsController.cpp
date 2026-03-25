@@ -980,18 +980,13 @@ ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &respo
         return ErrorCode::ApiPurchaseError;
     }
 
-    duplicateServerIndex = m_serversModel->indexOfServerWithVpnKey(key);
-    if (duplicateServerIndex >= 0) {
-        qInfo().noquote() << "[IAP] Subscription config with the same vpn_key already exists";
-        return ErrorCode::ApiConfigAlreadyAdded;
-    }
-
     QString normalizedKey = key;
     normalizedKey.replace(QStringLiteral("vpn://"), QString());
 
     QByteArray configString = QByteArray::fromBase64(normalizedKey.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
     QByteArray configUncompressed = qUncompress(configString);
-    if (!configUncompressed.isEmpty()) {
+    const bool payloadWasCompressed = !configUncompressed.isEmpty();
+    if (payloadWasCompressed) {
         configString = configUncompressed;
     }
 
@@ -1002,12 +997,27 @@ ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &respo
 
     QJsonObject configObject = QJsonDocument::fromJson(configString).object();
 
-    quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
     auto apiConfig = configObject.value(apiDefs::key::apiConfig).toObject();
-    apiConfig[apiDefs::key::vpnKey] = normalizedKey;
-    apiConfig[apiDefs::key::isTestPurchase] = isTestPurchase;
-
+    apiConfig.insert(apiDefs::key::isTestPurchase, isTestPurchase);
+    apiConfig.insert(apiDefs::key::isInAppPurchase, true);
     configObject.insert(apiDefs::key::apiConfig, apiConfig);
+
+    configString = QJsonDocument(configObject).toJson();
+    if (payloadWasCompressed) {
+        configString = qCompress(configString, 8);
+    }
+    normalizedKey = QString(configString.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals));
+
+    duplicateServerIndex = m_serversModel->indexOfServerWithVpnKey(normalizedKey);
+    if (duplicateServerIndex >= 0) {
+        qInfo().noquote() << "[IAP] Subscription config with the same vpn_key already exists";
+        return ErrorCode::ApiConfigAlreadyAdded;
+    }
+
+    apiConfig.insert(apiDefs::key::vpnKey, normalizedKey);
+    configObject.insert(apiDefs::key::apiConfig, apiConfig);
+
+    quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
     configObject.insert(config_key::crc, crc);
     m_serversModel->addServer(configObject);
 

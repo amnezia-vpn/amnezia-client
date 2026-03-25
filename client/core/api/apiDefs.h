@@ -72,6 +72,7 @@ namespace apiDefs
 
         constexpr QLatin1String transactionId("transaction_id");
         constexpr QLatin1String isTestPurchase("is_test_purchase");
+        constexpr QLatin1String isInAppPurchase("is_in_app_purchase");
 
         constexpr QLatin1String userCountryCode("user_country_code");
 

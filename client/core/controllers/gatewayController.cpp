@@ -343,6 +343,7 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
         qDebug() << "empty storage endpoint list";
         return {};
     }
+
     std::random_device randomDevice;
     std::mt19937 generator(randomDevice());
     std::shuffle(baseUrls.begin(), baseUrls.end(), generator);
