@@ -8,58 +8,6 @@
 #include "configurators/wireguard_configurator.h"
 #include "configurators/xray_configurator.h"
 
-#include <QJsonDocument>
-
-namespace {
-bool openVpnConfigHasInlineBlock(const QString &config, const QString &openTag, const QString &closeTag, const QString &marker)
-{
-    const int start = config.indexOf(openTag);
-    if (start < 0) {
-        return false;
-    }
-    const int end = config.indexOf(closeTag, start + openTag.size());
-    if (end < 0 || end <= start) {
-        return false;
-    }
-
-    const QString block = config.mid(start + openTag.size(), end - (start + openTag.size()));
-    return block.contains(marker);
-}
-
-bool openVpnConfigHasClientCredentials(const QString &config)
-{
-    const bool hasCert = openVpnConfigHasInlineBlock(config, "<cert>", "</cert>", "BEGIN CERTIFICATE");
-    const bool hasKey = openVpnConfigHasInlineBlock(config, "<key>", "</key>", "BEGIN PRIVATE KEY")
-        || openVpnConfigHasInlineBlock(config, "<key>", "</key>", "BEGIN RSA PRIVATE KEY");
-    return hasCert && hasKey;
-}
-
-QString openVpnConfigFromProtocolConfig(const QJsonObject &protocolConfig)
-{
-    const QString directConfig = protocolConfig.value(config_key::config).toString();
-    if (!directConfig.isEmpty()) {
-        return directConfig;
-    }
-
-    const QString lastConfig = protocolConfig.value(config_key::last_config).toString();
-    if (lastConfig.isEmpty()) {
-        return {};
-    }
-
-    const QJsonDocument lastConfigDoc = QJsonDocument::fromJson(lastConfig.toUtf8());
-    if (!lastConfigDoc.isObject()) {
-        return {};
-    }
-
-    return lastConfigDoc.object().value(config_key::config).toString();
-}
-
-bool openVpnConfigUsesUserPass(const QString &config)
-{
-    return config.contains("auth-user-pass");
-}
-}  // namespace
-
 VpnConfigurationsController::VpnConfigurationsController(const std::shared_ptr<Settings> &settings,
                                                          QSharedPointer<ServerController> serverController, QObject *parent)
     : QObject { parent }, m_settings(settings), m_serverController(serverController)
@@ -104,41 +52,6 @@ ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const Se
     }
 
     return errorCode;
-}
-
-ErrorCode VpnConfigurationsController::ensureContainerConfigReadyForConnection(const ServerCredentials &credentials, const int serverIndex,
-                                                                               const DockerContainer container, QJsonObject &containerConfig)
-{
-    if (!ContainerProps::protocolsForContainer(container).contains(Proto::OpenVpn)) {
-        return ErrorCode::NoError;
-    }
-
-    QJsonObject openVpnConfig = containerConfig.value(ProtocolProps::protoToString(Proto::OpenVpn)).toObject();
-    const bool isThirdParty = openVpnConfig.value(config_key::isThirdPartyConfig).toBool(false);
-    if (isThirdParty) {
-        return ErrorCode::NoError;
-    }
-
-    const QString config = openVpnConfigFromProtocolConfig(openVpnConfig);
-    const bool configHasCreds = !config.isEmpty() && openVpnConfigHasClientCredentials(config);
-    const bool configAllowsUserPass = !config.isEmpty() && openVpnConfigUsesUserPass(config);
-    if (configHasCreds || configAllowsUserPass) {
-        return ErrorCode::NoError;
-    }
-
-    if (!credentials.isValid()) {
-        qWarning() << "Missing OpenVPN client credentials and no valid server credentials to regenerate config";
-        return ErrorCode::OpenVpnConfigMissing;
-    }
-
-    const ErrorCode regenError = createProtocolConfigForContainer(credentials, container, containerConfig);
-    if (regenError != ErrorCode::NoError) {
-        qWarning() << "Failed to regenerate OpenVPN client config:" << regenError;
-        return regenError;
-    }
-
-    m_settings->setContainerConfig(serverIndex, container, containerConfig);
-    return ErrorCode::NoError;
 }
 
 ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isApiConfig, const QPair<QString, QString> &dns,

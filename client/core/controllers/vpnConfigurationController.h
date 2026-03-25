@@ -18,8 +18,6 @@ public:
 public slots:
     ErrorCode createProtocolConfigForContainer(const ServerCredentials &credentials, const DockerContainer container,
                                                QJsonObject &containerConfig);
-    ErrorCode ensureContainerConfigReadyForConnection(const ServerCredentials &credentials, const int serverIndex,
-                                                      const DockerContainer container, QJsonObject &containerConfig);
     ErrorCode createProtocolConfigString(const bool isApiConfig, const QPair<QString, QString> &dns, const ServerCredentials &credentials,
                                          const DockerContainer container, const QJsonObject &containerConfig, const Proto protocol,
                                          QString &protocolConfigString);

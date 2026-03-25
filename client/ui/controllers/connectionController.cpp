@@ -56,12 +56,6 @@ void ConnectionController::openConnection()
 
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
-    const ErrorCode preparationError =
-        vpnConfigurationController.ensureContainerConfigReadyForConnection(credentials, serverIndex, container, containerConfig);
-    if (preparationError != ErrorCode::NoError) {
-        emit connectionErrorOccurred(preparationError);
-        return;
-    }
 
     auto dns = m_serversModel->getDnsPair(serverIndex);
 
