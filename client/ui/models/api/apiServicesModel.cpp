@@ -1,6 +1,7 @@
 #include "apiServicesModel.h"
 
 #include <QDateTime>
+#include <QJsonArray>
 #include <QJsonObject>
 
 #include "core/api/apiDefs.h"
@@ -34,6 +35,30 @@ namespace
         constexpr char storeEndpoint[] = "store_endpoint";
 
         constexpr char isAvailable[] = "is_available";
+
+        constexpr char subscriptionPlans[] = "subscription_plans";
+
+        constexpr char premiumBenefitCountriesTitle[] = "premium_benefit_countries_title";
+        constexpr char premiumBenefitCountriesBody[] = "premium_benefit_countries_body";
+        constexpr char premiumBenefitDevicesTitle[] = "premium_benefit_devices_title";
+        constexpr char premiumBenefitDevicesBody[] = "premium_benefit_devices_body";
+        constexpr char premiumBenefitVideoTitle[] = "premium_benefit_video_title";
+        constexpr char premiumBenefitVideoBody[] = "premium_benefit_video_body";
+        constexpr char premiumBenefitTrafficTitle[] = "premium_benefit_traffic_title";
+        constexpr char premiumBenefitTrafficBody[] = "premium_benefit_traffic_body";
+    }
+
+    QVariantList jsonObjectArrayToVariantList(const QJsonArray &arr)
+    {
+        QVariantList list;
+        list.reserve(arr.size());
+        for (const QJsonValue &v : arr) {
+            if (!v.isObject()) {
+                continue;
+            }
+            list.append(v.toObject().toVariantMap());
+        }
+        return list;
     }
 
     namespace serviceType
@@ -124,11 +149,20 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     case OrderRole: {
         if (serviceType == serviceType::amneziaPremium) {
             return 0;
-        } else if (serviceType == serviceType::amneziaTrial) {
+        }
+        if (serviceType == serviceType::amneziaTrial) {
             return 1;
-        } else if (serviceType == serviceType::amneziaFree) {
+        }
+        if (serviceType == serviceType::amneziaFree) {
             return 2;
         }
+        return QVariant();
+    }
+    case SubscriptionPlansRole: {
+        return apiServiceData.subscriptionPlans;
+    }
+    case PremiumBenefitPanelRowsRole: {
+        return ApiServicesModel::buildPremiumBenefitPanelRows(apiServiceData);
     }
     }
 
@@ -216,6 +250,32 @@ QVariant ApiServicesModel::getSelectedServiceData(const QString roleString)
     return {};
 }
 
+int ApiServicesModel::serviceIndexForType(const QString &type) const
+{
+    for (int i = 0; i < m_services.size(); ++i) {
+        if (m_services.at(i).type == type) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+QVariant ApiServicesModel::getServiceFieldForType(const QString &type, const QString &roleString) const
+{
+    const int row = serviceIndexForType(type);
+    if (row < 0) {
+        return {};
+    }
+    const QModelIndex modelIndex = index(row);
+    const auto roles = roleNames();
+    for (auto it = roles.begin(); it != roles.end(); ++it) {
+        if (QString(it.value()) == roleString) {
+            return data(modelIndex, it.key());
+        }
+    }
+    return {};
+}
+
 QHash<int, QByteArray> ApiServicesModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -230,6 +290,8 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[PriceRole] = "price";
     roles[EndDateRole] = "endDate";
     roles[OrderRole] = "order";
+    roles[SubscriptionPlansRole] = "subscriptionPlans";
+    roles[PremiumBenefitPanelRowsRole] = "premiumBenefitRows";
 
     return roles;
 }
@@ -255,6 +317,17 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.serviceInfo.description = serviceDescription.value(configKey::description).toString();
     serviceData.serviceInfo.features = serviceDescription.value(configKey::features).toString();
 
+    serviceData.subscriptionPlans = jsonObjectArrayToVariantList(serviceDescription.value(configKey::subscriptionPlans).toArray());
+
+    serviceData.premiumBenefitCountriesTitle = serviceDescription.value(configKey::premiumBenefitCountriesTitle).toString();
+    serviceData.premiumBenefitCountriesBody = serviceDescription.value(configKey::premiumBenefitCountriesBody).toString();
+    serviceData.premiumBenefitDevicesTitle = serviceDescription.value(configKey::premiumBenefitDevicesTitle).toString();
+    serviceData.premiumBenefitDevicesBody = serviceDescription.value(configKey::premiumBenefitDevicesBody).toString();
+    serviceData.premiumBenefitVideoTitle = serviceDescription.value(configKey::premiumBenefitVideoTitle).toString();
+    serviceData.premiumBenefitVideoBody = serviceDescription.value(configKey::premiumBenefitVideoBody).toString();
+    serviceData.premiumBenefitTrafficTitle = serviceDescription.value(configKey::premiumBenefitTrafficTitle).toString();
+    serviceData.premiumBenefitTrafficBody = serviceDescription.value(configKey::premiumBenefitTrafficBody).toString();
+
     serviceData.type = serviceType;
     serviceData.protocol = serviceProtocol;
 
@@ -272,4 +345,31 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.subscription.endDate = subscriptionObject.value(apiDefs::key::endDate).toString();
 
     return serviceData;
+}
+
+QVariantList ApiServicesModel::buildPremiumBenefitPanelRows(const ApiServicesData &service)
+{
+    const QStringList icons = { QStringLiteral("qrc:/images/controls/globe-2.svg"),
+                                QStringLiteral("qrc:/images/controls/smartphone.svg"),
+                                QStringLiteral("qrc:/images/controls/gauge.svg"),
+                                QStringLiteral("qrc:/images/controls/infinity.svg") };
+
+    QVariantList out;
+
+    const auto appendRow = [&out, &icons](int iconIndex, const QString &title, const QString &body) {
+        if (title.isEmpty() && body.isEmpty()) {
+            return;
+        }
+        QVariantMap m;
+        m.insert(QStringLiteral("icon"), icons.at(iconIndex));
+        m.insert(QStringLiteral("title"), title);
+        m.insert(QStringLiteral("body"), body);
+        out.append(m);
+    };
+
+    appendRow(0, service.premiumBenefitCountriesTitle, service.premiumBenefitCountriesBody);
+    appendRow(1, service.premiumBenefitDevicesTitle, service.premiumBenefitDevicesBody);
+    appendRow(2, service.premiumBenefitVideoTitle, service.premiumBenefitVideoBody);
+    appendRow(3, service.premiumBenefitTrafficTitle, service.premiumBenefitTrafficBody);
+    return out;
 }

@@ -13,6 +13,7 @@ QtObject {
         readonly property color onyxBlack: '#1C1D21'
         readonly property color midnightBlack: '#0E0E11'
         readonly property color goldenApricot: '#FBB26A'
+        readonly property color softViolet: '#A87BE2'
         readonly property color burntOrange: '#A85809'
         readonly property color mutedBrown: '#84603D'
         readonly property color richBrown: '#633303'

@@ -76,6 +76,8 @@ namespace PageLoader
         PageShareFullAccess,
         PageShareConnection,
 
+        PageSetupWizardApiPremiumInfo,
+
         PageDevMenu
     };
     Q_ENUM_NS(PageEnum)

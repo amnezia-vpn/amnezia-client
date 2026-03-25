@@ -89,7 +89,11 @@ PageType {
                 onClicked: {
                     if (isServiceAvailable) {
                         ApiServicesModel.setServiceIndex(proxyApiServicesModel.mapToSource(index))
-                        PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
+                        if (ApiServicesModel.getSelectedServiceType() === "amnezia-premium") {
+                            PageController.goToPage(PageEnum.PageSetupWizardApiPremiumInfo)
+                        } else {
+                            PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
+                        }
                     }
                 }
                 

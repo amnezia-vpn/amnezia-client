@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QVariantList>
 
 class ApiServicesModel : public QAbstractListModel
 {
@@ -21,7 +22,9 @@ public:
         FeaturesRole,
         PriceRole,
         EndDateRole,
-        OrderRole
+        OrderRole,
+        SubscriptionPlansRole,
+        PremiumBenefitPanelRowsRole
     };
 
     explicit ApiServicesModel(QObject *parent = nullptr);
@@ -46,6 +49,9 @@ public slots:
     QString getStoreEndpoint();
 
     QVariant getSelectedServiceData(const QString roleString);
+
+    Q_INVOKABLE int serviceIndexForType(const QString &type) const;
+    Q_INVOKABLE QVariant getServiceFieldForType(const QString &type, const QString &roleString) const;
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -83,9 +89,21 @@ private:
         Subscription subscription;
 
         QJsonArray availableCountries;
+
+        QVariantList subscriptionPlans;
+        QString premiumBenefitCountriesTitle;
+        QString premiumBenefitCountriesBody;
+        QString premiumBenefitDevicesTitle;
+        QString premiumBenefitDevicesBody;
+        QString premiumBenefitVideoTitle;
+        QString premiumBenefitVideoBody;
+        QString premiumBenefitTrafficTitle;
+        QString premiumBenefitTrafficBody;
     };
 
     ApiServicesData getApiServicesData(const QJsonObject &data);
+
+    static QVariantList buildPremiumBenefitPanelRows(const ApiServicesData &service);
 
     QString m_countryCode;
     QVector<ApiServicesData> m_services;
