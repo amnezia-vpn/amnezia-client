@@ -109,7 +109,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                text: SettingsController.getTempHint()
+                text: qsTr("Hint: ") + SettingsController.getTempHint()
             }
 
             BasicButtonType {
