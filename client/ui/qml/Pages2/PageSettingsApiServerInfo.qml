@@ -55,11 +55,13 @@ PageType {
     property bool isSubscriptionExpired: false
     property bool isSubscriptionExpiringSoon: false
     property bool isSubscriptionRenewalAvailable: false
+    property bool isInAppPurchase: false
 
     function updateSubscriptionState() {
         root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
         root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
         root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isComponentVisible")
+        root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
     }
 
     Component.onCompleted: {
@@ -168,7 +170,7 @@ PageType {
 
             BasicButtonType {
                 visible: (root.isSubscriptionExpired || root.isSubscriptionExpiringSoon)
-                    && root.isSubscriptionRenewalAvailable
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -226,7 +228,7 @@ PageType {
 
             BasicButtonType {
                 visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
-                    && root.isSubscriptionRenewalAvailable
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 16
@@ -250,7 +252,7 @@ PageType {
 
             DividerType {
                 visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
-                    && root.isSubscriptionRenewalAvailable
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
             }
 
             SwitcherType {

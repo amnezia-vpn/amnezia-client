@@ -80,6 +80,9 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
             return false;
         }
+        if (m_accountInfoData.isInAppPurchase) {
+            return false;
+        }
         if (m_accountInfoData.subscriptionEndDate.isEmpty()) {
             return false;
         }
@@ -89,10 +92,16 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
             return false;
         }
+        if (m_accountInfoData.isInAppPurchase) {
+            return false;
+        }
         if (m_accountInfoData.subscriptionEndDate.isEmpty()) {
             return false;
         }
         return apiUtils::isSubscriptionExpiringSoon(m_accountInfoData.subscriptionEndDate);
+    }
+    case IsInAppPurchaseRole: {
+        return m_accountInfoData.isInAppPurchase;
     }
     }
 
@@ -113,6 +122,9 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
     accountInfoData.subscriptionEndDate = accountInfoObject.value(apiDefs::key::subscriptionEndDate).toString();
 
     accountInfoData.configType = apiUtils::getConfigType(serverConfig);
+
+    const QJsonObject apiConfig = serverConfig.value(apiDefs::key::apiConfig).toObject();
+    accountInfoData.isInAppPurchase = apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false);
 
     accountInfoData.subscriptionDescription = accountInfoObject.value(apiDefs::key::subscriptionDescription).toString();
 
@@ -187,6 +199,7 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[IsProtocolSelectionSupportedRole] = "isProtocolSelectionSupported";
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
     roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
+    roles[IsInAppPurchaseRole] = "isInAppPurchase";
 
     return roles;
 }

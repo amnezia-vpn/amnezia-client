@@ -757,6 +757,9 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
         newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
         newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));
         newApiConfig.insert(apiDefs::key::vpnKey, apiConfig.value(apiDefs::key::vpnKey));
+        if (apiConfig.contains(apiDefs::key::isInAppPurchase)) {
+            newApiConfig.insert(apiDefs::key::isInAppPurchase, apiConfig.value(apiDefs::key::isInAppPurchase));
+        }
 
         newServerConfig.insert(configKey::apiConfig, newApiConfig);
         newServerConfig.insert(configKey::authData, gatewayRequestData.authData);
@@ -782,7 +785,11 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
         return true;
     } else {
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
-            emit subscriptionExpiredOnServer();
+            if (!apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false)) {
+                emit subscriptionExpiredOnServer();
+            } else {
+                emit errorOccurred(errorCode);
+            }
         } else {
             emit errorOccurred(errorCode);
         }

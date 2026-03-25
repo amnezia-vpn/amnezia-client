@@ -21,7 +21,8 @@ public:
         HasExpiredWorkerRole,
         IsProtocolSelectionSupportedRole,
         IsSubscriptionExpiredRole,
-        IsSubscriptionExpiringSoonRole
+        IsSubscriptionExpiringSoonRole,
+        IsInAppPurchaseRole
     };
 
     explicit ApiAccountInfoModel(QObject *parent = nullptr);
@@ -57,6 +58,8 @@ private:
         QStringList supportedProtocols;
 
         QString subscriptionDescription;
+
+        bool isInAppPurchase = false;
     };
 
     AccountInfoData m_accountInfoData;

@@ -183,6 +183,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         if (configVersion != apiDefs::ConfigSource::AmneziaGateway) {
             return false;
         }
+        if (apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false)) {
+            return false;
+        }
         const QString endDate =
                 apiConfig.value(apiDefs::key::subscription).toObject().value(apiDefs::key::endDate).toString();
         if (endDate.isEmpty()) {
@@ -192,6 +195,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     }
     case IsSubscriptionExpiringSoonRole: {
         if (configVersion != apiDefs::ConfigSource::AmneziaGateway) {
+            return false;
+        }
+        if (apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false)) {
             return false;
         }
         const QString endDate =
