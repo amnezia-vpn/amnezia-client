@@ -67,7 +67,12 @@ ListViewType {
                     Layout.fillWidth: true
 
                     text: name
-                    descriptionText: serverDescription
+                    descriptionText: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
+                        ? (isSubscriptionExpired ? qsTr("Subscription expired. Please renew.") : qsTr("Subscription expiring soon."))
+                        : serverDescription
+                    descriptionColor: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
+                        ? (isSubscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot)
+                        : AmneziaStyle.color.mutedGray
 
                     checked: index === root.selectedIndex
                     checkable: !ConnectionController.isConnected
@@ -124,18 +129,6 @@ ListViewType {
                         drawer.closeTriggered()
                     }
                 }
-            }
-
-            CaptionTextType {
-                visible: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 64
-                Layout.bottomMargin: 8
-
-                text: isSubscriptionExpired ? qsTr("Subscription expired. Please renew.") : qsTr("Subscription expiring soon.")
-                color: isSubscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
-                wrapMode: Text.WordWrap
             }
 
             DividerType {

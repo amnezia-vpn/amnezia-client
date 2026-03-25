@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
-import Qt5Compat.GraphicalEffects
 
 import SortFilterProxyModel 0.2
 
@@ -55,10 +54,12 @@ PageType {
 
     property bool isSubscriptionExpired: false
     property bool isSubscriptionExpiringSoon: false
+    property bool isSubscriptionRenewalAvailable: false
 
     function updateSubscriptionState() {
         root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
         root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
+        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isComponentVisible")
     }
 
     Component.onCompleted: {
@@ -124,7 +125,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon ? 0 : 10
 
                 actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
@@ -135,13 +136,13 @@ PageType {
                 }
             }
 
-            Text {
+            ParagraphTextType {
                 visible: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 4
+                Layout.topMargin: 12
 
                 text: root.isSubscriptionExpired
                     ? qsTr("Subscription expired")
@@ -150,10 +151,6 @@ PageType {
                 color: root.isSubscriptionExpired
                     ? AmneziaStyle.color.vibrantRed
                     : AmneziaStyle.color.goldenApricot
-
-                font.pixelSize: 14
-                font.weight: Font.Medium
-                wrapMode: Text.WordWrap
             }
 
             ParagraphTextType {
@@ -170,7 +167,8 @@ PageType {
             }
 
             BasicButtonType {
-                visible: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
+                visible: (root.isSubscriptionExpired || root.isSubscriptionExpiringSoon)
+                    && root.isSubscriptionRenewalAvailable
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -226,52 +224,33 @@ PageType {
 
             readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
 
-            Item {
+            BasicButtonType {
                 visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+                    && root.isSubscriptionRenewalAvailable
 
-                Layout.fillWidth: true
-                implicitHeight: renewRow.implicitHeight + 32
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 16
+                Layout.bottomMargin: 16
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: ApiSettingsController.getRenewalLink()
-                }
+                implicitHeight: 25
 
-                Row {
-                    id: renewRow
-                    anchors.centerIn: parent
-                    spacing: 12
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                textColor: AmneziaStyle.color.goldenApricot
+                leftImageSource: "qrc:/images/controls/refresh-cw.svg"
+                leftImageColor: AmneziaStyle.color.goldenApricot
 
-                    Item {
-                        width: renewIcon.implicitWidth
-                        height: renewIcon.implicitHeight
-                        anchors.verticalCenter: parent.verticalCenter
+                text: qsTr("Renew subscription")
 
-                        Image {
-                            id: renewIcon
-                            source: "qrc:/images/controls/refresh-cw.svg"
-                        }
-
-                        ColorOverlay {
-                            anchors.fill: renewIcon
-                            source: renewIcon
-                            color: AmneziaStyle.color.goldenApricot
-                        }
-                    }
-
-                    Text {
-                        text: qsTr("Renew subscription")
-                        color: AmneziaStyle.color.goldenApricot
-                        font.pixelSize: 18
-                        font.weight: Font.Medium
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
+                clickedFunc: function() {
+                    ApiSettingsController.getRenewalLink()
                 }
             }
 
             DividerType {
                 visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+                    && root.isSubscriptionRenewalAvailable
             }
 
             SwitcherType {

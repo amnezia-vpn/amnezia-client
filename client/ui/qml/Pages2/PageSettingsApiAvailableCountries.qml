@@ -20,9 +20,12 @@ PageType {
     property var processedServer
     property bool subscriptionExpired: false
     property bool subscriptionExpiringSoon: false
+    property bool isSubscriptionRenewalAvailable: false
+
     function updateSubscriptionState() {
         root.subscriptionExpired = ServersModel.getProcessedServerData("isSubscriptionExpired")
         root.subscriptionExpiringSoon = ServersModel.getProcessedServerData("isSubscriptionExpiringSoon")
+        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isComponentVisible")
     }
 
     Component.onCompleted: {
@@ -34,6 +37,14 @@ PageType {
 
         function onProcessedServerChanged() {
             root.processedServer = proxyServersModel.get(0)
+            root.updateSubscriptionState()
+        }
+    }
+
+    Connections {
+        target: ApiAccountInfoModel
+
+        function onModelReset() {
             root.updateSubscriptionState()
         }
     }
@@ -87,7 +98,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 4
+                Layout.bottomMargin: root.subscriptionExpired || root.subscriptionExpiringSoon ? 0 : 4
 
                 actionButtonImage: "qrc:/images/controls/settings.svg"
 
@@ -105,26 +116,27 @@ PageType {
                 }
             }
 
-            CaptionTextType {
+            ParagraphTextType {
                 visible: root.subscriptionExpired || root.subscriptionExpiringSoon
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 4
+                Layout.topMargin: 12
 
                 text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
                 color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
             }
 
             BasicButtonType {
-                visible: root.subscriptionExpired || root.subscriptionExpiringSoon
+                visible: (root.subscriptionExpired || root.subscriptionExpiringSoon)
+                    && root.isSubscriptionRenewalAvailable
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 8
-                Layout.bottomMargin: 4
+                Layout.topMargin: 28
+                Layout.bottomMargin: 0
 
                 defaultColor: AmneziaStyle.color.paleGray
                 hoveredColor: AmneziaStyle.color.lightGray
@@ -138,11 +150,11 @@ PageType {
                 }
             }
 
-            CaptionTextType {
+            ParagraphTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: (root.subscriptionExpired || root.subscriptionExpiringSoon) ? 8 : 4
+                Layout.topMargin: (root.subscriptionExpired || root.subscriptionExpiringSoon) ? 12 : 4
                 Layout.bottomMargin: 8
 
                 text: qsTr("Location for connection")
