@@ -97,6 +97,8 @@ public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig);
     amnezia::XrayProtocolConfig getProtocolConfig();
     bool isServerSettingsEqual();
+    void resetToDefaults();
+    void applyServerConfig(const amnezia::XrayServerConfig &serverConfig);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

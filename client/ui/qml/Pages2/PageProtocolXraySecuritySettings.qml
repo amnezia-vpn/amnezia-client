@@ -14,16 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    // Temporary local state — will be replaced by model roles
-    property int selectedSecurity: 2  // 0=None, 1=TLS, 2=Reality
-
-    // Shared TLS + Reality fields
-    property string fingerprint: "Mozilla/5.0"
-    property string serverName: "cdn.example.com"
-
-    // TLS-only fields
-    property string alpn: "HTTP/2"
-
     BackButtonType {
         id: backButton
         anchors.top: parent.top
@@ -32,17 +22,17 @@ PageType {
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
     }
 
-    FlickableType {
-        id: flickable
+    ListViewType {
+        id: listView
         anchors.top: backButton.bottom
         anchors.bottom: saveButton.top
         anchors.left: parent.left
         anchors.right: parent.right
-        contentHeight: mainColumn.implicitHeight
 
-        ColumnLayout {
-            id: mainColumn
-            width: flickable.width
+        model: XrayConfigModel
+
+        delegate: ColumnLayout {
+            width: listView.width
             spacing: 0
 
             Header2TextType {
@@ -54,50 +44,45 @@ PageType {
                 text: qsTr("Security")
             }
 
-            // ── Radio: None ───────────────────────────────────────────
             VerticalRadioButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("None")
-                checked: root.selectedSecurity === 0
-                onClicked: root.selectedSecurity = 0
+                checked: security === "none"
+                onClicked: security = "none"
             }
 
             DividerType {
             }
 
-            // ── Radio: TLS ────────────────────────────────────────────
             VerticalRadioButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("TLS")
-                checked: root.selectedSecurity === 1
-                onClicked: root.selectedSecurity = 1
+                checked: security === "tls"
+                onClicked: security = "tls"
             }
 
             DividerType {
             }
 
-            // ── Radio: Reality ────────────────────────────────────────
             VerticalRadioButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Reality")
-                checked: root.selectedSecurity === 2
-                onClicked: root.selectedSecurity = 2
+                checked: security === "reality"
+                onClicked: security = "reality"
             }
 
             DividerType {
             }
 
-            // ══════════════════════════════════════════════════════════
-            // TLS fields (ALPN + Fingerprint + SNI)
-            // ══════════════════════════════════════════════════════════
+            // ── TLS fields ────────────────────────────────────────────
             ColumnLayout {
-                visible: root.selectedSecurity === 1
+                visible: security === "tls"
                 Layout.fillWidth: true
                 spacing: 0
 
@@ -107,7 +92,7 @@ PageType {
                     Layout.topMargin: 16
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.alpn
+                    text: alpn
                     descriptionText: qsTr("ALPN")
                     headerText: qsTr("ALPN")
                     drawerParent: root
@@ -125,17 +110,24 @@ PageType {
                             }
                         }
                         clickedFunction: function () {
-                            root.alpn = selectedText
+                            alpn = selectedText
                             tlsAlpnDropDown.text = selectedText
                             tlsAlpnDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.alpn) {
+                                if (model.get(i).name === alpn) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
+                        }
+                    }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            tlsAlpnDropDown.text = alpn
                         }
                     }
                 }
@@ -146,7 +138,7 @@ PageType {
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.fingerprint
+                    text: fingerprint
                     descriptionText: qsTr("Fingerprint")
                     headerText: qsTr("Fingerprint")
                     drawerParent: root
@@ -157,45 +149,52 @@ PageType {
                                 name: "Mozilla/5.0"
                             }
                             ListElement {
-                                name: "Chrome"
+                                name: "chrome"
                             }
                             ListElement {
-                                name: "Firefox"
+                                name: "firefox"
                             }
                             ListElement {
-                                name: "Safari"
+                                name: "safari"
                             }
                             ListElement {
-                                name: "iOS"
+                                name: "ios"
                             }
                             ListElement {
-                                name: "Android"
+                                name: "android"
                             }
                             ListElement {
-                                name: "Edge"
+                                name: "edge"
                             }
                             ListElement {
                                 name: "360"
                             }
                             ListElement {
-                                name: "QQ"
+                                name: "qq"
                             }
                             ListElement {
-                                name: "Random"
+                                name: "random"
                             }
                         }
                         clickedFunction: function () {
-                            root.fingerprint = selectedText
+                            fingerprint = selectedText
                             tlsFingerprintDropDown.text = selectedText
                             tlsFingerprintDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.fingerprint) {
+                                if (model.get(i).name === fingerprint) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
+                        }
+                    }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            tlsFingerprintDropDown.text = fingerprint
                         }
                     }
                 }
@@ -206,16 +205,16 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
-                    textField.text: root.serverName
-                    textField.onEditingFinished: root.serverName = textField.text
+                    textField.text: sni
+                    textField.onEditingFinished: {
+                        if (textField.text !== sni) sni = textField.text
+                    }
                 }
             }
 
-            // ══════════════════════════════════════════════════════════
-            // Reality fields (Fingerprint + SNI)
-            // ══════════════════════════════════════════════════════════
+            // ── Reality fields ────────────────────────────────────────
             ColumnLayout {
-                visible: root.selectedSecurity === 2
+                visible: security === "reality"
                 Layout.fillWidth: true
                 spacing: 0
 
@@ -225,7 +224,7 @@ PageType {
                     Layout.topMargin: 16
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.fingerprint
+                    text: fingerprint
                     descriptionText: qsTr("Fingerprint")
                     headerText: qsTr("Fingerprint")
                     drawerParent: root
@@ -236,45 +235,52 @@ PageType {
                                 name: "Mozilla/5.0"
                             }
                             ListElement {
-                                name: "Chrome"
+                                name: "chrome"
                             }
                             ListElement {
-                                name: "Firefox"
+                                name: "firefox"
                             }
                             ListElement {
-                                name: "Safari"
+                                name: "safari"
                             }
                             ListElement {
-                                name: "iOS"
+                                name: "ios"
                             }
                             ListElement {
-                                name: "Android"
+                                name: "android"
                             }
                             ListElement {
-                                name: "Edge"
+                                name: "edge"
                             }
                             ListElement {
                                 name: "360"
                             }
                             ListElement {
-                                name: "QQ"
+                                name: "qq"
                             }
                             ListElement {
-                                name: "Random"
+                                name: "random"
                             }
                         }
                         clickedFunction: function () {
-                            root.fingerprint = selectedText
+                            fingerprint = selectedText
                             realityFingerprintDropDown.text = selectedText
                             realityFingerprintDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.fingerprint) {
+                                if (model.get(i).name === fingerprint) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
+                        }
+                    }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            realityFingerprintDropDown.text = fingerprint
                         }
                     }
                 }
@@ -285,8 +291,10 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
-                    textField.text: root.serverName
-                    textField.onEditingFinished: root.serverName = textField.text
+                    textField.text: sni
+                    textField.onEditingFinished: {
+                        if (textField.text !== sni) sni = textField.text
+                    }
                 }
             }
 
@@ -304,11 +312,10 @@ PageType {
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-
         text: qsTr("Save")
         onClicked: {
             forceActiveFocus()
-            // XrayConfigModel.setSecurity(...)
+            PageController.closePage()
         }
         Keys.onEnterPressed: clicked()
         Keys.onReturnPressed: clicked()

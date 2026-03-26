@@ -14,14 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    // Temporary local state
-    property string xPaddingBytes: "0—0"
-    property bool   xPaddingObfsMode: true
-    property string xPaddingKey: "www.googletagmanager.com"
-    property string xPaddingHeader: ""
-    property string xPaddingPlacement: "Cookie"
-    property string xPaddingMethod: "Repeat-x"
-
     BackButtonType {
         id: backButton
         anchors.top: parent.top
@@ -30,20 +22,19 @@ PageType {
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
     }
 
-    FlickableType {
-        id: flickable
+    ListViewType {
+        id: listView
         anchors.top: backButton.bottom
         anchors.bottom: saveButton.top
         anchors.left: parent.left
         anchors.right: parent.right
-        contentHeight: mainColumn.implicitHeight
 
-        ColumnLayout {
-            id: mainColumn
-            width: flickable.width
+        model: XrayConfigModel
+
+        delegate: ColumnLayout {
+            width: listView.width
             spacing: 0
 
-            // ── Header ────────────────────────────────────────────────
             Header2TextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -53,11 +44,11 @@ PageType {
                 text: qsTr("xPadding")
             }
 
-            // ── xPaddingBytes nav row ─────────────────────────────────
+            // xPaddingBytes — min/max display row
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("xPaddingBytes")
-                descriptionText: root.xPaddingBytes
+                descriptionText: (xPaddingBytesMin !== "" ? xPaddingBytesMin : "0") + "—" + (xPaddingBytesMax !== "" ? xPaddingBytesMax : "0")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 clickedFunction: function () {
                     PageController.goToPage(PageEnum.PageProtocolXrayXPaddingBytesSettings)
@@ -67,48 +58,48 @@ PageType {
             DividerType {
             }
 
-            // ── xPaddingObfsMode switcher ─────────────────────────────
             SwitcherType {
                 Layout.fillWidth: true
                 Layout.margins: 16
                 text: qsTr("xPaddingObfsMode")
-                checked: root.xPaddingObfsMode
-                onToggled: root.xPaddingObfsMode = checked
+                checked: xPaddingObfsMode
+                onToggled: xPaddingObfsMode = checked
             }
 
             DividerType {
             }
 
-            // ── xPaddingKey ───────────────────────────────────────────
             TextFieldWithHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
                 headerText: qsTr("xPaddingKey")
-                textField.text: root.xPaddingKey
-                textField.onEditingFinished: root.xPaddingKey = textField.text
+                textField.text: xPaddingKey
+                textField.onEditingFinished: {
+                    if (textField.text !== xPaddingKey) xPaddingKey = textField.text
+                }
             }
 
-            // ── xPaddingHeader ────────────────────────────────────────
             TextFieldWithHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 8
                 headerText: qsTr("xPaddingHeader")
-                textField.text: root.xPaddingHeader
-                textField.onEditingFinished: root.xPaddingHeader = textField.text
+                textField.text: xPaddingHeader
+                textField.onEditingFinished: {
+                    if (textField.text !== xPaddingHeader) xPaddingHeader = textField.text
+                }
             }
 
-            // ── xPaddingPlacement dropdown ────────────────────────────
             DropDownType {
                 id: placementDropDown
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                text: root.xPaddingPlacement
+                text: xPaddingPlacement
                 descriptionText: qsTr("xPaddingPlacement")
                 headerText: qsTr("xPaddingPlacement")
                 drawerParent: root
@@ -129,29 +120,35 @@ PageType {
                         }
                     }
                     clickedFunction: function () {
-                        root.xPaddingPlacement = selectedText
+                        xPaddingPlacement = selectedText
                         placementDropDown.text = selectedText
                         placementDropDown.closeTriggered()
                     }
                     Component.onCompleted: {
                         for (var i = 0; i < model.count; i++) {
-                            if (model.get(i).name === root.xPaddingPlacement) {
+                            if (model.get(i).name === xPaddingPlacement) {
                                 selectedIndex = i;
                                 break
                             }
                         }
                     }
                 }
+                Connections {
+                    target: XrayConfigModel
+
+                    function onDataChanged() {
+                        placementDropDown.text = xPaddingPlacement
+                    }
+                }
             }
 
-            // ── xPaddingMethod dropdown ───────────────────────────────
             DropDownType {
                 id: methodDropDown
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                text: root.xPaddingMethod
+                text: xPaddingMethod
                 descriptionText: qsTr("xPaddingMethod")
                 headerText: qsTr("xPaddingMethod")
                 drawerParent: root
@@ -169,17 +166,24 @@ PageType {
                         }
                     }
                     clickedFunction: function () {
-                        root.xPaddingMethod = selectedText
+                        xPaddingMethod = selectedText
                         methodDropDown.text = selectedText
                         methodDropDown.closeTriggered()
                     }
                     Component.onCompleted: {
                         for (var i = 0; i < model.count; i++) {
-                            if (model.get(i).name === root.xPaddingMethod) {
+                            if (model.get(i).name === xPaddingMethod) {
                                 selectedIndex = i;
                                 break
                             }
                         }
+                    }
+                }
+                Connections {
+                    target: XrayConfigModel
+
+                    function onDataChanged() {
+                        methodDropDown.text = xPaddingMethod
                     }
                 }
             }
@@ -190,7 +194,6 @@ PageType {
         }
     }
 
-    // ── Save button ───────────────────────────────────────────────────
     BasicButtonType {
         id: saveButton
         anchors.bottom: parent.bottom
@@ -199,11 +202,10 @@ PageType {
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-
         text: qsTr("Save")
         onClicked: {
             forceActiveFocus()
-            // XrayConfigModel.setXPadding(...)
+            PageController.closePage()
         }
         Keys.onEnterPressed: clicked()
         Keys.onReturnPressed: clicked()

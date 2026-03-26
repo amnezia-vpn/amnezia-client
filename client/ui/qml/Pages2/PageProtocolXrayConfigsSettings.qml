@@ -14,26 +14,11 @@ import "../Components"
 PageType {
     id: root
 
-    // Temporary model — will be replaced by real XrayConfigsModel
-    ListModel {
-        id: configsModel
-        ListElement {
-            configName: "XHTTP TLS Reality"; configDate: "24.02.2026 11:12"
-        }
-        ListElement {
-            configName: "RAW (TCP) TLS Reality"; configDate: "24.02.2026 11:14"
-        }
-        ListElement {
-            configName: "RAW (TCP) TLS Reality"; configDate: "24.02.2026 11:14"
-        }
-        ListElement {
-            configName: "RAW (TCP) TLS Reality"; configDate: "24.02.2026 11:15"
-        }
-    }
+    property string selectedConfigName:  ""
+    property int    selectedConfigIndex: -1
 
-    // Currently selected config for the drawer
-    property string selectedConfigName: ""
-    property int selectedConfigIndex: -1
+    // Reload the list every time we open this page
+    Component.onCompleted: XrayConfigsModel.reload()
 
     BackButtonType {
         id: backButton
@@ -50,11 +35,12 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
+        model: XrayConfigsModel
+
         header: ColumnLayout {
             width: listView.width
             spacing: 0
 
-            // ── Header ────────────────────────────────────────────────
             Header2TextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -65,32 +51,37 @@ PageType {
                 wrapMode: Text.WordWrap
             }
 
-            // ── Create config from current settings ───────────────────
+            // ── Create from current settings ──────────────────────────
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("Create configuration based on current settings")
                 textMaximumLineCount: 2
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
-                    // XrayConfigModel.createConfigFromCurrent()
+                clickedFunction: function() {
+                    XrayConfigsModel.createFromCurrent(XrayConfigModel.getProtocolConfig().serverConfig)
                 }
             }
 
-            DividerType {
-            }
+            DividerType {}
 
             // ── Export ────────────────────────────────────────────────
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("Export settings")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
-                    // XrayConfigModel.exportSettings()
+                clickedFunction: function() {
+                    if (root.selectedConfigIndex >= 0) {
+                        var json = XrayConfigsModel.exportToJson(root.selectedConfigIndex)
+                        ExportController.shareText(json, "xray_config.json")
+                    } else if (XrayConfigsModel.rowCount() > 0) {
+                        // Export the first one if none selected
+                        var json = XrayConfigsModel.exportToJson(0)
+                        ExportController.shareText(json, "xray_config.json")
+                    }
                 }
             }
 
-            DividerType {
-            }
+            DividerType {}
 
             // ── Import ────────────────────────────────────────────────
             LabelWithButtonType {
@@ -98,15 +89,14 @@ PageType {
                 text: qsTr("Import settings")
                 descriptionText: qsTr("In JSON format")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
-                    // XrayConfigModel.importSettings()
+                clickedFunction: function() {
+                    ImportController.importConfig()
                 }
             }
 
-            DividerType {
-            }
+            DividerType {}
 
-            // ── Configurations section label ──────────────────────────
+            // ── Section label ─────────────────────────────────────────
             CaptionTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -115,42 +105,64 @@ PageType {
                 Layout.bottomMargin: 8
                 text: qsTr("Configurations")
                 color: AmneziaStyle.color.mutedGray
+                visible: XrayConfigsModel.rowCount() > 0
             }
         }
 
-        model: configsModel
+        // ── Empty state ───────────────────────────────────────────────
+        footer: ColumnLayout {
+            width: listView.width
+            visible: XrayConfigsModel.rowCount() === 0
+            spacing: 0
 
+            Item { Layout.preferredHeight: 32 }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                text: qsTr("No saved configurations yet.\nCreate one from the current settings.")
+                color: AmneziaStyle.color.mutedGray
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+        }
+
+        // ── Config list items ─────────────────────────────────────────
         delegate: ColumnLayout {
             width: listView.width
             spacing: 0
 
             LabelWithButtonType {
                 Layout.fillWidth: true
-
                 text: configName
                 descriptionText: configDate
-
                 rightImageSource: "qrc:/images/controls/more-vertical.svg"
-
-                clickedFunction: function () {
-                    root.selectedConfigName = configName
+                clickedFunction: function() {
+                    root.selectedConfigName  = configName
                     root.selectedConfigIndex = index
                     configActionsDrawer.openTriggered()
                 }
             }
 
-            DividerType {
-            }
+            DividerType {}
+        }
+    }
+
+    // ── Import result handler ─────────────────────────────────────────
+    Connections {
+        target: XrayConfigsModel
+        function onImportFailed(errorMessage) {
+            PageController.showNotificationMessage(errorMessage)
         }
     }
 
     // ── Per-config actions drawer ─────────────────────────────────────
     DrawerType2 {
         id: configActionsDrawer
-
         parent: root
         anchors.fill: parent
-        expandedHeight: root.height * 0.4
+        expandedHeight: root.height * 0.35
 
         expandedStateContent: ColumnLayout {
             id: drawerContent
@@ -166,7 +178,7 @@ PageType {
             BackButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                backButtonFunction: function () {
+                backButtonFunction: function() {
                     configActionsDrawer.closeTriggered()
                 }
             }
@@ -181,37 +193,57 @@ PageType {
                 wrapMode: Text.WordWrap
             }
 
-            // ── Apply config ──────────────────────────────────────────
+            // Apply
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("Apply configuration")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
+                clickedFunction: function() {
                     configActionsDrawer.closeTriggered()
-                    // XrayConfigModel.applyConfig(root.selectedConfigIndex)
+                    var serverConfig = XrayConfigsModel.applyConfig(root.selectedConfigIndex)
+                    XrayConfigModel.applyServerConfig(serverConfig)
+                    PageController.closePage()
                 }
             }
 
-            DividerType {
+            DividerType {}
+
+            // Export this config
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                text: qsTr("Export configuration")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                clickedFunction: function() {
+                    configActionsDrawer.closeTriggered()
+                    var json = XrayConfigsModel.exportToJson(root.selectedConfigIndex)
+                    ExportController.shareText(json, "xray_config.json")
+                }
             }
 
-            // ── Delete config ─────────────────────────────────────────
+            DividerType {}
+
+            // Delete
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("Delete configuration")
                 textColor: AmneziaStyle.color.vibrantRed
-                clickedFunction: function () {
+                clickedFunction: function() {
                     configActionsDrawer.closeTriggered()
-                    // XrayConfigModel.deleteConfig(root.selectedConfigIndex)
+                    var yesButtonFunction = function() {
+                        XrayConfigsModel.removeConfig(root.selectedConfigIndex)
+                        root.selectedConfigIndex = -1
+                        root.selectedConfigName  = ""
+                    }
+                    showQuestionDrawer(
+                        qsTr("Delete configuration?"),
+                        qsTr("This action cannot be undone."),
+                        qsTr("Delete"), qsTr("Cancel"),
+                        yesButtonFunction, function() {})
                 }
             }
 
-            DividerType {
-            }
-
-            Item {
-                Layout.preferredHeight: 16
-            }
+            DividerType {}
+            Item { Layout.preferredHeight: 16 }
         }
     }
 }

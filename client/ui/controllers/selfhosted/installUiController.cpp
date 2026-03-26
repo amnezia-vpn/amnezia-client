@@ -480,7 +480,8 @@ void InstallUiController::updateProtocolConfigModel(int serverIndex, int contain
     case Proto::Awg: updateIfPresent(m_awgConfigModel, containerConfig.getAwgProtocolConfig()); break;
     case Proto::WireGuard: updateIfPresent(m_wireGuardConfigModel, containerConfig.getWireGuardProtocolConfig()); break;
     case Proto::OpenVpn: updateIfPresent(m_openVpnConfigModel, containerConfig.getOpenVpnProtocolConfig()); break;
-    case Proto::Xray: updateIfPresent(m_xrayConfigModel, containerConfig.getXrayProtocolConfig()); break;
+    case Proto::Xray:
+    case Proto::SSXray: updateIfPresent(m_xrayConfigModel, containerConfig.getXrayProtocolConfig()); break;
     case Proto::TorWebSite: updateIfPresent(m_torConfigModel, containerConfig.getTorProtocolConfig()); break;
     case Proto::Sftp: updateIfPresent(m_sftpConfigModel, containerConfig.getSftpProtocolConfig()); break;
     case Proto::Socks5Proxy: updateIfPresent(m_socks5ConfigModel, containerConfig.getSocks5ProxyProtocolConfig()); break;

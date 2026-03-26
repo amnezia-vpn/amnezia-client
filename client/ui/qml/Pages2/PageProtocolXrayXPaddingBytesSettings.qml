@@ -41,48 +41,29 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 0
                 Layout.bottomMargin: 24
-                text: qsTr("Flow")
+                text: qsTr("xPaddingBytes")
             }
 
-            VerticalRadioButton {
+            CaptionTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                text: qsTr("Empty")
-                checked: flow === ""
-                onClicked: flow = ""
+                Layout.bottomMargin: 8
+                text: qsTr("Range")
+                color: AmneziaStyle.color.mutedGray
             }
 
-            DividerType {
-            }
-
-            VerticalRadioButton {
+            MinMaxRowType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                text: "xtls-rprx-vision"
-                checked: flow === "xtls-rprx-vision"
-                onClicked: flow = "xtls-rprx-vision"
+                minValue: xPaddingBytesMin
+                maxValue: xPaddingBytesMax
+                onMinChanged: xPaddingBytesMin = val
+                onMaxChanged: xPaddingBytesMax = val
             }
 
-            DividerType {
-            }
-
-            VerticalRadioButton {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                text: "xtls-rprx-vision-udp443"
-                checked: flow === "xtls-rprx-vision-udp443"
-                onClicked: flow = "xtls-rprx-vision-udp443"
-            }
-
-            DividerType {
-            }
-
-            Item {
-                Layout.preferredHeight: 16
-            }
+            Item { Layout.preferredHeight: 16 }
         }
     }
 

@@ -50,7 +50,6 @@ PageType {
 
             spacing: 0
 
-            // ── Header ────────────────────────────────────────────────
             RowLayout {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -69,22 +68,17 @@ PageType {
                     implicitHeight: 40
                     image: "qrc:/images/controls/more-vertical.svg"
                     imageColor: AmneziaStyle.color.mutedGray
-                    onClicked: function () {
-                        PageController.goToPage(PageEnum.PageProtocolXrayConfigsSettings)
-                    }
+                    onClicked: PageController.goToPage(PageEnum.PageProtocolXrayConfigsSettings)
                 }
             }
 
-            // ── "More about settings" link ────────────────────────────
             LabelTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 4
-
                 text: qsTr("More about settings")
                 color: AmneziaStyle.color.burntOrange
-
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -92,43 +86,32 @@ PageType {
                 }
             }
 
-            // ── Port field ────────────────────────────────────────────
             TextFieldWithHeaderType {
                 id: portTextField
-
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-
                 enabled: listView.enabled
-
                 headerText: qsTr("Port")
                 textField.text: port
                 textField.maximumLength: 5
                 textField.validator: IntValidator {
                     bottom: 1; top: 65535
                 }
-
                 textField.onEditingFinished: {
-                    if (textField.text !== port) {
-                        port = textField.text
-                    }
+                    if (textField.text !== port) port = textField.text
                 }
-
                 checkEmptyText: true
             }
 
-            // ── Transport row ─────────────────────────────────────────
             LabelWithButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-
                 text: qsTr("Transport")
-                descriptionText: "RAW (TCP)"  // TODO: model role
+                descriptionText: transport
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
-
                 clickedFunction: function () {
                     PageController.goToPage(PageEnum.PageProtocolXrayTransportSettings)
                 }
@@ -137,15 +120,12 @@ PageType {
             DividerType {
             }
 
-            // ── Security row ──────────────────────────────────────────
             LabelWithButtonType {
                 Layout.fillWidth: true
-
                 text: qsTr("Security")
-                descriptionText: "TLS"  // TODO: model role
+                descriptionText: security
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
-
                 clickedFunction: function () {
                     PageController.goToPage(PageEnum.PageProtocolXraySecuritySettings)
                 }
@@ -154,15 +134,12 @@ PageType {
             DividerType {
             }
 
-            // ── Flow row ──────────────────────────────────────────────
             LabelWithButtonType {
                 Layout.fillWidth: true
-
                 text: qsTr("Flow")
-                descriptionText: "xtls-rprx-vision"  // TODO: model role
+                descriptionText: flow
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
-
                 clickedFunction: function () {
                     PageController.goToPage(PageEnum.PageProtocolXrayFlowSettings)
                 }
@@ -171,83 +148,58 @@ PageType {
             DividerType {
             }
 
-            // ── Spacer ────────────────────────────────────────────────
             Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 24
+                Layout.fillWidth: true; Layout.preferredHeight: 24
             }
 
-            // ── Save button ───────────────────────────────────────────
             BasicButtonType {
                 id: saveButton
-
                 Layout.fillWidth: true
                 Layout.bottomMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-
                 enabled: portTextField.errorText === ""
-
                 text: qsTr("Save")
-
                 onClicked: function () {
                     forceActiveFocus()
-
                     var headerText = qsTr("Save settings?")
                     var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
-
                     var yesButtonFunction = function () {
                         if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
                             PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                             return
                         }
-
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
                     }
                     var noButtonFunction = function () {
-                        if (!GC.isMobile()) {
-                            saveButton.forceActiveFocus()
-                        }
+                        if (!GC.isMobile()) saveButton.forceActiveFocus()
                     }
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
-
                 Keys.onEnterPressed: saveButton.clicked()
                 Keys.onReturnPressed: saveButton.clicked()
             }
 
-            // ── Reset settings ────────────────────────────────────────
             LabelWithButtonType {
                 Layout.fillWidth: true
-
                 text: qsTr("Reset settings")
                 textColor: AmneziaStyle.color.vibrantRed
                 visible: listView.enabled
-
                 clickedFunction: function () {
-                    var headerText = qsTr("Reset settings?")
-                    var descriptionText = qsTr("All XRay settings will be restored to defaults.")
-                    var yesButtonText = qsTr("Reset")
-                    var noButtonText = qsTr("Cancel")
-
                     var yesButtonFunction = function () {
                         XrayConfigModel.resetToDefaults()
                     }
-                    var noButtonFunction = function () {
-                    }
-
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText,
-                        yesButtonFunction, noButtonFunction)
+                    showQuestionDrawer(qsTr("Reset settings?"), qsTr("All XRay settings will be restored to defaults."),
+                        qsTr("Reset"), qsTr("Cancel"), yesButtonFunction, function () {
+                        })
                 }
             }
 
-            // ── Bottom padding ────────────────────────────────────────
             Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 32
+                Layout.fillWidth: true; Layout.preferredHeight: 32
             }
         }
     }
