@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.files import copy, collect_libs
+from conan.tools.files import copy
 from conan.tools.scm import Git
 from conan.errors import ConanInvalidConfiguration
 

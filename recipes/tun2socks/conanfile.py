@@ -65,7 +65,8 @@ class Tun2Socks(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        env = Environment()
+        env = tc.environment()
+        env.define("LDFLAGS", "")
         env.define("CGO_LDFLAGS", tc.ldflags)
         env.define("CGO_CFLAGS", tc.cflags)
         env.define("GOOS", self._goos)

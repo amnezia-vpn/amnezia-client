@@ -1,10 +1,8 @@
-# conanfile.py
 from conan import ConanFile
 from conan.tools.files import get, copy, collect_libs, chdir, rename
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.env import Environment
 
 import os
 
@@ -63,7 +61,7 @@ class AmneziaXrayBindings(ConanFile):
         tc.make_args = [
             "LIB_ARC=libamnezia_xray.a"
         ]
-        env = Environment()
+        env = tc.environment()
         env.define("ARCH", self._goarch)
         env.define("GOARCH", self._goarch)
         env.define("GOOS", self._goos)

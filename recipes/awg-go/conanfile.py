@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.env import Environment
 
 import os
 
@@ -48,9 +47,11 @@ class AwgGo(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        env = Environment()
+        env = tc.environment()
         env.define("GOOS", self._goos)
         env.define("GOARCH", self._goarch)
+        env.define("CGO_LDFLAGS", tc.ldflags)
+        env.define("CGO_CFLAGS", tc.cflags)
         tc.generate(env)
 
     def build(self):
