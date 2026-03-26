@@ -79,7 +79,7 @@ namespace PageLoader
 
         PageDevMenu,
 
-        PageProtocolXrayConfigsSettings,
+        PageProtocolXraySnapshots,
         PageProtocolXrayTransportSettings,
         PageProtocolXrayXmuxSettings,
         PageProtocolXrayXPaddingSettings,

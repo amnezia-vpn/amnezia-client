@@ -25,7 +25,7 @@ PageType {
     ListViewType {
         id: listView
         anchors.top: backButton.bottom
-        anchors.bottom: saveButton.top
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
 
@@ -63,24 +63,26 @@ PageType {
                 onMaxChanged: xPaddingBytesMax = val
             }
 
-            Item { Layout.preferredHeight: 16 }
+            Item {
+                Layout.preferredHeight: 16
+            }
         }
     }
 
-    BasicButtonType {
-        id: saveButton
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        text: qsTr("Save")
-        onClicked: {
-            forceActiveFocus()
-            PageController.closePage()
-        }
-        Keys.onEnterPressed: clicked()
-        Keys.onReturnPressed: clicked()
-    }
+    //     BasicButtonType {
+    //         id: saveButton
+    //         anchors.bottom: parent.bottom
+    //         anchors.left: parent.left
+    //         anchors.right: parent.right
+    //         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+    //         anchors.leftMargin: 16
+    //         anchors.rightMargin: 16
+    //         text: qsTr("Save")
+    //         onClicked: {
+    //             forceActiveFocus()
+    //             PageController.closePage()
+    //         }
+    //         Keys.onEnterPressed: clicked()
+    //         Keys.onReturnPressed: clicked()
+    //     }
 }

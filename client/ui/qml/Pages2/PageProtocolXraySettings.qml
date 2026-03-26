@@ -68,7 +68,7 @@ PageType {
                     implicitHeight: 40
                     image: "qrc:/images/controls/more-vertical.svg"
                     imageColor: AmneziaStyle.color.mutedGray
-                    onClicked: PageController.goToPage(PageEnum.PageProtocolXrayConfigsSettings)
+                    onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
                 }
             }
 

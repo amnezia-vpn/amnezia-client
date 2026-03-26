@@ -1,4 +1,4 @@
-#include "xrayConfigsModel.h"
+#include "xrayConfigSnapshotsModel.h"
 
 #include <QJsonDocument>
 #include <QUuid>
@@ -26,13 +26,14 @@ XrayConfigSnapshot XrayConfigSnapshot::fromJson(const QJsonObject &json)
     return s;
 }
 
-XrayConfigsModel::XrayConfigsModel(SecureAppSettingsRepository *appSettings, QObject *parent)
-    : QAbstractListModel(parent), m_appSettings(appSettings)
+XrayConfigSnapshotsModel::XrayConfigSnapshotsModel(SecureAppSettingsRepository *appSettings,
+                                                   XrayConfigModel *xrayConfigModel, QObject *parent)
+    : QAbstractListModel(parent), m_appSettings(appSettings), m_xrayConfigModel(xrayConfigModel)
 {
     loadAll();
 }
 
-void XrayConfigsModel::loadAll()
+void XrayConfigSnapshotsModel::loadAll()
 {
     m_configs.clear();
     QByteArray raw = m_appSettings->xraySavedConfigs();
@@ -46,7 +47,7 @@ void XrayConfigsModel::loadAll()
     }
 }
 
-void XrayConfigsModel::persistAll()
+void XrayConfigSnapshotsModel::persistAll()
 {
     QJsonArray arr;
     for (const XrayConfigSnapshot &s : m_configs) {
@@ -55,13 +56,13 @@ void XrayConfigsModel::persistAll()
     m_appSettings->setXraySavedConfigs(QJsonDocument(arr).toJson(QJsonDocument::Compact));
 }
 
-int XrayConfigsModel::rowCount(const QModelIndex &parent) const
+int XrayConfigSnapshotsModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return m_configs.size();
 }
 
-QVariant XrayConfigsModel::data(const QModelIndex &index, int role) const
+QVariant XrayConfigSnapshotsModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= m_configs.size()) {
         return QVariant();
@@ -83,7 +84,7 @@ QVariant XrayConfigsModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-QHash<int, QByteArray> XrayConfigsModel::roleNames() const
+QHash<int, QByteArray> XrayConfigSnapshotsModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles[IdRole] = "configId";
@@ -92,14 +93,14 @@ QHash<int, QByteArray> XrayConfigsModel::roleNames() const
     return roles;
 }
 
-void XrayConfigsModel::reload()
+void XrayConfigSnapshotsModel::reload()
 {
     beginResetModel();
     loadAll();
     endResetModel();
 }
 
-void XrayConfigsModel::createFromCurrent(const amnezia::XrayServerConfig &serverConfig)
+void XrayConfigSnapshotsModel::createFromCurrent(const amnezia::XrayServerConfig &serverConfig)
 {
     XrayConfigSnapshot snapshot;
     snapshot.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
@@ -114,7 +115,7 @@ void XrayConfigsModel::createFromCurrent(const amnezia::XrayServerConfig &server
     persistAll();
 }
 
-amnezia::XrayServerConfig XrayConfigsModel::applyConfig(int index) const
+amnezia::XrayServerConfig XrayConfigSnapshotsModel::applyConfig(int index) const
 {
     if (index < 0 || index >= m_configs.size()) {
         return amnezia::XrayServerConfig {};
@@ -123,7 +124,7 @@ amnezia::XrayServerConfig XrayConfigsModel::applyConfig(int index) const
     return m_configs.at(index).serverConfig;
 }
 
-void XrayConfigsModel::removeConfig(int index)
+void XrayConfigSnapshotsModel::removeConfig(int index)
 {
     if (index < 0 || index >= m_configs.size()) {
         return;
@@ -137,7 +138,7 @@ void XrayConfigsModel::removeConfig(int index)
     emit configRemoved(index);
 }
 
-QString XrayConfigsModel::exportToJson(int index) const
+QString XrayConfigSnapshotsModel::exportToJson(int index) const
 {
     if (index < 0 || index >= m_configs.size()) {
         return {};
@@ -145,7 +146,7 @@ QString XrayConfigsModel::exportToJson(int index) const
     return QString::fromUtf8(QJsonDocument(m_configs.at(index).toJson()).toJson(QJsonDocument::Indented));
 }
 
-bool XrayConfigsModel::importFromJson(const QString &jsonString)
+bool XrayConfigSnapshotsModel::importFromJson(const QString &jsonString)
 {
     QJsonDocument doc = QJsonDocument::fromJson(jsonString.toUtf8());
     if (!doc.isObject()) {
@@ -170,7 +171,7 @@ bool XrayConfigsModel::importFromJson(const QString &jsonString)
     return true;
 }
 
-QString XrayConfigsModel::buildDisplayName(const amnezia::XrayServerConfig &cfg)
+QString XrayConfigSnapshotsModel::buildDisplayName(const amnezia::XrayServerConfig &cfg)
 {
     // Build a human-readable name: "XHTTP TLS Reality", "RAW Reality", etc.
     QString transport;
@@ -194,22 +195,22 @@ QString XrayConfigsModel::buildDisplayName(const amnezia::XrayServerConfig &cfg)
     return QString("%1 %2").arg(transport, security).trimmed();
 }
 
-void XrayConfigsModel::createFromXrayModel(XrayConfigModel *model)
+void XrayConfigSnapshotsModel::createFromCurrentModel()
 {
-    if (!model) {
+    if (!m_xrayConfigModel) {
         return;
     }
-    createFromCurrent(model->getProtocolConfig().serverConfig);
+    createFromCurrent(m_xrayConfigModel->getProtocolConfig().serverConfig);
 }
 
-void XrayConfigsModel::applyConfigToXrayModel(int index, XrayConfigModel *model)
+void XrayConfigSnapshotsModel::applyConfigToCurrentModel(int index)
 {
-    if (!model) {
+    if (!m_xrayConfigModel) {
         return;
     }
     amnezia::XrayServerConfig cfg = applyConfig(index);
     if (cfg.port.isEmpty()) {
         return; // guard against invalid index
     }
-    model->applyServerConfig(cfg);
+    m_xrayConfigModel->applyServerConfig(cfg);
 }
