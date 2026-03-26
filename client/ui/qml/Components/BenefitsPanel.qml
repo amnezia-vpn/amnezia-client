@@ -33,7 +33,7 @@ Rectangle {
                 iconSource: root.benefitItems[index].icon
                 titleText: root.benefitItems[index].title
                 bodyText: root.benefitItems[index].body
-                bodyAccent: !!root.benefitItems[index].body_accent
+                accent: !!root.benefitItems[index].accent
             }
         }
     }

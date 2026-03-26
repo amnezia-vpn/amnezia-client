@@ -24,7 +24,7 @@ public:
         EndDateRole,
         OrderRole,
         SubscriptionPlansRole,
-        BenefitPanelRowsRole
+        BenefitRowsRole
     };
 
     explicit ApiServicesModel(QObject *parent = nullptr);
@@ -92,12 +92,12 @@ private:
         QJsonArray availableCountries;
 
         QVariantList subscriptionPlans;
-        QJsonArray benefitsConfig;
+        QJsonArray benefits;
     };
 
     ApiServicesData getApiServicesData(const QJsonObject &data);
 
-    QVariantList buildBenefitPanelRows(const ApiServicesData &service) const;
+    QVariantList buildBenefitRows(const ApiServicesData &service) const;
     QString benefitInjectValue(const QString &injectKey, const ServiceInfo &info,
                                const QJsonObject &supportInfo) const;
     QString formatPriceForBenefit(const QString &rawPrice) const;

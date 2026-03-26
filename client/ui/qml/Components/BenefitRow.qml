@@ -11,7 +11,7 @@ RowLayout {
     property string iconSource: ""
     property string titleText: ""
     property string bodyText: ""
-    property bool bodyAccent: false
+    property bool accent: false
 
     spacing: 12
 
@@ -44,14 +44,14 @@ RowLayout {
                 id: bodyLabel
                 width: parent.width
                 text: root.bodyText
-                color: root.bodyAccent ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
+                color: root.accent ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
                 font.pixelSize: 14
                 wrapMode: Text.Wrap
             }
 
             MouseArea {
                 anchors.fill: bodyLabel
-                visible: root.bodyAccent && root.bodyText.length > 0
+                visible: root.accent && root.bodyText.length > 0
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     var t = root.bodyText.trim()

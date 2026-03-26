@@ -13,31 +13,28 @@ import "../Components"
 PageType {
     id: root
 
-    // ApiServicesModel selection is amnezia-premium (set in PageSetupWizardApiServicesList before navigation).
-
     property var subscriptionPlans: []
     property var benefitRows: []
-    property int selectedGatewayPlanIndex: 0
+    property int selectedPlanIndex: 0
     property string premiumFeaturesHtml: ""
     property string premiumHeaderName: ""
     property string premiumHeaderDescription: ""
 
-    readonly property var currentGatewayPlan: subscriptionPlans[selectedGatewayPlanIndex]
+    readonly property var currentPlan: subscriptionPlans[selectedPlanIndex]
 
     function syncFromModel() {
         root.subscriptionPlans = ApiServicesModel.getSelectedServiceData("subscriptionPlans")
         root.benefitRows = ApiServicesModel.getSelectedServiceData("benefitRows")
 
-        root.selectedGatewayPlanIndex = 0
+        root.selectedPlanIndex = 0
         for (var i = 0; i < root.subscriptionPlans.length; ++i) {
             if (root.subscriptionPlans[i].recommended) {
-                root.selectedGatewayPlanIndex = i
+                root.selectedPlanIndex = i
                 break
             }
         }
 
-        root.premiumFeaturesHtml = String(ApiServicesModel.getSelectedServiceData("features")).replace("%1",
-                                                                                                       LanguageModel.getCurrentSiteUrl("free")).replace("/free", "")
+        root.premiumFeaturesHtml = String(ApiServicesModel.getSelectedServiceData("features")).replace("%1", LanguageModel.getCurrentSiteUrl("free")).replace("/free", "")
         root.premiumHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
         root.premiumHeaderDescription = String(ApiServicesModel.getSelectedServiceData("serviceDescription"))
     }
@@ -118,14 +115,14 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: index === root.subscriptionPlans.length - 1 ? 24 : 12
 
-                    selected: root.selectedGatewayPlanIndex === index
+                    selected: root.selectedPlanIndex === index
                     primaryLeft: String(plan.primary_left)
                     primaryRight: String(plan.primary_right)
                     subtitle: String(plan.subtitle)
                     showRecommendedBadge: !!plan.recommended
                     recommendedText: qsTr("Recommended")
 
-                    onSelectRequested: root.selectedGatewayPlanIndex = index
+                    onSelectRequested: root.selectedPlanIndex = index
                 }
             }
 
@@ -258,7 +255,7 @@ PageType {
         anchors.bottomMargin: 16 + SettingsController.safeAreaBottomMargin
 
         text: {
-            var plan = root.currentGatewayPlan
+            var plan = root.currentPlan
             if (!plan) {
                 return qsTr("Continue")
             }
@@ -266,7 +263,7 @@ PageType {
         }
 
         clickedFunc: function() {
-            var plan = root.currentGatewayPlan
+            var plan = root.currentPlan
             if (!plan) {
                 return
             }

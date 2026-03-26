@@ -37,8 +37,6 @@ namespace
 
         constexpr char isAvailable[] = "is_available";
 
-        constexpr char supportInfo[] = "support_info";
-
         constexpr char subscriptionPlans[] = "subscription_plans";
         constexpr char benefits[] = "benefits";
     }
@@ -176,8 +174,8 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     case SubscriptionPlansRole: {
         return apiServiceData.subscriptionPlans;
     }
-    case BenefitPanelRowsRole: {
-        return buildBenefitPanelRows(apiServiceData);
+    case BenefitRowsRole: {
+        return buildBenefitRows(apiServiceData);
     }
     }
 
@@ -306,7 +304,7 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[EndDateRole] = "endDate";
     roles[OrderRole] = "order";
     roles[SubscriptionPlansRole] = "subscriptionPlans";
-    roles[BenefitPanelRowsRole] = "benefitRows";
+    roles[BenefitRowsRole] = "benefitRows";
 
     return roles;
 }
@@ -333,9 +331,9 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.serviceInfo.features = serviceDescription.value(configKey::features).toString();
 
     serviceData.subscriptionPlans = jsonObjectArrayToVariantList(serviceDescription.value(configKey::subscriptionPlans).toArray());
-    serviceData.benefitsConfig = serviceDescription.value(configKey::benefits).toArray();
+    serviceData.benefits = serviceDescription.value(configKey::benefits).toArray();
 
-    serviceData.supportInfo = data.value(configKey::supportInfo).toObject();
+    serviceData.supportInfo = data.value(apiDefs::key::supportInfo).toObject();
 
     serviceData.type = serviceType;
     serviceData.protocol = serviceProtocol;
@@ -381,8 +379,8 @@ QString ApiServicesModel::benefitInjectValue(const QString &injectKey, const Ser
         return formatPriceForBenefit(info.price);
     }
 
-    if (injectKey == QLatin1String("support_telegram")) {
-        const QString handle = supportInfo.value(QStringLiteral("telegram")).toString().trimmed();
+    if (injectKey == apiDefs::key::telegram) {
+        const QString handle = supportInfo.value(apiDefs::key::telegram).toString().trimmed();
         if (handle.isEmpty()) {
             return QStringLiteral("—");
         }
@@ -394,10 +392,10 @@ QString ApiServicesModel::benefitInjectValue(const QString &injectKey, const Ser
     return QString();
 }
 
-QVariantList ApiServicesModel::buildBenefitPanelRows(const ApiServicesData &service) const
+QVariantList ApiServicesModel::buildBenefitRows(const ApiServicesData &service) const
 {
     QVariantList out;
-    for (const QJsonValue &v : service.benefitsConfig) {
+    for (const QJsonValue &v : service.benefits) {
         if (!v.isObject()) {
             continue;
         }
@@ -420,8 +418,8 @@ QVariantList ApiServicesModel::buildBenefitPanelRows(const ApiServicesData &serv
         m.insert(QStringLiteral("icon"), iconUrlFromGatewayBenefitIcon(iconKey));
         m.insert(QStringLiteral("title"), title);
         m.insert(QStringLiteral("body"), body);
-        if (o.value(QStringLiteral("body_accent")).toBool()) {
-            m.insert(QStringLiteral("body_accent"), true);
+        if (o.value(QStringLiteral("accent")).toBool()) {
+            m.insert(QStringLiteral("accent"), true);
         }
         out.append(m);
     }
