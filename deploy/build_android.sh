@@ -103,7 +103,13 @@ echo "Using Android NDK in $ANDROID_NDK_ROOT"
 qt_cmake_opts=()
 
 if [[ -v AAB || "$ABIS" = "all" ]]; then
-  qt_cmake_opts+=(-DQT_ANDROID_BUILD_ALL_ABIS=ON)
+  # Qt 6.10 may still configure the native build for a single default ABI
+  # unless the ABI set is also passed explicitly. androiddeployqt then looks
+  # for x86_64/arm64/x86/armeabi-v7a libraries that were never produced.
+  qt_cmake_opts+=(
+    -DQT_ANDROID_BUILD_ALL_ABIS=ON
+    -DQT_ANDROID_ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
+  )
 else
   qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABIS")
 fi

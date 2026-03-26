@@ -1,0 +1,231 @@
+2026-03-26 23:44:17,426 - aqt.helper - DEBUG - helper 136090145015616 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/Updates.xml.sha256
+2026-03-26 23:44:27,020 - aqt.main - INFO - installer 138956307302208 aqtinstall(aqt) v3.3.0 on Python 3.13.12 [CPython GCC 14.3.0]
+2026-03-26 23:44:27,021 - aqt.helper - DEBUG - helper 138956307302208 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/Updates.xml.sha256
+2026-03-26 23:44:28,648 - aqt.helper - DEBUG - helper 138956307302208 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/extensions/qtwebengine/6101/x86_64/Updates.xml.sha256
+2026-03-26 23:44:33,842 - aqt.archives - INFO - archives 138956307302208 Found extension qtwebengine
+2026-03-26 23:44:33,843 - aqt.helper - DEBUG - helper 138956307302208 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/extensions/qtpdf/6101/x86_64/Updates.xml.sha256
+2026-03-26 23:44:35,775 - aqt.archives - INFO - archives 138956307302208 Found extension qtpdf
+2026-03-26 23:44:35,997 - aqt.helper - DEBUG - helper 132077008623424 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.addons.qt5compat.linux_gcc_64/6.10.1-0-202511161843qt5compat-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z.sha256
+2026-03-26 23:44:35,997 - aqt.helper - DEBUG - helper 128986106095424 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.addons.qtshadertools.linux_gcc_64/6.10.1-0-202511161843qtshadertools-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z.sha256
+2026-03-26 23:44:35,997 - aqt.helper - DEBUG - helper 123235987535680 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.addons.qtremoteobjects.linux_gcc_64/6.10.1-0-202511161843qtremoteobjects-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z.sha256
+2026-03-26 23:44:36,002 - aqt.helper - DEBUG - helper 133134522771264 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtbase-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z.sha256
+2026-03-26 23:44:36,574 - aqt.helper - INFO - helper 123235987535680 Downloading qtremoteobjects...
+2026-03-26 23:44:36,575 - aqt.installer - DEBUG - installer 123235987535680 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.addons.qtremoteobjects.linux_gcc_64/6.10.1-0-202511161843qtremoteobjects-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:36,872 - aqt.helper - INFO - helper 132077008623424 Downloading qt5compat...
+2026-03-26 23:44:36,873 - aqt.installer - DEBUG - installer 132077008623424 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.addons.qt5compat.linux_gcc_64/6.10.1-0-202511161843qt5compat-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:36,947 - aqt.helper - INFO - helper 128986106095424 Downloading qtshadertools...
+2026-03-26 23:44:36,948 - aqt.installer - DEBUG - installer 128986106095424 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.addons.qtshadertools.linux_gcc_64/6.10.1-0-202511161843qtshadertools-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:37,408 - aqt.helper - DEBUG - helper 123235987535680 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.addons.qtremoteobjects.linux_gcc_64/6.10.1-0-202511161843qtremoteobjects-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:37,409 - aqt.helper - INFO - helper 123235987535680 Redirected: ftp.fau.de
+2026-03-26 23:44:37,725 - aqt.helper - DEBUG - helper 132077008623424 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.addons.qt5compat.linux_gcc_64/6.10.1-0-202511161843qt5compat-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:37,727 - aqt.helper - INFO - helper 132077008623424 Redirected: ftp.fau.de
+2026-03-26 23:44:38,466 - aqt.installer - INFO - installer 132077008623424 Finished installation of qt5compat-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z in 2.47184832
+2026-03-26 23:44:38,479 - aqt.helper - DEBUG - helper 132077008623424 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtsvg-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z.sha256
+2026-03-26 23:44:39,509 - aqt.helper - INFO - helper 132077008623424 Downloading qtsvg...
+2026-03-26 23:44:39,512 - aqt.installer - DEBUG - installer 132077008623424 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtsvg-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:40,055 - aqt.helper - DEBUG - helper 132077008623424 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtsvg-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:40,056 - aqt.helper - INFO - helper 132077008623424 Redirected: ftp.fau.de
+2026-03-26 23:44:40,059 - aqt.helper - INFO - helper 133134522771264 Downloading qtbase...
+2026-03-26 23:44:40,060 - aqt.installer - DEBUG - installer 133134522771264 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtbase-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:40,976 - aqt.helper - DEBUG - helper 133134522771264 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtbase-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:40,977 - aqt.helper - INFO - helper 133134522771264 Redirected: ftp.fau.de
+2026-03-26 23:44:41,188 - aqt.helper - DEBUG - helper 128986106095424 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.addons.qtshadertools.linux_gcc_64/6.10.1-0-202511161843qtshadertools-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:41,189 - aqt.helper - INFO - helper 128986106095424 Redirected: ftp.fau.de
+2026-03-26 23:44:41,970 - aqt.installer - INFO - installer 123235987535680 Finished installation of qtremoteobjects-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z in 5.97628964
+2026-03-26 23:44:41,984 - aqt.helper - DEBUG - helper 123235987535680 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtdeclarative-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z.sha256
+2026-03-26 23:44:43,498 - aqt.helper - INFO - helper 123235987535680 Downloading qtdeclarative...
+2026-03-26 23:44:43,499 - aqt.installer - DEBUG - installer 123235987535680 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtdeclarative-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:43,904 - aqt.installer - INFO - installer 128986106095424 Finished installation of qtshadertools-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z in 7.90991328
+2026-03-26 23:44:43,919 - aqt.helper - DEBUG - helper 128986106095424 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qttools-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z.sha256
+2026-03-26 23:44:44,365 - aqt.helper - DEBUG - helper 123235987535680 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtdeclarative-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:44,365 - aqt.helper - INFO - helper 123235987535680 Redirected: ftp.fau.de
+2026-03-26 23:44:44,546 - aqt.helper - INFO - helper 128986106095424 Downloading qttools...
+2026-03-26 23:44:44,547 - aqt.installer - DEBUG - installer 128986106095424 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qttools-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:46,022 - aqt.helper - DEBUG - helper 128986106095424 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qttools-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:46,022 - aqt.helper - INFO - helper 128986106095424 Redirected: ftp.fau.de
+2026-03-26 23:44:48,638 - aqt.installer - INFO - installer 132077008623424 Finished installation of qtsvg-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z in 10.16181224
+2026-03-26 23:44:48,651 - aqt.helper - DEBUG - helper 132077008623424 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qttranslations-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z.sha256
+2026-03-26 23:44:49,189 - aqt.helper - INFO - helper 132077008623424 Downloading qttranslations...
+2026-03-26 23:44:49,190 - aqt.installer - DEBUG - installer 132077008623424 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qttranslations-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:49,796 - aqt.helper - DEBUG - helper 132077008623424 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qttranslations-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:49,797 - aqt.helper - INFO - helper 132077008623424 Redirected: ftp.fau.de
+2026-03-26 23:44:53,914 - aqt.installer - INFO - installer 132077008623424 Finished installation of qttranslations-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z in 4.45917823
+2026-03-26 23:44:53,926 - aqt.helper - DEBUG - helper 132077008623424 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtwayland-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z.sha256
+2026-03-26 23:44:54,798 - aqt.helper - INFO - helper 132077008623424 Downloading qtwayland...
+2026-03-26 23:44:54,799 - aqt.installer - DEBUG - installer 132077008623424 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtwayland-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:58,162 - aqt.helper - DEBUG - helper 132077008623424 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843qtwayland-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z
+2026-03-26 23:44:58,163 - aqt.helper - INFO - helper 132077008623424 Redirected: ftp.fau.de
+2026-03-26 23:44:59,644 - aqt.installer - INFO - installer 132077008623424 Finished installation of qtwayland-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z in 5.71981796
+2026-03-26 23:44:59,862 - aqt.helper - DEBUG - helper 135866382206784 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843icu-linux-Rhel8.6-x86_64.7z.sha256
+2026-03-26 23:45:01,947 - aqt.helper - INFO - helper 135866382206784 Downloading icu...
+2026-03-26 23:45:01,948 - aqt.installer - DEBUG - installer 135866382206784 Download URL: https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843icu-linux-Rhel8.6-x86_64.7z
+2026-03-26 23:45:03,464 - aqt.helper - DEBUG - helper 135866382206784 Asked to redirect(302) to: https://ftp.fau.de/qtproject/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/qt.qt6.6101.linux_gcc_64/6.10.1-0-202511161843icu-linux-Rhel8.6-x86_64.7z
+2026-03-26 23:45:03,465 - aqt.helper - INFO - helper 135866382206784 Redirected: ftp.fau.de
+2026-03-26 23:45:04,185 - aqt.installer - INFO - installer 128986106095424 Finished installation of qttools-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z in 19.46280101
+2026-03-26 23:45:18,508 - aqt.installer - INFO - installer 135866382206784 Finished installation of icu-linux-Rhel8.6-x86_64.7z in 18.64857968
+2026-03-26 23:45:31,329 - aqt.installer - INFO - installer 133134522771264 Finished installation of qtbase-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z in 53.64388246
+2026-03-26 23:45:33,151 - aqt.installer - INFO - installer 123235987535680 Finished installation of qtdeclarative-Linux-RHEL_9_4-GCC-Linux-RHEL_9_4-X86_64.7z in 49.48187101
+2026-03-26 23:45:33,252 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/bin/qmake
+2026-03-26 23:45:33,257 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Widgets.pc
+2026-03-26 23:45:33,257 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6LabsQmlModels.pc
+2026-03-26 23:45:33,258 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlCore.pc
+2026-03-26 23:45:33,258 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Test.pc
+2026-03-26 23:45:33,258 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Svg.pc
+2026-03-26 23:45:33,259 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickWidgets.pc
+2026-03-26 23:45:33,259 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6LabsAnimation.pc
+2026-03-26 23:45:33,259 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlIntegration.pc
+2026-03-26 23:45:33,260 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlAssetDownloader.pc
+2026-03-26 23:45:33,260 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2Fusion.pc
+2026-03-26 23:45:33,260 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6PrintSupport.pc
+2026-03-26 23:45:33,261 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6OpenGLWidgets.pc
+2026-03-26 23:45:33,261 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlWorkerScript.pc
+2026-03-26 23:45:33,262 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2BasicStyleImpl.pc
+2026-03-26 23:45:33,262 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Platform.pc
+2026-03-26 23:45:33,262 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickTemplates2.pc
+2026-03-26 23:45:33,262 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6UiTools.pc
+2026-03-26 23:45:33,263 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickDialogs2.pc
+2026-03-26 23:45:33,263 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2Universal.pc
+2026-03-26 23:45:33,263 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6RemoteObjects.pc
+2026-03-26 23:45:33,264 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6SvgWidgets.pc
+2026-03-26 23:45:33,264 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6OpenGL.pc
+2026-03-26 23:45:33,264 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2.pc
+2026-03-26 23:45:33,264 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2Basic.pc
+2026-03-26 23:45:33,265 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlXmlListModel.pc
+2026-03-26 23:45:33,265 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Designer.pc
+2026-03-26 23:45:33,265 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickDialogs2QuickImpl.pc
+2026-03-26 23:45:33,266 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Qml.pc
+2026-03-26 23:45:33,266 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Concurrent.pc
+2026-03-26 23:45:33,266 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2UniversalStyleImpl.pc
+2026-03-26 23:45:33,266 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlLocalStorage.pc
+2026-03-26 23:45:33,267 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlNetwork.pc
+2026-03-26 23:45:33,267 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlMeta.pc
+2026-03-26 23:45:33,267 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickTest.pc
+2026-03-26 23:45:33,267 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Sql.pc
+2026-03-26 23:45:33,268 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickVectorImage.pc
+2026-03-26 23:45:33,268 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2Impl.pc
+2026-03-26 23:45:33,268 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Quick.pc
+2026-03-26 23:45:33,268 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Core5Compat.pc
+2026-03-26 23:45:33,269 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2ImagineStyleImpl.pc
+2026-03-26 23:45:33,269 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlCompiler.pc
+2026-03-26 23:45:33,269 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickVectorImageHelpers.pc
+2026-03-26 23:45:33,270 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6LabsFolderListModel.pc
+2026-03-26 23:45:33,270 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickEffects.pc
+2026-03-26 23:45:33,270 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2FluentWinUI3StyleImpl.pc
+2026-03-26 23:45:33,270 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2MaterialStyleImpl.pc
+2026-03-26 23:45:33,271 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Linguist.pc
+2026-03-26 23:45:33,271 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6ShaderTools.pc
+2026-03-26 23:45:33,271 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Xml.pc
+2026-03-26 23:45:33,271 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6LabsPlatform.pc
+2026-03-26 23:45:33,272 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2Imagine.pc
+2026-03-26 23:45:33,272 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QmlModels.pc
+2026-03-26 23:45:33,272 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickDialogs2Utils.pc
+2026-03-26 23:45:33,273 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6LabsWavefrontMesh.pc
+2026-03-26 23:45:33,273 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6DBus.pc
+2026-03-26 23:45:33,273 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Help.pc
+2026-03-26 23:45:33,273 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Gui.pc
+2026-03-26 23:45:33,274 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2Material.pc
+2026-03-26 23:45:33,274 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6UiPlugin.pc
+2026-03-26 23:45:33,274 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6RepParser.pc
+2026-03-26 23:45:33,277 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6LabsSynchronizer.pc
+2026-03-26 23:45:33,277 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6LabsSharedImage.pc
+2026-03-26 23:45:33,277 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6RemoteObjectsQml.pc
+2026-03-26 23:45:33,277 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Core.pc
+2026-03-26 23:45:33,278 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickControls2FusionStyleImpl.pc
+2026-03-26 23:45:33,278 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6WaylandClient.pc
+2026-03-26 23:45:33,278 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6Network.pc
+2026-03-26 23:45:33,279 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6QuickLayouts.pc
+2026-03-26 23:45:33,279 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/pkgconfig/Qt6LabsSettings.pc
+2026-03-26 23:45:33,280 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlFormat.prl
+2026-03-26 23:45:33,280 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6DesignerComponents.prl
+2026-03-26 23:45:33,281 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6OpenGL.prl
+2026-03-26 23:45:33,281 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6XcbQpa.prl
+2026-03-26 23:45:33,281 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6PacketProtocol.prl
+2026-03-26 23:45:33,282 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6KmsSupport.prl
+2026-03-26 23:45:33,282 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Svg.prl
+2026-03-26 23:45:33,282 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6OpenGLWidgets.prl
+2026-03-26 23:45:33,283 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6DBus.prl
+2026-03-26 23:45:33,283 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlToolingSettings.prl
+2026-03-26 23:45:33,283 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Quick.prl
+2026-03-26 23:45:33,283 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2ImagineStyleImpl.prl
+2026-03-26 23:45:33,284 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2FusionStyleImpl.prl
+2026-03-26 23:45:33,284 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlLS.prl
+2026-03-26 23:45:33,284 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6InputSupport.prl
+2026-03-26 23:45:33,284 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6LabsSettings.prl
+2026-03-26 23:45:33,285 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2Material.prl
+2026-03-26 23:45:33,285 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickTestUtils.prl
+2026-03-26 23:45:33,285 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickWidgets.prl
+2026-03-26 23:45:33,286 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6LabsPlatform.prl
+2026-03-26 23:45:33,286 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6ExampleIcons.prl
+2026-03-26 23:45:33,286 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2BasicStyleImpl.prl
+2026-03-26 23:45:33,286 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6LabsWavefrontMesh.prl
+2026-03-26 23:45:33,286 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlNetwork.prl
+2026-03-26 23:45:33,287 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Network.prl
+2026-03-26 23:45:33,287 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlXmlListModel.prl
+2026-03-26 23:45:33,287 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlMeta.prl
+2026-03-26 23:45:33,287 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6ShaderTools.prl
+2026-03-26 23:45:33,288 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Widgets.prl
+2026-03-26 23:45:33,288 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6SvgWidgets.prl
+2026-03-26 23:45:33,288 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6LabsSynchronizer.prl
+2026-03-26 23:45:33,288 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickEffects.prl
+2026-03-26 23:45:33,289 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Sql.prl
+2026-03-26 23:45:33,289 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickDialogs2QuickImpl.prl
+2026-03-26 23:45:33,290 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlTypeRegistrar.prl
+2026-03-26 23:45:33,290 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickParticles.prl
+2026-03-26 23:45:33,290 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Designer.prl
+2026-03-26 23:45:33,290 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Help.prl
+2026-03-26 23:45:33,291 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickShapesDesignHelpers.prl
+2026-03-26 23:45:33,291 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6LabsSharedImage.prl
+2026-03-26 23:45:33,291 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickShapes.prl
+2026-03-26 23:45:33,292 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlDom.prl
+2026-03-26 23:45:33,292 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickTemplates2.prl
+2026-03-26 23:45:33,292 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6RemoteObjects.prl
+2026-03-26 23:45:33,293 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6LabsAnimation.prl
+2026-03-26 23:45:33,293 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2Imagine.prl
+2026-03-26 23:45:33,293 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6WaylandClient.prl
+2026-03-26 23:45:33,294 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6PrintSupport.prl
+2026-03-26 23:45:33,294 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickVectorImageHelpers.prl
+2026-03-26 23:45:33,294 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2UniversalStyleImpl.prl
+2026-03-26 23:45:33,295 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Core5Compat.prl
+2026-03-26 23:45:33,295 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6ExamplesAssetDownloader.prl
+2026-03-26 23:45:33,295 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2.prl
+2026-03-26 23:45:33,296 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlModels.prl
+2026-03-26 23:45:33,296 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlDebug.prl
+2026-03-26 23:45:33,296 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6LabsFolderListModel.prl
+2026-03-26 23:45:33,297 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6EglFsKmsGbmSupport.prl
+2026-03-26 23:45:33,297 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickVectorImage.prl
+2026-03-26 23:45:33,297 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Test.prl
+2026-03-26 23:45:33,298 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6EglFsKmsSupport.prl
+2026-03-26 23:45:33,298 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6UiTools.prl
+2026-03-26 23:45:33,298 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlLocalStorage.prl
+2026-03-26 23:45:33,298 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2FluentWinUI3StyleImpl.prl
+2026-03-26 23:45:33,299 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControlsTestUtils.prl
+2026-03-26 23:45:33,299 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Concurrent.prl
+2026-03-26 23:45:33,299 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Gui.prl
+2026-03-26 23:45:33,300 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlWorkerScript.prl
+2026-03-26 23:45:33,300 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2Fusion.prl
+2026-03-26 23:45:33,300 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6RemoteObjectsQml.prl
+2026-03-26 23:45:33,301 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Qml.prl
+2026-03-26 23:45:33,301 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6EglFSDeviceIntegration.prl
+2026-03-26 23:45:33,301 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickDialogs2.prl
+2026-03-26 23:45:33,302 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlAssetDownloader.prl
+2026-03-26 23:45:33,302 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2Basic.prl
+2026-03-26 23:45:33,302 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Core.prl
+2026-03-26 23:45:33,302 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlCompiler.prl
+2026-03-26 23:45:33,303 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6FbSupport.prl
+2026-03-26 23:45:33,303 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2Impl.prl
+2026-03-26 23:45:33,303 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickTest.prl
+2026-03-26 23:45:33,303 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6Xml.prl
+2026-03-26 23:45:33,304 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QmlCore.prl
+2026-03-26 23:45:33,304 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6WlShellIntegration.prl
+2026-03-26 23:45:33,304 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6LabsQmlModels.prl
+2026-03-26 23:45:33,305 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickDialogs2Utils.prl
+2026-03-26 23:45:33,305 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickLayouts.prl
+2026-03-26 23:45:33,305 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2Universal.prl
+2026-03-26 23:45:33,306 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickVectorImageGenerator.prl
+2026-03-26 23:45:33,306 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6QuickControls2MaterialStyleImpl.prl
+2026-03-26 23:45:33,306 - aqt.updater - INFO - updater 138956307302208 Patching /home/nykilka/Qt/6.10.1/gcc_64/lib/libQt6DeviceDiscoverySupport.prl
+2026-03-26 23:45:33,307 - aqt.main - INFO - installer 138956307302208 Finished installation
+2026-03-26 23:45:33,307 - aqt.main - INFO - installer 138956307302208 Time elapsed: 64.59781163 second
+2026-03-26 23:45:53,670 - aqt.helper - DEBUG - helper 138330034968384 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6101/qt6_6101/Updates.xml.sha256
+2026-03-26 23:46:07,109 - aqt.helper - DEBUG - helper 138330034968384 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/extensions/qtpdf/6101/x86_64/Updates.xml.sha256
+2026-03-26 23:46:08,584 - aqt.helper - DEBUG - helper 138330034968384 Attempt to download checksum at https://download.qt.io/online/qtsdkrepository/linux_x64/extensions/qtwebengine/6101/x86_64/Updates.xml.sha256
