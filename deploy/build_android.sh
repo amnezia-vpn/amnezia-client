@@ -9,7 +9,7 @@ usage() {
 Usage:
   build_android [options] <artifact_types>
 
-Build AmneziaVPN android client.
+Build FBLink VPN android client.
 
 Artifact types:
  -u, --aab                        Build Android App Bundle (AAB)
@@ -67,6 +67,8 @@ DEPLOY_DIR=$PROJECT_DIR/deploy
 mkdir -p $DEPLOY_DIR/build
 BUILD_DIR=$DEPLOY_DIR/build
 OUT_APP_DIR=$BUILD_DIR/client
+ANDROID_DEPLOY_SETTINGS=
+ANDROID_BUILD_OUT_DIR=$OUT_APP_DIR/android-build
 
 echo "Project dir: $PROJECT_DIR"
 echo "Build dir: $BUILD_DIR"
@@ -133,13 +135,33 @@ if [ "$BUILD_TYPE" = "release" ]; then
   deployqt_opts+=(--release)
 fi
 
+# Resolve the deployment settings file dynamically so the script survives
+# target/binary renames and does not rely on stale generated names.
+if [[ -f "$OUT_APP_DIR/android-FBLink-deployment-settings.json" ]]; then
+  ANDROID_DEPLOY_SETTINGS="$OUT_APP_DIR/android-FBLink-deployment-settings.json"
+else
+  deployment_settings=("$OUT_APP_DIR"/android-*-deployment-settings.json)
+  if [[ -f "${deployment_settings[0]}" ]]; then
+    ANDROID_DEPLOY_SETTINGS="${deployment_settings[0]}"
+  fi
+fi
+
+if [[ -z "${ANDROID_DEPLOY_SETTINGS:-}" || ! -f "$ANDROID_DEPLOY_SETTINGS" ]]; then
+  echo "ERROR: Android deployment settings were not generated in $OUT_APP_DIR"
+  exit 1
+fi
+
+# Remove stale androiddeployqt output so manifest/package/activity changes are
+# copied from source instead of reusing an old android-build-* tree.
+rm -rf "$ANDROID_BUILD_OUT_DIR"
+
 # for gradle to skip all tasks when it is executed by androiddeployqt
 # gradle is started later explicitly
 export ANDROIDDEPLOYQT_RUN=1
 
 $QT_HOST_PATH/bin/androiddeployqt \
-  --input $OUT_APP_DIR/android-FBLink-deployment-settings.json \
-  --output $OUT_APP_DIR/android-build \
+  --input "$ANDROID_DEPLOY_SETTINGS" \
+  --output "$ANDROID_BUILD_OUT_DIR" \
   "${deployqt_opts[@]}"
 
 # run gradle
@@ -156,19 +178,20 @@ if [ -v ABIS ]; then
   gradle_opts+=(assemble"${BUILD_TYPE^}")
 fi
 
-$OUT_APP_DIR/android-build/gradlew \
-  --project-dir $OUT_APP_DIR/android-build \
+"$ANDROID_BUILD_OUT_DIR/gradlew" \
+  --project-dir "$ANDROID_BUILD_OUT_DIR" \
   -DexplicitRun=1 \
   "${gradle_opts[@]}"
 
 if [[ -v CI || -v MOVE_RESULT ]]; then
   echo "Moving APK/AAB..."
   if [ -v AAB ]; then
-    AAB_FILE=$OUT_APP_DIR/android-build/build/outputs/bundle/$BUILD_TYPE/AmneziaVPN-$BUILD_TYPE.aab
-    if [ ! -f "$AAB_FILE" ]; then
-      AAB_FILE=$(find "$OUT_APP_DIR/android-build" -type f -name "*.aab" 2>/dev/null | head -1)
+    AAB_FILE=$(find "$ANDROID_BUILD_OUT_DIR" -type f -name "*.aab" 2>/dev/null | head -1)
+    if [ -z "$AAB_FILE" ]; then
+      echo "ERROR: AAB not found under $ANDROID_BUILD_OUT_DIR"
+      exit 1
     fi
-    mv -u "$AAB_FILE" $PROJECT_DIR/deploy/build/AmneziaVPN-$BUILD_TYPE.aab
+    mv -u "$AAB_FILE" $PROJECT_DIR/deploy/build/FBLinkVPN-$BUILD_TYPE.aab
   fi
 
   if [ -v ABIS ]; then
@@ -181,17 +204,12 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
       suffix+="-unsigned"
     fi
 
-    APK_OUT_DIR=$OUT_APP_DIR/android-build/build/outputs/apk/$BUILD_TYPE
+    APK_OUT_DIR=$ANDROID_BUILD_OUT_DIR/build/outputs/apk/$BUILD_TYPE
 
     # Qt 6.7+ with QT_ANDROID_BUILD_ALL_ABIS=ON produces a single universal APK
     # instead of separate per-ABI files.  Detect which naming convention was used.
-    UNIVERSAL_APK=$APK_OUT_DIR/AmneziaVPN-$suffix.apk
-    UNIVERSAL_APK_UNSIGNED=$APK_OUT_DIR/AmneziaVPN-$suffix-unsigned.apk
+    UNIVERSAL_APK=$(find "$APK_OUT_DIR" -maxdepth 1 -type f -name "*$suffix*.apk" 2>/dev/null | head -1)
     # resolve: prefer signed, fall back to unsigned
-    if [ ! -f "$UNIVERSAL_APK" ] && [ -f "$UNIVERSAL_APK_UNSIGNED" ]; then
-      UNIVERSAL_APK=$UNIVERSAL_APK_UNSIGNED
-    fi
-
     IFS=';' read -r -a abi_array <<< "$ABIS"
     for ABI in "${abi_array[@]}"
     do
@@ -215,13 +233,13 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
         elif [ -f "$UNIVERSAL_APK" ]; then
           # Qt 6.7+ universal APK: copy it once per requested ABI so the
           # downstream rename/upload steps keep working as before.
-          cp "$UNIVERSAL_APK" $PROJECT_DIR/deploy/build/AmneziaVPN-$ABI-$suffix.apk
+          cp "$UNIVERSAL_APK" $PROJECT_DIR/deploy/build/FBLinkVPN-$ABI-$suffix.apk
         else
           echo "ERROR: APK not found for ABI=$ABI (tried $PER_ABI_APK and $UNIVERSAL_APK)"
           echo "Contents of $APK_OUT_DIR:"
           ls -la "$APK_OUT_DIR" 2>/dev/null || echo "(directory does not exist)"
           echo "All APKs under android-build:"
-          find "$OUT_APP_DIR/android-build" -name "*.apk" 2>/dev/null || true
+          find "$ANDROID_BUILD_OUT_DIR" -name "*.apk" 2>/dev/null || true
           exit 1
         fi
       fi

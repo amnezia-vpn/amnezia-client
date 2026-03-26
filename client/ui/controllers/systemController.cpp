@@ -41,7 +41,7 @@ void SystemController::saveFile(const QString &fileName, const QString &data)
 #endif
 
     // todo check if save successful
-    file.open(QIODevice::WriteOnly);
+    (void)file.open(QIODevice::WriteOnly);
     file.write(data.toUtf8());
     file.close();
 
@@ -196,5 +196,16 @@ void SystemController::measurePing(const QString &host)
     });
 
     timer->start();
-    socket->connectToHost(host, 22); // SSH is always open on these servers
+    
+    QString cleanHost = host;
+    int colonIndex = cleanHost.lastIndexOf(':');
+    if (colonIndex > 0) {
+        // Only strip if it's an IPv4 with a port or domain with a port.
+        // If it's an IPv6 like [::1]:51820 we handle it, but for simplicity split by last colon.
+        if (cleanHost.count(':') == 1 || cleanHost.endsWith("]")) {
+            cleanHost = cleanHost.left(colonIndex);
+        }
+    }
+    
+    socket->connectToHost(cleanHost, 22); // SSH is always open on these servers
 }

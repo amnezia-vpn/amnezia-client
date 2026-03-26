@@ -140,6 +140,7 @@ DrawerType2 {
                                 Layout.bottomMargin: 20
 
                                 text: languageName
+                                horizontalAlignment: Text.AlignLeft
                             }
 
                             Image {

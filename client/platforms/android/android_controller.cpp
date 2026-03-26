@@ -14,8 +14,8 @@ namespace
 {
     AndroidController *s_instance = nullptr;
 
-    constexpr auto QT_ANDROID_CONTROLLER_CLASS = "org/fblink/vpn/qt/QtAndroidController";
-    constexpr auto ANDROID_LOG_CLASS = "org/fblink/vpn/util/Log";
+    constexpr auto QT_ANDROID_CONTROLLER_CLASS = "com/fblink/vpn/qt/QtAndroidController";
+    constexpr auto ANDROID_LOG_CLASS = "com/fblink/vpn/util/Log";
     constexpr auto TAG = "FBLinkQt";
 } // namespace
 

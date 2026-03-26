@@ -180,7 +180,7 @@ void SettingsController::restoreAppConfig(const QString &fileName)
 {
     QFile file(fileName);
 
-    file.open(QIODevice::ReadOnly);
+    (void)file.open(QIODevice::ReadOnly);
 
     QByteArray data = file.readAll();
 

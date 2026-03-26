@@ -7,9 +7,9 @@ import com.fblink.vpn.util.Log
 import com.fblink.vpn.util.Prefs
 import org.qtproject.qt.android.bindings.QtApplication
 
-private const val TAG = "AmneziaApplication"
+private const val TAG = "FBLinkApplication"
 
-class AmneziaApplication : QtApplication(), CameraXConfig.Provider {
+class FBLinkApplication : QtApplication(), CameraXConfig.Provider {
 
     override fun onCreate() {
         super.onCreate()

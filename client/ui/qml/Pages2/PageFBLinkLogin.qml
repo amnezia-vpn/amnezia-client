@@ -17,6 +17,12 @@ PageType {
     property string errorMessage: ""
     property bool isLoading: false
 
+    function isSubscriptionGateMessage(message) {
+        var normalized = (message || "").toLowerCase()
+        return normalized.indexOf("active subscription required") !== -1
+            || normalized.indexOf("subscription expired") !== -1
+    }
+
     BackButtonType {
         id: backButton
         anchors.top: parent.top
@@ -176,16 +182,36 @@ PageType {
         target: FBLinkController
 
         function onLoginSuccess() {
+            if (!root.visible) return
             root.errorMessage = ""
         }
 
         function onLoginError(message) {
+            if (!root.visible) return
+            root.isLoading = false
+            PageController.showBusyIndicator(false)
+            root.errorMessage = message
+        }
+
+        function onSubscriptionFetched() {
+            if (!root.visible) return
+            if (!FBLinkController.isSubscribed) {
+                root.isLoading = false
+                PageController.showBusyIndicator(false)
+                root.errorMessage = ""
+                PageController.goToPageHome()
+            }
+        }
+
+        function onSubscriptionError(message) {
+            if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
             root.errorMessage = message
         }
 
         function onConfigFetched() {
+            if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
             root.errorMessage = ""
@@ -193,8 +219,14 @@ PageType {
         }
 
         function onConfigError(message) {
+            if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
+            if (root.isSubscriptionGateMessage(message)) {
+                root.errorMessage = ""
+                PageController.goToPageHome()
+                return
+            }
             root.errorMessage = message
         }
     }

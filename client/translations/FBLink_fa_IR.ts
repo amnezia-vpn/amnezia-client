@@ -175,13 +175,28 @@
         <translation type="vanished">در هنگام آماده‌سازی پیکربندی، نمی‌توان از اتصال خارج شد.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="57"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="58"/>
+        <source>Войти</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="59"/>
         <source>Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="64"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="65"/>
         <source>Невозможно отключиться во время подготовки конфигурации</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="261"/>
+        <source>Требуется вход</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="273"/>
+        <source>Войдите в аккаунт для подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -189,12 +204,12 @@
         <translation type="obsolete">اتصال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="273"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="280"/>
         <source>Требуется активная подписка для подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="260"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="261"/>
         <source>Нужна подписка</source>
         <translation type="unfinished"></translation>
     </message>
@@ -304,12 +319,12 @@
 <context>
     <name>CoreController</name>
     <message>
-        <location filename="../core/controllers/coreController.cpp" line="375"/>
+        <location filename="../core/controllers/coreController.cpp" line="376"/>
         <source>Ошибка: конфигурация API недействительна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/controllers/coreController.cpp" line="382"/>
+        <location filename="../core/controllers/coreController.cpp" line="384"/>
         <source>Ошибка: нет установленных контейнеров. Войдите в FBLink и получите конфигурацию.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -324,79 +339,79 @@
 <context>
     <name>FBLinkController</name>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="39"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="49"/>
         <source>Email and password cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="72"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="82"/>
         <source>Invalid response format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="77"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="87"/>
         <source>Network Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="105"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="115"/>
         <source>Ошибка регистрации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="141"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="152"/>
         <source>Неверный ответ сервера</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="146"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="157"/>
         <source>Неверный код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="170"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="181"/>
         <source>Ошибка отправки кода</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="195"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="206"/>
         <source>Ошибка сброса пароля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="217"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="391"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="227"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="423"/>
         <source>Не выполнен вход в систему</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="318"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="335"/>
         <source>Внутренняя ошибка: Контроллеры не инициализированы</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="321"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="338"/>
         <source>Сервер не вернул конфигурацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="326"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="422"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="343"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="469"/>
         <source>Ошибка сети: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="349"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="381"/>
         <source>Необходимо войти в аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="377"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="409"/>
         <source>Сессия истекла, войдите снова</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="381"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="413"/>
         <source>Ошибка создания платежа: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -612,10 +627,14 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>NotificationHandler</name>
     <message>
+        <source>FBLink</source>
+        <translation type="vanished">FBLink</translation>
+    </message>
+    <message>
         <location filename="../ui/notificationhandler.cpp" line="57"/>
         <location filename="../ui/notificationhandler.cpp" line="64"/>
-        <source>FBLink</source>
-        <translation>FBLink</translation>
+        <source>FBLink VPN</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="58"/>
@@ -786,52 +805,52 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageFBLinkLogin</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="53"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="59"/>
         <source>Вход</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="54"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="60"/>
         <source>Введите данные аккаунта FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="81"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="87"/>
         <source>Email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="92"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="98"/>
         <source>Пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="111"/>
         <source>Забыли пароль?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="130"/>
         <source>Нет аккаунта?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="135"/>
         <source>Зарегистрироваться</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="161"/>
         <source>Вход...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="161"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="163"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="169"/>
         <source>Пожалуйста, заполните все поля</source>
         <translation type="unfinished"></translation>
     </message>
@@ -839,102 +858,102 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageFBLinkRegister</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="104"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="130"/>
         <source>Создание аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="104"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="130"/>
         <source>Подтверждение email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="132"/>
         <source>Введите код, отправленный на </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="107"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="133"/>
         <source>Зарегистрируйтесь в сервисе FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="134"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="160"/>
         <source>Email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="170"/>
         <source>Пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="156"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="182"/>
         <source>Подтвердите пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="194"/>
         <source>Код подтверждения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="210"/>
         <source>Уже есть аккаунт?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="189"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="215"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="233"/>
         <source>Отправить повторно (%1 сек)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="208"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="234"/>
         <source>Отправить код повторно</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="263"/>
         <source>Проверка...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="263"/>
         <source>Отправка...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="238"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="264"/>
         <source>Создать аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="238"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="264"/>
         <source>Подтвердить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="247"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="273"/>
         <source>Введите 6-значный код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="260"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="286"/>
         <source>Пожалуйста, заполните все поля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="264"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="290"/>
         <source>Пароли не совпадают</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="268"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="294"/>
         <source>Пароль должен быть не менее 8 символов</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1191,18 +1210,18 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="289"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="310"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="383"/>
         <source>Выбрать локацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="298"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="319"/>
         <source>Подключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="298"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="319"/>
         <source>Нажмите для смены региона</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2992,12 +3011,12 @@ Already installed containers were found on the server. All installed containers 
         <translation>نام برنامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="256"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="255"/>
         <source>Open executable file</source>
         <translation>فایل اجرایی را باز کنید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="257"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="256"/>
         <source>Executable files (*.*)</source>
         <translation>فایل‌های اجرایی (*.*)</translation>
     </message>
@@ -3892,34 +3911,34 @@ Already installed containers were found on the server. All installed containers 
         <translation>سرور پیش‌فرض از عملکرد تونل‌سازی تقسیم شده پشتیبانی نمی‌کند</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="71"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="73"/>
         <source>Addresses from the list should not be accessed via VPN</source>
         <translation>دسترسی به آدرس‎های لیست بدون وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="104"/>
         <source>Split tunneling</source>
         <translation>جداسازی ترافیک</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="131"/>
         <source>Mode</source>
         <translation>حالت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="213"/>
         <source>Remove </source>
         <translation>حذف </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="212"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="362"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="364"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="213"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="363"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="365"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
@@ -3929,12 +3948,12 @@ Already installed containers were found on the server. All installed containers 
         <translation>نمی توان تنظیمات تونل تقسیم را در طول اتصال فعال تغییر داد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="68"/>
         <source>Only the sites listed here will be accessed through the VPN</source>
         <translation>تنها سایت‌های موجود در اینجا از طریق VPN دسترسی داده خواهند شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="263"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="265"/>
         <source>website or IP</source>
         <translation>وب‌سایت یا آدرس IP</translation>
     </message>
@@ -3943,65 +3962,65 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">وارد کردن / صادر کردن وب‌سایت‌ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="309"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="311"/>
         <source>Additional options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="316"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="318"/>
         <source>Import</source>
         <translation>بارگذاری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="329"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="331"/>
         <source>Save site list</source>
         <translation>ذخیره لیست سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="336"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="338"/>
         <source>Save sites</source>
         <translation>ذخیره سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="337"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="463"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="476"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="339"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="465"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="478"/>
         <source>Sites files (*.json)</source>
         <translation>Sites files (*.json)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="357"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="359"/>
         <source>Clear site list</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="360"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="362"/>
         <source>Clear site list?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="361"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="363"/>
         <source>All sites will be removed from list.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="425"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="427"/>
         <source>Import a list of sites</source>
         <translation>بارگذاری لیست سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="460"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="462"/>
         <source>Replace site list</source>
         <translation>جایگزین کردن لیست سایت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="462"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="475"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="464"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="477"/>
         <source>Open sites file</source>
         <translation>باز کردن فایل سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="473"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="475"/>
         <source>Add imported sites to existing ones</source>
         <translation>اضافه کردن سایت‎های بارگذاری شده به سایت‎های موجود</translation>
     </message>
@@ -6136,7 +6155,7 @@ For more detailed information, you can
         <translation type="obsolete">امکان تغییر سرور در هنگام متصل بودن وجود ندارد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ServersListView.qml" line="116"/>
+        <location filename="../ui/qml/Components/ServersListView.qml" line="119"/>
         <source>Нельзя менять сервер во время активного подключения</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6331,7 +6350,7 @@ For more detailed information, you can
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="425"/>
+        <location filename="../vpnconnection.cpp" line="429"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>

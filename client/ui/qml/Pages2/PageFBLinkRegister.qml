@@ -20,6 +20,12 @@ PageType {
     property string pendingEmail: ""
     property int resendCooldown: 0
 
+    function isSubscriptionGateMessage(message) {
+        var normalized = (message || "").toLowerCase()
+        return normalized.indexOf("active subscription required") !== -1
+            || normalized.indexOf("subscription expired") !== -1
+    }
+
     Timer {
         id: resendTimer
         interval: 1000
@@ -32,6 +38,7 @@ PageType {
         target: FBLinkController
 
         function onRegisterCodeSent() {
+            if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
             root.codeSent = true
@@ -40,31 +47,58 @@ PageType {
         }
 
         function onRegisterError(message) {
+            if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
             root.errorMessage = message
         }
 
         function onVerifySuccess() {
+            if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
         }
 
         function onVerifyError(message) {
+            if (!root.visible) return
+            root.isLoading = false
+            PageController.showBusyIndicator(false)
+            root.errorMessage = message
+        }
+
+        function onSubscriptionFetched() {
+            if (!root.visible) return
+            if (!FBLinkController.isSubscribed) {
+                root.isLoading = false
+                PageController.showBusyIndicator(false)
+                root.errorMessage = ""
+                PageController.goToPageHome()
+            }
+        }
+
+        function onSubscriptionError(message) {
+            if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
             root.errorMessage = message
         }
 
         function onConfigFetched() {
+            if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
             PageController.goToPageHome()
         }
 
         function onConfigError(message) {
+            if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
+            if (root.isSubscriptionGateMessage(message)) {
+                root.errorMessage = ""
+                PageController.goToPageHome()
+                return
+            }
             root.errorMessage = message
         }
     }

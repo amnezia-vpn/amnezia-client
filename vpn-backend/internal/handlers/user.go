@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"time"
+	"vpn-backend/internal/config"
 	"vpn-backend/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -9,11 +11,12 @@ import (
 )
 
 type UserHandler struct {
-	db *gorm.DB
+	db  *gorm.DB
+	cfg *config.Config
 }
 
-func NewUserHandler(db *gorm.DB) *UserHandler {
-	return &UserHandler{db: db}
+func NewUserHandler(db *gorm.DB, cfg *config.Config) *UserHandler {
+	return &UserHandler{db: db, cfg: cfg}
 }
 
 // GET /api/v1/me
@@ -45,17 +48,36 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 		Count(&trialCount)
 	trialAvailable := trialCount == 0
 
-	var sub models.Subscription
-	if err := h.db.Where("user_id = ?", userID).First(&sub).Error; err != nil {
-		// Подписки ещё нет — возвращаем дефолтный ответ (не 404)
-		c.JSON(http.StatusOK, gin.H{
-			"plan":            "none",
-			"status":          "none",
-			"auto_renew":      false,
-			"card_saved":      false,
-			"trial_available": trialAvailable,
-		})
+	sub, err := ensureDefaultSubscription(h.db, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
 		return
+	}
+
+	if h.cfg != nil && h.cfg.YooKassaShopID != "" && h.cfg.YooKassaKey != "" {
+		var pending models.Payment
+		if err := h.db.Where("user_id = ? AND status = ?", userID, models.PaymentPending).
+			Order("created_at desc").
+			First(&pending).Error; err == nil {
+			if status, err := verifyYooKassaPaymentStatus(h.cfg.YooKassaShopID, h.cfg.YooKassaKey, pending.YooKassaID); err == nil && status == "succeeded" {
+				_ = h.db.Transaction(func(tx *gorm.DB) error {
+					now := time.Now()
+					if err := tx.Model(&pending).Updates(map[string]interface{}{
+						"status":       models.PaymentSucceeded,
+						"confirmed_at": now,
+					}).Error; err != nil {
+						return err
+					}
+					return activateSubscriptionFromPayment(tx, &pending, "")
+				})
+
+				sub, err = ensureDefaultSubscription(h.db, userID)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to reload subscription"})
+					return
+				}
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{

@@ -28,10 +28,10 @@ import com.fblink.vpn.protocol.ProtocolState.RECONNECTING
 import com.fblink.vpn.protocol.ProtocolState.UNKNOWN
 import com.fblink.vpn.util.Log
 
-private const val TAG = "AmneziaTileService"
+private const val TAG = "FBLinkTileService"
 private const val DEFAULT_TILE_LABEL = "FBLink"
 
-class AmneziaTileService : TileService() {
+class FBLinkTileService : TileService() {
 
     private lateinit var scope: CoroutineScope
     private var vpnStateListeningJob: Job? = null
@@ -91,7 +91,7 @@ class AmneziaTileService : TileService() {
         try {
             super.onBind(intent)
         } catch (e: Throwable) {
-            Log.e(TAG, "Failed to bind AmneziaTileService: $e")
+            Log.e(TAG, "Failed to bind FBLinkTileService: $e")
             null
         }
 
@@ -101,7 +101,7 @@ class AmneziaTileService : TileService() {
             Log.d(TAG, "Start listening")
             vpnProto = VpnStateStore.getVpnState().vpnProto
             vpnProto.also { proto ->
-                if (proto != null && AmneziaVpnService.isRunning(applicationContext, proto.processName)) {
+                if (proto != null && FBLinkService.isRunning(applicationContext, proto.processName)) {
                     Log.d(TAG, "Vpn service is running")
                     doBindService()
                 } else {
@@ -145,7 +145,7 @@ class AmneziaTileService : TileService() {
             }
         } else {
             Log.d(TAG, "Start Activity")
-            Intent(this, AmneziaActivity::class.java).apply {
+            Intent(this, FBLinkActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.also {
                 startActivityAndCollapseCompat(it)

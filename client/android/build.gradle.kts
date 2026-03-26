@@ -98,7 +98,7 @@ android {
             outputs.map { it as BaseVariantOutputImpl }
                 .forEach { output ->
                     if (output.outputFileName.endsWith(".apk")) {
-                        output.outputFileName = "$outputBaseName-${buildType.name}.apk"
+                        output.outputFileName = "$outputBaseName-FBLink-${buildType.name}.apk"
                     }
                 }
         }

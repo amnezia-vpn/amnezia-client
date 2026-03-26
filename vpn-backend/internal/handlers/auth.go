@@ -254,6 +254,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	if _, err := ensureDefaultSubscription(h.db, user.ID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to initialize subscription"})
+		return
+	}
+
 	tokens, err := h.generateTokens(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate tokens"})

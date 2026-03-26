@@ -32,7 +32,7 @@ QString SshConfigurator::convertOpenSShKey(const QString &key)
     #ifdef QT_DEBUG
     tmp.setAutoRemove(false);
     #endif
-    tmp.open();
+    (void)tmp.open();
     tmp.write(key.toUtf8());
     tmp.close();
 
@@ -59,7 +59,7 @@ QString SshConfigurator::convertOpenSShKey(const QString &key)
 
     qDebug().noquote() << "OpenVpnConfigurator::convertOpenSShKey" << p.exitCode() << p.exitStatus() << p.readAll();
 
-    tmp.open();
+    (void)tmp.open();
 
     return tmp.readAll();
 #else

@@ -82,7 +82,7 @@ class VpnRequestActivity : ComponentActivity() {
                 ContextCompat.startForegroundService(this, it)
             }
         } ?: run {
-            Intent(this, AmneziaActivity::class.java).apply {
+            Intent(this, FBLinkActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.also {
                 startActivity(it)

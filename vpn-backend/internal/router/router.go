@@ -74,7 +74,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	// Handlers
 	authH := handlers.NewAuthHandler(db, cfg)
-	userH := handlers.NewUserHandler(db)
+	userH := handlers.NewUserHandler(db, cfg)
 	vpnH := handlers.NewVPNHandler(db)
 	payH := handlers.NewPaymentHandler(db, cfg.YooKassaShopID, cfg.YooKassaKey, cfg)
 	adminH := handlers.NewAdminHandler(db, cfg)

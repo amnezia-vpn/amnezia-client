@@ -30,8 +30,12 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
 	// Проверяем активную подписку
-	var sub models.Subscription
-	if err := h.db.Where("user_id = ? AND status = ?", userID, models.SubActive).First(&sub).Error; err != nil {
+	sub, err := ensureDefaultSubscription(h.db, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
+		return
+	}
+	if sub.Status != models.SubActive {
 		c.JSON(http.StatusForbidden, gin.H{"error": "active subscription required"})
 		return
 	}

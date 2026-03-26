@@ -55,12 +55,14 @@ func sshExec(server *models.VPNServer, cmd string) (string, error) {
 	}
 	defer session.Close()
 
-	out, err := session.CombinedOutput(cmd)
+	// wrap the cmd to ensure docker and awg can be found
+	fullCmd := fmt.Sprintf("export PATH=$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/snap/bin; %s", cmd)
+	out, err := session.CombinedOutput(fullCmd)
 	return string(out), err
 }
 
 // addAWGPeer добавляет WireGuard/AWG peer на сервере через SSH
-// Работает с amnezia-awg контейнером через docker exec
+// Работает с fblink-awg контейнером через docker exec
 func addAWGPeer(server *models.VPNServer, clientPublicKey, presharedKey, allowedIP string) error {
 	if server.SSHPassword == "" {
 		// SSH не настроен — пропускаем, peer нужно добавить вручную
@@ -69,7 +71,7 @@ func addAWGPeer(server *models.VPNServer, clientPublicKey, presharedKey, allowed
 
 	container := server.AWGContainer
 	if container == "" {
-		container = "amnezia-awg"
+		container = "amnezia-awg2"
 	}
 	iface := server.AWGInterface
 	if iface == "" {
@@ -79,7 +81,7 @@ func addAWGPeer(server *models.VPNServer, clientPublicKey, presharedKey, allowed
 
 	// 1. Добавляем peer в память (работает сразу)
 	addCmd := fmt.Sprintf(
-		`docker exec %s sh -c 'echo "%s" > /tmp/psk.txt && awg set %s peer %s preshared-key /tmp/psk.txt allowed-ips %s/32 && rm /tmp/psk.txt'`,
+		`docker exec %s sh -c 'echo "%s" > /tmp/psk.txt && wg set %s peer %s preshared-key /tmp/psk.txt allowed-ips %s/32 && rm /tmp/psk.txt'`,
 		container, presharedKey, iface, clientPublicKey, allowedIP,
 	)
 	if _, err := sshExec(server, addCmd); err != nil {
@@ -113,7 +115,7 @@ func removeAWGPeer(server *models.VPNServer, clientPublicKey string) error {
 
 	container := server.AWGContainer
 	if container == "" {
-		container = "amnezia-awg"
+		container = "amnezia-awg2"
 	}
 	iface := server.AWGInterface
 	if iface == "" {
@@ -123,7 +125,7 @@ func removeAWGPeer(server *models.VPNServer, clientPublicKey string) error {
 
 	// 1. Удалить peer из памяти
 	removeCmd := fmt.Sprintf(
-		`docker exec %s awg set %s peer %s remove`,
+		`docker exec %s wg set %s peer %s remove`,
 		container, iface, clientPublicKey,
 	)
 	if _, err := sshExec(server, removeCmd); err != nil {
@@ -157,24 +159,25 @@ func fetchServerPublicKey(server *models.VPNServer) (string, error) {
 
 	container := server.AWGContainer
 	if container == "" {
-		container = "amnezia-awg"
+		container = "amnezia-awg2"
 	}
 	iface := server.AWGInterface
 	if iface == "" {
 		iface = "awg0"
 	}
 
-	cmd := fmt.Sprintf(`docker exec %s awg show %s public-key`, container, iface)
-	out, err := sshExec(server, cmd)
-	if err != nil {
+	cmd := fmt.Sprintf(`docker exec %s wg show %s public-key`, container, iface)
+	out1, err1 := sshExec(server, cmd)
+	if err1 != nil {
 		// Попробуем без docker exec (если WG установлен на хосте)
 		cmdHost := fmt.Sprintf(`awg show %s public-key`, iface)
-		out, err = sshExec(server, cmdHost)
-		if err != nil {
-			return "", fmt.Errorf("failed to get public key via docker and host: %w", err)
+		out2, err2 := sshExec(server, cmdHost)
+		if err2 != nil {
+			return "", fmt.Errorf("failed via docker: %q (%v), via host: %q (%v)", strings.TrimSpace(out1), err1, strings.TrimSpace(out2), err2)
 		}
+		return strings.TrimSpace(out2), nil
 	}
-	return strings.TrimSpace(out), nil
+	return strings.TrimSpace(out1), nil
 }
 
 // fetchServerConfigHeaders получает параметры обфускации из конфига сервера (awg0.conf)
@@ -185,7 +188,7 @@ func fetchServerConfigHeaders(server *models.VPNServer) error {
 
 	container := server.AWGContainer
 	if container == "" {
-		container = "amnezia-awg"
+		container = "amnezia-awg2"
 	}
 	iface := server.AWGInterface
 	if iface == "" {

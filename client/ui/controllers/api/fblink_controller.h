@@ -90,12 +90,14 @@ private:
     void saveRefreshToken(const QString &token);
     QString getRefreshToken() const;
     void refreshAccessToken(std::function<void()> onSuccess = nullptr);
+    void beginSessionSync();
     void saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,
                               bool autoRenew = true, bool cardSaved = false, bool trialAvailable = true);
     void clearExistingFBLinkServers();
 
     bool m_isRefreshing = false;
     bool m_isLoading = false;
+    bool m_fetchConfigAfterSubscription = false;
     // Защита от обхода подписки: время последней серверной верификации
     // Если прошло > 24ч — при следующем isSubscribed() принудительно обновляем
     qint64 m_lastSubscriptionVerifiedAt = 0;

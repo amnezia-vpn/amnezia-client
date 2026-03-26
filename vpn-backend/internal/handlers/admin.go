@@ -166,7 +166,7 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 	}
 	awgContainer := req.AWGContainer
 	if awgContainer == "" {
-		awgContainer = "amnezia-awg"
+		awgContainer = "amnezia-awg2"
 	}
 	awgIface := req.AWGInterface
 	if awgIface == "" {
@@ -227,6 +227,7 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 	if server.PublicKey == "" {
 		pubKey, err := fetchServerPublicKey(&server)
 		if err != nil {
+			fmt.Printf("[ERROR] fetchServerPublicKey failed: %v\n", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch public key from server via SSH: " + err.Error()})
 			return
 		}

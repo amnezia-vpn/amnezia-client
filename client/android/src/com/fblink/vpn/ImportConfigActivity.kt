@@ -129,7 +129,7 @@ class ImportConfigActivity : ComponentActivity() {
     private fun startMainActivity(config: String) {
         if (config.isNotBlank()) {
             Log.d(TAG, "startMainActivity")
-            Intent(applicationContext, AmneziaActivity::class.java).apply {
+            Intent(applicationContext, FBLinkActivity::class.java).apply {
                 action = ACTION_IMPORT_CONFIG
                 addCategory(CATEGORY_DEFAULT)
                 putExtra(EXTRA_CONFIG, config)

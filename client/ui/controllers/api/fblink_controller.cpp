@@ -31,11 +31,16 @@ FBLinkController::FBLinkController(ImportController *importController,
         emit loadingChanged();
         QTimer::singleShot(0, this, [this]() {
             refreshAccessToken([this]() {
-                fetchConfig();
-                fetchSubscription();
+                beginSessionSync();
             });
         });
     }
+}
+
+void FBLinkController::beginSessionSync()
+{
+    m_fetchConfigAfterSubscription = true;
+    fetchSubscription();
 }
 
 void FBLinkController::login(const QString &email, const QString &password)
@@ -72,9 +77,7 @@ void FBLinkController::login(const QString &email, const QString &password)
                 emit loginStateChanged();
                 emit subscriptionChanged();
 
-                // Fetch VPN config and subscription status right after successful login
-                fetchConfig();
-                fetchSubscription();
+                beginSessionSync();
             } else {
                 emit loginError(tr("Invalid response format"));
             }
@@ -144,8 +147,7 @@ void FBLinkController::verifyEmail(const QString &email, const QString &code)
                 emit verifySuccess();
                 emit loginStateChanged();
                 emit subscriptionChanged();
-                fetchConfig();
-                fetchSubscription();
+                beginSessionSync();
             } else {
                 emit verifyError(tr("Неверный ответ сервера"));
             }
@@ -215,8 +217,7 @@ void FBLinkController::loginWithToken(const QString &token)
     saveSubscriptionInfo("", "", "");
     emit loginStateChanged();
     emit subscriptionChanged();
-    fetchConfig();
-    fetchSubscription();
+    beginSessionSync();
 }
 
 void FBLinkController::fetchConfig()
@@ -447,12 +448,21 @@ void FBLinkController::fetchSubscription()
             saveSubscriptionInfo(status, plan, endDate, autoRenew, cardSaved, trialAvailable);
             // Сервер подтвердил статус — записываем время верификации
             m_lastSubscriptionVerifiedAt = QDateTime::currentSecsSinceEpoch();
+            const bool shouldFetchConfig = m_fetchConfigAfterSubscription;
+            m_fetchConfigAfterSubscription = false;
             if (m_isLoading) {
                 m_isLoading = false;
                 emit loadingChanged();
             }
             emit subscriptionChanged();
             emit subscriptionFetched();
+            if (shouldFetchConfig) {
+                if (isSubscribed()) {
+                    fetchConfig();
+                } else {
+                    clearExistingFBLinkServers();
+                }
+            }
         } else {
             QByteArray responseData = reply->readAll();
             QJsonDocument doc = QJsonDocument::fromJson(responseData);
@@ -465,6 +475,7 @@ void FBLinkController::fetchSubscription()
                 reply->error() == QNetworkReply::ContentAccessDenied) {
                 refreshAccessToken([this]() { fetchSubscription(); });
             } else {
+                m_fetchConfigAfterSubscription = false;
                 if (m_isLoading) {
                     m_isLoading = false;
                     emit loadingChanged();

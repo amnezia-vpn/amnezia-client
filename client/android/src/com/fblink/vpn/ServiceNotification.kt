@@ -50,7 +50,7 @@ class ServiceNotification(private val context: Context) {
             PendingIntent.getActivity(
                 context,
                 GET_ACTIVITY_REQUEST_CODE,
-                Intent(context, AmneziaActivity::class.java),
+                Intent(context, FBLinkActivity::class.java),
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
         )
@@ -65,7 +65,7 @@ class ServiceNotification(private val context: Context) {
         Log.v(TAG, "Build notification: $serverName, $state")
 
         return notificationBuilder
-            .setSmallIcon(R.drawable.ic_FBLink_round)
+            .setSmallIcon(R.drawable.ic_fblink_round)
             .setContentTitle((serverName ?: "FBLink") + (protocol?.let { " $it" } ?: ""))
             .setContentText(context.getString(state))
             .setSubText(speedString)

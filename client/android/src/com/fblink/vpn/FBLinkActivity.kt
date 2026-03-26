@@ -66,7 +66,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.qtproject.qt.android.bindings.QtActivity
 
-private const val TAG = "AmneziaActivity"
+private const val TAG = "FBLinkActivity"
 const val ACTIVITY_MESSENGER_NAME = "Activity"
 
 private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
@@ -76,7 +76,7 @@ private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
 
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 
-class AmneziaActivity : QtActivity() {
+class FBLinkActivity : QtActivity() {
 
     private lateinit var mainScope: CoroutineScope
     private val qtInitialized = CompletableDeferred<Unit>()
@@ -258,7 +258,7 @@ class AmneziaActivity : QtActivity() {
         mainScope.launch {
             qtInitialized.await()
             vpnProto?.let { proto ->
-                if (AmneziaVpnService.isRunning(applicationContext, proto.processName)) {
+                if (FBLinkService.isRunning(applicationContext, proto.processName)) {
                     doBindService()
                 }
             }
@@ -512,7 +512,7 @@ class AmneziaActivity : QtActivity() {
             startActivityForResult(intent, CHECK_VPN_PERMISSION_ACTION_CODE, ActivityResultHandler(
                 onSuccess = {
                     Log.d(TAG, "Vpn permission granted")
-                    Toast.makeText(this@AmneziaActivity, resources.getText(R.string.vpnGranted), Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@FBLinkActivity, resources.getText(R.string.vpnGranted), Toast.LENGTH_LONG).show()
                     onPermissionGranted()
                 },
                 onFail = {
@@ -706,7 +706,7 @@ class AmneziaActivity : QtActivity() {
                         }
                     ))
                 } catch (_: ActivityNotFoundException) {
-                    Toast.makeText(this@AmneziaActivity, "Unsupported", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@FBLinkActivity, "Unsupported", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -744,7 +744,7 @@ class AmneziaActivity : QtActivity() {
                     }
                 }
             } else {
-                Intent(this@AmneziaActivity, TvFilePicker::class.java)
+                Intent(this@FBLinkActivity, TvFilePicker::class.java)
             }
 
             try {
@@ -1000,7 +1000,7 @@ class AmneziaActivity : QtActivity() {
         Log.v(TAG, "Request authentication")
         mainScope.launch {
             qtInitialized.await()
-            Intent(this@AmneziaActivity, AuthActivity::class.java).also {
+            Intent(this@FBLinkActivity, AuthActivity::class.java).also {
                 startActivity(it)
             }
         }

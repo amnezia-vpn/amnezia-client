@@ -403,38 +403,38 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   config.m_killSwitchEnabled = QVariant(obj.value("killSwitchOption").toString()).toBool();
 
   if (!obj.value("Jc").isNull()) {
-    config.m_junkPacketCount = obj.value("Jc").toString();
+    config.m_junkPacketCount = obj.value("Jc").toVariant().toString();
   }
   if (!obj.value("Jmin").isNull()) {
-    config.m_junkPacketMinSize = obj.value("Jmin").toString();
+    config.m_junkPacketMinSize = obj.value("Jmin").toVariant().toString();
   }
   if (!obj.value("Jmax").isNull()) {
-    config.m_junkPacketMaxSize = obj.value("Jmax").toString();
+    config.m_junkPacketMaxSize = obj.value("Jmax").toVariant().toString();
   }
   if (!obj.value("S1").isNull()) {
-    config.m_initPacketJunkSize = obj.value("S1").toString();
+    config.m_initPacketJunkSize = obj.value("S1").toVariant().toString();
   }
   if (!obj.value("S2").isNull()) {
-    config.m_responsePacketJunkSize = obj.value("S2").toString();
+    config.m_responsePacketJunkSize = obj.value("S2").toVariant().toString();
   }
   if (!obj.value("S3").isNull()) {
-    config.m_cookieReplyPacketJunkSize = obj.value("S3").toString();
+    config.m_cookieReplyPacketJunkSize = obj.value("S3").toVariant().toString();
   }
   if (!obj.value("S4").isNull()) {
-    config.m_transportPacketJunkSize = obj.value("S4").toString();
+    config.m_transportPacketJunkSize = obj.value("S4").toVariant().toString();
   }
 
   if (!obj.value("H1").isNull()) {
-    config.m_initPacketMagicHeader = obj.value("H1").toString();
+    config.m_initPacketMagicHeader = obj.value("H1").toVariant().toString();
   }
   if (!obj.value("H2").isNull()) {
-    config.m_responsePacketMagicHeader = obj.value("H2").toString();
+    config.m_responsePacketMagicHeader = obj.value("H2").toVariant().toString();
   }
   if (!obj.value("H3").isNull()) {
-    config.m_underloadPacketMagicHeader = obj.value("H3").toString();
+    config.m_underloadPacketMagicHeader = obj.value("H3").toVariant().toString();
   }
   if (!obj.value("H4").isNull()) {
-    config.m_transportPacketMagicHeader = obj.value("H4").toString();
+    config.m_transportPacketMagicHeader = obj.value("H4").toVariant().toString();
   }
 
   if (!obj.value("I1").isNull()) {

@@ -234,9 +234,16 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
 
     EVP_PKEY *pKey = EVP_PKEY_new();
     q_check_ptr(pKey);
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
     RSA *rsa = RSA_generate_key(2048, RSA_F4, nullptr, nullptr);
     q_check_ptr(rsa);
     EVP_PKEY_assign_RSA(pKey, rsa);
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
     // 2. set version of x509 req
     X509_REQ *x509_req = X509_REQ_new();

@@ -161,7 +161,9 @@ PageType {
                 tabBarStackView.goToTabBarPage(PageEnum.PageFBLinkLogin)
                 tabBar.visible = false
             } else if (!FBLinkController.isSubscribed) {
-                PageController.goToPage(PageEnum.PageFBLinkSubscription)
+                tabBar.visible = true
+                tabBar.setCurrentIndex(0)
+                tabBarStackView.goToTabBarPage(PageEnum.PageHome)
             } else {
                 // Logged in with subscription but no containers: fetch fresh config
                 FBLinkController.fetchConfig()

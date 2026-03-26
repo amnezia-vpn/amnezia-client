@@ -14,7 +14,7 @@
 #include "windowstunnelservice.h"
 #include "wireguardutilswindows.h"
 
-#define TUNNEL_SERVICE_NAME L"FBLinkWGTunnel$FBLink"
+#define TUNNEL_SERVICE_NAME L"AmneziaWGTunnel$FBLink"
 
 class WindowsDaemon final : public Daemon {
   Q_DISABLE_COPY_MOVE(WindowsDaemon)

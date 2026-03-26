@@ -21,6 +21,7 @@ PageType {
     property string errorMessage: ""
     property bool isWaitingForPayment: false
     property int pollCount: 0
+    property bool confirmDeleteCard: false
     property string mgmtError: ""
     readonly property int maxPolls: 60  // 60 × 2 s = 2 min
 

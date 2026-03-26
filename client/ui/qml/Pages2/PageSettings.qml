@@ -122,7 +122,7 @@ PageType {
 
                             Text {
                                 visible: FBLinkController.isSubscribed
-                                text: qsTr("Действует до: ") + FBLinkController.subscriptionEndDate
+                                text: qsTr("Действует до: ") + new Date(FBLinkController.subscriptionEndDate).toLocaleDateString(Qt.locale(), Locale.LongFormat)
                                 font.pixelSize: 11
                                 color: Qt.rgba(1, 1, 1, 0.5)
                             }

@@ -58,7 +58,7 @@ import com.fblink.vpn.util.net.TrafficStats
 import org.json.JSONException
 import org.json.JSONObject
 
-private const val TAG = "AmneziaVpnService"
+private const val TAG = "FBLinkService"
 
 const val ACTION_DISCONNECT = "com.fblink.vpn.action.disconnect"
 const val ACTION_CONNECT = "com.fblink.vpn.action.connect"
@@ -78,7 +78,7 @@ private const val DISCONNECT_TIMEOUT = 5000L
 private const val STOP_SERVICE_TIMEOUT = 5000L
 
 @SuppressLint("Registered")
-open class AmneziaVpnService : VpnService() {
+open class FBLinkService : VpnService() {
 
     private lateinit var mainScope: CoroutineScope
     private lateinit var connectionScope: CoroutineScope
@@ -167,7 +167,7 @@ open class AmneziaVpnService : VpnService() {
                         clientMessengers[msg.replyTo]?.let { clientMessenger ->
                             clientMessenger.send {
                                 ServiceEvent.STATUS.packToMessage {
-                                    putStatus(this@AmneziaVpnService.protocolState.value)
+                                    putStatus(this@FBLinkService.protocolState.value)
                                 }
                             }
                         }

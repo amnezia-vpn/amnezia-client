@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!-- Leave package attribute for androiddeployqt -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    package="com.fblink.vpn"
     android:versionName="-- %%INSERT_VERSION_NAME%% --"
     android:versionCode="-- %%INSERT_VERSION_CODE%% --"
     android:installLocation="auto">
@@ -29,7 +29,7 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 
     <application
-        android:name=".AmneziaApplication"
+        android:name=".FBLinkApplication"
         android:label="-- %%INSERT_APP_NAME%% --"
         android:icon="@mipmap/icon"
         android:roundIcon="@mipmap/icon_round"
@@ -41,7 +41,7 @@
         tools:targetApi="s">
 
         <activity
-            android:name=".AmneziaActivity"
+            android:name=".FBLinkActivity"
             android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|density
                 |fontScale|layoutDirection|locale|keyboard|keyboardHidden|navigation|mcc|mnc"
             android:launchMode="singleInstance"
@@ -154,7 +154,7 @@
 
         <service
             android:name=".AwgService"
-            android:process=":amneziaAwgService"
+            android:process=":fblinkAwgService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="systemExempted"
             android:exported="false"
@@ -167,7 +167,7 @@
 
         <service
             android:name=".OpenVpnService"
-            android:process=":amneziaOpenVpnService"
+            android:process=":fblinkOpenVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="systemExempted"
             android:exported="false"
@@ -180,7 +180,7 @@
 
         <service
             android:name=".XrayService"
-            android:process=":amneziaXrayService"
+            android:process=":fblinkXrayService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="systemExempted"
             android:exported="false"
@@ -192,9 +192,9 @@
         </service>
 
         <service
-            android:name=".AmneziaTileService"
-            android:process=":amneziaTileService"
-            android:icon="@drawable/ic_amnezia_round"
+            android:name=".FBLinkTileService"
+            android:process=":fblinkTileService"
+            android:icon="@drawable/ic_fblink_round"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:exported="true">
 

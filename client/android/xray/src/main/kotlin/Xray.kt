@@ -11,10 +11,10 @@ import com.fblink.vpn.protocol.ProtocolState.CONNECTED
 import com.fblink.vpn.protocol.ProtocolState.DISCONNECTED
 import com.fblink.vpn.protocol.Statistics
 import com.fblink.vpn.protocol.VpnStartException
-import com.fblink.vpn.protocol.xray.libXray.DialerController
-import com.fblink.vpn.protocol.xray.libXray.LibXray
-import com.fblink.vpn.protocol.xray.libXray.Logger
-import com.fblink.vpn.protocol.xray.libXray.Tun2SocksConfig
+import org.amnezia.vpn.protocol.xray.libXray.DialerController
+import org.amnezia.vpn.protocol.xray.libXray.LibXray
+import org.amnezia.vpn.protocol.xray.libXray.Logger
+import org.amnezia.vpn.protocol.xray.libXray.Tun2SocksConfig
 import com.fblink.vpn.util.Log
 import com.fblink.vpn.util.net.InetNetwork
 import com.fblink.vpn.util.net.ip
