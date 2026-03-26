@@ -199,10 +199,14 @@ void LinuxNetworkWatcherWorker::checkDevices() {
 
 void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 {
+  logger.debug() << "NMStateChanged " << state;
+
   if (state == NM_STATE_ASLEEP) {
     emit wakeup();
+  } else if (state >= NM_STATE_CONNECTED_SITE && m_previousNMState < NM_STATE_CONNECTED_SITE) {
+    emit networkChanged();
   }
 
-  logger.debug() << "NMStateChanged " << state;
+  m_previousNMState = state;
 }
 

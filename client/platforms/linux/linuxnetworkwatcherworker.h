@@ -24,6 +24,7 @@ class LinuxNetworkWatcherWorker final : public QObject {
  signals:
   void unsecuredNetwork(const QString& networkName, const QString& networkId);
   void wakeup();
+  void networkChanged();
 
  public slots:
   void initialize();
@@ -38,6 +39,7 @@ class LinuxNetworkWatcherWorker final : public QObject {
   // initialization. When a property of them changes, we check if the access
   // point is active and unsecure.
   QStringList m_devicePaths;
+  quint32 m_previousNMState = 0;
 };
 
 #endif  // LINUXNETWORKWATCHERWORKER_H
