@@ -15,3 +15,12 @@ if(APPLE)
         set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "" FORCE)
     endif()
 endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    set(CONAN_INSTALL_ARGS
+    "--build=missing"
+    "-c=tools.android:cmake_legacy_toolchain=false"
+    "-c=tools.build:sharedlinkflags=['-Wl,-z,max-page-size=16384']"
+    "-c=tools.build:exelinkflags=['-Wl,-z,max-page-size=16384']"
+    CACHE STRING "" FORCE)
+endif()
