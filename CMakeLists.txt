@@ -3,26 +3,11 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 set(AMNEZIAVPN_VERSION 4.8.15.4)
 
-include(cmake/conan_bootstrap.cmake)
-set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_SOURCE_DIR}/cmake/conan_provider.cmake CACHE STRING "" FORCE)
-
-if(APPLE)
-    get_property(generator_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-    if (generator_is_multi_config)
-        set(CONAN_INSTALL_BUILD_CONFIGURATIONS Release Debug MinSizeRel RelWithDebInfo)
-    endif()
-    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "" FORCE)
-        set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "" FORCE)
-    elseif(MACOS_NE)
-        set(CONAN_INSTALL_ARGS "--build=missing;-o=&:macos_ne=True" CACHE STRING "" FORCE)
-        set(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" CACHE STRING "" FORCE)
-        set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
-    else()
-        set(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" CACHE STRING "" FORCE)
-        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "" FORCE)
-    endif()
-endif()
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
+    ${CMAKE_SOURCE_DIR}/cmake/platform_settings.cmake
+    ${CMAKE_SOURCE_DIR}/cmake/recipes_bootstrap.cmake
+    ${CMAKE_SOURCE_DIR}/cmake/conan_provider.cmake
+    CACHE STRING "" FORCE)
 
 project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         DESCRIPTION "AmneziaVPN"
