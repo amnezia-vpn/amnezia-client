@@ -77,6 +77,7 @@ namespace PageLoader
         PageShareConnection,
 
         PageSetupWizardApiPremiumInfo,
+        PageSetupWizardApiTrialEmail,
 
         PageDevMenu
     };

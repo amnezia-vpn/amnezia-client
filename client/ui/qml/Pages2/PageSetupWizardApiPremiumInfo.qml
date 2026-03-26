@@ -9,21 +9,20 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
+import PageEnum 1.0
 
 PageType {
     id: root
 
     property int selectedPlanIndex: 0
-    property string premiumFeaturesHtml: ""
     property string premiumHeaderName: ""
     property string premiumHeaderDescription: ""
 
-    readonly property var currentPlan: ApiConfigsController.subscriptionPlansModel.planAt(selectedPlanIndex)
+    readonly property var currentPlan: ApiSubscriptionPlansModel.planAt(selectedPlanIndex)
 
     function syncFromModel() {
-        root.selectedPlanIndex = ApiConfigsController.subscriptionPlansModel.recommendedRowIndex()
+        root.selectedPlanIndex = ApiSubscriptionPlansModel.recommendedRowIndex()
 
-        root.premiumFeaturesHtml = String(ApiServicesModel.getSelectedServiceData("features")).replace("%1", LanguageModel.getCurrentSiteUrl("free")).replace("/free", "")
         root.premiumHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
         root.premiumHeaderDescription = String(ApiServicesModel.getSelectedServiceData("serviceDescription"))
     }
@@ -72,27 +71,17 @@ PageType {
                 descriptionText: root.premiumHeaderDescription
             }
 
-            LabelTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 12
-
-                text: qsTr("Choose a plan")
-                color: AmneziaStyle.color.mutedGray
-                font.pixelSize: 13
-            }
-
             Repeater {
-                model: ApiConfigsController.subscriptionPlansModel
+                model: ApiSubscriptionPlansModel
 
                 delegate: SubscriptionPlanCard {
                     required property int index
+                    required property var model
 
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: index === ApiConfigsController.subscriptionPlansModel.rowCount() - 1 ? 24 : 12
+                    Layout.bottomMargin: index === ApiSubscriptionPlansModel.rowCount() - 1 ? 24 : 12
 
                     selected: root.selectedPlanIndex === index
                     primaryLeft: String(model.primaryLeft)
@@ -116,32 +105,13 @@ PageType {
                 font.pixelSize: 13
             }
 
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
-
-                textFormat: Text.RichText
-                text: root.premiumFeaturesHtml
-                onLinkActivated: function(link) {
-                    Qt.openUrlExternally(link)
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
-                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
-                }
-            }
-
             BenefitsPanel {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                benefitsModel: ApiConfigsController.benefitsModel
+                benefitsModel: ApiBenefitsModel
             }
 
             ParagraphTextType {
@@ -177,7 +147,7 @@ PageType {
                     var termsUrl = LanguageModel.getCurrentSiteUrl()
                     var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
                     return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
-                        .arg(termsUrl).arg(privacyUrl).arg(Qt.colorToString(AmneziaStyle.color.goldenApricot))
+                        .arg(termsUrl).arg(privacyUrl).arg("#FBB26A")
                 }
 
                 onLinkActivated: function(link) {
@@ -208,7 +178,7 @@ PageType {
                     var termsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
                     var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
                     return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
-                        .arg(termsUrl).arg(privacyUrl).arg(Qt.colorToString(AmneziaStyle.color.goldenApricot))
+                        .arg(termsUrl).arg(privacyUrl).arg("#FBB26A")
                 }
 
                 onLinkActivated: function(link) {
@@ -248,27 +218,24 @@ PageType {
             if (!plan) {
                 return
             }
+            if (plan.isTrial) {
+                PageController.goToPage(PageEnum.PageSetupWizardApiTrialEmail)
+                return
+            }
             if (plan.checkoutUrl) {
                 Qt.openUrlExternally(plan.checkoutUrl)
                 PageController.closePage()
                 PageController.closePage()
                 return
             }
-            if (plan.serviceType) {
-                var idx = ApiServicesModel.serviceIndexForType(plan.serviceType)
-                if (idx < 0) {
-                    return
-                }
-                ApiServicesModel.setServiceIndex(idx)
-                PageController.showBusyIndicator(true)
-                var ok = ApiConfigsController.importService()
-                PageController.showBusyIndicator(false)
-                if (!ok) {
-                    var endpoint = ApiServicesModel.getStoreEndpoint()
-                    Qt.openUrlExternally(endpoint)
-                    PageController.closePage()
-                    PageController.closePage()
-                }
+            PageController.showBusyIndicator(true)
+            var ok = ApiConfigsController.importService()
+            PageController.showBusyIndicator(false)
+            if (!ok) {
+                var endpoint = ApiServicesModel.getStoreEndpoint()
+                Qt.openUrlExternally(endpoint)
+                PageController.closePage()
+                PageController.closePage()
             }
         }
     }

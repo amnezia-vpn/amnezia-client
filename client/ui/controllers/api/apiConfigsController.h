@@ -18,9 +18,6 @@ public:
                          const QSharedPointer<ApiBenefitsModel> &benefitsModel, const std::shared_ptr<Settings> &settings,
                          QObject *parent = nullptr);
 
-    Q_PROPERTY(ApiSubscriptionPlansModel *subscriptionPlansModel READ subscriptionPlansModel CONSTANT)
-    Q_PROPERTY(ApiBenefitsModel *benefitsModel READ benefitsModel CONSTANT)
-
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY vpnKeyExportReady)
     Q_PROPERTY(QString vpnKey READ getVpnKey NOTIFY vpnKeyExportReady)
@@ -36,7 +33,8 @@ public slots:
     bool importService();
     bool importSerivceFromAppStore();
     bool restoreSerivceFromAppStore();
-    bool importServiceFromGateway();
+    bool importFreeFromGateway();
+    bool importTrialFromGateway(const QString &email);
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
     bool updateServiceFromTelegram(const int serverIndex);
@@ -44,9 +42,6 @@ public slots:
     bool deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode);
 
     bool isConfigValid();
-
-    ApiSubscriptionPlansModel *subscriptionPlansModel() const { return m_subscriptionPlansModel.get(); }
-    ApiBenefitsModel *benefitsModel() const { return m_benefitsModel.get(); }
 
     void setCurrentProtocol(const QString &protocolName);
     bool isVlessProtocol();

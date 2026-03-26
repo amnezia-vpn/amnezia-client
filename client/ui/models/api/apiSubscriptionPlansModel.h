@@ -16,7 +16,7 @@ public:
         SubtitleRole,
         RecommendedRole,
         CheckoutUrlRole,
-        ServiceTypeRole,
+        IsTrialRole,
         ServiceProtocolRole
     };
     Q_ENUM(Roles)
@@ -41,7 +41,7 @@ private:
         QString subtitle;
         bool recommended = false;
         QString checkoutUrl;
-        QString serviceType;
+        bool isTrial = false;
         QString serviceProtocol;
     };
 

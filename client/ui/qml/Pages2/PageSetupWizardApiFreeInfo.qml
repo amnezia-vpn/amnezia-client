@@ -74,7 +74,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 12
 
-                text: qsTr("Available with Free")
+                text: qsTr("Free features")
                 color: AmneziaStyle.color.mutedGray
                 font.pixelSize: 13
             }
@@ -85,7 +85,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                benefitsModel: ApiConfigsController.benefitsModel
+                benefitsModel: ApiBenefitsModel
             }
 
             ParagraphTextType {
@@ -94,7 +94,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16
 
-                visible: root.freeFeaturesHtml.length > 0 && ApiConfigsController.benefitsModel.rowCount() === 0
+                visible: root.freeFeaturesHtml.length > 0 && ApiBenefitsModel.rowCount() === 0
 
                 textFormat: Text.RichText
                 text: root.freeFeaturesHtml
@@ -127,7 +127,7 @@ PageType {
                     var termsUrl = LanguageModel.getCurrentSiteUrl()
                     var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
                     return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
-                        .arg(termsUrl).arg(privacyUrl).arg(Qt.colorToString(AmneziaStyle.color.goldenApricot))
+                        .arg(termsUrl).arg(privacyUrl).arg("#FBB26A")
                 }
 
                 onLinkActivated: function(link) {
@@ -158,7 +158,7 @@ PageType {
                     var termsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
                     var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
                     return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
-                        .arg(termsUrl).arg(privacyUrl).arg(Qt.colorToString(AmneziaStyle.color.goldenApricot))
+                        .arg(termsUrl).arg(privacyUrl).arg("#FBB26A")
                 }
 
                 onLinkActivated: function(link) {
@@ -185,7 +185,7 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + SettingsController.safeAreaBottomMargin
 
-        text: ApiServicesModel.getSelectedServiceType() === "amnezia-trial" ? qsTr("Try Trial") : qsTr("Continue")
+        text: qsTr("Continue")
 
         clickedFunc: function() {
             PageController.showBusyIndicator(true)

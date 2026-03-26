@@ -45,7 +45,6 @@ namespace
     {
         constexpr char amneziaFree[] = "amnezia-free";
         constexpr char amneziaPremium[] = "amnezia-premium";
-        constexpr char amneziaTrial[] = "amnezia-trial";
     }
 }
 
@@ -76,7 +75,7 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     }
     case CardDescriptionRole: {
         auto speed = apiServiceData.serviceInfo.speed;
-        if (serviceType == serviceType::amneziaPremium || serviceType == serviceType::amneziaTrial) {
+        if (serviceType == serviceType::amneziaPremium) {
             return apiServiceData.serviceInfo.cardDescription.arg(speed);
         } else if (serviceType == serviceType::amneziaFree) {
             QString description = apiServiceData.serviceInfo.cardDescription;
@@ -132,11 +131,8 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         if (serviceType == serviceType::amneziaPremium) {
             return 0;
         }
-        if (serviceType == serviceType::amneziaTrial) {
-            return 1;
-        }
         if (serviceType == serviceType::amneziaFree) {
-            return 2;
+            return 1;
         }
         return QVariant();
     }

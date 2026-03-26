@@ -14,13 +14,13 @@ namespace configKey
     constexpr char subtitle[] = "subtitle";
     constexpr char recommended[] = "recommended";
     constexpr char checkoutUrl[] = "checkout_url";
-    constexpr char serviceType[] = "service_type";
+    constexpr char isTrial[] = "is_trial";
     constexpr char serviceProtocol[] = "service_protocol";
 
     constexpr char primaryLeftCamel[] = "primaryLeft";
     constexpr char primaryRightCamel[] = "primaryRight";
     constexpr char checkoutUrlCamel[] = "checkoutUrl";
-    constexpr char serviceTypeCamel[] = "serviceType";
+    constexpr char isTrialCamel[] = "isTrial";
     constexpr char serviceProtocolCamel[] = "serviceProtocol";
 }
 }
@@ -55,8 +55,8 @@ QVariant ApiSubscriptionPlansModel::data(const QModelIndex &index, int role) con
         return plan.recommended;
     case CheckoutUrlRole:
         return plan.checkoutUrl;
-    case ServiceTypeRole:
-        return plan.serviceType;
+    case IsTrialRole:
+        return plan.isTrial;
     case ServiceProtocolRole:
         return plan.serviceProtocol;
     default:
@@ -72,7 +72,7 @@ QHash<int, QByteArray> ApiSubscriptionPlansModel::roleNames() const
         { SubtitleRole, "subtitle" },
         { RecommendedRole, "recommended" },
         { CheckoutUrlRole, "checkoutUrl" },
-        { ServiceTypeRole, "serviceType" },
+        { IsTrialRole, "isTrial" },
         { ServiceProtocolRole, "serviceProtocol" },
     };
 }
@@ -93,7 +93,7 @@ void ApiSubscriptionPlansModel::updateModel(const QJsonArray &arr)
         subscriptionPlan.subtitle = planObject.value(configKey::subtitle).toString();
         subscriptionPlan.recommended = planObject.value(configKey::recommended).toBool();
         subscriptionPlan.checkoutUrl = planObject.value(configKey::checkoutUrl).toString();
-        subscriptionPlan.serviceType = planObject.value(configKey::serviceType).toString();
+        subscriptionPlan.isTrial = planObject.value(configKey::isTrial).toBool();
         subscriptionPlan.serviceProtocol = planObject.value(configKey::serviceProtocol).toString();
         m_subscriptionPlans.append(std::move(subscriptionPlan));
     }
@@ -119,7 +119,7 @@ QVariantMap ApiSubscriptionPlansModel::planAt(int row) const
     planMap.insert(QLatin1String(configKey::subtitle), plan.subtitle);
     planMap.insert(QLatin1String(configKey::recommended), plan.recommended);
     planMap.insert(QLatin1String(configKey::checkoutUrlCamel), plan.checkoutUrl);
-    planMap.insert(QLatin1String(configKey::serviceTypeCamel), plan.serviceType);
+    planMap.insert(QLatin1String(configKey::isTrialCamel), plan.isTrial);
     planMap.insert(QLatin1String(configKey::serviceProtocolCamel), plan.serviceProtocol);
     return planMap;
 }

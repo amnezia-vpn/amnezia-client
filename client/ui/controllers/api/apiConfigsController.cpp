@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QSet>
+#include <QVariantMap>
 
 #include "platforms/ios/ios_controller.h"
 
@@ -459,7 +460,7 @@ bool ApiConfigsController::importService()
             return importSerivceFromAppStore();
         }
     } else if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaFree) {
-        importServiceFromGateway();
+        importFreeFromGateway();
         return true;
     }
     return false;
@@ -675,7 +676,7 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
     return true;
 }
 
-bool ApiConfigsController::importServiceFromGateway()
+bool ApiConfigsController::importFreeFromGateway()
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -725,6 +726,72 @@ bool ApiConfigsController::importServiceFromGateway()
         emit errorOccurred(errorCode);
         return false;
     }
+}
+
+bool ApiConfigsController::importTrialFromGateway(const QString &email)
+{
+    const QString trimmedEmail = email.trimmed();
+    if (trimmedEmail.isEmpty()) {
+        emit errorOccurred(ErrorCode::ApiConfigEmptyError);
+        return false;
+    }
+
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
+                                            m_settings->getInstallationUuid(true),
+                                            m_apiServicesModel->getCountryCode(),
+                                            "",
+                                            m_apiServicesModel->getSelectedServiceType(),
+                                            m_apiServicesModel->getSelectedServiceProtocol(),
+                                            QJsonObject() };
+
+    if (m_serversModel->isServerFromApiAlreadyExists(gatewayRequestData.userCountryCode, gatewayRequestData.serviceType,
+                                                     gatewayRequestData.serviceProtocol)) {
+        emit errorOccurred(ErrorCode::ApiConfigAlreadyAdded);
+        return false;
+    }
+
+    ProtocolData protocolData = generateProtocolData(gatewayRequestData.serviceProtocol);
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
+    apiPayload.insert(apiDefs::key::email, trimmedEmail);
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/trial"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return false;
+    }
+
+    QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
+    QString key = responseObject.value(apiDefs::key::config).toString();
+    if (key.isEmpty()) {
+        qWarning().noquote() << "[Trial] trial response does not contain config field";
+        emit errorOccurred(ErrorCode::ApiConfigEmptyError);
+        return false;
+    }
+
+    key.replace(QStringLiteral("vpn://"), QString());
+    QByteArray configBytes = QByteArray::fromBase64(key.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QByteArray uncompressed = qUncompress(configBytes);
+    if (!uncompressed.isEmpty()) {
+        configBytes = uncompressed;
+    }
+    if (configBytes.isEmpty()) {
+        qWarning().noquote() << "[Trial] trial response config payload is empty";
+        emit errorOccurred(ErrorCode::ApiConfigEmptyError);
+        return false;
+    }
+
+    QJsonObject configObject = QJsonDocument::fromJson(configBytes).object();
+    quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
+    configObject.insert(config_key::crc, crc);
+    m_serversModel->addServer(configObject);
+
+    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+    return true;
 }
 
 bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,

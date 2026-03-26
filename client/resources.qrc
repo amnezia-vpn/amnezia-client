@@ -234,6 +234,7 @@
         <file>ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardApiFreeInfo.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardApiServicesList.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardConfigSource.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardCredentials.qml</file>
