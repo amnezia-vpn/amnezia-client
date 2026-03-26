@@ -114,3 +114,13 @@ void ExportUiController::applyExportResult(const ExportController::ExportResult 
 
     emit exportConfigChanged();
 }
+
+void ExportUiController::setConfigFromString(const QString &config, const QString &fileName)
+{
+    clearPreviousConfig();
+    m_config = config;
+    emit exportConfigChanged();
+    if (!fileName.isEmpty()) {
+        SystemController::saveFile(fileName, m_config);
+    }
+}

@@ -58,7 +58,7 @@ PageType {
                 textMaximumLineCount: 2
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 clickedFunction: function() {
-                    XrayConfigsModel.createFromCurrent(XrayConfigModel.getProtocolConfig().serverConfig)
+                    XrayConfigsModel.createFromXrayModel(XrayConfigModel)
                 }
             }
 
@@ -72,11 +72,11 @@ PageType {
                 clickedFunction: function() {
                     if (root.selectedConfigIndex >= 0) {
                         var json = XrayConfigsModel.exportToJson(root.selectedConfigIndex)
-                        ExportController.shareText(json, "xray_config.json")
+                        ExportController.setConfigFromString(json, "xray_config.json")
                     } else if (XrayConfigsModel.rowCount() > 0) {
                         // Export the first one if none selected
                         var json = XrayConfigsModel.exportToJson(0)
-                        ExportController.shareText(json, "xray_config.json")
+                        ExportController.setConfigFromString(json, "xray_config.json")
                     }
                 }
             }
@@ -90,7 +90,13 @@ PageType {
                 descriptionText: qsTr("In JSON format")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 clickedFunction: function() {
-                    ImportController.importConfig()
+                    var filePath = SystemController.getFileName(qsTr("Open XRay config"), qsTr("JSON files (*.json)"))
+                    if (filePath !== "") {
+                        var jsonContent = ImportController.readTextFile(filePath)
+                        if (jsonContent !== "") {
+                            XrayConfigsModel.importFromJson(jsonContent)
+                        }
+                    }
                 }
             }
 
@@ -200,8 +206,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 clickedFunction: function() {
                     configActionsDrawer.closeTriggered()
-                    var serverConfig = XrayConfigsModel.applyConfig(root.selectedConfigIndex)
-                    XrayConfigModel.applyServerConfig(serverConfig)
+                    XrayConfigsModel.applyConfigToXrayModel(root.selectedConfigIndex, XrayConfigModel)
                     PageController.closePage()
                 }
             }
@@ -216,7 +221,7 @@ PageType {
                 clickedFunction: function() {
                     configActionsDrawer.closeTriggered()
                     var json = XrayConfigsModel.exportToJson(root.selectedConfigIndex)
-                    ExportController.shareText(json, "xray_config.json")
+                    ExportController.setConfigFromString(json, "xray_config.json")
                 }
             }
 

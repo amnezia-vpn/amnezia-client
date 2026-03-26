@@ -9,6 +9,7 @@
 #include <QVector>
 
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "ui/models/protocols/xrayConfigModel.h"
 
 class SecureAppSettingsRepository;
 
@@ -48,6 +49,10 @@ public slots:
 
     Q_INVOKABLE QString exportToJson(int index) const;
     Q_INVOKABLE bool importFromJson(const QString &jsonString);
+
+    // Convenience: create snapshot from live model, apply snapshot back to model
+    Q_INVOKABLE void createFromXrayModel(XrayConfigModel *model);
+    Q_INVOKABLE void applyConfigToXrayModel(int index, XrayConfigModel *model);
 
 signals:
     void configApplied(int index);
