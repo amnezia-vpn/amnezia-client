@@ -378,3 +378,21 @@ QHash<int, QByteArray> XrayConfigModel::roleNames() const
 
     return roles;
 }
+
+void XrayConfigModel::resetToDefaults()
+{
+    beginResetModel();
+    m_protocolConfig.serverConfig = amnezia::XrayServerConfig{};
+    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+    endResetModel();
+}
+
+void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverConfig)
+{
+    beginResetModel();
+    m_protocolConfig.serverConfig = serverConfig;
+    // Clear client config since server settings changed
+    m_protocolConfig.clearClientConfig();
+    m_originalProtocolConfig = m_protocolConfig;
+    endResetModel();
+}

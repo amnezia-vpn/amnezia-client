@@ -85,6 +85,7 @@ namespace PageLoader
         PageProtocolXrayXPaddingSettings,
         PageProtocolXrayFlowSettings,
         PageProtocolXraySecuritySettings,
+        PageProtocolXrayXPaddingBytesSettings,
     };
     Q_ENUM_NS(PageEnum)
 

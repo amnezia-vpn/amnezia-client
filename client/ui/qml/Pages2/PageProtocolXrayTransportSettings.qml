@@ -14,41 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    // Temporary local state — will be replaced by model roles
-    property int selectedTransport: 0   // 0=RAW, 1=XHTTP, 2=mKCP
-
-    // XHTTP fields
-    property string xhttpMode: "Auto"
-    property string xhttpHost: "www.googletagmanager.com"
-    property string xhttpPath: ""
-    property string xhttpHeadersTemplate: "HTTP"
-    property string xhttpUplinkMethod: "POST"
-    property bool   xhttpDisableGrpc: true
-    property bool   xhttpDisableSse: true
-    // Session & Sequence
-    property string sessionPlacement: "Path"
-    property string sessionKey: "Path"
-    property string seqPlacement: "Path"
-    property string seqKey: ""
-    property string uplinkDataPlacement: "Body"
-    property string uplinkDataKey: ""
-    // Traffic Shaping
-    property string uplinkChunkSize: "0"
-    property string scMaxBufferedPosts: ""
-    property string scMaxEachPostBytesMin: "1"
-    property string scMaxEachPostBytesMax: "100"
-    property string scMinPostsIntervalMsMin: "100"
-    property string scMinPostsIntervalMsMax: "800"
-    property string scStreamUpServerSecsMin: "1"
-    property string scStreamUpServerSecsMax: "100"
-    // mKCP fields
-    property string mkcpTti: ""
-    property string mkcpUplinkCapacity: ""
-    property string mkcpDownlinkCapacity: ""
-    property string mkcpReadBufferSize: ""
-    property string mkcpWriteBufferSize: ""
-    property bool   mkcpCongestion: true
-
     BackButtonType {
         id: backButton
         anchors.top: parent.top
@@ -57,20 +22,19 @@ PageType {
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
     }
 
-    FlickableType {
-        id: flickable
+    ListViewType {
+        id: listView
         anchors.top: backButton.bottom
         anchors.bottom: saveButton.top
         anchors.left: parent.left
         anchors.right: parent.right
-        contentHeight: mainColumn.implicitHeight
 
-        ColumnLayout {
-            id: mainColumn
-            width: flickable.width
+        model: XrayConfigModel
+
+        delegate: ColumnLayout {
+            width: listView.width
             spacing: 0
 
-            // ── Header ────────────────────────────────────────────────
             Header2TextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -80,51 +44,49 @@ PageType {
                 text: qsTr("Transport")
             }
 
-            // ── Radio: RAW (TCP) ──────────────────────────────────────
+            // ── Radio buttons ─────────────────────────────────────────
             VerticalRadioButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("RAW (TCP)")
-                checked: root.selectedTransport === 0
-                onClicked: root.selectedTransport = 0
+                checked: transport === "raw"
+                onClicked: transport = "raw"
             }
 
             DividerType {
             }
 
-            // ── Radio: XHTTP ──────────────────────────────────────────
             VerticalRadioButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("XHTTP")
                 descriptionText: qsTr("Advanced users")
-                checked: root.selectedTransport === 1
-                onClicked: root.selectedTransport = 1
+                checked: transport === "xhttp"
+                onClicked: transport = "xhttp"
             }
 
             DividerType {
             }
 
-            // ── Radio: mKCP ───────────────────────────────────────────
             VerticalRadioButton {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("mKCP")
-                checked: root.selectedTransport === 2
-                onClicked: root.selectedTransport = 2
+                checked: transport === "mkcp"
+                onClicked: transport = "mkcp"
             }
 
             DividerType {
             }
 
             // ══════════════════════════════════════════════════════════
-            // mKCP Settings (visible when mKCP selected)
+            // mKCP Settings
             // ══════════════════════════════════════════════════════════
             ColumnLayout {
-                visible: root.selectedTransport === 2
+                visible: transport === "mkcp"
                 Layout.fillWidth: true
                 spacing: 0
 
@@ -144,8 +106,10 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("TTI")
-                    textField.text: root.mkcpTti
-                    textField.onEditingFinished: root.mkcpTti = textField.text
+                    textField.text: mkcpTti
+                    textField.onEditingFinished: {
+                        if (textField.text !== mkcpTti) mkcpTti = textField.text
+                    }
                 }
 
                 TextFieldWithHeaderType {
@@ -154,8 +118,10 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("uplinkCapacity")
-                    textField.text: root.mkcpUplinkCapacity
-                    textField.onEditingFinished: root.mkcpUplinkCapacity = textField.text
+                    textField.text: mkcpUplinkCapacity
+                    textField.onEditingFinished: {
+                        if (textField.text !== mkcpUplinkCapacity) mkcpUplinkCapacity = textField.text
+                    }
                 }
 
                 TextFieldWithHeaderType {
@@ -164,8 +130,10 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("downlinkCapacity")
-                    textField.text: root.mkcpDownlinkCapacity
-                    textField.onEditingFinished: root.mkcpDownlinkCapacity = textField.text
+                    textField.text: mkcpDownlinkCapacity
+                    textField.onEditingFinished: {
+                        if (textField.text !== mkcpDownlinkCapacity) mkcpDownlinkCapacity = textField.text
+                    }
                 }
 
                 TextFieldWithHeaderType {
@@ -174,8 +142,10 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("readBufferSize")
-                    textField.text: root.mkcpReadBufferSize
-                    textField.onEditingFinished: root.mkcpReadBufferSize = textField.text
+                    textField.text: mkcpReadBufferSize
+                    textField.onEditingFinished: {
+                        if (textField.text !== mkcpReadBufferSize) mkcpReadBufferSize = textField.text
+                    }
                 }
 
                 TextFieldWithHeaderType {
@@ -184,8 +154,10 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("writeBufferSize")
-                    textField.text: root.mkcpWriteBufferSize
-                    textField.onEditingFinished: root.mkcpWriteBufferSize = textField.text
+                    textField.text: mkcpWriteBufferSize
+                    textField.onEditingFinished: {
+                        if (textField.text !== mkcpWriteBufferSize) mkcpWriteBufferSize = textField.text
+                    }
                 }
 
                 SwitcherType {
@@ -193,32 +165,30 @@ PageType {
                     Layout.margins: 16
                     Layout.topMargin: 8
                     text: qsTr("Congestion")
-                    checked: root.mkcpCongestion
-                    onToggled: root.mkcpCongestion = checked
+                    checked: mkcpCongestion
+                    onToggled: mkcpCongestion = checked
                 }
             }
 
             // ══════════════════════════════════════════════════════════
-            // XHTTP Settings (visible when XHTTP selected)
+            // XHTTP Settings
             // ══════════════════════════════════════════════════════════
             ColumnLayout {
-                visible: root.selectedTransport === 1
+                visible: transport === "xhttp"
                 Layout.fillWidth: true
                 spacing: 0
 
-                // Mode dropdown
                 DropDownType {
                     id: modeDropDown
                     Layout.fillWidth: true
                     Layout.topMargin: 16
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.xhttpMode
+                    text: xhttpMode
                     descriptionText: qsTr("Mode")
                     headerText: qsTr("Mode")
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
-                        id: modeListView
                         rootWidth: root.width
                         model: ListModel {
                             ListElement {
@@ -235,22 +205,28 @@ PageType {
                             }
                         }
                         clickedFunction: function () {
-                            root.xhttpMode = selectedText
+                            xhttpMode = selectedText
                             modeDropDown.text = selectedText
                             modeDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.xhttpMode) {
+                                if (model.get(i).name === xhttpMode) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
                         }
                     }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            modeDropDown.text = xhttpMode
+                        }
+                    }
                 }
 
-                // HTTP Profile label
                 CaptionTextType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
@@ -267,8 +243,10 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Host")
-                    textField.text: root.xhttpHost
-                    textField.onEditingFinished: root.xhttpHost = textField.text
+                    textField.text: xhttpHost
+                    textField.onEditingFinished: {
+                        if (textField.text !== xhttpHost) xhttpHost = textField.text
+                    }
                 }
 
                 TextFieldWithHeaderType {
@@ -277,18 +255,19 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Path")
-                    textField.text: root.xhttpPath
-                    textField.onEditingFinished: root.xhttpPath = textField.text
+                    textField.text: xhttpPath
+                    textField.onEditingFinished: {
+                        if (textField.text !== xhttpPath) xhttpPath = textField.text
+                    }
                 }
 
-                // Headers template dropdown
                 DropDownType {
                     id: headersDropDown
                     Layout.fillWidth: true
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.xhttpHeadersTemplate
+                    text: xhttpHeadersTemplate
                     descriptionText: qsTr("Headers template")
                     headerText: qsTr("Headers template")
                     drawerParent: root
@@ -303,29 +282,35 @@ PageType {
                             }
                         }
                         clickedFunction: function () {
-                            root.xhttpHeadersTemplate = selectedText
+                            xhttpHeadersTemplate = selectedText
                             headersDropDown.text = selectedText
                             headersDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.xhttpHeadersTemplate) {
+                                if (model.get(i).name === xhttpHeadersTemplate) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
                         }
                     }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            headersDropDown.text = xhttpHeadersTemplate
+                        }
+                    }
                 }
 
-                // UplinkHTTPMethod dropdown
                 DropDownType {
                     id: uplinkMethodDropDown
                     Layout.fillWidth: true
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.xhttpUplinkMethod
+                    text: xhttpUplinkMethod
                     descriptionText: qsTr("UplinkHTTPMethod")
                     headerText: qsTr("UplinkHTTPMethod")
                     drawerParent: root
@@ -343,43 +328,48 @@ PageType {
                             }
                         }
                         clickedFunction: function () {
-                            root.xhttpUplinkMethod = selectedText
+                            xhttpUplinkMethod = selectedText
                             uplinkMethodDropDown.text = selectedText
                             uplinkMethodDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.xhttpUplinkMethod) {
+                                if (model.get(i).name === xhttpUplinkMethod) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
                         }
                     }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            uplinkMethodDropDown.text = xhttpUplinkMethod
+                        }
+                    }
                 }
 
-                // Disable gRPC Header
                 SwitcherType {
                     Layout.fillWidth: true
                     Layout.margins: 16
                     Layout.topMargin: 16
                     text: qsTr("Disable gRPC Header")
                     descriptionText: qsTr("noGRPCHeader")
-                    checked: root.xhttpDisableGrpc
-                    onToggled: root.xhttpDisableGrpc = checked
+                    checked: xhttpDisableGrpc
+                    onToggled: xhttpDisableGrpc = checked
                 }
 
                 DividerType {
                 }
 
-                // Disable SSE Header
                 SwitcherType {
                     Layout.fillWidth: true
                     Layout.margins: 16
                     text: qsTr("Disable SSE Header")
                     descriptionText: qsTr("noSSEHeader")
-                    checked: root.xhttpDisableSse
-                    onToggled: root.xhttpDisableSse = checked
+                    checked: xhttpDisableSse
+                    onToggled: xhttpDisableSse = checked
                 }
 
                 DividerType {
@@ -402,7 +392,7 @@ PageType {
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.sessionPlacement
+                    text: xhttpSessionPlacement
                     descriptionText: qsTr("SessionPlacement")
                     headerText: qsTr("SessionPlacement")
                     drawerParent: root
@@ -423,17 +413,24 @@ PageType {
                             }
                         }
                         clickedFunction: function () {
-                            root.sessionPlacement = selectedText
+                            xhttpSessionPlacement = selectedText
                             sessionPlacementDropDown.text = selectedText
                             sessionPlacementDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.sessionPlacement) {
+                                if (model.get(i).name === xhttpSessionPlacement) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
+                        }
+                    }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            sessionPlacementDropDown.text = xhttpSessionPlacement
                         }
                     }
                 }
@@ -444,7 +441,7 @@ PageType {
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.sessionKey
+                    text: xhttpSessionKey
                     descriptionText: qsTr("SessionKey")
                     headerText: qsTr("SessionKey")
                     drawerParent: root
@@ -462,17 +459,24 @@ PageType {
                             }
                         }
                         clickedFunction: function () {
-                            root.sessionKey = selectedText
+                            xhttpSessionKey = selectedText
                             sessionKeyDropDown.text = selectedText
                             sessionKeyDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.sessionKey) {
+                                if (model.get(i).name === xhttpSessionKey) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
+                        }
+                    }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            sessionKeyDropDown.text = xhttpSessionKey
                         }
                     }
                 }
@@ -483,7 +487,7 @@ PageType {
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.seqPlacement
+                    text: xhttpSeqPlacement
                     descriptionText: qsTr("SeqPlacement")
                     headerText: qsTr("SeqPlacement")
                     drawerParent: root
@@ -504,17 +508,24 @@ PageType {
                             }
                         }
                         clickedFunction: function () {
-                            root.seqPlacement = selectedText
+                            xhttpSeqPlacement = selectedText
                             seqPlacementDropDown.text = selectedText
                             seqPlacementDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.seqPlacement) {
+                                if (model.get(i).name === xhttpSeqPlacement) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
+                        }
+                    }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            seqPlacementDropDown.text = xhttpSeqPlacement
                         }
                     }
                 }
@@ -525,8 +536,10 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("SeqKey")
-                    textField.text: root.seqKey
-                    textField.onEditingFinished: root.seqKey = textField.text
+                    textField.text: xhttpSeqKey
+                    textField.onEditingFinished: {
+                        if (textField.text !== xhttpSeqKey) xhttpSeqKey = textField.text
+                    }
                 }
 
                 DropDownType {
@@ -535,7 +548,7 @@ PageType {
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: root.uplinkDataPlacement
+                    text: xhttpUplinkDataPlacement
                     descriptionText: qsTr("UplinkDataPlacement")
                     headerText: qsTr("UplinkDataPlacement")
                     drawerParent: root
@@ -550,17 +563,24 @@ PageType {
                             }
                         }
                         clickedFunction: function () {
-                            root.uplinkDataPlacement = selectedText
+                            xhttpUplinkDataPlacement = selectedText
                             uplinkDataPlacementDropDown.text = selectedText
                             uplinkDataPlacementDropDown.closeTriggered()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === root.uplinkDataPlacement) {
+                                if (model.get(i).name === xhttpUplinkDataPlacement) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
+                        }
+                    }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            uplinkDataPlacementDropDown.text = xhttpUplinkDataPlacement
                         }
                     }
                 }
@@ -571,8 +591,10 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("UplinkDataKey")
-                    textField.text: root.uplinkDataKey
-                    textField.onEditingFinished: root.uplinkDataKey = textField.text
+                    textField.text: xhttpUplinkDataKey
+                    textField.onEditingFinished: {
+                        if (textField.text !== xhttpUplinkDataKey) xhttpUplinkDataKey = textField.text
+                    }
                 }
 
                 // ── Traffic Shaping ───────────────────────────────────
@@ -592,11 +614,13 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("UplinkChunkSize")
-                    textField.text: root.uplinkChunkSize
+                    textField.text: xhttpUplinkChunkSize
                     textField.validator: IntValidator {
                         bottom: 0
                     }
-                    textField.onEditingFinished: root.uplinkChunkSize = textField.text
+                    textField.onEditingFinished: {
+                        if (textField.text !== xhttpUplinkChunkSize) xhttpUplinkChunkSize = textField.text
+                    }
                 }
 
                 TextFieldWithHeaderType {
@@ -605,11 +629,12 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("scMaxBufferedPosts")
-                    textField.text: root.scMaxBufferedPosts
-                    textField.onEditingFinished: root.scMaxBufferedPosts = textField.text
+                    textField.text: xhttpScMaxBufferedPosts
+                    textField.onEditingFinished: {
+                        if (textField.text !== xhttpScMaxBufferedPosts) xhttpScMaxBufferedPosts = textField.text
+                    }
                 }
 
-                // scMaxEachPostBytes — min/max range
                 CaptionTextType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
@@ -623,13 +648,12 @@ PageType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    minValue: root.scMaxEachPostBytesMin
-                    maxValue: root.scMaxEachPostBytesMax
-                    onMinChanged: root.scMaxEachPostBytesMin = val
-                    onMaxChanged: root.scMaxEachPostBytesMax = val
+                    minValue: xhttpScMaxEachPostBytesMin
+                    maxValue: xhttpScMaxEachPostBytesMax
+                    onMinChanged: xhttpScMaxEachPostBytesMin = val
+                    onMaxChanged: xhttpScMaxEachPostBytesMax = val
                 }
 
-                // scMinPostsIntervalMs — min/max range
                 CaptionTextType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
@@ -643,13 +667,12 @@ PageType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    minValue: root.scMinPostsIntervalMsMin
-                    maxValue: root.scMinPostsIntervalMsMax
-                    onMinChanged: root.scMinPostsIntervalMsMin = val
-                    onMaxChanged: root.scMinPostsIntervalMsMax = val
+                    minValue: xhttpScMinPostsIntervalMsMin
+                    maxValue: xhttpScMinPostsIntervalMsMax
+                    onMinChanged: xhttpScMinPostsIntervalMsMin = val
+                    onMaxChanged: xhttpScMinPostsIntervalMsMax = val
                 }
 
-                // scStreamUpServerSecs — min/max range
                 CaptionTextType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
@@ -663,10 +686,10 @@ PageType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    minValue: root.scStreamUpServerSecsMin
-                    maxValue: root.scStreamUpServerSecsMax
-                    onMinChanged: root.scStreamUpServerSecsMin = val
-                    onMaxChanged: root.scStreamUpServerSecsMax = val
+                    minValue: xhttpScStreamUpServerSecsMin
+                    maxValue: xhttpScStreamUpServerSecsMax
+                    onMinChanged: xhttpScStreamUpServerSecsMin = val
+                    onMaxChanged: xhttpScStreamUpServerSecsMax = val
                 }
 
                 // ── Padding and multiplexing ──────────────────────────
@@ -688,18 +711,20 @@ PageType {
                         PageController.goToPage(PageEnum.PageProtocolXrayXPaddingSettings)
                     }
                 }
+
                 DividerType {
                 }
 
                 LabelWithButtonType {
                     Layout.fillWidth: true
                     text: qsTr("XMux")
-                    descriptionText: qsTr("On")
+                    descriptionText: xmuxEnabled ? qsTr("On") : qsTr("Off")
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
                     clickedFunction: function () {
                         PageController.goToPage(PageEnum.PageProtocolXrayXmuxSettings)
                     }
                 }
+
                 DividerType {
                 }
             }
@@ -710,7 +735,6 @@ PageType {
         }
     }
 
-    // ── Save button ───────────────────────────────────────────────────
     BasicButtonType {
         id: saveButton
         anchors.bottom: parent.bottom
@@ -719,11 +743,10 @@ PageType {
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-
         text: qsTr("Save")
         onClicked: {
             forceActiveFocus()
-            // XrayConfigModel.setTransport(...)
+            PageController.closePage()
         }
         Keys.onEnterPressed: clicked()
         Keys.onReturnPressed: clicked()
