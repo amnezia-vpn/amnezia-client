@@ -464,6 +464,7 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
 
     XrayClientConfig clientConfig;
     clientConfig.nativeConfig = config;
+    qDebug() << "config:" << config;
     clientConfig.localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort);
     clientConfig.id = xrayClientId;
 

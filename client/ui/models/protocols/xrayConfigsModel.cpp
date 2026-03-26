@@ -193,3 +193,23 @@ QString XrayConfigsModel::buildDisplayName(const amnezia::XrayServerConfig &cfg)
 
     return QString("%1 %2").arg(transport, security).trimmed();
 }
+
+void XrayConfigsModel::createFromXrayModel(XrayConfigModel *model)
+{
+    if (!model) {
+        return;
+    }
+    createFromCurrent(model->getProtocolConfig().serverConfig);
+}
+
+void XrayConfigsModel::applyConfigToXrayModel(int index, XrayConfigModel *model)
+{
+    if (!model) {
+        return;
+    }
+    amnezia::XrayServerConfig cfg = applyConfig(index);
+    if (cfg.port.isEmpty()) {
+        return; // guard against invalid index
+    }
+    model->applyServerConfig(cfg);
+}
