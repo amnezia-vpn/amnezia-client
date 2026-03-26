@@ -41,39 +41,6 @@ namespace
         constexpr char benefits[] = "benefits";
     }
 
-    QString iconUrlFromGatewayBenefitIcon(const QString &iconKey)
-    {
-        if (iconKey.startsWith(QLatin1String("qrc:"))) {
-            return iconKey;
-        }
-        static const QHash<QString, QString> map = {
-            { QStringLiteral("globe-2"), QStringLiteral("qrc:/images/controls/globe-2.svg") },
-            { QStringLiteral("smartphone"), QStringLiteral("qrc:/images/controls/smartphone.svg") },
-            { QStringLiteral("gauge"), QStringLiteral("qrc:/images/controls/gauge.svg") },
-            { QStringLiteral("infinity"), QStringLiteral("qrc:/images/controls/infinity.svg") },
-            { QStringLiteral("tag"), QStringLiteral("qrc:/images/controls/tag.svg") },
-            { QStringLiteral("history"), QStringLiteral("qrc:/images/controls/history.svg") },
-            { QStringLiteral("info"), QStringLiteral("qrc:/images/controls/info.svg") },
-            { QStringLiteral("app"), QStringLiteral("qrc:/images/controls/app.svg") },
-            { QStringLiteral("download"), QStringLiteral("qrc:/images/controls/download.svg") },
-            { QStringLiteral("help-circle"), QStringLiteral("qrc:/images/controls/help-circle.svg") },
-        };
-        return map.value(iconKey, QStringLiteral("qrc:/images/controls/info.svg"));
-    }
-
-    QVariantList jsonObjectArrayToVariantList(const QJsonArray &arr)
-    {
-        QVariantList list;
-        list.reserve(arr.size());
-        for (const QJsonValue &v : arr) {
-            if (!v.isObject()) {
-                continue;
-            }
-            list.append(v.toObject().toVariantMap());
-        }
-        return list;
-    }
-
     namespace serviceType
     {
         constexpr char amneziaFree[] = "amnezia-free";
@@ -82,7 +49,9 @@ namespace
     }
 }
 
-ApiServicesModel::ApiServicesModel(QObject *parent) : QAbstractListModel(parent)
+ApiServicesModel::ApiServicesModel(QObject *parent)
+    : QAbstractListModel(parent)
+    , m_selectedServiceIndex(0)
 {
 }
 
@@ -171,12 +140,6 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         }
         return QVariant();
     }
-    case SubscriptionPlansRole: {
-        return apiServiceData.subscriptionPlans;
-    }
-    case BenefitRowsRole: {
-        return buildBenefitRows(apiServiceData);
-    }
     }
 
     return QVariant();
@@ -201,12 +164,27 @@ void ApiServicesModel::updateModel(const QJsonObject &data)
         }
     }
 
+    if (!m_services.isEmpty() && m_selectedServiceIndex >= m_services.size()) {
+        m_selectedServiceIndex = 0;
+    }
+
     endResetModel();
+
+    emit serviceSelectionChanged();
 }
 
 void ApiServicesModel::setServiceIndex(const int index)
 {
     m_selectedServiceIndex = index;
+    emit serviceSelectionChanged();
+}
+
+ApiServicesModel::ApiServicesData ApiServicesModel::selectedServiceData() const
+{
+    if (m_services.isEmpty() || m_selectedServiceIndex < 0 || m_selectedServiceIndex >= m_services.size()) {
+        return {};
+    }
+    return m_services.at(m_selectedServiceIndex);
 }
 
 QJsonObject ApiServicesModel::getSelectedServiceInfo()
@@ -265,28 +243,12 @@ QVariant ApiServicesModel::getSelectedServiceData(const QString roleString)
 
 int ApiServicesModel::serviceIndexForType(const QString &type) const
 {
-    for (int i = 0; i < m_services.size(); ++i) {
-        if (m_services.at(i).type == type) {
-            return i;
+    for (int serviceIndex = 0; serviceIndex < m_services.size(); ++serviceIndex) {
+        if (m_services.at(serviceIndex).type == type) {
+            return serviceIndex;
         }
     }
     return -1;
-}
-
-QVariant ApiServicesModel::getServiceFieldForType(const QString &type, const QString &roleString) const
-{
-    const int row = serviceIndexForType(type);
-    if (row < 0) {
-        return {};
-    }
-    const QModelIndex modelIndex = index(row);
-    const auto roles = roleNames();
-    for (auto it = roles.begin(); it != roles.end(); ++it) {
-        if (QString(it.value()) == roleString) {
-            return data(modelIndex, it.key());
-        }
-    }
-    return {};
 }
 
 QHash<int, QByteArray> ApiServicesModel::roleNames() const
@@ -303,8 +265,6 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[PriceRole] = "price";
     roles[EndDateRole] = "endDate";
     roles[OrderRole] = "order";
-    roles[SubscriptionPlansRole] = "subscriptionPlans";
-    roles[BenefitRowsRole] = "benefitRows";
 
     return roles;
 }
@@ -330,7 +290,7 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.serviceInfo.description = serviceDescription.value(configKey::description).toString();
     serviceData.serviceInfo.features = serviceDescription.value(configKey::features).toString();
 
-    serviceData.subscriptionPlans = jsonObjectArrayToVariantList(serviceDescription.value(configKey::subscriptionPlans).toArray());
+    serviceData.subscriptionPlansJson = serviceDescription.value(configKey::subscriptionPlans).toArray();
     serviceData.benefits = serviceDescription.value(configKey::benefits).toArray();
 
     serviceData.supportInfo = data.value(apiDefs::key::supportInfo).toObject();
@@ -352,76 +312,4 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.subscription.endDate = subscriptionObject.value(apiDefs::key::endDate).toString();
 
     return serviceData;
-}
-
-QString ApiServicesModel::formatPriceForBenefit(const QString &rawPrice) const
-{
-    if (rawPrice == QStringLiteral("free")) {
-        return tr("Free");
-    }
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    return tr("%1 $").arg(rawPrice);
-#else
-    return tr("%1 $/month").arg(rawPrice);
-#endif
-}
-
-QString ApiServicesModel::benefitInjectValue(const QString &injectKey, const ServiceInfo &info,
-                                             const QJsonObject &supportInfo) const
-{
-    if (injectKey == QLatin1String("region")) {
-        return info.region.isEmpty() ? QStringLiteral("—") : info.region;
-    }
-    if (injectKey == QLatin1String("speed")) {
-        return info.speed.isEmpty() ? QStringLiteral("—") : info.speed;
-    }
-    if (injectKey == QLatin1String("price")) {
-        return formatPriceForBenefit(info.price);
-    }
-
-    if (injectKey == apiDefs::key::telegram) {
-        const QString handle = supportInfo.value(apiDefs::key::telegram).toString().trimmed();
-        if (handle.isEmpty()) {
-            return QStringLiteral("—");
-        }
-        if (handle.startsWith(QLatin1Char('@'))) {
-            return handle;
-        }
-        return QLatin1Char('@') + handle;
-    }
-    return QString();
-}
-
-QVariantList ApiServicesModel::buildBenefitRows(const ApiServicesData &service) const
-{
-    QVariantList out;
-    for (const QJsonValue &v : service.benefits) {
-        if (!v.isObject()) {
-            continue;
-        }
-        const QJsonObject o = v.toObject();
-        QString title = o.value(QStringLiteral("title")).toString();
-        QString body = o.value(QStringLiteral("body")).toString();
-        const QString iconKey = o.value(QStringLiteral("icon")).toString();
-        const QString injectKey = o.value(QStringLiteral("inject_key")).toString();
-        if (body.contains(QLatin1String("%1")) && !injectKey.isEmpty()) {
-            QString injected = benefitInjectValue(injectKey, service.serviceInfo, service.supportInfo);
-            if (injected.isEmpty()) {
-                injected = QStringLiteral("—");
-            }
-            body = body.arg(injected);
-        }
-        if (title.isEmpty() && body.isEmpty()) {
-            continue;
-        }
-        QVariantMap m;
-        m.insert(QStringLiteral("icon"), iconUrlFromGatewayBenefitIcon(iconKey));
-        m.insert(QStringLiteral("title"), title);
-        m.insert(QStringLiteral("body"), body);
-        if (o.value(QStringLiteral("accent")).toBool()) {
-            m.insert(QStringLiteral("accent"), true);
-        }
-        out.append(m);
-    }
-    return out;
 }

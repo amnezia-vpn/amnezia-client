@@ -91,6 +91,12 @@ void CoreController::initModels()
     m_apiServicesModel.reset(new ApiServicesModel(this));
     m_engine->rootContext()->setContextProperty("ApiServicesModel", m_apiServicesModel.get());
 
+    m_apiSubscriptionPlansModel.reset(new ApiSubscriptionPlansModel(this));
+    m_engine->rootContext()->setContextProperty("ApiSubscriptionPlansModel", m_apiSubscriptionPlansModel.get());
+
+    m_apiBenefitsModel.reset(new ApiBenefitsModel(this));
+    m_engine->rootContext()->setContextProperty("ApiBenefitsModel", m_apiBenefitsModel.get());
+
     m_apiCountryModel.reset(new ApiCountryModel(this));
     m_engine->rootContext()->setContextProperty("ApiCountryModel", m_apiCountryModel.get());
 
@@ -151,7 +157,8 @@ void CoreController::initControllers()
             new ApiSettingsController(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsController.get());
 
-    m_apiConfigsController.reset(new ApiConfigsController(m_serversModel, m_apiServicesModel, m_settings));
+    m_apiConfigsController.reset(
+            new ApiConfigsController(m_serversModel, m_apiServicesModel, m_apiSubscriptionPlansModel, m_apiBenefitsModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController.get());
     connect(m_apiConfigsController.get(), &ApiConfigsController::subscriptionRefreshNeeded,
             this, [this]() { m_apiSettingsController->getAccountInfo(false); });

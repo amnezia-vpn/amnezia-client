@@ -13,26 +13,15 @@ import "../Components"
 PageType {
     id: root
 
-    property var subscriptionPlans: []
-    property var benefitRows: []
     property int selectedPlanIndex: 0
     property string premiumFeaturesHtml: ""
     property string premiumHeaderName: ""
     property string premiumHeaderDescription: ""
 
-    readonly property var currentPlan: subscriptionPlans[selectedPlanIndex]
+    readonly property var currentPlan: ApiConfigsController.subscriptionPlansModel.planAt(selectedPlanIndex)
 
     function syncFromModel() {
-        root.subscriptionPlans = ApiServicesModel.getSelectedServiceData("subscriptionPlans")
-        root.benefitRows = ApiServicesModel.getSelectedServiceData("benefitRows")
-
-        root.selectedPlanIndex = 0
-        for (var i = 0; i < root.subscriptionPlans.length; ++i) {
-            if (root.subscriptionPlans[i].recommended) {
-                root.selectedPlanIndex = i
-                break
-            }
-        }
+        root.selectedPlanIndex = ApiConfigsController.subscriptionPlansModel.recommendedRowIndex()
 
         root.premiumFeaturesHtml = String(ApiServicesModel.getSelectedServiceData("features")).replace("%1", LanguageModel.getCurrentSiteUrl("free")).replace("/free", "")
         root.premiumHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
@@ -40,14 +29,6 @@ PageType {
     }
 
     Component.onCompleted: syncFromModel()
-
-    Connections {
-        target: ApiServicesModel
-
-        function onModelReset() {
-            root.syncFromModel()
-        }
-    }
 
     BackButtonType {
         id: backButton
@@ -103,23 +84,21 @@ PageType {
             }
 
             Repeater {
-                model: subscriptionPlans.length
+                model: ApiConfigsController.subscriptionPlansModel
 
                 delegate: SubscriptionPlanCard {
                     required property int index
 
-                    readonly property var plan: root.subscriptionPlans[index]
-
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: index === root.subscriptionPlans.length - 1 ? 24 : 12
+                    Layout.bottomMargin: index === ApiConfigsController.subscriptionPlansModel.rowCount() - 1 ? 24 : 12
 
                     selected: root.selectedPlanIndex === index
-                    primaryLeft: String(plan.primary_left)
-                    primaryRight: String(plan.primary_right)
-                    subtitle: String(plan.subtitle)
-                    showRecommendedBadge: !!plan.recommended
+                    primaryLeft: String(model.primaryLeft)
+                    primaryRight: String(model.primaryRight)
+                    subtitle: String(model.subtitle)
+                    showRecommendedBadge: !!model.recommended
                     recommendedText: qsTr("Recommended")
 
                     onSelectRequested: root.selectedPlanIndex = index
@@ -162,7 +141,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                benefitItems: root.benefitRows
+                benefitsModel: ApiConfigsController.benefitsModel
             }
 
             ParagraphTextType {
@@ -197,7 +176,8 @@ PageType {
                 text: {
                     var termsUrl = LanguageModel.getCurrentSiteUrl()
                     var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
-                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: #FBB26A;\">Terms of Use</a> and <a href=\"%2\" style=\"color: #FBB26A;\">Privacy Policy</a>").arg(termsUrl).arg(privacyUrl)
+                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
+                        .arg(termsUrl).arg(privacyUrl).arg(Qt.colorToString(AmneziaStyle.color.goldenApricot))
                 }
 
                 onLinkActivated: function(link) {
@@ -227,7 +207,8 @@ PageType {
                 text: {
                     var termsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
                     var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
-                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: #FBB26A;\">Terms of Use</a> and <a href=\"%2\" style=\"color: #FBB26A;\">Privacy Policy</a>").arg(termsUrl).arg(privacyUrl)
+                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
+                        .arg(termsUrl).arg(privacyUrl).arg(Qt.colorToString(AmneziaStyle.color.goldenApricot))
                 }
 
                 onLinkActivated: function(link) {
@@ -259,7 +240,7 @@ PageType {
             if (!plan) {
                 return qsTr("Continue")
             }
-            return qsTr("Subscribe — %1 for %2").arg(String(plan.primary_left)).arg(String(plan.primary_right))
+            return qsTr("Subscribe — %1 for %2").arg(String(plan.primaryLeft)).arg(String(plan.primaryRight))
         }
 
         clickedFunc: function() {
@@ -267,14 +248,14 @@ PageType {
             if (!plan) {
                 return
             }
-            if (plan.checkout_url) {
-                Qt.openUrlExternally(plan.checkout_url)
+            if (plan.checkoutUrl) {
+                Qt.openUrlExternally(plan.checkoutUrl)
                 PageController.closePage()
                 PageController.closePage()
                 return
             }
-            if (plan.service_type) {
-                var idx = ApiServicesModel.serviceIndexForType(plan.service_type)
+            if (plan.serviceType) {
+                var idx = ApiServicesModel.serviceIndexForType(plan.serviceType)
                 if (idx < 0) {
                     return
                 }

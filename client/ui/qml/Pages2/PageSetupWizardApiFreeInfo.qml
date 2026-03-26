@@ -16,27 +16,15 @@ PageType {
     property string freeHeaderName: ""
     property string freeHeaderDescription: ""
     property string freeFeaturesHtml: ""
-    property var benefitRows: []
 
     function syncFromModel() {
         root.freeHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
         root.freeHeaderDescription = String(ApiServicesModel.getSelectedServiceData("serviceDescription"))
         var text = ApiServicesModel.getSelectedServiceData("features")
         root.freeFeaturesHtml = String(text).replace("%1", LanguageModel.getCurrentSiteUrl("free")).replace("/free", "")
-
-        var rows = ApiServicesModel.getSelectedServiceData("benefitRows")
-        root.benefitRows = rows !== undefined && rows !== null ? rows : []
     }
 
     Component.onCompleted: syncFromModel()
-
-    Connections {
-        target: ApiServicesModel
-
-        function onModelReset() {
-            root.syncFromModel()
-        }
-    }
 
     BackButtonType {
         id: backButton
@@ -97,7 +85,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                benefitItems: root.benefitRows
+                benefitsModel: ApiConfigsController.benefitsModel
             }
 
             ParagraphTextType {
@@ -106,7 +94,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16
 
-                visible: root.freeFeaturesHtml.length > 0 && (!root.benefitRows || root.benefitRows.length === 0)
+                visible: root.freeFeaturesHtml.length > 0 && ApiConfigsController.benefitsModel.rowCount() === 0
 
                 textFormat: Text.RichText
                 text: root.freeFeaturesHtml
@@ -138,7 +126,8 @@ PageType {
                 text: {
                     var termsUrl = LanguageModel.getCurrentSiteUrl()
                     var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
-                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: #FBB26A;\">Terms of Use</a> and <a href=\"%2\" style=\"color: #FBB26A;\">Privacy Policy</a>").arg(termsUrl).arg(privacyUrl)
+                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
+                        .arg(termsUrl).arg(privacyUrl).arg(Qt.colorToString(AmneziaStyle.color.goldenApricot))
                 }
 
                 onLinkActivated: function(link) {
@@ -168,7 +157,8 @@ PageType {
                 text: {
                     var termsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
                     var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
-                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: #FBB26A;\">Terms of Use</a> and <a href=\"%2\" style=\"color: #FBB26A;\">Privacy Policy</a>").arg(termsUrl).arg(privacyUrl)
+                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
+                        .arg(termsUrl).arg(privacyUrl).arg(Qt.colorToString(AmneziaStyle.color.goldenApricot))
                 }
 
                 onLinkActivated: function(link) {

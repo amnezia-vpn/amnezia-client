@@ -242,9 +242,22 @@ namespace
 
 ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ApiServicesModel> &apiServicesModel,
+                                           const QSharedPointer<ApiSubscriptionPlansModel> &subscriptionPlansModel,
+                                           const QSharedPointer<ApiBenefitsModel> &benefitsModel,
                                            const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_settings(settings)
+    : QObject(parent)
+    , m_serversModel(serversModel)
+    , m_apiServicesModel(apiServicesModel)
+    , m_subscriptionPlansModel(subscriptionPlansModel)
+    , m_benefitsModel(benefitsModel)
+    , m_settings(settings)
 {
+    connect(m_apiServicesModel.data(), &ApiServicesModel::serviceSelectionChanged, this, [this]() {
+        const ApiServicesModel::ApiServicesData serviceData = m_apiServicesModel->selectedServiceData();
+        m_subscriptionPlansModel->updateModel(serviceData.subscriptionPlansJson);
+        m_benefitsModel->updateModel(serviceData.benefits, serviceData.serviceInfo.region, serviceData.serviceInfo.speed,
+                                     serviceData.serviceInfo.price, serviceData.supportInfo);
+    });
 }
 
 bool ApiConfigsController::exportVpnKey(const QString &fileName)

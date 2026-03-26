@@ -8,12 +8,12 @@ import Style 1.0
 Rectangle {
     id: root
 
-    property var benefitItems: []
+    property var benefitsModel: null
 
-    visible: benefitItems && benefitItems.length > 0
+    visible: benefitsModel && benefitsModel.rowCount() > 0
 
     radius: 16
-    color: "#1C1C1E"
+    color: AmneziaStyle.color.benefitsPanelBackground
     implicitHeight: inner.implicitHeight + 24
 
     ColumnLayout {
@@ -26,14 +26,14 @@ Rectangle {
         spacing: 20
 
         Repeater {
-            model: root.benefitItems ? root.benefitItems.length : 0
+            model: benefitsModel
 
             delegate: BenefitRow {
                 Layout.fillWidth: true
-                iconSource: root.benefitItems[index].icon
-                titleText: root.benefitItems[index].title
-                bodyText: root.benefitItems[index].body
-                accent: !!root.benefitItems[index].accent
+                iconSource: model.icon
+                titleText: model.title
+                bodyText: model.body
+                accent: !!model.accent
             }
         }
     }

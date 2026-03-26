@@ -32,9 +32,11 @@
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
 #include "ui/models/api/apiAccountInfoModel.h"
+#include "ui/models/api/apiBenefitsModel.h"
 #include "ui/models/api/apiCountryModel.h"
 #include "ui/models/api/apiDevicesModel.h"
 #include "ui/models/api/apiServicesModel.h"
+#include "ui/models/api/apiSubscriptionPlansModel.h"
 #include "ui/models/appSplitTunnelingModel.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/protocols/awgConfigModel.h"
@@ -133,6 +135,8 @@ private:
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
     QSharedPointer<ApiServicesModel> m_apiServicesModel;
+    QSharedPointer<ApiSubscriptionPlansModel> m_apiSubscriptionPlansModel;
+    QSharedPointer<ApiBenefitsModel> m_apiBenefitsModel;
     QSharedPointer<ApiCountryModel> m_apiCountryModel;
     QSharedPointer<ApiAccountInfoModel> m_apiAccountInfoModel;
     QSharedPointer<ApiDevicesModel> m_apiDevicesModel;
