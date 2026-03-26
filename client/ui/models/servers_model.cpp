@@ -27,6 +27,21 @@ namespace
         constexpr char expiresAt[] = "expires_at";
     }
 
+    QString serverCountryCodeForServer(const QJsonObject &server)
+    {
+        const auto apiConfig = server.value(configKey::apiConfig).toObject();
+
+        QString countryCode = apiConfig.value(configKey::serverCountryCode).toString().trimmed();
+        if (countryCode.isEmpty()) {
+            countryCode = server.value(configKey::serverCountryCode).toString().trimmed();
+        }
+        if (countryCode.isEmpty()) {
+            countryCode = server.value("country_code").toString().trimmed();
+        }
+
+        return countryCode.toUpper();
+    }
+
     QString normalizeVpnKey(const QString &vpnKey)
     {
         QString normalized = vpnKey.trimmed();
@@ -161,7 +176,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return apiConfig.value(configKey::availableCountries).toArray();
     }
     case ApiServerCountryCodeRole: {
-        return apiConfig.value(configKey::serverCountryCode).toString();
+        return serverCountryCodeForServer(server);
     }
     case HasFBLinkDns: {
         QString primaryDns = server.value(config_key::dns1).toString();
@@ -944,13 +959,12 @@ void ServersModel::removeApiConfig(const int serverIndex)
 const QString ServersModel::getDefaultServerImagePathCollapsed()
 {
     const auto server = m_servers.at(m_defaultServerIndex).toObject();
-    const auto apiConfig = server.value(configKey::apiConfig).toObject();
-    const auto countryCode = apiConfig.value(configKey::serverCountryCode).toString();
+    const auto countryCode = serverCountryCodeForServer(server);
 
     if (countryCode.isEmpty()) {
         return "";
     }
-    return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode.toUpper());
+    return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode);
 }
 
 bool ServersModel::processedServerIsPremium() const

@@ -887,102 +887,102 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageFBLinkRegister</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="138"/>
         <source>Создание аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="138"/>
         <source>Подтверждение email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="140"/>
         <source>Введите код, отправленный на </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="133"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="141"/>
         <source>Зарегистрируйтесь в сервисе FBLink VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="160"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="168"/>
         <source>Email</source>
         <translation type="unfinished">Email</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="178"/>
         <source>Пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="182"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="190"/>
         <source>Подтвердите пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="194"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="202"/>
         <source>Код подтверждения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="210"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="218"/>
         <source>Уже есть аккаунт?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="223"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="233"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="241"/>
         <source>Отправить повторно (%1 сек)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="234"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="242"/>
         <source>Отправить код повторно</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="263"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="271"/>
         <source>Проверка...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="263"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="271"/>
         <source>Отправка...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="264"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="272"/>
         <source>Создать аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="264"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="272"/>
         <source>Подтвердить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="273"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="281"/>
         <source>Введите 6-значный код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="286"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="294"/>
         <source>Пожалуйста, заполните все поля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="290"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="298"/>
         <source>Пароли не совпадают</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="294"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkRegister.qml" line="302"/>
         <source>Пароль должен быть не менее 8 символов</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4826,17 +4826,17 @@ Thank you for staying with us!</source>
 <context>
     <name>PageStart</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="207"/>
         <source>Logging was disabled after 14 days, log files were deleted</source>
         <translation>Логирование было отключено по прошествии 14 дней, файлы логов были удалены.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="209"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="211"/>
         <source>Settings restored from backup file</source>
         <translation>Настройки восстановлены из бэкап файла</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="217"/>
         <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
         <translation>Логирование включено. Обратите внимание, что через 14 дней оно будет автоматически отключено, а все файлы логов будут удалены.</translation>
     </message>
