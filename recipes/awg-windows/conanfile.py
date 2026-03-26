@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, chdir, collect_libs
+from conan.tools.files import get, copy, chdir
 from conan.tools.gnu import AutotoolsToolchain
 
 import os
