@@ -10,6 +10,8 @@ Rectangle {
 
     property var benefitItems: []
 
+    visible: benefitItems && benefitItems.length > 0
+
     radius: 16
     color: "#1C1C1E"
     implicitHeight: inner.implicitHeight + 24
@@ -31,6 +33,7 @@ Rectangle {
                 iconSource: root.benefitItems[index].icon
                 titleText: root.benefitItems[index].title
                 bodyText: root.benefitItems[index].body
+                bodyAccent: !!root.benefitItems[index].body_accent
             }
         }
     }

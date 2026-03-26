@@ -1,6 +1,7 @@
 #include "apiServicesModel.h"
 
 #include <QDateTime>
+#include <QHash>
 #include <QJsonArray>
 #include <QJsonObject>
 
@@ -36,16 +37,30 @@ namespace
 
         constexpr char isAvailable[] = "is_available";
 
-        constexpr char subscriptionPlans[] = "subscription_plans";
+        constexpr char supportInfo[] = "support_info";
 
-        constexpr char premiumBenefitCountriesTitle[] = "premium_benefit_countries_title";
-        constexpr char premiumBenefitCountriesBody[] = "premium_benefit_countries_body";
-        constexpr char premiumBenefitDevicesTitle[] = "premium_benefit_devices_title";
-        constexpr char premiumBenefitDevicesBody[] = "premium_benefit_devices_body";
-        constexpr char premiumBenefitVideoTitle[] = "premium_benefit_video_title";
-        constexpr char premiumBenefitVideoBody[] = "premium_benefit_video_body";
-        constexpr char premiumBenefitTrafficTitle[] = "premium_benefit_traffic_title";
-        constexpr char premiumBenefitTrafficBody[] = "premium_benefit_traffic_body";
+        constexpr char subscriptionPlans[] = "subscription_plans";
+        constexpr char benefits[] = "benefits";
+    }
+
+    QString iconUrlFromGatewayBenefitIcon(const QString &iconKey)
+    {
+        if (iconKey.startsWith(QLatin1String("qrc:"))) {
+            return iconKey;
+        }
+        static const QHash<QString, QString> map = {
+            { QStringLiteral("globe-2"), QStringLiteral("qrc:/images/controls/globe-2.svg") },
+            { QStringLiteral("smartphone"), QStringLiteral("qrc:/images/controls/smartphone.svg") },
+            { QStringLiteral("gauge"), QStringLiteral("qrc:/images/controls/gauge.svg") },
+            { QStringLiteral("infinity"), QStringLiteral("qrc:/images/controls/infinity.svg") },
+            { QStringLiteral("tag"), QStringLiteral("qrc:/images/controls/tag.svg") },
+            { QStringLiteral("history"), QStringLiteral("qrc:/images/controls/history.svg") },
+            { QStringLiteral("info"), QStringLiteral("qrc:/images/controls/info.svg") },
+            { QStringLiteral("app"), QStringLiteral("qrc:/images/controls/app.svg") },
+            { QStringLiteral("download"), QStringLiteral("qrc:/images/controls/download.svg") },
+            { QStringLiteral("help-circle"), QStringLiteral("qrc:/images/controls/help-circle.svg") },
+        };
+        return map.value(iconKey, QStringLiteral("qrc:/images/controls/info.svg"));
     }
 
     QVariantList jsonObjectArrayToVariantList(const QJsonArray &arr)
@@ -161,8 +176,8 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     case SubscriptionPlansRole: {
         return apiServiceData.subscriptionPlans;
     }
-    case PremiumBenefitPanelRowsRole: {
-        return ApiServicesModel::buildPremiumBenefitPanelRows(apiServiceData);
+    case BenefitPanelRowsRole: {
+        return buildBenefitPanelRows(apiServiceData);
     }
     }
 
@@ -291,7 +306,7 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[EndDateRole] = "endDate";
     roles[OrderRole] = "order";
     roles[SubscriptionPlansRole] = "subscriptionPlans";
-    roles[PremiumBenefitPanelRowsRole] = "premiumBenefitRows";
+    roles[BenefitPanelRowsRole] = "benefitRows";
 
     return roles;
 }
@@ -318,15 +333,9 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.serviceInfo.features = serviceDescription.value(configKey::features).toString();
 
     serviceData.subscriptionPlans = jsonObjectArrayToVariantList(serviceDescription.value(configKey::subscriptionPlans).toArray());
+    serviceData.benefitsConfig = serviceDescription.value(configKey::benefits).toArray();
 
-    serviceData.premiumBenefitCountriesTitle = serviceDescription.value(configKey::premiumBenefitCountriesTitle).toString();
-    serviceData.premiumBenefitCountriesBody = serviceDescription.value(configKey::premiumBenefitCountriesBody).toString();
-    serviceData.premiumBenefitDevicesTitle = serviceDescription.value(configKey::premiumBenefitDevicesTitle).toString();
-    serviceData.premiumBenefitDevicesBody = serviceDescription.value(configKey::premiumBenefitDevicesBody).toString();
-    serviceData.premiumBenefitVideoTitle = serviceDescription.value(configKey::premiumBenefitVideoTitle).toString();
-    serviceData.premiumBenefitVideoBody = serviceDescription.value(configKey::premiumBenefitVideoBody).toString();
-    serviceData.premiumBenefitTrafficTitle = serviceDescription.value(configKey::premiumBenefitTrafficTitle).toString();
-    serviceData.premiumBenefitTrafficBody = serviceDescription.value(configKey::premiumBenefitTrafficBody).toString();
+    serviceData.supportInfo = data.value(configKey::supportInfo).toObject();
 
     serviceData.type = serviceType;
     serviceData.protocol = serviceProtocol;
@@ -347,29 +356,74 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     return serviceData;
 }
 
-QVariantList ApiServicesModel::buildPremiumBenefitPanelRows(const ApiServicesData &service)
+QString ApiServicesModel::formatPriceForBenefit(const QString &rawPrice) const
 {
-    const QStringList icons = { QStringLiteral("qrc:/images/controls/globe-2.svg"),
-                                QStringLiteral("qrc:/images/controls/smartphone.svg"),
-                                QStringLiteral("qrc:/images/controls/gauge.svg"),
-                                QStringLiteral("qrc:/images/controls/infinity.svg") };
+    if (rawPrice == QStringLiteral("free")) {
+        return tr("Free");
+    }
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    return tr("%1 $").arg(rawPrice);
+#else
+    return tr("%1 $/month").arg(rawPrice);
+#endif
+}
 
+QString ApiServicesModel::benefitInjectValue(const QString &injectKey, const ServiceInfo &info,
+                                             const QJsonObject &supportInfo) const
+{
+    if (injectKey == QLatin1String("region")) {
+        return info.region.isEmpty() ? QStringLiteral("—") : info.region;
+    }
+    if (injectKey == QLatin1String("speed")) {
+        return info.speed.isEmpty() ? QStringLiteral("—") : info.speed;
+    }
+    if (injectKey == QLatin1String("price")) {
+        return formatPriceForBenefit(info.price);
+    }
+
+    if (injectKey == QLatin1String("support_telegram")) {
+        const QString handle = supportInfo.value(QStringLiteral("telegram")).toString().trimmed();
+        if (handle.isEmpty()) {
+            return QStringLiteral("—");
+        }
+        if (handle.startsWith(QLatin1Char('@'))) {
+            return handle;
+        }
+        return QLatin1Char('@') + handle;
+    }
+    return QString();
+}
+
+QVariantList ApiServicesModel::buildBenefitPanelRows(const ApiServicesData &service) const
+{
     QVariantList out;
-
-    const auto appendRow = [&out, &icons](int iconIndex, const QString &title, const QString &body) {
+    for (const QJsonValue &v : service.benefitsConfig) {
+        if (!v.isObject()) {
+            continue;
+        }
+        const QJsonObject o = v.toObject();
+        QString title = o.value(QStringLiteral("title")).toString();
+        QString body = o.value(QStringLiteral("body")).toString();
+        const QString iconKey = o.value(QStringLiteral("icon")).toString();
+        const QString injectKey = o.value(QStringLiteral("inject_key")).toString();
+        if (body.contains(QLatin1String("%1")) && !injectKey.isEmpty()) {
+            QString injected = benefitInjectValue(injectKey, service.serviceInfo, service.supportInfo);
+            if (injected.isEmpty()) {
+                injected = QStringLiteral("—");
+            }
+            body = body.arg(injected);
+        }
         if (title.isEmpty() && body.isEmpty()) {
-            return;
+            continue;
         }
         QVariantMap m;
-        m.insert(QStringLiteral("icon"), icons.at(iconIndex));
+        m.insert(QStringLiteral("icon"), iconUrlFromGatewayBenefitIcon(iconKey));
         m.insert(QStringLiteral("title"), title);
         m.insert(QStringLiteral("body"), body);
+        if (o.value(QStringLiteral("body_accent")).toBool()) {
+            m.insert(QStringLiteral("body_accent"), true);
+        }
         out.append(m);
-    };
-
-    appendRow(0, service.premiumBenefitCountriesTitle, service.premiumBenefitCountriesBody);
-    appendRow(1, service.premiumBenefitDevicesTitle, service.premiumBenefitDevicesBody);
-    appendRow(2, service.premiumBenefitVideoTitle, service.premiumBenefitVideoBody);
-    appendRow(3, service.premiumBenefitTrafficTitle, service.premiumBenefitTrafficBody);
+    }
     return out;
 }

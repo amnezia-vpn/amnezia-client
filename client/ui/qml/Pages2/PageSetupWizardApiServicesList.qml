@@ -92,7 +92,7 @@ PageType {
                         if (ApiServicesModel.getSelectedServiceType() === "amnezia-premium") {
                             PageController.goToPage(PageEnum.PageSetupWizardApiPremiumInfo)
                         } else {
-                            PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
+                            PageController.goToPage(PageEnum.PageSetupWizardApiFreeInfo)
                         }
                     }
                 }

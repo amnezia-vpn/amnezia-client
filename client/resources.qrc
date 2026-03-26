@@ -232,8 +232,8 @@
         <file>ui/qml/Pages2/PageSettingsNewsDetail.qml</file>
         <file>ui/qml/Pages2/PageProtocolAwgClientSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml</file>
-        <file>ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml</file>
-        <file>ui/qml/Pages2/PageSetupWizardApiPremium.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardApiFreeInfo.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardApiServicesList.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardConfigSource.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardCredentials.qml</file>

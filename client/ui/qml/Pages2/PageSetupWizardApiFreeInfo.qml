@@ -13,33 +13,19 @@ import "../Components"
 PageType {
     id: root
 
-    // ApiServicesModel selection is amnezia-premium (set in PageSetupWizardApiServicesList before navigation).
-
-    property var subscriptionPlans: []
+    property string freeHeaderName: ""
+    property string freeHeaderDescription: ""
+    property string freeFeaturesHtml: ""
     property var benefitRows: []
-    property int selectedGatewayPlanIndex: 0
-    property string premiumFeaturesHtml: ""
-    property string premiumHeaderName: ""
-    property string premiumHeaderDescription: ""
-
-    readonly property var currentGatewayPlan: subscriptionPlans[selectedGatewayPlanIndex]
 
     function syncFromModel() {
-        root.subscriptionPlans = ApiServicesModel.getSelectedServiceData("subscriptionPlans")
-        root.benefitRows = ApiServicesModel.getSelectedServiceData("benefitRows")
+        root.freeHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
+        root.freeHeaderDescription = String(ApiServicesModel.getSelectedServiceData("serviceDescription"))
+        var text = ApiServicesModel.getSelectedServiceData("features")
+        root.freeFeaturesHtml = String(text).replace("%1", LanguageModel.getCurrentSiteUrl("free")).replace("/free", "")
 
-        root.selectedGatewayPlanIndex = 0
-        for (var i = 0; i < root.subscriptionPlans.length; ++i) {
-            if (root.subscriptionPlans[i].recommended) {
-                root.selectedGatewayPlanIndex = i
-                break
-            }
-        }
-
-        root.premiumFeaturesHtml = String(ApiServicesModel.getSelectedServiceData("features")).replace("%1",
-                                                                                                       LanguageModel.getCurrentSiteUrl("free")).replace("/free", "")
-        root.premiumHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
-        root.premiumHeaderDescription = String(ApiServicesModel.getSelectedServiceData("serviceDescription"))
+        var rows = ApiServicesModel.getSelectedServiceData("benefitRows")
+        root.benefitRows = rows !== undefined && rows !== null ? rows : []
     }
 
     Component.onCompleted: syncFromModel()
@@ -90,8 +76,8 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                headerText: root.premiumHeaderName
-                descriptionText: root.premiumHeaderDescription
+                headerText: root.freeHeaderName
+                descriptionText: root.freeHeaderDescription
             }
 
             LabelTextType {
@@ -100,63 +86,9 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 12
 
-                text: qsTr("Choose a plan")
+                text: qsTr("Available with Free")
                 color: AmneziaStyle.color.mutedGray
                 font.pixelSize: 13
-            }
-
-            Repeater {
-                model: subscriptionPlans.length
-
-                delegate: SubscriptionPlanCard {
-                    required property int index
-
-                    readonly property var plan: root.subscriptionPlans[index]
-
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.bottomMargin: index === root.subscriptionPlans.length - 1 ? 24 : 12
-
-                    selected: root.selectedGatewayPlanIndex === index
-                    primaryLeft: String(plan.primary_left)
-                    primaryRight: String(plan.primary_right)
-                    subtitle: String(plan.subtitle)
-                    showRecommendedBadge: !!plan.recommended
-                    recommendedText: qsTr("Recommended")
-
-                    onSelectRequested: root.selectedGatewayPlanIndex = index
-                }
-            }
-
-            LabelTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 12
-
-                text: qsTr("Premium features")
-                color: AmneziaStyle.color.mutedGray
-                font.pixelSize: 13
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
-
-                textFormat: Text.RichText
-                text: root.premiumFeaturesHtml
-                onLinkActivated: function(link) {
-                    Qt.openUrlExternally(link)
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
-                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
-                }
             }
 
             BenefitsPanel {
@@ -174,14 +106,20 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16
 
-                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild)
+                visible: root.freeFeaturesHtml.length > 0 && (!root.benefitRows || root.benefitRows.length === 0)
 
-                horizontalAlignment: Text.AlignHCenter
-                textFormat: Text.PlainText
-                color: AmneziaStyle.color.mutedGray
-                font.pixelSize: 12
+                textFormat: Text.RichText
+                text: root.freeFeaturesHtml
 
-                text: qsTr("Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.")
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
 
             ParagraphTextType {
@@ -257,40 +195,18 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + SettingsController.safeAreaBottomMargin
 
-        text: {
-            var plan = root.currentGatewayPlan
-            if (!plan) {
-                return qsTr("Continue")
-            }
-            return qsTr("Subscribe — %1 for %2").arg(String(plan.primary_left)).arg(String(plan.primary_right))
-        }
+        text: ApiServicesModel.getSelectedServiceType() === "amnezia-trial" ? qsTr("Try Trial") : qsTr("Continue")
 
         clickedFunc: function() {
-            var plan = root.currentGatewayPlan
-            if (!plan) {
-                return
-            }
-            if (plan.checkout_url) {
-                Qt.openUrlExternally(plan.checkout_url)
+            PageController.showBusyIndicator(true)
+            var result = ApiConfigsController.importService()
+            PageController.showBusyIndicator(false)
+
+            if (!result) {
+                var endpoint = ApiServicesModel.getStoreEndpoint()
+                Qt.openUrlExternally(endpoint)
                 PageController.closePage()
                 PageController.closePage()
-                return
-            }
-            if (plan.service_type) {
-                var idx = ApiServicesModel.serviceIndexForType(plan.service_type)
-                if (idx < 0) {
-                    return
-                }
-                ApiServicesModel.setServiceIndex(idx)
-                PageController.showBusyIndicator(true)
-                var ok = ApiConfigsController.importService()
-                PageController.showBusyIndicator(false)
-                if (!ok) {
-                    var endpoint = ApiServicesModel.getStoreEndpoint()
-                    Qt.openUrlExternally(endpoint)
-                    PageController.closePage()
-                    PageController.closePage()
-                }
             }
         }
     }

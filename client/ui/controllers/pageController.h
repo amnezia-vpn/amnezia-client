@@ -59,7 +59,7 @@ namespace PageLoader
         PageSetupWizardViewConfig,
         PageSetupWizardQrReader,
         PageSetupWizardApiServicesList,
-        PageSetupWizardApiServiceInfo,
+        PageSetupWizardApiFreeInfo,
 
         PageProtocolOpenVpnSettings,
         PageProtocolShadowSocksSettings,
