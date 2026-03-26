@@ -24,7 +24,7 @@ struct XrayConfigSnapshot
     static XrayConfigSnapshot fromJson(const QJsonObject &json);
 };
 
-class XrayConfigsModel : public QAbstractListModel
+class XrayConfigSnapshotsModel : public QAbstractListModel
 {
     Q_OBJECT
 
@@ -35,7 +35,8 @@ public:
         CreatedAtRole, // "dd.MM.yyyy HH:mm"
     };
 
-    explicit XrayConfigsModel(SecureAppSettingsRepository *appSettings, QObject *parent = nullptr);
+    explicit XrayConfigSnapshotsModel(SecureAppSettingsRepository *appSettings, XrayConfigModel *xrayConfigModel,
+                                      QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -51,8 +52,8 @@ public slots:
     Q_INVOKABLE bool importFromJson(const QString &jsonString);
 
     // Convenience: create snapshot from live model, apply snapshot back to model
-    Q_INVOKABLE void createFromXrayModel(XrayConfigModel *model);
-    Q_INVOKABLE void applyConfigToXrayModel(int index, XrayConfigModel *model);
+    Q_INVOKABLE void createFromCurrentModel();
+    Q_INVOKABLE void applyConfigToCurrentModel(int index);
 
 signals:
     void configApplied(int index);
@@ -64,6 +65,7 @@ protected:
 
 private:
     SecureAppSettingsRepository *m_appSettings;
+    XrayConfigModel *m_xrayConfigModel;
     QVector<XrayConfigSnapshot> m_configs;
 
     void persistAll();
