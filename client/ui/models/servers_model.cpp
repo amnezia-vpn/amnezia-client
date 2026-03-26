@@ -186,6 +186,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         if (apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false)) {
             return false;
         }
+        if (apiConfig.value(apiDefs::key::subscriptionExpiredByServer).toBool(false)) {
+            return true;
+        }
         const QString endDate =
                 apiConfig.value(apiDefs::key::subscription).toObject().value(apiDefs::key::endDate).toString();
         if (endDate.isEmpty()) {

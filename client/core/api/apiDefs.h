@@ -56,6 +56,7 @@ namespace apiDefs
         constexpr QLatin1String activeDeviceCount("active_device_count");
         constexpr QLatin1String maxDeviceCount("max_device_count");
         constexpr QLatin1String subscriptionEndDate("subscription_end_date");
+        constexpr QLatin1String subscriptionExpiredByServer("subscription_expired_by_server");
         constexpr QLatin1String subscription("subscription");
         constexpr QLatin1String endDate("end_date");
         constexpr QLatin1String issuedConfigs("issued_configs");

@@ -799,6 +799,9 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     } else {
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
             if (!apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false)) {
+                apiConfig.insert(apiDefs::key::subscriptionExpiredByServer, true);
+                serverConfig.insert(configKey::apiConfig, apiConfig);
+                m_serversModel->editServer(serverConfig, serverIndex);
                 emit subscriptionExpiredOnServer();
             } else {
                 emit errorOccurred(errorCode);
