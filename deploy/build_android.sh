@@ -66,7 +66,17 @@ PROJECT_DIR=$(pwd)
 DEPLOY_DIR=$PROJECT_DIR/deploy
 
 mkdir -p $DEPLOY_DIR/build
-BUILD_DIR=$DEPLOY_DIR/build
+ARTIFACT_DIR=$DEPLOY_DIR/build
+if [[ -v AAB && -n "${ABIS:-}" ]]; then
+  build_suffix="${ABIS//;/-}-aab"
+elif [[ -n "${ABIS:-}" ]]; then
+  build_suffix="${ABIS//;/-}"
+elif [[ -v AAB ]]; then
+  build_suffix="aab"
+else
+  build_suffix="android"
+fi
+BUILD_DIR=$ARTIFACT_DIR/work/$build_suffix
 OUT_APP_DIR=$BUILD_DIR/client
 ANDROID_DEPLOY_SETTINGS=
 ANDROID_BUILD_OUT_DIR=$OUT_APP_DIR/android-build
@@ -207,7 +217,7 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
       echo "ERROR: AAB not found under $ANDROID_BUILD_OUT_DIR"
       exit 1
     fi
-    mv -u "$AAB_FILE" $PROJECT_DIR/deploy/build/FBLink-$BUILD_TYPE.aab
+    mv -u "$AAB_FILE" $ARTIFACT_DIR/FBLink-$BUILD_TYPE.aab
   fi
 
   if [ -v ABIS ]; then
@@ -230,10 +240,10 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
 
       if [ -f "$PER_ABI_APK" ]; then
         # Standard per-ABI APK (Qt < 6.7 behaviour)
-        mv -u "$PER_ABI_APK" $PROJECT_DIR/deploy/build/FBLink-$ABI-$suffix.apk
+        mv -u "$PER_ABI_APK" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
       elif [ -f "$PER_ABI_APK_UNSIGNED" ]; then
         # Unsigned APK (no signing key configured)
-        mv -u "$PER_ABI_APK_UNSIGNED" $PROJECT_DIR/deploy/build/FBLink-$ABI-$suffix.apk
+        mv -u "$PER_ABI_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
       else
         # Try a broader find: ABI in filename OR in directory path (Qt 6.3+ sub-projects)
         FOUND=$(find "$OUT_APP_DIR" -type f \( \
@@ -241,11 +251,11 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
                   \( -name "*${suffix}*.apk" -path "*${ABI}*" \) \
                 \) 2>/dev/null | head -1)
         if [ -n "$FOUND" ]; then
-          mv -u "$FOUND" $PROJECT_DIR/deploy/build/FBLink-$ABI-$suffix.apk
+          mv -u "$FOUND" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
         elif [ -f "$UNIVERSAL_APK" ]; then
           # Qt 6.7+ universal APK: copy it once per requested ABI so the
           # downstream rename/upload steps keep working as before.
-          cp "$UNIVERSAL_APK" $PROJECT_DIR/deploy/build/FBLink-$ABI-$suffix.apk
+          cp "$UNIVERSAL_APK" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
         else
           echo "ERROR: APK not found for ABI=$ABI (tried $PER_ABI_APK and $UNIVERSAL_APK)"
           echo "Contents of $APK_OUT_DIR:"
