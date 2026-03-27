@@ -123,6 +123,7 @@ fi
 # We'll build apks during androiddeployqt
 $QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -B $BUILD_DIR \
   -DQT_NO_GLOBAL_APK_TARGET_PART_OF_ALL=ON \
+  -DQT_USE_TARGET_ANDROID_BUILD_DIR=ON \
   -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
   "${qt_cmake_opts[@]}"
 
