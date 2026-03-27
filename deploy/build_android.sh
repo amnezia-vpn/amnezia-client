@@ -88,6 +88,8 @@ if [[ "${ABIS:-}" = "all" ]]; then
   ABIS="$DEFAULT_ANDROID_ABIS"
 fi
 
+ANDROID_ABIS_FOR_PACKAGING="${ABIS:-}"
+
 # Determine path to qt bin folder with qt-cmake
 if [[ -v AAB || "${ABIS:-}" = "$DEFAULT_ANDROID_ABIS" ]]; then
   qt_bin_dir_suffix="x86_64"
@@ -180,6 +182,42 @@ fi
 # Remove stale androiddeployqt output so manifest/package/activity changes are
 # copied from source instead of reusing an old android-build-* tree.
 rm -rf "$ANDROID_BUILD_OUT_DIR"
+
+# Qt 6.10 CI builds sometimes produce the application .so in the CMake build
+# tree but fail to copy it into android-build/libs/<abi> before packaging.
+# Pre-stage the main binary so androiddeployqt can proceed consistently.
+if [[ -n "${ANDROID_ABIS_FOR_PACKAGING:-}" ]]; then
+  IFS=';' read -r -a abi_array <<< "$ANDROID_ABIS_FOR_PACKAGING"
+  for ABI in "${abi_array[@]}"
+  do
+    DEST_DIR="$ANDROID_BUILD_OUT_DIR/libs/$ABI"
+    DEST_FILE="$DEST_DIR/libFBLink_$ABI.so"
+    mkdir -p "$DEST_DIR"
+
+    SRC_FILE=""
+    for CANDIDATE in \
+      "$OUT_APP_DIR/libFBLink_$ABI.so" \
+      "$BUILD_DIR/client/libFBLink_$ABI.so" \
+      "$BUILD_DIR/libFBLink_$ABI.so"
+    do
+      if [[ -f "$CANDIDATE" ]]; then
+        SRC_FILE="$CANDIDATE"
+        break
+      fi
+    done
+
+    if [[ -z "$SRC_FILE" ]]; then
+      SRC_FILE=$(find "$BUILD_DIR" -type f -name "libFBLink_$ABI.so" 2>/dev/null | head -1 || true)
+    fi
+
+    if [[ -n "$SRC_FILE" && -f "$SRC_FILE" ]]; then
+      cp "$SRC_FILE" "$DEST_FILE"
+      echo "Pre-staged application binary for $ABI: $SRC_FILE -> $DEST_FILE"
+    else
+      echo "WARN: Could not pre-stage libFBLink_$ABI.so before androiddeployqt"
+    fi
+  done
+fi
 
 # for gradle to skip all tasks when it is executed by androiddeployqt
 # gradle is started later explicitly
