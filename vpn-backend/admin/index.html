@@ -90,7 +90,7 @@
     }
     .brand-card { padding: 18px; border-radius: 20px; background: linear-gradient(180deg, rgba(0,200,255,.08), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.06); }
     .brand-card .row { display: flex; align-items: center; gap: 12px; }
-    .brand-card img { width: 36px; height: 36px; }
+    .brand-card img { width: 44px; height: 44px; object-fit: contain; }
     .brand-card strong { display: block; font-size: 20px; }
     .brand-card span { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
     .nav { display: flex; flex-direction: column; gap: 8px; }
@@ -107,10 +107,13 @@
     .hero-card, .panel, .kpi-card { padding: 20px; }
     .hero-title { margin: 0 0 10px; font-size: 34px; font-weight: 800; letter-spacing: -.04em; }
     .hero-subtitle, .panel p { color: var(--muted); }
-    .hero-visual { min-height: 170px; display: flex; align-items: flex-end; gap: 14px; }
-    .hero-shield { width: 110px; height: 110px; padding: 24px; border-radius: 28px; background: radial-gradient(circle at top, rgba(0,200,255,.22), rgba(0,200,255,.05)); border: 1px solid rgba(0,200,255,.18); }
-    .hero-bars { flex: 1; display: flex; align-items: flex-end; gap: 10px; }
-    .hero-bars span { flex: 1; border-radius: 16px 16px 6px 6px; background: linear-gradient(180deg, rgba(108,231,255,.95), rgba(0,200,255,.18)); border: 1px solid rgba(255,255,255,.06); }
+    .period-card { min-height: 170px; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; }
+    .period-card-top { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; }
+    .period-icon { width: 64px; height: 64px; padding: 14px; border-radius: 20px; background: radial-gradient(circle at top, rgba(0,200,255,.22), rgba(0,200,255,.05)); border: 1px solid rgba(0,200,255,.18); }
+    .period-switch { display: inline-flex; gap: 8px; padding: 8px; border-radius: 18px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); }
+    .period-switch button { min-width: 104px; padding: 12px 16px; border-radius: 14px; border: 1px solid transparent; color: var(--muted); background: transparent; font-weight: 800; cursor: pointer; }
+    .period-switch button.active { color: #061018; background: linear-gradient(135deg, var(--cyan), var(--cyan2)); }
+    .period-note { color: var(--muted); font-size: 13px; line-height: 1.45; }
     .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; margin-bottom: 22px; }
     .kpi-card .icon { width: 36px; height: 36px; padding: 8px; border-radius: 12px; margin-bottom: 16px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.06); }
     .kpi-card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
@@ -142,6 +145,38 @@
     .bad { color: #ffd4d4; background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.24); }
     .info { color: #d7f5ff; background: rgba(0,200,255,.12); border-color: rgba(0,200,255,.2); }
     .table-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .table-toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+    .table-toolbar input, .table-toolbar select {
+      min-width: 200px;
+      padding: 12px 14px;
+      color: var(--text);
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      outline: none;
+    }
+    .table-toolbar input::placeholder { color: var(--muted); }
+    .table-toolbar select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding-right: 42px;
+      background-image:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3 5.5L7 9.5L11 5.5' stroke='%2396A0B8' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat, no-repeat;
+      background-position: 0 0, calc(100% - 14px) center;
+      background-size: auto, 14px;
+      cursor: pointer;
+    }
+    .table-toolbar input:focus, .table-toolbar select:focus {
+      border-color: rgba(0,200,255,.45);
+      box-shadow: 0 0 0 3px rgba(0,200,255,.12);
+    }
+    .table-toolbar select option {
+      color: var(--text);
+      background: #111722;
+    }
     .empty { color: var(--muted); padding: 24px; text-align: center; }
     .modal-overlay { position: fixed; inset: 0; display: none; place-items: center; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); z-index: 20; padding: 20px; }
     .modal { width: min(560px, 100%); padding: 24px; }
@@ -155,7 +190,7 @@
   <section id="loginScreen" class="login-screen">
     <div class="login-card glass">
       <div class="brand">
-        <img src="./assets/FBLink.svg" alt="FBLink">
+        <img src="./assets/brand-icon.png" alt="FBLink">
         <div>
           <div class="brand-title">FBLink <span class="accent">Admin</span></div>
           <div class="subtitle">Панель управления сетью, подписками и платёжной аналитикой</div>
@@ -172,7 +207,7 @@
     <aside class="sidebar">
       <div class="brand-card">
         <div class="row">
-          <img src="./assets/FBLink.svg" alt="FBLink">
+          <img src="./assets/brand-icon.png" alt="FBLink">
           <div><strong>FBLink VPN</strong><span>Операционный центр продукта</span></div>
         </div>
       </div>
@@ -196,19 +231,25 @@
               <button class="btn btn-primary" onclick="refreshAll()">Обновить всё</button>
               <button class="btn btn-secondary" onclick="triggerBackup()">Отправить бэкап</button>
             </div>
-            <div class="hero-visual">
-              <div class="hero-shield glass"><img src="./assets/shield-tick.svg" alt="" style="width:100%;height:100%"></div>
-              <div class="hero-bars"><span style="height:52%"></span><span style="height:76%"></span><span style="height:63%"></span><span style="height:88%"></span></div>
-            </div>
           </div>
-          <div class="panel glass">
-            <h3>Операционные сигналы</h3>
-            <p>Быстрый срез сервиса в реальном времени.</p>
+          <div class="panel glass period-card">
+            <div class="period-card-top">
+              <div>
+                <h3>Период аналитики</h3>
+                <p id="periodSummary">Данные за последние 7 дней.</p>
+              </div>
+              <div class="period-icon"><img src="./assets/history.svg" alt="" style="width:100%;height:100%"></div>
+            </div>
+            <div class="period-switch">
+              <button id="periodButton7" class="active" onclick="setStatsPeriod(7)">7 дней</button>
+              <button id="periodButton30" onclick="setStatsPeriod(30)">30 дней</button>
+            </div>
             <div class="metric-list">
               <div class="metric-row"><div class="name">Конверсия</div><div class="track"><div id="conversionBar" class="fill" style="width:0%"></div></div><div id="conversionValue" class="value">0%</div></div>
               <div class="metric-row"><div class="name">Автопродление</div><div class="track"><div id="autoRenewBar" class="fill" style="width:0%"></div></div><div id="autoRenewValue" class="value">0%</div></div>
               <div class="metric-row"><div class="name">Активные серверы</div><div class="track"><div id="serverActivityBar" class="fill" style="width:0%"></div></div><div id="serverActivityValue" class="value">0/0</div></div>
             </div>
+            <div class="period-note">Переключатель влияет на графики роста, выручку по дням и сводку рисков в текущем окне.</div>
           </div>
         </div>
 
@@ -220,8 +261,8 @@
         </div>
 
         <div class="analytics-grid">
-          <div class="panel glass"><h3>Рост пользователей за 7 дней</h3><p>Новые регистрации по дням.</p><div id="usersChart" class="chart"></div></div>
-          <div class="panel glass"><h3>Выручка по дням</h3><p>Успешные оплаты за последние 7 дней.</p><div id="revenueChart" class="chart"></div></div>
+          <div class="panel glass"><h3 id="usersChartTitle">Рост пользователей за 7 дней</h3><p>Новые регистрации по дням.</p><div id="usersChart" class="chart"></div></div>
+          <div class="panel glass"><h3 id="revenueChartTitle">Выручка по дням</h3><p id="revenueChartSubtitle">Успешные оплаты за последние 7 дней.</p><div id="revenueChart" class="chart"></div></div>
           <div class="panel glass"><h3>Структура подписок</h3><p>Планы и статусы.</p><div id="planBreakdown" class="metric-list"></div><div style="height:14px"></div><div id="statusBreakdown" class="metric-list"></div></div>
         </div>
 
@@ -229,11 +270,16 @@
           <div class="panel glass"><h3>Топ регионов</h3><p>Основная активная нагрузка по регионам.</p><div id="regionsList" class="metric-list"></div></div>
           <div class="panel glass"><h3>Загрузка серверов</h3><p>Сортировка по максимальной утилизации пиров.</p><div id="serverLoadList" class="metric-list"></div></div>
         </div>
+
+        <div class="analytics-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="panel glass"><h3>Платёжные риски</h3><p>Проблемные точки по платежам и подпискам.</p><div id="paymentRiskList" class="metric-list"></div></div>
+          <div class="panel glass"><h3>Проблемные серверы</h3><p>Выключенные или близкие к лимиту узлы.</p><div id="problemServersList" class="metric-list"></div></div>
+        </div>
       </section>
 
-      <section id="page-users" class="page hidden"><div class="section-head"><h2>Пользователи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadUsers()">Обновить</button></div></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Роль</th><th>Тариф</th><th>Статус</th><th>Истекает</th><th>Действия</th></tr></thead><tbody id="usersBody"><tr><td colspan="7" class="empty">Загрузка пользователей...</td></tr></tbody></table></div></section>
-      <section id="page-servers" class="page hidden"><div class="section-head"><h2>Серверы</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadServers()">Обновить</button><button class="btn btn-primary" onclick="openAddServerModal()">Добавить сервер</button></div></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Сервер</th><th>Регион</th><th>Endpoint</th><th>Ключи</th><th>Лимит</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="serversBody"><tr><td colspan="8" class="empty">Загрузка серверов...</td></tr></tbody></table></div></section>
-      <section id="page-payments" class="page hidden"><div class="section-head"><h2>Платежи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadPayments()">Обновить</button></div></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Сумма</th><th>План</th><th>Статус</th><th>Создан</th><th>Действия</th></tr></thead><tbody id="paymentsBody"><tr><td colspan="7" class="empty">Загрузка платежей...</td></tr></tbody></table></div></section>
+      <section id="page-users" class="page hidden"><div class="section-head"><h2>Пользователи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadUsers()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('users')">Экспорт CSV</button></div></div><div class="table-toolbar"><input id="usersSearch" type="text" placeholder="Поиск по email" oninput="renderUsers()"><select id="usersRoleFilter" onchange="renderUsers()"><option value="">Все роли</option><option value="admin">Администратор</option><option value="user">Пользователь</option></select><select id="usersStatusFilter" onchange="renderUsers()"><option value="">Все статусы</option><option value="active">Активные</option><option value="expired">Истекшие</option><option value="cancelled">Отменённые</option><option value="none">Без подписки</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Роль</th><th>Тариф</th><th>Статус</th><th>Истекает</th><th>Действия</th></tr></thead><tbody id="usersBody"><tr><td colspan="7" class="empty">Загрузка пользователей...</td></tr></tbody></table></div></section>
+      <section id="page-servers" class="page hidden"><div class="section-head"><h2>Серверы</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadServers()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('servers')">Экспорт CSV</button><button class="btn btn-primary" onclick="openAddServerModal()">Добавить сервер</button></div></div><div class="table-toolbar"><input id="serversSearch" type="text" placeholder="Поиск по названию, региону, endpoint" oninput="renderServers()"><select id="serversStatusFilter" onchange="renderServers()"><option value="">Все статусы</option><option value="active">Активные</option><option value="inactive">Отключённые</option></select><select id="serversCountryFilter" onchange="renderServers()"><option value="">Все страны</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Сервер</th><th>Регион</th><th>Endpoint</th><th>Ключи</th><th>Лимит</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="serversBody"><tr><td colspan="8" class="empty">Загрузка серверов...</td></tr></tbody></table></div></section>
+      <section id="page-payments" class="page hidden"><div class="section-head"><h2>Платежи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadPayments()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('payments')">Экспорт CSV</button></div></div><div class="table-toolbar"><input id="paymentsSearch" type="text" placeholder="Поиск по email" oninput="renderPayments()"><select id="paymentsPlanFilter" onchange="renderPayments()"><option value="">Все планы</option><option value="trial">Trial</option><option value="basic">Premium</option><option value="free">Free</option></select><select id="paymentsStatusFilter" onchange="renderPayments()"><option value="">Все статусы</option><option value="pending">Ожидают</option><option value="succeeded">Успешные</option><option value="failed">Неуспешные</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Сумма</th><th>План</th><th>Статус</th><th>Создан</th><th>Действия</th></tr></thead><tbody id="paymentsBody"><tr><td colspan="7" class="empty">Загрузка платежей...</td></tr></tbody></table></div></section>
     </main>
   </div>
 
@@ -258,6 +304,10 @@
     const API = '';
     let token = localStorage.getItem('fblink_admin_token') || '';
     let editingServerId = null;
+    let selectedStatsDays = 7;
+    let usersData = [];
+    let serversData = [];
+    let paymentsData = [];
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -278,6 +328,10 @@
 
     function badge(text, kind = 'info') {
       return `<span class="badge ${kind}">${escapeHtml(text)}</span>`;
+    }
+
+    function normalizeText(value) {
+      return String(value ?? '').toLowerCase();
     }
 
     function api(path, opts = {}) {
@@ -344,6 +398,21 @@
       document.getElementById(id).style.width = `${Math.max(0, Math.min(100, Number(value || 0)))}%`;
     }
 
+    function updatePeriodButtons() {
+      document.getElementById('periodButton7').classList.toggle('active', selectedStatsDays === 7);
+      document.getElementById('periodButton30').classList.toggle('active', selectedStatsDays === 30);
+    }
+
+    function setStatsPeriod(days) {
+      if (selectedStatsDays === days) return;
+      selectedStatsDays = days;
+      updatePeriodButtons();
+      loadStats().catch(err => {
+        console.error(err);
+        alert('Не удалось обновить аналитику по выбранному периоду');
+      });
+    }
+
     function renderSeries(containerId, items, kind = 'users') {
       const el = document.getElementById(containerId);
       if (!items || !items.length) {
@@ -398,41 +467,58 @@
       `).join('') || '<div class="empty">Нет данных</div>';
     }
 
-    async function loadStats() {
-      const res = await api('/api/v1/admin/stats');
-      if (!res.ok) throw new Error('Не удалось загрузить статистику');
-      const stats = await res.json();
-
-      document.getElementById('statUsers').textContent = stats.total_users ?? 0;
-      document.getElementById('statSubs').textContent = stats.active_subscriptions ?? 0;
-      document.getElementById('statKeys').textContent = stats.active_vpn_keys ?? 0;
-      document.getElementById('statRevenue').textContent = fmtMoney(stats.monthly_revenue);
-
-      setBar('conversionBar', stats.conversion_rate);
-      setBar('autoRenewBar', stats.auto_renew_rate);
-      setBar('serverActivityBar', stats.total_servers ? ((stats.active_servers / stats.total_servers) * 100) : 0);
-
-      document.getElementById('conversionValue').textContent = `${Math.round(stats.conversion_rate || 0)}%`;
-      document.getElementById('autoRenewValue').textContent = `${Math.round(stats.auto_renew_rate || 0)}%`;
-      document.getElementById('serverActivityValue').textContent = `${stats.active_servers || 0}/${stats.total_servers || 0}`;
-
-      renderSeries('usersChart', stats.users_series, 'users');
-      renderSeries('revenueChart', stats.revenue_series, 'revenue');
-      renderMetricBreakdown('planBreakdown', stats.subscriptions_by_plan, { free: 'План Free', trial: 'Пробный', basic: 'Премиум' });
-      renderMetricBreakdown('statusBreakdown', stats.subscriptions_by_status, { active: 'Активные', expired: 'Истекшие', cancelled: 'Отменённые' });
-      renderRegions(stats.top_regions || []);
-      renderServerLoad(stats.server_load || []);
+    function renderPaymentRisks(stats) {
+      const entries = [
+        { label: 'Ожидают оплаты', value: Number(stats.pending_payments || 0) },
+        { label: 'Истекли подписки', value: Number(stats.expired_subscriptions || 0) },
+        { label: 'Отменённые подписки', value: Number(stats.cancelled_subscriptions || 0) }
+      ];
+      const max = Math.max(...entries.map(x => x.value), 1);
+      document.getElementById('paymentRiskList').innerHTML = entries.map(item => `
+        <div class="metric-row">
+          <div class="name">${escapeHtml(item.label)}</div>
+          <div class="track"><div class="fill" style="width:${(item.value / max) * 100}%"></div></div>
+          <div class="value">${item.value}</div>
+        </div>
+      `).join('');
     }
 
-    async function loadUsers() {
-      const res = await api('/api/v1/admin/users');
-      const data = await res.json();
-      const body = document.getElementById('usersBody');
-      if (!data.users?.length) {
-        body.innerHTML = '<tr><td colspan="7" class="empty">Пользователей пока нет</td></tr>';
+    function renderProblemServers(items) {
+      const problems = (items || []).filter(item => !item.active || Number(item.utilization || 0) >= 80).slice(0, 6);
+      if (!problems.length) {
+        document.getElementById('problemServersList').innerHTML = '<div class="empty">Критичных серверов не найдено</div>';
         return;
       }
-      body.innerHTML = data.users.map(user => {
+      document.getElementById('problemServersList').innerHTML = problems.map(item => {
+        const label = !item.active ? 'Выключен' : `Высокая загрузка ${Math.round(Number(item.utilization || 0))}%`;
+        return `
+          <div class="metric-row" style="grid-template-columns:1fr 1fr 90px;">
+            <div class="name">${escapeHtml(item.region || item.name)}</div>
+            <div class="track"><div class="fill" style="width:${Math.min(100, Number(item.utilization || 0))}%"></div></div>
+            <div class="value">${escapeHtml(label)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderUsers() {
+      const body = document.getElementById('usersBody');
+      const search = normalizeText(document.getElementById('usersSearch')?.value);
+      const roleFilter = document.getElementById('usersRoleFilter')?.value || '';
+      const statusFilter = document.getElementById('usersStatusFilter')?.value || '';
+      const filtered = usersData.filter(user => {
+        const sub = user.subscription || {};
+        const status = String(sub.status || 'none');
+        const matchesSearch = !search || normalizeText(user.email).includes(search);
+        const matchesRole = !roleFilter || user.role === roleFilter;
+        const matchesStatus = !statusFilter || status === statusFilter;
+        return matchesSearch && matchesRole && matchesStatus;
+      });
+      if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="7" class="empty">Ничего не найдено по выбранным фильтрам</td></tr>';
+        return;
+      }
+      body.innerHTML = filtered.map(user => {
         const sub = user.subscription || {};
         const statusKind = sub.status === 'active' ? 'ok' : (sub.status === 'expired' ? 'warn' : 'info');
         return `
@@ -454,15 +540,33 @@
       }).join('');
     }
 
-    async function loadServers() {
-      const res = await api('/api/v1/admin/servers');
-      const data = await res.json();
+    function updateServerCountryFilter() {
+      const select = document.getElementById('serversCountryFilter');
+      const current = select.value;
+      const codes = [...new Set(serversData.map(server => String(server.country_code || '').trim().toUpperCase()).filter(Boolean))].sort();
+      select.innerHTML = '<option value="">Все страны</option>' + codes.map(code => `<option value="${escapeHtml(code)}">${escapeHtml(code)}</option>`).join('');
+      if (codes.includes(current)) {
+        select.value = current;
+      }
+    }
+
+    function renderServers() {
       const body = document.getElementById('serversBody');
-      if (!data.servers?.length) {
-        body.innerHTML = '<tr><td colspan="8" class="empty">Серверов пока нет</td></tr>';
+      const search = normalizeText(document.getElementById('serversSearch')?.value);
+      const statusFilter = document.getElementById('serversStatusFilter')?.value || '';
+      const countryFilter = document.getElementById('serversCountryFilter')?.value || '';
+      const filtered = serversData.filter(server => {
+        const searchBlob = normalizeText([server.name, server.region, server.endpoint, server.host, server.country_code].join(' '));
+        const matchesSearch = !search || searchBlob.includes(search);
+        const matchesStatus = !statusFilter || (statusFilter === 'active' ? !!server.active : !server.active);
+        const matchesCountry = !countryFilter || String(server.country_code || '').toUpperCase() === countryFilter;
+        return matchesSearch && matchesStatus && matchesCountry;
+      });
+      if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="8" class="empty">Серверы по этим фильтрам не найдены</td></tr>';
         return;
       }
-      body.innerHTML = data.servers.map(server => `
+      body.innerHTML = filtered.map(server => `
         <tr>
           <td>${server.id}</td>
           <td>${escapeHtml(server.name)}</td>
@@ -480,15 +584,22 @@
       `).join('');
     }
 
-    async function loadPayments() {
-      const res = await api('/api/v1/admin/payments');
-      const data = await res.json();
+    function renderPayments() {
       const body = document.getElementById('paymentsBody');
-      if (!data.payments?.length) {
-        body.innerHTML = '<tr><td colspan="7" class="empty">Платежей пока нет</td></tr>';
+      const search = normalizeText(document.getElementById('paymentsSearch')?.value);
+      const planFilter = document.getElementById('paymentsPlanFilter')?.value || '';
+      const statusFilter = document.getElementById('paymentsStatusFilter')?.value || '';
+      const filtered = paymentsData.filter(payment => {
+        const matchesSearch = !search || normalizeText(payment.user_email).includes(search);
+        const matchesPlan = !planFilter || payment.plan === planFilter;
+        const matchesStatus = !statusFilter || payment.status === statusFilter;
+        return matchesSearch && matchesPlan && matchesStatus;
+      });
+      if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="7" class="empty">Платежи по этим фильтрам не найдены</td></tr>';
         return;
       }
-      body.innerHTML = data.payments.map(payment => `
+      body.innerHTML = filtered.map(payment => `
         <tr>
           <td>${payment.id}</td>
           <td>${escapeHtml(payment.user_email || '—')}</td>
@@ -501,10 +612,94 @@
       `).join('');
     }
 
+    async function loadStats() {
+      const res = await api(`/api/v1/admin/stats?days=${selectedStatsDays}`);
+      if (!res.ok) throw new Error('Не удалось загрузить статистику');
+      const stats = await res.json();
+      const windowDays = Number(stats.window_days || selectedStatsDays || 7);
+      selectedStatsDays = windowDays === 30 ? 30 : 7;
+      updatePeriodButtons();
+
+      document.getElementById('statUsers').textContent = stats.total_users ?? 0;
+      document.getElementById('statSubs').textContent = stats.active_subscriptions ?? 0;
+      document.getElementById('statKeys').textContent = stats.active_vpn_keys ?? 0;
+      document.getElementById('statRevenue').textContent = fmtMoney(stats.monthly_revenue);
+
+      setBar('conversionBar', stats.conversion_rate);
+      setBar('autoRenewBar', stats.auto_renew_rate);
+      setBar('serverActivityBar', stats.total_servers ? ((stats.active_servers / stats.total_servers) * 100) : 0);
+
+      document.getElementById('conversionValue').textContent = `${Math.round(stats.conversion_rate || 0)}%`;
+      document.getElementById('autoRenewValue').textContent = `${Math.round(stats.auto_renew_rate || 0)}%`;
+      document.getElementById('serverActivityValue').textContent = `${stats.active_servers || 0}/${stats.total_servers || 0}`;
+      document.getElementById('periodSummary').textContent = `Данные за последние ${windowDays} ${windowDays === 30 ? 'дней' : 'дней'}.`;
+      document.getElementById('usersChartTitle').textContent = `Рост пользователей за ${windowDays} ${windowDays === 30 ? 'дней' : 'дней'}`;
+      document.getElementById('revenueChartSubtitle').textContent = `Успешные оплаты за последние ${windowDays} ${windowDays === 30 ? 'дней' : 'дней'}.`;
+
+      renderSeries('usersChart', stats.users_series, 'users');
+      renderSeries('revenueChart', stats.revenue_series, 'revenue');
+      renderMetricBreakdown('planBreakdown', stats.subscriptions_by_plan, { free: 'План Free', trial: 'Пробный', basic: 'Премиум' });
+      renderMetricBreakdown('statusBreakdown', stats.subscriptions_by_status, { active: 'Активные', expired: 'Истекшие', cancelled: 'Отменённые' });
+      renderRegions(stats.top_regions || []);
+      renderServerLoad(stats.server_load || []);
+      renderPaymentRisks(stats);
+      renderProblemServers(stats.server_load || []);
+    }
+
+    async function loadUsers() {
+      const res = await api('/api/v1/admin/users');
+      const data = await res.json();
+      usersData = data.users || [];
+      if (!usersData.length) {
+        document.getElementById('usersBody').innerHTML = '<tr><td colspan="7" class="empty">Пользователей пока нет</td></tr>';
+        return;
+      }
+      renderUsers();
+    }
+
+    async function loadServers() {
+      const res = await api('/api/v1/admin/servers');
+      const data = await res.json();
+      serversData = data.servers || [];
+      if (!serversData.length) {
+        document.getElementById('serversBody').innerHTML = '<tr><td colspan="8" class="empty">Серверов пока нет</td></tr>';
+        return;
+      }
+      updateServerCountryFilter();
+      renderServers();
+    }
+
+    async function loadPayments() {
+      const res = await api('/api/v1/admin/payments');
+      const data = await res.json();
+      paymentsData = data.payments || [];
+      if (!paymentsData.length) {
+        document.getElementById('paymentsBody').innerHTML = '<tr><td colspan="7" class="empty">Платежей пока нет</td></tr>';
+        return;
+      }
+      renderPayments();
+    }
+
     async function triggerBackup() {
       const res = await api('/api/v1/admin/backup/send', { method: 'POST' });
       const data = await res.json().catch(() => ({}));
       alert(data.message || data.error || 'Операция выполнена');
+    }
+
+    async function exportCSV(entity) {
+      const res = await api(`/api/v1/admin/export/${entity}`);
+      if (!res.ok) {
+        return alert('Не удалось скачать CSV');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${entity}-export.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     }
 
     async function upgradeUser(id) {
@@ -609,7 +804,7 @@
     }
 
     if (token) {
-      fetch(API + '/api/v1/admin/stats', { headers: { Authorization: 'Bearer ' + token } })
+      fetch(API + `/api/v1/admin/stats?days=${selectedStatsDays}`, { headers: { Authorization: 'Bearer ' + token } })
         .then(res => {
           if (!res.ok) throw new Error('unauthorized');
           document.getElementById('loginScreen').classList.add('hidden');

@@ -140,6 +140,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			adminGrp.GET("/payments", adminH.GetPayments)
 			adminGrp.POST("/payments/:id/approve", adminH.ApprovePayment)
 			adminGrp.GET("/stats", adminH.GetStats)
+			adminGrp.GET("/export/:entity", adminH.ExportCSV)
 			adminGrp.POST("/backup/send", adminH.TriggerBackup)
 		}
 	}

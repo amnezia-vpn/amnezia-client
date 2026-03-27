@@ -29,6 +29,7 @@ EOT
 }
 
 BUILD_TYPE="release"
+DEFAULT_ANDROID_ABIS="armeabi-v7a;arm64-v8a"
 
 opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,help -o "dua:b:mfh" -- "$@")
 eval set -- "$opts"
@@ -73,8 +74,12 @@ ANDROID_BUILD_OUT_DIR=$OUT_APP_DIR/android-build
 echo "Project dir: $PROJECT_DIR"
 echo "Build dir: $BUILD_DIR"
 
+if [[ "${ABIS:-}" = "all" ]]; then
+  ABIS="$DEFAULT_ANDROID_ABIS"
+fi
+
 # Determine path to qt bin folder with qt-cmake
-if [[ -v AAB || "$ABIS" = "all" ]]; then
+if [[ -v AAB || "${ABIS:-}" = "$DEFAULT_ANDROID_ABIS" ]]; then
   qt_bin_dir_suffix="x86_64"
 else
   if [[ $ABIS = *";"* ]]; then
@@ -102,13 +107,13 @@ echo "Using Android NDK in $ANDROID_NDK_ROOT"
 # Run qt-cmake to configure build
 qt_cmake_opts=()
 
-if [[ -v AAB || "$ABIS" = "all" ]]; then
-  # Qt 6.10 may still configure the native build for a single default ABI
-  # unless the ABI set is also passed explicitly. androiddeployqt then looks
-  # for x86_64/arm64/x86/armeabi-v7a libraries that were never produced.
+if [[ -v AAB || "${ABIS:-}" = "$DEFAULT_ANDROID_ABIS" ]]; then
+  # Keep release packaging on physical-device ABIs only. x86/x86_64 emulator
+  # variants have been unstable in CI with Qt 6.10 and are not needed for
+  # published artifacts.
   qt_cmake_opts+=(
     -DQT_ANDROID_BUILD_ALL_ABIS=ON
-    -DQT_ANDROID_ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
+    -DQT_ANDROID_ABIS="$DEFAULT_ANDROID_ABIS"
   )
 else
   qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABIS")
@@ -131,6 +136,10 @@ deployqt_opts=()
 
 if [ -v AAB ]; then
   deployqt_opts+=(--aab)
+fi
+
+if [[ -n "${ABIS:-}" ]]; then
+  deployqt_opts+=(--android-abis "$ABIS")
 fi
 
 if [ -v ANDROID_BUILD_PLATFORM ]; then
@@ -197,14 +206,10 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
       echo "ERROR: AAB not found under $ANDROID_BUILD_OUT_DIR"
       exit 1
     fi
-    mv -u "$AAB_FILE" $PROJECT_DIR/deploy/build/FBLinkVPN-$BUILD_TYPE.aab
+    mv -u "$AAB_FILE" $PROJECT_DIR/deploy/build/FBLink-$BUILD_TYPE.aab
   fi
 
   if [ -v ABIS ]; then
-    if [ "$ABIS" = "all" ]; then
-      ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
-    fi
-
     suffix=$BUILD_TYPE
     if [ -v FDROID ]; then
       suffix+="-unsigned"
@@ -224,10 +229,10 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
 
       if [ -f "$PER_ABI_APK" ]; then
         # Standard per-ABI APK (Qt < 6.7 behaviour)
-        mv -u "$PER_ABI_APK" $PROJECT_DIR/deploy/build/
+        mv -u "$PER_ABI_APK" $PROJECT_DIR/deploy/build/FBLink-$ABI-$suffix.apk
       elif [ -f "$PER_ABI_APK_UNSIGNED" ]; then
         # Unsigned APK (no signing key configured)
-        mv -u "$PER_ABI_APK_UNSIGNED" $PROJECT_DIR/deploy/build/AmneziaVPN-$ABI-$suffix.apk
+        mv -u "$PER_ABI_APK_UNSIGNED" $PROJECT_DIR/deploy/build/FBLink-$ABI-$suffix.apk
       else
         # Try a broader find: ABI in filename OR in directory path (Qt 6.3+ sub-projects)
         FOUND=$(find "$OUT_APP_DIR" -type f \( \
@@ -235,11 +240,11 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
                   \( -name "*${suffix}*.apk" -path "*${ABI}*" \) \
                 \) 2>/dev/null | head -1)
         if [ -n "$FOUND" ]; then
-          mv -u "$FOUND" $PROJECT_DIR/deploy/build/AmneziaVPN-$ABI-$suffix.apk
+          mv -u "$FOUND" $PROJECT_DIR/deploy/build/FBLink-$ABI-$suffix.apk
         elif [ -f "$UNIVERSAL_APK" ]; then
           # Qt 6.7+ universal APK: copy it once per requested ABI so the
           # downstream rename/upload steps keep working as before.
-          cp "$UNIVERSAL_APK" $PROJECT_DIR/deploy/build/FBLinkVPN-$ABI-$suffix.apk
+          cp "$UNIVERSAL_APK" $PROJECT_DIR/deploy/build/FBLink-$ABI-$suffix.apk
         else
           echo "ERROR: APK not found for ABI=$ABI (tried $PER_ABI_APK and $UNIVERSAL_APK)"
           echo "Contents of $APK_OUT_DIR:"

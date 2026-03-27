@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/csv"
 	"fmt"
 	"net/http"
 	"sort"
@@ -392,6 +394,10 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 	var totalServers, activeServers int64
 	var totalRevenue, monthlyRevenue float64
 	var pendingPayments int64
+	windowDays := 7
+	if c.Query("days") == "30" {
+		windowDays = 30
+	}
 
 	h.db.Model(&models.User{}).Count(&totalUsers)
 	h.db.Model(&models.Subscription{}).Where("status = ?", models.SubActive).Count(&activeSubscriptions)
@@ -415,7 +421,7 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 		Select("COALESCE(SUM(amount), 0)").
 		Scan(&monthlyRevenue)
 
-	startWindow := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, -6)
+	startWindow := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, -(windowDays - 1))
 
 	var recentUsers []models.User
 	h.db.Where("created_at >= ?", startWindow).Find(&recentUsers)
@@ -425,7 +431,7 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 
 	userDays := map[string]int{}
 	revenueDays := map[string]float64{}
-	for i := 0; i < 7; i++ {
+	for i := 0; i < windowDays; i++ {
 		dayKey := startWindow.AddDate(0, 0, i).Format("2006-01-02")
 		userDays[dayKey] = 0
 		revenueDays[dayKey] = 0
@@ -444,9 +450,9 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 		revenueDays[dayKey] += p.Amount
 	}
 
-	usersSeries := make([]gin.H, 0, 7)
-	revenueSeries := make([]gin.H, 0, 7)
-	for i := 0; i < 7; i++ {
+	usersSeries := make([]gin.H, 0, windowDays)
+	revenueSeries := make([]gin.H, 0, windowDays)
+	for i := 0; i < windowDays; i++ {
 		day := startWindow.AddDate(0, 0, i)
 		dayKey := day.Format("2006-01-02")
 		usersSeries = append(usersSeries, gin.H{
@@ -554,6 +560,7 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 		"pending_payments":        pendingPayments,
 		"total_revenue":           totalRevenue,
 		"monthly_revenue":         monthlyRevenue,
+		"window_days":             windowDays,
 		"conversion_rate":         conversionRate,
 		"auto_renew_rate":         autoRenewRate,
 		"users_series":            usersSeries,
@@ -570,6 +577,79 @@ func maxInt(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// GET /api/v1/admin/export/:entity
+func (h *AdminHandler) ExportCSV(c *gin.Context) {
+	entity := c.Param("entity")
+
+	var buf bytes.Buffer
+	writer := csv.NewWriter(&buf)
+
+	switch entity {
+	case "users":
+		_ = writer.Write([]string{"id", "email", "role", "created_at"})
+		var users []models.User
+		h.db.Order("id asc").Find(&users)
+		for _, u := range users {
+			_ = writer.Write([]string{
+				fmt.Sprint(u.ID),
+				u.Email,
+				string(u.Role),
+				u.CreatedAt.Format(time.RFC3339),
+			})
+		}
+	case "payments":
+		_ = writer.Write([]string{"id", "user_id", "amount", "currency", "status", "plan", "created_at", "confirmed_at"})
+		var payments []models.Payment
+		h.db.Order("id desc").Find(&payments)
+		for _, p := range payments {
+			confirmedAt := ""
+			if p.ConfirmedAt != nil {
+				confirmedAt = p.ConfirmedAt.Format(time.RFC3339)
+			}
+			_ = writer.Write([]string{
+				fmt.Sprint(p.ID),
+				fmt.Sprint(p.UserID),
+				fmt.Sprintf("%.2f", p.Amount),
+				p.Currency,
+				string(p.Status),
+				string(p.Plan),
+				p.CreatedAt.Format(time.RFC3339),
+				confirmedAt,
+			})
+		}
+	case "servers":
+		_ = writer.Write([]string{"id", "name", "region", "country_code", "host", "endpoint", "active", "max_peers", "awg_port"})
+		var servers []models.VPNServer
+		h.db.Order("id asc").Find(&servers)
+		for _, s := range servers {
+			_ = writer.Write([]string{
+				fmt.Sprint(s.ID),
+				s.Name,
+				s.Region,
+				s.CountryCode,
+				s.Host,
+				s.Endpoint,
+				fmt.Sprint(s.Active),
+				fmt.Sprint(s.MaxPeers),
+				fmt.Sprint(s.AWGPort),
+			})
+		}
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unknown export entity"})
+		return
+	}
+
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to build csv"})
+		return
+	}
+
+	c.Header("Content-Type", "text/csv; charset=utf-8")
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s-export.csv", entity))
+	c.String(http.StatusOK, buf.String())
 }
 
 // POST /api/v1/admin/users/:id/upgrade
