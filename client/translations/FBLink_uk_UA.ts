@@ -1240,18 +1240,18 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="310"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="383"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="311"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="384"/>
         <source>Выбрать локацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="319"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="320"/>
         <source>Подключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="319"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="320"/>
         <source>Нажмите для смены региона</source>
         <translation type="unfinished"></translation>
     </message>

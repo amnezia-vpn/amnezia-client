@@ -34,6 +34,7 @@ private:
     std::shared_ptr<Settings> m_settings;
 
     QObject *m_qmlRoot;
+    quint64 m_pingRequestId = 0;
 };
 
 #endif // SYSTEMCONTROLLER_H

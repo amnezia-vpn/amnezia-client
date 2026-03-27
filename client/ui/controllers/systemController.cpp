@@ -7,8 +7,8 @@
 #include <QFileInfo>
 #include <QQuickItem>
 #include <QStandardPaths>
+#include <QTimer>
 #include <QUrl>
-#include <QtConcurrent>
 #include <QTcpSocket>
 #include <QElapsedTimer>
 
@@ -24,6 +24,55 @@
 SystemController::SystemController(const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent), m_settings(settings)
 {
+}
+
+namespace
+{
+    struct PingTarget
+    {
+        QString host;
+        QList<quint16> ports;
+    };
+
+    PingTarget parsePingTarget(const QString &rawHost)
+    {
+        PingTarget result;
+        QString host = rawHost.trimmed();
+        quint16 explicitPort = 0;
+
+        if (host.startsWith('[')) {
+            const int closingBracketIndex = host.indexOf(']');
+            if (closingBracketIndex > 0) {
+                const QString bracketedHost = host.mid(1, closingBracketIndex - 1);
+                const QString remainder = host.mid(closingBracketIndex + 1);
+                host = bracketedHost;
+
+                if (remainder.startsWith(':')) {
+                    explicitPort = static_cast<quint16>(remainder.mid(1).toUShort());
+                }
+            }
+        } else {
+            const int colonCount = host.count(':');
+            if (colonCount == 1) {
+                const int colonIndex = host.lastIndexOf(':');
+                explicitPort = static_cast<quint16>(host.mid(colonIndex + 1).toUShort());
+                host = host.left(colonIndex);
+            }
+        }
+
+        result.host = host.trimmed();
+        if (explicitPort > 0) {
+            result.ports.append(explicitPort);
+        }
+
+        for (quint16 fallbackPort : {443, 80, 22}) {
+            if (!result.ports.contains(fallbackPort)) {
+                result.ports.append(fallbackPort);
+            }
+        }
+
+        return result;
+    }
 }
 
 void SystemController::saveFile(const QString &fileName, const QString &data)
@@ -178,34 +227,73 @@ void SystemController::measurePing(const QString &host)
         return;
     }
 
-    QTcpSocket* socket = new QTcpSocket(this);
-    QElapsedTimer* timer = new QElapsedTimer();
-
-    connect(socket, &QTcpSocket::connected, this, [this, socket, timer]() {
-        emit pingMeasured(timer->elapsed());
-        socket->disconnectFromHost();
-        socket->deleteLater();
-        delete timer;
-    });
-
-    void(QTcpSocket::*errorSignal)(QAbstractSocket::SocketError) = &QTcpSocket::errorOccurred;
-    connect(socket, errorSignal, this, [this, socket, timer](QAbstractSocket::SocketError) {
+    const auto target = parsePingTarget(host);
+    if (target.host.isEmpty()) {
         emit pingMeasured(-1);
-        socket->deleteLater();
-        delete timer;
-    });
-
-    timer->start();
-    
-    QString cleanHost = host;
-    int colonIndex = cleanHost.lastIndexOf(':');
-    if (colonIndex > 0) {
-        // Only strip if it's an IPv4 with a port or domain with a port.
-        // If it's an IPv6 like [::1]:51820 we handle it, but for simplicity split by last colon.
-        if (cleanHost.count(':') == 1 || cleanHost.endsWith("]")) {
-            cleanHost = cleanHost.left(colonIndex);
-        }
+        return;
     }
-    
-    socket->connectToHost(cleanHost, 22); // SSH is always open on these servers
+
+    const quint64 requestId = ++m_pingRequestId;
+    auto ports = std::make_shared<QList<quint16>>(target.ports);
+    auto elapsed = std::make_shared<QElapsedTimer>();
+    elapsed->start();
+
+    auto tryNextPort = std::make_shared<std::function<void()>>();
+    *tryNextPort = [this, requestId, target, ports, elapsed, tryNextPort]() {
+        if (requestId != m_pingRequestId) {
+            return;
+        }
+
+        if (ports->isEmpty()) {
+            emit pingMeasured(-1);
+            return;
+        }
+
+        const quint16 port = ports->takeFirst();
+        auto *socket = new QTcpSocket(this);
+        auto *timeout = new QTimer(socket);
+        timeout->setSingleShot(true);
+
+        auto finished = std::make_shared<bool>(false);
+        auto cleanup = [socket, timeout, finished]() {
+            if (*finished) {
+                return false;
+            }
+            *finished = true;
+            timeout->stop();
+            socket->abort();
+            socket->deleteLater();
+            return true;
+        };
+
+        connect(socket, &QTcpSocket::connected, this, [this, requestId, elapsed, cleanup]() {
+            if (!cleanup() || requestId != m_pingRequestId) {
+                return;
+            }
+
+            emit pingMeasured(static_cast<int>(elapsed->elapsed()));
+        });
+
+        void(QTcpSocket::*errorSignal)(QAbstractSocket::SocketError) = &QTcpSocket::errorOccurred;
+        connect(socket, errorSignal, this, [this, requestId, cleanup, tryNextPort](QAbstractSocket::SocketError) {
+            if (!cleanup() || requestId != m_pingRequestId) {
+                return;
+            }
+
+            (*tryNextPort)();
+        });
+
+        connect(timeout, &QTimer::timeout, this, [this, requestId, cleanup, tryNextPort]() {
+            if (!cleanup() || requestId != m_pingRequestId) {
+                return;
+            }
+
+            (*tryNextPort)();
+        });
+
+        socket->connectToHost(target.host, port);
+        timeout->start(1500);
+    };
+
+    (*tryNextPort)();
 }

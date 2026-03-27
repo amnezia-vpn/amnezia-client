@@ -260,14 +260,13 @@ PageType {
                     }
 
                     function measurePing() {
-                        var serverInfo = ServersModel.defaultServerInfo || {}
-                        var serverIp = serverInfo["hostName"] || serverInfo["host"] || ""
-                        if (serverIp === "") {
+                        var serverHost = ServersModel.getDefaultServerData("hostName") || ""
+                        if (serverHost === "") {
                             locationCardRef.realPingMs = -1
                             return
                         }
 
-                        SystemController.measurePing(serverIp)
+                        SystemController.measurePing(serverHost)
                     }
 
                     Timer {
