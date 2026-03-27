@@ -46,7 +46,7 @@ void FBLinkController::beginSessionSync()
 void FBLinkController::login(const QString &email, const QString &password)
 {
     if (email.isEmpty() || password.isEmpty()) {
-        emit loginError(tr("Email and password cannot be empty"));
+        emit loginError(tr("Email и пароль не могут быть пустыми"));
         return;
     }
 
@@ -79,12 +79,12 @@ void FBLinkController::login(const QString &email, const QString &password)
 
                 beginSessionSync();
             } else {
-                emit loginError(tr("Invalid response format"));
+                emit loginError(tr("Некорректный формат ответа сервера"));
             }
         } else {
             QByteArray responseData = reply->readAll();
             QJsonDocument doc = QJsonDocument::fromJson(responseData);
-            QString errStr = tr("Network Error: ") + reply->errorString();
+            QString errStr = tr("Ошибка сети: ") + reply->errorString();
             if(!doc.isNull() && doc.object().contains("error")) {
                 errStr = doc.object()["error"].toString();
             }

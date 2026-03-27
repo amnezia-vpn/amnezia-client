@@ -53,7 +53,7 @@ PageType {
     readonly property string apiBase: "https://srv.frakebit.com"
 
     readonly property var plans: [
-        { id: "basic", title: qsTr("Premium"), price: "199 ₽", period: qsTr("/ 30 дней"), badge: qsTr("ЛУЧШИЙ"), saving: qsTr("Максимальная скорость и приоритет") }
+        { id: "basic", title: qsTr("Премиум"), price: "199 ₽", period: qsTr("/ 30 дней"), badge: qsTr("ЛУЧШИЙ"), saving: qsTr("Максимальная скорость и приоритет") }
     ]
 
     // Features list
@@ -61,7 +61,7 @@ PageType {
         { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Безлимитный трафик") },
         { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("10+ стран и регионов") },
         { icon: "qrc:/images/controls/monitor.svg",     text: qsTr("До 5 устройств одновременно") },
-        { icon: "qrc:/images/controls/info.svg",        text: qsTr("Kill Switch защита") },
+        { icon: "qrc:/images/controls/info.svg",        text: qsTr("Защита Kill Switch") },
         { icon: "qrc:/images/controls/history.svg",     text: qsTr("Быстрые серверы без логов") }
     ]
 
@@ -129,7 +129,7 @@ PageType {
                     // Title
                     LabelTextType {
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("FBLink VPN Premium")
+                        text: qsTr("FBLink VPN Премиум")
                         font.pixelSize: 24
                         font.weight: 700
                         color: FBLinkStyle.color.paleGray
@@ -661,14 +661,14 @@ PageType {
                             Layout.fillWidth: true
 
                             LabelTextType {
-                                text: qsTr("Premium подписка активна")
+                        text: qsTr("Подписка «Премиум» активна")
                                 font.pixelSize: 13
                                 font.weight: 600
                                 color: "#10B981"
                             }
 
                             LabelTextType {
-                                text: qsTr("Действует до: ") + Qt.formatDate(new Date(FBLinkController.subscriptionEndDate.slice(0, 10)), "d MMMM yyyy")
+                                text: qsTr("Действует до: ") + new Date(FBLinkController.subscriptionEndDate).toLocaleDateString(Qt.locale(), Locale.LongFormat)
                                 font.pixelSize: 12
                                 color: FBLinkStyle.color.mutedGray
                             }

@@ -56,7 +56,7 @@ Button {
 
     text: root.isNotLoggedIn
         ? qsTr("Войти")
-        : (root.isSubscriptionRequired ? qsTr("Premium") : ConnectionController.connectionStateText)
+        : (root.isSubscriptionRequired ? qsTr("Премиум") : ConnectionController.connectionStateText)
 
     Connections {
         target: ConnectionController

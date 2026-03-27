@@ -84,12 +84,12 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     m_state = state;
 
     m_isConnected = false;
-    m_connectionStateText = tr("Connecting...");
+    m_connectionStateText = tr("Подключение...");
     switch (state) {
     case Vpn::ConnectionState::Connected: {
         m_isConnectionInProgress = false;
         m_isConnected = true;
-        m_connectionStateText = tr("Connected");
+        m_connectionStateText = tr("Подключено");
         break;
     }
     case Vpn::ConnectionState::Connecting: {
@@ -98,33 +98,33 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     }
     case Vpn::ConnectionState::Reconnecting: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Reconnecting...");
+        m_connectionStateText = tr("Переподключение...");
         break;
     }
     case Vpn::ConnectionState::Disconnected: {
         m_isConnectionInProgress = false;
-        m_connectionStateText = tr("Connect");
+        m_connectionStateText = tr("Подключиться");
         break;
     }
     case Vpn::ConnectionState::Disconnecting: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Disconnecting...");
+        m_connectionStateText = tr("Отключение...");
         break;
     }
     case Vpn::ConnectionState::Preparing: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Preparing...");
+        m_connectionStateText = tr("Подготовка...");
         break;
     }
     case Vpn::ConnectionState::Error: {
         m_isConnectionInProgress = false;
-        m_connectionStateText = tr("Connect");
+        m_connectionStateText = tr("Подключиться");
         emit connectionErrorOccurred(getLastConnectionError());
         break;
     }
     case Vpn::ConnectionState::Unknown: {
         m_isConnectionInProgress = false;
-        m_connectionStateText = tr("Connect");
+        m_connectionStateText = tr("Подключиться");
         emit connectionErrorOccurred(getLastConnectionError());
         break;
     }
@@ -135,10 +135,10 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
 void ConnectionController::onCurrentContainerUpdated()
 {
     if (m_isConnected || m_isConnectionInProgress) {
-        emit reconnectWithUpdatedContainer(tr("Settings updated successfully, reconnnection..."));
+        emit reconnectWithUpdatedContainer(tr("Настройки успешно обновлены, выполняется переподключение..."));
         openConnection();
     } else {
-        emit reconnectWithUpdatedContainer(tr("Settings updated successfully"));
+        emit reconnectWithUpdatedContainer(tr("Настройки успешно обновлены"));
     }
 }
 

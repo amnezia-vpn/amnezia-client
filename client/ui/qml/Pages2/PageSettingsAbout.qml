@@ -128,7 +128,7 @@ PageType {
                 font.pixelSize: 14
                 wrapMode: Text.WordWrap
 
-                text: qsTr("FBLink VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.\n\nПриложение создано на основе открытого проекта FBLink (fblink-vpn.org), распространяемого по лицензии GNU GPL v3.")
+                            text: qsTr("FBLink VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.\n\nПриложение создано на основе открытого проекта Amnezia (amnezia.org), распространяемого по лицензии GNU GPL v3.")
                 color: FBLinkStyle.color.paleGray
             }
 
@@ -294,7 +294,7 @@ PageType {
                         top: parent.top
                         margins: 12
                     }
-                    text: qsTr("🏛 Основано на FBLink (GNU GPL v3)\nИсходный код: github.com/fblink-vpn")
+                            text: qsTr("🏛 Основано на Amnezia (GNU GPL v3)\nИсходный код: amnezia.org")
                     font.pixelSize: 12
                     color: "#8A8A8E"
                     wrapMode: Text.WordWrap
@@ -303,7 +303,7 @@ PageType {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: Qt.openUrlExternally("https://github.com/fblink-vpn/fblink-client")
+                        onClicked: Qt.openUrlExternally("https://amnezia.org")
                     }
                 }
             }

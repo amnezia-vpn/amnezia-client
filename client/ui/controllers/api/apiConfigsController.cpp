@@ -635,7 +635,7 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
         return false;
     }
 
-    emit installServerFromApiFinished(tr("Subscription restored successfully."));
+    emit installServerFromApiFinished(tr("Подписка успешно восстановлена."));
     if (duplicateCount > 0) {
         qInfo().noquote() << "[IAP] Skipped" << duplicateCount
                           << "duplicate restored transactions for original transaction IDs already processed";
@@ -729,7 +729,7 @@ bool ApiConfigsController::importServiceFromGateway()
         serverConfig.insert(configKey::apiConfig, apiConfig);
 
         m_serversModel->addServer(serverConfig);
-        emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+        emit installServerFromApiFinished(tr("%1 успешно установлен.").arg(m_apiServicesModel->getSelectedServiceName()));
         return true;
     } else {
         emit errorOccurred(errorCode);
@@ -790,11 +790,11 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
         }
         m_serversModel->editServer(newServerConfig, serverIndex);
         if (reloadServiceConfig) {
-            emit reloadServerFromApiFinished(tr("API config reloaded"));
+            emit reloadServerFromApiFinished(tr("Конфигурация API обновлена"));
         } else if (newCountryName.isEmpty()) {
             emit updateServerFromApiFinished();
         } else {
-            emit changeApiCountryFinished(tr("Successfully changed the country of connection to %1").arg(newCountryName));
+            emit changeApiCountryFinished(tr("Страна подключения успешно изменена на %1").arg(newCountryName));
         }
         return true;
     } else {

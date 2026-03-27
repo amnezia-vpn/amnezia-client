@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"time"
 	"vpn-backend/internal/backup"
 	"vpn-backend/internal/config"
@@ -95,8 +96,8 @@ type addServerRequest struct {
 	Region      string `json:"region"`
 	CountryCode string `json:"country_code"` // ISO 3166-1 alpha-2, e.g. "RU"
 	MaxPeers    int    `json:"max_peers"`
-	AWGPort   int    `json:"awg_port"`
-	MTU       string `json:"mtu"`
+	AWGPort     int    `json:"awg_port"`
+	MTU         string `json:"mtu"`
 	// SSH доступ для управления peers
 	SSHHost      string `json:"ssh_host"`
 	SSHPort      int    `json:"ssh_port"`
@@ -387,16 +388,188 @@ func (h *AdminHandler) GetPayments(c *gin.Context) {
 
 // GET /api/v1/admin/stats
 func (h *AdminHandler) GetStats(c *gin.Context) {
-	var totalUsers, activeSubscriptions, activeKeys int64
+	var totalUsers, activeSubscriptions, expiredSubscriptions, cancelledSubscriptions, activeKeys int64
+	var totalServers, activeServers int64
+	var totalRevenue, monthlyRevenue float64
+	var pendingPayments int64
+
 	h.db.Model(&models.User{}).Count(&totalUsers)
 	h.db.Model(&models.Subscription{}).Where("status = ?", models.SubActive).Count(&activeSubscriptions)
+	h.db.Model(&models.Subscription{}).Where("status = ?", models.SubExpired).Count(&expiredSubscriptions)
+	h.db.Model(&models.Subscription{}).Where("status = ?", models.SubCancelled).Count(&cancelledSubscriptions)
 	h.db.Model(&models.VPNKey{}).Where("revoked_at IS NULL").Count(&activeKeys)
+	h.db.Model(&models.VPNServer{}).Count(&totalServers)
+	h.db.Model(&models.VPNServer{}).Where("active = ?", true).Count(&activeServers)
+	h.db.Model(&models.Payment{}).Where("status = ?", models.PaymentPending).Count(&pendingPayments)
+
+	now := time.Now()
+	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+
+	h.db.Model(&models.Payment{}).
+		Where("status = ?", models.PaymentSucceeded).
+		Select("COALESCE(SUM(amount), 0)").
+		Scan(&totalRevenue)
+
+	h.db.Model(&models.Payment{}).
+		Where("status = ? AND confirmed_at >= ?", models.PaymentSucceeded, startOfMonth).
+		Select("COALESCE(SUM(amount), 0)").
+		Scan(&monthlyRevenue)
+
+	startWindow := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, -6)
+
+	var recentUsers []models.User
+	h.db.Where("created_at >= ?", startWindow).Find(&recentUsers)
+
+	var recentPayments []models.Payment
+	h.db.Where("created_at >= ?", startWindow).Find(&recentPayments)
+
+	userDays := map[string]int{}
+	revenueDays := map[string]float64{}
+	for i := 0; i < 7; i++ {
+		dayKey := startWindow.AddDate(0, 0, i).Format("2006-01-02")
+		userDays[dayKey] = 0
+		revenueDays[dayKey] = 0
+	}
+
+	for _, u := range recentUsers {
+		dayKey := u.CreatedAt.Format("2006-01-02")
+		userDays[dayKey]++
+	}
+
+	for _, p := range recentPayments {
+		if p.Status != models.PaymentSucceeded {
+			continue
+		}
+		dayKey := p.CreatedAt.Format("2006-01-02")
+		revenueDays[dayKey] += p.Amount
+	}
+
+	usersSeries := make([]gin.H, 0, 7)
+	revenueSeries := make([]gin.H, 0, 7)
+	for i := 0; i < 7; i++ {
+		day := startWindow.AddDate(0, 0, i)
+		dayKey := day.Format("2006-01-02")
+		usersSeries = append(usersSeries, gin.H{
+			"date":  dayKey,
+			"label": day.Format("02.01"),
+			"value": userDays[dayKey],
+		})
+		revenueSeries = append(revenueSeries, gin.H{
+			"date":  dayKey,
+			"label": day.Format("02.01"),
+			"value": revenueDays[dayKey],
+		})
+	}
+
+	var subscriptions []models.Subscription
+	h.db.Find(&subscriptions)
+	planBreakdown := map[string]int{
+		string(models.PlanFree):  0,
+		string(models.PlanTrial): 0,
+		string(models.PlanBasic): 0,
+	}
+	statusBreakdown := map[string]int{
+		string(models.SubActive):    0,
+		string(models.SubExpired):   0,
+		string(models.SubCancelled): 0,
+	}
+	autoRenewEnabled := 0
+	for _, sub := range subscriptions {
+		planBreakdown[string(sub.Plan)]++
+		statusBreakdown[string(sub.Status)]++
+		if sub.AutoRenew {
+			autoRenewEnabled++
+		}
+	}
+
+	var servers []models.VPNServer
+	h.db.Find(&servers)
+	serverLoad := make([]gin.H, 0, len(servers))
+	regionTotals := map[string]int{}
+	for _, s := range servers {
+		var peersCount int64
+		h.db.Model(&models.VPNKey{}).Where("server_id = ? AND revoked_at IS NULL", s.ID).Count(&peersCount)
+
+		utilization := 0.0
+		if s.MaxPeers > 0 {
+			utilization = (float64(peersCount) / float64(s.MaxPeers)) * 100
+		}
+
+		regionKey := s.Region
+		if regionKey == "" {
+			regionKey = s.Name
+		}
+		regionTotals[regionKey] += int(peersCount)
+
+		serverLoad = append(serverLoad, gin.H{
+			"id":           s.ID,
+			"name":         s.Name,
+			"region":       s.Region,
+			"country_code": s.CountryCode,
+			"active":       s.Active,
+			"active_keys":  peersCount,
+			"max_peers":    s.MaxPeers,
+			"utilization":  utilization,
+			"available":    maxInt(s.MaxPeers-int(peersCount), 0),
+			"endpoint":     s.Endpoint,
+		})
+	}
+
+	sort.Slice(serverLoad, func(i, j int) bool {
+		return serverLoad[i]["utilization"].(float64) > serverLoad[j]["utilization"].(float64)
+	})
+
+	topRegions := make([]gin.H, 0, len(regionTotals))
+	for region, peers := range regionTotals {
+		topRegions = append(topRegions, gin.H{
+			"region": region,
+			"peers":  peers,
+		})
+	}
+	sort.Slice(topRegions, func(i, j int) bool {
+		return topRegions[i]["peers"].(int) > topRegions[j]["peers"].(int)
+	})
+	if len(topRegions) > 6 {
+		topRegions = topRegions[:6]
+	}
+
+	conversionRate := 0.0
+	if totalUsers > 0 {
+		conversionRate = (float64(activeSubscriptions) / float64(totalUsers)) * 100
+	}
+
+	autoRenewRate := 0.0
+	if len(subscriptions) > 0 {
+		autoRenewRate = (float64(autoRenewEnabled) / float64(len(subscriptions))) * 100
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"total_users":          totalUsers,
-		"active_subscriptions": activeSubscriptions,
-		"active_vpn_keys":      activeKeys,
+		"total_users":             totalUsers,
+		"active_subscriptions":    activeSubscriptions,
+		"expired_subscriptions":   expiredSubscriptions,
+		"cancelled_subscriptions": cancelledSubscriptions,
+		"active_vpn_keys":         activeKeys,
+		"total_servers":           totalServers,
+		"active_servers":          activeServers,
+		"pending_payments":        pendingPayments,
+		"total_revenue":           totalRevenue,
+		"monthly_revenue":         monthlyRevenue,
+		"conversion_rate":         conversionRate,
+		"auto_renew_rate":         autoRenewRate,
+		"users_series":            usersSeries,
+		"revenue_series":          revenueSeries,
+		"subscriptions_by_plan":   planBreakdown,
+		"subscriptions_by_status": statusBreakdown,
+		"top_regions":             topRegions,
+		"server_load":             serverLoad,
 	})
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 // POST /api/v1/admin/users/:id/upgrade
@@ -497,7 +670,7 @@ func (h *AdminHandler) ApprovePayment(c *gin.Context) {
 	// Upgrade user subscription immediately
 	var sub models.Subscription
 	h.db.Where("user_id = ?", p.UserID).FirstOrInit(&sub, models.Subscription{UserID: p.UserID})
-	
+
 	now = time.Now()
 	var durationDays int
 	if p.Plan == models.PlanTrial {
@@ -505,7 +678,7 @@ func (h *AdminHandler) ApprovePayment(c *gin.Context) {
 	} else {
 		durationDays = 30 // для Basic
 	}
-	
+
 	newExpiry := now.AddDate(0, 0, durationDays)
 	if p.Plan != models.PlanTrial && sub.ExpiresAt.After(now) && sub.Plan != models.PlanFree {
 		newExpiry = sub.ExpiresAt.AddDate(0, 0, durationDays)

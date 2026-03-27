@@ -1,1127 +1,626 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FBLink VPN — Admin Panel</title>
+  <title>FBLink VPN Admin</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
-
     :root {
-      --bg-dark: #0a0a0f;
-      --bg-gradient: linear-gradient(135deg, #0a0a0f, #161525, #0a0a0f);
-      --glass-bg: rgba(26, 26, 36, 0.4);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-
-      --accent: #6C5CE7;
-      --accent-hover: #8072FF;
-      --accent-gradient: linear-gradient(135deg, #6C5CE7, #a29bfe);
-      --danger: #ff4757;
-      --success: #2ed573;
-      --text: #F8F8FF;
-      --muted: #a4b0be;
+      --bg: #0b0d12;
+      --panel: rgba(19,24,35,.82);
+      --border: rgba(255,255,255,.08);
+      --text: #eef4ff;
+      --muted: #96a0b8;
+      --cyan: #00c8ff;
+      --cyan2: #6ce7ff;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --radius: 20px;
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      background: var(--bg-dark);
-      background-image: radial-gradient(circle at 50% 0%, rgba(108, 92, 231, 0.15) 0%, transparent 70%);
-      background-attachment: fixed;
+      margin: 0;
       color: var(--text);
-      font-family: 'Outfit', system-ui, sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      line-height: 1.5;
+      font-family: "Segoe UI", Inter, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(0,200,255,.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(16,185,129,.10), transparent 24%),
+        linear-gradient(180deg, #0b0d12 0%, #10141d 100%);
     }
-
-    /* Glassmorphism Utilities */
+    .hidden { display: none !important; }
     .glass {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      border-radius: 20px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
     }
-
-    /* Page Transitions */
-    .fade-in {
-      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Login screen */
-    #loginScreen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .login-screen {
       min-height: 100vh;
+      display: grid;
+      place-items: center;
       padding: 24px;
-      position: relative;
     }
-
-    #loginScreen::before {
-      content: '';
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      background: rgba(108, 92, 231, 0.2);
-      filter: blur(100px);
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: -1;
-      animation: pulse 6s infinite alternate;
+    .login-card { width: min(460px, 100%); padding: 34px; }
+    .brand { display: flex; gap: 14px; align-items: center; margin-bottom: 10px; }
+    .brand img { width: 40px; height: 40px; }
+    .brand-title { font-size: 30px; font-weight: 800; letter-spacing: -.03em; }
+    .accent { background: linear-gradient(90deg, var(--cyan), var(--cyan2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: var(--muted); margin-bottom: 22px; }
+    .error {
+      display: none;
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      color: #ffd7d7;
+      border: 1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.12);
+      border-radius: 14px;
     }
-
-    @keyframes pulse {
-      0% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.5;
-      }
-
-      100% {
-        transform: translate(-50%, -50%) scale(1.1);
-        opacity: 0.8;
-      }
-    }
-
-    #loginScreen h1 {
-      font-size: 36px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.5px;
-    }
-
-    #loginScreen p {
-      color: var(--muted);
-      margin-bottom: 32px;
-      font-size: 16px;
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 420px;
-      padding: 40px;
-      animation: fadeIn 0.6s ease-out;
-    }
-
-    .field {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .field label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 8px;
-      opacity: 0.9;
-    }
-
+    .field { margin-bottom: 16px; }
+    .field label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
     .field input {
       width: 100%;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
       padding: 14px 16px;
       color: var(--text);
-      font-size: 15px;
-      font-family: inherit;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
       outline: none;
-      transition: all 0.3s ease;
     }
-
-    .field input:focus {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
-    }
-
-    /* Buttons */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 14px 24px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
       border: none;
-      transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-      text-decoration: none;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-primary {
-      background: var(--accent-gradient);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    .btn-primary::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transform: skewX(-20deg);
-      animation: shine 3s infinite;
-    }
-
-    @keyframes shine {
-      0% {
-        left: -100%;
-      }
-
-      20% {
-        left: 200%;
-      }
-
-      100% {
-        left: 200%;
-      }
-    }
-
-    .btn-danger {
-      background: rgba(255, 71, 87, 0.1);
-      color: var(--danger);
-      border: 1px solid rgba(255, 71, 87, 0.3);
-    }
-
-    .btn-danger:hover {
-      background: rgba(255, 71, 87, 0.2);
-    }
-
-    .btn-full {
-      width: 100%;
-    }
-
-    /* Main layout */
-    #app {
-      display: none;
-      flex-direction: row;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: 260px;
-      padding: 30px 20px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      border-radius: 0;
-      border-left: none;
-      border-top: none;
-      border-bottom: none;
-      background: rgba(15, 15, 20, 0.6);
-      backdrop-filter: blur(20px);
-      border-right: 1px solid var(--glass-border);
-      z-index: 10;
-    }
-
-    .sidebar .logo {
-      font-size: 24px;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 14px;
       font-weight: 700;
-      margin-bottom: 40px;
-      padding: 0 12px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .sidebar .logo span {
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-      border-radius: 12px;
       cursor: pointer;
-      color: var(--muted);
-      font-size: 15px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      margin-bottom: 8px;
-      position: relative;
     }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-      transform: translateX(4px);
+    .btn-primary { color: #02131a; background: linear-gradient(135deg, var(--cyan), var(--cyan2)); }
+    .btn-secondary { color: var(--text); background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); }
+    .btn-danger { color: #ffd8d8; background: rgba(239,68,68,.14); border: 1px solid rgba(239,68,68,.25); }
+    .btn-success { color: #d3fff0; background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.25); }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    #app { display: none; min-height: 100vh; }
+    .sidebar {
+      position: fixed; inset: 0 auto 0 0; width: 280px; padding: 26px 18px;
+      background: rgba(8,11,18,.9); border-right: 1px solid rgba(255,255,255,.08);
+      display: flex; flex-direction: column; gap: 18px;
     }
-
-    .nav-item.active {
-      background: var(--accent-gradient);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2);
+    .brand-card { padding: 18px; border-radius: 20px; background: linear-gradient(180deg, rgba(0,200,255,.08), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.06); }
+    .brand-card .row { display: flex; align-items: center; gap: 12px; }
+    .brand-card img { width: 36px; height: 36px; }
+    .brand-card strong { display: block; font-size: 20px; }
+    .brand-card span { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .nav { display: flex; flex-direction: column; gap: 8px; }
+    .nav button {
+      text-align: left; color: var(--muted); background: transparent; border: 1px solid transparent;
+      padding: 13px 14px; border-radius: 16px; font-size: 14px; font-weight: 700; cursor: pointer;
     }
-
-    .content {
-      flex: 1;
-      padding: 40px;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-      animation: fadeIn 0.4s ease-out forwards;
-    }
-
-    /* Stats cards */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 24px;
-      margin-bottom: 40px;
-    }
-
-    .stat-card {
-      padding: 24px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: -50px;
-      right: -50px;
-      width: 100px;
-      height: 100px;
-      background: var(--accent-gradient);
-      filter: blur(40px);
-      opacity: 0.15;
-      border-radius: 50%;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-    }
-
-    .stat-card .label {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--muted);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .stat-card .value {
-      font-size: 42px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .stat-card .value.accent {
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    /* Tables */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    .section-header h2 {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .table-container {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: var(--glass-shadow);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th {
-      padding: 16px 20px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      background: rgba(0, 0, 0, 0.2);
-    }
-
-    td {
-      padding: 16px 20px;
-      font-size: 15px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      transition: background 0.2s;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover td {
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 6px 12px;
-      border-radius: 30px;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      backdrop-filter: blur(4px);
-    }
-
-    .badge-success {
-      background: rgba(46, 213, 115, 0.15);
-      color: #2ed573;
-      border: 1px solid rgba(46, 213, 115, 0.3);
-    }
-
-    .badge-danger {
-      background: rgba(255, 71, 87, 0.15);
-      color: #ff4757;
-      border: 1px solid rgba(255, 71, 87, 0.3);
-    }
-
-    .badge-info {
-      background: rgba(108, 92, 231, 0.15);
-      color: #a29bfe;
-      border: 1px solid rgba(108, 92, 231, 0.3);
-    }
-
-    .error-msg {
-      background: rgba(255, 71, 87, 0.1);
-      border: 1px solid rgba(255, 71, 87, 0.3);
-      color: #ff4757;
-      padding: 14px 16px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      font-size: 14px;
-      display: none;
-      animation: fadeIn 0.3s;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-card {
-      width: 100%;
-      max-width: 440px;
-      padding: 32px;
-    }
-
-    .modal-card h3 {
-      font-size: 24px;
-      margin-bottom: 24px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-
-      .content {
-        padding: 20px;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    .nav button.active { color: #061018; background: linear-gradient(135deg, var(--cyan), var(--cyan2)); }
+    .sidebar-footer { margin-top: auto; padding: 16px; border-radius: 18px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); color: var(--muted); font-size: 13px; }
+    .content { margin-left: 280px; padding: 28px; }
+    .hero, .analytics-grid { display: grid; gap: 18px; margin-bottom: 22px; }
+    .hero { grid-template-columns: 1.4fr 1fr; }
+    .analytics-grid { grid-template-columns: 1.25fr 1.25fr 1fr; }
+    .hero-card, .panel, .kpi-card { padding: 20px; }
+    .hero-title { margin: 0 0 10px; font-size: 34px; font-weight: 800; letter-spacing: -.04em; }
+    .hero-subtitle, .panel p { color: var(--muted); }
+    .hero-visual { min-height: 170px; display: flex; align-items: flex-end; gap: 14px; }
+    .hero-shield { width: 110px; height: 110px; padding: 24px; border-radius: 28px; background: radial-gradient(circle at top, rgba(0,200,255,.22), rgba(0,200,255,.05)); border: 1px solid rgba(0,200,255,.18); }
+    .hero-bars { flex: 1; display: flex; align-items: flex-end; gap: 10px; }
+    .hero-bars span { flex: 1; border-radius: 16px 16px 6px 6px; background: linear-gradient(180deg, rgba(108,231,255,.95), rgba(0,200,255,.18)); border: 1px solid rgba(255,255,255,.06); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; margin-bottom: 22px; }
+    .kpi-card .icon { width: 36px; height: 36px; padding: 8px; border-radius: 12px; margin-bottom: 16px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.06); }
+    .kpi-card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+    .kpi-card .value { font-size: 30px; font-weight: 800; letter-spacing: -.04em; }
+    .kpi-card .hint { margin-top: 6px; color: var(--muted); font-size: 13px; }
+    .panel h3 { margin: 0 0 6px; font-size: 18px; }
+    .chart { display: flex; align-items: end; gap: 10px; min-height: 190px; }
+    .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .chart-bar-wrap { width: 100%; height: 150px; display: flex; align-items: end; }
+    .chart-bar { width: 100%; min-height: 8px; border-radius: 14px 14px 6px 6px; background: linear-gradient(180deg, var(--cyan2), rgba(0,200,255,.18)); border: 1px solid rgba(255,255,255,.06); }
+    .chart-bar.revenue { background: linear-gradient(180deg, #2cf0b0, rgba(16,185,129,.16)); }
+    .chart-label, .chart-value { font-size: 12px; }
+    .chart-label { color: var(--muted); }
+    .chart-value { font-weight: 700; }
+    .metric-list { display: flex; flex-direction: column; gap: 12px; }
+    .metric-row { display: grid; grid-template-columns: 110px 1fr 54px; gap: 12px; align-items: center; font-size: 13px; }
+    .metric-row .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .metric-row .track { position: relative; height: 10px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
+    .metric-row .fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--cyan), var(--green)); border-radius: 99px; }
+    .metric-row .value { color: var(--muted); text-align: right; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 14px; }
+    .section-head h2 { margin: 0; font-size: 24px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.05); text-align: left; vertical-align: top; font-size: 14px; }
+    th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; background: rgba(255,255,255,.02); }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; border: 1px solid transparent; }
+    .ok { color: #cffff0; background: rgba(16,185,129,.14); border-color: rgba(16,185,129,.24); }
+    .warn { color: #ffe5b3; background: rgba(245,158,11,.14); border-color: rgba(245,158,11,.24); }
+    .bad { color: #ffd4d4; background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.24); }
+    .info { color: #d7f5ff; background: rgba(0,200,255,.12); border-color: rgba(0,200,255,.2); }
+    .table-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .empty { color: var(--muted); padding: 24px; text-align: center; }
+    .modal-overlay { position: fixed; inset: 0; display: none; place-items: center; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); z-index: 20; padding: 20px; }
+    .modal { width: min(560px, 100%); padding: 24px; }
+    .modal h3 { margin: 0 0 16px; font-size: 22px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 1180px) { .hero, .analytics-grid { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 860px) { .sidebar { position: static; width: 100%; } .content { margin-left: 0; padding: 18px; } #app { display: block; } .kpi-grid, .form-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
-
 <body>
-
-  <!-- Login Screen -->
-  <div id="loginScreen" class="fade-in">
-    <h1>⚡ FBLink VPN</h1>
-    <p>Панель управления администратора</p>
+  <section id="loginScreen" class="login-screen">
     <div class="login-card glass">
-      <div id="loginError" class="error-msg"></div>
-      <div class="field">
-        <label>Email администратора</label>
-        <input type="email" id="loginEmail" placeholder="admin@fblink.com" autocomplete="username">
+      <div class="brand">
+        <img src="./assets/FBLink.svg" alt="FBLink">
+        <div>
+          <div class="brand-title">FBLink <span class="accent">Admin</span></div>
+          <div class="subtitle">Панель управления сетью, подписками и платёжной аналитикой</div>
+        </div>
       </div>
-      <div class="field">
-        <label>Пароль</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <button class="btn btn-primary btn-full" onclick="doLogin()" style="margin-top:10px">
-        Войти
-      </button>
+      <div id="loginError" class="error"></div>
+      <div class="field"><label>Email администратора</label><input type="email" id="loginEmail" placeholder="admin@fblink.com"></div>
+      <div class="field"><label>Пароль</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Войти в панель</button>
     </div>
-  </div>
+  </section>
 
-  <!-- Main App -->
   <div id="app">
     <aside class="sidebar">
-      <div class="logo">FBLink <span>VPN</span></div>
-      <div class="nav-item active" onclick="showPage('dashboard')">📊 Дашборд</div>
-      <div class="nav-item" onclick="showPage('users')">👥 Пользователи</div>
-      <div class="nav-item" onclick="showPage('servers')">🖥️ Серверы</div>
-      <div class="nav-item" onclick="showPage('payments')">💳 Платежи</div>
-      <div style="flex:1"></div>
-      <div class="nav-item" onclick="logout()" style="margin-top:auto">🚪 Выйти</div>
+      <div class="brand-card">
+        <div class="row">
+          <img src="./assets/FBLink.svg" alt="FBLink">
+          <div><strong>FBLink VPN</strong><span>Операционный центр продукта</span></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="active" onclick="showPage('dashboard', this)">Обзор и аналитика</button>
+        <button onclick="showPage('users', this)">Пользователи</button>
+        <button onclick="showPage('servers', this)">Серверы</button>
+        <button onclick="showPage('payments', this)">Платежи</button>
+      </div>
+      <div class="sidebar-footer">Панель использует фирменную палитру и SVG-ассеты из VPN-клиента.</div>
+      <button class="btn btn-secondary" onclick="logout()">Выйти</button>
     </aside>
 
     <main class="content">
-      <!-- Dashboard -->
-      <div id="page-dashboard" class="page active">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
-          <h1 style="font-size:32px;font-weight:700;letter-spacing:-0.5px">Обзор</h1>
-          <button class="btn btn-primary" id="backupBtn" onclick="triggerBackup()" style="background:rgba(108,92,231,0.2);border:1px solid rgba(108,92,231,0.4);color:#a29bfe;box-shadow:none;">
-            💾 Отправить бэкап сейчас
-          </button>
-        </div>
-        <div id="backupStatus" style="display:none;margin-bottom:16px;"></div>
-        <div class="stats-grid">
-          <div class="stat-card glass">
-            <div class="label">Всего пользователей</div>
-            <div class="value accent" id="stat-users">—</div>
+      <section id="page-dashboard" class="page">
+        <div class="hero">
+          <div class="hero-card glass">
+            <h1 class="hero-title">Контроль продукта, выручки и сети</h1>
+            <div class="hero-subtitle">Единый дашборд по росту аудитории, статусам подписок, выручке и загрузке регионов.</div>
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="refreshAll()">Обновить всё</button>
+              <button class="btn btn-secondary" onclick="triggerBackup()">Отправить бэкап</button>
+            </div>
+            <div class="hero-visual">
+              <div class="hero-shield glass"><img src="./assets/shield-tick.svg" alt="" style="width:100%;height:100%"></div>
+              <div class="hero-bars"><span style="height:52%"></span><span style="height:76%"></span><span style="height:63%"></span><span style="height:88%"></span></div>
+            </div>
           </div>
-          <div class="stat-card glass">
-            <div class="label">Активные подписки</div>
-            <div class="value" id="stat-subs">—</div>
-          </div>
-          <div class="stat-card glass">
-            <div class="label">Активные ключи VPN</div>
-            <div class="value" id="stat-keys">—</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Users -->
-      <div id="page-users" class="page">
-        <div class="section-header">
-          <h2>Пользователи</h2>
-          <button class="btn btn-primary" onclick="loadUsers()">
-            <span style="font-size: 18px;">⟳</span> Обновить данные
-          </button>
-        </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Email</th>
-                <th>Роль</th>
-                <th>Тариф</th>
-                <th>Статус</th>
-                <th>Зарегистрирован</th>
-                <th>Действия</th>
-              </tr>
-            </thead>
-            <tbody id="users-tbody">
-              <tr>
-                <td colspan="7" class="empty-state">Загрузка данных пользователей...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Servers -->
-      <div id="page-servers" class="page">
-        <div class="section-header">
-          <h2>Кластер серверов</h2>
-          <div style="display: flex; gap: 12px;">
-            <button class="btn btn-primary" onclick="loadServers()">
-              <span style="font-size: 18px;">⟳</span> Обновить список
-            </button>
-            <button class="btn btn-primary"
-              style="background: var(--success); box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);"
-              onclick="openAddServerModal()">
-              + Добавить сервер
-            </button>
+          <div class="panel glass">
+            <h3>Операционные сигналы</h3>
+            <p>Быстрый срез сервиса в реальном времени.</p>
+            <div class="metric-list">
+              <div class="metric-row"><div class="name">Конверсия</div><div class="track"><div id="conversionBar" class="fill" style="width:0%"></div></div><div id="conversionValue" class="value">0%</div></div>
+              <div class="metric-row"><div class="name">Автопродление</div><div class="track"><div id="autoRenewBar" class="fill" style="width:0%"></div></div><div id="autoRenewValue" class="value">0%</div></div>
+              <div class="metric-row"><div class="name">Активные серверы</div><div class="track"><div id="serverActivityBar" class="fill" style="width:0%"></div></div><div id="serverActivityValue" class="value">0/0</div></div>
+            </div>
           </div>
         </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Название</th>
-                <th>Регион</th>
-                <th>Host IP</th>
-                <th>Endpoint</th>
-                <th>Пиры</th>
-                <th>Статус</th>
-                <th>Действия</th>
-              </tr>
-            </thead>
-            <tbody id="servers-tbody">
-              <tr>
-                <td colspan="7" class="empty-state">Загрузка серверов...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      <!-- Payments -->
-      <div id="page-payments" class="page">
-        <div class="section-header">
-          <h2>История платежей</h2>
-          <button class="btn btn-primary" onclick="loadPayments()">
-            <span style="font-size: 18px;">⟳</span> Синхронизировать
-          </button>
+        <div class="kpi-grid">
+          <div class="kpi-card glass"><img class="icon" src="./assets/monitor.svg" alt=""><div class="label">Пользователи</div><div id="statUsers" class="value">—</div><div class="hint">Все аккаунты</div></div>
+          <div class="kpi-card glass"><img class="icon" src="./assets/shield-tick.svg" alt=""><div class="label">Активные подписки</div><div id="statSubs" class="value">—</div><div class="hint">Текущие планы</div></div>
+          <div class="kpi-card glass"><img class="icon" src="./assets/server.svg" alt=""><div class="label">Активные ключи</div><div id="statKeys" class="value">—</div><div class="hint">Не отозванные</div></div>
+          <div class="kpi-card glass"><img class="icon" src="./assets/gauge.svg" alt=""><div class="label">Выручка за месяц</div><div id="statRevenue" class="value">—</div><div class="hint">Успешные платежи</div></div>
         </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>ID Транзакции</th>
-                <th>Email пользователя</th>
-                <th>Сумма</th>
-                <th>Тариф</th>
-                <th>Статус</th>
-                <th>Дата</th>
-                <th>Действия</th>
-              </tr>
-            </thead>
-            <tbody id="payments-tbody">
-              <tr>
-                <td colspan="7" class="empty-state">Загрузка транзакций...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-  </div>
-  </main>
 
-  <div id="addServerModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card glass fade-in" style="max-width:520px;">
-      <h3>🖥️ Добавить VPN-сервер</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="field">
-          <label>Название сервера</label>
-          <input type="text" id="addServerName" placeholder="EU-Frankfurt-1">
+        <div class="analytics-grid">
+          <div class="panel glass"><h3>Рост пользователей за 7 дней</h3><p>Новые регистрации по дням.</p><div id="usersChart" class="chart"></div></div>
+          <div class="panel glass"><h3>Выручка по дням</h3><p>Успешные оплаты за последние 7 дней.</p><div id="revenueChart" class="chart"></div></div>
+          <div class="panel glass"><h3>Структура подписок</h3><p>Планы и статусы.</p><div id="planBreakdown" class="metric-list"></div><div style="height:14px"></div><div id="statusBreakdown" class="metric-list"></div></div>
         </div>
-        <div class="field">
-          <label>🌍 Регион (отображается в клиенте)</label>
-          <input type="text" id="addServerRegion" placeholder="Германия">
+
+        <div class="analytics-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="panel glass"><h3>Топ регионов</h3><p>Основная активная нагрузка по регионам.</p><div id="regionsList" class="metric-list"></div></div>
+          <div class="panel glass"><h3>Загрузка серверов</h3><p>Сортировка по максимальной утилизации пиров.</p><div id="serverLoadList" class="metric-list"></div></div>
         </div>
-        <div class="field">
-          <label>🏳️ Код страны (ISO, напр. DE, RU, US)</label>
-          <input type="text" id="addServerCountryCode" placeholder="DE" maxlength="2" style="text-transform:uppercase;">
-        </div>
-        <div class="field">
-          <label>Host IP (для SSH)</label>
-          <input type="text" id="addServerHost" placeholder="192.168.1.1">
-        </div>
-        <div class="field">
-          <label>Endpoint (IP:порт для клиентов)</label>
-          <input type="text" id="addServerEndpoint" placeholder="1.2.3.4:51820">
-        </div>
-        <div class="field">
-          <label>Root SSH Пароль</label>
-          <input type="password" id="addServerPassword" placeholder="••••••••">
-        </div>
-        <div class="field">
-          <label>AWG Порт</label>
-          <input type="number" id="addServerAwgPort" placeholder="51820" value="51820">
-        </div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:8px 0 16px;">⚠️ Регион отображается в клиентском приложении как
-        название сервера (например: «🇩🇪 Германия»)</p>
-      <div style="display: flex; gap: 12px; margin-top: 8px;">
-        <button class="btn btn-primary btn-full" onclick="addServer()">Добавить сервер</button>
-        <button class="btn btn-danger btn-full" onclick="closeAddServerModal()">Отмена</button>
-      </div>
-    </div>
-  </div>
+      </section>
+
+      <section id="page-users" class="page hidden"><div class="section-head"><h2>Пользователи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadUsers()">Обновить</button></div></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Роль</th><th>Тариф</th><th>Статус</th><th>Истекает</th><th>Действия</th></tr></thead><tbody id="usersBody"><tr><td colspan="7" class="empty">Загрузка пользователей...</td></tr></tbody></table></div></section>
+      <section id="page-servers" class="page hidden"><div class="section-head"><h2>Серверы</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadServers()">Обновить</button><button class="btn btn-primary" onclick="openAddServerModal()">Добавить сервер</button></div></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Сервер</th><th>Регион</th><th>Endpoint</th><th>Ключи</th><th>Лимит</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="serversBody"><tr><td colspan="8" class="empty">Загрузка серверов...</td></tr></tbody></table></div></section>
+      <section id="page-payments" class="page hidden"><div class="section-head"><h2>Платежи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadPayments()">Обновить</button></div></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Сумма</th><th>План</th><th>Статус</th><th>Создан</th><th>Действия</th></tr></thead><tbody id="paymentsBody"><tr><td colspan="7" class="empty">Загрузка платежей...</td></tr></tbody></table></div></section>
+    </main>
   </div>
 
-  <div id="editServerModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card glass fade-in" style="max-width:520px;">
-      <h3>✏️ Редактировать сервер</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="field">
-          <label>Название сервера</label>
-          <input type="text" id="editServerName" placeholder="EU-Frankfurt-1">
-        </div>
-        <div class="field">
-          <label>🌍 Регион</label>
-          <input type="text" id="editServerRegion" placeholder="Германия">
-        </div>
-        <div class="field">
-          <label>🏳️ Код страны (ISO, напр. DE)</label>
-          <input type="text" id="editServerCountryCode" placeholder="DE" maxlength="2" style="text-transform:uppercase;">
-        </div>
-        <div class="field">
-          <label>Endpoint (IP:порт для клиентов)</label>
-          <input type="text" id="editServerEndpoint" placeholder="1.2.3.4:51820">
-        </div>
-        <div class="field">
-          <label>Макс. пиров</label>
-          <input type="number" id="editServerMaxPeers" placeholder="100">
-        </div>
-        <div class="field">
-          <label>AWG Порт</label>
-          <input type="number" id="editServerAwgPort" placeholder="51820">
-        </div>
-        <div class="field" style="grid-column:1/-1;">
-          <label>SSH Пароль (оставьте пустым чтобы не менять)</label>
-          <input type="password" id="editServerPassword" placeholder="••••••••">
-        </div>
+  <div id="serverModalWrap" class="modal-overlay">
+    <div class="modal glass">
+      <h3 id="serverModalTitle">Добавить сервер</h3>
+      <div class="form-grid">
+        <div class="field"><label>Название</label><input id="serverName" type="text" placeholder="FBLink EU-01"></div>
+        <div class="field"><label>Регион</label><input id="serverRegion" type="text" placeholder="Амстердам"></div>
+        <div class="field"><label>Код страны</label><input id="serverCountryCode" type="text" maxlength="2" placeholder="NL"></div>
+        <div class="field"><label>Host для SSH</label><input id="serverHost" type="text" placeholder="1.2.3.4"></div>
+        <div class="field"><label>Endpoint</label><input id="serverEndpoint" type="text" placeholder="1.2.3.4:51820"></div>
+        <div class="field"><label>Макс. пиров</label><input id="serverMaxPeers" type="number" placeholder="100"></div>
+        <div class="field"><label>AWG порт</label><input id="serverAwgPort" type="number" placeholder="51820"></div>
+        <div class="field"><label>SSH пароль</label><input id="serverPassword" type="password" placeholder="••••••••"></div>
       </div>
-      <div style="display: flex; gap: 12px; margin-top: 16px;">
-        <button class="btn btn-primary btn-full" onclick="saveServer()">Сохранить</button>
-        <button class="btn btn-danger btn-full" onclick="closeEditServerModal()">Отмена</button>
-      </div>
+      <div class="btn-row" style="margin-top:14px"><button id="serverSaveButton" class="btn btn-primary" onclick="submitServerModal()">Сохранить</button><button class="btn btn-secondary" onclick="closeServerModal()">Отмена</button></div>
     </div>
   </div>
 
   <script>
-    const API = '';  // same origin or set to 'https://yourvpn.app'
+    const API = '';
     let token = localStorage.getItem('fblink_admin_token') || '';
+    let editingServerId = null;
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
+    }
+
+    function fmtDate(value) {
+      if (!value) return '—';
+      return new Date(value).toLocaleString('ru-RU');
+    }
+
+    function fmtMoney(value) {
+      return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(Number(value || 0));
+    }
+
+    function badge(text, kind = 'info') {
+      return `<span class="badge ${kind}">${escapeHtml(text)}</span>`;
+    }
 
     function api(path, opts = {}) {
       return fetch(API + path, {
         ...opts,
-        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', ...(opts.headers || {}) }
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json',
+          ...(opts.headers || {})
+        }
       });
     }
 
     async function doLogin() {
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
-      const errEl = document.getElementById('loginError');
-      errEl.style.display = 'none';
+      const err = document.getElementById('loginError');
+      err.style.display = 'none';
 
       const res = await fetch(API + '/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await res.json();
-      if (!res.ok) { errEl.textContent = data.error || 'Ошибка авторизации'; errEl.style.display = 'block'; return; }
+      const data = await res.json().catch(() => ({}));
 
-      token = data.access_token;
-
-      // Проверяем admin доступ через защищённый endpoint
-      const checkRes = await api('/api/v1/admin/stats');
-      if (checkRes.status === 403 || checkRes.status === 401) {
-        token = '';
-        errEl.textContent = 'Доступ запрещен: требуются права администратора';
-        errEl.style.display = 'block';
+      if (!res.ok || !data.access_token) {
+        err.textContent = data.error || 'Ошибка авторизации';
+        err.style.display = 'block';
         return;
       }
 
+      token = data.access_token;
       localStorage.setItem('fblink_admin_token', token);
-      showApp();
+
+      const check = await api('/api/v1/admin/stats');
+      if (!check.ok) {
+        token = '';
+        localStorage.removeItem('fblink_admin_token');
+        err.textContent = 'Доступ запрещён: нужны права администратора';
+        err.style.display = 'block';
+        return;
+      }
+
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('app').style.display = 'block';
+      refreshAll();
     }
 
     function logout() {
-      localStorage.removeItem('fblink_admin_token');
       token = '';
-      document.getElementById('app').style.display = 'none';
-      document.getElementById('loginScreen').style.display = 'flex';
+      localStorage.removeItem('fblink_admin_token');
+      location.reload();
     }
 
-    function showApp() {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('app').style.display = 'flex';
-      loadStats();
+    function showPage(page, button) {
+      document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`page-${page}`).classList.remove('hidden');
+      document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+      if (button) button.classList.add('active');
     }
 
-    function showPage(name) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById('page-' + name).classList.add('active');
-      event.currentTarget.classList.add('active');
-      if (name === 'users') loadUsers();
-      if (name === 'servers') loadServers();
-      if (name === 'payments') loadPayments();
+    function setBar(id, value) {
+      document.getElementById(id).style.width = `${Math.max(0, Math.min(100, Number(value || 0)))}%`;
+    }
+
+    function renderSeries(containerId, items, kind = 'users') {
+      const el = document.getElementById(containerId);
+      if (!items || !items.length) {
+        el.innerHTML = '<div class="empty">Нет данных</div>';
+        return;
+      }
+      const max = Math.max(...items.map(x => Number(x.value || 0)), 1);
+      el.innerHTML = items.map(item => {
+        const height = Math.max(8, (Number(item.value || 0) / max) * 150);
+        return `
+          <div class="chart-col">
+            <div class="chart-bar-wrap">
+              <div class="chart-bar ${kind === 'revenue' ? 'revenue' : ''}" style="height:${height}px"></div>
+            </div>
+            <div class="chart-value">${kind === 'revenue' ? fmtMoney(item.value) : item.value}</div>
+            <div class="chart-label">${escapeHtml(item.label)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMetricBreakdown(containerId, data, labels = {}) {
+      const entries = Object.entries(data || {});
+      const max = Math.max(...entries.map(([, v]) => Number(v || 0)), 1);
+      document.getElementById(containerId).innerHTML = entries.map(([key, value]) => `
+        <div class="metric-row">
+          <div class="name">${escapeHtml(labels[key] || key)}</div>
+          <div class="track"><div class="fill" style="width:${(Number(value || 0) / max) * 100}%"></div></div>
+          <div class="value">${escapeHtml(String(value))}</div>
+        </div>
+      `).join('') || '<div class="empty">Нет данных</div>';
+    }
+
+    function renderRegions(items) {
+      const max = Math.max(...(items || []).map(x => Number(x.peers || 0)), 1);
+      document.getElementById('regionsList').innerHTML = (items || []).map(item => `
+        <div class="metric-row">
+          <div class="name">${escapeHtml(item.region || 'Без региона')}</div>
+          <div class="track"><div class="fill" style="width:${(Number(item.peers || 0) / max) * 100}%"></div></div>
+          <div class="value">${item.peers}</div>
+        </div>
+      `).join('') || '<div class="empty">Нет данных</div>';
+    }
+
+    function renderServerLoad(items) {
+      document.getElementById('serverLoadList').innerHTML = (items || []).slice(0, 6).map(item => `
+        <div class="metric-row" style="grid-template-columns:1fr 1fr 54px;">
+          <div class="name">${escapeHtml(item.region || item.name)}${item.country_code ? ` (${escapeHtml(item.country_code)})` : ''}</div>
+          <div class="track"><div class="fill" style="width:${Math.min(100, Number(item.utilization || 0))}%"></div></div>
+          <div class="value">${Math.round(Number(item.utilization || 0))}%</div>
+        </div>
+      `).join('') || '<div class="empty">Нет данных</div>';
     }
 
     async function loadStats() {
       const res = await api('/api/v1/admin/stats');
-      if (!res.ok) return;
-      const d = await res.json();
-      document.getElementById('stat-users').textContent = d.total_users;
-      document.getElementById('stat-subs').textContent = d.active_subscriptions;
-      document.getElementById('stat-keys').textContent = d.active_vpn_keys;
+      if (!res.ok) throw new Error('Не удалось загрузить статистику');
+      const stats = await res.json();
+
+      document.getElementById('statUsers').textContent = stats.total_users ?? 0;
+      document.getElementById('statSubs').textContent = stats.active_subscriptions ?? 0;
+      document.getElementById('statKeys').textContent = stats.active_vpn_keys ?? 0;
+      document.getElementById('statRevenue').textContent = fmtMoney(stats.monthly_revenue);
+
+      setBar('conversionBar', stats.conversion_rate);
+      setBar('autoRenewBar', stats.auto_renew_rate);
+      setBar('serverActivityBar', stats.total_servers ? ((stats.active_servers / stats.total_servers) * 100) : 0);
+
+      document.getElementById('conversionValue').textContent = `${Math.round(stats.conversion_rate || 0)}%`;
+      document.getElementById('autoRenewValue').textContent = `${Math.round(stats.auto_renew_rate || 0)}%`;
+      document.getElementById('serverActivityValue').textContent = `${stats.active_servers || 0}/${stats.total_servers || 0}`;
+
+      renderSeries('usersChart', stats.users_series, 'users');
+      renderSeries('revenueChart', stats.revenue_series, 'revenue');
+      renderMetricBreakdown('planBreakdown', stats.subscriptions_by_plan, { free: 'План Free', trial: 'Пробный', basic: 'Премиум' });
+      renderMetricBreakdown('statusBreakdown', stats.subscriptions_by_status, { active: 'Активные', expired: 'Истекшие', cancelled: 'Отменённые' });
+      renderRegions(stats.top_regions || []);
+      renderServerLoad(stats.server_load || []);
     }
 
     async function loadUsers() {
-      const tbody = document.getElementById('users-tbody');
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Загрузка...</td></tr>';
       const res = await api('/api/v1/admin/users');
-      if (!res.ok) return;
-      const d = await res.json();
-      if (!d.users.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет пользователей</td></tr>'; return; }
-      tbody.innerHTML = d.users.map(u => `
-    <tr>
-      <td>${u.id}</td>
-      <td>${u.email}</td>
-      <td><span class="badge ${u.role === 'admin' ? 'badge-info' : 'badge-success'}">${u.role}</span></td>
-      <td>${u.subscription?.plan || '—'}</td>
-      <td><span class="badge ${u.subscription?.status === 'active' ? 'badge-success' : 'badge-danger'}">${u.subscription?.status === 'active' ? 'Активна' : (u.subscription?.status || 'Нет')}</span></td>
-      <td>${new Date(u.created_at).toLocaleDateString('ru')}</td>
-      <td>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="upgradeUser('${u.id}')">⭐ Выдать Basic</button>
-          ${u.role === 'admin'
-            ? `<button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="setUserRole('${u.id}', 'user')">👤 Снять админа</button>`
-            : `<button class="btn" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(108,92,231,0.15); border:1px solid rgba(108,92,231,0.4); color:#a29bfe;" onclick="setUserRole('${u.id}', 'admin')">🛡️ Сделать админом</button>`
-          }
-          <button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="revokeUserKeys('${u.id}')">Сбросить ключи</button>
-          <button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(255, 71, 87, 0.2); border:1px solid #ff4757; color:#ff4757;" onclick="deleteUser('${u.id}')">Удалить</button>
-        </div>
-      </td>
-    </tr>`).join('');
+      const data = await res.json();
+      const body = document.getElementById('usersBody');
+      if (!data.users?.length) {
+        body.innerHTML = '<tr><td colspan="7" class="empty">Пользователей пока нет</td></tr>';
+        return;
+      }
+      body.innerHTML = data.users.map(user => {
+        const sub = user.subscription || {};
+        const statusKind = sub.status === 'active' ? 'ok' : (sub.status === 'expired' ? 'warn' : 'info');
+        return `
+          <tr>
+            <td>${user.id}</td>
+            <td>${escapeHtml(user.email)}</td>
+            <td>${badge(user.role === 'admin' ? 'Администратор' : 'Пользователь', user.role === 'admin' ? 'info' : 'ok')}</td>
+            <td>${escapeHtml(sub.plan || 'none')}</td>
+            <td>${badge(sub.status || '—', statusKind)}</td>
+            <td>${fmtDate(sub.expires_at)}</td>
+            <td><div class="table-actions">
+              <button class="btn btn-success" onclick="upgradeUser(${user.id})">Выдать премиум</button>
+              <button class="btn btn-secondary" onclick="toggleUserRole(${user.id}, '${user.role}')">${user.role === 'admin' ? 'Сделать user' : 'Сделать admin'}</button>
+              <button class="btn btn-secondary" onclick="revokeUserKeys(${user.id})">Отозвать ключи</button>
+              <button class="btn btn-danger" onclick="deleteUser(${user.id})">Удалить</button>
+            </div></td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    let _serversCache = {};
-
     async function loadServers() {
-      const tbody = document.getElementById('servers-tbody');
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Загрузка...</td></tr>';
       const res = await api('/api/v1/admin/servers');
-      if (!res.ok) return;
-      const d = await res.json();
-      if (!d.servers.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Серверов нет</td></tr>'; return; }
-      _serversCache = {};
-      d.servers.forEach(s => { _serversCache[s.id] = s; });
-      tbody.innerHTML = d.servers.map(s => `
-    <tr>
-      <td>${s.id}</td>
-      <td>${s.name}</td>
-      <td><span class="badge badge-info" style="font-size:14px;">${s.country_code ? `<img src="https://flagcdn.com/16x12/${s.country_code.toLowerCase()}.png" style="vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">` : ''}${s.region || '—'}</span></td>
-      <td>${s.host}</td>
-      <td>${s.endpoint || s.host}</td>
-      <td>${s.active_keys || 0} / ${s.max_peers}</td>
-      <td><span class="badge ${s.active ? 'badge-success' : 'badge-danger'}">${s.active ? 'Онлайн' : 'Офлайн'}</span></td>
-      <td>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(0,200,255,0.15); border:1px solid #00c8ff; color:#00c8ff;" onclick="openEditServerModal(${s.id})">✏️ Изменить</button>
-          <button class="btn ${s.active ? 'btn-danger' : 'btn-primary'}" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="toggleServer('${s.id}')">
-            ${s.active ? 'Отключить' : 'Включить'}
-          </button>
-          <button class="btn btn-danger" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none; background:rgba(255, 71, 87, 0.2); border:1px solid #ff4757; color:#ff4757;" onclick="deleteServer('${s.id}')">Удалить</button>
-        </div>
-      </td>
-    </tr>`).join('');
+      const data = await res.json();
+      const body = document.getElementById('serversBody');
+      if (!data.servers?.length) {
+        body.innerHTML = '<tr><td colspan="8" class="empty">Серверов пока нет</td></tr>';
+        return;
+      }
+      body.innerHTML = data.servers.map(server => `
+        <tr>
+          <td>${server.id}</td>
+          <td>${escapeHtml(server.name)}</td>
+          <td>${escapeHtml(server.region || '—')} ${server.country_code ? badge(server.country_code, 'info') : ''}</td>
+          <td>${escapeHtml(server.endpoint || server.host || '—')}</td>
+          <td>${server.active_keys}</td>
+          <td>${server.max_peers}</td>
+          <td>${badge(server.active ? 'Активен' : 'Отключён', server.active ? 'ok' : 'warn')}</td>
+          <td><div class="table-actions">
+            <button class="btn btn-secondary" onclick='openEditServerModal(${JSON.stringify(server).replace(/'/g, "&apos;")})'>Редактировать</button>
+            <button class="btn btn-secondary" onclick="toggleServer(${server.id})">${server.active ? 'Выключить' : 'Включить'}</button>
+            <button class="btn btn-danger" onclick="deleteServer(${server.id})">Удалить</button>
+          </div></td>
+        </tr>
+      `).join('');
     }
 
     async function loadPayments() {
-      const tbody = document.getElementById('payments-tbody');
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Загрузка...</td></tr>';
       const res = await api('/api/v1/admin/payments');
-      if (!res.ok) return;
-      const d = await res.json();
-      if (!d.payments.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет платежей</td></tr>'; return; }
-      tbody.innerHTML = d.payments.map(p => `
-    <tr>
-      <td>${p.id}</td>
-      <td>${p.user_email}</td>
-      <td>${p.amount} ₽</td>
-      <td>${p.plan}</td>
-      <td><span class="badge ${p.status === 'succeeded' ? 'badge-success' : p.status === 'pending' ? 'badge-info' : 'badge-danger'}">${p.status === 'succeeded' ? 'Успешно' : p.status === 'pending' ? 'Ожидание' : 'Ошибка'}</span></td>
-      <td>${new Date(p.created_at).toLocaleDateString('ru')}</td>
-      <td>
-        ${p.status !== 'succeeded' ? `<button class="btn btn-primary" style="padding:4px 8px; font-size:12px; height:auto; box-shadow:none;" onclick="approvePayment('${p.id}')">Подтвердить</button>` : '—'}
-      </td>
-    </tr>`).join('');
-    }
-
-    // Action Functions
-    async function upgradeUser(id) {
-      if (!confirm('Выдать Basic на 1 месяц этому пользователю?')) return;
-      await api('/api/v1/admin/users/' + id + '/upgrade', { method: 'POST' });
-      loadUsers();
+      const data = await res.json();
+      const body = document.getElementById('paymentsBody');
+      if (!data.payments?.length) {
+        body.innerHTML = '<tr><td colspan="7" class="empty">Платежей пока нет</td></tr>';
+        return;
+      }
+      body.innerHTML = data.payments.map(payment => `
+        <tr>
+          <td>${payment.id}</td>
+          <td>${escapeHtml(payment.user_email || '—')}</td>
+          <td>${fmtMoney(payment.amount)}</td>
+          <td>${escapeHtml(payment.plan)}</td>
+          <td>${badge(payment.status, payment.status === 'succeeded' ? 'ok' : (payment.status === 'pending' ? 'warn' : 'bad'))}</td>
+          <td>${fmtDate(payment.created_at)}</td>
+          <td>${payment.status === 'pending' ? `<button class="btn btn-success" onclick="approvePayment(${payment.id})">Подтвердить вручную</button>` : ''}</td>
+        </tr>
+      `).join('');
     }
 
     async function triggerBackup() {
-      const btn = document.getElementById('backupBtn');
-      const statusEl = document.getElementById('backupStatus');
-      btn.disabled = true;
-      btn.textContent = '⏳ Отправка...';
-      statusEl.style.display = 'none';
-
       const res = await api('/api/v1/admin/backup/send', { method: 'POST' });
-      const d = await res.json();
-
-      btn.disabled = false;
-      btn.textContent = '💾 Отправить бэкап сейчас';
-
-      if (res.ok) {
-        statusEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;background:rgba(46,213,115,0.1);border:1px solid rgba(46,213,115,0.3);color:#2ed573;font-size:14px;margin-bottom:16px;';
-        statusEl.textContent = '✓ ' + d.message;
-      } else {
-        statusEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.3);color:#ff4757;font-size:14px;margin-bottom:16px;';
-        statusEl.textContent = '✗ Ошибка: ' + (d.error || 'Unknown error');
-      }
+      const data = await res.json().catch(() => ({}));
+      alert(data.message || data.error || 'Операция выполнена');
     }
 
-    async function setUserRole(id, role) {
-      const label = role === 'admin' ? 'администратора' : 'обычного пользователя';
-      if (!confirm(`Назначить этому пользователю роль ${label}?`)) return;
-      const res = await api('/api/v1/admin/users/' + id + '/set-role', {
-        method: 'POST',
-        body: JSON.stringify({ role })
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        alert('Ошибка: ' + (d.error || 'Unknown error'));
-        return;
-      }
-      loadUsers();
+    async function upgradeUser(id) {
+      if (!confirm('Выдать пользователю премиум-подписку?')) return;
+      await api(`/api/v1/admin/users/${id}/upgrade`, { method: 'POST' });
+      refreshAll();
     }
 
     async function revokeUserKeys(id) {
-      if (!confirm('Отозвать все ключи VPN у этого пользователя? Это отключит его устройства.')) return;
-      await api('/api/v1/admin/users/' + id + '/revoke', { method: 'POST' });
+      if (!confirm('Отозвать все активные VPN-ключи пользователя?')) return;
+      await api(`/api/v1/admin/users/${id}/revoke`, { method: 'POST' });
+      refreshAll();
+    }
+
+    async function toggleUserRole(id, role) {
+      const nextRole = role === 'admin' ? 'user' : 'admin';
+      if (!confirm(`Изменить роль пользователя на ${nextRole}?`)) return;
+      const res = await api(`/api/v1/admin/users/${id}/set-role`, { method: 'POST', body: JSON.stringify({ role: nextRole }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return alert(data.error || 'Не удалось изменить роль');
       loadUsers();
     }
 
     async function deleteUser(id) {
-      if (!confirm('ВНИМАНИЕ! Полностью удалить пользователя, его ключи с серверов, подписки и платежи? Это действие необратимо.')) return;
-      await api('/api/v1/admin/users/' + id, { method: 'DELETE' });
-      loadUsers();
-    }
-
-    async function toggleServer(id) {
-      if (!confirm('Изменить статус сервера? Отключенный сервер не принимает новые подключения.')) return;
-      await api('/api/v1/admin/servers/' + id + '/toggle', { method: 'POST' });
-      loadServers();
-    }
-
-    async function deleteServer(id) {
-      if (!confirm('ВНИМАНИЕ! Полностью удалить сервер и сбросить все ключи пользователей подключённых к нему? Это действие необратимо.')) return;
-      await api('/api/v1/admin/servers/' + id, { method: 'DELETE' });
-      loadServers();
+      if (!confirm('Удалить пользователя и все связанные данные безвозвратно?')) return;
+      await api(`/api/v1/admin/users/${id}`, { method: 'DELETE' });
+      refreshAll();
     }
 
     async function approvePayment(id) {
-      if (!confirm('Подтвердить этот платеж и выдать Basic вручную?')) return;
-      await api('/api/v1/admin/payments/' + id + '/approve', { method: 'POST' });
-      loadPayments();
-      // wait a moment so payment and subscription data is updated before reloading users
-      setTimeout(() => loadUsers(), 500);
+      if (!confirm('Подтвердить платёж вручную и выдать подписку?')) return;
+      await api(`/api/v1/admin/payments/${id}/approve`, { method: 'POST' });
+      refreshAll();
     }
-
-    // Auto-login if token exists
-    if (token) {
-      api('/api/v1/admin/stats').then(r => {
-        if (r.ok) showApp();
-        else { localStorage.removeItem('fblink_admin_token'); token = ''; }
-      });
-    }
-
-    document.getElementById('loginPassword').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
 
     function openAddServerModal() {
-      document.getElementById('addServerModal').style.display = 'flex';
-    }
-
-    function closeAddServerModal() {
-      document.getElementById('addServerModal').style.display = 'none';
-      document.getElementById('addServerName').value = '';
-      document.getElementById('addServerRegion').value = '';
-      document.getElementById('addServerCountryCode').value = '';
-      document.getElementById('addServerHost').value = '';
-      document.getElementById('addServerEndpoint').value = '';
-      document.getElementById('addServerPassword').value = '';
-      document.getElementById('addServerAwgPort').value = '51820';
-    }
-
-    async function addServer() {
-      const name = document.getElementById('addServerName').value.trim();
-      const region = document.getElementById('addServerRegion').value.trim();
-      const host = document.getElementById('addServerHost').value.trim();
-      const endpoint = document.getElementById('addServerEndpoint').value.trim();
-      const rootPassword = document.getElementById('addServerPassword').value;
-      const awgPort = parseInt(document.getElementById('addServerAwgPort').value) || 51820;
-
-      if (!name || !host) {
-        alert('Название и Host IP обязательны');
-        return;
-      }
-      if (!region) {
-        alert('Укажите регион — он отображается как название сервера в приложении!');
-        return;
-      }
-
-      const countryCode = document.getElementById('addServerCountryCode').value.trim().toUpperCase();
-      const body = { name, host, region, country_code: countryCode, root_password: rootPassword, awg_port: awgPort };
-      if (endpoint) body.endpoint = endpoint;
-
-      const res = await api('/api/v1/admin/servers', {
-        method: 'POST',
-        body: JSON.stringify(body)
-      });
-
-      if (res.ok) {
-        closeAddServerModal();
-        loadServers();
-      } else {
-        const d = await res.json();
-        alert('Ошибка добавления сервера: ' + (d.error || 'Unknown error'));
-      }
-    }
-
-    let editingServerId = null;
-
-    function openEditServerModal(id) {
-      const s = _serversCache[id];
-      if (!s) return;
-      editingServerId = id;
-      document.getElementById('editServerName').value = s.name || '';
-      document.getElementById('editServerRegion').value = s.region || '';
-      document.getElementById('editServerCountryCode').value = s.country_code || '';
-      document.getElementById('editServerEndpoint').value = s.endpoint || '';
-      document.getElementById('editServerMaxPeers').value = s.max_peers || 100;
-      document.getElementById('editServerAwgPort').value = s.awg_port || 51820;
-      document.getElementById('editServerPassword').value = '';
-      document.getElementById('editServerModal').style.display = 'flex';
-    }
-
-    function closeEditServerModal() {
       editingServerId = null;
-      document.getElementById('editServerModal').style.display = 'none';
+      document.getElementById('serverModalTitle').textContent = 'Добавить сервер';
+      document.getElementById('serverSaveButton').textContent = 'Добавить сервер';
+      ['serverName','serverRegion','serverCountryCode','serverHost','serverEndpoint','serverMaxPeers','serverAwgPort','serverPassword'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('serverModalWrap').style.display = 'grid';
     }
 
-    async function saveServer() {
-      if (!editingServerId) return;
-      const body = {
-        name: document.getElementById('editServerName').value.trim(),
-        region: document.getElementById('editServerRegion').value.trim(),
-        country_code: document.getElementById('editServerCountryCode').value.trim().toUpperCase(),
-        endpoint: document.getElementById('editServerEndpoint').value.trim(),
-        max_peers: parseInt(document.getElementById('editServerMaxPeers').value) || 0,
-        awg_port: parseInt(document.getElementById('editServerAwgPort').value) || 0,
-        ssh_password: document.getElementById('editServerPassword').value,
+    function openEditServerModal(server) {
+      editingServerId = server.id;
+      document.getElementById('serverModalTitle').textContent = 'Редактировать сервер';
+      document.getElementById('serverSaveButton').textContent = 'Сохранить изменения';
+      document.getElementById('serverName').value = server.name || '';
+      document.getElementById('serverRegion').value = server.region || '';
+      document.getElementById('serverCountryCode').value = server.country_code || '';
+      document.getElementById('serverHost').value = server.host || '';
+      document.getElementById('serverEndpoint').value = server.endpoint || '';
+      document.getElementById('serverMaxPeers').value = server.max_peers || '';
+      document.getElementById('serverAwgPort').value = server.awg_port || '';
+      document.getElementById('serverPassword').value = '';
+      document.getElementById('serverModalWrap').style.display = 'grid';
+    }
+
+    function closeServerModal() {
+      document.getElementById('serverModalWrap').style.display = 'none';
+    }
+
+    async function submitServerModal() {
+      const payload = {
+        name: document.getElementById('serverName').value.trim(),
+        region: document.getElementById('serverRegion').value.trim(),
+        country_code: document.getElementById('serverCountryCode').value.trim().toUpperCase(),
+        host: document.getElementById('serverHost').value.trim(),
+        endpoint: document.getElementById('serverEndpoint').value.trim(),
+        max_peers: Number(document.getElementById('serverMaxPeers').value || 0),
+        awg_port: Number(document.getElementById('serverAwgPort').value || 0),
+        root_password: document.getElementById('serverPassword').value,
+        ssh_password: document.getElementById('serverPassword').value
       };
-      const res = await api('/api/v1/admin/servers/' + editingServerId, {
-        method: 'PUT',
-        body: JSON.stringify(body)
-      });
-      if (res.ok) {
-        closeEditServerModal();
-        loadServers();
-      } else {
-        const d = await res.json();
-        alert('Ошибка: ' + (d.error || 'Unknown error'));
+      const url = editingServerId ? `/api/v1/admin/servers/${editingServerId}` : '/api/v1/admin/servers';
+      const method = editingServerId ? 'PUT' : 'POST';
+      const res = await api(url, { method, body: JSON.stringify(payload) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return alert(data.error || 'Не удалось сохранить сервер');
+      closeServerModal();
+      refreshAll();
+    }
+
+    async function toggleServer(id) {
+      await api(`/api/v1/admin/servers/${id}/toggle`, { method: 'POST' });
+      refreshAll();
+    }
+
+    async function deleteServer(id) {
+      if (!confirm('Удалить сервер и все связанные ключи?')) return;
+      await api(`/api/v1/admin/servers/${id}`, { method: 'DELETE' });
+      refreshAll();
+    }
+
+    async function refreshAll() {
+      try {
+        await Promise.all([loadStats(), loadUsers(), loadServers(), loadPayments()]);
+      } catch (err) {
+        console.error(err);
+        alert('Не удалось загрузить часть данных админ-панели');
       }
+    }
+
+    if (token) {
+      fetch(API + '/api/v1/admin/stats', { headers: { Authorization: 'Bearer ' + token } })
+        .then(res => {
+          if (!res.ok) throw new Error('unauthorized');
+          document.getElementById('loginScreen').classList.add('hidden');
+          document.getElementById('app').style.display = 'block';
+          refreshAll();
+        })
+        .catch(() => {
+          token = '';
+          localStorage.removeItem('fblink_admin_token');
+        });
     }
   </script>
 </body>
-
 </html>

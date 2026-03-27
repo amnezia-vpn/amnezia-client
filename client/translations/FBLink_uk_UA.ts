@@ -84,24 +84,36 @@
     <name>ApiConfigsController</name>
     <message>
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="515"/>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="732"/>
         <source>%1 installed successfully.</source>
         <translation type="unfinished">%1 встановлено успішно.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="638"/>
-        <source>Subscription restored successfully.</source>
+        <source>Подписка успешно восстановлена.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="732"/>
+        <source>%1 успешно установлен.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="793"/>
-        <source>API config reloaded</source>
-        <translation type="unfinished">Конфігурацію API перезавантажено</translation>
+        <source>Конфигурация API обновлена</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="797"/>
+        <source>Страна подключения успешно изменена на %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API config reloaded</source>
+        <translation type="obsolete">Конфігурацію API перезавантажено</translation>
+    </message>
+    <message>
         <source>Successfully changed the country of connection to %1</source>
-        <translation type="unfinished">Успішно змінено країну підключення на %1</translation>
+        <translation type="obsolete">Успішно змінено країну підключення на %1</translation>
     </message>
 </context>
 <context>
@@ -193,7 +205,7 @@
     </message>
     <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="59"/>
-        <source>Premium</source>
+        <source>Премиум</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -239,51 +251,83 @@
         <translation type="vanished">Неможливо створити конфігурацію</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="87"/>
         <source>Connecting...</source>
-        <translation>Підключення...</translation>
+        <translation type="vanished">Підключення...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
         <source>Connected</source>
-        <translation>Підключено</translation>
+        <translation type="vanished">Підключено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="116"/>
         <source>Preparing...</source>
-        <translation>Підготовка...</translation>
+        <translation type="vanished">Підготовка...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="138"/>
         <source>Settings updated successfully, reconnnection...</source>
-        <translation>Налаштування оновлено, підключення...</translation>
+        <translation type="vanished">Налаштування оновлено, підключення...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="141"/>
         <source>Settings updated successfully</source>
-        <translation>Налаштування оновлено</translation>
+        <translation type="vanished">Налаштування оновлено</translation>
     </message>
     <message>
         <source>The selected protocol is not supported on the current platform</source>
         <translation type="vanished">Вибраний протокол не підтримується на цьому пристрої</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="101"/>
         <source>Reconnecting...</source>
-        <translation>Перепідключення...</translation>
+        <translation type="vanished">Перепідключення...</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation type="vanished">Підключитись</translation>
+    </message>
+    <message>
+        <source>Disconnecting...</source>
+        <translation type="vanished">Відключаємось...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="70"/>
         <location filename="../ui/controllers/connectionController.cpp" line="106"/>
         <location filename="../ui/controllers/connectionController.cpp" line="121"/>
         <location filename="../ui/controllers/connectionController.cpp" line="127"/>
-        <source>Connect</source>
-        <translation>Підключитись</translation>
+        <source>Подключиться</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionController.cpp" line="87"/>
+        <source>Подключение...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
+        <source>Подключено</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionController.cpp" line="101"/>
+        <source>Переподключение...</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="111"/>
-        <source>Disconnecting...</source>
-        <translation>Відключаємось...</translation>
+        <source>Отключение...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionController.cpp" line="116"/>
+        <source>Подготовка...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionController.cpp" line="138"/>
+        <source>Настройки успешно обновлены, выполняется переподключение...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionController.cpp" line="141"/>
+        <source>Настройки успешно обновлены</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -361,21 +405,6 @@
 <context>
     <name>FBLinkController</name>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="49"/>
-        <source>Email and password cannot be empty</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="82"/>
-        <source>Invalid response format</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="87"/>
-        <source>Network Error: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/controllers/api/fblink_controller.cpp" line="115"/>
         <source>Ошибка регистрации</source>
         <translation type="unfinished"></translation>
@@ -417,9 +446,20 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="87"/>
         <location filename="../ui/controllers/api/fblink_controller.cpp" line="343"/>
         <location filename="../ui/controllers/api/fblink_controller.cpp" line="469"/>
         <source>Ошибка сети: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="49"/>
+        <source>Email и пароль не могут быть пустыми</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="82"/>
+        <source>Некорректный формат ответа сервера</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1007,11 +1047,6 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="56"/>
-        <source>Premium</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="61"/>
         <source>Безлимитный трафик</source>
         <translation type="unfinished"></translation>
@@ -1027,18 +1062,23 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="64"/>
-        <source>Kill Switch защита</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="65"/>
         <source>Быстрые серверы без логов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="56"/>
+        <source>Премиум</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="64"/>
+        <source>Защита Kill Switch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="132"/>
-        <source>FBLink VPN Premium</source>
+        <source>FBLink VPN Премиум</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1124,7 +1164,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="664"/>
-        <source>Premium подписка активна</source>
+        <source>Подписка «Премиум» активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1225,18 +1265,18 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete">Підключено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="102"/>
-        <source>Получить Premium</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="103"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="102"/>
+        <source>Получить Премиум</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="150"/>
-        <source>Premium</source>
+        <source>Премиум</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2509,7 +2549,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="131"/>
         <source>FBLink VPN — коммерческий VPN-сервис, созданный для безопасного и приватного доступа в интернет. Мы обеспечиваем шифрование трафика и скрытие вашего реального IP-адреса.
 
-Приложение создано на основе открытого проекта FBLink (fblink-vpn.org), распространяемого по лицензии GNU GPL v3.</source>
+Приложение создано на основе открытого проекта Amnezia (amnezia.org), распространяемого по лицензии GNU GPL v3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2539,8 +2579,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="297"/>
-        <source>🏛 Основано на FBLink (GNU GPL v3)
-Исходный код: github.com/fblink-vpn</source>
+        <source>🏛 Основано на Amnezia (GNU GPL v3)
+Исходный код: amnezia.org</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

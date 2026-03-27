@@ -99,7 +99,7 @@ PageType {
 
                     LabelTextType {
                         text: FBLinkController.isLoggedIn
-                            ? qsTr("Получить Premium")
+                            ? qsTr("Получить Премиум")
                             : qsTr("Войти")
                         font.pixelSize: 13
                         font.weight: 700
@@ -147,7 +147,7 @@ PageType {
                     }
 
                     LabelTextType {
-                        text: qsTr("Premium")
+                        text: qsTr("Премиум")
                         font.pixelSize: 13
                         font.weight: 700
                         color: "#10B981"
