@@ -354,10 +354,11 @@ endif()
 add_custom_command(
     TARGET ${PROJECT} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-    ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}
+    "${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}"
     $<TARGET_FILE_DIR:${PROJECT}>
     COMMAND_EXPAND_LISTS
 )
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}/" DESTINATION ".")
 
 if (WIN32)
     find_package(awg-windows REQUIRED)
@@ -384,3 +385,34 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         ${BLOBS}
         $<TARGET_FILE_DIR:${PROJECT}>
 )
+install(FILES ${BLOBS} DESTINATION ".")
+
+# install drivers
+if (WIN32)
+    find_package(tap-windows6 REQUIRED)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${TAP_WINDOWS6_BIN}"
+            "$<TARGET_FILE_DIR:${PROJECT}>/tap"
+    )
+    install(DIRECTORY "${TAP_WINDOWS6_BIN}/" DESTINATION "tap")
+
+    find_package(win-split-tunnel REQUIRED)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${WIN_SPLIT_TUNNEL_BIN}"
+            "$<TARGET_FILE_DIR:${PROJECT}>"
+    )
+    install(DIRECTORY "${WIN_SPLIT_TUNNEL_BIN}/" DESTINATION ".")
+endif()
+
+# install target
+install(TARGETS ${PROJECT} DESTINATION ".")
+install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}> DESTINATION ".")
+
+qt_generate_deploy_app_script(
+    TARGET ${PROJECT}
+    OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+    NO_UNSUPPORTED_PLATFORM_ERROR
+)
+install(SCRIPT ${QT_DEPLOY_SCRIPT})

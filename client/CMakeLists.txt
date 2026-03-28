@@ -243,3 +243,13 @@ if(COMMAND qt_finalize_executable)
 else()
     qt_finalize_target(${PROJECT})
 endif()
+
+install(TARGETS ${PROJECT} DESTINATION ".")
+install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}> DESTINATION ".")
+
+qt_generate_deploy_qml_app_script(
+    TARGET ${PROJECT}
+    OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+    NO_UNSUPPORTED_PLATFORM_ERROR
+)
+install(SCRIPT ${QT_DEPLOY_SCRIPT})
