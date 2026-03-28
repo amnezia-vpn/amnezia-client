@@ -12,7 +12,7 @@ add_compile_definitions(_WINSOCKAPI_)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(BUILD_WITH_QT6 ON)
-add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain)
+add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain EXCLUDE_FROM_ALL)
 
 if(ANDROID)
     # Use qtgamepad from amnezia-vpn/qtgamepad repository
