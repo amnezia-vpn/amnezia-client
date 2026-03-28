@@ -3,6 +3,13 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN-service)
 project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION})
 
+if (APPLE)
+    # CMAKE_INSTALL_BINDIR must be called before find_package(Qt6) for
+    # Qt to configure prefixes properly
+    # FIXME: make Amnezia-service a bundle and remove this hack completely
+    set(CMAKE_INSTALL_BINDIR "AmneziaVPN.app/Contents/MacOS")
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -358,8 +365,9 @@ add_custom_command(
     $<TARGET_FILE_DIR:${PROJECT}>
     COMMAND_EXPAND_LISTS
 )
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}/" DESTINATION ".")
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}/" DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+# install non-linked dependencies
 if (WIN32)
     find_package(awg-windows REQUIRED)
     list(APPEND BLOBS $<TARGET_FILE:amnezia::awg-windows>)
@@ -385,7 +393,7 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         ${BLOBS}
         $<TARGET_FILE_DIR:${PROJECT}>
 )
-install(FILES ${BLOBS} DESTINATION ".")
+install(FILES ${BLOBS} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # install drivers
 if (WIN32)
@@ -395,7 +403,7 @@ if (WIN32)
             "${TAP_WINDOWS6_BIN}"
             "$<TARGET_FILE_DIR:${PROJECT}>/tap"
     )
-    install(DIRECTORY "${TAP_WINDOWS6_BIN}/" DESTINATION "tap")
+    install(DIRECTORY "${TAP_WINDOWS6_BIN}/" DESTINATION "${CMAKE_INSTALL_BINDIR}/tap")
 
     find_package(win-split-tunnel REQUIRED)
     add_custom_command(TARGET ${PROJECT} POST_BUILD
@@ -403,12 +411,12 @@ if (WIN32)
             "${WIN_SPLIT_TUNNEL_BIN}"
             "$<TARGET_FILE_DIR:${PROJECT}>"
     )
-    install(DIRECTORY "${WIN_SPLIT_TUNNEL_BIN}/" DESTINATION ".")
+    install(DIRECTORY "${WIN_SPLIT_TUNNEL_BIN}/" DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 # install target
-install(TARGETS ${PROJECT} DESTINATION ".")
-install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}> DESTINATION ".")
+install(TARGETS ${PROJECT} DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}> DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 qt_generate_deploy_app_script(
     TARGET ${PROJECT}
