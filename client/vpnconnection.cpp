@@ -379,7 +379,14 @@ void VpnConnection::appendSplitTunnelingConfig()
 
         auto apps = m_settings->getVpnApps(appsRouteMode);
         for (const auto &app : apps) {
+#ifdef Q_OS_ANDROID
+            // Android VpnService.Builder accepts application package names only.
+            if (!app.packageName.isEmpty()) {
+                appsJsonArray.append(app.packageName);
+            }
+#else
             appsJsonArray.append(app.appPath.isEmpty() ? app.packageName : app.appPath);
+#endif
         }
 
         if (appsJsonArray.isEmpty()) {

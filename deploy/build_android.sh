@@ -192,13 +192,20 @@ if [[ -n "${ANDROID_ABIS_FOR_PACKAGING:-}" ]]; then
   do
     DEST_DIR="$ANDROID_BUILD_OUT_DIR/libs/$ABI"
     DEST_FILE="$DEST_DIR/libFBLink_$ABI.so"
+    ABI_UNDERSCORES="${ABI//-/_}"
     mkdir -p "$DEST_DIR"
 
     SRC_FILE=""
     for CANDIDATE in \
       "$OUT_APP_DIR/libFBLink_$ABI.so" \
+      "$OUT_APP_DIR/libFBLink_$ABI_UNDERSCORES.so" \
+      "$OUT_APP_DIR/libFBLink.so" \
       "$BUILD_DIR/client/libFBLink_$ABI.so" \
-      "$BUILD_DIR/libFBLink_$ABI.so"
+      "$BUILD_DIR/client/libFBLink_$ABI_UNDERSCORES.so" \
+      "$BUILD_DIR/client/libFBLink.so" \
+      "$BUILD_DIR/libFBLink_$ABI.so" \
+      "$BUILD_DIR/libFBLink_$ABI_UNDERSCORES.so" \
+      "$BUILD_DIR/libFBLink.so"
     do
       if [[ -f "$CANDIDATE" ]]; then
         SRC_FILE="$CANDIDATE"
@@ -207,7 +214,11 @@ if [[ -n "${ANDROID_ABIS_FOR_PACKAGING:-}" ]]; then
     done
 
     if [[ -z "$SRC_FILE" ]]; then
-      SRC_FILE=$(find "$BUILD_DIR" -type f -name "libFBLink_$ABI.so" 2>/dev/null | head -1 || true)
+      SRC_FILE=$(find "$BUILD_DIR" -type f \( \
+        -name "libFBLink_$ABI.so" -o \
+        -name "libFBLink_$ABI_UNDERSCORES.so" -o \
+        -name "libFBLink.so" \
+      \) 2>/dev/null | head -1 || true)
     fi
 
     if [[ -n "$SRC_FILE" && -f "$SRC_FILE" ]]; then
