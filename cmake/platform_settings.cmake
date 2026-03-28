@@ -24,3 +24,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
     "-c=tools.build:exelinkflags=['-Wl,-z,max-page-size=16384']"
     CACHE STRING "" FORCE)
 endif()
+
+if (WIN32)
+    set(CMAKE_INSTALL_BINDIR ".")
+endif()
