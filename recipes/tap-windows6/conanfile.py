@@ -42,3 +42,6 @@ class TapWindows6(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "openvpn::tap-windows6")
+        self.cpp_info.set_property("cmake_extra_variables", {
+            "TAP_WINDOWS6_BIN": os.path.join(self.package_folder, "bin").replace("\\", "/")
+        })
