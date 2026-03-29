@@ -203,11 +203,21 @@
     </message>
     <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="261"/>
-        <source>Требуется вход</source>
+        <source>Нажмите для отключения</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="262"/>
+        <source>Нажмите для подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="273"/>
+        <source>Требуется вход</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="285"/>
         <source>Войдите в аккаунт для подключения</source>
         <translation type="unfinished"></translation>
     </message>
@@ -216,12 +226,12 @@
         <translation type="obsolete">ချိတ်ဆက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="280"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="292"/>
         <source>Требуется активная подписка для подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="261"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="273"/>
         <source>Нужна подписка</source>
         <translation type="unfinished"></translation>
     </message>
@@ -919,32 +929,32 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="206"/>
         <source>Email</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="216"/>
         <source>Пароль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="229"/>
         <source>Забыли пароль?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="297"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="274"/>
         <source>Нет аккаунта?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="303"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="280"/>
         <source>Зарегистрироваться</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="273"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="250"/>
         <source>Вход...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -974,22 +984,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="195"/>
-        <source>Введите данные аккаунта FBLink VPN. После входа клиент подтянет актуальную подписку и конфиги.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="257"/>
-        <source>Новый интерфейс оставляет только главное: вход, состояние аккаунта и быстрый переход к оформлению подписки.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="273"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="250"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="280"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkLogin.qml" line="257"/>
         <source>Пожалуйста, заполните все поля</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1427,38 +1427,80 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete">ချိတ်ဆက်ပြီးသွားပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="112"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="111"/>
         <source>Получить Премиум</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="26"/>
+        <source>VPN активен</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="27"/>
+        <source>Подготавливаем подключение</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="27"/>
+        <source>Готово к подключению</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="30"/>
+        <source>Выберите локацию и нажмите подключение</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="160"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="192"/>
         <source>VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="161"/>
         <source>Премиум</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="317"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="390"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="192"/>
+        <source>Premium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="193"/>
+        <source>Free</source>
+        <translation type="unfinished">အခမဲ့</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="199"/>
+        <source>Ожидание</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="208"/>
+        <source>VIP routing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="386"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="459"/>
         <source>Выбрать локацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="326"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="199"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="395"/>
         <source>Подключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="326"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="395"/>
         <source>Нажмите для смены региона</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2452,123 +2494,99 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="28"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="27"/>
         <source>Без активной подписки</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="30"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="29"/>
         <source>Действует до %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="35"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="34"/>
         <source>Free</source>
         <translation type="unfinished">အခမဲ့</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="37"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="36"/>
         <source>VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="37"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="36"/>
         <source>Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="116"/>
-        <source>Управляйте аккаунтом, подключением и VIP-инструментами из одного центра.</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="130"/>
+        <source>Аккаунт подключён</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
-        <source>Подключение, приложение и базовые инструменты доступны сразу. Для VIP-функций войдите в аккаунт.</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="130"/>
+        <source>Гость</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="146"/>
-        <source>Аккаунт и подписка</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="153"/>
+        <source>Аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="154"/>
-        <source>Текущий план, карта оплаты, подписка и VIP-маршрутизация.</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="162"/>
+        <source>Подписка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="155"/>
-        <source>Войдите, чтобы управлять подпиской и синхронизацией конфигов.</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="162"/>
+        <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="163"/>
-        <source>Открыть подписку</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="181"/>
+        <source>VIP-пресеты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="163"/>
-        <source>Войти в аккаунт</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="196"/>
+        <source>Выйти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="180"/>
-        <source>VIP-пресеты и маршрутизация</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="194"/>
-        <source>Выйти из аккаунта</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="214"/>
-        <source>Подключение и приложение</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="221"/>
-        <source>Быстрый доступ к протоколам, split tunneling, DNS и системным настройкам приложения.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="229"/>
-        <source>Подключение</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="240"/>
-        <source>Приложение</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="252"/>
+        <source>Новости • новое</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="253"/>
-        <source>Новости и уведомления • новое</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="254"/>
-        <source>Новости и уведомления</source>
+        <source>Новости</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="280"/>
-        <source>Инструменты и информация</source>
+        <source>Инструменты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="287"/>
-        <source>Справка, отладочные функции и информация о приложении доступны без перегруженного списка.</source>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="307"/>
+        <source>Dev-консоль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="300"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="217"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="226"/>
+        <source>Подключение</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="238"/>
+        <source>Приложение</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="294"/>
         <source>О приложении</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="312"/>
-        <source>Консоль разработчика</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2673,53 +2691,33 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="214"/>
-        <source>VIP аккаунт</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="215"/>
-        <source>Premium аккаунт</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="216"/>
-        <source>Бесплатный аккаунт</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="224"/>
-        <source>Действует до: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="258"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="212"/>
         <source>Выйти из аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="299"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="253"/>
         <source>🏛 Основано на Amnezia (GNU GPL v3)
 Исходный код: amnezia.org</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="323"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="277"/>
         <source>Telegram поддержка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="324"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="278"/>
         <source>Задайте вопрос нашей команде</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="334"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="288"/>
         <source>support@fblink.com</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="335"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="289"/>
         <source>По вопросам и жалобам</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4435,38 +4433,13 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsVipRoutingProfiles</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="46"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="41"/>
         <source>Домены: %1 • Суффиксы: %2 • CIDR: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="80"/>
-        <source>Вставьте JSON или список правил для импорта</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="104"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="115"/>
         <source>Введите название профиля</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="147"/>
-        <source>Профиль маршрутизации сохранён</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="151"/>
-        <source>VIP-профиль сохранён</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="154"/>
-        <source>Профиль маршрутизации удалён</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="158"/>
-        <source>VIP-профиль удалён</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4475,66 +4448,198 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="405"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="334"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="383"/>
         <source>Новый профиль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="282"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="344"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="294"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="354"/>
         <source>Без названия</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="291"/>
-        <source>СИСТЕМНЫЙ</source>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="257"/>
+        <source>AI через VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="293"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="355"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="84"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="258"/>
+        <source>Медиа через VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="259"/>
+        <source>RU без VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="260"/>
+        <source>Банки и госуслуги</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="98"/>
+        <source>Игры и лаунчеры без VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="102"/>
+        <source>Локальные медиа без VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="153"/>
+        <source>Профиль сохранён</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="159"/>
+        <source>Профиль удалён</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="202"/>
+        <source>VIP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="203"/>
+        <source>Новые пакеты</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="208"/>
+        <source>VIP-пресеты и маршрутизация</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="218"/>
+        <source>Готовые пакеты и свои правила без длинной перегруженной формы.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="219"/>
+        <source>Редактирование доступно только в VIP.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="246"/>
+        <source>Быстрые пакеты</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="261"/>
+        <source>Игры без VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="262"/>
+        <source>Локальные медиа</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="275"/>
+        <source>%1 шт.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="301"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="361"/>
         <source>ВКЛЮЧЕН</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="293"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="355"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="301"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="361"/>
         <source>ВЫКЛЮЧЕН</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="310"/>
         <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="368"/>
         <source>Выключить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="310"/>
         <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="368"/>
         <source>Включить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="378"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="329"/>
+        <source>Мои профили</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="343"/>
+        <source>Пока нет пользовательских профилей</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="369"/>
         <source>Редактировать</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="389"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="370"/>
         <source>Удалить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="405"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="383"/>
         <source>Редактирование профиля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="427"/>
-        <source>Название профиля</source>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="395"/>
+        <source>Название</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="465"/>
-        <source>Вставьте JSON или список правил для быстрого импорта</source>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="395"/>
+        <source>Например, AI через VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="399"/>
+        <source>Без VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="400"/>
+        <source>Через VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="402"/>
+        <source>Домены, по одному на строку</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="403"/>
+        <source>Суффиксы доменов, по одному на строку</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="404"/>
+        <source>CIDR-подсети, по одной на строку</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="410"/>
+        <source>Сохранить</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="411"/>
+        <source>Отмена</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4548,161 +4653,18 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="39"/>
-        <source>Совпавший трафик принудительно уходит в VPN.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="39"/>
-        <source>Совпавший трафик пойдёт напрямую, в обход VPN.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="93"/>
-        <source>Правила импортированы в форму. Проверьте направление трафика и сохраните профиль.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="97"/>
-        <source>Текст импортирован как список доменов. При необходимости скорректируйте остальные поля.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="194"/>
-        <source>VIP routing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="201"/>
-        <source>Системные пресеты и свои сценарии</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="211"/>
-        <source>Встроенные direct/proxy пресеты и ваши профили будут встроены в VLESS-конфиг при подключении. Можно комбинировать сценарии “без VPN” и “через VPN” в одном интерфейсе.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="212"/>
-        <source>Профили сохранены за аккаунтом, но управлять ими можно только в VIP. После апгрейда пресеты и свои правила снова будут доступны.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="222"/>
-        <source>Direct = в обход VPN</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="223"/>
-        <source>Proxy = через VPN</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="250"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="274"/>
         <source>Системные пресеты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="253"/>
-        <source>Готовые сценарии для локальных сервисов, AI и медиа. Их нельзя удалить, но можно включать и выключать.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="260"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="280"/>
         <source>Системные пресеты пока не загружены</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="301"/>
-        <source>Выключить пресет</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="301"/>
-        <source>Включить пресет</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="318"/>
-        <source>Свои профили и редактор</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="321"/>
-        <source>Создавайте собственные правила, импортируйте JSON и решайте, должен трафик идти напрямую или через VPN.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="353"/>
-        <source>СВОЙ</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="408"/>
-        <source>Сначала выберите направление трафика, затем добавьте домены, суффиксы и CIDR. Редактор одинаково читается на mobile и desktop.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="429"/>
-        <source>Например, AI через VPN для браузера</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="439"/>
-        <source>Трафик без VPN</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="450"/>
-        <source>Трафик через VPN</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="474"/>
-        <source>Импортировать</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="485"/>
-        <source>Профиль будет включён</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="485"/>
-        <source>Профиль будет выключен</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="494"/>
-        <source>Домены, по одному на строку
-example.com</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="495"/>
-        <source>Суффиксы доменов, по одному на строку
-.ru</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="496"/>
-        <source>CIDR-подсети, по одной на строку
-192.168.0.0/16</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="506"/>
-        <source>Сохранить изменения</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="506"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="410"/>
         <source>Создать профиль</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="516"/>
-        <source>Сбросить</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5101,62 +5063,65 @@ example.com</source>
         <translation type="vanished">ကွန်ရက်ပရိုတိုကော</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="72"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="140"/>
         <source>Шаг 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="148"/>
         <source>Установка %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="102"/>
         <source>Кратко</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="107"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="108"/>
         <source>Сначала выберите обязательные параметры. Детали и описание протокола доступны ниже по кнопке.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="118"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="242"/>
         <source>Подробнее о %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="166"/>
         <source>Базовые параметры</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="146"/>
-        <source>Advanced-настройки мы держим за пределами первого экрана, чтобы установка не превращалась в перегруженную форму.</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="175"/>
+        <source>Сначала только обязательные поля. Подробности протокола открываются отдельно и не перегружают первый экран.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="183"/>
         <source>Сетевой протокол</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="196"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="180"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="210"/>
         <source>После установки вы сможете вернуться и открыть детальные параметры протокола уже из карточки сервера.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="220"/>
         <source>Установить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="272"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="317"/>
         <source>Закрыть</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5165,7 +5130,7 @@ example.com</source>
         <translation type="vanished">ထည်သွင်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="199"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="229"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation>Port သည် 1 မှ 65535 အတွင်း ဖြစ်ရမည်</translation>
     </message>
