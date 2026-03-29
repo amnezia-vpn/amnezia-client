@@ -124,6 +124,14 @@ echo "Using Qt in $QT_BIN_DIR"
 echo "Using Android SDK in $ANDROID_SDK_ROOT"
 echo "Using Android NDK in $ANDROID_NDK_ROOT"
 
+if [[ -f "$QT_BIN_DIR/qt-cmake" && ! -x "$QT_BIN_DIR/qt-cmake" ]]; then
+  chmod +x "$QT_BIN_DIR/qt-cmake"
+fi
+
+if [[ -f "$QT_HOST_PATH/bin/androiddeployqt" && ! -x "$QT_HOST_PATH/bin/androiddeployqt" ]]; then
+  chmod +x "$QT_HOST_PATH/bin/androiddeployqt"
+fi
+
 # Run qt-cmake to configure build
 qt_cmake_opts=()
 

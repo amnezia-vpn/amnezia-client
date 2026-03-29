@@ -612,7 +612,7 @@ jobs:
     - name: 'Grant execute permission for qt-cmake'
       shell: bash
       run: |
-        chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
+        find "${{ runner.temp }}/Qt/${{ env.QT_VERSION }}" -type f \( -name qt-cmake -o -name androiddeployqt \) -exec chmod +x {} \;
 
     - name: 'Get sources'
       uses: actions/checkout@v4
