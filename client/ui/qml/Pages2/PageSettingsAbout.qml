@@ -183,52 +183,6 @@ PageType {
                 spacing: 8
                 visible: FBLinkController.isLoggedIn
 
-                // Account info
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: accountRow.implicitHeight + 20
-                    radius: 12
-                    color: Qt.rgba(0, 200/255, 255/255, 0.07)
-                    border.color: Qt.rgba(0, 200/255, 255/255, 0.2)
-                    border.width: 1
-
-                    RowLayout {
-                        id: accountRow
-                        anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
-                        anchors.leftMargin: 16; anchors.rightMargin: 16
-                        spacing: 10
-
-                        Rectangle {
-                            width: 32; height: 32; radius: 16
-                            color: Qt.rgba(0, 200/255, 255/255, 0.15)
-                            Text { anchors.centerIn: parent; text: "👤"; font.pixelSize: 15 }
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 1
-
-                            Text {
-                                text: FBLinkController.isSubscribed
-                                    ? (FBLinkController.subscriptionPlan === "vip"
-                                        ? qsTr("VIP аккаунт")
-                                        : qsTr("Premium аккаунт"))
-                                    : qsTr("Бесплатный аккаунт")
-                                font.pixelSize: 13
-                                font.weight: Font.Medium
-                                color: "#FFFFFF"
-                            }
-
-                            Text {
-                                visible: FBLinkController.isSubscribed
-                                text: qsTr("Действует до: ") + new Date(FBLinkController.subscriptionEndDate).toLocaleDateString(Qt.locale(), Locale.LongFormat)
-                                font.pixelSize: 11
-                                color: Qt.rgba(1, 1, 1, 0.5)
-                            }
-                        }
-                    }
-                }
-
                 // Logout button
                 Rectangle {
                     Layout.fillWidth: true

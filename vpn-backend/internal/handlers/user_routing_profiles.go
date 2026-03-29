@@ -9,10 +9,20 @@ import (
 
 type routingProfileRequest struct {
 	Name           string   `json:"name"`
+	Action         string   `json:"action"`
 	Enabled        *bool    `json:"enabled"`
 	Domains        []string `json:"domains"`
 	DomainSuffixes []string `json:"domain_suffixes"`
 	CIDRs          []string `json:"cidrs"`
+}
+
+func normalizeRoutingProfileAction(raw string) models.RoutingProfileAction {
+	switch models.RoutingProfileAction(raw) {
+	case models.RoutingProfileProxy:
+		return models.RoutingProfileProxy
+	default:
+		return models.RoutingProfileDirect
+	}
 }
 
 // GET /api/v1/me/routing-profiles
@@ -25,7 +35,7 @@ func (h *UserHandler) GetRoutingProfiles(c *gin.Context) {
 	}
 
 	var profiles []models.RoutingProfile
-	if err := h.db.Where("user_id = ?", userID).Order("kind asc, id asc").Find(&profiles).Error; err != nil {
+	if err := h.db.Where("user_id = ?", userID).Order("sort_order asc, kind asc, id asc").Find(&profiles).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load routing profiles"})
 		return
 	}
@@ -71,6 +81,7 @@ func (h *UserHandler) CreateRoutingProfile(c *gin.Context) {
 		UserID:             userID,
 		Name:               req.Name,
 		Kind:               models.RoutingProfileCustom,
+		Action:             normalizeRoutingProfileAction(req.Action),
 		Enabled:            enabled,
 		DomainsJSON:        encodeJSONStringArray(req.Domains),
 		DomainSuffixesJSON: encodeJSONStringArray(req.DomainSuffixes),
@@ -125,6 +136,7 @@ func (h *UserHandler) UpdateRoutingProfile(c *gin.Context) {
 		if req.Name != "" {
 			updates["name"] = req.Name
 		}
+		updates["action"] = normalizeRoutingProfileAction(req.Action)
 		updates["domains_json"] = encodeJSONStringArray(req.Domains)
 		updates["domain_suffixes_json"] = encodeJSONStringArray(req.DomainSuffixes)
 		updates["cidrs_json"] = encodeJSONStringArray(req.CIDRs)

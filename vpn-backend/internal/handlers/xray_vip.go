@@ -587,15 +587,25 @@ func removeXrayClient(server *models.VPNServer, template *models.VLESSServerTemp
 }
 
 func buildVIPRoutingRules(profiles []models.RoutingProfile) []map[string]interface{} {
-	domainRules := []string{}
-	ipRules := []string{}
+	domainRulesByAction := map[models.RoutingProfileAction][]string{
+		models.RoutingProfileDirect: {},
+		models.RoutingProfileProxy:  {},
+	}
+	ipRulesByAction := map[models.RoutingProfileAction][]string{
+		models.RoutingProfileDirect: {},
+		models.RoutingProfileProxy:  {},
+	}
 
 	for _, profile := range profiles {
 		if !profile.Enabled {
 			continue
 		}
+		action := profile.Action
+		if action != models.RoutingProfileProxy {
+			action = models.RoutingProfileDirect
+		}
 		for _, domain := range decodeJSONStringArray(profile.DomainsJSON) {
-			domainRules = append(domainRules, "full:"+domain)
+			domainRulesByAction[action] = append(domainRulesByAction[action], "full:"+domain)
 		}
 		for _, suffix := range decodeJSONStringArray(profile.DomainSuffixesJSON) {
 			trimmed := strings.TrimPrefix(strings.TrimSpace(suffix), ".")
@@ -603,30 +613,37 @@ func buildVIPRoutingRules(profiles []models.RoutingProfile) []map[string]interfa
 				continue
 			}
 			if strings.Contains(trimmed, ".") {
-				domainRules = append(domainRules, "domain:"+trimmed)
+				domainRulesByAction[action] = append(domainRulesByAction[action], "domain:"+trimmed)
 			} else {
-				domainRules = append(domainRules, "regexp:(^|\\.).*\\."+regexp.QuoteMeta(trimmed)+"$")
+				domainRulesByAction[action] = append(domainRulesByAction[action], "regexp:(^|\\.).*\\."+regexp.QuoteMeta(trimmed)+"$")
 			}
 		}
-		ipRules = append(ipRules, decodeJSONStringArray(profile.CIDRsJSON)...)
+		ipRulesByAction[action] = append(ipRulesByAction[action], decodeJSONStringArray(profile.CIDRsJSON)...)
 	}
 
-	rules := make([]map[string]interface{}, 0, 2)
-	if len(domainRules) > 0 {
-		rules = append(rules, map[string]interface{}{
-			"type":        "field",
-			"outboundTag": xrayDirectTag,
-			"domain":      domainRules,
-		})
-	}
-	if len(ipRules) > 0 {
-		rules = append(rules, map[string]interface{}{
-			"type":        "field",
-			"outboundTag": xrayDirectTag,
-			"ip":          ipRules,
-		})
+	appendRules := func(rules []map[string]interface{}, action models.RoutingProfileAction, outboundTag string) []map[string]interface{} {
+		domainRules := domainRulesByAction[action]
+		ipRules := ipRulesByAction[action]
+		if len(domainRules) > 0 {
+			rules = append(rules, map[string]interface{}{
+				"type":        "field",
+				"outboundTag": outboundTag,
+				"domain":      domainRules,
+			})
+		}
+		if len(ipRules) > 0 {
+			rules = append(rules, map[string]interface{}{
+				"type":        "field",
+				"outboundTag": outboundTag,
+				"ip":          ipRules,
+			})
+		}
+		return rules
 	}
 
+	rules := make([]map[string]interface{}, 0, 4)
+	rules = appendRules(rules, models.RoutingProfileDirect, xrayDirectTag)
+	rules = appendRules(rules, models.RoutingProfileProxy, xrayProxyTag)
 	if len(rules) == 0 {
 		return nil
 	}

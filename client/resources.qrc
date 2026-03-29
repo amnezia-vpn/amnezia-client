@@ -141,6 +141,8 @@
         <file>ui/qml/Components/SettingsContainersListView.qml</file>
         <file>ui/qml/Components/TransportProtoSelector.qml</file>
         <file>ui/qml/Components/AddSitePanel.qml</file>
+        <file>ui/qml/Components/PremiumBadge.qml</file>
+        <file>ui/qml/Components/PremiumPanel.qml</file>
         <file>ui/qml/Config/GlobalConfig.qml</file>
         <file>ui/qml/Config/qmldir</file>
         <file>ui/qml/Controls2/BackButtonType.qml</file>

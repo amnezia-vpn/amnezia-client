@@ -24,6 +24,9 @@ PageType {
     property bool confirmDeleteCard: false
     property string mgmtError: ""
     readonly property int maxPolls: 60  // 60 × 2 s = 2 min
+    readonly property bool wideLayout: GC.isWideWidth(width)
+    readonly property real sideMargin: GC.pageHorizontalMargin(width)
+    readonly property real maxContentWidth: GC.pageMaxWidth(width)
 
     readonly property int currentPlanLevel: {
         if (!FBLinkController.isSubscribed) return -1
@@ -82,13 +85,13 @@ PageType {
             price: "399 ₽",
             period: qsTr("/ 30 дней"),
             badge: qsTr("МАКС"),
-            saving: qsTr("XRay VLESS, .ru без VPN и VIP-инструменты маршрутизации"),
+            saving: qsTr("XRay VLESS, direct/proxy VIP-пресеты и маршрутизация без перегруза"),
             cta: qsTr("Оплатить 399 ₽ / VIP"),
             features: [
                 { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Протокол XRay VLESS для скорости и стабильности") },
-                { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("Профиль «RU without VPN» и свои правила маршрутизации") },
+                { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("Готовые direct-пресеты: RU, банки, локальные медиа и игры") },
                 { icon: "qrc:/images/controls/monitor.svg",     text: qsTr("Раздельное туннелирование для сайтов и приложений") },
-                { icon: "qrc:/images/controls/info.svg",        text: qsTr("Приоритетная обработка трафика и премиальные маршруты") },
+                { icon: "qrc:/images/controls/info.svg",        text: qsTr("Proxy-пресеты для AI и медиа без ручного набора доменов") },
                 { icon: "qrc:/images/controls/history.svg",     text: qsTr("Все возможности Premium + VIP-управление трафиком") }
             ]
         }
@@ -113,7 +116,8 @@ PageType {
 
         ColumnLayout {
             id: mainColumn
-            width: parent.width
+            width: Math.min(root.maxContentWidth, parent.width - root.sideMargin * 2)
+            x: (parent.width - width) / 2
             spacing: 0
 
             // Back button

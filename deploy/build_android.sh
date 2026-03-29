@@ -84,14 +84,22 @@ ANDROID_BUILD_OUT_DIR=$OUT_APP_DIR/android-build
 echo "Project dir: $PROJECT_DIR"
 echo "Build dir: $BUILD_DIR"
 
+if [[ -v AAB && -z "${ABIS:-}" ]]; then
+  ABIS="$DEFAULT_ANDROID_ABIS"
+fi
+
 if [[ "${ABIS:-}" = "all" ]]; then
   ABIS="$DEFAULT_ANDROID_ABIS"
 fi
 
 ANDROID_ABIS_FOR_PACKAGING="${ABIS:-}"
+CONFIGURE_ALL_ABIS=0
+if [[ -n "${ABIS:-}" && "${ABIS:-}" = "$DEFAULT_ANDROID_ABIS" ]]; then
+  CONFIGURE_ALL_ABIS=1
+fi
 
 # Determine path to qt bin folder with qt-cmake
-if [[ -v AAB || "${ABIS:-}" = "$DEFAULT_ANDROID_ABIS" ]]; then
+if [[ $CONFIGURE_ALL_ABIS -eq 1 ]]; then
   qt_bin_dir_suffix="x86_64"
 else
   if [[ $ABIS = *";"* ]]; then
@@ -119,7 +127,7 @@ echo "Using Android NDK in $ANDROID_NDK_ROOT"
 # Run qt-cmake to configure build
 qt_cmake_opts=()
 
-if [[ -v AAB || "${ABIS:-}" = "$DEFAULT_ANDROID_ABIS" ]]; then
+if [[ $CONFIGURE_ALL_ABIS -eq 1 ]]; then
   # Keep release packaging on physical-device ABIs only. x86/x86_64 emulator
   # variants have been unstable in CI with Qt 6.10 and are not needed for
   # published artifacts.

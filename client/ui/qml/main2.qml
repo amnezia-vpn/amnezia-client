@@ -43,12 +43,16 @@ Window  {
     }
 
     visible: true
-    width: GC.screenWidth
-    height: GC.screenHeight
-    minimumWidth: GC.isDesktop() ? 360 : 0
-    minimumHeight: GC.isDesktop() ? 640 : 0
-    maximumWidth: 600
-    maximumHeight: 800
+    width: GC.isDesktop()
+        ? Math.min(GC.desktopPreferredWidth, Screen.desktopAvailableWidth)
+        : Screen.width
+    height: GC.isDesktop()
+        ? Math.min(GC.desktopPreferredHeight, Screen.desktopAvailableHeight)
+        : Screen.height
+    minimumWidth: GC.isDesktop() ? GC.desktopMinWidth : 0
+    minimumHeight: GC.isDesktop() ? GC.desktopMinHeight : 0
+    maximumWidth: GC.isDesktop() ? Screen.desktopAvailableWidth : Screen.width
+    maximumHeight: GC.isDesktop() ? Screen.desktopAvailableHeight : Screen.height
 
     color: FBLinkStyle.color.midnightBlack
 

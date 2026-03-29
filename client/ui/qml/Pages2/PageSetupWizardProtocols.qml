@@ -10,27 +10,24 @@ import Style 1.0
 
 import "./"
 import "../Controls2"
+import "../Controls2/TextTypes"
 import "../Config"
+import "../Components"
 
 PageType {
     id: root
+
+    readonly property bool wideLayout: GC.isWideWidth(width)
+    readonly property real sideMargin: GC.pageHorizontalMargin(width)
+    readonly property real maxContentWidth: GC.pageMaxWidth(width)
 
     SortFilterProxyModel {
         id: proxyContainersModel
         sourceModel: ContainersModel
         filters: [
-            ValueFilter {
-                roleName: "serviceType"
-                value: ProtocolEnum.Vpn
-            },
-            ValueFilter {
-                roleName: "isSupported"
-                value: true
-            },
-            ValueFilter {
-                roleName: "isInstallationAllowed"
-                value: true
-            }
+            ValueFilter { roleName: "serviceType"; value: ProtocolEnum.Vpn },
+            ValueFilter { roleName: "isSupported"; value: true },
+            ValueFilter { roleName: "isInstallationAllowed"; value: true }
         ]
         sorters: RoleSorter {
             roleName: "installPageOrder"
@@ -38,67 +35,125 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
+    Flickable {
+        anchors.fill: parent
+        contentHeight: content.implicitHeight + 28
+        clip: true
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        Item {
+            width: parent.width
+            height: content.implicitHeight + 28
 
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+            ColumnLayout {
+                id: content
+                width: Math.min(root.maxContentWidth, parent.width - root.sideMargin * 2)
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                spacing: 18
 
-    ListViewType {
-        id: listView
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+                BackButtonType {
+                    Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                    Layout.leftMargin: 4
+                }
 
-        header: ColumnLayout {
-            width: listView.width
+                PremiumPanel {
+                    Layout.fillWidth: true
+                    accentVisible: true
+                    accentColor: "#00C8FF"
 
-            BaseHeaderType {
-                id: header
+                    PremiumBadge {
+                        text: qsTr("Шаг 1")
+                        tone: "accent"
+                        iconSource: "qrc:/images/controls/server.svg"
+                    }
 
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                    LabelTextType {
+                        Layout.fillWidth: true
+                        text: qsTr("Выберите сценарий подключения")
+                        font.pixelSize: root.wideLayout ? 30 : 26
+                        font.weight: 700
+                        color: FBLinkStyle.color.paleGray
+                        wrapMode: Text.WordWrap
+                    }
 
-                headerText: qsTr("VPN protocol")
-                descriptionText: qsTr("Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.")
-            }
-        }
+                    LabelTextType {
+                        Layout.fillWidth: true
+                        text: qsTr("Новый setup flow оставляет только доступные на текущей платформе протоколы. На следующем шаге вы увидите только обязательные параметры, а детали останутся в раскрывающейся секции.")
+                        wrapMode: Text.WordWrap
+                        font.pixelSize: 14
+                        color: FBLinkStyle.color.mutedGray
+                    }
+                }
 
-        model: proxyContainersModel
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: root.wideLayout ? 2 : 1
+                    columnSpacing: 16
+                    rowSpacing: 16
 
-        spacing: 0
-        snapMode: ListView.SnapToItem
+                    Repeater {
+                        model: proxyContainersModel
 
-        delegate: ColumnLayout {
-            width: listView.width
+                        delegate: PremiumPanel {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignTop
+                            accentVisible: index === 0
+                            accentColor: index === 0 ? "#10B981" : "#00C8FF"
 
-            LabelWithButtonType {
-                Layout.fillWidth: true
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 10
 
-                text: name
-                descriptionText: description
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                                PremiumBadge {
+                                    text: index === 0 ? qsTr("Рекомендуем") : qsTr("Доступно")
+                                    tone: index === 0 ? "success" : "accent"
+                                    iconSource: index === 0 ? "qrc:/images/controls/shield-tick.svg" : "qrc:/images/controls/chevron-right.svg"
+                                }
 
-                clickedFunction: function () {
-                    ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(index));
-                    PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings);
+                                Item { Layout.fillWidth: true }
+                            }
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: name
+                                font.pixelSize: 22
+                                font.weight: 700
+                                color: FBLinkStyle.color.paleGray
+                                wrapMode: Text.WordWrap
+                            }
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: description
+                                font.pixelSize: 14
+                                color: FBLinkStyle.color.mutedGray
+                                wrapMode: Text.WordWrap
+                            }
+
+                            BasicButtonType {
+                                Layout.fillWidth: true
+                                text: qsTr("Продолжить")
+                                defaultColor: index === 0 ? "#10B981" : Qt.rgba(1, 1, 1, 0.08)
+                                hoveredColor: index === 0 ? "#13C88E" : Qt.rgba(1, 1, 1, 0.12)
+                                pressedColor: index === 0 ? "#0D9B6E" : Qt.rgba(1, 1, 1, 0.18)
+                                textColor: "#FFFFFF"
+                                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                                clickedFunc: function() {
+                                    ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(index))
+                                    PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 24 + SettingsController.safeAreaBottomMargin
                 }
             }
-
-            DividerType {}
         }
     }
 }

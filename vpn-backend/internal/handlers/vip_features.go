@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	vipRoutingProfileName = "RU without VPN"
+	legacyVIPRoutingProfileName = "RU without VPN"
 )
 
 type subscriptionCapabilities struct {
@@ -51,30 +51,213 @@ func canManageVIPFeatures(sub models.Subscription) bool {
 	return buildSubscriptionCapabilities(sub).CanManageRoutingProfiles
 }
 
-func ensureDefaultRoutingProfiles(db *gorm.DB, userID uint) error {
-	var systemProfile models.RoutingProfile
-	err := db.Where("user_id = ? AND kind = ? AND name = ?", userID, models.RoutingProfileSystem, vipRoutingProfileName).
-		First(&systemProfile).Error
-	if err == nil {
-		// Respect the user's explicit enabled/disabled choice for the built-in profile.
-		// We only auto-create the system profile once when it does not exist yet.
-		return nil
+type defaultRoutingProfileSeed struct {
+	Code             string
+	Name             string
+	Action           models.RoutingProfileAction
+	Description      string
+	Icon             string
+	SortOrder        int
+	EnabledByDefault bool
+	Domains          []string
+	DomainSuffixes   []string
+	CIDRs            []string
+	LegacyNames      []string
+}
+
+func defaultRoutingProfileSeeds() []defaultRoutingProfileSeed {
+	return []defaultRoutingProfileSeed{
+		{
+			Code:             "ru_direct",
+			Name:             "RU без VPN",
+			Action:           models.RoutingProfileDirect,
+			Description:      "Базовый системный пресет для .ru, .xn--p1ai и локальных российских ресурсов.",
+			Icon:             "map-pin.svg",
+			SortOrder:        10,
+			EnabledByDefault: true,
+			DomainSuffixes:   []string{".ru", ".xn--p1ai"},
+			LegacyNames:      []string{legacyVIPRoutingProfileName},
+		},
+		{
+			Code:             "banks_gosuslugi_direct",
+			Name:             "Банки и госуслуги",
+			Action:           models.RoutingProfileDirect,
+			Description:      "Госуслуги, налоги и популярные банковские домены идут напрямую без VPN.",
+			Icon:             "shield-tick.svg",
+			SortOrder:        20,
+			EnabledByDefault: false,
+			Domains: []string{
+				"gosuslugi.ru",
+				"esia.gosuslugi.ru",
+				"gosuslugi.com",
+			},
+			DomainSuffixes: []string{
+				".gosuslugi.ru",
+				".nalog.gov.ru",
+				".sberbank.ru",
+				".sber.ru",
+				".vtb.ru",
+				".alfabank.ru",
+				".tbank.ru",
+			},
+		},
+		{
+			Code:             "games_launchers_direct",
+			Name:             "Игры и лаунчеры без VPN",
+			Action:           models.RoutingProfileDirect,
+			Description:      "Локальные игровые лаунчеры и сервисы можно держать вне VPN для более ровного пинга.",
+			Icon:             "gauge.svg",
+			SortOrder:        30,
+			EnabledByDefault: false,
+			DomainSuffixes: []string{
+				".vkplay.ru",
+				".4game.ru",
+				".lesta.ru",
+				".tanki.su",
+				".mail.ru",
+			},
+		},
+		{
+			Code:             "local_media_direct",
+			Name:             "Локальные медиа без VPN",
+			Action:           models.RoutingProfileDirect,
+			Description:      "Российские видеосервисы и локальные стриминги идут напрямую.",
+			Icon:             "monitor.svg",
+			SortOrder:        40,
+			EnabledByDefault: false,
+			DomainSuffixes: []string{
+				".kinopoisk.ru",
+				".rutube.ru",
+				".ivi.ru",
+				".okko.tv",
+				".wink.ru",
+				".smotrim.ru",
+				".premier.one",
+			},
+		},
+		{
+			Code:             "ai_proxy",
+			Name:             "AI через VPN",
+			Action:           models.RoutingProfileProxy,
+			Description:      "ChatGPT, Claude, Gemini, Perplexity и другие AI-сервисы принудительно идут через VPN.",
+			Icon:             "scan-line.svg",
+			SortOrder:        110,
+			EnabledByDefault: false,
+			Domains: []string{
+				"chatgpt.com",
+				"claude.ai",
+				"perplexity.ai",
+				"poe.com",
+				"notebooklm.google.com",
+				"gemini.google.com",
+			},
+			DomainSuffixes: []string{
+				".openai.com",
+				".anthropic.com",
+				".perplexity.ai",
+				".poe.com",
+				".openrouter.ai",
+				".generativelanguage.googleapis.com",
+				".notebooklm.google.com",
+				".gemini.google.com",
+			},
+		},
+		{
+			Code:             "media_proxy",
+			Name:             "Медиа через VPN",
+			Action:           models.RoutingProfileProxy,
+			Description:      "YouTube, Twitch, TikTok и связанные медиадомены идут через VPN без ручной настройки.",
+			Icon:             "monitor.svg",
+			SortOrder:        120,
+			EnabledByDefault: false,
+			Domains: []string{
+				"youtube.com",
+				"youtu.be",
+				"twitch.tv",
+				"tiktok.com",
+			},
+			DomainSuffixes: []string{
+				".youtube.com",
+				".youtu.be",
+				".googlevideo.com",
+				".ytimg.com",
+				".youtubei.googleapis.com",
+				".twitch.tv",
+				".ttvnw.net",
+				".jtvnw.net",
+				".tiktok.com",
+				".tiktokcdn.com",
+				".byteoversea.com",
+			},
+		},
 	}
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
+}
+
+func ensureDefaultRoutingProfiles(db *gorm.DB, userID uint) error {
+	for _, seed := range defaultRoutingProfileSeeds() {
+		var profile models.RoutingProfile
+		err := db.Where("user_id = ? AND kind = ? AND code = ?", userID, models.RoutingProfileSystem, seed.Code).
+			First(&profile).Error
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return err
+		}
+
+		if err == gorm.ErrRecordNotFound {
+			for _, legacyName := range seed.LegacyNames {
+				legacyErr := db.Where("user_id = ? AND kind = ? AND name = ?", userID, models.RoutingProfileSystem, legacyName).
+					First(&profile).Error
+				if legacyErr == nil {
+					err = nil
+					break
+				}
+				if legacyErr != nil && legacyErr != gorm.ErrRecordNotFound {
+					return legacyErr
+				}
+			}
+		}
+
+		domainsJSON, _ := json.Marshal(normalizeRoutingProfileInput(seed.Domains))
+		domainSuffixesJSON, _ := json.Marshal(normalizeRoutingProfileInput(seed.DomainSuffixes))
+		cidrsJSON, _ := json.Marshal(normalizeRoutingProfileInput(seed.CIDRs))
+
+		if err == gorm.ErrRecordNotFound {
+			profile = models.RoutingProfile{
+				UserID:             userID,
+				Name:               seed.Name,
+				Code:               seed.Code,
+				Kind:               models.RoutingProfileSystem,
+				Action:             seed.Action,
+				Enabled:            seed.EnabledByDefault,
+				Description:        seed.Description,
+				Icon:               seed.Icon,
+				SortOrder:          seed.SortOrder,
+				DomainsJSON:        string(domainsJSON),
+				DomainSuffixesJSON: string(domainSuffixesJSON),
+				CIDRsJSON:          string(cidrsJSON),
+			}
+			if createErr := db.Create(&profile).Error; createErr != nil {
+				return createErr
+			}
+			continue
+		}
+
+		updates := map[string]interface{}{
+			"name":                 seed.Name,
+			"code":                 seed.Code,
+			"action":               seed.Action,
+			"description":          seed.Description,
+			"icon":                 seed.Icon,
+			"sort_order":           seed.SortOrder,
+			"domains_json":         string(domainsJSON),
+			"domain_suffixes_json": string(domainSuffixesJSON),
+			"cidrs_json":           string(cidrsJSON),
+		}
+		if updateErr := db.Model(&profile).Updates(updates).Error; updateErr != nil {
+			return updateErr
+		}
 	}
 
-	domainSuffixes, _ := json.Marshal([]string{".ru"})
-	profile := models.RoutingProfile{
-		UserID:             userID,
-		Name:               vipRoutingProfileName,
-		Kind:               models.RoutingProfileSystem,
-		Enabled:            true,
-		DomainSuffixesJSON: string(domainSuffixes),
-		DomainsJSON:        "[]",
-		CIDRsJSON:          "[]",
-	}
-	return db.Create(&profile).Error
+	return nil
 }
 
 func decodeJSONStringArray(raw string) []string {
@@ -118,8 +301,15 @@ func routingProfileToMap(profile models.RoutingProfile) map[string]interface{} {
 	return map[string]interface{}{
 		"id":              profile.ID,
 		"name":            profile.Name,
+		"code":            profile.Code,
 		"kind":            profile.Kind,
+		"action":          profile.Action,
 		"enabled":         profile.Enabled,
+		"description":     profile.Description,
+		"icon":            profile.Icon,
+		"sort_order":      profile.SortOrder,
+		"editable":        profile.Kind != models.RoutingProfileSystem,
+		"deletable":       profile.Kind != models.RoutingProfileSystem,
 		"domains":         decodeJSONStringArray(profile.DomainsJSON),
 		"domain_suffixes": decodeJSONStringArray(profile.DomainSuffixesJSON),
 		"cidrs":           decodeJSONStringArray(profile.CIDRsJSON),

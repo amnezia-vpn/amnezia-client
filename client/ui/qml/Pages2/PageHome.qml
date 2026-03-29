@@ -19,6 +19,15 @@ import "../Components"
 
 PageType {
     id: root
+    readonly property bool wideLayout: GC.isWideWidth(width)
+    readonly property real contentWidth: Math.min(width - 32, GC.pageMaxWidth(width))
+    readonly property real contentSideMargin: Math.max(16, (width - contentWidth) / 2)
+    readonly property string homeStateTitle: ConnectionController.isConnected
+        ? qsTr("VPN активен")
+        : (ConnectionController.isConnectionInProgress ? qsTr("Подготавливаем подключение") : qsTr("Готово к подключению"))
+    readonly property string homeStateSubtitle: ServersModel.defaultServerName !== ""
+        ? ServersModel.defaultServerName
+        : qsTr("Выберите локацию и нажмите подключение")
 
     Connections {
         target: Qt.application
@@ -59,8 +68,8 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.topMargin: 14 + SettingsController.safeAreaTopMargin
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
+            anchors.leftMargin: root.contentSideMargin
+            anchors.rightMargin: root.contentSideMargin
 
             Item { Layout.fillWidth: true }
 
@@ -164,6 +173,69 @@ PageType {
             }
         }
 
+        PremiumPanel {
+            id: statusCard
+            width: root.contentWidth
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: connectButton.top
+            anchors.bottomMargin: 18
+            padding: 12
+            accentVisible: true
+            accentColor: ConnectionController.isConnected ? "#10B981" : "#00C8FF"
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                PremiumBadge {
+                    text: FBLinkController.isSubscribed
+                        ? (FBLinkController.subscriptionPlan === "vip" ? qsTr("VIP") : qsTr("Premium"))
+                        : qsTr("Free")
+                    tone: FBLinkController.isSubscribed ? "success" : "accent"
+                    iconSource: "qrc:/images/controls/shield-tick.svg"
+                }
+
+                PremiumBadge {
+                    text: ConnectionController.isConnected ? qsTr("Подключено") : qsTr("Ожидание")
+                    tone: ConnectionController.isConnected ? "success" : "accent"
+                    iconSource: ConnectionController.isConnected
+                        ? "qrc:/images/controls/check.svg"
+                        : "qrc:/images/controls/radio.svg"
+                }
+
+                PremiumBadge {
+                    visible: FBLinkController.canManageRoutingProfiles
+                    text: qsTr("VIP routing")
+                    tone: "proxy"
+                    iconSource: "qrc:/images/controls/tag.svg"
+                }
+
+                PremiumBadge {
+                    visible: locationCardRef.realPingMs >= 0
+                    text: locationCardRef.pingDisplay
+                    tone: locationCardRef.realPingMs < 80 ? "success" : (locationCardRef.realPingMs < 150 ? "warning" : "neutral")
+                    iconSource: "qrc:/images/controls/gauge.svg"
+                }
+            }
+
+            LabelTextType {
+                Layout.fillWidth: true
+                text: root.homeStateTitle
+                font.pixelSize: 17
+                font.weight: 700
+                color: FBLinkStyle.color.paleGray
+                wrapMode: Text.WordWrap
+            }
+
+            LabelTextType {
+                Layout.fillWidth: true
+                text: root.homeStateSubtitle
+                font.pixelSize: 13
+                color: FBLinkStyle.color.mutedGray
+                wrapMode: Text.WordWrap
+            }
+        }
+
         // ── Connect button centered ──────────────────────────────
         ConnectButton {
             id: connectButton
@@ -185,8 +257,8 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottomMargin: 16
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
+            anchors.leftMargin: root.contentSideMargin
+            anchors.rightMargin: root.contentSideMargin
 
             height: contentHeight
         }
@@ -238,7 +310,8 @@ PageType {
                 Rectangle {
                     id: locationCardRef
                     Layout.fillWidth: true
-                    Layout.margins: 16
+                    Layout.leftMargin: root.contentSideMargin
+                    Layout.rightMargin: root.contentSideMargin
                     Layout.topMargin: drawer.isCollapsedStateActive ? 16 : 8
                     Layout.bottomMargin: drawer.isCollapsedStateActive ? 48 + SettingsController.safeAreaBottomMargin : 16
                     height: 64

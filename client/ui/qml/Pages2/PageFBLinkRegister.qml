@@ -19,6 +19,9 @@ PageType {
     property bool codeSent: false
     property string pendingEmail: ""
     property int resendCooldown: 0
+    readonly property bool wideLayout: GC.isWideWidth(width)
+    readonly property real sideMargin: GC.pageHorizontalMargin(width)
+    readonly property real maxContentWidth: GC.pageMaxWidth(width)
 
     function isSubscriptionGateMessage(message) {
         var normalized = (message || "").toLowerCase()
@@ -103,210 +106,265 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
-        anchors.leftMargin: 16
-    }
+    Flickable {
+        anchors.fill: parent
+        contentHeight: content.implicitHeight + 28
+        clip: true
 
-    ColumnLayout {
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 24
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        spacing: 16
+        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-        // Logo
-        Image {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 8
-            Layout.preferredWidth: 120
-            Layout.preferredHeight: 120
-            fillMode: Image.PreserveAspectFit
-            sourceSize.width: 120
-            sourceSize.height: 120
-            source: "qrc:/images/fblink_logo.png"
-        }
+        Item {
+            width: parent.width
+            height: content.implicitHeight + 28
 
-        BaseHeaderType {
-            Layout.fillWidth: true
-            headerText: root.codeSent ? qsTr("Подтверждение email") : qsTr("Создание аккаунта")
-            descriptionText: root.codeSent
-                ? qsTr("Введите код, отправленный на ") + root.pendingEmail
-                : qsTr("Зарегистрируйтесь в сервисе FBLink VPN")
-        }
+            ColumnLayout {
+                id: content
+                width: Math.min(root.maxContentWidth, parent.width - root.sideMargin * 2)
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                spacing: 18
 
-        // Error
-        Rectangle {
-            Layout.fillWidth: true
-            height: errorText.implicitHeight + 16
-            color: "#3D1515"
-            radius: 8
-            visible: root.errorMessage !== ""
-
-            LabelTextType {
-                id: errorText
-                anchors.centerIn: parent
-                anchors.margins: 8
-                width: parent.width - 16
-                text: root.errorMessage
-                color: "#FF6B6B"
-                wrapMode: Text.WordWrap
-                font.pixelSize: 13
-            }
-        }
-
-        // Step 1: Email + Password
-        TextFieldWithHeaderType {
-            id: emailField
-            Layout.fillWidth: true
-            headerText: qsTr("Email")
-            textField.placeholderText: "you@example.com"
-            textField.inputMethodHints: Qt.ImhEmailCharactersOnly
-            visible: !root.codeSent
-        }
-
-        TextFieldWithHeaderType {
-            id: passwordField
-            property bool hidePassword: true
-            Layout.fillWidth: true
-            headerText: qsTr("Пароль")
-            textField.placeholderText: "••••••••"
-            textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-            buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-            clickedFunc: function() { hidePassword = !hidePassword }
-            visible: !root.codeSent
-        }
-
-        TextFieldWithHeaderType {
-            id: confirmPasswordField
-            property bool hidePassword: true
-            Layout.fillWidth: true
-            headerText: qsTr("Подтвердите пароль")
-            textField.placeholderText: "••••••••"
-            textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-            buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-            clickedFunc: function() { hidePassword = !hidePassword }
-            visible: !root.codeSent
-        }
-
-        // Step 2: Verification code
-        TextFieldWithHeaderType {
-            id: codeField
-            Layout.fillWidth: true
-            headerText: qsTr("Код подтверждения")
-            textField.placeholderText: "000000"
-            textField.inputMethodHints: Qt.ImhDigitsOnly
-            textField.maximumLength: 6
-            visible: root.codeSent
-        }
-
-        Item { Layout.fillHeight: true }
-
-        // Login link
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
-            visible: !root.codeSent
-
-            LabelTextType {
-                text: qsTr("Уже есть аккаунт?")
-                color: FBLinkStyle.color.mutedGray
-                font.pixelSize: 14
-            }
-            ButtonTextType {
-                text: qsTr("Войти")
-                font.pixelSize: 14
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: PageController.goToPage(PageEnum.PageFBLinkLogin)
+                BackButtonType {
+                    Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                    Layout.leftMargin: 4
                 }
-            }
-        }
 
-        // Resend code link
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
-            visible: root.codeSent
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: root.wideLayout ? 2 : 1
+                    columnSpacing: 18
+                    rowSpacing: 18
 
-            ButtonTextType {
-                text: root.resendCooldown > 0
-                    ? qsTr("Отправить повторно (%1 сек)").arg(root.resendCooldown)
-                    : qsTr("Отправить код повторно")
-                font.pixelSize: 14
-                opacity: root.resendCooldown > 0 ? 0.5 : 1.0
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: root.resendCooldown > 0 ? Qt.ArrowCursor : Qt.PointingHandCursor
-                    onClicked: {
-                        if (root.resendCooldown > 0) return
-                        root.errorMessage = ""
-                        root.isLoading = true
-                        PageController.showBusyIndicator(true)
-                        FBLinkController.registerUser(root.pendingEmail, passwordField.textField.text)
+                    PremiumPanel {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
+                        accentVisible: true
+                        accentColor: "#10B981"
+                        visible: root.wideLayout
+
+                        PremiumBadge {
+                            text: root.codeSent ? qsTr("Шаг 2 из 2") : qsTr("Шаг 1 из 2")
+                            tone: "success"
+                            iconSource: "qrc:/images/controls/mail.svg"
+                        }
+
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: root.codeSent
+                                ? qsTr("Подтвердите email и завершите вход")
+                                : qsTr("Создайте FBLink ID и сразу синхронизируйте приложение")
+                            font.pixelSize: 28
+                            font.weight: 700
+                            color: FBLinkStyle.color.paleGray
+                            wrapMode: Text.WordWrap
+                        }
+
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: root.codeSent
+                                ? qsTr("Код уже отправлен на %1. После подтверждения аккаунт сразу готов к использованию.").arg(root.pendingEmail)
+                                : qsTr("Новый поток регистрации не перегружает формами: сначала аккаунт, потом подтверждение и синхронизация конфигов.")
+                            wrapMode: Text.WordWrap
+                            font.pixelSize: 14
+                            color: FBLinkStyle.color.mutedGray
+                        }
+                    }
+
+                    PremiumPanel {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
+                        accentVisible: true
+                        accentColor: "#00C8FF"
+
+                        Image {
+                            visible: !root.wideLayout
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.preferredWidth: 88
+                            Layout.preferredHeight: 88
+                            fillMode: Image.PreserveAspectFit
+                            source: "qrc:/images/fblink_logo.png"
+                        }
+
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: root.codeSent ? qsTr("Подтверждение email") : qsTr("Создание аккаунта")
+                            font.pixelSize: 26
+                            font.weight: 700
+                            color: FBLinkStyle.color.paleGray
+                        }
+
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: root.codeSent
+                                ? qsTr("Введите код, отправленный на %1.").arg(root.pendingEmail)
+                                : qsTr("Создайте аккаунт FBLink VPN и получите доступ к premium и VIP-потоку без перегруженных экранов.")
+                            wrapMode: Text.WordWrap
+                            font.pixelSize: 14
+                            color: FBLinkStyle.color.mutedGray
+                        }
+
+                        WarningType {
+                            Layout.fillWidth: true
+                            visible: root.errorMessage !== ""
+                            textString: root.errorMessage
+                            iconPath: "qrc:/images/controls/alert-circle.svg"
+                            backGroundColor: Qt.rgba(239/255, 68/255, 68/255, 0.12)
+                            imageColor: "#EF4444"
+                            textColor: "#FFB4B4"
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: emailField
+                            Layout.fillWidth: true
+                            headerText: qsTr("Email")
+                            textField.placeholderText: "you@example.com"
+                            textField.inputMethodHints: Qt.ImhEmailCharactersOnly
+                            visible: !root.codeSent
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: passwordField
+                            property bool hidePassword: true
+                            Layout.fillWidth: true
+                            headerText: qsTr("Пароль")
+                            textField.placeholderText: "••••••••"
+                            textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
+                            buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+                            clickedFunc: function() { hidePassword = !hidePassword }
+                            visible: !root.codeSent
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: confirmPasswordField
+                            property bool hidePassword: true
+                            Layout.fillWidth: true
+                            headerText: qsTr("Подтвердите пароль")
+                            textField.placeholderText: "••••••••"
+                            textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
+                            buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+                            clickedFunc: function() { hidePassword = !hidePassword }
+                            visible: !root.codeSent
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: codeField
+                            Layout.fillWidth: true
+                            headerText: qsTr("Код подтверждения")
+                            textField.placeholderText: "000000"
+                            textField.inputMethodHints: Qt.ImhDigitsOnly
+                            textField.maximumLength: 6
+                            visible: root.codeSent
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            visible: !root.codeSent
+                            spacing: 6
+
+                            Item { Layout.fillWidth: true }
+
+                            LabelTextType {
+                                text: qsTr("Уже есть аккаунт?")
+                                color: FBLinkStyle.color.mutedGray
+                                font.pixelSize: 14
+                            }
+
+                            ButtonTextType {
+                                text: qsTr("Войти")
+                                font.pixelSize: 14
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: PageController.goToPage(PageEnum.PageFBLinkLogin)
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            visible: root.codeSent
+                            spacing: 6
+
+                            Item { Layout.fillWidth: true }
+
+                            ButtonTextType {
+                                text: root.resendCooldown > 0
+                                    ? qsTr("Отправить повторно (%1 сек)").arg(root.resendCooldown)
+                                    : qsTr("Отправить код повторно")
+                                font.pixelSize: 14
+                                opacity: root.resendCooldown > 0 ? 0.5 : 1.0
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: root.resendCooldown > 0 ? Qt.ArrowCursor : Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (root.resendCooldown > 0) return
+                                        root.errorMessage = ""
+                                        root.isLoading = true
+                                        PageController.showBusyIndicator(true)
+                                        FBLinkController.registerUser(root.pendingEmail, passwordField.textField.text)
+                                    }
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true }
+                        }
+
+                        BasicButtonType {
+                            Layout.fillWidth: true
+                            defaultColor: "#00C8FF"
+                            hoveredColor: "#33D4FF"
+                            pressedColor: "#0099BB"
+                            disabledColor: FBLinkStyle.color.mutedGray
+                            textColor: "#FFFFFF"
+                            enabled: !root.isLoading
+                            text: root.isLoading
+                                ? (root.codeSent ? qsTr("Проверка...") : qsTr("Отправка..."))
+                                : (root.codeSent ? qsTr("Подтвердить") : qsTr("Создать аккаунт"))
+                            clickedFunc: function() {
+                                root.errorMessage = ""
+
+                                if (root.codeSent) {
+                                    var code = codeField.textField.text.trim()
+                                    if (code.length !== 6) {
+                                        root.errorMessage = qsTr("Введите 6-значный код")
+                                        return
+                                    }
+                                    root.isLoading = true
+                                    PageController.showBusyIndicator(true)
+                                    FBLinkController.verifyEmail(root.pendingEmail, code)
+                                } else {
+                                    var email = emailField.textField.text.trim()
+                                    var password = passwordField.textField.text
+                                    var confirmPassword = confirmPasswordField.textField.text
+
+                                    if (email === "" || password === "" || confirmPassword === "") {
+                                        root.errorMessage = qsTr("Пожалуйста, заполните все поля")
+                                        return
+                                    }
+                                    if (password !== confirmPassword) {
+                                        root.errorMessage = qsTr("Пароли не совпадают")
+                                        return
+                                    }
+                                    if (password.length < 8) {
+                                        root.errorMessage = qsTr("Пароль должен быть не менее 8 символов")
+                                        return
+                                    }
+
+                                    root.pendingEmail = email
+                                    root.isLoading = true
+                                    PageController.showBusyIndicator(true)
+                                    FBLinkController.registerUser(email, password)
+                                }
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        BasicButtonType {
-            Layout.fillWidth: true
-            Layout.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
-
-            defaultColor: "#00C8FF"
-            hoveredColor: "#33D4FF"
-            pressedColor: "#0099BB"
-            disabledColor: FBLinkStyle.color.mutedGray
-            textColor: FBLinkStyle.color.paleGray
-
-            enabled: !root.isLoading
-            text: root.isLoading
-                ? (root.codeSent ? qsTr("Проверка...") : qsTr("Отправка..."))
-                : (root.codeSent ? qsTr("Подтвердить") : qsTr("Создать аккаунт"))
-
-            clickedFunc: function() {
-                root.errorMessage = ""
-
-                if (root.codeSent) {
-                    // Step 2: verify code
-                    var code = codeField.textField.text.trim()
-                    if (code.length !== 6) {
-                        root.errorMessage = qsTr("Введите 6-значный код")
-                        return
-                    }
-                    root.isLoading = true
-                    PageController.showBusyIndicator(true)
-                    FBLinkController.verifyEmail(root.pendingEmail, code)
-                } else {
-                    // Step 1: send code
-                    var email = emailField.textField.text.trim()
-                    var password = passwordField.textField.text
-                    var confirmPassword = confirmPasswordField.textField.text
-
-                    if (email === "" || password === "" || confirmPassword === "") {
-                        root.errorMessage = qsTr("Пожалуйста, заполните все поля")
-                        return
-                    }
-                    if (password !== confirmPassword) {
-                        root.errorMessage = qsTr("Пароли не совпадают")
-                        return
-                    }
-                    if (password.length < 8) {
-                        root.errorMessage = qsTr("Пароль должен быть не менее 8 символов")
-                        return
-                    }
-
-                    root.pendingEmail = email
-                    root.isLoading = true
-                    PageController.showBusyIndicator(true)
-                    FBLinkController.registerUser(email, password)
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 24 + SettingsController.safeAreaBottomMargin
                 }
             }
         }

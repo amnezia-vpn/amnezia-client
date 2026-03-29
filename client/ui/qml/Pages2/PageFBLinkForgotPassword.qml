@@ -17,9 +17,12 @@ PageType {
     property string errorMessage: ""
     property string successMessage: ""
     property bool isLoading: false
-    property int step: 1 // 1=email, 2=code, 3=new password
+    property int step: 1
     property string pendingEmail: ""
     property int resendCooldown: 0
+    readonly property bool wideLayout: GC.isWideWidth(width)
+    readonly property real sideMargin: GC.pageHorizontalMargin(width)
+    readonly property real maxContentWidth: GC.pageMaxWidth(width)
 
     Timer {
         id: resendTimer
@@ -50,7 +53,7 @@ PageType {
             root.isLoading = false
             PageController.showBusyIndicator(false)
             root.errorMessage = ""
-            root.successMessage = qsTr("Пароль успешно изменён! Войдите с новым паролем.")
+            root.successMessage = qsTr("Пароль успешно изменён. Теперь можно войти с новым паролем.")
             root.step = 0
         }
 
@@ -61,246 +64,282 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
-        anchors.leftMargin: 16
-    }
+    Flickable {
+        anchors.fill: parent
+        contentHeight: content.implicitHeight + 28
+        clip: true
 
-    ColumnLayout {
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 24
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        spacing: 16
+        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-        // Logo
-        Image {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 8
-            Layout.preferredWidth: 120
-            Layout.preferredHeight: 120
-            fillMode: Image.PreserveAspectFit
-            sourceSize.width: 120
-            sourceSize.height: 120
-            source: "qrc:/images/fblink_logo.png"
-        }
+        Item {
+            width: parent.width
+            height: content.implicitHeight + 28
 
-        BaseHeaderType {
-            Layout.fillWidth: true
-            headerText: {
-                if (root.step === 1) return qsTr("Восстановление пароля")
-                if (root.step === 2) return qsTr("Введите код")
-                if (root.step === 3) return qsTr("Новый пароль")
-                return qsTr("Готово")
-            }
-            descriptionText: {
-                if (root.step === 1) return qsTr("Введите email вашего аккаунта")
-                if (root.step === 2) return qsTr("Код отправлен на ") + root.pendingEmail
-                if (root.step === 3) return qsTr("Введите новый пароль")
-                return ""
-            }
-        }
+            ColumnLayout {
+                id: content
+                width: Math.min(root.maxContentWidth, parent.width - root.sideMargin * 2)
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                spacing: 18
 
-        // Error
-        Rectangle {
-            Layout.fillWidth: true
-            height: errorText.implicitHeight + 16
-            color: "#3D1515"
-            radius: 8
-            visible: root.errorMessage !== ""
+                BackButtonType {
+                    Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                    Layout.leftMargin: 4
+                }
 
-            LabelTextType {
-                id: errorText
-                anchors.centerIn: parent
-                anchors.margins: 8
-                width: parent.width - 16
-                text: root.errorMessage
-                color: "#FF6B6B"
-                wrapMode: Text.WordWrap
-                font.pixelSize: 13
-            }
-        }
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: root.wideLayout ? 2 : 1
+                    columnSpacing: 18
+                    rowSpacing: 18
 
-        // Success
-        Rectangle {
-            Layout.fillWidth: true
-            height: successText.implicitHeight + 16
-            color: "#153D1F"
-            radius: 8
-            visible: root.successMessage !== ""
+                    PremiumPanel {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
+                        accentVisible: true
+                        accentColor: "#F59E0B"
+                        visible: root.wideLayout
 
-            LabelTextType {
-                id: successText
-                anchors.centerIn: parent
-                anchors.margins: 8
-                width: parent.width - 16
-                text: root.successMessage
-                color: "#6BFF8A"
-                wrapMode: Text.WordWrap
-                font.pixelSize: 13
-            }
-        }
+                        PremiumBadge {
+                            text: root.step === 0 ? qsTr("Готово") : qsTr("Восстановление")
+                            tone: "warning"
+                            iconSource: "qrc:/images/controls/mail.svg"
+                        }
 
-        // Step 1: Email
-        TextFieldWithHeaderType {
-            id: emailField
-            Layout.fillWidth: true
-            headerText: qsTr("Email")
-            textField.placeholderText: "you@example.com"
-            textField.inputMethodHints: Qt.ImhEmailCharactersOnly
-            visible: root.step === 1
-        }
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: root.step === 0
+                                ? qsTr("Возврат к аккаунту без лишних шагов")
+                                : qsTr("Сброс пароля через понятный пошаговый поток")
+                            font.pixelSize: 28
+                            font.weight: 700
+                            color: FBLinkStyle.color.paleGray
+                            wrapMode: Text.WordWrap
+                        }
 
-        // Step 2: Code
-        TextFieldWithHeaderType {
-            id: codeField
-            Layout.fillWidth: true
-            headerText: qsTr("Код подтверждения")
-            textField.placeholderText: "000000"
-            textField.inputMethodHints: Qt.ImhDigitsOnly
-            textField.maximumLength: 6
-            visible: root.step === 2
-        }
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: root.step === 1
+                                ? qsTr("Сначала указываете email, затем код и новый пароль. На mobile и desktop поток одинаковый и предсказуемый.")
+                                : qsTr("Мы держим только текущий шаг на экране, чтобы форма не превращалась в длинную перегруженную простыню.")
+                            wrapMode: Text.WordWrap
+                            font.pixelSize: 14
+                            color: FBLinkStyle.color.mutedGray
+                        }
+                    }
 
-        // Step 3: New password
-        TextFieldWithHeaderType {
-            id: newPasswordField
-            property bool hidePassword: true
-            Layout.fillWidth: true
-            headerText: qsTr("Новый пароль")
-            textField.placeholderText: "••••••••"
-            textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-            buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-            clickedFunc: function() { hidePassword = !hidePassword }
-            visible: root.step === 3
-        }
+                    PremiumPanel {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
+                        accentVisible: true
+                        accentColor: "#00C8FF"
 
-        TextFieldWithHeaderType {
-            id: confirmPasswordField
-            property bool hidePassword: true
-            Layout.fillWidth: true
-            headerText: qsTr("Подтвердите пароль")
-            textField.placeholderText: "••••••••"
-            textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-            buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-            clickedFunc: function() { hidePassword = !hidePassword }
-            visible: root.step === 3
-        }
+                        Image {
+                            visible: !root.wideLayout
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.preferredWidth: 88
+                            Layout.preferredHeight: 88
+                            fillMode: Image.PreserveAspectFit
+                            source: "qrc:/images/fblink_logo.png"
+                        }
 
-        Item { Layout.fillHeight: true }
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: root.step === 1 ? qsTr("Восстановление пароля")
+                                 : root.step === 2 ? qsTr("Введите код")
+                                 : root.step === 3 ? qsTr("Новый пароль")
+                                 : qsTr("Готово")
+                            font.pixelSize: 26
+                            font.weight: 700
+                            color: FBLinkStyle.color.paleGray
+                        }
 
-        // Resend code link
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
-            visible: root.step === 2
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: root.step === 1 ? qsTr("Введите email вашего аккаунта.")
+                                 : root.step === 2 ? qsTr("Код уже отправлен на %1.").arg(root.pendingEmail)
+                                 : root.step === 3 ? qsTr("Введите и подтвердите новый пароль.")
+                                 : qsTr("Пароль обновлён. Можно возвращаться к входу.")
+                            wrapMode: Text.WordWrap
+                            font.pixelSize: 14
+                            color: FBLinkStyle.color.mutedGray
+                        }
 
-            ButtonTextType {
-                text: root.resendCooldown > 0
-                    ? qsTr("Отправить повторно (%1 сек)").arg(root.resendCooldown)
-                    : qsTr("Отправить код повторно")
-                font.pixelSize: 14
-                opacity: root.resendCooldown > 0 ? 0.5 : 1.0
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: root.resendCooldown > 0 ? Qt.ArrowCursor : Qt.PointingHandCursor
-                    onClicked: {
-                        if (root.resendCooldown > 0) return
-                        root.errorMessage = ""
-                        root.isLoading = true
-                        PageController.showBusyIndicator(true)
-                        FBLinkController.forgotPassword(root.pendingEmail)
+                        WarningType {
+                            Layout.fillWidth: true
+                            visible: root.errorMessage !== ""
+                            textString: root.errorMessage
+                            iconPath: "qrc:/images/controls/alert-circle.svg"
+                            backGroundColor: Qt.rgba(239/255, 68/255, 68/255, 0.12)
+                            imageColor: "#EF4444"
+                            textColor: "#FFB4B4"
+                        }
+
+                        WarningType {
+                            Layout.fillWidth: true
+                            visible: root.successMessage !== ""
+                            textString: root.successMessage
+                            iconPath: "qrc:/images/controls/check.svg"
+                            backGroundColor: Qt.rgba(16/255, 185/255, 129/255, 0.12)
+                            imageColor: "#10B981"
+                            textColor: "#B6F2D2"
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: emailField
+                            Layout.fillWidth: true
+                            headerText: qsTr("Email")
+                            textField.placeholderText: "you@example.com"
+                            textField.inputMethodHints: Qt.ImhEmailCharactersOnly
+                            visible: root.step === 1
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: codeField
+                            Layout.fillWidth: true
+                            headerText: qsTr("Код подтверждения")
+                            textField.placeholderText: "000000"
+                            textField.inputMethodHints: Qt.ImhDigitsOnly
+                            textField.maximumLength: 6
+                            visible: root.step === 2
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: newPasswordField
+                            property bool hidePassword: true
+                            Layout.fillWidth: true
+                            headerText: qsTr("Новый пароль")
+                            textField.placeholderText: "••••••••"
+                            textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
+                            buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+                            clickedFunc: function() { hidePassword = !hidePassword }
+                            visible: root.step === 3
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: confirmPasswordField
+                            property bool hidePassword: true
+                            Layout.fillWidth: true
+                            headerText: qsTr("Подтвердите пароль")
+                            textField.placeholderText: "••••••••"
+                            textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
+                            buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+                            clickedFunc: function() { hidePassword = !hidePassword }
+                            visible: root.step === 3
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            visible: root.step === 2
+                            spacing: 6
+
+                            Item { Layout.fillWidth: true }
+
+                            ButtonTextType {
+                                text: root.resendCooldown > 0
+                                    ? qsTr("Отправить повторно (%1 сек)").arg(root.resendCooldown)
+                                    : qsTr("Отправить код повторно")
+                                font.pixelSize: 14
+                                opacity: root.resendCooldown > 0 ? 0.5 : 1.0
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: root.resendCooldown > 0 ? Qt.ArrowCursor : Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (root.resendCooldown > 0) return
+                                        root.errorMessage = ""
+                                        root.isLoading = true
+                                        PageController.showBusyIndicator(true)
+                                        FBLinkController.forgotPassword(root.pendingEmail)
+                                    }
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            visible: root.step === 0
+
+                            Item { Layout.fillWidth: true }
+
+                            ButtonTextType {
+                                text: qsTr("Вернуться к входу")
+                                font.pixelSize: 14
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: PageController.goToPage(PageEnum.PageFBLinkLogin)
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true }
+                        }
+
+                        BasicButtonType {
+                            Layout.fillWidth: true
+                            visible: root.step > 0
+                            defaultColor: "#00C8FF"
+                            hoveredColor: "#33D4FF"
+                            pressedColor: "#0099BB"
+                            disabledColor: FBLinkStyle.color.mutedGray
+                            textColor: "#FFFFFF"
+                            enabled: !root.isLoading
+                            text: root.isLoading
+                                ? qsTr("Отправка...")
+                                : root.step === 1 ? qsTr("Отправить код")
+                                : root.step === 2 ? qsTr("Далее")
+                                : qsTr("Сменить пароль")
+                            clickedFunc: function() {
+                                root.errorMessage = ""
+
+                                if (root.step === 1) {
+                                    var email = emailField.textField.text.trim()
+                                    if (email === "") {
+                                        root.errorMessage = qsTr("Введите email")
+                                        return
+                                    }
+                                    root.pendingEmail = email
+                                    root.isLoading = true
+                                    PageController.showBusyIndicator(true)
+                                    FBLinkController.forgotPassword(email)
+                                } else if (root.step === 2) {
+                                    var code = codeField.textField.text.trim()
+                                    if (code.length !== 6) {
+                                        root.errorMessage = qsTr("Введите 6-значный код")
+                                        return
+                                    }
+                                    root.step = 3
+                                } else if (root.step === 3) {
+                                    var password = newPasswordField.textField.text
+                                    var confirmPassword = confirmPasswordField.textField.text
+                                    var resetCode = codeField.textField.text.trim()
+
+                                    if (password === "" || confirmPassword === "") {
+                                        root.errorMessage = qsTr("Пожалуйста, заполните все поля")
+                                        return
+                                    }
+                                    if (password !== confirmPassword) {
+                                        root.errorMessage = qsTr("Пароли не совпадают")
+                                        return
+                                    }
+                                    if (password.length < 8) {
+                                        root.errorMessage = qsTr("Пароль должен быть не менее 8 символов")
+                                        return
+                                    }
+
+                                    root.isLoading = true
+                                    PageController.showBusyIndicator(true)
+                                    FBLinkController.resetPassword(root.pendingEmail, resetCode, password)
+                                }
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        // Back to login link (shown on success)
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
-            visible: root.step === 0
-
-            ButtonTextType {
-                text: qsTr("Вернуться к входу")
-                font.pixelSize: 14
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: PageController.goToPage(PageEnum.PageFBLinkLogin)
-                }
-            }
-        }
-
-        BasicButtonType {
-            Layout.fillWidth: true
-            Layout.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
-
-            defaultColor: "#00C8FF"
-            hoveredColor: "#33D4FF"
-            pressedColor: "#0099BB"
-            disabledColor: FBLinkStyle.color.mutedGray
-            textColor: FBLinkStyle.color.paleGray
-
-            enabled: !root.isLoading
-            visible: root.step > 0
-
-            text: {
-                if (root.isLoading) {
-                    return qsTr("Отправка...")
-                }
-                if (root.step === 1) return qsTr("Отправить код")
-                if (root.step === 2) return qsTr("Далее")
-                return qsTr("Сменить пароль")
-            }
-
-            clickedFunc: function() {
-                root.errorMessage = ""
-
-                if (root.step === 1) {
-                    var email = emailField.textField.text.trim()
-                    if (email === "") {
-                        root.errorMessage = qsTr("Введите email")
-                        return
-                    }
-                    root.pendingEmail = email
-                    root.isLoading = true
-                    PageController.showBusyIndicator(true)
-                    FBLinkController.forgotPassword(email)
-                } else if (root.step === 2) {
-                    var code = codeField.textField.text.trim()
-                    if (code.length !== 6) {
-                        root.errorMessage = qsTr("Введите 6-значный код")
-                        return
-                    }
-                    // Move to step 3 (enter new password)
-                    root.step = 3
-                } else if (root.step === 3) {
-                    var password = newPasswordField.textField.text
-                    var confirmPassword = confirmPasswordField.textField.text
-
-                    if (password === "" || confirmPassword === "") {
-                        root.errorMessage = qsTr("Пожалуйста, заполните все поля")
-                        return
-                    }
-                    if (password !== confirmPassword) {
-                        root.errorMessage = qsTr("Пароли не совпадают")
-                        return
-                    }
-                    if (password.length < 8) {
-                        root.errorMessage = qsTr("Пароль должен быть не менее 8 символов")
-                        return
-                    }
-
-                    root.isLoading = true
-                    PageController.showBusyIndicator(true)
-                    FBLinkController.resetPassword(root.pendingEmail, codeField.textField.text.trim(), password)
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 24 + SettingsController.safeAreaBottomMargin
                 }
             }
         }

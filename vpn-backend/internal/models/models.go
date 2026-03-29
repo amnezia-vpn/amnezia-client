@@ -144,15 +144,27 @@ const (
 	RoutingProfileCustom RoutingProfileKind = "custom"
 )
 
+type RoutingProfileAction string
+
+const (
+	RoutingProfileDirect RoutingProfileAction = "direct"
+	RoutingProfileProxy  RoutingProfileAction = "proxy"
+)
+
 type RoutingProfile struct {
 	gorm.Model
-	UserID             uint               `gorm:"not null;index"`
-	Name               string             `gorm:"not null"`
-	Kind               RoutingProfileKind `gorm:"default:'custom'"`
-	Enabled            bool               `gorm:"default:false"`
-	DomainsJSON        string             `gorm:"default:'[]'"`
-	DomainSuffixesJSON string             `gorm:"default:'[]'"`
-	CIDRsJSON          string             `gorm:"default:'[]'"`
+	UserID             uint                 `gorm:"not null;index"`
+	Name               string               `gorm:"not null"`
+	Code               string               `gorm:"default:'';index"`
+	Kind               RoutingProfileKind   `gorm:"default:'custom'"`
+	Action             RoutingProfileAction `gorm:"default:'direct'"`
+	Enabled            bool                 `gorm:"default:false"`
+	Description        string               `gorm:"default:''"`
+	Icon               string               `gorm:"default:''"`
+	SortOrder          int                  `gorm:"default:0"`
+	DomainsJSON        string               `gorm:"default:'[]'"`
+	DomainSuffixesJSON string               `gorm:"default:'[]'"`
+	CIDRsJSON          string               `gorm:"default:'[]'"`
 
 	User User
 }

@@ -50,8 +50,8 @@ Button {
     Keys.onLeftPressed:     FocusController.nextKeyLeftItem()
     Keys.onRightPressed:    FocusController.nextKeyRightItem()
 
-    implicitWidth: 190
-    implicitHeight: 190
+    implicitWidth: Qt.platform.os === "android" || Qt.platform.os === "ios" ? 164 : 188
+    implicitHeight: Qt.platform.os === "android" || Qt.platform.os === "ios" ? 164 : 188
     padding: 0
 
     text: root.isNotLoggedIn
@@ -240,7 +240,7 @@ Button {
 
                 font.family: "PT Root UI VF"
                 font.weight: 700
-                font.pixelSize: root.isSubscriptionRequired ? 16 : 20
+                font.pixelSize: root.isSubscriptionRequired ? 15 : 19
 
                 transform: Translate { x: shakeTranslate.x }
 
@@ -252,6 +252,18 @@ Button {
 
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: !root.isSubscriptionRequired
+                text: ConnectionController.isConnected
+                    ? qsTr("Нажмите для отключения")
+                    : qsTr("Нажмите для подключения")
+                font.family: "PT Root UI VF"
+                font.pixelSize: 11
+                color: Qt.rgba(1, 1, 1, 0.65)
+                horizontalAlignment: Text.AlignHCenter
             }
 
             // Sub-label when locked
