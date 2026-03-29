@@ -1,6 +1,7 @@
 #include "fblink_controller.h"
 
 #include <QNetworkRequest>
+#include <QNetworkProxy>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -9,9 +10,64 @@
 #include <QDate>
 #include <QDateTime>
 #include <QTimer>
+#include <QVariantList>
 
 // Backend API URL
 const QString BACKEND_URL = "https://srv.frakebit.com/api/v1";
+
+namespace
+{
+bool stringListContainsInsensitive(const QStringList &values, const QString &expected)
+{
+    for (const QString &value : values) {
+        if (value.compare(expected, Qt::CaseInsensitive) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isFBLinkServer(const QJsonObject &server)
+{
+    const QString description = server.value("description").toString();
+    const QString name = server.value("name").toString();
+    return description.startsWith("FBLink VPN")
+            || name.startsWith("FBLink VPN")
+            || server.value("fblink_server").toBool();
+}
+
+bool serverHasContainer(const QJsonObject &server, const QString &containerName)
+{
+    const QJsonArray containers = server.value("containers").toArray();
+    for (const QJsonValue &containerValue : containers) {
+        const QJsonObject containerObject = containerValue.toObject();
+        if (containerObject.value("container").toString().compare(containerName, Qt::CaseInsensitive) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+QString networkOperationToString(QNetworkAccessManager::Operation operation)
+{
+    switch (operation) {
+    case QNetworkAccessManager::HeadOperation:
+        return "HEAD";
+    case QNetworkAccessManager::GetOperation:
+        return "GET";
+    case QNetworkAccessManager::PutOperation:
+        return "PUT";
+    case QNetworkAccessManager::PostOperation:
+        return "POST";
+    case QNetworkAccessManager::DeleteOperation:
+        return "DELETE";
+    case QNetworkAccessManager::CustomOperation:
+        return "CUSTOM";
+    default:
+        return "UNKNOWN";
+    }
+}
+} // namespace
 
 FBLinkController::FBLinkController(ImportController *importController,
                                      const std::shared_ptr<Settings> &settings,
@@ -22,17 +78,16 @@ FBLinkController::FBLinkController(ImportController *importController,
       m_serversModel(serversModel)
 {
     m_nam = new QNetworkAccessManager(this);
+    m_nam->setProxy(QNetworkProxy(QNetworkProxy::NoProxy));
     m_apiUrl = BACKEND_URL;
 
-    // Lazy sync at startup: если пользователь уже залогинен — сначала обновляем токен (sliding window),
-    // потом синхронизируем конфиги. Если refresh провалится — logout().
+    // Lazy sync at startup: если пользователь уже залогинен — сразу идём в bootstrap
+    // через текущий access token. Refresh произойдёт только при реальном 401 внутри
+    // fetchSubscription()/fetchConfig(), что убирает лишний round-trip на каждый запуск.
     if (isLoggedIn()) {
-        m_isLoading = true;
-        emit loadingChanged();
+        setLoadingState(true);
         QTimer::singleShot(0, this, [this]() {
-            refreshAccessToken([this]() {
-                beginSessionSync();
-            });
+            beginSessionSync();
         });
     }
 }
@@ -40,7 +95,65 @@ FBLinkController::FBLinkController(ImportController *importController,
 void FBLinkController::beginSessionSync()
 {
     m_fetchConfigAfterSubscription = true;
-    fetchSubscription();
+    fetchSubscription(true);
+}
+
+QNetworkRequest FBLinkController::createApiRequest(const QString &path, bool isJsonRequest, bool authorized) const
+{
+    QNetworkRequest request(QUrl(m_apiUrl + path));
+    request.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
+
+    if (isJsonRequest) {
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    }
+
+    if (authorized) {
+        const QString token = getJwtToken();
+        if (!token.isEmpty()) {
+            request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+        }
+    }
+
+    return request;
+}
+
+void FBLinkController::logApiFailure(const QString &operationName, QNetworkReply *reply) const
+{
+    if (!reply) {
+        return;
+    }
+
+    const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    qWarning().noquote()
+        << QString("[FBLink API] %1 failed: %2 %3, http=%4, error=%5 (%6)")
+              .arg(operationName,
+                   networkOperationToString(reply->operation()),
+                   reply->request().url().toString(),
+                   QString::number(httpStatus),
+                   QString::number(reply->error()),
+                   reply->errorString());
+}
+
+bool FBLinkController::shouldRefreshToken(QNetworkReply *reply) const
+{
+    if (!reply) {
+        return false;
+    }
+
+    const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    return reply->error() == QNetworkReply::AuthenticationRequiredError
+           || reply->error() == QNetworkReply::ContentAccessDenied
+           || httpStatus == 401;
+}
+
+void FBLinkController::setLoadingState(bool isLoading)
+{
+    if (m_isLoading == isLoading) {
+        return;
+    }
+
+    m_isLoading = isLoading;
+    emit loadingChanged();
 }
 
 void FBLinkController::login(const QString &email, const QString &password)
@@ -50,9 +163,7 @@ void FBLinkController::login(const QString &email, const QString &password)
         return;
     }
 
-    QUrl url(m_apiUrl + "/auth/login");
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QNetworkRequest request = createApiRequest("/auth/login", true, false);
 
     QJsonObject json;
     json["email"] = email;
@@ -73,12 +184,14 @@ void FBLinkController::login(const QString &email, const QString &password)
                 if (obj.contains("refresh_token"))
                     saveRefreshToken(obj["refresh_token"].toString());
                 saveSubscriptionInfo("", "", "");  // Clear stale data from previous user
+                setLoadingState(true);
                 emit loginSuccess();
                 emit loginStateChanged();
                 emit subscriptionChanged();
 
                 beginSessionSync();
             } else {
+                setLoadingState(false);
                 emit loginError(tr("Некорректный формат ответа сервера"));
             }
         } else {
@@ -88,6 +201,8 @@ void FBLinkController::login(const QString &email, const QString &password)
             if(!doc.isNull() && doc.object().contains("error")) {
                 errStr = doc.object()["error"].toString();
             }
+            logApiFailure("login", reply);
+            setLoadingState(false);
             emit loginError(errStr);
         }
     });
@@ -95,9 +210,7 @@ void FBLinkController::login(const QString &email, const QString &password)
 
 void FBLinkController::registerUser(const QString &email, const QString &password)
 {
-    QUrl url(m_apiUrl + "/auth/register");
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QNetworkRequest request = createApiRequest("/auth/register", true, false);
 
     QJsonObject json;
     json["email"] = email;
@@ -115,6 +228,7 @@ void FBLinkController::registerUser(const QString &email, const QString &passwor
             QString errStr = tr("Ошибка регистрации");
             if (!doc.isNull() && doc.object().contains("error"))
                 errStr = doc.object()["error"].toString();
+            logApiFailure("register", reply);
             emit registerError(errStr);
         }
     });
@@ -122,9 +236,7 @@ void FBLinkController::registerUser(const QString &email, const QString &passwor
 
 void FBLinkController::verifyEmail(const QString &email, const QString &code)
 {
-    QUrl url(m_apiUrl + "/auth/verify");
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QNetworkRequest request = createApiRequest("/auth/verify", true, false);
 
     QJsonObject json;
     json["email"] = email;
@@ -144,11 +256,13 @@ void FBLinkController::verifyEmail(const QString &email, const QString &code)
                 if (obj.contains("refresh_token"))
                     saveRefreshToken(obj["refresh_token"].toString());
                 saveSubscriptionInfo("", "", "");
+                setLoadingState(true);
                 emit verifySuccess();
                 emit loginStateChanged();
                 emit subscriptionChanged();
                 beginSessionSync();
             } else {
+                setLoadingState(false);
                 emit verifyError(tr("Неверный ответ сервера"));
             }
         } else {
@@ -157,6 +271,8 @@ void FBLinkController::verifyEmail(const QString &email, const QString &code)
             QString errStr = tr("Неверный код");
             if (!doc.isNull() && doc.object().contains("error"))
                 errStr = doc.object()["error"].toString();
+            logApiFailure("verify", reply);
+            setLoadingState(false);
             emit verifyError(errStr);
         }
     });
@@ -164,9 +280,7 @@ void FBLinkController::verifyEmail(const QString &email, const QString &code)
 
 void FBLinkController::forgotPassword(const QString &email)
 {
-    QUrl url(m_apiUrl + "/auth/forgot-password");
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QNetworkRequest request = createApiRequest("/auth/forgot-password", true, false);
 
     QJsonObject json;
     json["email"] = email;
@@ -178,6 +292,7 @@ void FBLinkController::forgotPassword(const QString &email)
         if (reply->error() == QNetworkReply::NoError) {
             emit forgotPasswordSent();
         } else {
+            logApiFailure("forgot-password", reply);
             emit forgotPasswordError(tr("Ошибка отправки кода"));
         }
     });
@@ -185,9 +300,7 @@ void FBLinkController::forgotPassword(const QString &email)
 
 void FBLinkController::resetPassword(const QString &email, const QString &code, const QString &newPassword)
 {
-    QUrl url(m_apiUrl + "/auth/reset-password");
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QNetworkRequest request = createApiRequest("/auth/reset-password", true, false);
 
     QJsonObject json;
     json["email"] = email;
@@ -206,6 +319,7 @@ void FBLinkController::resetPassword(const QString &email, const QString &code, 
             QString errStr = tr("Ошибка сброса пароля");
             if (!doc.isNull() && doc.object().contains("error"))
                 errStr = doc.object()["error"].toString();
+            logApiFailure("reset-password", reply);
             emit resetPasswordError(errStr);
         }
     });
@@ -215,6 +329,7 @@ void FBLinkController::loginWithToken(const QString &token)
 {
     saveJwtToken(token);
     saveSubscriptionInfo("", "", "");
+    setLoadingState(true);
     emit loginStateChanged();
     emit subscriptionChanged();
     beginSessionSync();
@@ -222,19 +337,22 @@ void FBLinkController::loginWithToken(const QString &token)
 
 void FBLinkController::fetchConfig()
 {
+    fetchConfig(true);
+}
+
+void FBLinkController::fetchConfig(bool allowRefreshRetry)
+{
     QString token = getJwtToken();
     if (token.isEmpty()) {
         emit configError(tr("Не выполнен вход в систему"));
         return;
     }
 
-    QUrl url(m_apiUrl + "/me/config");
-    QNetworkRequest request(url);
-    request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+    QNetworkRequest request = createApiRequest("/me/config", false, true);
 
     QNetworkReply *reply = m_nam->get(request);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, allowRefreshRetry]() {
         reply->deleteLater();
 
         if (reply->error() == QNetworkReply::NoError) {
@@ -254,10 +372,7 @@ void FBLinkController::fetchConfig()
                     // Locate all existing FBLink VPN servers by description prefix or fblink_server marker
                     for (int i = 0; i < servers.size(); ++i) {
                         QJsonObject server = servers.at(i).toObject();
-                        QString desc = server.value("description").toString();
-                        QString name = server.value("name").toString();
-                        if (desc.startsWith("FBLink VPN") || name.startsWith("FBLink VPN")
-                            || server.value("fblink_server").toBool()) {
+                        if (isFBLinkServer(server)) {
                             existingFBLinkServerIndices.append(i);
                         }
                     }
@@ -330,11 +445,48 @@ void FBLinkController::fetchConfig()
                         }
                     }
 
+                    const QStringList subscriptionProtocols = allowedProtocols();
+                    QString preferredContainer = "fblink-awg";
+                    if (stringListContainsInsensitive(subscriptionProtocols, "vless")
+                        || stringListContainsInsensitive(subscriptionProtocols, "xray")
+                        || subscriptionPlan().compare("vip", Qt::CaseInsensitive) == 0) {
+                        preferredContainer = "fblink-xray";
+                    }
+
+                    const QJsonArray syncedServers = m_settings->serversArray();
+                    int preferredServerIndex = -1;
+                    for (int i = 0; i < syncedServers.size(); ++i) {
+                        QJsonObject server = syncedServers.at(i).toObject();
+                        if (!isFBLinkServer(server)) {
+                            continue;
+                        }
+
+                        const QString defaultContainer = server.value("defaultContainer").toString();
+                        if (defaultContainer.compare(preferredContainer, Qt::CaseInsensitive) == 0) {
+                            preferredServerIndex = i;
+                            break;
+                        }
+
+                        if (serverHasContainer(server, preferredContainer)) {
+                            server["defaultContainer"] = preferredContainer;
+                            m_serversModel->editServer(server, i);
+                            preferredServerIndex = i;
+                            break;
+                        }
+                    }
+
+                    if (preferredServerIndex >= 0) {
+                        m_serversModel->setDefaultServerIndex(preferredServerIndex);
+                        m_serversModel->setProcessedServerIndex(preferredServerIndex);
+                    }
+
                     emit configFetched();
                 } else {
+                    setLoadingState(false);
                     emit configError(tr("Внутренняя ошибка: Контроллеры не инициализированы"));
                 }
             } else {
+                setLoadingState(false);
                 emit configError(tr("Сервер не вернул конфигурацию"));
             }
         } else {
@@ -344,16 +496,17 @@ void FBLinkController::fetchConfig()
              if(!doc.isNull() && doc.object().contains("error")) {
                  errStr = doc.object()["error"].toString();
              }
-             emit configError(errStr);
+             logApiFailure("fetch-config", reply);
 
-             // If Unauthorized (401), try refresh before logging out
-             if (reply->error() == QNetworkReply::AuthenticationRequiredError ||
-                 reply->error() == QNetworkReply::ContentAccessDenied) {
+             if (allowRefreshRetry && shouldRefreshToken(reply)) {
                  refreshAccessToken([this]() {
-                     fetchConfig();
-                     fetchSubscription();
+                     fetchConfig(false);
                  });
+                 return;
              }
+
+             setLoadingState(false);
+             emit configError(errStr);
         }
     });
 }
@@ -376,23 +529,25 @@ void FBLinkController::clearExistingFBLinkServers()
 
 void FBLinkController::createPayment(const QString &plan)
 {
+    createPayment(plan, true);
+}
+
+void FBLinkController::createPayment(const QString &plan, bool allowRefreshRetry)
+{
     QString token = getJwtToken();
     if (token.isEmpty()) {
         emit paymentError(tr("Необходимо войти в аккаунт"));
         return;
     }
 
-    QUrl url(m_apiUrl + "/payments/create");
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+    QNetworkRequest request = createApiRequest("/payments/create", true, true);
 
     QJsonObject json;
     json["plan"] = plan;
 
     QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, plan, allowRefreshRetry]() {
         reply->deleteLater();
 
         QByteArray responseData = reply->readAll();
@@ -403,12 +558,15 @@ void FBLinkController::createPayment(const QString &plan)
             QString confirmUrl = obj.value("confirmation_url").toString();
             emit paymentCreated(confirmUrl);
         } else {
-            int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            if (httpStatus == 401) {
-                logout();
-                emit paymentError(tr("Сессия истекла, войдите снова"));
+            logApiFailure("create-payment", reply);
+
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this, plan]() {
+                    createPayment(plan, false);
+                });
                 return;
             }
+
             QString errStr = obj.contains("error") ? obj["error"].toString()
                                                     : tr("Ошибка создания платежа: ") + reply->errorString();
             emit paymentError(errStr);
@@ -418,19 +576,22 @@ void FBLinkController::createPayment(const QString &plan)
 
 void FBLinkController::fetchSubscription()
 {
+    fetchSubscription(true);
+}
+
+void FBLinkController::fetchSubscription(bool allowRefreshRetry)
+{
     QString token = getJwtToken();
     if (token.isEmpty()) {
         emit subscriptionError(tr("Не выполнен вход в систему"));
         return;
     }
 
-    QUrl url(m_apiUrl + "/me/subscription");
-    QNetworkRequest request(url);
-    request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+    QNetworkRequest request = createApiRequest("/me/subscription", false, true);
 
     QNetworkReply *reply = m_nam->get(request);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, allowRefreshRetry]() {
         reply->deleteLater();
 
         if (reply->error() == QNetworkReply::NoError) {
@@ -444,21 +605,27 @@ void FBLinkController::fetchSubscription()
             bool autoRenew        = obj.value("auto_renew").toBool(true);
             bool cardSaved        = obj.value("card_saved").toBool(false);
             bool trialAvailable   = obj.value("trial_available").toBool(false);
+            QStringList allowedProtocols;
+            for (const QJsonValue &item : obj.value("allowed_protocols").toArray()) {
+                allowedProtocols.append(item.toString());
+            }
+            const bool canUseSiteSplitTunneling = obj.value("can_use_site_split_tunneling").toBool(false);
+            const bool canUseAppSplitTunneling = obj.value("can_use_app_split_tunneling").toBool(false);
+            const bool canManageRoutingProfiles = obj.value("can_manage_routing_profiles").toBool(false);
 
-            saveSubscriptionInfo(status, plan, endDate, autoRenew, cardSaved, trialAvailable);
+            saveSubscriptionInfo(status, plan, endDate, autoRenew, cardSaved, trialAvailable,
+                                 allowedProtocols, canUseSiteSplitTunneling, canUseAppSplitTunneling,
+                                 canManageRoutingProfiles);
             // Сервер подтвердил статус — записываем время верификации
             m_lastSubscriptionVerifiedAt = QDateTime::currentSecsSinceEpoch();
             const bool shouldFetchConfig = m_fetchConfigAfterSubscription;
             m_fetchConfigAfterSubscription = false;
-            if (m_isLoading) {
-                m_isLoading = false;
-                emit loadingChanged();
-            }
+            setLoadingState(false);
             emit subscriptionChanged();
             emit subscriptionFetched();
             if (shouldFetchConfig) {
                 if (isSubscribed()) {
-                    fetchConfig();
+                    fetchConfig(true);
                 } else {
                     clearExistingFBLinkServers();
                 }
@@ -470,24 +637,27 @@ void FBLinkController::fetchSubscription()
             if (!doc.isNull() && doc.object().contains("error")) {
                 errStr = doc.object()["error"].toString();
             }
-            // BUG#8: если 401 — пытаемся обновить access token
-            if (reply->error() == QNetworkReply::AuthenticationRequiredError ||
-                reply->error() == QNetworkReply::ContentAccessDenied) {
-                refreshAccessToken([this]() { fetchSubscription(); });
-            } else {
-                m_fetchConfigAfterSubscription = false;
-                if (m_isLoading) {
-                    m_isLoading = false;
-                    emit loadingChanged();
-                }
-                emit subscriptionError(errStr);
+            logApiFailure("fetch-subscription", reply);
+
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this]() {
+                    fetchSubscription(false);
+                });
+                return;
             }
+
+            m_fetchConfigAfterSubscription = false;
+            setLoadingState(false);
+            emit subscriptionError(errStr);
         }
     });
 }
 
 void FBLinkController::logout()
 {
+    m_pendingRefreshCallbacks.clear();
+    m_isRefreshing = false;
+    setLoadingState(false);
     saveJwtToken("");
     saveRefreshToken("");
     saveSubscriptionInfo("", "", "");
@@ -538,6 +708,12 @@ QString FBLinkController::subscriptionPlan() const
     return qSettings.value("subscriptionPlan", "").toString();
 }
 
+QStringList FBLinkController::allowedProtocols() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    return qSettings.value("subscriptionAllowedProtocols").toStringList();
+}
+
 QString FBLinkController::subscriptionEndDate() const
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
@@ -545,7 +721,9 @@ QString FBLinkController::subscriptionEndDate() const
 }
 
 void FBLinkController::saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,
-                                             bool autoRenew, bool cardSaved, bool trialAvailable)
+                                             bool autoRenew, bool cardSaved, bool trialAvailable,
+                                             const QStringList &allowedProtocols, bool canUseSiteSplitTunneling,
+                                             bool canUseAppSplitTunneling, bool canManageRoutingProfiles)
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
     qSettings.setValue("subscriptionStatus", status);
@@ -554,6 +732,10 @@ void FBLinkController::saveSubscriptionInfo(const QString &status, const QString
     qSettings.setValue("subscriptionAutoRenew", autoRenew);
     qSettings.setValue("subscriptionCardSaved", cardSaved);
     qSettings.setValue("subscriptionTrialAvailable", trialAvailable);
+    qSettings.setValue("subscriptionAllowedProtocols", allowedProtocols);
+    qSettings.setValue("subscriptionCanUseSiteSplitTunneling", canUseSiteSplitTunneling);
+    qSettings.setValue("subscriptionCanUseAppSplitTunneling", canUseAppSplitTunneling);
+    qSettings.setValue("subscriptionCanManageRoutingProfiles", canManageRoutingProfiles);
     qSettings.sync();
 }
 
@@ -575,6 +757,24 @@ bool FBLinkController::trialAvailable() const
     return qSettings.value("subscriptionTrialAvailable", false).toBool();
 }
 
+bool FBLinkController::canUseSiteSplitTunneling() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    return qSettings.value("subscriptionCanUseSiteSplitTunneling", false).toBool();
+}
+
+bool FBLinkController::canUseAppSplitTunneling() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    return qSettings.value("subscriptionCanUseAppSplitTunneling", false).toBool();
+}
+
+bool FBLinkController::canManageRoutingProfiles() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    return qSettings.value("subscriptionCanManageRoutingProfiles", false).toBool();
+}
+
 bool FBLinkController::isLoading() const
 {
     return m_isLoading;
@@ -582,20 +782,22 @@ bool FBLinkController::isLoading() const
 
 void FBLinkController::setAutoRenew(bool enabled)
 {
+    setAutoRenew(enabled, true);
+}
+
+void FBLinkController::setAutoRenew(bool enabled, bool allowRefreshRetry)
+{
     QString token = getJwtToken();
     if (token.isEmpty()) return;
 
-    QUrl url(m_apiUrl + "/me/subscription/auto-renew");
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+    QNetworkRequest request = createApiRequest("/me/subscription/auto-renew", true, true);
 
     QJsonObject json;
     json["enabled"] = enabled;
 
     QNetworkReply *reply = m_nam->sendCustomRequest(request, "PATCH", QJsonDocument(json).toJson());
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, enabled]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, enabled, allowRefreshRetry]() {
         reply->deleteLater();
         if (reply->error() == QNetworkReply::NoError) {
             QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
@@ -604,6 +806,14 @@ void FBLinkController::setAutoRenew(bool enabled)
             emit autoRenewChanged(enabled);
             emit subscriptionChanged();
         } else {
+            logApiFailure("set-auto-renew", reply);
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this, enabled]() {
+                    setAutoRenew(enabled, false);
+                });
+                return;
+            }
+
             QByteArray data = reply->readAll();
             QJsonDocument doc = QJsonDocument::fromJson(data);
             QString errStr = doc.object().value("error").toString(reply->errorString());
@@ -614,16 +824,19 @@ void FBLinkController::setAutoRenew(bool enabled)
 
 void FBLinkController::deleteCard()
 {
+    deleteCard(true);
+}
+
+void FBLinkController::deleteCard(bool allowRefreshRetry)
+{
     QString token = getJwtToken();
     if (token.isEmpty()) return;
 
-    QUrl url(m_apiUrl + "/me/card");
-    QNetworkRequest request(url);
-    request.setRawHeader("Authorization", ("Bearer " + token).toUtf8());
+    QNetworkRequest request = createApiRequest("/me/card", false, true);
 
     QNetworkReply *reply = m_nam->deleteResource(request);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, allowRefreshRetry]() {
         reply->deleteLater();
         if (reply->error() == QNetworkReply::NoError) {
             QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
@@ -633,10 +846,141 @@ void FBLinkController::deleteCard()
             emit cardDeleted();
             emit subscriptionChanged();
         } else {
+            logApiFailure("delete-card", reply);
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this]() {
+                    deleteCard(false);
+                });
+                return;
+            }
+
             QByteArray data = reply->readAll();
             QJsonDocument doc = QJsonDocument::fromJson(data);
             QString errStr = doc.object().value("error").toString(reply->errorString());
             emit requestError(errStr);
+        }
+    });
+}
+
+void FBLinkController::fetchRoutingProfiles()
+{
+    fetchRoutingProfiles(true);
+}
+
+void FBLinkController::fetchRoutingProfiles(bool allowRefreshRetry)
+{
+    QString token = getJwtToken();
+    if (token.isEmpty()) {
+        emit routingProfilesError(tr("Необходимо войти в аккаунт"));
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest("/me/routing-profiles", false, true);
+
+    QNetworkReply *reply = m_nam->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, allowRefreshRetry]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            emit routingProfilesFetched(obj.value("profiles").toArray().toVariantList());
+        } else {
+            logApiFailure("fetch-routing-profiles", reply);
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this]() {
+                    fetchRoutingProfiles(false);
+                });
+                return;
+            }
+
+            QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            emit routingProfilesError(obj.value("error").toString(reply->errorString()));
+        }
+    });
+}
+
+void FBLinkController::saveRoutingProfile(const QVariantMap &profile)
+{
+    saveRoutingProfile(profile, true);
+}
+
+void FBLinkController::saveRoutingProfile(const QVariantMap &profile, bool allowRefreshRetry)
+{
+    QString token = getJwtToken();
+    if (token.isEmpty()) {
+        emit routingProfilesError(tr("Необходимо войти в аккаунт"));
+        return;
+    }
+
+    const int id = profile.value("id").toInt();
+    const bool hasId = id > 0;
+
+    QNetworkRequest request = createApiRequest(hasId ? QString("/me/routing-profiles/%1").arg(id)
+                                                     : "/me/routing-profiles",
+                                               true, true);
+
+    QJsonObject payload = QJsonObject::fromVariantMap(profile);
+    QNetworkReply *reply = hasId
+        ? m_nam->put(request, QJsonDocument(payload).toJson())
+        : m_nam->post(request, QJsonDocument(payload).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, profile, allowRefreshRetry]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            emit routingProfileSaved();
+            fetchRoutingProfiles(true);
+            if (isSubscribed()) {
+                fetchConfig(true);
+            }
+        } else {
+            logApiFailure("save-routing-profile", reply);
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this, profile]() {
+                    saveRoutingProfile(profile, false);
+                });
+                return;
+            }
+
+            QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            emit routingProfilesError(obj.value("error").toString(reply->errorString()));
+        }
+    });
+}
+
+void FBLinkController::deleteRoutingProfile(int id)
+{
+    deleteRoutingProfile(id, true);
+}
+
+void FBLinkController::deleteRoutingProfile(int id, bool allowRefreshRetry)
+{
+    QString token = getJwtToken();
+    if (token.isEmpty()) {
+        emit routingProfilesError(tr("Необходимо войти в аккаунт"));
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest(QString("/me/routing-profiles/%1").arg(id), false, true);
+
+    QNetworkReply *reply = m_nam->deleteResource(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, id, allowRefreshRetry]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            emit routingProfileDeleted();
+            fetchRoutingProfiles(true);
+            if (isSubscribed()) {
+                fetchConfig(true);
+            }
+        } else {
+            logApiFailure("delete-routing-profile", reply);
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this, id]() {
+                    deleteRoutingProfile(id, false);
+                });
+                return;
+            }
+
+            QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            emit routingProfilesError(obj.value("error").toString(reply->errorString()));
         }
     });
 }
@@ -646,29 +990,37 @@ void FBLinkController::deleteCard()
 // onSuccess вызывается после успешного обновления.
 void FBLinkController::refreshAccessToken(std::function<void()> onSuccess)
 {
-    if (m_isRefreshing) return;
+    if (onSuccess) {
+        m_pendingRefreshCallbacks.append(onSuccess);
+    }
+
+    if (m_isRefreshing) {
+        qDebug() << "[FBLink API] refresh already in progress, queued callback";
+        return;
+    }
 
     QString refreshToken = getRefreshToken();
     if (refreshToken.isEmpty()) {
         // Нет refresh-токена — сессия истекла
+        m_pendingRefreshCallbacks.clear();
         logout();
         return;
     }
 
     m_isRefreshing = true;
 
-    QUrl url(m_apiUrl + "/auth/refresh");
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QNetworkRequest request = createApiRequest("/auth/refresh", true, false);
 
     QJsonObject json;
     json["refresh_token"] = refreshToken;
 
     QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, onSuccess]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         reply->deleteLater();
         m_isRefreshing = false;
+        const auto callbacks = m_pendingRefreshCallbacks;
+        m_pendingRefreshCallbacks.clear();
 
         if (reply->error() == QNetworkReply::NoError) {
             QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
@@ -677,12 +1029,18 @@ void FBLinkController::refreshAccessToken(std::function<void()> onSuccess)
                 if (obj.contains("refresh_token"))
                     saveRefreshToken(obj["refresh_token"].toString());
                 emit loginStateChanged();
-                if (onSuccess) onSuccess();
+                for (const auto &callback : callbacks) {
+                    if (callback) {
+                        callback();
+                    }
+                }
             } else {
+                qWarning() << "[FBLink API] refresh succeeded without access_token";
                 logout();
             }
         } else {
             // refresh провалился — токен истёк или недействителен
+            logApiFailure("refresh-token", reply);
             logout();
         }
     });

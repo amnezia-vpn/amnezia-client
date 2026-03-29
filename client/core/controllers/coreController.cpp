@@ -159,9 +159,6 @@ void CoreController::initControllers()
 
     m_fbLinkController.reset(new FBLinkController(m_importController.get(), m_settings, m_serversModel.get(), this));
     m_engine->rootContext()->setContextProperty("FBLinkController", m_fbLinkController.get());
-    
-    // Автоматическая загрузка профиля FBLink VPN при старте клиента (если залогинен)
-    m_fbLinkController->fetchConfig();
 }
 
 void CoreController::initAndroidController()

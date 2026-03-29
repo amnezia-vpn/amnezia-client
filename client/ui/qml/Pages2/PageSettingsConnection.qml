@@ -13,6 +13,18 @@ PageType {
     id: root
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+    property bool canUseSiteSplitTunneling: FBLinkController.canUseSiteSplitTunneling
+    property bool canUseAppSplitTunneling: FBLinkController.canUseAppSplitTunneling
+    property bool canManageRoutingProfiles: FBLinkController.canManageRoutingProfiles
+
+    function goToVipFeature(page, isAllowed) {
+        if (isAllowed) {
+            PageController.goToPage(page)
+        } else {
+            PageController.showNotificationMessage(qsTr("Функция доступна только в VIP"))
+            PageController.goToPage(PageEnum.PageFBLinkSubscription)
+        }
+    }
 
     BackButtonType {
         id: backButton
@@ -80,11 +92,31 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Раздельное туннелирование (сайты)")
-                descriptionText: qsTr("Выбор сайтов, которые работают через VPN")
+                descriptionText: root.canUseSiteSplitTunneling
+                    ? qsTr("Выбор сайтов, которые работают через VPN")
+                    : qsTr("Доступно только в VIP")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
+                    root.goToVipFeature(PageEnum.PageSettingsSplitTunneling, root.canUseSiteSplitTunneling)
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                id: routingProfilesButton
+
+                Layout.fillWidth: true
+
+                text: qsTr("VIP-конфигурации маршрутизации")
+                descriptionText: root.canManageRoutingProfiles
+                    ? qsTr("Профили «RU without VPN» и собственные правила маршрутов")
+                    : qsTr("Доступно только в VIP")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    root.goToVipFeature(PageEnum.PageSettingsVipRoutingProfiles, root.canManageRoutingProfiles)
                 }
             }
 
@@ -104,11 +136,13 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Раздельное туннелирование (приложения)")
-                descriptionText: qsTr("Выбор приложений, работающих через VPN")
+                descriptionText: root.canUseAppSplitTunneling
+                    ? qsTr("Выбор приложений, работающих через VPN")
+                    : qsTr("Доступно только в VIP")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
+                    root.goToVipFeature(PageEnum.PageSettingsAppSplitTunneling, root.canUseAppSplitTunneling)
                 }
             }
 

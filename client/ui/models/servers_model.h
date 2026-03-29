@@ -143,6 +143,7 @@ public slots:
     bool hasServerWithVpnKey(const QString &vpnKey) const;
 
     QVariant getDefaultServerData(const QString roleString);
+    QString getDefaultServerPingTarget();
 
     QVariant getProcessedServerData(const QString roleString);
     bool setProcessedServerData(const QString &roleString, const QVariant &value);

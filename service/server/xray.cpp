@@ -2,6 +2,7 @@
 #include "core/networkUtilities.h"
 
 #include <QDebug>
+#include <QString>
 #include <QNetworkInterface>
 #include <QCoreApplication>
 #include <amnezia_xray.h>
@@ -31,6 +32,10 @@ bool Xray::startXray(const QString &cfg)
 {
     qDebug() << "Xray::startXray()";
 
+    if (!stopEmbeddedXray(true)) {
+        qWarning() << "[xray] pre-start cleanup reported an unrecoverable error";
+    }
+
     auto defaultIface = NetworkUtilities::getGatewayAndIface().second;
 #ifdef Q_OS_LINUX
     m_defaultIfaceName = defaultIface.name().toUtf8();
@@ -56,22 +61,18 @@ bool Xray::startXray(const QString &cfg)
     if (auto err = amnezia_xray_start(); err != nullptr) {
         qDebug() << "[xray] failed to start: " << err;
         amnezia_xray_free(err);
+        m_running = false;
         return false;
     }
 
+    m_running = true;
     return true;
 }
 
 bool Xray::stopXray()
 {
     qDebug() << "Xray::stopXray()";
-    if (auto err = amnezia_xray_stop(); err != nullptr) {
-        qDebug() << "[xray] failed to stop: " << err;
-        amnezia_xray_free(err);
-        return false;
-    }
-
-    return true;
+    return stopEmbeddedXray(false);
 }
 
 void Xray::logHandler(char* str)
@@ -101,4 +102,35 @@ void Xray::sockCallback(uintptr_t fd)
         setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, m_defaultIfaceName.data(), m_defaultIfaceName.size());
     }
 #endif
+}
+
+bool Xray::stopEmbeddedXray(bool forRestart)
+{
+    if (!m_running && !forRestart) {
+        return true;
+    }
+
+    if (auto err = amnezia_xray_stop(); err != nullptr) {
+        const QString errorText = QString::fromUtf8(err);
+        amnezia_xray_free(err);
+
+        const bool benign =
+            errorText.contains("use of closed network connection", Qt::CaseInsensitive) ||
+            errorText.contains("closed network connection", Qt::CaseInsensitive) ||
+            errorText.contains("already stopped", Qt::CaseInsensitive) ||
+            errorText.contains("not started", Qt::CaseInsensitive);
+
+        if (benign) {
+            qDebug() << (forRestart ? "[xray] pre-start cleanup:" : "[xray] stop cleanup:") << errorText;
+            m_running = false;
+            return true;
+        }
+
+        qDebug() << (forRestart ? "[xray] failed to stop before restart:" : "[xray] failed to stop:") << errorText;
+        m_running = false;
+        return false;
+    }
+
+    m_running = false;
+    return true;
 }

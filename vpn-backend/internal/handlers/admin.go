@@ -71,8 +71,12 @@ func (h *AdminHandler) GetServers(c *gin.Context) {
 
 	result := make([]gin.H, 0, len(servers))
 	for _, s := range servers {
+		var template models.VLESSServerTemplate
+		_ = h.db.Where("server_id = ?", s.ID).First(&template).Error
 		var peersCount int64
 		h.db.Model(&models.VPNKey{}).Where("server_id = ? AND revoked_at IS NULL", s.ID).Count(&peersCount)
+		var activeVLESS int64
+		h.db.Model(&models.VLESSCredential{}).Where("server_id = ? AND revoked_at IS NULL", s.ID).Count(&activeVLESS)
 		result = append(result, gin.H{
 			"id":           s.ID,
 			"name":         s.Name,
@@ -83,7 +87,21 @@ func (h *AdminHandler) GetServers(c *gin.Context) {
 			"active":       s.Active,
 			"max_peers":    s.MaxPeers,
 			"active_keys":  peersCount,
+			"active_vless": activeVLESS,
 			"awg_port":     s.AWGPort,
+			"vless_template": gin.H{
+				"address":        template.Address,
+				"port":           template.Port,
+				"server_name":    template.ServerName,
+				"public_key":     template.PublicKey,
+				"short_id":       template.ShortID,
+				"fingerprint":    template.Fingerprint,
+				"flow":           template.Flow,
+				"network":        template.Network,
+				"security":       template.Security,
+				"spider_x":       template.SpiderX,
+				"container_name": template.ContainerName,
+			},
 		})
 	}
 
@@ -125,6 +143,21 @@ type addServerRequest struct {
 	I3   string `json:"i3"`
 	I4   string `json:"i4"`
 	I5   string `json:"i5"`
+	// VLESS template
+	VLESSAddress       string `json:"vless_address"`
+	VLESSPort          int    `json:"vless_port"`
+	VLESSServerName    string `json:"vless_server_name"`
+	VLESSPublicKey     string `json:"vless_public_key"`
+	VLESSShortID       string `json:"vless_short_id"`
+	VLESSFingerprint   string `json:"vless_fingerprint"`
+	VLESSFlow          string `json:"vless_flow"`
+	VLESSNetwork       string `json:"vless_network"`
+	VLESSSecurity      string `json:"vless_security"`
+	VLESSSpiderX       string `json:"vless_spider_x"`
+	VLESSContainerName string `json:"vless_container_name"`
+	// Bootstrap self-hosted XRay
+	BootstrapSelfHostedXray  bool `json:"bootstrap_selfhosted_xray"`
+	BootstrapForceRegenerate bool `json:"bootstrap_force_regenerate"`
 }
 
 // POST /api/v1/admin/servers
@@ -166,6 +199,10 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 	sshPassword := req.SSHPassword
 	if sshPassword == "" {
 		sshPassword = req.RootPassword
+	}
+	if req.BootstrapSelfHostedXray && sshPassword == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ssh_password is required for self-hosted XRay bootstrap"})
+		return
 	}
 	awgContainer := req.AWGContainer
 	if awgContainer == "" {
@@ -227,6 +264,20 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 		AWGInterface: awgIface,
 	}
 
+	template := models.VLESSServerTemplate{
+		Address:       req.VLESSAddress,
+		Port:          req.VLESSPort,
+		ServerName:    req.VLESSServerName,
+		PublicKey:     req.VLESSPublicKey,
+		ShortID:       req.VLESSShortID,
+		Fingerprint:   req.VLESSFingerprint,
+		Flow:          req.VLESSFlow,
+		Network:       req.VLESSNetwork,
+		Security:      req.VLESSSecurity,
+		SpiderX:       req.VLESSSpiderX,
+		ContainerName: req.VLESSContainerName,
+	}
+
 	if server.PublicKey == "" {
 		pubKey, err := fetchServerPublicKey(&server)
 		if err != nil {
@@ -247,7 +298,40 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, server)
+	xrayTemplateDefaults(&template, &server)
+
+	bootstrap := xrayBootstrapResult{}
+	if req.BootstrapSelfHostedXray {
+		bootstrap.Ran = true
+		options := defaultSelfHostedXrayBootstrapOptions(&server, &template)
+		options.ForceRegenerate = req.BootstrapForceRegenerate
+
+		if bootstrappedTemplate, _, err := bootstrapSelfHostedXray(&server, &template, options); err != nil {
+			bootstrap.Error = err.Error()
+		} else if bootstrappedTemplate != nil {
+			template = *bootstrappedTemplate
+			bootstrap.Message = fmt.Sprintf("Self-hosted XRay deployed: %s:%d (%s)", template.Address, template.Port, template.ContainerName)
+		}
+	}
+
+	if (template.PublicKey == "" || template.ShortID == "" || template.ServerName == "") && server.SSHPassword != "" {
+		if fetchedTemplate, err := fetchVLESSTemplateFromServer(&server, &template); err == nil {
+			template = *mergeFetchedBootstrapTemplate(fetchedTemplate, &template)
+		}
+	}
+	xrayTemplateDefaults(&template, &server)
+	if template.PublicKey != "" && template.ShortID != "" && template.ServerName != "" {
+		template.ServerID = server.ID
+		if err := h.db.Create(&template).Error; err != nil {
+			fmt.Printf("[WARN] Failed to save VLESS template for server %s: %v\n", server.Name, err)
+		}
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message":   "server added",
+		"server_id": server.ID,
+		"bootstrap": bootstrap,
+	})
 }
 
 // PUT /api/v1/admin/servers/:id
@@ -267,9 +351,27 @@ func (h *AdminHandler) UpdateServer(c *gin.Context) {
 		MaxPeers    int    `json:"max_peers"`
 		SSHPassword string `json:"ssh_password"`
 		AWGPort     int    `json:"awg_port"`
+		// VLESS template
+		VLESSAddress             string `json:"vless_address"`
+		VLESSPort                int    `json:"vless_port"`
+		VLESSServerName          string `json:"vless_server_name"`
+		VLESSPublicKey           string `json:"vless_public_key"`
+		VLESSShortID             string `json:"vless_short_id"`
+		VLESSFingerprint         string `json:"vless_fingerprint"`
+		VLESSFlow                string `json:"vless_flow"`
+		VLESSNetwork             string `json:"vless_network"`
+		VLESSSecurity            string `json:"vless_security"`
+		VLESSSpiderX             string `json:"vless_spider_x"`
+		VLESSContainerName       string `json:"vless_container_name"`
+		BootstrapSelfHostedXray  bool   `json:"bootstrap_selfhosted_xray"`
+		BootstrapForceRegenerate bool   `json:"bootstrap_force_regenerate"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if req.BootstrapSelfHostedXray && req.SSHPassword == "" && s.SSHPassword == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ssh_password is required for self-hosted XRay bootstrap"})
 		return
 	}
 
@@ -298,8 +400,93 @@ func (h *AdminHandler) UpdateServer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update server"})
 		return
 	}
+	if req.Name != "" {
+		s.Name = req.Name
+	}
+	if req.Region != "" {
+		s.Region = req.Region
+	}
+	s.CountryCode = req.CountryCode
+	if req.Endpoint != "" {
+		s.Endpoint = req.Endpoint
+	}
+	if req.MaxPeers > 0 {
+		s.MaxPeers = req.MaxPeers
+	}
+	if req.SSHPassword != "" {
+		s.SSHPassword = req.SSHPassword
+	}
+	if req.AWGPort > 0 {
+		s.AWGPort = req.AWGPort
+	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "server updated"})
+	var template models.VLESSServerTemplate
+	h.db.Where("server_id = ?", s.ID).FirstOrInit(&template, models.VLESSServerTemplate{ServerID: s.ID})
+	if req.VLESSAddress != "" {
+		template.Address = req.VLESSAddress
+	}
+	if req.VLESSPort > 0 {
+		template.Port = req.VLESSPort
+	}
+	if req.VLESSServerName != "" {
+		template.ServerName = req.VLESSServerName
+	}
+	if req.VLESSPublicKey != "" {
+		template.PublicKey = req.VLESSPublicKey
+	}
+	if req.VLESSShortID != "" {
+		template.ShortID = req.VLESSShortID
+	}
+	if req.VLESSFingerprint != "" {
+		template.Fingerprint = req.VLESSFingerprint
+	}
+	if req.VLESSFlow != "" {
+		template.Flow = req.VLESSFlow
+	}
+	if req.VLESSNetwork != "" {
+		template.Network = req.VLESSNetwork
+	}
+	if req.VLESSSecurity != "" {
+		template.Security = req.VLESSSecurity
+	}
+	if req.VLESSSpiderX != "" {
+		template.SpiderX = req.VLESSSpiderX
+	}
+	if req.VLESSContainerName != "" {
+		template.ContainerName = req.VLESSContainerName
+	}
+	xrayTemplateDefaults(&template, &s)
+
+	bootstrap := xrayBootstrapResult{}
+	if req.BootstrapSelfHostedXray {
+		bootstrap.Ran = true
+		options := defaultSelfHostedXrayBootstrapOptions(&s, &template)
+		options.ForceRegenerate = req.BootstrapForceRegenerate
+
+		if bootstrappedTemplate, _, err := bootstrapSelfHostedXray(&s, &template, options); err != nil {
+			bootstrap.Error = err.Error()
+		} else if bootstrappedTemplate != nil {
+			template = *bootstrappedTemplate
+			bootstrap.Message = fmt.Sprintf("Self-hosted XRay deployed: %s:%d (%s)", template.Address, template.Port, template.ContainerName)
+		}
+	}
+
+	if (template.PublicKey == "" || template.ShortID == "" || template.ServerName == "") && s.SSHPassword != "" {
+		if fetchedTemplate, err := fetchVLESSTemplateFromServer(&s, &template); err == nil {
+			template = *mergeFetchedBootstrapTemplate(fetchedTemplate, &template)
+		}
+	}
+	xrayTemplateDefaults(&template, &s)
+	if template.PublicKey != "" && template.ShortID != "" && template.ServerName != "" {
+		if err := h.db.Save(&template).Error; err != nil {
+			fmt.Printf("[WARN] Failed to save VLESS template for server %s: %v\n", s.Name, err)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "server updated",
+		"bootstrap": bootstrap,
+	})
 }
 
 // DELETE /api/v1/admin/servers/:id
@@ -315,6 +502,8 @@ func (h *AdminHandler) DeleteServer(c *gin.Context) {
 	// 1. Находим все ключи, привязанные к этому серверу
 	var keys []models.VPNKey
 	h.db.Where("server_id = ?", id).Find(&keys)
+	var xrayCreds []models.VLESSCredential
+	h.db.Where("server_id = ?", id).Find(&xrayCreds)
 
 	// 2. Удаляем пиров с самого сервера через SSH (если они не отозваны)
 	for _, k := range keys {
@@ -324,9 +513,24 @@ func (h *AdminHandler) DeleteServer(c *gin.Context) {
 			}
 		}
 	}
+	if s.VLESSTemplate == nil {
+		var tpl models.VLESSServerTemplate
+		if err := h.db.Where("server_id = ?", s.ID).First(&tpl).Error; err == nil {
+			s.VLESSTemplate = &tpl
+		}
+	}
+	for _, cred := range xrayCreds {
+		if cred.RevokedAt == nil {
+			if err := removeXrayClient(&s, s.VLESSTemplate, cred.ClientID); err != nil {
+				fmt.Printf("[WARN] Failed to remove VLESS client %s during server deletion: %v\n", cred.ClientID, err)
+			}
+		}
+	}
 
 	// 3. Удаляем ключи из БД
 	h.db.Where("server_id = ?", id).Delete(&models.VPNKey{})
+	h.db.Where("server_id = ?", id).Delete(&models.VLESSCredential{})
+	h.db.Where("server_id = ?", id).Delete(&models.VLESSServerTemplate{})
 
 	// 4. Удаляем сам сервер
 	h.db.Delete(&s)
@@ -347,6 +551,8 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 	// 1. Находим все ключи пользователя для удаления с серверов
 	var keys []models.VPNKey
 	h.db.Where("user_id = ?", id).Preload("Server").Find(&keys)
+	var xrayCreds []models.VLESSCredential
+	h.db.Where("user_id = ?", id).Preload("Server.VLESSTemplate").Find(&xrayCreds)
 
 	for _, k := range keys {
 		if k.RevokedAt == nil && k.PublicKey != "" {
@@ -355,9 +561,18 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 			}
 		}
 	}
+	for _, cred := range xrayCreds {
+		if cred.RevokedAt == nil {
+			if err := removeXrayClient(&cred.Server, cred.Server.VLESSTemplate, cred.ClientID); err != nil {
+				fmt.Printf("[WARN] Failed to remove VLESS client %s during user deletion: %v\n", cred.ClientID, err)
+			}
+		}
+	}
 
 	// 2. Удаляем все связанные данные из БД
 	h.db.Unscoped().Where("user_id = ?", id).Delete(&models.VPNKey{})
+	h.db.Unscoped().Where("user_id = ?", id).Delete(&models.VLESSCredential{})
+	h.db.Unscoped().Where("user_id = ?", id).Delete(&models.RoutingProfile{})
 	h.db.Unscoped().Where("user_id = ?", id).Delete(&models.Subscription{})
 	h.db.Unscoped().Where("user_id = ?", id).Delete(&models.Payment{})
 
@@ -391,6 +606,7 @@ func (h *AdminHandler) GetPayments(c *gin.Context) {
 // GET /api/v1/admin/stats
 func (h *AdminHandler) GetStats(c *gin.Context) {
 	var totalUsers, activeSubscriptions, expiredSubscriptions, cancelledSubscriptions, activeKeys int64
+	var activeVLESSKeys int64
 	var totalServers, activeServers int64
 	var totalRevenue, monthlyRevenue float64
 	var pendingPayments int64
@@ -404,6 +620,8 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 	h.db.Model(&models.Subscription{}).Where("status = ?", models.SubExpired).Count(&expiredSubscriptions)
 	h.db.Model(&models.Subscription{}).Where("status = ?", models.SubCancelled).Count(&cancelledSubscriptions)
 	h.db.Model(&models.VPNKey{}).Where("revoked_at IS NULL").Count(&activeKeys)
+	h.db.Model(&models.VLESSCredential{}).Where("revoked_at IS NULL").Count(&activeVLESSKeys)
+	activeKeys += activeVLESSKeys
 	h.db.Model(&models.VPNServer{}).Count(&totalServers)
 	h.db.Model(&models.VPNServer{}).Where("active = ?", true).Count(&activeServers)
 	h.db.Model(&models.Payment{}).Where("status = ?", models.PaymentPending).Count(&pendingPayments)
@@ -473,6 +691,7 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 		string(models.PlanFree):  0,
 		string(models.PlanTrial): 0,
 		string(models.PlanBasic): 0,
+		string(models.PlanVIP):   0,
 	}
 	statusBreakdown := map[string]int{
 		string(models.SubActive):    0,
@@ -494,18 +713,21 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 	regionTotals := map[string]int{}
 	for _, s := range servers {
 		var peersCount int64
+		var vlessCount int64
 		h.db.Model(&models.VPNKey{}).Where("server_id = ? AND revoked_at IS NULL", s.ID).Count(&peersCount)
+		h.db.Model(&models.VLESSCredential{}).Where("server_id = ? AND revoked_at IS NULL", s.ID).Count(&vlessCount)
+		totalActive := peersCount + vlessCount
 
 		utilization := 0.0
 		if s.MaxPeers > 0 {
-			utilization = (float64(peersCount) / float64(s.MaxPeers)) * 100
+			utilization = (float64(totalActive) / float64(s.MaxPeers)) * 100
 		}
 
 		regionKey := s.Region
 		if regionKey == "" {
 			regionKey = s.Name
 		}
-		regionTotals[regionKey] += int(peersCount)
+		regionTotals[regionKey] += int(totalActive)
 
 		serverLoad = append(serverLoad, gin.H{
 			"id":           s.ID,
@@ -513,10 +735,12 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 			"region":       s.Region,
 			"country_code": s.CountryCode,
 			"active":       s.Active,
-			"active_keys":  peersCount,
+			"active_keys":  totalActive,
+			"active_awg":   peersCount,
+			"active_vless": vlessCount,
 			"max_peers":    s.MaxPeers,
 			"utilization":  utilization,
-			"available":    maxInt(s.MaxPeers-int(peersCount), 0),
+			"available":    maxInt(s.MaxPeers-int(totalActive), 0),
 			"endpoint":     s.Endpoint,
 		})
 	}
@@ -660,13 +884,25 @@ func (h *AdminHandler) UpgradeUser(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	}
+	var req struct {
+		Plan models.PlanType `json:"plan"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	plan := req.Plan
+	if plan == "" {
+		plan = models.PlanBasic
+	}
+	if plan != models.PlanBasic && plan != models.PlanVIP {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported plan"})
+		return
+	}
 	var sub models.Subscription
 	h.db.Where("user_id = ?", user.ID).FirstOrInit(&sub, models.Subscription{UserID: user.ID})
 	sub.Status = models.SubActive
-	sub.Plan = "basic"
+	sub.Plan = plan
 	sub.ExpiresAt = time.Now().AddDate(0, 1, 0) // +1 month
 	h.db.Save(&sub)
-	c.JSON(http.StatusOK, gin.H{"message": "user upgraded to basic"})
+	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("user upgraded to %s", plan)})
 }
 
 // POST /api/v1/admin/users/:id/revoke
@@ -686,6 +922,14 @@ func (h *AdminHandler) RevokeUserKeys(c *gin.Context) {
 	}
 
 	h.db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", userId).Update("revoked_at", &now)
+	var xrayCreds []models.VLESSCredential
+	h.db.Where("user_id = ? AND revoked_at IS NULL", userId).Preload("Server.VLESSTemplate").Find(&xrayCreds)
+	for _, cred := range xrayCreds {
+		if err := removeXrayClient(&cred.Server, cred.Server.VLESSTemplate, cred.ClientID); err != nil {
+			fmt.Printf("[WARN] Admin RevokeUserKeys XRay failed for %s: %v\n", cred.Server.Name, err)
+		}
+	}
+	h.db.Model(&models.VLESSCredential{}).Where("user_id = ? AND revoked_at IS NULL", userId).Update("revoked_at", &now)
 	c.JSON(http.StatusOK, gin.H{"message": "all user keys revoked"})
 }
 
@@ -756,7 +1000,7 @@ func (h *AdminHandler) ApprovePayment(c *gin.Context) {
 	if p.Plan == models.PlanTrial {
 		durationDays = 7
 	} else {
-		durationDays = 30 // для Basic
+		durationDays = planPrices[p.Plan].DurationDays
 	}
 
 	newExpiry := now.AddDate(0, 0, durationDays)

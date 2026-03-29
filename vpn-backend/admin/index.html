@@ -76,6 +76,21 @@
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .btn[disabled] { opacity: .7; cursor: wait; }
+    .btn.is-loading::before {
+      content: '';
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      animation: button-spin .8s linear infinite;
     }
     .btn-primary { color: #02131a; background: linear-gradient(135deg, var(--cyan), var(--cyan2)); }
     .btn-secondary { color: var(--text); background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); }
@@ -178,12 +193,37 @@
       background: #111722;
     }
     .empty { color: var(--muted); padding: 24px; text-align: center; }
-    .modal-overlay { position: fixed; inset: 0; display: none; place-items: center; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); z-index: 20; padding: 20px; }
-    .modal { width: min(560px, 100%); padding: 24px; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: start center;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      z-index: 20;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .modal {
+      width: min(860px, 100%);
+      padding: 24px;
+      margin: auto 0;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
     .modal h3 { margin: 0 0 16px; font-size: 22px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @keyframes button-spin { to { transform: rotate(360deg); } }
     @media (max-width: 1180px) { .hero, .analytics-grid { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
-    @media (max-width: 860px) { .sidebar { position: static; width: 100%; } .content { margin-left: 0; padding: 18px; } #app { display: block; } .kpi-grid, .form-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 860px) {
+      .sidebar { position: static; width: 100%; }
+      .content { margin-left: 0; padding: 18px; }
+      #app { display: block; }
+      .kpi-grid, .form-grid { grid-template-columns: 1fr; }
+      .modal-overlay { padding: 12px; }
+      .modal { padding: 18px; max-height: calc(100vh - 24px); }
+    }
   </style>
 </head>
 <body>
@@ -279,7 +319,7 @@
 
       <section id="page-users" class="page hidden"><div class="section-head"><h2>Пользователи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadUsers()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('users')">Экспорт CSV</button></div></div><div class="table-toolbar"><input id="usersSearch" type="text" placeholder="Поиск по email" oninput="renderUsers()"><select id="usersRoleFilter" onchange="renderUsers()"><option value="">Все роли</option><option value="admin">Администратор</option><option value="user">Пользователь</option></select><select id="usersStatusFilter" onchange="renderUsers()"><option value="">Все статусы</option><option value="active">Активные</option><option value="expired">Истекшие</option><option value="cancelled">Отменённые</option><option value="none">Без подписки</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Роль</th><th>Тариф</th><th>Статус</th><th>Истекает</th><th>Действия</th></tr></thead><tbody id="usersBody"><tr><td colspan="7" class="empty">Загрузка пользователей...</td></tr></tbody></table></div></section>
       <section id="page-servers" class="page hidden"><div class="section-head"><h2>Серверы</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadServers()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('servers')">Экспорт CSV</button><button class="btn btn-primary" onclick="openAddServerModal()">Добавить сервер</button></div></div><div class="table-toolbar"><input id="serversSearch" type="text" placeholder="Поиск по названию, региону, endpoint" oninput="renderServers()"><select id="serversStatusFilter" onchange="renderServers()"><option value="">Все статусы</option><option value="active">Активные</option><option value="inactive">Отключённые</option></select><select id="serversCountryFilter" onchange="renderServers()"><option value="">Все страны</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Сервер</th><th>Регион</th><th>Endpoint</th><th>Ключи</th><th>Лимит</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="serversBody"><tr><td colspan="8" class="empty">Загрузка серверов...</td></tr></tbody></table></div></section>
-      <section id="page-payments" class="page hidden"><div class="section-head"><h2>Платежи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadPayments()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('payments')">Экспорт CSV</button></div></div><div class="table-toolbar"><input id="paymentsSearch" type="text" placeholder="Поиск по email" oninput="renderPayments()"><select id="paymentsPlanFilter" onchange="renderPayments()"><option value="">Все планы</option><option value="trial">Trial</option><option value="basic">Premium</option><option value="free">Free</option></select><select id="paymentsStatusFilter" onchange="renderPayments()"><option value="">Все статусы</option><option value="pending">Ожидают</option><option value="succeeded">Успешные</option><option value="failed">Неуспешные</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Сумма</th><th>План</th><th>Статус</th><th>Создан</th><th>Действия</th></tr></thead><tbody id="paymentsBody"><tr><td colspan="7" class="empty">Загрузка платежей...</td></tr></tbody></table></div></section>
+      <section id="page-payments" class="page hidden"><div class="section-head"><h2>Платежи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadPayments()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('payments')">Экспорт CSV</button></div></div><div class="table-toolbar"><input id="paymentsSearch" type="text" placeholder="Поиск по email" oninput="renderPayments()"><select id="paymentsPlanFilter" onchange="renderPayments()"><option value="">Все планы</option><option value="trial">Trial</option><option value="basic">Premium</option><option value="vip">VIP</option><option value="free">Free</option></select><select id="paymentsStatusFilter" onchange="renderPayments()"><option value="">Все статусы</option><option value="pending">Ожидают</option><option value="succeeded">Успешные</option><option value="failed">Неуспешные</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Сумма</th><th>План</th><th>Статус</th><th>Создан</th><th>Действия</th></tr></thead><tbody id="paymentsBody"><tr><td colspan="7" class="empty">Загрузка платежей...</td></tr></tbody></table></div></section>
     </main>
   </div>
 
@@ -295,6 +335,30 @@
         <div class="field"><label>Макс. пиров</label><input id="serverMaxPeers" type="number" placeholder="100"></div>
         <div class="field"><label>AWG порт</label><input id="serverAwgPort" type="number" placeholder="51820"></div>
         <div class="field"><label>SSH пароль</label><input id="serverPassword" type="password" placeholder="••••••••"></div>
+        <div class="field"><label>VLESS address</label><input id="serverVlessAddress" type="text" placeholder="vpn.example.com или 1.2.3.4"></div>
+        <div class="field"><label>VLESS port</label><input id="serverVlessPort" type="number" placeholder="8443"></div>
+        <div class="field"><label>VLESS server_name / SNI</label><input id="serverVlessServerName" type="text" placeholder="www.googletagmanager.com"></div>
+        <div class="field"><label>VLESS public_key</label><input id="serverVlessPublicKey" type="text" placeholder="REALITY public key"></div>
+        <div class="field"><label>VLESS short_id</label><input id="serverVlessShortId" type="text" placeholder="0123456789abcdef"></div>
+        <div class="field"><label>VLESS fingerprint</label><input id="serverVlessFingerprint" type="text" placeholder="chrome"></div>
+        <div class="field"><label>VLESS flow</label><input id="serverVlessFlow" type="text" placeholder="xtls-rprx-vision"></div>
+        <div class="field"><label>VLESS network</label><input id="serverVlessNetwork" type="text" placeholder="tcp"></div>
+        <div class="field"><label>VLESS security</label><input id="serverVlessSecurity" type="text" placeholder="reality"></div>
+        <div class="field"><label>VLESS spider_x</label><input id="serverVlessSpiderX" type="text" placeholder="/"></div>
+        <div class="field"><label>VLESS container</label><input id="serverVlessContainerName" type="text" placeholder="amnezia-xray"></div>
+        <div class="field" style="grid-column:1 / -1">
+          <label style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <input id="serverBootstrapSelfHostedXray" type="checkbox" style="width:auto">
+            Авторазвернуть self-hosted XRay на VPS после сохранения
+          </label>
+          <div style="color:var(--muted);font-size:13px">Через SSH соберёт контейнер <code>amnezia-xray</code>, создаст Reality-конфиг и сразу подтянет VLESS-шаблон обратно в базу.</div>
+        </div>
+        <div class="field" style="grid-column:1 / -1">
+          <label style="display:flex;align-items:center;gap:10px;margin-bottom:0">
+            <input id="serverBootstrapForceRegenerate" type="checkbox" style="width:auto">
+            Перегенерировать UUID и Reality-ключи при bootstrap
+          </label>
+        </div>
       </div>
       <div class="btn-row" style="margin-top:14px"><button id="serverSaveButton" class="btn btn-primary" onclick="submitServerModal()">Сохранить</button><button class="btn btn-secondary" onclick="closeServerModal()">Отмена</button></div>
     </div>
@@ -324,6 +388,15 @@
 
     function fmtMoney(value) {
       return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(Number(value || 0));
+    }
+
+    function planLabel(plan) {
+      return ({
+        free: 'Free',
+        trial: 'Trial',
+        basic: 'Premium',
+        vip: 'VIP'
+      })[plan] || (plan || '—');
     }
 
     function badge(text, kind = 'info') {
@@ -526,11 +599,12 @@
             <td>${user.id}</td>
             <td>${escapeHtml(user.email)}</td>
             <td>${badge(user.role === 'admin' ? 'Администратор' : 'Пользователь', user.role === 'admin' ? 'info' : 'ok')}</td>
-            <td>${escapeHtml(sub.plan || 'none')}</td>
+            <td>${escapeHtml(planLabel(sub.plan || 'none'))}</td>
             <td>${badge(sub.status || '—', statusKind)}</td>
             <td>${fmtDate(sub.expires_at)}</td>
             <td><div class="table-actions">
-              <button class="btn btn-success" onclick="upgradeUser(${user.id})">Выдать премиум</button>
+              <button class="btn btn-success" onclick="upgradeUser(${user.id}, 'basic')">Выдать Premium</button>
+              <button class="btn btn-primary" onclick="upgradeUser(${user.id}, 'vip')">Выдать VIP</button>
               <button class="btn btn-secondary" onclick="toggleUserRole(${user.id}, '${user.role}')">${user.role === 'admin' ? 'Сделать user' : 'Сделать admin'}</button>
               <button class="btn btn-secondary" onclick="revokeUserKeys(${user.id})">Отозвать ключи</button>
               <button class="btn btn-danger" onclick="deleteUser(${user.id})">Удалить</button>
@@ -572,7 +646,7 @@
           <td>${escapeHtml(server.name)}</td>
           <td>${escapeHtml(server.region || '—')} ${server.country_code ? badge(server.country_code, 'info') : ''}</td>
           <td>${escapeHtml(server.endpoint || server.host || '—')}</td>
-          <td>${server.active_keys}</td>
+          <td>AWG: ${server.active_keys}<br>VLESS: ${server.active_vless || 0}</td>
           <td>${server.max_peers}</td>
           <td>${badge(server.active ? 'Активен' : 'Отключён', server.active ? 'ok' : 'warn')}</td>
           <td><div class="table-actions">
@@ -604,7 +678,7 @@
           <td>${payment.id}</td>
           <td>${escapeHtml(payment.user_email || '—')}</td>
           <td>${fmtMoney(payment.amount)}</td>
-          <td>${escapeHtml(payment.plan)}</td>
+          <td>${escapeHtml(planLabel(payment.plan))}</td>
           <td>${badge(payment.status, payment.status === 'succeeded' ? 'ok' : (payment.status === 'pending' ? 'warn' : 'bad'))}</td>
           <td>${fmtDate(payment.created_at)}</td>
           <td>${payment.status === 'pending' ? `<button class="btn btn-success" onclick="approvePayment(${payment.id})">Подтвердить вручную</button>` : ''}</td>
@@ -638,7 +712,7 @@
 
       renderSeries('usersChart', stats.users_series, 'users');
       renderSeries('revenueChart', stats.revenue_series, 'revenue');
-      renderMetricBreakdown('planBreakdown', stats.subscriptions_by_plan, { free: 'План Free', trial: 'Пробный', basic: 'Премиум' });
+      renderMetricBreakdown('planBreakdown', stats.subscriptions_by_plan, { free: 'План Free', trial: 'Пробный', basic: 'Premium', vip: 'VIP' });
       renderMetricBreakdown('statusBreakdown', stats.subscriptions_by_status, { active: 'Активные', expired: 'Истекшие', cancelled: 'Отменённые' });
       renderRegions(stats.top_regions || []);
       renderServerLoad(stats.server_load || []);
@@ -702,9 +776,10 @@
       URL.revokeObjectURL(url);
     }
 
-    async function upgradeUser(id) {
-      if (!confirm('Выдать пользователю премиум-подписку?')) return;
-      await api(`/api/v1/admin/users/${id}/upgrade`, { method: 'POST' });
+    async function upgradeUser(id, plan = 'basic') {
+      const label = planLabel(plan);
+      if (!confirm(`Выдать пользователю подписку ${label}?`)) return;
+      await api(`/api/v1/admin/users/${id}/upgrade`, { method: 'POST', body: JSON.stringify({ plan }) });
       refreshAll();
     }
 
@@ -739,14 +814,30 @@
       editingServerId = null;
       document.getElementById('serverModalTitle').textContent = 'Добавить сервер';
       document.getElementById('serverSaveButton').textContent = 'Добавить сервер';
-      ['serverName','serverRegion','serverCountryCode','serverHost','serverEndpoint','serverMaxPeers','serverAwgPort','serverPassword'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('serverSaveButton').dataset.defaultText = 'Добавить сервер';
+      document.getElementById('serverSaveButton').disabled = false;
+      document.getElementById('serverSaveButton').classList.remove('is-loading');
+      ['serverName','serverRegion','serverCountryCode','serverHost','serverEndpoint','serverMaxPeers','serverAwgPort','serverPassword','serverVlessAddress','serverVlessPort','serverVlessServerName','serverVlessPublicKey','serverVlessShortId','serverVlessFingerprint','serverVlessFlow','serverVlessNetwork','serverVlessSecurity','serverVlessSpiderX','serverVlessContainerName'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('serverVlessPort').value = '8443';
+      document.getElementById('serverVlessServerName').value = 'www.googletagmanager.com';
+      document.getElementById('serverVlessFingerprint').value = 'chrome';
+      document.getElementById('serverVlessFlow').value = 'xtls-rprx-vision';
+      document.getElementById('serverVlessNetwork').value = 'tcp';
+      document.getElementById('serverVlessSecurity').value = 'reality';
+      document.getElementById('serverVlessContainerName').value = 'amnezia-xray';
+      document.getElementById('serverBootstrapSelfHostedXray').checked = true;
+      document.getElementById('serverBootstrapForceRegenerate').checked = false;
       document.getElementById('serverModalWrap').style.display = 'grid';
     }
 
     function openEditServerModal(server) {
       editingServerId = server.id;
+      const template = server.vless_template || {};
       document.getElementById('serverModalTitle').textContent = 'Редактировать сервер';
       document.getElementById('serverSaveButton').textContent = 'Сохранить изменения';
+      document.getElementById('serverSaveButton').dataset.defaultText = 'Сохранить изменения';
+      document.getElementById('serverSaveButton').disabled = false;
+      document.getElementById('serverSaveButton').classList.remove('is-loading');
       document.getElementById('serverName').value = server.name || '';
       document.getElementById('serverRegion').value = server.region || '';
       document.getElementById('serverCountryCode').value = server.country_code || '';
@@ -755,6 +846,19 @@
       document.getElementById('serverMaxPeers').value = server.max_peers || '';
       document.getElementById('serverAwgPort').value = server.awg_port || '';
       document.getElementById('serverPassword').value = '';
+      document.getElementById('serverVlessAddress').value = template.address || '';
+      document.getElementById('serverVlessPort').value = template.port || '';
+      document.getElementById('serverVlessServerName').value = template.server_name || '';
+      document.getElementById('serverVlessPublicKey').value = template.public_key || '';
+      document.getElementById('serverVlessShortId').value = template.short_id || '';
+      document.getElementById('serverVlessFingerprint').value = template.fingerprint || '';
+      document.getElementById('serverVlessFlow').value = template.flow || '';
+      document.getElementById('serverVlessNetwork').value = template.network || '';
+      document.getElementById('serverVlessSecurity').value = template.security || '';
+      document.getElementById('serverVlessSpiderX').value = template.spider_x || '';
+      document.getElementById('serverVlessContainerName').value = template.container_name || '';
+      document.getElementById('serverBootstrapSelfHostedXray').checked = false;
+      document.getElementById('serverBootstrapForceRegenerate').checked = false;
       document.getElementById('serverModalWrap').style.display = 'grid';
     }
 
@@ -762,7 +866,17 @@
       document.getElementById('serverModalWrap').style.display = 'none';
     }
 
+    function setServerSaveButtonLoading(isLoading) {
+      const button = document.getElementById('serverSaveButton');
+      if (!button) return;
+      const defaultText = button.dataset.defaultText || (editingServerId ? 'Сохранить изменения' : 'Добавить сервер');
+      button.disabled = isLoading;
+      button.classList.toggle('is-loading', isLoading);
+      button.textContent = isLoading ? (editingServerId ? 'Сохраняем...' : 'Добавляем...') : defaultText;
+    }
+
     async function submitServerModal() {
+      const bootstrapSelfHostedXray = document.getElementById('serverBootstrapSelfHostedXray').checked;
       const payload = {
         name: document.getElementById('serverName').value.trim(),
         region: document.getElementById('serverRegion').value.trim(),
@@ -772,15 +886,41 @@
         max_peers: Number(document.getElementById('serverMaxPeers').value || 0),
         awg_port: Number(document.getElementById('serverAwgPort').value || 0),
         root_password: document.getElementById('serverPassword').value,
-        ssh_password: document.getElementById('serverPassword').value
+        ssh_password: document.getElementById('serverPassword').value,
+        vless_address: document.getElementById('serverVlessAddress').value.trim(),
+        vless_port: Number(document.getElementById('serverVlessPort').value || 0),
+        vless_server_name: document.getElementById('serverVlessServerName').value.trim(),
+        vless_public_key: document.getElementById('serverVlessPublicKey').value.trim(),
+        vless_short_id: document.getElementById('serverVlessShortId').value.trim(),
+        vless_fingerprint: document.getElementById('serverVlessFingerprint').value.trim(),
+        vless_flow: document.getElementById('serverVlessFlow').value.trim(),
+        vless_network: document.getElementById('serverVlessNetwork').value.trim(),
+        vless_security: document.getElementById('serverVlessSecurity').value.trim(),
+        vless_spider_x: document.getElementById('serverVlessSpiderX').value.trim(),
+        vless_container_name: document.getElementById('serverVlessContainerName').value.trim(),
+        bootstrap_selfhosted_xray: bootstrapSelfHostedXray,
+        bootstrap_force_regenerate: document.getElementById('serverBootstrapForceRegenerate').checked
       };
-      const url = editingServerId ? `/api/v1/admin/servers/${editingServerId}` : '/api/v1/admin/servers';
-      const method = editingServerId ? 'PUT' : 'POST';
-      const res = await api(url, { method, body: JSON.stringify(payload) });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) return alert(data.error || 'Не удалось сохранить сервер');
-      closeServerModal();
-      refreshAll();
+      if (bootstrapSelfHostedXray && !payload.ssh_password.trim() && !editingServerId) {
+        return alert('Для авторазвёртывания self-hosted XRay нужен SSH пароль.');
+      }
+      setServerSaveButtonLoading(true);
+      try {
+        const url = editingServerId ? `/api/v1/admin/servers/${editingServerId}` : '/api/v1/admin/servers';
+        const method = editingServerId ? 'PUT' : 'POST';
+        const res = await api(url, { method, body: JSON.stringify(payload) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return alert(data.error || 'Не удалось сохранить сервер');
+        closeServerModal();
+        if (data.bootstrap?.error) {
+          alert(`Сервер сохранён, но bootstrap XRay завершился с ошибкой:\n${data.bootstrap.error}`);
+        } else if (bootstrapSelfHostedXray && data.bootstrap?.message) {
+          alert(data.bootstrap.message);
+        }
+        refreshAll();
+      } finally {
+        setServerSaveButtonLoading(false);
+      }
     }
 
     async function toggleServer(id) {

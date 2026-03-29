@@ -7,7 +7,7 @@ RUN apk add --no-cache curl unzip bash openssl netcat-openbsd dumb-init rng-tool
 RUN apk --update upgrade --no-cache
 
 RUN mkdir -p /opt/amnezia
-RUN echo -e "#!/bin/bash\ntail -f /dev/null" > /opt/amnezia/start.sh
+COPY start.sh /opt/amnezia/start.sh
 RUN chmod a+x /opt/amnezia/start.sh
 
 RUN mkdir -p /opt/amnezia/xray

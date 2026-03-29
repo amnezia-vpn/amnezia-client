@@ -59,8 +59,15 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	// Проверить, что email не занят
 	var existing models.User
-	if h.db.Where("email = ?", req.Email).First(&existing).Error == nil {
+	if err := h.db.Where("email = ?", req.Email).First(&existing).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "email already registered"})
+		return
+	} else if !isRecordNotFoundError(err) {
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to check email availability"})
 		return
 	}
 
@@ -167,8 +174,16 @@ func (h *AuthHandler) ForgotPassword(c *gin.Context) {
 	}
 
 	var user models.User
-	if h.db.Where("email = ?", req.Email).First(&user).Error != nil {
-		c.JSON(http.StatusOK, gin.H{"message": "if this email is registered, a code will be sent"})
+	if err := h.db.Where("email = ?", req.Email).First(&user).Error; err != nil {
+		if isRecordNotFoundError(err) {
+			c.JSON(http.StatusOK, gin.H{"message": "if this email is registered, a code will be sent"})
+			return
+		}
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to process password reset request"})
 		return
 	}
 
@@ -245,17 +260,20 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	var user models.User
 	if err := h.db.Where("email = ?", req.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+		if isRecordNotFoundError(err) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+			return
+		}
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load user"})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
-		return
-	}
-
-	if _, err := ensureDefaultSubscription(h.db, user.ID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to initialize subscription"})
 		return
 	}
 
@@ -289,7 +307,15 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	claims := token.Claims.(*middleware.Claims)
 	var user models.User
 	if err := h.db.First(&user, claims.UserID).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+		if isRecordNotFoundError(err) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			return
+		}
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load user"})
 		return
 	}
 

@@ -6,19 +6,297 @@
 #include "core/networkUtilities.h"
 
 #include <QCryptographicHash>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkInterface>
+#include <QTcpSocket>
 #include <QJsonDocument>
 #include <QtCore/qlogging.h>
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qprocess.h>
+
+#ifdef Q_OS_WIN
+    #include <winsock2.h>
+    #include <Iphlpapi.h>
+    #include <iptypes.h>
+    #include <Ws2tcpip.h>
+#endif
 
 #ifdef Q_OS_MACOS
 static const QString tunName = "utun22";
 #else
 static const QString tunName = "tun2";
 #endif
+
+namespace {
+void rememberProcessSnippet(QString &buffer, const QString &text)
+{
+    const QString trimmed = text.trimmed();
+    if (trimmed.isEmpty()) {
+        return;
+    }
+
+    if (!buffer.isEmpty()) {
+        buffer += "\n";
+    }
+    buffer += trimmed;
+
+    static constexpr int maxChars = 4096;
+    if (buffer.size() > maxChars) {
+        buffer = buffer.right(maxChars);
+    }
+}
+
+void forceResolvedOutboundAddress(QJsonObject &xrayConfig, const QString &resolvedAddress)
+{
+    if (resolvedAddress.isEmpty()) {
+        return;
+    }
+
+    QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    for (int i = 0; i < outbounds.size(); ++i) {
+        QJsonObject outbound = outbounds.at(i).toObject();
+        QJsonObject settings = outbound.value("settings").toObject();
+        QJsonArray vnext = settings.value("vnext").toArray();
+        if (vnext.isEmpty()) {
+            continue;
+        }
+
+        QJsonObject firstHop = vnext.at(0).toObject();
+        const QString currentAddress = firstHop.value("address").toString();
+        if (currentAddress.compare(resolvedAddress, Qt::CaseInsensitive) == 0) {
+            return;
+        }
+
+        firstHop.insert("address", resolvedAddress);
+        vnext.replace(0, firstHop);
+        settings.insert("vnext", vnext);
+        outbound.insert("settings", settings);
+        outbounds.replace(i, outbound);
+        xrayConfig.insert("outbounds", outbounds);
+        qDebug() << "XrayProtocol: forcing outbound address to resolved IPv4" << resolvedAddress << "(was" << currentAddress << ")";
+        return;
+    }
+}
+
+QString shortDigest(const QString &value)
+{
+    if (value.isEmpty()) {
+        return "<empty>";
+    }
+
+    const QByteArray digest = QCryptographicHash::hash(value.toUtf8(), QCryptographicHash::Sha1).toHex();
+    return QString::fromLatin1(digest.left(10));
+}
+
+bool isTcpPortReachable(const QString &address, quint16 port, int timeoutMs = 1200)
+{
+    if (address.isEmpty() || port == 0) {
+        return false;
+    }
+
+    QTcpSocket socket;
+    socket.connectToHost(address, port);
+    const bool connected = socket.waitForConnected(timeoutMs);
+    if (connected) {
+        socket.disconnectFromHost();
+    }
+    return connected;
+}
+
+bool fallbackOutboundPortTo443(QJsonObject &xrayConfig, const QString &resolvedAddress)
+{
+    if (resolvedAddress.isEmpty()) {
+        return false;
+    }
+
+    QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    if (outbounds.isEmpty()) {
+        return false;
+    }
+
+    QJsonObject outbound = outbounds.at(0).toObject();
+    QJsonObject settings = outbound.value("settings").toObject();
+    QJsonArray vnext = settings.value("vnext").toArray();
+    if (vnext.isEmpty()) {
+        return false;
+    }
+
+    QJsonObject firstHop = vnext.at(0).toObject();
+    const int configuredPort = firstHop.value("port").toInt();
+    if (configuredPort <= 0) {
+        return false;
+    }
+
+    if (isTcpPortReachable(resolvedAddress, static_cast<quint16>(configuredPort))) {
+        qDebug() << "XrayProtocol: configured outbound port is reachable:" << resolvedAddress << configuredPort;
+        return false;
+    }
+
+    if (configuredPort == 443) {
+        qWarning() << "XrayProtocol: configured outbound port 443 is not reachable:" << resolvedAddress;
+        return false;
+    }
+
+    if (!isTcpPortReachable(resolvedAddress, 443)) {
+        qWarning() << "XrayProtocol: configured outbound port is unreachable and 443 fallback is also closed:"
+                   << resolvedAddress << configuredPort;
+        return false;
+    }
+
+    qWarning() << "XrayProtocol: outbound port" << configuredPort
+               << "is unreachable; switching VLESS outbound to 443 for" << resolvedAddress;
+    firstHop.insert("port", 443);
+    vnext.replace(0, firstHop);
+    settings.insert("vnext", vnext);
+    outbound.insert("settings", settings);
+    outbounds.replace(0, outbound);
+    xrayConfig.insert("outbounds", outbounds);
+    return true;
+}
+
+quint16 firstOutboundPort(const QJsonObject &xrayConfig)
+{
+    const QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    if (outbounds.isEmpty()) {
+        return 0;
+    }
+
+    const QJsonObject outbound = outbounds.at(0).toObject();
+    const QJsonObject settings = outbound.value("settings").toObject();
+    const QJsonArray vnext = settings.value("vnext").toArray();
+    if (vnext.isEmpty()) {
+        return 0;
+    }
+
+    return static_cast<quint16>(vnext.at(0).toObject().value("port").toInt());
+}
+
+void sanitizeDesktopXrayConfig(QJsonObject &xrayConfig)
+{
+    QJsonObject log = xrayConfig.value("log").toObject();
+    log.insert("loglevel", "warning");
+    xrayConfig.insert("log", log);
+
+    QJsonArray inbounds = xrayConfig.value("inbounds").toArray();
+    if (!inbounds.isEmpty()) {
+        QJsonObject inbound = inbounds.at(0).toObject();
+        QJsonObject settings = inbound.value("settings").toObject();
+        settings.insert("auth", "noauth");
+        settings.insert("udp", true);
+        inbound.insert("settings", settings);
+        inbounds.replace(0, inbound);
+        xrayConfig.insert("inbounds", inbounds);
+    }
+
+    QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    for (int i = 0; i < outbounds.size(); ++i) {
+        QJsonObject outbound = outbounds.at(i).toObject();
+        if (outbound.value("protocol").toString() != "vless") {
+            continue;
+        }
+
+        QJsonObject streamSettings = outbound.value("streamSettings").toObject();
+        QJsonObject sockopt = streamSettings.value("sockopt").toObject();
+        sockopt.insert("tcpFastOpen", true);
+        sockopt.insert("tcpKeepAliveIdle", 45);
+        sockopt.insert("tcpKeepAliveInterval", 45);
+        streamSettings.insert("sockopt", sockopt);
+        outbound.insert("streamSettings", streamSettings);
+        outbounds.replace(i, outbound);
+    }
+    xrayConfig.insert("outbounds", outbounds);
+}
+
+void logXrayConfigSummary(const QJsonObject &xrayConfig)
+{
+    const QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    if (outbounds.isEmpty()) {
+        qWarning() << "XrayProtocol: no outbounds in config";
+        return;
+    }
+
+    const QJsonObject outbound = outbounds.at(0).toObject();
+    const QJsonObject settings = outbound.value("settings").toObject();
+    const QJsonArray vnext = settings.value("vnext").toArray();
+    const QJsonObject firstHop = vnext.isEmpty() ? QJsonObject() : vnext.at(0).toObject();
+    const QJsonArray users = firstHop.value("users").toArray();
+    const QJsonObject user = users.isEmpty() ? QJsonObject() : users.at(0).toObject();
+    const QJsonObject streamSettings = outbound.value("streamSettings").toObject();
+    const QJsonObject realitySettings = streamSettings.value("realitySettings").toObject();
+    const QJsonObject routing = xrayConfig.value("routing").toObject();
+    const QJsonArray routingRules = routing.value("rules").toArray();
+
+    qDebug().noquote()
+        << QString("XrayProtocol config summary: address=%1 port=%2 serverName=%3 network=%4 security=%5 flow=%6 shortIdHash=%7 publicKeyHash=%8 routingRules=%9")
+               .arg(firstHop.value("address").toString())
+               .arg(firstHop.value("port").toInt())
+               .arg(realitySettings.value("serverName").toString())
+               .arg(streamSettings.value("network").toString())
+               .arg(streamSettings.value("security").toString())
+               .arg(user.value("flow").toString())
+               .arg(shortDigest(realitySettings.value("shortId").toString()))
+               .arg(shortDigest(realitySettings.value("publicKey").toString()))
+               .arg(routingRules.size());
+}
+
+#ifdef Q_OS_WIN
+QStringList dnsServersForInterfaceIndex(ULONG interfaceIndex)
+{
+    QStringList resolvers;
+    if (interfaceIndex == 0) {
+        return resolvers;
+    }
+
+    ULONG bufferLength = 16 * 1024;
+    PIP_ADAPTER_ADDRESSES addresses = reinterpret_cast<PIP_ADAPTER_ADDRESSES>(malloc(bufferLength));
+    if (!addresses) {
+        return resolvers;
+    }
+
+    DWORD result = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_ALL_INTERFACES, nullptr, addresses, &bufferLength);
+    if (result == ERROR_BUFFER_OVERFLOW) {
+        free(addresses);
+        addresses = reinterpret_cast<PIP_ADAPTER_ADDRESSES>(malloc(bufferLength));
+        if (!addresses) {
+            return resolvers;
+        }
+        result = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_ALL_INTERFACES, nullptr, addresses, &bufferLength);
+    }
+
+    if (result != NO_ERROR) {
+        free(addresses);
+        return resolvers;
+    }
+
+    for (PIP_ADAPTER_ADDRESSES adapter = addresses; adapter != nullptr; adapter = adapter->Next) {
+        if (adapter->IfIndex != interfaceIndex) {
+            continue;
+        }
+
+        for (PIP_ADAPTER_DNS_SERVER_ADDRESS_XP dns = adapter->FirstDnsServerAddress; dns != nullptr; dns = dns->Next) {
+            if (!dns->Address.lpSockaddr || dns->Address.lpSockaddr->sa_family != AF_INET) {
+                continue;
+            }
+
+            char buffer[INET_ADDRSTRLEN] = {'\0'};
+            const sockaddr_in *addr = reinterpret_cast<const sockaddr_in *>(dns->Address.lpSockaddr);
+            if (inet_ntop(AF_INET, &(addr->sin_addr), buffer, sizeof(buffer)) != nullptr) {
+                const QString ip = QString::fromLatin1(buffer);
+                if (!ip.isEmpty() && !resolvers.contains(ip)) {
+                    resolvers.append(ip);
+                }
+            }
+        }
+        break;
+    }
+
+    free(addresses);
+    return resolvers;
+}
+#endif
+}
 
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
@@ -40,6 +318,14 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     if (xrayConfiguration.isEmpty()) {
         xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::SSXray)).toObject();
     }
+
+    // Keep the transport path pinned to the already resolved IPv4 address.
+    // This avoids runtime re-resolution to an IPv6/alternate record after the full-tunnel routes are installed.
+    forceResolvedOutboundAddress(xrayConfiguration, m_remoteAddress);
+    m_remoteEndpointReachable = fallbackOutboundPortTo443(xrayConfiguration, m_remoteAddress)
+                                || isTcpPortReachable(m_remoteAddress, firstOutboundPort(xrayConfiguration));
+    sanitizeDesktopXrayConfig(xrayConfiguration);
+    logXrayConfigSummary(xrayConfiguration);
     m_xrayConfig = xrayConfiguration;
 }
 
@@ -53,7 +339,20 @@ ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
 
+    if (!m_remoteEndpointReachable) {
+        qCritical() << "XrayProtocol::start(): refusing to start because remote endpoint is unreachable"
+                    << m_remoteAddress;
+        return ErrorCode::XrayRemoteEndpointUnavailable;
+    }
+
     return IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+        auto deleteTun = iface->deleteTun(tunName);
+        if (!deleteTun.waitForFinished() || !deleteTun.returnValue()) {
+            qWarning() << "XrayProtocol::start(): failed to pre-clean stale tunnel routes";
+        } else {
+            qDebug() << "XrayProtocol::start(): pre-cleaned stale tunnel routes";
+        }
+
         auto xrayStart = iface->xrayStart(QJsonDocument(m_xrayConfig).toJson());
         if (!xrayStart.waitForFinished() || !xrayStart.returnValue()) {
             qCritical() << "Failed to start xray";
@@ -116,6 +415,9 @@ void XrayProtocol::stop()
 
 ErrorCode XrayProtocol::startTun2Socks()
 {
+    m_lastTun2SocksStdout.clear();
+    m_lastTun2SocksStderr.clear();
+
     m_tun2socksProcess = IpcClient::CreatePrivilegedProcess();
     if (!m_tun2socksProcess->waitForSource()) {
         return ErrorCode::FBLinkServiceConnectionFailed;
@@ -132,6 +434,7 @@ ErrorCode XrayProtocol::startTun2Socks()
         }
 
         const QString line = readAllStandardOutput.returnValue();
+        rememberProcessSnippet(m_lastTun2SocksStdout, line);
 
         if (!line.contains("[TCP]") && !line.contains("[UDP]"))
             qDebug() << "[tun2socks]:" << line;
@@ -148,11 +451,39 @@ ErrorCode XrayProtocol::startTun2Socks()
         }
     }, Qt::QueuedConnection);
 
+    connect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, [this]() {
+        auto readAllStandardError = m_tun2socksProcess->readAllStandardError();
+        if (!readAllStandardError.waitForFinished()) {
+            qWarning() << "Failed to read stderr from tun2socks";
+            return;
+        }
+
+        const QString stderrText = QString::fromUtf8(readAllStandardError.returnValue()).trimmed();
+        if (!stderrText.isEmpty()) {
+            rememberProcessSnippet(m_lastTun2SocksStderr, stderrText);
+            qWarning() << "[tun2socks][stderr]:" << stderrText;
+        }
+    }, Qt::QueuedConnection);
+
     connect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::finished, this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
+        auto readAllStandardOutput = m_tun2socksProcess->readAllStandardOutput();
+        if (readAllStandardOutput.waitForFinished()) {
+            rememberProcessSnippet(m_lastTun2SocksStdout, QString::fromUtf8(readAllStandardOutput.returnValue()));
+        }
+
+        auto readAllStandardError = m_tun2socksProcess->readAllStandardError();
+        if (readAllStandardError.waitForFinished()) {
+            rememberProcessSnippet(m_lastTun2SocksStderr, QString::fromUtf8(readAllStandardError.returnValue()));
+        }
+
         if (exitStatus == QProcess::ExitStatus::CrashExit) {
-            qCritical() << "Tun2socks process crashed!";
+            qCritical() << "Tun2socks process crashed!"
+                        << "lastStdout=" << m_lastTun2SocksStdout
+                        << "lastStderr=" << m_lastTun2SocksStderr;
         } else {
-            qCritical() << QString("Tun2socks process was closed with %1 exit code").arg(exitCode);
+            qCritical() << QString("Tun2socks process was closed with %1 exit code").arg(exitCode)
+                        << "lastStdout=" << m_lastTun2SocksStdout
+                        << "lastStderr=" << m_lastTun2SocksStderr;
         }
         stop();
         setLastError(ErrorCode::Tun2SockExecutableCrashed);
@@ -166,6 +497,7 @@ ErrorCode XrayProtocol::setupRouting() {
     return IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {
 #ifdef Q_OS_WIN
         const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
+        const QStringList physicalDnsResolvers = dnsServersForInterfaceIndex(static_cast<ULONG>(qMax(inetAdapterIndex, 0)));
 #endif
         auto createTun = iface->createTun(tunName, fblink::protocols::xray::defaultLocalAddr);
         if (!createTun.waitForFinished() || !createTun.returnValue()) {
@@ -173,11 +505,15 @@ ErrorCode XrayProtocol::setupRouting() {
             return ErrorCode::InternalError;
         }
 
+#ifdef Q_OS_WIN
+        qDebug() << "XrayProtocol::setupRouting(): keeping system DNS configuration on Windows";
+#else
         auto updateResolvers = iface->updateResolvers(tunName, m_dnsServers);
         if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
             qCritical() << "Failed to set DNS resolvers for TUN";
             return ErrorCode::InternalError;
         }
+#endif
 
 #ifdef Q_OS_WIN
         int vpnAdapterIndex = -1;
@@ -191,7 +527,14 @@ ErrorCode XrayProtocol::setupRouting() {
 #else
         static const int vpnAdapterIndex = 0;
 #endif
-        const bool killSwitchEnabled = QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool();
+        const bool requestedKillSwitchEnabled = QVariant(m_rawConfig.value(config_key::killSwitchOption).toString()).toBool();
+        bool killSwitchEnabled = requestedKillSwitchEnabled;
+#ifdef Q_OS_WIN
+        if (requestedKillSwitchEnabled) {
+            qWarning() << "XrayProtocol::setupRouting(): skipping legacy Windows kill switch for XRay session";
+            killSwitchEnabled = false;
+        }
+#endif
         if (killSwitchEnabled) {
             if (vpnAdapterIndex != -1) {
                 QJsonObject config = m_rawConfig;
@@ -216,6 +559,30 @@ ErrorCode XrayProtocol::setupRouting() {
             }
         }
 
+        // Keep the transport path to the XRay/VLESS server outside of the TUN.
+        // Otherwise full-tunnel mode can blackhole the server connection itself.
+        if (!m_remoteAddress.isEmpty() && NetworkUtilities::checkIPv4Format(m_remoteAddress) && !m_routeGateway.isEmpty()) {
+            auto routeServerDirect = iface->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
+            if (!routeServerDirect.waitForFinished() || routeServerDirect.returnValue() < 1) {
+                qWarning() << "Failed to add direct route to XRay server" << m_remoteAddress << "via" << m_routeGateway;
+            } else {
+                qDebug() << "Added direct route to XRay server" << m_remoteAddress << "via" << m_routeGateway;
+            }
+        }
+
+#ifdef Q_OS_WIN
+        if (!physicalDnsResolvers.isEmpty() && !m_routeGateway.isEmpty()) {
+            auto routeDnsDirect = iface->routeAddList(m_routeGateway, physicalDnsResolvers);
+            if (!routeDnsDirect.waitForFinished() || routeDnsDirect.returnValue() < physicalDnsResolvers.size()) {
+                qWarning() << "Failed to add direct routes to system DNS resolvers" << physicalDnsResolvers << "via" << m_routeGateway;
+            } else {
+                qDebug() << "Added direct routes to system DNS resolvers" << physicalDnsResolvers << "via" << m_routeGateway;
+            }
+        } else {
+            qDebug() << "XrayProtocol::setupRouting(): no physical IPv4 DNS resolvers detected for direct bypass";
+        }
+#endif
+
         auto StopRoutingIpv6 = iface->StopRoutingIpv6();
         if (!StopRoutingIpv6.waitForFinished() || !StopRoutingIpv6.returnValue()) {
             qCritical() << "Failed to disable IPv6 routing";
@@ -223,6 +590,7 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
 #ifdef Q_OS_WIN
+        const bool hasAppSplitTunnel = !m_rawConfig.value(config_key::splitTunnelApps).toArray().isEmpty();
         if (inetAdapterIndex != -1 && vpnAdapterIndex != -1) {
             QJsonObject config = m_rawConfig;
             config.insert("inetAdapterIndex", inetAdapterIndex);
@@ -230,10 +598,16 @@ ErrorCode XrayProtocol::setupRouting() {
             config.insert("vpnGateway", m_vpnGateway);
             config.insert("vpnServer", m_remoteAddress);
 
-            auto enablePeerTraffic = iface->enablePeerTraffic(config);
-            if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
-                qCritical() << "Failed to enable peer traffic";
-                return ErrorCode::InternalError;
+            // XRay full-tunnel already has an explicit direct route to the server.
+            // Only invoke legacy Windows peer-traffic plumbing when a feature still needs it.
+            if (killSwitchEnabled || hasAppSplitTunnel) {
+                auto enablePeerTraffic = iface->enablePeerTraffic(config);
+                if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
+                    qCritical() << "Failed to enable peer traffic";
+                    return ErrorCode::InternalError;
+                }
+            } else {
+                qDebug() << "XrayProtocol::setupRouting(): skipping Windows peer traffic plumbing for pure XRay full-tunnel";
             }
         } else
             qWarning() << "Failed to get adapter indexes. Split-tunneling disabled";

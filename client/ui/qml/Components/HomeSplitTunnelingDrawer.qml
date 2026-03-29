@@ -12,6 +12,18 @@ DrawerType2 {
     id: root
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+    property bool canUseSiteSplitTunneling: FBLinkController.canUseSiteSplitTunneling
+    property bool canUseAppSplitTunneling: FBLinkController.canUseAppSplitTunneling
+
+    function openVipFeature(page, isAllowed) {
+        if (isAllowed) {
+            PageController.goToPage(page)
+        } else {
+            PageController.showNotificationMessage(qsTr("Функция доступна только в VIP"))
+            PageController.goToPage(PageEnum.PageFBLinkSubscription)
+        }
+        root.closeTriggered()
+    }
 
     anchors.fill: parent
     expandedHeight: parent.height * 0.9
@@ -31,8 +43,8 @@ DrawerType2 {
             Layout.leftMargin: 16
             Layout.bottomMargin: 16
 
-            headerText: qsTr("Split tunneling")
-            descriptionText:  qsTr("Allows you to connect to some sites or applications through a VPN connection and bypass others")
+            headerText: qsTr("Раздельное туннелирование")
+            descriptionText:  qsTr("Разделяйте трафик между VPN и прямым подключением, если у вас активен VIP")
         }
 
         LabelWithButtonType {
@@ -42,8 +54,8 @@ DrawerType2 {
 
             visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
 
-            text: qsTr("Split tunneling on the server")
-            descriptionText: qsTr("Enabled \nCan't be disabled for current server")
+            text: qsTr("Раздельное туннелирование на сервере")
+            descriptionText: qsTr("Включено\nНедоступно для отключения на текущем сервере")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
@@ -61,13 +73,14 @@ DrawerType2 {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            text: qsTr("Site-based split tunneling")
-            descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            text: qsTr("Раздельное туннелирование по сайтам")
+            descriptionText: root.canUseSiteSplitTunneling
+                ? (SitesModel.isTunnelingEnabled ? qsTr("Включено") : qsTr("Выключено"))
+                : qsTr("Доступно только в VIP")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
-                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-                root.closeTriggered()
+                root.openVipFeature(PageEnum.PageSettingsSplitTunneling, root.canUseSiteSplitTunneling)
             }
         }
 
@@ -80,13 +93,14 @@ DrawerType2 {
 
             Layout.fillWidth: true
 
-            text: qsTr("App-based split tunneling")
-            descriptionText: AppSplitTunnelingModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            text: qsTr("Раздельное туннелирование по приложениям")
+            descriptionText: root.canUseAppSplitTunneling
+                ? (AppSplitTunnelingModel.isTunnelingEnabled ? qsTr("Включено") : qsTr("Выключено"))
+                : qsTr("Доступно только в VIP")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
-                PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
-                root.closeTriggered()
+                root.openVipFeature(PageEnum.PageSettingsAppSplitTunneling, root.canUseAppSplitTunneling)
             }
         }
 

@@ -1,6 +1,41 @@
 #include "ipcserverprocess.h"
 #include "ipc.h"
 #include <QProcess>
+#include <QDir>
+
+namespace {
+QString processErrorToString(QProcess::ProcessError error)
+{
+    switch (error) {
+    case QProcess::FailedToStart: return "FailedToStart";
+    case QProcess::Crashed: return "Crashed";
+    case QProcess::Timedout: return "Timedout";
+    case QProcess::ReadError: return "ReadError";
+    case QProcess::WriteError: return "WriteError";
+    case QProcess::UnknownError: return "UnknownError";
+    }
+    return "UnknownProcessError";
+}
+
+QString processStateToString(QProcess::ProcessState state)
+{
+    switch (state) {
+    case QProcess::NotRunning: return "NotRunning";
+    case QProcess::Starting: return "Starting";
+    case QProcess::Running: return "Running";
+    }
+    return "UnknownProcessState";
+}
+
+QString exitStatusToString(QProcess::ExitStatus status)
+{
+    switch (status) {
+    case QProcess::NormalExit: return "NormalExit";
+    case QProcess::CrashExit: return "CrashExit";
+    }
+    return "UnknownExitStatus";
+}
+}
 
 #ifndef Q_OS_IOS
 
@@ -17,7 +52,35 @@ IpcServerProcess::IpcServerProcess(QObject *parent) :
     connect(m_process.data(), &QProcess::stateChanged, this, &IpcServerProcess::stateChanged);
 
     connect(m_process.data(), &QProcess::errorOccurred, [&](QProcess::ProcessError error){
-        qDebug() << "IpcServerProcess errorOccurred " << error;
+        qWarning() << "IpcServerProcess errorOccurred"
+                   << processErrorToString(error)
+                   << "program=" << m_process->program()
+                   << "arguments=" << m_process->arguments()
+                   << "pid=" << m_process->processId()
+                   << "state=" << processStateToString(m_process->state())
+                   << "errorString=" << m_process->errorString();
+    });
+    connect(m_process.data(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            this, [&](int exitCode, QProcess::ExitStatus exitStatus) {
+        qWarning() << "IpcServerProcess finished"
+                   << "program=" << m_process->program()
+                   << "arguments=" << m_process->arguments()
+                   << "pid=" << m_process->processId()
+                   << "exitCode=" << exitCode
+                   << "exitStatus=" << exitStatusToString(exitStatus);
+    });
+    connect(m_process.data(), &QProcess::started, this, [&]() {
+        qDebug() << "IpcServerProcess started signal"
+                 << "program=" << m_process->program()
+                 << "arguments=" << m_process->arguments()
+                 << "pid=" << m_process->processId()
+                 << "workingDirectory=" << m_process->workingDirectory();
+    });
+    connect(m_process.data(), &QProcess::stateChanged, this, [&](QProcess::ProcessState state) {
+        qDebug() << "IpcServerProcess stateChanged"
+                 << processStateToString(state)
+                 << "program=" << m_process->program()
+                 << "pid=" << m_process->processId();
     });
 
 }
@@ -35,9 +98,17 @@ void IpcServerProcess::start()
 
     Utils::killProcessByName(m_process->program());
     m_process->start();
-    qDebug() << "IpcServerProcess started, " << m_process->program() << m_process->arguments();
+    qDebug() << "IpcServerProcess start requested"
+             << "program=" << m_process->program()
+             << "arguments=" << m_process->arguments()
+             << "workingDirectory=" << (m_process->workingDirectory().isEmpty() ? QDir::currentPath() : m_process->workingDirectory());
 
-    m_process->waitForStarted();
+    if (!m_process->waitForStarted()) {
+        qWarning() << "IpcServerProcess waitForStarted failed"
+                   << "program=" << m_process->program()
+                   << "arguments=" << m_process->arguments()
+                   << "errorString=" << m_process->errorString();
+    }
 }
 
 void IpcServerProcess::terminate() {

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
 	"vpn-backend/internal/models"
 
@@ -44,99 +44,172 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		return
 	}
 
+	capabilities := buildSubscriptionCapabilities(sub)
+	if len(capabilities.AllowedProtocols) == 0 {
+		c.JSON(http.StatusForbidden, gin.H{"error": "no protocol available for current subscription"})
+		return
+	}
+
 	// Получаем все активные серверы
 	var servers []models.VPNServer
-	if err := h.db.Where("active = ?", true).Find(&servers).Error; err != nil || len(servers) == 0 {
+	if err := h.db.Where("active = ?", true).Preload("VLESSTemplate").Find(&servers).Error; err != nil || len(servers) == 0 {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "no available VPN servers"})
 		return
 	}
 
-	// Получаем все существующие ключи пользователя
-	var existingKeys []models.VPNKey
-	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server").Find(&existingKeys)
-
-	keyMap := make(map[uint]*models.VPNKey)
-	for i := range existingKeys {
-		keyMap[existingKeys[i].ServerID] = &existingKeys[i]
-	}
-
-	// Линейный IP-маппинг без коллизий: user_id → 10.8.X.Y
-	// Пример: user_id=1 → 10.8.1.2, user_id=253 → 10.8.1.254, user_id=254 → 10.8.2.2
-	// Поддерживает до 64*253 ≈ 16 192 уникальных пользователей
-	clientIP := fmt.Sprintf("10.8.%d.%d", (userID-1)/253+1, (userID-1)%253+2)
-
-	var responseConfigs []map[string]interface{}
-
-	for i := range servers {
-		server := &servers[i]
-
-		// Если для этого сервера уже есть ключ, используем его
-		if existingKey, ok := keyMap[server.ID]; ok {
-			// Инжектируем актуальный country_code в уже сохранённый конфиг
-			configText := existingKey.ConfigText
-			configMap := map[string]interface{}{}
-			if err := json.Unmarshal([]byte(configText), &configMap); err == nil {
-				configMap["country_code"] = existingKey.Server.CountryCode
-				if modified, err := json.Marshal(configMap); err == nil {
-					configText = string(modified)
+	responseConfigs := make([]map[string]interface{}, 0, len(servers))
+	switch sub.Plan {
+	case models.PlanVIP:
+		var legacyAWGKeys []models.VPNKey
+		h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server").Find(&legacyAWGKeys)
+		if len(legacyAWGKeys) > 0 {
+			now := time.Now()
+			for _, key := range legacyAWGKeys {
+				if key.PublicKey != "" {
+					if err := removeAWGPeer(&key.Server, key.PublicKey); err != nil {
+						fmt.Printf("[WARN] Failed to remove legacy AWG peer for VIP user %d on server %s: %v\n", userID, key.Server.Name, err)
+					}
 				}
 			}
-			responseConfigs = append(responseConfigs, map[string]interface{}{
-				"config":    configText,
-				"server":    existingKey.Server.Name,
-				"region":    existingKey.Server.Region,
-				"issued_at": existingKey.IssuedAt,
-			})
-			continue
+			h.db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", userID).Update("revoked_at", &now)
 		}
 
-		// Иначе генерируем новый ключ для этого сервера
-		privateKey, publicKey, err := generateWGKeyPair()
-		if err != nil {
-			continue // пропускаем сервер при ошибке генерации
-		}
-		presharedKey, err := generatePresharedKey()
-		if err != nil {
-			continue
+		var profiles []models.RoutingProfile
+		if err := ensureDefaultRoutingProfiles(h.db, userID); err == nil {
+			h.db.Where("user_id = ?", userID).Find(&profiles)
 		}
 
-		endpoint := server.Endpoint
-		if endpoint == "" {
-			endpoint = fmt.Sprintf("%s:%d", server.Host, server.AWGPort)
-		}
+		for i := range servers {
+			server := &servers[i]
+			template, err := ensureVLESSTemplate(h.db, server)
+			if err != nil {
+				fmt.Printf("[WARN] ensureVLESSTemplate failed for server %s: %v\n", server.Name, err)
+				continue
+			}
+			if template == nil || template.PublicKey == "" || template.ShortID == "" || template.ServerName == "" {
+				continue
+			}
 
-		awgConfig := buildAWG2Config(privateKey, publicKey, presharedKey, clientIP, endpoint, server)
-		configJSON, err := json.Marshal(awgConfig)
-		if err != nil {
-			continue
-		}
+			clientID := strings.TrimSpace(template.ClientID)
+			issuedAt := time.Now()
+			if clientID == "" {
+				var credential *models.VLESSCredential
+				err = h.db.Transaction(func(tx *gorm.DB) error {
+					var txErr error
+					credential, txErr = ensureVLESSCredential(tx, userID, server, template)
+					return txErr
+				})
+				if err != nil || credential == nil {
+					fmt.Printf("[WARN] ensureVLESSCredential failed for server %s: %v\n", server.Name, err)
+					continue
+				}
+				clientID = credential.ClientID
+				issuedAt = credential.CreatedAt
+			}
 
-		// Сначала добавляем peer через SSH
-		if err := addAWGPeer(server, publicKey, presharedKey, clientIP); err != nil {
-			fmt.Printf("[WARN] SSH addAWGPeer failed for server %s: %v\n", server.Name, err)
-			continue // Если SSH упал, ключ в БД не пишем!
-		}
+			configJSON, err := json.Marshal(buildVLESSConfig(clientID, server, template, profiles))
+			if err != nil {
+				continue
+			}
 
-		now := time.Now()
-		key := models.VPNKey{
-			UserID:       userID,
-			ServerID:     server.ID,
-			PublicKey:    publicKey,
-			PresharedKey: presharedKey,
-			ConfigText:   string(configJSON),
-			IssuedAt:     now,
-		}
-
-		if err := h.db.Create(&key).Error; err == nil {
 			responseConfigs = append(responseConfigs, map[string]interface{}{
 				"config":    string(configJSON),
 				"server":    server.Name,
 				"region":    server.Region,
-				"issued_at": now,
+				"issued_at": issuedAt,
 			})
-		} else {
-			// Если БД упала (что редкость), удаляем только что добавленный пир на сервере
-			removeAWGPeer(server, publicKey)
+		}
+	default:
+		var legacyVLESS []models.VLESSCredential
+		h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server.VLESSTemplate").Find(&legacyVLESS)
+		if len(legacyVLESS) > 0 {
+			now := time.Now()
+			for _, cred := range legacyVLESS {
+				if err := removeXrayClient(&cred.Server, cred.Server.VLESSTemplate, cred.ClientID); err != nil {
+					fmt.Printf("[WARN] Failed to remove legacy VLESS client for basic user %d on server %s: %v\n", userID, cred.Server.Name, err)
+				}
+			}
+			h.db.Model(&models.VLESSCredential{}).Where("user_id = ? AND revoked_at IS NULL", userID).Update("revoked_at", &now)
+		}
+
+		// Получаем все существующие ключи пользователя
+		var existingKeys []models.VPNKey
+		h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server").Find(&existingKeys)
+
+		keyMap := make(map[uint]*models.VPNKey)
+		for i := range existingKeys {
+			keyMap[existingKeys[i].ServerID] = &existingKeys[i]
+		}
+
+		// Линейный IP-маппинг без коллизий: user_id → 10.8.X.Y
+		clientIP := fmt.Sprintf("10.8.%d.%d", (userID-1)/253+1, (userID-1)%253+2)
+
+		for i := range servers {
+			server := &servers[i]
+
+			if existingKey, ok := keyMap[server.ID]; ok {
+				configText := existingKey.ConfigText
+				configMap := map[string]interface{}{}
+				if err := json.Unmarshal([]byte(configText), &configMap); err == nil {
+					configMap["country_code"] = existingKey.Server.CountryCode
+					if modified, err := json.Marshal(configMap); err == nil {
+						configText = string(modified)
+					}
+				}
+				responseConfigs = append(responseConfigs, map[string]interface{}{
+					"config":    configText,
+					"server":    existingKey.Server.Name,
+					"region":    existingKey.Server.Region,
+					"issued_at": existingKey.IssuedAt,
+				})
+				continue
+			}
+
+			privateKey, publicKey, err := generateWGKeyPair()
+			if err != nil {
+				continue
+			}
+			presharedKey, err := generatePresharedKey()
+			if err != nil {
+				continue
+			}
+
+			endpoint := server.Endpoint
+			if endpoint == "" {
+				endpoint = fmt.Sprintf("%s:%d", server.Host, server.AWGPort)
+			}
+
+			awgConfig := buildAWG2Config(privateKey, publicKey, presharedKey, clientIP, endpoint, server)
+			configJSON, err := json.Marshal(awgConfig)
+			if err != nil {
+				continue
+			}
+
+			if err := addAWGPeer(server, publicKey, presharedKey, clientIP); err != nil {
+				fmt.Printf("[WARN] SSH addAWGPeer failed for server %s: %v\n", server.Name, err)
+				continue
+			}
+
+			now := time.Now()
+			key := models.VPNKey{
+				UserID:       userID,
+				ServerID:     server.ID,
+				PublicKey:    publicKey,
+				PresharedKey: presharedKey,
+				ConfigText:   string(configJSON),
+				IssuedAt:     now,
+			}
+
+			if err := h.db.Create(&key).Error; err == nil {
+				responseConfigs = append(responseConfigs, map[string]interface{}{
+					"config":    string(configJSON),
+					"server":    server.Name,
+					"region":    server.Region,
+					"issued_at": now,
+				})
+			} else {
+				_ = removeAWGPeer(server, publicKey)
+			}
 		}
 	}
 
@@ -155,8 +228,9 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"config": strings.Join(configLines, "\n"),
-		"region": region,
+		"config":   strings.Join(configLines, "\n"),
+		"region":   region,
+		"protocol": capabilities.AllowedProtocols[0],
 	})
 }
 
@@ -290,6 +364,12 @@ func (h *VPNHandler) RevokeConfig(c *gin.Context) {
 		}
 	}
 
+	var xrayCredentials []models.VLESSCredential
+	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server.VLESSTemplate").Find(&xrayCredentials)
+	for _, credential := range xrayCredentials {
+		_ = removeXrayClient(&credential.Server, credential.Server.VLESSTemplate, credential.ClientID)
+	}
+
 	now := time.Now()
 	result := h.db.Model(&models.VPNKey{}).
 		Where("user_id = ? AND revoked_at IS NULL", userID).
@@ -297,6 +377,13 @@ func (h *VPNHandler) RevokeConfig(c *gin.Context) {
 
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to revoke key in DB"})
+		return
+	}
+
+	if err := h.db.Model(&models.VLESSCredential{}).
+		Where("user_id = ? AND revoked_at IS NULL", userID).
+		Update("revoked_at", now).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to revoke vless credentials in DB"})
 		return
 	}
 

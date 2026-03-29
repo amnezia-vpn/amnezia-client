@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QVector>
 #include <functional>
 #include <memory>
 
@@ -21,10 +22,14 @@ class FBLinkController : public QObject
     Q_PROPERTY(bool isLoggedIn READ isLoggedIn NOTIFY loginStateChanged)
     Q_PROPERTY(bool isSubscribed READ isSubscribed NOTIFY subscriptionChanged)
     Q_PROPERTY(QString subscriptionPlan READ subscriptionPlan NOTIFY subscriptionChanged)
+    Q_PROPERTY(QStringList allowedProtocols READ allowedProtocols NOTIFY subscriptionChanged)
     Q_PROPERTY(QString subscriptionEndDate READ subscriptionEndDate NOTIFY subscriptionChanged)
     Q_PROPERTY(bool autoRenew READ autoRenew NOTIFY subscriptionChanged)
     Q_PROPERTY(bool cardSaved READ cardSaved NOTIFY subscriptionChanged)
     Q_PROPERTY(bool trialAvailable READ trialAvailable NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool canUseSiteSplitTunneling READ canUseSiteSplitTunneling NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool canUseAppSplitTunneling READ canUseAppSplitTunneling NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool canManageRoutingProfiles READ canManageRoutingProfiles NOTIFY subscriptionChanged)
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY loadingChanged)
 
 public:
@@ -42,15 +47,22 @@ public:
     Q_INVOKABLE void createPayment(const QString &plan);
     Q_INVOKABLE void setAutoRenew(bool enabled);
     Q_INVOKABLE void deleteCard();
+    Q_INVOKABLE void fetchRoutingProfiles();
+    Q_INVOKABLE void saveRoutingProfile(const QVariantMap &profile);
+    Q_INVOKABLE void deleteRoutingProfile(int id);
     Q_INVOKABLE void logout();
 
     bool isLoggedIn() const;
     bool isSubscribed() const;
     QString subscriptionPlan() const;
+    QStringList allowedProtocols() const;
     QString subscriptionEndDate() const;
     bool autoRenew() const;
     bool cardSaved() const;
     bool trialAvailable() const;
+    bool canUseSiteSplitTunneling() const;
+    bool canUseAppSplitTunneling() const;
+    bool canManageRoutingProfiles() const;
     bool isLoading() const;
 
 signals:
@@ -74,6 +86,10 @@ signals:
     void paymentError(const QString &errorMessage);
     void autoRenewChanged(bool enabled);
     void cardDeleted();
+    void routingProfilesFetched(const QVariantList &profiles);
+    void routingProfilesError(const QString &errorMessage);
+    void routingProfileSaved();
+    void routingProfileDeleted();
     void requestError(const QString &errorMessage);
     void loadingChanged();
 
@@ -85,6 +101,20 @@ private:
 
     QString m_apiUrl;
 
+    QNetworkRequest createApiRequest(const QString &path, bool isJsonRequest = false, bool authorized = false) const;
+    void logApiFailure(const QString &operationName, QNetworkReply *reply) const;
+    bool shouldRefreshToken(QNetworkReply *reply) const;
+    void setLoadingState(bool isLoading);
+
+    void fetchConfig(bool allowRefreshRetry);
+    void fetchSubscription(bool allowRefreshRetry);
+    void fetchRoutingProfiles(bool allowRefreshRetry);
+    void saveRoutingProfile(const QVariantMap &profile, bool allowRefreshRetry);
+    void deleteRoutingProfile(int id, bool allowRefreshRetry);
+    void createPayment(const QString &plan, bool allowRefreshRetry);
+    void setAutoRenew(bool enabled, bool allowRefreshRetry);
+    void deleteCard(bool allowRefreshRetry);
+
     void saveJwtToken(const QString &token);
     QString getJwtToken() const;
     void saveRefreshToken(const QString &token);
@@ -92,12 +122,15 @@ private:
     void refreshAccessToken(std::function<void()> onSuccess = nullptr);
     void beginSessionSync();
     void saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,
-                              bool autoRenew = true, bool cardSaved = false, bool trialAvailable = true);
+                              bool autoRenew = true, bool cardSaved = false, bool trialAvailable = true,
+                              const QStringList &allowedProtocols = {}, bool canUseSiteSplitTunneling = false,
+                              bool canUseAppSplitTunneling = false, bool canManageRoutingProfiles = false);
     void clearExistingFBLinkServers();
 
     bool m_isRefreshing = false;
     bool m_isLoading = false;
     bool m_fetchConfigAfterSubscription = false;
+    QVector<std::function<void()>> m_pendingRefreshCallbacks;
     // Защита от обхода подписки: время последней серверной верификации
     // Если прошло > 24ч — при следующем isSubscribed() принудительно обновляем
     qint64 m_lastSubscriptionVerifiedAt = 0;

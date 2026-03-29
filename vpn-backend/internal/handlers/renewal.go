@@ -91,6 +91,16 @@ func processAutoRenewals(db *gorm.DB, shopID, key string) {
 				db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", s.UserID).Update("revoked_at", now)
 				log.Printf("[renewal] Отозваны VPN ключи для пользователя %d (подписка истекла)", s.UserID)
 			}
+
+			var xrayCreds []models.VLESSCredential
+			if err := db.Where("user_id = ? AND revoked_at IS NULL", s.UserID).Preload("Server.VLESSTemplate").Find(&xrayCreds).Error; err == nil {
+				for _, cred := range xrayCreds {
+					if err := removeXrayClient(&cred.Server, cred.Server.VLESSTemplate, cred.ClientID); err != nil {
+						log.Printf("[renewal] Ошибка удаления VLESS credential (user_id=%d) с сервера %s: %v", s.UserID, cred.Server.Name, err)
+					}
+				}
+				db.Model(&models.VLESSCredential{}).Where("user_id = ? AND revoked_at IS NULL", s.UserID).Update("revoked_at", now)
+			}
 		}
 	}
 }

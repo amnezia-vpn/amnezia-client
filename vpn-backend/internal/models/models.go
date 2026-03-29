@@ -30,6 +30,7 @@ const (
 	PlanFree  PlanType = "free"
 	PlanTrial PlanType = "trial"
 	PlanBasic PlanType = "basic"
+	PlanVIP   PlanType = "vip"
 )
 
 type SubscriptionStatus string
@@ -52,10 +53,10 @@ type Subscription struct {
 
 type VPNServer struct {
 	gorm.Model
-	Name      string `gorm:"not null"`
-	Host      string `gorm:"not null"`
-	PublicKey string `gorm:"not null"`
-	MaxPeers  int    `gorm:"default:100"`
+	Name        string `gorm:"not null"`
+	Host        string `gorm:"not null"`
+	PublicKey   string `gorm:"not null"`
+	MaxPeers    int    `gorm:"default:100"`
 	Region      string
 	CountryCode string `gorm:"default:''"` // ISO 3166-1 alpha-2, e.g. "RU", "US", "DE"
 	Active      bool   `gorm:"default:true"`
@@ -89,7 +90,9 @@ type VPNServer struct {
 	AWGContainer string `gorm:"default:'amnezia-awg2'"`
 	AWGInterface string `gorm:"default:'awg0'"`
 
-	VPNKeys []VPNKey `gorm:"foreignKey:ServerID"`
+	VPNKeys       []VPNKey             `gorm:"foreignKey:ServerID"`
+	VLESSTemplate *VLESSServerTemplate `gorm:"foreignKey:ServerID"`
+	VLESSClients  []VLESSCredential    `gorm:"foreignKey:ServerID"`
 }
 
 type VPNKey struct {
@@ -104,6 +107,54 @@ type VPNKey struct {
 
 	User   User
 	Server VPNServer `gorm:"foreignKey:ServerID"`
+}
+
+type VLESSServerTemplate struct {
+	gorm.Model
+	ServerID      uint   `gorm:"uniqueIndex;not null"`
+	ClientID      string `gorm:"default:''"`
+	Address       string `gorm:"not null"`
+	Port          int    `gorm:"default:443"`
+	ServerName    string `gorm:"not null"`
+	PublicKey     string `gorm:"not null"`
+	ShortID       string `gorm:"not null"`
+	Fingerprint   string `gorm:"default:'chrome'"`
+	Flow          string `gorm:"default:'xtls-rprx-vision'"`
+	Network       string `gorm:"default:'tcp'"`
+	Security      string `gorm:"default:'reality'"`
+	SpiderX       string `gorm:"default:''"`
+	ContainerName string `gorm:"default:'amnezia-xray'"`
+}
+
+type VLESSCredential struct {
+	gorm.Model
+	UserID    uint   `gorm:"not null;uniqueIndex:idx_vless_user_server"`
+	ServerID  uint   `gorm:"not null;uniqueIndex:idx_vless_user_server"`
+	ClientID  string `gorm:"not null"`
+	RevokedAt *time.Time
+
+	User   User
+	Server VPNServer `gorm:"foreignKey:ServerID"`
+}
+
+type RoutingProfileKind string
+
+const (
+	RoutingProfileSystem RoutingProfileKind = "system"
+	RoutingProfileCustom RoutingProfileKind = "custom"
+)
+
+type RoutingProfile struct {
+	gorm.Model
+	UserID             uint               `gorm:"not null;index"`
+	Name               string             `gorm:"not null"`
+	Kind               RoutingProfileKind `gorm:"default:'custom'"`
+	Enabled            bool               `gorm:"default:false"`
+	DomainsJSON        string             `gorm:"default:'[]'"`
+	DomainSuffixesJSON string             `gorm:"default:'[]'"`
+	CIDRsJSON          string             `gorm:"default:'[]'"`
+
+	User User
 }
 
 type PaymentStatus string

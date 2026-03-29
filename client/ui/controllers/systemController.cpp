@@ -63,6 +63,7 @@ namespace
         result.host = host.trimmed();
         if (explicitPort > 0) {
             result.ports.append(explicitPort);
+            return result;
         }
 
         for (quint16 fallbackPort : {443, 80, 22}) {

@@ -115,6 +115,10 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			me.GET("/subscription", userH.GetSubscription)
 			me.PATCH("/subscription/auto-renew", userH.SetAutoRenew)
 			me.DELETE("/card", userH.DeleteCard)
+			me.GET("/routing-profiles", userH.GetRoutingProfiles)
+			me.POST("/routing-profiles", userH.CreateRoutingProfile)
+			me.PUT("/routing-profiles/:id", userH.UpdateRoutingProfile)
+			me.DELETE("/routing-profiles/:id", userH.DeleteRoutingProfile)
 			me.GET("/config", vpnH.GetConfig)
 			me.POST("/config/revoke", vpnH.RevokeConfig)
 		}

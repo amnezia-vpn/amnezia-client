@@ -1,6 +1,6 @@
 {
     "log": {
-        "loglevel": "error"
+        "loglevel": "warning"
     },
     "inbounds": [
         {
@@ -8,6 +8,7 @@
             "port": 10808,
             "protocol": "socks",
             "settings": {
+                "auth": "noauth",
                 "udp": true
             }
         }
@@ -33,6 +34,11 @@
             "streamSettings": {
                 "network": "tcp",
                 "security": "reality",
+                "sockopt": {
+                    "tcpFastOpen": true,
+                    "tcpKeepAliveIdle": 45,
+                    "tcpKeepAliveInterval": 45
+                },
                 "realitySettings": {
                     "fingerprint": "chrome",
                     "serverName": "$XRAY_SITE_NAME",

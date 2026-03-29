@@ -99,6 +99,7 @@ namespace fblink
         CloakExecutableCrashed = 802,
         XrayExecutableCrashed = 803,
         Tun2SockExecutableCrashed = 804,
+        XrayRemoteEndpointUnavailable = 805,
 
         // import and install errors
         ImportInvalidConfigError = 900,

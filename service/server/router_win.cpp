@@ -17,6 +17,15 @@ LONG (NTAPI * NtResumeProcess)(HANDLE ProcessHandle)  = NULL;
 
 QList<QString> RouterWin::kIpv6Subnets = { "fc00::/7", "2000::/4", "3000::/4" };
 
+namespace {
+bool routeRowsEquivalent(const MIB_IPFORWARDROW &lhs, const MIB_IPFORWARDROW &rhs)
+{
+    return lhs.dwForwardDest == rhs.dwForwardDest
+           && lhs.dwForwardMask == rhs.dwForwardMask
+           && lhs.dwForwardNextHop == rhs.dwForwardNextHop;
+}
+}
+
 RouterWin &RouterWin::Instance()
 {
     static RouterWin s;
@@ -124,15 +133,46 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
         inet_pton(AF_INET, mask.toStdString().c_str(), &maskAddr);
         ipfrow.dwForwardMask = maskAddr.S_un.S_addr;
 
+        // Clean up stale routes left from previous broken sessions before
+        // attempting to create the fresh entry for the current session.
+        for (DWORD rowIndex = 0; rowIndex < pIpForwardTable->dwNumEntries; ++rowIndex) {
+            const MIB_IPFORWARDROW &existingRow = pIpForwardTable->table[rowIndex];
+            if (!routeRowsEquivalent(existingRow, ipfrow)) {
+                continue;
+            }
+
+            const DWORD deleteStatus = DeleteIpForwardEntry(const_cast<MIB_IPFORWARDROW *>(&existingRow));
+            if (deleteStatus == NO_ERROR) {
+                qDebug() << "Router::routeAddList: removed stale existing route before recreate:" << ipWithMask << gw;
+            }
+            break;
+        }
+
         dwStatus = CreateIpForwardEntry(&ipfrow);
         if (dwStatus == NO_ERROR){
-            m_ipForwardRows.insert(ip, ipfrow);
+            m_ipForwardRows.insert(ipWithMask, ipfrow);
             success_count++;
         }
         else if (dwStatus == ERROR_OBJECT_ALREADY_EXISTS) {
-            m_ipForwardRows.insert(ip, ipfrow);
-            success_count++;
-            qDebug() << "Router::routeAdd: warning, route already exist:" << ip << gw;
+            bool storedExistingRow = false;
+            for (DWORD rowIndex = 0; rowIndex < pIpForwardTable->dwNumEntries; ++rowIndex) {
+                const MIB_IPFORWARDROW &existingRow = pIpForwardTable->table[rowIndex];
+                if (!routeRowsEquivalent(existingRow, ipfrow)) {
+                    continue;
+                }
+
+                m_ipForwardRows.insert(ipWithMask, existingRow);
+                storedExistingRow = true;
+                success_count++;
+                break;
+            }
+
+            if (!storedExistingRow) {
+                m_ipForwardRows.insert(ipWithMask, ipfrow);
+                success_count++;
+            }
+
+            qDebug() << "Router::routeAdd: warning, route already exist:" << ipWithMask << gw;
         }
         else {
             qDebug() << "Router::routeAdd: failed CreateIpForwardEntry(), Error:" << ip << gw << dwStatus;
@@ -182,21 +222,44 @@ bool RouterWin::clearSavedRoutes()
         return false;
     }
 
-    int removed_count = 0;
-    for (auto i = m_ipForwardRows.begin(); i != m_ipForwardRows.end(); ++i) {
-        dwStatus = DeleteIpForwardEntry(&i.value());
+    auto deleteMatchingCurrentRow = [pIpForwardTable](const MIB_IPFORWARDROW &savedRow) -> bool {
+        for (DWORD rowIndex = 0; rowIndex < pIpForwardTable->dwNumEntries; ++rowIndex) {
+            MIB_IPFORWARDROW currentRow = pIpForwardTable->table[rowIndex];
+            if (!routeRowsEquivalent(currentRow, savedRow)) {
+                continue;
+            }
 
-        if (dwStatus != ERROR_SUCCESS) {
-            qDebug() << "Router::clearSavedRoutes : Could not delete old row" << i.key();
+            return DeleteIpForwardEntry(&currentRow) == ERROR_SUCCESS;
         }
-        else  removed_count++;
+
+        return false;
+    };
+
+    int removed_count = 0;
+    QMultiMap<QString, MIB_IPFORWARDROW> remainingRows;
+    for (auto i = m_ipForwardRows.begin(); i != m_ipForwardRows.end(); ++i) {
+        bool removed = DeleteIpForwardEntry(&i.value()) == ERROR_SUCCESS;
+        if (!removed) {
+            removed = deleteMatchingCurrentRow(i.value());
+        }
+
+        if (!removed) {
+            qDebug() << "Router::clearSavedRoutes : Could not delete old row" << i.key();
+            remainingRows.insert(i.key(), i.value());
+        } else {
+            removed_count++;
+        }
     }
 
     if (pIpForwardTable)
         free(pIpForwardTable);
 
     qDebug() << "Router::clearSavedRoutes : removed routes:" << removed_count << "of" << m_ipForwardRows.size();
-    m_ipForwardRows.clear();
+    if (!remainingRows.isEmpty()) {
+        qWarning() << "Router::clearSavedRoutes : keeping" << remainingRows.size()
+                   << "routes for a later cleanup retry";
+    }
+    m_ipForwardRows = remainingRows;
 
     suspendWcmSvc(false);
 
@@ -379,6 +442,85 @@ bool RouterWin::createTun(const QString &dev, const QString &subnet)
     }
 
     return ctx.found;
+}
+
+bool RouterWin::deleteTun(const QString &dev)
+{
+    QStringList candidateNames;
+    if (!dev.isEmpty()) {
+        candidateNames << dev;
+    }
+    candidateNames << "sing-tun";
+
+    QList<DWORD> interfaceIndexes;
+    const QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
+    for (const auto &iface : interfaces) {
+        const QString interfaceName = iface.name();
+        const QString readableName = iface.humanReadableName();
+
+        bool matches = false;
+        for (const QString &candidate : candidateNames) {
+            if (interfaceName.contains(candidate, Qt::CaseInsensitive)
+                || readableName.contains(candidate, Qt::CaseInsensitive)) {
+                matches = true;
+                break;
+            }
+        }
+
+        if (matches && !interfaceIndexes.contains(static_cast<DWORD>(iface.index()))) {
+            interfaceIndexes.append(static_cast<DWORD>(iface.index()));
+        }
+    }
+
+    if (interfaceIndexes.isEmpty()) {
+        qDebug() << "RouterWin::deleteTun: no matching tunnel interfaces found for" << dev;
+        return true;
+    }
+
+    PMIB_IPFORWARDTABLE pIpForwardTable = NULL;
+    DWORD dwSize = 0;
+    BOOL bOrder = FALSE;
+    DWORD dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
+    if (dwStatus == ERROR_INSUFFICIENT_BUFFER) {
+        pIpForwardTable = reinterpret_cast<PMIB_IPFORWARDTABLE>(malloc(dwSize));
+        if (!pIpForwardTable) {
+            qWarning() << "RouterWin::deleteTun: malloc failed";
+            return false;
+        }
+        dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
+    }
+
+    if (dwStatus != ERROR_SUCCESS) {
+        qWarning() << "RouterWin::deleteTun: GetIpForwardTable failed";
+        if (pIpForwardTable) {
+            free(pIpForwardTable);
+        }
+        return false;
+    }
+
+    int removedRoutes = 0;
+    for (DWORD rowIndex = 0; rowIndex < pIpForwardTable->dwNumEntries; ++rowIndex) {
+        MIB_IPFORWARDROW row = pIpForwardTable->table[rowIndex];
+        if (!interfaceIndexes.contains(row.dwForwardIfIndex)) {
+            continue;
+        }
+
+        if (row.dwForwardType == MIB_IPROUTE_TYPE_DIRECT) {
+            continue;
+        }
+
+        if (DeleteIpForwardEntry(&row) == ERROR_SUCCESS) {
+            removedRoutes++;
+        }
+    }
+
+    if (pIpForwardTable) {
+        free(pIpForwardTable);
+    }
+
+    qDebug() << "RouterWin::deleteTun: removed" << removedRoutes
+             << "routes for tunnel interfaces" << interfaceIndexes;
+    return true;
 }
 
 void RouterWin::suspendWcmSvc(bool suspend)
@@ -565,6 +707,9 @@ bool RouterWin::StartRoutingIpv6()
         [](bool &result, bool success) {
             result = result && success;
         }, true);
+
+        res.waitForFinished();
+        return res.result();
     }
 
     return false;

@@ -50,6 +50,55 @@ namespace
         }
         return normalized;
     }
+
+    QString formatPingTarget(const QString &host, const quint16 port)
+    {
+        const QString trimmedHost = host.trimmed();
+        if (trimmedHost.isEmpty()) {
+            return {};
+        }
+
+        if (port == 0) {
+            return trimmedHost;
+        }
+
+        if (trimmedHost.contains(':') && !trimmedHost.startsWith('[')) {
+            return QString("[%1]:%2").arg(trimmedHost).arg(port);
+        }
+
+        return QString("%1:%2").arg(trimmedHost).arg(port);
+    }
+
+    QString pingTargetFromXrayLastConfig(const QString &lastConfig, const QString &fallbackHost)
+    {
+        if (lastConfig.trimmed().isEmpty()) {
+            return {};
+        }
+
+        const QJsonDocument configDocument = QJsonDocument::fromJson(lastConfig.toUtf8());
+        if (!configDocument.isObject()) {
+            return {};
+        }
+
+        const QJsonArray outbounds = configDocument.object().value("outbounds").toArray();
+        for (const QJsonValue &outboundValue : outbounds) {
+            const QJsonObject settings = outboundValue.toObject().value("settings").toObject();
+            const QJsonArray vnext = settings.value("vnext").toArray();
+            if (vnext.isEmpty()) {
+                continue;
+            }
+
+            const QJsonObject firstHop = vnext.at(0).toObject();
+            const QString address = firstHop.value("address").toString().trimmed();
+            const quint16 port = static_cast<quint16>(firstHop.value("port").toInt());
+            const QString target = formatPingTarget(address.isEmpty() ? fallbackHost : address, port);
+            if (!target.isEmpty()) {
+                return target;
+            }
+        }
+
+        return {};
+    }
 }
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
@@ -785,6 +834,28 @@ QVariant ServersModel::getDefaultServerData(const QString roleString)
     }
 
     return {};
+}
+
+QString ServersModel::getDefaultServerPingTarget()
+{
+    if (m_defaultServerIndex < 0 || m_defaultServerIndex >= static_cast<int>(m_servers.size())) {
+        return {};
+    }
+
+    const QJsonObject server = m_servers.at(m_defaultServerIndex).toObject();
+    const QString defaultHost = server.value(config_key::hostName).toString().trimmed();
+    const DockerContainer defaultContainer = ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
+
+    if (defaultContainer == DockerContainer::Xray || defaultContainer == DockerContainer::SSXray) {
+        const Proto proto = ContainerProps::defaultProtocol(defaultContainer);
+        const QJsonObject protocolConfig = m_settings->protocolConfig(m_defaultServerIndex, defaultContainer, proto);
+        const QString target = pingTargetFromXrayLastConfig(protocolConfig.value(config_key::last_config).toString(), defaultHost);
+        if (!target.isEmpty()) {
+            return target;
+        }
+    }
+
+    return defaultHost;
 }
 
 QVariant ServersModel::getProcessedServerData(const QString roleString)

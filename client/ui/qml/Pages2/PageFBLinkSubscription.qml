@@ -15,7 +15,7 @@ import "../Components"
 PageType {
     id: root
 
-    // 0 = basic, 1 = premium
+    // 0 = basic, 1 = vip
     property int selectedPlan: 0
     property bool isLoading: false
     property string errorMessage: ""
@@ -27,9 +27,12 @@ PageType {
 
     readonly property int currentPlanLevel: {
         if (!FBLinkController.isSubscribed) return -1
-        if (FBLinkController.subscriptionPlan === "basic") return 0
+        if (FBLinkController.subscriptionPlan === "vip") return 1
+        if (FBLinkController.subscriptionPlan === "basic" || FBLinkController.subscriptionPlan === "trial") return 0
         return -1
     }
+
+    readonly property var selectedPlanData: root.plans[Math.max(0, Math.min(root.selectedPlan, root.plans.length - 1))]
 
     Timer {
         id: pollTimer
@@ -53,17 +56,53 @@ PageType {
     readonly property string apiBase: "https://srv.frakebit.com"
 
     readonly property var plans: [
-        { id: "basic", title: qsTr("Премиум"), price: "199 ₽", period: qsTr("/ 30 дней"), badge: qsTr("ЛУЧШИЙ"), saving: qsTr("Максимальная скорость и приоритет") }
+        {
+            id: "basic",
+            title: qsTr("Premium"),
+            heroTitle: qsTr("Premium"),
+            heroSubtitle: qsTr("Быстрая защита на базе AWG"),
+            price: "199 ₽",
+            period: qsTr("/ 30 дней"),
+            badge: qsTr("ОСНОВА"),
+            saving: qsTr("Надёжное подключение и полный доступ к серверам"),
+            cta: qsTr("Оплатить 199 ₽ / Premium"),
+            features: [
+                { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Безлимитный трафик") },
+                { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("10+ стран и регионов") },
+                { icon: "qrc:/images/controls/monitor.svg",     text: qsTr("До 5 устройств одновременно") },
+                { icon: "qrc:/images/controls/info.svg",        text: qsTr("Защита Kill Switch") },
+                { icon: "qrc:/images/controls/history.svg",     text: qsTr("AWG-протокол для ежедневного использования") }
+            ]
+        },
+        {
+            id: "vip",
+            title: qsTr("VIP"),
+            heroTitle: qsTr("VIP"),
+            heroSubtitle: qsTr("VLESS, split tunneling и маршрутизация без компромиссов"),
+            price: "399 ₽",
+            period: qsTr("/ 30 дней"),
+            badge: qsTr("МАКС"),
+            saving: qsTr("XRay VLESS, .ru без VPN и VIP-инструменты маршрутизации"),
+            cta: qsTr("Оплатить 399 ₽ / VIP"),
+            features: [
+                { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Протокол XRay VLESS для скорости и стабильности") },
+                { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("Профиль «RU without VPN» и свои правила маршрутизации") },
+                { icon: "qrc:/images/controls/monitor.svg",     text: qsTr("Раздельное туннелирование для сайтов и приложений") },
+                { icon: "qrc:/images/controls/info.svg",        text: qsTr("Приоритетная обработка трафика и премиальные маршруты") },
+                { icon: "qrc:/images/controls/history.svg",     text: qsTr("Все возможности Premium + VIP-управление трафиком") }
+            ]
+        }
     ]
 
-    // Features list
-    readonly property var features: [
-        { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Безлимитный трафик") },
-        { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("10+ стран и регионов") },
-        { icon: "qrc:/images/controls/monitor.svg",     text: qsTr("До 5 устройств одновременно") },
-        { icon: "qrc:/images/controls/info.svg",        text: qsTr("Защита Kill Switch") },
-        { icon: "qrc:/images/controls/history.svg",     text: qsTr("Быстрые серверы без логов") }
-    ]
+    function planTitleById(planId) {
+        for (var i = 0; i < root.plans.length; i++) {
+            if (root.plans[i].id === planId) {
+                return root.plans[i].title
+            }
+        }
+        if (planId === "trial") return qsTr("Premium")
+        return qsTr("Подписка")
+    }
 
     Flickable {
         anchors.fill: parent
@@ -129,7 +168,7 @@ PageType {
                     // Title
                     LabelTextType {
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("FBLink VPN Премиум")
+                        text: qsTr("FBLink VPN %1").arg(root.selectedPlanData.heroTitle)
                         font.pixelSize: 24
                         font.weight: 700
                         color: FBLinkStyle.color.paleGray
@@ -138,7 +177,7 @@ PageType {
                     // Subtitle
                     LabelTextType {
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Полный доступ без ограничений")
+                        text: root.selectedPlanData.heroSubtitle
                         font.pixelSize: 14
                         color: FBLinkStyle.color.mutedGray
                     }
@@ -196,7 +235,7 @@ PageType {
                             }
 
                             LabelTextType {
-                                text: qsTr("Полный доступ ко всем функциям")
+                                text: qsTr("Premium на 7 дней с полным доступом")
                                 font.pixelSize: 12
                                 color: FBLinkStyle.color.mutedGray
                             }
@@ -281,8 +320,9 @@ PageType {
                     delegate: Rectangle {
                         id: planCard
                         Layout.fillWidth: true
-                        implicitHeight: cardContent.implicitHeight + 28
+                        implicitHeight: cardContent.implicitHeight + 32
                         radius: 16
+                        clip: true
 
                         property bool isSelected: root.selectedPlan === index
                         property bool isCurrentPlan: FBLinkController.isSubscribed && FBLinkController.subscriptionPlan === modelData.id
@@ -307,51 +347,34 @@ PageType {
                         border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 2 : 1
                         border.color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#00C8FF" : FBLinkStyle.color.slateGray)
 
-                        opacity: (planCard.isBlocked && !planCard.isCurrentPlan) ? 0.45 : 1.0
+                        opacity: (planCard.isBlocked && !planCard.isCurrentPlan) ? 0.52 : 1.0
 
                         Behavior on border.width { NumberAnimation { duration: 150 } }
 
                         ColumnLayout {
                             id: cardContent
-                            anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
-                            anchors.leftMargin: 20; anchors.rightMargin: 20
-                            spacing: 4
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                top: parent.top
+                                bottom: parent.bottom
+                            }
+                            anchors.leftMargin: 20
+                            anchors.rightMargin: 20
+                            anchors.topMargin: 16
+                            anchors.bottomMargin: 16
+                            spacing: 8
 
-                            RowLayout {
+                            Item {
                                 Layout.fillWidth: true
-                                spacing: 8
+                                implicitHeight: Math.max(planMeta.implicitHeight, 22)
 
-                                LabelTextType {
-                                    text: modelData.title
-                                    font.pixelSize: 15
-                                    font.weight: 600
-                                    color: planCard.isSelected ? FBLinkStyle.color.paleGray : FBLinkStyle.color.lightGray
-                                }
-
-                                // Badge: "АКТИВНА" overrides normal badge
                                 Rectangle {
-                                    visible: planCard.isCurrentPlan || modelData.badge !== ""
-                                    height: 20
-                                    width: activeBadgeText.implicitWidth + 12
-                                    radius: 10
-                                    color: planCard.isCurrentPlan ? "#10B981" : "#00C8FF"
-
-                                    LabelTextType {
-                                        id: activeBadgeText
-                                        anchors.centerIn: parent
-                                        text: planCard.isCurrentPlan ? qsTr("АКТИВНА") : modelData.badge
-                                        font.pixelSize: 10
-                                        font.weight: 700
-                                        color: "#FFFFFF"
-                                    }
-                                }
-
-                                Item { Layout.fillWidth: true }
-
-                                // Radio / checkmark indicator
-                                Rectangle {
+                                    id: selectionIndicator
                                     width: 22; height: 22
                                     radius: 11
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
                                     border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 0 : 2
                                     border.color: FBLinkStyle.color.slateGray
                                     color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#00C8FF" : "transparent")
@@ -364,6 +387,45 @@ PageType {
                                         radius: 4
                                         color: "white"
                                         visible: planCard.isSelected || planCard.isCurrentPlan
+                                    }
+                                }
+
+                                Row {
+                                    id: planMeta
+                                    anchors.left: parent.left
+                                    anchors.right: selectionIndicator.left
+                                    anchors.rightMargin: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: 8
+
+                                    LabelTextType {
+                                        id: planTitleLabel
+                                        width: Math.max(0, planMeta.width - (activeBadge.visible ? activeBadge.width + planMeta.spacing : 0))
+                                        text: modelData.title
+                                        font.pixelSize: 15
+                                        font.weight: 600
+                                        color: planCard.isSelected ? FBLinkStyle.color.paleGray : FBLinkStyle.color.lightGray
+                                        elide: Text.ElideRight
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    // Badge: "АКТИВНА" overrides normal badge
+                                    Rectangle {
+                                        id: activeBadge
+                                        visible: planCard.isCurrentPlan || modelData.badge !== ""
+                                        height: 20
+                                        width: activeBadgeText.implicitWidth + 12
+                                        radius: 10
+                                        color: planCard.isCurrentPlan ? "#10B981" : "#00C8FF"
+
+                                        LabelTextType {
+                                            id: activeBadgeText
+                                            anchors.centerIn: parent
+                                            text: planCard.isCurrentPlan ? qsTr("АКТИВНА") : modelData.badge
+                                            font.pixelSize: 10
+                                            font.weight: 700
+                                            color: "#FFFFFF"
+                                        }
                                     }
                                 }
                             }
@@ -394,6 +456,8 @@ PageType {
                                 text: modelData.saving
                                 font.pixelSize: 12
                                 color: "#10B981"
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
                             }
                         }
 
@@ -423,7 +487,7 @@ PageType {
                 }
 
                 Repeater {
-                    model: root.features
+                    model: root.selectedPlanData.features
 
                     delegate: RowLayout {
                         Layout.fillWidth: true
@@ -572,7 +636,7 @@ PageType {
                     ? qsTr("Создание платежа...")
                     : (root.selectedPlan <= root.currentPlanLevel
                         ? qsTr("Уже активна")
-                        : qsTr("Оплатить 199 ₽ / Premium"))
+                        : root.selectedPlanData.cta)
 
                 clickedFunc: function() {
                     root.errorMessage = ""
@@ -617,7 +681,8 @@ PageType {
                     if (FBLinkController.isSubscribed && root.isWaitingForPayment) {
                         pollTimer.stop()
                         root.isWaitingForPayment = false
-                        PageController.showNotificationMessage(qsTr("Подписка активирована! Добро пожаловать в Premium."))
+                        root.selectedPlan = Math.max(root.currentPlanLevel, 0)
+                        PageController.showNotificationMessage(qsTr("Подписка активирована! Добро пожаловать в %1.").arg(root.planTitleById(FBLinkController.subscriptionPlan)))
                         FBLinkController.fetchConfig()
                         PageController.goToPageHome()
                     }
@@ -661,7 +726,7 @@ PageType {
                             Layout.fillWidth: true
 
                             LabelTextType {
-                        text: qsTr("Подписка «Премиум» активна")
+                        text: qsTr("Подписка «%1» активна").arg(root.planTitleById(FBLinkController.subscriptionPlan))
                                 font.pixelSize: 13
                                 font.weight: 600
                                 color: "#10B981"
@@ -990,6 +1055,7 @@ PageType {
 
     // Refresh subscription status when page opens
     Component.onCompleted: {
+        root.selectedPlan = Math.max(root.currentPlanLevel, 0)
         if (FBLinkController.isLoggedIn) {
             FBLinkController.fetchSubscription()
         }

@@ -147,7 +147,9 @@ PageType {
                     }
 
                     LabelTextType {
-                        text: qsTr("Премиум")
+                        text: FBLinkController.subscriptionPlan === "vip"
+                            ? qsTr("VIP")
+                            : qsTr("Премиум")
                         font.pixelSize: 13
                         font.weight: 700
                         color: "#10B981"
@@ -260,13 +262,13 @@ PageType {
                     }
 
                     function measurePing() {
-                        var serverHost = ServersModel.getDefaultServerData("hostName") || ""
-                        if (serverHost === "") {
+                        var pingTarget = ServersModel.getDefaultServerPingTarget() || ""
+                        if (pingTarget === "") {
                             locationCardRef.realPingMs = -1
                             return
                         }
 
-                        SystemController.measurePing(serverHost)
+                        SystemController.measurePing(pingTarget)
                     }
 
                     Timer {
@@ -324,7 +326,7 @@ PageType {
                             }
                         }
 
-                        // Fake Ping / Chevron
+                        // Active endpoint ping / Chevron
                         RowLayout {
                             Layout.alignment: Qt.AlignVCenter
                             spacing: 8

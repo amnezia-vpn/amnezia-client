@@ -25,12 +25,14 @@ private:
 
     void sockCallback(uintptr_t fd);
     void logHandler(char* str);
+    bool stopEmbeddedXray(bool forRestart);
 
 #ifdef Q_OS_LINUX
     QByteArray m_defaultIfaceName;
 #else
     int m_defaultIfaceIdx;
 #endif
+    bool m_running = false;
 };
 
 #endif // XRAY_H

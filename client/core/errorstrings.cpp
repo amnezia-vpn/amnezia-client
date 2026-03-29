@@ -52,6 +52,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::CloakExecutableMissing): errorMessage = QObject::tr("Cloak (ck-client) executable missing"); break;
     case (ErrorCode::FBLinkServiceConnectionFailed): errorMessage = QObject::tr("FBLink helper service error"); break;
     case (ErrorCode::OpenSslFailed): errorMessage = QObject::tr("OpenSSL failed"); break;
+    case (ErrorCode::XrayRemoteEndpointUnavailable): errorMessage = QObject::tr("XRay server endpoint is unreachable"); break;
 
     // VPN errors
     case (ErrorCode::OpenVpnAdaptersInUseError): errorMessage = QObject::tr("Can't connect: another VPN connection is active"); break;

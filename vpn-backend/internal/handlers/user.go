@@ -15,8 +15,22 @@ type UserHandler struct {
 	cfg *config.Config
 }
 
+const pendingPaymentSyncWindow = 30 * time.Minute
+
 func NewUserHandler(db *gorm.DB, cfg *config.Config) *UserHandler {
 	return &UserHandler{db: db, cfg: cfg}
+}
+
+func shouldSyncPendingPayment(payment models.Payment) bool {
+	if payment.YooKassaID == "" || payment.Status != models.PaymentPending {
+		return false
+	}
+
+	if payment.CreatedAt.IsZero() {
+		return true
+	}
+
+	return time.Since(payment.CreatedAt) <= pendingPaymentSyncWindow
 }
 
 // GET /api/v1/me
@@ -43,13 +57,24 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 
 	// Проверяем доступность пробного периода
 	var trialCount int64
-	h.db.Model(&models.Payment{}).
+	if err := h.db.Model(&models.Payment{}).
 		Where("user_id = ? AND plan = ?", userID, models.PlanTrial).
-		Count(&trialCount)
+		Count(&trialCount).Error; err != nil {
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
+		return
+	}
 	trialAvailable := trialCount == 0
 
 	sub, err := ensureDefaultSubscription(h.db, userID)
 	if err != nil {
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
 		return
 	}
@@ -59,34 +84,63 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 		if err := h.db.Where("user_id = ? AND status = ?", userID, models.PaymentPending).
 			Order("created_at desc").
 			First(&pending).Error; err == nil {
-			if status, err := verifyYooKassaPaymentStatus(h.cfg.YooKassaShopID, h.cfg.YooKassaKey, pending.YooKassaID); err == nil && status == "succeeded" {
-				_ = h.db.Transaction(func(tx *gorm.DB) error {
-					now := time.Now()
-					if err := tx.Model(&pending).Updates(map[string]interface{}{
-						"status":       models.PaymentSucceeded,
-						"confirmed_at": now,
-					}).Error; err != nil {
-						return err
-					}
-					return activateSubscriptionFromPayment(tx, &pending, "")
-				})
+			if shouldSyncPendingPayment(pending) {
+				if status, err := verifyYooKassaPaymentStatus(h.cfg.YooKassaShopID, h.cfg.YooKassaKey, pending.YooKassaID); err == nil && status == "succeeded" {
+					_ = h.db.Transaction(func(tx *gorm.DB) error {
+						now := time.Now()
+						if err := tx.Model(&pending).Updates(map[string]interface{}{
+							"status":       models.PaymentSucceeded,
+							"confirmed_at": now,
+						}).Error; err != nil {
+							return err
+						}
+						return activateSubscriptionFromPayment(tx, &pending, "")
+					})
 
-				sub, err = ensureDefaultSubscription(h.db, userID)
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to reload subscription"})
-					return
+					sub, err = ensureDefaultSubscription(h.db, userID)
+					if err != nil {
+						if isDatabaseBusyError(err) {
+							respondDatabaseBusy(c)
+							return
+						}
+						c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to reload subscription"})
+						return
+					}
 				}
 			}
+		} else if !isRecordNotFoundError(err) {
+			if isDatabaseBusyError(err) {
+				respondDatabaseBusy(c)
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
+			return
+		}
+	}
+
+	capabilities := buildSubscriptionCapabilities(sub)
+	if capabilities.CanManageRoutingProfiles {
+		if err := ensureDefaultRoutingProfiles(h.db, userID); err != nil {
+			if isDatabaseBusyError(err) {
+				respondDatabaseBusy(c)
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
+			return
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"plan":            sub.Plan,
-		"status":          sub.Status,
-		"expires_at":      sub.ExpiresAt,
-		"auto_renew":      sub.AutoRenew,
-		"card_saved":      sub.PaymentMethodID != "",
-		"trial_available": trialAvailable,
+		"plan":                         sub.Plan,
+		"status":                       sub.Status,
+		"expires_at":                   sub.ExpiresAt,
+		"auto_renew":                   sub.AutoRenew,
+		"card_saved":                   sub.PaymentMethodID != "",
+		"trial_available":              trialAvailable,
+		"allowed_protocols":            capabilities.AllowedProtocols,
+		"can_use_site_split_tunneling": capabilities.CanUseSiteSplitTunnel,
+		"can_use_app_split_tunneling":  capabilities.CanUseAppSplitTunnel,
+		"can_manage_routing_profiles":  capabilities.CanManageRoutingProfiles,
 	})
 }
 

@@ -21,11 +21,15 @@ import "../Components"
 PageType {
     id: root
 
+    property bool hasVipAccess: FBLinkController.canUseAppSplitTunneling
     property bool pageEnabled
 
     Component.onCompleted: {
-        if (ConnectionController.isConnected) {
-            PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
+        if (!root.hasVipAccess) {
+            PageController.showNotificationMessage(qsTr("Раздельное туннелирование по приложениям доступно только в VIP"))
+            root.pageEnabled = false
+        } else if (ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Нельзя менять настройки раздельного туннелирования во время активного подключения"))
             root.pageEnabled = false
         } else {
             root.pageEnabled = true
@@ -47,14 +51,14 @@ PageType {
     QtObject {
         id: onlyForwardApps
 
-        readonly property string name: qsTr("Only the apps from the list should have access via VPN")
+        readonly property string name: qsTr("Только приложения из списка будут работать через VPN")
         readonly property int type: routeMode.onlyForwardApps
     }
 
     QtObject {
         id: allExceptApps
         
-        readonly property string name: qsTr("Apps from the list should not have access via VPN")
+        readonly property string name: qsTr("Приложения из списка будут открываться без VPN")
         readonly property int type: routeMode.allExceptApps
     }
 
@@ -85,7 +89,7 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            headerText: qsTr("App split tunneling")
+            headerText: qsTr("Раздельное туннелирование приложений")
 
             enabled: root.pageEnabled
             showSwitcher: true
@@ -96,6 +100,35 @@ PageType {
             switcherFunction: function(checked) {
                 AppSplitTunnelingModel.toggleSplitTunneling(checked)
                 selector.text = root.routeModesModel[getRouteModesModelIndex()].name
+            }
+        }
+
+        WarningType {
+            Layout.fillWidth: true
+            Layout.topMargin: 12
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+
+            visible: !root.hasVipAccess
+            textString: qsTr("Эта настройка доступна только в VIP. Список приложений сохранится, но не будет применяться без VIP-подписки.")
+            iconPath: "qrc:/images/controls/alert-circle.svg"
+        }
+
+        BasicButtonType {
+            Layout.fillWidth: true
+            Layout.topMargin: !root.hasVipAccess ? 12 : 0
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+
+            visible: !root.hasVipAccess
+            text: qsTr("Открыть VIP-подписку")
+            defaultColor: "#00C8FF"
+            hoveredColor: "#33D4FF"
+            pressedColor: "#0099BB"
+            textColor: "#FFFFFF"
+
+            clickedFunc: function() {
+                PageController.goToPage(PageEnum.PageFBLinkSubscription)
             }
         }
 
@@ -110,7 +143,7 @@ PageType {
             drawerHeight: 0.4375
             drawerParent: root
 
-            headerText: qsTr("Mode")
+            headerText: qsTr("Режим")
 
             enabled: (Qt.platform.os === "android") && root.pageEnabled
 
@@ -152,7 +185,7 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            textString: qsTr("Only \"Apps from the list should not have access via VPN\" mode is available on Windows")
+            textString: qsTr("На Windows доступен только режим «Приложения из списка будут открываться без VPN»")
             iconPath: "qrc:/images/controls/alert-circle.svg"
 
             visible: (Qt.platform.os === "windows") && root.pageEnabled
@@ -243,7 +276,7 @@ PageType {
 
                 Layout.fillWidth: true
 
-                textField.placeholderText: qsTr("application name")
+                textField.placeholderText: qsTr("название приложения")
                 buttonImageSource: "qrc:/images/controls/plus.svg"
 
                 rightButtonClickedOnEnter: true
@@ -252,7 +285,7 @@ PageType {
                     searchField.focus = false
 
                     if (Qt.platform.os === "windows") {
-                        var fileName = SystemController.getFileName(qsTr("Open executable file"),
+                        var fileName = SystemController.getFileName(qsTr("Открыть исполняемый файл"),
                                                                     qsTr("Executable files (*.*)"))
                         if (fileName !== "") {
                             PageController.showBusyIndicator(true)

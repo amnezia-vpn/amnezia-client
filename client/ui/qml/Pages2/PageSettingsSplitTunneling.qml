@@ -22,15 +22,18 @@ PageType {
     id: root
 
     property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
-    
+    property bool hasVipAccess: FBLinkController.canUseSiteSplitTunneling
     property bool pageEnabled
 
     Component.onCompleted: {
-        if (ConnectionController.isConnected) {
-            PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
+        if (!root.hasVipAccess) {
+            PageController.showNotificationMessage(qsTr("Раздельное туннелирование по сайтам доступно только в VIP"))
+            root.pageEnabled = false
+        } else if (ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Нельзя менять настройки раздельного туннелирования во время активного подключения"))
             root.pageEnabled = false
         } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling) {
-            PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
+            PageController.showNotificationMessage(qsTr("Текущий сервер не поддерживает изменение раздельного туннелирования"))
             root.pageEnabled = false
         } else {
             root.pageEnabled = true
@@ -65,12 +68,12 @@ PageType {
 
     QtObject {
         id: onlyForwardSites
-        property string name: qsTr("Only the sites listed here will be accessed through the VPN")
+        property string name: qsTr("Только сайты из списка будут работать через VPN")
         property int type: routeMode.onlyForwardSites
     }
     QtObject {
         id: allExceptSites
-        property string name: qsTr("Addresses from the list should not be accessed via VPN")
+        property string name: qsTr("Сайты из списка будут открываться без VPN")
         property int type: routeMode.allExceptSites
     }
 
@@ -101,7 +104,7 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            headerText: qsTr("Split tunneling")
+            headerText: qsTr("Раздельное туннелирование")
 
             enabled: root.pageEnabled
             showSwitcher: true
@@ -112,6 +115,35 @@ PageType {
             switcherFunction: function(checked) {
                 SitesModel.toggleSplitTunneling(checked)
                 selector.text = root.routeModesModel[getRouteModesModelIndex()].name
+            }
+        }
+
+        WarningType {
+            Layout.fillWidth: true
+            Layout.topMargin: 12
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+
+            visible: !root.hasVipAccess
+            textString: qsTr("Эта настройка доступна только в VIP. Сохранённые правила останутся в приложении, но без VIP не применяются.")
+            iconPath: "qrc:/images/controls/alert-circle.svg"
+        }
+
+        BasicButtonType {
+            Layout.fillWidth: true
+            Layout.topMargin: !root.hasVipAccess ? 12 : 0
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+
+            visible: !root.hasVipAccess
+            text: qsTr("Открыть VIP-подписку")
+            defaultColor: "#00C8FF"
+            hoveredColor: "#33D4FF"
+            pressedColor: "#0099BB"
+            textColor: "#FFFFFF"
+
+            clickedFunc: function() {
+                PageController.goToPage(PageEnum.PageFBLinkSubscription)
             }
         }
 
@@ -128,7 +160,7 @@ PageType {
 
             enabled: root.pageEnabled
 
-            headerText: qsTr("Mode")
+            headerText: qsTr("Режим")
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -262,7 +294,7 @@ PageType {
                 Layout.fillWidth: true
                 rightButtonClickedOnEnter: true
 
-                textField.placeholderText: qsTr("website or IP")
+                textField.placeholderText: qsTr("сайт или IP")
                 buttonImageSource: "qrc:/images/controls/plus.svg"
 
                 clickedFunc: function() {
@@ -308,14 +340,14 @@ PageType {
                 Layout.fillWidth: true
                 Layout.margins: 16
 
-                headerText: qsTr("Additional options")
+                headerText: qsTr("Дополнительные действия")
             }
 
             LabelWithButtonType {
                 id: importSitesButton
                 Layout.fillWidth: true
 
-                text: qsTr("Import")
+                text: qsTr("Импорт")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -328,14 +360,14 @@ PageType {
             LabelWithButtonType {
                 id: exportSitesButton
                 Layout.fillWidth: true
-                text: qsTr("Save site list")
+                text: qsTr("Сохранить список сайтов")
 
                 clickedFunction: function() {
                     var fileName = ""
                     if (GC.isMobile()) {
                         fileName = "fblink_sites.json"
                     } else {
-                        fileName = SystemController.getFileName(qsTr("Save sites"),
+                        fileName = SystemController.getFileName(qsTr("Сохранить сайты"),
                                                                 qsTr("Sites files (*.json)"),
                                                                 StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/fblink_sites",
                                                                 true,
@@ -356,13 +388,13 @@ PageType {
                 id: clearSitesButton
                 Layout.fillWidth: true
 
-                text: qsTr("Clear site list")
+                text: qsTr("Очистить список сайтов")
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Clear site list?")
-                    var descriptionText = qsTr("All sites will be removed from list.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Очистить список сайтов?")
+                    var descriptionText = qsTr("Все сайты будут удалены из списка.")
+                    var yesButtonText = qsTr("Продолжить")
+                    var noButtonText = qsTr("Отмена")
 
                     var yesButtonFunction = function() {
                         PageController.showBusyIndicator(true)
@@ -424,7 +456,7 @@ PageType {
                         Layout.fillWidth: true
                         Layout.margins: 16
 
-                        headerText: qsTr("Import a list of sites")
+                        headerText: qsTr("Импорт списка сайтов")
                     }
                 }
 
@@ -459,9 +491,9 @@ PageType {
     QtObject {
         id: replaceOption
 
-        readonly property string title: qsTr("Replace site list")
+        readonly property string title: qsTr("Заменить текущий список")
         readonly property var clickedHandler: function() {
-            var fileName = SystemController.getFileName(qsTr("Open sites file"),
+            var fileName = SystemController.getFileName(qsTr("Открыть файл со списком сайтов"),
                                                         qsTr("Sites files (*.json)"))
             if (fileName !== "") {
                 root.importSites(fileName, true)
@@ -472,9 +504,9 @@ PageType {
     QtObject {
         id: addOption
 
-        readonly property string title: qsTr("Add imported sites to existing ones")
+        readonly property string title: qsTr("Добавить импортированные сайты к текущим")
         readonly property var clickedHandler: function() {
-            var fileName = SystemController.getFileName(qsTr("Open sites file"),
+            var fileName = SystemController.getFileName(qsTr("Открыть файл со списком сайтов"),
                                                         qsTr("Sites files (*.json)"))
             if (fileName !== "") {
                 root.importSites(fileName, false)

@@ -25,6 +25,9 @@ private:
     Settings::RouteMode m_routeMode;
     QList<QHostAddress> m_dnsServers;
     QString m_remoteAddress;
+    QString m_lastTun2SocksStdout;
+    QString m_lastTun2SocksStderr;
+    bool m_remoteEndpointReachable = true;
 
     QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
 };

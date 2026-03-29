@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -10,6 +11,12 @@ import (
 	"gorm.io/gorm"
 )
 
+const yooKassaStatusTimeout = 1500 * time.Millisecond
+
+var yooKassaStatusHTTPClient = &http.Client{
+	Timeout: yooKassaStatusTimeout,
+}
+
 func verifyYooKassaPaymentStatus(shopID, key, paymentID string) (string, error) {
 	req, err := http.NewRequest("GET", "https://api.yookassa.ru/v3/payments/"+paymentID, nil)
 	if err != nil {
@@ -17,11 +24,15 @@ func verifyYooKassaPaymentStatus(shopID, key, paymentID string) (string, error) 
 	}
 	req.SetBasicAuth(shopID, key)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := yooKassaStatusHTTPClient.Do(req)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return "", fmt.Errorf("yookassa status check returned http %d", resp.StatusCode)
+	}
 
 	body, _ := io.ReadAll(resp.Body)
 	var data map[string]interface{}

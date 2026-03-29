@@ -74,6 +74,8 @@ Item {
                 id: input
                 anchors.fill: backgroud
                 ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
                     Layout.margins: 16
                     LabelTextType {
                         text: root.headerText
@@ -82,6 +84,7 @@ Item {
                         visible: text !== ""
 
                         Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
                     }
 
                     TextField {
@@ -113,6 +116,7 @@ Item {
 
                         height: 24
                         Layout.fillWidth: true
+                        Layout.minimumWidth: 0
 
                         topPadding: 0
                         rightPadding: 0
