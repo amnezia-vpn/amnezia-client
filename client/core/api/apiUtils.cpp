@@ -8,6 +8,14 @@ namespace
 {
     const QByteArray AMNEZIA_CONFIG_SIGNATURE = QByteArray::fromHex("000000ff");
 
+    constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
+
+    QString apiErrorMessageFromJson(const QJsonObject &jsonObj)
+    {
+        const QJsonValue value = jsonObj.value(QStringLiteral("message"));
+        return value.isString() ? value.toString().trimmed() : QString();
+    }
+
     QString escapeUnicode(const QString &input)
     {
         QString output;
@@ -156,7 +164,10 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
             return amnezia::ErrorCode::ApiUpdateRequestError;
         }
         if (httpStatusFromBody == httpStatusCodeUnprocessableEntity) {
-            return amnezia::ErrorCode::ApiSubscriptionExpiredError;
+            if (apiErrorMessageFromJson(jsonObj) == unprocessableSubscriptionMessage) {
+                return amnezia::ErrorCode::ApiSubscriptionExpiredError;
+            }
+            return amnezia::ErrorCode::ApiConfigDownloadError;
         }
         if (httpStatusFromBody == httpStatusCodePaymentRequired) {
             return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
