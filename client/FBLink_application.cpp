@@ -95,11 +95,34 @@ namespace {
             QDir(cacheRoot + "/qmlcache").removeRecursively();
         }
     }
+
+    static void clearQtCachesIfNeeded()
+    {
+        QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
+        const QString cacheVersionKey = QStringLiteral("android/qmlCacheVersion");
+        const QString currentVersion = QStringLiteral(APP_VERSION);
+
+#ifdef QT_DEBUG
+        clearQtCaches();
+        settings.setValue(cacheVersionKey, currentVersion);
+        settings.sync();
+#else
+        const QString cachedVersion = settings.value(cacheVersionKey).toString();
+        if (cachedVersion != currentVersion) {
+            clearQtCaches();
+            settings.setValue(cacheVersionKey, currentVersion);
+            settings.sync();
+        }
+#endif
+    }
 }
 #endif
 
 void FBLinkApplication::init()
 {
+#ifdef Q_OS_ANDROID
+    clearQtCachesIfNeeded();
+#endif
     m_engine = new QQmlApplicationEngine;
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
@@ -112,6 +135,10 @@ void FBLinkApplication::init()
             }
             // install filter on main window
             if (auto win = qobject_cast<QQuickWindow*>(obj)) {
+#ifdef Q_OS_ANDROID
+                win->setPersistentGraphics(false);
+                win->setPersistentSceneGraph(false);
+#endif
                 win->installEventFilter(this);
                 win->show();
             }

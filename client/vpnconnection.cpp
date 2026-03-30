@@ -399,6 +399,7 @@ void VpnConnection::appendSplitTunnelingConfig()
     const bool canUseAppSplitTunneling = subscriptionSettings.value("subscriptionCanUseAppSplitTunneling", false).toBool();
 
     if (canUseSiteSplitTunneling && m_settings->isSitesSplitTunnelingEnabled()) {
+        routeMode = m_settings->routeMode();
         if (isXrayBasedProtocol) {
             if (xrayHasManagedRouting) {
                 qDebug() << "XRay config already contains routing rules, skipping OS-level site split tunneling";
@@ -406,8 +407,6 @@ void VpnConnection::appendSplitTunnelingConfig()
                 qDebug() << "XRay split tunneling is handled by VIP routing profiles, skipping legacy OS-level site split tunneling";
             }
         } else {
-            routeMode = m_settings->routeMode();
-
             if (allowSiteBasedSplitTunneling) {
                 auto sites = m_settings->getVpnIps(routeMode);
                 for (const auto &site : sites) {
@@ -539,10 +538,11 @@ void VpnConnection::disconnectFromVpn()
 
 #ifdef Q_OS_ANDROID
     auto *const connection = new QMetaObject::Connection;
-    *connection = connect(AndroidController::instance(), &AndroidController::vpnStateChanged, this,
-                          [this, connection](AndroidController::ConnectionState state) {
-                              if (state == AndroidController::ConnectionState::DISCONNECTED) {
-                                  onConnectionStateChanged(Vpn::ConnectionState::Disconnected);
+    *connection = connect(AndroidController::instance(), &AndroidController::connectionStateChanged, this,
+                          [this, connection](Vpn::ConnectionState state) {
+                              if (state == Vpn::ConnectionState::Disconnected
+                                  || state == Vpn::ConnectionState::Error) {
+                                  setConnectionState(Vpn::ConnectionState::Disconnected);
                                   disconnect(*connection);
                                   delete connection;
                               }

@@ -11,6 +11,7 @@ Rectangle {
     property string text: ""
     property string tone: "neutral"
     property string iconSource: ""
+    property bool compact: false
 
     readonly property color backgroundColor: {
         switch (tone) {
@@ -36,9 +37,9 @@ Rectangle {
         }
     }
 
-    implicitHeight: 28
-    implicitWidth: row.implicitWidth + 18
-    radius: 14
+    implicitHeight: compact ? 24 : 28
+    implicitWidth: row.implicitWidth + (compact ? 14 : 18)
+    radius: implicitHeight / 2
     color: backgroundColor
     border.color: Qt.rgba(foregroundColor.r, foregroundColor.g, foregroundColor.b, 0.18)
     border.width: 1
@@ -51,7 +52,7 @@ Rectangle {
         Image {
             visible: root.iconSource !== ""
             source: root.iconSource
-            sourceSize: Qt.size(12, 12)
+            sourceSize: Qt.size(root.compact ? 10 : 12, root.compact ? 10 : 12)
 
             layer.enabled: true
             layer.effect: ColorOverlay {
@@ -61,7 +62,7 @@ Rectangle {
 
         LabelTextType {
             text: root.text
-            font.pixelSize: 11
+            font.pixelSize: root.compact ? 10 : 11
             font.weight: 700
             color: root.foregroundColor
         }

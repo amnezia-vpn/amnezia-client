@@ -20,14 +20,19 @@ import "../Components"
 PageType {
     id: root
     readonly property bool wideLayout: GC.isWideWidth(width)
+    readonly property bool compactHeaderBadges: width < 420
     readonly property real contentWidth: Math.min(width - 32, GC.pageMaxWidth(width))
     readonly property real contentSideMargin: Math.max(16, (width - contentWidth) / 2)
+    property int homePingMs: -1
+    readonly property string homePingDisplay: homePingMs >= 0 ? (homePingMs + " ms") : "—"
     readonly property string homeStateTitle: ConnectionController.isConnected
         ? qsTr("VPN активен")
         : (ConnectionController.isConnectionInProgress ? qsTr("Подготавливаем подключение") : qsTr("Готово к подключению"))
-    readonly property string homeStateSubtitle: ServersModel.defaultServerName !== ""
-        ? ServersModel.defaultServerName
-        : qsTr("Выберите локацию и нажмите подключение")
+    readonly property string homeStateSubtitle: FBLinkController.isLoading
+        ? qsTr("Обновление конфигураций...")
+        : (ServersModel.defaultServerName !== ""
+            ? ServersModel.defaultServerName
+            : qsTr("Выберите локацию и нажмите подключение"))
 
     Connections {
         target: Qt.application
@@ -55,11 +60,54 @@ PageType {
     }
 
 
-    Item {
+    Flickable {
+        id: homeFlickable
         objectName: "homeColumnItem"
 
         anchors.fill: parent
         anchors.bottomMargin: drawer.collapsedHeight + subscriptionBanner.implicitHeight
+        contentWidth: width
+        contentHeight: height
+        flickableDirection: Flickable.VerticalFlick
+        boundsBehavior: Flickable.DragAndOvershootBounds
+
+        Item {
+            id: ptrIndicator
+            width: homeFlickable.width
+            height: 60
+            y: -80
+            visible: FBLinkController.isLoading || homeFlickable.contentY < 0
+
+            RowLayout {
+                anchors.centerIn: parent
+                spacing: 12
+                
+                BusyIndicator {
+                    Layout.preferredWidth: 24
+                    Layout.preferredHeight: 24
+                    running: FBLinkController.isLoading || homeFlickable.contentY < -40
+                    visible: running
+                }
+                
+                LabelTextType {
+                    text: FBLinkController.isLoading 
+                        ? qsTr("Обновление конфигураций...") 
+                        : (homeFlickable.contentY < -70 ? qsTr("Отпустите для обновления") : qsTr("Потяните для обновления"))
+                    font.pixelSize: 13
+                    color: FBLinkStyle.color.mutedGray
+                }
+            }
+        }
+
+        onMovementEnded: {
+            if (contentY < -70 && !FBLinkController.isLoading) {
+                if (FBLinkController.isLoggedIn) {
+                    FBLinkController.syncAll()
+                } else {
+                    FBLinkController.fetchConfig() // triggers error message
+                }
+            }
+        }
 
         // ── Top bar: Premium button ──────────────────────────────
         RowLayout {
@@ -183,11 +231,13 @@ PageType {
             accentVisible: true
             accentColor: ConnectionController.isConnected ? "#10B981" : "#00C8FF"
 
-            RowLayout {
+            Flow {
                 Layout.fillWidth: true
+                width: statusCard.width - statusCard.padding * 2
                 spacing: 8
 
                 PremiumBadge {
+                    compact: root.compactHeaderBadges
                     text: FBLinkController.isSubscribed
                         ? (FBLinkController.subscriptionPlan === "vip" ? qsTr("VIP") : qsTr("Premium"))
                         : qsTr("Free")
@@ -196,6 +246,7 @@ PageType {
                 }
 
                 PremiumBadge {
+                    compact: root.compactHeaderBadges
                     text: ConnectionController.isConnected ? qsTr("Подключено") : qsTr("Ожидание")
                     tone: ConnectionController.isConnected ? "success" : "accent"
                     iconSource: ConnectionController.isConnected
@@ -205,15 +256,17 @@ PageType {
 
                 PremiumBadge {
                     visible: FBLinkController.canManageRoutingProfiles
-                    text: qsTr("VIP routing")
+                    compact: root.compactHeaderBadges
+                    text: root.compactHeaderBadges ? qsTr("Routing") : qsTr("VIP routing")
                     tone: "proxy"
                     iconSource: "qrc:/images/controls/tag.svg"
                 }
 
                 PremiumBadge {
-                    visible: locationCardRef.realPingMs >= 0
-                    text: locationCardRef.pingDisplay
-                    tone: locationCardRef.realPingMs < 80 ? "success" : (locationCardRef.realPingMs < 150 ? "warning" : "neutral")
+                    visible: root.homePingMs >= 0
+                    compact: root.compactHeaderBadges
+                    text: root.homePingDisplay
+                    tone: root.homePingMs < 80 ? "success" : (root.homePingMs < 150 ? "warning" : "neutral")
                     iconSource: "qrc:/images/controls/gauge.svg"
                 }
             }
@@ -331,6 +384,7 @@ PageType {
                         target: SystemController
                         function onPingMeasured(ms) {
                             locationCardRef.realPingMs = ms
+                            root.homePingMs = ms
                         }
                     }
 
@@ -338,6 +392,7 @@ PageType {
                         var pingTarget = ServersModel.getDefaultServerPingTarget() || ""
                         if (pingTarget === "") {
                             locationCardRef.realPingMs = -1
+                            root.homePingMs = -1
                             return
                         }
 

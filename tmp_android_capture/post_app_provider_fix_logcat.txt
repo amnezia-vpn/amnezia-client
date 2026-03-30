@@ -1,0 +1,222 @@
+--------- beginning of main
+03-30 21:34:03.887  4909  4909 I com.fblink.vpn: Late-enabling -Xcheck:jni
+03-30 21:34:04.476  4909  4909 I Perf    : Connecting to perf service.
+03-30 21:34:04.511  4909  4909 W com.fblink.vpn: Accessing hidden field Landroid/os/Trace;->TRACE_TAG_APP:J (light greylist, reflection)
+03-30 21:34:04.511  4909  4909 W com.fblink.vpn: Accessing hidden method Landroid/os/Trace;->isTagEnabled(J)Z (light greylist, reflection)
+03-30 21:34:04.534  4909  4909 V Prefs   : Init Prefs
+03-30 21:34:04.534  4909  4909 V Log     : Init Log
+03-30 21:34:04.596  4909  4909 W com.fblink.vpn: Accessing hidden field Ljava/nio/Buffer;->address:J (light greylist, reflection)
+03-30 21:34:04.915  4909  4909 V VpnState: Init VpnStateStore
+03-30 21:34:04.915  4909  4909 D FBLinkApplication: Create Amnezia application
+03-30 21:34:04.964  4909  4909 W com.fblink.vpn: Accessing hidden method Landroid/content/ContextWrapper;->getDisplay()Landroid/view/Display; (light greylist, linking)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn: Rejecting re-init on previously-failed class java.lang.Class<org.qtproject.qt.android.QtInputDelegate$2>: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/view/WindowInsetsAnimation$Callback;
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegateBase.<init>(android.app.Activity) (QtActivityDelegateBase.java:49)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegate.<init>(android.app.Activity) (QtActivityDelegate.java:47)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityBase.<init>() (QtActivityBase.java:91)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.bindings.QtActivity.<init>() (QtActivity.java:11)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.fblink.vpn.FBLinkActivity.<init>() (FBLinkActivity.kt:77)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Object java.lang.Class.newInstance() (Class.java:-2)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.AppComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (AppComponentFactory.java:69)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity androidx.core.app.CoreComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (CoreComponentFactory.java:44)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.Instrumentation.newActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (Instrumentation.java:1216)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.performLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.content.Intent) (ActivityThread.java:2837)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.handleLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.app.servertransaction.PendingTransactionActions, android.content.Intent) (ActivityThread.java:3054)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.LaunchActivityItem.execute(android.app.ClientTransactionHandler, android.os.IBinder, android.app.servertransaction.PendingTransactionActions) (LaunchActivityItem.java:78)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.executeCallbacks(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:108)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.execute(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:68)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.ActivityThread$H.handleMessage(android.os.Message) (ActivityThread.java:1814)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.os.Handler.dispatchMessage(android.os.Message) (Handler.java:106)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.os.Looper.loop() (Looper.java:280)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.ActivityThread.main(java.lang.String[]) (ActivityThread.java:6706)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[]) (Method.java:-2)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run() (RuntimeInit.java:493)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.android.internal.os.ZygoteInit.main(java.lang.String[]) (ZygoteInit.java:858)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn: Caused by: java.lang.ClassNotFoundException: Didn't find class "android.view.WindowInsetsAnimation$Callback" on path: DexPathList[[zip file "/data/app/com.fblink.vpn-J3PMjj1tNZal57wSse9mvA==/base.apk"],nativeLibraryDirectories=[/data/app/com.fblink.vpn-J3PMjj1tNZal57wSse9mvA==/lib/arm64, /data/app/com.fblink.vpn-J3PMjj1tNZal57wSse9mvA==/base.apk!/lib/arm64-v8a, /system/lib64, /system/vendor/lib64]]
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Class dalvik.system.BaseDexClassLoader.findClass(java.lang.String) (BaseDexClassLoader.java:134)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Class java.lang.ClassLoader.loadClass(java.lang.String, boolean) (ClassLoader.java:379)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Class java.lang.ClassLoader.loadClass(java.lang.String) (ClassLoader.java:312)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegateBase.<init>(android.app.Activity) (QtActivityDelegateBase.java:49)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegate.<init>(android.app.Activity) (QtActivityDelegate.java:47)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityBase.<init>() (QtActivityBase.java:91)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.bindings.QtActivity.<init>() (QtActivity.java:11)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.fblink.vpn.FBLinkActivity.<init>() (FBLinkActivity.kt:77)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Object java.lang.Class.newInstance() (Class.java:-2)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.AppComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (AppComponentFactory.java:69)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity androidx.core.app.CoreComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (CoreComponentFactory.java:44)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.Instrumentation.newActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (Instrumentation.java:1216)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.performLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.content.Intent) (ActivityThread.java:2837)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.handleLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.app.servertransaction.PendingTransactionActions, android.content.Intent) (ActivityThread.java:3054)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.LaunchActivityItem.execute(android.app.ClientTransactionHandler, android.os.IBinder, android.app.servertransaction.PendingTransactionActions) (LaunchActivityItem.java:78)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.executeCallbacks(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:108)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.execute(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:68)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.ActivityThread$H.handleMessage(android.os.Message) (ActivityThread.java:1814)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.os.Handler.dispatchMessage(android.os.Message) (Handler.java:106)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.os.Looper.loop() (Looper.java:280)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.ActivityThread.main(java.lang.String[]) (ActivityThread.java:6706)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[]) (Method.java:-2)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run() (RuntimeInit.java:493)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.android.internal.os.ZygoteInit.main(java.lang.String[]) (ZygoteInit.java:858)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn: 
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn: Rejecting re-init on previously-failed class java.lang.Class<org.qtproject.qt.android.QtInputDelegate$2>: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/view/WindowInsetsAnimation$Callback;
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegateBase.<init>(android.app.Activity) (QtActivityDelegateBase.java:49)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegate.<init>(android.app.Activity) (QtActivityDelegate.java:47)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityBase.<init>() (QtActivityBase.java:91)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.bindings.QtActivity.<init>() (QtActivity.java:11)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.fblink.vpn.FBLinkActivity.<init>() (FBLinkActivity.kt:77)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Object java.lang.Class.newInstance() (Class.java:-2)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.AppComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (AppComponentFactory.java:69)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity androidx.core.app.CoreComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (CoreComponentFactory.java:44)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.Instrumentation.newActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (Instrumentation.java:1216)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.performLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.content.Intent) (ActivityThread.java:2837)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.handleLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.app.servertransaction.PendingTransactionActions, android.content.Intent) (ActivityThread.java:3054)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.LaunchActivityItem.execute(android.app.ClientTransactionHandler, android.os.IBinder, android.app.servertransaction.PendingTransactionActions) (LaunchActivityItem.java:78)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.executeCallbacks(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:108)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.execute(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:68)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.ActivityThread$H.handleMessage(android.os.Message) (ActivityThread.java:1814)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.os.Handler.dispatchMessage(android.os.Message) (Handler.java:106)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.os.Looper.loop() (Looper.java:280)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.ActivityThread.main(java.lang.String[]) (ActivityThread.java:6706)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[]) (Method.java:-2)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run() (RuntimeInit.java:493)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.android.internal.os.ZygoteInit.main(java.lang.String[]) (ZygoteInit.java:858)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn: Caused by: java.lang.ClassNotFoundException: Didn't find class "android.view.WindowInsetsAnimation$Callback" on path: DexPathList[[zip file "/data/app/com.fblink.vpn-J3PMjj1tNZal57wSse9mvA==/base.apk"],nativeLibraryDirectories=[/data/app/com.fblink.vpn-J3PMjj1tNZal57wSse9mvA==/lib/arm64, /data/app/com.fblink.vpn-J3PMjj1tNZal57wSse9mvA==/base.apk!/lib/arm64-v8a, /system/lib64, /system/vendor/lib64]]
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Class dalvik.system.BaseDexClassLoader.findClass(java.lang.String) (BaseDexClassLoader.java:134)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Class java.lang.ClassLoader.loadClass(java.lang.String, boolean) (ClassLoader.java:379)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Class java.lang.ClassLoader.loadClass(java.lang.String) (ClassLoader.java:312)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegateBase.<init>(android.app.Activity) (QtActivityDelegateBase.java:49)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegate.<init>(android.app.Activity) (QtActivityDelegate.java:47)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityBase.<init>() (QtActivityBase.java:91)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void org.qtproject.qt.android.bindings.QtActivity.<init>() (QtActivity.java:11)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void com.fblink.vpn.FBLinkActivity.<init>() (FBLinkActivity.kt:77)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at java.lang.Object java.lang.Class.newInstance() (Class.java:-2)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.AppComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (AppComponentFactory.java:69)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity androidx.core.app.CoreComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (CoreComponentFactory.java:44)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.Instrumentation.newActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (Instrumentation.java:1216)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.performLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.content.Intent) (ActivityThread.java:2837)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.handleLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.app.servertransaction.PendingTransactionActions, android.content.Intent) (ActivityThread.java:3054)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.LaunchActivityItem.execute(android.app.ClientTransactionHandler, android.os.IBinder, android.app.servertransaction.PendingTransactionActions) (LaunchActivityItem.java:78)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.executeCallbacks(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:108)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.execute(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:68)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.app.ActivityThread$H.handleMessage(android.os.Message) (ActivityThread.java:1814)
+03-30 21:34:04.967  4909  4909 I com.fblink.vpn:   at void android.os.Handler.dispatchMessage(android.os.Message) (Handler.java:106)
+03-30 21:34:04.968  4909  4909 I com.fblink.vpn:   at void android.os.Looper.loop() (Looper.java:280)
+03-30 21:34:04.968  4909  4909 I com.fblink.vpn:   at void android.app.ActivityThread.main(java.lang.String[]) (ActivityThread.java:6706)
+03-30 21:34:04.968  4909  4909 I com.fblink.vpn:   at java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[]) (Method.java:-2)
+03-30 21:34:04.968  4909  4909 I com.fblink.vpn:   at void com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run() (RuntimeInit.java:493)
+03-30 21:34:04.968  4909  4909 I com.fblink.vpn:   at void com.android.internal.os.ZygoteInit.main(java.lang.String[]) (ZygoteInit.java:858)
+03-30 21:34:04.968  4909  4909 I com.fblink.vpn: 
+03-30 21:34:04.971  4909  4909 W com.fblink.vpn: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;-><init>()V (dark greylist, linking)
+03-30 21:34:05.474  4909  4909 W com.fblink.vpn: Accessing hidden method Landroid/graphics/drawable/StateListDrawable;->getStateCount()I (light greylist, linking)
+03-30 21:34:05.479  4909  4909 W QtLoader: Null extras from the Activity's intent.
+03-30 21:34:05.484  4909  4934 W linker  : Warning: "/data/app/com.fblink.vpn-J3PMjj1tNZal57wSse9mvA==/lib/arm64/libc++_shared.so" unused DT entry: unknown processor-specific (type 0x70000001 arg 0x0) (ignoring)
+03-30 21:34:05.489  4909  4934 I QtCore  : Start
+03-30 21:34:05.591  4909  4934 I Qt      : Qt platform plugin started
+03-30 21:34:05.626  4909  4909 D FBLinkActivity: Create FBLink activity
+03-30 21:34:05.627  4909  4909 D LibraryLoader: Loading library: rsapss
+03-30 21:34:05.630  4909  4909 D LibraryLoader: Loading library: crypto_3
+03-30 21:34:05.632  4909  4909 D LibraryLoader: Loading library: ssl_3
+03-30 21:34:05.633  4909  4909 D LibraryLoader: Loading library: ssh
+03-30 21:34:05.646  4909  4909 D FBLinkActivity: Start FBLink activity
+03-30 21:34:05.651  4909  4909 D FBLinkActivity: Resume FBLink activity
+03-30 21:34:05.653  4909  4909 D OpenGLRenderer: Skia GL Pipeline
+03-30 21:34:05.665  4909  4909 I Choreographer: Skipped 67 frames!  The application may be doing too much work on its main thread.
+03-30 21:34:05.676  4909  4945 I Adreno  : QUALCOMM build                   : 7ae04e7, Ia74c9b5270
+03-30 21:34:05.676  4909  4945 I Adreno  : Build Date                       : 09/20/18
+03-30 21:34:05.676  4909  4945 I Adreno  : OpenGL ES Shader Compiler Version: EV031.25.03.00
+03-30 21:34:05.676  4909  4945 I Adreno  : Local Branch                     : 
+03-30 21:34:05.676  4909  4945 I Adreno  : Remote Branch                    : refs/tags/AU_LINUX_ANDROID_LA.UM.7.4.R1.09.00.00.453.030
+03-30 21:34:05.676  4909  4945 I Adreno  : Remote Branch                    : NONE
+03-30 21:34:05.676  4909  4945 I Adreno  : Reconstruct Branch               : NOTHING
+03-30 21:34:05.676  4909  4945 I Adreno  : Build Config                     : S L 6.0.7 AArch64
+03-30 21:34:05.678  4909  4945 D vndksupport: Loading /vendor/lib64/hw/gralloc.msm8998.so from current namespace instead of sphal namespace.
+03-30 21:34:05.675  4909  4909 W RenderThread: type=1400 audit(0.0:22886): avc: denied { search } for name="proc" dev="debugfs" ino=20357 scontext=u:r:untrusted_app:s0:c215,c256,c512,c768 tcontext=u:object_r:qti_debugfs:s0 tclass=dir permissive=0 ppid=1274 pcomm="main" pgid=4909 pgcomm="com.fblink.vpn"
+03-30 21:34:05.689  4909  4945 I Adreno  : PFP: 0x005ff112, ME: 0x005ff066
+03-30 21:34:05.692  4909  4945 I ConfigStore: android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasWideColorDisplay retrieved: 0
+03-30 21:34:05.693  4909  4945 I ConfigStore: android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasHDRDisplay retrieved: 0
+03-30 21:34:05.695  4909  4945 I OpenGLRenderer: Initialized EGL, version 1.4
+03-30 21:34:05.695  4909  4945 D OpenGLRenderer: Swap behavior 2
+03-30 21:34:05.704  4909  4909 D FBLinkActivity: Window focus changed: hasFocus=true
+03-30 21:34:05.715  4909  4945 D vndksupport: Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+03-30 21:34:05.715  4909  4945 D vndksupport: Loading /vendor/lib64/hw/gralloc.msm8998.so from current namespace instead of sphal namespace.
+03-30 21:34:05.791  4909  4934 W KeyStore: KeyStore exception
+03-30 21:34:05.791  4909  4934 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 21:34:05.791  4909  4934 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 21:34:05.975  4909  4934 W KeyStore: KeyStore exception
+03-30 21:34:05.975  4909  4934 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 21:34:05.975  4909  4934 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 21:34:06.141  4909  4934 W KeyStore: KeyStore exception
+03-30 21:34:06.141  4909  4934 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 21:34:06.141  4909  4934 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 21:34:06.153  4909  4909 W com.fblink.vpn: Accessing hidden method Landroid/os/Trace;->asyncTraceBegin(JLjava/lang/String;I)V (light greylist, reflection)
+03-30 21:34:06.153  4909  4909 W com.fblink.vpn: Accessing hidden method Landroid/os/Trace;->asyncTraceEnd(JLjava/lang/String;I)V (light greylist, reflection)
+03-30 21:34:06.153  4909  4909 W com.fblink.vpn: Accessing hidden method Landroid/os/Trace;->traceCounter(JLjava/lang/String;I)V (light greylist, reflection)
+03-30 21:34:06.180  4909  4952 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;-><init>()V (light greylist, reflection)
+03-30 21:34:06.180  4909  4952 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;->addFontFromAssetManager(Landroid/content/res/AssetManager;Ljava/lang/String;IZIII[Landroid/graphics/fonts/FontVariationAxis;)Z (light greylist, reflection)
+03-30 21:34:06.180  4909  4952 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;->addFontFromBuffer(Ljava/nio/ByteBuffer;I[Landroid/graphics/fonts/FontVariationAxis;II)Z (light greylist, reflection)
+03-30 21:34:06.180  4909  4952 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;->freeze()Z (light greylist, reflection)
+03-30 21:34:06.180  4909  4952 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;->abortCreation()V (light greylist, reflection)
+03-30 21:34:06.180  4909  4952 W com.fblink.vpn: Accessing hidden method Landroid/graphics/Typeface;->createFromFamiliesWithDefault([Landroid/graphics/FontFamily;Ljava/lang/String;II)Landroid/graphics/Typeface; (light greylist, reflection)
+03-30 21:34:06.301  4909  4934 W KeyStore: KeyStore exception
+03-30 21:34:06.301  4909  4934 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 21:34:06.301  4909  4934 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 21:34:06.474  4909  4934 D default : Call activity method: setNavigationBarColor
+03-30 21:34:06.475  4909  4934 V FBLinkActivity: Change navigation bar color: #FF0E0E11
+03-30 21:34:06.487  4909  4934 D FBLinkQt: Call activity method: setSaveLogs
+03-30 21:34:06.487  4909  4934 V FBLinkActivity: Set save logs: false
+03-30 21:34:06.488  4909  4934 D FBLinkQt: Call activity method: setScreenshotsEnabled
+03-30 21:34:06.488  4909  4934 V FBLinkActivity: Set screenshots enabled: true
+03-30 21:34:06.488  4909  4934 D FBLinkQt: Initialize AndroidController
+03-30 21:34:06.489  4909  4934 D FBLinkQt: Call activity method: qtAndroidControllerInitialized
+03-30 21:34:06.489  4909  4934 V FBLinkActivity: Qt Android controller initialized
+03-30 21:34:06.956  4909  4934 D FBLinkQt: Call activity method: isEdgeToEdgeEnabled
+03-30 21:34:06.972  4909  4934 D FBLinkQt: Call activity method: isOnTv
+03-30 21:34:07.035  4909  4934 W com.fblink.vpn: Accessing hidden field Landroid/graphics/Insets;->left:I (light greylist, linking)
+03-30 21:34:07.035  4909  4934 W com.fblink.vpn: Accessing hidden field Landroid/graphics/Insets;->top:I (light greylist, linking)
+03-30 21:34:07.035  4909  4934 W com.fblink.vpn: Accessing hidden field Landroid/graphics/Insets;->right:I (light greylist, linking)
+03-30 21:34:07.035  4909  4934 W com.fblink.vpn: Accessing hidden field Landroid/graphics/Insets;->bottom:I (light greylist, linking)
+03-30 21:34:07.035  4909  4934 W com.fblink.vpn: Accessing hidden method Landroid/graphics/Insets;->of(IIII)Landroid/graphics/Insets; (light greylist, linking)
+03-30 21:34:07.565  4909  4934 D NetworkSecurityConfig: No Network Security Config specified, using platform default

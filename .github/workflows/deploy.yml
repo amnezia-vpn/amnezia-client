@@ -647,7 +647,15 @@ jobs:
         KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
       shell: bash
       run: |
+        if [ -z "${KEYSTORE_BASE64:-}" ]; then
+          echo "ERROR: ANDROID_RELEASE_KEYSTORE_BASE64 is empty"
+          exit 1
+        fi
         printf "%s" "$KEYSTORE_BASE64" | base64 --decode > android.keystore
+        if [ ! -s android.keystore ]; then
+          echo "ERROR: android.keystore was not decoded correctly"
+          exit 1
+        fi
 
     - name: 'Build Android arm64-v8a'
       env:
@@ -675,6 +683,18 @@ jobs:
         mv FBLink-arm64-v8a-release.apk FBLinkVPN_${VERSION}_android9+_arm64-v8a.apk
         mv FBLink-armeabi-v7a-release.apk FBLinkVPN_${VERSION}_android9+_armeabi-v7a.apk
         cd ../..
+
+    - name: 'Verify signed Android APKs'
+      shell: bash
+      run: |
+        APKSIGNER=$(find "${ANDROID_HOME}/build-tools" -type f -name apksigner | sort -V | tail -1)
+        if [ -z "${APKSIGNER:-}" ] || [ ! -x "$APKSIGNER" ]; then
+          echo "ERROR: apksigner not found under ${ANDROID_HOME}/build-tools"
+          exit 1
+        fi
+
+        "$APKSIGNER" verify --verbose "deploy/build/FBLinkVPN_${VERSION}_android9+_arm64-v8a.apk"
+        "$APKSIGNER" verify --verbose "deploy/build/FBLinkVPN_${VERSION}_android9+_armeabi-v7a.apk"
 
     - name: 'Upload arm64-v8a apk'
       uses: actions/upload-artifact@v4

@@ -28,6 +28,7 @@ private:
     QString m_lastTun2SocksStdout;
     QString m_lastTun2SocksStderr;
     bool m_remoteEndpointReachable = true;
+    bool m_hasInternalRoutingRules = false;
 
     QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
 };

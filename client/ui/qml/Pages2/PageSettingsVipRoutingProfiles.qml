@@ -89,12 +89,12 @@ PageType {
             nameField.textField.text = qsTr("RU без VPN")
             editingAction = "direct"
             suffixesArea.textArea.text = ".ru\n.xn--p1ai"
-        } else if (code === "banks_direct") {
+        } else if (code === "banks_gosuslugi_direct") {
             nameField.textField.text = qsTr("Банки и госуслуги")
             editingAction = "direct"
             domainsArea.textArea.text = "gosuslugi.ru\nesia.gosuslugi.ru\ngosuslugi.com"
             suffixesArea.textArea.text = ".gosuslugi.ru\n.nalog.gov.ru\n.sber.ru\n.vtb.ru\n.tbank.ru"
-        } else if (code === "games_direct") {
+        } else if (code === "games_launchers_direct") {
             nameField.textField.text = qsTr("Игры и лаунчеры без VPN")
             editingAction = "direct"
             suffixesArea.textArea.text = ".vkplay.ru\n.4game.ru\n.lesta.ru\n.tanki.su\n.mail.ru"
@@ -129,16 +129,20 @@ PageType {
     }
 
     function toggleProfile(profile) {
-        FBLinkController.saveRoutingProfile({
-            id: profile.id,
-            name: profile.name,
-            kind: profile.kind,
-            action: profile.action || "direct",
-            enabled: !profile.enabled,
-            domains: profile.domains || [],
-            domain_suffixes: profile.domain_suffixes || [],
-            cidrs: profile.cidrs || []
-        })
+        const payload = {
+            id: Number(profile.id || 0),
+            enabled: !profile.enabled
+        }
+
+        if (profile.kind !== "system") {
+            payload.name = profile.name
+            payload.action = profile.action || "direct"
+            payload.domains = profile.domains || []
+            payload.domain_suffixes = profile.domain_suffixes || []
+            payload.cidrs = profile.cidrs || []
+        }
+
+        FBLinkController.saveRoutingProfile(payload)
     }
 
     function deleteProfile(profile) {
@@ -257,8 +261,8 @@ PageType {
                         BasicButtonType { width: root.wideLayout ? 220 : parent.width; implicitHeight: 48; text: qsTr("AI через VPN"); defaultColor: Qt.rgba(0, 200/255, 255/255, 0.16); hoveredColor: Qt.rgba(0, 200/255, 255/255, 0.26); pressedColor: Qt.rgba(0, 200/255, 255/255, 0.32); textColor: "#FFFFFF"; clickedFunc: function() { root.applyQuickTemplate("ai_proxy") } }
                         BasicButtonType { width: root.wideLayout ? 220 : parent.width; implicitHeight: 48; text: qsTr("Медиа через VPN"); defaultColor: Qt.rgba(0, 200/255, 255/255, 0.16); hoveredColor: Qt.rgba(0, 200/255, 255/255, 0.26); pressedColor: Qt.rgba(0, 200/255, 255/255, 0.32); textColor: "#FFFFFF"; clickedFunc: function() { root.applyQuickTemplate("media_proxy") } }
                         BasicButtonType { width: root.wideLayout ? 220 : parent.width; implicitHeight: 48; text: qsTr("RU без VPN"); defaultColor: Qt.rgba(16/255, 185/255, 129/255, 0.18); hoveredColor: Qt.rgba(16/255, 185/255, 129/255, 0.28); pressedColor: Qt.rgba(16/255, 185/255, 129/255, 0.34); textColor: "#FFFFFF"; clickedFunc: function() { root.applyQuickTemplate("ru_direct") } }
-                        BasicButtonType { width: root.wideLayout ? 220 : parent.width; implicitHeight: 48; text: qsTr("Банки и госуслуги"); defaultColor: Qt.rgba(16/255, 185/255, 129/255, 0.18); hoveredColor: Qt.rgba(16/255, 185/255, 129/255, 0.28); pressedColor: Qt.rgba(16/255, 185/255, 129/255, 0.34); textColor: "#FFFFFF"; clickedFunc: function() { root.applyQuickTemplate("banks_direct") } }
-                        BasicButtonType { width: root.wideLayout ? 220 : parent.width; implicitHeight: 48; text: qsTr("Игры без VPN"); defaultColor: Qt.rgba(16/255, 185/255, 129/255, 0.18); hoveredColor: Qt.rgba(16/255, 185/255, 129/255, 0.28); pressedColor: Qt.rgba(16/255, 185/255, 129/255, 0.34); textColor: "#FFFFFF"; clickedFunc: function() { root.applyQuickTemplate("games_direct") } }
+                        BasicButtonType { width: root.wideLayout ? 220 : parent.width; implicitHeight: 48; text: qsTr("Банки и госуслуги"); defaultColor: Qt.rgba(16/255, 185/255, 129/255, 0.18); hoveredColor: Qt.rgba(16/255, 185/255, 129/255, 0.28); pressedColor: Qt.rgba(16/255, 185/255, 129/255, 0.34); textColor: "#FFFFFF"; clickedFunc: function() { root.applyQuickTemplate("banks_gosuslugi_direct") } }
+                        BasicButtonType { width: root.wideLayout ? 220 : parent.width; implicitHeight: 48; text: qsTr("Игры без VPN"); defaultColor: Qt.rgba(16/255, 185/255, 129/255, 0.18); hoveredColor: Qt.rgba(16/255, 185/255, 129/255, 0.28); pressedColor: Qt.rgba(16/255, 185/255, 129/255, 0.34); textColor: "#FFFFFF"; clickedFunc: function() { root.applyQuickTemplate("games_launchers_direct") } }
                         BasicButtonType { width: root.wideLayout ? 220 : parent.width; implicitHeight: 48; text: qsTr("Локальные медиа"); defaultColor: Qt.rgba(16/255, 185/255, 129/255, 0.18); hoveredColor: Qt.rgba(16/255, 185/255, 129/255, 0.28); pressedColor: Qt.rgba(16/255, 185/255, 129/255, 0.34); textColor: "#FFFFFF"; clickedFunc: function() { root.applyQuickTemplate("local_media_direct") } }
                     }
                 }

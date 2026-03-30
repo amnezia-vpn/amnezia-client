@@ -136,7 +136,7 @@ Button {
         anchors.fill: focusBorder
         clip: true
 
-        implicitWidth: Math.min(content.implicitWidth, width)
+        implicitWidth: content.implicitWidth
         implicitHeight: content.implicitHeight
 
         RowLayout {

@@ -23,14 +23,12 @@ import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import android.os.ParcelFileDescriptor
-import android.os.SystemClock
 import android.provider.OpenableColumns
 import android.provider.Settings
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams
 import android.webkit.MimeTypeMap
 import android.widget.Toast
@@ -46,7 +44,6 @@ import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
 import kotlin.text.RegexOption.IGNORE_CASE
-import AppListProvider
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,6 +53,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import com.fblink.vpn.protocol.ProtocolState
 import com.fblink.vpn.protocol.getStatistics
 import com.fblink.vpn.protocol.getStatus
 import com.fblink.vpn.qt.QtAndroidController
@@ -87,6 +85,7 @@ class FBLinkActivity : QtActivity() {
     private var notificationStateReceiver: BroadcastReceiver? = null
     private lateinit var vpnServiceMessenger: IpcMessenger
     private var pfd: ParcelFileDescriptor? = null
+    private var lastKnownProtocolState: ProtocolState = ProtocolState.DISCONNECTED
 
     private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
     private val permissionRequestHandlers = mutableMapOf<Int, PermissionRequestHandler>()
@@ -104,6 +103,7 @@ class FBLinkActivity : QtActivity() {
                     ServiceEvent.STATUS_CHANGED -> {
                         msg.data?.getStatus()?.let { (state) ->
                             Log.d(TAG, "Handle protocol state: $state")
+                            lastKnownProtocolState = state
                             QtAndroidController.onVpnStateChanged(state.ordinal)
                         }
                     }
@@ -111,7 +111,10 @@ class FBLinkActivity : QtActivity() {
                     ServiceEvent.STATUS -> {
                         if (isWaitingStatus) {
                             isWaitingStatus = false
-                            msg.data?.getStatus()?.let { QtAndroidController.onStatus(it) }
+                            msg.data?.getStatus()?.let {
+                                lastKnownProtocolState = it.state
+                                QtAndroidController.onStatus(it)
+                            }
                         }
                     }
 
@@ -179,15 +182,12 @@ class FBLinkActivity : QtActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "Create Amnezia activity")
+        Log.d(TAG, "Create FBLink activity")
         loadLibs()
 
         // Configure window for edge-to-edge display
         configureWindowForEdgeToEdge()
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-        val proto = mainScope.async(Dispatchers.IO) {
-            VpnStateStore.getVpnState().vpnProto
-        }
         vpnServiceMessenger = IpcMessenger(
             "VpnService",
             onDeadObjectException = {
@@ -198,7 +198,43 @@ class FBLinkActivity : QtActivity() {
         )
         registerBroadcastReceivers()
         intent?.let(::processIntent)
-        runBlocking { vpnProto = proto.await() }
+        restoreVpnProtoStateAsync()
+    }
+
+    private fun restoreVpnProtoStateAsync() {
+        refreshVpnStateAndSyncBindingAsync()
+    }
+
+    private fun refreshVpnStateAndSyncBindingAsync() {
+        mainScope.launch(Dispatchers.IO) {
+            val restoredState = VpnStateStore.getVpnState()
+            withContext(Dispatchers.Main.immediate) {
+                vpnProto = restoredState.vpnProto
+                lastKnownProtocolState = restoredState.protocolState
+                if (restoredState.vpnProto != null) {
+                    mainScope.launch {
+                        qtInitialized.await()
+                        if (!isDestroyed && !isFinishing) {
+                            syncVpnServiceBindingIfNeeded()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun syncVpnServiceBindingIfNeeded() {
+        vpnProto?.let { proto ->
+            val shouldBindByState = lastKnownProtocolState != ProtocolState.DISCONNECTED &&
+                lastKnownProtocolState != ProtocolState.UNKNOWN
+
+            if (!isInBoundState && shouldBindByState) {
+                doBindService()
+            } else if (isServiceConnected) {
+                isWaitingStatus = true
+                vpnServiceMessenger.send(Action.REQUEST_STATUS, replyTo = activityMessenger)
+            }
+        }
     }
 
     private fun loadLibs() {
@@ -254,15 +290,8 @@ class FBLinkActivity : QtActivity() {
 
     override fun onStart() {
         super.onStart()
-        Log.d(TAG, "Start Amnezia activity")
-        mainScope.launch {
-            qtInitialized.await()
-            vpnProto?.let { proto ->
-                if (FBLinkService.isRunning(applicationContext, proto.processName)) {
-                    doBindService()
-                }
-            }
-        }
+        Log.d(TAG, "Start FBLink activity")
+        refreshVpnStateAndSyncBindingAsync()
     }
 
     override fun onStop() {
@@ -270,12 +299,8 @@ class FBLinkActivity : QtActivity() {
         hasWindowFocus = false
         // Cancel all pending operations when activity stops
         resumeHandler.removeCallbacksAndMessages(null)
-        Log.d(TAG, "Stop Amnezia activity")
+        Log.d(TAG, "Stop FBLink activity")
         doUnbindService()
-        mainScope.launch {
-            qtInitialized.await()
-            QtAndroidController.onServiceDisconnected()
-        }
         super.onStop()
     }
 
@@ -333,39 +358,27 @@ class FBLinkActivity : QtActivity() {
         isActivityResumed = false
         // Cancel all pending operations when activity pauses
         resumeHandler.removeCallbacksAndMessages(null)
-        Log.d(TAG, "Pause Amnezia activity")
+        Log.d(TAG, "Pause FBLink activity")
     }
 
     override fun onResume() {
         super.onResume()
         isActivityResumed = true
-        Log.d(TAG, "Resume Amnezia activity")
+        Log.d(TAG, "Resume FBLink activity")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            window.decorView.apply {
-                invalidate()
-
-                resumeHandler.postDelayed({
-                    // Check if activity is still resumed and has focus before executing
-                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
-                        sendTouch(1f, 1f)
-                    }
-                }, 100)
-                
-                resumeHandler.postDelayed({
-                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
-                        sendTouch(2f, 2f)
-                    }
-                }, 200)
-                
-                resumeHandler.postDelayed({
-                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
-                        requestLayout()
-                        invalidate()
-                    }
-                }, 250)
-            }
+            window.decorView.invalidate()
         }
+
+        resumeHandler.postDelayed({
+            if (!isActivityResumed || !hasWindowFocus || isFinishing || isDestroyed) {
+                return@postDelayed
+            }
+
+            window.decorView.requestLayout()
+            window.decorView.invalidate()
+            refreshVpnStateAndSyncBindingAsync()
+        }, 180)
     }
 
     private fun configureWindowForEdgeToEdge() {
@@ -432,7 +445,7 @@ class FBLinkActivity : QtActivity() {
         hasWindowFocus = false
         // Cancel all pending operations when activity is destroyed
         resumeHandler.removeCallbacksAndMessages(null)
-        Log.d(TAG, "Destroy Amnezia activity")
+        Log.d(TAG, "Destroy FBLink activity")
         unregisterBroadcastReceiver(notificationStateReceiver)
         notificationStateReceiver = null
         mainScope.cancel()
@@ -483,7 +496,7 @@ class FBLinkActivity : QtActivity() {
         Log.d(TAG, "Bind service")
         vpnProto?.let { proto ->
             Intent(this, proto.serviceClass).also {
-                bindService(it, serviceConnection, BIND_ABOVE_CLIENT and BIND_AUTO_CREATE)
+                bindService(it, serviceConnection, BIND_ABOVE_CLIENT or BIND_AUTO_CREATE)
             }
             isInBoundState = true
         }
@@ -632,7 +645,15 @@ class FBLinkActivity : QtActivity() {
     @MainThread
     private fun disconnectFromVpn() {
         Log.d(TAG, "Disconnect from VPN")
-        vpnServiceMessenger.send(Action.DISCONNECT)
+        if (vpnServiceMessenger.isReady()) {
+            vpnServiceMessenger.send(Action.DISCONNECT)
+        } else {
+            Log.w(TAG, "Service messenger is not ready, sending disconnect broadcast fallback")
+        }
+
+        sendBroadcast(
+            Intent(ACTION_DISCONNECT).setPackage(packageName)
+        )
     }
 
     /**
@@ -1009,46 +1030,15 @@ class FBLinkActivity : QtActivity() {
     // method to workaround Qt's problem with calling the keyboard on TVs
     @Suppress("unused")
     fun sendTouch(x: Float, y: Float) {
-        Log.v(TAG, "Send touch: $x, $y")
-        blockingCall {
-            findQtWindow(window.decorView)?.let {
-                Log.v(TAG, "Send touch to $it")
-                it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN))
-                it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP))
+        Log.v(TAG, "sendTouch refresh request: $x, $y")
+        window.decorView.post {
+            if (!isFinishing && !isDestroyed) {
+                window.decorView.requestFocus()
+                window.decorView.requestLayout()
+                window.decorView.invalidate()
             }
         }
     }
-
-    private fun findQtWindow(view: View): View? {
-        Log.v(TAG, "findQtWindow: process $view")
-        if (view::class.simpleName == "QtWindow") return view
-        else if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                val result = findQtWindow(view.getChildAt(i))
-                if (result != null) return result
-            }
-            return null
-        } else return null
-    }
-
-    private fun createEvent(x: Float, y: Float, eventTime: Long, action: Int): MotionEvent =
-        MotionEvent.obtain(
-            eventTime,
-            eventTime,
-            action,
-            1,
-            arrayOf(MotionEvent.PointerProperties().apply {
-                id = 0
-                toolType = MotionEvent.TOOL_TYPE_FINGER
-            }),
-            arrayOf(MotionEvent.PointerCoords().apply {
-                this.x = x
-                this.y = y
-                pressure = 1f
-                size = 1f
-            }),
-            0, 0, 1.0f, 1.0f, 0, 0, 0,0
-        )
 
     // workaround for a bug in Qt that causes the mouse click event not to be handled
     // also disable right-click, as it causes the application to crash
@@ -1099,7 +1089,6 @@ class FBLinkActivity : QtActivity() {
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        Log.v(TAG, "dispatchTouch: $ev")
         if (ev != null && ev.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE) {
             return handleMouseEvent(ev) { super.dispatchTouchEvent(it) }
         }

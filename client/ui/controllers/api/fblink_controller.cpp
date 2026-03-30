@@ -98,6 +98,14 @@ void FBLinkController::beginSessionSync()
     fetchSubscription(true);
 }
 
+void FBLinkController::syncAll()
+{
+    if (isLoggedIn()) {
+        setLoadingState(true);
+        beginSessionSync();
+    }
+}
+
 QNetworkRequest FBLinkController::createApiRequest(const QString &path, bool isJsonRequest, bool authorized) const
 {
     QNetworkRequest request(QUrl(m_apiUrl + path));
@@ -360,10 +368,23 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
             QJsonDocument doc = QJsonDocument::fromJson(responseData);
             QJsonObject obj = doc.object();
 
-            if (obj.contains("config")) {
-                QString configDataStr = obj["config"].toString();
+            if (obj.contains("configs") || obj.contains("config")) {
+                QStringList configStrings;
+                if (obj.contains("configs") && obj["configs"].isArray()) {
+                    QJsonArray configsArr = obj["configs"].toArray();
+                    for (const QJsonValue &val : configsArr) {
+                        if (val.isString()) configStrings.append(val.toString());
+                        else if (val.isObject()) {
+                            // Support array of objects { config: "vpn://...", region: "NL" }
+                            QJsonObject cObj = val.toObject();
+                            if (cObj.contains("config")) configStrings.append(cObj["config"].toString());
+                        }
+                    }
+                } else if (obj.contains("config")) {
+                    QString configDataStr = obj["config"].toString();
+                    configStrings = configDataStr.split('\n', Qt::SkipEmptyParts);
+                }
                 QString region = obj["region"].toString();
-                QStringList configStrings = configDataStr.split('\n', Qt::SkipEmptyParts);
 
                 if (m_importController && m_settings && m_serversModel) {
                     QJsonArray servers = m_settings->serversArray();

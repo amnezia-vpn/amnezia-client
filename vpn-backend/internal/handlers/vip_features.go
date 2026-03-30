@@ -193,7 +193,49 @@ func defaultRoutingProfileSeeds() []defaultRoutingProfileSeed {
 	}
 }
 
+func ensureRoutingProfileSchema(db *gorm.DB) error {
+	requiredColumns := []string{"Code", "Action", "Description", "Icon", "SortOrder"}
+	for _, column := range requiredColumns {
+		if db.Migrator().HasColumn(&models.RoutingProfile{}, column) {
+			continue
+		}
+		if err := db.Migrator().AddColumn(&models.RoutingProfile{}, column); err != nil {
+			return err
+		}
+	}
+
+	if err := db.Model(&models.RoutingProfile{}).
+		Where("coalesce(action, '') = ''").
+		UpdateColumn("action", models.RoutingProfileDirect).Error; err != nil {
+		return err
+	}
+
+	if err := db.Model(&models.RoutingProfile{}).
+		Where("description IS NULL").
+		UpdateColumn("description", "").Error; err != nil {
+		return err
+	}
+
+	if err := db.Model(&models.RoutingProfile{}).
+		Where("icon IS NULL").
+		UpdateColumn("icon", "").Error; err != nil {
+		return err
+	}
+
+	if err := db.Model(&models.RoutingProfile{}).
+		Where("sort_order IS NULL").
+		UpdateColumn("sort_order", 0).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ensureDefaultRoutingProfiles(db *gorm.DB, userID uint) error {
+	if err := ensureRoutingProfileSchema(db); err != nil {
+		return err
+	}
+
 	for _, seed := range defaultRoutingProfileSeeds() {
 		var profile models.RoutingProfile
 		err := db.Where("user_id = ? AND kind = ? AND code = ?", userID, models.RoutingProfileSystem, seed.Code).

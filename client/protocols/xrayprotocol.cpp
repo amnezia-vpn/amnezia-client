@@ -30,6 +30,96 @@ static const QString tunName = "tun2";
 #endif
 
 namespace {
+int transportOutboundIndex(const QJsonObject &xrayConfig)
+{
+    const QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    for (int i = 0; i < outbounds.size(); ++i) {
+        const QJsonObject outbound = outbounds.at(i).toObject();
+        const QJsonObject settings = outbound.value("settings").toObject();
+        if (!settings.value("vnext").toArray().isEmpty()) {
+            return i;
+        }
+    }
+
+    return outbounds.isEmpty() ? -1 : 0;
+}
+
+QString defaultOutboundTag(const QJsonObject &xrayConfig)
+{
+    const QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    if (outbounds.isEmpty()) {
+        return QString();
+    }
+
+    const QString tag = outbounds.at(0).toObject().value("tag").toString();
+    return tag.isEmpty() ? QStringLiteral("<untagged>") : tag;
+}
+
+void reorderOutboundsToDefaultTag(QJsonObject &xrayConfig, const QString &tag)
+{
+    if (tag.isEmpty()) {
+        return;
+    }
+
+    QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    if (outbounds.size() < 2) {
+        return;
+    }
+
+    int taggedIndex = -1;
+    for (int i = 0; i < outbounds.size(); ++i) {
+        if (outbounds.at(i).toObject().value("tag").toString() == tag) {
+            taggedIndex = i;
+            break;
+        }
+    }
+
+    if (taggedIndex <= 0) {
+        return;
+    }
+
+    const QJsonValue preferredOutbound = outbounds.at(taggedIndex);
+    outbounds.removeAt(taggedIndex);
+    outbounds.prepend(preferredOutbound);
+    xrayConfig.insert("outbounds", outbounds);
+}
+
+void alignManagedRoutingDefaultOutbound(QJsonObject &xrayConfig, Settings::RouteMode routeMode)
+{
+    const QJsonArray rules = xrayConfig.value("routing").toObject().value("rules").toArray();
+    if (rules.isEmpty()) {
+        return;
+    }
+
+    bool hasDirectRules = false;
+    bool hasProxyRules = false;
+    for (const QJsonValue &ruleValue : rules) {
+        const QJsonObject rule = ruleValue.toObject();
+        const QString outboundTag = rule.value("outboundTag").toString();
+        const bool hasMatchers = !rule.value("domain").toArray().isEmpty() || !rule.value("ip").toArray().isEmpty();
+        if (!hasMatchers) {
+            continue;
+        }
+
+        if (outboundTag == QLatin1String("direct")) {
+            hasDirectRules = true;
+        } else if (outboundTag == QLatin1String("proxy")) {
+            hasProxyRules = true;
+        }
+    }
+
+    QString preferredDefaultTag = QStringLiteral("proxy");
+    if (hasProxyRules && !hasDirectRules) {
+        preferredDefaultTag = QStringLiteral("direct");
+    } else if (hasDirectRules && !hasProxyRules) {
+        preferredDefaultTag = QStringLiteral("proxy");
+    } else if (hasProxyRules && hasDirectRules && routeMode == Settings::RouteMode::VpnOnlyForwardSites) {
+        preferredDefaultTag = QStringLiteral("direct");
+    }
+
+    reorderOutboundsToDefaultTag(xrayConfig, preferredDefaultTag);
+}
+
 void rememberProcessSnippet(QString &buffer, const QString &text)
 {
     const QString trimmed = text.trimmed();
@@ -112,11 +202,12 @@ bool fallbackOutboundPortTo443(QJsonObject &xrayConfig, const QString &resolvedA
     }
 
     QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
-    if (outbounds.isEmpty()) {
+    const int outboundIndex = transportOutboundIndex(xrayConfig);
+    if (outboundIndex < 0 || outboundIndex >= outbounds.size()) {
         return false;
     }
 
-    QJsonObject outbound = outbounds.at(0).toObject();
+    QJsonObject outbound = outbounds.at(outboundIndex).toObject();
     QJsonObject settings = outbound.value("settings").toObject();
     QJsonArray vnext = settings.value("vnext").toArray();
     if (vnext.isEmpty()) {
@@ -151,7 +242,7 @@ bool fallbackOutboundPortTo443(QJsonObject &xrayConfig, const QString &resolvedA
     vnext.replace(0, firstHop);
     settings.insert("vnext", vnext);
     outbound.insert("settings", settings);
-    outbounds.replace(0, outbound);
+    outbounds.replace(outboundIndex, outbound);
     xrayConfig.insert("outbounds", outbounds);
     return true;
 }
@@ -159,11 +250,12 @@ bool fallbackOutboundPortTo443(QJsonObject &xrayConfig, const QString &resolvedA
 quint16 firstOutboundPort(const QJsonObject &xrayConfig)
 {
     const QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
-    if (outbounds.isEmpty()) {
+    const int outboundIndex = transportOutboundIndex(xrayConfig);
+    if (outboundIndex < 0 || outboundIndex >= outbounds.size()) {
         return 0;
     }
 
-    const QJsonObject outbound = outbounds.at(0).toObject();
+    const QJsonObject outbound = outbounds.at(outboundIndex).toObject();
     const QJsonObject settings = outbound.value("settings").toObject();
     const QJsonArray vnext = settings.value("vnext").toArray();
     if (vnext.isEmpty()) {
@@ -212,12 +304,13 @@ void sanitizeDesktopXrayConfig(QJsonObject &xrayConfig)
 void logXrayConfigSummary(const QJsonObject &xrayConfig)
 {
     const QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
-    if (outbounds.isEmpty()) {
+    const int transportIndex = transportOutboundIndex(xrayConfig);
+    if (transportIndex < 0 || transportIndex >= outbounds.size()) {
         qWarning() << "XrayProtocol: no outbounds in config";
         return;
     }
 
-    const QJsonObject outbound = outbounds.at(0).toObject();
+    const QJsonObject outbound = outbounds.at(transportIndex).toObject();
     const QJsonObject settings = outbound.value("settings").toObject();
     const QJsonArray vnext = settings.value("vnext").toArray();
     const QJsonObject firstHop = vnext.isEmpty() ? QJsonObject() : vnext.at(0).toObject();
@@ -227,9 +320,28 @@ void logXrayConfigSummary(const QJsonObject &xrayConfig)
     const QJsonObject realitySettings = streamSettings.value("realitySettings").toObject();
     const QJsonObject routing = xrayConfig.value("routing").toObject();
     const QJsonArray routingRules = routing.value("rules").toArray();
+    int directDomainRules = 0;
+    int directIpRules = 0;
+    int proxyDomainRules = 0;
+    int proxyIpRules = 0;
+
+    for (const QJsonValue &ruleValue : routingRules) {
+        const QJsonObject rule = ruleValue.toObject();
+        const QString outboundTag = rule.value("outboundTag").toString();
+        const int domainCount = rule.value("domain").toArray().size();
+        const int ipCount = rule.value("ip").toArray().size();
+
+        if (outboundTag == QLatin1String("direct")) {
+            directDomainRules += domainCount;
+            directIpRules += ipCount;
+        } else if (outboundTag == QLatin1String("proxy")) {
+            proxyDomainRules += domainCount;
+            proxyIpRules += ipCount;
+        }
+    }
 
     qDebug().noquote()
-        << QString("XrayProtocol config summary: address=%1 port=%2 serverName=%3 network=%4 security=%5 flow=%6 shortIdHash=%7 publicKeyHash=%8 routingRules=%9")
+        << QString("XrayProtocol config summary: address=%1 port=%2 serverName=%3 network=%4 security=%5 flow=%6 shortIdHash=%7 publicKeyHash=%8 routingRules=%9 directDomains=%10 directIps=%11 proxyDomains=%12 proxyIps=%13 defaultOutbound=%14")
                .arg(firstHop.value("address").toString())
                .arg(firstHop.value("port").toInt())
                .arg(realitySettings.value("serverName").toString())
@@ -238,7 +350,12 @@ void logXrayConfigSummary(const QJsonObject &xrayConfig)
                .arg(user.value("flow").toString())
                .arg(shortDigest(realitySettings.value("shortId").toString()))
                .arg(shortDigest(realitySettings.value("publicKey").toString()))
-               .arg(routingRules.size());
+               .arg(routingRules.size())
+               .arg(directDomainRules)
+               .arg(directIpRules)
+               .arg(proxyDomainRules)
+               .arg(proxyIpRules)
+               .arg(defaultOutboundTag(xrayConfig));
 }
 
 #ifdef Q_OS_WIN
@@ -322,8 +439,10 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     // Keep the transport path pinned to the already resolved IPv4 address.
     // This avoids runtime re-resolution to an IPv6/alternate record after the full-tunnel routes are installed.
     forceResolvedOutboundAddress(xrayConfiguration, m_remoteAddress);
+    alignManagedRoutingDefaultOutbound(xrayConfiguration, m_routeMode);
     m_remoteEndpointReachable = fallbackOutboundPortTo443(xrayConfiguration, m_remoteAddress)
                                 || isTcpPortReachable(m_remoteAddress, firstOutboundPort(xrayConfiguration));
+    m_hasInternalRoutingRules = !xrayConfiguration.value("routing").toObject().value("rules").toArray().isEmpty();
     sanitizeDesktopXrayConfig(xrayConfiguration);
     logXrayConfigSummary(xrayConfiguration);
     m_xrayConfig = xrayConfiguration;
@@ -549,13 +668,19 @@ ErrorCode XrayProtocol::setupRouting() {
                 qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
         }
 
-        if (m_routeMode == Settings::RouteMode::VpnAllSites) {
+        const bool requiresFullTunnelRoutes =
+                m_routeMode == Settings::RouteMode::VpnAllSites || m_hasInternalRoutingRules;
+        if (requiresFullTunnelRoutes) {
             static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
 
             auto routeAddList =  iface->routeAddList(m_vpnGateway, subnets);
             if (!routeAddList.waitForFinished() || routeAddList.returnValue() != subnets.count()) {
                 qCritical() << "Failed to set routes for TUN";
                 return ErrorCode::InternalError;
+            }
+
+            if (m_hasInternalRoutingRules && m_routeMode != Settings::RouteMode::VpnAllSites) {
+                qDebug() << "XrayProtocol::setupRouting(): forcing full-tunnel routes because embedded XRay routing rules are active";
             }
         }
 

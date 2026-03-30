@@ -1,3 +1,5 @@
+package com.fblink.vpn
+
 import android.Manifest.permission.INTERNET
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo

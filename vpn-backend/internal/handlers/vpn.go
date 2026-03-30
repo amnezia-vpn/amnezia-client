@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"strconv"
@@ -74,9 +75,23 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 			h.db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", userID).Update("revoked_at", &now)
 		}
 
+		if err := ensureRoutingProfileSchema(h.db); err != nil {
+			log.Printf("[ROUTING] failed to ensure routing profile schema for user %d during config fetch: %v", userID, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
+			return
+		}
+
+		if err := ensureDefaultRoutingProfiles(h.db, userID); err != nil {
+			log.Printf("[ROUTING] failed to seed routing profiles for user %d during config fetch: %v", userID, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
+			return
+		}
+
 		var profiles []models.RoutingProfile
-		if err := ensureDefaultRoutingProfiles(h.db, userID); err == nil {
-			h.db.Where("user_id = ?", userID).Find(&profiles)
+		if err := h.db.Where("user_id = ?", userID).Order("sort_order asc, kind asc, id asc").Find(&profiles).Error; err != nil {
+			log.Printf("[ROUTING] failed to load routing profiles for user %d during config fetch: %v", userID, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load routing profiles"})
+			return
 		}
 
 		for i := range servers {

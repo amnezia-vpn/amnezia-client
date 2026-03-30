@@ -492,7 +492,7 @@ open class FBLinkService : VpnService() {
 
     @MainThread
     private fun connectToVpn(vpnConfig: String) {
-        if (isConnected || protocolState.value == CONNECTING) return
+        if (isConnected || protocolState.value == CONNECTING || protocolState.value == DISCONNECTING) return
 
         Log.d(TAG, "Start VPN connection")
 
@@ -542,16 +542,22 @@ open class FBLinkService : VpnService() {
             connectionJob?.cancelAndJoin()
             connectionJob = null
 
-            vpnProto?.protocol?.stopVpn()
-
             try {
+                vpnProto?.protocol?.stopVpn()
+
                 withTimeout(DISCONNECT_TIMEOUT) {
-                    // waiting for disconnect state
+                    // Prefer the real protocol callback, but do not hang forever if
+                    // the tunnel is already torn down and the backend forgot to emit it.
                     protocolState.first { it == DISCONNECTED }
                 }
             } catch (e: TimeoutCancellationException) {
                 Log.w(TAG, "Disconnect timeout")
-                stopService()
+                protocolState.value = DISCONNECTED
+            } finally {
+                if (protocolState.value != DISCONNECTED) {
+                    protocolState.value = DISCONNECTED
+                }
+                disconnectionJob = null
             }
         }
     }

@@ -162,9 +162,9 @@ type RoutingProfile struct {
 	Description        string               `gorm:"default:''"`
 	Icon               string               `gorm:"default:''"`
 	SortOrder          int                  `gorm:"default:0"`
-	DomainsJSON        string               `gorm:"default:'[]'"`
-	DomainSuffixesJSON string               `gorm:"default:'[]'"`
-	CIDRsJSON          string               `gorm:"default:'[]'"`
+	DomainsJSON        string               `gorm:"column:domains_json;default:'[]'"`
+	DomainSuffixesJSON string               `gorm:"column:domain_suffixes_json;default:'[]'"`
+	CIDRsJSON          string               `gorm:"column:cidrs_json;default:'[]'"`
 
 	User User
 }

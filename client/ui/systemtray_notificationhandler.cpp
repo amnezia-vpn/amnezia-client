@@ -17,6 +17,11 @@
 
 #include "version.h"
 
+namespace
+{
+    const QString BrandTrayIcon = QStringLiteral(":/images/controls/FBLink.svg");
+}
+
 SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     NotificationHandler(parent),
     m_systemTrayIcon(parent)
@@ -25,7 +30,7 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     m_systemTrayIcon.show();
     connect(&m_systemTrayIcon, &QSystemTrayIcon::activated, this, &SystemTrayNotificationHandler::onTrayActivated);
 
-    m_trayActionShow =  m_menu.addAction(QIcon(":/images/tray/application.png"), tr("Show") + " FBLink VPN", this, [this](){
+    m_trayActionShow =  m_menu.addAction(QIcon(BrandTrayIcon), tr("Show") + " FBLink VPN", this, [this](){
         emit raiseRequested();
     });
     m_menu.addSeparator();
@@ -34,12 +39,12 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
 
     m_menu.addSeparator();
 
-    m_trayActionVisitWebSite = m_menu.addAction(QIcon(":/images/tray/link.png"), tr("Visit Website"), [&](){
+    m_trayActionVisitWebSite = m_menu.addAction(QIcon(BrandTrayIcon), tr("Visit Website"), [&](){
         QDesktopServices::openUrl(QUrl(websiteUrl));
     });
 
     // Quit action: disconnect VPN first on macOS NE, else quit directly
-    m_trayActionQuit = m_menu.addAction(QIcon(":/images/tray/cancel.png"),
+    m_trayActionQuit = m_menu.addAction(QIcon(BrandTrayIcon),
                                        tr("Quit") + " FBLink VPN",
                                        this,
                                        [&](){ qApp->quit(); });
@@ -73,7 +78,7 @@ void SystemTrayNotificationHandler::updateWebsiteUrl(const QString &newWebsiteUr
 
 void SystemTrayNotificationHandler::setTrayIcon(const QString &iconPath)
 {
-    QIcon trayIconMask(QPixmap(iconPath).scaled(128,128));
+    QIcon trayIconMask = QIcon(iconPath);
 #ifndef Q_OS_MAC
     trayIconMask.setIsMask(true);
 #endif
@@ -91,41 +96,39 @@ void SystemTrayNotificationHandler::onTrayActivated(QSystemTrayIcon::ActivationR
 
 void SystemTrayNotificationHandler::setTrayState(Vpn::ConnectionState state)
 {
-    QString resourcesPath = ":/images/tray/%1";
-
     switch (state) {
     case Vpn::ConnectionState::Disconnected:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        setTrayIcon(BrandTrayIcon);
         m_trayActionConnect->setEnabled(true);
         m_trayActionDisconnect->setEnabled(false);
         break;
     case Vpn::ConnectionState::Preparing:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        setTrayIcon(BrandTrayIcon);
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
     case Vpn::ConnectionState::Connecting:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        setTrayIcon(BrandTrayIcon);
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
     case Vpn::ConnectionState::Connected:
-        setTrayIcon(QString(resourcesPath).arg(ConnectedTrayIconName));
+        setTrayIcon(BrandTrayIcon);
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
     case Vpn::ConnectionState::Disconnecting:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        setTrayIcon(BrandTrayIcon);
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
     case Vpn::ConnectionState::Reconnecting:
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        setTrayIcon(BrandTrayIcon);
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
         break;
     case Vpn::ConnectionState::Error:
-        setTrayIcon(QString(resourcesPath).arg(ErrorTrayIconName));
+        setTrayIcon(BrandTrayIcon);
         m_trayActionConnect->setEnabled(true);
         m_trayActionDisconnect->setEnabled(false);
         break;
@@ -133,7 +136,7 @@ void SystemTrayNotificationHandler::setTrayState(Vpn::ConnectionState state)
     default:
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
-        setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
+        setTrayIcon(BrandTrayIcon);
     }
 
     //#ifdef Q_OS_MAC
@@ -152,7 +155,7 @@ void SystemTrayNotificationHandler::notify(NotificationHandler::Message type,
                                            int timerMsec) {
   Q_UNUSED(type);
 
-  QIcon icon(ConnectedTrayIconName);
+  QIcon icon(BrandTrayIcon);
   m_systemTrayIcon.showMessage(title, message, icon, timerMsec);
 }
 
@@ -170,4 +173,3 @@ void SystemTrayNotificationHandler::showHideWindow() {
 //#endif
 //  }
 }
-

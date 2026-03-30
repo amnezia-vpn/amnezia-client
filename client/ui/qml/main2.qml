@@ -87,8 +87,8 @@ Window  {
     }
 
     Loader {
-        active: Qt.platform.os === "android"
-        source: Qt.platform.os === "android" ? "Components/GamepadLoader.qml" : ""
+        active: Qt.platform.os === "android" && SettingsController.isOnTv()
+        source: active ? "Components/GamepadLoader.qml" : ""
     }
 
     Connections {

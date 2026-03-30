@@ -33,6 +33,8 @@ class IpcMessenger(
         messenger = null
     }
 
+    fun isReady(): Boolean = messenger != null
+
     fun send(msg: () -> Message) = messenger?.sendMsg(msg())
 
     fun send(msg: Message, replyTo: Messenger) = messenger?.sendMsg(msg.apply { this.replyTo = replyTo })

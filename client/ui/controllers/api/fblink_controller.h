@@ -44,6 +44,7 @@ public:
     Q_INVOKABLE void loginWithToken(const QString &token);
     Q_INVOKABLE void fetchConfig();
     Q_INVOKABLE void fetchSubscription();
+    Q_INVOKABLE void syncAll();
     Q_INVOKABLE void createPayment(const QString &plan);
     Q_INVOKABLE void setAutoRenew(bool enabled);
     Q_INVOKABLE void deleteCard();
@@ -137,3 +138,4 @@ private:
 };
 
 #endif // FBLINKCONTROLLER_H
+// touched

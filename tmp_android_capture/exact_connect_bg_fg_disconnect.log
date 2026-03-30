@@ -1,0 +1,1223 @@
+--------- beginning of system
+03-30 20:45:31.824  1678  2958 I ActivityManager: Force stopping com.fblink.vpn appid=10215 user=0: from pid 30297
+03-30 20:45:31.824  1678  2958 I ActivityManager: Killing 30142:com.fblink.vpn:fblinkXrayService/u0a215 (adj 0): stop com.fblink.vpn
+--------- beginning of main
+03-30 20:45:30.782   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 expire 2 lines
+03-30 20:45:30.798   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:31.825  1678  1755 W libprocessgroup: kill(-30142, 9) failed: No such process
+03-30 20:45:31.826  1678  2958 W ActivityManager: Scheduling restart of crashed service com.fblink.vpn/.XrayService in 397638ms
+03-30 20:45:31.831  1678  2958 I ActivityManager: Killing 30058:com.fblink.vpn/u0a215 (adj 100): stop com.fblink.vpn
+03-30 20:45:31.833  1678  2958 W ActivityManager: Force removing ActivityRecord{23d2885 u0 com.fblink.vpn/.FBLinkActivity t2752}: app died, no saved state
+03-30 20:45:31.843  1262  1638 W SurfaceFlinger: Attempting to destroy on removed layer: AppWindowToken{77bb70b token=Token{240f6da ActivityRecord{23d2885 u0 com.fblink.vpn/.FBLinkActivity t2752}}}#0
+03-30 20:45:31.858  1274  1274 I Zygote  : Process 30142 exited due to signal (9)
+03-30 20:45:31.865   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 3, app_layer_count: 2, gpu_target_index: 2, display type: 0
+03-30 20:45:31.871  1678  1755 W libprocessgroup: kill(-30142, 9) failed: No such process
+03-30 20:45:31.871  1678  1755 I libprocessgroup: Successfully killed process cgroup uid 10215 pid 30142 in 45ms
+03-30 20:45:31.871  1678  1755 W libprocessgroup: kill(-30058, 9) failed: No such process
+03-30 20:45:31.875  1678  2958 I ActivityManager:   Force stopping service ServiceRecord{3ae7fa2 u0 com.fblink.vpn/.XrayService}
+03-30 20:45:31.888  2259  2259 E PhoneInterfaceManager: [PhoneIntfMgr] getCarrierPackageNamesForIntent: No UICC
+03-30 20:45:31.888  2259  2259 D CarrierSvcBindHelper: No carrier app for: 0
+03-30 20:45:31.889  1678  1753 I DisplayBooster: DisplayBoosterService: CABC is not supported in this model
+03-30 20:45:31.890  2259  2259 E PhoneInterfaceManager: [PhoneIntfMgr] getCarrierPackageNamesForIntent: No UICC
+03-30 20:45:31.890  2259  2259 D CarrierSvcBindHelper: No carrier app for: 1
+03-30 20:45:31.891  3260  3260 I bqwu    : onStart
+03-30 20:45:31.893  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:31.894  3260  3260 I bout    : (REDACTED) [%s] onStart()
+03-30 20:45:31.895  3260  3260 I boxc    : Reloading theme data
+03-30 20:45:31.897   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 3, app_layer_count: 2, gpu_target_index: 2, display type: 0
+03-30 20:45:31.900  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:31.900  3260  3260 I bqwu    : onResume
+03-30 20:45:31.912  1678  1755 W libprocessgroup: kill(-30058, 9) failed: No such process
+03-30 20:45:31.913   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 3, app_layer_count: 2, gpu_target_index: 2, display type: 0
+03-30 20:45:31.915  2960  2960 D RegisteredServicesCache:  Reading service state data always from file
+03-30 20:45:31.916  1678  2958 I InputDispatcher: Focus entered window: Window{f77abff u0 com.sonymobile.home/com.sonymobile.home.HomeActivity}
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache: ServiceStateFileVersion=1.0
+03-30 20:45:31.916  2960  2960 E RegisteredServicesCache: Next Tag=services
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache:  curr component com.google.android.gms/com.google.android.gms.nearby.mediums.nearfieldcommunication.NfcAdvertisingService
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache:  curr uid 10053
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache:  curr state 1
+03-30 20:45:31.916  2960  2960 E RegisteredServicesCache: installedServices no uidString 
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache:  curr component com.google.android.gms/com.google.android.gms.fido.fido2.ui.hybrid.NfcEmulationService
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache:  curr uid 10053
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache:  curr state 1
+03-30 20:45:31.916  2960  2960 E RegisteredServicesCache: installedServices contains uidString : 10053
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache:  curr component com.google.android.gms/com.google.android.gms.pay.hce.service.PayHceService
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache:  curr uid 10053
+03-30 20:45:31.916  2960  2960 D RegisteredServicesCache:  curr state 1
+03-30 20:45:31.916  2960  2960 E RegisteredServicesCache: installedServices contains uidString : 10053
+03-30 20:45:31.917  2960  2960 E RegisteredServicesCache: 1invalidateCache:WriteServiceStateToFile
+03-30 20:45:31.917  2960  2960 E RegisteredServicesCache:  Writing service state Data Always
+03-30 20:45:31.917 14205 14205 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.inappreach.service.START dat=chimera-action: cmp=com.google.android.gms/.chimera.GmsApiService }
+03-30 20:45:31.917 14205 14205 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.inappreach.service.START dat=chimera-action: cmp=com.google.android.gms/.chimera.GmsApiService }
+03-30 20:45:31.919  2960  2960 E RegisteredServicesCache: component namecom.google.android.gms/com.google.android.gms.nearby.mediums.nearfieldcommunication.NfcAdvertisingService
+03-30 20:45:31.919  2960  2960 E RegisteredServicesCache: component namecom.google.android.gms/com.google.android.gms.fido.fido2.ui.hybrid.NfcEmulationService
+03-30 20:45:31.919  2960  2960 E RegisteredServicesCache: component namecom.google.android.gms/com.google.android.gms.pay.hce.service.PayHceService
+03-30 20:45:31.926  1678  1768 W ActivityManager: setHasOverlayUi called on unknown pid: 30058
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state before adding screen state1
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state after17
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state17
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state before adding screen state1
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state after17
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state17
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state before adding screen state1
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state after17
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state17
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state before adding screen state1
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state after17
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state17
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state before adding screen state1
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state after17
+03-30 20:45:31.931  2960  2960 D RegisteredAidCache:  AID power state17
+03-30 20:45:31.931  2960  2960 D NfcService: GetDefaultRouteLoc  :2
+03-30 20:45:31.931  2960  2960 D NfcService: GetDefaultRouteLoc  :2
+03-30 20:45:31.933  1274  1274 I Zygote  : Process 30058 exited due to signal (9)
+03-30 20:45:31.933  2960  2960 D NxpApduServiceInfo: updateServiceCommitStatus:Description:Nearby:InternalState:1:commitStatus:true
+03-30 20:45:31.936  2960  2960 D NxpApduServiceInfo: updateServiceCommitStatus:Description:Fido NFC Emulation Service:InternalState:1:commitStatus:true
+03-30 20:45:31.936  2960  2960 D NxpApduServiceInfo: updateServiceCommitStatus:Description:Google Кошелек:InternalState:1:commitStatus:true
+03-30 20:45:31.936  2960  2960 E RegisteredServicesCache: 3updateStatusOfServices:WriteServiceStateToFile
+03-30 20:45:31.937  2960  2960 E RegisteredServicesCache:  Writing service state Data Always
+03-30 20:45:31.938  2960  2960 E RegisteredServicesCache: component namecom.google.android.gms/com.google.android.gms.nearby.mediums.nearfieldcommunication.NfcAdvertisingService
+03-30 20:45:31.938  2960  2960 E RegisteredServicesCache: component namecom.google.android.gms/com.google.android.gms.fido.fido2.ui.hybrid.NfcEmulationService
+03-30 20:45:31.938  2960  2960 E RegisteredServicesCache: component namecom.google.android.gms/com.google.android.gms.pay.hce.service.PayHceService
+03-30 20:45:31.953  2069  2069 W w       : onStartInput event aborted
+03-30 20:45:31.953  2069  2069 W w       : vb0.t: could not obtain extracted text
+03-30 20:45:31.953  2069  2069 W w       : 	at vb0.l0.G(Unknown Source:329)
+03-30 20:45:31.953  2069  2069 W w       : 	at a70.q0.h(Unknown Source:283)
+03-30 20:45:31.953  2069  2069 W w       : 	at a70.p6.h(Unknown Source:2)
+03-30 20:45:31.953  2069  2069 W w       : 	at com.touchtype.KeyboardService.onStartInput(Unknown Source:11)
+03-30 20:45:31.953  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService.doStartInput(InputMethodService.java:2000)
+03-30 20:45:31.953  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService$InputMethodImpl.startInput(InputMethodService.java:509)
+03-30 20:45:31.953  2069  2069 W w       : 	at android.view.inputmethod.InputMethod.dispatchStartInputWithToken(InputMethod.java:193)
+03-30 20:45:31.953  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService$InputMethodImpl.dispatchStartInputWithToken(InputMethodService.java:536)
+03-30 20:45:31.953  2069  2069 W w       : 	at android.inputmethodservice.IInputMethodWrapper.executeMessage(IInputMethodWrapper.java:186)
+03-30 20:45:31.953  2069  2069 W w       : 	at com.android.internal.os.HandlerCaller$MyHandler.handleMessage(HandlerCaller.java:37)
+03-30 20:45:31.953  2069  2069 W w       : 	at android.os.Handler.dispatchMessage(Handler.java:106)
+03-30 20:45:31.953  2069  2069 W w       : 	at android.os.Looper.loop(Looper.java:280)
+03-30 20:45:31.953  2069  2069 W w       : 	at android.app.ActivityThread.main(ActivityThread.java:6706)
+03-30 20:45:31.953  2069  2069 W w       : 	at java.lang.reflect.Method.invoke(Native Method)
+03-30 20:45:31.953  2069  2069 W w       : 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+03-30 20:45:31.953  2069  2069 W w       : 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+03-30 20:45:31.958  1678  1755 W libprocessgroup: kill(-30058, 9) failed: No such process
+03-30 20:45:31.958  1678  1755 I libprocessgroup: Successfully killed process cgroup uid 10215 pid 30058 in 87ms
+03-30 20:45:31.964   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:31.971  2960  2960 D RegisteredNfcFServicesCache: Service unchanged, not updating
+03-30 20:45:31.981   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:31.997   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 1 line
+03-30 20:45:32.014   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:32.100  1678  1768 I Timeline: Timeline: Activity_windows_visible id: ActivityRecord{38bd8f2 u0 com.sonymobile.home/.HomeActivity t2} time:24329146 diff:247 start:warm|service batt:86|1 mw:off|0 mem:1305544|0|59|1|29 cpu:[1,1,1,1,1,0,0,0],[1900,979]
+03-30 20:45:32.130   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:32.780   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 2 lines
+03-30 20:45:32.797   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:32.849  2090  2335 V WifiManager: registerSoftApCallback: callback=com.android.systemui.statusbar.policy.HotspotControllerImpl@fda8b2a, handler=Handler (android.os.Handler) {2f03d1b}
+03-30 20:45:32.851  2090  2105 V WifiManager: SoftApCallbackProxy: onStateChanged: state=11, failureReason=0
+03-30 20:45:32.851  2090  2105 V WifiManager: SoftApCallbackProxy: onNumClientsChanged: numClients=0
+03-30 20:45:32.875  2090  2335 V WifiManager: registerSoftApCallback: callback=com.android.systemui.statusbar.policy.HotspotControllerImpl@fda8b2a, handler=Handler (android.os.Handler) {2f03d1b}
+03-30 20:45:32.876  2090  2105 V WifiManager: SoftApCallbackProxy: onStateChanged: state=11, failureReason=0
+03-30 20:45:32.876  2090  2105 V WifiManager: SoftApCallbackProxy: onNumClientsChanged: numClients=0
+03-30 20:45:32.879   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:33.047  1678  9372 I ActivityManager: START u0 {flg=0x10000000 cmp=com.fblink.vpn/.FBLinkActivity} from uid 2000
+03-30 20:45:32.930   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:33.058  3260  3260 I bqwu    : onPause
+03-30 20:45:33.059  3260  3260 I bqwu    : onStop
+03-30 20:45:33.063  1678  1961 W WindowManager: Token{358e8b4 ActivityRecord{e3cb187 u0 com.fblink.vpn/.FBLinkActivity t2753}} failed creating starting window
+03-30 20:45:33.063  1678  1961 W WindowManager: android.view.InflateException: Binary XML file line #35: Binary XML file line #35: Error inflating class <unknown>
+03-30 20:45:33.063  1678  1961 W WindowManager: Caused by: android.view.InflateException: Binary XML file line #35: Error inflating class <unknown>
+03-30 20:45:33.063  1678  1961 W WindowManager: Caused by: java.lang.reflect.InvocationTargetException
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.LayoutInflater.createView(LayoutInflater.java:647)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at com.android.internal.policy.PhoneLayoutInflater.onCreateView(PhoneLayoutInflater.java:58)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.LayoutInflater.onCreateView(LayoutInflater.java:720)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:788)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:730)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.LayoutInflater.rInflate(LayoutInflater.java:863)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.LayoutInflater.rInflateChildren(LayoutInflater.java:824)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.LayoutInflater.inflate(LayoutInflater.java:515)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.LayoutInflater.inflate(LayoutInflater.java:423)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.LayoutInflater.inflate(LayoutInflater.java:374)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at com.android.internal.policy.DecorView.onResourcesLoaded(DecorView.java:1898)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at com.android.internal.policy.PhoneWindow.generateLayout(PhoneWindow.java:2605)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at com.android.internal.policy.PhoneWindow.installDecor(PhoneWindow.java:2682)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at com.android.internal.policy.PhoneWindow.getDecorView(PhoneWindow.java:2077)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at com.android.server.policy.PhoneWindowManager.addSplashScreen(PhoneWindowManager.java:3450)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at com.android.server.wm.SplashScreenStartingData.createStartingSurface(SplashScreenStartingData.java:56)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at com.android.server.wm.AppWindowContainerController$1.run(AppWindowContainerController.java:151)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.os.Handler.handleCallback(Handler.java:873)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.os.Looper.loop(Looper.java:280)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.os.HandlerThread.run(HandlerThread.java:65)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:44)
+03-30 20:45:33.063  1678  1961 W WindowManager: Caused by: java.lang.UnsupportedOperationException: Failed to resolve attribute at index 35: TypedValue{t=0x2/d=0x1010059 a=-1}
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.content.res.TypedArray.getDrawableForDensity(TypedArray.java:946)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.content.res.TypedArray.getDrawable(TypedArray.java:930)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.View.<init>(View.java:5364)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.view.ViewGroup.<init>(ViewGroup.java:659)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.widget.FrameLayout.<init>(FrameLayout.java:92)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.widget.FrameLayout.<init>(FrameLayout.java:87)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	at android.widget.FrameLayout.<init>(FrameLayout.java:82)
+03-30 20:45:33.063  1678  1961 W WindowManager: 	... 24 more
+03-30 20:45:33.077  1678  1754 I ActivityManager: Start proc 30307:com.fblink.vpn/u0a215 for activity com.fblink.vpn/.FBLinkActivity
+03-30 20:45:33.078   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:33.080 30307 30307 I com.fblink.vpn: Late-enabling -Xcheck:jni
+03-30 20:45:33.095   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:33.150  1678  1753 I DisplayBooster: DisplayBoosterService: CABC is not supported in this model
+03-30 20:45:33.152  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:33.240  1678  9372 D ConnectivityService: getProxy: mDefaultProxy return
+03-30 20:45:33.153  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:33.778   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:33.794   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:34.337 30307 30307 I Perf    : Connecting to perf service.
+03-30 20:45:34.403 30307 30307 W com.fblink.vpn: Accessing hidden field Landroid/os/Trace;->TRACE_TAG_APP:J (light greylist, reflection)
+03-30 20:45:34.403 30307 30307 W com.fblink.vpn: Accessing hidden method Landroid/os/Trace;->isTagEnabled(J)Z (light greylist, reflection)
+03-30 20:45:34.448 30307 30307 V Prefs   : Init Prefs
+03-30 20:45:34.448 30307 30307 V Log     : Init Log
+03-30 20:45:34.578 30307 30307 W com.fblink.vpn: Accessing hidden field Ljava/nio/Buffer;->address:J (light greylist, reflection)
+03-30 20:45:34.758   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:45:34.790  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:34.790  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:34.817  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:34.817  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:34.864  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:34.864  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:34.913  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:34.913  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:34.940  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:34.940  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:34.968  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:34.968  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:34.954   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 26 lines
+03-30 20:45:34.954   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:45:35.008   872  2340 D audio_hw_primary: adev_set_parameters: enter: wireless_charging=off
+03-30 20:45:35.008   872  2340 D audio_hw_extn: audio_extn_set_anc_parameters: anc_enabled:0
+03-30 20:45:35.008  2259  2259 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 0
+03-30 20:45:35.043   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:35.077   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:35.167 30307 30307 V VpnState: Init VpnStateStore
+03-30 20:45:35.168 30307 30307 D FBLinkApplication: Create Amnezia application
+03-30 20:45:35.284 30307 30307 W com.fblink.vpn: Accessing hidden method Landroid/content/ContextWrapper;->getDisplay()Landroid/view/Display; (light greylist, linking)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn: Rejecting re-init on previously-failed class java.lang.Class<org.qtproject.qt.android.QtInputDelegate$2>: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/view/WindowInsetsAnimation$Callback;
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegateBase.<init>(android.app.Activity) (QtActivityDelegateBase.java:49)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegate.<init>(android.app.Activity) (QtActivityDelegate.java:47)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityBase.<init>() (QtActivityBase.java:91)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.bindings.QtActivity.<init>() (QtActivity.java:11)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void com.fblink.vpn.FBLinkActivity.<init>() (FBLinkActivity.kt:77)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at java.lang.Object java.lang.Class.newInstance() (Class.java:-2)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.AppComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (AppComponentFactory.java:69)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity androidx.core.app.CoreComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (CoreComponentFactory.java:44)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.Instrumentation.newActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (Instrumentation.java:1216)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.performLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.content.Intent) (ActivityThread.java:2837)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.handleLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.app.servertransaction.PendingTransactionActions, android.content.Intent) (ActivityThread.java:3054)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.LaunchActivityItem.execute(android.app.ClientTransactionHandler, android.os.IBinder, android.app.servertransaction.PendingTransactionActions) (LaunchActivityItem.java:78)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.executeCallbacks(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:108)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.execute(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:68)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void android.app.ActivityThread$H.handleMessage(android.os.Message) (ActivityThread.java:1814)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void android.os.Handler.dispatchMessage(android.os.Message) (Handler.java:106)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void android.os.Looper.loop() (Looper.java:280)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void android.app.ActivityThread.main(java.lang.String[]) (ActivityThread.java:6706)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[]) (Method.java:-2)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run() (RuntimeInit.java:493)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void com.android.internal.os.ZygoteInit.main(java.lang.String[]) (ZygoteInit.java:858)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn: Caused by: java.lang.ClassNotFoundException: Didn't find class "android.view.WindowInsetsAnimation$Callback" on path: DexPathList[[zip file "/data/app/com.fblink.vpn-MVFnhgdUD56BmnBmITD7-A==/base.apk"],nativeLibraryDirectories=[/data/app/com.fblink.vpn-MVFnhgdUD56BmnBmITD7-A==/lib/arm64, /data/app/com.fblink.vpn-MVFnhgdUD56BmnBmITD7-A==/base.apk!/lib/arm64-v8a, /system/lib64, /system/vendor/lib64]]
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at java.lang.Class dalvik.system.BaseDexClassLoader.findClass(java.lang.String) (BaseDexClassLoader.java:134)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at java.lang.Class java.lang.ClassLoader.loadClass(java.lang.String, boolean) (ClassLoader.java:379)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at java.lang.Class java.lang.ClassLoader.loadClass(java.lang.String) (ClassLoader.java:312)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegateBase.<init>(android.app.Activity) (QtActivityDelegateBase.java:49)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegate.<init>(android.app.Activity) (QtActivityDelegate.java:47)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityBase.<init>() (QtActivityBase.java:91)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.bindings.QtActivity.<init>() (QtActivity.java:11)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at void com.fblink.vpn.FBLinkActivity.<init>() (FBLinkActivity.kt:77)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at java.lang.Object java.lang.Class.newInstance() (Class.java:-2)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.AppComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (AppComponentFactory.java:69)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity androidx.core.app.CoreComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (CoreComponentFactory.java:44)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.Instrumentation.newActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (Instrumentation.java:1216)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.performLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.content.Intent) (ActivityThread.java:2837)
+03-30 20:45:35.292 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.handleLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.app.servertransaction.PendingTransactionActions, android.content.Intent) (ActivityThread.java:3054)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.LaunchActivityItem.execute(android.app.ClientTransactionHandler, android.os.IBinder, android.app.servertransaction.PendingTransactionActions) (LaunchActivityItem.java:78)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.executeCallbacks(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:108)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.execute(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:68)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at void android.app.ActivityThread$H.handleMessage(android.os.Message) (ActivityThread.java:1814)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at void android.os.Handler.dispatchMessage(android.os.Message) (Handler.java:106)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at void android.os.Looper.loop() (Looper.java:280)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at void android.app.ActivityThread.main(java.lang.String[]) (ActivityThread.java:6706)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[]) (Method.java:-2)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at void com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run() (RuntimeInit.java:493)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn:   at void com.android.internal.os.ZygoteInit.main(java.lang.String[]) (ZygoteInit.java:858)
+03-30 20:45:35.293 30307 30307 I com.fblink.vpn: 
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn: Rejecting re-init on previously-failed class java.lang.Class<org.qtproject.qt.android.QtInputDelegate$2>: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/view/WindowInsetsAnimation$Callback;
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegateBase.<init>(android.app.Activity) (QtActivityDelegateBase.java:49)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegate.<init>(android.app.Activity) (QtActivityDelegate.java:47)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityBase.<init>() (QtActivityBase.java:91)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.bindings.QtActivity.<init>() (QtActivity.java:11)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void com.fblink.vpn.FBLinkActivity.<init>() (FBLinkActivity.kt:77)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at java.lang.Object java.lang.Class.newInstance() (Class.java:-2)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.AppComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (AppComponentFactory.java:69)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity androidx.core.app.CoreComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (CoreComponentFactory.java:44)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.Instrumentation.newActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (Instrumentation.java:1216)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.performLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.content.Intent) (ActivityThread.java:2837)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.handleLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.app.servertransaction.PendingTransactionActions, android.content.Intent) (ActivityThread.java:3054)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.LaunchActivityItem.execute(android.app.ClientTransactionHandler, android.os.IBinder, android.app.servertransaction.PendingTransactionActions) (LaunchActivityItem.java:78)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.executeCallbacks(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:108)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.execute(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:68)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.ActivityThread$H.handleMessage(android.os.Message) (ActivityThread.java:1814)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.os.Handler.dispatchMessage(android.os.Message) (Handler.java:106)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.os.Looper.loop() (Looper.java:280)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.ActivityThread.main(java.lang.String[]) (ActivityThread.java:6706)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[]) (Method.java:-2)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run() (RuntimeInit.java:493)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void com.android.internal.os.ZygoteInit.main(java.lang.String[]) (ZygoteInit.java:858)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn: Caused by: java.lang.ClassNotFoundException: Didn't find class "android.view.WindowInsetsAnimation$Callback" on path: DexPathList[[zip file "/data/app/com.fblink.vpn-MVFnhgdUD56BmnBmITD7-A==/base.apk"],nativeLibraryDirectories=[/data/app/com.fblink.vpn-MVFnhgdUD56BmnBmITD7-A==/lib/arm64, /data/app/com.fblink.vpn-MVFnhgdUD56BmnBmITD7-A==/base.apk!/lib/arm64-v8a, /system/lib64, /system/vendor/lib64]]
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at java.lang.Class dalvik.system.BaseDexClassLoader.findClass(java.lang.String) (BaseDexClassLoader.java:134)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at java.lang.Class java.lang.ClassLoader.loadClass(java.lang.String, boolean) (ClassLoader.java:379)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at java.lang.Class java.lang.ClassLoader.loadClass(java.lang.String) (ClassLoader.java:312)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegateBase.<init>(android.app.Activity) (QtActivityDelegateBase.java:49)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityDelegate.<init>(android.app.Activity) (QtActivityDelegate.java:47)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.QtActivityBase.<init>() (QtActivityBase.java:91)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void org.qtproject.qt.android.bindings.QtActivity.<init>() (QtActivity.java:11)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void com.fblink.vpn.FBLinkActivity.<init>() (FBLinkActivity.kt:77)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at java.lang.Object java.lang.Class.newInstance() (Class.java:-2)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.AppComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (AppComponentFactory.java:69)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity androidx.core.app.CoreComponentFactory.instantiateActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (CoreComponentFactory.java:44)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.Instrumentation.newActivity(java.lang.ClassLoader, java.lang.String, android.content.Intent) (Instrumentation.java:1216)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.performLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.content.Intent) (ActivityThread.java:2837)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at android.app.Activity android.app.ActivityThread.handleLaunchActivity(android.app.ActivityThread$ActivityClientRecord, android.app.servertransaction.PendingTransactionActions, android.content.Intent) (ActivityThread.java:3054)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.LaunchActivityItem.execute(android.app.ClientTransactionHandler, android.os.IBinder, android.app.servertransaction.PendingTransactionActions) (LaunchActivityItem.java:78)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.executeCallbacks(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:108)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.servertransaction.TransactionExecutor.execute(android.app.servertransaction.ClientTransaction) (TransactionExecutor.java:68)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.ActivityThread$H.handleMessage(android.os.Message) (ActivityThread.java:1814)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.os.Handler.dispatchMessage(android.os.Message) (Handler.java:106)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.os.Looper.loop() (Looper.java:280)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void android.app.ActivityThread.main(java.lang.String[]) (ActivityThread.java:6706)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[]) (Method.java:-2)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run() (RuntimeInit.java:493)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn:   at void com.android.internal.os.ZygoteInit.main(java.lang.String[]) (ZygoteInit.java:858)
+03-30 20:45:35.294 30307 30307 I com.fblink.vpn: 
+03-30 20:45:35.307 30307 30307 W com.fblink.vpn: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;-><init>()V (dark greylist, linking)
+03-30 20:45:35.698 29910 29931 E chromium: [ERROR:base/android/pre_freeze_background_memory_trimmer.cc:152] Unexpected return from madvise: Invalid argument (22)
+03-30 20:45:35.777   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:36.223  1678  1754 I ActivityManager: Start proc 30330:android.process.acore/u0a20 for content provider com.android.providers.contacts/.ContactsProvider2
+03-30 20:45:36.230 30330 30330 E d.process.acor: Not starting debugger since process cannot load the jdwp agent.
+03-30 20:45:36.266  1678  2192 D ConnectivityService: getProxy: mDefaultProxy return
+03-30 20:45:36.272 30330 30330 I d.process.acor: The ClassLoaderContext is a special shared library.
+03-30 20:45:36.305 30330 30330 I Perf    : Connecting to perf service.
+03-30 20:45:36.355 30330 30330 I ContactsPerf: VoicemailContentProvider.onCreate start
+03-30 20:45:36.362 30330 30330 I ContactsPerf: VoicemailContentProvider.onCreate finish
+03-30 20:45:36.392 30330 30345 D ContactsDatabaseHelper: WAL enabled for contacts2.db: true
+03-30 20:45:36.474 30330 30345 I ContactLocale: AddressBook Labels [[ru_RU,en_US]]: […, А, Б, В, Г, Д, Ђ, Е, Є, Ж, З, И, І, Й, Ј, К, Л, Љ, М, Н, Њ, О, П, Р, С, Т, Ћ, У, Ф, Х, Ц, Ч, Џ, Ш, Щ, Ы, Э, Ю, Я, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, Α, Β, Γ, Δ, Ε, Ζ, Η, Θ, Ι, Κ, Λ, Μ, Ν, Ξ, Ο, Π, Ρ, Σ, Τ, Υ, Φ, Χ, Ψ, Ω, …, א, ב, ג, ד, ה, ו, ז, ח, ט, י, כ, ל, מ, נ, ס, ע, פ, צ, ק, ר, ש, ת, …, ا, ب, ت, ث, ج, ح, خ, د, ذ, ر, ز, س, ش, ص, ض, ط, ظ, ع, غ, ف, ق, ك, ل, م, ن, ه, و, ي, …, ก, ข, ฃ, ค, ฅ, ฆ, ง, จ, ฉ, ช, ซ, ฌ, ญ, ฎ, ฏ, ฐ, ฑ, ฒ, ณ, ด, ต, ถ, ท, ธ, น, บ, ป, ผ, ฝ, พ, ฟ, ภ, ม, ย, ร, ฤ, ล, ฦ, ว, ศ, ษ, ส, ห, ฬ, อ, ฮ, …, ㄱ, ㄴ, ㄷ, ㄹ, ㅁ, ㅂ, ㅅ, ㅇ, ㅈ, ㅊ, ㅋ, ㅌ, ㅍ, ㅎ, …, あ, か, さ, た, な, は, ま, や, ら, わ, #, …]
+03-30 20:45:36.491 30307 30307 W com.fblink.vpn: Accessing hidden method Landroid/graphics/drawable/StateListDrawable;->getStateCount()I (light greylist, linking)
+03-30 20:45:36.494 30330 30345 D ContactsDatabaseHelper: WAL enabled for profile.db: false
+03-30 20:45:36.503 30307 30307 W QtLoader: Null extras from the Activity's intent.
+03-30 20:45:36.516 30307 30349 W linker  : Warning: "/data/app/com.fblink.vpn-MVFnhgdUD56BmnBmITD7-A==/lib/arm64/libc++_shared.so" unused DT entry: unknown processor-specific (type 0x70000001 arg 0x0) (ignoring)
+03-30 20:45:36.528 30307 30349 I QtCore  : Start
+03-30 20:45:36.596 30330 30345 W d.process.acor: Unknown chunk type '200'.
+03-30 20:45:36.597 30330 30345 I chatty  : uid=10020(com.android.calllogbackup) Worker-1 identical 2 lines
+03-30 20:45:36.598 30330 30345 W d.process.acor: Unknown chunk type '200'.
+03-30 20:45:36.742 30307 30349 I Qt      : Qt platform plugin started
+03-30 20:45:36.817 30307 30307 D FBLinkActivity: Create FBLink activity
+03-30 20:45:36.819 30307 30307 D LibraryLoader: Loading library: rsapss
+03-30 20:45:36.826 30307 30307 D LibraryLoader: Loading library: crypto_3
+03-30 20:45:36.829 30307 30307 D LibraryLoader: Loading library: ssl_3
+03-30 20:45:36.832 30307 30307 D LibraryLoader: Loading library: ssh
+03-30 20:45:36.861 30307 30307 D FBLinkActivity: Start FBLink activity
+03-30 20:45:36.867 30307 30307 D FBLinkActivity: Resume FBLink activity
+03-30 20:45:36.871 30307 30307 D OpenGLRenderer: Skia GL Pipeline
+03-30 20:45:36.890 30307 30307 I Choreographer: Skipped 146 frames!  The application may be doing too much work on its main thread.
+03-30 20:45:36.893   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:36.907  1678  7114 I InputDispatcher: Focus entered window: Window{e14f45f u0 com.fblink.vpn/com.fblink.vpn.FBLinkActivity}
+03-30 20:45:36.914 30307 30353 I Adreno  : QUALCOMM build                   : 7ae04e7, Ia74c9b5270
+03-30 20:45:36.914 30307 30353 I Adreno  : Build Date                       : 09/20/18
+03-30 20:45:36.914 30307 30353 I Adreno  : OpenGL ES Shader Compiler Version: EV031.25.03.00
+03-30 20:45:36.914 30307 30353 I Adreno  : Local Branch                     : 
+03-30 20:45:36.914 30307 30353 I Adreno  : Remote Branch                    : refs/tags/AU_LINUX_ANDROID_LA.UM.7.4.R1.09.00.00.453.030
+03-30 20:45:36.914 30307 30353 I Adreno  : Remote Branch                    : NONE
+03-30 20:45:36.914 30307 30353 I Adreno  : Reconstruct Branch               : NOTHING
+03-30 20:45:36.914 30307 30353 I Adreno  : Build Config                     : S L 6.0.7 AArch64
+03-30 20:45:36.914 30307 30353 D vndksupport: Loading /vendor/lib64/hw/gralloc.msm8998.so from current namespace instead of sphal namespace.
+03-30 20:45:36.905 30307 30307 W RenderThread: type=1400 audit(0.0:20791): avc: denied { search } for name="proc" dev="debugfs" ino=20357 scontext=u:r:untrusted_app:s0:c215,c256,c512,c768 tcontext=u:object_r:qti_debugfs:s0 tclass=dir permissive=0 ppid=1274 pcomm="main" pgid=30307 pgcomm="com.fblink.vpn"
+03-30 20:45:36.920 30307 30353 I Adreno  : PFP: 0x005ff112, ME: 0x005ff066
+03-30 20:45:36.926 30307 30353 I ConfigStore: android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasWideColorDisplay retrieved: 0
+03-30 20:45:36.927 30307 30353 I ConfigStore: android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasHDRDisplay retrieved: 0
+03-30 20:45:36.931 30307 30353 I OpenGLRenderer: Initialized EGL, version 1.4
+03-30 20:45:36.931 30307 30353 D OpenGLRenderer: Swap behavior 2
+03-30 20:45:36.945 30307 30307 D FBLinkActivity: Window focus changed: hasFocus=true
+03-30 20:45:36.960 30307 30353 D vndksupport: Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+03-30 20:45:36.961 30307 30353 D vndksupport: Loading /vendor/lib64/hw/gralloc.msm8998.so from current namespace instead of sphal namespace.
+03-30 20:45:36.992  1678  1768 I ActivityManager: Displayed com.fblink.vpn/.FBLinkActivity: +3s922ms
+03-30 20:45:36.995  2069  2069 W w       : onStartInput event aborted
+03-30 20:45:36.995  2069  2069 W w       : vb0.t: could not obtain extracted text
+03-30 20:45:36.995  2069  2069 W w       : 	at vb0.l0.G(Unknown Source:329)
+03-30 20:45:36.995  2069  2069 W w       : 	at a70.q0.h(Unknown Source:283)
+03-30 20:45:36.995  2069  2069 W w       : 	at a70.p6.h(Unknown Source:2)
+03-30 20:45:36.995  2069  2069 W w       : 	at com.touchtype.KeyboardService.onStartInput(Unknown Source:11)
+03-30 20:45:36.995  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService.doStartInput(InputMethodService.java:2000)
+03-30 20:45:36.995  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService$InputMethodImpl.startInput(InputMethodService.java:509)
+03-30 20:45:36.995  2069  2069 W w       : 	at android.view.inputmethod.InputMethod.dispatchStartInputWithToken(InputMethod.java:193)
+03-30 20:45:36.995  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService$InputMethodImpl.dispatchStartInputWithToken(InputMethodService.java:536)
+03-30 20:45:36.995  2069  2069 W w       : 	at android.inputmethodservice.IInputMethodWrapper.executeMessage(IInputMethodWrapper.java:186)
+03-30 20:45:36.995  2069  2069 W w       : 	at com.android.internal.os.HandlerCaller$MyHandler.handleMessage(HandlerCaller.java:37)
+03-30 20:45:36.995  2069  2069 W w       : 	at android.os.Handler.dispatchMessage(Handler.java:106)
+03-30 20:45:36.995  2069  2069 W w       : 	at android.os.Looper.loop(Looper.java:280)
+03-30 20:45:36.995  2069  2069 W w       : 	at android.app.ActivityThread.main(ActivityThread.java:6706)
+03-30 20:45:36.995  2069  2069 W w       : 	at java.lang.reflect.Method.invoke(Native Method)
+03-30 20:45:36.995  2069  2069 W w       : 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+03-30 20:45:36.995  2069  2069 W w       : 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+03-30 20:45:37.010   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 6, app_layer_count: 5, gpu_target_index: 5, display type: 0
+03-30 20:45:37.043   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 2 lines
+03-30 20:45:37.060   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 6, app_layer_count: 5, gpu_target_index: 5, display type: 0
+03-30 20:45:37.072 30307 30349 W KeyStore: KeyStore exception
+03-30 20:45:37.072 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:45:37.072 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:45:37.077   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 6, app_layer_count: 5, gpu_target_index: 5, display type: 0
+03-30 20:45:37.088  4439 30358 W System.err: INFO: com.whatsapp.net.logging.a.a(WtLog.java:10) : Start handshake.
+03-30 20:45:37.092   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 6, app_layer_count: 5, gpu_target_index: 5, display type: 0
+03-30 20:45:37.142   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 3 lines
+03-30 20:45:37.159   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 6, app_layer_count: 5, gpu_target_index: 5, display type: 0
+03-30 20:45:37.162  1678  1768 I Timeline: Timeline: Activity_windows_visible id: ActivityRecord{e3cb187 u0 com.fblink.vpn/.FBLinkActivity t2753} time:24334210 diff:4105 start:cold| batt:86|1 mw:off|48 mem:1263260|0|61|1|29 cpu:[1,1,1,1,1,0,0,0],[1900,979]
+03-30 20:45:37.178   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:37.191   881  1022 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:37.208   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:37.214  1678  1753 I DisplayBooster: DisplayBoosterService: CABC is not supported in this model
+03-30 20:45:37.216  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:37.333  1294  1402 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+03-30 20:45:37.368  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:37.368  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:37.218  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:37.370 30307 30307 W com.fblink.vpn: Accessing hidden method Landroid/os/Trace;->asyncTraceBegin(JLjava/lang/String;I)V (light greylist, reflection)
+03-30 20:45:37.370 30307 30307 W com.fblink.vpn: Accessing hidden method Landroid/os/Trace;->asyncTraceEnd(JLjava/lang/String;I)V (light greylist, reflection)
+03-30 20:45:37.370 30307 30307 W com.fblink.vpn: Accessing hidden method Landroid/os/Trace;->traceCounter(JLjava/lang/String;I)V (light greylist, reflection)
+03-30 20:45:37.390 14090 15668 I FontLog : (REDACTED) Received query %s, URI %s
+03-30 20:45:37.390 14090 15668 I FontLog : (REDACTED) Query [%s] resolved to %s
+03-30 20:45:37.393 14090 15668 I FontLog : (REDACTED) Fetch %s end status %s
+03-30 20:45:37.405 30307 30362 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;-><init>()V (light greylist, reflection)
+03-30 20:45:37.405 30307 30362 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;->addFontFromAssetManager(Landroid/content/res/AssetManager;Ljava/lang/String;IZIII[Landroid/graphics/fonts/FontVariationAxis;)Z (light greylist, reflection)
+03-30 20:45:37.405 30307 30362 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;->addFontFromBuffer(Ljava/nio/ByteBuffer;I[Landroid/graphics/fonts/FontVariationAxis;II)Z (light greylist, reflection)
+03-30 20:45:37.405 30307 30362 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;->freeze()Z (light greylist, reflection)
+03-30 20:45:37.405 30307 30362 W com.fblink.vpn: Accessing hidden method Landroid/graphics/FontFamily;->abortCreation()V (light greylist, reflection)
+03-30 20:45:37.406 30307 30362 W com.fblink.vpn: Accessing hidden method Landroid/graphics/Typeface;->createFromFamiliesWithDefault([Landroid/graphics/FontFamily;Ljava/lang/String;II)Landroid/graphics/Typeface; (light greylist, reflection)
+03-30 20:45:37.411 30307 30349 W KeyStore: KeyStore exception
+03-30 20:45:37.411 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:45:37.411 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:45:37.412 14090 14266 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+03-30 20:45:37.424 14090 14266 I FontLog : (REDACTED) Pulling font file for id = %d, cache size = %d
+03-30 20:45:37.570 30360 30360 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+03-30 20:45:37.687 30360 30360 I app_process: The ClassLoaderContext is a special shared library.
+03-30 20:45:37.719  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:37.719  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:37.741 30360 30360 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+03-30 20:45:37.746 30360 30360 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=530.0, y[0]=615.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=24334791, downTime=24334791, deviceId=6, source=0x1002 }
+03-30 20:45:37.752 30360 30360 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=530.0, y[0]=615.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=24334791, downTime=24334791, deviceId=6, source=0x1002 }
+03-30 20:45:37.755 30360 30360 D AndroidRuntime: Shutting down VM
+03-30 20:45:37.763 30307 30349 W KeyStore: KeyStore exception
+03-30 20:45:37.763 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:45:37.763 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:45:37.775   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:38.063  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:38.063  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:37.791   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:38.104 30307 30349 W KeyStore: KeyStore exception
+03-30 20:45:38.104 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:45:38.104 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:45:38.397  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:45:38.397  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:45:38.450 30307 30349 D default : Call activity method: setNavigationBarColor
+03-30 20:45:38.452 30307 30349 V FBLinkActivity: Change navigation bar color: #FF0E0E11
+03-30 20:45:38.470 30307 30349 D FBLinkQt: Call activity method: setSaveLogs
+03-30 20:45:38.470 30307 30349 V FBLinkActivity: Set save logs: false
+03-30 20:45:38.471 30307 30349 D FBLinkQt: Call activity method: setScreenshotsEnabled
+03-30 20:45:38.471 30307 30349 V FBLinkActivity: Set screenshots enabled: true
+03-30 20:45:38.472 30307 30349 D FBLinkQt: Initialize AndroidController
+03-30 20:45:38.472 30307 30349 D FBLinkQt: Call activity method: qtAndroidControllerInitialized
+03-30 20:45:38.473 30307 30349 V FBLinkActivity: Qt Android controller initialized
+03-30 20:45:38.474   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:38.774   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 2 lines
+03-30 20:45:38.790   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:39.148 30307 30349 D FBLinkQt: Call activity method: isEdgeToEdgeEnabled
+03-30 20:45:39.164 30307 30349 D FBLinkQt: Call activity method: isOnTv
+03-30 20:45:39.286 30307 30349 W com.fblink.vpn: Accessing hidden field Landroid/graphics/Insets;->left:I (light greylist, linking)
+03-30 20:45:39.286 30307 30349 W com.fblink.vpn: Accessing hidden field Landroid/graphics/Insets;->top:I (light greylist, linking)
+03-30 20:45:39.286 30307 30349 W com.fblink.vpn: Accessing hidden field Landroid/graphics/Insets;->right:I (light greylist, linking)
+03-30 20:45:39.286 30307 30349 W com.fblink.vpn: Accessing hidden field Landroid/graphics/Insets;->bottom:I (light greylist, linking)
+03-30 20:45:39.286 30307 30349 W com.fblink.vpn: Accessing hidden method Landroid/graphics/Insets;->of(IIII)Landroid/graphics/Insets; (light greylist, linking)
+03-30 20:45:39.340   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:39.391   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 2 lines
+03-30 20:45:39.407   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 4, app_layer_count: 3, gpu_target_index: 3, display type: 0
+03-30 20:45:39.490   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:39.673   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:39.950 30307 30349 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+03-30 20:45:40.028   872  2340 D audio_hw_primary: adev_set_parameters: enter: wireless_charging=off
+03-30 20:45:40.029   872  2340 D audio_hw_extn: audio_extn_set_anc_parameters: anc_enabled:0
+03-30 20:45:40.030  2259  2259 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 0
+03-30 20:45:40.056   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:40.089   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:40.767 30307 30349 I FBLinkQt: Started FBLinkVPN version 4.8.13.1 c9b594ff
+03-30 20:45:40.767 30307 30349 I FBLinkQt: Android Pie (9.0) (arm64)
+03-30 20:45:40.768 30307 30349 I FBLinkQt: SSL backend: OpenSSL 3.0.13 30 Jan 2024
+03-30 20:45:40.788   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:40.805   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 1 line
+03-30 20:45:40.905   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:42.125   884   884 W memtrack@1.0-se: type=1400 audit(0.0:20792): avc: denied { search } for name="proc" dev="debugfs" ino=20357 scontext=u:r:hal_memtrack_default:s0 tcontext=u:object_r:qti_debugfs:s0 tclass=dir permissive=0 ppid=1 pcomm="init" pgid=1 pgcomm="init"
+03-30 20:45:42.125   884   884 W memtrack@1.0-se: type=1400 audit(0.0:20793): avc: denied { search } for name="proc" dev="debugfs" ino=20357 scontext=u:r:hal_memtrack_default:s0 tcontext=u:object_r:qti_debugfs:s0 tclass=dir permissive=0 ppid=1 pcomm="init" pgid=1 pgcomm="init"
+03-30 20:45:42.303 30307 30384 D ProfileInstaller: Installing profile for com.fblink.vpn
+03-30 20:45:42.304   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:42.786   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 1 line
+03-30 20:45:42.803   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:43.323   900  2136 V LocSvc_HIDL_IzatProvider: [onLocationChanged][71] [HS] =>>>> [HC]
+03-30 20:45:43.324  1678  2041 V LocSvc_HIDL_IzatProvider_jni: [onLocationChanged][208] [HC] <<= [HS]
+03-30 20:45:43.803   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:43.819   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:45.033  2259  2259 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 0
+03-30 20:45:45.035   872  2340 D audio_hw_primary: adev_set_parameters: enter: wireless_charging=off
+03-30 20:45:45.035   872  2340 D audio_hw_extn: audio_extn_set_anc_parameters: anc_enabled:0
+03-30 20:45:45.068   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:47.799   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 6 lines
+03-30 20:45:47.816   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:48.099 30388 30388 D vndksupport: Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+03-30 20:45:48.100 30388 30388 D vndksupport: Loading /vendor/lib64/hw/gralloc.msm8998.so from current namespace instead of sphal namespace.
+03-30 20:45:48.122 14205 14205 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.inappreach.service.START dat=chimera-action: cmp=com.google.android.gms/.chimera.GmsApiService }
+03-30 20:45:48.115   884   884 W memtrack@1.0-se: type=1400 audit(0.0:20794): avc: denied { search } for name="proc" dev="debugfs" ino=20357 scontext=u:r:hal_memtrack_default:s0 tcontext=u:object_r:qti_debugfs:s0 tclass=dir permissive=0 ppid=1 pcomm="init" pgid=1 pgcomm="init"
+03-30 20:45:48.115   884   884 W memtrack@1.0-se: type=1400 audit(0.0:20795): avc: denied { search } for name="proc" dev="debugfs" ino=20357 scontext=u:r:hal_memtrack_default:s0 tcontext=u:object_r:qti_debugfs:s0 tclass=dir permissive=0 ppid=1 pcomm="init" pgid=1 pgcomm="init"
+03-30 20:45:48.797   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:48.814   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:49.046 30390 30390 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+03-30 20:45:49.116 29945 29963 E chromium: [ERROR:base/android/pre_freeze_background_memory_trimmer.cc:152] Unexpected return from madvise: Invalid argument (22)
+03-30 20:45:49.150 30390 30390 I app_process: The ClassLoaderContext is a special shared library.
+03-30 20:45:49.197 30390 30390 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+03-30 20:45:49.199 30390 30390 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=24346247, downTime=24346247, deviceId=-1, source=0x101 }
+03-30 20:45:49.201 30390 30390 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=24346247, downTime=24346247, deviceId=-1, source=0x101 }
+03-30 20:45:49.204  2090  2090 V StatusBar: mStatusBarWindow: com.android.systemui.statusbar.phone.StatusBarWindowView{b5a4512 V.E...... ........ 0,0-1080,72} canPanelBeCollapsed(): false
+03-30 20:45:49.204  2090  2090 I vol.Events: writeEvent dismiss_dialog volume_controller
+03-30 20:45:49.205  1678  2004 I ActivityManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10200000 cmp=com.sonymobile.home/.HomeActivity (has extras)} from uid 1000
+03-30 20:45:49.213 30390 30390 D AndroidRuntime: Shutting down VM
+03-30 20:45:49.213 30307 30307 D FBLinkActivity: Pause FBLink activity
+03-30 20:45:49.249 30307 30307 D FBLinkActivity: Window focus changed: hasFocus=false
+03-30 20:45:49.251  1678  1753 I DisplayBooster: DisplayBoosterService: CABC is not supported in this model
+03-30 20:45:49.255  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:49.259  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:49.262  3260  3260 I bqwu    : onStart
+03-30 20:45:49.266  3260  3260 I bout    : (REDACTED) [%s] onStart()
+03-30 20:45:49.266  3260  3260 I boxc    : Reloading theme data
+03-30 20:45:49.269  1678  9372 I InputDispatcher: Focus entered window: Window{f77abff u0 com.sonymobile.home/com.sonymobile.home.HomeActivity}
+03-30 20:45:49.269  3260  3260 I bqwu    : onResume
+03-30 20:45:49.272 30307 30349 D FBLinkQt: QML: Application going to background, state: 2
+03-30 20:45:49.278 14205 14205 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.inappreach.service.START dat=chimera-action: cmp=com.google.android.gms/.chimera.GmsApiService }
+03-30 20:45:49.278 14205 14205 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.inappreach.service.START dat=chimera-action: cmp=com.google.android.gms/.chimera.GmsApiService }
+03-30 20:45:49.293  2069  2069 W w       : onStartInput event aborted
+03-30 20:45:49.293  2069  2069 W w       : vb0.t: could not obtain extracted text
+03-30 20:45:49.293  2069  2069 W w       : 	at vb0.l0.G(Unknown Source:329)
+03-30 20:45:49.293  2069  2069 W w       : 	at a70.q0.h(Unknown Source:283)
+03-30 20:45:49.293  2069  2069 W w       : 	at a70.p6.h(Unknown Source:2)
+03-30 20:45:49.293  2069  2069 W w       : 	at com.touchtype.KeyboardService.onStartInput(Unknown Source:11)
+03-30 20:45:49.293  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService.doStartInput(InputMethodService.java:2000)
+03-30 20:45:49.293  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService$InputMethodImpl.startInput(InputMethodService.java:509)
+03-30 20:45:49.293  2069  2069 W w       : 	at android.view.inputmethod.InputMethod.dispatchStartInputWithToken(InputMethod.java:193)
+03-30 20:45:49.293  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService$InputMethodImpl.dispatchStartInputWithToken(InputMethodService.java:536)
+03-30 20:45:49.293  2069  2069 W w       : 	at android.inputmethodservice.IInputMethodWrapper.executeMessage(IInputMethodWrapper.java:186)
+03-30 20:45:49.293  2069  2069 W w       : 	at com.android.internal.os.HandlerCaller$MyHandler.handleMessage(HandlerCaller.java:37)
+03-30 20:45:49.293  2069  2069 W w       : 	at android.os.Handler.dispatchMessage(Handler.java:106)
+03-30 20:45:49.293  2069  2069 W w       : 	at android.os.Looper.loop(Looper.java:280)
+03-30 20:45:49.293  2069  2069 W w       : 	at android.app.ActivityThread.main(ActivityThread.java:6706)
+03-30 20:45:49.293  2069  2069 W w       : 	at java.lang.reflect.Method.invoke(Native Method)
+03-30 20:45:49.293  2069  2069 W w       : 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+03-30 20:45:49.293  2069  2069 W w       : 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+03-30 20:45:49.315   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 6, app_layer_count: 5, gpu_target_index: 5, display type: 0
+03-30 20:45:49.332   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 7, app_layer_count: 6, gpu_target_index: 6, display type: 0
+03-30 20:45:49.397   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 4 lines
+03-30 20:45:49.414   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 7, app_layer_count: 6, gpu_target_index: 6, display type: 0
+03-30 20:45:49.427  2090  2103 I ndroid.systemu: NativeAlloc concurrent copying GC freed 112426(4MB) AllocSpace objects, 0(0B) LOS objects, 49% free, 8MB/17MB, paused 108us total 108.647ms
+03-30 20:45:49.431   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 7, app_layer_count: 6, gpu_target_index: 6, display type: 0
+03-30 20:45:49.447   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 7, app_layer_count: 6, gpu_target_index: 6, display type: 0
+03-30 20:45:49.453  1678  1768 I Timeline: Timeline: Activity_windows_visible id: ActivityRecord{38bd8f2 u0 com.sonymobile.home/.HomeActivity t2} time:24346496 diff:240 start:warm|service batt:86|1 mw:off|0 mem:1211460|0|61|1|29 cpu:[1,1,1,1,1,0,0,0],[1900,979]
+03-30 20:45:49.455 30307 30376 W FBLinkQt: makeCurrent(): no EGLSurface, likely Surface destroyed by Android.
+03-30 20:45:49.455 30307 30376 W FBLinkQt: QRhiGles2: Failed to make context current. Expect bad things to happen.
+03-30 20:45:49.455 30307 30376 W FBLinkQt: Failed to start frame
+03-30 20:45:49.455 30307 30307 D FBLinkActivity: Stop FBLink activity
+03-30 20:45:49.456 30307 30349 D FBLinkQt: QML: Application going to background, state: 0
+03-30 20:45:49.466   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:49.477  1678  1753 I DisplayBooster: DisplayBoosterService: CABC is not supported in this model
+03-30 20:45:49.480  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:49.482  2986  3009 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:49.599   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:50.043  2259  2259 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 0
+03-30 20:45:50.045   872  2340 D audio_hw_primary: adev_set_parameters: enter: wireless_charging=off
+03-30 20:45:50.046   872  2340 D audio_hw_extn: audio_extn_set_anc_parameters: anc_enabled:0
+03-30 20:45:50.079   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:53.384  1678  7114 I ActivityManager: START u0 {flg=0x10000000 cmp=com.fblink.vpn/.FBLinkActivity} from uid 2000
+03-30 20:45:52.811   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 4 lines
+03-30 20:45:52.828   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:53.391  3260  3260 I bqwu    : onPause
+03-30 20:45:53.392  3260  3260 I bqwu    : onStop
+03-30 20:45:53.422  1678  1753 I DisplayBooster: DisplayBoosterService: CABC is not supported in this model
+03-30 20:45:53.423 30307 30307 V FBLinkActivity: onNewIntent: Intent { flg=0x10000000 cmp=com.fblink.vpn/.FBLinkActivity }
+03-30 20:45:53.428 30307 30307 D FBLinkActivity: Start FBLink activity
+03-30 20:45:53.429  2986  3011 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:53.432  2986  3011 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:53.433 30307 30307 D FBLinkActivity: Resume FBLink activity
+03-30 20:45:53.435  1262  1334 E BufferQueueProducer: [SurfaceView - com.fblink.vpn/com.fblink.vpn.FBLinkActivity#0] query: BufferQueue has been abandoned
+03-30 20:45:53.436  1262  1334 E BufferQueueProducer: [SurfaceView - com.fblink.vpn/com.fblink.vpn.FBLinkActivity#0] dequeueBuffer: BufferQueue has been abandoned
+03-30 20:45:53.436 30307 30376 I Adreno  : DequeueBuffer: dequeueBuffer failed
+03-30 20:45:53.436  1262  1334 E BufferQueueProducer: [SurfaceView - com.fblink.vpn/com.fblink.vpn.FBLinkActivity#0] query: BufferQueue has been abandoned
+03-30 20:45:53.436  1262  1334 E BufferQueueProducer: [SurfaceView - com.fblink.vpn/com.fblink.vpn.FBLinkActivity#0] dequeueBuffer: BufferQueue has been abandoned
+03-30 20:45:53.436 30307 30376 I Adreno  : DequeueBuffer: dequeueBuffer failed
+03-30 20:45:53.443   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:53.449  1678  7114 I InputDispatcher: Focus entered window: Window{e14f45f u0 com.fblink.vpn/com.fblink.vpn.FBLinkActivity}
+03-30 20:45:53.458 30307 30307 D FBLinkActivity: Window focus changed: hasFocus=true
+03-30 20:45:53.460   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:53.496 30307 30376 W FBLinkQt: QEGLPlatformContext: eglSwapBuffers failed: 300d
+03-30 20:45:53.536  2069  2069 W w       : onStartInput event aborted
+03-30 20:45:53.536  2069  2069 W w       : vb0.t: could not obtain extracted text
+03-30 20:45:53.536  2069  2069 W w       : 	at vb0.l0.G(Unknown Source:329)
+03-30 20:45:53.536  2069  2069 W w       : 	at a70.q0.h(Unknown Source:283)
+03-30 20:45:53.536  2069  2069 W w       : 	at a70.p6.h(Unknown Source:2)
+03-30 20:45:53.536  2069  2069 W w       : 	at com.touchtype.KeyboardService.onStartInput(Unknown Source:11)
+03-30 20:45:53.536  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService.doStartInput(InputMethodService.java:2000)
+03-30 20:45:53.536  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService$InputMethodImpl.startInput(InputMethodService.java:509)
+03-30 20:45:53.536  2069  2069 W w       : 	at android.view.inputmethod.InputMethod.dispatchStartInputWithToken(InputMethod.java:193)
+03-30 20:45:53.536  2069  2069 W w       : 	at android.inputmethodservice.InputMethodService$InputMethodImpl.dispatchStartInputWithToken(InputMethodService.java:536)
+03-30 20:45:53.536  2069  2069 W w       : 	at android.inputmethodservice.IInputMethodWrapper.executeMessage(IInputMethodWrapper.java:186)
+03-30 20:45:53.536  2069  2069 W w       : 	at com.android.internal.os.HandlerCaller$MyHandler.handleMessage(HandlerCaller.java:37)
+03-30 20:45:53.536  2069  2069 W w       : 	at android.os.Handler.dispatchMessage(Handler.java:106)
+03-30 20:45:53.536  2069  2069 W w       : 	at android.os.Looper.loop(Looper.java:280)
+03-30 20:45:53.536  2069  2069 W w       : 	at android.app.ActivityThread.main(ActivityThread.java:6706)
+03-30 20:45:53.536  2069  2069 W w       : 	at java.lang.reflect.Method.invoke(Native Method)
+03-30 20:45:53.536  2069  2069 W w       : 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+03-30 20:45:53.536  2069  2069 W w       : 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+03-30 20:45:53.561   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 7, app_layer_count: 6, gpu_target_index: 6, display type: 0
+03-30 20:45:53.694   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 8 lines
+03-30 20:45:53.711   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 7, app_layer_count: 6, gpu_target_index: 6, display type: 0
+03-30 20:45:53.721  1678  1768 I Timeline: Timeline: Activity_windows_visible id: ActivityRecord{e3cb187 u0 com.fblink.vpn/.FBLinkActivity t2753} time:24350758 diff:320 start:warm|previous batt:86|1 mw:off|48 mem:1199812|0|61|1|29 cpu:[1,1,1,1,1,0,0,0],[1900,979]
+03-30 20:45:53.731   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 6, app_layer_count: 5, gpu_target_index: 5, display type: 0
+03-30 20:45:53.746   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:53.760   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:53.764  1678  1753 I DisplayBooster: DisplayBoosterService: CABC is not supported in this model
+03-30 20:45:53.766  2986  3011 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:53.768  2986  3011 I android_os_HwBinder: HwBinder: Starting thread pool for default::vendor.somc.hardware.swiqi@1.0::IHidlSwiqi
+03-30 20:45:53.778   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:54.893   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 3 lines
+03-30 20:45:54.909   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:55.061  2259  2259 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 0
+03-30 20:45:55.062   872  2573 D audio_hw_primary: adev_set_parameters: enter: wireless_charging=off
+03-30 20:45:55.062   872  2573 D audio_hw_extn: audio_extn_set_anc_parameters: anc_enabled:0
+03-30 20:45:55.086  1678  1757 D KernelUidCpuTimeReader: Removing uids 99063-99063
+03-30 20:45:55.086  1678  1757 D KernelUidCpuTimeReader: Removing uids 99060-99060
+03-30 20:45:55.124   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:56.923   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 4 lines
+03-30 20:45:56.939   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:57.830   730   730 I QNS     : QNS: soc=85, v=3977, i=-875, t=460
+03-30 20:45:57.830   730   730 I QNS     : QNS: requested charging params: current: 500, voltage: 4300
+03-30 20:45:57.889   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:58.854   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 3 lines
+03-30 20:45:58.870   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:59.733 30410 30410 D vndksupport: Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+03-30 20:45:59.734 30410 30410 D vndksupport: Loading /vendor/lib64/hw/gralloc.msm8998.so from current namespace instead of sphal namespace.
+03-30 20:45:59.819   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:45:59.836   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 1 line
+03-30 20:46:00.052   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:00.058   872  2340 D audio_hw_primary: adev_set_parameters: enter: wireless_charging=off
+03-30 20:46:00.058   872  2340 D audio_hw_extn: audio_extn_set_anc_parameters: anc_enabled:0
+03-30 20:46:00.060  2259  2259 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 0
+03-30 20:46:00.185   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:00.685 30412 30412 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+03-30 20:46:00.793 30412 30412 I app_process: The ClassLoaderContext is a special shared library.
+03-30 20:46:00.835   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:00.843 30412 30412 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+03-30 20:46:00.847 30412 30412 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=530.0, y[0]=615.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=24357893, downTime=24357893, deviceId=6, source=0x1002 }
+03-30 20:46:00.851   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:00.852 30412 30412 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=530.0, y[0]=615.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=24357893, downTime=24357893, deviceId=6, source=0x1002 }
+03-30 20:46:00.855 30412 30412 D AndroidRuntime: Shutting down VM
+03-30 20:46:00.856 30307 30349 D FBLinkQt: Call activity method: isOnTv
+03-30 20:46:00.859 30307 30349 D FBLinkQt: [FBLink] prepareConfig: defaultServerIndex = 0
+03-30 20:46:00.887 30307 30349 D FBLinkQt: [FBLink] prepareConfig: both valid, calling openConnection()
+03-30 20:46:00.887 30307 30349 D FBLinkQt: VpnConfigurator::getDnsForConfig "1.1.1.1" "8.8.8.8"
+03-30 20:46:00.913 30307 30374 D FBLinkQt: "Trying to connect to VPN, server index is 0, container is fblink-xray, route mode is" Settings::VpnOnlyForwardSites
+03-30 20:46:00.940 30307 30374 D FBLinkQt: "Site split tunneling is disabled, route mode is 0"
+03-30 20:46:00.941 30307 30374 D FBLinkQt: "App split tunneling is disabled, route mode is 0"
+03-30 20:46:00.941 30307 30374 D FBLinkQt: AndroidVpnProtocol::start()
+03-30 20:46:00.942 30307 30374 D FBLinkQt: Call activity method: start
+03-30 20:46:00.942 30307 30374 V FBLinkActivity: Start VPN
+03-30 20:46:00.944 30307 30307 D FBLinkActivity: Check VPN permission
+03-30 20:46:00.945 30307 30307 D FBLinkActivity: Check notification permission
+03-30 20:46:00.958 30307 30307 V FBLinkActivity: Proto from config: XRAY, current proto: XRAY
+03-30 20:46:00.958 30307 30307 D FBLinkActivity: Start VPN service: XRAY
+03-30 20:46:00.962 30307 30307 D FBLinkActivity: Bind service
+03-30 20:46:00.976  1678  1754 I ActivityManager: Start proc 30424:com.fblink.vpn:fblinkXrayService/u0a215 for service com.fblink.vpn/.XrayService
+03-30 20:46:00.978 30424 30424 I linkXrayServic: Late-enabling -Xcheck:jni
+03-30 20:46:01.144  1678  7114 D ConnectivityService: getProxy: mDefaultProxy return
+03-30 20:46:01.850   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:01.867   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:02.231  1678  2321 E WifiScanner: listener cannot be found
+03-30 20:46:02.248 30424 30424 I Perf    : Connecting to perf service.
+03-30 20:46:02.280 30424 30424 V Prefs   : Init Prefs
+03-30 20:46:02.280 30424 30424 V Log     : Init Log
+03-30 20:46:02.418 30424 30424 W linkXrayServic: Accessing hidden field Ljava/nio/Buffer;->address:J (light greylist, reflection)
+03-30 20:46:02.612   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:02.653  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:02.653  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:02.691  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:02.691  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:02.747  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:02.747  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:02.810  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:02.810  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:02.846  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:02.846  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:02.883  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:02.883  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:02.864   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 26 lines
+03-30 20:46:02.864   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:03.080 30424 30424 V VpnState: Init VpnStateStore
+03-30 20:46:03.081 30424 30424 D FBLinkApplication: Create Amnezia application
+03-30 20:46:03.106 30424 30424 D FBLinkService: Create Amnezia VPN service
+03-30 20:46:03.137   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:03.170  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.170  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.201  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.201  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.234  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.234  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.294  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.294  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.268   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 18 lines
+03-30 20:46:03.268   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:03.296 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:03.296 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:03.296 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:03.303   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:03.357  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.357  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.589  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.589  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.616  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.616  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.599   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 6 lines
+03-30 20:46:03.599   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:03.650 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:03.650 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:03.650 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:03.671   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:03.707   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 4 lines
+03-30 20:46:03.707   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:03.832   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:03.945  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.945  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.951  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.952  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.849   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:03.959   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:03.994  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:03.994  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:03.965   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 2 lines
+03-30 20:46:03.965   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:04.011 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:04.011 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:04.011 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:04.016   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:04.076  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:04.076  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:04.309  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:04.309  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:04.356  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:04.356  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:04.329   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 8 lines
+03-30 20:46:04.329   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:04.372 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:04.372 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:04.372 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:04.376   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:04.433  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:04.433  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:04.663  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:04.663  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:04.692  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:04.692  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:04.674   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 6 lines
+03-30 20:46:04.674   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:04.707 30424 30424 D FBLinkService: Load server data: (-1, FBLink VPN - Амстердам)
+03-30 20:46:04.722 30424 30424 D FBLinkService: Register broadcast receivers
+03-30 20:46:04.734 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:04.734 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:04.734 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:04.737 30424 30424 D FBLinkService: Register screen state broadcast receivers
+03-30 20:46:04.740 30424 30424 D FBLinkService: onBind by Intent { cmp=com.fblink.vpn/.XrayService }
+03-30 20:46:04.743 30424 30424 D FBLinkService: Start service
+03-30 20:46:04.744 30307 30307 D FBLinkActivity: Service com.fblink.vpn/com.fblink.vpn.XrayService was connected
+03-30 20:46:04.746  1678  7114 D WificondControl: Scan result ready event
+03-30 20:46:04.746  1442  2060 I LOWI-8.6.0.26: [LOWI-Scan] lowi_close_record:Scan done in 103441190ms, 10 APs in scan results
+03-30 20:46:04.774 14090 15668 I NullBinder: NullBinder for android.net.action.RECOMMEND_NETWORKS triggering remote TransactionTooLargeException due to Service without Chimera impl, calling uid: 1000, calling pid: 0
+03-30 20:46:04.784   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:04.785   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:04.831   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:05.017  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.017  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:04.847   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:05.022   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.045  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.045  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:05.067   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 6 lines
+03-30 20:46:05.067   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.075   872  2573 D audio_hw_primary: adev_set_parameters: enter: wireless_charging=off
+03-30 20:46:05.075   872  2573 D audio_hw_extn: audio_extn_set_anc_parameters: anc_enabled:0
+03-30 20:46:05.075  2259  2259 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 0
+03-30 20:46:05.098  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.098  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:05.102 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:05.102 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:05.102 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:05.108   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.113   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 2 lines
+03-30 20:46:05.113   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.114   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:05.165  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.165  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:05.399  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.399  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:05.147   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:05.405   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.435  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.435  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:05.486  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.486  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:05.469   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 8 lines
+03-30 20:46:05.469   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.487 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:05.487 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:05.487 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:05.495   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.552  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.552  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:05.501   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 2 lines
+03-30 20:46:05.501   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.569 30424 30424 D FBLinkService: Start VPN connection
+03-30 20:46:05.575 30424 30424 D FBLinkService: Save server data: (-1, FBLink VPN - Амстердам)
+03-30 20:46:05.784  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.784  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:05.806   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.845  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.845  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:05.828   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 4 lines
+03-30 20:46:05.828   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.846 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:05.846 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:05.846 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:05.854   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:05.911  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:05.911  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.144  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.144  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.171  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.172  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.235  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.235  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.209   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 12 lines
+03-30 20:46:06.209   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:06.237 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:06.237 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:06.237 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:06.242   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:06.299  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.299  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.533  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.533  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.560  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.560  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.590   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 8 lines
+03-30 20:46:06.591   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:06.594 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:06.594 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:06.594 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:06.599   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:06.655  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.656  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.605   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 2 lines
+03-30 20:46:06.605   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:06.846   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:06.891  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.891  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.862   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:06.896   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:06.920  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.920  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.976  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:06.976  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:06.942   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 6 lines
+03-30 20:46:06.942   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:06.978 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:06.978 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:06.978 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:06.986   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:07.051  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:07.052  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:07.283  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:07.283  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:07.317  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:07.317  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:07.367  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:07.367  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:07.350   703   703 I chatty  : uid=1000(system) keymaster@3.0-s identical 12 lines
+03-30 20:46:07.350   703   703 W /vendor/bin/hw/android.hardware.keymaster@3.0-service: Not performing software digesting for symmetric cipher keys
+03-30 20:46:07.367 30307 30349 W KeyStore: KeyStore exception
+03-30 20:46:07.367 30307 30349 W KeyStore: android.os.ServiceSpecificException:  (code 7)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at android.os.Parcel.createException(Parcel.java:1990)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1935)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at android.os.Parcel.readException(Parcel.java:1885)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at android.security.IKeystoreService$Stub$Proxy.get(IKeystoreService.java:786)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at android.security.KeyStore.get(KeyStore.java:195)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at android.security.keystore.AndroidKeyStoreSpi.engineGetCertificateChain(AndroidKeyStoreSpi.java:118)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at java.security.KeyStoreSpi.engineGetEntry(KeyStoreSpi.java:484)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at java.security.KeyStore.getEntry(KeyStore.java:1560)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative.startQtApplication(Native Method)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtNative$$ExternalSyntheticLambda5.run(D8$$SyntheticClass:0)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at org.qtproject.qt.android.QtThread$1.run(QtThread.java:25)
+03-30 20:46:07.367 30307 30349 W KeyStore: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:07.378 30424 30424 D FBLinkService: Protocol state changed: CONNECTING
+03-30 20:46:07.379 30424 30424 V ServiceNotification: Update notification: FBLink VPN - Амстердам, CONNECTING
+03-30 20:46:07.379 30424 30424 V ServiceNotification: Build notification: FBLink VPN - Амстердам, CONNECTING
+03-30 20:46:07.405 30424 30424 V ServiceNotification: Build notification: FBLink VPN - Амстердам, CONNECTING
+03-30 20:46:07.425 30424 30424 D FBLinkService: Handle action: REGISTER_CLIENT
+03-30 20:46:07.427 30424 30424 D FBLinkService: Messenger client 'Activity' was registered
+03-30 20:46:07.476 30424 30444 W linkXrayServic: Accessing hidden method Ljava/net/InetAddress;->parseNumericAddress(Ljava/lang/String;)Ljava/net/InetAddress; (light greylist, reflection)
+03-30 20:46:07.595   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:07.611   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:07.639 30424 30444 D Protocol: addAddress: 10.0.42.2/30
+03-30 20:46:07.639 30424 30444 W linkXrayServic: Accessing hidden method Landroid/net/IpPrefix;-><init>(Ljava/net/InetAddress;I)V (dark greylist, linking)
+03-30 20:46:07.639 30424 30444 D Protocol: addDnsServer: /1.1.1.1
+03-30 20:46:07.639 30424 30444 D Protocol: addDnsServer: /8.8.8.8
+03-30 20:46:07.640 30424 30444 D Protocol: addRoute: 0.0.0.0/2
+03-30 20:46:07.640 30424 30444 D Protocol: addRoute: 64.0.0.0/3
+03-30 20:46:07.640 30424 30444 D Protocol: addRoute: 96.0.0.0/4
+03-30 20:46:07.640 30424 30444 D Protocol: addRoute: 112.0.0.0/5
+03-30 20:46:07.640 30424 30444 D Protocol: addRoute: 120.0.0.0/6
+03-30 20:46:07.641 30424 30444 D Protocol: addRoute: 124.0.0.0/7
+03-30 20:46:07.641 30424 30444 D Protocol: addRoute: 126.0.0.0/8
+03-30 20:46:07.641 30424 30444 D Protocol: addRoute: 128.0.0.0/5
+03-30 20:46:07.641 30424 30444 D Protocol: addRoute: 136.0.0.0/7
+03-30 20:46:07.642 30424 30444 D Protocol: addRoute: 138.0.0.0/10
+03-30 20:46:07.642 30424 30444 D Protocol: addRoute: 138.64.0.0/11
+03-30 20:46:07.642 30424 30444 D Protocol: addRoute: 138.96.0.0/12
+03-30 20:46:07.642 30424 30444 D Protocol: addRoute: 138.112.0.0/13
+03-30 20:46:07.642 30424 30444 D Protocol: addRoute: 138.120.0.0/14
+03-30 20:46:07.643 30424 30444 D Protocol: addRoute: 138.124.0.0/18
+03-30 20:46:07.643 30424 30444 D Protocol: addRoute: 138.124.64.0/19
+03-30 20:46:07.643 30424 30444 D Protocol: addRoute: 138.124.96.0/22
+03-30 20:46:07.643 30424 30444 D Protocol: addRoute: 138.124.100.0/24
+03-30 20:46:07.643 30424 30444 D Protocol: addRoute: 138.124.101.0/26
+03-30 20:46:07.644 30424 30444 D Protocol: addRoute: 138.124.101.64/30
+03-30 20:46:07.644 30424 30444 D Protocol: addRoute: 138.124.101.68/32
+03-30 20:46:07.644 30424 30444 D Protocol: addRoute: 138.124.101.70/31
+03-30 20:46:07.644 30424 30444 D Protocol: addRoute: 138.124.101.72/29
+03-30 20:46:07.644 30424 30444 D Protocol: addRoute: 138.124.101.80/28
+03-30 20:46:07.645 30424 30444 D Protocol: addRoute: 138.124.101.96/27
+03-30 20:46:07.645 30424 30444 D Protocol: addRoute: 138.124.101.128/25
+03-30 20:46:07.645 30424 30444 D Protocol: addRoute: 138.124.102.0/23
+03-30 20:46:07.645 30424 30444 D Protocol: addRoute: 138.124.104.0/21
+03-30 20:46:07.645 30424 30444 D Protocol: addRoute: 138.124.112.0/20
+03-30 20:46:07.646 30424 30444 D Protocol: addRoute: 138.124.128.0/17
+03-30 20:46:07.646 30424 30444 D Protocol: addRoute: 138.125.0.0/16
+03-30 20:46:07.646 30424 30444 D Protocol: addRoute: 138.126.0.0/15
+03-30 20:46:07.646 30424 30444 D Protocol: addRoute: 138.128.0.0/9
+03-30 20:46:07.646 30424 30444 D Protocol: addRoute: 139.0.0.0/8
+03-30 20:46:07.647 30424 30444 D Protocol: addRoute: 140.0.0.0/6
+03-30 20:46:07.647 30424 30444 D Protocol: addRoute: 144.0.0.0/4
+03-30 20:46:07.647 30424 30444 D Protocol: addRoute: 160.0.0.0/3
+03-30 20:46:07.647 30424 30444 D Protocol: addRoute: 192.0.0.0/2
+03-30 20:46:07.648 30424 30444 D Protocol: addRoute: 2000::/3
+03-30 20:46:07.649 30424 30444 D Protocol: setMtu: 1500
+03-30 20:46:07.649 30424 30444 D Protocol: setBlocking: false
+03-30 20:46:07.655  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+03-30 20:46:07.655  1678  1752 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.sonyericsson.crashmonitor/.receiver.CrashMonitorServiceBroadcastReceiver
+03-30 20:46:07.658  1678  2192 D VpnJni  : Address added on tun0: 10.0.42.2/30
+03-30 20:46:07.658  1678  2051 I EthernetTracker: maybeTrackInterface tun0
+03-30 20:46:07.659  1678  1766 I EthernetTracker: interfaceLinkStateChanged, iface: tun0, up: false
+03-30 20:46:07.660  1678  2192 D Vpn     : setting state=CONNECTING, reason=establish
+03-30 20:46:07.660  1678  1766 I EthernetTracker: interfaceLinkStateChanged, iface: tun0, up: true
+03-30 20:46:07.663 30424 30424 D FBLinkService: onBind by Intent { act=android.net.VpnService cmp=com.fblink.vpn/.XrayService }
+03-30 20:46:07.672  1678  2192 D ConnectivityService: registerNetworkAgent NetworkAgentInfo{ ni{[type: VPN[], state: CONNECTING/CONNECTING, reason: (unspecified), extra: (none), failover: false, available: false, roaming: false]}  network{125}  nethandle{540276609037}  lp{{InterfaceName: tun0 LinkAddresses: [10.0.42.2/30,]  Routes: [0.0.0.0/2 -> 0.0.0.0 tun0,64.0.0.0/3 -> 0.0.0.0 tun0,96.0.0.0/4 -> 0.0.0.0 tun0,112.0.0.0/5 -> 0.0.0.0 tun0,120.0.0.0/6 -> 0.0.0.0 tun0,124.0.0.0/7 -> 0.0.0.0 tun0,126.0.0.0/8 -> 0.0.0.0 tun0,128.0.0.0/5 -> 0.0.0.0 tun0,136.0.0.0/7 -> 0.0.0.0 tun0,138.0.0.0/10 -> 0.0.0.0 tun0,138.64.0.0/11 -> 0.0.0.0 tun0,138.96.0.0/12 -> 0.0.0.0 tun0,138.112.0.0/13 -> 0.0.0.0 tun0,138.120.0.0/14 -> 0.0.0.0 tun0,138.124.0.0/18 -> 0.0.0.0 tun0,138.124.64.0/19 -> 0.0.0.0 tun0,138.124.96.0/22 -> 0.0.0.0 tun0,138.124.100.0/24 -> 0.0.0.0 tun0,138.124.101.0/26 -> 0.0.0.0 tun0,138.124.101.64/30 -> 0.0.0.0 tun0,138.124.101.68/32 -> 0.0.0.0 tun0,138.124.101.70/31 -> 0.0.0.0 tun0,138.124.101.72/29 -> 0.0.0.0 tun0,138.124.101.80/28 -> 0.0.0.0 tun0,138.124.101.96/27 -> 0.0.0.0 tun0,138.124.101.128/25 -> 0.0.0.0 tun0,138.124.102.0/23 -> 0.0.0.0 tun0,138.124.104.0/21 -> 0.0.0.0 tun0,138.124.112.0/20 -> 0.0.0.0 tun0,138.124.128.0/17 -> 0.0.0.0 tun0,138.125.0.0/16 -> 0.0.0.0 tun0,138.126.0.0/15 -> 0.0.0.0 tun0,138.128.0.0/9 -> 0.0.0.0 tun0,139.0.0.0/8 -> 0.0.0.0 tun0,140.0.0.0/6 -> 0.0.0.0 tun0,144.0.0.0/4 -> 0.0.0.0 tun0,160.0.0.0/3 -> 0.0.0.0 tun0,192.0.0.0/2 -> 0.0.0.0 tun0,2000::/3 -> :: tun0,10.0.42.0/30 -> 0.0.0.0 tun0,] DnsAddresses: [1.1.1.1,8.8.8.8,] UsePrivateDns: false PrivateDnsServerName: null Domains:  MTU: 0}}  nc{[ Transports: VPN Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED Unwanted:  Uids: <{0-99999}> EstablishingAppUid: 10215]}  Score{61}  everValidated{false}  lastValidated{false}  created{false} lingering{false} explicitlySelected{false} acceptUnvalidated{false} everCaptivePortalDetected{false} lastCaptivePortalDetected{false} clat{null} }
+03-30 20:46:07.672  1678  2192 D Vpn     : setting state=CONNECTED, reason=agentConnect
+03-30 20:46:07.672  1678  2192 I Vpn     : Established by com.fblink.vpn on tun0
+03-30 20:46:07.673  1678  2026 D ConnectivityService: NetworkAgentInfo [VPN () - 125] EVENT_NETWORK_INFO_CHANGED, going from null to CONNECTING
+03-30 20:46:07.673 30424 30444 D Xray    : Run tun2Socks
+03-30 20:46:07.676  1289  1492 I Netd    : Destroyed 6 sockets for UidRanges{ 0-99999 } skip={1016 10215} in 1.3 ms
+03-30 20:46:07.677  1678  2026 D ConnectivityService: NetworkAgentInfo [VPN () - 125] EVENT_NETWORK_INFO_CHANGED, going from CONNECTING to CONNECTED
+03-30 20:46:07.677 14090 30237 V NativeCrypto: Read error: ssl=0x7dc166dd88: I/O error during system call, Software caused connection abort
+03-30 20:46:07.677 30424 30444 D Xray    : Run XRay
+03-30 20:46:07.678 30424 30444 I Xray    : xray 25.9.11
+03-30 20:46:07.679 30424 30444 V Xray    : xray.location.asset: /data/user/0/com.fblink.vpn/app_assets/geo
+03-30 20:46:07.679 30424 30444 V Xray    : config: /data/user/0/com.fblink.vpn/cache/config.json
+03-30 20:46:07.679  1678  2026 D ConnectivityService: Adding iface tun0 to network 125
+03-30 20:46:07.682  4439  4630 E fbservices:c: Unable to create output stream
+03-30 20:46:07.682  4439  4630 E fbservices:c: javax.net.ssl.SSLHandshakeException: SSL handshake aborted: ssl=0x7da640f008: I/O error during system call, Software caused connection abort
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.org.conscrypt.NativeCrypto.SSL_do_handshake(Native Method)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.org.conscrypt.NativeSsl.doHandshake(NativeSsl.java:375)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.org.conscrypt.ConscryptFileDescriptorSocket.startHandshake(ConscryptFileDescriptorSocket.java:224)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.io.RealConnection.connectTls(RealConnection.java:192)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.io.RealConnection.connectSocket(RealConnection.java:149)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.io.RealConnection.connect(RealConnection.java:112)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.http.StreamAllocation.findConnection(StreamAllocation.java:184)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.http.StreamAllocation.findHealthyConnection(StreamAllocation.java:126)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.http.StreamAllocation.newStream(StreamAllocation.java:95)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.http.HttpEngine.connect(HttpEngine.java:281)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.http.HttpEngine.sendRequest(HttpEngine.java:224)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.execute(HttpURLConnectionImpl.java:461)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.connect(HttpURLConnectionImpl.java:127)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.getOutputStream(HttpURLConnectionImpl.java:258)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.huc.DelegatingHttpsURLConnection.getOutputStream(DelegatingHttpsURLConnection.java:218)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.android.okhttp.internal.huc.HttpsURLConnectionImpl.getOutputStream(HttpsURLConnectionImpl.java:26)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.facebook.rti.common.a.a.c.a(AnalyticsService.java:82)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.facebook.rti.common.a.a.c.a(AnalyticsService.java:60)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.facebook.rti.common.a.a.a.a(AnalyticsHttpClient.java:46)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at com.facebook.rti.common.a.a.g$b.run(CounterAnalytics.java:143)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+03-30 20:46:07.682  4439  4630 E fbservices:c: 	at java.lang.Thread.run(Thread.java:764)
+03-30 20:46:07.682  4439  4630 E fbservices:g: Unsuccessful upload. response code=-1
+03-30 20:46:07.691 30424 30451 W libXray : 2026/03/30 17:46:07.687662 [Info] infra/conf/serial: Reading config: &{Name:/data/user/0/com.fblink.vpn/cache/config.json Format:json}
+03-30 20:46:07.691 14090 30277 V NativeCrypto: SSL shutdown failed: ssl=0x7dc166dd88: I/O error during system call, Broken pipe
+03-30 20:46:07.692 14090 30277 W WakeLock: GCM_HB_ALARM release without a matched acquire! [CONTEXT service_id=259 ]
+03-30 20:46:07.692 14090 30277 W WakeLock: GCM_HB_ALARM counter does not exist
+03-30 20:46:07.701 14090 30277 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_CONN_ALARM type: 2 triggerAtMillis: 103472306]
+03-30 20:46:07.703 14090 30277 W WakeLock: GCM_CONN_ALARM release without a matched acquire! [CONTEXT service_id=259 ]
+03-30 20:46:07.703 14090 30277 W WakeLock: GCM_CONN_ALARM counter does not exist
+03-30 20:46:07.712 30424 30454 W libXray : 2026/03/30 17:46:07.711168 [Warning] core: Xray 25.9.11 started
+03-30 20:46:07.719 30424 30424 D FBLinkService: Protocol state changed: CONNECTED
+03-30 20:46:07.719 30424 30424 V ServiceNotification: Update notification: FBLink VPN - Амстердам, CONNECTED
+03-30 20:46:07.719 30424 30424 V ServiceNotification: Build notification: FBLink VPN - Амстердам, CONNECTED
+03-30 20:46:07.725  1678  2026 D ConnectivityService: Setting DNS servers for network 125 to [/1.1.1.1, /8.8.8.8]
+03-30 20:46:07.725  1678  2026 D DnsManager: setDnsConfigurationForNetwork(125, [1.1.1.1, 8.8.8.8], [], [1800, 25, 8, 64], , [])
+03-30 20:46:07.726  1678  2026 I Nat464Xlat: Android Xlat is disabled
+03-30 20:46:07.733 30307 30307 D FBLinkActivity: Handle event: STATUS_CHANGED
+03-30 20:46:07.734 30307 30307 D FBLinkActivity: Handle protocol state: CONNECTED
+03-30 20:46:07.742 30307 30349 D FBLinkQt: Android event: VPN state changed: "CONNECTED"
+03-30 20:46:07.743 30307 30374 D FBLinkQt: VpnProtocol::setConnectionState "Подключено"
+03-30 20:46:07.743 30307 30374 D FBLinkQt: Connection state: 'Подключено'
+03-30 20:46:07.756 30424 30424 D NetworkState: Bind network listener
+03-30 20:46:07.758  1678  7114 D ConnectivityService: requestNetwork for uid/pid:10215/30424 NetworkRequest [ REQUEST id=607, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 10215] ]
+03-30 20:46:07.759 30424 30424 D FBLinkService: Stop traffic stats update
+03-30 20:46:07.761 30424 30424 V FBLinkService: Launch traffic stats update
+03-30 20:46:07.768  1678 30464 D NetworkMonitor/NetworkAgentInfo [VPN () - 125]: Network would not satisfy default request, not validating
+03-30 20:46:07.769 30424 30424 D FBLinkService: Start traffic stats update
+03-30 20:46:07.799  1678  2134 D NetworkTimeUpdateService: New default network 125; checking time.
+03-30 20:46:07.805  1678  2026 D ConnectivityService: Sending CONNECTED broadcast for type 17 NetworkAgentInfo [VPN () - 125] isDefaultNetwork=false
+03-30 20:46:07.805  2228  2311 E QCNEJ   : |QCNEJ/CndHalConnector| Failed to parse input for notifyDefaultNetworkChanged: java.lang.IllegalArgumentException: Unknown RatType:17
+03-30 20:46:07.805  2228  2311 W QCNEJ   : |CORE| notifyDefaultNetworkChanged failed
+03-30 20:46:07.808  1678  3909 V LocSvc_HIDL_Subscription_jni: networkinfo_update
+03-30 20:46:07.808  1678  3909 V LocSvc_HIDL_Subscription_jni: [networkinfo_update][325] [HC] =>> [HS]
+03-30 20:46:07.808   900   900 V LocSvc_HIDL_IzatSubscription: [networkinfoUpdate][322] [HS] <<<<= [HC]
+03-30 20:46:07.810  1678  3909 V LocSvc_HIDL_Subscription_jni: Exit Result 0
+03-30 20:46:07.811   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:07.816 11386 11719 W Settings: Setting development_settings_enabled has moved from android.provider.Settings.Secure to android.provider.Settings.Global.
+03-30 20:46:07.845  1678  7114 D ConnectivityService: getProxy: mDefaultProxy return
+03-30 20:46:07.846  1678  2023 D WIFI_UT : got request NetworkRequest [ REQUEST id=607, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 10215] ] with score 60
+03-30 20:46:07.846  1678  2051 D Ethernet: got request NetworkRequest [ REQUEST id=607, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 10215] ] with score 60
+03-30 20:46:07.846  1678  2023 D WIFI    : got request NetworkRequest [ REQUEST id=607, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 10215] ] with score 60
+03-30 20:46:07.847  1678  2026 D ConnectivityService: NetworkAgentInfo [VPN () - 125] validation passed
+03-30 20:46:07.847  1678  2958 D ConnectivityService: getProxy: mDefaultProxy return
+03-30 20:46:07.847  2259  2259 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ REQUEST id=607, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 10215] ] with score 60
+03-30 20:46:07.848  1678  2042 I GnssLocationProvider: WakeLock acquired by sendMessage(UPDATE_NETWORK_STATE, 0, 125)
+03-30 20:46:07.849  2377  2377 D QcrilMsgTunnelIfaceManager: handleMessage what = 1
+03-30 20:46:07.850  2377  2377 I QcrilOemhookMsgTunnel: [0]invokeOemRilRequestRaw: serial=1766 length=24
+03-30 20:46:07.851  2377  2408 I QcrilOemhookMsgTunnel: [0]processOemHookResponse serial no: 1766 error: 0length=0
+03-30 20:46:07.851  2377  2377 D QcrilMsgTunnelIfaceManager: handleMessage what = 2
+03-30 20:46:07.852 30424 30424 V NetworkState: onAvailable: 102
+03-30 20:46:07.853 30424 30424 V NetworkState: onCapabilitiesChanged: 102, [ Transports: WIFI Capabilities: NOT_METERED&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED Unwanted:  LinkUpBandwidth>=1048576Kbps LinkDnBandwidth>=1048576Kbps SignalStrength: -60 SSID: "Keenetic-6767"]
+03-30 20:46:07.853  2377  2377 D QcrilMsgTunnelIfaceManager: handleMessage what = 1
+03-30 20:46:07.854  2377  2408 I QcrilOemhookMsgTunnel: [0]processOemHookIndication length=28
+03-30 20:46:07.854  2377  2377 I QcrilOemhookMsgTunnel: [1]invokeOemRilRequestRaw: serial=1767 length=24
+03-30 20:46:07.854  2377  2377 D QcrilMsgTunnelIfaceManager: handleMessage what = 0
+03-30 20:46:07.856  2377  2408 I QcrilOemhookMsgTunnel: [1]processOemHookResponse serial no: 1767 error: 0length=0
+03-30 20:46:07.856  2377  2377 D QcrilMsgTunnelIfaceManager: handleMessage what = 2
+03-30 20:46:07.859  2377  2408 I QcrilOemhookMsgTunnel: [1]processOemHookIndication length=28
+03-30 20:46:07.859  2377  2377 D QcrilMsgTunnelIfaceManager: handleMessage what = 0
+03-30 20:46:07.861   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:07.878   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:07.879  4439  4439 W fbservices:InitStatus: Not blocking Service (241381222)
+03-30 20:46:07.877  2259  2280 D TelephonyProvider: getPreferredApnIdFromApn: for subId 2147483643
+03-30 20:46:07.894   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:07.925  1678  1751 E GnssLocationProvider: No APN found to select.
+03-30 20:46:07.927   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:07.931  1678  1751 E GnssLocationProvider: updateNetworkAvailability failed
+03-30 20:46:07.932  1678  1751 I GnssLocationProvider: WakeLock released by handleMessage(UPDATE_NETWORK_STATE, 0, 125)
+03-30 20:46:07.944   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:07.961   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 1 line
+03-30 20:46:08.128   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:08.263 14090 29976 I NetworkManagementSocketTagger: tagSocketFd(-1, 1031, -1) failed with errno-9
+03-30 20:46:08.345   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:08.448 14205 14205 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.inappreach.service.START dat=chimera-action: cmp=com.google.android.gms/.chimera.GmsApiService }
+03-30 20:46:09.211   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:09.393   872  2573 D audio_hw_primary: adev_set_parameters: enter: wireless_charging=off
+03-30 20:46:09.393   872  2573 D audio_hw_extn: audio_extn_set_anc_parameters: anc_enabled:0
+03-30 20:46:09.394  2259  2259 D QtiCarrierConfigHelper: WARNING, no carrier configs on phone Id: 0
+03-30 20:46:09.410   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:09.013  1678  2958 D ConnectivityService: getProxy: mDefaultProxy return
+03-30 20:46:12.806  1678  6410 D ConnectivityService: getProxy: mDefaultProxy return
+03-30 20:46:12.341   881  1026 I chatty  : uid=1000(system) HwBinder:881_2 identical 7 lines
+03-30 20:46:12.507   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:12.815 14090 14202 E WakeLock: GCM_CONN_ALARM ** IS FORCE-RELEASED ON TIMEOUT ** [CONTEXT service_id=259 ]
+03-30 20:46:12.990   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:13.006   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0
+03-30 20:46:13.221 30482 30482 D vndksupport: Loading /vendor/lib64/hw/android.hardware.graphics.mapper@2.0-impl.so from current namespace instead of sphal namespace.
+03-30 20:46:13.222 30482 30482 D vndksupport: Loading /vendor/lib64/hw/gralloc.msm8998.so from current namespace instead of sphal namespace.
+03-30 20:46:13.274  1267  1430 I ThermalEngine: ACTION: GPU - Setting GPU[0] to 257000000
+03-30 20:46:13.456   881  1026 D SDM     : DisplayBase::BuildLayerStackStats: LayerStack layer_count: 5, app_layer_count: 4, gpu_target_index: 4, display type: 0

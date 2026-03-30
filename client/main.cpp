@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QOperatingSystemVersion>
 #include <QTimer>
 
 #include "FBLink_application.h"
@@ -75,6 +76,12 @@ int main(int argc, char *argv[])
 
     FBLinkApplication app(argc, argv);
     OsSignalHandler::setup();
+
+#ifdef Q_OS_ANDROID
+    if (QOperatingSystemVersion::current().majorVersion() <= 9) {
+        qputenv("QSG_RENDER_LOOP", "basic");
+    }
+#endif
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (isAnotherInstanceRunning()) {

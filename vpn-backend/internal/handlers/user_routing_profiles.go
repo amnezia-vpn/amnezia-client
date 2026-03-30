@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"vpn-backend/internal/models"
 
@@ -29,7 +30,14 @@ func normalizeRoutingProfileAction(raw string) models.RoutingProfileAction {
 func (h *UserHandler) GetRoutingProfiles(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
+	if err := ensureRoutingProfileSchema(h.db); err != nil {
+		log.Printf("[ROUTING] failed to ensure routing profile schema for user %d: %v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
+		return
+	}
+
 	if err := ensureDefaultRoutingProfiles(h.db, userID); err != nil {
+		log.Printf("[ROUTING] failed to seed routing profiles for user %d: %v", userID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
 		return
 	}
@@ -51,6 +59,12 @@ func (h *UserHandler) GetRoutingProfiles(c *gin.Context) {
 // POST /api/v1/me/routing-profiles
 func (h *UserHandler) CreateRoutingProfile(c *gin.Context) {
 	userID := c.GetUint("user_id")
+
+	if err := ensureRoutingProfileSchema(h.db); err != nil {
+		log.Printf("[ROUTING] failed to ensure routing profile schema for user %d: %v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
+		return
+	}
 
 	sub, err := ensureDefaultSubscription(h.db, userID)
 	if err != nil {
@@ -100,6 +114,12 @@ func (h *UserHandler) CreateRoutingProfile(c *gin.Context) {
 func (h *UserHandler) UpdateRoutingProfile(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
+	if err := ensureRoutingProfileSchema(h.db); err != nil {
+		log.Printf("[ROUTING] failed to ensure routing profile schema for user %d: %v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
+		return
+	}
+
 	sub, err := ensureDefaultSubscription(h.db, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
@@ -128,8 +148,16 @@ func (h *UserHandler) UpdateRoutingProfile(c *gin.Context) {
 	}
 
 	if profile.Kind == models.RoutingProfileSystem {
-		if len(updates) == 0 {
+		if req.Enabled == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "nothing to update"})
+			return
+		}
+
+		if err := h.db.Model(&models.RoutingProfile{}).
+			Where("id = ? AND user_id = ?", profile.ID, userID).
+			UpdateColumn("enabled", *req.Enabled).Error; err != nil {
+			log.Printf("[ROUTING] failed to update system routing profile %d for user %d: %v", profile.ID, userID, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update routing profile"})
 			return
 		}
 	} else {
@@ -140,14 +168,15 @@ func (h *UserHandler) UpdateRoutingProfile(c *gin.Context) {
 		updates["domains_json"] = encodeJSONStringArray(req.Domains)
 		updates["domain_suffixes_json"] = encodeJSONStringArray(req.DomainSuffixes)
 		updates["cidrs_json"] = encodeJSONStringArray(req.CIDRs)
-	}
-
-	if err := h.db.Model(&profile).Updates(updates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update routing profile"})
-		return
+		if err := h.db.Model(&profile).Updates(updates).Error; err != nil {
+			log.Printf("[ROUTING] failed to update custom routing profile %d for user %d: %v", profile.ID, userID, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update routing profile"})
+			return
+		}
 	}
 
 	if err := h.db.First(&profile, profile.ID).Error; err != nil {
+		log.Printf("[ROUTING] failed to reload routing profile %d for user %d: %v", profile.ID, userID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to reload routing profile"})
 		return
 	}
@@ -158,6 +187,12 @@ func (h *UserHandler) UpdateRoutingProfile(c *gin.Context) {
 // DELETE /api/v1/me/routing-profiles/:id
 func (h *UserHandler) DeleteRoutingProfile(c *gin.Context) {
 	userID := c.GetUint("user_id")
+
+	if err := ensureRoutingProfileSchema(h.db); err != nil {
+		log.Printf("[ROUTING] failed to ensure routing profile schema for user %d: %v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
+		return
+	}
 
 	sub, err := ensureDefaultSubscription(h.db, userID)
 	if err != nil {
