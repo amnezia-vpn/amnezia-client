@@ -23,6 +23,9 @@ public:
         QString features;
         QString cardDescription;
 
+        QString termsOfUseUrl;
+        QString privacyPolicyUrl;
+
         QJsonObject object;
     };
 
@@ -60,6 +63,8 @@ public:
         FeaturesRole,
         PriceRole,
         EndDateRole,
+        TermsOfUseUrlRole,
+        PrivacyPolicyUrlRole,
         OrderRole
     };
 

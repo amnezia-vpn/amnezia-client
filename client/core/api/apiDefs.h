@@ -61,6 +61,8 @@ namespace apiDefs
         constexpr QLatin1String endDate("end_date");
         constexpr QLatin1String issuedConfigs("issued_configs");
         constexpr QLatin1String subscriptionDescription("subscription_description");
+        constexpr QLatin1String termsOfUseUrl("terms_of_use_url");
+        constexpr QLatin1String privacyPolicyUrl("privacy_policy_url");
 
         constexpr QLatin1String supportInfo("support_info");
         constexpr QLatin1String email("email");

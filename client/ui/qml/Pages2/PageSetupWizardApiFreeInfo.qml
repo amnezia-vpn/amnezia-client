@@ -124,10 +124,10 @@ PageType {
                 font.pixelSize: 12
 
                 text: {
-                    var termsUrl = LanguageModel.getCurrentSiteUrl()
-                    var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
                     return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
-                        .arg(termsUrl).arg(privacyUrl).arg("#FBB26A")
+                        .arg(String(ApiServicesModel.getSelectedServiceData("termsOfUseUrl")))
+                        .arg(String(ApiServicesModel.getSelectedServiceData("privacyPolicyUrl")))
+                        .arg(AmneziaStyle.color.goldenApricotString)
                 }
 
                 onLinkActivated: function(link) {
@@ -158,7 +158,7 @@ PageType {
                     var termsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
                     var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
                     return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
-                        .arg(termsUrl).arg(privacyUrl).arg("#FBB26A")
+                        .arg(termsUrl).arg(privacyUrl).arg(AmneziaStyle.color.goldenApricotString)
                 }
 
                 onLinkActivated: function(link) {

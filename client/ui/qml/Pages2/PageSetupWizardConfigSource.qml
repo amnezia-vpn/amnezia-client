@@ -361,7 +361,7 @@ PageType {
         property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            ApiConfigsController.restoreSerivceFromAppStore()
+            ApiConfigsController.restoreServiceFromAppStore()
             PageController.showBusyIndicator(false)
         }
     }

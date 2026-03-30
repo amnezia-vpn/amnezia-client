@@ -457,7 +457,7 @@ bool ApiConfigsController::importService()
 
     if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaPremium) {
         if (isIosOrMacOsNe) {
-            return importSerivceFromAppStore();
+            return importServiceFromAppStore();
         }
     } else if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaFree) {
         importFreeFromGateway();
@@ -466,7 +466,7 @@ bool ApiConfigsController::importService()
     return false;
 }
 
-bool ApiConfigsController::importSerivceFromAppStore()
+bool ApiConfigsController::importServiceFromAppStore()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     bool purchaseOk = false;
@@ -533,7 +533,7 @@ bool ApiConfigsController::importSerivceFromAppStore()
     return true;
 }
 
-bool ApiConfigsController::restoreSerivceFromAppStore()
+bool ApiConfigsController::restoreServiceFromAppStore()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     const QString premiumServiceType = QStringLiteral("amnezia-premium");

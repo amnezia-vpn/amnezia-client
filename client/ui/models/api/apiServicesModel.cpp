@@ -127,6 +127,12 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     case EndDateRole: {
         return QDateTime::fromString(apiServiceData.subscription.endDate, Qt::ISODate).toLocalTime().toString("d MMM yyyy");
     }
+    case TermsOfUseUrlRole: {
+        return apiServiceData.serviceInfo.termsOfUseUrl;
+    }
+    case PrivacyPolicyUrlRole: {
+        return apiServiceData.serviceInfo.privacyPolicyUrl;
+    }
     case OrderRole: {
         if (serviceType == serviceType::amneziaPremium) {
             return 0;
@@ -260,6 +266,8 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[FeaturesRole] = "features";
     roles[PriceRole] = "price";
     roles[EndDateRole] = "endDate";
+    roles[TermsOfUseUrlRole] = "termsOfUseUrl";
+    roles[PrivacyPolicyUrlRole] = "privacyPolicyUrl";
     roles[OrderRole] = "order";
 
     return roles;
@@ -285,6 +293,8 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.serviceInfo.cardDescription = serviceDescription.value(configKey::cardDescription).toString();
     serviceData.serviceInfo.description = serviceDescription.value(configKey::description).toString();
     serviceData.serviceInfo.features = serviceDescription.value(configKey::features).toString();
+    serviceData.serviceInfo.termsOfUseUrl = serviceDescription.value(apiDefs::key::termsOfUseUrl).toString();
+    serviceData.serviceInfo.privacyPolicyUrl = serviceDescription.value(apiDefs::key::privacyPolicyUrl).toString();
 
     serviceData.subscriptionPlansJson = serviceDescription.value(configKey::subscriptionPlans).toArray();
     serviceData.benefits = serviceDescription.value(configKey::benefits).toArray();

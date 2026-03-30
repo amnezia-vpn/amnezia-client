@@ -31,8 +31,8 @@ public slots:
 
     bool fillAvailableServices();
     bool importService();
-    bool importSerivceFromAppStore();
-    bool restoreSerivceFromAppStore();
+    bool importServiceFromAppStore();
+    bool restoreServiceFromAppStore();
     bool importFreeFromGateway();
     bool importTrialFromGateway(const QString &email);
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,

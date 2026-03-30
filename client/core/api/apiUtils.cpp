@@ -3,12 +3,25 @@
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonValue>
 
 namespace
 {
     const QByteArray AMNEZIA_CONFIG_SIGNATURE = QByteArray::fromHex("000000ff");
 
     constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
+
+    QDateTime subscriptionEndUtcFromString(const QString &subscriptionEndDate)
+    {
+        if (subscriptionEndDate.isEmpty()) {
+            return {};
+        }
+        QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODateWithMs).toUTC();
+        if (!endDate.isValid()) {
+            endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODate).toUTC();
+        }
+        return endDate;
+    }
 
     QString apiErrorMessageFromJson(const QJsonObject &jsonObj)
     {
@@ -35,11 +48,11 @@ bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
     if (subscriptionEndDate.isEmpty()) {
         return false;
     }
-    const QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODate).toUTC();
+    const QDateTime endDate = subscriptionEndUtcFromString(subscriptionEndDate);
     if (!endDate.isValid()) {
         return false;
     }
-    return endDate < QDateTime::currentDateTimeUtc();
+    return endDate <= QDateTime::currentDateTimeUtc();
 }
 
 bool apiUtils::isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays)
@@ -47,12 +60,12 @@ bool apiUtils::isSubscriptionExpiringSoon(const QString &subscriptionEndDate, in
     if (subscriptionEndDate.isEmpty()) {
         return false;
     }
-    const QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODate).toUTC();
+    const QDateTime endDate = subscriptionEndUtcFromString(subscriptionEndDate);
     if (!endDate.isValid()) {
         return false;
     }
     const QDateTime nowUtc = QDateTime::currentDateTimeUtc();
-    if (endDate < nowUtc) {
+    if (endDate <= nowUtc) {
         return false;
     }
     return endDate <= nowUtc.addDays(withinDays);

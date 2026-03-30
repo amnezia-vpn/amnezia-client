@@ -114,50 +114,47 @@ PageType {
                 benefitsModel: ApiBenefitsModel
             }
 
-            ParagraphTextType {
+            ColumnLayout {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 24
+                visible: Qt.platform.os === "ios" || IsMacOsNeBuild
+                spacing: 16
 
-                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild)
+                ParagraphTextType {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    textFormat: Text.PlainText
+                    color: AmneziaStyle.color.mutedGray
+                    font.pixelSize: 12
 
-                horizontalAlignment: Text.AlignHCenter
-                textFormat: Text.PlainText
-                color: AmneziaStyle.color.mutedGray
-                font.pixelSize: 12
-
-                text: qsTr("Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.")
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
-
-                visible: !(Qt.platform.os === "ios" || IsMacOsNeBuild)
-
-                horizontalAlignment: Text.AlignHCenter
-                textFormat: Text.RichText
-                color: AmneziaStyle.color.mutedGray
-                font.pixelSize: 12
-
-                text: {
-                    var termsUrl = LanguageModel.getCurrentSiteUrl()
-                    var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
-                    return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
-                        .arg(termsUrl).arg(privacyUrl).arg("#FBB26A")
+                    text: qsTr("Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.")
                 }
 
-                onLinkActivated: function(link) {
-                    Qt.openUrlExternally(link)
-                }
+                ParagraphTextType {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    textFormat: Text.RichText
+                    color: AmneziaStyle.color.mutedGray
+                    font.pixelSize: 12
 
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
-                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    text: {
+                        var termsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+                        var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
+                        return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
+                            .arg(termsUrl).arg(privacyUrl).arg(AmneziaStyle.color.goldenApricotString)
+                    }
+
+                    onLinkActivated: function(link) {
+                        Qt.openUrlExternally(link)
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.NoButton
+                        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    }
                 }
             }
 
@@ -167,7 +164,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild)
+                visible: !(Qt.platform.os === "ios" || IsMacOsNeBuild)
 
                 horizontalAlignment: Text.AlignHCenter
                 textFormat: Text.RichText
@@ -175,10 +172,10 @@ PageType {
                 font.pixelSize: 12
 
                 text: {
-                    var termsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-                    var privacyUrl = LanguageModel.getCurrentSiteUrl("policy")
                     return qsTr("By continuing, you agree to the <a href=\"%1\" style=\"color: %3;\">Terms of Use</a> and <a href=\"%2\" style=\"color: %3;\">Privacy Policy</a>")
-                        .arg(termsUrl).arg(privacyUrl).arg("#FBB26A")
+                        .arg(String(ApiServicesModel.getSelectedServiceData("termsOfUseUrl")))
+                        .arg(String(ApiServicesModel.getSelectedServiceData("privacyPolicyUrl")))
+                        .arg(AmneziaStyle.color.goldenApricotString)
                 }
 
                 onLinkActivated: function(link) {
