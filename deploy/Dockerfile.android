@@ -1,0 +1,135 @@
+# AmneziaVPN Android build environment
+#
+# Versions are pinned to match the CI pipeline.  Override via --build-arg:
+#   docker build --build-arg QT_VERSION=6.10.1 -f deploy/Dockerfile.android -t amnezia-android-builder .
+#
+# Usage after building the image – run from the repository root:
+#   docker run --rm \
+#     -v "$(pwd)":/src \
+#     amnezia-android-builder \
+#     --apk arm64-v8a          # or: --aab  |  --apk all  |  --apk "arm64-v8a;armeabi-v7a"
+#
+# Pass --debug to build a debug APK (no keystore required).
+# For a signed release build, also mount your keystore and pass the env vars:
+#   -e ANDROID_KEYSTORE_PATH=/src/android.keystore
+#   -e ANDROID_KEYSTORE_KEY_ALIAS=<alias>
+#   -e ANDROID_KEYSTORE_KEY_PASS=<pass>
+
+ARG UBUNTU_VERSION=22.04
+FROM ubuntu:${UBUNTU_VERSION}
+
+# ── version pins (must match CI pipeline) ────────────────────────────────────
+ARG QT_VERSION=6.10.1
+ARG QT_MODULES="qtremoteobjects qt5compat qtimageformats qtshadertools"
+ARG AQT_VERSION=latest
+
+ARG GO_VERSION=1.24.2
+
+# NDK r26b
+ARG ANDROID_NDK_PKG=26.1.10909125
+ARG ANDROID_PLATFORM=android-36
+ARG ANDROID_BUILD_TOOLS=35.0.0
+# cmdline-tools build ID from the download URL:
+#   https://dl.google.com/android/repository/commandlinetools-linux-<BUILD_ID>_latest.zip
+# Check https://developer.android.com/studio#command-tools for the latest value.
+ARG CMDLINE_TOOLS_BUILD=11076708
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+
+# ── 1. System packages ────────────────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        wget curl unzip git ca-certificates gpg \
+        ninja-build make \
+        python3 python3-pip \
+        p7zip-full \
+        libgl1-mesa-dev libglib2.0-dev \
+        libssl-dev libffi-dev \
+        openjdk-17-jdk-headless \
+    && rm -rf /var/lib/apt/lists/*
+
+# CMake 3.25+ from Kitware (Ubuntu 22.04 ships 3.22 which is too old)
+RUN wget -qO- https://apt.kitware.com/keys/kitware-archive-latest.asc \
+        | gpg --dearmor - > /usr/share/keyrings/kitware-archive-keyring.gpg \
+    && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' \
+        > /etc/apt/sources.list.d/kitware.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends cmake \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# ── 2. Go ─────────────────────────────────────────────────────────────────────
+ENV GO_VERSION=${GO_VERSION}
+RUN set -eux; \
+    wget -q "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -O /tmp/go.tar.gz; \
+    tar -C /usr/local -xzf /tmp/go.tar.gz; \
+    rm /tmp/go.tar.gz
+
+ENV GOROOT=/usr/local/go
+ENV GOPATH=/root/go
+ENV PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+
+# ── 3. Android SDK (command-line tools + platform + build-tools) ──────────────
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV ANDROID_HOME=$ANDROID_SDK_ROOT
+ENV PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+
+RUN set -eux; \
+    mkdir -p $ANDROID_SDK_ROOT/cmdline-tools; \
+    wget -q \
+        "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_BUILD}_latest.zip" \
+        -O /tmp/cmdline-tools.zip; \
+    unzip -q /tmp/cmdline-tools.zip -d /tmp/ct; \
+    mv /tmp/ct/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest; \
+    rm -rf /tmp/cmdline-tools.zip /tmp/ct
+
+RUN yes | sdkmanager --licenses > /dev/null 2>&1; \
+    sdkmanager \
+        "platform-tools" \
+        "platforms;${ANDROID_PLATFORM}" \
+        "build-tools;${ANDROID_BUILD_TOOLS}"
+
+# ── 4. Android NDK ────────────────────────────────────────────────────────────
+ENV ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${ANDROID_NDK_PKG}
+
+RUN sdkmanager "ndk;${ANDROID_NDK_PKG}"
+
+# ── 5. Qt ─────────────────────────────────────────────────────────────────────
+ENV QT_ROOT=/opt/Qt
+ENV QT_VERSION=${QT_VERSION}
+ENV QT_HOST_PATH=$QT_ROOT/$QT_VERSION/gcc_64
+
+RUN if [ "${AQT_VERSION}" = "latest" ]; then \
+        pip3 install --no-cache-dir aqtinstall; \
+    else \
+        pip3 install --no-cache-dir aqtinstall==${AQT_VERSION}; \
+    fi
+
+# Linux host tools – aqt works for desktop Qt 6.10.1
+RUN aqt install-qt linux desktop ${QT_VERSION} linux_gcc_64 \
+        -m ${QT_MODULES} \
+        --outputdir ${QT_ROOT}
+
+# Android targets – aqt doesn't index Qt 6.8+ Android packages; use direct CDN downloader
+COPY deploy/install_qt_android.py /tmp/install_qt_android.py
+
+RUN python3 /tmp/install_qt_android.py ${QT_VERSION} ${QT_ROOT} android_arm64_v8a ${QT_MODULES}
+RUN python3 /tmp/install_qt_android.py ${QT_VERSION} ${QT_ROOT} android_armv7    ${QT_MODULES}
+RUN python3 /tmp/install_qt_android.py ${QT_VERSION} ${QT_ROOT} android_x86_64   ${QT_MODULES}
+RUN python3 /tmp/install_qt_android.py ${QT_VERSION} ${QT_ROOT} android_x86      ${QT_MODULES}
+
+# Make qt-cmake executable (needed for Android builds)
+RUN find ${QT_ROOT}/${QT_VERSION} -name qt-cmake -exec chmod +x {} \;
+
+# ── 6. gomobile ───────────────────────────────────────────────────────────────
+RUN go install golang.org/x/mobile/cmd/gomobile@latest && gomobile init
+
+# ── 7. Entrypoint ─────────────────────────────────────────────────────────────
+WORKDIR /src
+
+COPY deploy/docker-entrypoint-android.sh /usr/local/bin/docker-entrypoint-android.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint-android.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint-android.sh"]

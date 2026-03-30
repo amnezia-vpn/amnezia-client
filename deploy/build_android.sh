@@ -71,6 +71,19 @@ OUT_APP_DIR=$BUILD_DIR/client
 echo "Project dir: $PROJECT_DIR"
 echo "Build dir: $BUILD_DIR"
 
+# Wipe the CMake cache if the Qt toolchain path it recorded no longer exists.
+# This happens when switching Qt versions (e.g. 6.8 → 6.10).
+CACHED_TOOLCHAIN=$BUILD_DIR/CMakeFiles/$(cmake --version | grep -oP '\d+\.\d+\.\d+' | head -1)/CMakeSystem.cmake
+if [[ -f "$CACHED_TOOLCHAIN" ]] && grep -q "qt.toolchain.cmake" "$CACHED_TOOLCHAIN"; then
+  CACHED_QT=$(grep -oP '(?<=include\()[^)]+(?=/lib)' "$CACHED_TOOLCHAIN" || true)
+  if [[ -n "$CACHED_QT" && ! -d "$CACHED_QT" ]]; then
+    echo "Stale CMake cache detected (was built with Qt at $CACHED_QT, which no longer exists)."
+    echo "Cleaning build directory..."
+    rm -rf "$BUILD_DIR"
+    mkdir -p "$BUILD_DIR"
+  fi
+fi
+
 # Determine path to qt bin folder with qt-cmake
 if [[ -v AAB || "$ABIS" = "all" ]]; then
   qt_bin_dir_suffix="x86_64"
