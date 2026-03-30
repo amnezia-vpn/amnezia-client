@@ -62,6 +62,7 @@ namespace amnezia
         ServerCgroupMountpoint = 212,
         DockerPullRateLimit = 213,
         ServerLinuxKernelTooOld = 214,
+        ServerIPaddressBlockedByDocker = 215,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
