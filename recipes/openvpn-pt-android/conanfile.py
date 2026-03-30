@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.files import copy, replace_in_file
+from conan.tools.files import copy, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Git
 from conan.errors import ConanInvalidConfiguration
 
@@ -12,8 +12,11 @@ class OpenvpnPtAndroid(ConanFile):
     package_type = "shared-library"
     settings = "os", "arch", "build_type", "compiler"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
         self.tool_requires("swig/4.1.1")
@@ -36,15 +39,8 @@ class OpenvpnPtAndroid(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self,
-            os.path.join(self.source_folder, "cloak.cmake"),
-            "COMMAND ${GO_EXEC} ${BUILD_CMD_ARGS}",
-            "COMMAND ${CMAKE_COMMAND} -E env CGO_CFLAGS=${CMAKE_C_FLAGS} CGO_LDFLAGS=${CMAKE_SHARED_LINKER_FLAGS} ${GO_EXEC} ${BUILD_CMD_ARGS}",
-        )
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target=["ck_ovpn_plugin_go", "ovpn3", "ovpnutil", "rsapss"])
