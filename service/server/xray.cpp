@@ -36,6 +36,11 @@ bool Xray::startXray(const QString &cfg)
         qWarning() << "[xray] pre-start cleanup reported an unrecoverable error";
     }
 
+    // Указываем Xray путь до файлов geoip.dat и geosite.dat. 
+    // В собранном установщике сервис запускается как C:\Windows\System32, 
+    // и без этой переменной Xray не найдет базы данных маршрутизации.
+    qputenv("xray.location.asset", QCoreApplication::applicationDirPath().toUtf8());
+
     auto defaultIface = NetworkUtilities::getGatewayAndIface().second;
 #ifdef Q_OS_LINUX
     m_defaultIfaceName = defaultIface.name().toUtf8();
