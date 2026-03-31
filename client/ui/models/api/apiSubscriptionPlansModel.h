@@ -11,8 +11,8 @@ class ApiSubscriptionPlansModel : public QAbstractListModel
 
 public:
     enum Roles {
-        PrimaryLeftRole = Qt::UserRole + 1,
-        PrimaryRightRole,
+        BillingPeriodRole = Qt::UserRole + 1,
+        PriceLabelRole,
         SubtitleRole,
         RecommendedRole,
         CheckoutUrlRole,
@@ -37,8 +37,8 @@ public:
 private:
     struct SubscriptionPlanItem
     {
-        QString primaryLeft;
-        QString primaryRight;
+        QString billingPeriod;
+        QString priceLabel;
         QString subtitle;
         bool recommended = false;
         QString checkoutUrl;

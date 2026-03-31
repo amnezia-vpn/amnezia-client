@@ -9,8 +9,8 @@ Rectangle {
     id: root
 
     property bool selected: false
-    property string primaryLeft: ""
-    property string primaryRight: ""
+    property string billingPeriod: ""
+    property string priceLabel: ""
     property string subtitle: ""
     property bool showRecommendedBadge: false
     property string recommendedText: "Recommended"
@@ -39,7 +39,7 @@ Rectangle {
 
             LabelTextType {
                 Layout.fillWidth: true
-                text: root.primaryLeft
+                text: root.billingPeriod
                 color: root.selected ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.paleGray
                 font.pixelSize: 17
                 font.weight: Font.DemiBold
@@ -47,7 +47,7 @@ Rectangle {
             }
 
             LabelTextType {
-                text: root.primaryRight
+                text: root.priceLabel
                 color: root.selected ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.paleGray
                 font.pixelSize: 17
                 font.weight: Font.DemiBold

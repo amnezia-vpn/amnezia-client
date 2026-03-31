@@ -2,27 +2,21 @@
 
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QModelIndex>
 #include <utility>
 
 namespace
 {
 namespace configKey
 {
-    constexpr char primaryLeft[] = "primary_left";
-    constexpr char primaryRight[] = "primary_right";
+    constexpr char billingPeriod[] = "billing_period";
+    constexpr char priceLabel[] = "price_label";
     constexpr char subtitle[] = "subtitle";
     constexpr char recommended[] = "recommended";
     constexpr char checkoutUrl[] = "checkout_url";
     constexpr char isTrial[] = "is_trial";
     constexpr char serviceProtocol[] = "service_protocol";
     constexpr char storeProductId[] = "store_product_id";
-
-    constexpr char primaryLeftCamel[] = "primaryLeft";
-    constexpr char primaryRightCamel[] = "primaryRight";
-    constexpr char checkoutUrlCamel[] = "checkoutUrl";
-    constexpr char isTrialCamel[] = "isTrial";
-    constexpr char serviceProtocolCamel[] = "serviceProtocol";
-    constexpr char storeProductIdCamel[] = "storeProductId";
 }
 }
 
@@ -46,10 +40,10 @@ QVariant ApiSubscriptionPlansModel::data(const QModelIndex &index, int role) con
     }
     const SubscriptionPlanItem &plan = m_subscriptionPlans.at(index.row());
     switch (role) {
-    case PrimaryLeftRole:
-        return plan.primaryLeft;
-    case PrimaryRightRole:
-        return plan.primaryRight;
+    case BillingPeriodRole:
+        return plan.billingPeriod;
+    case PriceLabelRole:
+        return plan.priceLabel;
     case SubtitleRole:
         return plan.subtitle;
     case RecommendedRole:
@@ -70,8 +64,8 @@ QVariant ApiSubscriptionPlansModel::data(const QModelIndex &index, int role) con
 QHash<int, QByteArray> ApiSubscriptionPlansModel::roleNames() const
 {
     return {
-        { PrimaryLeftRole, "primaryLeft" },
-        { PrimaryRightRole, "primaryRight" },
+        { BillingPeriodRole, "billingPeriod" },
+        { PriceLabelRole, "priceLabel" },
         { SubtitleRole, "subtitle" },
         { RecommendedRole, "recommended" },
         { CheckoutUrlRole, "checkoutUrl" },
@@ -92,8 +86,8 @@ void ApiSubscriptionPlansModel::updateModel(const QJsonArray &arr)
         }
         const QJsonObject planObject = planValue.toObject();
         SubscriptionPlanItem subscriptionPlan;
-        subscriptionPlan.primaryLeft = planObject.value(configKey::primaryLeft).toString();
-        subscriptionPlan.primaryRight = planObject.value(configKey::primaryRight).toString();
+        subscriptionPlan.billingPeriod = planObject.value(configKey::billingPeriod).toString();
+        subscriptionPlan.priceLabel = planObject.value(configKey::priceLabel).toString();
         subscriptionPlan.subtitle = planObject.value(configKey::subtitle).toString();
         subscriptionPlan.recommended = planObject.value(configKey::recommended).toBool();
         subscriptionPlan.checkoutUrl = planObject.value(configKey::checkoutUrl).toString();
@@ -117,16 +111,13 @@ QVariantMap ApiSubscriptionPlansModel::planAt(int row) const
     if (row < 0 || row >= m_subscriptionPlans.size()) {
         return {};
     }
-    const SubscriptionPlanItem &plan = m_subscriptionPlans.at(row);
+    const QModelIndex modelIndex = index(row, 0);
     QVariantMap planMap;
-    planMap.insert(QLatin1String(configKey::primaryLeftCamel), plan.primaryLeft);
-    planMap.insert(QLatin1String(configKey::primaryRightCamel), plan.primaryRight);
-    planMap.insert(QLatin1String(configKey::subtitle), plan.subtitle);
-    planMap.insert(QLatin1String(configKey::recommended), plan.recommended);
-    planMap.insert(QLatin1String(configKey::checkoutUrlCamel), plan.checkoutUrl);
-    planMap.insert(QLatin1String(configKey::isTrialCamel), plan.isTrial);
-    planMap.insert(QLatin1String(configKey::serviceProtocolCamel), plan.serviceProtocol);
-    planMap.insert(QLatin1String(configKey::storeProductIdCamel), plan.storeProductId);
+    const QHash<int, QByteArray> roles = roleNames();
+    planMap.reserve(roles.size());
+    for (auto roleIt = roles.cbegin(); roleIt != roles.cend(); ++roleIt) {
+        planMap.insert(QString::fromUtf8(roleIt.value()), data(modelIndex, roleIt.key()));
+    }
     return planMap;
 }
 

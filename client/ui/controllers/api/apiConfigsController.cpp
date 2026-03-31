@@ -46,7 +46,7 @@ namespace
         constexpr char serviceDescription[] = "service_description";
         constexpr char subscriptionPlans[] = "subscription_plans";
         constexpr char storeProductId[] = "store_product_id";
-        constexpr char primaryRight[] = "primary_right";
+        constexpr char priceLabel[] = "price_label";
 
         constexpr char apiPayload[] = "api_payload";
         constexpr char keyPayload[] = "key_payload";
@@ -337,7 +337,7 @@ namespace
                 if (priceIt == idToDisplayPrice.cend()) {
                     continue;
                 }
-                planObject.insert(configKey::primaryRight, *priceIt);
+                planObject.insert(configKey::priceLabel, *priceIt);
                 mergedPlans.append(planObject);
             }
             plans = mergedPlans;

@@ -84,8 +84,8 @@ PageType {
                     Layout.bottomMargin: index === ApiSubscriptionPlansModel.rowCount() - 1 ? 24 : 12
 
                     selected: root.selectedPlanIndex === index
-                    primaryLeft: String(model.primaryLeft)
-                    primaryRight: String(model.primaryRight)
+                    billingPeriod: String(model.billingPeriod)
+                    priceLabel: String(model.priceLabel)
                     subtitle: String(model.subtitle)
                     showRecommendedBadge: !!model.recommended
                     recommendedText: qsTr("Recommended")
@@ -207,7 +207,7 @@ PageType {
             if (!plan) {
                 return qsTr("Continue")
             }
-            return qsTr("Subscribe — %1 for %2").arg(String(plan.primaryLeft)).arg(String(plan.primaryRight))
+            return qsTr("Subscribe — %1 for %2").arg(String(plan.billingPeriod)).arg(String(plan.priceLabel))
         }
 
         clickedFunc: function() {
