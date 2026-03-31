@@ -108,7 +108,7 @@ int LinuxFirewall::linkChain(LinuxFirewall::IPVersion ip, const QString& chain, 
         //    (we can't safely delete all rules at once since rule numbers change)
         // TODO: occasionally this script results in warnings in logs "Bad rule (does a matching rule exist in the chain?)" - this happens when
         // the e.g OUTPUT chain is empty but this script attempts to delete things from it anyway. It doesn't cause any problems, but we should still fix at some point..
-        return execute(QStringLiteral("if ! %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) == 1 && $2 == \"%3\" { found=1 } END { if(found==1) { exit 0 } else { exit 1 } }' ; then %1 -I %2 -j %3 -t %4 && %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) > 1 && $2 == \"%3\" { print $1; exit }' | xargs %1 -t %4 -D %2 ; fi").arg(cmd, parent, chain, tableName));
+        return execute(QStringLiteral("if ! %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) == 1 && $2 == \"%3\" { found=1 } END { if(found==1) { exit 0 } else { exit 1 } }' ; then %1 -I %2 -j %3 -t %4 && %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) > 1 && $2 == \"%3\" { print $1; exit }' | xargs -r %1 -t %4 -D %2 ; fi").arg(cmd, parent, chain, tableName));
     }
     else
         return execute(QStringLiteral("if ! %1 -C %2 -j %3 -t %4 2> /dev/null ; then %1 -A %2 -j %3 -t %4; fi").arg(cmd, parent, chain, tableName));
@@ -289,6 +289,7 @@ void LinuxFirewall::install()
     installAnchor(Both, QStringLiteral("100.blockAll"), {
                                                             QStringLiteral("-j REJECT"),
                                                         });
+    installAnchor(Both, QStringLiteral("400.allowPIA"), {});
     // NAT rules
     installAnchor(Both, QStringLiteral("100.transIp"), {
 
@@ -495,13 +496,23 @@ int LinuxFirewall::execute(const QString &command, bool ignoreErrors)
         logger.debug() << "(" << exitCode << ") $ " << command;
     if (!out.isEmpty())
         logger.info() << out;
-    if (!err.isEmpty())
+    if (!err.isEmpty() && !ignoreErrors)
         logger.warning() << err;
     return exitCode;
 }
 
 void LinuxFirewall::setupTrafficSplitting()
 {
+    // Register the routing table name so the ip tool can resolve it by name
+    execute(QStringLiteral("grep -q '%1' /etc/iproute2/rt_tables || printf '200\\t%1\\n' >> /etc/iproute2/rt_tables").arg(kRtableName));
+
+    // On cgroup v2 (unified hierarchy) systems /sys/fs/cgroup/net_cls/ does not exist.
+    // Try to mount the legacy net_cls cgroup v1 controller so traffic splitting works.
+    execute(QStringLiteral(
+        "if [ ! -d /sys/fs/cgroup/net_cls ] ; then "
+        "mkdir -p /sys/fs/cgroup/net_cls && "
+        "mount -t cgroup -o net_cls cgroup /sys/fs/cgroup/net_cls ; fi"));
+
     auto cGroupDir = "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnexclusions/";
     logger.info() << "Should be setting up cgroup in" << cGroupDir << "for traffic splitting";
     execute(QStringLiteral("if [ ! -d %1 ] ; then mkdir %1 ; sleep 0.1 ; echo %2 > %1/net_cls.classid ; fi").arg(cGroupDir).arg(kCGroupId));
@@ -513,6 +524,9 @@ void LinuxFirewall::teardownTrafficSplitting()
 {
     logger.info() << "Tearing down cgroup and routing rules";
     execute(QStringLiteral("if ip rule list | grep -q %1; then ip rule del from all fwmark %1 lookup %2 2> /dev/null ; fi").arg(kPacketTag, kRtableName));
-    execute(QStringLiteral("ip route flush table %1").arg(kRtableName));
+    // Ignore errors here: on first teardown the table name may not be registered yet
+    execute(QStringLiteral("ip route flush table %1").arg(kRtableName), true);
     execute(QStringLiteral("ip route flush cache"));
+    // Remove the rt_tables entry we added
+    execute(QStringLiteral("sed -i '/%1/d' /etc/iproute2/rt_tables").arg(kRtableName));
 }
