@@ -23,6 +23,7 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
       m_settings(settings)
 {
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
+    connect(m_vpnConnection.get(), &VpnConnection::bytesChanged, this, &ConnectionController::onBytesChanged);
     connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
 
@@ -98,6 +99,9 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     case Vpn::ConnectionState::Disconnected: {
         m_isConnectionInProgress = false;
         m_connectionStateText = tr("Connect");
+        m_downloadSpeed.clear();
+        m_uploadSpeed.clear();
+        emit speedChanged();
         break;
     }
     case Vpn::ConnectionState::Disconnecting: {
@@ -176,4 +180,31 @@ bool ConnectionController::isConnectionInProgress() const
 bool ConnectionController::isConnected() const
 {
     return m_isConnected;
+}
+
+void ConnectionController::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
+{
+    qint64 elapsedMs = m_speedTimer.isValid() ? m_speedTimer.elapsed() : 0;
+    m_speedTimer.restart();
+
+    if (elapsedMs > 0) {
+        quint64 rxPerSec = receivedBytes * 1000 / static_cast<quint64>(elapsedMs);
+        quint64 txPerSec = sentBytes * 1000 / static_cast<quint64>(elapsedMs);
+        m_downloadSpeed = VpnConnection::bytesPerSecToText(rxPerSec);
+        m_uploadSpeed   = VpnConnection::bytesPerSecToText(txPerSec);
+    } else {
+        m_downloadSpeed = VpnConnection::bytesPerSecToText(receivedBytes);
+        m_uploadSpeed   = VpnConnection::bytesPerSecToText(sentBytes);
+    }
+    emit speedChanged();
+}
+
+QString ConnectionController::downloadSpeed() const
+{
+    return m_downloadSpeed;
+}
+
+QString ConnectionController::uploadSpeed() const
+{
+    return m_uploadSpeed;
 }

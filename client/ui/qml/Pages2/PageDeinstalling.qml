@@ -65,7 +65,7 @@ PageType {
 
                     interval: 300
                     repeat: true
-                    running: true
+                    running: progressBar.value < 0.95
                     onTriggered: {
                         progressBar.value += 0.003
                     }

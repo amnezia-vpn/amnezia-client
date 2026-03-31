@@ -42,6 +42,10 @@ ListViewType {
         property variant delegateData: model
         property VerticalRadioButton serverRadioButtonProperty: serverRadioButton
 
+        readonly property bool isExpired: isSubscriptionExpired
+        readonly property bool isExpiringSoon: isSubscriptionExpiringSoon
+        readonly property bool isApiServer: isServerFromGatewayApi
+
         implicitWidth: root.width
         implicitHeight: serverRadioButtonContent.implicitHeight
 
@@ -127,14 +131,14 @@ ListViewType {
             }
 
             CaptionTextType {
-                visible: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
+                visible: menuContentDelegate.isApiServer && (menuContentDelegate.isExpired || menuContentDelegate.isExpiringSoon)
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 64
                 Layout.bottomMargin: 8
 
-                text: isSubscriptionExpired ? qsTr("Subscription expired. Please renew.") : qsTr("Subscription expiring soon.")
-                color: isSubscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
+                text: menuContentDelegate.isExpired ? qsTr("Subscription expired. Please renew.") : qsTr("Subscription expiring soon.")
+                color: menuContentDelegate.isExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
                 wrapMode: Text.WordWrap
             }
 

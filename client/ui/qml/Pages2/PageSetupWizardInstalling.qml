@@ -124,7 +124,7 @@ PageType {
 
                     interval: 300
                     repeat: true
-                    running: root.isTimerRunning
+                    running: root.isTimerRunning && progressBar.value < 0.95
                     onTriggered: {
                         progressBar.value += 0.003
                     }
