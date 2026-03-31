@@ -151,6 +151,15 @@ target_link_libraries(test_exports PRIVATE
     test_common
 )
 
+add_executable(test_serialization
+    testSerialization.cpp
+)
+
+target_link_libraries(test_serialization PRIVATE
+    Qt6::Test
+    test_common
+)
+
 enable_testing()
 add_test(NAME ImportExportTest COMMAND test_import_export)
 add_test(NAME MultipleImportsTest COMMAND test_multiple_imports)
@@ -165,3 +174,4 @@ add_test(NAME SettingsSignalsTest COMMAND test_settings_signals)
 add_test(NAME UiServersModelAndControllerTest COMMAND test_ui_servers_model_and_controller)
 add_test(NAME SelfHostedServerSetupTest COMMAND test_self_hosted_server_setup)
 add_test(NAME MultipleExportsTest COMMAND test_exports)
+add_test(NAME SerializationTest COMMAND test_serialization)
