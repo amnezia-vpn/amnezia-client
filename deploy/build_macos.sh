@@ -301,6 +301,12 @@ else
                "$FINAL_PKG"
 fi
 
+FINAL_PKG_SIZE=$(stat -f%z "$FINAL_PKG")
+if [ "$FINAL_PKG_SIZE" -lt 1000000 ]; then
+  echo "::error::Final macOS installer is unexpectedly small (${FINAL_PKG_SIZE} bytes): $FINAL_PKG"
+  exit 1
+fi
+
 if [ -n "${MAC_INSTALL_CERT_PW-}" ] && [ -n "${NOTARIZE_APP-}" ]; then
   echo "Notarizing installer package..."
   xcrun notarytool submit "$FINAL_PKG" \
