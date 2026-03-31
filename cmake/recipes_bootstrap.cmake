@@ -1,4 +1,4 @@
-find_program(CONAN_COMMAND "conan" REQUIRED HINTS /opt/homebrew/bin)
+find_program(CONAN_COMMAND "conan" REQUIRED)
 
 file(GLOB_RECURSE LOCAL_RECIPES "${CMAKE_SOURCE_DIR}/recipes/*/conanfile.py")
 foreach(RECIPE ${LOCAL_RECIPES})
