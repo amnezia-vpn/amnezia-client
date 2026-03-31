@@ -59,9 +59,9 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
     return false;
   }
 
-  m_resolvers = resolvers;
   setLinkDNS(m_ifindex, resolvers);
   setLinkDefaultRoute(m_ifindex, true);
+  setLinkDomains(m_ifindex, {DnsLinkDomain(".", true)});
   updateLinkDomains();
   return true;
 }
@@ -175,18 +175,13 @@ void DnsUtilsLinux::updateLinkDomains() {
 }
 
 void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
-  QDBusPendingReply<QVariant> reply = *call;
-  delete call;
+    QDBusPendingReply<QVariant> reply = *call;
+    call->deleteLater();
   if (reply.isError()) {
     // systemd-resolved may still be starting up after a restart — retry a few times
     if (m_domainRetries++ < 5) {
       logger.debug() << "systemd-resolved not ready yet, retrying DNS setup ("
                      << m_domainRetries << "/5)";
-      // Re-apply DNS servers and default route in case systemd-resolved lost them on restart
-      if (m_ifindex > 0 && !m_resolvers.isEmpty()) {
-        setLinkDNS(m_ifindex, m_resolvers);
-        setLinkDefaultRoute(m_ifindex, true);
-      }
       QTimer::singleShot(500, this, &DnsUtilsLinux::updateLinkDomains);
     } else {
       logger.warning() << "Failed to configure DNS after 5 retries";
