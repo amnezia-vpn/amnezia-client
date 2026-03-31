@@ -156,7 +156,10 @@ void OpenVpnProtocol::updateRouteGateway(QString line)
             m_routeGateway = params.at(3);
         }
     } else {
-        line = line.split("ROUTE_GATEWAY", Qt::SkipEmptyParts).at(1);
+        auto parts = line.split("ROUTE_GATEWAY", Qt::SkipEmptyParts);
+        if (parts.size() < 2)
+            return;
+        line = parts.at(1);
         if (!line.contains("/"))
             return;
         m_routeGateway = line.split("/", Qt::SkipEmptyParts).first();
@@ -325,6 +328,8 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
 
             beg += sizeof(">BYTECOUNT:") - 1;
             QList<QByteArray> count = data.mid(beg, end - beg + 1).split(',');
+            if (count.size() < 2)
+                continue;
 
             quint64 r = static_cast<quint64>(count.at(0).trimmed().toULongLong());
             quint64 s = static_cast<quint64>(count.at(1).trimmed().toULongLong());
@@ -342,9 +347,10 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
     QStringList params = line.split(",");
     for (const QString &l : params) {
         if (l.contains("ifconfig")) {
-            if (l.split(" ").size() == 3) {
-                m_vpnLocalAddress = l.split(" ").at(1);
-                m_vpnGateway = l.split(" ").at(2);
+            QStringList ifconfigParts = l.split(" ");
+            if (ifconfigParts.size() == 3) {
+                m_vpnLocalAddress = ifconfigParts.at(1);
+                m_vpnGateway = ifconfigParts.at(2);
 #ifdef Q_OS_WIN
                 QThread::msleep(300);
                 IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {

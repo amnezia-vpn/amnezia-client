@@ -309,7 +309,7 @@ void VpnConnection::appendSplitTunnelingConfig()
             for (auto &line : nativeConfigLines) {
                 if (line.contains("AllowedIPs")) {
                     auto allowedIpsString = line.split(" = ");
-                    if (allowedIpsString.size() < 1) {
+                    if (allowedIpsString.size() < 2) {
                         break;
                     }
                     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIpsString.at(1).split(", "));
@@ -326,7 +326,7 @@ void VpnConnection::appendSplitTunnelingConfig()
             for (auto &line : nativeConfigLines) {
                 if (line.contains("PersistentKeepalive")) {
                     auto persistentKeepaliveString = line.split(" = ");
-                    if (persistentKeepaliveString.size() < 1) {
+                    if (persistentKeepaliveString.size() < 2) {
                         break;
                     }
                     configData.insert(config_key::persistent_keep_alive, persistentKeepaliveString.at(1));

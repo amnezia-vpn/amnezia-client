@@ -90,6 +90,7 @@ void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
     #endif
 
     p->startDetached();
+    delete p;
 #endif
 }
 
