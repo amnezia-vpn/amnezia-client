@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QIcon>
 #include <QOperatingSystemVersion>
 #include <QTimer>
 
@@ -101,6 +102,9 @@ int main(int argc, char *argv[])
     app.setApplicationName(APPLICATION_NAME);
     app.setOrganizationName(ORGANIZATION_NAME);
     app.setApplicationDisplayName("FBLink VPN");
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    app.setWindowIcon(QIcon(QStringLiteral(":/images/fblink_logo.png")));
+#endif
 
     app.loadFonts();
 
