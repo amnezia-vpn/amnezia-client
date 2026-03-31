@@ -65,18 +65,10 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
         return false;
     }
 
-    // Kill any orphaned wireguard-go process from a previous crash that may
-    // still hold the amn0 TUN device, then delete the stale interface.
-    QProcess::execute("pkill", {"-f", QString("wireguard-go.*%1").arg(WG_INTERFACE)});
-    QProcess::execute("ip", {"link", "delete", WG_INTERFACE});
-
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
     if (!wgRuntimeDir.exists()) {
         wgRuntimeDir.mkpath(".");
     }
-    // Remove stale runtime files from a previous session.
-    QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
-    QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".sock"));
 
     QProcessEnvironment pe = QProcessEnvironment::systemEnvironment();
     QString wgNameFile = wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".sock");
@@ -245,8 +237,10 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     // Exclude the server address, except for multihop exit servers.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+        IPAddress v4(config.m_serverIpv4AddrIn);
+        if (!v4.address().isNull()) m_rtmonitor->addExclusionRoute(v4);
+        IPAddress v6(config.m_serverIpv6AddrIn);
+        if (!v6.address().isNull()) m_rtmonitor->addExclusionRoute(v6);
     }
 
     int err = uapiErrno(uapiCommand(message));
@@ -260,11 +254,13 @@ bool WireguardUtilsLinux::deletePeer(const InterfaceConfig& config) {
     QByteArray publicKey =
         QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
 
-    // Clear exclustion routes for this peer.
+    // Clear exclusion routes for this peer.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+        IPAddress v4(config.m_serverIpv4AddrIn);
+        if (!v4.address().isNull()) m_rtmonitor->deleteExclusionRoute(v4);
+        IPAddress v6(config.m_serverIpv6AddrIn);
+        if (!v6.address().isNull()) m_rtmonitor->deleteExclusionRoute(v6);
     }
 
     QString message;

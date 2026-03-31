@@ -213,7 +213,12 @@ void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
   if (state == NM_STATE_ASLEEP) {
     emit wakeup();
   } else if (state >= NM_STATE_CONNECTED_SITE && m_previousNMState < NM_STATE_CONNECTED_SITE) {
-    emit networkChanged();
+    // Delay the reconnect so the kernel routing table (and default gateway)
+    // are fully restored before the VPN exclusion route is recalculated.
+    // Without this delay, getGatewayAndIface() may return an empty gateway
+    // immediately after network recovery, causing the server exclusion route
+    // to be installed with gateway 0.0.0.0 and breaking WG handshakes.
+    QTimer::singleShot(3000, this, [this]() { emit networkChanged(); });
   }
 
   m_previousNMState = state;

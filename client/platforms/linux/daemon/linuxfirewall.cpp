@@ -378,7 +378,7 @@ void LinuxFirewall::uninstall()
 
 bool LinuxFirewall::isInstalled()
 {
-    return execute(QStringLiteral("iptables -C %1 -j %2 2> /dev/null").arg(kOutputChain, kRootChain)) == 0;
+    return execute(QStringLiteral("iptables -C %1 -j %2 2> /dev/null").arg(kOutputChain, kRootChain), true) == 0;
 }
 
 void LinuxFirewall::enableAnchor(LinuxFirewall::IPVersion ip, const QString &anchor, const QString& tableName)
