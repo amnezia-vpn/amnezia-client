@@ -2,6 +2,7 @@
 #define XRAYPROTOCOLCONFIG_H
 
 #include <QJsonObject>
+#include "core/utils/constants/protocolConstants.h"
 #include <QString>
 #include <optional>
 
@@ -15,8 +16,8 @@ struct XrayXPaddingConfig {
     bool    obfsMode = true;            // xPaddingObfsMode
     QString key;                        // xPaddingKey
     QString header;                     // xPaddingHeader
-    QString placement = "Cookie";       // xPaddingPlacement: Cookie|Header|Query|Body
-    QString method    = "Repeat-x";     // xPaddingMethod: Repeat-x|Random|Zero
+    QString placement = protocols::xray::defaultXPaddingPlacement; // xPaddingPlacement: Cookie|Header|Query|Body
+    QString method = protocols::xray::defaultXPaddingMethod;       // xPaddingMethod: Repeat-x|Random|Zero
 
     QJsonObject toJson() const;
     static XrayXPaddingConfig fromJson(const QJsonObject &json);
@@ -44,31 +45,31 @@ struct XrayXmuxConfig {
 
 // ── XHTTP transport ───────────────────────────────────────────────────────────
 struct XrayXhttpConfig {
-    QString mode             = "Auto";  // Auto|Packet-up|Stream-up|Stream-one
-    QString host             = "www.googletagmanager.com";
+    QString mode             = protocols::xray::defaultXhttpMode;  // Auto|Packet-up|Stream-up|Stream-one
+    QString host             = protocols::xray::defaultXhttpHost;
     QString path;
-    QString headersTemplate  = "HTTP";  // HTTP|None
-    QString uplinkMethod     = "POST";  // POST|PUT|PATCH
+    QString headersTemplate  = protocols::xray::defaultXhttpHeadersTemplate;  // HTTP|None
+    QString uplinkMethod     = protocols::xray::defaultXhttpUplinkMethod;  // POST|PUT|PATCH
     bool    disableGrpc      = true;
     bool    disableSse       = true;
 
     // Session & Sequence
-    QString sessionPlacement = "Path";  // Path|Header|Cookie|None
-    QString sessionKey       = "Path";
-    QString seqPlacement     = "Path";
+    QString sessionPlacement = protocols::xray::defaultXhttpSessionPlacement;
+    QString sessionKey       = protocols::xray::defaultXhttpSessionKey;
+    QString seqPlacement     = protocols::xray::defaultXhttpSeqPlacement;
     QString seqKey;
-    QString uplinkDataPlacement = "Body"; // Body|Query
+    QString uplinkDataPlacement = protocols::xray::defaultXhttpUplinkDataPlacement;
     QString uplinkDataKey;
 
     // Traffic Shaping
-    QString uplinkChunkSize       = "0";
+    QString uplinkChunkSize       = protocols::xray::defaultXhttpUplinkChunkSize;
     QString scMaxBufferedPosts;
-    QString scMaxEachPostBytesMin = "1";
-    QString scMaxEachPostBytesMax = "100";
-    QString scMinPostsIntervalMsMin = "100";
-    QString scMinPostsIntervalMsMax = "800";
-    QString scStreamUpServerSecsMin = "1";
-    QString scStreamUpServerSecsMax = "100";
+    QString scMaxEachPostBytesMin = protocols::xray::defaultXhttpScMaxEachPostBytesMin;
+    QString scMaxEachPostBytesMax = protocols::xray::defaultXhttpScMaxEachPostBytesMax;
+    QString scMinPostsIntervalMsMin = protocols::xray::defaultXhttpScMinPostsIntervalMsMin;
+    QString scMinPostsIntervalMsMax = protocols::xray::defaultXhttpScMinPostsIntervalMsMax;
+    QString scStreamUpServerSecsMin = protocols::xray::defaultXhttpScStreamUpServerSecsMin;
+    QString scStreamUpServerSecsMax = protocols::xray::defaultXhttpScStreamUpServerSecsMax;
 
     XrayXPaddingConfig xPadding;
     XrayXmuxConfig     xmux;
@@ -100,14 +101,14 @@ struct XrayServerConfig {
     bool    isThirdPartyConfig = false;
 
     // New: Security
-    QString security    = "reality";    // none|tls|reality
-    QString flow        = "xtls-rprx-vision"; // ""|xtls-rprx-vision|xtls-rprx-vision-udp443
-    QString fingerprint = "Mozilla/5.0";
-    QString sni         = "cdn.example.com";
-    QString alpn        = "HTTP/2";     // TLS only: HTTP/2|HTTP/1.1|HTTP/2,HTTP/1.1
+    QString security    = protocols::xray::defaultSecurity;
+    QString flow        = protocols::xray::defaultFlow;
+    QString fingerprint = protocols::xray::defaultFingerprint;
+    QString sni         = protocols::xray::defaultSni;
+    QString alpn        = protocols::xray::defaultAlpn;
 
     // New: Transport
-    QString transport = "raw";          // raw|xhttp|mkcp
+    QString transport = protocols::xray::defaultTransport;
     XrayXhttpConfig xhttp;
     XrayMkcpConfig  mkcp;
 

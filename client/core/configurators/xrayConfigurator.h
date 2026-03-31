@@ -20,6 +20,9 @@ public:
                                 const amnezia::DnsSettings &dnsSettings,
                                 amnezia::ErrorCode &errorCode) override;
 
+    amnezia::ProtocolConfig processConfigWithLocalSettings(const amnezia::ConnectionSettings &settings,
+                                                           amnezia::ProtocolConfig protocolConfig) override;
+
 private:
     QString prepareServerConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container, const amnezia::ContainerConfig &containerConfig,
                                 const amnezia::DnsSettings &dnsSettings,

@@ -2,6 +2,7 @@
 #define XRAYCONFIGMODEL_H
 
 #include <QAbstractListModel>
+#include <QStringList>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
@@ -92,6 +93,29 @@ public:
 
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
+    // ── Static option lists (for QML DropDown models) ─────────────────
+    Q_INVOKABLE static QStringList flowOptions();
+    Q_INVOKABLE static QStringList securityOptions();
+    Q_INVOKABLE static QStringList transportOptions();
+    Q_INVOKABLE static QStringList fingerprintOptions();
+    Q_INVOKABLE static QStringList alpnOptions();
+    Q_INVOKABLE static QStringList xhttpModeOptions();
+    Q_INVOKABLE static QStringList xhttpHeadersTemplateOptions();
+    Q_INVOKABLE static QStringList xhttpUplinkMethodOptions();
+    Q_INVOKABLE static QStringList xhttpSessionPlacementOptions();
+    Q_INVOKABLE static QStringList xhttpSessionKeyOptions();
+    Q_INVOKABLE static QStringList xhttpSeqPlacementOptions();
+    Q_INVOKABLE static QStringList xhttpUplinkDataPlacementOptions();
+    Q_INVOKABLE static QStringList xPaddingPlacementOptions();
+    Q_INVOKABLE static QStringList xPaddingMethodOptions();
+
+    // mKCP display defaults (protocolConstants.h — must match xrayConfigurator empty-field behavior)
+    Q_INVOKABLE static QString mkcpDefaultTti();
+    Q_INVOKABLE static QString mkcpDefaultUplinkCapacity();
+    Q_INVOKABLE static QString mkcpDefaultDownlinkCapacity();
+    Q_INVOKABLE static QString mkcpDefaultReadBufferSize();
+    Q_INVOKABLE static QString mkcpDefaultWriteBufferSize();
 
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig);

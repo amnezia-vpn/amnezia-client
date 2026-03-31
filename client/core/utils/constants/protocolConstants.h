@@ -57,6 +57,40 @@ namespace amnezia
             constexpr char defaultPort[] = "443";
             constexpr char defaultLocalProxyPort[] = "10808";
             constexpr char defaultLocalAddr[] = "10.33.0.2";
+            constexpr char defaultLocalListenAddr[] = "127.0.0.1";
+
+            constexpr char defaultSecurity[] = "reality";
+            constexpr char defaultFlow[] = "xtls-rprx-vision";
+            constexpr char defaultTransport[] = "raw";
+            constexpr char defaultFingerprint[] = "chrome";
+            constexpr char defaultSni[] = "cdn.example.com";
+            constexpr char defaultAlpn[] = "HTTP/2";
+
+            constexpr char defaultXhttpMode[] = "Auto";
+            constexpr char defaultXhttpHeadersTemplate[] = "HTTP";
+            constexpr char defaultXhttpUplinkMethod[] = "POST";
+            constexpr char defaultXhttpSessionPlacement[] = "Path";
+            constexpr char defaultXhttpSessionKey[] = "Path";
+            constexpr char defaultXhttpSeqPlacement[] = "Path";
+            constexpr char defaultXhttpUplinkDataPlacement[] = "Body";
+
+            constexpr char defaultXhttpHost[] = "www.googletagmanager.com";
+            constexpr char defaultXhttpUplinkChunkSize[] = "0";
+            constexpr char defaultXhttpScMaxEachPostBytesMin[] = "1";
+            constexpr char defaultXhttpScMaxEachPostBytesMax[] = "100";
+            constexpr char defaultXhttpScMinPostsIntervalMsMin[] = "100";
+            constexpr char defaultXhttpScMinPostsIntervalMsMax[] = "800";
+            constexpr char defaultXhttpScStreamUpServerSecsMin[] = "1";
+            constexpr char defaultXhttpScStreamUpServerSecsMax[] = "100";
+
+            constexpr char defaultXPaddingPlacement[] = "Cookie";
+            constexpr char defaultXPaddingMethod[] = "Repeat-x";
+
+            constexpr char defaultMkcpTti[] = "50";
+            constexpr char defaultMkcpUplinkCapacity[] = "5";
+            constexpr char defaultMkcpDownlinkCapacity[] = "20";
+            constexpr char defaultMkcpReadBufferSize[] = "2";
+            constexpr char defaultMkcpWriteBufferSize[] = "2";
 
             constexpr char outbounds[] = "outbounds";
             constexpr char inbounds[] = "inbounds";

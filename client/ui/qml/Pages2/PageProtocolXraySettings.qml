@@ -58,7 +58,7 @@ PageType {
 
                 Header2TextType {
                     Layout.fillWidth: true
-                    text: qsTr("XRay\nVLESS")
+                    text: qsTr("XRay VLESS settings")
                     wrapMode: Text.WordWrap
                 }
 
