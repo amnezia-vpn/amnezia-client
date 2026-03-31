@@ -238,9 +238,9 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
         IPAddress v4(config.m_serverIpv4AddrIn);
-        if (!v4.address().isNull()) m_rtmonitor->addExclusionRoute(v4);
+        if (!v4.address().isNull()) addExclusionRoute(v4);
         IPAddress v6(config.m_serverIpv6AddrIn);
-        if (!v6.address().isNull()) m_rtmonitor->addExclusionRoute(v6);
+        if (!v6.address().isNull()) addExclusionRoute(v6);
     }
 
     int err = uapiErrno(uapiCommand(message));
@@ -258,9 +258,9 @@ bool WireguardUtilsLinux::deletePeer(const InterfaceConfig& config) {
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
         IPAddress v4(config.m_serverIpv4AddrIn);
-        if (!v4.address().isNull()) m_rtmonitor->deleteExclusionRoute(v4);
+        if (!v4.address().isNull()) deleteExclusionRoute(v4);
         IPAddress v6(config.m_serverIpv6AddrIn);
-        if (!v6.address().isNull()) m_rtmonitor->deleteExclusionRoute(v6);
+        if (!v6.address().isNull()) deleteExclusionRoute(v6);
     }
 
     QString message;
@@ -361,6 +361,10 @@ bool WireguardUtilsLinux::addExclusionRoute(const IPAddress& prefix) {
     if (!m_rtmonitor) {
         return false;
     }
+    if (++m_exclusionRefCount[prefix] > 1) {
+        // Route already in the kernel (added by a different caller).
+        return true;
+    }
     return m_rtmonitor->addExclusionRoute(prefix);
 }
 
@@ -368,6 +372,14 @@ bool WireguardUtilsLinux::deleteExclusionRoute(const IPAddress& prefix) {
     if (!m_rtmonitor) {
         return false;
     }
+    auto it = m_exclusionRefCount.find(prefix);
+    if (it == m_exclusionRefCount.end()) {
+        return true;  // not tracked — already gone
+    }
+    if (--(*it) > 0) {
+        return true;  // still referenced by another caller
+    }
+    m_exclusionRefCount.erase(it);
     return m_rtmonitor->deleteExclusionRoute(prefix);
 }
 

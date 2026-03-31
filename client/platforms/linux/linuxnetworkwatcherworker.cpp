@@ -4,8 +4,10 @@
 
 #include "linuxnetworkwatcherworker.h"
 
+#include <QTimer>
 #include <QtDBus/QtDBus>
 
+#include "core/networkUtilities.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -122,9 +124,6 @@ void LinuxNetworkWatcherWorker::initialize() {
         SLOT(propertyChanged(QString, QVariantMap, QStringList)));
   }
 
-  // Seed m_previousNMState with the current NM state so that a transient
-  // drop from CONNECTED_GLOBAL (70) to CONNECTED_SITE (60) caused by the
-  // VPN's DNS setup does not look like a reconnection from offline.
   QVariant currentState = nm.property("State");
   if (currentState.isValid()) {
     m_previousNMState = currentState.toUInt();
@@ -211,16 +210,42 @@ void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
   logger.debug() << "NMStateChanged " << state;
 
   if (state == NM_STATE_ASLEEP) {
+    // Invalidate any in-flight gateway poll before emitting wakeup.
+    ++m_pollGeneration;
     emit wakeup();
   } else if (state >= NM_STATE_CONNECTED_SITE && m_previousNMState < NM_STATE_CONNECTED_SITE) {
-    // Delay the reconnect so the kernel routing table (and default gateway)
-    // are fully restored before the VPN exclusion route is recalculated.
-    // Without this delay, getGatewayAndIface() may return an empty gateway
-    // immediately after network recovery, causing the server exclusion route
-    // to be installed with gateway 0.0.0.0 and breaking WG handshakes.
-    QTimer::singleShot(3000, this, [this]() { emit networkChanged(); });
+    int gen = ++m_pollGeneration;
+    QTimer::singleShot(200, this, [this, gen]() { checkGatewayAndEmit(gen, 0); });
+  } else if (state < NM_STATE_CONNECTED_SITE) {
+    ++m_pollGeneration;
   }
 
   m_previousNMState = state;
+}
+
+void LinuxNetworkWatcherWorker::checkGatewayAndEmit(int generation, int count) {
+  if (m_pollGeneration.load() != generation) {
+    return;  // cancelled by a newer connect/disconnect event
+  }
+
+  ++count;
+  QString gateway = NetworkUtilities::getGatewayAndIface().first;
+
+  if (!gateway.isEmpty()) {
+    logger.debug() << "Default gateway" << gateway << "ready after"
+                   << count << "poll(s), emitting networkChanged";
+    emit networkChanged();
+    return;
+  }
+
+  if (count >= 25) {
+    logger.warning() << "Default gateway not found after 5 s, emitting networkChanged anyway";
+    emit networkChanged();
+    return;
+  }
+
+  QTimer::singleShot(200, this, [this, generation, count]() {
+    checkGatewayAndEmit(generation, count);
+  });
 }
 

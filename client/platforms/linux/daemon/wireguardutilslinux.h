@@ -5,6 +5,7 @@
 #ifndef WIREGUARDUTILSLINUX_H
 #define WIREGUARDUTILSLINUX_H
 
+#include <QHash>
 #include <QObject>
 #include <QProcess>
 
@@ -56,6 +57,7 @@ private:
     QString m_ifname;
     QProcess m_tunnel;
     LinuxRouteMonitor* m_rtmonitor = nullptr;
+    QHash<IPAddress, int> m_exclusionRefCount;
 };
 
 #endif  // WIREGUARDUTILSLINUX_H
