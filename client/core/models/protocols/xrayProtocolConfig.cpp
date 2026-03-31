@@ -13,11 +13,6 @@ using namespace ProtocolUtils;
 
 namespace amnezia
 {
-
-// ═════════════════════════════════════════════════════════════════════════════
-// XrayXPaddingConfig
-// ═════════════════════════════════════════════════════════════════════════════
-
 QJsonObject XrayXPaddingConfig::toJson() const
 {
     QJsonObject obj;
@@ -37,16 +32,12 @@ XrayXPaddingConfig XrayXPaddingConfig::fromJson(const QJsonObject &json)
     c.bytesMin  = json.value(configKey::xPaddingBytesMin).toString();
     c.bytesMax  = json.value(configKey::xPaddingBytesMax).toString();
     c.obfsMode  = json.value(configKey::xPaddingObfsMode).toBool(true);
-    c.key       = json.value(configKey::xPaddingKey).toString("www.googletagmanager.com");
+    c.key       = json.value(configKey::xPaddingKey).toString(protocols::xray::defaultSite);
     c.header    = json.value(configKey::xPaddingHeader).toString();
-    c.placement = json.value(configKey::xPaddingPlacement).toString("Cookie");
-    c.method    = json.value(configKey::xPaddingMethod).toString("Repeat-x");
+    c.placement = json.value(configKey::xPaddingPlacement).toString(protocols::xray::defaultXPaddingPlacement);
+    c.method    = json.value(configKey::xPaddingMethod).toString(protocols::xray::defaultXPaddingMethod);
     return c;
 }
-
-// ═════════════════════════════════════════════════════════════════════════════
-// XrayXmuxConfig
-// ═════════════════════════════════════════════════════════════════════════════
 
 QJsonObject XrayXmuxConfig::toJson() const
 {
@@ -84,10 +75,6 @@ XrayXmuxConfig XrayXmuxConfig::fromJson(const QJsonObject &json)
     return c;
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// XrayXhttpConfig
-// ═════════════════════════════════════════════════════════════════════════════
-
 QJsonObject XrayXhttpConfig::toJson() const
 {
     QJsonObject obj;
@@ -124,19 +111,19 @@ QJsonObject XrayXhttpConfig::toJson() const
 XrayXhttpConfig XrayXhttpConfig::fromJson(const QJsonObject &json)
 {
     XrayXhttpConfig c;
-    c.mode            = json.value(configKey::xhttpMode).toString("Auto");
-    c.host            = json.value(configKey::xhttpHost).toString("www.googletagmanager.com");
+    c.mode            = json.value(configKey::xhttpMode).toString(protocols::xray::defaultXhttpMode);
+    c.host            = json.value(configKey::xhttpHost).toString(protocols::xray::defaultSite);
     c.path            = json.value(configKey::xhttpPath).toString();
-    c.headersTemplate = json.value(configKey::xhttpHeadersTemplate).toString("HTTP");
-    c.uplinkMethod    = json.value(configKey::xhttpUplinkMethod).toString("POST");
+    c.headersTemplate = json.value(configKey::xhttpHeadersTemplate).toString(protocols::xray::defaultXhttpHeadersTemplate);
+    c.uplinkMethod    = json.value(configKey::xhttpUplinkMethod).toString(protocols::xray::defaultXhttpUplinkMethod);
     c.disableGrpc     = json.value(configKey::xhttpDisableGrpc).toBool(true);
     c.disableSse      = json.value(configKey::xhttpDisableSse).toBool(true);
 
-    c.sessionPlacement    = json.value(configKey::xhttpSessionPlacement).toString("Path");
-    c.sessionKey          = json.value(configKey::xhttpSessionKey).toString("Path");
-    c.seqPlacement        = json.value(configKey::xhttpSeqPlacement).toString("Path");
+    c.sessionPlacement    = json.value(configKey::xhttpSessionPlacement).toString(protocols::xray::defaultXhttpSessionPlacement);
+    c.sessionKey          = json.value(configKey::xhttpSessionKey).toString();
+    c.seqPlacement        = json.value(configKey::xhttpSeqPlacement).toString(protocols::xray::defaultXhttpSessionPlacement);
     c.seqKey              = json.value(configKey::xhttpSeqKey).toString();
-    c.uplinkDataPlacement = json.value(configKey::xhttpUplinkDataPlacement).toString("Body");
+    c.uplinkDataPlacement = json.value(configKey::xhttpUplinkDataPlacement).toString(protocols::xray::defaultXhttpUplinkDataPlacement);
     c.uplinkDataKey       = json.value(configKey::xhttpUplinkDataKey).toString();
 
     c.uplinkChunkSize         = json.value(configKey::xhttpUplinkChunkSize).toString("0");
@@ -153,10 +140,6 @@ XrayXhttpConfig XrayXhttpConfig::fromJson(const QJsonObject &json)
 
     return c;
 }
-
-// ═════════════════════════════════════════════════════════════════════════════
-// XrayMkcpConfig
-// ═════════════════════════════════════════════════════════════════════════════
 
 QJsonObject XrayMkcpConfig::toJson() const
 {
@@ -181,10 +164,6 @@ XrayMkcpConfig XrayMkcpConfig::fromJson(const QJsonObject &json)
     c.congestion       = json.value(configKey::mkcpCongestion).toBool(true);
     return c;
 }
-
-// ═════════════════════════════════════════════════════════════════════════════
-// XrayServerConfig
-// ═════════════════════════════════════════════════════════════════════════════
 
 QJsonObject XrayServerConfig::toJson() const
 {
@@ -224,14 +203,17 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject &json)
     c.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
 
     // New: Security
-    c.security    = json.value(configKey::xraySecurity).toString("reality");
-    c.flow        = json.value(configKey::xrayFlow).toString("xtls-rprx-vision");
-    c.fingerprint = json.value(configKey::xrayFingerprint).toString("Mozilla/5.0");
-    c.sni         = json.value(configKey::xraySni).toString("cdn.example.com");
-    c.alpn        = json.value(configKey::xrayAlpn).toString("HTTP/2");
+    c.security    = json.value(configKey::xraySecurity).toString(protocols::xray::defaultSecurity);
+    c.flow        = json.value(configKey::xrayFlow).toString(protocols::xray::defaultFlow);
+    c.fingerprint = json.value(configKey::xrayFingerprint).toString(protocols::xray::defaultFingerprint);
+    if (c.fingerprint.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
+        c.fingerprint = QString::fromLatin1(protocols::xray::defaultFingerprint);
+    }
+    c.sni         = json.value(configKey::xraySni).toString(protocols::xray::defaultSni);
+    c.alpn        = json.value(configKey::xrayAlpn).toString(protocols::xray::defaultAlpn);
 
     // New: Transport
-    c.transport = json.value(configKey::xrayTransport).toString("raw");
+    c.transport = json.value(configKey::xrayTransport).toString(protocols::xray::defaultTransport);
     c.xhttp     = XrayXhttpConfig::fromJson(json.value("xhttp").toObject());
     c.mkcp      = XrayMkcpConfig::fromJson(json.value("mkcp").toObject());
 
@@ -248,10 +230,6 @@ bool XrayServerConfig::hasEqualServerSettings(const XrayServerConfig &other) con
         && fingerprint == other.fingerprint
         && sni         == other.sni;
 }
-
-// ═════════════════════════════════════════════════════════════════════════════
-// XrayClientConfig  (unchanged logic, kept as-is)
-// ═════════════════════════════════════════════════════════════════════════════
 
 QJsonObject XrayClientConfig::toJson() const
 {
@@ -299,10 +277,6 @@ XrayClientConfig XrayClientConfig::fromJson(const QJsonObject &json)
 
     return c;
 }
-
-// ═════════════════════════════════════════════════════════════════════════════
-// XrayProtocolConfig  (unchanged logic, kept as-is)
-// ═════════════════════════════════════════════════════════════════════════════
 
 QJsonObject XrayProtocolConfig::toJson() const
 {

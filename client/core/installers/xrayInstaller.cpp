@@ -14,8 +14,18 @@
 #include "core/models/protocols/xrayProtocolConfig.h"
 #include "logger.h"
 
-namespace {
+namespace
+{
     Logger logger("XrayInstaller");
+
+    // Xray expects uTLS preset names (chrome, firefox, …). Old Amnezia/server templates used "Mozilla/5.0".
+    QString normalizeXrayFingerprint(const QString &fp)
+    {
+        if (fp.isEmpty() || fp.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
+            return QString::fromLatin1(protocols::xray::defaultFingerprint);
+        }
+        return fp;
+    }
 }
 
 using namespace amnezia;
@@ -103,14 +113,14 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             srv.site = srv.sni;
         }
 
-        srv.fingerprint = rs.value(protocols::xray::fingerprint).toString("Mozilla/5.0");
+        srv.fingerprint = normalizeXrayFingerprint(rs.value(protocols::xray::fingerprint).toString());
     }
 
     // ── TLS settings ──────────────────────────────────────────────────
     if (srv.security == "tls") {
         QJsonObject tls = streamSettings.value("tlsSettings").toObject();
         srv.sni = tls.value(protocols::xray::serverName).toString();
-        srv.fingerprint = tls.value(protocols::xray::fingerprint).toString("Mozilla/5.0");
+        srv.fingerprint = normalizeXrayFingerprint(tls.value(protocols::xray::fingerprint).toString());
 
         QJsonArray alpnArr = tls.value("alpn").toArray();
         QStringList alpnList;
@@ -129,29 +139,94 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         }
     }
 
-    // ── XHTTP settings ────────────────────────────────────────────────
+    // ── XHTTP settings (Xray-core SplitHTTPConfig + legacy Amnezia keys) ──
     if (srv.transport == "xhttp") {
         QJsonObject xhttpObj = streamSettings.value("xhttpSettings").toObject();
-        srv.xhttp.mode = xhttpObj.value("mode").toString("Auto");
+        {
+            const QString m = xhttpObj.value("mode").toString();
+            if (m.isEmpty() || m == QLatin1String("auto"))
+                srv.xhttp.mode = QStringLiteral("Auto");
+            else if (m == QLatin1String("packet-up"))
+                srv.xhttp.mode = QStringLiteral("Packet-up");
+            else if (m == QLatin1String("stream-up"))
+                srv.xhttp.mode = QStringLiteral("Stream-up");
+            else if (m == QLatin1String("stream-one"))
+                srv.xhttp.mode = QStringLiteral("Stream-one");
+            else
+                srv.xhttp.mode = m;
+        }
+
         srv.xhttp.host = xhttpObj.value("host").toString();
         srv.xhttp.path = xhttpObj.value("path").toString();
-        srv.xhttp.uplinkMethod = xhttpObj.value("method").toString("POST");
+
+        {
+            const QJsonObject hdrs = xhttpObj.value("headers").toObject();
+            if (hdrs.contains(QLatin1String("Host")) || !hdrs.isEmpty())
+                srv.xhttp.headersTemplate = QStringLiteral("HTTP");
+        }
+
+        if (xhttpObj.contains(QLatin1String("uplinkHTTPMethod")))
+            srv.xhttp.uplinkMethod = xhttpObj.value("uplinkHTTPMethod").toString();
+        else
+            srv.xhttp.uplinkMethod = xhttpObj.value("method").toString();
+
         srv.xhttp.disableGrpc = xhttpObj.value("noGRPCHeader").toBool(true);
         srv.xhttp.disableSse = xhttpObj.value("noSSEHeader").toBool(true);
 
-        srv.xhttp.sessionPlacement = xhttpObj.value("scSessionPlacement").toString("Path");
-        srv.xhttp.seqPlacement = xhttpObj.value("scSeqPlacement").toString("Path");
-        srv.xhttp.uplinkDataPlacement = xhttpObj.value("scUplinkDataPlacement").toString("Body");
+        auto sessionSeqUi = [](const QString &core) -> QString {
+            if (core.isEmpty() || core == QLatin1String("path"))
+                return QStringLiteral("Path");
+            if (core == QLatin1String("cookie"))
+                return QStringLiteral("Cookie");
+            if (core == QLatin1String("header"))
+                return QStringLiteral("Header");
+            if (core == QLatin1String("query"))
+                return QStringLiteral("Query");
+            return core;
+        };
+        QString sess = xhttpObj.value("sessionPlacement").toString();
+        if (sess.isEmpty())
+            sess = xhttpObj.value("scSessionPlacement").toString();
+        srv.xhttp.sessionPlacement = sessionSeqUi(sess);
 
-        if (xhttpObj.contains("xhttpUplinkChunkSize")) {
-            srv.xhttp.uplinkChunkSize = QString::number(xhttpObj["xhttpUplinkChunkSize"].toInt());
+        QString seq = xhttpObj.value("seqPlacement").toString();
+        if (seq.isEmpty())
+            seq = xhttpObj.value("scSeqPlacement").toString();
+        srv.xhttp.seqPlacement = sessionSeqUi(seq);
+
+        auto uplinkDataUi = [](const QString &core) -> QString {
+            if (core.isEmpty() || core == QLatin1String("body"))
+                return QStringLiteral("Body");
+            if (core == QLatin1String("auto"))
+                return QStringLiteral("Auto");
+            if (core == QLatin1String("header"))
+                return QStringLiteral("Header");
+            if (core == QLatin1String("cookie"))
+                return QStringLiteral("Cookie");
+            return core;
+        };
+        QString udata = xhttpObj.value("uplinkDataPlacement").toString();
+        if (udata.isEmpty())
+            udata = xhttpObj.value("scUplinkDataPlacement").toString();
+        srv.xhttp.uplinkDataPlacement = uplinkDataUi(udata);
+
+        srv.xhttp.sessionKey = xhttpObj.value("sessionKey").toString();
+        srv.xhttp.seqKey = xhttpObj.value("seqKey").toString();
+        srv.xhttp.uplinkDataKey = xhttpObj.value("uplinkDataKey").toString();
+
+        if (xhttpObj.contains(QLatin1String("uplinkChunkSize"))) {
+            QJsonObject uc = xhttpObj.value("uplinkChunkSize").toObject();
+            if (!uc.isEmpty())
+                srv.xhttp.uplinkChunkSize = QString::number(uc.value("from").toInt());
+        } else if (xhttpObj.contains(QLatin1String("xhttpUplinkChunkSize"))) {
+            srv.xhttp.uplinkChunkSize = QString::number(xhttpObj.value("xhttpUplinkChunkSize").toInt());
         }
-        if (xhttpObj.contains("scMaxBufferedPosts")) {
-            srv.xhttp.scMaxBufferedPosts = QString::number(xhttpObj["scMaxBufferedPosts"].toInt());
+        if (xhttpObj.contains(QLatin1String("scMaxBufferedPosts"))) {
+            srv.xhttp.scMaxBufferedPosts = QString::number(xhttpObj.value("scMaxBufferedPosts").toVariant().toLongLong());
         }
 
         auto readRange = [&](const char *key, QString &minOut, QString &maxOut) {
-            QJsonObject r = xhttpObj.value(key).toObject();
+            QJsonObject r = xhttpObj.value(QLatin1String(key)).toObject();
             if (!r.isEmpty()) {
                 minOut = QString::number(r.value("from").toInt());
                 maxOut = QString::number(r.value("to").toInt());
@@ -161,28 +236,51 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         readRange("scMinPostsIntervalMs", srv.xhttp.scMinPostsIntervalMsMin, srv.xhttp.scMinPostsIntervalMsMax);
         readRange("scStreamUpServerSecs", srv.xhttp.scStreamUpServerSecsMin, srv.xhttp.scStreamUpServerSecsMax);
 
-        // xPadding
-        if (xhttpObj.contains("xPadding")) {
-            QJsonObject pad = xhttpObj["xPadding"].toObject();
-            srv.xhttp.xPadding.obfsMode = true;
+        auto loadPaddingFromObject = [&](const QJsonObject &pad) {
+            if (pad.contains(QLatin1String("xPaddingObfsMode")))
+                srv.xhttp.xPadding.obfsMode = pad.value("xPaddingObfsMode").toBool(true);
             srv.xhttp.xPadding.key = pad.value("xPaddingKey").toString();
             srv.xhttp.xPadding.header = pad.value("xPaddingHeader").toString();
-            srv.xhttp.xPadding.placement = pad.value("xPaddingPlacement").toString("Cookie");
-            srv.xhttp.xPadding.method = pad.value("xPaddingMethod").toString("Repeat-x");
+            srv.xhttp.xPadding.placement = pad.value("xPaddingPlacement").toString();
+            srv.xhttp.xPadding.method = pad.value("xPaddingMethod").toString();
             QJsonObject bytesRange = pad.value("xPaddingBytes").toObject();
             if (!bytesRange.isEmpty()) {
                 srv.xhttp.xPadding.bytesMin = QString::number(bytesRange.value("from").toInt());
                 srv.xhttp.xPadding.bytesMax = QString::number(bytesRange.value("to").toInt());
             }
+            QString pl = srv.xhttp.xPadding.placement.toLower();
+            if (pl == QLatin1String("cookie"))
+                srv.xhttp.xPadding.placement = QStringLiteral("Cookie");
+            else if (pl == QLatin1String("header"))
+                srv.xhttp.xPadding.placement = QStringLiteral("Header");
+            else if (pl == QLatin1String("query"))
+                srv.xhttp.xPadding.placement = QStringLiteral("Query");
+            else if (pl == QLatin1String("queryinheader"))
+                srv.xhttp.xPadding.placement = QStringLiteral("Query in header");
+            QString met = srv.xhttp.xPadding.method.toLower();
+            if (met == QLatin1String("repeat-x"))
+                srv.xhttp.xPadding.method = QStringLiteral("Repeat-x");
+            else if (met == QLatin1String("tokenish"))
+                srv.xhttp.xPadding.method = QStringLiteral("Tokenish");
+        };
+        if (xhttpObj.contains(QLatin1String("xPaddingObfsMode")) || xhttpObj.contains(QLatin1String("xPaddingKey"))
+            || !xhttpObj.value("xPaddingBytes").toObject().isEmpty()) {
+            loadPaddingFromObject(xhttpObj);
+        } else if (xhttpObj.contains(QLatin1String("xPadding")) && xhttpObj.value("xPadding").isObject()) {
+            const QJsonObject nested = xhttpObj.value("xPadding").toObject();
+            if (!nested.isEmpty()) {
+                loadPaddingFromObject(nested);
+                if (!nested.contains(QLatin1String("xPaddingObfsMode")))
+                    srv.xhttp.xPadding.obfsMode = true;
+            }
         }
 
-        // xmux
-        if (xhttpObj.contains("xmux")) {
-            QJsonObject mux = xhttpObj["xmux"].toObject();
-            srv.xhttp.xmux.enabled = mux.value("enabled").toBool(true);
+        if (xhttpObj.contains(QLatin1String("xmux"))) {
+            QJsonObject mux = xhttpObj.value("xmux").toObject();
+            srv.xhttp.xmux.enabled = true;
 
             auto readMuxRange = [&](const char *key, QString &minOut, QString &maxOut) {
-                QJsonObject r = mux.value(key).toObject();
+                QJsonObject r = mux.value(QLatin1String(key)).toObject();
                 if (!r.isEmpty()) {
                     minOut = QString::number(r.value("from").toInt());
                     maxOut = QString::number(r.value("to").toInt());
@@ -194,8 +292,8 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             readMuxRange("hMaxRequestTimes", srv.xhttp.xmux.hMaxRequestTimesMin, srv.xhttp.xmux.hMaxRequestTimesMax);
             readMuxRange("hMaxReusableSecs", srv.xhttp.xmux.hMaxReusableSecsMin, srv.xhttp.xmux.hMaxReusableSecsMax);
 
-            if (mux.contains("hKeepAlivePeriod"))
-                srv.xhttp.xmux.hKeepAlivePeriod = QString::number(mux["hKeepAlivePeriod"].toInt());
+            if (mux.contains(QLatin1String("hKeepAlivePeriod")))
+                srv.xhttp.xmux.hKeepAlivePeriod = QString::number(mux.value("hKeepAlivePeriod").toVariant().toLongLong());
         }
     }
 

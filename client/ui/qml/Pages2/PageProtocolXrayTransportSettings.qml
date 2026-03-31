@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import ProtocolEnum 1.0
 import Style 1.0
 
 import "./"
@@ -25,10 +26,11 @@ PageType {
     ListViewType {
         id: listView
         anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
+        anchors.bottom: saveButton.top
         anchors.left: parent.left
         anchors.right: parent.right
 
+        enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
         delegate: ColumnLayout {
@@ -106,6 +108,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("TTI")
+                    subtitleText: qsTr("Default: %1 ms", "mKCP TTI").arg(XrayConfigModel.mkcpDefaultTti())
                     textField.text: mkcpTti
                     textField.onEditingFinished: {
                         if (textField.text !== mkcpTti) mkcpTti = textField.text
@@ -118,6 +121,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("uplinkCapacity")
+                    subtitleText: qsTr("Default: %1 Mbit/s", "mKCP uplink").arg(XrayConfigModel.mkcpDefaultUplinkCapacity())
                     textField.text: mkcpUplinkCapacity
                     textField.onEditingFinished: {
                         if (textField.text !== mkcpUplinkCapacity) mkcpUplinkCapacity = textField.text
@@ -130,6 +134,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("downlinkCapacity")
+                    subtitleText: qsTr("Default: %1 Mbit/s", "mKCP downlink").arg(XrayConfigModel.mkcpDefaultDownlinkCapacity())
                     textField.text: mkcpDownlinkCapacity
                     textField.onEditingFinished: {
                         if (textField.text !== mkcpDownlinkCapacity) mkcpDownlinkCapacity = textField.text
@@ -142,6 +147,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("readBufferSize")
+                    subtitleText: qsTr("Default: %1 MiB").arg(XrayConfigModel.mkcpDefaultReadBufferSize())
                     textField.text: mkcpReadBufferSize
                     textField.onEditingFinished: {
                         if (textField.text !== mkcpReadBufferSize) mkcpReadBufferSize = textField.text
@@ -154,6 +160,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("writeBufferSize")
+                    subtitleText: qsTr("Default: %1 MiB").arg(XrayConfigModel.mkcpDefaultWriteBufferSize())
                     textField.text: mkcpWriteBufferSize
                     textField.onEditingFinished: {
                         if (textField.text !== mkcpWriteBufferSize) mkcpWriteBufferSize = textField.text
@@ -178,10 +185,20 @@ PageType {
                 Layout.fillWidth: true
                 spacing: 0
 
+                CaptionTextType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 16
+                    Layout.bottomMargin: 8
+                    text: qsTr("Transport Mode")
+                    color: AmneziaStyle.color.mutedGray
+                }
+
                 DropDownType {
                     id: modeDropDown
                     Layout.fillWidth: true
-                    Layout.topMargin: 16
+                    Layout.topMargin: 0
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     text: xhttpMode
@@ -191,17 +208,11 @@ PageType {
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: ListModel {
-                            ListElement {
-                                name: "Auto"
-                            }
-                            ListElement {
-                                name: "Packet-up"
-                            }
-                            ListElement {
-                                name: "Stream-up"
-                            }
-                            ListElement {
-                                name: "Stream-one"
+                            Component.onCompleted: {
+                                var opts = XrayConfigModel.xhttpModeOptions()
+                                for (var i = 0; i < opts.length; i++) {
+                                    append({name: opts[i]})
+                                }
                             }
                         }
                         clickedFunction: function () {
@@ -274,11 +285,11 @@ PageType {
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: ListModel {
-                            ListElement {
-                                name: "HTTP"
-                            }
-                            ListElement {
-                                name: "None"
+                            Component.onCompleted: {
+                                var opts = XrayConfigModel.xhttpHeadersTemplateOptions()
+                                for (var i = 0; i < opts.length; i++) {
+                                    append({name: opts[i]})
+                                }
                             }
                         }
                         clickedFunction: function () {
@@ -317,14 +328,11 @@ PageType {
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: ListModel {
-                            ListElement {
-                                name: "POST"
-                            }
-                            ListElement {
-                                name: "PUT"
-                            }
-                            ListElement {
-                                name: "PATCH"
+                            Component.onCompleted: {
+                                var opts = XrayConfigModel.xhttpUplinkMethodOptions()
+                                for (var i = 0; i < opts.length; i++) {
+                                    append({name: opts[i]})
+                                }
                             }
                         }
                         clickedFunction: function () {
@@ -399,17 +407,11 @@ PageType {
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: ListModel {
-                            ListElement {
-                                name: "Path"
-                            }
-                            ListElement {
-                                name: "Header"
-                            }
-                            ListElement {
-                                name: "Cookie"
-                            }
-                            ListElement {
-                                name: "None"
+                            Component.onCompleted: {
+                                var opts = XrayConfigModel.xhttpSessionPlacementOptions()
+                                for (var i = 0; i < opts.length; i++) {
+                                    append({name: opts[i]})
+                                }
                             }
                         }
                         clickedFunction: function () {
@@ -448,14 +450,11 @@ PageType {
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: ListModel {
-                            ListElement {
-                                name: "Path"
-                            }
-                            ListElement {
-                                name: "Header"
-                            }
-                            ListElement {
-                                name: "None"
+                            Component.onCompleted: {
+                                var opts = XrayConfigModel.xhttpSessionKeyOptions()
+                                for (var i = 0; i < opts.length; i++) {
+                                    append({name: opts[i]})
+                                }
                             }
                         }
                         clickedFunction: function () {
@@ -494,17 +493,11 @@ PageType {
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: ListModel {
-                            ListElement {
-                                name: "Path"
-                            }
-                            ListElement {
-                                name: "Header"
-                            }
-                            ListElement {
-                                name: "Cookie"
-                            }
-                            ListElement {
-                                name: "None"
+                            Component.onCompleted: {
+                                var opts = XrayConfigModel.xhttpSeqPlacementOptions()
+                                for (var i = 0; i < opts.length; i++) {
+                                    append({name: opts[i]})
+                                }
                             }
                         }
                         clickedFunction: function () {
@@ -555,11 +548,11 @@ PageType {
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: ListModel {
-                            ListElement {
-                                name: "Body"
-                            }
-                            ListElement {
-                                name: "Query"
+                            Component.onCompleted: {
+                                var opts = XrayConfigModel.xhttpUplinkDataPlacementOptions()
+                                for (var i = 0; i < opts.length; i++) {
+                                    append({name: opts[i]})
+                                }
                             }
                         }
                         clickedFunction: function () {
@@ -660,25 +653,6 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 16
                     Layout.bottomMargin: 8
-                    text: qsTr("scMinPostsIntervalMs")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xhttpScMinPostsIntervalMsMin
-                    maxValue: xhttpScMinPostsIntervalMsMax
-                    onMinChanged: xhttpScMinPostsIntervalMsMin = val
-                    onMaxChanged: xhttpScMinPostsIntervalMsMax = val
-                }
-
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 8
                     text: qsTr("scStreamUpServerSecs")
                     color: AmneziaStyle.color.mutedGray
                 }
@@ -690,6 +664,25 @@ PageType {
                     maxValue: xhttpScStreamUpServerSecsMax
                     onMinChanged: xhttpScStreamUpServerSecsMin = val
                     onMaxChanged: xhttpScStreamUpServerSecsMax = val
+                }
+
+                CaptionTextType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 16
+                    Layout.bottomMargin: 8
+                    text: qsTr("scMinPostsIntervalMs")
+                    color: AmneziaStyle.color.mutedGray
+                }
+                MinMaxRowType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    minValue: xhttpScMinPostsIntervalMsMin
+                    maxValue: xhttpScMinPostsIntervalMsMax
+                    onMinChanged: xhttpScMinPostsIntervalMsMin = val
+                    onMaxChanged: xhttpScMinPostsIntervalMsMax = val
                 }
 
                 // ── Padding and multiplexing ──────────────────────────
@@ -735,21 +728,37 @@ PageType {
         }
     }
 
-    //     BasicButtonType {
-    //         id: saveButton
-    //         anchors.bottom: parent.bottom
-    //         anchors.left: parent.left
-    //         anchors.right: parent.right
-    //         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
-    //         anchors.leftMargin: 16
-    //         anchors.rightMargin: 16
-    //         text: qsTr("Save")
-    //         onClicked: {
-    //             forceActiveFocus()
-    //             PageController.closePage()
-    //         }
-    //         Keys.onEnterPressed: clicked()
-    //         Keys.onReturnPressed: clicked()
-    //     }
-}
+    BasicButtonType {
+        id: saveButton
 
+        anchors.left: root.left
+        anchors.right: root.right
+        anchors.bottom: root.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+
+        enabled: listView.enabled
+        text: qsTr("Save")
+        clickedFunc: function () {
+            var headerText = qsTr("Save settings?")
+            var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = qsTr("Cancel")
+            var yesButtonFunction = function () {
+                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
+                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                    return
+                }
+                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+            }
+            var noButtonFunction = function () {
+                if (typeof GC !== "undefined" && !GC.isMobile()) {
+                    saveButton.forceActiveFocus()
+                }
+            }
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+    }
+}

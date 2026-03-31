@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import ProtocolEnum 1.0
 import Style 1.0
 
 import "./"
@@ -25,10 +26,11 @@ PageType {
     ListViewType {
         id: listView
         anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
+        anchors.bottom: saveButton.top
         anchors.left: parent.left
         anchors.right: parent.right
 
+        enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
         delegate: ColumnLayout {
@@ -182,21 +184,38 @@ PageType {
         }
     }
 
-    //     BasicButtonType {
-    //         id: saveButton
-    //         anchors.bottom: parent.bottom
-    //         anchors.left: parent.left
-    //         anchors.right: parent.right
-    //         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
-    //         anchors.leftMargin: 16
-    //         anchors.rightMargin: 16
-    //         text: qsTr("Save")
-    //         onClicked: {
-    //             forceActiveFocus()
-    //             PageController.closePage()
-    //         }
-    //         Keys.onEnterPressed: clicked()
-    //         Keys.onReturnPressed: clicked()
-    //     }
+    BasicButtonType {
+        id: saveButton
+
+        anchors.left: root.left
+        anchors.right: root.right
+        anchors.bottom: root.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+
+        enabled: listView.enabled
+        text: qsTr("Save")
+        clickedFunc: function () {
+            var headerText = qsTr("Save settings?")
+            var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = qsTr("Cancel")
+            var yesButtonFunction = function () {
+                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
+                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                    return
+                }
+                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+            }
+            var noButtonFunction = function () {
+                if (typeof GC !== "undefined" && !GC.isMobile()) {
+                    saveButton.forceActiveFocus()
+                }
+            }
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+    }
 }
 

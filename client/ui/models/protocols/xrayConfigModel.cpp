@@ -263,31 +263,75 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container,
     endResetModel();
 }
 
-void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig& config)
+void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &config)
 {
-    if (config.port.isEmpty())
+    if (config.port.isEmpty()) {
         config.port = protocols::xray::defaultPort;
+    }
 
-    if (config.site.isEmpty())
+    if (config.site.isEmpty()) {
         config.site = protocols::xray::defaultSite;
+    }
 
-    if (config.transport.isEmpty())
-        config.transport = "raw";
+    if (config.transport.isEmpty()) {
+        config.transport = protocols::xray::defaultTransport;
+    }
 
-    if (config.security.isEmpty())
-        config.security = "reality";
+    if (config.security.isEmpty()) {
+        config.security = protocols::xray::defaultSecurity;
+    }
 
-    if (config.flow.isEmpty())
-        config.flow = "xtls-rprx-vision";
+    if (config.flow.isEmpty()) {
+        config.flow = protocols::xray::defaultFlow;
+    }
 
-    if (config.fingerprint.isEmpty())
-        config.fingerprint = "Mozilla/5.0";
+    if (config.fingerprint.isEmpty()) {
+        config.fingerprint = protocols::xray::defaultFingerprint;
+    } else if (config.fingerprint.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
+        config.fingerprint = QString::fromLatin1(protocols::xray::defaultFingerprint);
+    }
 
-    if (config.sni.isEmpty())
-        config.sni = "cdn.example.com";
+    if (config.sni.isEmpty()) {
+        config.sni = protocols::xray::defaultSni;
+    }
 
-    if (config.alpn.isEmpty())
-        config.alpn = "HTTP/2";
+    if (config.alpn.isEmpty()) {
+        config.alpn = protocols::xray::defaultAlpn;
+    }
+
+    // XHTTP transport defaults
+    if (config.xhttp.host.isEmpty()) {
+        config.xhttp.host = protocols::xray::defaultXhttpHost;
+    }
+    if (config.xhttp.mode.isEmpty()) {
+        config.xhttp.mode = protocols::xray::defaultXhttpMode;
+    }
+    if (config.xhttp.headersTemplate.isEmpty()) {
+        config.xhttp.headersTemplate = protocols::xray::defaultXhttpHeadersTemplate;
+    }
+    if (config.xhttp.uplinkMethod.isEmpty()) {
+        config.xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
+    }
+    if (config.xhttp.sessionPlacement.isEmpty()) {
+        config.xhttp.sessionPlacement = protocols::xray::defaultXhttpSessionPlacement;
+    }
+    if (config.xhttp.sessionKey.isEmpty()) {
+        config.xhttp.sessionKey = protocols::xray::defaultXhttpSessionKey;
+    }
+    if (config.xhttp.seqPlacement.isEmpty()) {
+        config.xhttp.seqPlacement = protocols::xray::defaultXhttpSeqPlacement;
+    }
+    if (config.xhttp.uplinkDataPlacement.isEmpty()) {
+        config.xhttp.uplinkDataPlacement = protocols::xray::defaultXhttpUplinkDataPlacement;
+    }
+
+    // xPadding defaults
+    if (config.xhttp.xPadding.placement.isEmpty()) {
+        config.xhttp.xPadding.placement = protocols::xray::defaultXPaddingPlacement;
+    }
+    if (config.xhttp.xPadding.method.isEmpty()) {
+        config.xhttp.xPadding.method = protocols::xray::defaultXPaddingMethod;
+    }
 }
 
 amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
@@ -395,4 +439,105 @@ void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverC
     m_protocolConfig.clearClientConfig();
     m_originalProtocolConfig = m_protocolConfig;
     endResetModel();
+}
+
+QStringList XrayConfigModel::flowOptions()
+{
+    return {
+        "",                        // Empty (no flow)
+        "xtls-rprx-vision",
+        "xtls-rprx-vision-udp443"
+    };
+}
+
+QStringList XrayConfigModel::securityOptions()
+{
+    return { "none", "tls", "reality" };
+}
+
+QStringList XrayConfigModel::transportOptions()
+{
+    return { "raw", "xhttp", "mkcp" };
+}
+
+QStringList XrayConfigModel::fingerprintOptions()
+{
+    return { "chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random" };
+}
+
+QStringList XrayConfigModel::alpnOptions()
+{
+    return { "HTTP/2", "HTTP/1.1", "HTTP/2,HTTP/1.1" };
+}
+
+QStringList XrayConfigModel::xhttpModeOptions()
+{
+    return { "Auto", "Packet-up", "Stream-up", "Stream-one" };
+}
+
+QStringList XrayConfigModel::xhttpHeadersTemplateOptions()
+{
+    return { "HTTP", "None" };
+}
+
+QStringList XrayConfigModel::xhttpUplinkMethodOptions()
+{
+    return { "POST", "PUT", "PATCH" };
+}
+
+QStringList XrayConfigModel::xhttpSessionPlacementOptions()
+{
+    return { "Path", "Header", "Cookie", "None" };
+}
+
+QStringList XrayConfigModel::xhttpSessionKeyOptions()
+{
+    return { "Path", "Header", "None" };
+}
+
+QStringList XrayConfigModel::xhttpSeqPlacementOptions()
+{
+    return { "Path", "Header", "Cookie", "None" };
+}
+
+QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
+{
+    // Matches splithttp uplink payload placement (packet-up / advanced)
+    return { "Body", "Auto", "Header", "Cookie" };
+}
+
+QStringList XrayConfigModel::xPaddingPlacementOptions()
+{
+    // Xray-core: cookie | header | query | queryInHeader (not "body")
+    return { "Cookie", "Header", "Query", "Query in header" };
+}
+
+QStringList XrayConfigModel::xPaddingMethodOptions()
+{
+    return { "Repeat-x", "Tokenish" };
+}
+
+QString XrayConfigModel::mkcpDefaultTti()
+{
+    return QString::fromLatin1(protocols::xray::defaultMkcpTti);
+}
+
+QString XrayConfigModel::mkcpDefaultUplinkCapacity()
+{
+    return QString::fromLatin1(protocols::xray::defaultMkcpUplinkCapacity);
+}
+
+QString XrayConfigModel::mkcpDefaultDownlinkCapacity()
+{
+    return QString::fromLatin1(protocols::xray::defaultMkcpDownlinkCapacity);
+}
+
+QString XrayConfigModel::mkcpDefaultReadBufferSize()
+{
+    return QString::fromLatin1(protocols::xray::defaultMkcpReadBufferSize);
+}
+
+QString XrayConfigModel::mkcpDefaultWriteBufferSize()
+{
+    return QString::fromLatin1(protocols::xray::defaultMkcpWriteBufferSize);
 }

@@ -2,6 +2,7 @@
 
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/ipcClient.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/serialization/serialization.h"
@@ -9,6 +10,7 @@
 
 #include <QCryptographicHash>
 #include <QJsonDocument>
+#include <QTimer>
 #include <QJsonObject>
 #include <QNetworkInterface>
 #include <QtCore/qlogging.h>
@@ -79,10 +81,27 @@ ErrorCode XrayProtocol::start()
     m_socksPassword = creds.password;
     m_socksPort = creds.port;
 
-    const QString xrayConfigStr = QJsonDocument(m_xrayConfig).toJson(QJsonDocument::Compact);
+    QString xrayConfigStr = QJsonDocument(m_xrayConfig).toJson(QJsonDocument::Compact);
     if (xrayConfigStr.isEmpty()) {
         qCritical() << "Xray config is empty";
         return ErrorCode::XrayExecutableCrashed;
+    }
+
+    // Fix fingerprint: old configs may contain "Mozilla/5.0" which xray-core rejects.
+    // Replace with the correct default at runtime so stale stored configs still work.
+    if (xrayConfigStr.contains("Mozilla/5.0", Qt::CaseInsensitive)) {
+        xrayConfigStr.replace("Mozilla/5.0", amnezia::protocols::xray::defaultFingerprint,
+                              Qt::CaseInsensitive);
+        qDebug() << "XrayProtocol: patched legacy fingerprint to"
+                 << amnezia::protocols::xray::defaultFingerprint;
+    }
+
+    // Fix inbound listen address: old configs may use "10.33.0.2" which doesn't exist
+    // until TUN is created. xray must listen on 127.0.0.1 so tun2socks can connect.
+    if (xrayConfigStr.contains(amnezia::protocols::xray::defaultLocalAddr)) {
+        xrayConfigStr.replace(amnezia::protocols::xray::defaultLocalAddr,
+                              amnezia::protocols::xray::defaultLocalListenAddr);
+        qDebug() << "XrayProtocol: patched legacy inbound listen address to 127.0.0.1";
     }
 
     return IpcClient::withInterface(
@@ -188,6 +207,33 @@ ErrorCode XrayProtocol::startTun2Socks()
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::finished, this,
             [this](int exitCode, QProcess::ExitStatus exitStatus) {
+                // Check stdout for "resource busy" — the TUN device was not yet released
+                // by the previous tun2socks instance. Retry after a short delay.
+                bool resourceBusy = false;
+                if (m_tun2socksProcess) {
+                    auto readOut = m_tun2socksProcess->readAllStandardOutput();
+                    if (readOut.waitForFinished()) {
+                        resourceBusy = readOut.returnValue().contains("resource busy");
+                    }
+                }
+
+                if (resourceBusy && m_tun2socksRetryCount < maxTun2SocksRetries) {
+                    m_tun2socksRetryCount++;
+                    qWarning() << QString("Tun2socks: TUN resource busy, retrying (%1/%2) in %3ms...")
+                                      .arg(m_tun2socksRetryCount)
+                                      .arg(maxTun2SocksRetries)
+                                      .arg(tun2socksRetryDelayMs);
+                    QTimer::singleShot(tun2socksRetryDelayMs, this, [this]() {
+                        if (ErrorCode err = startTun2Socks(); err != ErrorCode::NoError) {
+                            stop();
+                            setLastError(err);
+                        }
+                    });
+                    return;
+                }
+
+                m_tun2socksRetryCount = 0;
+
                 if (exitStatus == QProcess::ExitStatus::CrashExit) {
                     qCritical() << "Tun2socks process crashed!";
                 } else {
