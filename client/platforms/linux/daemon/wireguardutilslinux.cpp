@@ -65,10 +65,18 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
         return false;
     }
 
+    // Kill any orphaned wireguard-go process from a previous crash that may
+    // still hold the amn0 TUN device, then delete the stale interface.
+    QProcess::execute("pkill", {"-f", QString("wireguard-go.*%1").arg(WG_INTERFACE)});
+    QProcess::execute("ip", {"link", "delete", WG_INTERFACE});
+
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
     if (!wgRuntimeDir.exists()) {
         wgRuntimeDir.mkpath(".");
     }
+    // Remove stale runtime files from a previous session.
+    QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
+    QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".sock"));
 
     QProcessEnvironment pe = QProcessEnvironment::systemEnvironment();
     QString wgNameFile = wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".sock");

@@ -122,6 +122,15 @@ void LinuxNetworkWatcherWorker::initialize() {
         SLOT(propertyChanged(QString, QVariantMap, QStringList)));
   }
 
+  // Seed m_previousNMState with the current NM state so that a transient
+  // drop from CONNECTED_GLOBAL (70) to CONNECTED_SITE (60) caused by the
+  // VPN's DNS setup does not look like a reconnection from offline.
+  QVariant currentState = nm.property("State");
+  if (currentState.isValid()) {
+    m_previousNMState = currentState.toUInt();
+    logger.debug() << "Initial NM state:" << m_previousNMState;
+  }
+
   QDBusConnection::systemBus().connect(DBUS_NETWORKMANAGER,
                                        DBUS_NETWORKMANAGER_PATH,
                                        DBUS_NETWORKMANAGER,
