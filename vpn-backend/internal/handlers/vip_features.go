@@ -19,6 +19,7 @@ type subscriptionCapabilities struct {
 	CanUseSiteSplitTunnel    bool     `json:"can_use_site_split_tunneling"`
 	CanUseAppSplitTunnel     bool     `json:"can_use_app_split_tunneling"`
 	CanManageRoutingProfiles bool     `json:"can_manage_routing_profiles"`
+	CanUseAdBlock            bool     `json:"can_use_ad_block"`
 }
 
 func isSubscriptionEntitled(sub models.Subscription) bool {
@@ -41,6 +42,7 @@ func buildSubscriptionCapabilities(sub models.Subscription) subscriptionCapabili
 			CanUseSiteSplitTunnel:    true,
 			CanUseAppSplitTunnel:     true,
 			CanManageRoutingProfiles: true,
+			CanUseAdBlock:            true,
 		}
 	default:
 		return subscriptionCapabilities{AllowedProtocols: []string{}}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 	"vpn-backend/internal/backup"
 	"vpn-backend/internal/config"
@@ -78,17 +79,26 @@ func (h *AdminHandler) GetServers(c *gin.Context) {
 		var activeVLESS int64
 		h.db.Model(&models.VLESSCredential{}).Where("server_id = ? AND revoked_at IS NULL", s.ID).Count(&activeVLESS)
 		result = append(result, gin.H{
-			"id":           s.ID,
-			"name":         s.Name,
-			"host":         s.Host,
-			"endpoint":     s.Endpoint,
-			"region":       s.Region,
-			"country_code": s.CountryCode,
-			"active":       s.Active,
-			"max_peers":    s.MaxPeers,
-			"active_keys":  peersCount,
-			"active_vless": activeVLESS,
-			"awg_port":     s.AWGPort,
+			"id":                     s.ID,
+			"name":                   s.Name,
+			"host":                   s.Host,
+			"endpoint":               s.Endpoint,
+			"region":                 s.Region,
+			"country_code":           s.CountryCode,
+			"active":                 s.Active,
+			"max_peers":              s.MaxPeers,
+			"active_keys":            peersCount,
+			"active_vless":           activeVLESS,
+			"awg_port":               s.AWGPort,
+			"pihole_mode":            s.PiHoleMode,
+			"pihole_container_name":  s.PiHoleContainerName,
+			"pihole_group_name":      s.PiHoleGroupName,
+			"pihole_enabled":         s.PiHoleEnabled,
+			"pihole_dns_ip":          s.PiHoleDNSIP,
+			"pihole_last_sync_at":    s.PiHoleLastSyncAt,
+			"pihole_last_sync_error": s.PiHoleLastSyncError,
+			"pihole_last_mode":       s.PiHoleLastMode,
+			"pihole_last_client_ip":  s.PiHoleLastClientIP,
 			"vless_template": gin.H{
 				"address":        template.Address,
 				"port":           template.Port,
@@ -158,6 +168,12 @@ type addServerRequest struct {
 	// Bootstrap self-hosted XRay
 	BootstrapSelfHostedXray  bool `json:"bootstrap_selfhosted_xray"`
 	BootstrapForceRegenerate bool `json:"bootstrap_force_regenerate"`
+	// Pi-hole bootstrap
+	BootstrapPiHole      bool   `json:"bootstrap_pihole"`
+	BootstrapPiHoleForce bool   `json:"bootstrap_pihole_force"`
+	PiHoleMode           string `json:"pihole_mode"`
+	PiHoleContainerName  string `json:"pihole_container_name"`
+	PiHoleGroupName      string `json:"pihole_group_name"`
 }
 
 // POST /api/v1/admin/servers
@@ -262,6 +278,11 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 		SSHPassword:  sshPassword,
 		AWGContainer: awgContainer,
 		AWGInterface: awgIface,
+		// Pi-hole defaults
+		PiHoleMode:          req.PiHoleMode,
+		PiHoleContainerName: req.PiHoleContainerName,
+		PiHoleGroupName:     req.PiHoleGroupName,
+		PiHoleEnabled:       true,
 	}
 
 	template := models.VLESSServerTemplate{
@@ -327,10 +348,25 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 		}
 	}
 
+	// Pi-hole bootstrap (опционально, только если явно запрошено)
+	var piholeBootstrap interface{}
+	if req.BootstrapPiHole {
+		xrayContainer := strings.TrimSpace(template.ContainerName)
+		if xrayContainer == "" {
+			xrayContainer = defaultXrayContainer
+		}
+		result := syncPiHoleServer(&server, xrayContainer)
+		piholeBootstrap = result
+		if err := persistPiHoleSyncResult(h.db, &server, result); err != nil {
+			fmt.Printf("[WARN] Failed to persist Pi-hole bootstrap result for server %s: %v\n", server.Name, err)
+		}
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
-		"message":   "server added",
-		"server_id": server.ID,
-		"bootstrap": bootstrap,
+		"message":          "server added",
+		"server_id":        server.ID,
+		"bootstrap":        bootstrap,
+		"pihole_bootstrap": piholeBootstrap,
 	})
 }
 
@@ -1014,4 +1050,51 @@ func (h *AdminHandler) ApprovePayment(c *gin.Context) {
 	h.db.Save(&sub)
 
 	c.JSON(http.StatusOK, gin.H{"message": "payment manually approved and subscription issued"})
+}
+
+// POST /api/v1/admin/servers/pihole-sync
+// Массовая синхронизация Pi-hole на всех (или указанных) VPS.
+func (h *AdminHandler) PiHoleSync(c *gin.Context) {
+	var req struct {
+		ServerIDs []uint `json:"server_ids"` // если пусто — все активные серверы
+		Force     bool   `json:"force"`
+	}
+	_ = c.ShouldBindJSON(&req)
+
+	var servers []models.VPNServer
+	query := h.db.Where("active = ? AND pi_hole_enabled = ?", true, true)
+	if len(req.ServerIDs) > 0 {
+		query = query.Where("id IN ?", req.ServerIDs)
+	}
+	if err := query.Find(&servers).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load servers"})
+		return
+	}
+
+	results := make([]piHoleSyncResult, 0, len(servers))
+	for i := range servers {
+		srv := &servers[i]
+		// Определяем XRay-контейнер для проверки reachability
+		xrayContainer := defaultXrayContainer
+		var tpl models.VLESSServerTemplate
+		if err := h.db.Where("server_id = ?", srv.ID).First(&tpl).Error; err == nil {
+			if trimmed := strings.TrimSpace(tpl.ContainerName); trimmed != "" {
+				xrayContainer = trimmed
+			}
+		}
+
+		res := syncPiHoleServer(srv, xrayContainer)
+		if err := persistPiHoleSyncResult(h.db, srv, res); err != nil {
+			fmt.Printf("[WARN] Failed to persist Pi-hole sync result for %s: %v\n", srv.Name, err)
+		}
+
+		results = append(results, res)
+		fmt.Printf("[Pi-hole Sync] server=%s mode=%s dns=%s xray_reachable=%v err=%s\n",
+			srv.Name, res.ModeDetected, res.DNSIP, res.XrayReachable, res.Error)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"synced":  len(results),
+		"results": results,
+	})
 }

@@ -29,6 +29,8 @@ private:
     QString m_lastTun2SocksStderr;
     bool m_remoteEndpointReachable = true;
     bool m_hasInternalRoutingRules = false;
+    bool m_usesInternalFBLinkDns = false;
+    bool m_forceTunResolversOnWindows = false;
 
     QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
 };

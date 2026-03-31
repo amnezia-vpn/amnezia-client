@@ -122,16 +122,21 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 				issuedAt = credential.CreatedAt
 			}
 
-			configJSON, err := json.Marshal(buildVLESSConfig(clientID, server, template, profiles))
+			dnsConfig := resolveVIPDNSConfig(h.db, server, template, sub)
+			configJSON, err := json.Marshal(buildVLESSConfig(clientID, server, template, profiles, dnsConfig))
 			if err != nil {
 				continue
 			}
 
 			responseConfigs = append(responseConfigs, map[string]interface{}{
-				"config":    string(configJSON),
-				"server":    server.Name,
-				"region":    server.Region,
-				"issued_at": issuedAt,
+				"config":                  string(configJSON),
+				"server":                  server.Name,
+				"region":                  server.Region,
+				"issued_at":               issuedAt,
+				"vip_ad_block_requested":  dnsConfig.Requested,
+				"vip_ad_block_applied":    dnsConfig.Applied,
+				"vip_ad_block_status":     dnsConfig.Status,
+				"vip_ad_block_dns_source": dnsConfig.Source,
 			})
 		}
 	default:
@@ -236,16 +241,65 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 	// Возвращаем все конфиги через \n — Qt клиент split('\n') парсит каждый отдельно
 	var configLines []string
 	var region string
+	configStatuses := make([]map[string]interface{}, 0, len(responseConfigs))
 	for _, rc := range responseConfigs {
 		configLines = append(configLines, rc["config"].(string))
 		if region == "" {
 			region, _ = rc["region"].(string)
 		}
+		configStatuses = append(configStatuses, map[string]interface{}{
+			"server":                  rc["server"],
+			"region":                  rc["region"],
+			"vip_ad_block_requested":  rc["vip_ad_block_requested"],
+			"vip_ad_block_applied":    rc["vip_ad_block_applied"],
+			"vip_ad_block_status":     rc["vip_ad_block_status"],
+			"vip_ad_block_dns_source": rc["vip_ad_block_dns_source"],
+		})
 	}
+	vipAdBlockRequested := sub.VIPAdBlockEnabled
+	vipAdBlockApplied := false
+	vipAdBlockStatus := vipAdBlockStatusUnavailable
+	vipAdBlockDNSSource := piHoleDNSSourceClean
+	if vipAdBlockRequested {
+		allApplied := true
+		firstAppliedSource := ""
+		mixedSources := false
+		for _, rc := range responseConfigs {
+			applied, _ := rc["vip_ad_block_applied"].(bool)
+			status, _ := rc["vip_ad_block_status"].(string)
+			source, _ := rc["vip_ad_block_dns_source"].(string)
+
+			if applied {
+				vipAdBlockApplied = true
+				if firstAppliedSource == "" && source != "" {
+					firstAppliedSource = source
+				} else if source != "" && source != firstAppliedSource {
+					mixedSources = true
+				}
+			}
+			if status != vipAdBlockStatusApplied {
+				allApplied = false
+			}
+		}
+		if len(responseConfigs) > 0 && allApplied && vipAdBlockApplied {
+			vipAdBlockStatus = vipAdBlockStatusApplied
+			if firstAppliedSource != "" && !mixedSources {
+				vipAdBlockDNSSource = firstAppliedSource
+			}
+		} else {
+			vipAdBlockStatus = vipAdBlockStatusDegraded
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"config":   strings.Join(configLines, "\n"),
-		"region":   region,
-		"protocol": capabilities.AllowedProtocols[0],
+		"config":                  strings.Join(configLines, "\n"),
+		"region":                  region,
+		"protocol":                capabilities.AllowedProtocols[0],
+		"vip_ad_block_requested":  vipAdBlockRequested,
+		"vip_ad_block_applied":    vipAdBlockApplied,
+		"vip_ad_block_status":     vipAdBlockStatus,
+		"vip_ad_block_dns_source": vipAdBlockDNSSource,
+		"config_statuses":         configStatuses,
 	})
 }
 

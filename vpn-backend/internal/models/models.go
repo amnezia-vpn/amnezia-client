@@ -43,12 +43,13 @@ const (
 
 type Subscription struct {
 	gorm.Model
-	UserID          uint               `gorm:"uniqueIndex;not null"`
-	Plan            PlanType           `gorm:"default:free"`
-	Status          SubscriptionStatus `gorm:"default:active"`
-	ExpiresAt       time.Time
-	AutoRenew       bool   `gorm:"default:true"`
-	PaymentMethodID string `gorm:"default:''"` // YooKassa payment_method_id для автосписания
+	UserID            uint               `gorm:"uniqueIndex;not null"`
+	Plan              PlanType           `gorm:"default:free"`
+	Status            SubscriptionStatus `gorm:"default:active"`
+	ExpiresAt         time.Time
+	AutoRenew         bool   `gorm:"default:true"`
+	PaymentMethodID   string `gorm:"default:''"` // YooKassa payment_method_id для автосписания
+	VIPAdBlockEnabled bool   `gorm:"column:vip_ad_block_enabled;default:false"`
 }
 
 type VPNServer struct {
@@ -89,6 +90,17 @@ type VPNServer struct {
 	SSHPassword  string // пароль SSH (ili private key)
 	AWGContainer string `gorm:"default:'amnezia-awg2'"`
 	AWGInterface string `gorm:"default:'awg0'"`
+
+	// Pi-hole AdBlock
+	PiHoleMode          string `gorm:"default:'auto'"` // auto | host | docker | disabled
+	PiHoleContainerName string `gorm:"default:''"`     // override docker container name
+	PiHoleGroupName     string `gorm:"default:'VIP'"`  // gravity.db group name
+	PiHoleEnabled       bool   `gorm:"default:true"`
+	PiHoleDNSIP         string `gorm:"default:''"` // кеш IP после pihole-sync (не ходим по SSH при каждом запросе)
+	PiHoleLastSyncAt    *time.Time
+	PiHoleLastSyncError string `gorm:"default:''"`
+	PiHoleLastMode      string `gorm:"default:''"`
+	PiHoleLastClientIP  string `gorm:"default:''"`
 
 	VPNKeys       []VPNKey             `gorm:"foreignKey:ServerID"`
 	VLESSTemplate *VLESSServerTemplate `gorm:"foreignKey:ServerID"`

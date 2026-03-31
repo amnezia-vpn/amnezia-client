@@ -650,7 +650,42 @@ func buildVIPRoutingRules(profiles []models.RoutingProfile) []map[string]interfa
 	return rules
 }
 
-func buildVLESSConfig(clientID string, server *models.VPNServer, template *models.VLESSServerTemplate, profiles []models.RoutingProfile) map[string]interface{} {
+func vipDNSProxyRules(dnsConfig vipDNSConfig) []map[string]interface{} {
+	ips := make([]string, 0, 2)
+	seen := map[string]struct{}{}
+
+	appendIP := func(ip string) {
+		ip = strings.TrimSpace(ip)
+		if ip == "" {
+			return
+		}
+		cidr := ip + "/32"
+		if _, ok := seen[cidr]; ok {
+			return
+		}
+		seen[cidr] = struct{}{}
+		ips = append(ips, cidr)
+	}
+
+	appendIP(dnsConfig.Primary)
+	appendIP(dnsConfig.Secondary)
+	appendIP(vipDNSCleanIP)
+	appendIP(vipDNSAdBlockIP)
+
+	if len(ips) == 0 {
+		return nil
+	}
+
+	return []map[string]interface{}{
+		{
+			"type":        "field",
+			"outboundTag": xrayProxyTag,
+			"ip":          ips,
+		},
+	}
+}
+
+func buildVLESSConfig(clientID string, server *models.VPNServer, template *models.VLESSServerTemplate, profiles []models.RoutingProfile, dnsConfig vipDNSConfig) map[string]interface{} {
 	xrayTemplateDefaults(template, server)
 
 	primaryOutbound := map[string]interface{}{
@@ -706,6 +741,7 @@ func buildVLESSConfig(clientID string, server *models.VPNServer, template *model
 	}
 
 	if routingRules := buildVIPRoutingRules(profiles); len(routingRules) > 0 {
+		routingRules = append(vipDNSProxyRules(dnsConfig), routingRules...)
 		inbounds := xrayConfig["inbounds"].([]interface{})
 		inbound := inbounds[0].(map[string]interface{})
 		inbound["sniffing"] = map[string]interface{}{
@@ -753,8 +789,8 @@ func buildVLESSConfig(clientID string, server *models.VPNServer, template *model
 		"defaultContainer": "fblink-xray",
 		"description":      description,
 		"country_code":     server.CountryCode,
-		"dns1":             "1.1.1.1",
-		"dns2":             "8.8.8.8",
+		"dns1":             dnsConfig.Primary,
+		"dns2":             dnsConfig.Secondary,
 		"hostName":         template.Address,
 	}
 }

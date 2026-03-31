@@ -30,6 +30,8 @@ class FBLinkController : public QObject
     Q_PROPERTY(bool canUseSiteSplitTunneling READ canUseSiteSplitTunneling NOTIFY subscriptionChanged)
     Q_PROPERTY(bool canUseAppSplitTunneling READ canUseAppSplitTunneling NOTIFY subscriptionChanged)
     Q_PROPERTY(bool canManageRoutingProfiles READ canManageRoutingProfiles NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool canUseAdBlock READ canUseAdBlock NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool vipAdBlockEnabled READ vipAdBlockEnabled NOTIFY subscriptionChanged)
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY loadingChanged)
 
 public:
@@ -47,6 +49,7 @@ public:
     Q_INVOKABLE void syncAll();
     Q_INVOKABLE void createPayment(const QString &plan);
     Q_INVOKABLE void setAutoRenew(bool enabled);
+    Q_INVOKABLE void setVipAdBlockEnabled(bool enabled);
     Q_INVOKABLE void deleteCard();
     Q_INVOKABLE void fetchRoutingProfiles();
     Q_INVOKABLE void saveRoutingProfile(const QVariantMap &profile);
@@ -64,6 +67,8 @@ public:
     bool canUseSiteSplitTunneling() const;
     bool canUseAppSplitTunneling() const;
     bool canManageRoutingProfiles() const;
+    bool canUseAdBlock() const;
+    bool vipAdBlockEnabled() const;
     bool isLoading() const;
 
 signals:
@@ -86,6 +91,7 @@ signals:
     void paymentCreated(const QString &confirmationUrl);
     void paymentError(const QString &errorMessage);
     void autoRenewChanged(bool enabled);
+    void vipAdBlockChanged(bool enabled);
     void cardDeleted();
     void routingProfilesFetched(const QVariantList &profiles);
     void routingProfilesError(const QString &errorMessage);
@@ -114,6 +120,7 @@ private:
     void deleteRoutingProfile(int id, bool allowRefreshRetry);
     void createPayment(const QString &plan, bool allowRefreshRetry);
     void setAutoRenew(bool enabled, bool allowRefreshRetry);
+    void setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry);
     void deleteCard(bool allowRefreshRetry);
 
     void saveJwtToken(const QString &token);
@@ -125,7 +132,8 @@ private:
     void saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,
                               bool autoRenew = true, bool cardSaved = false, bool trialAvailable = true,
                               const QStringList &allowedProtocols = {}, bool canUseSiteSplitTunneling = false,
-                              bool canUseAppSplitTunneling = false, bool canManageRoutingProfiles = false);
+                              bool canUseAppSplitTunneling = false, bool canManageRoutingProfiles = false,
+                              bool canUseAdBlock = false, bool vipAdBlockEnabled = false);
     void clearExistingFBLinkServers();
 
     bool m_isRefreshing = false;

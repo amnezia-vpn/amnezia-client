@@ -137,7 +137,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
         config.replace(regex, "");
 
         // We don't use secondary DNS if primary DNS is FBLinkDNS
-        if (dns.first.contains(protocols::dns::fblinkDnsIp)) {
+        if (protocols::dns::isFBLinkDnsAddress(dns.first)) {
             QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);
             config.replace(dnsRegex, "");
         }
@@ -186,7 +186,7 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString
     config.replace(regex, "");
 
     // We don't use secondary DNS if primary DNS is FBLinkDNS
-    if (dns.first.contains(protocols::dns::fblinkDnsIp)) {
+    if (protocols::dns::isFBLinkDnsAddress(dns.first)) {
         QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);
         config.replace(dnsRegex, "");
     }

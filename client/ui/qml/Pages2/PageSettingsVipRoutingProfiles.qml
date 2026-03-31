@@ -23,6 +23,7 @@ PageType {
     property bool showEditor: false
 
     readonly property bool canManageProfiles: FBLinkController.canManageRoutingProfiles
+    readonly property bool canUseAdBlock: FBLinkController.canUseAdBlock
     readonly property bool wideLayout: GC.isWideWidth(width)
     readonly property real sideMargin: GC.pageHorizontalMargin(width)
     readonly property real maxContentWidth: GC.pageMaxWidth(width)
@@ -153,6 +154,11 @@ PageType {
         target: FBLinkController
         function onRoutingProfilesFetched(profiles) { root.profiles = profiles }
         function onRoutingProfilesError(errorMessage) { root.statusMessage = errorMessage; root.statusIsError = true }
+        function onVipAdBlockChanged(enabled) {
+            root.statusMessage = enabled ? qsTr("Ad Block для VIP включён") : qsTr("Ad Block для VIP выключен")
+            root.statusIsError = false
+        }
+        function onRequestError(errorMessage) { root.statusMessage = errorMessage; root.statusIsError = true }
         function onRoutingProfileSaved() {
             root.statusMessage = qsTr("Профиль сохранён")
             root.statusIsError = false
@@ -236,6 +242,60 @@ PageType {
                         pressedColor: "#0099BB"
                         textColor: "#FFFFFF"
                         clickedFunc: function() { PageController.goToPage(PageEnum.PageFBLinkSubscription) }
+                    }
+                }
+
+                PremiumPanel {
+                    Layout.fillWidth: true
+                    padding: 12
+                    visible: root.canManageProfiles && root.canUseAdBlock
+                    accentVisible: true
+                    accentColor: FBLinkController.vipAdBlockEnabled ? "#10B981" : "#00C8FF"
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 6
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+                                PremiumBadge { text: qsTr("VIP DNS"); tone: FBLinkController.vipAdBlockEnabled ? "success" : "accent"; iconSource: "qrc:/images/controls/shield-tick.svg" }
+                                PremiumBadge { text: FBLinkController.vipAdBlockEnabled ? qsTr("AD BLOCK ВКЛ") : qsTr("AD BLOCK ВЫКЛ"); tone: FBLinkController.vipAdBlockEnabled ? "success" : "neutral" }
+                            }
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: qsTr("Ad Block только для VIP")
+                                font.pixelSize: 17
+                                font.weight: 700
+                                color: FBLinkStyle.color.paleGray
+                                wrapMode: Text.WordWrap
+                            }
+
+                            CaptionTextType {
+                                Layout.fillWidth: true
+                                text: FBLinkController.vipAdBlockEnabled
+                                    ? qsTr("Новый VIP-конфиг будет использовать ad-block DNS на вашем VPS.")
+                                    : qsTr("Трафик остаётся через VPN, но DNS идёт без ad-block фильтра.")
+                                color: FBLinkStyle.color.mutedGray
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+
+                        SwitcherType {
+                            Layout.alignment: Qt.AlignTop
+                            enabled: root.canManageProfiles && !FBLinkController.isLoading
+                            checked: FBLinkController.vipAdBlockEnabled
+                            onToggled: {
+                                if (checked !== FBLinkController.vipAdBlockEnabled) {
+                                    FBLinkController.setVipAdBlockEnabled(checked)
+                                }
+                            }
+                        }
                     }
                 }
 

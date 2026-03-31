@@ -48,6 +48,58 @@ bool serverHasContainer(const QJsonObject &server, const QString &containerName)
     return false;
 }
 
+int findFBLinkServerIndexByHostName(const QJsonArray &servers, const QString &hostName)
+{
+    if (hostName.isEmpty()) {
+        return -1;
+    }
+
+    for (int i = 0; i < servers.size(); ++i) {
+        const QJsonObject server = servers.at(i).toObject();
+        if (!isFBLinkServer(server)) {
+            continue;
+        }
+        if (server.value("hostName").toString().compare(hostName, Qt::CaseInsensitive) == 0) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+void reconcileServerDefaultContainer(ServersModel *serversModel, const std::shared_ptr<Settings> &settings,
+                                     int serverIndex, const QString &preferredContainer,
+                                     const QString &fallbackContainer)
+{
+    if (!serversModel || !settings || serverIndex < 0) {
+        return;
+    }
+
+    const QJsonArray syncedServers = settings->serversArray();
+    if (serverIndex >= syncedServers.size()) {
+        return;
+    }
+
+    QJsonObject server = syncedServers.at(serverIndex).toObject();
+    QString containerToApply;
+    if (!preferredContainer.isEmpty() && serverHasContainer(server, preferredContainer)) {
+        containerToApply = preferredContainer;
+    } else if (!fallbackContainer.isEmpty() && serverHasContainer(server, fallbackContainer)) {
+        containerToApply = fallbackContainer;
+    }
+
+    if (containerToApply.isEmpty()) {
+        return;
+    }
+
+    if (server.value("defaultContainer").toString().compare(containerToApply, Qt::CaseInsensitive) == 0) {
+        return;
+    }
+
+    server["defaultContainer"] = containerToApply;
+    serversModel->editServer(server, serverIndex);
+}
+
 QString networkOperationToString(QNetworkAccessManager::Operation operation)
 {
     switch (operation) {
@@ -385,9 +437,29 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                     configStrings = configDataStr.split('\n', Qt::SkipEmptyParts);
                 }
                 QString region = obj["region"].toString();
+                const bool vipAdBlockRequested = obj.value("vip_ad_block_requested").toBool(false);
+                const bool vipAdBlockApplied = obj.value("vip_ad_block_applied").toBool(false);
+                const QString vipAdBlockStatus = obj.value("vip_ad_block_status").toString();
+                const QString vipAdBlockDnsSource = obj.value("vip_ad_block_dns_source").toString();
+
+                qDebug() << "[FBLink] fetchConfig: vip_ad_block_requested =" << vipAdBlockRequested
+                         << "vip_ad_block_applied =" << vipAdBlockApplied
+                         << "vip_ad_block_status =" << vipAdBlockStatus
+                         << "vip_ad_block_dns_source =" << vipAdBlockDnsSource;
 
                 if (m_importController && m_settings && m_serversModel) {
                     QJsonArray servers = m_settings->serversArray();
+                    const int currentDefaultServerIndex = m_serversModel->getDefaultServerIndex();
+                    QString selectedFBLinkHostName;
+                    QString selectedFBLinkContainer;
+                    if (currentDefaultServerIndex >= 0 && currentDefaultServerIndex < servers.size()) {
+                        const QJsonObject currentDefaultServer = servers.at(currentDefaultServerIndex).toObject();
+                        if (isFBLinkServer(currentDefaultServer)) {
+                            selectedFBLinkHostName = currentDefaultServer.value("hostName").toString();
+                            selectedFBLinkContainer = currentDefaultServer.value("defaultContainer").toString();
+                        }
+                    }
+
                     QList<int> existingFBLinkServerIndices;
 
                     // Locate all existing FBLink VPN servers by description prefix or fblink_server marker
@@ -475,6 +547,7 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                     }
 
                     const QJsonArray syncedServers = m_settings->serversArray();
+                    const int preservedServerIndex = findFBLinkServerIndexByHostName(syncedServers, selectedFBLinkHostName);
                     int preferredServerIndex = -1;
                     for (int i = 0; i < syncedServers.size(); ++i) {
                         QJsonObject server = syncedServers.at(i).toObject();
@@ -496,9 +569,14 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         }
                     }
 
-                    if (preferredServerIndex >= 0) {
-                        m_serversModel->setDefaultServerIndex(preferredServerIndex);
-                        m_serversModel->setProcessedServerIndex(preferredServerIndex);
+                    const int finalServerIndex = preservedServerIndex >= 0 ? preservedServerIndex : preferredServerIndex;
+                    if (finalServerIndex >= 0) {
+                        if (preservedServerIndex >= 0) {
+                            reconcileServerDefaultContainer(m_serversModel, m_settings, preservedServerIndex,
+                                                            preferredContainer, selectedFBLinkContainer);
+                        }
+                        m_serversModel->setDefaultServerIndex(finalServerIndex);
+                        m_serversModel->setProcessedServerIndex(finalServerIndex);
                     }
 
                     emit configFetched();
@@ -633,10 +711,12 @@ void FBLinkController::fetchSubscription(bool allowRefreshRetry)
             const bool canUseSiteSplitTunneling = obj.value("can_use_site_split_tunneling").toBool(false);
             const bool canUseAppSplitTunneling = obj.value("can_use_app_split_tunneling").toBool(false);
             const bool canManageRoutingProfiles = obj.value("can_manage_routing_profiles").toBool(false);
+            const bool canUseAdBlock = obj.value("can_use_ad_block").toBool(false);
+            const bool vipAdBlockEnabled = obj.value("vip_ad_block_enabled").toBool(false);
 
             saveSubscriptionInfo(status, plan, endDate, autoRenew, cardSaved, trialAvailable,
                                  allowedProtocols, canUseSiteSplitTunneling, canUseAppSplitTunneling,
-                                 canManageRoutingProfiles);
+                                 canManageRoutingProfiles, canUseAdBlock, vipAdBlockEnabled);
             // Сервер подтвердил статус — записываем время верификации
             m_lastSubscriptionVerifiedAt = QDateTime::currentSecsSinceEpoch();
             const bool shouldFetchConfig = m_fetchConfigAfterSubscription;
@@ -744,7 +824,8 @@ QString FBLinkController::subscriptionEndDate() const
 void FBLinkController::saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,
                                              bool autoRenew, bool cardSaved, bool trialAvailable,
                                              const QStringList &allowedProtocols, bool canUseSiteSplitTunneling,
-                                             bool canUseAppSplitTunneling, bool canManageRoutingProfiles)
+                                             bool canUseAppSplitTunneling, bool canManageRoutingProfiles,
+                                             bool canUseAdBlock, bool vipAdBlockEnabled)
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
     qSettings.setValue("subscriptionStatus", status);
@@ -757,6 +838,8 @@ void FBLinkController::saveSubscriptionInfo(const QString &status, const QString
     qSettings.setValue("subscriptionCanUseSiteSplitTunneling", canUseSiteSplitTunneling);
     qSettings.setValue("subscriptionCanUseAppSplitTunneling", canUseAppSplitTunneling);
     qSettings.setValue("subscriptionCanManageRoutingProfiles", canManageRoutingProfiles);
+    qSettings.setValue("subscriptionCanUseAdBlock", canUseAdBlock);
+    qSettings.setValue("subscriptionVIPAdBlockEnabled", vipAdBlockEnabled);
     qSettings.sync();
 }
 
@@ -796,6 +879,18 @@ bool FBLinkController::canManageRoutingProfiles() const
     return qSettings.value("subscriptionCanManageRoutingProfiles", false).toBool();
 }
 
+bool FBLinkController::canUseAdBlock() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    return qSettings.value("subscriptionCanUseAdBlock", false).toBool();
+}
+
+bool FBLinkController::vipAdBlockEnabled() const
+{
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    return qSettings.value("subscriptionVIPAdBlockEnabled", false).toBool();
+}
+
 bool FBLinkController::isLoading() const
 {
     return m_isLoading;
@@ -804,6 +899,11 @@ bool FBLinkController::isLoading() const
 void FBLinkController::setAutoRenew(bool enabled)
 {
     setAutoRenew(enabled, true);
+}
+
+void FBLinkController::setVipAdBlockEnabled(bool enabled)
+{
+    setVipAdBlockEnabled(enabled, true);
 }
 
 void FBLinkController::setAutoRenew(bool enabled, bool allowRefreshRetry)
@@ -831,6 +931,46 @@ void FBLinkController::setAutoRenew(bool enabled, bool allowRefreshRetry)
             if (allowRefreshRetry && shouldRefreshToken(reply)) {
                 refreshAccessToken([this, enabled]() {
                     setAutoRenew(enabled, false);
+                });
+                return;
+            }
+
+            QByteArray data = reply->readAll();
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            QString errStr = doc.object().value("error").toString(reply->errorString());
+            emit requestError(errStr);
+        }
+    });
+}
+
+void FBLinkController::setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry)
+{
+    QString token = getJwtToken();
+    if (token.isEmpty()) return;
+
+    QNetworkRequest request = createApiRequest("/me/subscription/ad-block", true, true);
+
+    QJsonObject json;
+    json["enabled"] = enabled;
+
+    QNetworkReply *reply = m_nam->sendCustomRequest(request, "PATCH", QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, enabled, allowRefreshRetry]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+            qSettings.setValue("subscriptionVIPAdBlockEnabled", enabled);
+            qSettings.sync();
+            emit vipAdBlockChanged(enabled);
+            emit subscriptionChanged();
+            if (isSubscribed()) {
+                fetchConfig(true);
+            }
+        } else {
+            logApiFailure("set-vip-ad-block", reply);
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this, enabled]() {
+                    setVipAdBlockEnabled(enabled, false);
                 });
                 return;
             }

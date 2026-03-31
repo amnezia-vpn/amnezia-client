@@ -392,73 +392,73 @@
 <context>
     <name>FBLinkController</name>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="236"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="288"/>
         <source>Ошибка регистрации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="274"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="326"/>
         <source>Неверный ответ сервера</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="279"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="331"/>
         <source>Неверный код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="304"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="356"/>
         <source>Ошибка отправки кода</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="327"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="379"/>
         <source>Ошибка сброса пароля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="355"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="607"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="407"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="685"/>
         <source>Не выполнен вход в систему</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="507"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="585"/>
         <source>Внутренняя ошибка: Контроллеры не инициализированы</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="511"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="589"/>
         <source>Сервер не вернул конфигурацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="208"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="516"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="657"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="260"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="594"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="737"/>
         <source>Ошибка сети: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="170"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="222"/>
         <source>Email и пароль не могут быть пустыми</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="203"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="255"/>
         <source>Некорректный формат ответа сервера</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="560"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="895"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="931"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="979"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="638"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1035"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1071"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1119"/>
         <source>Необходимо войти в аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="592"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="670"/>
         <source>Ошибка создания платежа: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -4454,237 +4454,277 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsVipRoutingProfiles</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="42"/>
         <source>Домены: %1 • Суффиксы: %2 • CIDR: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="116"/>
         <source>Введите название профиля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="233"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="239"/>
         <source>Открыть VIP-подписку</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="338"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="387"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="398"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="447"/>
         <source>Новый профиль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="298"/>
         <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="358"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="418"/>
         <source>Без названия</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="79"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="261"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="321"/>
         <source>AI через VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="84"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="262"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="85"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="322"/>
         <source>Медиа через VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="89"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="263"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="323"/>
         <source>RU без VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="93"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="264"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="324"/>
         <source>Банки и госуслуги</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="98"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="99"/>
         <source>Игры и лаунчеры без VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="103"/>
         <source>Локальные медиа без VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="157"/>
-        <source>Профиль сохранён</source>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="158"/>
+        <source>Ad Block для VIP включён</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="158"/>
+        <source>Ad Block для VIP выключен</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="163"/>
+        <source>Профиль сохранён</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="169"/>
         <source>Профиль удалён</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="206"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="212"/>
         <source>VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="213"/>
         <source>Новые пакеты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="212"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="218"/>
         <source>VIP-пресеты и маршрутизация</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="228"/>
         <source>Готовые пакеты и свои правила без длинной перегруженной формы.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="229"/>
         <source>Редактирование доступно только в VIP.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="250"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="266"/>
+        <source>VIP DNS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="267"/>
+        <source>AD BLOCK ВКЛ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="267"/>
+        <source>AD BLOCK ВЫКЛ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="272"/>
+        <source>Ad Block только для VIP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="282"/>
+        <source>Новый VIP-конфиг будет использовать ad-block DNS на вашем VPS.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="283"/>
+        <source>Трафик остаётся через VPN, но DNS идёт без ad-block фильтра.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="310"/>
         <source>Быстрые пакеты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="265"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="325"/>
         <source>Игры без VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="266"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="326"/>
         <source>Локальные медиа</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="279"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="339"/>
         <source>%1 шт.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="305"/>
         <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="365"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="425"/>
         <source>ВКЛЮЧЕН</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="305"/>
         <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="365"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="425"/>
         <source>ВЫКЛЮЧЕН</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="314"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="372"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="374"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="432"/>
         <source>Выключить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="314"/>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="372"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="374"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="432"/>
         <source>Включить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="333"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="393"/>
         <source>Мои профили</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="347"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="407"/>
         <source>Пока нет пользовательских профилей</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="373"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="433"/>
         <source>Редактировать</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="374"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="434"/>
         <source>Удалить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="387"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="447"/>
         <source>Редактирование профиля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="399"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="459"/>
         <source>Название</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="399"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="459"/>
         <source>Например, AI через VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="403"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="463"/>
         <source>Без VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="404"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="464"/>
         <source>Через VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="406"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="466"/>
         <source>Домены, по одному на строку</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="407"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="467"/>
         <source>Суффиксы доменов, по одному на строку</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="408"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="468"/>
         <source>CIDR-подсети, по одной на строку</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="414"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="474"/>
         <source>Сохранить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="415"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="475"/>
         <source>Отмена</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="37"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="38"/>
         <source>ЧЕРЕЗ VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="37"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="38"/>
         <source>БЕЗ VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="278"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="338"/>
         <source>Системные пресеты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="284"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="344"/>
         <source>Системные пресеты пока не загружены</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="414"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="474"/>
         <source>Создать профиль</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6942,32 +6982,32 @@ For more detailed information, you can
 <context>
     <name>SystemTrayNotificationHandler</name>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="33"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="67"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="35"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="69"/>
         <source>Show</source>
         <translation>ပြမည်</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="37"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="68"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="39"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="70"/>
         <source>Connect</source>
         <translation>ချိတ်ဆက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="38"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="69"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="40"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="71"/>
         <source>Disconnect</source>
         <translation>ဖြုတ်ချမည်</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="42"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="70"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="44"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="72"/>
         <source>Visit Website</source>
         <translation>ဝဘ်ဆိုက်ကိုဝင်ကြည့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="48"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="71"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="50"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="73"/>
         <source>Quit</source>
         <translation>ထွက်မည်</translation>
     </message>

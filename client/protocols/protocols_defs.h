@@ -122,6 +122,13 @@ namespace fblink
         namespace dns
         {
             constexpr char fblinkDnsIp[] = "172.29.172.254";
+            constexpr char fblinkAdBlockDnsIp[] = "172.29.172.253";
+
+            inline bool isFBLinkDnsAddress(const QString &address)
+            {
+                return address == QLatin1String(fblinkDnsIp)
+                        || address == QLatin1String(fblinkAdBlockDnsIp);
+            }
         }
 
         namespace openvpn

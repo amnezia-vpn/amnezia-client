@@ -159,8 +159,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("primaryDnsServer", rawConfig.value(fblink::config_key::dns1));
 
   // We don't use secondary DNS if primary DNS is FBLinkDNS
-  if (!rawConfig.value(fblink::config_key::dns1).toString().
-    contains(fblink::protocols::dns::fblinkDnsIp)) {
+  if (!fblink::protocols::dns::isFBLinkDnsAddress(rawConfig.value(fblink::config_key::dns1).toString())) {
     json.insert("secondaryDnsServer", rawConfig.value(fblink::config_key::dns2));
   }
 

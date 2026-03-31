@@ -136,11 +136,13 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 		"expires_at":                   sub.ExpiresAt,
 		"auto_renew":                   sub.AutoRenew,
 		"card_saved":                   sub.PaymentMethodID != "",
+		"vip_ad_block_enabled":         sub.VIPAdBlockEnabled,
 		"trial_available":              trialAvailable,
 		"allowed_protocols":            capabilities.AllowedProtocols,
 		"can_use_site_split_tunneling": capabilities.CanUseSiteSplitTunnel,
 		"can_use_app_split_tunneling":  capabilities.CanUseAppSplitTunnel,
 		"can_manage_routing_profiles":  capabilities.CanManageRoutingProfiles,
+		"can_use_ad_block":             capabilities.CanUseAdBlock,
 	})
 }
 
@@ -164,6 +166,39 @@ func (h *UserHandler) SetAutoRenew(c *gin.Context) {
 
 	h.db.Model(&sub).Update("auto_renew", req.Enabled)
 	c.JSON(http.StatusOK, gin.H{"auto_renew": req.Enabled})
+}
+
+// PATCH /api/v1/me/subscription/ad-block
+func (h *UserHandler) SetVIPAdBlock(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	var req struct {
+		Enabled bool `json:"enabled"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	sub, err := ensureDefaultSubscription(h.db, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
+		return
+	}
+
+	if !buildSubscriptionCapabilities(sub).CanUseAdBlock {
+		c.JSON(http.StatusForbidden, gin.H{"error": "VIP required"})
+		return
+	}
+
+	if err := h.db.Model(&models.Subscription{}).
+		Where("user_id = ?", userID).
+		Update("vip_ad_block_enabled", req.Enabled).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update ad block settings"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"enabled": req.Enabled})
 }
 
 // DELETE /api/v1/me/card — удалить привязанную карту и отключить автосписание

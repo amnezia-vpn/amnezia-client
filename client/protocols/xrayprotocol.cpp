@@ -195,6 +195,18 @@ bool isTcpPortReachable(const QString &address, quint16 port, int timeoutMs = 12
     return connected;
 }
 
+bool isPrivateIPv4Address(const QString &address)
+{
+    const QHostAddress host(address);
+    if (host.protocol() != QAbstractSocket::IPv4Protocol) {
+        return false;
+    }
+
+    return host.isInSubnet(QHostAddress(QStringLiteral("10.0.0.0")), 8)
+            || host.isInSubnet(QHostAddress(QStringLiteral("172.16.0.0")), 12)
+            || host.isInSubnet(QHostAddress(QStringLiteral("192.168.0.0")), 16);
+}
+
 bool fallbackOutboundPortTo443(QJsonObject &xrayConfig, const QString &resolvedAddress)
 {
     if (resolvedAddress.isEmpty()) {
@@ -425,10 +437,14 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(fblink::config_key::hostName).toString());
 
     const QString primaryDns = configuration.value(fblink::config_key::dns1).toString();
+    m_usesInternalFBLinkDns = fblink::protocols::dns::isFBLinkDnsAddress(primaryDns);
+    m_forceTunResolversOnWindows = m_usesInternalFBLinkDns || isPrivateIPv4Address(primaryDns);
     m_dnsServers.push_back(QHostAddress(primaryDns));
-    if (primaryDns != fblink::protocols::dns::fblinkDnsIp) {
+    if (!m_usesInternalFBLinkDns) {
         const QString secondaryDns = configuration.value(fblink::config_key::dns2).toString();
-        m_dnsServers.push_back(QHostAddress(secondaryDns));
+        if (!secondaryDns.isEmpty()) {
+            m_dnsServers.push_back(QHostAddress(secondaryDns));
+        }
     }
 
     QJsonObject xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::Xray)).toObject();
@@ -625,7 +641,16 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
 #ifdef Q_OS_WIN
-        qDebug() << "XrayProtocol::setupRouting(): keeping system DNS configuration on Windows";
+        if (m_forceTunResolversOnWindows) {
+            auto updateResolvers = iface->updateResolvers(tunName, m_dnsServers);
+            if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
+                qCritical() << "Failed to set XRay DNS resolvers for TUN on Windows";
+                return ErrorCode::InternalError;
+            }
+            qDebug() << "XrayProtocol::setupRouting(): applied XRay DNS resolvers on Windows";
+        } else {
+            qDebug() << "XrayProtocol::setupRouting(): keeping system DNS configuration on Windows";
+        }
 #else
         auto updateResolvers = iface->updateResolvers(tunName, m_dnsServers);
         if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
@@ -696,13 +721,15 @@ ErrorCode XrayProtocol::setupRouting() {
         }
 
 #ifdef Q_OS_WIN
-        if (!physicalDnsResolvers.isEmpty() && !m_routeGateway.isEmpty()) {
+        if (!m_forceTunResolversOnWindows && !physicalDnsResolvers.isEmpty() && !m_routeGateway.isEmpty()) {
             auto routeDnsDirect = iface->routeAddList(m_routeGateway, physicalDnsResolvers);
             if (!routeDnsDirect.waitForFinished() || routeDnsDirect.returnValue() < physicalDnsResolvers.size()) {
                 qWarning() << "Failed to add direct routes to system DNS resolvers" << physicalDnsResolvers << "via" << m_routeGateway;
             } else {
                 qDebug() << "Added direct routes to system DNS resolvers" << physicalDnsResolvers << "via" << m_routeGateway;
             }
+        } else if (m_forceTunResolversOnWindows) {
+            qDebug() << "XrayProtocol::setupRouting(): skipping physical DNS bypass because XRay DNS override is active";
         } else {
             qDebug() << "XrayProtocol::setupRouting(): no physical IPv4 DNS resolvers detected for direct bypass";
         }
