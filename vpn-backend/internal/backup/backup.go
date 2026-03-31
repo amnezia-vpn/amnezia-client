@@ -29,14 +29,10 @@ func RunScheduler(db *gorm.DB, cfg *config.Config) {
 
 	interval := time.Duration(cfg.BackupIntervalHours) * time.Hour
 	log.Printf("[backup] Планировщик запущен, интервал: %v", interval)
+	log.Println("[backup] Стартовый бэкап при запуске сервера отключён")
 
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
-
-	// Выполняем бэкап сразу при старте, затем по расписанию
-	if err := DoBackup(db, cfg); err != nil {
-		log.Printf("[backup] Ошибка бэкапа: %v", err)
-	}
 
 	for range ticker.C {
 		if err := DoBackup(db, cfg); err != nil {

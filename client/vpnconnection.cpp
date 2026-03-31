@@ -398,28 +398,28 @@ void VpnConnection::appendSplitTunnelingConfig()
     const bool canUseSiteSplitTunneling = subscriptionSettings.value("subscriptionCanUseSiteSplitTunneling", false).toBool();
     const bool canUseAppSplitTunneling = subscriptionSettings.value("subscriptionCanUseAppSplitTunneling", false).toBool();
 
-    if (canUseSiteSplitTunneling && m_settings->isSitesSplitTunnelingEnabled()) {
+    const bool usesManagedXrayRouting = isXrayBasedProtocol && xrayHasManagedRouting;
+    const bool usesLegacySiteSplitTunneling = canUseSiteSplitTunneling && m_settings->isSitesSplitTunnelingEnabled();
+
+    if (usesManagedXrayRouting) {
+        routeMode = m_settings->routeMode();
+        qDebug() << "XRay config already contains routing rules, preserving route mode for embedded routing:" << routeMode;
+    } else if (usesLegacySiteSplitTunneling) {
         routeMode = m_settings->routeMode();
         if (isXrayBasedProtocol) {
-            if (xrayHasManagedRouting) {
-                qDebug() << "XRay config already contains routing rules, skipping OS-level site split tunneling";
-            } else {
-                qDebug() << "XRay split tunneling is handled by VIP routing profiles, skipping legacy OS-level site split tunneling";
+            qDebug() << "XRay split tunneling is handled by VIP routing profiles, skipping legacy OS-level site split tunneling";
+        } else if (allowSiteBasedSplitTunneling) {
+            auto sites = m_settings->getVpnIps(routeMode);
+            for (const auto &site : sites) {
+                sitesJsonArray.append(site);
             }
-        } else {
-            if (allowSiteBasedSplitTunneling) {
-                auto sites = m_settings->getVpnIps(routeMode);
-                for (const auto &site : sites) {
-                    sitesJsonArray.append(site);
-                }
 
-                if (sitesJsonArray.isEmpty()) {
-                    routeMode = Settings::RouteMode::VpnAllSites;
-                } else if (routeMode == Settings::VpnOnlyForwardSites) {
-                    // Allow traffic to FBLink DNS
-                    sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
-                    sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
-                }
+            if (sitesJsonArray.isEmpty()) {
+                routeMode = Settings::RouteMode::VpnAllSites;
+            } else if (routeMode == Settings::VpnOnlyForwardSites) {
+                // Allow traffic to FBLink DNS
+                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
+                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
             }
         }
     }
@@ -453,7 +453,9 @@ void VpnConnection::appendSplitTunnelingConfig()
     m_vpnConfiguration.insert(config_key::splitTunnelApps, appsJsonArray);
 
     QString siteSplitStatus = "disabled";
-    if (canUseSiteSplitTunneling && m_settings->isSitesSplitTunnelingEnabled()) {
+    if (usesManagedXrayRouting) {
+        siteSplitStatus = "managed by XRay";
+    } else if (usesLegacySiteSplitTunneling) {
         if (isXrayBasedProtocol) {
             siteSplitStatus = xrayHasManagedRouting ? "managed by XRay" : "waiting for XRay routing profiles";
         } else {
