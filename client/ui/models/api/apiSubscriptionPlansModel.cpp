@@ -114,7 +114,6 @@ QVariantMap ApiSubscriptionPlansModel::planAt(int row) const
     const QModelIndex modelIndex = index(row, 0);
     QVariantMap planMap;
     const QHash<int, QByteArray> roles = roleNames();
-    planMap.reserve(roles.size());
     for (auto roleIt = roles.cbegin(); roleIt != roles.cend(); ++roleIt) {
         planMap.insert(QString::fromUtf8(roleIt.value()), data(modelIndex, roleIt.key()));
     }
