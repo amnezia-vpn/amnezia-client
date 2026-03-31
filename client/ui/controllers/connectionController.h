@@ -1,6 +1,8 @@
 #ifndef CONNECTIONCONTROLLER_H
 #define CONNECTIONCONTROLLER_H
 
+#include <QElapsedTimer>
+
 #include "protocols/vpnprotocol.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
@@ -15,6 +17,8 @@ public:
     Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectionStateChanged)
     Q_PROPERTY(bool isConnectionInProgress READ isConnectionInProgress NOTIFY connectionStateChanged)
     Q_PROPERTY(QString connectionStateText READ connectionStateText NOTIFY connectionStateChanged)
+    Q_PROPERTY(QString downloadSpeed READ downloadSpeed NOTIFY speedChanged)
+    Q_PROPERTY(QString uploadSpeed READ uploadSpeed NOTIFY speedChanged)
 
     explicit ConnectionController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                   const QSharedPointer<ClientManagementModel> &clientManagementModel,
@@ -26,6 +30,8 @@ public:
     bool isConnected() const;
     bool isConnectionInProgress() const;
     QString connectionStateText() const;
+    QString downloadSpeed() const;
+    QString uploadSpeed() const;
 
 public slots:
     void toggleConnection();
@@ -40,6 +46,8 @@ public slots:
 
     void onTranslationsUpdated();
 
+    void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
+
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
     void disconnectFromVpn();
@@ -51,6 +59,8 @@ signals:
     void connectButtonClicked();
     void preparingConfig();
     void prepareConfig();
+
+    void speedChanged();
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();
@@ -68,6 +78,10 @@ private:
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;
     QString m_connectionStateText = tr("Connect");
+
+    QString m_downloadSpeed;
+    QString m_uploadSpeed;
+    QElapsedTimer m_speedTimer;
 
     Vpn::ConnectionState m_state;
 };

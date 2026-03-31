@@ -94,10 +94,6 @@ Button {
             border.color: borderColor
             border.width: borderWidth
 
-            Behavior on color {
-                PropertyAnimation { duration: 200 }
-            }
-
             Rectangle {
                 visible: root.squareLeftSide
 
@@ -117,10 +113,6 @@ Button {
                     } else {
                         return root.disabledColor
                     }
-                }
-
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
                 }
             }
         }

@@ -68,15 +68,15 @@ Button {
             height: parent.implicitHeight
             anchors.bottom: parent.bottom
             anchors.right: parent.right
-            layer.enabled: true
+            layer.enabled: !ConnectionController.isConnectionInProgress
             layer.samples: 4
             layer.smooth: true
             layer.effect: DropShadow {
                 anchors.fill: backgroundCircle
                 horizontalOffset: 0
                 verticalOffset: 0
-                radius: 10
-                samples: 25
+                radius: 8
+                samples: 9
                 color: root.buttonActiveFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.goldenApricot
                 source: backgroundCircle
             }
@@ -135,8 +135,7 @@ Button {
             height: parent.implicitHeight
             anchors.bottom: parent.bottom
             anchors.right: parent.right
-            layer.enabled: true
-            layer.samples: 4
+            layer.enabled: false
 
             visible: ConnectionController.isConnectionInProgress
 

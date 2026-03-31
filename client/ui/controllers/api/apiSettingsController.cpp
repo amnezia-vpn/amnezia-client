@@ -1,8 +1,6 @@
 #include "apiSettingsController.h"
 
-#include <QEventLoop>
 #include <QJsonDocument>
-#include <QTimer>
 
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
@@ -45,12 +43,6 @@ ApiSettingsController::~ApiSettingsController()
 
 bool ApiSettingsController::getAccountInfo(bool reload)
 {
-    if (reload) {
-        QEventLoop wait;
-        QTimer::singleShot(1000, &wait, &QEventLoop::quit);
-        wait.exec(QEventLoop::ExcludeUserInputEvents);
-    }
-
     auto processedIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfig = m_serversModel->getServerConfig(processedIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();

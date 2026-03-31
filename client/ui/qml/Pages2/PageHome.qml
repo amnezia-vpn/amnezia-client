@@ -118,12 +118,79 @@ PageType {
                 }
             }
 
-            ConnectButton {
-                id: connectButton
-                objectName: "connectButton"
-
+            Item {
                 Layout.fillHeight: true
-                Layout.alignment: Qt.AlignCenter
+                Layout.fillWidth: true
+
+                ConnectButton {
+                    id: connectButton
+                    objectName: "connectButton"
+
+                    anchors.centerIn: parent
+                }
+
+                RowLayout {
+                    id: speedIndicator
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: connectButton.top
+                    anchors.bottomMargin: 16
+
+                    spacing: 24
+
+                    opacity: ConnectionController.isConnected ? 1.0 : 0.0
+                    visible: opacity > 0
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 300; easing.type: Easing.InOutQuad }
+                    }
+
+                    // Download ↓
+                    ColumnLayout {
+                        spacing: 2
+
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: "↓"
+                            font.pixelSize: 11
+                            font.weight: Font.Medium
+                            color: AmneziaStyle.color.mutedGray
+                        }
+
+                        Text {
+                            id: downloadLabel
+                            Layout.alignment: Qt.AlignHCenter
+                            text: ConnectionController.downloadSpeed || "0.00 Mbps"
+                            font.family: "PT Root UI VF"
+                            font.pixelSize: 13
+                            font.weight: Font.Medium
+                            color: AmneziaStyle.color.goldenApricot
+                        }
+                    }
+
+                    // Upload ↑
+                    ColumnLayout {
+                        spacing: 2
+
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: "↑"
+                            font.pixelSize: 11
+                            font.weight: Font.Medium
+                            color: AmneziaStyle.color.mutedGray
+                        }
+
+                        Text {
+                            id: uploadLabel
+                            Layout.alignment: Qt.AlignHCenter
+                            text: ConnectionController.uploadSpeed || "0.00 Mbps"
+                            font.family: "PT Root UI VF"
+                            font.pixelSize: 13
+                            font.weight: Font.Medium
+                            color: AmneziaStyle.color.paleGray
+                        }
+                    }
+                }
             }
 
             BasicButtonType {
@@ -271,9 +338,6 @@ PageType {
                         text: ServersModel.defaultServerName
                         horizontalAlignment: Qt.AlignHCenter
 
-                        Behavior on opacity {
-                            PropertyAnimation { duration: 200 }
-                        }
                     }
 
                     ImageButtonType {

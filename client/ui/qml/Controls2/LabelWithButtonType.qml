@@ -184,9 +184,6 @@ Item {
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
 
-                Behavior on opacity {
-                    PropertyAnimation { duration: 200 }
-                }
             }
 
 
@@ -215,9 +212,6 @@ Item {
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
 
-                Behavior on opacity {
-                    PropertyAnimation { duration: 200 }
-                }
 
                 function replaceWithAsterisks(input) {
                     return '*'.repeat(input.length)
@@ -244,9 +238,6 @@ Item {
                 radius: 12
                 color: AmneziaStyle.color.transparent
 
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
             }
 
             onClicked: {
@@ -281,9 +272,6 @@ Item {
                 radius: 12
                 color: AmneziaStyle.color.transparent
 
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
             }
             onClicked: {
                 if (clickedFunction && typeof clickedFunction === "function") {

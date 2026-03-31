@@ -16,6 +16,7 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
     connect(m_impl.get(), &ControllerImpl::connected, this,
             [this](const QString &pubkey, const QDateTime &connectionTimestamp) {
                 setConnectionState(Vpn::ConnectionState::Connected);
+                m_statsTimer.start();
             });
     connect(m_impl.get(), &ControllerImpl::statusUpdated, this,
             [this](const QString& serverIpv4Gateway,
@@ -35,10 +36,18 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
                     (!m_vpnLocalAddress.isEmpty() && m_vpnLocalAddress != previousLocal)) {
                     emit tunnelAddressesUpdated(m_vpnGateway, m_vpnLocalAddress);
                 }
+
+                setBytesChanged(rxBytes, txBytes);
             });
 
+    m_statsTimer.setInterval(1000);
+    connect(&m_statsTimer, &QTimer::timeout, m_impl.get(), &ControllerImpl::checkStatus);
+
     connect(m_impl.get(), &ControllerImpl::disconnected, this,
-            [this]() { setConnectionState(Vpn::ConnectionState::Disconnected); });
+            [this]() {
+                m_statsTimer.stop();
+                setConnectionState(Vpn::ConnectionState::Disconnected);
+            });
     m_impl->initialize(nullptr, nullptr);
 }
 
