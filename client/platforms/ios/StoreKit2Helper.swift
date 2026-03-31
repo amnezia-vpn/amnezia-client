@@ -105,6 +105,7 @@ public class StoreKit2Helper: NSObject {
                         "title": product.displayName,
                         "description": product.description,
                         "price": "\(product.price)",
+                        "displayPrice": product.displayPrice,
                         "currencyCode": currencyCode
                     ]
                 }

@@ -11,6 +11,8 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QEventLoop>
+#include <QHash>
+#include <QJsonArray>
 #include <QSet>
 #include <QVariantMap>
 
@@ -39,6 +41,12 @@ namespace
         constexpr char serviceType[] = "service_type";
         constexpr char serviceInfo[] = "service_info";
         constexpr char serviceProtocol[] = "service_protocol";
+
+        constexpr char services[] = "services";
+        constexpr char serviceDescription[] = "service_description";
+        constexpr char subscriptionPlans[] = "subscription_plans";
+        constexpr char storeProductId[] = "store_product_id";
+        constexpr char primaryRight[] = "primary_right";
 
         constexpr char apiPayload[] = "api_payload";
         constexpr char keyPayload[] = "key_payload";
@@ -239,6 +247,108 @@ namespace
 
         return ErrorCode::NoError;
     }
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    void mergeStoreKitPricesIntoPremiumPlans(QJsonObject &data)
+    {
+        QJsonArray services = data.value(configKey::services).toArray();
+        if (services.isEmpty()) {
+            return;
+        }
+
+        QStringList productIds;
+        QSet<QString> seen;
+        for (int i = 0; i < services.size(); ++i) {
+            const QJsonObject service = services.at(i).toObject();
+            if (service.value(configKey::serviceType).toString() != serviceType::amneziaPremium) {
+                continue;
+            }
+            const QJsonObject description = service.value(configKey::serviceDescription).toObject();
+            const QJsonArray plans = description.value(configKey::subscriptionPlans).toArray();
+            for (const QJsonValue &planValue : plans) {
+                if (!planValue.isObject()) {
+                    continue;
+                }
+                const QString id = planValue.toObject().value(configKey::storeProductId).toString();
+                if (id.isEmpty() || seen.contains(id)) {
+                    continue;
+                }
+                seen.insert(id);
+                productIds.append(id);
+            }
+        }
+
+        if (productIds.isEmpty()) {
+            qInfo().noquote() << "[IAP] No store_product_id in premium plans; skip StoreKit merge into services payload";
+            return;
+        }
+
+        QList<QVariantMap> fetchedProducts;
+        QEventLoop loop;
+        IosController::Instance()->fetchProducts(productIds,
+                                                 [&](const QList<QVariantMap> &products, const QStringList &invalidIds,
+                                                     const QString &errorString) {
+                                                     if (!errorString.isEmpty()) {
+                                                         qWarning().noquote() << "[IAP] StoreKit merge fetch:" << errorString;
+                                                     }
+                                                     if (!invalidIds.isEmpty()) {
+                                                         qWarning().noquote() << "[IAP] Unknown App Store product ids:" << invalidIds;
+                                                     }
+                                                     fetchedProducts = products;
+                                                     loop.quit();
+                                                 });
+        loop.exec();
+
+        QHash<QString, QString> idToDisplayPrice;
+        idToDisplayPrice.reserve(fetchedProducts.size());
+        for (const QVariantMap &product : fetchedProducts) {
+            const QString id = product.value(QStringLiteral("productId")).toString();
+            if (id.isEmpty()) {
+                continue;
+            }
+            QString display = product.value(QStringLiteral("displayPrice")).toString();
+            if (display.isEmpty()) {
+                const QString price = product.value(QStringLiteral("price")).toString();
+                const QString currencyCode = product.value(QStringLiteral("currencyCode")).toString();
+                display = currencyCode.isEmpty() ? price : (price + QLatin1Char(' ') + currencyCode);
+            }
+            idToDisplayPrice.insert(id, display);
+        }
+
+        for (int i = 0; i < services.size(); ++i) {
+            QJsonObject service = services.at(i).toObject();
+            if (service.value(configKey::serviceType).toString() != serviceType::amneziaPremium) {
+                continue;
+            }
+            QJsonObject description = service.value(configKey::serviceDescription).toObject();
+            QJsonArray plans = description.value(configKey::subscriptionPlans).toArray();
+
+            QJsonArray mergedPlans;
+            for (const QJsonValue &planValue : plans) {
+                if (!planValue.isObject()) {
+                    continue;
+                }
+                QJsonObject planObject = planValue.toObject();
+                const QString storeId = planObject.value(configKey::storeProductId).toString();
+                if (storeId.isEmpty()) {
+                    continue;
+                }
+                const auto priceIt = idToDisplayPrice.constFind(storeId);
+                if (priceIt == idToDisplayPrice.cend()) {
+                    continue;
+                }
+                planObject.insert(configKey::primaryRight, *priceIt);
+                mergedPlans.append(planObject);
+            }
+            plans = mergedPlans;
+
+            description.insert(configKey::subscriptionPlans, plans);
+            service.insert(configKey::serviceDescription, description);
+            services.replace(i, service);
+        }
+        data.insert(configKey::services, services);
+    }
+#endif
 }
 
 ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &serversModel,
@@ -395,51 +505,11 @@ bool ApiConfigsController::fillAvailableServices()
     }
 
     QJsonObject data = QJsonDocument::fromJson(responseBody).object();
-    
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    QEventLoop waitProducts;
-    bool productsFetched = false;
-    QString productPrice;
-    QString productCurrency;
-    
-    IosController::Instance()->fetchProducts(QStringList() << QStringLiteral("amnezia_premium_6_month"),
-                                             [&](const QList<QVariantMap> &products,
-                                                 const QStringList &invalidIds,
-                                                 const QString &errorString) {
-                                                 if (!errorString.isEmpty() || products.isEmpty()) {
-                                                     qWarning().noquote() << "[IAP] Failed to fetch product price:" << errorString;
-                                                 } else {
-                                                     const auto &product = products.first();
-                                                     productPrice = product.value("price").toString();
-                                                     productCurrency = product.value("currencyCode").toString();
-                                                     productsFetched = true;
-                                                     qInfo().noquote() << "[IAP] Fetched product price:" << productPrice << productCurrency;
-                                                 }
-                                                 waitProducts.quit();
-                                             });
-    waitProducts.exec();
-    
-    if (productsFetched && !productPrice.isEmpty()) {
-        QJsonArray services = data.value("services").toArray();
-        for (int i = 0; i < services.size(); ++i) {
-            QJsonObject service = services[i].toObject();
-            if (service.value(configKey::serviceType).toString() == serviceType::amneziaPremium) {
-                QJsonObject serviceInfo = service.value(configKey::serviceInfo).toObject();
-                QString formattedPrice = productPrice;
-                if (!productCurrency.isEmpty()) {
-                    formattedPrice += " " + productCurrency;
-                }
-                serviceInfo["price"] = formattedPrice;
-                service[configKey::serviceInfo] = serviceInfo;
-                services[i] = service;
-                data["services"] = services;
-                qInfo().noquote() << "[IAP] Updated premium service price in data:" << formattedPrice;
-                break;
-            }
-        }
-    }
+    mergeStoreKitPricesIntoPremiumPlans(data);
 #endif
-    
+
     m_apiServicesModel->updateModel(data);
     if (m_apiServicesModel->rowCount() > 0) {
         m_apiServicesModel->setServiceIndex(0);
@@ -457,7 +527,7 @@ bool ApiConfigsController::importService()
 
     if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaPremium) {
         if (isIosOrMacOsNe) {
-            return importServiceFromAppStore();
+            return importPremiumFromAppStore(QString());
         }
     } else if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaFree) {
         importFreeFromGateway();
@@ -466,22 +536,27 @@ bool ApiConfigsController::importService()
     return false;
 }
 
-bool ApiConfigsController::importServiceFromAppStore()
+bool ApiConfigsController::importPremiumFromAppStore(const QString &storeProductId)
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
+    QString productId = storeProductId.trimmed();
+    if (productId.isEmpty()) {
+        productId = QStringLiteral("amnezia_premium_6_month");
+    }
+
     bool purchaseOk = false;
     QString originalTransactionId;
     QString storeTransactionId;
-    QString storeProductId;
+    QString purchasedStoreProductId;
     QString purchaseError;
     QEventLoop waitPurchase;
-    IosController::Instance()->purchaseProduct(QStringLiteral("amnezia_premium_6_month"),
+    IosController::Instance()->purchaseProduct(productId,
                                                [&](bool success, const QString &txId, const QString &purchasedProductId,
                                                    const QString &originalTxId, const QString &errorString) {
                                                    purchaseOk = success;
                                                    originalTransactionId = originalTxId;
                                                    storeTransactionId = txId;
-                                                   storeProductId = purchasedProductId;
+                                                   purchasedStoreProductId = purchasedProductId;
                                                    purchaseError = errorString;
                                                    waitPurchase.quit();
                                                });
@@ -493,7 +568,7 @@ bool ApiConfigsController::importServiceFromAppStore()
         return false;
     }
     qInfo().noquote() << "[IAP] Purchase success. transactionId =" << storeTransactionId
-                      << "originalTransactionId =" << originalTransactionId << "productId =" << storeProductId;
+                      << "originalTransactionId =" << originalTransactionId << "productId =" << purchasedStoreProductId;
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -529,8 +604,11 @@ bool ApiConfigsController::importServiceFromAppStore()
     }
     emit installServerFromApiFinished(
             tr("%1 was added to the app.").arg(m_apiServicesModel->getSelectedServiceName()));
-#endif
     return true;
+#else
+    Q_UNUSED(storeProductId);
+    return false;
+#endif
 }
 
 bool ApiConfigsController::restoreServiceFromAppStore()

@@ -1153,6 +1153,9 @@ void IosController::fetchProducts(const QStringList &productIds,
                 m["title"] = QString::fromUtf8([p[@"title"] UTF8String]);
                 m["description"] = QString::fromUtf8([p[@"description"] UTF8String]);
                 m["price"] = QString::fromUtf8([p[@"price"] UTF8String]);
+                if (p[@"displayPrice"]) {
+                    m["displayPrice"] = QString::fromUtf8([p[@"displayPrice"] UTF8String]);
+                }
                 m["currencyCode"] = QString::fromUtf8([p[@"currencyCode"] UTF8String]);
                 outProducts.push_back(m);
             }

@@ -1,6 +1,7 @@
 #ifndef APICONFIGSCONTROLLER_H
 #define APICONFIGSCONTROLLER_H
 
+#include <QList>
 #include <QObject>
 
 #include "configurators/openvpn_configurator.h"
@@ -31,7 +32,7 @@ public slots:
 
     bool fillAvailableServices();
     bool importService();
-    bool importServiceFromAppStore();
+    bool importPremiumFromAppStore(const QString &storeProductId);
     bool restoreServiceFromAppStore();
     bool importFreeFromGateway();
     bool importTrialFromGateway(const QString &email);

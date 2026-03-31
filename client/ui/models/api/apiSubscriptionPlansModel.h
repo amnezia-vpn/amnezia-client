@@ -17,7 +17,8 @@ public:
         RecommendedRole,
         CheckoutUrlRole,
         IsTrialRole,
-        ServiceProtocolRole
+        ServiceProtocolRole,
+        StoreProductIdRole
     };
     Q_ENUM(Roles)
 
@@ -43,6 +44,7 @@ private:
         QString checkoutUrl;
         bool isTrial = false;
         QString serviceProtocol;
+        QString storeProductId;
     };
 
     QVector<SubscriptionPlanItem> m_subscriptionPlans;

@@ -219,6 +219,19 @@ PageType {
                 PageController.goToPage(PageEnum.PageSetupWizardApiTrialEmail)
                 return
             }
+            if (Qt.platform.os === "ios" || IsMacOsNeBuild) {
+                PageController.showBusyIndicator(true)
+                var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
+                var ok = ApiConfigsController.importPremiumFromAppStore(storeId)
+                PageController.showBusyIndicator(false)
+                if (!ok) {
+                    var endpoint = ApiServicesModel.getStoreEndpoint()
+                    Qt.openUrlExternally(endpoint)
+                    PageController.closePage()
+                    PageController.closePage()
+                }
+                return
+            }
             if (plan.checkoutUrl) {
                 Qt.openUrlExternally(plan.checkoutUrl)
                 PageController.closePage()
@@ -226,11 +239,11 @@ PageType {
                 return
             }
             PageController.showBusyIndicator(true)
-            var ok = ApiConfigsController.importService()
+            var importOk = ApiConfigsController.importService()
             PageController.showBusyIndicator(false)
-            if (!ok) {
-                var endpoint = ApiServicesModel.getStoreEndpoint()
-                Qt.openUrlExternally(endpoint)
+            if (!importOk) {
+                var fallbackEndpoint = ApiServicesModel.getStoreEndpoint()
+                Qt.openUrlExternally(fallbackEndpoint)
                 PageController.closePage()
                 PageController.closePage()
             }

@@ -2,7 +2,6 @@
 
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QVariantMap>
 #include <utility>
 
 namespace
@@ -16,12 +15,14 @@ namespace configKey
     constexpr char checkoutUrl[] = "checkout_url";
     constexpr char isTrial[] = "is_trial";
     constexpr char serviceProtocol[] = "service_protocol";
+    constexpr char storeProductId[] = "store_product_id";
 
     constexpr char primaryLeftCamel[] = "primaryLeft";
     constexpr char primaryRightCamel[] = "primaryRight";
     constexpr char checkoutUrlCamel[] = "checkoutUrl";
     constexpr char isTrialCamel[] = "isTrial";
     constexpr char serviceProtocolCamel[] = "serviceProtocol";
+    constexpr char storeProductIdCamel[] = "storeProductId";
 }
 }
 
@@ -59,6 +60,8 @@ QVariant ApiSubscriptionPlansModel::data(const QModelIndex &index, int role) con
         return plan.isTrial;
     case ServiceProtocolRole:
         return plan.serviceProtocol;
+    case StoreProductIdRole:
+        return plan.storeProductId;
     default:
         return {};
     }
@@ -74,6 +77,7 @@ QHash<int, QByteArray> ApiSubscriptionPlansModel::roleNames() const
         { CheckoutUrlRole, "checkoutUrl" },
         { IsTrialRole, "isTrial" },
         { ServiceProtocolRole, "serviceProtocol" },
+        { StoreProductIdRole, "storeProductId" },
     };
 }
 
@@ -95,6 +99,7 @@ void ApiSubscriptionPlansModel::updateModel(const QJsonArray &arr)
         subscriptionPlan.checkoutUrl = planObject.value(configKey::checkoutUrl).toString();
         subscriptionPlan.isTrial = planObject.value(configKey::isTrial).toBool();
         subscriptionPlan.serviceProtocol = planObject.value(configKey::serviceProtocol).toString();
+        subscriptionPlan.storeProductId = planObject.value(configKey::storeProductId).toString();
         m_subscriptionPlans.append(std::move(subscriptionPlan));
     }
     endResetModel();
@@ -121,6 +126,7 @@ QVariantMap ApiSubscriptionPlansModel::planAt(int row) const
     planMap.insert(QLatin1String(configKey::checkoutUrlCamel), plan.checkoutUrl);
     planMap.insert(QLatin1String(configKey::isTrialCamel), plan.isTrial);
     planMap.insert(QLatin1String(configKey::serviceProtocolCamel), plan.serviceProtocol);
+    planMap.insert(QLatin1String(configKey::storeProductIdCamel), plan.storeProductId);
     return planMap;
 }
 
