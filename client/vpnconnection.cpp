@@ -57,7 +57,15 @@ void VpnConnection::onKillSwitchModeChanged(bool enabled)
 {
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([enabled](QSharedPointer<IpcInterfaceReplica> iface){
-        iface->refreshKillSwitch(enabled);
+        auto reply = iface->refreshKillSwitch(enabled);
+        auto *watcher = new QRemoteObjectPendingCallWatcher(reply);
+        QObject::connect(watcher, &QRemoteObjectPendingCallWatcher::finished, [watcher]() {
+            if (watcher->returnValue().toBool())
+                qDebug() << "VpnConnection::onKillSwitchModeChanged: Killswitch refreshed";
+            else
+                qWarning() << "VpnConnection::onKillSwitchModeChanged: Failed to refresh killswitch";
+            watcher->deleteLater();
+        });
     });
 #endif
 }
@@ -71,7 +79,15 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
         switch (state) {
             case Vpn::ConnectionState::Connected: {
                 iface->resetIpStack();
-                iface->flushDns();
+                {
+                    auto reply = iface->flushDns();
+                    auto *w = new QRemoteObjectPendingCallWatcher(reply);
+                    QObject::connect(w, &QRemoteObjectPendingCallWatcher::finished, [w]() {
+                        if (w->returnValue().toBool()) qDebug() << "VpnConnection: DNS flushed on connect";
+                        else qWarning() << "VpnConnection: Failed to flush DNS on connect";
+                        w->deleteLater();
+                    });
+                }
 
                 if (!ContainerProps::isAwgContainer(container) &&
                     container != DockerContainer::WireGuard) {
@@ -99,8 +115,24 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             } break;
             case Vpn::ConnectionState::Disconnected:
             case Vpn::ConnectionState::Error: {
-                iface->flushDns();
-                iface->clearSavedRoutes();
+                {
+                    auto reply = iface->flushDns();
+                    auto *w = new QRemoteObjectPendingCallWatcher(reply);
+                    QObject::connect(w, &QRemoteObjectPendingCallWatcher::finished, [w]() {
+                        if (w->returnValue().toBool()) qDebug() << "VpnConnection: DNS flushed on disconnect";
+                        else qWarning() << "VpnConnection: Failed to flush DNS on disconnect";
+                        w->deleteLater();
+                    });
+                }
+                {
+                    auto reply = iface->clearSavedRoutes();
+                    auto *w = new QRemoteObjectPendingCallWatcher(reply);
+                    QObject::connect(w, &QRemoteObjectPendingCallWatcher::finished, [w]() {
+                        if (w->returnValue().toBool()) qDebug() << "VpnConnection: Saved routes cleared";
+                        else qWarning() << "VpnConnection: Failed to clear saved routes";
+                        w->deleteLater();
+                    });
+                }
             } break;
             default:
                 break;
@@ -162,7 +194,13 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
                         m_settings->addVpnSite(mode, site, ip);
                     }
                     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-                        iface->flushDns();
+                        auto reply = iface->flushDns();
+                        auto *w = new QRemoteObjectPendingCallWatcher(reply);
+                        QObject::connect(w, &QRemoteObjectPendingCallWatcher::finished, [w]() {
+                            if (!w->returnValue().toBool())
+                                qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
+                            w->deleteLater();
+                        });
                     });
                     break;
                 }
