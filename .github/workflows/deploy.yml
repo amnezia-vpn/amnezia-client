@@ -452,17 +452,16 @@ jobs:
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
         bash deploy/build_macos.sh -n
 
-    - name: 'Pack macOS installer'
+    - name: 'Prepare macOS installer artifact'
       run: |
-        cd deploy/build/pkg
-        zip -r ../../FBLinkVPN_${VERSION}_macos.zip FBLink.pkg
-        cd ../../..
+        cp deploy/build/pkg/FBLink.pkg deploy/FBLinkVPN_${VERSION}_macos.pkg
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: FBLinkVPN_${{ env.VERSION }}_macos.zip
-        path: deploy/FBLinkVPN_${{ env.VERSION }}_macos.zip
+        name: FBLinkVPN_${{ env.VERSION }}_macos.pkg
+        path: deploy/FBLinkVPN_${{ env.VERSION }}_macos.pkg
+        compression-level: 0
         retention-days: 7
 
     - name: 'Upload unpacked artifact'

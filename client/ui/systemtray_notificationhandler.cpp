@@ -155,8 +155,7 @@ void SystemTrayNotificationHandler::notify(NotificationHandler::Message type,
                                            int timerMsec) {
   Q_UNUSED(type);
 
-  QIcon icon(BrandTrayIcon);
-  m_systemTrayIcon.showMessage(title, message, icon, timerMsec);
+  m_systemTrayIcon.showMessage(title, message, QSystemTrayIcon::NoIcon, timerMsec);
 }
 
 void SystemTrayNotificationHandler::showHideWindow() {
