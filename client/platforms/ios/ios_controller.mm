@@ -1157,6 +1157,15 @@ void IosController::fetchProducts(const QStringList &productIds,
                     m["displayPrice"] = QString::fromUtf8([p[@"displayPrice"] UTF8String]);
                 }
                 m["currencyCode"] = QString::fromUtf8([p[@"currencyCode"] UTF8String]);
+                if (p[@"priceAmount"]) {
+                    m["priceAmount"] = [p[@"priceAmount"] doubleValue];
+                }
+                if (p[@"subscriptionBillingMonths"]) {
+                    m["subscriptionBillingMonths"] = [p[@"subscriptionBillingMonths"] doubleValue];
+                }
+                if (p[@"displayPricePerMonth"]) {
+                    m["displayPricePerMonth"] = QString::fromUtf8([p[@"displayPricePerMonth"] UTF8String]);
+                }
                 outProducts.push_back(m);
             }
 

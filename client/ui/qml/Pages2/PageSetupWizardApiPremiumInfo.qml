@@ -222,14 +222,8 @@ PageType {
             if (Qt.platform.os === "ios" || IsMacOsNeBuild) {
                 PageController.showBusyIndicator(true)
                 var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
-                var ok = ApiConfigsController.importPremiumFromAppStore(storeId)
+                ApiConfigsController.importPremiumFromAppStore(storeId)
                 PageController.showBusyIndicator(false)
-                if (!ok) {
-                    var endpoint = ApiServicesModel.getStoreEndpoint()
-                    Qt.openUrlExternally(endpoint)
-                    PageController.closePage()
-                    PageController.closePage()
-                }
                 return
             }
             if (plan.checkoutUrl) {
@@ -237,15 +231,6 @@ PageType {
                 PageController.closePage()
                 PageController.closePage()
                 return
-            }
-            PageController.showBusyIndicator(true)
-            var importOk = ApiConfigsController.importService()
-            PageController.showBusyIndicator(false)
-            if (!importOk) {
-                var fallbackEndpoint = ApiServicesModel.getStoreEndpoint()
-                Qt.openUrlExternally(fallbackEndpoint)
-                PageController.closePage()
-                PageController.closePage()
             }
         }
     }

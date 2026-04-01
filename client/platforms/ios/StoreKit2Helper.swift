@@ -94,20 +94,54 @@ public class StoreKit2Helper: NSObject {
         product.priceFormatStyle.locale.currencyCode ?? ""
     }
 
+    private func subscriptionBillingMonths(_ period: Product.SubscriptionPeriod) -> Double {
+        let v = Double(period.value)
+        switch period.unit {
+        case .day:
+            return v / 30.0
+        case .week:
+            return v * 7.0 / 30.0
+        case .month:
+            return v
+        case .year:
+            return v * 12.0
+        @unknown default:
+            return v
+        }
+    }
+
     public func fetchProducts(identifiers: Set<String>, completion: @escaping ([NSDictionary], [String], NSError?) -> Void) {
         Task {
             do {
                 let products = try await Product.products(for: identifiers)
                 let productDicts = products.map { product -> NSDictionary in
                     let currencyCode = storefrontCurrencyCode(for: product)
-                    return [
+                    var dict: [String: Any] = [
                         "productId": product.id,
                         "title": product.displayName,
                         "description": product.description,
                         "price": "\(product.price)",
                         "displayPrice": product.displayPrice,
-                        "currencyCode": currencyCode
+                        "currencyCode": currencyCode,
+                        "priceAmount": NSDecimalNumber(decimal: product.price).doubleValue
                     ]
+                    if let sub = product.subscription {
+                        let months = subscriptionBillingMonths(sub.subscriptionPeriod)
+                        dict["subscriptionBillingMonths"] = months
+                        if months > 1e-6 {
+                            let perMonth = product.price / Decimal(months)
+                            let formatter = NumberFormatter()
+                            formatter.numberStyle = .currency
+                            formatter.locale = product.priceFormatStyle.locale
+                            if !currencyCode.isEmpty {
+                                formatter.currencyCode = currencyCode
+                            }
+                            if let perMonthStr = formatter.string(from: NSDecimalNumber(decimal: perMonth)) {
+                                dict["displayPricePerMonth"] = perMonthStr
+                            }
+                        }
+                    }
+                    return dict as NSDictionary
                 }
                 let fetchedIds = Set(products.map { $0.id })
                 let invalidIdentifiers = identifiers.filter { !fetchedIds.contains($0) }

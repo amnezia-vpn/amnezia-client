@@ -9,12 +9,14 @@
 #include "ui/controllers/systemController.h"
 #include "version.h"
 #include <QClipboard>
+#include <QCoreApplication>
 #include <QDebug>
 #include <QEventLoop>
 #include <QHash>
 #include <QJsonArray>
 #include <QSet>
 #include <QVariantMap>
+#include <limits>
 
 #include "platforms/ios/ios_controller.h"
 
@@ -47,6 +49,9 @@ namespace
         constexpr char subscriptionPlans[] = "subscription_plans";
         constexpr char storeProductId[] = "store_product_id";
         constexpr char priceLabel[] = "price_label";
+        constexpr char subtitle[] = "subtitle";
+        constexpr char isTrial[] = "is_trial";
+        constexpr char minPriceLabel[] = "min_price_label";
 
         constexpr char apiPayload[] = "api_payload";
         constexpr char keyPayload[] = "key_payload";
@@ -249,6 +254,13 @@ namespace
     }
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
+    struct StoreKitPlanQuote {
+        QString displayPrice;
+        double priceAmount = 0.0;
+        double subscriptionBillingMonths = 0.0;
+        QString displayPricePerMonth;
+    };
+
     void mergeStoreKitPricesIntoPremiumPlans(QJsonObject &data)
     {
         QJsonArray services = data.value(configKey::services).toArray();
@@ -299,20 +311,25 @@ namespace
                                                  });
         loop.exec();
 
-        QHash<QString, QString> idToDisplayPrice;
-        idToDisplayPrice.reserve(fetchedProducts.size());
+        QHash<QString, StoreKitPlanQuote> idToQuote;
+        idToQuote.reserve(fetchedProducts.size());
         for (const QVariantMap &product : fetchedProducts) {
             const QString id = product.value(QStringLiteral("productId")).toString();
             if (id.isEmpty()) {
                 continue;
             }
+            StoreKitPlanQuote quote;
             QString display = product.value(QStringLiteral("displayPrice")).toString();
             if (display.isEmpty()) {
                 const QString price = product.value(QStringLiteral("price")).toString();
                 const QString currencyCode = product.value(QStringLiteral("currencyCode")).toString();
                 display = currencyCode.isEmpty() ? price : (price + QLatin1Char(' ') + currencyCode);
             }
-            idToDisplayPrice.insert(id, display);
+            quote.displayPrice = display;
+            quote.priceAmount = product.value(QStringLiteral("priceAmount")).toDouble();
+            quote.subscriptionBillingMonths = product.value(QStringLiteral("subscriptionBillingMonths")).toDouble();
+            quote.displayPricePerMonth = product.value(QStringLiteral("displayPricePerMonth")).toString();
+            idToQuote.insert(id, quote);
         }
 
         for (int i = 0; i < services.size(); ++i) {
@@ -324,25 +341,56 @@ namespace
             QJsonArray plans = description.value(configKey::subscriptionPlans).toArray();
 
             QJsonArray mergedPlans;
+            double minMonthlyAmount = std::numeric_limits<double>::infinity();
+            QString minMonthlyDisplay;
+
             for (const QJsonValue &planValue : plans) {
                 if (!planValue.isObject()) {
                     continue;
                 }
                 QJsonObject planObject = planValue.toObject();
+                const bool trial = planObject.value(configKey::isTrial).toBool();
                 const QString storeId = planObject.value(configKey::storeProductId).toString();
+
                 if (storeId.isEmpty()) {
                     continue;
                 }
-                const auto priceIt = idToDisplayPrice.constFind(storeId);
-                if (priceIt == idToDisplayPrice.cend()) {
+
+                const auto quoteIt = idToQuote.constFind(storeId);
+                if (quoteIt == idToQuote.cend()) {
                     continue;
                 }
-                planObject.insert(configKey::priceLabel, *priceIt);
+
+                const StoreKitPlanQuote &quote = *quoteIt;
+                planObject.insert(configKey::priceLabel, quote.displayPrice);
+
+                const double months = quote.subscriptionBillingMonths;
+                if (!trial && months > 1.0 + 1e-6 && !quote.displayPricePerMonth.isEmpty()) {
+                    planObject.insert(
+                            configKey::subtitle,
+                            QCoreApplication::translate("ApiConfigsController", "%1/mo", "IAP: price per month in plan subtitle")
+                                    .arg(quote.displayPricePerMonth));
+                }
+
+                if (!trial && quote.priceAmount > 0.0) {
+                    const double monthsForMin = months > 1e-6 ? months : 1.0;
+                    const double monthly = quote.priceAmount / monthsForMin;
+                    if (monthly < minMonthlyAmount - 1e-9) {
+                        minMonthlyAmount = monthly;
+                        minMonthlyDisplay = !quote.displayPricePerMonth.isEmpty() ? quote.displayPricePerMonth : quote.displayPrice;
+                    }
+                }
+
                 mergedPlans.append(planObject);
             }
-            plans = mergedPlans;
 
-            description.insert(configKey::subscriptionPlans, plans);
+            description.insert(configKey::subscriptionPlans, mergedPlans);
+            if (minMonthlyAmount < std::numeric_limits<double>::infinity() && !minMonthlyDisplay.isEmpty()) {
+                description.insert(configKey::minPriceLabel,
+                                   QCoreApplication::translate("ApiConfigsController", "from %1 per month",
+                                                               "IAP: card footer minimum monthly price from StoreKit")
+                                           .arg(minMonthlyDisplay));
+            }
             service.insert(configKey::serviceDescription, description);
             services.replace(i, service);
         }
