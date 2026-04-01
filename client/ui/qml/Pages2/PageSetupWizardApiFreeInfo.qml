@@ -15,13 +15,10 @@ PageType {
 
     property string freeHeaderName: ""
     property string freeHeaderDescription: ""
-    property string freeFeaturesHtml: ""
 
     function syncFromModel() {
         root.freeHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
         root.freeHeaderDescription = String(ApiServicesModel.getSelectedServiceData("serviceDescription"))
-        var text = ApiServicesModel.getSelectedServiceData("features")
-        root.freeFeaturesHtml = String(text).replace("%1", LanguageModel.getCurrentSiteUrl("free")).replace("/free", "")
     }
 
     Component.onCompleted: syncFromModel()
@@ -86,28 +83,6 @@ PageType {
                 Layout.bottomMargin: 24
 
                 benefitsModel: ApiBenefitsModel
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
-
-                visible: root.freeFeaturesHtml.length > 0 && ApiBenefitsModel.rowCount() === 0
-
-                textFormat: Text.RichText
-                text: root.freeFeaturesHtml
-
-                onLinkActivated: function(link) {
-                    Qt.openUrlExternally(link)
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
-                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
-                }
             }
 
             ParagraphTextType {

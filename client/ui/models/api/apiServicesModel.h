@@ -20,7 +20,6 @@ public:
         QString price;
 
         QString description;
-        QString features;
         QString cardDescription;
 
         QString termsOfUseUrl;
@@ -50,6 +49,8 @@ public:
 
         QJsonArray subscriptionPlansJson;
         QJsonArray benefits;
+
+        QString minPriceLabel;
     };
 
     enum Roles {
@@ -60,11 +61,11 @@ public:
         SpeedRole,
         TimeLimitRole,
         RegionRole,
-        FeaturesRole,
         PriceRole,
         EndDateRole,
         TermsOfUseUrlRole,
         PrivacyPolicyUrlRole,
+        ShowRecommendedRole,
         OrderRole
     };
 

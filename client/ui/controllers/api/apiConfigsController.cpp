@@ -918,6 +918,9 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
         if (apiConfig.contains(apiDefs::key::isInAppPurchase)) {
             newApiConfig.insert(apiDefs::key::isInAppPurchase, apiConfig.value(apiDefs::key::isInAppPurchase));
         }
+        if (apiConfig.contains(apiDefs::key::isTestPurchase)) {
+            newApiConfig.insert(apiDefs::key::isTestPurchase, apiConfig.value(apiDefs::key::isTestPurchase));
+        }
 
         newServerConfig.insert(configKey::apiConfig, newApiConfig);
         newServerConfig.insert(configKey::authData, gatewayRequestData.authData);

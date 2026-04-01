@@ -187,6 +187,7 @@
         <file>ui/qml/Controls2/TextTypes/LabelTextType.qml</file>
         <file>ui/qml/Controls2/TextTypes/ListItemTitleType.qml</file>
         <file>ui/qml/Controls2/TextTypes/ParagraphTextType.qml</file>
+        <file>ui/qml/Controls2/TextTypes/BadgeTextType.qml</file>
         <file>ui/qml/Controls2/TextTypes/SmallTextType.qml</file>
         <file>ui/qml/Controls2/TopCloseButtonType.qml</file>
         <file>ui/qml/Controls2/VerticalRadioButton.qml</file>

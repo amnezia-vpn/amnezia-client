@@ -84,6 +84,9 @@ PageType {
                 bodyText: cardDescription
                 footerText: price
 
+                showRecommendedBadge: showRecommended && isServiceAvailable
+                recommendedText: qsTr("Recommended")
+
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: {

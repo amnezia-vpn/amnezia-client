@@ -29,7 +29,6 @@ namespace
 
         constexpr char description[] = "description";
         constexpr char cardDescription[] = "card_description";
-        constexpr char features[] = "features";
 
         constexpr char availableCountries[] = "available_countries";
 
@@ -38,6 +37,7 @@ namespace
         constexpr char isAvailable[] = "is_available";
 
         constexpr char subscriptionPlans[] = "subscription_plans";
+        constexpr char minPriceLabel[] = "min_price_label";
         constexpr char benefits[] = "benefits";
     }
 
@@ -110,10 +110,10 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     case RegionRole: {
         return apiServiceData.serviceInfo.region;
     }
-    case FeaturesRole: {
-        return apiServiceData.serviceInfo.features;
-    }
     case PriceRole: {
+        if (serviceType == serviceType::amneziaPremium && !apiServiceData.minPriceLabel.isEmpty()) {
+            return apiServiceData.minPriceLabel;
+        }
         auto price = apiServiceData.serviceInfo.price;
         if (price == "free") {
             return tr("Free");
@@ -132,6 +132,9 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     }
     case PrivacyPolicyUrlRole: {
         return apiServiceData.serviceInfo.privacyPolicyUrl;
+    }
+    case ShowRecommendedRole: {
+        return serviceType == serviceType::amneziaPremium;
     }
     case OrderRole: {
         if (serviceType == serviceType::amneziaPremium) {
@@ -263,11 +266,11 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[SpeedRole] = "speed";
     roles[TimeLimitRole] = "timeLimit";
     roles[RegionRole] = "region";
-    roles[FeaturesRole] = "features";
     roles[PriceRole] = "price";
     roles[EndDateRole] = "endDate";
     roles[TermsOfUseUrlRole] = "termsOfUseUrl";
     roles[PrivacyPolicyUrlRole] = "privacyPolicyUrl";
+    roles[ShowRecommendedRole] = "showRecommended";
     roles[OrderRole] = "order";
 
     return roles;
@@ -292,12 +295,15 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
 
     serviceData.serviceInfo.cardDescription = serviceDescription.value(configKey::cardDescription).toString();
     serviceData.serviceInfo.description = serviceDescription.value(configKey::description).toString();
-    serviceData.serviceInfo.features = serviceDescription.value(configKey::features).toString();
     serviceData.serviceInfo.termsOfUseUrl = serviceDescription.value(apiDefs::key::termsOfUseUrl).toString();
     serviceData.serviceInfo.privacyPolicyUrl = serviceDescription.value(apiDefs::key::privacyPolicyUrl).toString();
 
     serviceData.subscriptionPlansJson = serviceDescription.value(configKey::subscriptionPlans).toArray();
     serviceData.benefits = serviceDescription.value(configKey::benefits).toArray();
+
+    if (serviceType == serviceType::amneziaPremium) {
+        serviceData.minPriceLabel = serviceDescription.value(configKey::minPriceLabel).toString().trimmed();
+    }
 
     serviceData.supportInfo = data.value(apiDefs::key::supportInfo).toObject();
 
