@@ -3,7 +3,6 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QFile>
-#include <QHostInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QObject>
@@ -114,25 +113,6 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 
                     // TODO: add error code handling for all routeAddList (or rework the code below)
                     iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
-
-                    if (m_settings->isSitesSplitTunnelingEnabled()) {
-                        if (!usesLegacyDesktopSiteRouting(m_vpnConfiguration)) {
-                            qDebug() << "VpnConnection::onConnectionStateChanged: XRay uses managed routing profiles, skipping legacy desktop site routes";
-                        } else {
-                            iface->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
-                            // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
-                            if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
-                                QTimer::singleShot(1000, m_vpnProtocol.data(),
-                                                   [this]() { addSitesRoutes(m_vpnProtocol->vpnGateway(), m_settings->routeMode()); });
-                            } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
-                                iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
-                                iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
-
-                                iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
-                                addSitesRoutes(m_vpnProtocol->routeGateway(), m_settings->routeMode());
-                            }
-                        }
-                    }
                 }
             } break;
             case Vpn::ConnectionState::Disconnected:
@@ -171,57 +151,6 @@ const QString &VpnConnection::remoteAddress() const
     return m_remoteAddress;
 }
 
-void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
-{
-#ifdef AMNEZIA_DESKTOP
-    QStringList ips;
-    QStringList sites;
-    const QVariantMap &m = m_settings->vpnSites(mode);
-    for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
-        if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
-            ips.append(i.key());
-        } else {
-            if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
-                ips.append(i.value().toString());
-            }
-            sites.append(i.key());
-        }
-    }
-    ips.removeDuplicates();
-
-    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->routeAddList(gw, ips);
-    });
-
-    // re-resolve domains
-    for (const QString &site : sites) {
-        const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
-            const QList<QHostAddress> &addresses = hostInfo.addresses();
-            QString ipv4Addr;
-            for (const QHostAddress &addr : hostInfo.addresses()) {
-                if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-                    const QString &ip = addr.toString();
-                    // qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
-                    if (!ips.contains(ip)) {
-                        IpcClient::withInterface([&gw, &ip](QSharedPointer<IpcInterfaceReplica> iface) {
-                            iface->routeAddList(gw, QStringList() << ip);
-                        });
-                        m_settings->addVpnSite(mode, site, ip);
-                    }
-                    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-                        auto reply = iface->flushDns();
-                        if (!reply.waitForFinished() || !reply.returnValue())
-                            qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
-                    });
-                    break;
-                }
-            }
-        };
-        QHostInfo::lookupHost(site, this, cbResolv);
-    }
-#endif
-}
-
 QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
 {
     return m_vpnProtocol;
@@ -250,10 +179,9 @@ ErrorCode VpnConnection::lastError() const
 void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &vpnConfiguration)
 {
-    qDebug() << QString("Trying to connect to VPN, server index is %1, container is %2, route mode is")
+    qDebug() << QString("Trying to connect to VPN, server index is %1, container is %2")
                         .arg(serverIndex)
-                        .arg(ContainerProps::containerToString(container))
-             << m_settings->routeMode();
+                        .arg(ContainerProps::containerToString(container));
 
     m_remoteAddress = NetworkUtilities::getIPAddress(credentials.hostName);
     setConnectionState(Vpn::ConnectionState::Connecting);
@@ -322,8 +250,6 @@ void VpnConnection::appendKillSwitchConfig()
 
 void VpnConnection::appendSplitTunnelingConfig()
 {
-    bool allowSiteBasedSplitTunneling = true;
-
     // this block is for old native configs and for old self-hosted configs
     auto protocolName = m_vpnConfiguration.value(config_key::vpnproto).toString();
     const bool isXrayBasedProtocol = isXrayBasedProtocolName(protocolName);
@@ -343,7 +269,6 @@ void VpnConnection::appendSplitTunnelingConfig()
     }
 
     if (protocolName == ProtocolProps::protoToString(Proto::Awg) || protocolName == ProtocolProps::protoToString(Proto::WireGuard)) {
-        allowSiteBasedSplitTunneling = false;
         auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
         if (configData.value(config_key::allowed_ips).isString()) {
             QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value(config_key::allowed_ips).toString().split(", "));
@@ -388,40 +313,21 @@ void VpnConnection::appendSplitTunnelingConfig()
 
         QJsonArray allowedIpsJsonArray = configData.value(config_key::allowed_ips).toArray();
         if (allowedIpsJsonArray.contains("0.0.0.0/0") && allowedIpsJsonArray.contains("::/0")) {
-            allowSiteBasedSplitTunneling = true;
+            // Full-tunnel WG/AWG config is valid. Legacy site split remains disabled.
         }
     }
 
     Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
     QJsonArray sitesJsonArray;
     QSettings subscriptionSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
-    const bool canUseSiteSplitTunneling = subscriptionSettings.value("subscriptionCanUseSiteSplitTunneling", false).toBool();
     const bool canUseAppSplitTunneling = subscriptionSettings.value("subscriptionCanUseAppSplitTunneling", false).toBool();
 
     const bool usesManagedXrayRouting = isXrayBasedProtocol && xrayHasManagedRouting;
-    const bool usesLegacySiteSplitTunneling = canUseSiteSplitTunneling && m_settings->isSitesSplitTunnelingEnabled();
 
     if (usesManagedXrayRouting) {
-        routeMode = m_settings->routeMode();
-        qDebug() << "XRay config already contains routing rules, preserving route mode for embedded routing:" << routeMode;
-    } else if (usesLegacySiteSplitTunneling) {
-        routeMode = m_settings->routeMode();
-        if (isXrayBasedProtocol) {
-            qDebug() << "XRay split tunneling is handled by VIP routing profiles, skipping legacy OS-level site split tunneling";
-        } else if (allowSiteBasedSplitTunneling) {
-            auto sites = m_settings->getVpnIps(routeMode);
-            for (const auto &site : sites) {
-                sitesJsonArray.append(site);
-            }
-
-            if (sitesJsonArray.isEmpty()) {
-                routeMode = Settings::RouteMode::VpnAllSites;
-            } else if (routeMode == Settings::VpnOnlyForwardSites) {
-                // Allow traffic to FBLink DNS
-                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
-                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
-            }
-        }
+        qDebug() << "XRay config contains managed routing rules; legacy site split tunneling is disabled";
+    } else if (isXrayBasedProtocol) {
+        qWarning() << "XRay VIP routing rules are missing in config, falling back to full-tunnel until profiles are synced";
     }
 
     m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
@@ -452,20 +358,14 @@ void VpnConnection::appendSplitTunnelingConfig()
     m_vpnConfiguration.insert(config_key::appSplitTunnelType, appsRouteMode);
     m_vpnConfiguration.insert(config_key::splitTunnelApps, appsJsonArray);
 
-    QString siteSplitStatus = "disabled";
+    QString siteSplitStatus = "deprecated (disabled)";
     if (usesManagedXrayRouting) {
-        siteSplitStatus = "managed by XRay";
-    } else if (usesLegacySiteSplitTunneling) {
-        if (isXrayBasedProtocol) {
-            siteSplitStatus = xrayHasManagedRouting ? "managed by XRay" : "waiting for XRay routing profiles";
-        } else {
-            siteSplitStatus = "enabled";
-        }
+        siteSplitStatus = "managed by XRay routing profiles (legacy disabled)";
+    } else if (isXrayBasedProtocol) {
+        siteSplitStatus = "disabled (no XRay routing rules)";
     }
 
-    qDebug() << QString("Site split tunneling is %1, route mode is %2")
-                        .arg(siteSplitStatus)
-                        .arg(routeMode);
+    qDebug() << QString("Site split tunneling is %1").arg(siteSplitStatus);
     qDebug() << QString("App split tunneling is %1, route mode is %2")
                         .arg((canUseAppSplitTunneling && m_settings->isAppsSplitTunnelingEnabled()) ? "enabled" : "disabled")
                         .arg(appsRouteMode);

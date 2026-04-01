@@ -168,6 +168,7 @@ type RoutingProfile struct {
 	UserID             uint                 `gorm:"not null;index"`
 	Name               string               `gorm:"not null"`
 	Code               string               `gorm:"default:'';index"`
+	TemplateCode       string               `gorm:"default:'';index"`
 	Kind               RoutingProfileKind   `gorm:"default:'custom'"`
 	Action             RoutingProfileAction `gorm:"default:'direct'"`
 	Enabled            bool                 `gorm:"default:false"`

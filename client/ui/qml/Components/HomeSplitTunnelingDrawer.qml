@@ -12,7 +12,7 @@ DrawerType2 {
     id: root
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
-    property bool canUseSiteSplitTunneling: FBLinkController.canUseSiteSplitTunneling
+    property bool canManageRoutingProfiles: FBLinkController.canManageRoutingProfiles
     property bool canUseAppSplitTunneling: FBLinkController.canUseAppSplitTunneling
 
     function openVipFeature(page, isAllowed) {
@@ -43,44 +43,23 @@ DrawerType2 {
             Layout.leftMargin: 16
             Layout.bottomMargin: 16
 
-            headerText: qsTr("Раздельное туннелирование")
-            descriptionText:  qsTr("Разделяйте трафик между VPN и прямым подключением, если у вас активен VIP")
+            headerText: qsTr("Маршрутизация")
+            descriptionText:  qsTr("Управляйте сайтами через VIP-профили и раздельным туннелированием приложений")
         }
 
         LabelWithButtonType {
-            id: splitTunnelingSwitch
+            id: siteRoutingButton
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
-
-            text: qsTr("Раздельное туннелирование на сервере")
-            descriptionText: qsTr("Включено\nНедоступно для отключения на текущем сервере")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-            clickedFunction: function() {
-                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-                root.closeTriggered()
-            }
-        }
-
-        DividerType {
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
-        }
-
-        LabelWithButtonType {
-            id: siteBasedSplitTunnelingSwitch
-            Layout.fillWidth: true
-            Layout.topMargin: 16
-
-            text: qsTr("Раздельное туннелирование по сайтам")
-            descriptionText: root.canUseSiteSplitTunneling
-                ? (SitesModel.isTunnelingEnabled ? qsTr("Включено") : qsTr("Выключено"))
+            text: qsTr("Маршрутизация сайтов (VIP)")
+            descriptionText: root.canManageRoutingProfiles
+                ? qsTr("Системные пресеты и ваши профили")
                 : qsTr("Доступно только в VIP")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
-                root.openVipFeature(PageEnum.PageSettingsSplitTunneling, root.canUseSiteSplitTunneling)
+                root.openVipFeature(PageEnum.PageSettingsVipRoutingProfiles, root.canManageRoutingProfiles)
             }
         }
 

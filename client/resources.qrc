@@ -226,6 +226,8 @@
         <file>ui/qml/Pages2/PageSettingsServersList.qml</file>
         <file>ui/qml/Pages2/PageSettingsSplitTunneling.qml</file>
         <file>ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml</file>
+        <file>ui/qml/Pages2/PageSettingsVipRoutingProfileEditor.qml</file>
+        <file>ui/qml/Pages2/PageSettingsVipPresetCatalog.qml</file>
         <file>ui/qml/Pages2/PageSettingsNewsNotifications.qml</file>
         <file>ui/qml/Pages2/PageSettingsNewsDetail.qml</file>
         <file>ui/qml/Pages2/PageProtocolAwgClientSettings.qml</file>
@@ -513,5 +515,3 @@
         <file>images/flagKit/AD.svg</file>
     </qresource>
 </RCC>
-<!-- touched -->
-<!-- touched2 -->

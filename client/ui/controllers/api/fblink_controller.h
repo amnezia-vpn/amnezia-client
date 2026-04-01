@@ -54,6 +54,7 @@ public:
     Q_INVOKABLE void fetchRoutingProfiles();
     Q_INVOKABLE void saveRoutingProfile(const QVariantMap &profile);
     Q_INVOKABLE void deleteRoutingProfile(int id);
+    Q_INVOKABLE void copySystemRoutingProfile(const QString &code);
     Q_INVOKABLE void logout();
 
     bool isLoggedIn() const;
@@ -97,6 +98,7 @@ signals:
     void routingProfilesError(const QString &errorMessage);
     void routingProfileSaved();
     void routingProfileDeleted();
+    void routingSystemProfileCopied(const QVariantMap &profile, bool created);
     void requestError(const QString &errorMessage);
     void loadingChanged();
 
@@ -118,6 +120,7 @@ private:
     void fetchRoutingProfiles(bool allowRefreshRetry);
     void saveRoutingProfile(const QVariantMap &profile, bool allowRefreshRetry);
     void deleteRoutingProfile(int id, bool allowRefreshRetry);
+    void copySystemRoutingProfile(const QString &code, bool allowRefreshRetry);
     void createPayment(const QString &plan, bool allowRefreshRetry);
     void setAutoRenew(bool enabled, bool allowRefreshRetry);
     void setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry);
@@ -146,4 +149,3 @@ private:
 };
 
 #endif // FBLINKCONTROLLER_H
-// touched

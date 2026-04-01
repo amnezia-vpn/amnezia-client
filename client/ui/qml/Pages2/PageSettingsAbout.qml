@@ -278,18 +278,18 @@ PageType {
         readonly property string description: qsTr("Задайте вопрос нашей команде")
         readonly property string imageSource: "qrc:/images/controls/telegram.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally("https://t.me/fblink_vpn")
+            Qt.openUrlExternally("https://t.me/frakebit_support")
         }
     }
 
     QtObject {
         id: mailSupport
 
-        readonly property string title: qsTr("support@fblink.com")
+        readonly property string title: qsTr("support@frakebit.com")
         readonly property string description: qsTr("По вопросам и жалобам")
         readonly property string imageSource: "qrc:/images/controls/mail.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally("mailto:support@fblink.com")
+            Qt.openUrlExternally("mailto:support@frakebit.com")
         }
     }
 }

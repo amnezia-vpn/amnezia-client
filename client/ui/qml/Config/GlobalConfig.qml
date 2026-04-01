@@ -15,6 +15,9 @@ Item {
     readonly property int desktopMinHeight: 720
 
     readonly property int defaultMargin: 20
+    property var vipRoutingProfileEditorDraft: ({})
+    property string vipRoutingProfilesStatusMessage: ""
+    property bool vipRoutingProfilesStatusIsError: false
 
     function isMobile() {
         if (Qt.platform.os === "android" ||

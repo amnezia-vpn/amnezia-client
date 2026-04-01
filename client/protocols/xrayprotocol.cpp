@@ -15,6 +15,7 @@
 #include <QtCore/qlogging.h>
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qprocess.h>
+#include <QThread>
 
 #ifdef Q_OS_WIN
     #include <winsock2.h>
@@ -634,8 +635,29 @@ ErrorCode XrayProtocol::setupRouting() {
         const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
         const QStringList physicalDnsResolvers = dnsServersForInterfaceIndex(static_cast<ULONG>(qMax(inetAdapterIndex, 0)));
 #endif
-        auto createTun = iface->createTun(tunName, fblink::protocols::xray::defaultLocalAddr);
-        if (!createTun.waitForFinished() || !createTun.returnValue()) {
+        bool tunReady = false;
+        static constexpr int kMaxCreateTunAttempts = 4;
+        for (int attempt = 1; attempt <= kMaxCreateTunAttempts; ++attempt) {
+            auto createTun = iface->createTun(tunName, fblink::protocols::xray::defaultLocalAddr);
+            if (createTun.waitForFinished() && createTun.returnValue()) {
+                tunReady = true;
+                break;
+            }
+
+            qWarning() << "Failed to assign IP address for TUN, attempt"
+                       << attempt << "of" << kMaxCreateTunAttempts;
+
+            // The previous adapter instance can be left in a transient state on Windows.
+            // Clean it before retrying to avoid failing the whole connection sequence.
+            auto deleteTun = iface->deleteTun(tunName);
+            deleteTun.waitForFinished();
+
+            if (attempt < kMaxCreateTunAttempts) {
+                QThread::msleep(250);
+            }
+        }
+
+        if (!tunReady) {
             qCritical() << "Failed to assign IP address for TUN";
             return ErrorCode::InternalError;
         }
@@ -693,8 +715,13 @@ ErrorCode XrayProtocol::setupRouting() {
                 qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
         }
 
-        const bool requiresFullTunnelRoutes =
+        bool requiresFullTunnelRoutes =
                 m_routeMode == Settings::RouteMode::VpnAllSites || m_hasInternalRoutingRules;
+        if (!m_hasInternalRoutingRules && m_routeMode != Settings::RouteMode::VpnAllSites) {
+            qWarning() << "XrayProtocol::setupRouting(): split mode requested without embedded routing rules;"
+                          " forcing full-tunnel routes to keep connectivity";
+            requiresFullTunnelRoutes = true;
+        }
         if (requiresFullTunnelRoutes) {
             static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
 

@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"strings"
 	"vpn-backend/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -48,9 +49,18 @@ func (h *UserHandler) GetRoutingProfiles(c *gin.Context) {
 		return
 	}
 
+	customByTemplateCode := buildRoutingTemplateCopyIndex(profiles)
 	items := make([]map[string]interface{}, 0, len(profiles))
 	for _, profile := range profiles {
-		items = append(items, routingProfileToMap(profile))
+		item := routingProfileToMap(profile)
+		if profile.Kind == models.RoutingProfileSystem {
+			copyProfile, alreadyAdded := customByTemplateCode[profile.Code]
+			item["already_added"] = alreadyAdded
+			if alreadyAdded {
+				item["linked_custom_id"] = copyProfile.ID
+			}
+		}
+		items = append(items, item)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"profiles": items})
@@ -220,4 +230,56 @@ func (h *UserHandler) DeleteRoutingProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "routing profile deleted"})
+}
+
+// POST /api/v1/me/routing-profiles/system/:code/copy
+func (h *UserHandler) CopySystemRoutingProfile(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	if err := ensureRoutingProfileSchema(h.db); err != nil {
+		log.Printf("[ROUTING] failed to ensure routing profile schema for user %d: %v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
+		return
+	}
+
+	if err := ensureDefaultRoutingProfiles(h.db, userID); err != nil {
+		log.Printf("[ROUTING] failed to seed routing profiles for user %d: %v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
+		return
+	}
+
+	sub, err := ensureDefaultSubscription(h.db, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
+		return
+	}
+	if !canManageVIPFeatures(sub) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "VIP required"})
+		return
+	}
+
+	code := strings.TrimSpace(c.Param("code"))
+	if code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "system profile code is required"})
+		return
+	}
+
+	var systemProfile models.RoutingProfile
+	if err := h.db.Where("user_id = ? AND kind = ? AND code = ?", userID, models.RoutingProfileSystem, code).
+		First(&systemProfile).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "system profile not found"})
+		return
+	}
+
+	profile, created, err := ensureCustomRoutingProfileFromTemplate(h.db, userID, systemProfile, true)
+	if err != nil {
+		log.Printf("[ROUTING] failed to copy system profile %q for user %d: %v", code, userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to copy system profile"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"profile": routingProfileToMap(profile),
+		"created": created,
+	})
 }

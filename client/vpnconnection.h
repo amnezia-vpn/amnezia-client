@@ -37,7 +37,6 @@ public:
     QSharedPointer<VpnProtocol> vpnProtocol() const;
 
     const QString &remoteAddress() const;
-    void addSitesRoutes(const QString &gw, Settings::RouteMode mode);
 
 #ifdef Q_OS_ANDROID
     void restoreConnection();

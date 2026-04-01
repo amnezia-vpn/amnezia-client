@@ -39,7 +39,7 @@ func buildSubscriptionCapabilities(sub models.Subscription) subscriptionCapabili
 	case models.PlanVIP:
 		return subscriptionCapabilities{
 			AllowedProtocols:         []string{"vless"},
-			CanUseSiteSplitTunnel:    true,
+			CanUseSiteSplitTunnel:    false, // deprecated: site routing now only via VIP profiles
 			CanUseAppSplitTunnel:     true,
 			CanManageRoutingProfiles: true,
 			CanUseAdBlock:            true,
@@ -196,7 +196,7 @@ func defaultRoutingProfileSeeds() []defaultRoutingProfileSeed {
 }
 
 func ensureRoutingProfileSchema(db *gorm.DB) error {
-	requiredColumns := []string{"Code", "Action", "Description", "Icon", "SortOrder"}
+	requiredColumns := []string{"Code", "TemplateCode", "Action", "Description", "Icon", "SortOrder"}
 	for _, column := range requiredColumns {
 		if db.Migrator().HasColumn(&models.RoutingProfile{}, column) {
 			continue
@@ -227,6 +227,12 @@ func ensureRoutingProfileSchema(db *gorm.DB) error {
 	if err := db.Model(&models.RoutingProfile{}).
 		Where("sort_order IS NULL").
 		UpdateColumn("sort_order", 0).Error; err != nil {
+		return err
+	}
+
+	if err := db.Model(&models.RoutingProfile{}).
+		Where("template_code IS NULL").
+		UpdateColumn("template_code", "").Error; err != nil {
 		return err
 	}
 
@@ -301,16 +307,125 @@ func ensureDefaultRoutingProfiles(db *gorm.DB, userID uint) error {
 		}
 	}
 
+	if err := migrateEnabledSystemProfilesToCustomCopies(db, userID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ensureCustomRoutingProfileFromTemplate(db *gorm.DB, userID uint, template models.RoutingProfile, enabled bool) (models.RoutingProfile, bool, error) {
+	var existing models.RoutingProfile
+	if err := db.Where("user_id = ? AND kind = ? AND template_code = ?", userID, models.RoutingProfileCustom, template.Code).
+		First(&existing).Error; err == nil {
+		return existing, false, nil
+	} else if err != gorm.ErrRecordNotFound {
+		return models.RoutingProfile{}, false, err
+	}
+
+	copyProfile := models.RoutingProfile{
+		UserID:             userID,
+		Name:               template.Name,
+		Code:               "",
+		TemplateCode:       template.Code,
+		Kind:               models.RoutingProfileCustom,
+		Action:             template.Action,
+		Enabled:            enabled,
+		Description:        template.Description,
+		Icon:               template.Icon,
+		SortOrder:          template.SortOrder,
+		DomainsJSON:        template.DomainsJSON,
+		DomainSuffixesJSON: template.DomainSuffixesJSON,
+		CIDRsJSON:          template.CIDRsJSON,
+	}
+
+	if err := db.Create(&copyProfile).Error; err != nil {
+		return models.RoutingProfile{}, false, err
+	}
+	return copyProfile, true, nil
+}
+
+func migrateEnabledSystemProfilesToCustomCopies(db *gorm.DB, userID uint) error {
+	var systemProfiles []models.RoutingProfile
+	if err := db.Where("user_id = ? AND kind = ? AND enabled = ?", userID, models.RoutingProfileSystem, true).
+		Order("sort_order asc, id asc").
+		Find(&systemProfiles).Error; err != nil {
+		return err
+	}
+
+	for _, systemProfile := range systemProfiles {
+		if strings.TrimSpace(systemProfile.Code) == "" {
+			continue
+		}
+
+		customProfile, _, err := ensureCustomRoutingProfileFromTemplate(db, userID, systemProfile, true)
+		if err != nil {
+			return err
+		}
+		if !customProfile.Enabled {
+			if err := db.Model(&models.RoutingProfile{}).
+				Where("id = ? AND user_id = ?", customProfile.ID, userID).
+				Update("enabled", true).Error; err != nil {
+				return err
+			}
+		}
+
+		if err := db.Model(&models.RoutingProfile{}).
+			Where("id = ? AND user_id = ?", systemProfile.ID, userID).
+			Update("enabled", false).Error; err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func decodeJSONStringArray(raw string) []string {
-	if strings.TrimSpace(raw) == "" {
+	trimmedRaw := strings.TrimSpace(raw)
+	if trimmedRaw == "" {
 		return []string{}
 	}
+
+	tryNormalizePlainText := func(text string) []string {
+		text = strings.TrimSpace(text)
+		if text == "" {
+			return []string{}
+		}
+
+		text = strings.Trim(text, "\"'")
+		if text == "" {
+			return []string{}
+		}
+
+		fields := strings.FieldsFunc(text, func(r rune) bool {
+			switch r {
+			case '\n', '\r', '\t', ',', ';':
+				return true
+			default:
+				return false
+			}
+		})
+
+		seen := map[string]struct{}{}
+		normalized := make([]string, 0, len(fields))
+		for _, field := range fields {
+			field = strings.TrimSpace(strings.Trim(field, "\"'"))
+			if field == "" {
+				continue
+			}
+			if _, ok := seen[field]; ok {
+				continue
+			}
+			seen[field] = struct{}{}
+			normalized = append(normalized, field)
+		}
+		sort.Strings(normalized)
+		return normalized
+	}
+
 	var values []string
-	if err := json.Unmarshal([]byte(raw), &values); err != nil {
-		return []string{}
+	if err := json.Unmarshal([]byte(trimmedRaw), &values); err != nil {
+		return tryNormalizePlainText(trimmedRaw)
 	}
 
 	seen := map[string]struct{}{}
@@ -346,6 +461,7 @@ func routingProfileToMap(profile models.RoutingProfile) map[string]interface{} {
 		"id":              profile.ID,
 		"name":            profile.Name,
 		"code":            profile.Code,
+		"template_code":   profile.TemplateCode,
 		"kind":            profile.Kind,
 		"action":          profile.Action,
 		"enabled":         profile.Enabled,
@@ -360,6 +476,24 @@ func routingProfileToMap(profile models.RoutingProfile) map[string]interface{} {
 		"created_at":      profile.CreatedAt,
 		"updated_at":      profile.UpdatedAt,
 	}
+}
+
+func buildRoutingTemplateCopyIndex(profiles []models.RoutingProfile) map[string]models.RoutingProfile {
+	index := map[string]models.RoutingProfile{}
+	for _, profile := range profiles {
+		if profile.Kind == models.RoutingProfileSystem {
+			continue
+		}
+		templateCode := strings.TrimSpace(profile.TemplateCode)
+		if templateCode == "" {
+			continue
+		}
+		if _, exists := index[templateCode]; exists {
+			continue
+		}
+		index[templateCode] = profile
+	}
+	return index
 }
 
 func normalizeRoutingProfileInput(values []string) []string {

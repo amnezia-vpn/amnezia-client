@@ -364,6 +364,23 @@
     </div>
   </div>
 
+  <div id="piholeSyncModal" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal glass" style="max-width:900px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0">🛡 Pi-hole Sync — результаты</h3>
+        <button class="btn btn-secondary" onclick="document.getElementById('piholeSyncModal').style.display='none'">Закрыть</button>
+      </div>
+      <div style="overflow:auto">
+        <table>
+          <thead><tr>
+            <th>Сервер</th><th>Режим</th><th>DNS IP</th><th>Списки</th><th>XRay</th><th>Статус</th><th>Ошибка</th>
+          </tr></thead>
+          <tbody id="piholeSyncBody"><tr><td colspan="7" class="empty">Нет данных</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API = '';
     let token = localStorage.getItem('fblink_admin_token') || '';
@@ -574,7 +591,38 @@
       }).join('');
     }
 
-               <button class="btn btn-secondary" onclick="toggleUserRole(${user.id}, '${user.role}')">${user.role === 'admin' ? 'Сделать user' : 'Сделать admin'}</button>
+    function renderUsers() {
+      const body = document.getElementById('usersBody');
+      const search = normalizeText(document.getElementById('usersSearch')?.value);
+      const roleFilter = document.getElementById('usersRoleFilter')?.value || '';
+      const statusFilter = document.getElementById('usersStatusFilter')?.value || '';
+      const filtered = usersData.filter(user => {
+        const sub = user.subscription || {};
+        const status = String(sub.status || 'none');
+        const matchesSearch = !search || normalizeText(user.email).includes(search);
+        const matchesRole = !roleFilter || user.role === roleFilter;
+        const matchesStatus = !statusFilter || status === statusFilter;
+        return matchesSearch && matchesRole && matchesStatus;
+      });
+      if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="7" class="empty">Ничего не найдено по выбранным фильтрам</td></tr>';
+        return;
+      }
+      body.innerHTML = filtered.map(user => {
+        const sub = user.subscription || {};
+        const statusKind = sub.status === 'active' ? 'ok' : (sub.status === 'expired' ? 'warn' : 'info');
+        return `
+          <tr>
+            <td>${user.id}</td>
+            <td>${escapeHtml(user.email)}</td>
+            <td>${badge(user.role === 'admin' ? 'Администратор' : 'Пользователь', user.role === 'admin' ? 'info' : 'ok')}</td>
+            <td>${escapeHtml(planLabel(sub.plan || 'none'))}</td>
+            <td>${badge(sub.status || '—', statusKind)}</td>
+            <td>${fmtDate(sub.expires_at)}</td>
+            <td><div class="table-actions">
+              <button class="btn btn-success" onclick="upgradeUser(${user.id}, 'basic')">Выдать Premium</button>
+              <button class="btn btn-primary" onclick="upgradeUser(${user.id}, 'vip')">Выдать VIP</button>
+              <button class="btn btn-secondary" onclick="toggleUserRole(${user.id}, '${user.role}')">${user.role === 'admin' ? 'Сделать user' : 'Сделать admin'}</button>
               <button class="btn btn-secondary" onclick="revokeUserKeys(${user.id})">Отозвать ключи</button>
               <button class="btn btn-danger" onclick="deleteUser(${user.id})">Удалить</button>
             </div></td>
@@ -582,13 +630,12 @@
         `;
       }).join('');
     }
-
     function updateServerCountryFilter() {
       const select = document.getElementById('serversCountryFilter');
       const current = select.value;
-      const codes = [...new Set(serversData.map(server => String(server.country_code || '').trim().toUpperCase()).filter(Boolean))].sort();
-      select.innerHTML = '<option value="">Все страны</option>' + codes.map(code => `<option value="${escapeHtml(code)}">${escapeHtml(code)}</option>`).join('');
-      if (codes.includes(current)) { select.value = current; }
+      const codes = [...new Set(serversData.map(s => String(s.country_code || '').trim().toUpperCase()).filter(Boolean))].sort();
+      select.innerHTML = '<option value="">Все страны</option>' + codes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+      if (codes.includes(current)) select.value = current;
     }
 
     function renderServers() {
@@ -597,11 +644,10 @@
       const statusFilter = document.getElementById('serversStatusFilter')?.value || '';
       const countryFilter = document.getElementById('serversCountryFilter')?.value || '';
       const filtered = serversData.filter(server => {
-        const searchBlob = normalizeText([server.name, server.region, server.endpoint, server.host, server.country_code].join(' '));
-        const matchesSearch = !search || searchBlob.includes(search);
-        const matchesStatus = !statusFilter || (statusFilter === 'active' ? !!server.active : !server.active);
-        const matchesCountry = !countryFilter || String(server.country_code || '').toUpperCase() === countryFilter;
-        return matchesSearch && matchesStatus && matchesCountry;
+        const blob = normalizeText([server.name, server.region, server.endpoint, server.host, server.country_code].join(' '));
+        return (!search || blob.includes(search))
+          && (!statusFilter || (statusFilter === 'active' ? !!server.active : !server.active))
+          && (!countryFilter || String(server.country_code || '').toUpperCase() === countryFilter);
       });
       if (!filtered.length) {
         body.innerHTML = '<tr><td colspan="9" class="empty">Серверы по этим фильтрам не найдены</td></tr>';
@@ -625,38 +671,47 @@
         </tr>
       `).join('');
     }
-     </tr>
-      `).join('');
-    }    const statusFilter = document.getElementById('serversStatusFilter')?.value || '';
-      const countryFilter = document.getElementById('serversCountryFilter')?.value || '';
-      const filtered = serversData.filter(server => {
-        const searchBlob = normalizeText([server.name, server.region, server.endpoint, server.host, server.country_code].join(' '));
-        const matchesSearch = !search || searchBlob.includes(search);
-        const matchesStatus = !statusFilter || (statusFilter === 'active' ? !!server.active : !server.active);
-        const matchesCountry = !countryFilter || String(server.country_code || '').toUpperCase() === countryFilter;
-        return matchesSearch && matchesStatus && matchesCountry;
-      });
-      if (!filtered.length) {
-        body.innerHTML = '<tr><td colspan="8" class="empty">Серверы по этим фильтрам не найдены</td></tr>';
-        return;
+
+    async function runPiholeSync() {
+      const btn = document.getElementById('piholeBtn');
+      btn.disabled = true;
+      btn.classList.add('is-loading');
+      btn.textContent = 'Синхронизация...';
+      try {
+        const res = await api('/api/v1/admin/servers/pihole-sync', { method: 'POST', body: '{}' });
+        const data = await res.json().catch(() => ({}));
+        showPiholeSyncResult(data.results || []);
+        loadServers(); // обновить колонку Pi-hole
+      } catch(e) {
+        alert('Ошибка Pi-hole Sync: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('is-loading');
+        btn.textContent = '🛡 Pi-hole Sync';
       }
-      body.innerHTML = filtered.map(server => `
-        <tr>
-          <td>${server.id}</td>
-          <td>${escapeHtml(server.name)}</td>
-          <td>${escapeHtml(server.region || '—')} ${server.country_code ? badge(server.country_code, 'info') : ''}</td>
-          <td>${escapeHtml(server.endpoint || server.host || '—')}</td>
-          <td>AWG: ${server.active_keys}<br>VLESS: ${server.active_vless || 0}</td>
-          <td>${server.max_peers}</td>
-          <td>${badge(server.active ? 'Активен' : 'Отключён', server.active ? 'ok' : 'warn')}</td>
-          <td><div class="table-actions">
-            <button class="btn btn-secondary" onclick='openEditServerModal(${JSON.stringify(server).replace(/'/g, "&apos;")})'>Редактировать</button>
-            <button class="btn btn-secondary" onclick="toggleServer(${server.id})">${server.active ? 'Выключить' : 'Включить'}</button>
-            <button class="btn btn-danger" onclick="deleteServer(${server.id})">Удалить</button>
-          </div></td>
-        </tr>
-      `).join('');
     }
+
+    function showPiholeSyncResult(results) {
+      const modal = document.getElementById('piholeSyncModal');
+      const body = document.getElementById('piholeSyncBody');
+      body.innerHTML = results.map(r => {
+        const ok = !r.error;
+        const statusBadge = ok ? badge('✓ OK', 'ok') : badge('✗ Ошибка', 'bad');
+        const xrayBadge = r.xray_reachable ? badge('XRay ✓', 'ok') : badge('XRay —', 'warn');
+        return `
+          <tr>
+            <td>${escapeHtml(r.server_name)} <span style="color:var(--muted);font-size:12px">#${r.server_id}</span></td>
+            <td>${badge(r.mode_detected || '—', 'info')}</td>
+            <td>${r.dns_ip ? `<code>${escapeHtml(r.dns_ip)}</code>` : '—'}</td>
+            <td>${r.lists_synced || 0} списков</td>
+            <td>${xrayBadge}</td>
+            <td>${statusBadge}</td>
+            <td style="max-width:220px;word-break:break-all;font-size:12px;color:var(--muted)">${escapeHtml(r.error || '')}</td>
+          </tr>`;
+      }).join('') || '<tr><td colspan="7" class="empty">Нет результатов</td></tr>';
+      modal.style.display = 'grid';
+    }
+
 
     function renderPayments() {
       const body = document.getElementById('paymentsBody');

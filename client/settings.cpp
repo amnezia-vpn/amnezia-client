@@ -43,6 +43,8 @@ Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_N
         }
     }
 
+    clearLegacySiteSplitSettings();
+
     m_gatewayEndpoint = gatewayEndpoint;
 }
 
@@ -359,7 +361,26 @@ void Settings::clearSettings()
     auto uuid = getInstallationUuid(false);
     m_settings.clearSettings();
     setInstallationUuid(uuid);
+    clearLegacySiteSplitSettings();
     emit settingsCleared();
+}
+
+void Settings::clearLegacySiteSplitSettings()
+{
+    // Legacy site split tunneling is deprecated in favor of VIP routing profiles.
+    // Keep app split tunneling untouched.
+    const QStringList keysToRemove{
+        "Conf/sitesSplitTunnelingEnabled",
+        "Conf/routeMode",
+        "Conf/AllSites",
+        "Conf/ForwardSites",
+        "Conf/ExceptSites",
+    };
+
+    for (const QString &key : keysToRemove) {
+        m_settings.remove(key);
+    }
+    m_settings.sync();
 }
 
 QString Settings::appsRouteModeString(AppsRouteMode mode) const

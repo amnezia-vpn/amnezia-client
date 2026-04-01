@@ -4,6 +4,15 @@ function appName()
     return installer.value("Name")
 }
 
+function appLinkName()
+{
+    var title = installer.value("Title");
+    if (title && title.length > 0) {
+        return title;
+    }
+    return appName();
+}
+
 function serviceName()
 {
     // Must match SERVICE_NAME in version.h.in exactly.
@@ -70,14 +79,23 @@ Component.prototype.createOperations = function()
     component.createOperations();
 
     if (runningOnWindows()) {
+        var shortcutFileName = appLinkName() + ".lnk";
+        var desktopShortcutPath = QDesktopServices.storageLocation(QDesktopServices.DesktopLocation) + "/" + shortcutFileName;
 
         component.addOperation("CreateShortcut", "@TargetDir@/" + appExecutableFileName(),
-                               QDesktopServices.storageLocation(QDesktopServices.DesktopLocation) + "/" + appName() + ".lnk",
+                               desktopShortcutPath,
                                "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
 
+        var publicDir = installer.environmentVariable("PUBLIC");
+        if (publicDir && publicDir.length > 0) {
+            var publicDesktopShortcutPath = publicDir.replace(/\\/g, "/") + "/Desktop/" + shortcutFileName;
+            component.addElevatedOperation("CreateShortcut", "@TargetDir@/" + appExecutableFileName(),
+                                           publicDesktopShortcutPath,
+                                           "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
+        }
 
         component.addElevatedOperation("CreateShortcut", "@TargetDir@/" + appExecutableFileName(),
-                                       installer.value("AllUsersStartMenuProgramsPath") + "/" + appName() + ".lnk",
+                                       installer.value("AllUsersStartMenuProgramsPath") + "/" + shortcutFileName,
                                        "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
 
         if (!vcRuntimeIsInstalled()) {

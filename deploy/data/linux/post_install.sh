@@ -5,13 +5,13 @@ LOG_FOLDER=/var/log/$APP_NAME
 LOG_FILE="$LOG_FOLDER/post-install.log"
 APP_PATH=/opt/$APP_NAME
 
-if ! test -f $LOG_FOLDER; then
+if ! test -d "$LOG_FOLDER"; then
         sudo mkdir $LOG_FOLDER
         echo "AmneziaVPN log dir created at /var/log/"
 fi
 
-if ! test -f $LOG_FILE; then
-        touch $LOG_FILE
+if ! test -f "$LOG_FILE"; then
+        touch "$LOG_FILE"
         echo "AmneziaVPN log file created at /var/log/AmneziaVPN/post-install.log"
 fi
 
@@ -46,6 +46,23 @@ sudo cp $APP_PATH/FBLink.png /usr/share/pixmaps/ >> $LOG_FILE
 sudo chmod 555 /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
 
 echo "user desktop creation loop ended" >> $LOG_FILE
+
+# Create a desktop launcher for the current user as well.
+TARGET_USER="$SUDO_USER"
+if [ -z "$TARGET_USER" ] || [ "$TARGET_USER" = "root" ]; then
+        TARGET_USER=$(logname 2>/dev/null || true)
+fi
+if [ -n "$TARGET_USER" ] && [ "$TARGET_USER" != "root" ]; then
+        TARGET_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
+        TARGET_DESKTOP="$TARGET_HOME/Desktop"
+        if [ -f "/usr/share/applications/$APP_NAME.desktop" ] && [ -d "$TARGET_DESKTOP" ]; then
+                USER_DESKTOP_FILE="$TARGET_DESKTOP/FBLink VPN.desktop"
+                sudo cp "/usr/share/applications/$APP_NAME.desktop" "$USER_DESKTOP_FILE" >> $LOG_FILE 2>&1
+                sudo chown "$TARGET_USER:$TARGET_USER" "$USER_DESKTOP_FILE" >> $LOG_FILE 2>&1
+                sudo chmod 755 "$USER_DESKTOP_FILE" >> $LOG_FILE 2>&1
+                echo "desktop launcher created for $TARGET_USER at $USER_DESKTOP_FILE" >> $LOG_FILE
+        fi
+fi
 
 if command -v steamos-readonly &> /dev/null; then
         sudo steamos-readonly enable >> $LOG_FILE

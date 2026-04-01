@@ -13,7 +13,6 @@ PageType {
     id: root
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
-    property bool canUseSiteSplitTunneling: FBLinkController.canUseSiteSplitTunneling
     property bool canUseAppSplitTunneling: FBLinkController.canUseAppSplitTunneling
     property bool canManageRoutingProfiles: FBLinkController.canManageRoutingProfiles
 
@@ -87,31 +86,13 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                id: splitTunnelingButton
-
-                Layout.fillWidth: true
-
-                text: qsTr("Раздельное туннелирование (сайты)")
-                descriptionText: root.canUseSiteSplitTunneling
-                    ? qsTr("Выбор сайтов, которые работают через VPN")
-                    : qsTr("Доступно только в VIP")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    root.goToVipFeature(PageEnum.PageSettingsSplitTunneling, root.canUseSiteSplitTunneling)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
                 id: routingProfilesButton
 
                 Layout.fillWidth: true
 
-                text: qsTr("VIP-конфигурации маршрутизации")
+                text: qsTr("Маршрутизация сайтов (VIP)")
                 descriptionText: root.canManageRoutingProfiles
-                    ? qsTr("Профили «RU without VPN» и собственные правила маршрутов")
+                    ? qsTr("Системные пресеты и ваши профили маршрутизации")
                     : qsTr("Доступно только в VIP")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 

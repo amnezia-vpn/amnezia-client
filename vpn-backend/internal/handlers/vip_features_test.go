@@ -55,7 +55,7 @@ func TestEnsureRoutingProfileSchemaUpgradesLegacyTable(t *testing.T) {
 		t.Fatalf("ensureRoutingProfileSchema: %v", err)
 	}
 
-	for _, field := range []string{"Code", "Action", "Description", "Icon", "SortOrder"} {
+	for _, field := range []string{"Code", "TemplateCode", "Action", "Description", "Icon", "SortOrder"} {
 		if !db.Migrator().HasColumn(&models.RoutingProfile{}, field) {
 			t.Fatalf("expected column %s to exist after schema fix", field)
 		}
@@ -88,5 +88,136 @@ VALUES (1, 'RU without VPN', 'system', 1, '[]', '[".ru"]', '[]');
 
 	if profile.Description == "" {
 		t.Fatalf("expected seeded description to be populated")
+	}
+}
+
+func TestEnsureDefaultRoutingProfilesMigratesEnabledSystemToCustomCopy(t *testing.T) {
+	db := openLegacyRoutingProfileDB(t)
+
+	if err := ensureDefaultRoutingProfiles(db, 1); err != nil {
+		t.Fatalf("ensureDefaultRoutingProfiles: %v", err)
+	}
+
+	var systemProfile models.RoutingProfile
+	if err := db.Where("user_id = ? AND code = ?", 1, "ai_proxy").First(&systemProfile).Error; err != nil {
+		t.Fatalf("load ai_proxy system profile: %v", err)
+	}
+
+	if err := db.Model(&models.RoutingProfile{}).
+		Where("id = ?", systemProfile.ID).
+		Update("enabled", true).Error; err != nil {
+		t.Fatalf("enable system profile: %v", err)
+	}
+
+	if err := ensureDefaultRoutingProfiles(db, 1); err != nil {
+		t.Fatalf("ensureDefaultRoutingProfiles after enable: %v", err)
+	}
+
+	var customCopies []models.RoutingProfile
+	if err := db.Where("user_id = ? AND kind = ? AND template_code = ?", 1, models.RoutingProfileCustom, "ai_proxy").
+		Find(&customCopies).Error; err != nil {
+		t.Fatalf("load custom copies: %v", err)
+	}
+
+	if len(customCopies) != 1 {
+		t.Fatalf("expected exactly one custom copy, got %d", len(customCopies))
+	}
+	if !customCopies[0].Enabled {
+		t.Fatalf("expected custom copy to be enabled")
+	}
+
+	var systemAfter models.RoutingProfile
+	if err := db.First(&systemAfter, systemProfile.ID).Error; err != nil {
+		t.Fatalf("reload system profile: %v", err)
+	}
+	if systemAfter.Enabled {
+		t.Fatalf("expected system profile to be disabled after migration")
+	}
+
+	if err := ensureDefaultRoutingProfiles(db, 1); err != nil {
+		t.Fatalf("ensureDefaultRoutingProfiles idempotency: %v", err)
+	}
+	var customCount int64
+	if err := db.Model(&models.RoutingProfile{}).
+		Where("user_id = ? AND kind = ? AND template_code = ?", 1, models.RoutingProfileCustom, "ai_proxy").
+		Count(&customCount).Error; err != nil {
+		t.Fatalf("count custom copies: %v", err)
+	}
+	if customCount != 1 {
+		t.Fatalf("expected idempotent single custom copy, got %d", customCount)
+	}
+}
+
+func TestEnsureCustomRoutingProfileFromTemplateIsIdempotent(t *testing.T) {
+	db := openLegacyRoutingProfileDB(t)
+
+	if err := ensureDefaultRoutingProfiles(db, 1); err != nil {
+		t.Fatalf("ensureDefaultRoutingProfiles: %v", err)
+	}
+
+	var systemProfile models.RoutingProfile
+	if err := db.Where("user_id = ? AND code = ?", 1, "media_proxy").First(&systemProfile).Error; err != nil {
+		t.Fatalf("load media_proxy system profile: %v", err)
+	}
+
+	first, created, err := ensureCustomRoutingProfileFromTemplate(db, 1, systemProfile, true)
+	if err != nil {
+		t.Fatalf("first ensureCustomRoutingProfileFromTemplate: %v", err)
+	}
+	if !created {
+		t.Fatalf("expected first copy call to create profile")
+	}
+
+	second, created, err := ensureCustomRoutingProfileFromTemplate(db, 1, systemProfile, true)
+	if err != nil {
+		t.Fatalf("second ensureCustomRoutingProfileFromTemplate: %v", err)
+	}
+	if created {
+		t.Fatalf("expected second copy call to reuse existing profile")
+	}
+	if first.ID != second.ID {
+		t.Fatalf("expected same profile id for repeated copy, got %d and %d", first.ID, second.ID)
+	}
+}
+
+func TestEnsureDefaultRoutingProfilesEnablesExistingCustomCopyDuringMigration(t *testing.T) {
+	db := openLegacyRoutingProfileDB(t)
+
+	if err := ensureDefaultRoutingProfiles(db, 1); err != nil {
+		t.Fatalf("ensureDefaultRoutingProfiles: %v", err)
+	}
+
+	var systemProfile models.RoutingProfile
+	if err := db.Where("user_id = ? AND code = ?", 1, "ai_proxy").First(&systemProfile).Error; err != nil {
+		t.Fatalf("load ai_proxy system profile: %v", err)
+	}
+
+	custom, created, err := ensureCustomRoutingProfileFromTemplate(db, 1, systemProfile, false)
+	if err != nil {
+		t.Fatalf("create custom copy disabled: %v", err)
+	}
+	if !created {
+		t.Fatalf("expected custom copy to be created")
+	}
+	if custom.Enabled {
+		t.Fatalf("expected custom copy to be disabled initially")
+	}
+
+	if err := db.Model(&models.RoutingProfile{}).
+		Where("id = ?", systemProfile.ID).
+		Update("enabled", true).Error; err != nil {
+		t.Fatalf("enable system profile: %v", err)
+	}
+
+	if err := ensureDefaultRoutingProfiles(db, 1); err != nil {
+		t.Fatalf("ensureDefaultRoutingProfiles migration: %v", err)
+	}
+
+	var customAfter models.RoutingProfile
+	if err := db.Where("id = ?", custom.ID).First(&customAfter).Error; err != nil {
+		t.Fatalf("reload custom profile: %v", err)
+	}
+	if !customAfter.Enabled {
+		t.Fatalf("expected migration to enable existing custom copy")
 	}
 }

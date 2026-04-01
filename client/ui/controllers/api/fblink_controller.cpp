@@ -1146,6 +1146,53 @@ void FBLinkController::deleteRoutingProfile(int id, bool allowRefreshRetry)
     });
 }
 
+void FBLinkController::copySystemRoutingProfile(const QString &code)
+{
+    copySystemRoutingProfile(code, true);
+}
+
+void FBLinkController::copySystemRoutingProfile(const QString &code, bool allowRefreshRetry)
+{
+    const QString normalizedCode = code.trimmed();
+    if (normalizedCode.isEmpty()) {
+        emit routingProfilesError(tr("Код системного пресета не задан"));
+        return;
+    }
+
+    QString token = getJwtToken();
+    if (token.isEmpty()) {
+        emit routingProfilesError(tr("Необходимо войти в аккаунт"));
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest(QString("/me/routing-profiles/system/%1/copy").arg(normalizedCode), true, true);
+    QNetworkReply *reply = m_nam->post(request, QByteArrayLiteral("{}"));
+    connect(reply, &QNetworkReply::finished, this, [this, reply, normalizedCode, allowRefreshRetry]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            const QVariantMap profile = obj.value("profile").toObject().toVariantMap();
+            const bool created = obj.value("created").toBool(false);
+            emit routingSystemProfileCopied(profile, created);
+            fetchRoutingProfiles(true);
+            if (isSubscribed()) {
+                fetchConfig(true);
+            }
+        } else {
+            logApiFailure("copy-system-routing-profile", reply);
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this, normalizedCode]() {
+                    copySystemRoutingProfile(normalizedCode, false);
+                });
+                return;
+            }
+
+            QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            emit routingProfilesError(obj.value("error").toString(reply->errorString()));
+        }
+    });
+}
+
 // Обновить пару токенов через refresh_token.
 // Если refresh провалится — автоматически вызывается logout().
 // onSuccess вызывается после успешного обновления.

@@ -224,11 +224,10 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         m_appSplitTunnelingModel->toggleSplitTunneling(appSplittunnelingEnabled);
 #endif
 
-        int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
-        bool siteSplittunnelingEnabled =
-                newConfigData.value("Conf/sitesSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
-        m_sitesModel->setRouteMode(siteSplitTunnelingRouteMode);
-        m_sitesModel->toggleSplitTunneling(siteSplittunnelingEnabled);
+        // Legacy site split tunneling is deprecated in favor of VIP routing profiles.
+        m_settings->clearLegacySiteSplitSettings();
+        m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
+        m_sitesModel->toggleSplitTunneling(false);
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
         m_settings->setAutoConnect(false);
@@ -259,7 +258,8 @@ void SettingsController::clearSettings()
     m_serversModel->resetModel();
     m_languageModel->changeLanguage(m_languageModel->getSystemLanguageEnum());
 
-    m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
+    m_settings->clearLegacySiteSplitSettings();
+    m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
     m_sitesModel->toggleSplitTunneling(false);
 
     m_appSplitTunnelingModel->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);

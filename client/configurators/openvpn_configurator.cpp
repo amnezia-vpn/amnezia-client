@@ -142,19 +142,9 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
             config.replace(dnsRegex, "");
         }
 
-        if (!m_settings->isSitesSplitTunnelingEnabled()) {
-            config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
-            config.append("block-ipv6\n");
-        } else if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
-
-               // no redirect-gateway
-        } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-            config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
-            // Prevent ipv6 leak
-#endif
-            config.append("block-ipv6\n");
-        }
+        // Legacy site split tunneling is deprecated; OpenVPN always runs full-tunnel.
+        config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
+        config.append("block-ipv6\n");
     }
 
 #ifndef MZ_WINDOWS

@@ -6,6 +6,7 @@
 #include <winternl.h>
 
 #include <QProcess>
+#include <QThread>
 #include <QtConcurrent>
 
 #include <core/networkUtilities.h>
@@ -23,6 +24,103 @@ bool routeRowsEquivalent(const MIB_IPFORWARDROW &lhs, const MIB_IPFORWARDROW &rh
     return lhs.dwForwardDest == rhs.dwForwardDest
            && lhs.dwForwardMask == rhs.dwForwardMask
            && lhs.dwForwardNextHop == rhs.dwForwardNextHop;
+}
+
+bool interfaceHasIpv4Address(const NET_LUID &luid, const IN_ADDR &expectedAddress)
+{
+    PMIB_UNICASTIPADDRESS_TABLE table = nullptr;
+    const DWORD status = GetUnicastIpAddressTable(AF_INET, &table);
+    if (status != NO_ERROR || !table) {
+        return false;
+    }
+
+    const auto tableGuard = qScopeGuard([table]() {
+        FreeMibTable(table);
+    });
+
+    for (ULONG i = 0; i < table->NumEntries; ++i) {
+        const MIB_UNICASTIPADDRESS_ROW &row = table->Table[i];
+        if (row.InterfaceLuid.Value != luid.Value || row.Address.si_family != AF_INET) {
+            continue;
+        }
+
+        if (row.Address.Ipv4.sin_addr.S_un.S_addr == expectedAddress.S_un.S_addr) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool resolveTunInterfaceLuid(const QString &requestedName, NET_LUID &outLuid, QString &resolvedName)
+{
+    const QString requested = requestedName.trimmed();
+    if (requested.isEmpty()) {
+        return false;
+    }
+
+    DWORD res = ConvertInterfaceAliasToLuid(reinterpret_cast<const wchar_t*>(requested.utf16()), &outLuid);
+    if (res == NO_ERROR) {
+        resolvedName = requested;
+        return true;
+    }
+
+    const QStringList candidates = {
+        requested,
+        requested + " ",
+        QStringLiteral("sing-tun"),
+        QStringLiteral("wintun"),
+    };
+
+    int bestScore = -1;
+    int bestIndex = -1;
+    QString bestName;
+
+    const QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
+    for (const auto &iface : interfaces) {
+        const QString ifaceName = iface.name();
+        const QString readableName = iface.humanReadableName();
+
+        int score = -1;
+        for (const QString &candidate : candidates) {
+            if (candidate.isEmpty()) {
+                continue;
+            }
+            if (ifaceName.compare(candidate, Qt::CaseInsensitive) == 0
+                || readableName.compare(candidate, Qt::CaseInsensitive) == 0) {
+                score = qMax(score, 300);
+            } else if (ifaceName.startsWith(candidate, Qt::CaseInsensitive)
+                       || readableName.startsWith(candidate, Qt::CaseInsensitive)) {
+                score = qMax(score, 200);
+            } else if (ifaceName.contains(candidate, Qt::CaseInsensitive)
+                       || readableName.contains(candidate, Qt::CaseInsensitive)) {
+                score = qMax(score, 100);
+            }
+        }
+
+        if (score < 0) {
+            continue;
+        }
+
+        score += iface.index();
+        if (score > bestScore) {
+            bestScore = score;
+            bestIndex = iface.index();
+            bestName = ifaceName.isEmpty() ? readableName : ifaceName;
+        }
+    }
+
+    if (bestIndex <= 0) {
+        return false;
+    }
+
+    res = ConvertInterfaceIndexToLuid(static_cast<NET_IFINDEX>(bestIndex), &outLuid);
+    if (res != NO_ERROR) {
+        return false;
+    }
+
+    resolvedName = bestName;
+    return true;
 }
 }
 
@@ -376,11 +474,23 @@ void RouterWin::resetIpStack()
 bool RouterWin::createTun(const QString &dev, const QString &subnet)
 {
     NET_LUID luid;
-    DWORD res = ConvertInterfaceAliasToLuid(reinterpret_cast<const wchar_t*>(dev.utf16()), &luid);
-    if (res != NO_ERROR) {
-        qCritical() << "Failed to convert luid: " << res;
+    QString resolvedTunName;
+    static constexpr int kResolveAttempts = 12;
+    for (int attempt = 1; attempt <= kResolveAttempts; ++attempt) {
+        if (resolveTunInterfaceLuid(dev, luid, resolvedTunName)) {
+            break;
+        }
+        if (attempt < kResolveAttempts) {
+            QThread::msleep(100);
+        }
+    }
+    if (resolvedTunName.isEmpty()) {
+        qCritical() << "RouterWin::createTun: failed to resolve tunnel interface for" << dev;
         return false;
     }
+    qDebug() << "RouterWin::createTun: using interface" << resolvedTunName << "for requested name" << dev;
+
+    DWORD res = NO_ERROR;
 
     HANDLE hEvent = CreateEvent(nullptr, true, false, nullptr);
     if (!hEvent) {
@@ -389,19 +499,30 @@ bool RouterWin::createTun(const QString &dev, const QString &subnet)
     }
     auto _guardEvent = qScopeGuard([hEvent](){ CloseHandle(hEvent); });
 
+    IN_ADDR expectedAddress{};
+    if (inet_pton(AF_INET, subnet.toStdString().c_str(), &expectedAddress) != 1) {
+        qCritical() << "RouterWin::createTun: invalid subnet/IP" << subnet;
+        return false;
+    }
+
+    // If the TUN already has the target address, consider createTun successful.
+    if (interfaceHasIpv4Address(luid, expectedAddress)) {
+        qDebug() << "RouterWin::createTun: TUN already has expected address" << subnet;
+        return true;
+    }
+
     struct {
         HANDLE hEvent;
         NET_LUID luid;
-        const QString &subnet;
+        ULONG expectedIpv4;
         bool found;
-    } ctx = { .hEvent = hEvent, .luid = luid, .subnet = subnet, .found = false };
+    } ctx = { .hEvent = hEvent, .luid = luid, .expectedIpv4 = expectedAddress.S_un.S_addr, .found = false };
 
     auto cb = [](void *priv, MIB_UNICASTIPADDRESS_ROW *row, MIB_NOTIFICATION_TYPE NotificationType) {
+        Q_UNUSED(NotificationType);
         auto* c = reinterpret_cast<decltype(ctx)*>(priv);
         if (row != nullptr && row->InterfaceLuid.Value == c->luid.Value && row->Address.si_family == AF_INET) {
-            char ip[INET_ADDRSTRLEN];
-            inet_ntop(row->Address.Ipv4.sin_family, &row->Address.Ipv4.sin_addr, ip, INET_ADDRSTRLEN);
-            if (c->subnet == ip) {
+            if (row->Address.Ipv4.sin_addr.S_un.S_addr == c->expectedIpv4) {
                 c->found = true;
                 SetEvent(c->hEvent);
             }
@@ -422,7 +543,7 @@ bool RouterWin::createTun(const QString &dev, const QString &subnet)
     row.InterfaceLuid = luid;
     row.Address.si_family = AF_INET;
 
-    inet_pton(AF_INET, subnet.toStdString().c_str(), &row.Address.Ipv4.sin_addr);
+    row.Address.Ipv4.sin_addr = expectedAddress;
 
     row.OnLinkPrefixLength = 32;
     row.ValidLifetime = 0xffffffff;
@@ -430,18 +551,44 @@ bool RouterWin::createTun(const QString &dev, const QString &subnet)
     row.DadState = IpDadStatePreferred;
 
     res = CreateUnicastIpAddressEntry(&row);
-    if (res != NO_ERROR && res != ERROR_OBJECT_ALREADY_EXISTS) {
-        qDebug() << "Failed to create IP address:" << res;
+    if (res == ERROR_OBJECT_ALREADY_EXISTS) {
+        const bool hasExpectedIp = interfaceHasIpv4Address(luid, expectedAddress);
+        if (!hasExpectedIp) {
+            qWarning() << "RouterWin::createTun: address already exists but expected address not found on interface"
+                       << dev << subnet;
+        }
+        return hasExpectedIp;
+    }
+
+    if (res != NO_ERROR) {
+        qCritical() << "RouterWin::createTun: failed to create IP address:" << res;
         return false;
     }
 
     res = WaitForSingleObject(hEvent, 10000);
+    if (res == WAIT_OBJECT_0 && ctx.found) {
+        return true;
+    }
+
+    // Notification callbacks can be flaky on some Windows builds.
+    // Trust the actual adapter state before failing the connection.
+    if (interfaceHasIpv4Address(luid, expectedAddress)) {
+        qWarning() << "RouterWin::createTun: notification was not received, but address is present";
+        return true;
+    }
+
     if (res == WAIT_TIMEOUT) {
         qCritical() << "Timeout of waiting for IP assignment for " << dev << " device";
+    } else {
+        qCritical() << "RouterWin::createTun: waiting for IP assignment failed:" << res;
+    }
+
+    if (!ctx.found) {
+        qCritical() << "RouterWin::createTun: expected address was not observed on interface" << subnet;
         return false;
     }
 
-    return ctx.found;
+    return true;
 }
 
 bool RouterWin::deleteTun(const QString &dev)

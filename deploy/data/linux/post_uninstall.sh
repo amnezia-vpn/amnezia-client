@@ -65,6 +65,21 @@ if test -f /usr/share/pixmaps/FBLink.png; then
 
 fi
 
+### Remove desktop launcher created for the user
+TARGET_USER="$SUDO_USER"
+if [ -z "$TARGET_USER" ] || [ "$TARGET_USER" = "root" ]; then
+    TARGET_USER=$(logname 2>/dev/null || true)
+fi
+if [ -n "$TARGET_USER" ] && [ "$TARGET_USER" != "root" ]; then
+    TARGET_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
+    if test -f "$TARGET_HOME/Desktop/FBLink VPN.desktop"; then
+        rm -f "$TARGET_HOME/Desktop/FBLink VPN.desktop" >> $LOG_FILE 2>&1
+    fi
+    if test -f "$TARGET_HOME/Desktop/$APP_NAME.desktop"; then
+        rm -f "$TARGET_HOME/Desktop/$APP_NAME.desktop" >> $LOG_FILE 2>&1
+    fi
+fi
+
 ### Remove the service log file (keep post-uninstall.log)
 if test -f "$LOG_FOLDER/AmneziaVPN-service.log"; then
     sudo rm -f "$LOG_FOLDER/AmneziaVPN-service.log" >> $LOG_FILE 2>&1

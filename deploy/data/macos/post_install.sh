@@ -57,4 +57,15 @@ run_cmd launchctl print "system/$APP_NAME-service" || true
 log "Launching ${APP_NAME} application"
 run_cmd open -a "$APP_PATH" || true
 
+# Create a desktop alias for the active user.
+ACTIVE_USER=$(stat -f%Su /dev/console 2>/dev/null || true)
+if [ -n "$ACTIVE_USER" ] && [ "$ACTIVE_USER" != "root" ]; then
+  ACTIVE_HOME=$(dscl . -read "/Users/$ACTIVE_USER" NFSHomeDirectory 2>/dev/null | awk '{print $2}')
+  ACTIVE_DESKTOP="$ACTIVE_HOME/Desktop"
+  if [ -d "$ACTIVE_DESKTOP" ]; then
+    DESKTOP_LINK="$ACTIVE_DESKTOP/FBLink.app"
+    run_cmd sudo -u "$ACTIVE_USER" ln -sfn "$APP_PATH" "$DESKTOP_LINK" || true
+  fi
+fi
+
 log "Script finished"

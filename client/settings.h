@@ -202,6 +202,7 @@ public:
     }
 
     void clearSettings();
+    void clearLegacySiteSplitSettings();
 
     enum AppsRouteMode {
         VpnAllApps,

@@ -9,6 +9,14 @@ SYSTEM_APP_SUPPORT="/Library/Application Support/$APP_NAME"
 LOG_FOLDER="/var/log/$APP_NAME"
 CACHES_FOLDER="$HOME/Library/Caches/$APP_NAME"
 
+ACTIVE_USER=$(stat -f%Su /dev/console 2>/dev/null || true)
+if [ -n "$ACTIVE_USER" ] && [ "$ACTIVE_USER" != "root" ]; then
+    ACTIVE_HOME=$(dscl . -read "/Users/$ACTIVE_USER" NFSHomeDirectory 2>/dev/null | awk '{print $2}')
+    if [ -n "$ACTIVE_HOME" ] && [ -L "$ACTIVE_HOME/Desktop/FBLink.app" ]; then
+        sudo -u "$ACTIVE_USER" rm -f "$ACTIVE_HOME/Desktop/FBLink.app" || true
+    fi
+fi
+
 # Attempt to quit the GUI application if it's currently running
 if pgrep -x "$APP_NAME" > /dev/null; then
     echo "Quitting $APP_NAME..."

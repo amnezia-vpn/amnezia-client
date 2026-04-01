@@ -34,6 +34,8 @@ namespace PageLoader
         PageSettingsSplitTunneling,
         PageSettingsAppSplitTunneling,
         PageSettingsVipRoutingProfiles,
+        PageSettingsVipRoutingProfileEditor,
+        PageSettingsVipPresetCatalog,
         PageSettingsKillSwitch,
         PageSettingsApiServerInfo,
         PageSettingsApiAvailableCountries,

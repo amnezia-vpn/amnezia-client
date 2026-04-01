@@ -22,6 +22,47 @@ type VPNHandler struct {
 	db *gorm.DB
 }
 
+func aggregateVIPAdBlockState(requested bool, responseConfigs []map[string]interface{}) (bool, string, string) {
+	vipAdBlockApplied := false
+	vipAdBlockStatus := vipAdBlockStatusUnavailable
+	vipAdBlockDNSSource := piHoleDNSSourceClean
+
+	if !requested {
+		return vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource
+	}
+
+	allApplied := len(responseConfigs) > 0
+	firstAppliedSource := ""
+	for _, rc := range responseConfigs {
+		applied, _ := rc["vip_ad_block_applied"].(bool)
+		status, _ := rc["vip_ad_block_status"].(string)
+		source, _ := rc["vip_ad_block_dns_source"].(string)
+		source = strings.TrimSpace(source)
+
+		if applied {
+			vipAdBlockApplied = true
+			if firstAppliedSource == "" && source != "" && source != piHoleDNSSourceClean {
+				firstAppliedSource = source
+			}
+		}
+
+		if !(applied && status == vipAdBlockStatusApplied && source != "" && source != piHoleDNSSourceClean) {
+			allApplied = false
+		}
+	}
+
+	if allApplied && vipAdBlockApplied {
+		vipAdBlockStatus = vipAdBlockStatusApplied
+		if firstAppliedSource != "" {
+			vipAdBlockDNSSource = firstAppliedSource
+		}
+		return vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource
+	}
+
+	vipAdBlockStatus = vipAdBlockStatusDegraded
+	return vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource
+}
+
 func NewVPNHandler(db *gorm.DB) *VPNHandler {
 	return &VPNHandler{db: db}
 }
@@ -257,39 +298,7 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		})
 	}
 	vipAdBlockRequested := sub.VIPAdBlockEnabled
-	vipAdBlockApplied := false
-	vipAdBlockStatus := vipAdBlockStatusUnavailable
-	vipAdBlockDNSSource := piHoleDNSSourceClean
-	if vipAdBlockRequested {
-		allApplied := true
-		firstAppliedSource := ""
-		mixedSources := false
-		for _, rc := range responseConfigs {
-			applied, _ := rc["vip_ad_block_applied"].(bool)
-			status, _ := rc["vip_ad_block_status"].(string)
-			source, _ := rc["vip_ad_block_dns_source"].(string)
-
-			if applied {
-				vipAdBlockApplied = true
-				if firstAppliedSource == "" && source != "" {
-					firstAppliedSource = source
-				} else if source != "" && source != firstAppliedSource {
-					mixedSources = true
-				}
-			}
-			if status != vipAdBlockStatusApplied {
-				allApplied = false
-			}
-		}
-		if len(responseConfigs) > 0 && allApplied && vipAdBlockApplied {
-			vipAdBlockStatus = vipAdBlockStatusApplied
-			if firstAppliedSource != "" && !mixedSources {
-				vipAdBlockDNSSource = firstAppliedSource
-			}
-		} else {
-			vipAdBlockStatus = vipAdBlockStatusDegraded
-		}
-	}
+	vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource := aggregateVIPAdBlockState(vipAdBlockRequested, responseConfigs)
 
 	c.JSON(http.StatusOK, gin.H{
 		"config":                  strings.Join(configLines, "\n"),

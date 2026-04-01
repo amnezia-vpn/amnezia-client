@@ -352,9 +352,36 @@ void CoreController::initTranslationsUpdatedHandler()
 
 void CoreController::initAutoConnectHandler()
 {
-    if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
-        QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
+    if (!m_settingsController->isAutoConnectEnabled() || m_serversModel->getDefaultServerIndex() < 0) {
+        return;
     }
+
+    auto autoConnect = [this]() {
+        m_connectionController->openConnection();
+    };
+
+    if (!m_fbLinkController || !m_fbLinkController->isLoggedIn()) {
+        QTimer::singleShot(1000, this, autoConnect);
+        return;
+    }
+
+    auto triggered = QSharedPointer<bool>::create(false);
+    auto runOnce = [triggered, autoConnect]() {
+        if (*triggered) {
+            return;
+        }
+        *triggered = true;
+        autoConnect();
+    };
+
+    // Wait for a fresh backend config first, so auto-connect does not start
+    // with stale routing profiles from a previous session.
+    connect(m_fbLinkController.get(), &FBLinkController::configFetched, this, runOnce, Qt::SingleShotConnection);
+    connect(m_fbLinkController.get(), &FBLinkController::configError, this,
+            [runOnce](const QString &) { runOnce(); }, Qt::SingleShotConnection);
+
+    // Fallback: do not block auto-connect forever on weak networks.
+    QTimer::singleShot(4500, this, runOnce);
 }
 
 void CoreController::initFBLinkDnsToggledHandler()

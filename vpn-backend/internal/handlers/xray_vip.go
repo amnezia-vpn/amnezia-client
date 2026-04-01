@@ -596,8 +596,22 @@ func buildVIPRoutingRules(profiles []models.RoutingProfile) []map[string]interfa
 		models.RoutingProfileProxy:  {},
 	}
 
+	hasEnabledCustomProfile := false
+	for _, profile := range profiles {
+		if profile.Enabled && profile.Kind == models.RoutingProfileCustom {
+			hasEnabledCustomProfile = true
+			break
+		}
+	}
+
 	for _, profile := range profiles {
 		if !profile.Enabled {
+			continue
+		}
+		// Prefer custom profiles at runtime.
+		// Keep temporary fallback to enabled system presets only when no custom
+		// profile is enabled yet (migration/compatibility safety net).
+		if profile.Kind == models.RoutingProfileSystem && hasEnabledCustomProfile {
 			continue
 		}
 		action := profile.Action
