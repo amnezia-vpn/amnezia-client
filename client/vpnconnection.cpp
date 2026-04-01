@@ -36,6 +36,17 @@
 #include "vpnconnection.h"
 
 namespace {
+constexpr int kConnectWatchdogTimeoutMs = 28000;
+constexpr int kDisconnectWatchdogTimeoutMs = 12000;
+constexpr int kReconnectBaseDelayMs = 1200;
+constexpr int kMaxRecoveryAttempts = 2;
+constexpr int kFailureWindowSecs = 180;
+constexpr int kSafeModeFailureThreshold = 3;
+constexpr int kSafeModeDurationSecs = 1800;
+
+constexpr char kSafeModeUntilEpochKey[] = "Conf/safeModeUntilEpochSec";
+constexpr char kVIPEnabledProfilesCountKey[] = "Conf/vipEnabledProfilesCount";
+
 bool isXrayBasedProtocolName(const QString &protocolName)
 {
     return protocolName == ProtocolProps::protoToString(Proto::Xray)
@@ -54,8 +65,23 @@ bool usesLegacyDesktopSiteRouting(const QJsonObject &vpnConfiguration)
 }
 
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent)
-    : QObject(parent), m_settings(settings), m_checkTimer(new QTimer(this))
+    : QObject(parent), m_settings(settings), m_checkTimer(this)
 {
+    m_connectionState = Vpn::ConnectionState::Disconnected;
+
+    m_stateWatchdogTimer.setSingleShot(true);
+    connect(&m_stateWatchdogTimer, &QTimer::timeout, this, &VpnConnection::handleStateWatchdogTimeout);
+
+    m_recoveryTimer.setSingleShot(true);
+    connect(&m_recoveryTimer, &QTimer::timeout, this, [this]() {
+        if (m_userRequestedDisconnect || m_reconnectScheduled == false) {
+            return;
+        }
+
+        m_reconnectScheduled = false;
+        connectToVpn(m_lastServerIndex, m_lastCredentials, m_lastContainer, m_lastVpnConfiguration);
+    });
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     m_checkTimer.setInterval(1000);
     connect(IosController::Instance(), &IosController::connectionStateChanged, this, &VpnConnection::onConnectionStateChanged);
@@ -179,6 +205,16 @@ ErrorCode VpnConnection::lastError() const
 void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &vpnConfiguration)
 {
+    if (!m_reconnectScheduled) {
+        clearRecoveryState();
+    }
+    m_reconnectScheduled = false;
+    m_userRequestedDisconnect = false;
+    m_lastServerIndex = serverIndex;
+    m_lastCredentials = credentials;
+    m_lastContainer = container;
+    m_lastVpnConfiguration = vpnConfiguration;
+
     qDebug() << QString("Trying to connect to VPN, server index is %1, container is %2")
                         .arg(serverIndex)
                         .arg(ContainerProps::containerToString(container));
@@ -198,6 +234,12 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
 #endif
 
     appendSplitTunnelingConfig();
+    if (hasMissingManagedRoutingRules()) {
+        qWarning() << "Managed routing profiles are enabled but rules are missing in config. Blocking unsafe full-tunnel fallback.";
+        setConnectionState(Vpn::ConnectionState::Error);
+        emit vpnProtocolError(ErrorCode::InternalError);
+        return;
+    }
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
@@ -321,17 +363,22 @@ void VpnConnection::appendSplitTunnelingConfig()
     QJsonArray sitesJsonArray;
     QSettings subscriptionSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
     const bool canUseAppSplitTunneling = subscriptionSettings.value("subscriptionCanUseAppSplitTunneling", false).toBool();
+    const int enabledManagedProfilesCount = subscriptionSettings.value(kVIPEnabledProfilesCountKey, 0).toInt();
 
     const bool usesManagedXrayRouting = isXrayBasedProtocol && xrayHasManagedRouting;
+    const bool missingExpectedManagedRouting = isXrayBasedProtocol && !xrayHasManagedRouting && enabledManagedProfilesCount > 0;
 
     if (usesManagedXrayRouting) {
         qDebug() << "XRay config contains managed routing rules; legacy site split tunneling is disabled";
+    } else if (missingExpectedManagedRouting) {
+        qWarning() << "XRay managed routing is expected, but rules are missing. Connection will be blocked until profiles sync.";
     } else if (isXrayBasedProtocol) {
-        qWarning() << "XRay VIP routing rules are missing in config, falling back to full-tunnel until profiles are synced";
+        qWarning() << "XRay config has no managed routing rules. Legacy site split remains disabled.";
     }
 
     m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
     m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
+    m_vpnConfiguration.insert("vipRoutingRulesMissing", missingExpectedManagedRouting);
 
     Settings::AppsRouteMode appsRouteMode = Settings::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;
@@ -359,7 +406,9 @@ void VpnConnection::appendSplitTunnelingConfig()
     m_vpnConfiguration.insert(config_key::splitTunnelApps, appsJsonArray);
 
     QString siteSplitStatus = "deprecated (disabled)";
-    if (usesManagedXrayRouting) {
+    if (missingExpectedManagedRouting) {
+        siteSplitStatus = "temporarily unavailable (managed profiles not synced)";
+    } else if (usesManagedXrayRouting) {
         siteSplitStatus = "managed by XRay routing profiles (legacy disabled)";
     } else if (isXrayBasedProtocol) {
         siteSplitStatus = "disabled (no XRay routing rules)";
@@ -425,6 +474,9 @@ void VpnConnection::reconnectToVpn() {
 
 void VpnConnection::disconnectFromVpn()
 {
+    m_userRequestedDisconnect = true;
+    clearRecoveryState();
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();
@@ -458,14 +510,158 @@ void VpnConnection::disconnectFromVpn()
 #endif
 
     m_vpnProtocol = nullptr;
+
+#if !defined(Q_OS_ANDROID)
+    QTimer::singleShot(200, this, [this]() {
+        if (m_connectionState == Vpn::ConnectionState::Disconnecting) {
+            setConnectionState(Vpn::ConnectionState::Disconnected);
+        }
+    });
+#endif
 }
 
-void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
+void VpnConnection::setConnectionState(Vpn::ConnectionState state)
+{
+    const Vpn::ConnectionState previousState = m_connectionState;
     onConnectionStateChanged(state);
 
-    if (state == Vpn::Disconnected && m_connectionState == Vpn::Reconnecting)
+    if (state == Vpn::ConnectionState::Disconnected && previousState == Vpn::ConnectionState::Reconnecting) {
         return;
+    }
 
     m_connectionState = state;
+    armStateWatchdog(state);
     emit connectionStateChanged(state);
+
+    if (state == Vpn::ConnectionState::Connected) {
+        m_recoveryAttempts = 0;
+        m_failureBurst = 0;
+        m_failureWindowStartedAt = 0;
+        m_userRequestedDisconnect = false;
+        clearRecoveryState();
+        return;
+    }
+
+    const bool failedTransition =
+            state == Vpn::ConnectionState::Error
+            || (state == Vpn::ConnectionState::Disconnected
+                && (previousState == Vpn::ConnectionState::Connecting
+                    || previousState == Vpn::ConnectionState::Preparing
+                    || previousState == Vpn::ConnectionState::Reconnecting));
+
+    if (failedTransition) {
+        registerFailureAndMaybeEnterSafeMode();
+        if (!m_userRequestedDisconnect) {
+            scheduleRecoveryReconnect();
+        }
+        return;
+    }
+
+    if (state == Vpn::ConnectionState::Disconnected && previousState == Vpn::ConnectionState::Disconnecting) {
+        m_userRequestedDisconnect = false;
+        clearRecoveryState();
+    }
+}
+
+void VpnConnection::armStateWatchdog(Vpn::ConnectionState state)
+{
+    switch (state) {
+    case Vpn::ConnectionState::Preparing:
+    case Vpn::ConnectionState::Connecting:
+    case Vpn::ConnectionState::Reconnecting:
+        m_stateWatchdogTimer.start(kConnectWatchdogTimeoutMs);
+        break;
+    case Vpn::ConnectionState::Disconnecting:
+        m_stateWatchdogTimer.start(kDisconnectWatchdogTimeoutMs);
+        break;
+    default:
+        m_stateWatchdogTimer.stop();
+        break;
+    }
+}
+
+void VpnConnection::handleStateWatchdogTimeout()
+{
+    if (m_connectionState == Vpn::ConnectionState::Disconnecting) {
+        qWarning() << "Disconnect watchdog timeout: forcing disconnected state";
+        setConnectionState(Vpn::ConnectionState::Disconnected);
+        return;
+    }
+
+    if (m_connectionState == Vpn::ConnectionState::Preparing
+        || m_connectionState == Vpn::ConnectionState::Connecting
+        || m_connectionState == Vpn::ConnectionState::Reconnecting) {
+        qWarning() << "Connection watchdog timeout while state is" << m_connectionState
+                   << "- attempting recovery";
+        if (m_vpnProtocol) {
+            m_vpnProtocol->stop();
+            m_vpnProtocol.reset();
+        }
+        setConnectionState(Vpn::ConnectionState::Error);
+        emit vpnProtocolError(ErrorCode::InternalError);
+    }
+}
+
+void VpnConnection::clearRecoveryState()
+{
+    m_recoveryTimer.stop();
+    m_reconnectScheduled = false;
+}
+
+void VpnConnection::scheduleRecoveryReconnect()
+{
+    QSettings settings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    const qint64 safeModeUntil = settings.value(kSafeModeUntilEpochKey, 0).toLongLong();
+    if (safeModeUntil > QDateTime::currentSecsSinceEpoch()) {
+        qWarning() << "Recovery reconnect skipped: safe mode is active";
+        return;
+    }
+
+    if (m_reconnectScheduled || m_recoveryAttempts >= kMaxRecoveryAttempts) {
+        return;
+    }
+
+    if (m_lastServerIndex < 0 || m_lastCredentials.hostName.isEmpty() || m_lastVpnConfiguration.isEmpty()) {
+        return;
+    }
+
+    ++m_recoveryAttempts;
+    const int delayMs = kReconnectBaseDelayMs * (1 << (m_recoveryAttempts - 1));
+    m_reconnectScheduled = true;
+    qWarning() << "Scheduling recovery reconnect attempt" << m_recoveryAttempts << "in" << delayMs << "ms";
+    m_recoveryTimer.start(delayMs);
+}
+
+void VpnConnection::registerFailureAndMaybeEnterSafeMode()
+{
+    const qint64 now = QDateTime::currentSecsSinceEpoch();
+    if (m_failureWindowStartedAt == 0 || (now - m_failureWindowStartedAt) > kFailureWindowSecs) {
+        m_failureWindowStartedAt = now;
+        m_failureBurst = 0;
+    }
+
+    ++m_failureBurst;
+    if (m_failureBurst < kSafeModeFailureThreshold) {
+        return;
+    }
+
+    QSettings settings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    const qint64 safeModeUntil = now + kSafeModeDurationSecs;
+    settings.setValue(kSafeModeUntilEpochKey, safeModeUntil);
+    settings.sync();
+
+    if (m_settings) {
+        m_settings->setAutoConnect(false);
+    }
+
+    qWarning() << "Safe mode enabled due to repeated VPN failures until" << safeModeUntil;
+    clearRecoveryState();
+    m_recoveryAttempts = 0;
+    m_failureBurst = 0;
+    m_failureWindowStartedAt = 0;
+}
+
+bool VpnConnection::hasMissingManagedRoutingRules() const
+{
+    return m_vpnConfiguration.value("vipRoutingRulesMissing").toBool(false);
 }

@@ -17,6 +17,7 @@ PageType {
     property var profiles: []
     property string statusMessage: ""
     property bool statusIsError: false
+    property bool profilesLoading: false
 
     readonly property bool canManageProfiles: FBLinkController.canManageRoutingProfiles
     readonly property bool canUseAdBlock: FBLinkController.canUseAdBlock
@@ -27,6 +28,15 @@ PageType {
 
     function actionLabel(action) { return action === "proxy" ? qsTr("ЧЕРЕЗ VPN") : qsTr("БЕЗ VPN") }
     function actionTone(action) { return action === "proxy" ? "proxy" : "direct" }
+    function adBlockStatusText() { return FBLinkController.vipAdBlockStatusLabel }
+    function adBlockReasonText() {
+        const reason = String(FBLinkController.vipAdBlockDegradeReason || "")
+        if (reason === "auth_expired") return qsTr("Проверьте вход в аккаунт и обновите данные.")
+        if (reason === "sync_stale") return qsTr("Профиль защиты обновляется. Повторите чуть позже.")
+        if (reason === "dns_unreachable") return qsTr("Сервис фильтрации временно недоступен.")
+        if (reason === "routing_rules_missing") return qsTr("Профили маршрутизации ещё не загрузились.")
+        return qsTr("")
+    }
 
     function openCreateProfileEditor() {
         if (!canManageProfiles) {
@@ -96,21 +106,31 @@ PageType {
 
     Connections {
         target: FBLinkController
-        function onRoutingProfilesFetched(profiles) { root.profiles = profiles }
-        function onRoutingProfilesError(errorMessage) { root.statusMessage = errorMessage; root.statusIsError = true }
+        function onRoutingProfilesFetched(profiles) { root.profiles = profiles; root.profilesLoading = false }
+        function onRoutingProfilesError(errorMessage) {
+            root.statusMessage = errorMessage
+            root.statusIsError = true
+            root.profilesLoading = false
+        }
         function onVipAdBlockChanged(enabled) {
             root.statusMessage = enabled ? qsTr("Ad Block для VIP включён") : qsTr("Ad Block для VIP выключен")
             root.statusIsError = false
         }
         function onRequestError(errorMessage) { root.statusMessage = errorMessage; root.statusIsError = true }
+        function onBugReportSubmitted(ticketId) {
+            root.statusMessage = qsTr("Отчёт отправлен. Номер: %1").arg(ticketId)
+            root.statusIsError = false
+        }
         function onRoutingProfileSaved() {
             root.statusMessage = qsTr("Профиль сохранён")
             root.statusIsError = false
+            root.profilesLoading = true
             FBLinkController.fetchRoutingProfiles()
         }
         function onRoutingProfileDeleted() {
             root.statusMessage = qsTr("Профиль удалён")
             root.statusIsError = false
+            root.profilesLoading = true
             FBLinkController.fetchRoutingProfiles()
         }
         function onRoutingSystemProfileCopied(profile, created) {
@@ -118,13 +138,17 @@ PageType {
                     ? qsTr("Пресет добавлен в мои профили")
                     : qsTr("Пресет уже был добавлен ранее")
             root.statusIsError = false
+            root.profilesLoading = true
             FBLinkController.fetchRoutingProfiles()
         }
     }
 
     Component.onCompleted: {
         root.syncSharedStatus()
-        if (FBLinkController.isLoggedIn) FBLinkController.fetchRoutingProfiles()
+        if (FBLinkController.isLoggedIn) {
+            root.profilesLoading = true
+            FBLinkController.fetchRoutingProfiles()
+        }
     }
 
     onVisibleChanged: {
@@ -133,6 +157,7 @@ PageType {
         }
         root.syncSharedStatus()
         if (FBLinkController.isLoggedIn) {
+            root.profilesLoading = true
             FBLinkController.fetchRoutingProfiles()
         }
     }
@@ -234,7 +259,12 @@ PageType {
                                 Layout.fillWidth: true
                                 spacing: 8
                                 PremiumBadge { text: qsTr("Защита"); tone: FBLinkController.vipAdBlockEnabled ? "success" : "accent"; iconSource: "qrc:/images/controls/shield-tick.svg" }
-                                PremiumBadge { text: FBLinkController.vipAdBlockEnabled ? qsTr("AD BLOCK ВКЛ") : qsTr("AD BLOCK ВЫКЛ"); tone: FBLinkController.vipAdBlockEnabled ? "success" : "neutral" }
+                                PremiumBadge {
+                                    text: root.adBlockStatusText().toUpperCase()
+                                    tone: FBLinkController.vipAdBlockStatus === "applied"
+                                        ? "success"
+                                        : (FBLinkController.vipAdBlockEnabled ? "warning" : "neutral")
+                                }
                             }
 
                             LabelTextType {
@@ -249,10 +279,34 @@ PageType {
                             CaptionTextType {
                                 Layout.fillWidth: true
                                 text: FBLinkController.vipAdBlockEnabled
-                                    ? qsTr("Реклама и трекеры блокируются автоматически.")
+                                    ? (FBLinkController.vipAdBlockStatus === "applied"
+                                        ? qsTr("Реклама и трекеры блокируются автоматически.")
+                                        : qsTr("Фильтрация временно недоступна, но VPN продолжает работать."))
                                     : qsTr("Ad Block выключен. Сайты открываются без фильтрации рекламы.")
                                 color: FBLinkStyle.color.mutedGray
                                 wrapMode: Text.WordWrap
+                            }
+
+                            CaptionTextType {
+                                Layout.fillWidth: true
+                                visible: FBLinkController.vipAdBlockEnabled && FBLinkController.vipAdBlockStatus === "degraded"
+                                text: root.adBlockReasonText()
+                                color: "#F59E0B"
+                                wrapMode: Text.WordWrap
+                            }
+
+                            BasicButtonType {
+                                Layout.fillWidth: true
+                                visible: FBLinkController.vipAdBlockEnabled && FBLinkController.vipAdBlockStatus === "degraded"
+                                implicitHeight: 38
+                                text: qsTr("Отправить отчёт")
+                                defaultColor: Qt.rgba(245/255, 158/255, 11/255, 0.18)
+                                hoveredColor: Qt.rgba(245/255, 158/255, 11/255, 0.28)
+                                pressedColor: Qt.rgba(245/255, 158/255, 11/255, 0.36)
+                                textColor: "#FFFFFF"
+                                clickedFunc: function() {
+                                    FBLinkController.submitBugReport(qsTr("Проблема с VIP Ad Block"))
+                                }
                             }
                         }
 
@@ -327,10 +381,43 @@ PageType {
                         }
                     }
 
-                    LabelTextType { visible: root.customProfiles.length === 0; text: qsTr("Пока нет пользовательских профилей"); font.pixelSize: 13; color: FBLinkStyle.color.mutedGray }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        visible: root.profilesLoading
+                        spacing: 10
+                        BusyIndicator {
+                            Layout.preferredWidth: 22
+                            Layout.preferredHeight: 22
+                            running: root.profilesLoading
+                        }
+                        LabelTextType {
+                            text: qsTr("Загружаем профили...")
+                            font.pixelSize: 13
+                            color: FBLinkStyle.color.mutedGray
+                        }
+                    }
+
+                    LabelTextType {
+                        visible: !root.profilesLoading && root.customProfiles.length === 0
+                        text: qsTr("Пока нет пользовательских профилей")
+                        font.pixelSize: 13
+                        color: FBLinkStyle.color.mutedGray
+                    }
+
+                    BasicButtonType {
+                        visible: !root.profilesLoading && root.customProfiles.length === 0 && root.canManageProfiles
+                        Layout.fillWidth: true
+                        implicitHeight: 42
+                        text: qsTr("Открыть каталог пресетов")
+                        defaultColor: Qt.rgba(1, 1, 1, 0.08)
+                        hoveredColor: Qt.rgba(1, 1, 1, 0.12)
+                        pressedColor: Qt.rgba(1, 1, 1, 0.18)
+                        textColor: FBLinkStyle.color.paleGray
+                        clickedFunc: function() { PageController.goToPage(PageEnum.PageSettingsVipPresetCatalog) }
+                    }
 
                     Repeater {
-                        model: root.customProfiles
+                        model: root.profilesLoading ? [] : root.customProfiles
                         delegate: PremiumPanel {
                             Layout.fillWidth: true
                             padding: 12

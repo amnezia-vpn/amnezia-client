@@ -1,6 +1,8 @@
 #include "coreController.h"
 
 #include <QDirIterator>
+#include <QDateTime>
+#include <QSettings>
 #include <QTranslator>
 
 #if defined(Q_OS_ANDROID)
@@ -352,6 +354,13 @@ void CoreController::initTranslationsUpdatedHandler()
 
 void CoreController::initAutoConnectHandler()
 {
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    const qint64 safeModeUntilEpoch = qSettings.value("Conf/safeModeUntilEpochSec", 0).toLongLong();
+    if (safeModeUntilEpoch > QDateTime::currentSecsSinceEpoch()) {
+        qWarning() << "Auto-connect is skipped because safe mode is active until" << safeModeUntilEpoch;
+        return;
+    }
+
     if (!m_settingsController->isAutoConnectEnabled() || m_serversModel->getDefaultServerIndex() < 0) {
         return;
     }

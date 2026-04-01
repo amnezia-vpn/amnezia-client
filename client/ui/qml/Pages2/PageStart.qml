@@ -24,7 +24,7 @@ PageType {
         target: PageController
 
         function onGoToPageHome() {
-            if (PageController.isStartPageVisible()) {
+            if (PageController.isStartPageVisible() && !FBLinkController.isLoggedIn) {
                 tabBar.visible = false
                 tabBarStackView.goToTabBarPage(PageEnum.PageFBLinkLogin)
             } else {
@@ -272,7 +272,7 @@ PageType {
 
         Component.onCompleted: {
             var pagePath
-            if (PageController.isStartPageVisible()) {
+            if (PageController.isStartPageVisible() && !FBLinkController.isLoggedIn) {
                 tabBar.visible = false
                 pagePath = PageController.getPagePath(PageEnum.PageFBLinkLogin)
             } else {

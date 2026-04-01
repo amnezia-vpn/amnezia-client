@@ -55,6 +55,12 @@ PageType {
             if (!root.visible) return
             root.isLoading = false
             PageController.showBusyIndicator(false)
+            if (FBLinkController.isLoggedIn) {
+                PageController.showNotificationMessage(qsTr("Вход выполнен, но статус подписки пока не обновился. Откройте раздел подписки позже."))
+                root.errorMessage = ""
+                PageController.goToPageHome()
+                return
+            }
             root.errorMessage = message
         }
 
@@ -71,6 +77,12 @@ PageType {
             root.isLoading = false
             PageController.showBusyIndicator(false)
             if (root.isSubscriptionGateMessage(message)) {
+                root.errorMessage = ""
+                PageController.goToPageHome()
+                return
+            }
+            if (FBLinkController.isLoggedIn) {
+                PageController.showNotificationMessage(qsTr("Вход выполнен, но конфиг пока не загрузился. Можно продолжить и обновить позже."))
                 root.errorMessage = ""
                 PageController.goToPageHome()
                 return

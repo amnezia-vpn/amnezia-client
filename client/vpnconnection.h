@@ -7,6 +7,7 @@
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
 #include <QTimer>
+#include <QDateTime>
 
 #include "protocols/vpnprotocol.h"
 #include "core/defs.h"
@@ -70,6 +71,7 @@ private:
     std::shared_ptr<Settings> m_settings;
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
+    QJsonObject m_lastVpnConfiguration;
     QString m_remoteAddress;
 
     // Only for iOS for now, check counters
@@ -83,8 +85,24 @@ private:
 #endif
 
    Vpn::ConnectionState m_connectionState;
+   QTimer m_stateWatchdogTimer;
+   QTimer m_recoveryTimer;
+   int m_recoveryAttempts = 0;
+   int m_failureBurst = 0;
+   qint64 m_failureWindowStartedAt = 0;
+   int m_lastServerIndex = -1;
+   ServerCredentials m_lastCredentials;
+   DockerContainer m_lastContainer = DockerContainer::None;
+   bool m_reconnectScheduled = false;
+   bool m_userRequestedDisconnect = false;
 
    void createProtocolConnections();
+   void armStateWatchdog(Vpn::ConnectionState state);
+   void handleStateWatchdogTimeout();
+   void clearRecoveryState();
+   void scheduleRecoveryReconnect();
+   void registerFailureAndMaybeEnterSafeMode();
+   bool hasMissingManagedRoutingRules() const;
 
    void appendSplitTunnelingConfig();
    void appendKillSwitchConfig();

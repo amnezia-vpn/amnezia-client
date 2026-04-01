@@ -42,28 +42,36 @@ const (
 )
 
 type vipDNSConfig struct {
-	Primary   string
-	Secondary string
-	Requested bool
-	Applied   bool
-	Status    string
-	Source    string
+	Primary       string
+	Secondary     string
+	Requested     bool
+	Applied       bool
+	Status        string
+	Source        string
+	DegradeReason string
 }
 
 const (
 	vipAdBlockStatusApplied     = "applied"
 	vipAdBlockStatusDegraded    = "degraded"
 	vipAdBlockStatusUnavailable = "unavailable"
+
+	vipAdBlockDegradeReasonNone        = ""
+	vipAdBlockDegradeReasonAuthExpired = "auth_expired"
+	vipAdBlockDegradeReasonSyncStale   = "sync_stale"
+	vipAdBlockDegradeReasonDNSDown     = "dns_unreachable"
+	vipAdBlockDegradeReasonRulesMissed = "routing_rules_missing"
 )
 
-func vipDNSCleanConfig(requested bool, status string) vipDNSConfig {
+func vipDNSCleanConfig(requested bool, status, degradeReason string) vipDNSConfig {
 	return vipDNSConfig{
-		Primary:   vipDNSPublicPrimary,
-		Secondary: vipDNSPublicSecondary,
-		Requested: requested,
-		Applied:   false,
-		Status:    status,
-		Source:    piHoleDNSSourceClean,
+		Primary:       vipDNSPublicPrimary,
+		Secondary:     vipDNSPublicSecondary,
+		Requested:     requested,
+		Applied:       false,
+		Status:        status,
+		Source:        piHoleDNSSourceClean,
+		DegradeReason: strings.TrimSpace(degradeReason),
 	}
 }
 
@@ -72,12 +80,26 @@ func vipDNSPiHoleConfig(primary, secondary, source string) vipDNSConfig {
 		secondary = vipDNSPublicSecondary
 	}
 	return vipDNSConfig{
-		Primary:   primary,
-		Secondary: secondary,
-		Requested: true,
-		Applied:   true,
-		Status:    vipAdBlockStatusApplied,
-		Source:    source,
+		Primary:       primary,
+		Secondary:     secondary,
+		Requested:     true,
+		Applied:       true,
+		Status:        vipAdBlockStatusApplied,
+		Source:        source,
+		DegradeReason: vipAdBlockDegradeReasonNone,
+	}
+}
+
+func mapPiHoleDegradeReason(errorCode string) string {
+	switch strings.TrimSpace(strings.ToLower(errorCode)) {
+	case "auth_failed", "auth_error", "auth_expired":
+		return vipAdBlockDegradeReasonAuthExpired
+	case "dns_unreachable", "xray_unreachable", "xray_not_reachable":
+		return vipAdBlockDegradeReasonDNSDown
+	case "routing_rules_missing":
+		return vipAdBlockDegradeReasonRulesMissed
+	default:
+		return vipAdBlockDegradeReasonSyncStale
 	}
 }
 
@@ -323,16 +345,16 @@ func ensureVIPPiHoleRuntime(server *models.VPNServer, targetXrayContainer string
 
 func resolveVIPDNSConfig(db *gorm.DB, server *models.VPNServer, template *models.VLESSServerTemplate, sub models.Subscription) vipDNSConfig {
 	if !sub.VIPAdBlockEnabled {
-		return vipDNSCleanConfig(false, vipAdBlockStatusUnavailable)
+		return vipDNSCleanConfig(false, vipAdBlockStatusUnavailable, vipAdBlockDegradeReasonNone)
 	}
 
 	if server == nil || template == nil || strings.TrimSpace(server.SSHPassword) == "" {
-		return vipDNSCleanConfig(true, vipAdBlockStatusDegraded)
+		return vipDNSCleanConfig(true, vipAdBlockStatusDegraded, vipAdBlockDegradeReasonSyncStale)
 	}
 
 	if !server.PiHoleEnabled || server.PiHoleMode == piholeDisabled {
 		log.Printf("[VIP DNS] Pi-hole disabled on %s while ad block requested", server.Name)
-		return vipDNSCleanConfig(true, vipAdBlockStatusDegraded)
+		return vipDNSCleanConfig(true, vipAdBlockStatusDegraded, vipAdBlockDegradeReasonSyncStale)
 	}
 
 	if cachedIP := strings.TrimSpace(server.PiHoleDNSIP); cachedIP != "" && strings.TrimSpace(server.PiHoleLastSyncError) == "" {
@@ -356,5 +378,5 @@ func resolveVIPDNSConfig(db *gorm.DB, server *models.VPNServer, template *models
 	}
 
 	log.Printf("[VIP DNS] degraded on %s: requested adblock but Pi-hole unavailable (%s: %s)", server.Name, result.ErrorCode, result.Error)
-	return vipDNSCleanConfig(true, vipAdBlockStatusDegraded)
+	return vipDNSCleanConfig(true, vipAdBlockStatusDegraded, mapPiHoleDegradeReason(result.ErrorCode))
 }

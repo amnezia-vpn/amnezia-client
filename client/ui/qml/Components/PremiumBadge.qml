@@ -12,6 +12,9 @@ Rectangle {
     property string tone: "neutral"
     property string iconSource: ""
     property bool compact: false
+    property bool interactive: false
+    property bool hovered: false
+    property bool pressed: false
 
     readonly property color backgroundColor: {
         switch (tone) {
@@ -37,12 +40,33 @@ Rectangle {
         }
     }
 
+    readonly property color displayBackgroundColor: {
+        if (!interactive) {
+            return backgroundColor
+        }
+        if (!hovered && !pressed) {
+            return Qt.lighter(backgroundColor, 1.06)
+        }
+        if (pressed) {
+            return Qt.lighter(backgroundColor, 1.14)
+        }
+        if (hovered) {
+            return Qt.lighter(backgroundColor, 1.08)
+        }
+        return backgroundColor
+    }
+
     implicitHeight: compact ? 24 : 28
     implicitWidth: row.implicitWidth + (compact ? 14 : 18)
     radius: implicitHeight / 2
-    color: backgroundColor
-    border.color: Qt.rgba(foregroundColor.r, foregroundColor.g, foregroundColor.b, 0.18)
-    border.width: 1
+    color: displayBackgroundColor
+    border.color: Qt.rgba(foregroundColor.r, foregroundColor.g, foregroundColor.b,
+                          interactive ? (hovered ? 0.40 : 0.28) : 0.18)
+    border.width: interactive ? (hovered ? 1.45 : 1.2) : 1
+    scale: interactive ? (pressed ? 0.97 : (hovered ? 1.03 : 1.0)) : 1.0
+
+    Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
+    Behavior on color { ColorAnimation { duration: 120 } }
 
     RowLayout {
         id: row
@@ -66,5 +90,6 @@ Rectangle {
             font.weight: 700
             color: root.foregroundColor
         }
+
     }
 }

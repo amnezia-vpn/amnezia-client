@@ -136,12 +136,11 @@ Button {
         anchors.fill: focusBorder
         clip: true
 
-        implicitWidth: content.implicitWidth
-        implicitHeight: content.implicitHeight
-
         RowLayout {
             id: content
-            anchors.centerIn: parent
+            anchors.fill: parent
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
             spacing: 8
 
             Image {
@@ -167,8 +166,7 @@ Button {
             ButtonTextType {
                 id: buttonText
 
-                Layout.preferredWidth: Math.max(0, Math.min(implicitWidth, root.width - 32 - (leftImage.visible ? 24 : 0) - (root.rightImageSource === "" ? 0 : 24)))
-                Layout.maximumWidth: Math.max(0, root.width - 32 - (leftImage.visible ? 24 : 0) - (root.rightImageSource === "" ? 0 : 24))
+                Layout.fillWidth: true
                 color: root.textColor
                 text: root.text
                 visible: root.text === "" ? false : true

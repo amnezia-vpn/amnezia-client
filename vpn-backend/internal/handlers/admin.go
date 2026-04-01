@@ -3,7 +3,9 @@ package handlers
 import (
 	"bytes"
 	"encoding/csv"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"sort"
 	"strings"
@@ -941,13 +943,10 @@ func (h *AdminHandler) UpgradeUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("user upgraded to %s", plan)})
 }
 
-// POST /api/v1/admin/users/:id/revoke
-func (h *AdminHandler) RevokeUserKeys(c *gin.Context) {
-	userId := c.Param("id")
+func (h *AdminHandler) revokeUserKeysByID(userID uint) {
 	now := time.Now()
-	// Mark all keys as revoked
 	var keys []models.VPNKey
-	h.db.Where("user_id = ? AND revoked_at IS NULL", userId).Preload("Server").Find(&keys)
+	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server").Find(&keys)
 
 	for _, k := range keys {
 		if k.PublicKey != "" {
@@ -957,15 +956,110 @@ func (h *AdminHandler) RevokeUserKeys(c *gin.Context) {
 		}
 	}
 
-	h.db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", userId).Update("revoked_at", &now)
+	h.db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", userID).Update("revoked_at", &now)
 	var xrayCreds []models.VLESSCredential
-	h.db.Where("user_id = ? AND revoked_at IS NULL", userId).Preload("Server.VLESSTemplate").Find(&xrayCreds)
+	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server.VLESSTemplate").Find(&xrayCreds)
 	for _, cred := range xrayCreds {
 		if err := removeXrayClient(&cred.Server, cred.Server.VLESSTemplate, cred.ClientID); err != nil {
 			fmt.Printf("[WARN] Admin RevokeUserKeys XRay failed for %s: %v\n", cred.Server.Name, err)
 		}
 	}
-	h.db.Model(&models.VLESSCredential{}).Where("user_id = ? AND revoked_at IS NULL", userId).Update("revoked_at", &now)
+	h.db.Model(&models.VLESSCredential{}).Where("user_id = ? AND revoked_at IS NULL", userID).Update("revoked_at", &now)
+}
+
+// POST /api/v1/admin/users/:id/subscription/revoke
+func (h *AdminHandler) RevokeUserSubscription(c *gin.Context) {
+	userID := c.Param("id")
+	var user models.User
+	if err := h.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	var req struct {
+		RevokeKeys *bool `json:"revoke_keys"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil && !errors.Is(err, io.EOF) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		return
+	}
+
+	revokeKeys := true
+	if req.RevokeKeys != nil {
+		revokeKeys = *req.RevokeKeys
+	}
+
+	now := time.Now()
+	err := h.db.Transaction(func(tx *gorm.DB) error {
+		var sub models.Subscription
+		loadErr := tx.Where("user_id = ?", user.ID).First(&sub).Error
+		if loadErr != nil {
+			if errors.Is(loadErr, gorm.ErrRecordNotFound) {
+				sub = models.Subscription{
+					UserID:            user.ID,
+					Plan:              models.PlanFree,
+					Status:            models.SubCancelled,
+					ExpiresAt:         now,
+					AutoRenew:         false,
+					PaymentMethodID:   "",
+					VIPAdBlockEnabled: false,
+				}
+				if createErr := tx.Create(&sub).Error; createErr != nil {
+					return createErr
+				}
+			} else {
+				return loadErr
+			}
+		} else {
+			if updateErr := tx.Model(&sub).Updates(map[string]interface{}{
+				"plan":                 models.PlanFree,
+				"status":               models.SubCancelled,
+				"expires_at":           now,
+				"auto_renew":           false,
+				"payment_method_id":    "",
+				"vip_ad_block_enabled": false,
+			}).Error; updateErr != nil {
+				return updateErr
+			}
+		}
+
+		if err := tx.Model(&models.RoutingProfile{}).
+			Where("user_id = ? AND enabled = ?", user.ID, true).
+			Update("enabled", false).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to revoke subscription"})
+		return
+	}
+
+	if revokeKeys {
+		h.revokeUserKeysByID(user.ID)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "subscription revoked",
+		"user_id":      user.ID,
+		"revoke_keys":  revokeKeys,
+		"plan":         models.PlanFree,
+		"status":       models.SubCancelled,
+		"vip_disabled": true,
+	})
+}
+
+// POST /api/v1/admin/users/:id/revoke
+func (h *AdminHandler) RevokeUserKeys(c *gin.Context) {
+	userID := c.Param("id")
+	var user models.User
+	if err := h.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	h.revokeUserKeysByID(user.ID)
 	c.JSON(http.StatusOK, gin.H{"message": "all user keys revoked"})
 }
 

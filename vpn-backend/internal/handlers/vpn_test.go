@@ -16,7 +16,7 @@ func TestAggregateVIPAdBlockStateMixedSourcesKeepsApplied(t *testing.T) {
 		},
 	}
 
-	applied, status, source := aggregateVIPAdBlockState(true, configs)
+	applied, status, source, reason := aggregateVIPAdBlockState(true, configs)
 	if !applied {
 		t.Fatalf("expected applied=true for mixed pihole sources")
 	}
@@ -25,6 +25,9 @@ func TestAggregateVIPAdBlockStateMixedSourcesKeepsApplied(t *testing.T) {
 	}
 	if source == "" || source == piHoleDNSSourceClean {
 		t.Fatalf("expected non-clean source for applied mixed setup, got %q", source)
+	}
+	if reason != vipAdBlockDegradeReasonNone {
+		t.Fatalf("expected empty degrade reason for applied state, got %q", reason)
 	}
 }
 
@@ -37,7 +40,7 @@ func TestAggregateVIPAdBlockStateRejectsAppliedCleanCombination(t *testing.T) {
 		},
 	}
 
-	applied, status, source := aggregateVIPAdBlockState(true, configs)
+	applied, status, source, reason := aggregateVIPAdBlockState(true, configs)
 	if !applied {
 		t.Fatalf("expected applied flag to reflect underlying config record")
 	}
@@ -47,10 +50,13 @@ func TestAggregateVIPAdBlockStateRejectsAppliedCleanCombination(t *testing.T) {
 	if source != piHoleDNSSourceClean {
 		t.Fatalf("expected clean source in degraded state, got %q", source)
 	}
+	if reason == vipAdBlockDegradeReasonNone {
+		t.Fatalf("expected non-empty degrade reason for degraded state")
+	}
 }
 
 func TestAggregateVIPAdBlockStateUnavailableWhenNotRequested(t *testing.T) {
-	applied, status, source := aggregateVIPAdBlockState(false, []map[string]interface{}{
+	applied, status, source, reason := aggregateVIPAdBlockState(false, []map[string]interface{}{
 		{
 			"vip_ad_block_applied":    true,
 			"vip_ad_block_status":     vipAdBlockStatusApplied,
@@ -66,5 +72,8 @@ func TestAggregateVIPAdBlockStateUnavailableWhenNotRequested(t *testing.T) {
 	}
 	if source != piHoleDNSSourceClean {
 		t.Fatalf("expected clean source, got %q", source)
+	}
+	if reason != vipAdBlockDegradeReasonNone {
+		t.Fatalf("expected empty degrade reason, got %q", reason)
 	}
 }

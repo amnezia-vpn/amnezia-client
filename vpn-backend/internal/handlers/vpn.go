@@ -22,13 +22,14 @@ type VPNHandler struct {
 	db *gorm.DB
 }
 
-func aggregateVIPAdBlockState(requested bool, responseConfigs []map[string]interface{}) (bool, string, string) {
+func aggregateVIPAdBlockState(requested bool, responseConfigs []map[string]interface{}) (bool, string, string, string) {
 	vipAdBlockApplied := false
 	vipAdBlockStatus := vipAdBlockStatusUnavailable
 	vipAdBlockDNSSource := piHoleDNSSourceClean
+	vipAdBlockDegradeReason := vipAdBlockDegradeReasonNone
 
 	if !requested {
-		return vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource
+		return vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource, vipAdBlockDegradeReason
 	}
 
 	allApplied := len(responseConfigs) > 0
@@ -37,7 +38,9 @@ func aggregateVIPAdBlockState(requested bool, responseConfigs []map[string]inter
 		applied, _ := rc["vip_ad_block_applied"].(bool)
 		status, _ := rc["vip_ad_block_status"].(string)
 		source, _ := rc["vip_ad_block_dns_source"].(string)
+		reason, _ := rc["vip_ad_block_degrade_reason"].(string)
 		source = strings.TrimSpace(source)
+		reason = strings.TrimSpace(reason)
 
 		if applied {
 			vipAdBlockApplied = true
@@ -49,18 +52,26 @@ func aggregateVIPAdBlockState(requested bool, responseConfigs []map[string]inter
 		if !(applied && status == vipAdBlockStatusApplied && source != "" && source != piHoleDNSSourceClean) {
 			allApplied = false
 		}
+
+		if vipAdBlockDegradeReason == "" && status == vipAdBlockStatusDegraded && reason != "" {
+			vipAdBlockDegradeReason = reason
+		}
 	}
 
 	if allApplied && vipAdBlockApplied {
 		vipAdBlockStatus = vipAdBlockStatusApplied
+		vipAdBlockDegradeReason = vipAdBlockDegradeReasonNone
 		if firstAppliedSource != "" {
 			vipAdBlockDNSSource = firstAppliedSource
 		}
-		return vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource
+		return vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource, vipAdBlockDegradeReason
 	}
 
 	vipAdBlockStatus = vipAdBlockStatusDegraded
-	return vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource
+	if vipAdBlockDegradeReason == "" {
+		vipAdBlockDegradeReason = vipAdBlockDegradeReasonSyncStale
+	}
+	return vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource, vipAdBlockDegradeReason
 }
 
 func NewVPNHandler(db *gorm.DB) *VPNHandler {
@@ -170,14 +181,16 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 			}
 
 			responseConfigs = append(responseConfigs, map[string]interface{}{
-				"config":                  string(configJSON),
-				"server":                  server.Name,
-				"region":                  server.Region,
-				"issued_at":               issuedAt,
-				"vip_ad_block_requested":  dnsConfig.Requested,
-				"vip_ad_block_applied":    dnsConfig.Applied,
-				"vip_ad_block_status":     dnsConfig.Status,
-				"vip_ad_block_dns_source": dnsConfig.Source,
+				"config":                      string(configJSON),
+				"server":                      server.Name,
+				"region":                      server.Region,
+				"issued_at":                   issuedAt,
+				"vip_ad_block_requested":      dnsConfig.Requested,
+				"vip_ad_block_applied":        dnsConfig.Applied,
+				"vip_ad_block_status":         dnsConfig.Status,
+				"vip_ad_block_dns_source":     dnsConfig.Source,
+				"vip_ad_block_degrade_reason": dnsConfig.DegradeReason,
+				"degrade_reason":              dnsConfig.DegradeReason,
 			})
 		}
 	default:
@@ -289,26 +302,30 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 			region, _ = rc["region"].(string)
 		}
 		configStatuses = append(configStatuses, map[string]interface{}{
-			"server":                  rc["server"],
-			"region":                  rc["region"],
-			"vip_ad_block_requested":  rc["vip_ad_block_requested"],
-			"vip_ad_block_applied":    rc["vip_ad_block_applied"],
-			"vip_ad_block_status":     rc["vip_ad_block_status"],
-			"vip_ad_block_dns_source": rc["vip_ad_block_dns_source"],
+			"server":                      rc["server"],
+			"region":                      rc["region"],
+			"vip_ad_block_requested":      rc["vip_ad_block_requested"],
+			"vip_ad_block_applied":        rc["vip_ad_block_applied"],
+			"vip_ad_block_status":         rc["vip_ad_block_status"],
+			"vip_ad_block_dns_source":     rc["vip_ad_block_dns_source"],
+			"vip_ad_block_degrade_reason": rc["vip_ad_block_degrade_reason"],
+			"degrade_reason":              rc["vip_ad_block_degrade_reason"],
 		})
 	}
 	vipAdBlockRequested := sub.VIPAdBlockEnabled
-	vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource := aggregateVIPAdBlockState(vipAdBlockRequested, responseConfigs)
+	vipAdBlockApplied, vipAdBlockStatus, vipAdBlockDNSSource, vipAdBlockDegradeReason := aggregateVIPAdBlockState(vipAdBlockRequested, responseConfigs)
 
 	c.JSON(http.StatusOK, gin.H{
-		"config":                  strings.Join(configLines, "\n"),
-		"region":                  region,
-		"protocol":                capabilities.AllowedProtocols[0],
-		"vip_ad_block_requested":  vipAdBlockRequested,
-		"vip_ad_block_applied":    vipAdBlockApplied,
-		"vip_ad_block_status":     vipAdBlockStatus,
-		"vip_ad_block_dns_source": vipAdBlockDNSSource,
-		"config_statuses":         configStatuses,
+		"config":                      strings.Join(configLines, "\n"),
+		"region":                      region,
+		"protocol":                    capabilities.AllowedProtocols[0],
+		"vip_ad_block_requested":      vipAdBlockRequested,
+		"vip_ad_block_applied":        vipAdBlockApplied,
+		"vip_ad_block_status":         vipAdBlockStatus,
+		"vip_ad_block_dns_source":     vipAdBlockDNSSource,
+		"vip_ad_block_degrade_reason": vipAdBlockDegradeReason,
+		"degrade_reason":              vipAdBlockDegradeReason,
+		"config_statuses":             configStatuses,
 	})
 }
 

@@ -11,12 +11,36 @@
 #include <QDateTime>
 #include <QTimer>
 #include <QVariantList>
+#include <QSysInfo>
+#include <QCryptographicHash>
+#include <QRegularExpression>
+#include <QGuiApplication>
+#include <QClipboard>
+#include <QLocale>
 
 // Backend API URL
 const QString BACKEND_URL = "https://srv.frakebit.com/api/v1";
 
 namespace
 {
+constexpr char kLastSelectedFBLinkHostNameKey[] = "Conf/lastSelectedFBLinkHostName";
+constexpr char kLastSelectedServerIdKey[] = "Conf/lastSelectedServerId";
+constexpr char kVIPEnabledProfilesCountKey[] = "Conf/vipEnabledProfilesCount";
+constexpr char kVIPLastActiveProfileIDKey[] = "Conf/vipLastActiveRoutingProfileId";
+constexpr char kVIPLastKnownRoutingHashKey[] = "Conf/vipLastKnownGoodRoutingRulesHash";
+constexpr char kLastActiveRoutingProfileIdKey[] = "Conf/lastActiveRoutingProfileId";
+constexpr char kLastKnownGoodRoutingRulesHashKey[] = "Conf/lastKnownGoodRoutingRulesHash";
+constexpr char kVIPAdBlockStatusKey[] = "subscriptionVIPAdBlockStatus";
+constexpr char kVIPAdBlockDnsSourceKey[] = "subscriptionVIPAdBlockDnsSource";
+constexpr char kVIPAdBlockDegradeReasonKey[] = "subscriptionVIPAdBlockDegradeReason";
+constexpr char kSafeModeUntilEpochKey[] = "Conf/safeModeUntilEpochSec";
+constexpr char kShowNewFeaturesGuideKey[] = "Conf/showNewFeaturesGuide";
+
+QSettings appSettings()
+{
+    return QSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+}
+
 bool stringListContainsInsensitive(const QStringList &values, const QString &expected)
 {
     for (const QString &value : values) {
@@ -118,6 +142,47 @@ QString networkOperationToString(QNetworkAccessManager::Operation operation)
     default:
         return "UNKNOWN";
     }
+}
+
+QString safeTrimmedReason(const QString &reason)
+{
+    QString normalized = reason.trimmed();
+    if (normalized == "none" || normalized == "ok") {
+        normalized.clear();
+    }
+    return normalized;
+}
+
+QString adBlockStatusLabel(const QString &rawStatus, bool enabled)
+{
+    if (!enabled) {
+        return QObject::tr("Выключен");
+    }
+
+    const QString normalized = rawStatus.trimmed().toLower();
+    if (normalized == "applied") {
+        return QObject::tr("Работает");
+    }
+    if (normalized == "degraded" || normalized == "unavailable" || normalized.isEmpty()) {
+        return QObject::tr("Временно недоступен");
+    }
+
+    return QObject::tr("Временно недоступен");
+}
+
+QString sanitizeSensitiveTokens(const QString &input)
+{
+    QString sanitized = input;
+    static const QRegularExpression bearerRegex(QStringLiteral("(Bearer\\s+)[A-Za-z0-9\\-_.]+"),
+                                                 QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression jwtRegex(QStringLiteral("([A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+)"));
+    static const QRegularExpression emailRegex(QStringLiteral("([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,})"),
+                                               QRegularExpression::CaseInsensitiveOption);
+
+    sanitized.replace(bearerRegex, QStringLiteral("\\1***"));
+    sanitized.replace(jwtRegex, QStringLiteral("***"));
+    sanitized.replace(emailRegex, QStringLiteral("***@***"));
+    return sanitized;
 }
 } // namespace
 
@@ -439,17 +504,48 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                 QString region = obj["region"].toString();
                 const bool vipAdBlockRequested = obj.value("vip_ad_block_requested").toBool(false);
                 const bool vipAdBlockApplied = obj.value("vip_ad_block_applied").toBool(false);
-                const QString vipAdBlockStatus = obj.value("vip_ad_block_status").toString();
+                const QString vipAdBlockStatus = obj.value("vip_ad_block_status").toString().trimmed().toLower();
                 const QString vipAdBlockDnsSource = obj.value("vip_ad_block_dns_source").toString();
+                QString vipAdBlockDegradeReason = safeTrimmedReason(obj.value("vip_ad_block_degrade_reason").toString());
+                if (vipAdBlockDegradeReason.isEmpty()) {
+                    vipAdBlockDegradeReason = safeTrimmedReason(obj.value("degrade_reason").toString());
+                }
 
                 qDebug() << "[FBLink] fetchConfig: vip_ad_block_requested =" << vipAdBlockRequested
                          << "vip_ad_block_applied =" << vipAdBlockApplied
                          << "vip_ad_block_status =" << vipAdBlockStatus
-                         << "vip_ad_block_dns_source =" << vipAdBlockDnsSource;
+                         << "vip_ad_block_dns_source =" << vipAdBlockDnsSource
+                         << "vip_ad_block_degrade_reason =" << vipAdBlockDegradeReason;
+
+                {
+                    QSettings qSettings = appSettings();
+                    qSettings.setValue(kVIPAdBlockStatusKey, vipAdBlockStatus);
+                    qSettings.setValue(kVIPAdBlockDnsSourceKey, vipAdBlockDnsSource);
+                    qSettings.setValue(kVIPAdBlockDegradeReasonKey, vipAdBlockDegradeReason);
+
+                    bool hasManagedRoutingSnapshot = false;
+                    for (const QString &configData : configStrings) {
+                        if (configData.contains("\"routing\"") && configData.contains("\"rules\"")) {
+                            hasManagedRoutingSnapshot = true;
+                            break;
+                        }
+                    }
+                    if (hasManagedRoutingSnapshot) {
+                        const QString joinedConfigs = configStrings.join('\n');
+                        const QString configHash = QString::fromLatin1(
+                                QCryptographicHash::hash(joinedConfigs.toUtf8(), QCryptographicHash::Sha1).toHex());
+                        qSettings.setValue(kVIPLastKnownRoutingHashKey, configHash);
+                        qSettings.setValue(kLastKnownGoodRoutingRulesHashKey, configHash);
+                    }
+                    qSettings.sync();
+                }
+                emit subscriptionChanged();
 
                 if (m_importController && m_settings && m_serversModel) {
                     QJsonArray servers = m_settings->serversArray();
                     const int currentDefaultServerIndex = m_serversModel->getDefaultServerIndex();
+                    QSettings qSettings = appSettings();
+                    const QString persistedSelectedHost = qSettings.value(kLastSelectedFBLinkHostNameKey, "").toString();
                     QString selectedFBLinkHostName;
                     QString selectedFBLinkContainer;
                     if (currentDefaultServerIndex >= 0 && currentDefaultServerIndex < servers.size()) {
@@ -457,7 +553,21 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         if (isFBLinkServer(currentDefaultServer)) {
                             selectedFBLinkHostName = currentDefaultServer.value("hostName").toString();
                             selectedFBLinkContainer = currentDefaultServer.value("defaultContainer").toString();
+                            if (!selectedFBLinkHostName.isEmpty()) {
+                                qSettings.setValue(kLastSelectedFBLinkHostNameKey, selectedFBLinkHostName);
+                                const QJsonValue serverIdValue = currentDefaultServer.value("id");
+                                if (serverIdValue.isDouble()) {
+                                    qSettings.setValue(kLastSelectedServerIdKey, serverIdValue.toInt());
+                                } else if (serverIdValue.isString()) {
+                                    qSettings.setValue(kLastSelectedServerIdKey, serverIdValue.toString());
+                                } else {
+                                    qSettings.setValue(kLastSelectedServerIdKey, selectedFBLinkHostName);
+                                }
+                            }
                         }
+                    }
+                    if (selectedFBLinkHostName.isEmpty()) {
+                        selectedFBLinkHostName = persistedSelectedHost;
                     }
 
                     QList<int> existingFBLinkServerIndices;
@@ -577,6 +687,25 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         }
                         m_serversModel->setDefaultServerIndex(finalServerIndex);
                         m_serversModel->setProcessedServerIndex(finalServerIndex);
+
+                        const QJsonArray finalServers = m_settings->serversArray();
+                        if (finalServerIndex >= 0 && finalServerIndex < finalServers.size()) {
+                            const QJsonObject finalServer = finalServers.at(finalServerIndex).toObject();
+                            if (isFBLinkServer(finalServer)) {
+                                const QString finalHost = finalServer.value("hostName").toString();
+                                if (!finalHost.isEmpty()) {
+                                    qSettings.setValue(kLastSelectedFBLinkHostNameKey, finalHost);
+                                    const QJsonValue serverIdValue = finalServer.value("id");
+                                    if (serverIdValue.isDouble()) {
+                                        qSettings.setValue(kLastSelectedServerIdKey, serverIdValue.toInt());
+                                    } else if (serverIdValue.isString()) {
+                                        qSettings.setValue(kLastSelectedServerIdKey, serverIdValue.toString());
+                                    } else {
+                                        qSettings.setValue(kLastSelectedServerIdKey, finalHost);
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     emit configFetched();
@@ -759,10 +888,23 @@ void FBLinkController::logout()
     m_pendingRefreshCallbacks.clear();
     m_isRefreshing = false;
     setLoadingState(false);
+    {
+        QSettings qSettings = appSettings();
+        qSettings.setValue(kVIPAdBlockStatusKey, "");
+        qSettings.setValue(kVIPAdBlockDnsSourceKey, "");
+        qSettings.setValue(kVIPAdBlockDegradeReasonKey, "");
+        qSettings.setValue(kVIPEnabledProfilesCountKey, 0);
+        qSettings.setValue(kVIPLastActiveProfileIDKey, -1);
+        qSettings.setValue(kLastActiveRoutingProfileIdKey, -1);
+        qSettings.setValue(kLastKnownGoodRoutingRulesHashKey, "");
+        qSettings.setValue(kShowNewFeaturesGuideKey, false);
+        qSettings.sync();
+    }
     saveJwtToken("");
     saveRefreshToken("");
     saveSubscriptionInfo("", "", "");
     emit loginStateChanged();
+    emit newFeaturesGuideChanged();
     emit subscriptionChanged();
 }
 
@@ -891,6 +1033,47 @@ bool FBLinkController::vipAdBlockEnabled() const
     return qSettings.value("subscriptionVIPAdBlockEnabled", false).toBool();
 }
 
+QString FBLinkController::vipAdBlockStatus() const
+{
+    QSettings qSettings = appSettings();
+    const QString status = qSettings.value(kVIPAdBlockStatusKey, "").toString().trimmed().toLower();
+    return status;
+}
+
+QString FBLinkController::vipAdBlockStatusLabel() const
+{
+    return adBlockStatusLabel(vipAdBlockStatus(), vipAdBlockEnabled());
+}
+
+QString FBLinkController::vipAdBlockDegradeReason() const
+{
+    QSettings qSettings = appSettings();
+    return safeTrimmedReason(qSettings.value(kVIPAdBlockDegradeReasonKey, "").toString());
+}
+
+bool FBLinkController::safeModeActive() const
+{
+    QSettings qSettings = appSettings();
+    const qint64 untilEpoch = qSettings.value(kSafeModeUntilEpochKey, 0).toLongLong();
+    return untilEpoch > QDateTime::currentSecsSinceEpoch();
+}
+
+QString FBLinkController::safeModeUntilText() const
+{
+    QSettings qSettings = appSettings();
+    const qint64 untilEpoch = qSettings.value(kSafeModeUntilEpochKey, 0).toLongLong();
+    if (untilEpoch <= QDateTime::currentSecsSinceEpoch()) {
+        return {};
+    }
+    return QLocale::system().toString(QDateTime::fromSecsSinceEpoch(untilEpoch), QLocale::ShortFormat);
+}
+
+bool FBLinkController::showNewFeaturesGuide() const
+{
+    QSettings qSettings = appSettings();
+    return qSettings.value(kShowNewFeaturesGuideKey, false).toBool();
+}
+
 bool FBLinkController::isLoading() const
 {
     return m_isLoading;
@@ -904,6 +1087,35 @@ void FBLinkController::setAutoRenew(bool enabled)
 void FBLinkController::setVipAdBlockEnabled(bool enabled)
 {
     setVipAdBlockEnabled(enabled, true);
+}
+
+void FBLinkController::submitBugReport(const QString &note)
+{
+    submitBugReport(note, true);
+}
+
+void FBLinkController::exitSafeMode()
+{
+    QSettings qSettings = appSettings();
+    qSettings.setValue(kSafeModeUntilEpochKey, 0);
+    qSettings.sync();
+    emit subscriptionChanged();
+}
+
+void FBLinkController::armNewFeaturesGuide()
+{
+    QSettings qSettings = appSettings();
+    qSettings.setValue(kShowNewFeaturesGuideKey, true);
+    qSettings.sync();
+    emit newFeaturesGuideChanged();
+}
+
+void FBLinkController::dismissNewFeaturesGuide()
+{
+    QSettings qSettings = appSettings();
+    qSettings.setValue(kShowNewFeaturesGuideKey, false);
+    qSettings.sync();
+    emit newFeaturesGuideChanged();
 }
 
 void FBLinkController::setAutoRenew(bool enabled, bool allowRefreshRetry)
@@ -983,6 +1195,77 @@ void FBLinkController::setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry
     });
 }
 
+void FBLinkController::submitBugReport(const QString &note, bool allowRefreshRetry)
+{
+    QString token = getJwtToken();
+    if (token.isEmpty()) {
+        emit requestError(tr("Необходимо войти в аккаунт"));
+        return;
+    }
+
+    QJsonObject diagnostics;
+    diagnostics.insert("platform", QSysInfo::prettyProductName());
+    diagnostics.insert("architecture", QSysInfo::currentCpuArchitecture());
+    diagnostics.insert("subscription_plan", subscriptionPlan());
+    diagnostics.insert("vip_ad_block_enabled", vipAdBlockEnabled());
+    diagnostics.insert("vip_ad_block_status", vipAdBlockStatus());
+    diagnostics.insert("vip_ad_block_dns_source", appSettings().value(kVIPAdBlockDnsSourceKey, "").toString());
+    diagnostics.insert("vip_ad_block_degrade_reason", vipAdBlockDegradeReason());
+    diagnostics.insert("safe_mode_active", safeModeActive());
+    diagnostics.insert("safe_mode_until", safeModeUntilText());
+
+    QSettings qSettings = appSettings();
+    diagnostics.insert("default_server_index", qSettings.value("Servers/defaultServerIndex", -1).toInt());
+    diagnostics.insert("last_selected_host", qSettings.value(kLastSelectedFBLinkHostNameKey, "").toString());
+    diagnostics.insert("enabled_profiles_count", qSettings.value(kVIPEnabledProfilesCountKey, 0).toInt());
+    diagnostics.insert("active_profile_id", qSettings.value(kVIPLastActiveProfileIDKey, -1).toInt());
+    diagnostics.insert("routing_rules_hash", qSettings.value(kVIPLastKnownRoutingHashKey, "").toString());
+
+    if (m_serversModel) {
+        const int defaultIndex = m_serversModel->getDefaultServerIndex();
+        if (defaultIndex >= 0) {
+            const QJsonObject server = m_serversModel->getServerConfig(defaultIndex);
+            diagnostics.insert("default_server_name", server.value("description").toString());
+            diagnostics.insert("default_server_host", server.value("hostName").toString());
+            diagnostics.insert("default_server_country", server.value("server_country_code").toString());
+            diagnostics.insert("default_server_container", server.value("defaultContainer").toString());
+        }
+    }
+
+    QJsonObject payload;
+    payload.insert("note", sanitizeSensitiveTokens(note));
+    payload.insert("diagnostics", diagnostics);
+
+    QNetworkRequest request = createApiRequest("/me/support/bug-report", true, true);
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(payload).toJson());
+    connect(reply, &QNetworkReply::finished, this, [this, reply, note, allowRefreshRetry, payload]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            const QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            const QString ticketId = obj.value("ticket_id").toString(
+                    QString::number(QDateTime::currentSecsSinceEpoch()));
+            emit bugReportSubmitted(ticketId);
+            return;
+        }
+
+        logApiFailure("submit-bug-report", reply);
+        if (allowRefreshRetry && shouldRefreshToken(reply)) {
+            refreshAccessToken([this, note]() {
+                submitBugReport(note, false);
+            });
+            return;
+        }
+
+        const QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+        if (auto *clipboard = QGuiApplication::clipboard()) {
+            clipboard->setText(QString::fromUtf8(QJsonDocument(payload).toJson(QJsonDocument::Compact)));
+        }
+        const QString fallbackMessage = obj.value("error").toString(reply->errorString());
+        emit requestError(tr("Не удалось отправить отчёт. Диагностика скопирована в буфер обмена. %1")
+                                  .arg(fallbackMessage));
+    });
+}
+
 void FBLinkController::deleteCard()
 {
     deleteCard(true);
@@ -1043,7 +1326,27 @@ void FBLinkController::fetchRoutingProfiles(bool allowRefreshRetry)
         reply->deleteLater();
         if (reply->error() == QNetworkReply::NoError) {
             QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
-            emit routingProfilesFetched(obj.value("profiles").toArray().toVariantList());
+            const QJsonArray profilesArray = obj.value("profiles").toArray();
+            int enabledProfilesCount = 0;
+            int activeProfileId = -1;
+            for (const QJsonValue &profileValue : profilesArray) {
+                const QJsonObject profile = profileValue.toObject();
+                if (!profile.value("enabled").toBool(false)) {
+                    continue;
+                }
+                ++enabledProfilesCount;
+                if (activeProfileId < 0) {
+                    activeProfileId = profile.value("id").toInt(-1);
+                }
+            }
+
+            QSettings qSettings = appSettings();
+            qSettings.setValue(kVIPEnabledProfilesCountKey, enabledProfilesCount);
+            qSettings.setValue(kVIPLastActiveProfileIDKey, activeProfileId);
+            qSettings.setValue(kLastActiveRoutingProfileIdKey, activeProfileId);
+            qSettings.sync();
+
+            emit routingProfilesFetched(profilesArray.toVariantList());
         } else {
             logApiFailure("fetch-routing-profiles", reply);
             if (allowRefreshRetry && shouldRefreshToken(reply)) {

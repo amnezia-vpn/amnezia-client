@@ -1,7 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 	"vpn-backend/internal/config"
 	"vpn-backend/internal/models"
@@ -13,6 +18,23 @@ import (
 type UserHandler struct {
 	db  *gorm.DB
 	cfg *config.Config
+}
+
+var (
+	supportBearerPattern = regexp.MustCompile(`(?i)(bearer\s+)[A-Za-z0-9\-_.]+`)
+	supportJwtPattern    = regexp.MustCompile(`[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+`)
+	supportAuthPattern   = regexp.MustCompile(`(?i)(authorization["']?\s*:\s*["']?)[^"'\s]+`)
+)
+
+func sanitizeSupportText(value string) string {
+	sanitized := strings.TrimSpace(value)
+	sanitized = supportBearerPattern.ReplaceAllString(sanitized, "${1}***")
+	sanitized = supportAuthPattern.ReplaceAllString(sanitized, "${1}***")
+	sanitized = supportJwtPattern.ReplaceAllString(sanitized, "***")
+	if len(sanitized) > 5000 {
+		sanitized = sanitized[:5000]
+	}
+	return sanitized
 }
 
 const pendingPaymentSyncWindow = 30 * time.Minute
@@ -199,6 +221,33 @@ func (h *UserHandler) SetVIPAdBlock(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"enabled": req.Enabled})
+}
+
+// POST /api/v1/me/support/bug-report
+func (h *UserHandler) SubmitBugReport(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	var req struct {
+		Note        string                 `json:"note"`
+		Diagnostics map[string]interface{} `json:"diagnostics"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ticketID := fmt.Sprintf("FBR-%d-%d", userID, time.Now().Unix())
+	sanitizedNote := sanitizeSupportText(req.Note)
+	rawDiagnostics, _ := json.Marshal(req.Diagnostics)
+	sanitizedDiagnostics := sanitizeSupportText(string(rawDiagnostics))
+
+	log.Printf("[SUPPORT] bug report ticket=%s user_id=%d note=%q diagnostics=%s",
+		ticketID, userID, sanitizedNote, sanitizedDiagnostics)
+
+	c.JSON(http.StatusOK, gin.H{
+		"ticket_id": ticketID,
+		"status":    "accepted",
+	})
 }
 
 // DELETE /api/v1/me/card — удалить привязанную карту и отключить автосписание

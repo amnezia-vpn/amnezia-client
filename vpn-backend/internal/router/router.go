@@ -121,6 +121,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			me.POST("/routing-profiles/system/:code/copy", userH.CopySystemRoutingProfile)
 			me.PUT("/routing-profiles/:id", userH.UpdateRoutingProfile)
 			me.DELETE("/routing-profiles/:id", userH.DeleteRoutingProfile)
+			me.POST("/support/bug-report", userH.SubmitBugReport)
 			me.GET("/config", vpnH.GetConfig)
 			me.POST("/config/revoke", vpnH.RevokeConfig)
 		}
@@ -135,6 +136,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		{
 			adminGrp.GET("/users", adminH.GetUsers)
 			adminGrp.POST("/users/:id/upgrade", adminH.UpgradeUser)
+			adminGrp.POST("/users/:id/subscription/revoke", adminH.RevokeUserSubscription)
 			adminGrp.POST("/users/:id/revoke", adminH.RevokeUserKeys)
 			adminGrp.POST("/users/:id/set-role", adminH.SetUserRole)
 			adminGrp.DELETE("/users/:id", adminH.DeleteUser)

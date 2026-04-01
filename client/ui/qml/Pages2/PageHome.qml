@@ -33,6 +33,46 @@ PageType {
         : (ServersModel.defaultServerName !== ""
             ? ServersModel.defaultServerName
             : qsTr("Выберите локацию и нажмите подключение"))
+    readonly property string adBlockBadgeText: {
+        if (!FBLinkController.canUseAdBlock) {
+            return qsTr("AdBlock недоступен")
+        }
+        return qsTr("AdBlock: %1").arg(FBLinkController.vipAdBlockStatusLabel)
+    }
+    readonly property string adBlockBadgeTone: {
+        if (!FBLinkController.canUseAdBlock) {
+            return "neutral"
+        }
+        if (!FBLinkController.vipAdBlockEnabled) {
+            return "neutral"
+        }
+        return FBLinkController.vipAdBlockStatus === "applied" ? "success" : "warning"
+    }
+
+    function openSubscriptionPage() {
+        if (!FBLinkController.isLoggedIn) {
+            PageController.goToPage(PageEnum.PageFBLinkLogin)
+            return
+        }
+        PageController.goToPage(PageEnum.PageFBLinkSubscription)
+    }
+
+    function openVipRoutingPage() {
+        if (!FBLinkController.isLoggedIn) {
+            PageController.goToPage(PageEnum.PageFBLinkLogin)
+            return
+        }
+        PageController.goToPage(PageEnum.PageSettingsVipRoutingProfiles)
+    }
+
+    function refreshNewFeaturesGuide() {
+        if (!root.visible || !FBLinkController.isSubscribed || !FBLinkController.showNewFeaturesGuide) {
+            return
+        }
+        if (!newFeaturesPopup.visible) {
+            newFeaturesPopup.open()
+        }
+    }
 
     Connections {
         target: Qt.application
@@ -56,6 +96,19 @@ PageType {
             if (isContainerInstalled) {
                 containersDropDown.rootButtonClickedFunction()
             }
+        }
+    }
+
+    Connections {
+        target: FBLinkController
+        function onNewFeaturesGuideChanged() { root.refreshNewFeaturesGuide() }
+        function onSubscriptionChanged() { root.refreshNewFeaturesGuide() }
+    }
+
+    Component.onCompleted: root.refreshNewFeaturesGuide()
+    onVisibleChanged: {
+        if (visible) {
+            root.refreshNewFeaturesGuide()
         }
     }
 
@@ -128,7 +181,7 @@ PageType {
                 height: 34
                 radius: 17
 
-                visible: !FBLinkController.isSubscribed
+                visible: false
 
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
@@ -185,7 +238,7 @@ PageType {
                 height: 34
                 radius: 17
 
-                visible: FBLinkController.isSubscribed
+                visible: false
 
                 color: Qt.rgba(16/255, 185/255, 129/255, 0.18)
                 border.color: Qt.rgba(16/255, 185/255, 129/255, 0.4)
@@ -222,11 +275,58 @@ PageType {
         }
 
         PremiumPanel {
+            id: safeModeBanner
+            visible: FBLinkController.safeModeActive
+            width: root.contentWidth
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: topBar.bottom
+            anchors.topMargin: 12
+            padding: 12
+            accentVisible: true
+            accentColor: "#F59E0B"
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                PremiumBadge {
+                    text: qsTr("Безопасный режим")
+                    tone: "warning"
+                    iconSource: "qrc:/images/controls/alert-circle.svg"
+                }
+                PremiumBadge {
+                    text: qsTr("Автоподключение выключено")
+                    tone: "neutral"
+                }
+            }
+
+            LabelTextType {
+                Layout.fillWidth: true
+                text: FBLinkController.safeModeUntilText !== ""
+                    ? qsTr("Приложение временно запущено в безопасном режиме до %1.").arg(FBLinkController.safeModeUntilText)
+                    : qsTr("Приложение временно запущено в безопасном режиме.")
+                font.pixelSize: 13
+                color: FBLinkStyle.color.mutedGray
+                wrapMode: Text.WordWrap
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                implicitHeight: 40
+                text: qsTr("Вернуться в обычный режим")
+                defaultColor: Qt.rgba(245/255, 158/255, 11/255, 0.18)
+                hoveredColor: Qt.rgba(245/255, 158/255, 11/255, 0.28)
+                pressedColor: Qt.rgba(245/255, 158/255, 11/255, 0.36)
+                textColor: "#FFFFFF"
+                clickedFunc: function() { FBLinkController.exitSafeMode() }
+            }
+        }
+
+        PremiumPanel {
             id: statusCard
             width: root.contentWidth
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: connectButton.top
-            anchors.bottomMargin: 18
+            anchors.top: FBLinkController.safeModeActive ? safeModeBanner.bottom : topBar.bottom
+            anchors.topMargin: 14
             padding: 12
             accentVisible: true
             accentColor: ConnectionController.isConnected ? "#10B981" : "#00C8FF"
@@ -237,29 +337,84 @@ PageType {
                 spacing: 8
 
                 PremiumBadge {
+                    id: subscriptionBadge
                     compact: root.compactHeaderBadges
                     text: FBLinkController.isSubscribed
                         ? (FBLinkController.subscriptionPlan === "vip" ? qsTr("VIP") : qsTr("Premium"))
                         : qsTr("Free")
                     tone: FBLinkController.isSubscribed ? "success" : "accent"
                     iconSource: "qrc:/images/controls/shield-tick.svg"
+                    interactive: true
+                    hovered: subscriptionBadgeMouse.containsMouse
+                    pressed: subscriptionBadgeMouse.pressed
+
+                    MouseArea {
+                        id: subscriptionBadgeMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.openSubscriptionPage()
+                    }
                 }
 
                 PremiumBadge {
+                    id: connectionBadge
                     compact: root.compactHeaderBadges
                     text: ConnectionController.isConnected ? qsTr("Подключено") : qsTr("Ожидание")
                     tone: ConnectionController.isConnected ? "success" : "accent"
                     iconSource: ConnectionController.isConnected
                         ? "qrc:/images/controls/check.svg"
                         : "qrc:/images/controls/radio.svg"
+                    interactive: true
+                    hovered: connectionBadgeMouse.containsMouse
+                    pressed: connectionBadgeMouse.pressed
+
+                    MouseArea {
+                        id: connectionBadgeMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: PageController.goToPage(PageEnum.PageSettingsConnection)
+                    }
                 }
 
                 PremiumBadge {
+                    id: routingBadge
                     visible: FBLinkController.canManageRoutingProfiles
                     compact: root.compactHeaderBadges
                     text: root.compactHeaderBadges ? qsTr("Routing") : qsTr("VIP routing")
                     tone: "proxy"
                     iconSource: "qrc:/images/controls/tag.svg"
+                    interactive: true
+                    hovered: routingBadgeMouse.containsMouse
+                    pressed: routingBadgeMouse.pressed
+
+                    MouseArea {
+                        id: routingBadgeMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.openVipRoutingPage()
+                    }
+                }
+
+                PremiumBadge {
+                    id: adBlockBadge
+                    compact: root.compactHeaderBadges
+                    text: root.adBlockBadgeText
+                    tone: root.adBlockBadgeTone
+                    iconSource: "qrc:/images/controls/shield-tick.svg"
+                    interactive: true
+                    hovered: adBlockBadgeMouse.containsMouse
+                    pressed: adBlockBadgeMouse.pressed
+
+                    MouseArea {
+                        id: adBlockBadgeMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.openVipRoutingPage()
+                    }
                 }
 
                 PremiumBadge {
@@ -295,11 +450,19 @@ PageType {
             objectName: "connectButton"
 
             z: 99
-            anchors.centerIn: parent
-            // Shift down by half topBar's height so button is centered
-            // in the visual space below the top bar, not the whole Item
-            anchors.verticalCenterOffset: (topBar.y + topBar.height) / 2
-                                          - (adLabel.visible ? adLabel.implicitHeight / 2 + 11 : 0)
+            visible: !newFeaturesPopup.visible
+            enabled: visible
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: {
+                var minY = statusCard.y + statusCard.height + 20
+                var maxY = parent.height - drawer.collapsedHeight
+                           - (adLabel.visible ? adLabel.implicitHeight + 24 : 24)
+                           - height
+                if (maxY <= minY) {
+                    return minY
+                }
+                return minY + (maxY - minY) / 2
+            }
         }
 
         // ── Ad label below button ────────────────────────────────
@@ -331,6 +494,185 @@ PageType {
         // Hide banner when drawer is expanded (server list is open)
         opacity: drawer.isCollapsedStateActive() ? 1.0 : 0.0
         Behavior on opacity { NumberAnimation { duration: 200 } }
+    }
+
+    Popup {
+        id: newFeaturesPopup
+        width: Math.min(root.width - 28, 560)
+        x: (root.width - width) / 2
+        y: Math.max(24 + SettingsController.safeAreaTopMargin, (root.height - implicitHeight) / 2)
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        padding: 20
+
+        onClosed: {
+            if (FBLinkController.showNewFeaturesGuide) {
+                FBLinkController.dismissNewFeaturesGuide()
+            }
+        }
+
+        Overlay.modal: Rectangle {
+            color: Qt.rgba(0, 0, 0, 0.56)
+        }
+
+        background: Rectangle {
+            clip: true
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.rgba(27/255, 30/255, 41/255, 0.99) }
+                GradientStop { position: 1.0; color: Qt.rgba(19/255, 22/255, 31/255, 0.99) }
+            }
+            radius: 20
+            border.color: Qt.rgba(0, 200/255, 255/255, 0.35)
+            border.width: 1
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+                anchors.topMargin: 10
+                height: 3
+                radius: 2
+                color: Qt.rgba(0, 200/255, 255/255, 0.8)
+            }
+
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 14
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                PremiumBadge {
+                    text: qsTr("VIP")
+                    tone: "proxy"
+                    iconSource: "qrc:/images/controls/shield-tick.svg"
+                }
+
+                PremiumBadge {
+                    text: qsTr("Новое")
+                    tone: "accent"
+                }
+
+                Item { Layout.fillWidth: true }
+
+                Rectangle {
+                    width: 30
+                    height: 30
+                    radius: 15
+                    color: closeGuideMouse.pressed
+                        ? Qt.rgba(1, 1, 1, 0.20)
+                        : (closeGuideMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.10))
+                    border.color: Qt.rgba(1, 1, 1, 0.12)
+                    border.width: 1
+
+                    Text {
+                        anchors.fill: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        text: "×"
+                        color: FBLinkStyle.color.paleGray
+                        font.pixelSize: 18
+                        font.family: "PT Root UI VF"
+                        font.weight: 500
+                    }
+
+                    MouseArea {
+                        id: closeGuideMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            FBLinkController.dismissNewFeaturesGuide()
+                            newFeaturesPopup.close()
+                        }
+                    }
+                }
+            }
+
+            LabelTextType {
+                Layout.fillWidth: true
+                text: qsTr("Новые возможности готовы")
+                font.pixelSize: 24
+                font.weight: 700
+                color: "#FFFFFF"
+                wrapMode: Text.WordWrap
+            }
+
+            CaptionTextType {
+                Layout.fillWidth: true
+                text: qsTr("Настройте маршруты для нужных сервисов и включите AdBlock в пару касаний.")
+                color: FBLinkStyle.color.mutedGray
+                wrapMode: Text.WordWrap
+            }
+
+            Flow {
+                Layout.fillWidth: true
+                spacing: 8
+
+                PremiumBadge {
+                    text: qsTr("Маршруты сервисов")
+                    tone: "proxy"
+                    compact: true
+                }
+
+                PremiumBadge {
+                    visible: FBLinkController.canUseAdBlock
+                    text: qsTr("AdBlock для VIP")
+                    tone: "success"
+                    compact: true
+                }
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                implicitHeight: 46
+                text: qsTr("Настроить VIP маршруты")
+                defaultColor: "#00C8FF"
+                hoveredColor: "#33D4FF"
+                pressedColor: "#0099BB"
+                textColor: "#FFFFFF"
+                clickedFunc: function() {
+                    FBLinkController.dismissNewFeaturesGuide()
+                    newFeaturesPopup.close()
+                    root.openVipRoutingPage()
+                }
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                implicitHeight: 46
+                visible: FBLinkController.canUseAdBlock
+                text: FBLinkController.vipAdBlockEnabled ? qsTr("Управлять AdBlock") : qsTr("Включить AdBlock")
+                defaultColor: Qt.rgba(16/255, 185/255, 129/255, 0.20)
+                hoveredColor: Qt.rgba(16/255, 185/255, 129/255, 0.30)
+                pressedColor: Qt.rgba(16/255, 185/255, 129/255, 0.38)
+                textColor: "#FFFFFF"
+                clickedFunc: function() {
+                    FBLinkController.dismissNewFeaturesGuide()
+                    newFeaturesPopup.close()
+                    root.openVipRoutingPage()
+                }
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                implicitHeight: 42
+                text: qsTr("Позже")
+                defaultColor: Qt.rgba(1, 1, 1, 0.08)
+                hoveredColor: Qt.rgba(1, 1, 1, 0.12)
+                pressedColor: Qt.rgba(1, 1, 1, 0.18)
+                textColor: FBLinkStyle.color.paleGray
+                clickedFunc: function() {
+                    FBLinkController.dismissNewFeaturesGuide()
+                    newFeaturesPopup.close()
+                }
+            }
+        }
     }
 
     DrawerType2 {

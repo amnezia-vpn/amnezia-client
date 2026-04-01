@@ -32,6 +32,12 @@ class FBLinkController : public QObject
     Q_PROPERTY(bool canManageRoutingProfiles READ canManageRoutingProfiles NOTIFY subscriptionChanged)
     Q_PROPERTY(bool canUseAdBlock READ canUseAdBlock NOTIFY subscriptionChanged)
     Q_PROPERTY(bool vipAdBlockEnabled READ vipAdBlockEnabled NOTIFY subscriptionChanged)
+    Q_PROPERTY(QString vipAdBlockStatus READ vipAdBlockStatus NOTIFY subscriptionChanged)
+    Q_PROPERTY(QString vipAdBlockStatusLabel READ vipAdBlockStatusLabel NOTIFY subscriptionChanged)
+    Q_PROPERTY(QString vipAdBlockDegradeReason READ vipAdBlockDegradeReason NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool safeModeActive READ safeModeActive NOTIFY subscriptionChanged)
+    Q_PROPERTY(QString safeModeUntilText READ safeModeUntilText NOTIFY subscriptionChanged)
+    Q_PROPERTY(bool showNewFeaturesGuide READ showNewFeaturesGuide NOTIFY newFeaturesGuideChanged)
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY loadingChanged)
 
 public:
@@ -55,6 +61,10 @@ public:
     Q_INVOKABLE void saveRoutingProfile(const QVariantMap &profile);
     Q_INVOKABLE void deleteRoutingProfile(int id);
     Q_INVOKABLE void copySystemRoutingProfile(const QString &code);
+    Q_INVOKABLE void submitBugReport(const QString &note = QString());
+    Q_INVOKABLE void exitSafeMode();
+    Q_INVOKABLE void armNewFeaturesGuide();
+    Q_INVOKABLE void dismissNewFeaturesGuide();
     Q_INVOKABLE void logout();
 
     bool isLoggedIn() const;
@@ -70,6 +80,12 @@ public:
     bool canManageRoutingProfiles() const;
     bool canUseAdBlock() const;
     bool vipAdBlockEnabled() const;
+    QString vipAdBlockStatus() const;
+    QString vipAdBlockStatusLabel() const;
+    QString vipAdBlockDegradeReason() const;
+    bool safeModeActive() const;
+    QString safeModeUntilText() const;
+    bool showNewFeaturesGuide() const;
     bool isLoading() const;
 
 signals:
@@ -99,6 +115,8 @@ signals:
     void routingProfileSaved();
     void routingProfileDeleted();
     void routingSystemProfileCopied(const QVariantMap &profile, bool created);
+    void bugReportSubmitted(const QString &ticketId);
+    void newFeaturesGuideChanged();
     void requestError(const QString &errorMessage);
     void loadingChanged();
 
@@ -121,6 +139,7 @@ private:
     void saveRoutingProfile(const QVariantMap &profile, bool allowRefreshRetry);
     void deleteRoutingProfile(int id, bool allowRefreshRetry);
     void copySystemRoutingProfile(const QString &code, bool allowRefreshRetry);
+    void submitBugReport(const QString &note, bool allowRefreshRetry);
     void createPayment(const QString &plan, bool allowRefreshRetry);
     void setAutoRenew(bool enabled, bool allowRefreshRetry);
     void setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry);

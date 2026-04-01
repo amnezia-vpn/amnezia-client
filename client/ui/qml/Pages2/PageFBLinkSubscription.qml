@@ -252,13 +252,17 @@ PageType {
                             radius: 10
                             color: "#10B981"
 
-                            LabelTextType {
+                            Text {
                                 id: priceLabel
-                                anchors.centerIn: parent
+                                anchors.fill: parent
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
                                 text: "5 ₽"
                                 font.pixelSize: 14
                                 font.weight: 700
+                                font.family: "PT Root UI VF"
                                 color: "white"
+                                wrapMode: Text.NoWrap
                             }
                         }
                     }
@@ -422,13 +426,17 @@ PageType {
                                         radius: 10
                                         color: planCard.isCurrentPlan ? "#10B981" : "#00C8FF"
 
-                                        LabelTextType {
+                                        Text {
                                             id: activeBadgeText
-                                            anchors.centerIn: parent
+                                            anchors.fill: parent
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
                                             text: planCard.isCurrentPlan ? qsTr("АКТИВНА") : modelData.badge
                                             font.pixelSize: 10
                                             font.weight: 700
+                                            font.family: "PT Root UI VF"
                                             color: "#FFFFFF"
+                                            wrapMode: Text.NoWrap
                                         }
                                     }
                                 }
@@ -687,6 +695,7 @@ PageType {
                         root.isWaitingForPayment = false
                         root.selectedPlan = Math.max(root.currentPlanLevel, 0)
                         PageController.showNotificationMessage(qsTr("Подписка активирована! Добро пожаловать в %1.").arg(root.planTitleById(FBLinkController.subscriptionPlan)))
+                        FBLinkController.armNewFeaturesGuide()
                         FBLinkController.fetchConfig()
                         PageController.goToPageHome()
                     }
