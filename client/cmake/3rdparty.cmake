@@ -41,7 +41,7 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
 )
 
-find_package(openssl REQUIRED)
+find_package(OpenSSL REQUIRED)
 list(APPEND LIBS OpenSSL::SSL OpenSSL::Crypto)
 
 find_package(libssh REQUIRED)
