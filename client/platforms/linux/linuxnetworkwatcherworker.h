@@ -44,7 +44,6 @@ class LinuxNetworkWatcherWorker final : public QObject {
   // point is active and unsecure.
   QStringList m_devicePaths;
   quint32 m_previousNMState = 0;
-  // Incremented on every connect/disconnect event to cancel in-flight polls.
   std::atomic<int> m_pollGeneration{0};
 };
 

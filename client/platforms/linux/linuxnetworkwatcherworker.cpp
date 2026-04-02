@@ -210,7 +210,6 @@ void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
   logger.debug() << "NMStateChanged " << state;
 
   if (state == NM_STATE_ASLEEP) {
-    // Invalidate any in-flight gateway poll before emitting wakeup.
     ++m_pollGeneration;
     emit wakeup();
   } else if (state >= NM_STATE_CONNECTED_SITE && m_previousNMState < NM_STATE_CONNECTED_SITE) {
@@ -225,7 +224,7 @@ void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 
 void LinuxNetworkWatcherWorker::checkGatewayAndEmit(int generation, int count) {
   if (m_pollGeneration.load() != generation) {
-    return;  // cancelled by a newer connect/disconnect event
+    return;
   }
 
   ++count;

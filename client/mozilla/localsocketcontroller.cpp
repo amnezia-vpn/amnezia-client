@@ -27,7 +27,7 @@
 #include "protocols/protocols_defs.h"
 
 // How many times do we try to reconnect.
-constexpr int MAX_CONNECTION_RETRY = 70;
+constexpr int MAX_CONNECTION_RETRY = 10;
 
 // How long do we wait between one try and the next one.
 constexpr int CONNECTION_RETRY_TIMER_MSEC = 500;
