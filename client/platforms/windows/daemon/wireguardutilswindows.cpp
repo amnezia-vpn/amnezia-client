@@ -142,8 +142,12 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
 
   if (config.m_killSwitchEnabled) {
     // Enable the windows firewall
-    NET_IFINDEX ifindex;
-    ConvertInterfaceLuidToIndex(&luid, &ifindex);
+    NET_IFINDEX ifindex = 0;
+    DWORD indexResult = ConvertInterfaceLuidToIndex(&luid, &ifindex);
+    if (indexResult != NO_ERROR || ifindex == 0) {
+      logger.error() << "Failed to map interface LUID to index:" << indexResult;
+      return false;
+    }
     if (!m_firewall->allowAllTraffic()) {
       logger.error() << "Failed to reset existing firewall rules";
       return false;

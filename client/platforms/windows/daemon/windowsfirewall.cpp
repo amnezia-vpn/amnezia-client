@@ -50,6 +50,61 @@ constexpr uint8_t LOW_WEIGHT = 0;
 constexpr uint8_t MED_WEIGHT = 7;
 constexpr uint8_t HIGH_WEIGHT = 13;
 constexpr uint8_t MAX_WEIGHT = 15;
+
+bool purgeSublayerFilters(HANDLE engineHandle) {
+  HANDLE enumHandle = nullptr;
+  DWORD result = FwpmFilterCreateEnumHandle0(engineHandle, nullptr, &enumHandle);
+  if (result != ERROR_SUCCESS) {
+    logger.warning() << "Failed to create filter enumeration handle:" << result;
+    return false;
+  }
+  auto cleanupEnum = qScopeGuard([&] {
+    if (enumHandle != nullptr) {
+      FwpmFilterDestroyEnumHandle0(engineHandle, enumHandle);
+    }
+  });
+
+  UINT32 removed = 0;
+  while (true) {
+    FWPM_FILTER0** filters = nullptr;
+    UINT32 count = 0;
+    result = FwpmFilterEnum0(engineHandle, enumHandle, 128, &filters, &count);
+    if (result != ERROR_SUCCESS) {
+      logger.warning() << "Failed to enumerate filters:" << result;
+      return false;
+    }
+    auto cleanupFilters = qScopeGuard([&] {
+      if (filters != nullptr) {
+        FwpmFreeMemory0((void**)&filters);
+      }
+    });
+
+    if (count == 0 || filters == nullptr) {
+      break;
+    }
+
+    for (UINT32 i = 0; i < count; ++i) {
+      FWPM_FILTER0* filter = filters[i];
+      if (filter == nullptr) {
+        continue;
+      }
+      if (memcmp(&filter->subLayerKey, &ST_FW_WINFW_BASELINE_SUBLAYER_KEY,
+                 sizeof(GUID)) != 0) {
+        continue;
+      }
+
+      DWORD deleteResult = FwpmFilterDeleteById0(engineHandle, filter->filterId);
+      if (deleteResult == ERROR_SUCCESS) {
+        removed++;
+      }
+    }
+  }
+
+  if (removed > 0) {
+    logger.info() << "Removed stale firewall filters:" << removed;
+  }
+  return true;
+}
 }  // namespace
 
 WindowsFirewall* WindowsFirewall::create(QObject* parent) {
@@ -78,8 +133,10 @@ WindowsFirewall* WindowsFirewall::create(QObject* parent) {
   }
   logger.debug() << "Filter engine opened successfully.";
   if (!initSublayer()) {
+    FwpmEngineClose0(engineHandle);
     return nullptr;
   }
+  purgeSublayerFilters(engineHandle);
   s_instance = new WindowsFirewall(engineHandle, parent);
   return s_instance;
 }
@@ -92,7 +149,7 @@ WindowsFirewall::WindowsFirewall(HANDLE session, QObject* parent)
 WindowsFirewall::~WindowsFirewall() {
   MZ_COUNT_DTOR(WindowsFirewall);
   if (m_sessionHandle != INVALID_HANDLE_VALUE) {
-    CloseHandle(m_sessionHandle);
+    FwpmEngineClose0(m_sessionHandle);
   }
 }
 
@@ -128,7 +185,7 @@ bool WindowsFirewall::initSublayer() {
   }
 
   // Step 1: Start Transaction
-  result = FwpmTransactionBegin(wfp, NULL);
+  result = FwpmTransactionBegin(wfp, 0);
   if (result != ERROR_SUCCESS) {
     logger.error() << "FwpmTransactionBegin0 failed. Return value:.\n"
                    << result;
@@ -165,7 +222,7 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
 // disables the whole killswitch and returns false if not.
 #define FW_OK(rule)                                                       \
   {                                                                       \
-    auto result = FwpmTransactionBegin(m_sessionHandle, NULL);            \
+    auto result = FwpmTransactionBegin(m_sessionHandle, 0);               \
     if (result != ERROR_SUCCESS) {                                        \
       disableKillSwitch();                                                \
       return false;                                                       \
@@ -215,7 +272,7 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
 // Allow unprotected traffic sent to the following local address ranges.
 bool WindowsFirewall::enableLanBypass(const QList<IPAddress>& ranges) {
   // Start the firewall transaction
-  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
+  auto result = FwpmTransactionBegin(m_sessionHandle, 0);
   if (result != ERROR_SUCCESS) {
     disableKillSwitch();
     return false;
@@ -245,7 +302,7 @@ bool WindowsFirewall::enableLanBypass(const QList<IPAddress>& ranges) {
 // Allow unprotected traffic sent to the following address ranges.
 bool WindowsFirewall::allowTrafficRange(const QStringList& ranges) {
   // Start the firewall transaction
-  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
+  auto result = FwpmTransactionBegin(m_sessionHandle, 0);
   if (result != ERROR_SUCCESS) {
     disableKillSwitch();
     return false;
@@ -275,7 +332,7 @@ bool WindowsFirewall::allowTrafficRange(const QStringList& ranges) {
 
 bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
   // Start the firewall transaction
-  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
+  auto result = FwpmTransactionBegin(m_sessionHandle, 0);
   if (result != ERROR_SUCCESS) {
     disableKillSwitch();
     return false;
@@ -356,7 +413,7 @@ bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
 }
 
 bool WindowsFirewall::disablePeerTraffic(const QString& pubkey) {
-  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
+  auto result = FwpmTransactionBegin(m_sessionHandle, 0);
   auto cleanup = qScopeGuard([&] {
     if (result != ERROR_SUCCESS) {
       FwpmTransactionAbort0(m_sessionHandle);
@@ -389,7 +446,7 @@ bool WindowsFirewall::disableKillSwitch() {
 }
 
 bool WindowsFirewall::allowAllTraffic() {
-    auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
+    auto result = FwpmTransactionBegin(m_sessionHandle, 0);
     auto cleanup = qScopeGuard([&] {
         if (result != ERROR_SUCCESS) {
             FwpmTransactionAbort0(m_sessionHandle);

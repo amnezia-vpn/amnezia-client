@@ -1,10 +1,13 @@
+#ifdef Q_OS_WIN
+    #include <winsock2.h>
+#endif
+
 #include "networkUtilities.h"
 #include <QtNetwork/qnetworkinterface.h>
 #include <cstddef>
 #include <cstring>
 
 #ifdef Q_OS_WIN
-    #include <winsock2.h>
     #include <windows.h>
     #include <Ws2tcpip.h>
     #include <ws2ipdef.h>

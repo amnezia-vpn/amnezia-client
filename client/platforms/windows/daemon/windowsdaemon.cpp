@@ -4,6 +4,7 @@
 
 #include "windowsdaemon.h"
 
+#include <winsock2.h>
 #include <Windows.h>
 #include <qassert.h>
 
@@ -107,15 +108,27 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
     return true;
   }
   if (config.m_vpnDisabledApps.length() > 0) {
+    if (m_inetAdapterIndex <= 0) {
+      emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
+      m_splitTunnelManager->stop();
+      return true;
+    }
+
     if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
-    };
+      m_splitTunnelManager->stop();
+      return true;
+    }
     if (!m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps)) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
-    };
+      m_splitTunnelManager->stop();
+      return true;
+    }
     // Now the driver should be running (State == 4)
     if (!m_splitTunnelManager->isRunning()) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
+      m_splitTunnelManager->stop();
+      return true;
     }
     return true;
   }
