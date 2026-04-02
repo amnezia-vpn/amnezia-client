@@ -1,0 +1,22 @@
+if (LINUX)
+    set(CPACK_COMPONENTS_ALL                            "client" "service")
+    set(CPACK_COMPONENTS_GROUPING                       ALL_COMPONENTS_IN_ONE)
+    set(CPACK_GENERATOR                                 "IFW")
+    set(CPACK_IFW_PACKAGE_NAME                          "AmneziaVPN")
+    set(CPACK_IFW_PACKAGE_TITLE                         "AmneziaVPN")
+    set(CPACK_IFW_PACKAGE_VERSION                       "${AMNEZIAVPN_VERSION}")
+    set(CPACK_IFW_TARGET_DIRECTORY                      "@ApplicationsDir@/AmneziaVPN")
+    set(CPACK_IFW_PACKAGE_WIZARD_DEFAULT_WIDTH          "600")
+    set(CPACK_IFW_PACKAGE_WIZARD_DEFAULT_HEIGHT         "380")
+    set(CPACK_IFW_PACKAGE_WIZARD_STYLE                  "Modern")
+    set(CPACK_IFW_PACKAGE_REMOVE_TARGET_DIR             ON)
+    set(CPACK_IFW_PACKAGE_ALLOW_SPACE_IN_PATH           ON)
+    set(CPACK_IFW_PACKAGE_ALLOW_NON_ASCII_CHARACTERS    ON)
+    set(CPACK_IFW_PACKAGE_CONTROL_SCRIPT                "${CMAKE_SOURCE_DIR}/deploy/installer/config/controlscript.js")
+    include(CPackIFW)
+    cpack_ifw_add_repository(main
+        URL "https://amneziavpn.org/updates/linux"
+        DISPLAY_NAME "AmneziaVPN - repository for Linux"
+    )
+    include(CPack)
+endif()
