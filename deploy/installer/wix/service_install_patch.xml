@@ -27,6 +27,12 @@
                 Remove="both"
                 Wait="no" />
         <ServiceControl
+                Id="LegacyServiceControlFBLink"
+                Name="FBLink-service"
+                Stop="both"
+                Remove="both"
+                Wait="no" />
+        <ServiceControl
                 Id="LegacyServiceControlWGTunnelAmnezia"
                 Name="AmneziaWGTunnel$AmneziaVPN"
                 Stop="both"

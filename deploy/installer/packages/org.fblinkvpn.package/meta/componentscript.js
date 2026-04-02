@@ -112,24 +112,20 @@ Component.prototype.createOperations = function()
 
         let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"
         
+        var cleanupScript = "\"" + pu_path + "cleanup_services.cmd\"";
+        var postUninstallScript = "\"" + pu_path + "post_uninstall.cmd\"";
+        var postInstallScript = "\"" + pu_path + "post_install.cmd\"";
+
         // Clean service state before (re)install to keep updates idempotent.
-        // Also remove legacy names from previous branding/builds.
-        var cleanupCmd = "net stop " + serviceName() + " 2>nul & sc delete " + serviceName() + " 2>nul"
-            + " & net stop AmneziaVPN-service 2>nul & sc delete AmneziaVPN-service 2>nul"
-            + " & net stop AmneziaWGTunnel$AmneziaVPN 2>nul & sc delete AmneziaWGTunnel$AmneziaVPN 2>nul"
-            + " & net stop AmneziaWGTunnel$FBLink 2>nul & sc delete AmneziaWGTunnel$FBLink 2>nul"
-            + " & net stop AmneziaVPNSplitTunnel 2>nul & sc delete AmneziaVPNSplitTunnel 2>nul"
-            + " & net stop FBLinkSplitTunnel 2>nul & sc delete FBLinkSplitTunnel 2>nul"
-            + " & exit 0";
-        component.addElevatedOperation("Execute", "cmd", "/c", cleanupCmd);
+        component.addElevatedOperation("Execute", "cmd", "/c", cleanupScript);
 
         component.addElevatedOperation("Execute",
                                        "sc", "create", serviceName(),
                                        "binpath=", "\"" + pu_path + serviceExecutableFileName() + "\"",
                                        "start=", "auto", "depend=", "BFE/nsi",
-                                       "UNDOEXECUTE", "cmd", "/c", pu_path + "post_uninstall.cmd");
+                                       "UNDOEXECUTE", "cmd", "/c", postUninstallScript);
 										
-        component.addElevatedOperation("Execute", "cmd", "/c", pu_path + "post_install.cmd");
+        component.addElevatedOperation("Execute", "cmd", "/c", postInstallScript);
     } else if (runningOnMacOS()) {
         component.addElevatedOperation("Execute", "@TargetDir@/post_install.sh", "UNDOEXECUTE", "@TargetDir@/post_uninstall.sh");
     } else if (runningOnLinux()) {

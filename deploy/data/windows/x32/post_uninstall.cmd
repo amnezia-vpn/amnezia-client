@@ -10,21 +10,7 @@ set "SYS_LOG_DIR=%SYS_APP_DIR%\log"
 set "SYS_LOG_FILE=%SYS_LOG_DIR%\AmneziaVPN-service.log"
 
 timeout /t 1
-sc stop FBLinkVPN-service 2>nul
-sc delete FBLinkVPN-service 2>nul
-rem Also clean up legacy AmneziaVPN service if present
-sc stop AmneziaVPN-service 2>nul
-sc delete AmneziaVPN-service 2>nul
-sc stop AmneziaWGTunnel$AmneziaVPN 2>nul
-sc delete AmneziaWGTunnel$AmneziaVPN 2>nul
-sc stop AmneziaWGTunnel$FBLink 2>nul
-sc delete AmneziaWGTunnel$FBLink 2>nul
-sc stop AmneziaVPNSplitTunnel 2>nul
-sc delete AmneziaVPNSplitTunnel 2>nul
-sc stop FBLinkSplitTunnel 2>nul
-sc delete FBLinkSplitTunnel 2>nul
-taskkill /IM "FBLinkVPN-service.exe" /F 2>nul
-taskkill /IM "FBLinkVPN.exe" /F 2>nul
+call "%~dp0cleanup_services.cmd"
 
 rem Delete the service log file under ProgramData
 if exist "%SYS_LOG_FILE%" del /F /Q "%SYS_LOG_FILE%"
