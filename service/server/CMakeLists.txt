@@ -353,50 +353,46 @@ if(WIN32)
         set(DEPLOY_PLATFORM_PATH "windows/x32")
     endif()
 elseif(LINUX)
-    set(DEPLOY_PLATFORM_PATH "linux/client")
+    list(APPEND CONAN_EXECS "${CMAKE_SOURCE_DIR}/deploy/data/linux/update-resolv-conf.sh")
 elseif(APPLE AND NOT IOS)
     set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
-add_custom_command(
-    TARGET ${PROJECT} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-    "${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}"
-    $<TARGET_FILE_DIR:${PROJECT}>
-    COMMAND_EXPAND_LISTS
-)
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}/"
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT ${PROJECT}
-)
-
 # install non-linked dependencies
 if (WIN32)
     find_package(awg-windows REQUIRED)
-    list(APPEND BLOBS $<TARGET_FILE:amnezia::awg-windows>)
+    list(APPEND CONAN_EXECS $<TARGET_FILE:amnezia::awg-windows>)
 
     find_package(wintun REQUIRED)
-    list(APPEND BLOBS $<TARGET_FILE:zx2c4::wintun>)
+    list(APPEND CONAN_BINS $<TARGET_FILE:zx2c4::wintun>)
 else()
     find_package(awg-go REQUIRED)
-    list(APPEND BLOBS $<TARGET_FILE:amnezia::awg-go>)
+    list(APPEND CONAN_EXECS $<TARGET_FILE:amnezia::awg-go>)
 endif()
 
 find_package(openvpn REQUIRED)
-list(APPEND BLOBS $<TARGET_FILE:openvpn::openvpn>)
+list(APPEND CONAN_EXECS $<TARGET_FILE:openvpn::openvpn>)
 
 find_package(tun2socks REQUIRED)
-list(APPEND BLOBS $<TARGET_FILE:xjasonlyu::tun2socks>)
+list(APPEND CONAN_EXECS $<TARGET_FILE:xjasonlyu::tun2socks>)
 
 find_package(v2ray-rules-dat REQUIRED)
-list(APPEND BLOBS ${GEOSITE_DAT_PATH} ${GEOIP_DAT_PATH})
+list(APPEND CONAN_BINS ${GEOSITE_DAT_PATH} ${GEOIP_DAT_PATH})
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${BLOBS}
+        ${CONAN_EXECS} ${CONAN_BINS}
         "$<TARGET_FILE_DIR:${PROJECT}>"
 )
-install(FILES ${BLOBS}
+install(FILES ${CONAN_EXECS}
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT service
+    PERMISSIONS
+        OWNER_READ OWNER_EXECUTE
+        GROUP_READ GROUP_EXECUTE
+        WORLD_READ WORLD_EXECUTE
+)
+install(FILES ${CONAN_BINS}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT service
 )

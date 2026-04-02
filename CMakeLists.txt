@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 set(AMNEZIAVPN_VERSION 4.8.15.4)
 
+set(QT_CREATOR_SKIP_PACKAGE_MANAGER_SETUP ON CACHE BOOL "" FORCE)
 set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
     ${CMAKE_SOURCE_DIR}/cmake/platform_settings.cmake
     ${CMAKE_SOURCE_DIR}/cmake/recipes_bootstrap.cmake
@@ -42,8 +43,6 @@ add_subdirectory(client)
 
 if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_subdirectory(service)
-
-    include(${CMAKE_SOURCE_DIR}/deploy/installer/config.cmake)
 endif()
 
 set(AMNEZIA_STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
