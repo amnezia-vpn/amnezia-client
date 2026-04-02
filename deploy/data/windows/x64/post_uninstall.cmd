@@ -17,8 +17,12 @@ sc stop AmneziaVPN-service 2>nul
 sc delete AmneziaVPN-service 2>nul
 sc stop AmneziaWGTunnel$AmneziaVPN 2>nul
 sc delete AmneziaWGTunnel$AmneziaVPN 2>nul
+sc stop AmneziaWGTunnel$FBLink 2>nul
+sc delete AmneziaWGTunnel$FBLink 2>nul
 sc stop AmneziaVPNSplitTunnel 2>nul
 sc delete AmneziaVPNSplitTunnel 2>nul
+sc stop FBLinkSplitTunnel 2>nul
+sc delete FBLinkSplitTunnel 2>nul
 taskkill /IM "FBLinkVPN-service.exe" /F 2>nul
 taskkill /IM "FBLinkVPN.exe" /F 2>nul
 

@@ -63,12 +63,20 @@ WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
   MZ_COUNT_CTOR(WindowsRouteMonitor);
   logger.debug() << "WindowsRouteMonitor created.";
 
-  NotifyRouteChange2(AF_INET, routeChangeCallback, this, FALSE, &m_routeHandle);
+  DWORD result =
+      NotifyRouteChange2(AF_UNSPEC, routeChangeCallback, this, FALSE,
+                         &m_routeHandle);
+  if (result != NO_ERROR) {
+    logger.error() << "Failed to subscribe to route changes:" << result;
+    m_routeHandle = INVALID_HANDLE_VALUE;
+  }
 }
 
 WindowsRouteMonitor::~WindowsRouteMonitor() {
   MZ_COUNT_DTOR(WindowsRouteMonitor);
-  CancelMibChangeNotify2(m_routeHandle);
+  if (m_routeHandle != INVALID_HANDLE_VALUE) {
+    CancelMibChangeNotify2(m_routeHandle);
+  }
 
   flushRouteTable(m_exclusionRoutes);
   flushRouteTable(m_clonedRoutes);
@@ -259,9 +267,12 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family) {
   PMIB_IPFORWARD_TABLE2 table;
   DWORD error = GetIpForwardTable2(family, &table);
   if (error != NO_ERROR) {
-    updateCapturedRoutes(family, table);
-    FreeMibTable(table);
+    logger.error() << "Failed to fetch routing table:" << error;
+    return;
   }
+
+  updateCapturedRoutes(family, table);
+  FreeMibTable(table);
 }
 
 void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {

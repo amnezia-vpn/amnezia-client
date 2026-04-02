@@ -24,21 +24,34 @@ if command -v steamos-readonly &> /dev/null; then
         echo "steamos-readonly disabled" >> $LOG_FILE
 fi
 
-if sudo systemctl is-active --quiet $APP_NAME; then
-	sudo systemctl stop $APP_NAME >> $LOG_FILE
-	sudo systemctl disable $APP_NAME >> $LOG_FILE
-	sudo rm -rf /etc/systemd/system/$APP_NAME.service >> $LOG_FILE
-fi
+sudo killall -9 "${APP_NAME}-service" 2>> $LOG_FILE
+sudo killall -9 "FBLink-service" 2>> $LOG_FILE
+
+# Clean old and current service registrations before reinstalling.
+for SERVICE_UNIT in "$APP_NAME" "FBLink"; do
+        sudo systemctl stop "$SERVICE_UNIT" >> $LOG_FILE 2>&1 || true
+        sudo systemctl disable "$SERVICE_UNIT" >> $LOG_FILE 2>&1 || true
+        sudo systemctl reset-failed "$SERVICE_UNIT" >> $LOG_FILE 2>&1 || true
+done
+
+sudo rm -f /etc/systemd/system/$APP_NAME.service >> $LOG_FILE 2>&1
+sudo rm -f /etc/systemd/system/FBLink.service >> $LOG_FILE 2>&1
+sudo rm -f /lib/systemd/system/$APP_NAME.service >> $LOG_FILE 2>&1
+sudo rm -f /lib/systemd/system/FBLink.service >> $LOG_FILE 2>&1
+sudo rm -f /usr/lib/systemd/system/$APP_NAME.service >> $LOG_FILE 2>&1
+sudo rm -f /usr/lib/systemd/system/FBLink.service >> $LOG_FILE 2>&1
+sudo systemctl daemon-reload >> $LOG_FILE 2>&1
 
 sudo chmod -R a-w $APP_PATH/
 
 sudo cp $APP_PATH/$APP_NAME.service /etc/systemd/system/ >> $LOG_FILE
+sudo systemctl daemon-reload >> $LOG_FILE 2>&1
 
 sudo systemctl start $APP_NAME >> $LOG_FILE
 sudo systemctl enable $APP_NAME >> $LOG_FILE
 sudo chmod 555 $APP_PATH/client/$APP_NAME.sh >> $LOG_FILE
-sudo ln -s $APP_PATH/client/$APP_NAME.sh /usr/local/sbin/$APP_NAME >> $LOG_FILE
-sudo ln -s $APP_PATH/client/$APP_NAME.sh /usr/local/bin/$APP_NAME >> $LOG_FILE
+sudo ln -sfn $APP_PATH/client/$APP_NAME.sh /usr/local/sbin/$APP_NAME >> $LOG_FILE
+sudo ln -sfn $APP_PATH/client/$APP_NAME.sh /usr/local/bin/$APP_NAME >> $LOG_FILE
 
 echo "user desktop creation loop started" >> $LOG_FILE
 sudo cp $APP_PATH/$APP_NAME.desktop /usr/share/applications/ >> $LOG_FILE

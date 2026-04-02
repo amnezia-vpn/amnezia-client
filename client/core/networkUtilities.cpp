@@ -1,6 +1,7 @@
 #include "networkUtilities.h"
 #include <QtNetwork/qnetworkinterface.h>
 #include <cstddef>
+#include <cstring>
 
 #ifdef Q_OS_WIN
     #include <winsock2.h>
@@ -179,18 +180,41 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
 #ifdef Q_OS_WIN
     qDebug() << "Getting Current Internet Adapter that routes to"
              << dst.toString();
-    quint32 ipBigEndian;
-    quint32 ip = dst.toIPv4Address();
-    qToBigEndian(ip, &ipBigEndian);
-    _MIB_IPFORWARDROW routeInfo;
-    auto result = GetBestRoute(ipBigEndian, 0, &routeInfo);
+
+    SOCKADDR_INET destination = {};
+    if (dst.protocol() == QAbstractSocket::IPv4Protocol) {
+        destination.Ipv4.sin_family = AF_INET;
+        quint32 ipBigEndian;
+        quint32 ip = dst.toIPv4Address();
+        qToBigEndian(ip, &ipBigEndian);
+        destination.Ipv4.sin_addr.S_un.S_addr = ipBigEndian;
+    } else if (dst.protocol() == QAbstractSocket::IPv6Protocol) {
+        destination.Ipv6.sin6_family = AF_INET6;
+        Q_IPV6ADDR v6 = dst.toIPv6Address();
+        std::memcpy(&destination.Ipv6.sin6_addr, v6.c, sizeof(v6.c));
+    } else {
+        return -1;
+    }
+
+    MIB_IPFORWARD_ROW2 routeInfo = {};
+    SOCKADDR_INET bestSourceAddress = {};
+    auto result = GetBestRoute2(nullptr, 0, nullptr, &destination, 0, &routeInfo,
+                                &bestSourceAddress);
     if (result != NO_ERROR) {
         return -1;
     }
-    auto adapter =
-        QNetworkInterface::interfaceFromIndex(routeInfo.dwForwardIfIndex);
+
+    NET_IFINDEX bestIfIndex = routeInfo.InterfaceIndex;
+    if (bestIfIndex == 0) {
+        NET_IFINDEX ifindex = 0;
+        if (ConvertInterfaceLuidToIndex(&routeInfo.InterfaceLuid, &ifindex) == NO_ERROR) {
+            bestIfIndex = ifindex;
+        }
+    }
+
+    auto adapter = QNetworkInterface::interfaceFromIndex(static_cast<int>(bestIfIndex));
     qDebug() << "Internet Adapter:" << adapter.name();
-    return routeInfo.dwForwardIfIndex;
+    return static_cast<int>(bestIfIndex);
 #endif
     return 0;
 }

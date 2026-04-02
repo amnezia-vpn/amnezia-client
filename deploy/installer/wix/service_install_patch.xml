@@ -18,7 +18,37 @@
                 Name="FBLinkVPN-service"
                 Start="install"
                 Stop="both"
-                Remove="uninstall"
+                Remove="both"
                 Wait="yes" />
+        <ServiceControl
+                Id="LegacyServiceControlAmneziaVPN"
+                Name="AmneziaVPN-service"
+                Stop="both"
+                Remove="both"
+                Wait="no" />
+        <ServiceControl
+                Id="LegacyServiceControlWGTunnelAmnezia"
+                Name="AmneziaWGTunnel$AmneziaVPN"
+                Stop="both"
+                Remove="both"
+                Wait="no" />
+        <ServiceControl
+                Id="LegacyServiceControlWGTunnelFBLink"
+                Name="AmneziaWGTunnel$FBLink"
+                Stop="both"
+                Remove="both"
+                Wait="no" />
+        <ServiceControl
+                Id="LegacyServiceControlSplitTunnelAmnezia"
+                Name="AmneziaVPNSplitTunnel"
+                Stop="both"
+                Remove="both"
+                Wait="no" />
+        <ServiceControl
+                Id="LegacyServiceControlSplitTunnelFBLink"
+                Name="FBLinkSplitTunnel"
+                Stop="both"
+                Remove="both"
+                Wait="no" />
     </CPackWiXFragment>
 </CPackWiXPatch>

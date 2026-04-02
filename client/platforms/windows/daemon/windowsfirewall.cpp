@@ -582,57 +582,65 @@ bool WindowsFirewall::allowTrafficTo(const QHostAddress& targetIP, uint port,
   GUID layerIn = isIPv4 ? FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4
                         : FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V6;
 
-  quint32_be ipBigEndian;
-  quint32 ip = targetIP.toIPv4Address();
-  qToBigEndian(ip, &ipBigEndian);
-
-  // Allow Traffic to IP with PORT using any protocol
-  FWPM_FILTER_CONDITION0 conds[4];
+  FWPM_FILTER_CONDITION0 conds[3] = {};
   conds[0].fieldKey = FWPM_CONDITION_IP_PROTOCOL;
   conds[0].matchType = FWP_MATCH_EQUAL;
   conds[0].conditionValue.type = FWP_UINT8;
-  conds[0].conditionValue.uint8 = (IPPROTO_UDP);
-
-  conds[1].fieldKey = FWPM_CONDITION_IP_PROTOCOL;
+  conds[1].fieldKey = FWPM_CONDITION_IP_REMOTE_PORT;
   conds[1].matchType = FWP_MATCH_EQUAL;
-  conds[1].conditionValue.type = FWP_UINT8;
-  conds[1].conditionValue.uint16 = (IPPROTO_TCP);
-
-  conds[2].fieldKey = FWPM_CONDITION_IP_REMOTE_PORT;
+  conds[1].conditionValue.type = FWP_UINT16;
+  conds[1].conditionValue.uint16 = port;
+  conds[2].fieldKey = FWPM_CONDITION_IP_REMOTE_ADDRESS;
   conds[2].matchType = FWP_MATCH_EQUAL;
-  conds[2].conditionValue.type = FWP_UINT16;
-  conds[2].conditionValue.uint16 = port;
-
-  conds[3].fieldKey = FWPM_CONDITION_IP_REMOTE_ADDRESS;
-  conds[3].matchType = FWP_MATCH_EQUAL;
   QByteArray buffer;
-  // will hold v6 Addess bytes if present
-  importAddress(targetIP, conds[3].conditionValue, &buffer);
+  // will hold v6 address bytes if present
+  importAddress(targetIP, conds[2].conditionValue, &buffer);
 
   // Assemble the Filter base
   FWPM_FILTER0 filter;
   memset(&filter, 0, sizeof(filter));
   filter.filterCondition = conds;
-  filter.numFilterConditions = 4;
+  filter.numFilterConditions = 3;
   filter.action.type = FWP_ACTION_PERMIT;
   filter.weight.type = FWP_UINT8;
   filter.weight.uint8 = weight;
   filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
   filter.flags = FWPM_FILTER_FLAG_CLEAR_ACTION_RIGHT;  // Hard Permit!
 
-  QString description("Permit traffic %1 %2 on port %3");
-  filter.layerKey = layerOut;
-  if (!enableFilter(&filter, title,
-                    description.arg("to").arg(targetIP.toString()).arg(port),
-                    peer)) {
+  auto addFiltersForProtocol = [&](UINT8 protocol, const QString& protoName) {
+    conds[0].conditionValue.uint8 = protocol;
+
+    QString description("Permit %1 traffic %2 %3 on port %4");
+    filter.layerKey = layerOut;
+    if (!enableFilter(&filter, title,
+                      description.arg(protoName)
+                          .arg("to")
+                          .arg(targetIP.toString())
+                          .arg(port),
+                      peer)) {
+      return false;
+    }
+
+    filter.layerKey = layerIn;
+    if (!enableFilter(&filter, title,
+                      description.arg(protoName)
+                          .arg("from")
+                          .arg(targetIP.toString())
+                          .arg(port),
+                      peer)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  if (!addFiltersForProtocol(IPPROTO_UDP, "UDP")) {
     return false;
   }
-  filter.layerKey = layerIn;
-  if (!enableFilter(&filter, title,
-                    description.arg("from").arg(targetIP.toString()).arg(port),
-                    peer)) {
+  if (!addFiltersForProtocol(IPPROTO_TCP, "TCP")) {
     return false;
   }
+
   return true;
 }
 
@@ -723,12 +731,12 @@ bool WindowsFirewall::allowDHCPTraffic(uint8_t weight, const QString& title) {
     conds[1].fieldKey = FWPM_CONDITION_IP_LOCAL_PORT;
     conds[1].matchType = FWP_MATCH_EQUAL;
     conds[1].conditionValue.type = FWP_UINT16;
-    conds[1].conditionValue.uint16 = (68);
+    conds[1].conditionValue.uint16 = (546);
 
     conds[2].fieldKey = FWPM_CONDITION_IP_REMOTE_PORT;
     conds[2].matchType = FWP_MATCH_EQUAL;
     conds[2].conditionValue.type = FWP_UINT16;
-    conds[2].conditionValue.uint16 = 67;
+    conds[2].conditionValue.uint16 = 547;
 
     // Assemble the Filter base
     FWPM_FILTER0 filter;
@@ -757,12 +765,12 @@ bool WindowsFirewall::allowDHCPTraffic(uint8_t weight, const QString& title) {
     conds[1].fieldKey = FWPM_CONDITION_IP_LOCAL_PORT;
     conds[1].matchType = FWP_MATCH_EQUAL;
     conds[1].conditionValue.type = FWP_UINT16;
-    conds[1].conditionValue.uint16 = (68);
+    conds[1].conditionValue.uint16 = (546);
 
     conds[2].fieldKey = FWPM_CONDITION_IP_REMOTE_PORT;
     conds[2].matchType = FWP_MATCH_EQUAL;
     conds[2].conditionValue.type = FWP_UINT16;
-    conds[2].conditionValue.uint16 = 67;
+    conds[2].conditionValue.uint16 = 547;
 
     // Assemble the Filter base
     FWPM_FILTER0 filter;
@@ -925,51 +933,60 @@ void WindowsFirewall::importAddress(const QHostAddress& addr,
 
 bool WindowsFirewall::blockTrafficOnPort(uint port, uint8_t weight,
                                          const QString& title) {
-  // Allow Traffic to IP with PORT using any protocol
-  FWPM_FILTER_CONDITION0 conds[3];
+  FWPM_FILTER_CONDITION0 conds[2] = {};
   conds[0].fieldKey = FWPM_CONDITION_IP_PROTOCOL;
   conds[0].matchType = FWP_MATCH_EQUAL;
   conds[0].conditionValue.type = FWP_UINT8;
-  conds[0].conditionValue.uint8 = (IPPROTO_UDP);
-
-  conds[1].fieldKey = FWPM_CONDITION_IP_PROTOCOL;
+  conds[1].fieldKey = FWPM_CONDITION_IP_REMOTE_PORT;
   conds[1].matchType = FWP_MATCH_EQUAL;
-  conds[1].conditionValue.type = FWP_UINT8;
-  conds[1].conditionValue.uint8 = (IPPROTO_TCP);
-
-  conds[2].fieldKey = FWPM_CONDITION_IP_REMOTE_PORT;
-  conds[2].matchType = FWP_MATCH_EQUAL;
-  conds[2].conditionValue.type = FWP_UINT16;
-  conds[2].conditionValue.uint16 = port;
+  conds[1].conditionValue.type = FWP_UINT16;
+  conds[1].conditionValue.uint16 = port;
 
   // Assemble the Filter base
   FWPM_FILTER0 filter;
   memset(&filter, 0, sizeof(filter));
   filter.filterCondition = conds;
-  filter.numFilterConditions = 3;
+  filter.numFilterConditions = 2;
   filter.action.type = FWP_ACTION_BLOCK;
   filter.weight.type = FWP_UINT8;
   filter.weight.uint8 = weight;
   filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
 
-  QString description("Block %1 on Port %2");
-  filter.layerKey = FWPM_LAYER_ALE_AUTH_CONNECT_V6;
-  if (!enableFilter(&filter, title, description.arg("outgoing v6").arg(port))) {
+  auto addFiltersForProtocol = [&](UINT8 protocol, const QString& protoName) {
+    conds[0].conditionValue.uint8 = protocol;
+
+    QString description("Block %1 %2 on port %3");
+    filter.layerKey = FWPM_LAYER_ALE_AUTH_CONNECT_V6;
+    if (!enableFilter(&filter, title,
+                      description.arg(protoName).arg("outgoing v6").arg(port))) {
+      return false;
+    }
+    filter.layerKey = FWPM_LAYER_ALE_AUTH_CONNECT_V4;
+    if (!enableFilter(&filter, title,
+                      description.arg(protoName).arg("outgoing v4").arg(port))) {
+      return false;
+    }
+    filter.layerKey = FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4;
+    if (!enableFilter(&filter, title,
+                      description.arg(protoName).arg("incoming v4").arg(port))) {
+      return false;
+    }
+    filter.layerKey = FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V6;
+    if (!enableFilter(&filter, title,
+                      description.arg(protoName).arg("incoming v6").arg(port))) {
+      return false;
+    }
+
+    return true;
+  };
+
+  if (!addFiltersForProtocol(IPPROTO_UDP, "UDP")) {
     return false;
   }
-  filter.layerKey = FWPM_LAYER_ALE_AUTH_CONNECT_V4;
-  if (!enableFilter(&filter, title, description.arg("outgoing v4").arg(port))) {
+  if (!addFiltersForProtocol(IPPROTO_TCP, "TCP")) {
     return false;
   }
 
-  filter.layerKey = FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4;
-  if (!enableFilter(&filter, title, description.arg("incoming v4").arg(port))) {
-    return false;
-  }
-  filter.layerKey = FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V6;
-  if (!enableFilter(&filter, title, description.arg("incoming v6").arg(port))) {
-    return false;
-  }
   return true;
 }
 

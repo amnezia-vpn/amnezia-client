@@ -20,6 +20,8 @@
   "\\pipe\\ProtectedPrefix\\Administrators\\AmneziaWG\\FBLink"
 
 constexpr uint32_t WINDOWS_TUNNEL_MONITOR_TIMEOUT_MSEC = 2000;
+constexpr uint32_t WINDOWS_UAPI_PIPE_CONNECT_TIMEOUT_MSEC = 1000;
+constexpr int WINDOWS_UAPI_PIPE_CONNECT_ATTEMPTS = 5;
 
 namespace {
 Logger logger("WindowsTunnelService");
@@ -238,17 +240,36 @@ static bool stopAndDeleteTunnelService(SC_HANDLE service) {
 QString WindowsTunnelService::uapiCommand(const QString& command) {
   // Create a pipe to the tunnel service.
   LPTSTR tunnelName = (LPTSTR)TEXT(TUNNEL_NAMED_PIPE);
-  HANDLE pipe = CreateFile(tunnelName, GENERIC_READ | GENERIC_WRITE, 0, nullptr,
-                           OPEN_EXISTING, 0, nullptr);
+  HANDLE pipe = INVALID_HANDLE_VALUE;
+  for (int attempt = 0; attempt < WINDOWS_UAPI_PIPE_CONNECT_ATTEMPTS;
+       ++attempt) {
+    pipe = CreateFile(tunnelName, GENERIC_READ | GENERIC_WRITE, 0, nullptr,
+                      OPEN_EXISTING, 0, nullptr);
+    if (pipe != INVALID_HANDLE_VALUE) {
+      break;
+    }
+
+    DWORD error = GetLastError();
+    if ((error != ERROR_PIPE_BUSY) && (error != ERROR_FILE_NOT_FOUND)) {
+      WindowsUtils::windowsLog("Failed to open tunnel named pipe");
+      return QString();
+    }
+
+    if (!WaitNamedPipe(tunnelName, WINDOWS_UAPI_PIPE_CONNECT_TIMEOUT_MSEC)) {
+      error = GetLastError();
+      if ((error != ERROR_SEM_TIMEOUT) && (error != ERROR_FILE_NOT_FOUND)) {
+        WindowsUtils::windowsLog("Failed to wait for tunnel named pipe");
+        return QString();
+      }
+    }
+  }
+
   if (pipe == INVALID_HANDLE_VALUE) {
+    WindowsUtils::windowsLog("Timed out waiting for tunnel named pipe");
     return QString();
   }
 
   auto guard = qScopeGuard([&] { CloseHandle(pipe); });
-  if (!WaitNamedPipe(tunnelName, 1000)) {
-    WindowsUtils::windowsLog("Failed to wait for named pipes");
-    return QString();
-  }
 
   DWORD mode = PIPE_READMODE_BYTE;
   if (!SetNamedPipeHandleState(pipe, &mode, nullptr, nullptr)) {

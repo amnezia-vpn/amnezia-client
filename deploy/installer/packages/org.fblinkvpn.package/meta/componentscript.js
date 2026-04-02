@@ -112,8 +112,16 @@ Component.prototype.createOperations = function()
 
         let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"
         
-        // Stop and delete service if it already exists, ignoring errors by returning 0
-        component.addElevatedOperation("Execute", "cmd", "/c", "net stop " + serviceName() + " & sc delete " + serviceName() + " & exit 0");
+        // Clean service state before (re)install to keep updates idempotent.
+        // Also remove legacy names from previous branding/builds.
+        var cleanupCmd = "net stop " + serviceName() + " 2>nul & sc delete " + serviceName() + " 2>nul"
+            + " & net stop AmneziaVPN-service 2>nul & sc delete AmneziaVPN-service 2>nul"
+            + " & net stop AmneziaWGTunnel$AmneziaVPN 2>nul & sc delete AmneziaWGTunnel$AmneziaVPN 2>nul"
+            + " & net stop AmneziaWGTunnel$FBLink 2>nul & sc delete AmneziaWGTunnel$FBLink 2>nul"
+            + " & net stop AmneziaVPNSplitTunnel 2>nul & sc delete AmneziaVPNSplitTunnel 2>nul"
+            + " & net stop FBLinkSplitTunnel 2>nul & sc delete FBLinkSplitTunnel 2>nul"
+            + " & exit 0";
+        component.addElevatedOperation("Execute", "cmd", "/c", cleanupCmd);
 
         component.addElevatedOperation("Execute",
                                        "sc", "create", serviceName(),

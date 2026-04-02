@@ -31,15 +31,22 @@ if pgrep -x "$APP_NAME" > /dev/null; then
 fi
 
 # Stop the running service if it exists
-if pgrep -x "${APP_NAME}-service" > /dev/null; then
-    sudo killall -9 "${APP_NAME}-service"
-fi
+for SVC_LABEL in "${APP_NAME}-service" "AmneziaVPN-service"; do
+    if pgrep -x "$SVC_LABEL" > /dev/null; then
+        sudo killall -9 "$SVC_LABEL" || true
+    fi
+done
 
-# Unload the service if loaded and remove its plist file regardless
-if launchctl list "${APP_NAME}-service" &> /dev/null; then
-    sudo launchctl bootout system "$LAUNCH_DAEMONS_PLIST_NAME" || sudo launchctl unload "$LAUNCH_DAEMONS_PLIST_NAME"
-fi
-sudo rm -f "$LAUNCH_DAEMONS_PLIST_NAME"
+# Unload current and legacy launch daemons and remove their plist files.
+for SVC_LABEL in "${APP_NAME}-service" "AmneziaVPN-service"; do
+    if launchctl list "$SVC_LABEL" &> /dev/null; then
+        sudo launchctl bootout "system/$SVC_LABEL" || true
+    fi
+done
+for PLIST_PATH in "$LAUNCH_DAEMONS_PLIST_NAME" "/Library/LaunchDaemons/AmneziaVPN.plist"; do
+    sudo launchctl bootout system "$PLIST_PATH" 2>/dev/null || sudo launchctl unload "$PLIST_PATH" 2>/dev/null || true
+    sudo rm -f "$PLIST_PATH"
+done
 
 # Remove the entire application bundle
 sudo rm -rf "$APP_PATH"

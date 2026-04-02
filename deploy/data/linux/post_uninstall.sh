@@ -23,17 +23,19 @@ ls /opt/AmneziaVPN/client/lib/* | while IFS=: read -r dir; do
 	sudo unlink $dir  >> $LOG_FILE
 done
 
-if sudo systemctl is-active --quiet $APP_NAME; then
-	sudo systemctl stop $APP_NAME >> $LOG_FILE
-fi
+for SERVICE_UNIT in "$APP_NAME" "FBLink"; do
+        sudo systemctl stop "$SERVICE_UNIT" >> $LOG_FILE 2>&1 || true
+        sudo systemctl disable "$SERVICE_UNIT" >> $LOG_FILE 2>&1 || true
+        sudo systemctl reset-failed "$SERVICE_UNIT" >> $LOG_FILE 2>&1 || true
+done
 
-if sudo systemctl is-enabled --quiet $APP_NAME; then
-	sudo systemctl disable $APP_NAME >> $LOG_FILE
-fi
-
-if test -f /etc/systemd/system/$APP_NAME.service; then
-	sudo rm -rf /etc/systemd/system/$APP_NAME.service >> $LOG_FILE
-fi
+sudo rm -f /etc/systemd/system/$APP_NAME.service >> $LOG_FILE 2>&1
+sudo rm -f /etc/systemd/system/FBLink.service >> $LOG_FILE 2>&1
+sudo rm -f /lib/systemd/system/$APP_NAME.service >> $LOG_FILE 2>&1
+sudo rm -f /lib/systemd/system/FBLink.service >> $LOG_FILE 2>&1
+sudo rm -f /usr/lib/systemd/system/$APP_NAME.service >> $LOG_FILE 2>&1
+sudo rm -f /usr/lib/systemd/system/FBLink.service >> $LOG_FILE 2>&1
+sudo systemctl daemon-reload >> $LOG_FILE 2>&1
 
 if test -f $APP_PATH; then
         sudo rm -rf $APP_PATH >> $LOG_FILE

@@ -108,7 +108,7 @@ bool DnsUtilsWindows::updateResolversWin32(
 }
 
 constexpr const char* netshFlushTemplate =
-    "interface %1 set dnsservers name=%2 address=none valdiate=no "
+    "interface %1 set dnsservers name=%2 address=none validate=no "
     "register=both\r\n";
 constexpr const char* netshAddTemplate =
     "interface %1 add dnsservers name=%2 address=%3 validate=no\r\n";

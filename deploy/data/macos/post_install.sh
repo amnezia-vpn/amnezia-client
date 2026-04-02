@@ -31,8 +31,20 @@ if [ -d "/Applications/${APP_NAME}.localized" ]; then
   run_cmd sudo rm -rf "/Applications/${APP_NAME}.localized"
 fi
 
-run_cmd launchctl bootout system "$LAUNCH_DAEMONS_PLIST_NAME" || run_cmd launchctl unload "$LAUNCH_DAEMONS_PLIST_NAME"
-run_cmd rm -f "$LAUNCH_DAEMONS_PLIST_NAME"
+cleanup_launch_daemon() {
+  local plist_path="$1"
+  local service_label="$2"
+  run_cmd launchctl bootout "system/${service_label}" || true
+  run_cmd launchctl bootout system "$plist_path" || true
+  run_cmd launchctl unload "$plist_path" || true
+  run_cmd rm -f "$plist_path"
+}
+
+# Clean existing and legacy launch daemons to keep updates idempotent.
+run_cmd killall -9 "FBLink-service" || true
+run_cmd killall -9 "AmneziaVPN-service" || true
+cleanup_launch_daemon "/Library/LaunchDaemons/FBLink.plist" "FBLink-service"
+cleanup_launch_daemon "/Library/LaunchDaemons/AmneziaVPN.plist" "AmneziaVPN-service"
 
 run_cmd sudo chmod -R a-w "$APP_PATH/"
 run_cmd sudo chown -R root "$APP_PATH/"

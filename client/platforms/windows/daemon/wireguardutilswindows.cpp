@@ -20,6 +20,20 @@
 
 namespace {
 Logger logger("WireguardUtilsWindows");
+
+int uapiErrno(const QString& reply) {
+  for (const QString& line : reply.split('\n')) {
+    int eq = line.indexOf('=');
+    if (eq <= 0) {
+      continue;
+    }
+    if (line.left(eq) == "errno") {
+      return line.mid(eq + 1).toInt();
+    }
+  }
+
+  return -1;
+}
 };  // namespace
 
 std::unique_ptr<WireguardUtilsWindows> WireguardUtilsWindows::create(
@@ -130,8 +144,15 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     // Enable the windows firewall
     NET_IFINDEX ifindex;
     ConvertInterfaceLuidToIndex(&luid, &ifindex);
-    m_firewall->allowAllTraffic();
-    m_firewall->enableInterface(ifindex);
+    if (!m_firewall->allowAllTraffic()) {
+      logger.error() << "Failed to reset existing firewall rules";
+      return false;
+    }
+
+    if (!m_firewall->enableInterface(ifindex)) {
+      logger.error() << "Failed to enable kill switch for VPN interface";
+      return false;
+    }
   }
 
   logger.debug() << "Registration completed";
@@ -156,7 +177,10 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
 
   if (config.m_killSwitchEnabled) {
     // Enable the windows firewall for this peer.
-    m_firewall->enablePeerTraffic(config);
+    if (!m_firewall->enablePeerTraffic(config)) {
+      logger.error() << "Failed to enable firewall rules for peer";
+      return false;
+    }
   }
   logger.debug() << "Configuring peer" << publicKey.toHex()
                  << "via" << config.m_serverIpv4AddrIn;
@@ -193,6 +217,12 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
 
   QString reply = m_tunnel.uapiCommand(message);
   logger.debug() << "DATA:" << reply;
+  int err = uapiErrno(reply);
+  if (err != 0) {
+    logger.error() << "Peer configuration failed with errno:" << err;
+    return false;
+  }
+
   return true;
 }
 
@@ -217,6 +247,12 @@ bool WireguardUtilsWindows::deletePeer(const InterfaceConfig& config) {
 
   QString reply = m_tunnel.uapiCommand(message);
   logger.debug() << "DATA:" << reply;
+  int err = uapiErrno(reply);
+  if (err != 0) {
+    logger.error() << "Peer deletion failed with errno:" << err;
+    return false;
+  }
+
   return true;
 }
 

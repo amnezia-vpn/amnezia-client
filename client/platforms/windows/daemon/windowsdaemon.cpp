@@ -60,7 +60,19 @@ void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAda
   // Before creating the interface we need to check which adapter
   // routes to the server endpoint
   if (inetAdapterIndex == 0) {
-      auto serveraddr = QHostAddress(config.m_serverIpv4AddrIn);
+      QHostAddress serveraddr;
+      if (!config.m_serverIpv4AddrIn.isEmpty()) {
+          serveraddr = QHostAddress(config.m_serverIpv4AddrIn);
+      } else if (!config.m_serverIpv6AddrIn.isEmpty()) {
+          serveraddr = QHostAddress(config.m_serverIpv6AddrIn);
+      }
+
+      if (serveraddr.isNull()) {
+          logger.warning() << "Unable to determine endpoint address for adapter selection";
+          m_inetAdapterIndex = -1;
+          return;
+      }
+
       m_inetAdapterIndex = NetworkUtilities::AdapterIndexTo(serveraddr);
   } else {
       m_inetAdapterIndex = inetAdapterIndex;
