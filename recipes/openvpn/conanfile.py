@@ -28,10 +28,12 @@ class Openvpn(ConanFile):
     def build_requirements(self):
         if self._is_windows:
             self.tool_requires("cmake/[>=3.14 <4]")
-            self.tool_requires("pkgconf/2.5.1")
         else:
             self.tool_requires("libtool/2.4.7")
             self.tool_requires("automake/1.16.5")
+
+        if self.settings.os == "Linux" or self._is_windows:
+            self.tool_requires("pkgconf/2.5.1")
 
     def requirements(self):
         self.requires("openssl/[>=1.1.0]", visible=False)
@@ -39,6 +41,9 @@ class Openvpn(ConanFile):
         self.requires("lzo/2.10", visible=False)
         if self._is_windows:
             self.requires("tap-windows6/[*]")
+        if self.settings.os == "Linux":
+            self.requires("libnl/3.9.0")
+            self.requires("libcap-ng/0.9.2")
 
     def source(self):
         get(self, f"https://github.com/OpenVPN/openvpn/archive/refs/tags/v{self.version}.zip",
@@ -55,6 +60,10 @@ class Openvpn(ConanFile):
     def generate(self):
         self._patch_sources()
 
+        if self.settings.os == "Linux" or self._is_windows:
+            pkgconf = PkgConfigDeps(self)
+            pkgconf.generate()
+
         if self._is_windows:
             tc = CMakeToolchain(self)
             applink_include_path = os.path.join(self.export_sources_folder, "include").replace("\\", "/")
@@ -66,10 +75,10 @@ class Openvpn(ConanFile):
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
-            pkgconf = PkgConfigDeps(self)
-            pkgconf.generate()
-        else:    
+        else:
             tc = AutotoolsToolchain(self)
+            tc.configure_args.extend(["--disable-shared", "--enable-static"])
+            tc.configure_args.append("--disable-plugins")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
