@@ -139,6 +139,7 @@
         <file>ui/qml/Components/BenefitRow.qml</file>
         <file>ui/qml/Components/BenefitsPanel.qml</file>
         <file>ui/qml/Components/SubscriptionPlanCard.qml</file>
+        <file>ui/qml/Components/TermsAndPrivacyText.qml</file>
         <file>ui/qml/Components/QuestionDrawer.qml</file>
         <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
         <file>ui/qml/Components/SubscriptionExpiredDrawer.qml</file>

@@ -1147,26 +1147,26 @@ void IosController::fetchProducts(const QStringList &productIds,
                                                    NSArray<NSString *> * _Nonnull invalidIdentifiers,
                                                    NSError * _Nullable error) {
             QList<QVariantMap> outProducts;
-            for (NSDictionary *p in products) {
-                QVariantMap m;
-                m["productId"] = QString::fromUtf8([p[@"productId"] UTF8String]);
-                m["title"] = QString::fromUtf8([p[@"title"] UTF8String]);
-                m["description"] = QString::fromUtf8([p[@"description"] UTF8String]);
-                m["price"] = QString::fromUtf8([p[@"price"] UTF8String]);
-                if (p[@"displayPrice"]) {
-                    m["displayPrice"] = QString::fromUtf8([p[@"displayPrice"] UTF8String]);
+            for (NSDictionary *productInfo in products) {
+                QVariantMap productData;
+                productData["productId"] = QString::fromUtf8([productInfo[@"productId"] UTF8String]);
+                productData["title"] = QString::fromUtf8([productInfo[@"title"] UTF8String]);
+                productData["description"] = QString::fromUtf8([productInfo[@"description"] UTF8String]);
+                productData["price"] = QString::fromUtf8([productInfo[@"price"] UTF8String]);
+                if (productInfo[@"displayPrice"]) {
+                    productData["displayPrice"] = QString::fromUtf8([productInfo[@"displayPrice"] UTF8String]);
                 }
-                m["currencyCode"] = QString::fromUtf8([p[@"currencyCode"] UTF8String]);
-                if (p[@"priceAmount"]) {
-                    m["priceAmount"] = [p[@"priceAmount"] doubleValue];
+                productData["currencyCode"] = QString::fromUtf8([productInfo[@"currencyCode"] UTF8String]);
+                if (productInfo[@"priceAmount"]) {
+                    productData["priceAmount"] = [productInfo[@"priceAmount"] doubleValue];
                 }
-                if (p[@"subscriptionBillingMonths"]) {
-                    m["subscriptionBillingMonths"] = [p[@"subscriptionBillingMonths"] doubleValue];
+                if (productInfo[@"subscriptionBillingMonths"]) {
+                    productData["subscriptionBillingMonths"] = [productInfo[@"subscriptionBillingMonths"] doubleValue];
                 }
-                if (p[@"displayPricePerMonth"]) {
-                    m["displayPricePerMonth"] = QString::fromUtf8([p[@"displayPricePerMonth"] UTF8String]);
+                if (productInfo[@"displayPricePerMonth"]) {
+                    productData["displayPricePerMonth"] = QString::fromUtf8([productInfo[@"displayPricePerMonth"] UTF8String]);
                 }
-                outProducts.push_back(m);
+                outProducts.push_back(productData);
             }
 
             QStringList invalid;

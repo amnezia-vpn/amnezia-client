@@ -9,6 +9,14 @@
 #include <QtCore/QDebug>
 #include <QtCore/QString>
 
+namespace
+{
+QString toQString(NSString *value)
+{
+    return QString::fromUtf8((value ?: @"").UTF8String);
+}
+}
+
 API_AVAILABLE(ios(15.0), macos(12.0))
 @implementation StoreKitController
 
@@ -45,11 +53,10 @@ API_AVAILABLE(ios(15.0), macos(12.0))
                                                                    NSString *originalTransactionId,
                                                                    NSError *error) {
         if (success) {
-            qInfo().noquote() << "[IAP][StoreKit2] Purchase success. transactionId =" << QString::fromUtf8(transactionId.UTF8String)
-                              << "originalTransactionId =" << QString::fromUtf8(originalTransactionId.UTF8String)
-                              << "productId =" << QString::fromUtf8(productId.UTF8String);
+            qInfo().noquote() << "[IAP][StoreKit2] Purchase success. transactionId =" << toQString(transactionId)
+                              << "originalTransactionId =" << toQString(originalTransactionId) << "productId =" << toQString(productId);
         } else if (error) {
-            qWarning().noquote() << "[IAP][StoreKit2] Purchase failed:" << QString::fromUtf8(error.localizedDescription.UTF8String);
+            qWarning().noquote() << "[IAP][StoreKit2] Purchase failed:" << toQString(error.localizedDescription);
         }
         if (completion) {
             completion(success, transactionId, productId, originalTransactionId, error);
@@ -67,15 +74,14 @@ API_AVAILABLE(ios(15.0), macos(12.0))
         if (success) {
             qInfo().noquote() << "[IAP][StoreKit2] currentEntitlements returned"
                               << (int)(entitlements ? entitlements.count : 0) << "active entitlements";
-            for (NSDictionary *info in entitlements) {
+            for (NSDictionary *entitlement in entitlements) {
                 qInfo().noquote() << "[IAP][StoreKit2] Active entitlement:"
-                                  << "transactionId=" << QString::fromUtf8([info[@"transactionId"] UTF8String])
-                                  << "originalTransactionId=" << QString::fromUtf8([info[@"originalTransactionId"] UTF8String])
-                                  << "productId=" << QString::fromUtf8([info[@"productId"] UTF8String]);
+                                  << "transactionId=" << toQString(entitlement[@"transactionId"])
+                                  << "originalTransactionId=" << toQString(entitlement[@"originalTransactionId"])
+                                  << "productId=" << toQString(entitlement[@"productId"]);
             }
         } else {
-            qWarning().noquote() << "[IAP][StoreKit2] fetchCurrentEntitlements failed:"
-                                 << QString::fromUtf8(error.localizedDescription.UTF8String);
+            qWarning().noquote() << "[IAP][StoreKit2] fetchCurrentEntitlements failed:" << toQString(error.localizedDescription);
         }
         if (completion) {
             completion(success, entitlements, error);
@@ -93,10 +99,10 @@ API_AVAILABLE(ios(15.0), macos(12.0))
                                                             NSArray<NSString *> *invalidIdentifiers,
                                                             NSError *error) {
         if (!error) {
-            for (NSDictionary *p in products) {
-                qInfo().noquote() << "[IAP][StoreKit2] Fetched product info" << QString::fromUtf8([p[@"productId"] UTF8String])
-                                  << "price=" << QString::fromUtf8([p[@"price"] UTF8String])
-                                  << "currency=" << QString::fromUtf8([p[@"currencyCode"] UTF8String]);
+            for (NSDictionary *productInfo in products) {
+                qInfo().noquote() << "[IAP][StoreKit2] Fetched product info" << toQString(productInfo[@"productId"])
+                                  << "price=" << toQString(productInfo[@"price"])
+                                  << "currency=" << toQString(productInfo[@"currencyCode"]);
             }
         }
         if (completion) {

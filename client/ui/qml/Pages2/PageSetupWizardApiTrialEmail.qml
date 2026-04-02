@@ -78,7 +78,7 @@ PageType {
                 wrapMode: Text.WordWrap
                 color: AmneziaStyle.color.mutedGray
                 font.pixelSize: 12
-                text: qsTr("Additional details for this step can be described here.")
+                text: qsTr("We will create an account for your trial subscription and send important subscription updates to this email.")
             }
         }
     }
