@@ -39,6 +39,7 @@
 enum NMState {
     NM_STATE_UNKNOWN = 0,
     NM_STATE_ASLEEP = 10,
+    NM_STATE_DISABLED = 10,
     NM_STATE_DISCONNECTED = 20,
     NM_STATE_DISCONNECTING = 30,
     NM_STATE_CONNECTING = 40,
@@ -209,7 +210,7 @@ void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 {
   logger.debug() << "NMStateChanged " << state;
 
-  if (state == NM_STATE_ASLEEP) {
+  if (state == NM_STATE_ASLEEP || state == NM_STATE_DISABLED) {
     ++m_pollGeneration;
     emit wakeup();
   } else if (state >= NM_STATE_CONNECTED_SITE && m_previousNMState < NM_STATE_CONNECTED_SITE) {
@@ -228,9 +229,13 @@ void LinuxNetworkWatcherWorker::checkGatewayAndEmit(int generation, int count) {
   }
 
   ++count;
-  QString gateway = NetworkUtilities::getGatewayAndIface().first;
+  auto result = NetworkUtilities::getGatewayAndIface();
+  const QString& gateway = result.first;
+  const QNetworkInterface& iface = result.second;
+  bool physicalGateway = !gateway.isEmpty() &&
+                         !(iface.flags() & QNetworkInterface::IsPointToPoint);
 
-  if (!gateway.isEmpty()) {
+  if (physicalGateway) {
     logger.debug() << "Default gateway" << gateway << "ready after"
                    << count << "poll(s), emitting networkChanged";
     emit networkChanged();
