@@ -21,14 +21,9 @@ namespace
         constexpr char serviceProtocol[] = "service_protocol";
         constexpr char serviceDescription[] = "service_description";
 
-        constexpr char name[] = "name";
-        constexpr char price[] = "price";
-        constexpr char speed[] = "speed";
-        constexpr char timelimit[] = "timelimit";
-        constexpr char region[] = "region";
-
         constexpr char description[] = "description";
         constexpr char cardDescription[] = "card_description";
+        constexpr char serviceName[] = "service_name";
 
         constexpr char availableCountries[] = "available_countries";
 
@@ -74,9 +69,8 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         return apiServiceData.serviceInfo.name;
     }
     case CardDescriptionRole: {
-        auto speed = apiServiceData.serviceInfo.speed;
         if (serviceType == serviceType::amneziaPremium) {
-            return apiServiceData.serviceInfo.cardDescription.arg(speed);
+            return apiServiceData.serviceInfo.cardDescription;
         } else if (serviceType == serviceType::amneziaFree) {
             QString description = apiServiceData.serviceInfo.cardDescription;
             if (!isServiceAvailable) {
@@ -97,32 +91,8 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         }
         return true;
     }
-    case SpeedRole: {
-        return tr("%1 MBit/s").arg(apiServiceData.serviceInfo.speed);
-    }
-    case TimeLimitRole: {
-        auto timeLimit = apiServiceData.serviceInfo.timeLimit;
-        if (timeLimit == "0") {
-            return "";
-        }
-        return tr("%1 days").arg(timeLimit);
-    }
-    case RegionRole: {
-        return apiServiceData.serviceInfo.region;
-    }
     case PriceRole: {
-        if (serviceType == serviceType::amneziaPremium && !apiServiceData.minPriceLabel.isEmpty()) {
-            return apiServiceData.minPriceLabel;
-        }
-        auto price = apiServiceData.serviceInfo.price;
-        if (price == "free") {
-            return tr("Free");
-        }
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-        return tr("%1 $").arg(price);
-#else
-        return tr("%1 $/month").arg(price);
-#endif
+        return apiServiceData.minPriceLabel;
     }
     case EndDateRole: {
         return QDateTime::fromString(apiServiceData.subscription.endDate, Qt::ISODate).toLocalTime().toString("d MMM yyyy");
@@ -263,9 +233,6 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[CardDescriptionRole] = "cardDescription";
     roles[ServiceDescriptionRole] = "serviceDescription";
     roles[IsServiceAvailableRole] = "isServiceAvailable";
-    roles[SpeedRole] = "speed";
-    roles[TimeLimitRole] = "timeLimit";
-    roles[RegionRole] = "region";
     roles[PriceRole] = "price";
     roles[EndDateRole] = "endDate";
     roles[TermsOfUseUrlRole] = "termsOfUseUrl";
@@ -287,11 +254,7 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     auto subscriptionObject = data.value(apiDefs::key::subscription).toObject();
 
     ApiServicesData serviceData;
-    serviceData.serviceInfo.name = serviceInfo.value(configKey::name).toString();
-    serviceData.serviceInfo.price = serviceInfo.value(configKey::price).toString();
-    serviceData.serviceInfo.region = serviceInfo.value(configKey::region).toString();
-    serviceData.serviceInfo.speed = serviceInfo.value(configKey::speed).toString();
-    serviceData.serviceInfo.timeLimit = serviceInfo.value(configKey::timelimit).toString();
+    serviceData.serviceInfo.name = serviceDescription.value(configKey::serviceName).toString();
 
     serviceData.serviceInfo.cardDescription = serviceDescription.value(configKey::cardDescription).toString();
     serviceData.serviceInfo.description = serviceDescription.value(configKey::description).toString();
@@ -301,9 +264,7 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.subscriptionPlansJson = serviceDescription.value(configKey::subscriptionPlans).toArray();
     serviceData.benefits = serviceDescription.value(configKey::benefits).toArray();
 
-    if (serviceType == serviceType::amneziaPremium) {
-        serviceData.minPriceLabel = serviceDescription.value(configKey::minPriceLabel).toString().trimmed();
-    }
+    serviceData.minPriceLabel = serviceDescription.value(configKey::minPriceLabel).toString().trimmed();
 
     serviceData.supportInfo = data.value(apiDefs::key::supportInfo).toObject();
 

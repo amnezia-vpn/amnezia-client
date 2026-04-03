@@ -5,8 +5,6 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-#include "core/api/apiDefs.h"
-
 namespace
 {
 namespace configKey
@@ -14,12 +12,7 @@ namespace configKey
     constexpr char title[] = "title";
     constexpr char body[] = "body";
     constexpr char icon[] = "icon";
-    constexpr char injectKey[] = "inject_key";
     constexpr char accent[] = "accent";
-
-    constexpr char region[] = "region";
-    constexpr char speed[] = "speed";
-    constexpr char price[] = "price";
 }
 
 QString gatewayIconKeyToUrl(const QString &iconKey)
@@ -86,8 +79,7 @@ QHash<int, QByteArray> ApiBenefitsModel::roleNames() const
     };
 }
 
-void ApiBenefitsModel::updateModel(const QJsonArray &benefits, const QString &region, const QString &speed,
-                                   const QString &price, const QJsonObject &supportInfo)
+void ApiBenefitsModel::updateModel(const QJsonArray &benefits)
 {
     beginResetModel();
     m_serviceBenefits.clear();
@@ -99,14 +91,6 @@ void ApiBenefitsModel::updateModel(const QJsonArray &benefits, const QString &re
         QString title = benefitObject.value(configKey::title).toString();
         QString body = benefitObject.value(configKey::body).toString();
         const QString iconKey = benefitObject.value(configKey::icon).toString();
-        const QString injectKey = benefitObject.value(configKey::injectKey).toString();
-        if (body.contains(QLatin1String("%1")) && !injectKey.isEmpty()) {
-            QString injected = benefitInjectValue(injectKey, region, speed, price, supportInfo);
-            if (injected.isEmpty()) {
-                injected = QStringLiteral("—");
-            }
-            body = body.arg(injected);
-        }
         if (title.isEmpty() && body.isEmpty()) {
             continue;
         }
@@ -125,42 +109,4 @@ void ApiBenefitsModel::clear()
     beginResetModel();
     m_serviceBenefits.clear();
     endResetModel();
-}
-
-QString ApiBenefitsModel::formatPriceForBenefit(const QString &rawPrice) const
-{
-    if (rawPrice == QStringLiteral("free")) {
-        return tr("Free");
-    }
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    return tr("%1 $").arg(rawPrice);
-#else
-    return tr("%1 $/month").arg(rawPrice);
-#endif
-}
-
-QString ApiBenefitsModel::benefitInjectValue(const QString &injectKey, const QString &region, const QString &speed,
-                                               const QString &price, const QJsonObject &supportInfo) const
-{
-    if (injectKey == QLatin1String(configKey::region)) {
-        return region.isEmpty() ? QStringLiteral("—") : region;
-    }
-    if (injectKey == QLatin1String(configKey::speed)) {
-        return speed.isEmpty() ? QStringLiteral("—") : speed;
-    }
-    if (injectKey == QLatin1String(configKey::price)) {
-        return formatPriceForBenefit(price);
-    }
-
-    if (injectKey == apiDefs::key::telegram) {
-        const QString handle = supportInfo.value(apiDefs::key::telegram).toString().trimmed();
-        if (handle.isEmpty()) {
-            return QStringLiteral("—");
-        }
-        if (handle.startsWith(QLatin1Char('@'))) {
-            return handle;
-        }
-        return QLatin1Char('@') + handle;
-    }
-    return QString();
 }

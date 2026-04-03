@@ -3,7 +3,6 @@
 
 #include <QAbstractListModel>
 #include <QJsonArray>
-#include <QJsonObject>
 #include <QString>
 #include <QVector>
 
@@ -26,8 +25,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void updateModel(const QJsonArray &benefits, const QString &region, const QString &speed, const QString &price,
-                     const QJsonObject &supportInfo);
+    void updateModel(const QJsonArray &benefits);
     void clear();
 
 private:
@@ -40,10 +38,6 @@ private:
     };
 
     QVector<ServiceBenefitItem> m_serviceBenefits;
-
-    QString formatPriceForBenefit(const QString &rawPrice) const;
-    QString benefitInjectValue(const QString &injectKey, const QString &region, const QString &speed, const QString &price,
-                               const QJsonObject &supportInfo) const;
 };
 
 #endif

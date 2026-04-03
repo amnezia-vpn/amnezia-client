@@ -434,8 +434,7 @@ ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &s
     connect(m_apiServicesModel.data(), &ApiServicesModel::serviceSelectionChanged, this, [this]() {
         const ApiServicesModel::ApiServicesData serviceData = m_apiServicesModel->selectedServiceData();
         m_subscriptionPlansModel->updateModel(serviceData.subscriptionPlansJson);
-        m_benefitsModel->updateModel(serviceData.benefits, serviceData.serviceInfo.region, serviceData.serviceInfo.speed,
-                                     serviceData.serviceInfo.price, serviceData.supportInfo);
+        m_benefitsModel->updateModel(serviceData.benefits);
     });
 }
 

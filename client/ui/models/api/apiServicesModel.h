@@ -14,10 +14,6 @@ public:
     struct ServiceInfo
     {
         QString name;
-        QString speed;
-        QString timeLimit;
-        QString region;
-        QString price;
 
         QString description;
         QString cardDescription;
@@ -58,9 +54,6 @@ public:
         CardDescriptionRole,
         ServiceDescriptionRole,
         IsServiceAvailableRole,
-        SpeedRole,
-        TimeLimitRole,
-        RegionRole,
         PriceRole,
         EndDateRole,
         TermsOfUseUrlRole,
