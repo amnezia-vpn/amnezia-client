@@ -237,10 +237,8 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     // Exclude the server address, except for multihop exit servers.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        IPAddress v4(config.m_serverIpv4AddrIn);
-        if (!v4.address().isNull()) addExclusionRoute(v4);
-        IPAddress v6(config.m_serverIpv6AddrIn);
-        if (!v6.address().isNull()) addExclusionRoute(v6);
+        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
     }
 
     int err = uapiErrno(uapiCommand(message));
@@ -254,13 +252,11 @@ bool WireguardUtilsLinux::deletePeer(const InterfaceConfig& config) {
     QByteArray publicKey =
         QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
 
-    // Clear exclusion routes for this peer.
+    // Clear exclustion routes for this peer.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        IPAddress v4(config.m_serverIpv4AddrIn);
-        if (!v4.address().isNull()) deleteExclusionRoute(v4);
-        IPAddress v6(config.m_serverIpv6AddrIn);
-        if (!v6.address().isNull()) deleteExclusionRoute(v6);
+        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
     }
 
     QString message;
@@ -361,10 +357,6 @@ bool WireguardUtilsLinux::addExclusionRoute(const IPAddress& prefix) {
     if (!m_rtmonitor) {
         return false;
     }
-    if (++m_exclusionRefCount[prefix] > 1) {
-        // Route already in the kernel (added by a different caller).
-        return true;
-    }
     return m_rtmonitor->addExclusionRoute(prefix);
 }
 
@@ -372,14 +364,6 @@ bool WireguardUtilsLinux::deleteExclusionRoute(const IPAddress& prefix) {
     if (!m_rtmonitor) {
         return false;
     }
-    auto it = m_exclusionRefCount.find(prefix);
-    if (it == m_exclusionRefCount.end()) {
-        return true;  // not tracked — already gone
-    }
-    if (--(*it) > 0) {
-        return true;  // still referenced by another caller
-    }
-    m_exclusionRefCount.erase(it);
     return m_rtmonitor->deleteExclusionRoute(prefix);
 }
 

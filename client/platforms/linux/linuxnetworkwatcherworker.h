@@ -9,8 +9,6 @@
 #include <QObject>
 #include <QVariant>
 
-#include <atomic>
-
 class QThread;
 
 class LinuxNetworkWatcherWorker final : public QObject {
@@ -37,7 +35,6 @@ class LinuxNetworkWatcherWorker final : public QObject {
   void NMStateChanged(quint32 state);
 
  private:
-  void checkGatewayAndEmit(int generation, int count);
 
   // We collect the list of DBus wifi network device paths during the
   // initialization. When a property of them changes, we check if the access
