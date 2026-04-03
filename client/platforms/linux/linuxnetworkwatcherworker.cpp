@@ -7,7 +7,6 @@
 #include <QTimer>
 #include <QtDBus/QtDBus>
 
-#include "core/networkUtilities.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -208,48 +207,13 @@ void LinuxNetworkWatcherWorker::checkDevices() {
 
 void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 {
-  logger.debug() << "NMStateChanged " << state;
+    logger.debug() << "NMStateChanged " << state;
 
-  if (state == NM_STATE_ASLEEP || state == NM_STATE_DISABLED) {
-    ++m_pollGeneration;
-    emit wakeup();
-  } else if (state >= NM_STATE_CONNECTED_SITE && m_previousNMState < NM_STATE_CONNECTED_SITE) {
-    int gen = ++m_pollGeneration;
-    QTimer::singleShot(200, this, [this, gen]() { checkGatewayAndEmit(gen, 0); });
-  } else if (state < NM_STATE_CONNECTED_SITE) {
-    ++m_pollGeneration;
-  }
+    if (state == NM_STATE_ASLEEP || state == NM_STATE_DISABLED) {
+        emit wakeup();
+    } else if (state >= NM_STATE_CONNECTED_SITE && m_previousNMState < NM_STATE_CONNECTED_SITE) {
+        emit networkChanged();
+    }
 
-  m_previousNMState = state;
+    m_previousNMState = state;
 }
-
-void LinuxNetworkWatcherWorker::checkGatewayAndEmit(int generation, int count) {
-  if (m_pollGeneration.load() != generation) {
-    return;
-  }
-
-  ++count;
-  auto result = NetworkUtilities::getGatewayAndIface();
-  const QString& gateway = result.first;
-  const QNetworkInterface& iface = result.second;
-  bool physicalGateway = !gateway.isEmpty() &&
-                         !(iface.flags() & QNetworkInterface::IsPointToPoint);
-
-  if (physicalGateway) {
-    logger.debug() << "Default gateway" << gateway << "ready after"
-                   << count << "poll(s), emitting networkChanged";
-    emit networkChanged();
-    return;
-  }
-
-  if (count >= 25) {
-    logger.warning() << "Default gateway not found after 5 s, emitting networkChanged anyway";
-    emit networkChanged();
-    return;
-  }
-
-  QTimer::singleShot(200, this, [this, generation, count]() {
-    checkGatewayAndEmit(generation, count);
-  });
-}
-

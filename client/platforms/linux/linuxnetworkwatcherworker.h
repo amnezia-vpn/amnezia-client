@@ -44,7 +44,6 @@ class LinuxNetworkWatcherWorker final : public QObject {
   // point is active and unsecure.
   QStringList m_devicePaths;
   quint32 m_previousNMState = 0;
-  std::atomic<int> m_pollGeneration{0};
 };
 
 #endif  // LINUXNETWORKWATCHERWORKER_H
