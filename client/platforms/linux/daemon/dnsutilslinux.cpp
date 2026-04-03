@@ -7,6 +7,7 @@
 #include <net/if.h>
 
 #include <QDBusVariant>
+#include <QTimer>
 #include <QtDBus/QtDBus>
 
 #include "leakdetector.h"
@@ -27,24 +28,53 @@ DnsUtilsLinux::DnsUtilsLinux(QObject* parent) : DnsUtils(parent) {
   logger.debug() << "DnsUtilsLinux created.";
 
   QDBusConnection conn = QDBusConnection::systemBus();
-  m_resolver = new QDBusInterface(DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH,
-                                  DBUS_RESOLVE_MANAGER, conn, this);
+  auto* watcher = new QDBusServiceWatcher(
+      DBUS_RESOLVE_SERVICE, conn,
+      QDBusServiceWatcher::WatchForRegistration |
+      QDBusServiceWatcher::WatchForUnregistration, this);
+
+  connect(watcher, &QDBusServiceWatcher::serviceRegistered,
+          this, &DnsUtilsLinux::onResolverRegistered);
+  connect(watcher, &QDBusServiceWatcher::serviceUnregistered,
+          this, &DnsUtilsLinux::onResolverUnregistered);
+
+  if (conn.interface()->isServiceRegistered(DBUS_RESOLVE_SERVICE)) {
+    onResolverRegistered();
+  }
+}
+
+void DnsUtilsLinux::onResolverRegistered() {
+  m_resolver.reset(new QDBusInterface(DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH,
+                                      DBUS_RESOLVE_MANAGER,
+                                      QDBusConnection::systemBus()));
+  logger.debug() << "systemd-resolved available, DNS resolver initialized";
+
+  if (!m_pendingIfname.isEmpty()) {
+    logger.debug() << "Re-applying DNS configuration for" << m_pendingIfname;
+    updateResolvers(m_pendingIfname, m_pendingResolvers);
+  }
+}
+
+void DnsUtilsLinux::onResolverUnregistered() {
+  logger.debug() << "systemd-resolved disappeared, dropping DNS resolver";
+  m_resolver.reset();
 }
 
 DnsUtilsLinux::~DnsUtilsLinux() {
   MZ_COUNT_DTOR(DnsUtilsLinux);
 
-  for (auto iterator = m_linkDomains.constBegin();
-       iterator != m_linkDomains.constEnd(); ++iterator) {
-    QList<QVariant> argumentList;
-    argumentList << QVariant::fromValue(iterator.key());
-    argumentList << QVariant::fromValue(iterator.value());
-    m_resolver->asyncCallWithArgumentList(QStringLiteral("SetLinkDomains"),
-                                          argumentList);
-  }
-
-  if (m_ifindex > 0) {
-    m_resolver->asyncCall(QStringLiteral("RevertLink"), m_ifindex);
+  if (m_resolver) {
+    for (auto iterator = m_linkDomains.constBegin();
+         iterator != m_linkDomains.constEnd(); ++iterator) {
+      QList<QVariant> argumentList;
+      argumentList << QVariant::fromValue(iterator.key());
+      argumentList << QVariant::fromValue(iterator.value());
+      m_resolver->asyncCallWithArgumentList(QStringLiteral("SetLinkDomains"),
+                                            argumentList);
+    }
+    if (m_ifindex > 0) {
+      m_resolver->asyncCall(QStringLiteral("RevertLink"), m_ifindex);
+    }
   }
 
   logger.debug() << "DnsUtilsLinux destroyed.";
@@ -58,13 +88,25 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
     return false;
   }
 
+  m_pendingIfname = ifname;
+  m_pendingResolvers = resolvers;
+
+  if (!m_resolver) {
+    logger.debug() << "systemd-resolved not ready, queuing DNS configuration";
+    return true;
+  }
+
   setLinkDNS(m_ifindex, resolvers);
   setLinkDefaultRoute(m_ifindex, true);
+  setLinkDomains(m_ifindex, {DnsLinkDomain(".", true)});
   updateLinkDomains();
   return true;
 }
 
 bool DnsUtilsLinux::restoreResolvers() {
+  m_pendingIfname.clear();
+  m_pendingResolvers.clear();
+
   for (auto iterator = m_linkDomains.constBegin();
        iterator != m_linkDomains.constEnd(); ++iterator) {
     setLinkDomains(iterator.key(), iterator.value());
@@ -72,7 +114,7 @@ bool DnsUtilsLinux::restoreResolvers() {
   m_linkDomains.clear();
 
   /* Revert the VPN interface's DNS configuration */
-  if (m_ifindex > 0) {
+  if (m_ifindex > 0 && m_resolver) {
     QList<QVariant> argumentList = {QVariant::fromValue(m_ifindex)};
     QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
         QStringLiteral("RevertLink"), argumentList);
@@ -90,13 +132,14 @@ bool DnsUtilsLinux::restoreResolvers() {
 void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<> reply = *call;
   if (reply.isError()) {
-    logger.error() << "Error received from the DBus service";
+    logger.debug() << "DBus call failed (may be transient after systemd-resolved restart)";
   }
   delete call;
 }
 
 void DnsUtilsLinux::setLinkDNS(int ifindex,
                                const QList<QHostAddress>& resolvers) {
+  if (!m_resolver) return;
   QList<DnsResolver> resolverList;
   char ifnamebuf[IF_NAMESIZE];
   const char* ifname = if_indextoname(ifindex, ifnamebuf);
@@ -121,6 +164,7 @@ void DnsUtilsLinux::setLinkDNS(int ifindex,
 
 void DnsUtilsLinux::setLinkDomains(int ifindex,
                                    const QList<DnsLinkDomain>& domains) {
+  if (!m_resolver) return;
   char ifnamebuf[IF_NAMESIZE];
   const char* ifname = if_indextoname(ifindex, ifnamebuf);
   if (ifname) {
@@ -144,6 +188,7 @@ void DnsUtilsLinux::setLinkDomains(int ifindex,
 }
 
 void DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
+  if (!m_resolver) return;
   QList<QVariant> argumentList;
   argumentList << QVariant::fromValue(ifindex);
   argumentList << QVariant::fromValue(enable);
@@ -156,6 +201,7 @@ void DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
 }
 
 void DnsUtilsLinux::updateLinkDomains() {
+  if (!m_resolver) return;
   /* Get the list of search domains, and remove any others that might conspire
    * to satisfy DNS resolution. Unfortunately, this is a pain because Qt doesn't
    * seem to be able to demarshall complex property types.
@@ -174,11 +220,20 @@ void DnsUtilsLinux::updateLinkDomains() {
 
 void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<QVariant> reply = *call;
+  call->deleteLater();
   if (reply.isError()) {
-    logger.error() << "Error retrieving the DNS  domains from the DBus service";
-    delete call;
+    // systemd-resolved may still be starting up after a restart — retry a few times
+    if (m_ifindex > 0 && m_domainRetries++ < 5) {
+      logger.debug() << "systemd-resolved not ready yet, retrying DNS setup ("
+                     << m_domainRetries << "/5)";
+      QTimer::singleShot(500, this, &DnsUtilsLinux::updateLinkDomains);
+    } else {
+      logger.warning() << "Failed to configure DNS after 5 retries";
+      m_domainRetries = 0;
+    }
     return;
   }
+  m_domainRetries = 0;
 
   /* Update the state of the DNS domains */
   m_linkDomains.clear();
@@ -204,9 +259,10 @@ void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
   }
 
   /* Add a root search domain for the new interface. */
-  QList<DnsLinkDomain> newlist = {root};
-  setLinkDomains(m_ifindex, newlist);
-  delete call;
+  if (m_ifindex > 0) {
+    QList<DnsLinkDomain> newlist = {root};
+    setLinkDomains(m_ifindex, newlist);
+  }
 }
 
 static DnsMetatypeRegistrationProxy s_dnsMetatypeProxy;
