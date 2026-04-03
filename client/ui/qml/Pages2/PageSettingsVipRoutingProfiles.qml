@@ -15,9 +15,9 @@ PageType {
     id: root
 
     property var profiles: []
-    property string statusMessage: ""
-    property bool statusIsError: false
     property bool profilesLoading: false
+    property bool restoreScrollAfterRefresh: false
+    property real pendingContentY: 0
 
     readonly property bool canManageProfiles: FBLinkController.canManageRoutingProfiles
     readonly property bool canUseAdBlock: FBLinkController.canUseAdBlock
@@ -76,11 +76,20 @@ PageType {
 
     function syncSharedStatus() {
         if (GC.vipRoutingProfilesStatusMessage && GC.vipRoutingProfilesStatusMessage.length > 0) {
-            statusMessage = GC.vipRoutingProfilesStatusMessage
-            statusIsError = GC.vipRoutingProfilesStatusIsError
+            const message = GC.vipRoutingProfilesStatusMessage
+            if (GC.vipRoutingProfilesStatusIsError) {
+                PageController.showErrorMessage(message)
+            } else {
+                PageController.showNotificationMessage(message)
+            }
             GC.vipRoutingProfilesStatusMessage = ""
             GC.vipRoutingProfilesStatusIsError = false
         }
+    }
+
+    function preserveScrollPosition() {
+        pendingContentY = profilesFlick.contentY
+        restoreScrollAfterRefresh = true
     }
 
     function toggleProfile(profile) {
@@ -106,38 +115,55 @@ PageType {
 
     Connections {
         target: FBLinkController
-        function onRoutingProfilesFetched(profiles) { root.profiles = profiles; root.profilesLoading = false }
-        function onRoutingProfilesError(errorMessage) {
-            root.statusMessage = errorMessage
-            root.statusIsError = true
+        function onRoutingProfilesFetched(profiles) {
+            root.profiles = profiles
             root.profilesLoading = false
+
+            if (root.restoreScrollAfterRefresh) {
+                const targetY = root.pendingContentY
+                root.restoreScrollAfterRefresh = false
+                Qt.callLater(function() {
+                    const maxY = Math.max(0, profilesFlick.contentHeight - profilesFlick.height)
+                    profilesFlick.contentY = Math.min(targetY, maxY)
+                })
+            }
+        }
+        function onRoutingProfilesError(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+            root.profilesLoading = false
+            root.restoreScrollAfterRefresh = false
         }
         function onVipAdBlockChanged(enabled) {
-            root.statusMessage = enabled ? qsTr("Ad Block для VIP включён") : qsTr("Ad Block для VIP выключен")
-            root.statusIsError = false
+            const message = enabled ? qsTr("Ad Block для VIP включён") : qsTr("Ad Block для VIP выключен")
+            PageController.showNotificationMessage(message)
         }
-        function onRequestError(errorMessage) { root.statusMessage = errorMessage; root.statusIsError = true }
+        function onRequestError(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+        }
         function onBugReportSubmitted(ticketId) {
-            root.statusMessage = qsTr("Отчёт отправлен. Номер: %1").arg(ticketId)
-            root.statusIsError = false
+            const message = qsTr("Отчёт отправлен. Номер: %1").arg(ticketId)
+            PageController.showNotificationMessage(message)
         }
         function onRoutingProfileSaved() {
-            root.statusMessage = qsTr("Профиль сохранён")
-            root.statusIsError = false
+            const message = qsTr("Профиль сохранён")
+            PageController.showNotificationMessage(message)
+            root.preserveScrollPosition()
             root.profilesLoading = true
             FBLinkController.fetchRoutingProfiles()
         }
         function onRoutingProfileDeleted() {
-            root.statusMessage = qsTr("Профиль удалён")
-            root.statusIsError = false
+            const message = qsTr("Профиль удалён")
+            PageController.showNotificationMessage(message)
+            root.preserveScrollPosition()
             root.profilesLoading = true
             FBLinkController.fetchRoutingProfiles()
         }
         function onRoutingSystemProfileCopied(profile, created) {
-            root.statusMessage = created
+            const message = created
                     ? qsTr("Пресет добавлен в мои профили")
                     : qsTr("Пресет уже был добавлен ранее")
-            root.statusIsError = false
+            PageController.showNotificationMessage(message)
+            root.preserveScrollPosition()
             root.profilesLoading = true
             FBLinkController.fetchRoutingProfiles()
         }
@@ -163,6 +189,7 @@ PageType {
     }
 
     Flickable {
+        id: profilesFlick
         anchors.fill: parent
         clip: true
         contentHeight: content.implicitHeight + 28
@@ -228,16 +255,6 @@ PageType {
                         textColor: "#FFFFFF"
                         clickedFunc: function() { PageController.goToPage(PageEnum.PageFBLinkSubscription) }
                     }
-                }
-
-                WarningType {
-                    Layout.fillWidth: true
-                    visible: root.statusMessage !== ""
-                    textString: root.statusMessage
-                    iconPath: root.statusIsError ? "qrc:/images/controls/alert-circle.svg" : "qrc:/images/controls/check.svg"
-                    backGroundColor: root.statusIsError ? Qt.rgba(239/255, 68/255, 68/255, 0.12) : Qt.rgba(16/255, 185/255, 129/255, 0.12)
-                    imageColor: root.statusIsError ? "#EF4444" : "#10B981"
-                    textColor: root.statusIsError ? "#FFB4B4" : "#B6F2D2"
                 }
 
                 PremiumPanel {

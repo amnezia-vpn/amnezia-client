@@ -153,7 +153,8 @@ Window  {
 
         anchors.right: parent.right
         anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+        z: 1000
 
         implicitHeight: popupNotificationMessage.height
 
@@ -178,7 +179,8 @@ Window  {
 
         anchors.right: parent.right
         anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+        z: 1001
 
         implicitHeight: popupErrorMessage.height
 

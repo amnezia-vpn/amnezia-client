@@ -1,5 +1,6 @@
 #include "router_win.h"
 
+#include <cstring>
 #include <string>
 #include <tlhelp32.h>
 #include <tchar.h>
@@ -24,6 +25,17 @@ bool routeRowsEquivalent(const MIB_IPFORWARDROW &lhs, const MIB_IPFORWARDROW &rh
     return lhs.dwForwardDest == rhs.dwForwardDest
            && lhs.dwForwardMask == rhs.dwForwardMask
            && lhs.dwForwardNextHop == rhs.dwForwardNextHop;
+}
+
+bool routeRowsSamePrefix(const MIB_IPFORWARDROW &lhs, const MIB_IPFORWARDROW &rhs)
+{
+    return lhs.dwForwardDest == rhs.dwForwardDest
+           && lhs.dwForwardMask == rhs.dwForwardMask;
+}
+
+bool isRouteDeleteSuccess(DWORD status)
+{
+    return status == ERROR_SUCCESS || status == ERROR_NOT_FOUND;
 }
 
 bool interfaceHasIpv4Address(const NET_LUID &luid, const IN_ADDR &expectedAddress)
@@ -52,6 +64,73 @@ bool interfaceHasIpv4Address(const NET_LUID &luid, const IN_ADDR &expectedAddres
     return false;
 }
 
+bool isTunLikeInterfaceName(const QNetworkInterface &iface, const QStringList &nameCandidates)
+{
+    const QString ifaceName = iface.name();
+    const QString humanName = iface.humanReadableName();
+    for (const QString &candidate : nameCandidates) {
+        if (candidate.isEmpty()) {
+            continue;
+        }
+        if (ifaceName.contains(candidate, Qt::CaseInsensitive)
+            || humanName.contains(candidate, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool removeConflictingTunIpv4Addresses(const NET_LUID &targetLuid,
+                                       const IN_ADDR &expectedAddress,
+                                       const QString &requestedName)
+{
+    PMIB_UNICASTIPADDRESS_TABLE table = nullptr;
+    const DWORD status = GetUnicastIpAddressTable(AF_INET, &table);
+    if (status != NO_ERROR || !table) {
+        return false;
+    }
+
+    const auto tableGuard = qScopeGuard([table]() {
+        FreeMibTable(table);
+    });
+
+    QStringList tunCandidates = {
+        requestedName.trimmed(),
+        requestedName.trimmed() + QStringLiteral(" "),
+        QStringLiteral("tun"),
+        QStringLiteral("sing-tun"),
+        QStringLiteral("wintun")
+    };
+
+    bool removedAny = false;
+    for (ULONG i = 0; i < table->NumEntries; ++i) {
+        MIB_UNICASTIPADDRESS_ROW row = table->Table[i];
+        if (row.InterfaceLuid.Value == targetLuid.Value || row.Address.si_family != AF_INET) {
+            continue;
+        }
+
+        if (row.Address.Ipv4.sin_addr.S_un.S_addr != expectedAddress.S_un.S_addr) {
+            continue;
+        }
+
+        const QNetworkInterface iface = QNetworkInterface::interfaceFromIndex(static_cast<int>(row.InterfaceIndex));
+        const bool tunLike = !iface.isValid() || isTunLikeInterfaceName(iface, tunCandidates);
+        if (!tunLike) {
+            continue;
+        }
+
+        const DWORD deleteStatus = DeleteUnicastIpAddressEntry(&row);
+        if (deleteStatus == NO_ERROR || deleteStatus == ERROR_NOT_FOUND) {
+            removedAny = true;
+            qWarning() << "RouterWin::createTun: removed conflicting IPv4 assignment from interface index"
+                       << row.InterfaceIndex << "for address"
+                       << QHostAddress(expectedAddress.S_un.S_addr).toString();
+        }
+    }
+
+    return removedAny;
+}
+
 bool resolveTunInterfaceLuid(const QString &requestedName, NET_LUID &outLuid, QString &resolvedName)
 {
     const QString requested = requestedName.trimmed();
@@ -61,8 +140,14 @@ bool resolveTunInterfaceLuid(const QString &requestedName, NET_LUID &outLuid, QS
 
     DWORD res = ConvertInterfaceAliasToLuid(reinterpret_cast<const wchar_t*>(requested.utf16()), &outLuid);
     if (res == NO_ERROR) {
-        resolvedName = requested;
-        return true;
+        NET_IFINDEX ifindex = 0;
+        if (ConvertInterfaceLuidToIndex(&outLuid, &ifindex) == NO_ERROR) {
+            const auto exactIface = QNetworkInterface::interfaceFromIndex(static_cast<int>(ifindex));
+            if (exactIface.isValid() && (exactIface.flags() & QNetworkInterface::IsUp)) {
+                resolvedName = exactIface.name().isEmpty() ? requested : exactIface.name();
+                return true;
+            }
+        }
     }
 
     const QStringList candidates = {
@@ -102,6 +187,12 @@ bool resolveTunInterfaceLuid(const QString &requestedName, NET_LUID &outLuid, QS
             continue;
         }
 
+        if (iface.flags() & QNetworkInterface::IsUp) {
+            score += 1000;
+        }
+        if (iface.flags() & QNetworkInterface::IsRunning) {
+            score += 500;
+        }
         score += iface.index();
         if (score > bestScore) {
             bestScore = score;
@@ -121,6 +212,71 @@ bool resolveTunInterfaceLuid(const QString &requestedName, NET_LUID &outLuid, QS
 
     resolvedName = bestName;
     return true;
+}
+
+bool ipv6RouteExistsOnInterface(ULONG interfaceIndex, const QString &subnet)
+{
+    if (interfaceIndex == 0) {
+        return false;
+    }
+
+    const auto parsed = QHostAddress::parseSubnet(subnet);
+    const QHostAddress expectedPrefix = parsed.first;
+    const int expectedPrefixLength = parsed.second;
+    if (expectedPrefix.protocol() != QAbstractSocket::IPv6Protocol || expectedPrefixLength < 0) {
+        return false;
+    }
+
+    PMIB_IPFORWARD_TABLE2 table = nullptr;
+    const DWORD status = GetIpForwardTable2(AF_INET6, &table);
+    if (status != NO_ERROR || !table) {
+        return false;
+    }
+
+    const auto tableGuard = qScopeGuard([table]() {
+        FreeMibTable(table);
+    });
+
+    const Q_IPV6ADDR expectedBytes = expectedPrefix.toIPv6Address();
+
+    for (ULONG i = 0; i < table->NumEntries; ++i) {
+        const MIB_IPFORWARD_ROW2 &row = table->Table[i];
+        if (row.InterfaceIndex != interfaceIndex
+            || row.DestinationPrefix.Prefix.si_family != AF_INET6
+            || static_cast<int>(row.DestinationPrefix.PrefixLength) != expectedPrefixLength) {
+            continue;
+        }
+
+        const QHostAddress routePrefix(row.DestinationPrefix.Prefix.Ipv6.sin6_addr.s6_addr);
+        const Q_IPV6ADDR routeBytes = routePrefix.toIPv6Address();
+        if (std::memcmp(routeBytes.c, expectedBytes.c, sizeof(expectedBytes.c)) == 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool executeNetshIpv6RouteCommand(const QStringList &arguments)
+{
+    QProcess process;
+    process.setProcessChannelMode(QProcess::MergedChannels);
+    process.start(QStringLiteral("netsh"), arguments);
+
+    if (!process.waitForFinished(10000) || process.exitStatus() != QProcess::NormalExit) {
+        qWarning() << "RouterWin: netsh command did not finish successfully:" << arguments
+                   << "output:" << QString::fromLocal8Bit(process.readAll()).trimmed();
+        return false;
+    }
+
+    const bool ok = process.exitCode() == 0;
+    if (!ok) {
+        qWarning() << "RouterWin: netsh command failed with exit code" << process.exitCode()
+                   << "args:" << arguments
+                   << "output:" << QString::fromLocal8Bit(process.readAll()).trimmed();
+    }
+
+    return ok;
 }
 }
 
@@ -231,23 +387,31 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
         inet_pton(AF_INET, mask.toStdString().c_str(), &maskAddr);
         ipfrow.dwForwardMask = maskAddr.S_un.S_addr;
 
-        // Clean up stale routes left from previous broken sessions before
-        // attempting to create the fresh entry for the current session.
+        // Clean up conflicting rows for the same destination prefix first.
+        // Otherwise CreateIpForwardEntry may report "already exists" while the
+        // route still points to an old gateway/interface from a previous session.
         for (DWORD rowIndex = 0; rowIndex < pIpForwardTable->dwNumEntries; ++rowIndex) {
             const MIB_IPFORWARDROW &existingRow = pIpForwardTable->table[rowIndex];
-            if (!routeRowsEquivalent(existingRow, ipfrow)) {
+            if (!routeRowsSamePrefix(existingRow, ipfrow)) {
                 continue;
             }
 
-            const DWORD deleteStatus = DeleteIpForwardEntry(const_cast<MIB_IPFORWARDROW *>(&existingRow));
-            if (deleteStatus == NO_ERROR) {
-                qDebug() << "Router::routeAddList: removed stale existing route before recreate:" << ipWithMask << gw;
+            if (existingRow.dwForwardType == MIB_IPROUTE_TYPE_DIRECT) {
+                continue;
             }
-            break;
+
+            MIB_IPFORWARDROW rowToDelete = existingRow;
+            const DWORD deleteStatus = DeleteIpForwardEntry(&rowToDelete);
+            if (deleteStatus == NO_ERROR) {
+                qDebug() << "Router::routeAddList: removed conflicting route before recreate:"
+                         << ipWithMask << "oldGw=" << QHostAddress(existingRow.dwForwardNextHop).toString()
+                         << "newGw=" << gw;
+            }
         }
 
         dwStatus = CreateIpForwardEntry(&ipfrow);
         if (dwStatus == NO_ERROR){
+            m_ipForwardRows.remove(ipWithMask);
             m_ipForwardRows.insert(ipWithMask, ipfrow);
             success_count++;
         }
@@ -259,6 +423,7 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
                     continue;
                 }
 
+                m_ipForwardRows.remove(ipWithMask);
                 m_ipForwardRows.insert(ipWithMask, existingRow);
                 storedExistingRow = true;
                 success_count++;
@@ -266,8 +431,8 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
             }
 
             if (!storedExistingRow) {
-                m_ipForwardRows.insert(ipWithMask, ipfrow);
-                success_count++;
+                qWarning() << "Router::routeAdd: route already exists with different gateway/interface:"
+                           << ipWithMask << "requestedGw=" << gw;
             }
 
             qDebug() << "Router::routeAdd: warning, route already exist:" << ipWithMask << gw;
@@ -323,11 +488,15 @@ bool RouterWin::clearSavedRoutes()
     auto deleteMatchingCurrentRow = [pIpForwardTable](const MIB_IPFORWARDROW &savedRow) -> bool {
         for (DWORD rowIndex = 0; rowIndex < pIpForwardTable->dwNumEntries; ++rowIndex) {
             MIB_IPFORWARDROW currentRow = pIpForwardTable->table[rowIndex];
-            if (!routeRowsEquivalent(currentRow, savedRow)) {
+            if (!routeRowsSamePrefix(currentRow, savedRow)) {
                 continue;
             }
 
-            return DeleteIpForwardEntry(&currentRow) == ERROR_SUCCESS;
+            if (currentRow.dwForwardType == MIB_IPROUTE_TYPE_DIRECT) {
+                continue;
+            }
+
+            return isRouteDeleteSuccess(DeleteIpForwardEntry(&currentRow));
         }
 
         return false;
@@ -336,7 +505,8 @@ bool RouterWin::clearSavedRoutes()
     int removed_count = 0;
     QMultiMap<QString, MIB_IPFORWARDROW> remainingRows;
     for (auto i = m_ipForwardRows.begin(); i != m_ipForwardRows.end(); ++i) {
-        bool removed = DeleteIpForwardEntry(&i.value()) == ERROR_SUCCESS;
+        const DWORD directDeleteStatus = DeleteIpForwardEntry(&i.value());
+        bool removed = isRouteDeleteSuccess(directDeleteStatus);
         if (!removed) {
             removed = deleteMatchingCurrentRow(i.value());
         }
@@ -553,11 +723,26 @@ bool RouterWin::createTun(const QString &dev, const QString &subnet)
     res = CreateUnicastIpAddressEntry(&row);
     if (res == ERROR_OBJECT_ALREADY_EXISTS) {
         const bool hasExpectedIp = interfaceHasIpv4Address(luid, expectedAddress);
-        if (!hasExpectedIp) {
-            qWarning() << "RouterWin::createTun: address already exists but expected address not found on interface"
-                       << dev << subnet;
+        if (hasExpectedIp) {
+            return true;
         }
-        return hasExpectedIp;
+
+        const bool removedConflicts = removeConflictingTunIpv4Addresses(luid, expectedAddress, dev);
+        if (!removedConflicts) {
+            qWarning() << "RouterWin::createTun: address already exists but expected address is not on the target interface"
+                       << dev << subnet;
+            return false;
+        }
+
+        QThread::msleep(120);
+        res = CreateUnicastIpAddressEntry(&row);
+        if (res == ERROR_OBJECT_ALREADY_EXISTS) {
+            return interfaceHasIpv4Address(luid, expectedAddress);
+        }
+        if (res != NO_ERROR) {
+            qCritical() << "RouterWin::createTun: failed to re-create IP address after conflict cleanup:" << res;
+            return false;
+        }
     }
 
     if (res != NO_ERROR) {
@@ -827,16 +1012,32 @@ bool RouterWin::StopRoutingIpv6()
     qDebug() << "RouterWin::StopRoutingIpv6";
 
     if (auto loopback = findLoopbackIface(); loopback.isValid()) {
-        QFuture<bool> res = QtConcurrent::mappedReduced(kIpv6Subnets, [loopback](const QString &subnet) -> bool {
-            int res = QProcess::execute("netsh", { "interface", "ipv6", "add", "route", subnet, QString("interface=%1").arg(loopback.index()), "metric=0", "store=active" });
-            return res == 0;
-        },
-        [](bool &result, bool success) {
-            result = result && success;
-        }, true);
+        const ULONG loopbackIndex = static_cast<ULONG>(loopback.index());
+        bool ok = true;
 
-        res.waitForFinished();
-        return res.result();
+        for (const QString &subnet : kIpv6Subnets) {
+            if (ipv6RouteExistsOnInterface(loopbackIndex, subnet)) {
+                continue;
+            }
+
+            const QStringList addArgs = {
+                QStringLiteral("interface"), QStringLiteral("ipv6"),
+                QStringLiteral("add"), QStringLiteral("route"), subnet,
+                QStringLiteral("interface=%1").arg(loopbackIndex),
+                QStringLiteral("metric=0"),
+                QStringLiteral("store=active")
+            };
+
+            executeNetshIpv6RouteCommand(addArgs);
+
+            if (!ipv6RouteExistsOnInterface(loopbackIndex, subnet)) {
+                qWarning() << "RouterWin::StopRoutingIpv6: failed to add IPv6 block route" << subnet
+                           << "on interface" << loopbackIndex;
+                ok = false;
+            }
+        }
+
+        return ok;
     }
 
     return false;
@@ -847,16 +1048,41 @@ bool RouterWin::StartRoutingIpv6()
     qDebug() << "RouterWin::StartRoutingIpv6";
 
     if (auto loopback = findLoopbackIface(); loopback.isValid()) {
-        QFuture<bool> res = QtConcurrent::mappedReduced(kIpv6Subnets, [loopback](const QString &subnet) -> bool {
-            int res = QProcess::execute("netsh", { "interface", "ipv6", "delete", "route", subnet, QString("interface=%1").arg(loopback.index()) });
-            return res == 0;
-        },
-        [](bool &result, bool success) {
-            result = result && success;
-        }, true);
+        const ULONG loopbackIndex = static_cast<ULONG>(loopback.index());
+        bool ok = true;
 
-        res.waitForFinished();
-        return res.result();
+        for (const QString &subnet : kIpv6Subnets) {
+            if (!ipv6RouteExistsOnInterface(loopbackIndex, subnet)) {
+                continue;
+            }
+
+            const QStringList deleteActiveArgs = {
+                QStringLiteral("interface"), QStringLiteral("ipv6"),
+                QStringLiteral("delete"), QStringLiteral("route"), subnet,
+                QStringLiteral("interface=%1").arg(loopbackIndex),
+                QStringLiteral("store=active")
+            };
+            executeNetshIpv6RouteCommand(deleteActiveArgs);
+
+            // Some Windows builds reject `store=active` for delete route.
+            // Retry with the minimal syntax before declaring failure.
+            if (ipv6RouteExistsOnInterface(loopbackIndex, subnet)) {
+                const QStringList deleteArgs = {
+                    QStringLiteral("interface"), QStringLiteral("ipv6"),
+                    QStringLiteral("delete"), QStringLiteral("route"), subnet,
+                    QStringLiteral("interface=%1").arg(loopbackIndex)
+                };
+                executeNetshIpv6RouteCommand(deleteArgs);
+            }
+
+            if (ipv6RouteExistsOnInterface(loopbackIndex, subnet)) {
+                qWarning() << "RouterWin::StartRoutingIpv6: failed to remove IPv6 block route" << subnet
+                           << "from interface" << loopbackIndex;
+                ok = false;
+            }
+        }
+
+        return ok;
     }
 
     return false;

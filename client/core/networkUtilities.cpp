@@ -278,43 +278,90 @@ DWORD GetAdaptersAddressesWrapper(const ULONG Family,
 QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 {
 #ifdef Q_OS_WIN
-    constexpr int BUFF_LEN = 100;
-    char buff[BUFF_LEN] = {'\0'};
-
     QString resGateway;
     int resIndex = -1;
 
-    PIP_ADAPTER_ADDRESSES pAdapterAddresses = nullptr;
-    DWORD dwRetVal =
-            GetAdaptersAddressesWrapper(AF_INET, GAA_FLAG_INCLUDE_GATEWAYS, NULL, pAdapterAddresses);
+    SOCKADDR_INET destination = {};
+    destination.Ipv4.sin_family = AF_INET;
+    inet_pton(AF_INET, "8.8.8.8", &(destination.Ipv4.sin_addr));
 
-    if (dwRetVal != NO_ERROR) {
-        qDebug() << "ipv4 stack detect GetAdaptersAddresses failed.";
-        return {};
-    }
+    MIB_IPFORWARD_ROW2 bestRoute = {};
+    SOCKADDR_INET bestSource = {};
+    const DWORD bestRouteResult = GetBestRoute2(nullptr, 0, nullptr, &destination, 0, &bestRoute, &bestSource);
+    if (bestRouteResult == NO_ERROR) {
+        NET_IFINDEX bestIfIndex = bestRoute.InterfaceIndex;
+        if (bestIfIndex == 0) {
+            NET_IFINDEX convertedIndex = 0;
+            if (ConvertInterfaceLuidToIndex(&bestRoute.InterfaceLuid, &convertedIndex) == NO_ERROR) {
+                bestIfIndex = convertedIndex;
+            }
+        }
 
-    PIP_ADAPTER_ADDRESSES pCurAddress = pAdapterAddresses;
-    while (pCurAddress) {
-        PIP_ADAPTER_GATEWAY_ADDRESS_LH gateway = pCurAddress->FirstGatewayAddress;
-        if (gateway) {
-            SOCKET_ADDRESS gateway_address = gateway->Address;
-            if (gateway->Address.lpSockaddr->sa_family == AF_INET) {
-                sockaddr_in* sa_in = (sockaddr_in*)gateway->Address.lpSockaddr;
-                QString gw = inet_ntop(AF_INET, &(sa_in->sin_addr), buff, BUFF_LEN);
-                qDebug() <<  "gateway IPV4:" << gw;
-                struct sockaddr_in addr;
-                if (inet_pton(AF_INET, buff, &addr.sin_addr) == 1) {
-                    qDebug() <<  "this is true v4 !";
-                    
+        if (bestIfIndex != 0) {
+            resIndex = static_cast<int>(bestIfIndex);
+        }
+
+        if (bestRoute.NextHop.si_family == AF_INET) {
+            char gatewayBuffer[INET_ADDRSTRLEN] = {'\0'};
+            if (inet_ntop(AF_INET, &(bestRoute.NextHop.Ipv4.sin_addr), gatewayBuffer, INET_ADDRSTRLEN)) {
+                const QString gw = QString::fromLatin1(gatewayBuffer);
+                if (!gw.isEmpty() && gw != QStringLiteral("0.0.0.0")) {
                     resGateway = gw;
-                    resIndex = pCurAddress->IfIndex;
                 }
             }
         }
+    }
+
+    PIP_ADAPTER_ADDRESSES pAdapterAddresses = nullptr;
+    DWORD dwRetVal = GetAdaptersAddressesWrapper(AF_INET, GAA_FLAG_INCLUDE_GATEWAYS, NULL, pAdapterAddresses);
+
+    if (dwRetVal != NO_ERROR) {
+        qDebug() << "ipv4 stack detect GetAdaptersAddresses failed.";
+        return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
+    }
+
+    QString fallbackGateway;
+    int fallbackIndex = -1;
+
+    PIP_ADAPTER_ADDRESSES pCurAddress = pAdapterAddresses;
+    while (pCurAddress) {
+        if (pCurAddress->OperStatus != IfOperStatusUp) {
+            pCurAddress = pCurAddress->Next;
+            continue;
+        }
+
+        PIP_ADAPTER_GATEWAY_ADDRESS_LH gateway = pCurAddress->FirstGatewayAddress;
+        if (gateway && gateway->Address.lpSockaddr &&
+            gateway->Address.lpSockaddr->sa_family == AF_INET) {
+            const auto *sa_in = reinterpret_cast<sockaddr_in*>(gateway->Address.lpSockaddr);
+            char gatewayBuffer[INET_ADDRSTRLEN] = {'\0'};
+            if (inet_ntop(AF_INET, &(sa_in->sin_addr), gatewayBuffer, INET_ADDRSTRLEN)) {
+                const QString gw = QString::fromLatin1(gatewayBuffer);
+                if (!gw.isEmpty() && gw != QStringLiteral("0.0.0.0")) {
+                    if (resIndex != -1 && static_cast<int>(pCurAddress->IfIndex) == resIndex && resGateway.isEmpty()) {
+                        resGateway = gw;
+                    }
+
+                    if (fallbackGateway.isEmpty()) {
+                        fallbackGateway = gw;
+                        fallbackIndex = static_cast<int>(pCurAddress->IfIndex);
+                    }
+                }
+            }
+        }
+
         pCurAddress = pCurAddress->Next;
     }
 
     free(pAdapterAddresses);
+
+    if (resGateway.isEmpty()) {
+        resGateway = fallbackGateway;
+    }
+    if (resIndex == -1) {
+        resIndex = fallbackIndex;
+    }
+
     return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
 #endif
 #ifdef Q_OS_LINUX

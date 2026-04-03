@@ -50,9 +50,57 @@ function runningOnLinux()
     return (systemInfo.kernelType === "linux");
 }
 
+function showRebootRequiredMessage()
+{
+    QMessageBox.information("os.information",
+                            appName(),
+                            qsTr("Installation is complete. Please reboot your computer to apply VPN service and routing changes."),
+                            QMessageBox.Ok);
+}
+
 function vcRuntimeIsInstalled()
 {
     return (installer.findPath("msvcp140.dll", [installer.value("RootDir")+ "\\Windows\\System32\\"]).length !== 0)
+}
+
+function sleep(milliseconds)
+{
+    var currentTime = new Date().getTime();
+    while (currentTime + milliseconds >= new Date().getTime()) {}
+}
+
+function serviceIsRunningWindows()
+{
+    var result = installer.execute("sc", ["query", serviceName()]);
+    var output = String(result[0]);
+    var exitCode = Number(result[1]);
+
+    if (exitCode !== 0) {
+        return false;
+    }
+
+    // `sc query` output can be localized, but "RUNNING" and numeric state 4
+    // are stable markers for a healthy service state.
+    return (output.indexOf("RUNNING") !== -1) || (output.match(/:\s*4\s+/) !== null);
+}
+
+function ensureServiceStartedAndRunningWindows()
+{
+    var startResult = installer.execute("net", ["start", serviceName()]);
+    console.log(("%1 start result: %2").arg(serviceName()).arg(startResult));
+
+    for (var i = 0; i < 8; ++i) {
+        if (serviceIsRunningWindows()) {
+            return true;
+        }
+        sleep(1500);
+    }
+
+    QMessageBox.critical("service.start.failed",
+                         appName(),
+                         qsTr("Service installation is incomplete: the VPN service did not enter RUNNING state.\n\nPlease reinstall the app (full installer) and reboot the computer before first launch."),
+                         QMessageBox.Ok);
+    return false;
 }
 
 function Component()
@@ -145,11 +193,15 @@ Component.prototype.installationFinished = function()
             return
         }
 
+        showRebootRequiredMessage()
+
         if (runningOnWindows()) {
             command = "@TargetDir@/" + appExecutableFileName()
 
-            var status1 = installer.execute("net", ["start", serviceName()])
-            console.log(("%1 started with status: %2 ").arg(serviceName()).arg(status1))
+            if (!ensureServiceStartedAndRunningWindows()) {
+                installer.dropAdminRights()
+                return
+            }
 
             var status2 = installer.execute("sc", ["failure", serviceName(), "reset=", "100", "actions=", "restart/2000/restart/2000/restart/2000"])
             console.log(("Changed settings for %1 with status: %2 ").arg(serviceName()).arg(status2))

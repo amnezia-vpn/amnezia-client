@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CPackWiXPatch>
     <CPackWiXFragment Id="#PRODUCT">
+        <Property Id="REBOOT" Value="Force" />
         <!-- Требует расширение WixToolset.Util.wixext и xmlns util -->
         <util:CloseApplication
                 Id="CloseFBLinkClient"
                 Target="FBLinkVPN.exe"
                 Description="Closing FBLink VPN client"
                 TerminateProcess="1"
-                RebootPrompt="no" />
+                RebootPrompt="yes" />
     </CPackWiXFragment>
 </CPackWiXPatch>

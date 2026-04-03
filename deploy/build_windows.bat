@@ -98,6 +98,10 @@ echo "Copying deploy data..."
 xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
 xcopy %PREBILT_DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
 
+echo "Verifying service runtime compatibility..."
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%\verify_windows_runtime.ps1" "%OUT_APP_DIR%" "%SERVICE_FILENAME%"
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 cd %SCRIPT_DIR%
 xcopy %SCRIPT_DIR:"=%\installer  %WORK_DIR:"=%\installer /s /e /y /i /f
 mkdir %INSTALLER_DATA_DIR%

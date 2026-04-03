@@ -15,13 +15,20 @@ Popup {
 
     leftMargin: 25
     rightMargin: 25
-    bottomMargin: 70 + SettingsController.safeAreaBottomMargin
 
     width: parent.width - leftMargin - rightMargin
 
-    anchors.centerIn: parent
+    x: (parent ? (parent.width - width) / 2 : 0)
+    y: 16 + SettingsController.safeAreaTopMargin
     modal: root.closeButtonVisible
     closePolicy: Popup.CloseOnEscape
+
+    enter: Transition {
+        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 120 }
+    }
+    exit: Transition {
+        NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 120 }
+    }
 
     Overlay.modal: Rectangle {
         visible: root.closeButtonVisible
@@ -39,8 +46,10 @@ Popup {
     background: Rectangle {
         anchors.fill: parent
 
-        color: "white"
-        radius: 4
+        color: "#F8FAFF"
+        radius: 12
+        border.width: 1
+        border.color: "#D7E5FF"
     }
 
     Timer {
@@ -66,6 +75,8 @@ Popup {
             anchors.fill: parent
             anchors.leftMargin: 16
             anchors.rightMargin: 16
+            anchors.topMargin: 10
+            anchors.bottomMargin: 10
 
             CaptionTextType {
                 horizontalAlignment: Text.AlignLeft
@@ -90,9 +101,9 @@ Popup {
 
                 implicitHeight: 32
 
-                defaultColor: "white"
-                hoveredColor: FBLinkStyle.color.lightGray
-                pressedColor: FBLinkStyle.color.lightGray
+                defaultColor: "#EAF2FF"
+                hoveredColor: "#DCEBFF"
+                pressedColor: "#D1E4FF"
                 disabledColor: FBLinkStyle.color.charcoalGray
 
                 textColor: FBLinkStyle.color.midnightBlack

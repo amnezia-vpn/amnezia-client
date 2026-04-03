@@ -2,6 +2,7 @@
 <installer-gui-script minSpecVersion="1">
     <title>FBLink Installer</title>
     <license file="LICENSE"/>
+    <conclusion file="install_conclusion.html"/>
     <choices-outline>
         <line choice="install"/>
         <line choice="uninstall"/>

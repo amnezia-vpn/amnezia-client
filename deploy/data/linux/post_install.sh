@@ -85,6 +85,8 @@ fi
 date >> $LOG_FILE
 echo "Service status:" >> $LOG_FILE
 sudo systemctl status $APP_NAME >> $LOG_FILE
+echo "Please reboot your computer to apply VPN networking changes." >> $LOG_FILE
+echo "Please reboot your computer to apply VPN networking changes."
 date >> $LOG_FILE
 echo "Script finished" >> $LOG_FILE
 exit 0

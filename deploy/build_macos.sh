@@ -188,6 +188,7 @@ cp "$DEPLOY_DATA_DIR/post_uninstall.sh" "$UNINSTALL_SCRIPTS_DIR/postinstall"
 mkdir -p "$RESOURCES_DIR/scripts"
 cp "$DEPLOY_DATA_DIR/check_install.sh" "$RESOURCES_DIR/scripts/check_install.sh"
 cp "$DEPLOY_DATA_DIR/check_uninstall.sh" "$RESOURCES_DIR/scripts/check_uninstall.sh"
+cp "$DEPLOY_DATA_DIR/install_conclusion.html" "$RESOURCES_DIR/install_conclusion.html"
 
 cat > "$SCRIPTS_DIR/postinstall" <<'EOS'
 #!/bin/bash

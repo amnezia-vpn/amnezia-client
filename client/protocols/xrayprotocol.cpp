@@ -636,7 +636,7 @@ ErrorCode XrayProtocol::setupRouting() {
         const QStringList physicalDnsResolvers = dnsServersForInterfaceIndex(static_cast<ULONG>(qMax(inetAdapterIndex, 0)));
 #endif
         bool tunReady = false;
-        static constexpr int kMaxCreateTunAttempts = 4;
+        static constexpr int kMaxCreateTunAttempts = 8;
         for (int attempt = 1; attempt <= kMaxCreateTunAttempts; ++attempt) {
             auto createTun = iface->createTun(tunName, fblink::protocols::xray::defaultLocalAddr);
             if (createTun.waitForFinished() && createTun.returnValue()) {
@@ -647,13 +647,15 @@ ErrorCode XrayProtocol::setupRouting() {
             qWarning() << "Failed to assign IP address for TUN, attempt"
                        << attempt << "of" << kMaxCreateTunAttempts;
 
-            // The previous adapter instance can be left in a transient state on Windows.
-            // Clean it before retrying to avoid failing the whole connection sequence.
-            auto deleteTun = iface->deleteTun(tunName);
-            deleteTun.waitForFinished();
+            // Give tun2socks/wintun time to settle before forcing adapter cleanup.
+            // Aggressive cleanup on every failure can race with adapter creation.
+            if (attempt == 4 || attempt == 6) {
+                auto deleteTun = iface->deleteTun(tunName);
+                deleteTun.waitForFinished();
+            }
 
             if (attempt < kMaxCreateTunAttempts) {
-                QThread::msleep(250);
+                QThread::msleep(500);
             }
         }
 
@@ -764,8 +766,7 @@ ErrorCode XrayProtocol::setupRouting() {
 
         auto StopRoutingIpv6 = iface->StopRoutingIpv6();
         if (!StopRoutingIpv6.waitForFinished() || !StopRoutingIpv6.returnValue()) {
-            qCritical() << "Failed to disable IPv6 routing";
-            return ErrorCode::InternalError;
+            qWarning() << "Failed to disable IPv6 routing; continuing without IPv6 block routes";
         }
 
 #ifdef Q_OS_WIN

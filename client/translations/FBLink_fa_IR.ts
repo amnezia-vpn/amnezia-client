@@ -4641,82 +4641,82 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsVipRoutingProfiles</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="225"/>
         <source>Для VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="213"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="240"/>
         <source>Выберите готовый пресет или создайте свой профиль маршрутизации.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="241"/>
         <source>Маршрутизация сайтов доступна в VIP.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="251"/>
         <source>Открыть VIP-подписку</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="261"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="278"/>
         <source>Защита</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="283"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="300"/>
         <source>Реклама и трекеры блокируются автоматически.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="284"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="301"/>
         <source>Фильтрация временно недоступна, но VPN продолжает работать.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="285"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="302"/>
         <source>Ad Block выключен. Сайты открываются без фильтрации рекламы.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="302"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="319"/>
         <source>Отправить отчёт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="308"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="325"/>
         <source>Проблема с VIP Ad Block</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="356"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="373"/>
         <source>Откройте каталог и добавьте нужный пресет в «Мои профили».</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="375"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="392"/>
         <source>Новый профиль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="394"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="411"/>
         <source>Загружаем профили...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="411"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="428"/>
         <source>Открыть каталог пресетов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="428"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="445"/>
         <source>Без названия</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="137"/>
         <source>Ad Block для VIP включён</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4746,92 +4746,92 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="137"/>
         <source>Ad Block для VIP выключен</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="144"/>
         <source>Отчёт отправлен. Номер: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="148"/>
         <source>Профиль сохранён</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="131"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="155"/>
         <source>Профиль удалён</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="163"/>
         <source>Пресет добавлен в мои профили</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="164"/>
         <source>Пресет уже был добавлен ранее</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="197"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="224"/>
         <source>VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="203"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="230"/>
         <source>VIP-пресеты и маршрутизация</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="272"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="289"/>
         <source>Ad Block только для VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="435"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="452"/>
         <source>ВКЛЮЧЕН</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="435"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="452"/>
         <source>ВЫКЛЮЧЕН</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="442"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="459"/>
         <source>Выключить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="442"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="459"/>
         <source>Включить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="370"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="387"/>
         <source>Мои профили</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="345"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="362"/>
         <source>Добавить пресет</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="402"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="419"/>
         <source>Пока нет пользовательских профилей</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="443"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="460"/>
         <source>Редактировать</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="444"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="461"/>
         <source>Удалить</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4846,7 +4846,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="337"/>
+        <location filename="../ui/qml/Pages2/PageSettingsVipRoutingProfiles.qml" line="354"/>
         <source>Системные пресеты</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5848,7 +5848,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PopupType</name>
     <message>
-        <location filename="../ui/qml/Controls2/PopupType.qml" line="101"/>
+        <location filename="../ui/qml/Controls2/PopupType.qml" line="112"/>
         <source>Close</source>
         <translation>بستن</translation>
     </message>
@@ -7604,12 +7604,12 @@ For more detailed information, you can
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="233"/>
+        <location filename="../ui/qml/main2.qml" line="235"/>
         <source>Private key passphrase</source>
         <translation>عبارت کلید خصوصی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="254"/>
+        <location filename="../ui/qml/main2.qml" line="256"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
