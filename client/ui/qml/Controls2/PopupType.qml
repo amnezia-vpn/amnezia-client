@@ -46,10 +46,10 @@ Popup {
     background: Rectangle {
         anchors.fill: parent
 
-        color: "#F8FAFF"
-        radius: 12
+        color: FBLinkStyle.color.onyxBlack
+        radius: 14
         border.width: 1
-        border.color: "#D7E5FF"
+        border.color: Qt.rgba(234/255, 179/255, 8/255, 0.35)
     }
 
     Timer {
@@ -81,6 +81,7 @@ Popup {
             CaptionTextType {
                 horizontalAlignment: Text.AlignLeft
                 Layout.fillWidth: true
+                color: FBLinkStyle.color.paleGray
 
                 onLinkActivated: function(link) {
                     Qt.openUrlExternally(LanguageModel.getCurrentDocsUrl(link))
@@ -101,12 +102,12 @@ Popup {
 
                 implicitHeight: 32
 
-                defaultColor: "#EAF2FF"
-                hoveredColor: "#DCEBFF"
-                pressedColor: "#D1E4FF"
+                defaultColor: Qt.rgba(234/255, 179/255, 8/255, 0.18)
+                hoveredColor: Qt.rgba(234/255, 179/255, 8/255, 0.26)
+                pressedColor: Qt.rgba(234/255, 179/255, 8/255, 0.34)
                 disabledColor: FBLinkStyle.color.charcoalGray
 
-                textColor: FBLinkStyle.color.midnightBlack
+                textColor: FBLinkStyle.color.paleGray
                 borderWidth: 0
 
                 text: qsTr("Close")

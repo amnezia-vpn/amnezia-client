@@ -11,6 +11,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTimer>
+#include <QThread>
 
 #include <configurators/cloak_configurator.h>
 #include <configurators/openvpn_configurator.h>
@@ -24,8 +25,6 @@
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
-    #include <QThread>
-
 #endif
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
@@ -68,6 +67,8 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent
     : QObject(parent), m_settings(settings), m_checkTimer(this)
 {
     m_connectionState = Vpn::ConnectionState::Disconnected;
+    m_stateWatchdogTimer.setParent(this);
+    m_recoveryTimer.setParent(this);
 
     m_stateWatchdogTimer.setSingleShot(true);
     connect(&m_stateWatchdogTimer, &QTimer::timeout, this, &VpnConnection::handleStateWatchdogTimeout);
@@ -205,6 +206,8 @@ ErrorCode VpnConnection::lastError() const
 void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &vpnConfiguration)
 {
+    const Vpn::ConnectionState previousConnectionState = m_connectionState;
+
     if (!m_reconnectScheduled) {
         clearRecoveryState();
     }
@@ -220,18 +223,29 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
                         .arg(ContainerProps::containerToString(container));
 
     m_remoteAddress = NetworkUtilities::getIPAddress(credentials.hostName);
-    setConnectionState(Vpn::ConnectionState::Connecting);
-
     m_vpnConfiguration = vpnConfiguration;
 
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
-        disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-        m_vpnProtocol->stop();
+        // Disconnect all old protocol signals first, otherwise its stop()
+        // may emit Disconnected and race with a fresh Connecting state.
+        disconnect(m_vpnProtocol.data(), nullptr, this, nullptr);
+        // When previous attempt already ended in Disconnected/Error, calling
+        // stop() again may emit an extra daemon-level "disconnected" broadcast
+        // that can be observed by a freshly created protocol instance.
+        // In this case, just drop the old object.
+        if (previousConnectionState != Vpn::ConnectionState::Disconnected
+            && previousConnectionState != Vpn::ConnectionState::Error) {
+            m_vpnProtocol->stop();
+        } else {
+            qDebug() << "VpnConnection::connectToVpn(): skipping stop() for already inactive protocol";
+        }
         m_vpnProtocol.reset();
     }
     appendKillSwitchConfig();
 #endif
+
+    setConnectionState(Vpn::ConnectionState::Connecting);
 
     appendSplitTunnelingConfig();
     if (hasMissingManagedRoutingRules()) {
@@ -522,6 +536,13 @@ void VpnConnection::disconnectFromVpn()
 
 void VpnConnection::setConnectionState(Vpn::ConnectionState state)
 {
+    if (QThread::currentThread() != thread()) {
+        QMetaObject::invokeMethod(this, [this, state]() {
+            setConnectionState(state);
+        }, Qt::QueuedConnection);
+        return;
+    }
+
     const Vpn::ConnectionState previousState = m_connectionState;
     onConnectionStateChanged(state);
 

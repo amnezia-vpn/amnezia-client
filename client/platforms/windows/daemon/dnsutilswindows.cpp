@@ -59,7 +59,12 @@ bool DnsUtilsWindows::updateResolvers(const QString& ifname,
   if (m_setInterfaceDnsSettingsProcAddr == nullptr) {
     return updateResolversNetsh(entry.InterfaceIndex, resolvers);
   }
-  return updateResolversWin32(entry.InterfaceGuid, resolvers);
+  if (updateResolversWin32(entry.InterfaceGuid, resolvers)) {
+    return true;
+  }
+
+  logger.warning() << "Win32 DNS update failed, falling back to netsh";
+  return updateResolversNetsh(entry.InterfaceIndex, resolvers);
 }
 
 bool DnsUtilsWindows::updateResolversWin32(
@@ -95,16 +100,23 @@ bool DnsUtilsWindows::updateResolversWin32(
     logger.error() << "Failed to configure IPv4 resolvers:" << v4result;
   }
 
-  // Configure nameservers for IPv6
-  QString v6resolverstring = v6resolvers.join(",");
-  settings.Flags |= DNS_SETTING_IPV6;
-  settings.NameServer = (wchar_t*)v6resolverstring.utf16();
-  DWORD v6result = m_setInterfaceDnsSettingsProcAddr(guid, &settings);
-  if (v6result != NO_ERROR) {
-    logger.error() << "Failed to configure IPv6 resolvers" << v6result;
+  DWORD v6result = NO_ERROR;
+  // Configure nameservers for IPv6 only if we actually have IPv6 resolvers.
+  // Some Windows setups (or interfaces) reject empty IPv6 DNS updates and that
+  // must not fail tunnel activation when IPv4 DNS is valid.
+  if (!v6resolvers.isEmpty()) {
+    QString v6resolverstring = v6resolvers.join(",");
+    settings.Flags |= DNS_SETTING_IPV6;
+    settings.NameServer = (wchar_t*)v6resolverstring.utf16();
+    v6result = m_setInterfaceDnsSettingsProcAddr(guid, &settings);
+    if (v6result != NO_ERROR) {
+      logger.error() << "Failed to configure IPv6 resolvers" << v6result;
+    }
+  } else {
+    logger.debug() << "Skipping IPv6 DNS configuration: no IPv6 resolvers provided";
   }
 
-  return ((v4result == NO_ERROR) && (v6result == NO_ERROR));
+  return (v4result == NO_ERROR) && (v6result == NO_ERROR);
 }
 
 constexpr const char* netshFlushTemplate =
@@ -180,5 +192,12 @@ bool DnsUtilsWindows::restoreResolvers() {
   if (m_setInterfaceDnsSettingsProcAddr == nullptr) {
     return updateResolversNetsh(entry.InterfaceIndex, empty);
   }
-  return updateResolversWin32(entry.InterfaceGuid, empty);
+  // If Win32 API path fails to clear DNS (often due IPv6 DNS semantics), do not
+  // block disconnect/cleanup: fallback to netsh.
+  if (updateResolversWin32(entry.InterfaceGuid, empty)) {
+    return true;
+  }
+
+  logger.warning() << "Win32 DNS restore failed, falling back to netsh";
+  return updateResolversNetsh(entry.InterfaceIndex, empty);
 }

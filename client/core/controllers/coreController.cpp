@@ -403,6 +403,15 @@ void CoreController::initPrepareConfigHandler()
     connect(m_connectionController.get(), &ConnectionController::prepareConfig, this, [this]() {
         qDebug() << "[FBLink] prepareConfig: defaultServerIndex =" << m_serversModel->getDefaultServerIndex();
 
+        QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+        const qint64 safeModeUntilEpoch = qSettings.value("Conf/safeModeUntilEpochSec", 0).toLongLong();
+        if (safeModeUntilEpoch > QDateTime::currentSecsSinceEpoch()) {
+            qWarning() << "[FBLink] prepareConfig: skipped because safe mode is active until" << safeModeUntilEpoch;
+            emit m_pageController->showNotificationMessage(tr("Безопасный режим активен. Отключите его на главной странице."));
+            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            return;
+        }
+
         // 1) First check API config validity (this initiates a synchronous HTTP request if expired)
         if (!m_apiConfigsController->isConfigValid()) {
             qDebug() << "[FBLink] prepareConfig: apiConfigsController->isConfigValid() = false";

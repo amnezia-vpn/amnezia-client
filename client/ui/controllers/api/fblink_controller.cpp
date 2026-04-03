@@ -33,6 +33,7 @@ constexpr char kLastKnownGoodRoutingRulesHashKey[] = "Conf/lastKnownGoodRoutingR
 constexpr char kVIPAdBlockStatusKey[] = "subscriptionVIPAdBlockStatus";
 constexpr char kVIPAdBlockDnsSourceKey[] = "subscriptionVIPAdBlockDnsSource";
 constexpr char kVIPAdBlockDegradeReasonKey[] = "subscriptionVIPAdBlockDegradeReason";
+constexpr char kUserEmailKey[] = "accountEmail";
 constexpr char kSafeModeUntilEpochKey[] = "Conf/safeModeUntilEpochSec";
 constexpr char kShowNewFeaturesGuideKey[] = "Conf/showNewFeaturesGuide";
 
@@ -163,11 +164,12 @@ QString adBlockStatusLabel(const QString &rawStatus, bool enabled)
     if (normalized == "applied") {
         return QObject::tr("Работает");
     }
-    if (normalized == "degraded" || normalized == "unavailable" || normalized.isEmpty()) {
+    if (normalized == "degraded" || normalized == "unavailable") {
         return QObject::tr("Временно недоступен");
     }
 
-    return QObject::tr("Временно недоступен");
+    // Optimistic UI: until fetchConfig() confirms degradation, keep AdBlock as active.
+    return QObject::tr("Работает");
 }
 
 QString sanitizeSensitiveTokens(const QString &input)
@@ -296,7 +298,7 @@ void FBLinkController::login(const QString &email, const QString &password)
 
     QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, email]() {
         reply->deleteLater();
 
         if (reply->error() == QNetworkReply::NoError) {
@@ -308,6 +310,7 @@ void FBLinkController::login(const QString &email, const QString &password)
                 saveJwtToken(obj["access_token"].toString());
                 if (obj.contains("refresh_token"))
                     saveRefreshToken(obj["refresh_token"].toString());
+                setUserEmail(email);
                 saveSubscriptionInfo("", "", "");  // Clear stale data from previous user
                 setLoadingState(true);
                 emit loginSuccess();
@@ -369,7 +372,7 @@ void FBLinkController::verifyEmail(const QString &email, const QString &code)
 
     QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, email]() {
         reply->deleteLater();
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray data = reply->readAll();
@@ -380,6 +383,7 @@ void FBLinkController::verifyEmail(const QString &email, const QString &code)
                 saveJwtToken(obj["access_token"].toString());
                 if (obj.contains("refresh_token"))
                     saveRefreshToken(obj["refresh_token"].toString());
+                setUserEmail(email);
                 saveSubscriptionInfo("", "", "");
                 setLoadingState(true);
                 emit verifySuccess();
@@ -453,6 +457,7 @@ void FBLinkController::resetPassword(const QString &email, const QString &code, 
 void FBLinkController::loginWithToken(const QString &token)
 {
     saveJwtToken(token);
+    setUserEmail("");
     saveSubscriptionInfo("", "", "");
     setLoadingState(true);
     emit loginStateChanged();
@@ -842,6 +847,19 @@ void FBLinkController::fetchSubscription(bool allowRefreshRetry)
             const bool canManageRoutingProfiles = obj.value("can_manage_routing_profiles").toBool(false);
             const bool canUseAdBlock = obj.value("can_use_ad_block").toBool(false);
             const bool vipAdBlockEnabled = obj.value("vip_ad_block_enabled").toBool(false);
+            QString accountEmail = obj.value("email").toString().trimmed();
+            if (accountEmail.isEmpty()) {
+                accountEmail = obj.value("user_email").toString().trimmed();
+            }
+            if (accountEmail.isEmpty()) {
+                accountEmail = obj.value("account_email").toString().trimmed();
+            }
+            if (accountEmail.isEmpty()) {
+                accountEmail = obj.value("user").toObject().value("email").toString().trimmed();
+            }
+            if (!accountEmail.isEmpty()) {
+                setUserEmail(accountEmail);
+            }
 
             saveSubscriptionInfo(status, plan, endDate, autoRenew, cardSaved, trialAvailable,
                                  allowedProtocols, canUseSiteSplitTunneling, canUseAppSplitTunneling,
@@ -902,6 +920,7 @@ void FBLinkController::logout()
     }
     saveJwtToken("");
     saveRefreshToken("");
+    setUserEmail("");
     saveSubscriptionInfo("", "", "");
     emit loginStateChanged();
     emit newFeaturesGuideChanged();
@@ -911,6 +930,12 @@ void FBLinkController::logout()
 bool FBLinkController::isLoggedIn() const
 {
     return !getJwtToken().isEmpty();
+}
+
+QString FBLinkController::userEmail() const
+{
+    QSettings qSettings = appSettings();
+    return qSettings.value(kUserEmailKey, "").toString();
 }
 
 bool FBLinkController::isSubscribed() const
@@ -1172,6 +1197,15 @@ void FBLinkController::setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry
         if (reply->error() == QNetworkReply::NoError) {
             QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
             qSettings.setValue("subscriptionVIPAdBlockEnabled", enabled);
+            if (enabled) {
+                // Optimistic state: show active immediately, then reconcile with /me/config.
+                qSettings.setValue(kVIPAdBlockStatusKey, "applied");
+                qSettings.setValue(kVIPAdBlockDegradeReasonKey, "");
+            } else {
+                qSettings.setValue(kVIPAdBlockStatusKey, "");
+                qSettings.setValue(kVIPAdBlockDnsSourceKey, "");
+                qSettings.setValue(kVIPAdBlockDegradeReasonKey, "");
+            }
             qSettings.sync();
             emit vipAdBlockChanged(enabled);
             emit subscriptionChanged();
@@ -1581,4 +1615,18 @@ QString FBLinkController::getRefreshToken() const
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
     return qSettings.value("refreshToken", "").toString();
+}
+
+void FBLinkController::setUserEmail(const QString &email)
+{
+    const QString normalized = email.trimmed();
+    QSettings qSettings = appSettings();
+    const QString current = qSettings.value(kUserEmailKey, "").toString();
+    if (current == normalized) {
+        return;
+    }
+
+    qSettings.setValue(kUserEmailKey, normalized);
+    qSettings.sync();
+    emit userEmailChanged();
 }

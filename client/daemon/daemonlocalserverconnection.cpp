@@ -107,12 +107,22 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
     InterfaceConfig config;
     if (!Daemon::parseConfig(obj, config)) {
       logger.error() << "Invalid configuration";
+      QJsonObject errorObj;
+      errorObj.insert("type", "backendFailure");
+      errorObj.insert("errorCode", static_cast<int>(DaemonError::ERROR_FATAL));
+      errorObj.insert("reason", "invalid_config");
+      write(errorObj);
       emit disconnected();
       return;
     }
 
     if (!Daemon::instance()->activate(config)) {
       logger.error() << "Failed to activate the interface";
+      QJsonObject errorObj;
+      errorObj.insert("type", "backendFailure");
+      errorObj.insert("errorCode", static_cast<int>(DaemonError::ERROR_FATAL));
+      errorObj.insert("reason", Daemon::instance()->lastErrorText());
+      write(errorObj);
       emit disconnected();
     }
     return;

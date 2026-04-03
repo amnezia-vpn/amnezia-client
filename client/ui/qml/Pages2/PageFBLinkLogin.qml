@@ -114,92 +114,42 @@ PageType {
                     Layout.leftMargin: 4
                 }
 
-                GridLayout {
+                Rectangle {
+                    id: authCard
                     Layout.fillWidth: true
-                    columns: root.wideLayout ? 2 : 1
-                    columnSpacing: 18
-                    rowSpacing: 18
+                    radius: 26
+                    color: Qt.rgba(12/255, 12/255, 12/255, 0.98)
+                    border.width: 1
+                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    clip: true
+                    implicitHeight: authContent.implicitHeight + (root.wideLayout ? 68 : 44)
 
-                    PremiumPanel {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        accentVisible: true
-                        accentColor: "#00C8FF"
-                        visible: root.wideLayout
-
-                        Image {
-                            Layout.alignment: Qt.AlignLeft
-                            Layout.preferredWidth: 84
-                            Layout.preferredHeight: 84
-                            fillMode: Image.PreserveAspectFit
-                            source: "qrc:/images/fblink_logo.png"
-                        }
-
-                        PremiumBadge {
-                            text: qsTr("FBLink ID")
-                            tone: "accent"
-                            iconSource: "qrc:/images/controls/shield-tick.svg"
-                        }
+                    ColumnLayout {
+                        id: authContent
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: root.wideLayout ? 34 : 22
+                        spacing: 14
 
                         LabelTextType {
                             Layout.fillWidth: true
-                            text: qsTr("Быстрый вход без лишнего шума")
-                            font.pixelSize: 28
-                            font.weight: 700
-                            color: FBLinkStyle.color.paleGray
-                            wrapMode: Text.WordWrap
-                        }
-
-                        LabelTextType {
-                            Layout.fillWidth: true
-                            text: qsTr("Логин, подписка и обновление конфигов теперь собраны в одном чистом потоке: вход, проверка статуса, синхронизация.")
-                            wrapMode: Text.WordWrap
-                            font.pixelSize: 14
-                            color: FBLinkStyle.color.mutedGray
-                        }
-
-                        PremiumPanel {
-                            Layout.fillWidth: true
-                            fillColor: Qt.rgba(1, 1, 1, 0.03)
-                            outlineColor: Qt.rgba(1, 1, 1, 0.06)
-                            padding: 14
-
-                            PremiumBadge {
-                                text: qsTr("Что вы получите")
-                                tone: "success"
-                            }
-
-                            LabelTextType {
-                                Layout.fillWidth: true
-                                text: qsTr("Премиум-карточки, актуальные конфиги и синхронизированные VIP-профили сразу после авторизации.")
-                                wrapMode: Text.WordWrap
-                                color: FBLinkStyle.color.lightGray
-                                font.pixelSize: 13
-                            }
-                        }
-                    }
-
-                    PremiumPanel {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        accentVisible: true
-                        accentColor: "#10B981"
-
-                        Image {
-                            visible: !root.wideLayout
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: 88
-                            Layout.preferredHeight: 88
-                            fillMode: Image.PreserveAspectFit
-                            source: "qrc:/images/fblink_logo.png"
+                            text: qsTr("FBLink VPN")
+                            font.pixelSize: root.wideLayout ? 44 : 36
+                            font.weight: 700
+                            color: "#F5F5F5"
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
                         }
 
-                        LabelTextType {
+                        CaptionTextType {
                             Layout.fillWidth: true
-                            text: qsTr("Вход")
-                            font.pixelSize: 26
-                            font.weight: 700
-                            color: FBLinkStyle.color.paleGray
+                            text: qsTr("Войдите для доступа к вашим сетям.")
+                            color: FBLinkStyle.color.mutedGray
+                            font.pixelSize: 13
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
                         }
 
                         WarningType {
@@ -234,7 +184,6 @@ PageType {
 
                         RowLayout {
                             Layout.fillWidth: true
-
                             Item { Layout.fillWidth: true }
 
                             ButtonTextType {
@@ -253,11 +202,12 @@ PageType {
                         BasicButtonType {
                             id: loginButton
                             Layout.fillWidth: true
-                            defaultColor: "#00C8FF"
-                            hoveredColor: "#33D4FF"
-                            pressedColor: "#0099BB"
+                            implicitHeight: 56
+                            defaultColor: "#EAB308"
+                            hoveredColor: "#FACC15"
+                            pressedColor: "#CA8A04"
                             disabledColor: FBLinkStyle.color.mutedGray
-                            textColor: "#FFFFFF"
+                            textColor: "#111111"
                             enabled: !root.isLoading
                             text: root.isLoading ? qsTr("Вход...") : qsTr("Войти")
                             clickedFunc: function() {

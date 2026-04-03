@@ -44,8 +44,10 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
 
 WireguardProtocol::~WireguardProtocol()
 {
-    WireguardProtocol::stop();
-    QThread::msleep(200);
+    if (connectionState() != Vpn::ConnectionState::Disconnected) {
+        WireguardProtocol::stop();
+        QThread::msleep(200);
+    }
 }
 
 void WireguardProtocol::stop()

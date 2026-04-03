@@ -134,7 +134,7 @@ PageType {
                     Layout.fillWidth: true
                     padding: 12
                     accentVisible: true
-                    accentColor: "#00C8FF"
+                    accentColor: "#EAB308"
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -182,7 +182,7 @@ PageType {
                     Layout.fillWidth: true
                     padding: 12
                     accentVisible: true
-                    accentColor: "#00C8FF"
+                    accentColor: "#EAB308"
 
                     TextFieldWithHeaderType {
                         id: nameField
@@ -213,9 +213,9 @@ PageType {
                             implicitHeight: 48
                             enabled: root.canManageProfiles
                             text: qsTr("Через VPN")
-                            defaultColor: root.editingAction === "proxy" ? Qt.rgba(0, 200/255, 255/255, 0.16) : Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: root.editingAction === "proxy" ? Qt.rgba(0, 200/255, 255/255, 0.26) : Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: root.editingAction === "proxy" ? Qt.rgba(0, 200/255, 255/255, 0.32) : Qt.rgba(1, 1, 1, 0.18)
+                            defaultColor: root.editingAction === "proxy" ? Qt.rgba(234/255, 179/255, 8/255, 0.16) : Qt.rgba(1, 1, 1, 0.08)
+                            hoveredColor: root.editingAction === "proxy" ? Qt.rgba(234/255, 179/255, 8/255, 0.26) : Qt.rgba(1, 1, 1, 0.12)
+                            pressedColor: root.editingAction === "proxy" ? Qt.rgba(234/255, 179/255, 8/255, 0.32) : Qt.rgba(1, 1, 1, 0.18)
                             textColor: "#FFFFFF"
                             clickedFunc: function() { root.editingAction = "proxy" }
                         }
@@ -255,9 +255,9 @@ PageType {
                             implicitHeight: 44
                             enabled: root.canManageProfiles
                             text: root.isEditMode ? qsTr("Сохранить") : qsTr("Создать профиль")
-                            defaultColor: "#00C8FF"
-                            hoveredColor: "#33D4FF"
-                            pressedColor: "#0099BB"
+                            defaultColor: "#EAB308"
+                            hoveredColor: "#FACC15"
+                            pressedColor: "#CA8A04"
                             textColor: "#FFFFFF"
                             clickedFunc: root.submitProfile
                         }

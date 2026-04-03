@@ -2,12 +2,20 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "../Config"
 
 Item {
     id: root
 
     property StackView stackView: StackView.view
+
+    Rectangle {
+        anchors.fill: parent
+        z: -2
+        color: FBLinkStyle.color.midnightBlack
+    }
 
     onVisibleChanged: {
         if (visible) {

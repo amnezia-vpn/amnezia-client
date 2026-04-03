@@ -51,7 +51,7 @@ PageType {
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
                     GradientStop { position: 0.0; color: "#005A80" }
-                    GradientStop { position: 1.0; color: "#00C8FF" }
+                    GradientStop { position: 1.0; color: "#EAB308" }
                 }
 
                 RowLayout {

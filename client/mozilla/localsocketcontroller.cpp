@@ -23,6 +23,7 @@
 #include "leakdetector.h"
 #include "logger.h"
 #include "daemon/daemonerrors.h"
+#include "core/networkUtilities.h"
 
 #include "protocols/protocols_defs.h"
 
@@ -120,6 +121,14 @@ void LocalSocketController::daemonConnected() {
 
 void LocalSocketController::activate(const QJsonObject &rawConfig) {
   QString protocolName = rawConfig.value("protocol").toString();
+  bool ipv6Enabled = NetworkUtilities::checkIpv6Enabled();
+#ifdef Q_OS_WINDOWS
+  // Temporary stability workaround: keep WireGuard/AWG tunnel IPv4-only on
+  // Windows until the IPv6 adapter setup path is fully stabilized.
+  ipv6Enabled = false;
+#endif
+  qDebug() << "LocalSocketController::activate() protocol=" << protocolName
+           << "ipv6Enabled=" << ipv6Enabled;
 
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
   QJsonArray splitTunnelSites = rawConfig.value("splitTunnelSites").toArray();
@@ -144,7 +153,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   // https://man7.org/linux/man-pages/man5/gai.conf.5.html
 
   // simply "dead::1" is globally-routable, don't use it
-  json.insert("deviceIpv6Address", "fd58:baa6:dead::1");
+  if (ipv6Enabled) {
+    json.insert("deviceIpv6Address", "fd58:baa6:dead::1");
+  }
 
   json.insert("serverPublicKey", wgConfig.value(fblink::config_key::server_pub_key));
   json.insert("serverPskKey", wgConfig.value(fblink::config_key::psk_key));
@@ -154,6 +165,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   json.insert("serverPort", wgConfig.value(fblink::config_key::port).toInt());
   json.insert("serverIpv4Gateway", wgConfig.value(fblink::config_key::hostName));
+  qDebug() << "LocalSocketController::activate() endpoint="
+           << wgConfig.value(fblink::config_key::hostName).toString()
+           << "port=" << wgConfig.value(fblink::config_key::port).toInt();
   //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
 
   json.insert("primaryDnsServer", rawConfig.value(fblink::config_key::dns1));
@@ -172,17 +186,21 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
     // Use AllowedIP list from WG config because of higher priority
     for (auto v : plainAllowedIP) {
       QString ipRange = v.toString();
+      const bool isIpv6Range = ipRange.contains(':');
+      if (isIpv6Range && !ipv6Enabled) {
+          continue;
+      }
       if (ipRange.split('/').size() > 1){
           QJsonObject range;
           range.insert("address", ipRange.split('/')[0]);
           range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-          range.insert("isIpv6", false);
+          range.insert("isIpv6", isIpv6Range);
           jsAllowedIPAddesses.append(range);
       } else {
           QJsonObject range;
           range.insert("address",ipRange);
-          range.insert("range", 32);
-          range.insert("isIpv6", false);
+          range.insert("range", isIpv6Range ? 128 : 32);
+          range.insert("isIpv6", isIpv6Range);
           jsAllowedIPAddesses.append(range);
       }
     }
@@ -196,27 +214,37 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
           range_ipv4.insert("isIpv6", false);
           jsAllowedIPAddesses.append(range_ipv4);
 
-          QJsonObject range_ipv6;
-          range_ipv6.insert("address", "::");
-          range_ipv6.insert("range", 0);
-          range_ipv6.insert("isIpv6", true);
-          jsAllowedIPAddesses.append(range_ipv6);
+          if (ipv6Enabled) {
+              QJsonObject range_ipv6;
+              range_ipv6.insert("address", "::");
+              range_ipv6.insert("range", 0);
+              range_ipv6.insert("isIpv6", true);
+              jsAllowedIPAddesses.append(range_ipv6);
+          }
       }
 
       if (splitTunnelType == 1) {
           for (auto v : splitTunnelSites) {
               QString ipRange = v.toString();
               if (ipRange.split('/').size() > 1){
+                  const bool isIpv6Range = ipRange.contains(':');
+                  if (isIpv6Range && !ipv6Enabled) {
+                      continue;
+                  }
                   QJsonObject range;
                   range.insert("address", ipRange.split('/')[0]);
                   range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-                  range.insert("isIpv6", false);
+                  range.insert("isIpv6", isIpv6Range);
                   jsAllowedIPAddesses.append(range);
               } else {
+                  const bool isIpv6Range = ipRange.contains(':');
+                  if (isIpv6Range && !ipv6Enabled) {
+                      continue;
+                  }
                   QJsonObject range;
                   range.insert("address",ipRange);
-                  range.insert("range", 32);
-                  range.insert("isIpv6", false);
+                  range.insert("range", isIpv6Range ? 128 : 32);
+                  range.insert("isIpv6", isIpv6Range);
                   jsAllowedIPAddesses.append(range);
               }
           }
@@ -288,11 +316,24 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
     json.insert(fblink::config_key::specialJunk5, wgConfig.value(fblink::config_key::specialJunk5));
   }
 
-  write(json);
+  if (m_daemonState != eReady ||
+      !m_socket ||
+      m_socket->state() != QLocalSocket::ConnectedState) {
+    m_pendingActivation = json;
+    m_hasPendingActivation = true;
+    logger.debug() << "Deferring activate command until daemon is ready";
+    return;
+  }
+
+  sendActivationPayload(json);
 }
 
 void LocalSocketController::deactivate() {
   logger.debug() << "Deactivating";
+  m_pendingActivation = QJsonObject();
+  m_hasPendingActivation = false;
+  m_activationInFlight = false;
+  m_ignoredEarlyDisconnect = false;
 
   if (m_daemonState != eReady) {
     logger.debug() << "No disconnect, controller is not ready";
@@ -427,6 +468,7 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
     }
 
     emit initialized(true, connected.toBool(), datetime);
+    trySendPendingActivation();
     return;
   }
 
@@ -468,11 +510,28 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
   }
 
   if (type == "disconnected") {
+    if (m_activationInFlight &&
+        !m_ignoredEarlyDisconnect &&
+        m_lastActivateSentAt.isValid() &&
+        m_lastActivateSentAt.elapsed() < 1500) {
+      m_ignoredEarlyDisconnect = true;
+      logger.warning() << "Ignoring early disconnected while activation is in flight";
+      QTimer::singleShot(120, this, [this]() {
+        if (m_daemonState == eReady) {
+          checkStatus();
+        }
+      });
+      return;
+    }
+
+    m_activationInFlight = false;
     disconnectInternal();
     return;
   }
 
   if (type == "connected") {
+    m_activationInFlight = false;
+    m_ignoredEarlyDisconnect = false;
     QJsonValue pubkey = obj.value("pubkey");
     if (!pubkey.isString()) {
       logger.error() << "Unexpected pubkey value";
@@ -491,6 +550,11 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
   }
 
   if (type == "backendFailure") {
+    m_activationInFlight = false;
+    const QString failureReason = obj.value("reason").toString();
+    if (!failureReason.isEmpty()) {
+      logger.error() << "backendFailure reason:" << failureReason;
+    }
     if (!obj.contains("errorCode")) {
       // report a generic error if we dont know what it is.
       logger.error() << "generic backend failure error";
@@ -524,6 +588,7 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
         Q_ASSERT(false);
         break;
     }
+    return;
   }
 
   if (type == "logs") {
@@ -542,9 +607,31 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
   logger.warning() << "Invalid command received:" << command;
 }
 
+void LocalSocketController::sendActivationPayload(const QJsonObject& json) {
+  write(json);
+  m_activationInFlight = true;
+  m_ignoredEarlyDisconnect = false;
+  m_lastActivateSentAt.start();
+}
+
 void LocalSocketController::write(const QJsonObject& json) {
   Q_ASSERT(m_socket);
   m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact));
   m_socket->write("\n");
   m_socket->flush();
+}
+
+void LocalSocketController::trySendPendingActivation() {
+  if (!m_hasPendingActivation) {
+    return;
+  }
+  if (m_daemonState != eReady || !m_socket ||
+      m_socket->state() != QLocalSocket::ConnectedState) {
+    return;
+  }
+
+  logger.debug() << "Sending deferred activate command";
+  sendActivationPayload(m_pendingActivation);
+  m_pendingActivation = QJsonObject();
+  m_hasPendingActivation = false;
 }

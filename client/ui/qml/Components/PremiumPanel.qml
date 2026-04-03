@@ -7,14 +7,14 @@ Rectangle {
     id: root
 
     property color fillColor: FBLinkStyle.color.onyxBlack
-    property color outlineColor: Qt.rgba(1, 1, 1, 0.08)
-    property color accentColor: "#00C8FF"
+    property color outlineColor: Qt.rgba(39/255, 39/255, 42/255, 1.0)
+    property color accentColor: "#EAB308"
     property bool accentVisible: false
     property int padding: 18
 
     default property alias contentData: contentLayout.data
 
-    radius: 22
+    radius: 20
     color: fillColor
     border.color: outlineColor
     border.width: 1

@@ -99,6 +99,44 @@ namespace
 
         return {};
     }
+
+    QString pingTargetFromPortInProtocolConfig(const QJsonObject &protocolConfig, const QString &fallbackHost)
+    {
+        const QString host = protocolConfig.value(config_key::hostName).toString().trimmed().isEmpty()
+                ? fallbackHost
+                : protocolConfig.value(config_key::hostName).toString().trimmed();
+
+        bool ok = false;
+        int port = protocolConfig.value(config_key::port).toVariant().toInt(&ok);
+        if (!ok || port <= 0 || port > 65535) {
+            return {};
+        }
+
+        return formatPingTarget(host, static_cast<quint16>(port));
+    }
+
+    QString endpointHostFromPingTarget(const QString &pingTarget)
+    {
+        const QString target = pingTarget.trimmed();
+        if (target.isEmpty()) {
+            return {};
+        }
+
+        if (target.startsWith('[')) {
+            const int bracketEnd = target.indexOf(']');
+            if (bracketEnd > 1) {
+                return target.mid(1, bracketEnd - 1);
+            }
+        }
+
+        const int firstColon = target.indexOf(':');
+        const int lastColon = target.lastIndexOf(':');
+        if (firstColon > 0 && firstColon == lastColon) {
+            return target.left(firstColon);
+        }
+
+        return target;
+    }
 }
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
@@ -106,6 +144,10 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
     m_isFBLinkDnsEnabled = m_settings->useFBLinkDns();
 
     connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerNameChanged);
+    connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerEndpointHostChanged);
+    connect(this, &ServersModel::defaultServerDefaultContainerChanged, this, [this](int) {
+        emit defaultServerEndpointHostChanged();
+    });
 
     connect(this, &ServersModel::defaultServerIndexChanged, this, [this](const int serverIndex) {
         auto defaultContainer =
@@ -855,7 +897,21 @@ QString ServersModel::getDefaultServerPingTarget()
         }
     }
 
+    if (defaultContainer == DockerContainer::WireGuard || ContainerProps::isAwgContainer(defaultContainer)) {
+        const Proto proto = ContainerProps::defaultProtocol(defaultContainer);
+        const QJsonObject protocolConfig = m_settings->protocolConfig(m_defaultServerIndex, defaultContainer, proto);
+        const QString target = pingTargetFromPortInProtocolConfig(protocolConfig, defaultHost);
+        if (!target.isEmpty()) {
+            return target;
+        }
+    }
+
     return defaultHost;
+}
+
+const QString ServersModel::getDefaultServerEndpointHost()
+{
+    return endpointHostFromPingTarget(getDefaultServerPingTarget());
 }
 
 QVariant ServersModel::getProcessedServerData(const QString roleString)

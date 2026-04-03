@@ -137,12 +137,12 @@ PageType {
                     anchors.centerIn: heroColumn
                     width: 120; height: 120
                     radius: 60
-                    color: "#00C8FF"
+                    color: "#EAB308"
                     opacity: 0.18
 
                     layer.enabled: true
                     layer.effect: DropShadow {
-                        color: "#00C8FF"
+                        color: "#EAB308"
                         radius: 40; samples: 81; spread: 0.05
                         transparentBorder: true
                     }
@@ -160,7 +160,7 @@ PageType {
                         sourceSize: Qt.size(64, 64)
 
                         layer.enabled: true
-                        layer.effect: ColorOverlay { color: "#00C8FF" }
+                        layer.effect: ColorOverlay { color: "#EAB308" }
 
                         SequentialAnimation on scale {
                             loops: Animation.Infinite
@@ -343,7 +343,7 @@ PageType {
                                 color: planCard.isCurrentPlan
                                     ? Qt.rgba(16/255, 185/255, 129/255, 0.18)
                                     : (planCard.isSelected
-                                        ? Qt.rgba(0, 200/255, 255/255, 0.22)
+                                        ? Qt.rgba(234/255, 179/255, 8/255, 0.22)
                                         : Qt.rgba(36/255, 36/255, 42/255, 1.0))
                             }
                             GradientStop {
@@ -353,7 +353,7 @@ PageType {
                         }
 
                         border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 2 : 1
-                        border.color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#00C8FF" : FBLinkStyle.color.slateGray)
+                        border.color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#EAB308" : FBLinkStyle.color.slateGray)
 
                         opacity: (planCard.isBlocked && !planCard.isCurrentPlan) ? 0.52 : 1.0
 
@@ -385,7 +385,7 @@ PageType {
                                     anchors.verticalCenter: parent.verticalCenter
                                     border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 0 : 2
                                     border.color: FBLinkStyle.color.slateGray
-                                    color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#00C8FF" : "transparent")
+                                    color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#EAB308" : "transparent")
 
                                     Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -424,7 +424,7 @@ PageType {
                                         height: 20
                                         width: activeBadgeText.implicitWidth + 12
                                         radius: 10
-                                        color: planCard.isCurrentPlan ? "#10B981" : "#00C8FF"
+                                        color: planCard.isCurrentPlan ? "#10B981" : "#EAB308"
 
                                         Text {
                                             id: activeBadgeText
@@ -450,7 +450,7 @@ PageType {
                                     text: modelData.price
                                     font.pixelSize: 26
                                     font.weight: 700
-                                    color: planCard.isSelected ? "#00C8FF" : FBLinkStyle.color.mutedGray
+                                    color: planCard.isSelected ? "#EAB308" : FBLinkStyle.color.mutedGray
                                 }
 
                                 LabelTextType {
@@ -560,8 +560,8 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 visible: root.isWaitingForPayment
-                color: Qt.rgba(0, 200/255, 255/255, 0.1)
-                border.color: Qt.rgba(0, 200/255, 255/255, 0.35)
+                color: Qt.rgba(234/255, 179/255, 8/255, 0.1)
+                border.color: Qt.rgba(234/255, 179/255, 8/255, 0.35)
                 border.width: 1
                 radius: 12
                 implicitHeight: waitingCol.implicitHeight + 24
@@ -578,7 +578,7 @@ PageType {
                         // Spinner dot animation
                         Rectangle {
                             width: 8; height: 8; radius: 4
-                            color: "#00C8FF"
+                            color: "#EAB308"
                             SequentialAnimation on opacity {
                                 loops: Animation.Infinite
                                 PropertyAnimation { to: 0.2; duration: 600 }
@@ -590,7 +590,7 @@ PageType {
                             text: qsTr("Ожидаем подтверждение оплаты...")
                             font.pixelSize: 13
                             font.weight: 600
-                            color: "#80D8FF"
+                            color: "#FDE68A"
                         }
                     }
 
@@ -612,10 +612,10 @@ PageType {
                 visible: root.isWaitingForPayment || root.errorMessage !== ""
 
                 defaultColor: "transparent"
-                hoveredColor: Qt.rgba(0, 200/255, 255/255, 0.12)
-                pressedColor: Qt.rgba(0, 200/255, 255/255, 0.2)
-                textColor: "#80D8FF"
-                borderColor: Qt.rgba(0, 200/255, 255/255, 0.5)
+                hoveredColor: Qt.rgba(234/255, 179/255, 8/255, 0.12)
+                pressedColor: Qt.rgba(234/255, 179/255, 8/255, 0.2)
+                textColor: FBLinkStyle.color.paleGray
+                borderColor: Qt.rgba(234/255, 179/255, 8/255, 0.5)
                 borderWidth: 1
 
                 text: qsTr("Проверить вручную")
@@ -638,9 +638,9 @@ PageType {
                 visible: !root.isWaitingForPayment
                 enabled: !root.isLoading && root.selectedPlan > root.currentPlanLevel
 
-                defaultColor: root.selectedPlan > root.currentPlanLevel ? "#00C8FF" : FBLinkStyle.color.charcoalGray
-                hoveredColor: "#33D4FF"
-                pressedColor: "#0099BB"
+                defaultColor: root.selectedPlan > root.currentPlanLevel ? "#EAB308" : FBLinkStyle.color.charcoalGray
+                hoveredColor: "#FACC15"
+                pressedColor: "#CA8A04"
                 disabledColor: FBLinkStyle.color.charcoalGray
                 textColor: "#FFFFFF"
 

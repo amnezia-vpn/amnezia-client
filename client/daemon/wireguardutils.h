@@ -50,6 +50,9 @@ class WireguardUtils : public QObject {
   virtual bool deleteExclusionRoute(const IPAddress& prefix) = 0;
 
   virtual bool excludeLocalNetworks(const QList<IPAddress>& addresses) = 0;
+
+  // Returns a short diagnostic marker for the most recent backend failure.
+  virtual QString diagnosticError() const { return QString(); }
 };
 
 #endif  // WIREGUARDUTILS_H

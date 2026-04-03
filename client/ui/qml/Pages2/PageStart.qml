@@ -317,8 +317,8 @@ PageType {
 
         topPadding: 8
         bottomPadding: 8 + SettingsController.safeAreaBottomMargin
-        leftPadding: 96
-        rightPadding: 96
+        leftPadding: 72
+        rightPadding: 72
 
         height: visible ? homeTabButton.implicitHeight + tabBar.topPadding + tabBar.bottomPadding : 0
 
@@ -358,7 +358,17 @@ PageType {
             }
         }
 
+        TabImageButtonType {
+            id: locationsTabButton
+            objectName: "locationsTabButton"
 
+            isSelected: tabBar.currentIndex === 1
+            image: "qrc:/images/controls/map-pin.svg"
+            clickedFunc: function () {
+                tabBarStackView.goToTabBarPage(PageEnum.PageSettingsServersList)
+                tabBar.currentIndex = 1
+            }
+        }
 
         TabImageButtonType {
             id: settingsTabButton

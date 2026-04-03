@@ -9,6 +9,8 @@ import "TextTypes"
 Switch {
     id: root
 
+    text: ""
+
     property alias descriptionText: description.text
     property string descriptionTextColor: FBLinkStyle.color.mutedGray
     property string descriptionTextDisabledColor: FBLinkStyle.color.charcoalGray

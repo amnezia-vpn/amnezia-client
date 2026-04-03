@@ -68,6 +68,7 @@ private:
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;
     QString m_connectionStateText = tr("Подключиться");
+    qint64 m_lastConnectAttemptMsec = 0;
 
     Vpn::ConnectionState m_state;
 };

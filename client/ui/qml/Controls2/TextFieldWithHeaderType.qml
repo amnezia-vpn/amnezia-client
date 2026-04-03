@@ -20,6 +20,8 @@ Item {
     property string buttonText
     property string buttonImageSource
     property var clickedFunc
+    readonly property bool iconOnlyPasswordToggle: buttonText === ""
+        && (buttonImageSource.indexOf("eye.svg") !== -1 || buttonImageSource.indexOf("eye-off.svg") !== -1)
 
     property alias textField: textField
     property string textFieldTextColor: FBLinkStyle.color.paleGray
@@ -147,6 +149,36 @@ Item {
                         }
                     }
                 }
+
+                BasicButtonType {
+                    id: rightButton
+                    visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
+
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.rightMargin: 10
+                    Layout.preferredWidth: root.iconOnlyPasswordToggle ? 52 : 40
+                    Layout.preferredHeight: root.iconOnlyPasswordToggle ? 24 : 40
+
+                    focusPolicy: Qt.NoFocus
+                    text: root.buttonText
+                    leftImageSource: root.buttonImageSource
+                    leftImageColor: root.iconOnlyPasswordToggle ? FBLinkStyle.color.charcoalGray : FBLinkStyle.color.mutedGray
+                    changeLeftImageSize: true
+
+                    defaultColor: root.iconOnlyPasswordToggle ? "transparent" : Qt.rgba(1, 1, 1, 0.02)
+                    hoveredColor: root.iconOnlyPasswordToggle ? "transparent" : Qt.rgba(1, 1, 1, 0.08)
+                    pressedColor: root.iconOnlyPasswordToggle ? "transparent" : Qt.rgba(1, 1, 1, 0.14)
+                    borderColor: root.iconOnlyPasswordToggle ? "transparent" : Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    borderWidth: root.iconOnlyPasswordToggle ? 0 : 1
+                    textColor: FBLinkStyle.color.mutedGray
+                    squareLeftSide: false
+
+                    clickedFunc: function() {
+                        if (root.clickedFunc && typeof root.clickedFunc === "function") {
+                            root.clickedFunc()
+                        }
+                    }
+                }
             }
         }
 
@@ -181,28 +213,6 @@ Item {
 
         onExited: {
             backgroud.border.color = getBackgroundBorderColor(root.borderColor)
-        }
-    }
-
-    BasicButtonType {
-        visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
-
-        focusPolicy: Qt.NoFocus
-        text: root.buttonText
-        leftImageSource: root.buttonImageSource
-
-        anchors.top: content.top
-        anchors.bottom: content.bottom
-        anchors.right: content.right
-
-        height: content.implicitHeight
-        width: content.implicitHeight
-        squareLeftSide: true
-
-        clickedFunc: function() {
-            if (root.clickedFunc && typeof root.clickedFunc === "function") {
-                root.clickedFunc()
-            }
         }
     }
 

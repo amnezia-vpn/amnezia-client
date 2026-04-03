@@ -20,6 +20,7 @@ class FBLinkController : public QObject
     Q_OBJECT
 
     Q_PROPERTY(bool isLoggedIn READ isLoggedIn NOTIFY loginStateChanged)
+    Q_PROPERTY(QString userEmail READ userEmail NOTIFY userEmailChanged)
     Q_PROPERTY(bool isSubscribed READ isSubscribed NOTIFY subscriptionChanged)
     Q_PROPERTY(QString subscriptionPlan READ subscriptionPlan NOTIFY subscriptionChanged)
     Q_PROPERTY(QStringList allowedProtocols READ allowedProtocols NOTIFY subscriptionChanged)
@@ -68,6 +69,7 @@ public:
     Q_INVOKABLE void logout();
 
     bool isLoggedIn() const;
+    QString userEmail() const;
     bool isSubscribed() const;
     QString subscriptionPlan() const;
     QStringList allowedProtocols() const;
@@ -119,6 +121,7 @@ signals:
     void newFeaturesGuideChanged();
     void requestError(const QString &errorMessage);
     void loadingChanged();
+    void userEmailChanged();
 
 private:
     QNetworkAccessManager *m_nam;
@@ -149,6 +152,7 @@ private:
     QString getJwtToken() const;
     void saveRefreshToken(const QString &token);
     QString getRefreshToken() const;
+    void setUserEmail(const QString &email);
     void refreshAccessToken(std::function<void()> onSuccess = nullptr);
     void beginSessionSync();
     void saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,

@@ -11,6 +11,8 @@
 #include <ws2ipdef.h>
 
 #include <QFileInfo>
+#include <QScopeGuard>
+#include <QThread>
 
 #include "leakdetector.h"
 #include "logger.h"
@@ -33,6 +35,21 @@ int uapiErrno(const QString& reply) {
   }
 
   return -1;
+}
+
+bool waitForInterfaceLuid(const QString& ifAlias, NET_LUID* luid) {
+  constexpr int kMaxAttempts = 100;
+  constexpr unsigned long kDelayMs = 100;
+
+  for (int attempt = 0; attempt < kMaxAttempts; ++attempt) {
+    const DWORD result = ConvertInterfaceAliasToLuid((wchar_t*)ifAlias.utf16(), luid);
+    if (result == NO_ERROR) {
+      return true;
+    }
+    QThread::msleep(kDelayMs);
+  }
+
+  return false;
 }
 };  // namespace
 
@@ -103,6 +120,7 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsWindows::getPeerStatus() {
 }
 
 bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
+  m_lastErrorReason.clear();
   QStringList addresses;
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
     addresses.append(ip.toString());
@@ -113,6 +131,7 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
   QString configString = config.toWgConf(extraConfig);
   if (configString.isEmpty()) {
     logger.error() << "Failed to create a config file";
+    m_lastErrorReason = "wgconf_empty";
     return false;
   }
 
@@ -124,20 +143,47 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     configString.truncate(peerStart);
   }
 
+  bool tunnelStarted = false;
+  bool initialized = false;
+  auto rollback = qScopeGuard([&]() {
+    if (initialized) {
+      return;
+    }
+
+    if (m_routeMonitor) {
+      m_routeMonitor->deleteLater();
+      m_routeMonitor = nullptr;
+    }
+    m_luid = 0;
+    if (tunnelStarted) {
+      m_tunnel.stop();
+    }
+    if (m_firewall) {
+      m_firewall->disableKillSwitch();
+    }
+  });
+
   if (!m_tunnel.start(configString)) {
     logger.error() << "Failed to activate the tunnel service";
+    m_lastErrorReason =
+        QString("tunnel_start_failed:%1").arg(m_tunnel.lastFailureReason());
     return false;
   }
+  tunnelStarted = true;
 
   // Determine the interface LUID
   NET_LUID luid;
   QString ifAlias = interfaceName();
-  DWORD result = ConvertInterfaceAliasToLuid((wchar_t*)ifAlias.utf16(), &luid);
-  if (result != 0) {
-    logger.error() << "Failed to lookup LUID:" << result;
+  if (!waitForInterfaceLuid(ifAlias, &luid)) {
+    logger.error() << "Failed to lookup interface LUID for alias:" << ifAlias;
+    m_lastErrorReason = "luid_lookup_failed";
     return false;
   }
   m_luid = luid.Value;
+  if (m_routeMonitor) {
+    m_routeMonitor->deleteLater();
+    m_routeMonitor = nullptr;
+  }
   m_routeMonitor = new WindowsRouteMonitor(luid.Value, this);
 
   if (config.m_killSwitchEnabled) {
@@ -146,20 +192,26 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     DWORD indexResult = ConvertInterfaceLuidToIndex(&luid, &ifindex);
     if (indexResult != NO_ERROR || ifindex == 0) {
       logger.error() << "Failed to map interface LUID to index:" << indexResult;
+      m_lastErrorReason = QString("luid_to_index_failed:%1").arg(indexResult);
       return false;
     }
     if (!m_firewall->allowAllTraffic()) {
-      logger.error() << "Failed to reset existing firewall rules";
-      return false;
-    }
-
-    if (!m_firewall->enableInterface(ifindex)) {
-      logger.error() << "Failed to enable kill switch for VPN interface";
-      return false;
+      logger.warning() << "Failed to reset existing firewall rules. Continuing without kill switch.";
+      m_lastErrorReason = "firewall_allow_all_failed";
+      m_firewall->disableKillSwitch();
+    } else if (!m_firewall->enableInterface(ifindex)) {
+      logger.warning() << "Failed to enable kill switch for VPN interface. Continuing without kill switch.";
+      m_lastErrorReason = "firewall_enable_interface_failed";
+      m_firewall->disableKillSwitch();
+    } else {
+      m_lastErrorReason.clear();
     }
   }
 
   logger.debug() << "Registration completed";
+  m_lastErrorReason.clear();
+  initialized = true;
+  rollback.dismiss();
   return true;
 }
 
@@ -174,16 +226,21 @@ bool WireguardUtilsWindows::deleteInterface() {
 }
 
 bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
+  m_lastErrorReason.clear();
   QByteArray publicKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
-  QByteArray pskKey =
-      QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
+  if (publicKey.size() != 32) {
+    logger.error() << "Peer configuration failed: invalid server public key length";
+    m_lastErrorReason = "invalid_server_public_key";
+    return false;
+  }
 
   if (config.m_killSwitchEnabled) {
     // Enable the windows firewall for this peer.
     if (!m_firewall->enablePeerTraffic(config)) {
-      logger.error() << "Failed to enable firewall rules for peer";
-      return false;
+      logger.warning() << "Failed to enable firewall rules for peer. Continuing without kill switch.";
+      m_lastErrorReason = "firewall_enable_peer_failed";
+      m_firewall->disableKillSwitch();
     }
   }
   logger.debug() << "Configuring peer" << publicKey.toHex()
@@ -194,7 +251,14 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
   QTextStream out(&message);
   out << "set=1\n";
   out << "public_key=" << QString(publicKey.toHex()) << "\n";
-  if (!config.m_serverPskKey.isNull()) {
+  if (!config.m_serverPskKey.isEmpty()) {
+    const QByteArray pskKey =
+        QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
+    if (pskKey.size() != 32) {
+      logger.error() << "Peer configuration failed: invalid PSK length";
+      m_lastErrorReason = "invalid_psk";
+      return false;
+    }
     out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
   }
   if (!config.m_serverIpv4AddrIn.isNull()) {
@@ -203,6 +267,7 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
     out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
   } else {
     logger.warning() << "Failed to create peer with no endpoints";
+    m_lastErrorReason = "missing_peer_endpoint";
     return false;
   }
   out << config.m_serverPort << "\n";
@@ -224,9 +289,11 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
   int err = uapiErrno(reply);
   if (err != 0) {
     logger.error() << "Peer configuration failed with errno:" << err;
+    m_lastErrorReason = QString("uapi_errno:%1").arg(err);
     return false;
   }
 
+  m_lastErrorReason.clear();
   return true;
 }
 

@@ -23,8 +23,13 @@ PageType {
     readonly property bool compactHeaderBadges: width < 420
     readonly property real contentWidth: Math.min(width - 32, GC.pageMaxWidth(width))
     readonly property real contentSideMargin: Math.max(16, (width - contentWidth) / 2)
+    property bool connectionCardsVisibleState: false
+    property bool connectionCardsRender: false
     property int homePingMs: -1
     readonly property string homePingDisplay: homePingMs >= 0 ? (homePingMs + " ms") : "—"
+    readonly property string homeEndpointDisplay: ServersModel.defaultServerEndpointHost !== ""
+        ? ServersModel.defaultServerEndpointHost
+        : "—"
     readonly property string homeStateTitle: ConnectionController.isConnected
         ? qsTr("VPN активен")
         : (ConnectionController.isConnectionInProgress ? qsTr("Подготавливаем подключение") : qsTr("Готово к подключению"))
@@ -46,7 +51,8 @@ PageType {
         if (!FBLinkController.vipAdBlockEnabled) {
             return "neutral"
         }
-        return FBLinkController.vipAdBlockStatus === "applied" ? "success" : "warning"
+        return (FBLinkController.vipAdBlockStatus === "degraded"
+            || FBLinkController.vipAdBlockStatus === "unavailable") ? "warning" : "success"
     }
 
     function openSubscriptionPage() {
@@ -74,6 +80,28 @@ PageType {
         }
     }
 
+    function refreshPing() {
+        const pingTarget = ServersModel.getDefaultServerPingTarget() || ""
+        if (pingTarget === "") {
+            root.homePingMs = -1
+            return
+        }
+        SystemController.measurePing(pingTarget)
+    }
+
+    function updateConnectionCards(connected) {
+        if (connected) {
+            connectionCardsHideTimer.stop()
+            connectionCardsRender = true
+            connectionCardsVisibleState = true
+        } else {
+            connectionCardsVisibleState = false
+            if (connectionCardsRender) {
+                connectionCardsHideTimer.restart()
+            }
+        }
+    }
+
     Connections {
         target: Qt.application
 
@@ -92,10 +120,42 @@ PageType {
         target: PageController
 
         function onRestorePageHomeState(isContainerInstalled) {
-            drawer.openTriggered()
-            if (isContainerInstalled) {
-                containersDropDown.rootButtonClickedFunction()
+            // Server list is now opened from the dedicated middle tab button.
+        }
+    }
+
+    Connections {
+        target: SystemController
+        function onPingMeasured(ms) {
+            root.homePingMs = ms
+        }
+    }
+
+    Connections {
+        target: ServersModel
+        function onDefaultServerIndexChanged(index) {
+            root.homePingMs = -1
+            if (ConnectionController.isConnected) {
+                root.refreshPing()
             }
+        }
+        function onDefaultServerDefaultContainerChanged(containerIndex) {
+            root.homePingMs = -1
+            if (ConnectionController.isConnected) {
+                root.refreshPing()
+            }
+        }
+    }
+
+    Connections {
+        target: ConnectionController
+        function onConnectionStateChanged() {
+            if (ConnectionController.isConnected) {
+                root.refreshPing()
+            } else {
+                root.homePingMs = -1
+            }
+            root.updateConnectionCards(ConnectionController.isConnected)
         }
     }
 
@@ -105,11 +165,30 @@ PageType {
         function onSubscriptionChanged() { root.refreshNewFeaturesGuide() }
     }
 
-    Component.onCompleted: root.refreshNewFeaturesGuide()
+    Component.onCompleted: {
+        root.refreshNewFeaturesGuide()
+        root.updateConnectionCards(ConnectionController.isConnected)
+    }
     onVisibleChanged: {
         if (visible) {
             root.refreshNewFeaturesGuide()
         }
+    }
+
+    Timer {
+        id: homePingTimer
+        interval: 5000
+        running: ConnectionController.isConnected
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: root.refreshPing()
+    }
+
+    Timer {
+        id: connectionCardsHideTimer
+        interval: 260
+        repeat: false
+        onTriggered: root.connectionCardsRender = false
     }
 
 
@@ -162,156 +241,75 @@ PageType {
             }
         }
 
-        // ── Top bar: Premium button ──────────────────────────────
-        RowLayout {
-            id: topBar
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.topMargin: 14 + SettingsController.safeAreaTopMargin
-            anchors.leftMargin: root.contentSideMargin
-            anchors.rightMargin: root.contentSideMargin
-
-            Item { Layout.fillWidth: true }
-
-            // Premium badge button
-            Rectangle {
-                id: premiumBtn
-                width: premiumBtnRow.implicitWidth + 20
-                height: 34
-                radius: 17
-
-                visible: false
-
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: "#33D4FF" }
-                    GradientStop { position: 1.0; color: "#00C8FF" }
-                }
-
-                border.color: Qt.rgba(1, 1, 1, 0.15)
-                border.width: 1
-
-                scale: premiumBtnMouse.pressed ? 0.93 : (premiumBtnMouse.containsMouse ? 1.04 : 1.0)
-                Behavior on scale { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
-
-                RowLayout {
-                    id: premiumBtnRow
-                    anchors.centerIn: parent
-                    spacing: 5
-
-                    Image {
-                        source: "qrc:/images/controls/shield-tick.svg"
-                        sourceSize: Qt.size(14, 14)
-                        layer.enabled: true
-                        layer.effect: ColorOverlay { color: "#FFFFFF" }
-                    }
-
-                    LabelTextType {
-                        text: FBLinkController.isLoggedIn
-                            ? qsTr("Получить Премиум")
-                            : qsTr("Войти")
-                        font.pixelSize: 13
-                        font.weight: 700
-                        color: "#FFFFFF"
-                    }
-                }
-
-                MouseArea {
-                    id: premiumBtnMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        if (FBLinkController.isLoggedIn) {
-                            PageController.goToPage(PageEnum.PageFBLinkSubscription)
-                        } else {
-                            PageController.goToPage(PageEnum.PageFBLinkLogin)
-                        }
-                    }
-                }
-            }
-
-            // Active subscription badge
-            Rectangle {
-                width: activeBadgeRow.implicitWidth + 20
-                height: 34
-                radius: 17
-
-                visible: false
-
-                color: Qt.rgba(16/255, 185/255, 129/255, 0.18)
-                border.color: Qt.rgba(16/255, 185/255, 129/255, 0.4)
-                border.width: 1
-
-                RowLayout {
-                    id: activeBadgeRow
-                    anchors.centerIn: parent
-                    spacing: 5
-
-                    Image {
-                        source: "qrc:/images/controls/shield-tick.svg"
-                        sourceSize: Qt.size(14, 14)
-                        layer.enabled: true
-                        layer.effect: ColorOverlay { color: "#10B981" }
-                    }
-
-                    LabelTextType {
-                        text: FBLinkController.subscriptionPlan === "vip"
-                            ? qsTr("VIP")
-                            : qsTr("Премиум")
-                        font.pixelSize: 13
-                        font.weight: 700
-                        color: "#10B981"
-                    }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: PageController.goToPage(PageEnum.PageFBLinkSubscription)
-                }
-            }
-        }
-
         PremiumPanel {
             id: safeModeBanner
             visible: FBLinkController.safeModeActive
             width: root.contentWidth
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: topBar.bottom
-            anchors.topMargin: 12
-            padding: 12
+            anchors.top: parent.top
+            anchors.topMargin: 14 + SettingsController.safeAreaTopMargin
+            padding: 14
+            fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+            outlineColor: Qt.rgba(245/255, 158/255, 11/255, 0.38)
             accentVisible: true
             accentColor: "#F59E0B"
+            opacity: visible ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 170; easing.type: Easing.OutCubic } }
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 8
-                PremiumBadge {
-                    text: qsTr("Безопасный режим")
-                    tone: "warning"
-                    iconSource: "qrc:/images/controls/alert-circle.svg"
-                }
-                PremiumBadge {
-                    text: qsTr("Автоподключение выключено")
-                    tone: "neutral"
-                }
-            }
+                spacing: 10
 
-            LabelTextType {
-                Layout.fillWidth: true
-                text: FBLinkController.safeModeUntilText !== ""
-                    ? qsTr("Приложение временно запущено в безопасном режиме до %1.").arg(FBLinkController.safeModeUntilText)
-                    : qsTr("Приложение временно запущено в безопасном режиме.")
-                font.pixelSize: 13
-                color: FBLinkStyle.color.mutedGray
-                wrapMode: Text.WordWrap
+                Rectangle {
+                    Layout.preferredWidth: 38
+                    Layout.preferredHeight: 38
+                    radius: 11
+                    color: Qt.rgba(245/255, 158/255, 11/255, 0.14)
+                    border.width: 1
+                    border.color: Qt.rgba(245/255, 158/255, 11/255, 0.45)
+
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/images/controls/alert-circle.svg"
+                        sourceSize: Qt.size(18, 18)
+                        layer.enabled: true
+                        layer.effect: ColorOverlay { color: "#F59E0B" }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+
+                    LabelTextType {
+                        Layout.fillWidth: true
+                        text: qsTr("Безопасный запуск")
+                        font.pixelSize: 15
+                        font.weight: 700
+                        color: FBLinkStyle.color.paleGray
+                        elide: Text.ElideRight
+                    }
+
+                    CaptionTextType {
+                        Layout.fillWidth: true
+                        text: FBLinkController.safeModeUntilText !== ""
+                            ? qsTr("Автоподключение временно выключено до %1").arg(FBLinkController.safeModeUntilText)
+                            : qsTr("Автоподключение временно выключено")
+                        color: FBLinkStyle.color.mutedGray
+                        elide: Text.ElideRight
+                    }
+                }
+
+                PremiumBadge {
+                    text: qsTr("SAFE")
+                    tone: "warning"
+                    compact: true
+                }
             }
 
             BasicButtonType {
                 Layout.fillWidth: true
-                implicitHeight: 40
+                implicitHeight: 42
                 text: qsTr("Вернуться в обычный режим")
                 defaultColor: Qt.rgba(245/255, 158/255, 11/255, 0.18)
                 hoveredColor: Qt.rgba(245/255, 158/255, 11/255, 0.28)
@@ -321,151 +319,254 @@ PageType {
             }
         }
 
-        PremiumPanel {
-            id: statusCard
-            width: root.contentWidth
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: FBLinkController.safeModeActive ? safeModeBanner.bottom : topBar.bottom
-            anchors.topMargin: 14
-            padding: 12
-            accentVisible: true
-            accentColor: ConnectionController.isConnected ? "#10B981" : "#00C8FF"
+        Item {
+            id: homeCenterStage
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: FBLinkController.safeModeActive ? safeModeBanner.bottom : parent.top
+            anchors.bottom: adLabel.top
+            anchors.topMargin: FBLinkController.safeModeActive ? 14 : (16 + SettingsController.safeAreaTopMargin)
+            anchors.bottomMargin: 20
 
-            Flow {
-                Layout.fillWidth: true
-                width: statusCard.width - statusCard.padding * 2
-                spacing: 8
+            ColumnLayout {
+                width: Math.min(root.contentWidth, 520)
+                anchors.centerIn: parent
+                spacing: 16
 
-                PremiumBadge {
-                    id: subscriptionBadge
-                    compact: root.compactHeaderBadges
-                    text: FBLinkController.isSubscribed
-                        ? (FBLinkController.subscriptionPlan === "vip" ? qsTr("VIP") : qsTr("Premium"))
-                        : qsTr("Free")
-                    tone: FBLinkController.isSubscribed ? "success" : "accent"
-                    iconSource: "qrc:/images/controls/shield-tick.svg"
-                    interactive: true
-                    hovered: subscriptionBadgeMouse.containsMouse
-                    pressed: subscriptionBadgeMouse.pressed
+                ConnectButton {
+                    id: connectButton
+                    objectName: "connectButton"
+                    Layout.alignment: Qt.AlignHCenter
+                    visible: !newFeaturesPopup.visible
+                    enabled: visible
+                }
+
+                Rectangle {
+                    visible: true
+                    Layout.fillWidth: true
+                    implicitHeight: 86
+                    radius: 16
+                    color: locationCardMouse.containsMouse
+                        ? Qt.rgba(24/255, 24/255, 24/255, 1.0)
+                        : Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    border.width: 1
+                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        spacing: 14
+
+                        Rectangle {
+                            Layout.preferredWidth: 46
+                            Layout.preferredHeight: 46
+                            Layout.alignment: Qt.AlignVCenter
+                            radius: 12
+                            color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                            border.width: 1
+                            border.color: Qt.rgba(63/255, 63/255, 70/255, 0.7)
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/map-pin.svg"
+                                sourceSize: Qt.size(22, 22)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: "#EAB308" }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: qsTr("Выбранная локация")
+                                font.pixelSize: 11
+                                color: FBLinkStyle.color.mutedGray
+                                font.capitalization: Font.AllUppercase
+                                elide: Text.ElideRight
+                            }
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: ServersModel.defaultServerName !== ""
+                                    ? ServersModel.defaultServerName
+                                    : qsTr("Выберите локацию")
+                                font.pixelSize: 18
+                                font.weight: 700
+                                color: FBLinkStyle.color.paleGray
+                                elide: Text.ElideRight
+                            }
+
+                            CaptionTextType {
+                                Layout.fillWidth: true
+                                visible: ConnectionController.isConnected
+                                text: root.homePingMs >= 0
+                                    ? qsTr("%1 · %2 ms").arg(ServersModel.defaultServerDefaultContainerName).arg(root.homePingMs)
+                                    : ServersModel.defaultServerDefaultContainerName
+                                color: root.homePingMs < 0 ? FBLinkStyle.color.mutedGray
+                                     : (root.homePingMs < 80 ? "#10B981"
+                                     : (root.homePingMs < 150 ? "#F59E0B" : "#EF4444"))
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        Item {
+                            Layout.preferredWidth: 20
+                            Layout.preferredHeight: 20
+                            Layout.alignment: Qt.AlignVCenter
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/chevron-right.svg"
+                                sourceSize: Qt.size(20, 20)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: FBLinkStyle.color.charcoalGray }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        visible: FBLinkController.isSubscribed && FBLinkController.subscriptionPlan === "vip"
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.topMargin: 8
+                        anchors.rightMargin: 8
+                        radius: 6
+                        color: "#EAB308"
+                        implicitWidth: vipTagText.implicitWidth + 8
+                        implicitHeight: vipTagText.implicitHeight + 4
+
+                        CaptionTextType {
+                            id: vipTagText
+                            anchors.centerIn: parent
+                            text: "VIP"
+                            color: "#111111"
+                            font.bold: true
+                            font.pixelSize: 9
+                        }
+                    }
 
                     MouseArea {
-                        id: subscriptionBadgeMouse
+                        id: locationCardMouse
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.openSubscriptionPage()
+                        onClicked: PageController.goToPage(PageEnum.PageSettingsServersList)
                     }
                 }
 
-                PremiumBadge {
-                    id: connectionBadge
-                    compact: root.compactHeaderBadges
-                    text: ConnectionController.isConnected ? qsTr("Подключено") : qsTr("Ожидание")
-                    tone: ConnectionController.isConnected ? "success" : "accent"
-                    iconSource: ConnectionController.isConnected
-                        ? "qrc:/images/controls/check.svg"
-                        : "qrc:/images/controls/radio.svg"
-                    interactive: true
-                    hovered: connectionBadgeMouse.containsMouse
-                    pressed: connectionBadgeMouse.pressed
+                GridLayout {
+                    id: connectionInfoCards
+                    Layout.fillWidth: true
+                    columns: 2
+                    columnSpacing: 12
+                    rowSpacing: 12
+                    visible: root.connectionCardsRender
 
-                    MouseArea {
-                        id: connectionBadgeMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: PageController.goToPage(PageEnum.PageSettingsConnection)
+                    Rectangle {
+                        id: ipInfoCard
+                        Layout.fillWidth: true
+                        implicitHeight: 84
+                        radius: 14
+                        color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                        border.width: 1
+                        border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                        property real revealOffset: root.connectionCardsVisibleState ? 0 : 14
+                        opacity: root.connectionCardsVisibleState ? 1 : 0
+                        transform: Translate { y: ipInfoCard.revealOffset }
+                        Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                        Behavior on revealOffset { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+
+                        ColumnLayout {
+                            anchors.centerIn: parent
+                            spacing: 2
+
+                            Image {
+                                Layout.alignment: Qt.AlignHCenter
+                                source: "qrc:/images/controls/map-pin.svg"
+                                sourceSize: Qt.size(18, 18)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: "#10B981" }
+                            }
+
+                            CaptionTextType {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: qsTr("IP Адрес")
+                                color: FBLinkStyle.color.mutedGray
+                            }
+
+                            LabelTextType {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: root.homeEndpointDisplay
+                                color: FBLinkStyle.color.paleGray
+                                font.weight: 700
+                                font.pixelSize: 13
+                                elide: Text.ElideMiddle
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        id: protocolInfoCard
+                        Layout.fillWidth: true
+                        implicitHeight: 84
+                        radius: 14
+                        color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                        border.width: 1
+                        border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                        property real revealOffset: root.connectionCardsVisibleState ? 0 : 14
+                        opacity: root.connectionCardsVisibleState ? 1 : 0
+                        transform: Translate { y: protocolInfoCard.revealOffset }
+                        Behavior on opacity {
+                            SequentialAnimation {
+                                PauseAnimation { duration: 60 }
+                                NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
+                            }
+                        }
+                        Behavior on revealOffset {
+                            SequentialAnimation {
+                                PauseAnimation { duration: 60 }
+                                NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
+                            }
+                        }
+
+                        ColumnLayout {
+                            anchors.centerIn: parent
+                            spacing: 2
+
+                            Image {
+                                Layout.alignment: Qt.AlignHCenter
+                                source: "qrc:/images/controls/radio.svg"
+                                sourceSize: Qt.size(18, 18)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: "#10B981" }
+                            }
+
+                            CaptionTextType {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: qsTr("Протокол")
+                                color: FBLinkStyle.color.mutedGray
+                            }
+
+                            LabelTextType {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: ServersModel.defaultServerDefaultContainerName !== ""
+                                    ? ServersModel.defaultServerDefaultContainerName
+                                    : qsTr("Неизвестно")
+                                color: FBLinkStyle.color.paleGray
+                                font.weight: 700
+                                font.pixelSize: 13
+                                elide: Text.ElideRight
+                            }
+                        }
                     }
                 }
-
-                PremiumBadge {
-                    id: routingBadge
-                    visible: FBLinkController.canManageRoutingProfiles
-                    compact: root.compactHeaderBadges
-                    text: root.compactHeaderBadges ? qsTr("Routing") : qsTr("VIP routing")
-                    tone: "proxy"
-                    iconSource: "qrc:/images/controls/tag.svg"
-                    interactive: true
-                    hovered: routingBadgeMouse.containsMouse
-                    pressed: routingBadgeMouse.pressed
-
-                    MouseArea {
-                        id: routingBadgeMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.openVipRoutingPage()
-                    }
-                }
-
-                PremiumBadge {
-                    id: adBlockBadge
-                    compact: root.compactHeaderBadges
-                    text: root.adBlockBadgeText
-                    tone: root.adBlockBadgeTone
-                    iconSource: "qrc:/images/controls/shield-tick.svg"
-                    interactive: true
-                    hovered: adBlockBadgeMouse.containsMouse
-                    pressed: adBlockBadgeMouse.pressed
-
-                    MouseArea {
-                        id: adBlockBadgeMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.openVipRoutingPage()
-                    }
-                }
-
-                PremiumBadge {
-                    visible: root.homePingMs >= 0
-                    compact: root.compactHeaderBadges
-                    text: root.homePingDisplay
-                    tone: root.homePingMs < 80 ? "success" : (root.homePingMs < 150 ? "warning" : "neutral")
-                    iconSource: "qrc:/images/controls/gauge.svg"
-                }
-            }
-
-            LabelTextType {
-                Layout.fillWidth: true
-                text: root.homeStateTitle
-                font.pixelSize: 17
-                font.weight: 700
-                color: FBLinkStyle.color.paleGray
-                wrapMode: Text.WordWrap
-            }
-
-            LabelTextType {
-                Layout.fillWidth: true
-                text: root.homeStateSubtitle
-                font.pixelSize: 13
-                color: FBLinkStyle.color.mutedGray
-                wrapMode: Text.WordWrap
             }
         }
 
-        // ── Connect button centered ──────────────────────────────
-        ConnectButton {
-            id: connectButton
-            objectName: "connectButton"
-
-            z: 99
-            visible: !newFeaturesPopup.visible
-            enabled: visible
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: {
-                var minY = statusCard.y + statusCard.height + 20
-                var maxY = parent.height - drawer.collapsedHeight
-                           - (adLabel.visible ? adLabel.implicitHeight + 24 : 24)
-                           - height
-                if (maxY <= minY) {
-                    return minY
-                }
-                return minY + (maxY - minY) / 2
-            }
-        }
-
-        // ── Ad label below button ────────────────────────────────
         AdLabel {
             id: adLabel
 
@@ -523,7 +624,7 @@ PageType {
                 GradientStop { position: 1.0; color: Qt.rgba(19/255, 22/255, 31/255, 0.99) }
             }
             radius: 20
-            border.color: Qt.rgba(0, 200/255, 255/255, 0.35)
+            border.color: Qt.rgba(234/255, 179/255, 8/255, 0.35)
             border.width: 1
 
             Rectangle {
@@ -535,7 +636,7 @@ PageType {
                 anchors.topMargin: 10
                 height: 3
                 radius: 2
-                color: Qt.rgba(0, 200/255, 255/255, 0.8)
+                color: Qt.rgba(234/255, 179/255, 8/255, 0.8)
             }
 
         }
@@ -605,7 +706,7 @@ PageType {
 
             CaptionTextType {
                 Layout.fillWidth: true
-                text: qsTr("Настройте маршруты для нужных сервисов и включите AdBlock в пару касаний.")
+                text: qsTr("Настройте маршруты для нужных сервисов в пару касаний.")
                 color: FBLinkStyle.color.mutedGray
                 wrapMode: Text.WordWrap
             }
@@ -621,10 +722,7 @@ PageType {
                 }
 
                 PremiumBadge {
-                    visible: FBLinkController.canUseAdBlock
-                    text: qsTr("AdBlock для VIP")
-                    tone: "success"
-                    compact: true
+                    visible: false
                 }
             }
 
@@ -632,25 +730,9 @@ PageType {
                 Layout.fillWidth: true
                 implicitHeight: 46
                 text: qsTr("Настроить VIP маршруты")
-                defaultColor: "#00C8FF"
-                hoveredColor: "#33D4FF"
-                pressedColor: "#0099BB"
-                textColor: "#FFFFFF"
-                clickedFunc: function() {
-                    FBLinkController.dismissNewFeaturesGuide()
-                    newFeaturesPopup.close()
-                    root.openVipRoutingPage()
-                }
-            }
-
-            BasicButtonType {
-                Layout.fillWidth: true
-                implicitHeight: 46
-                visible: FBLinkController.canUseAdBlock
-                text: FBLinkController.vipAdBlockEnabled ? qsTr("Управлять AdBlock") : qsTr("Включить AdBlock")
-                defaultColor: Qt.rgba(16/255, 185/255, 129/255, 0.20)
-                hoveredColor: Qt.rgba(16/255, 185/255, 129/255, 0.30)
-                pressedColor: Qt.rgba(16/255, 185/255, 129/255, 0.38)
+                defaultColor: "#EAB308"
+                hoveredColor: "#FACC15"
+                pressedColor: "#CA8A04"
                 textColor: "#FFFFFF"
                 clickedFunc: function() {
                     FBLinkController.dismissNewFeaturesGuide()
@@ -680,11 +762,15 @@ PageType {
         objectName: "drawerProtocol"
 
         anchors.fill: parent
+        visible: false
+        enabled: false
+        collapsedHeight: 0
+        expandedHeight: 0
 
         collapsedStateContent: Item {
             objectName: "ProtocolDrawerCollapsedContent"
 
-            implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
+            implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : root.height * 0.77
             Component.onCompleted: {
                 drawer.expandedHeight = implicitHeight
             }
@@ -698,57 +784,22 @@ PageType {
                 spacing: 0
 
                 Component.onCompleted: {
-                    drawer.collapsedHeight = collapsed.implicitHeight
+                    drawer.collapsedHeight = 0
                 }
 
-                // Modern Location Picker Card
                 Rectangle {
-                    id: locationCardRef
+                    id: bottomActionPanel
                     Layout.fillWidth: true
                     Layout.leftMargin: root.contentSideMargin
                     Layout.rightMargin: root.contentSideMargin
-                    Layout.topMargin: drawer.isCollapsedStateActive ? 16 : 8
-                    Layout.bottomMargin: drawer.isCollapsedStateActive ? 48 + SettingsController.safeAreaBottomMargin : 16
-                    height: 64
+                    Layout.topMargin: drawer.isCollapsedStateActive ? 14 : 8
+                    Layout.bottomMargin: drawer.isCollapsedStateActive ? (16 + SettingsController.safeAreaBottomMargin) : 12
+                    Layout.preferredHeight: 70
 
-                    color: locationMouseArea.pressed ? "#1F1F24" : (locationMouseArea.containsMouse ? "#2A2A30" : "#24242A")
+                    color: "#171717"
                     radius: 16
                     border.color: "#333333"
                     border.width: 1
-
-                    Behavior on color { ColorAnimation { duration: 150 } }
-
-                    // Кроссплатформенный TCP-пинг через C++ SystemController (работает на iOS, Android, Desktop)
-                    property int realPingMs: -1
-                    property string pingDisplay: realPingMs >= 0 ? (realPingMs + " ms") : "—"
-
-                    Connections {
-                        target: SystemController
-                        function onPingMeasured(ms) {
-                            locationCardRef.realPingMs = ms
-                            root.homePingMs = ms
-                        }
-                    }
-
-                    function measurePing() {
-                        var pingTarget = ServersModel.getDefaultServerPingTarget() || ""
-                        if (pingTarget === "") {
-                            locationCardRef.realPingMs = -1
-                            root.homePingMs = -1
-                            return
-                        }
-
-                        SystemController.measurePing(pingTarget)
-                    }
-
-                    Timer {
-                        id: pingTimer
-                        interval: 5000
-                        running: ConnectionController.isConnected
-                        repeat: true
-                        triggeredOnStart: true
-                        onTriggered: locationCardRef.measurePing()
-                    }
 
                     RowLayout {
                         anchors.fill: parent
@@ -756,23 +807,6 @@ PageType {
                         anchors.rightMargin: 16
                         spacing: 12
 
-                        // Location Icon / Flag
-                        Image {
-                            Layout.alignment: Qt.AlignVCenter
-                            source: ServersModel.defaultServerImagePathCollapsed !== "" ? ServersModel.defaultServerImagePathCollapsed : "qrc:/images/controls/map-pin.svg"
-                            sourceSize: Qt.size(24, 24)
-                            fillMode: Image.PreserveAspectFit
-
-                            scale: ConnectionController.isConnected ? 1.15 : 1.0
-                            Behavior on scale {
-                                NumberAnimation {
-                                    duration: 400
-                                    easing.type: Easing.OutBack
-                                }
-                            }
-                        }
-
-                        // Server Name & Status
                         ColumnLayout {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
@@ -780,58 +814,34 @@ PageType {
 
                             LabelTextType {
                                 Layout.fillWidth: true
-                                text: ServersModel.defaultServerName !== "" ? ServersModel.defaultServerName : qsTr("Выбрать локацию")
-                                font.pixelSize: 16
-                                font.weight: 600
-                                color: "#FFFFFF"
+                                text: qsTr("Панель быстрого доступа")
+                                font.pixelSize: 12
+                                font.weight: 500
+                                color: FBLinkStyle.color.mutedGray
                                 elide: Text.ElideRight
                             }
 
                             LabelTextType {
                                 Layout.fillWidth: true
-                                text: ConnectionController.isConnected ? qsTr("Подключено") : qsTr("Нажмите для смены региона")
-                                font.pixelSize: 13
-                                color: ConnectionController.isConnected ? "#10B981" : "#8A8A8E"
+                                text: ServersModel.defaultServerName !== "" ? ServersModel.defaultServerName : qsTr("Локация не выбрана")
+                                font.pixelSize: 15
+                                font.weight: 700
+                                color: "#FFFFFF"
                                 elide: Text.ElideRight
                             }
                         }
 
-                        // Active endpoint ping / Chevron
-                        RowLayout {
-                            Layout.alignment: Qt.AlignVCenter
-                            spacing: 8
-
-                            LabelTextType {
-                                text: "• " + locationCardRef.pingDisplay
-                                color: locationCardRef.realPingMs < 0 ? "#8A8A8E"
-                                     : locationCardRef.realPingMs < 80 ? "#10B981"
-                                     : locationCardRef.realPingMs < 150 ? "#F59E0B"
-                                     : "#EF4444"
-                                font.pixelSize: 13
-                                font.weight: 600
-                                visible: ConnectionController.isConnected
-                            }
-
-                            // Chevron
-                            Image {
-                                source: "qrc:/images/controls/chevron-up.svg"
-                                sourceSize: Qt.size(20, 20)
-                                rotation: drawer.isCollapsedStateActive ? 0 : 180
-                                Behavior on rotation { NumberAnimation { duration: 200 } }
-                            }
-                        }
-                    }
-
-                    MouseArea {
-                        id: locationMouseArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            if (drawer.isCollapsedStateActive()) {
+                        BasicButtonType {
+                            Layout.preferredWidth: 132
+                            implicitHeight: 42
+                            text: qsTr("Локации")
+                            defaultColor: Qt.rgba(234/255, 179/255, 8/255, 0.16)
+                            hoveredColor: Qt.rgba(234/255, 179/255, 8/255, 0.24)
+                            pressedColor: Qt.rgba(234/255, 179/255, 8/255, 0.30)
+                            textColor: "#FFFFFF"
+                            leftImageSource: "qrc:/images/controls/map-pin.svg"
+                            clickedFunc: function() {
                                 drawer.openTriggered()
-                            } else {
-                                drawer.closeTriggered()
                             }
                         }
                     }

@@ -15,9 +15,6 @@ PageType {
     id: root
 
     property var profiles: []
-    property string statusMessage: ""
-    property bool statusIsError: false
-
     readonly property bool canManageProfiles: FBLinkController.canManageRoutingProfiles
     readonly property bool wideLayout: GC.isWideWidth(width)
     readonly property real sideMargin: GC.pageHorizontalMargin(width)
@@ -54,16 +51,15 @@ PageType {
         }
 
         function onRoutingProfilesError(errorMessage) {
-            root.statusMessage = errorMessage
-            root.statusIsError = true
+            PageController.showErrorMessage(errorMessage)
         }
 
         function onRoutingSystemProfileCopied(profile, created) {
             const profileName = profile && profile.name ? String(profile.name) : qsTr("пресет")
-            root.statusMessage = created
+            const message = created
                 ? qsTr("Пресет «%1» добавлен в мои профили").arg(profileName)
                 : qsTr("Пресет уже добавлен в мои профили")
-            root.statusIsError = false
+            PageController.showNotificationMessage(message)
             FBLinkController.fetchRoutingProfiles()
         }
     }
@@ -120,16 +116,6 @@ PageType {
                     }
                 }
 
-                WarningType {
-                    Layout.fillWidth: true
-                    visible: root.statusMessage !== ""
-                    textString: root.statusMessage
-                    iconPath: root.statusIsError ? "qrc:/images/controls/alert-circle.svg" : "qrc:/images/controls/check.svg"
-                    backGroundColor: root.statusIsError ? Qt.rgba(239/255, 68/255, 68/255, 0.12) : Qt.rgba(16/255, 185/255, 129/255, 0.12)
-                    imageColor: root.statusIsError ? "#EF4444" : "#10B981"
-                    textColor: root.statusIsError ? "#FFB4B4" : "#B6F2D2"
-                }
-
                 Repeater {
                     model: root.systemProfiles
                     delegate: PremiumPanel {
@@ -168,9 +154,9 @@ PageType {
                             implicitHeight: 44
                             enabled: root.canManageProfiles
                             text: root.isAdded(profileData) ? qsTr("Открыть мои профили") : qsTr("Добавить в мои профили")
-                            defaultColor: root.isAdded(profileData) ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0, 200/255, 255/255, 0.16)
-                            hoveredColor: root.isAdded(profileData) ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 200/255, 255/255, 0.26)
-                            pressedColor: root.isAdded(profileData) ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(0, 200/255, 255/255, 0.32)
+                            defaultColor: root.isAdded(profileData) ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(234/255, 179/255, 8/255, 0.16)
+                            hoveredColor: root.isAdded(profileData) ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(234/255, 179/255, 8/255, 0.26)
+                            pressedColor: root.isAdded(profileData) ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(234/255, 179/255, 8/255, 0.32)
                             textColor: "#FFFFFF"
                             clickedFunc: function() {
                                 if (root.isAdded(profileData)) {

@@ -67,7 +67,7 @@ PageType {
                             Layout.alignment: Qt.AlignTop
                             visible: root.wideLayout
                             accentVisible: true
-                            accentColor: "#00C8FF"
+                            accentColor: "#EAB308"
 
                             PremiumBadge {
                                 text: qsTr("Шаг 2")
@@ -218,9 +218,9 @@ PageType {
                                 id: installButton
                                 Layout.fillWidth: true
                                 text: qsTr("Установить")
-                                defaultColor: "#00C8FF"
-                                hoveredColor: "#33D4FF"
-                                pressedColor: "#0099BB"
+                                defaultColor: "#EAB308"
+                                hoveredColor: "#FACC15"
+                                pressedColor: "#CA8A04"
                                 textColor: "#FFFFFF"
                                 clickedFunc: function() {
                                     if (!port.textField.acceptableInput &&
@@ -295,7 +295,7 @@ PageType {
                                             PremiumPanel {
                                                 Layout.fillWidth: true
                                                 accentVisible: true
-                                                accentColor: "#00C8FF"
+                                                accentColor: "#EAB308"
 
                                                 LabelTextType {
                                                     Layout.fillWidth: true

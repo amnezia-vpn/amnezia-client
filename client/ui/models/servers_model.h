@@ -74,6 +74,7 @@ public:
     Q_PROPERTY(QString defaultServerDescriptionCollapsed READ getDefaultServerDescriptionCollapsed NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerImagePathCollapsed READ getDefaultServerImagePathCollapsed NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerDescriptionExpanded READ getDefaultServerDescriptionExpanded NOTIFY defaultServerDefaultContainerChanged)
+    Q_PROPERTY(QString defaultServerEndpointHost READ getDefaultServerEndpointHost NOTIFY defaultServerEndpointHostChanged)
     Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY
                        defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
@@ -144,6 +145,7 @@ public slots:
 
     QVariant getDefaultServerData(const QString roleString);
     QString getDefaultServerPingTarget();
+    const QString getDefaultServerEndpointHost();
 
     QVariant getProcessedServerData(const QString roleString);
     bool setProcessedServerData(const QString &roleString, const QVariant &value);
@@ -169,6 +171,7 @@ signals:
     void defaultServerIndexChanged(const int index);
     void defaultServerNameChanged();
     void defaultServerDescriptionChanged();
+    void defaultServerEndpointHostChanged();
 
     void containersUpdated(const QJsonArray &containers);
     void defaultServerContainersUpdated(const QJsonArray &containers);

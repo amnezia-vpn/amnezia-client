@@ -11,8 +11,8 @@ import Style 1.0
 Button {
     id: root
 
-    property string defaultButtonColor: "#00C8FF"
-    property string progressButtonColor: "#33D4FF"
+    property string defaultButtonColor: "#52525B"
+    property string progressButtonColor: "#EAB308"
     property string connectedButtonColor: "#10B981"
     property bool buttonActiveFocus: activeFocus && (Qt.platform.os !== "android" || SettingsController.isOnTv())
 
@@ -88,67 +88,47 @@ Button {
         implicitHeight: parent.height
         transformOrigin: Item.Center
 
-        // ── Outer glow ───────────────────────────────────────────
         Rectangle {
-            id: outerGlow
             anchors.centerIn: parent
-            width: parent.width
-            height: parent.height
+            width: parent.width + 10
+            height: parent.height + 10
             radius: width / 2
-            color: "transparent"
+            color: root.accentColor
+            opacity: ConnectionController.isConnectionInProgress ? 0.16 : 0.08
 
-            layer.enabled: true
-            layer.effect: DropShadow {
-                transparentBorder: true
-                color: root.accentColor
-                radius: 30
-                samples: 61
-                spread: 0.1
-                opacity: ConnectionController.isConnectionInProgress ? 0.7 : 0.3
-            }
-
-            SequentialAnimation on scale {
-                running: ConnectionController.isConnectionInProgress
-                loops: Animation.Infinite
-                PropertyAnimation { to: 1.05; duration: 1000; easing.type: Easing.InOutSine }
-                PropertyAnimation { to: 0.98; duration: 1000; easing.type: Easing.InOutSine }
-            }
+            Behavior on opacity { NumberAnimation { duration: 150 } }
         }
 
-        // ── Main circle ──────────────────────────────────────────
         Rectangle {
             id: mainCircle
             anchors.fill: parent
             radius: width / 2
-
-            gradient: Gradient {
-                GradientStop {
-                    position: 0.0
-                    color: Qt.lighter(root.accentColor, 1.1)
-                }
-                GradientStop { position: 1.0; color: FBLinkStyle.color.midnightBlack }
-            }
-
+            color: "#121212"
             border.width: root.buttonActiveFocus ? 2 : 1
             border.color: root.accentColor
 
-            // ── Ripple ───────────────────────────────────────────
+            Rectangle {
+                anchors.fill: parent
+                radius: parent.radius
+                color: root.accentColor
+                opacity: ConnectionController.isConnected ? 0.12 : (ConnectionController.isConnectionInProgress ? 0.10 : 0.04)
+            }
+
             Rectangle {
                 id: ripple
                 anchors.centerIn: parent
-                width: 0; height: 0
+                width: 0
+                height: 0
                 radius: width / 2
-                color: Qt.rgba(255, 255, 255, 0.2)
+                color: Qt.rgba(1, 1, 1, 0.18)
                 opacity: 0
             }
 
             ParallelAnimation {
                 id: rippleAnim
-                NumberAnimation { target: ripple; property: "width";   from: 0; to: mainCircle.width  * 1.5; duration: 400; easing.type: Easing.OutQuad }
-                NumberAnimation { target: ripple; property: "height";  from: 0; to: mainCircle.height * 1.5; duration: 400; easing.type: Easing.OutQuad }
-                SequentialAnimation {
-                    NumberAnimation { target: ripple; property: "opacity"; from: 0.5; to: 0; duration: 400 }
-                }
+                NumberAnimation { target: ripple; property: "width"; from: 0; to: mainCircle.width * 1.25; duration: 330; easing.type: Easing.OutQuad }
+                NumberAnimation { target: ripple; property: "height"; from: 0; to: mainCircle.height * 1.25; duration: 330; easing.type: Easing.OutQuad }
+                NumberAnimation { target: ripple; property: "opacity"; from: 0.45; to: 0; duration: 330 }
             }
 
             MouseArea {
@@ -156,45 +136,39 @@ Button {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 hoverEnabled: true
-
-                // Let Button's AbstractButton handle the actual click;
-                // this MouseArea only provides hover state for visual effects.
                 onPressed: function(mouse) { mouse.accepted = false }
             }
 
-            scale: (root.hovered || buttonMouseArea.containsMouse) && !root.pressed ? 1.02 : (root.pressed ? 0.95 : 1.0)
-            Behavior on scale {
-                NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
-            }
+            scale: (root.hovered || buttonMouseArea.containsMouse) && !root.pressed ? 1.015 : (root.pressed ? 0.96 : 1.0)
+            Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
         }
 
-        // ── Lock icon overlay (when subscription required) ───────
         Rectangle {
             id: lockOverlay
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             anchors.bottomMargin: 10
             anchors.rightMargin: 10
-            width: 36; height: 36
-            radius: 18
+            width: 34
+            height: 34
+            radius: 17
             color: "#1C1D21"
             border.color: root.lockedButtonColor
-            border.width: 1.5
+            border.width: 1
             visible: root.isSubscriptionRequired
 
             opacity: root.isSubscriptionRequired ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 250 } }
+            Behavior on opacity { NumberAnimation { duration: 220 } }
 
             Image {
                 anchors.centerIn: parent
                 source: "qrc:/images/controls/info.svg"
-                sourceSize: Qt.size(18, 18)
+                sourceSize: Qt.size(16, 16)
                 layer.enabled: true
                 layer.effect: ColorOverlay { color: root.lockedButtonColor }
             }
         }
 
-        // ── Spinner (connecting) ─────────────────────────────────
         Shape {
             id: shape
             width: parent.implicitWidth
@@ -213,40 +187,80 @@ Button {
                 PathAngleArc {
                     centerX: shape.width / 2
                     centerY: shape.height / 2
-                    radiusX: 93; radiusY: 93
-                    startAngle: 0; sweepAngle: 90
+                    radiusX: 92
+                    radiusY: 92
+                    startAngle: -90
+                    sweepAngle: 86
                 }
             }
 
             RotationAnimator {
                 target: shape
                 running: ConnectionController.isConnectionInProgress
-                from: 0; to: 360
+                from: 0
+                to: 360
                 loops: Animation.Infinite
-                duration: 1000
+                duration: 900
             }
         }
     }
 
     contentItem: Item {
         Column {
-            spacing: 4
+            spacing: 6
             anchors.centerIn: parent
 
-            // ── Label ─────────────────────────────────────────────────
+            Item {
+                width: 48
+                height: 48
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: !root.isSubscriptionRequired
+
+                Image {
+                    id: stateIcon
+                    anchors.centerIn: parent
+                    source: ConnectionController.isConnected
+                        ? "qrc:/images/controls/shield-tick.svg"
+                        : (ConnectionController.isConnectionInProgress
+                            ? "qrc:/images/controls/refresh-cw.svg"
+                            : "qrc:/images/controls/shield.svg")
+                    sourceSize: Qt.size(42, 42)
+                    layer.enabled: true
+                    layer.effect: ColorOverlay {
+                        color: ConnectionController.isConnected
+                            ? root.connectedButtonColor
+                            : (ConnectionController.isConnectionInProgress ? root.progressButtonColor : "#A1A1AA")
+                    }
+
+                    RotationAnimator {
+                        target: stateIcon
+                        running: ConnectionController.isConnectionInProgress
+                        from: 0
+                        to: 360
+                        loops: Animation.Infinite
+                        duration: 1200
+                        onRunningChanged: {
+                            if (!running) {
+                                stateIcon.rotation = 0
+                            }
+                        }
+                    }
+                }
+            }
+
             Text {
                 width: root.implicitWidth - 40
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 font.family: "PT Root UI VF"
                 font.weight: 700
-                font.pixelSize: root.isSubscriptionRequired ? 15 : 19
+                font.pixelSize: root.isSubscriptionRequired ? 15 : 22
 
                 transform: Translate { x: shakeTranslate.x }
 
                 color: root.isSubscriptionRequired
                     ? root.lockedButtonColor
-                    : (root.isErrorState ? "#EF4444" : (ConnectionController.isConnected ? root.connectedButtonColor : root.defaultButtonColor))
+                    : (root.isErrorState ? "#EF4444" : (ConnectionController.isConnected ? root.connectedButtonColor : (ConnectionController.isConnectionInProgress ? root.progressButtonColor : "#E5E7EB")))
 
                 text: root.text
 
@@ -261,8 +275,8 @@ Button {
                     ? qsTr("Нажмите для отключения")
                     : qsTr("Нажмите для подключения")
                 font.family: "PT Root UI VF"
-                font.pixelSize: 11
-                color: Qt.rgba(1, 1, 1, 0.65)
+                font.pixelSize: 12
+                color: "#A1A1AA"
                 horizontalAlignment: Text.AlignHCenter
             }
 

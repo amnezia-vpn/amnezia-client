@@ -46,6 +46,7 @@ class WireguardUtilsWindows final : public WireguardUtils {
   bool deleteExclusionRoute(const IPAddress& prefix) override;
 
   bool excludeLocalNetworks(const QList<IPAddress>& addresses) override;
+  QString diagnosticError() const override { return m_lastErrorReason; }
 
  signals:
   void backendFailure();
@@ -58,6 +59,7 @@ class WireguardUtilsWindows final : public WireguardUtils {
   WindowsTunnelService m_tunnel;
   QPointer<WindowsRouteMonitor> m_routeMonitor;
   QPointer<WindowsFirewall> m_firewall;
+  QString m_lastErrorReason;
 };
 
 #endif  // WIREGUARDUTILSWINDOWS_H

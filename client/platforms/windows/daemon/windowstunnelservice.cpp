@@ -113,6 +113,7 @@ void WindowsTunnelService::timeout() {
 
 bool WindowsTunnelService::start(const QString& configData) {
   logger.debug() << "Starting the tunnel service";
+  m_lastFailureReason.clear();
 
   m_logworker = new WindowsTunnelLogger(WindowsCommons::tunnelLogFile());
   m_logworker->moveToThread(&m_logthread);
@@ -136,6 +137,7 @@ bool WindowsTunnelService::start(const QString& configData) {
   if (service) {
     logger.debug() << "An existing service has been detected. Let's close it.";
     if (!stopAndDeleteTunnelService(service)) {
+      m_lastFailureReason = "delete_previous_service_failed";
       return false;
     }
     CloseServiceHandle(service);
@@ -158,6 +160,8 @@ bool WindowsTunnelService::start(const QString& configData) {
                           TEXT("Nsi\0TcpIp\0"), nullptr, nullptr);
   if (!service) {
     WindowsUtils::windowsLog("Failed to create the tunnel service");
+    m_lastFailureReason =
+        QString("create_service_failed:%1").arg(GetLastError());
     return false;
   }
 
@@ -167,6 +171,7 @@ bool WindowsTunnelService::start(const QString& configData) {
   if (!ChangeServiceConfig2(service, SERVICE_CONFIG_DESCRIPTION, &sd)) {
     WindowsUtils::windowsLog(
         "Failed to set the description to the tunnel service");
+    m_lastFailureReason = "set_service_description_failed";
     return false;
   }
 
@@ -174,11 +179,14 @@ bool WindowsTunnelService::start(const QString& configData) {
   ssi.dwServiceSidType = SERVICE_SID_TYPE_UNRESTRICTED;
   if (!ChangeServiceConfig2(service, SERVICE_CONFIG_SERVICE_SID_INFO, &ssi)) {
     WindowsUtils::windowsLog("Failed to set the SID to the tunnel service");
+    m_lastFailureReason = "set_service_sid_failed";
     return false;
   }
 
   if (!StartService(service, 0, nullptr)) {
     WindowsUtils::windowsLog("Failed to start the service");
+    m_lastFailureReason =
+        QString("start_service_failed:%1").arg(GetLastError());
     return false;
   }
 
@@ -195,11 +203,15 @@ bool WindowsTunnelService::start(const QString& configData) {
   SERVICE_STATUS status;
   if (!QueryServiceStatus(service, &status)) {
     WindowsUtils::windowsLog("Failed to retrieve the service status");
+    m_lastFailureReason = "query_service_status_failed";
     return false;
   }
 
   logger.debug() << "The tunnel service exited with status:"
                  << status.dwWin32ExitCode << "-" << exitCodeToFailure(&status);
+  m_lastFailureReason = QString("service_exit:%1:%2")
+                            .arg(status.dwWin32ExitCode)
+                            .arg(exitCodeToFailure(&status));
 
   emit backendFailure();
   return false;

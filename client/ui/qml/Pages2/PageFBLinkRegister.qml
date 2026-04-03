@@ -141,78 +141,44 @@ PageType {
                     Layout.leftMargin: 4
                 }
 
-                GridLayout {
+                Rectangle {
+                    id: authCard
                     Layout.fillWidth: true
-                    columns: root.wideLayout ? 2 : 1
-                    columnSpacing: 18
-                    rowSpacing: 18
+                    radius: 26
+                    color: Qt.rgba(12/255, 12/255, 12/255, 0.98)
+                    border.width: 1
+                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    clip: true
+                    implicitHeight: authContent.implicitHeight + (root.wideLayout ? 68 : 44)
 
-                    PremiumPanel {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        accentVisible: true
-                        accentColor: "#10B981"
-                        visible: root.wideLayout
-
-                        PremiumBadge {
-                            text: root.codeSent ? qsTr("Шаг 2 из 2") : qsTr("Шаг 1 из 2")
-                            tone: "success"
-                            iconSource: "qrc:/images/controls/mail.svg"
-                        }
+                    ColumnLayout {
+                        id: authContent
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: root.wideLayout ? 34 : 22
+                        spacing: 14
 
                         LabelTextType {
                             Layout.fillWidth: true
-                            text: root.codeSent
-                                ? qsTr("Подтвердите email и завершите вход")
-                                : qsTr("Создайте FBLink ID и сразу синхронизируйте приложение")
-                            font.pixelSize: 28
-                            font.weight: 700
-                            color: FBLinkStyle.color.paleGray
-                            wrapMode: Text.WordWrap
-                        }
-
-                        LabelTextType {
-                            Layout.fillWidth: true
-                            text: root.codeSent
-                                ? qsTr("Код уже отправлен на %1. После подтверждения аккаунт сразу готов к использованию.").arg(root.pendingEmail)
-                                : qsTr("Новый поток регистрации не перегружает формами: сначала аккаунт, потом подтверждение и синхронизация конфигов.")
-                            wrapMode: Text.WordWrap
-                            font.pixelSize: 14
-                            color: FBLinkStyle.color.mutedGray
-                        }
-                    }
-
-                    PremiumPanel {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        accentVisible: true
-                        accentColor: "#00C8FF"
-
-                        Image {
-                            visible: !root.wideLayout
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: 88
-                            Layout.preferredHeight: 88
-                            fillMode: Image.PreserveAspectFit
-                            source: "qrc:/images/fblink_logo.png"
-                        }
-
-                        LabelTextType {
-                            Layout.fillWidth: true
-                            text: root.codeSent ? qsTr("Подтверждение email") : qsTr("Создание аккаунта")
-                            font.pixelSize: 26
+                            text: qsTr("FBLink VPN")
+                            font.pixelSize: root.wideLayout ? 44 : 34
                             font.weight: 700
-                            color: FBLinkStyle.color.paleGray
+                            color: "#F5F5F5"
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
                         }
 
-                        LabelTextType {
+                        CaptionTextType {
                             Layout.fillWidth: true
                             text: root.codeSent
-                                ? qsTr("Введите код, отправленный на %1.").arg(root.pendingEmail)
-                                : qsTr("Создайте аккаунт FBLink VPN и получите доступ к premium и VIP-потоку без перегруженных экранов.")
-                            wrapMode: Text.WordWrap
-                            font.pixelSize: 14
+                                ? qsTr("Подтвердите email кодом, отправленным на %1.").arg(root.pendingEmail)
+                                : qsTr("Создайте аккаунт для доступа к вашим сетям.")
                             color: FBLinkStyle.color.mutedGray
+                            font.pixelSize: 13
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
                         }
 
                         WarningType {
@@ -229,7 +195,7 @@ PageType {
                             id: emailField
                             Layout.fillWidth: true
                             headerText: qsTr("Email")
-                            textField.placeholderText: "you@example.com"
+                            textField.placeholderText: "user@company.com"
                             textField.inputMethodHints: Qt.ImhEmailCharactersOnly
                             visible: !root.codeSent
                         }
@@ -268,68 +234,14 @@ PageType {
                             visible: root.codeSent
                         }
 
-                        RowLayout {
-                            Layout.fillWidth: true
-                            visible: !root.codeSent
-                            spacing: 6
-
-                            Item { Layout.fillWidth: true }
-
-                            LabelTextType {
-                                text: qsTr("Уже есть аккаунт?")
-                                color: FBLinkStyle.color.mutedGray
-                                font.pixelSize: 14
-                            }
-
-                            ButtonTextType {
-                                text: qsTr("Войти")
-                                font.pixelSize: 14
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: PageController.goToPage(PageEnum.PageFBLinkLogin)
-                                }
-                            }
-
-                            Item { Layout.fillWidth: true }
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            visible: root.codeSent
-                            spacing: 6
-
-                            Item { Layout.fillWidth: true }
-
-                            ButtonTextType {
-                                text: root.resendCooldown > 0
-                                    ? qsTr("Отправить повторно (%1 сек)").arg(root.resendCooldown)
-                                    : qsTr("Отправить код повторно")
-                                font.pixelSize: 14
-                                opacity: root.resendCooldown > 0 ? 0.5 : 1.0
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: root.resendCooldown > 0 ? Qt.ArrowCursor : Qt.PointingHandCursor
-                                    onClicked: {
-                                        if (root.resendCooldown > 0) return
-                                        root.errorMessage = ""
-                                        root.isLoading = true
-                                        PageController.showBusyIndicator(true)
-                                        FBLinkController.registerUser(root.pendingEmail, passwordField.textField.text)
-                                    }
-                                }
-                            }
-
-                            Item { Layout.fillWidth: true }
-                        }
-
                         BasicButtonType {
                             Layout.fillWidth: true
-                            defaultColor: "#00C8FF"
-                            hoveredColor: "#33D4FF"
-                            pressedColor: "#0099BB"
+                            implicitHeight: 56
+                            defaultColor: "#EAB308"
+                            hoveredColor: "#FACC15"
+                            pressedColor: "#CA8A04"
                             disabledColor: FBLinkStyle.color.mutedGray
-                            textColor: "#FFFFFF"
+                            textColor: "#111111"
                             enabled: !root.isLoading
                             text: root.isLoading
                                 ? (root.codeSent ? qsTr("Проверка...") : qsTr("Отправка..."))
@@ -369,6 +281,60 @@ PageType {
                                     PageController.showBusyIndicator(true)
                                     FBLinkController.registerUser(email, password)
                                 }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                visible: root.codeSent
+                                text: root.resendCooldown > 0
+                                    ? qsTr("Отправить повторно (%1 сек)").arg(root.resendCooldown)
+                                    : qsTr("Отправить код повторно")
+                                color: root.resendCooldown > 0 ? FBLinkStyle.color.charcoalGray : FBLinkStyle.color.mutedGray
+                                font.pixelSize: 13
+                                horizontalAlignment: Text.AlignHCenter
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: root.codeSent && root.resendCooldown <= 0
+                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                    onClicked: {
+                                        root.errorMessage = ""
+                                        root.isLoading = true
+                                        PageController.showBusyIndicator(true)
+                                        FBLinkController.registerUser(root.pendingEmail, passwordField.textField.text)
+                                    }
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                visible: !root.codeSent
+                                spacing: 6
+
+                                Item { Layout.fillWidth: true }
+
+                                LabelTextType {
+                                    text: qsTr("Уже есть аккаунт?")
+                                    color: FBLinkStyle.color.mutedGray
+                                    font.pixelSize: 14
+                                }
+
+                                ButtonTextType {
+                                    text: qsTr("Войти")
+                                    font.pixelSize: 14
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: PageController.goToPage(PageEnum.PageFBLinkLogin)
+                                    }
+                                }
+
+                                Item { Layout.fillWidth: true }
                             }
                         }
                     }

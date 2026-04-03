@@ -9,7 +9,9 @@
 #include "utilities.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "version.h"
+#include <QDateTime>
 #include <QFileInfo>
+#include <QSettings>
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
@@ -34,6 +36,22 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
+    QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
+    const qint64 safeModeUntilEpoch = qSettings.value("Conf/safeModeUntilEpochSec", 0).toLongLong();
+    if (safeModeUntilEpoch > QDateTime::currentSecsSinceEpoch()) {
+        qWarning() << "ConnectionController::openConnection: blocked by safe mode until" << safeModeUntilEpoch;
+        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+        return;
+    }
+
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    if (m_state != Vpn::ConnectionState::Connected
+        && (now - m_lastConnectAttemptMsec) < 1200) {
+        qWarning() << "ConnectionController::openConnection: connect attempt throttled";
+        return;
+    }
+    m_lastConnectAttemptMsec = now;
+
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     // Check for FBLink-service OR the service named after the running EXE (e.g. FBLinkVPN-service)
     const QString altServiceName = QFileInfo(QCoreApplication::applicationFilePath()).baseName() + "-service";

@@ -122,9 +122,9 @@ PageType {
 
             visible: !root.hasVipAccess
             text: qsTr("Открыть VIP-подписку")
-            defaultColor: "#00C8FF"
-            hoveredColor: "#33D4FF"
-            pressedColor: "#0099BB"
+            defaultColor: "#EAB308"
+            hoveredColor: "#FACC15"
+            pressedColor: "#CA8A04"
             textColor: "#FFFFFF"
 
             clickedFunc: function() {

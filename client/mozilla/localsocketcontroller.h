@@ -6,6 +6,8 @@
 #define LOCALSOCKETCONTROLLER_H
 
 #include <QHostAddress>
+#include <QElapsedTimer>
+#include <QJsonObject>
 #include <QLocalSocket>
 #include <QTimer>
 #include <functional>
@@ -44,6 +46,8 @@ class LocalSocketController final : public ControllerImpl {
   void errorOccurred(QLocalSocket::LocalSocketError socketError);
   void readData();
   void parseCommand(const QByteArray& command);
+  void trySendPendingActivation();
+  void sendActivationPayload(const QJsonObject& json);
 
   void write(const QJsonObject& json);
 
@@ -60,6 +64,11 @@ class LocalSocketController final : public ControllerImpl {
   QByteArray m_buffer;
 
   QString m_deviceIpv4;
+  QJsonObject m_pendingActivation;
+  bool m_hasPendingActivation = false;
+  bool m_activationInFlight = false;
+  bool m_ignoredEarlyDisconnect = false;
+  QElapsedTimer m_lastActivateSentAt;
   std::function<void(const QString&)> m_logCallback = nullptr;
 
   QTimer m_initializingTimer;

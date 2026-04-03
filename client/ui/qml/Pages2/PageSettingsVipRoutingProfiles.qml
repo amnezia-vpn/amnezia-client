@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import PageEnum 1.0
 import Style 1.0
@@ -24,7 +25,9 @@ PageType {
     readonly property bool wideLayout: GC.isWideWidth(width)
     readonly property real sideMargin: GC.pageHorizontalMargin(width)
     readonly property real maxContentWidth: GC.pageMaxWidth(width)
+    readonly property var systemProfiles: root.profiles.filter(function(profile) { return profile.kind === "system" })
     readonly property var customProfiles: root.profiles.filter(function(profile) { return profile.kind !== "system" })
+    readonly property int enabledProfilesCount: root.customProfiles.filter(function(profile) { return profile.enabled }).length
 
     function actionLabel(action) { return action === "proxy" ? qsTr("ЧЕРЕЗ VPN") : qsTr("БЕЗ VPN") }
     function actionTone(action) { return action === "proxy" ? "proxy" : "direct" }
@@ -36,6 +39,13 @@ PageType {
         if (reason === "dns_unreachable") return qsTr("Сервис фильтрации временно недоступен.")
         if (reason === "routing_rules_missing") return qsTr("Профили маршрутизации ещё не загрузились.")
         return qsTr("")
+    }
+    function profileRulesSummary(profile) {
+        const domainsCount = (profile.domains || []).length
+        const suffixesCount = (profile.domain_suffixes || []).length
+        const cidrsCount = (profile.cidrs || []).length
+        const total = domainsCount + suffixesCount + cidrsCount
+        return total > 0 ? qsTr("Правил: %1").arg(total) : qsTr("Правил нет")
     }
 
     function openCreateProfileEditor() {
@@ -212,17 +222,37 @@ PageType {
                     Layout.leftMargin: 4
                 }
 
+                LabelTextType {
+                    Layout.fillWidth: true
+                    text: qsTr("Профили маршрутизации")
+                    font.pixelSize: root.wideLayout ? 34 : 30
+                    font.weight: 700
+                    color: FBLinkStyle.color.paleGray
+                }
+
                 PremiumPanel {
                     Layout.fillWidth: true
                     padding: 12
-                    accentVisible: true
-                    accentColor: root.canManageProfiles ? "#00C8FF" : "#F59E0B"
+                    visible: true
+                    radius: 16
+                    fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    accentVisible: false
 
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        PremiumBadge { text: qsTr("VIP"); tone: root.canManageProfiles ? "accent" : "warning"; iconSource: "qrc:/images/controls/tag.svg" }
-                        PremiumBadge { text: qsTr("Для VIP"); tone: "success"; iconSource: "qrc:/images/controls/shield-tick.svg" }
+
+                        PremiumBadge {
+                            text: root.canManageProfiles ? qsTr("VIP АКТИВЕН") : qsTr("VIP ТРЕБУЕТСЯ")
+                            tone: root.canManageProfiles ? "success" : "warning"
+                            compact: true
+                        }
+                        PremiumBadge {
+                            text: qsTr("МАРШРУТИЗАЦИЯ")
+                            tone: "neutral"
+                            compact: true
+                        }
                     }
 
                     LabelTextType {
@@ -249,150 +279,92 @@ PageType {
                         implicitHeight: 48
                         visible: !root.canManageProfiles
                         text: qsTr("Открыть VIP-подписку")
-                        defaultColor: "#00C8FF"
-                        hoveredColor: "#33D4FF"
-                        pressedColor: "#0099BB"
+                        defaultColor: "#EAB308"
+                        hoveredColor: "#FACC15"
+                        pressedColor: "#CA8A04"
                         textColor: "#FFFFFF"
                         clickedFunc: function() { PageController.goToPage(PageEnum.PageFBLinkSubscription) }
                     }
                 }
 
-                PremiumPanel {
+                GridLayout {
                     Layout.fillWidth: true
-                    padding: 12
-                    visible: root.canManageProfiles && root.canUseAdBlock
-                    accentVisible: true
-                    accentColor: FBLinkController.vipAdBlockEnabled ? "#10B981" : "#00C8FF"
+                    visible: root.canManageProfiles
+                    columns: 1
+                    columnSpacing: 10
+                    rowSpacing: 10
 
-                    RowLayout {
+                    PremiumPanel {
                         Layout.fillWidth: true
-                        spacing: 12
+                        radius: 16
+                        padding: 14
+                        fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                        outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                        accentVisible: false
 
-                        ColumnLayout {
+                        RowLayout {
                             Layout.fillWidth: true
-                            spacing: 6
-
-                            RowLayout {
-                                Layout.fillWidth: true
-                                spacing: 8
-                                PremiumBadge { text: qsTr("Защита"); tone: FBLinkController.vipAdBlockEnabled ? "success" : "accent"; iconSource: "qrc:/images/controls/shield-tick.svg" }
-                                PremiumBadge {
-                                    text: root.adBlockStatusText().toUpperCase()
-                                    tone: FBLinkController.vipAdBlockStatus === "applied"
-                                        ? "success"
-                                        : (FBLinkController.vipAdBlockEnabled ? "warning" : "neutral")
-                                }
-                            }
+                            spacing: 12
 
                             LabelTextType {
                                 Layout.fillWidth: true
-                                text: qsTr("Ad Block только для VIP")
+                                text: qsTr("Системные пресеты")
                                 font.pixelSize: 17
                                 font.weight: 700
                                 color: FBLinkStyle.color.paleGray
-                                wrapMode: Text.WordWrap
-                            }
-
-                            CaptionTextType {
-                                Layout.fillWidth: true
-                                text: FBLinkController.vipAdBlockEnabled
-                                    ? (FBLinkController.vipAdBlockStatus === "applied"
-                                        ? qsTr("Реклама и трекеры блокируются автоматически.")
-                                        : qsTr("Фильтрация временно недоступна, но VPN продолжает работать."))
-                                    : qsTr("Ad Block выключен. Сайты открываются без фильтрации рекламы.")
-                                color: FBLinkStyle.color.mutedGray
-                                wrapMode: Text.WordWrap
-                            }
-
-                            CaptionTextType {
-                                Layout.fillWidth: true
-                                visible: FBLinkController.vipAdBlockEnabled && FBLinkController.vipAdBlockStatus === "degraded"
-                                text: root.adBlockReasonText()
-                                color: "#F59E0B"
-                                wrapMode: Text.WordWrap
                             }
 
                             BasicButtonType {
-                                Layout.fillWidth: true
-                                visible: FBLinkController.vipAdBlockEnabled && FBLinkController.vipAdBlockStatus === "degraded"
-                                implicitHeight: 38
-                                text: qsTr("Отправить отчёт")
-                                defaultColor: Qt.rgba(245/255, 158/255, 11/255, 0.18)
-                                hoveredColor: Qt.rgba(245/255, 158/255, 11/255, 0.28)
-                                pressedColor: Qt.rgba(245/255, 158/255, 11/255, 0.36)
+                                implicitWidth: 208
+                                implicitHeight: 42
+                                text: qsTr("Добавить пресет")
+                                defaultColor: Qt.rgba(63/255, 63/255, 70/255, 0.42)
+                                hoveredColor: Qt.rgba(63/255, 63/255, 70/255, 0.64)
+                                pressedColor: Qt.rgba(63/255, 63/255, 70/255, 0.78)
                                 textColor: "#FFFFFF"
-                                clickedFunc: function() {
-                                    FBLinkController.submitBugReport(qsTr("Проблема с VIP Ad Block"))
-                                }
+                                clickedFunc: function() { PageController.goToPage(PageEnum.PageSettingsVipPresetCatalog) }
                             }
                         }
 
-                        SwitcherType {
-                            Layout.alignment: Qt.AlignTop
-                            enabled: root.canManageProfiles && !FBLinkController.isLoading
-                            checked: FBLinkController.vipAdBlockEnabled
-                            onToggled: {
-                                if (checked !== FBLinkController.vipAdBlockEnabled) {
-                                    FBLinkController.setVipAdBlockEnabled(checked)
-                                }
-                            }
+                        CaptionTextType {
+                            Layout.fillWidth: true
+                            text: qsTr("Откройте каталог и добавьте нужный пресет в «Мои профили».")
+                            color: FBLinkStyle.color.mutedGray
+                            wrapMode: Text.WordWrap
                         }
                     }
                 }
 
                 PremiumPanel {
                     Layout.fillWidth: true
-                    padding: 12
-                    visible: root.canManageProfiles
-                    accentVisible: true
-                    accentColor: "#10B981"
+                    radius: 16
+                    padding: 14
+                    fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    accentVisible: false
 
                     RowLayout {
                         Layout.fillWidth: true
                         LabelTextType {
                             Layout.fillWidth: true
-                            text: qsTr("Системные пресеты")
+                            text: qsTr("Мои профили")
                             font.pixelSize: 17
                             font.weight: 700
                             color: FBLinkStyle.color.paleGray
                         }
-                        BasicButtonType {
-                            implicitHeight: 38
-                            implicitWidth: 170
-                            text: qsTr("Добавить пресет")
-                            defaultColor: Qt.rgba(16/255, 185/255, 129/255, 0.18)
-                            hoveredColor: Qt.rgba(16/255, 185/255, 129/255, 0.28)
-                            pressedColor: Qt.rgba(16/255, 185/255, 129/255, 0.34)
-                            textColor: "#FFFFFF"
-                            clickedFunc: function() { PageController.goToPage(PageEnum.PageSettingsVipPresetCatalog) }
+                        PremiumBadge {
+                            text: qsTr("%1 активных").arg(root.enabledProfilesCount)
+                            tone: root.enabledProfilesCount > 0 ? "success" : "neutral"
+                            compact: true
                         }
-                    }
-
-                    CaptionTextType {
-                        Layout.fillWidth: true
-                        text: qsTr("Откройте каталог и добавьте нужный пресет в «Мои профили».")
-                        color: FBLinkStyle.color.mutedGray
-                        wrapMode: Text.WordWrap
-                    }
-                }
-
-                PremiumPanel {
-                    Layout.fillWidth: true
-                    padding: 12
-                    accentVisible: true
-                    accentColor: "#00C8FF"
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        LabelTextType { Layout.fillWidth: true; text: qsTr("Мои профили"); font.pixelSize: 17; font.weight: 700; color: FBLinkStyle.color.paleGray }
                         BasicButtonType {
                             visible: root.canManageProfiles
-                            implicitHeight: 38
-                            implicitWidth: 150
-                            text: qsTr("Новый профиль")
-                            defaultColor: Qt.rgba(0, 200/255, 255/255, 0.16)
-                            hoveredColor: Qt.rgba(0, 200/255, 255/255, 0.26)
-                            pressedColor: Qt.rgba(0, 200/255, 255/255, 0.32)
+                            implicitHeight: 42
+                            implicitWidth: 208
+                            text: qsTr("+  Новый профиль...")
+                            defaultColor: Qt.rgba(63/255, 63/255, 70/255, 0.42)
+                            hoveredColor: Qt.rgba(63/255, 63/255, 70/255, 0.64)
+                            pressedColor: Qt.rgba(63/255, 63/255, 70/255, 0.78)
                             textColor: "#FFFFFF"
                             clickedFunc: root.openCreateProfileEditor
                         }
@@ -438,11 +410,95 @@ PageType {
                         delegate: PremiumPanel {
                             Layout.fillWidth: true
                             padding: 12
-                            fillColor: Qt.rgba(1, 1, 1, 0.03)
-                            outlineColor: Qt.rgba(1, 1, 1, 0.06)
                             property var profileData: modelData
+                            fillColor: Qt.rgba(14/255, 14/255, 14/255, 1.0)
+                            outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                            accentVisible: false
 
-                            LabelTextType { Layout.fillWidth: true; text: profileData.name || qsTr("Без названия"); font.pixelSize: 16; font.weight: 700; color: FBLinkStyle.color.paleGray; wrapMode: Text.WordWrap }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                LabelTextType {
+                                    Layout.fillWidth: true
+                                    text: profileData.name || qsTr("Без названия")
+                                    font.pixelSize: 16
+                                    font.weight: 700
+                                    color: FBLinkStyle.color.paleGray
+                                    wrapMode: Text.WordWrap
+                                }
+
+                                SwitcherType {
+                                    text: ""
+                                    visible: root.canManageProfiles
+                                    enabled: root.canManageProfiles && !FBLinkController.isLoading
+                                    checked: !!profileData.enabled
+                                    onToggled: {
+                                        if (checked !== !!profileData.enabled) {
+                                            root.toggleProfile(profileData)
+                                        }
+                                    }
+                                }
+
+                                RowLayout {
+                                    visible: root.canManageProfiles
+                                    spacing: 8
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 34
+                                        Layout.preferredHeight: 34
+                                        radius: 9
+                                        color: editMouse.pressed
+                                            ? Qt.rgba(255/255, 255/255, 255/255, 0.14)
+                                            : (editMouse.containsMouse ? Qt.rgba(255/255, 255/255, 255/255, 0.10) : Qt.rgba(255/255, 255/255, 255/255, 0.06))
+                                        border.width: 1
+                                        border.color: Qt.rgba(255/255, 255/255, 255/255, 0.12)
+
+                                        Image {
+                                            anchors.centerIn: parent
+                                            source: "qrc:/images/controls/edit-3.svg"
+                                            sourceSize: Qt.size(16, 16)
+                                            layer.enabled: true
+                                            layer.effect: ColorOverlay { color: "#E5E7EB" }
+                                        }
+
+                                        MouseArea {
+                                            id: editMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: root.openEditProfileEditor(profileData)
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 34
+                                        Layout.preferredHeight: 34
+                                        radius: 9
+                                        color: deleteMouse.pressed
+                                            ? Qt.rgba(239/255, 68/255, 68/255, 0.28)
+                                            : (deleteMouse.containsMouse ? Qt.rgba(239/255, 68/255, 68/255, 0.22) : Qt.rgba(239/255, 68/255, 68/255, 0.14))
+                                        border.width: 1
+                                        border.color: Qt.rgba(239/255, 68/255, 68/255, 0.45)
+
+                                        Image {
+                                            anchors.centerIn: parent
+                                            source: "qrc:/images/controls/trash.svg"
+                                            sourceSize: Qt.size(16, 16)
+                                            layer.enabled: true
+                                            layer.effect: ColorOverlay { color: "#F87171" }
+                                        }
+
+                                        MouseArea {
+                                            id: deleteMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: root.deleteProfile(profileData)
+                                        }
+                                    }
+                                }
+                            }
 
                             Flow {
                                 Layout.fillWidth: true
@@ -450,15 +506,16 @@ PageType {
                                 spacing: 8
                                 PremiumBadge { text: root.actionLabel(profileData.action || "direct"); tone: root.actionTone(profileData.action || "direct") }
                                 PremiumBadge { text: profileData.enabled ? qsTr("ВКЛЮЧЕН") : qsTr("ВЫКЛЮЧЕН"); tone: profileData.enabled ? "success" : "neutral" }
+                                PremiumBadge { text: root.profileRulesSummary(profileData); tone: "neutral" }
                             }
 
-                                Flow {
+                            CaptionTextType {
                                 Layout.fillWidth: true
-                                width: parent ? parent.width : 0
-                                spacing: 10
-                                BasicButtonType { width: root.wideLayout ? 150 : parent.width; implicitHeight: 44; enabled: root.canManageProfiles; text: profileData.enabled ? qsTr("Выключить") : qsTr("Включить"); defaultColor: profileData.enabled ? Qt.rgba(16/255, 185/255, 129/255, 0.18) : Qt.rgba(0, 200/255, 255/255, 0.16); hoveredColor: profileData.enabled ? Qt.rgba(16/255, 185/255, 129/255, 0.28) : Qt.rgba(0, 200/255, 255/255, 0.26); pressedColor: profileData.enabled ? Qt.rgba(16/255, 185/255, 129/255, 0.34) : Qt.rgba(0, 200/255, 255/255, 0.32); textColor: "#FFFFFF"; clickedFunc: function() { root.toggleProfile(profileData) } }
-                                BasicButtonType { width: root.wideLayout ? 150 : parent.width; implicitHeight: 44; text: qsTr("Редактировать"); defaultColor: Qt.rgba(1, 1, 1, 0.08); hoveredColor: Qt.rgba(1, 1, 1, 0.12); pressedColor: Qt.rgba(1, 1, 1, 0.18); textColor: FBLinkStyle.color.paleGray; clickedFunc: function() { root.openEditProfileEditor(profileData) } }
-                                BasicButtonType { width: root.wideLayout ? 150 : parent.width; implicitHeight: 44; enabled: root.canManageProfiles; text: qsTr("Удалить"); defaultColor: Qt.rgba(239/255, 68/255, 68/255, 0.14); hoveredColor: Qt.rgba(239/255, 68/255, 68/255, 0.22); pressedColor: Qt.rgba(239/255, 68/255, 68/255, 0.30); textColor: "#FFFFFF"; clickedFunc: function() { root.deleteProfile(profileData) } }
+                                text: profileData.action === "proxy"
+                                    ? qsTr("Трафик правил направляется через VPN.")
+                                    : qsTr("Трафик правил идёт в обход VPN.")
+                                color: FBLinkStyle.color.mutedGray
+                                wrapMode: Text.WordWrap
                             }
                         }
                     }

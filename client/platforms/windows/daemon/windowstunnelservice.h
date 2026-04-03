@@ -24,6 +24,7 @@ class WindowsTunnelService final : public QObject {
   void stop();
   bool isRunning();
   QString uapiCommand(const QString& command);
+  QString lastFailureReason() const { return m_lastFailureReason; }
 
  signals:
   void backendFailure();
@@ -40,6 +41,7 @@ class WindowsTunnelService final : public QObject {
   // These are really SC_HANDLEs in disguise.
   void* m_scm = nullptr;
   void* m_service = nullptr;
+  QString m_lastFailureReason;
 };
 
 #endif  // WINDOWSTUNNELSERVICE_H

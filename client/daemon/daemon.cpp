@@ -54,8 +54,11 @@ Daemon* Daemon::instance() {
 }
 
 bool Daemon::activate(const InterfaceConfig& config) {
+  setLastErrorText(QString());
+
   if (wgutils() == nullptr) {
     logger.error() << "wgutils is null in activate. Cannot proceed.";
+    setLastErrorText("wgutils_null");
     return false;
   }
 
@@ -78,14 +81,19 @@ bool Daemon::activate(const InterfaceConfig& config) {
       logger.debug() << "Already connected. Server switching supported.";
 
       if (!switchServer(config)) {
+        setLastErrorText("switch_server_failed");
         return false;
       }
 
       if (!dnsutils()->restoreResolvers()) {
+        setLastErrorText("dns_restore_failed");
         return false;
       }
 
       if (!maybeUpdateResolvers(config)) {
+        if (lastErrorText().isEmpty()) {
+          setLastErrorText("dns_update_failed");
+        }
         return false;
       }
 
@@ -97,11 +105,13 @@ bool Daemon::activate(const InterfaceConfig& config) {
         emit_failure_guard.dismiss();
         return true;
       }
+      setLastErrorText("platform_run_switch_failed");
       return false;
     }
 
     logger.warning() << "Already connected. Server switching not supported.";
     if (!deactivate(false)) {
+      setLastErrorText("deactivate_before_reconnect_failed");
       return false;
     }
 
@@ -109,6 +119,9 @@ bool Daemon::activate(const InterfaceConfig& config) {
     if (activate(config)) {
       emit_failure_guard.dismiss();
       return true;
+    }
+    if (lastErrorText().isEmpty()) {
+      setLastErrorText("recursive_activate_failed");
     }
     return false;
   }
@@ -120,6 +133,12 @@ bool Daemon::activate(const InterfaceConfig& config) {
     // Create the interface.
     if (!wgutils()->addInterface(config)) {
       logger.error() << "Interface creation failed.";
+      QString reason = "add_interface_failed";
+      const QString diagnostic = wgutils()->diagnosticError();
+      if (!diagnostic.isEmpty()) {
+        reason += ":" + diagnostic;
+      }
+      setLastErrorText(reason);
       return false;
     }
   }
@@ -127,9 +146,11 @@ bool Daemon::activate(const InterfaceConfig& config) {
   // Bring the interface up.
   if (supportIPUtils()) {
     if (!iputils()->addInterfaceIPs(config)) {
+      setLastErrorText("iputils_add_interface_ips_failed");
       return false;
     }
     if (!iputils()->setMTUAndUp(config)) {
+      setLastErrorText("iputils_set_mtu_up_failed");
       return false;
     }
   }
@@ -142,10 +163,19 @@ bool Daemon::activate(const InterfaceConfig& config) {
   // Add the peer to this interface.
   if (!wgutils()->updatePeer(config)) {
     logger.error() << "Peer creation failed.";
+    QString reason = "update_peer_failed";
+    const QString diagnostic = wgutils()->diagnosticError();
+    if (!diagnostic.isEmpty()) {
+      reason += ":" + diagnostic;
+    }
+    setLastErrorText(reason);
     return false;
   }
 
   if (!maybeUpdateResolvers(config)) {
+    if (lastErrorText().isEmpty()) {
+      setLastErrorText("dns_update_failed");
+    }
     return false;
   }
 
@@ -153,6 +183,7 @@ bool Daemon::activate(const InterfaceConfig& config) {
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
     if (!wgutils()->updateRoutePrefix(ip)) {
       logger.debug() << "Routing configuration failed for" << ip.toString();
+      setLastErrorText(QString("route_prefix_failed:%1").arg(ip.toString()));
       return false;
     }
   }
@@ -165,11 +196,13 @@ bool Daemon::activate(const InterfaceConfig& config) {
     emit_failure_guard.dismiss();
     return true;
   }
+  setLastErrorText("platform_run_up_failed");
   return false;
 }
 
 bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
   if (wgutils() == nullptr) {
+    setLastErrorText("wgutils_null_in_dns");
     return false;
   }
   if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
@@ -187,6 +220,7 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
     }
 
     if (!dnsutils()->updateResolvers(wgutils()->interfaceName(), resolvers)) {
+      setLastErrorText("dns_update_resolvers_failed");
       return false;
     }
   }

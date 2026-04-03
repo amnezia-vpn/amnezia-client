@@ -52,13 +52,13 @@ Item {
             GradientStop { position: 1.0; color: Qt.rgba(4/255, 18/255, 32/255, 0.97) }
         }
 
-        border.color: Qt.rgba(0, 200/255, 255/255, 0.45)
+        border.color: Qt.rgba(234/255, 179/255, 8/255, 0.45)
         border.width: 1
 
-        // Cyan ambient glow
+        // Amber ambient glow
         layer.enabled: true
         layer.effect: DropShadow {
-            color: "#00C8FF"
+            color: "#EAB308"
             radius: 24
             samples: 49
             spread: 0.0
@@ -113,7 +113,7 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: 23
-                    color: Qt.rgba(0, 200/255, 255/255, 0.18)
+                    color: Qt.rgba(234/255, 179/255, 8/255, 0.18)
                 }
 
                 Image {
@@ -121,7 +121,7 @@ Item {
                     source: "qrc:/images/controls/shield-tick.svg"
                     sourceSize: Qt.size(24, 24)
                     layer.enabled: true
-                    layer.effect: ColorOverlay { color: "#80D8FF" }
+                    layer.effect: ColorOverlay { color: "#FDE68A" }
 
                     SequentialAnimation on scale {
                         loops: Animation.Infinite
@@ -164,8 +164,8 @@ Item {
 
                     gradient: Gradient {
                         orientation: Gradient.Horizontal
-                        GradientStop { position: 0.0; color: "#33D4FF" }
-                        GradientStop { position: 1.0; color: "#00A8D4" }
+                        GradientStop { position: 0.0; color: "#FACC15" }
+                        GradientStop { position: 1.0; color: "#CA8A04" }
                     }
 
                     scale: ctaMouse.pressed ? 0.95 : (ctaMouse.containsMouse ? 1.03 : 1.0)

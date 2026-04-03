@@ -61,7 +61,7 @@ PageType {
                 PremiumPanel {
                     Layout.fillWidth: true
                     accentVisible: true
-                    accentColor: "#00C8FF"
+                    accentColor: "#EAB308"
 
                     PremiumBadge {
                         text: qsTr("Шаг 1")
@@ -100,7 +100,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignTop
                             accentVisible: index === 0
-                            accentColor: index === 0 ? "#10B981" : "#00C8FF"
+                            accentColor: index === 0 ? "#10B981" : "#EAB308"
 
                             RowLayout {
                                 Layout.fillWidth: true

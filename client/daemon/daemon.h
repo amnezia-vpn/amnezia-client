@@ -35,6 +35,7 @@ class Daemon : public QObject {
   virtual bool activate(const InterfaceConfig& config);
   virtual bool deactivate(bool emitSignals = true);
   virtual QJsonObject getStatus();
+  QString lastErrorText() const { return m_lastErrorText; }
 
   // Callback before any Activating measure is done
   virtual void prepareActivation(const InterfaceConfig& config, int inetAdapterIndex = 0) {
@@ -75,6 +76,7 @@ class Daemon : public QObject {
 
   static bool parseStringList(const QJsonObject& obj, const QString& name,
                               QStringList& list);
+  void setLastErrorText(const QString& reason) { m_lastErrorText = reason; }
 
   void checkHandshake();
 
@@ -88,6 +90,7 @@ class Daemon : public QObject {
   QMap<InterfaceConfig::HopType, ConnectionState> m_connections;
   QHash<IPAddress, int> m_excludedAddrSet;
   QTimer m_handshakeTimer;
+  QString m_lastErrorText;
 };
 
 #endif  // DAEMON_H

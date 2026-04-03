@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import PageEnum 1.0
 import Style 1.0
@@ -17,9 +18,19 @@ PageType {
     readonly property bool wideLayout: GC.isWideWidth(width)
     readonly property real sideMargin: GC.pageHorizontalMargin(width)
     readonly property real maxContentWidth: GC.pageMaxWidth(width)
+    property bool adBlockSwitchSyncing: false
 
     function goTo(page) {
         PageController.goToPage(page)
+    }
+
+    function syncAdBlockSwitchFromState() {
+        if (!adBlockSwitch) {
+            return
+        }
+        root.adBlockSwitchSyncing = true
+        adBlockSwitch.checked = FBLinkController.vipAdBlockEnabled
+        root.adBlockSwitchSyncing = false
     }
 
     function formatSubscriptionDate() {
@@ -52,6 +63,18 @@ PageType {
         }
     }
 
+    Connections {
+        target: FBLinkController
+
+        function onVipAdBlockChanged(enabled) {
+            root.syncAdBlockSwitchFromState()
+        }
+
+        function onSubscriptionChanged() {
+            root.syncAdBlockSwitchFromState()
+        }
+    }
+
     Flickable {
         anchors.fill: parent
         clip: true
@@ -77,19 +100,48 @@ PageType {
                     Layout.leftMargin: 4
                 }
 
-                PremiumPanel {
+                LabelTextType {
                     Layout.fillWidth: true
-                    padding: 12
-                    accentVisible: true
-                    accentColor: FBLinkController.isSubscribed ? "#10B981" : "#00C8FF"
+                    text: qsTr("Настройки")
+                    font.pixelSize: root.wideLayout ? 30 : 26
+                    font.weight: 700
+                    color: FBLinkStyle.color.paleGray
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 92
+                    radius: 16
+                    color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    border.width: 1
+                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
 
                     RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 10
+                        anchors.fill: parent
+                        anchors.leftMargin: 14
+                        anchors.rightMargin: 14
+                        spacing: 12
+
+                        Rectangle {
+                            Layout.preferredWidth: 46
+                            Layout.preferredHeight: 46
+                            radius: 23
+                            color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                            border.width: 1
+                            border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/mail.svg"
+                                sourceSize: Qt.size(22, 22)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                            }
+                        }
 
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 6
+                            spacing: 4
 
                             RowLayout {
                                 Layout.fillWidth: true
@@ -97,221 +149,697 @@ PageType {
 
                                 LabelTextType {
                                     Layout.fillWidth: true
-                                    text: qsTr("Настройки")
-                                    font.pixelSize: root.wideLayout ? 24 : 21
-                                    font.weight: 700
+                                    text: qsTr("Аккаунт FBLink")
                                     color: FBLinkStyle.color.paleGray
-                                    wrapMode: Text.WordWrap
+                                    font.pixelSize: 15
+                                    font.weight: 700
+                                    elide: Text.ElideRight
                                 }
 
-                                PremiumBadge {
-                                    text: root.accountTierLabel()
-                                    tone: FBLinkController.isSubscribed ? "success" : "accent"
-                                    iconSource: "qrc:/images/controls/shield-tick.svg"
+                                Rectangle {
+                                    implicitWidth: tierText.implicitWidth + 12
+                                    implicitHeight: tierText.implicitHeight + 4
+                                    radius: 6
+                                    color: FBLinkController.subscriptionPlan === "vip"
+                                        ? Qt.rgba(234/255, 179/255, 8/255, 0.12)
+                                        : (FBLinkController.isSubscribed ? Qt.rgba(59/255, 130/255, 246/255, 0.12) : Qt.rgba(63/255, 63/255, 70/255, 0.8))
+                                    border.width: 1
+                                    border.color: FBLinkController.subscriptionPlan === "vip"
+                                        ? Qt.rgba(234/255, 179/255, 8/255, 0.25)
+                                        : (FBLinkController.isSubscribed ? Qt.rgba(59/255, 130/255, 246/255, 0.25) : Qt.rgba(63/255, 63/255, 70/255, 1.0))
+
+                                    CaptionTextType {
+                                        id: tierText
+                                        anchors.centerIn: parent
+                                        text: root.accountTierLabel()
+                                        color: FBLinkController.subscriptionPlan === "vip"
+                                            ? "#EAB308"
+                                            : (FBLinkController.isSubscribed ? "#60A5FA" : FBLinkStyle.color.mutedGray)
+                                    }
                                 }
                             }
 
+                            CaptionTextType {
+                                Layout.fillWidth: true
+                                text: FBLinkController.isLoggedIn
+                                    ? (FBLinkController.userEmail !== "" ? FBLinkController.userEmail : qsTr("Email не получен"))
+                                    : qsTr("Гость")
+                                color: FBLinkStyle.color.mutedGray
+                                elide: Text.ElideRight
+                            }
                         }
-                    }
 
-                    Flow {
-                        Layout.fillWidth: true
-                        width: parent ? parent.width : 0
-                        spacing: 8
-
-                        PremiumBadge {
+                        Rectangle {
+                            Layout.preferredWidth: 44
+                            Layout.preferredHeight: 44
                             visible: FBLinkController.isLoggedIn
-                            text: root.formatSubscriptionDate()
-                            tone: FBLinkController.isSubscribed ? "success" : "neutral"
-                            iconSource: "qrc:/images/controls/history.svg"
-                        }
+                            radius: 12
+                            color: logoutMouse.pressed
+                                ? Qt.rgba(20/255, 20/255, 20/255, 1.0)
+                                : (logoutMouse.containsMouse ? Qt.rgba(24/255, 24/255, 24/255, 1.0) : Qt.rgba(12/255, 12/255, 12/255, 1.0))
+                            border.width: 1
+                            border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
 
-                        PremiumBadge {
-                            text: FBLinkController.isLoggedIn ? qsTr("Аккаунт подключён") : qsTr("Гость")
-                            tone: FBLinkController.isLoggedIn ? "accent" : "neutral"
-                            iconSource: FBLinkController.isLoggedIn
-                                ? "qrc:/images/controls/check.svg"
-                                : "qrc:/images/controls/info.svg"
-                        }
-                    }
-                }
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/x-circle.svg"
+                                sourceSize: Qt.size(22, 22)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: "#EF4444" }
+                            }
 
-                GridLayout {
-                    Layout.fillWidth: true
-                    columns: root.wideLayout ? 2 : 1
-                    columnSpacing: 14
-                    rowSpacing: 14
-
-                    PremiumPanel {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        padding: 12
-                        accentVisible: true
-                        accentColor: "#00C8FF"
-
-                        LabelTextType {
-                            text: qsTr("Аккаунт")
-                            font.pixelSize: 17
-                            font.weight: 700
-                            color: FBLinkStyle.color.paleGray
-                        }
-
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            implicitHeight: 46
-                            text: FBLinkController.isLoggedIn ? qsTr("Подписка") : qsTr("Войти")
-                            defaultColor: "#00C8FF"
-                            hoveredColor: "#33D4FF"
-                            pressedColor: "#0099BB"
-                            textColor: "#FFFFFF"
-                            leftImageSource: "qrc:/images/controls/shield-tick.svg"
-                            clickedFunc: function() {
-                                if (FBLinkController.isLoggedIn) {
-                                    root.goTo(PageEnum.PageFBLinkSubscription)
-                                } else {
-                                    root.goTo(PageEnum.PageFBLinkLogin)
+                            MouseArea {
+                                id: logoutMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    FBLinkController.logout()
+                                    PageController.goToPageHome()
                                 }
-                            }
-                        }
-
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            implicitHeight: 46
-                            visible: FBLinkController.isLoggedIn
-                            text: qsTr("VIP-пресеты")
-                            defaultColor: Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.18)
-                            textColor: FBLinkStyle.color.paleGray
-                            leftImageSource: "qrc:/images/controls/tag.svg"
-                            clickedFunc: function() {
-                                root.goTo(PageEnum.PageSettingsVipRoutingProfiles)
-                            }
-                        }
-
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            implicitHeight: 46
-                            visible: FBLinkController.isLoggedIn
-                            text: qsTr("Выйти")
-                            defaultColor: Qt.rgba(239/255, 68/255, 68/255, 0.14)
-                            hoveredColor: Qt.rgba(239/255, 68/255, 68/255, 0.20)
-                            pressedColor: Qt.rgba(239/255, 68/255, 68/255, 0.28)
-                            textColor: "#EF4444"
-                            leftImageSource: "qrc:/images/controls/x-circle.svg"
-                            clickedFunc: function() {
-                                FBLinkController.logout()
-                                PageController.goToPageHome()
-                            }
-                        }
-                    }
-
-                    PremiumPanel {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        padding: 12
-                        accentVisible: true
-                        accentColor: "#10B981"
-
-                        LabelTextType {
-                            text: qsTr("Подключение")
-                            font.pixelSize: 17
-                            font.weight: 700
-                            color: FBLinkStyle.color.paleGray
-                        }
-
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            implicitHeight: 46
-                            text: qsTr("Подключение")
-                            leftImageSource: "qrc:/images/controls/radio.svg"
-                            defaultColor: Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.18)
-                            textColor: FBLinkStyle.color.paleGray
-                            clickedFunc: function() { root.goTo(PageEnum.PageSettingsConnection) }
-                        }
-
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            implicitHeight: 46
-                            text: qsTr("Приложение")
-                            leftImageSource: "qrc:/images/controls/app.svg"
-                            defaultColor: Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.18)
-                            textColor: FBLinkStyle.color.paleGray
-                            clickedFunc: function() { root.goTo(PageEnum.PageSettingsApplication) }
-                        }
-
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            implicitHeight: 46
-                            visible: ServersModel.hasServersFromGatewayApi
-                            text: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()
-                                ? qsTr("Новости • новое")
-                                : qsTr("Новости")
-                            leftImageSource: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()
-                                ? "qrc:/images/controls/news-unread.svg"
-                                : "qrc:/images/controls/news.svg"
-                            defaultColor: Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.18)
-                            textColor: FBLinkStyle.color.paleGray
-                            clickedFunc: function() {
-                                if (!ServersModel.hasServersFromGatewayApi) {
-                                    return
-                                }
-                                PageController.showBusyIndicator(true)
-                                ApiNewsController.fetchNews(true)
-                                root.goTo(PageEnum.PageSettingsNewsNotifications)
                             }
                         }
                     }
                 }
 
-                PremiumPanel {
+                CaptionTextType {
                     Layout.fillWidth: true
-                    padding: 12
-                    accentVisible: true
-                    accentColor: "#F59E0B"
+                    text: "CONNECTION"
+                    color: FBLinkStyle.color.mutedGray
+                    font.bold: true
+                }
 
-                    LabelTextType {
-                        text: qsTr("Инструменты")
-                        font.pixelSize: 17
-                        font.weight: 700
-                        color: FBLinkStyle.color.paleGray
+                Rectangle {
+                    Layout.fillWidth: true
+                    radius: 16
+                    color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    border.width: 1
+                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    implicitHeight: 234
+
+                    Column {
+                        anchors.fill: parent
+                        spacing: 0
+
+                        Rectangle {
+                            width: parent.width
+                            height: 78
+                            color: "transparent"
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 14
+                                spacing: 12
+
+                                Rectangle {
+                                    Layout.preferredWidth: 40
+                                    Layout.preferredHeight: 40
+                                    radius: 10
+                                    color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                                    border.width: 1
+                                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        source: "qrc:/images/controls/shield-tick.svg"
+                                        sourceSize: Qt.size(18, 18)
+                                        layer.enabled: true
+                                        layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+
+                                    LabelTextType {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Kill Switch")
+                                        color: FBLinkStyle.color.paleGray
+                                        font.pixelSize: 14
+                                        font.weight: 600
+                                    }
+
+                                    CaptionTextType {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Блокировать интернет при обрыве VPN")
+                                        color: FBLinkStyle.color.mutedGray
+                                    }
+                                }
+
+                                SwitcherType {
+                                    checked: SettingsController.isKillSwitchEnabled
+                                    onToggled: {
+                                        if (checked !== SettingsController.isKillSwitchEnabled) {
+                                            SettingsController.isKillSwitchEnabled = checked
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 1
+                            color: Qt.rgba(63/255, 63/255, 70/255, 0.6)
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 77
+                            color: "transparent"
+                            opacity: FBLinkController.canManageRoutingProfiles ? 1.0 : 0.45
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 14
+                                spacing: 12
+
+                                Rectangle {
+                                    Layout.preferredWidth: 40
+                                    Layout.preferredHeight: 40
+                                    radius: 10
+                                    color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                                    border.width: 1
+                                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        source: "qrc:/images/controls/split-tunneling.svg"
+                                        sourceSize: Qt.size(18, 18)
+                                        layer.enabled: true
+                                        layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 6
+
+                                        Image {
+                                            Layout.preferredWidth: 14
+                                            Layout.preferredHeight: 14
+                                            source: "qrc:/images/controls/crown.svg"
+                                            sourceSize: Qt.size(14, 14)
+                                            layer.enabled: true
+                                            layer.effect: ColorOverlay { color: "#F5C542" }
+                                        }
+
+                                        LabelTextType {
+                                            Layout.fillWidth: true
+                                            text: qsTr("Профили маршрутизации")
+                                            color: FBLinkStyle.color.paleGray
+                                            font.pixelSize: 14
+                                            font.weight: 600
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+
+                                    CaptionTextType {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Управление split tunneling и маршрутами")
+                                        color: FBLinkStyle.color.mutedGray
+                                    }
+                                }
+
+                                Image {
+                                    source: "qrc:/images/controls/chevron-right.svg"
+                                    sourceSize: Qt.size(18, 18)
+                                    layer.enabled: true
+                                    layer.effect: ColorOverlay { color: FBLinkStyle.color.charcoalGray }
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: FBLinkController.canManageRoutingProfiles
+                                hoverEnabled: true
+                                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                onClicked: root.goTo(PageEnum.PageSettingsVipRoutingProfiles)
+                            }
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 1
+                            color: Qt.rgba(63/255, 63/255, 70/255, 0.6)
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 77
+                            color: "transparent"
+                            opacity: FBLinkController.canUseAdBlock ? 1.0 : 0.5
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 14
+                                spacing: 12
+
+                                Rectangle {
+                                    Layout.preferredWidth: 40
+                                    Layout.preferredHeight: 40
+                                    radius: 10
+                                    color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                                    border.width: 1
+                                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        source: "qrc:/images/controls/bug.svg"
+                                        sourceSize: Qt.size(18, 18)
+                                        layer.enabled: true
+                                        layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 6
+
+                                        Image {
+                                            Layout.preferredWidth: 14
+                                            Layout.preferredHeight: 14
+                                            source: "qrc:/images/controls/crown.svg"
+                                            sourceSize: Qt.size(14, 14)
+                                            layer.enabled: true
+                                            layer.effect: ColorOverlay { color: "#F5C542" }
+                                        }
+
+                                        LabelTextType {
+                                            Layout.fillWidth: true
+                                            text: qsTr("AdBlock")
+                                            color: FBLinkStyle.color.paleGray
+                                            font.pixelSize: 14
+                                            font.weight: 600
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+
+                                    CaptionTextType {
+                                        Layout.fillWidth: true
+                                        text: !FBLinkController.canUseAdBlock
+                                            ? qsTr("Доступно только для VIP аккаунта")
+                                            : (FBLinkController.vipAdBlockEnabled
+                                                ? ((FBLinkController.vipAdBlockStatus === "degraded"
+                                                    || FBLinkController.vipAdBlockStatus === "unavailable")
+                                                    ? qsTr("Фильтрация временно недоступна")
+                                                    : qsTr("Блокировка рекламы активна"))
+                                                : qsTr("AdBlock выключен"))
+                                        color: FBLinkStyle.color.mutedGray
+                                    }
+                                }
+
+                                SwitcherType {
+                                    id: adBlockSwitch
+                                    enabled: FBLinkController.canUseAdBlock && !FBLinkController.isLoading
+                                    checked: false
+                                    Component.onCompleted: root.syncAdBlockSwitchFromState()
+                                    onToggled: {
+                                        if (root.adBlockSwitchSyncing) {
+                                            return
+                                        }
+                                        if (checked === FBLinkController.vipAdBlockEnabled) {
+                                            return
+                                        }
+                                        FBLinkController.setVipAdBlockEnabled(checked)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                CaptionTextType {
+                    Layout.fillWidth: true
+                    text: "ACCOUNT"
+                    color: FBLinkStyle.color.mutedGray
+                    font.bold: true
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    radius: 16
+                    color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    border.width: 1
+                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    implicitHeight: 78
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 14
+                        anchors.rightMargin: 14
+                        spacing: 12
+
+                        Rectangle {
+                            Layout.preferredWidth: 40
+                            Layout.preferredHeight: 40
+                            radius: 10
+                            color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                            border.width: 1
+                            border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/tag.svg"
+                                sourceSize: Qt.size(18, 18)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: FBLinkController.isLoggedIn ? qsTr("Подписка") : qsTr("Войти")
+                                color: FBLinkStyle.color.paleGray
+                                font.pixelSize: 14
+                                font.weight: 600
+                            }
+
+                            CaptionTextType {
+                                Layout.fillWidth: true
+                                text: FBLinkController.isLoggedIn ? qsTr("Управление подпиской") : qsTr("Авторизуйтесь в FBLink ID")
+                                color: FBLinkStyle.color.mutedGray
+                            }
+                        }
+
+                        Image {
+                            source: "qrc:/images/controls/chevron-right.svg"
+                            sourceSize: Qt.size(18, 18)
+                            layer.enabled: true
+                            layer.effect: ColorOverlay { color: FBLinkStyle.color.charcoalGray }
+                        }
                     }
 
-                    Flow {
-                        Layout.fillWidth: true
-                        width: parent ? parent.width : 0
-                        spacing: 10
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (FBLinkController.isLoggedIn) {
+                                root.goTo(PageEnum.PageFBLinkSubscription)
+                            } else {
+                                root.goTo(PageEnum.PageFBLinkLogin)
+                            }
+                        }
+                    }
+                }
 
-                        BasicButtonType {
-                            width: root.wideLayout ? 220 : parent.width
-                            implicitHeight: 44
-                            text: qsTr("О приложении")
-                            leftImageSource: "qrc:/images/controls/info.svg"
-                            defaultColor: Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.18)
-                            textColor: FBLinkStyle.color.paleGray
-                            clickedFunc: function() { root.goTo(PageEnum.PageSettingsAbout) }
+                CaptionTextType {
+                    Layout.fillWidth: true
+                    text: "APPLICATION"
+                    color: FBLinkStyle.color.mutedGray
+                    font.bold: true
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    radius: 16
+                    color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    border.width: 1
+                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    implicitHeight: 234
+
+                    Column {
+                        anchors.fill: parent
+                        spacing: 0
+
+                        Rectangle {
+                            width: parent.width
+                            height: 78
+                            color: "transparent"
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 14
+                                spacing: 12
+
+                                Rectangle {
+                                    Layout.preferredWidth: 40
+                                    Layout.preferredHeight: 40
+                                    radius: 10
+                                    color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                                    border.width: 1
+                                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        source: "qrc:/images/controls/refresh-cw.svg"
+                                        sourceSize: Qt.size(18, 18)
+                                        layer.enabled: true
+                                        layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+
+                                    LabelTextType {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Автоподключение")
+                                        color: FBLinkStyle.color.paleGray
+                                        font.pixelSize: 14
+                                        font.weight: 600
+                                    }
+
+                                    CaptionTextType {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Подключаться при запуске приложения")
+                                        color: FBLinkStyle.color.mutedGray
+                                    }
+                                }
+
+                                SwitcherType {
+                                    checked: SettingsController.isAutoConnectEnabled()
+                                    onToggled: {
+                                        if (checked !== SettingsController.isAutoConnectEnabled()) {
+                                            SettingsController.toggleAutoConnect(checked)
+                                        }
+                                    }
+                                }
+                            }
                         }
 
-                        BasicButtonType {
-                            visible: SettingsController.isDevModeEnabled
-                            width: root.wideLayout ? 220 : parent.width
-                            implicitHeight: 44
-                            text: qsTr("Dev-консоль")
-                            leftImageSource: "qrc:/images/controls/bug.svg"
-                            defaultColor: Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.18)
-                            textColor: FBLinkStyle.color.paleGray
-                            clickedFunc: function() { root.goTo(PageEnum.PageDevMenu) }
+                        Rectangle {
+                            width: parent.width
+                            height: 1
+                            color: Qt.rgba(63/255, 63/255, 70/255, 0.6)
                         }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 77
+                            color: "transparent"
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 14
+                                spacing: 12
+
+                                Rectangle {
+                                    Layout.preferredWidth: 40
+                                    Layout.preferredHeight: 40
+                                    radius: 10
+                                    color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                                    border.width: 1
+                                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        source: "qrc:/images/controls/settings-2.svg"
+                                        sourceSize: Qt.size(18, 18)
+                                        layer.enabled: true
+                                        layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+
+                                    LabelTextType {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Язык и параметры")
+                                        color: FBLinkStyle.color.paleGray
+                                        font.pixelSize: 14
+                                        font.weight: 600
+                                    }
+
+                                    CaptionTextType {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Дополнительные настройки приложения")
+                                        color: FBLinkStyle.color.mutedGray
+                                    }
+                                }
+
+                                Image {
+                                    source: "qrc:/images/controls/chevron-right.svg"
+                                    sourceSize: Qt.size(18, 18)
+                                    layer.enabled: true
+                                    layer.effect: ColorOverlay { color: FBLinkStyle.color.charcoalGray }
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.goTo(PageEnum.PageSettingsApplication)
+                            }
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 1
+                            color: Qt.rgba(63/255, 63/255, 70/255, 0.6)
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 77
+                            color: "transparent"
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 14
+                                spacing: 12
+
+                                Rectangle {
+                                    Layout.preferredWidth: 40
+                                    Layout.preferredHeight: 40
+                                    radius: 10
+                                    color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                                    border.width: 1
+                                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        source: "qrc:/images/controls/archive-restore.svg"
+                                        sourceSize: Qt.size(18, 18)
+                                        layer.enabled: true
+                                        layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+
+                                    LabelTextType {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Сохранённые конфиги")
+                                        color: FBLinkStyle.color.paleGray
+                                        font.pixelSize: 14
+                                        font.weight: 600
+                                    }
+
+                                    CaptionTextType {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Резервная копия и восстановление")
+                                        color: FBLinkStyle.color.mutedGray
+                                    }
+                                }
+
+                                Image {
+                                    source: "qrc:/images/controls/chevron-right.svg"
+                                    sourceSize: Qt.size(18, 18)
+                                    layer.enabled: true
+                                    layer.effect: ColorOverlay { color: FBLinkStyle.color.charcoalGray }
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.goTo(PageEnum.PageSettingsBackup)
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    radius: 16
+                    color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    border.width: 1
+                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    implicitHeight: 78
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 14
+                        anchors.rightMargin: 14
+                        spacing: 12
+
+                        Rectangle {
+                            Layout.preferredWidth: 40
+                            Layout.preferredHeight: 40
+                            radius: 10
+                            color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                            border.width: 1
+                            border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/info.svg"
+                                sourceSize: Qt.size(18, 18)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: qsTr("О приложении")
+                                color: FBLinkStyle.color.paleGray
+                                font.pixelSize: 14
+                                font.weight: 600
+                            }
+
+                            CaptionTextType {
+                                Layout.fillWidth: true
+                                text: qsTr("Версия, лицензии и техническая информация")
+                                color: FBLinkStyle.color.mutedGray
+                            }
+                        }
+
+                        Image {
+                            source: "qrc:/images/controls/chevron-right.svg"
+                            sourceSize: Qt.size(18, 18)
+                            layer.enabled: true
+                            layer.effect: ColorOverlay { color: FBLinkStyle.color.charcoalGray }
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.goTo(PageEnum.PageSettingsAbout)
                     }
                 }
 

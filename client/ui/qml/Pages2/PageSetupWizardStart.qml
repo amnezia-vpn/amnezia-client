@@ -42,9 +42,9 @@ PageType {
             Layout.rightMargin: 16
             Layout.bottomMargin: 48 + SettingsController.safeAreaBottomMargin
 
-            defaultColor: "#00C8FF"
-            hoveredColor: "#33D4FF"
-            pressedColor: "#0099BB"
+            defaultColor: "#EAB308"
+            hoveredColor: "#FACC15"
+            pressedColor: "#CA8A04"
             textColor: FBLinkStyle.color.paleGray
 
             text: qsTr("Войти в FBLink VPN")

@@ -236,11 +236,8 @@ void SystemController::measurePing(const QString &host)
 
     const quint64 requestId = ++m_pingRequestId;
     auto ports = std::make_shared<QList<quint16>>(target.ports);
-    auto elapsed = std::make_shared<QElapsedTimer>();
-    elapsed->start();
-
     auto tryNextPort = std::make_shared<std::function<void()>>();
-    *tryNextPort = [this, requestId, target, ports, elapsed, tryNextPort]() {
+    *tryNextPort = [this, requestId, target, ports, tryNextPort]() {
         if (requestId != m_pingRequestId) {
             return;
         }
@@ -254,6 +251,8 @@ void SystemController::measurePing(const QString &host)
         auto *socket = new QTcpSocket(this);
         auto *timeout = new QTimer(socket);
         timeout->setSingleShot(true);
+        auto elapsed = std::make_shared<QElapsedTimer>();
+        elapsed->start();
 
         auto finished = std::make_shared<bool>(false);
         auto cleanup = [socket, timeout, finished]() {
