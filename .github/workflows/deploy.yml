@@ -97,6 +97,8 @@ jobs:
       QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
       BUILD_ARCH: 64
+      WIN_CODESIGN_PFX_BASE64: ${{ secrets.WIN_CODESIGN_PFX_BASE64 }}
+      WIN_CODESIGN_PFX_PASSWORD: ${{ secrets.WIN_CODESIGN_PFX_PASSWORD }}
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
@@ -145,13 +147,13 @@ jobs:
         arch: 'x64'
 
     - name: 'Import code-signing certificate (optional)'
-      if: ${{ secrets.WIN_CODESIGN_PFX_BASE64 != '' && secrets.WIN_CODESIGN_PFX_PASSWORD != '' }}
+      if: ${{ env.WIN_CODESIGN_PFX_BASE64 != '' && env.WIN_CODESIGN_PFX_PASSWORD != '' }}
       continue-on-error: true
       shell: powershell
       run: |
         try {
-          $base64 = "${{ secrets.WIN_CODESIGN_PFX_BASE64 }}".Trim()
-          $password = "${{ secrets.WIN_CODESIGN_PFX_PASSWORD }}"
+          $base64 = "${env:WIN_CODESIGN_PFX_BASE64}".Trim()
+          $password = "${env:WIN_CODESIGN_PFX_PASSWORD}"
           if ([string]::IsNullOrWhiteSpace($base64) -or [string]::IsNullOrEmpty($password)) {
             Write-Host "::warning::Code-signing secrets are empty. Continuing without signing."
             exit 0
@@ -176,7 +178,7 @@ jobs:
         }
 
     - name: 'Code signing disabled'
-      if: ${{ secrets.WIN_CODESIGN_PFX_BASE64 == '' || secrets.WIN_CODESIGN_PFX_PASSWORD == '' }}
+      if: ${{ env.WIN_CODESIGN_PFX_BASE64 == '' || env.WIN_CODESIGN_PFX_PASSWORD == '' }}
       shell: powershell
       run: |
         Write-Host "WIN_CODESIGN_PFX_BASE64 / WIN_CODESIGN_PFX_PASSWORD are not set. Build will continue without code signing."
@@ -678,28 +680,55 @@ jobs:
       with:
         ndk-version: 'r26b'
 
-    - name: 'Decode keystore secret to file'
+    - name: 'Prepare Android keystore (optional)'
       env:
         KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+        KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+        KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
       shell: bash
       run: |
-        if [ -z "${KEYSTORE_BASE64:-}" ]; then
-          echo "ERROR: ANDROID_RELEASE_KEYSTORE_BASE64 is empty"
-          exit 1
-        fi
-        printf "%s" "$KEYSTORE_BASE64" | base64 --decode > android.keystore
-        if [ ! -s android.keystore ]; then
-          echo "ERROR: android.keystore was not decoded correctly"
-          exit 1
+        set -euo pipefail
+
+        KEYSTORE_PATH="${GITHUB_WORKSPACE}/android.keystore"
+        rm -f "$KEYSTORE_PATH"
+
+        if [ -n "${KEYSTORE_BASE64:-}" ] && [ -n "${KEY_ALIAS:-}" ] && [ -n "${KEY_PASS:-}" ]; then
+          printf "%s" "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          if [ ! -s "$KEYSTORE_PATH" ]; then
+            echo "ERROR: android.keystore was not decoded correctly"
+            exit 1
+          fi
+          {
+            echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH"
+            echo "ANDROID_KEYSTORE_KEY_ALIAS=$KEY_ALIAS"
+            echo "ANDROID_KEYSTORE_KEY_PASS=$KEY_PASS"
+            echo "ANDROID_SIGNING_SOURCE=release-keystore"
+          } >> "$GITHUB_ENV"
+          echo "Using release Android keystore from secrets."
+        else
+          echo "::warning::ANDROID_RELEASE_KEYSTORE_* secrets are not fully configured. Generating temporary debug keystore."
+          keytool -genkeypair -v \
+            -keystore "$KEYSTORE_PATH" \
+            -storepass "android" \
+            -alias "androiddebugkey" \
+            -keypass "android" \
+            -dname "CN=Android Debug,O=Android,C=US" \
+            -keyalg RSA -keysize 2048 -validity 10000
+          {
+            echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH"
+            echo "ANDROID_KEYSTORE_KEY_ALIAS=androiddebugkey"
+            echo "ANDROID_KEYSTORE_KEY_PASS=android"
+            echo "ANDROID_SIGNING_SOURCE=generated-debug-keystore"
+          } >> "$GITHUB_ENV"
         fi
 
     - name: 'Build Android arm64-v8a'
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
-        ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
-        ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
-        ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
+        ANDROID_KEYSTORE_KEY_ALIAS: ${{ env.ANDROID_KEYSTORE_KEY_ALIAS }}
+        ANDROID_KEYSTORE_KEY_PASS: ${{ env.ANDROID_KEYSTORE_KEY_PASS }}
       shell: bash
       run: ./deploy/build_android.sh --aab --apk 'arm64-v8a' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
@@ -707,9 +736,9 @@ jobs:
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
-        ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
-        ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
-        ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
+        ANDROID_KEYSTORE_KEY_ALIAS: ${{ env.ANDROID_KEYSTORE_KEY_ALIAS }}
+        ANDROID_KEYSTORE_KEY_PASS: ${{ env.ANDROID_KEYSTORE_KEY_PASS }}
       shell: bash
       run: ./deploy/build_android.sh --apk 'armeabi-v7a' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
