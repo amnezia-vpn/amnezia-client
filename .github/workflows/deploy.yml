@@ -144,25 +144,38 @@ jobs:
       with:
         arch: 'x64'
 
-    - name: 'Import code-signing certificate'
+    - name: 'Import code-signing certificate (optional)'
       if: ${{ secrets.WIN_CODESIGN_PFX_BASE64 != '' && secrets.WIN_CODESIGN_PFX_PASSWORD != '' }}
+      continue-on-error: true
       shell: powershell
       run: |
-        $pfxPath = Join-Path $env:RUNNER_TEMP "windows-codesign.pfx"
-        [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String("${{ secrets.WIN_CODESIGN_PFX_BASE64 }}"))
+        try {
+          $base64 = "${{ secrets.WIN_CODESIGN_PFX_BASE64 }}".Trim()
+          $password = "${{ secrets.WIN_CODESIGN_PFX_PASSWORD }}"
+          if ([string]::IsNullOrWhiteSpace($base64) -or [string]::IsNullOrEmpty($password)) {
+            Write-Host "::warning::Code-signing secrets are empty. Continuing without signing."
+            exit 0
+          }
 
-        $securePassword = ConvertTo-SecureString "${{ secrets.WIN_CODESIGN_PFX_PASSWORD }}" -AsPlainText -Force
-        $imported = Import-PfxCertificate -FilePath $pfxPath -Password $securePassword -CertStoreLocation "Cert:\CurrentUser\My" -Exportable
-        $cert = $imported | Select-Object -First 1
+          $pfxPath = Join-Path $env:RUNNER_TEMP "windows-codesign.pfx"
+          [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($base64))
 
-        if (-not $cert) {
-          throw "PFX import failed: certificate was not imported into CurrentUser\\My"
+          $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
+          $imported = Import-PfxCertificate -FilePath $pfxPath -Password $securePassword -CertStoreLocation "Cert:\CurrentUser\My" -Exportable
+          $cert = $imported | Select-Object -First 1
+
+          if ($cert) {
+            "SIGN_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            Write-Host "Imported code-signing certificate. Thumbprint=$($cert.Thumbprint)"
+          } else {
+            Write-Host "::warning::PFX import returned no certificate. Continuing without signing."
+          }
+        } catch {
+          Write-Host "::warning::Failed to import code-signing certificate: $($_.Exception.Message)"
+          Write-Host "Continuing without code signing."
         }
 
-        "SIGN_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-        Write-Host "Imported code-signing certificate. Thumbprint=$($cert.Thumbprint)"
-
-    - name: 'Code-signing certificate not configured'
+    - name: 'Code signing disabled'
       if: ${{ secrets.WIN_CODESIGN_PFX_BASE64 == '' || secrets.WIN_CODESIGN_PFX_PASSWORD == '' }}
       shell: powershell
       run: |
