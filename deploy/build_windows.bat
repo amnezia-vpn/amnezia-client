@@ -9,6 +9,9 @@ set PATH=%QT_BIN_DIR:"=%;%PATH%
 echo "Using Qt in %QT_BIN_DIR%"
 echo "Using QIF in %QIF_BIN_DIR%"
 echo "Using WiX in %WIX_BIN_DIR%"
+if not "%SIGN_CERT_THUMBPRINT%"=="" (
+    echo "Using signing certificate thumbprint %SIGN_CERT_THUMBPRINT%"
+)
 
 if "%WIX_BIN_DIR%"=="" (
     echo "WIX_BIN_DIR is not set"
@@ -87,12 +90,20 @@ copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\FBLinkVPN.ico" >nul
 
 echo "Signing exe"
 cd %OUT_APP_DIR%
-signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe || echo "Signing skipped (no certificate)"
+if not "%SIGN_CERT_THUMBPRINT%"=="" (
+    signtool sign /v /sha1 "%SIGN_CERT_THUMBPRINT%" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe || echo "Signing skipped (thumbprint signing failed)"
+) else (
+    signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe || echo "Signing skipped (no certificate)"
+)
 
 "%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations --force-openssl "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
 "%QT_BIN_DIR:"=%\windeployqt" --release "%OUT_APP_DIR:"=%\%SERVICE_FILENAME:"=%"
 
-signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll || echo "Signing skipped (no certificate)"
+if not "%SIGN_CERT_THUMBPRINT%"=="" (
+    signtool sign /v /sha1 "%SIGN_CERT_THUMBPRINT%" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll || echo "Signing skipped (thumbprint signing failed)"
+) else (
+    signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll || echo "Signing skipped (no certificate)"
+)
 
 echo "Copying deploy data..."
 xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
@@ -120,7 +131,11 @@ echo "Creating installer..."
 timeout 5
 
 cd %PROJECT_DIR%
-signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%" || echo "Signing skipped (no certificate)"
+if not "%SIGN_CERT_THUMBPRINT%"=="" (
+    signtool sign /v /sha1 "%SIGN_CERT_THUMBPRINT%" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%" || echo "Signing skipped (thumbprint signing failed)"
+) else (
+    signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%" || echo "Signing skipped (no certificate)"
+)
 
 echo "Preparing staging directory for MSI..."
 rmdir /Q /S "%STAGE_DIR%"
@@ -159,7 +174,11 @@ if %errorlevel% neq 0 (
 )
 
 cd %PROJECT_DIR%
-signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_MSI_FILENAME%" || echo "Signing skipped (no certificate)"
+if not "%SIGN_CERT_THUMBPRINT%"=="" (
+    signtool sign /v /sha1 "%SIGN_CERT_THUMBPRINT%" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_MSI_FILENAME%" || echo "Signing skipped (thumbprint signing failed)"
+) else (
+    signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_MSI_FILENAME%" || echo "Signing skipped (no certificate)"
+)
 
 :FINISH
 echo "Finished, verify artifacts in workflow."

@@ -1,7 +1,8 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
-set "SERVICE_LIST=FBLinkVPN-service FBLink-service AmneziaVPN-service AmneziaWGTunnel$AmneziaVPN AmneziaWGTunnel$FBLink AmneziaVPNSplitTunnel FBLinkSplitTunnel"
+set "CRITICAL_SERVICE_LIST=FBLinkVPN-service FBLink-service AmneziaVPN-service"
+set "LEGACY_SERVICE_LIST=AmneziaWGTunnel$AmneziaVPN AmneziaWGTunnel$FBLink AmneziaVPNSplitTunnel FBLinkSplitTunnel"
 set "PROCESS_LIST=FBLinkVPN-service.exe FBLink-service.exe AmneziaVPN-service.exe FBLinkVPN.exe FBLink.exe AmneziaVPN.exe"
 set "FAILED=0"
 
@@ -9,13 +10,20 @@ for %%P in (%PROCESS_LIST%) do (
   taskkill /IM "%%P" /F >nul 2>nul
 )
 
-for %%S in (%SERVICE_LIST%) do (
+for %%S in (%CRITICAL_SERVICE_LIST%) do (
   call :remove_service "%%~S"
   if errorlevel 1 set "FAILED=1"
 )
 
+for %%S in (%LEGACY_SERVICE_LIST%) do (
+  call :remove_service "%%~S"
+  if errorlevel 1 (
+    echo WARNING: failed to remove optional legacy service "%%~S".
+  )
+)
+
 if "%FAILED%"=="1" (
-  echo ERROR: one or more legacy services could not be removed.
+  echo ERROR: one or more critical services could not be removed.
   exit /b 1
 )
 

@@ -163,14 +163,20 @@ Component.prototype.createOperations = function()
         var cleanupScript = "\"" + pu_path + "cleanup_services.cmd\"";
         var postUninstallScript = "\"" + pu_path + "post_uninstall.cmd\"";
         var postInstallScript = "\"" + pu_path + "post_install.cmd\"";
+        var serviceExePath = "\"" + pu_path + serviceExecutableFileName() + "\"";
 
         // Clean service state before (re)install to keep updates idempotent.
         component.addElevatedOperation("Execute", "cmd", "/c", cleanupScript);
 
+        // Create service on clean installs, or reconfigure it if it already exists.
+        // This avoids hard-failing updates where Service Control Manager still has
+        // stale service metadata from previous versions.
+        var serviceCreateCmd = "sc create \"" + serviceName() + "\" binpath= " + serviceExePath + " start= auto depend= BFE/nsi";
+        var serviceConfigCmd = "sc config \"" + serviceName() + "\" binpath= " + serviceExePath + " start= auto depend= BFE/nsi";
+        var serviceEnsureCmd = "(" + serviceCreateCmd + ") || (" + serviceConfigCmd + ")";
+
         component.addElevatedOperation("Execute",
-                                       "sc", "create", serviceName(),
-                                       "binpath=", "\"" + pu_path + serviceExecutableFileName() + "\"",
-                                       "start=", "auto", "depend=", "BFE/nsi",
+                                       "cmd", "/c", serviceEnsureCmd,
                                        "UNDOEXECUTE", "cmd", "/c", postUninstallScript);
 										
         component.addElevatedOperation("Execute", "cmd", "/c", postInstallScript);

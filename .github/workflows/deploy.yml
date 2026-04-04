@@ -144,6 +144,30 @@ jobs:
       with:
         arch: 'x64'
 
+    - name: 'Import code-signing certificate'
+      if: ${{ secrets.WIN_CODESIGN_PFX_BASE64 != '' && secrets.WIN_CODESIGN_PFX_PASSWORD != '' }}
+      shell: powershell
+      run: |
+        $pfxPath = Join-Path $env:RUNNER_TEMP "windows-codesign.pfx"
+        [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String("${{ secrets.WIN_CODESIGN_PFX_BASE64 }}"))
+
+        $securePassword = ConvertTo-SecureString "${{ secrets.WIN_CODESIGN_PFX_PASSWORD }}" -AsPlainText -Force
+        $imported = Import-PfxCertificate -FilePath $pfxPath -Password $securePassword -CertStoreLocation "Cert:\CurrentUser\My" -Exportable
+        $cert = $imported | Select-Object -First 1
+
+        if (-not $cert) {
+          throw "PFX import failed: certificate was not imported into CurrentUser\\My"
+        }
+
+        "SIGN_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        Write-Host "Imported code-signing certificate. Thumbprint=$($cert.Thumbprint)"
+
+    - name: 'Code-signing certificate not configured'
+      if: ${{ secrets.WIN_CODESIGN_PFX_BASE64 == '' || secrets.WIN_CODESIGN_PFX_PASSWORD == '' }}
+      shell: powershell
+      run: |
+        Write-Host "WIN_CODESIGN_PFX_BASE64 / WIN_CODESIGN_PFX_PASSWORD are not set. Build will continue without code signing."
+
     - name: 'Setup .NET SDK'
       uses: actions/setup-dotnet@v4
       with:
