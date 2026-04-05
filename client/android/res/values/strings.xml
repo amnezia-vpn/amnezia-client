@@ -25,4 +25,7 @@
     <string name="openNotificationSettings">Open notification settings</string>
 
     <string name="tvNoFileBrowser">Please install a file management utility to browse files</string>
+
+    <string name="widget_toggle_vpn">Toggle VPN</string>
+    <string name="widget_description">One-tap VPN toggle widget</string>
 </resources>

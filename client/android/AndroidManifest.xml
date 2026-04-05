@@ -207,6 +207,27 @@
                 android:value="true" />
         </service>
 
+        <!-- Home screen widget -->
+        <receiver
+            android:name=".AmneziaWidgetProvider"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.amnezia.vpn.WIDGET_TOGGLE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_vpn_toggle_info" />
+        </receiver>
+
+        <service
+            android:name=".AmneziaWidgetService"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="org.amnezia.vpn.qtprovider"
