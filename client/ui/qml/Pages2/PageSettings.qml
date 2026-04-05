@@ -95,12 +95,8 @@ PageType {
                 anchors.top: parent.top
                 spacing: 10
 
-                BackButtonType {
-                    Layout.topMargin: 16 + SettingsController.safeAreaTopMargin
-                    Layout.leftMargin: 4
-                }
-
                 LabelTextType {
+                    Layout.topMargin: 16 + SettingsController.safeAreaTopMargin
                     Layout.fillWidth: true
                     text: qsTr("Настройки")
                     font.pixelSize: root.wideLayout ? 30 : 26
