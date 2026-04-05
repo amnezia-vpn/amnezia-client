@@ -301,6 +301,8 @@ PageType {
                         fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
                         outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
                         accentVisible: false
+                        clickable: true
+                        onClicked: PageController.goToPage(PageEnum.PageSettingsVipPresetCatalog)
 
                         RowLayout {
                             Layout.fillWidth: true
@@ -313,16 +315,12 @@ PageType {
                                 font.weight: 700
                                 color: FBLinkStyle.color.paleGray
                             }
-
-                            BasicButtonType {
-                                implicitWidth: 208
-                                implicitHeight: 42
-                                text: qsTr("Добавить пресет")
-                                defaultColor: Qt.rgba(63/255, 63/255, 70/255, 0.42)
-                                hoveredColor: Qt.rgba(63/255, 63/255, 70/255, 0.64)
-                                pressedColor: Qt.rgba(63/255, 63/255, 70/255, 0.78)
-                                textColor: "#FFFFFF"
-                                clickedFunc: function() { PageController.goToPage(PageEnum.PageSettingsVipPresetCatalog) }
+                            Image {
+                                source: "qrc:/images/controls/chevron-right.svg"
+                                sourceSize: Qt.size(18, 18)
+                                Layout.alignment: Qt.AlignVCenter
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
                             }
                         }
 
@@ -332,6 +330,7 @@ PageType {
                             color: FBLinkStyle.color.mutedGray
                             wrapMode: Text.WordWrap
                         }
+
                     }
                 }
 
@@ -357,16 +356,24 @@ PageType {
                             tone: root.enabledProfilesCount > 0 ? "success" : "neutral"
                             compact: true
                         }
-                        BasicButtonType {
+                        Item {
                             visible: root.canManageProfiles
-                            implicitHeight: 42
-                            implicitWidth: 208
-                            text: qsTr("+  Новый профиль...")
-                            defaultColor: Qt.rgba(63/255, 63/255, 70/255, 0.42)
-                            hoveredColor: Qt.rgba(63/255, 63/255, 70/255, 0.64)
-                            pressedColor: Qt.rgba(63/255, 63/255, 70/255, 0.78)
-                            textColor: "#FFFFFF"
-                            clickedFunc: root.openCreateProfileEditor
+                            Layout.preferredHeight: 36
+                            Layout.preferredWidth: 36
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/plus.svg"
+                                sourceSize: Qt.size(22, 22)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: "#FFFFFF" }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.openCreateProfileEditor
+                            }
                         }
                     }
 

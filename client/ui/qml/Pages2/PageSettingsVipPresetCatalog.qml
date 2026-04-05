@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import PageEnum 1.0
 import Style 1.0
@@ -24,8 +25,6 @@ PageType {
         .filter(function(profile) { return profile.kind !== "system" && profile.template_code && profile.template_code.length > 0 })
         .map(function(profile) { return String(profile.template_code) })
 
-    function actionLabel(action) { return action === "proxy" ? qsTr("ЧЕРЕЗ VPN") : qsTr("БЕЗ VPN") }
-    function actionTone(action) { return action === "proxy" ? "proxy" : "direct" }
     function isAdded(profile) {
         const code = String(profile.code || "")
         return code.length > 0 && root.copiedTemplateCodes.indexOf(code) !== -1
@@ -58,7 +57,7 @@ PageType {
             const profileName = profile && profile.name ? String(profile.name) : qsTr("пресет")
             const message = created
                 ? qsTr("Пресет «%1» добавлен в мои профили").arg(profileName)
-                : qsTr("Пресет уже добавлен в мои профили")
+                : qsTr("Пресет уже добавлен")
             PageController.showNotificationMessage(message)
             FBLinkController.fetchRoutingProfiles()
         }
@@ -73,13 +72,13 @@ PageType {
     Flickable {
         anchors.fill: parent
         clip: true
-        contentHeight: content.implicitHeight + 28
+        contentHeight: content.implicitHeight + 26
 
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
         Item {
             width: parent.width
-            height: content.implicitHeight + 28
+            height: content.implicitHeight + 26
 
             ColumnLayout {
                 id: content
@@ -96,12 +95,14 @@ PageType {
                 PremiumPanel {
                     Layout.fillWidth: true
                     padding: 12
-                    accentVisible: true
-                    accentColor: "#10B981"
+                    radius: 16
+                    accentVisible: false
+                    fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
 
                     LabelTextType {
                         Layout.fillWidth: true
-                        text: qsTr("Каталог системных пресетов")
+                        text: qsTr("Системные конфиги")
                         font.pixelSize: root.wideLayout ? 24 : 21
                         font.weight: 700
                         color: FBLinkStyle.color.paleGray
@@ -110,7 +111,7 @@ PageType {
 
                     CaptionTextType {
                         Layout.fillWidth: true
-                        text: qsTr("Здесь готовые пресеты. Добавьте нужный и он появится в «Моих профилях».")
+                        text: qsTr("Выберите конфиг и добавьте его в «Мои профили».")
                         color: FBLinkStyle.color.mutedGray
                         wrapMode: Text.WordWrap
                     }
@@ -118,55 +119,82 @@ PageType {
 
                 Repeater {
                     model: root.systemProfiles
-                    delegate: PremiumPanel {
+
+                    delegate: Rectangle {
                         Layout.fillWidth: true
-                        padding: 12
-                        fillColor: Qt.rgba(1, 1, 1, 0.03)
-                        outlineColor: Qt.rgba(1, 1, 1, 0.06)
+                        implicitHeight: 74
+                        radius: 14
+                        color: Qt.rgba(16/255, 16/255, 16/255, 1.0)
+                        border.width: 1
+                        border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
                         property var profileData: modelData
 
-                        LabelTextType {
-                            Layout.fillWidth: true
-                            text: profileData.name || qsTr("Без названия")
-                            font.pixelSize: 16
-                            font.weight: 700
-                            color: FBLinkStyle.color.paleGray
-                            wrapMode: Text.WordWrap
-                        }
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: 10
+                            spacing: 10
 
-                        Flow {
-                            Layout.fillWidth: true
-                            width: parent ? parent.width : 0
-                            spacing: 8
-                            PremiumBadge { text: root.actionLabel(profileData.action || "direct"); tone: root.actionTone(profileData.action || "direct") }
-                            PremiumBadge { text: root.isAdded(profileData) ? qsTr("УЖЕ ДОБАВЛЕН") : qsTr("НЕ ДОБАВЛЕН"); tone: root.isAdded(profileData) ? "success" : "neutral" }
-                        }
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 2
 
-                        CaptionTextType {
-                            Layout.fillWidth: true
-                            text: profileData.description || ""
-                            color: FBLinkStyle.color.mutedGray
-                            wrapMode: Text.WordWrap
-                        }
+                                LabelTextType {
+                                    Layout.fillWidth: true
+                                    text: profileData.name || qsTr("Без названия")
+                                    font.pixelSize: 16
+                                    font.weight: 700
+                                    color: FBLinkStyle.color.paleGray
+                                    elide: Text.ElideRight
+                                }
 
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            implicitHeight: 44
-                            enabled: root.canManageProfiles
-                            text: root.isAdded(profileData) ? qsTr("Открыть мои профили") : qsTr("Добавить в мои профили")
-                            defaultColor: root.isAdded(profileData) ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(234/255, 179/255, 8/255, 0.16)
-                            hoveredColor: root.isAdded(profileData) ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(234/255, 179/255, 8/255, 0.26)
-                            pressedColor: root.isAdded(profileData) ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(234/255, 179/255, 8/255, 0.32)
-                            textColor: "#FFFFFF"
-                            clickedFunc: function() {
-                                if (root.isAdded(profileData)) {
-                                    root.openMyProfiles()
-                                } else {
-                                    root.addPreset(profileData)
+                                CaptionTextType {
+                                    Layout.fillWidth: true
+                                    text: profileData.description || ""
+                                    color: FBLinkStyle.color.mutedGray
+                                    elide: Text.ElideRight
+                                }
+                            }
+
+                            Item {
+                                Layout.preferredWidth: 36
+                                Layout.preferredHeight: 36
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    source: root.isAdded(profileData)
+                                        ? "qrc:/images/controls/check.svg"
+                                        : "qrc:/images/controls/plus.svg"
+                                    sourceSize: Qt.size(20, 20)
+                                    layer.enabled: true
+                                    layer.effect: ColorOverlay {
+                                        color: root.isAdded(profileData) ? "#10B981" : "#EAB308"
+                                    }
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+                                    onClicked: {
+                                        if (root.isAdded(profileData)) {
+                                            root.openMyProfiles()
+                                        } else {
+                                            root.addPreset(profileData)
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+                }
+
+                LabelTextType {
+                    Layout.fillWidth: true
+                    visible: root.systemProfiles.length === 0
+                    text: qsTr("Нет доступных системных конфигов")
+                    font.pixelSize: 13
+                    color: FBLinkStyle.color.mutedGray
                 }
 
                 Item {

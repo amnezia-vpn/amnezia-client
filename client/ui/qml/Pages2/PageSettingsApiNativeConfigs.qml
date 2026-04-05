@@ -21,74 +21,178 @@ PageType {
 
     property string configExtension: ".conf"
     property string configCaption: qsTr("Save FBLink VPN config")
+    readonly property bool wideLayout: GC.isWideWidth(width)
+    readonly property real sideMargin: GC.pageHorizontalMargin(width)
+    readonly property real maxContentWidth: GC.pageMaxWidth(width)
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
-        
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
+    function statusText(isIssued, isWorkerExpired) {
+        if (!isIssued) return qsTr("НЕ ВЫПУЩЕН")
+        return isWorkerExpired ? qsTr("ТРЕБУЕТСЯ ОБНОВЛЕНИЕ") : qsTr("ГОТОВ")
     }
 
-    ListViewType {
-        id: listView
+    function statusTone(isIssued, isWorkerExpired) {
+        if (!isIssued) return "neutral"
+        return isWorkerExpired ? "warning" : "success"
+    }
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+    function rowDescription(isIssued, isWorkerExpired) {
+        if (!isIssued) return qsTr("Сконфигурируйте и скачайте файл для роутера или AWG-клиента.")
+        if (isWorkerExpired) return qsTr("Текущий файл устарел. Выпустите новую конфигурацию.")
+        return qsTr("Файл активен. Можно перевыпустить или отозвать через меню.")
+    }
 
-        model: ApiCountryModel
+    Flickable {
+        anchors.fill: parent
+        clip: true
+        contentHeight: content.implicitHeight + 24
 
-        header: ColumnLayout {
-            width: listView.width
+        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-            BaseHeaderType {
-                id: header
+        Item {
+            width: parent.width
+            height: content.implicitHeight + 24
 
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+            ColumnLayout {
+                id: content
+                width: Math.min(root.maxContentWidth, parent.width - root.sideMargin * 2)
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                spacing: 10
 
-                headerText: qsTr("Configuration Files")
-                descriptionText: qsTr("For router setup or the AWG app")
-            }
-        }
+                BackButtonType {
+                    Layout.topMargin: 16 + SettingsController.safeAreaTopMargin
+                    Layout.leftMargin: 4
+                }
 
-        delegate: ColumnLayout {
-            width: listView.width
+                PremiumPanel {
+                    Layout.fillWidth: true
+                    padding: 14
+                    radius: 16
+                    fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    accentVisible: true
+                    accentColor: "#EAB308"
 
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 6
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        PremiumBadge { text: qsTr("СИСТЕМНЫЕ КОНФИГИ"); tone: "warning"; compact: true }
+                        PremiumBadge { text: qsTr("AWG / РОУТЕРЫ"); tone: "neutral"; compact: true }
+                    }
 
-                text: countryName
-                descriptionText: isWorkerExpired ? qsTr("The configuration needs to be reissued") : ""
-                hideDescription: isWorkerExpired ? false : true
-                descriptionColor: FBLinkStyle.color.vibrantRed
+                    LabelTextType {
+                        Layout.fillWidth: true
+                        text: qsTr("Конфигурации для устройств")
+                        font.pixelSize: root.wideLayout ? 24 : 21
+                        font.weight: 700
+                        color: FBLinkStyle.color.paleGray
+                        wrapMode: Text.WordWrap
+                    }
 
-                leftImageSource: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
-                rightImageSource: isIssued ? "qrc:/images/controls/more-vertical.svg" : "qrc:/images/controls/download.svg"
-
-                clickedFunction: function() {
-                    if (isIssued) {
-                        moreOptionsDrawer.countryName = countryName
-                        moreOptionsDrawer.countryCode = countryCode
-                        moreOptionsDrawer.openTriggered()
-                    } else {
-                        issueConfig(countryCode)
+                    CaptionTextType {
+                        Layout.fillWidth: true
+                        text: qsTr("Скачивайте готовые конфиги по странам, перевыпускайте при необходимости и отзывайте старые файлы.")
+                        color: FBLinkStyle.color.mutedGray
+                        wrapMode: Text.WordWrap
                     }
                 }
-            }
 
-            DividerType {}
+                Repeater {
+                    model: ApiCountryModel
+
+                    delegate: PremiumPanel {
+                        Layout.fillWidth: true
+                        padding: 12
+                        radius: 16
+                        fillColor: Qt.rgba(16/255, 16/255, 16/255, 1.0)
+                        outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                        accentVisible: false
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 12
+
+                            Rectangle {
+                                Layout.preferredWidth: 42
+                                Layout.preferredHeight: 42
+                                radius: 11
+                                color: Qt.rgba(255, 255, 255, 0.04)
+                                border.width: 1
+                                border.color: Qt.rgba(255, 255, 255, 0.12)
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    width: 24
+                                    height: 24
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 5
+
+                                LabelTextType {
+                                    Layout.fillWidth: true
+                                    text: countryName
+                                    font.pixelSize: 17
+                                    font.weight: 700
+                                    color: FBLinkStyle.color.paleGray
+                                    elide: Text.ElideRight
+                                }
+
+                                Flow {
+                                    Layout.fillWidth: true
+                                    width: parent ? parent.width : 0
+                                    spacing: 8
+                                    PremiumBadge {
+                                        text: root.statusText(isIssued, isWorkerExpired)
+                                        tone: root.statusTone(isIssued, isWorkerExpired)
+                                        compact: true
+                                    }
+                                    PremiumBadge {
+                                        text: qsTr("AWG")
+                                        tone: "neutral"
+                                        compact: true
+                                    }
+                                }
+                            }
+
+                            BasicButtonType {
+                                implicitHeight: 38
+                                implicitWidth: 126
+                                text: isIssued ? qsTr("Опции") : qsTr("Скачать")
+                                defaultColor: isIssued ? Qt.rgba(255, 255, 255, 0.10) : Qt.rgba(234/255, 179/255, 8/255, 0.18)
+                                hoveredColor: isIssued ? Qt.rgba(255, 255, 255, 0.15) : Qt.rgba(234/255, 179/255, 8/255, 0.28)
+                                pressedColor: isIssued ? Qt.rgba(255, 255, 255, 0.20) : Qt.rgba(234/255, 179/255, 8/255, 0.34)
+                                textColor: "#FFFFFF"
+                                clickedFunc: function() {
+                                    if (isIssued) {
+                                        moreOptionsDrawer.countryName = countryName
+                                        moreOptionsDrawer.countryCode = countryCode
+                                        moreOptionsDrawer.openTriggered()
+                                    } else {
+                                        root.issueConfig(countryCode)
+                                    }
+                                }
+                            }
+                        }
+
+                        CaptionTextType {
+                            Layout.fillWidth: true
+                            text: root.rowDescription(isIssued, isWorkerExpired)
+                            color: FBLinkStyle.color.mutedGray
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 24 + SettingsController.safeAreaBottomMargin
+                }
+            }
         }
     }
 
@@ -99,80 +203,71 @@ PageType {
         property string countryCode
 
         anchors.fill: parent
-        expandedHeight: parent.height * 0.4375
+        expandedHeight: parent.height * 0.45
 
         expandedStateContent: Item {
             implicitHeight: moreOptionsDrawer.expandedHeight
 
             BackButtonType {
                 id: moreOptionsDrawerBackButton
-
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.topMargin: 16
-
-                backButtonFunction: function() {
-                    moreOptionsDrawer.closeTriggered()
-                }
+                backButtonFunction: function() { moreOptionsDrawer.closeTriggered() }
             }
 
-            ListViewType {
-                id: drawerListView
-
+            ColumnLayout {
                 anchors.top: moreOptionsDrawerBackButton.bottom
-                anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+                spacing: 10
 
-                header: ColumnLayout {
-                    width: drawerListView.width
+                PremiumPanel {
+                    Layout.fillWidth: true
+                    padding: 14
+                    radius: 14
+                    fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    accentVisible: false
 
-                    Header2Type {
+                    LabelTextType {
                         Layout.fillWidth: true
-                        Layout.margins: 16
-
-                        headerText: moreOptionsDrawer.countryName + qsTr(" configuration file")
+                        text: qsTr("%1 — управление конфигом").arg(moreOptionsDrawer.countryName)
+                        font.pixelSize: 17
+                        font.weight: 700
+                        color: FBLinkStyle.color.paleGray
+                        wrapMode: Text.WordWrap
                     }
-                }
 
-                model: 1 // fake model to force the ListView to be created without a model
-
-                delegate: ColumnLayout {
-                    width: drawerListView.width
-
-                    LabelWithButtonType {
+                    BasicButtonType {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-
-                        text: qsTr("Generate a new configuration file")
-                        descriptionText: qsTr("The previously created one will stop working")
-
-                        clickedFunction: function() {
-                            showQuestion(true, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
+                        implicitHeight: 42
+                        text: qsTr("Выпустить новый конфиг")
+                        defaultColor: Qt.rgba(234/255, 179/255, 8/255, 0.16)
+                        hoveredColor: Qt.rgba(234/255, 179/255, 8/255, 0.26)
+                        pressedColor: Qt.rgba(234/255, 179/255, 8/255, 0.34)
+                        textColor: "#FFFFFF"
+                        clickedFunc: function() {
+                            root.showQuestion(true, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
                         }
                     }
 
-                    DividerType {}
-                }
-
-                footer: ColumnLayout {
-                    width: drawerListView.width
-
-                    LabelWithButtonType {
+                    BasicButtonType {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-
-                        text: qsTr("Revoke the current configuration file")
-
-                        clickedFunction: function() {
-                            showQuestion(false, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
+                        implicitHeight: 42
+                        text: qsTr("Отозвать текущий конфиг")
+                        defaultColor: Qt.rgba(239/255, 68/255, 68/255, 0.16)
+                        hoveredColor: Qt.rgba(239/255, 68/255, 68/255, 0.24)
+                        pressedColor: Qt.rgba(239/255, 68/255, 68/255, 0.30)
+                        textColor: "#F87171"
+                        clickedFunc: function() {
+                            root.showQuestion(false, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
                         }
                     }
-
-                    DividerType {}
                 }
             }
         }

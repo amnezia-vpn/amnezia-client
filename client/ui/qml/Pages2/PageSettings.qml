@@ -148,34 +148,48 @@ PageType {
                                 spacing: 8
 
                                 LabelTextType {
-                                    Layout.fillWidth: true
                                     text: qsTr("Аккаунт FBLink")
                                     color: FBLinkStyle.color.paleGray
                                     font.pixelSize: 15
                                     font.weight: 700
-                                    elide: Text.ElideRight
                                 }
 
                                 Rectangle {
-                                    implicitWidth: tierText.implicitWidth + 12
+                                    visible: FBLinkController.isSubscribed
+                                    implicitWidth: tierRow.implicitWidth + 12
                                     implicitHeight: tierText.implicitHeight + 4
                                     radius: 6
                                     color: FBLinkController.subscriptionPlan === "vip"
                                         ? Qt.rgba(234/255, 179/255, 8/255, 0.12)
-                                        : (FBLinkController.isSubscribed ? Qt.rgba(59/255, 130/255, 246/255, 0.12) : Qt.rgba(63/255, 63/255, 70/255, 0.8))
+                                        : Qt.rgba(59/255, 130/255, 246/255, 0.12)
                                     border.width: 1
                                     border.color: FBLinkController.subscriptionPlan === "vip"
                                         ? Qt.rgba(234/255, 179/255, 8/255, 0.25)
-                                        : (FBLinkController.isSubscribed ? Qt.rgba(59/255, 130/255, 246/255, 0.25) : Qt.rgba(63/255, 63/255, 70/255, 1.0))
+                                        : Qt.rgba(59/255, 130/255, 246/255, 0.25)
 
-                                    CaptionTextType {
-                                        id: tierText
+                                    RowLayout {
+                                        id: tierRow
                                         anchors.centerIn: parent
-                                        text: root.accountTierLabel()
-                                        color: FBLinkController.subscriptionPlan === "vip"
-                                            ? "#EAB308"
-                                            : (FBLinkController.isSubscribed ? "#60A5FA" : FBLinkStyle.color.mutedGray)
+                                        spacing: 4
+
+                                        Image {
+                                            visible: FBLinkController.subscriptionPlan === "vip"
+                                            source: "qrc:/images/controls/crown.svg"
+                                            sourceSize: Qt.size(12, 12)
+                                            layer.enabled: true
+                                            layer.effect: ColorOverlay { color: "#EAB308" }
+                                        }
+
+                                        CaptionTextType {
+                                            id: tierText
+                                            text: FBLinkController.subscriptionPlan === "vip" ? qsTr("VIP") : root.accountTierLabel()
+                                            color: FBLinkController.subscriptionPlan === "vip" ? "#EAB308" : "#60A5FA"
+                                        }
                                     }
+                                }
+
+                                Item {
+                                    Layout.fillWidth: true
                                 }
                             }
 
@@ -202,7 +216,7 @@ PageType {
 
                             Image {
                                 anchors.centerIn: parent
-                                source: "qrc:/images/controls/x-circle.svg"
+                                source: "qrc:/images/controls/log-out.svg"
                                 sourceSize: Qt.size(22, 22)
                                 layer.enabled: true
                                 layer.effect: ColorOverlay { color: "#EF4444" }
@@ -224,7 +238,7 @@ PageType {
 
                 CaptionTextType {
                     Layout.fillWidth: true
-                    text: "CONNECTION"
+                    text: qsTr("ПОДКЛЮЧЕНИЕ")
                     color: FBLinkStyle.color.mutedGray
                     font.bold: true
                 }
@@ -483,7 +497,7 @@ PageType {
 
                 CaptionTextType {
                     Layout.fillWidth: true
-                    text: "ACCOUNT"
+                    text: qsTr("АККАУНТ")
                     color: FBLinkStyle.color.mutedGray
                     font.bold: true
                 }
@@ -562,7 +576,7 @@ PageType {
 
                 CaptionTextType {
                     Layout.fillWidth: true
-                    text: "APPLICATION"
+                    text: qsTr("ПРИЛОЖЕНИЕ")
                     color: FBLinkStyle.color.mutedGray
                     font.bold: true
                 }
@@ -573,7 +587,7 @@ PageType {
                     color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
                     border.width: 1
                     border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
-                    implicitHeight: 234
+                    implicitHeight: 156
 
                     Column {
                         anchors.fill: parent
@@ -706,74 +720,6 @@ PageType {
                             }
                         }
 
-                        Rectangle {
-                            width: parent.width
-                            height: 1
-                            color: Qt.rgba(63/255, 63/255, 70/255, 0.6)
-                        }
-
-                        Rectangle {
-                            width: parent.width
-                            height: 77
-                            color: "transparent"
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 14
-                                anchors.rightMargin: 14
-                                spacing: 12
-
-                                Rectangle {
-                                    Layout.preferredWidth: 40
-                                    Layout.preferredHeight: 40
-                                    radius: 10
-                                    color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
-                                    border.width: 1
-                                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
-
-                                    Image {
-                                        anchors.centerIn: parent
-                                        source: "qrc:/images/controls/archive-restore.svg"
-                                        sourceSize: Qt.size(18, 18)
-                                        layer.enabled: true
-                                        layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
-                                    }
-                                }
-
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 2
-
-                                    LabelTextType {
-                                        Layout.fillWidth: true
-                                        text: qsTr("Сохранённые конфиги")
-                                        color: FBLinkStyle.color.paleGray
-                                        font.pixelSize: 14
-                                        font.weight: 600
-                                    }
-
-                                    CaptionTextType {
-                                        Layout.fillWidth: true
-                                        text: qsTr("Резервная копия и восстановление")
-                                        color: FBLinkStyle.color.mutedGray
-                                    }
-                                }
-
-                                Image {
-                                    source: "qrc:/images/controls/chevron-right.svg"
-                                    sourceSize: Qt.size(18, 18)
-                                    layer.enabled: true
-                                    layer.effect: ColorOverlay { color: FBLinkStyle.color.charcoalGray }
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.goTo(PageEnum.PageSettingsBackup)
-                            }
-                        }
                     }
                 }
 

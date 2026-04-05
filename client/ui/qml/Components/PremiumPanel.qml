@@ -6,10 +6,13 @@ import Style 1.0
 Rectangle {
     id: root
 
+    signal clicked
+
     property color fillColor: FBLinkStyle.color.onyxBlack
     property color outlineColor: Qt.rgba(39/255, 39/255, 42/255, 1.0)
     property color accentColor: "#EAB308"
     property bool accentVisible: false
+    property bool clickable: false
     property int padding: 18
 
     default property alias contentData: contentLayout.data
@@ -43,5 +46,12 @@ Rectangle {
         anchors.margins: root.padding
         anchors.topMargin: root.padding + (root.accentVisible ? 8 : 0)
         spacing: 12
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        enabled: root.clickable
+        cursorShape: root.clickable ? Qt.PointingHandCursor : Qt.ArrowCursor
+        onClicked: root.clicked()
     }
 }

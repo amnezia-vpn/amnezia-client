@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import PageEnum 1.0
 import Style 1.0
@@ -124,17 +125,67 @@ PageType {
                 anchors.top: parent.top
                 spacing: 10
 
-                BackButtonType {
+                Item {
+                    Layout.fillWidth: true
                     Layout.topMargin: 16 + SettingsController.safeAreaTopMargin
-                    Layout.leftMargin: 4
-                    backButtonFunction: root.goBack
+                    implicitHeight: 28
+
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 8
+
+                        Item {
+                            Layout.preferredHeight: 28
+                            Layout.preferredWidth: cancelText.implicitWidth + 6
+
+                            LabelTextType {
+                                id: cancelText
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                text: qsTr("Отмена")
+                                font.pixelSize: 16
+                                color: FBLinkStyle.color.mutedGray
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.goBack()
+                            }
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        Item {
+                            Layout.preferredHeight: 28
+                            Layout.preferredWidth: 28
+                            enabled: root.canManageProfiles
+                            opacity: root.canManageProfiles ? 1.0 : 0.5
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/check.svg"
+                                sourceSize: Qt.size(20, 20)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: "#10B981" }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: root.canManageProfiles
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.submitProfile()
+                            }
+                        }
+                    }
                 }
 
                 PremiumPanel {
                     Layout.fillWidth: true
                     padding: 12
-                    accentVisible: true
-                    accentColor: "#EAB308"
+                    fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    accentVisible: false
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -181,8 +232,9 @@ PageType {
                 PremiumPanel {
                     Layout.fillWidth: true
                     padding: 12
-                    accentVisible: true
-                    accentColor: "#EAB308"
+                    fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    accentVisible: false
 
                     TextFieldWithHeaderType {
                         id: nameField
@@ -192,32 +244,79 @@ PageType {
                         textField.placeholderText: qsTr("Например, AI через VPN")
                     }
 
-                    RowLayout {
+                    Rectangle {
                         Layout.fillWidth: true
-                        spacing: 10
+                        Layout.preferredHeight: 48
+                        radius: 14
+                        color: Qt.rgba(1, 1, 1, 0.10)
+                        border.width: 1
+                        border.color: Qt.rgba(255, 255, 255, 0.12)
+                        enabled: root.canManageProfiles
+                        opacity: root.canManageProfiles ? 1.0 : 0.55
 
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            implicitHeight: 48
-                            enabled: root.canManageProfiles
-                            text: qsTr("Без VPN")
-                            defaultColor: root.editingAction === "direct" ? Qt.rgba(16/255, 185/255, 129/255, 0.18) : Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: root.editingAction === "direct" ? Qt.rgba(16/255, 185/255, 129/255, 0.28) : Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: root.editingAction === "direct" ? Qt.rgba(16/255, 185/255, 129/255, 0.34) : Qt.rgba(1, 1, 1, 0.18)
-                            textColor: "#FFFFFF"
-                            clickedFunc: function() { root.editingAction = "direct" }
+                        Rectangle {
+                            id: actionThumb
+                            y: 3
+                            width: (parent.width - 6) / 2
+                            height: parent.height - 6
+                            radius: 11
+                            x: root.editingAction === "proxy" ? parent.width - width - 3 : 3
+                            color: root.editingAction === "proxy"
+                                ? Qt.rgba(234/255, 179/255, 8/255, 0.22)
+                                : Qt.rgba(16/255, 185/255, 129/255, 0.22)
+
+                            Behavior on x {
+                                NumberAnimation { duration: 180; easing.type: Easing.InOutQuad }
+                            }
+                            Behavior on color {
+                                ColorAnimation { duration: 180 }
+                            }
                         }
 
-                        BasicButtonType {
-                            Layout.fillWidth: true
-                            implicitHeight: 48
-                            enabled: root.canManageProfiles
-                            text: qsTr("Через VPN")
-                            defaultColor: root.editingAction === "proxy" ? Qt.rgba(234/255, 179/255, 8/255, 0.16) : Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: root.editingAction === "proxy" ? Qt.rgba(234/255, 179/255, 8/255, 0.26) : Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: root.editingAction === "proxy" ? Qt.rgba(234/255, 179/255, 8/255, 0.32) : Qt.rgba(1, 1, 1, 0.18)
-                            textColor: "#FFFFFF"
-                            clickedFunc: function() { root.editingAction = "proxy" }
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 3
+                            spacing: 0
+
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+
+                                LabelTextType {
+                                    anchors.centerIn: parent
+                                    text: qsTr("Без VPN")
+                                    font.pixelSize: 16
+                                    font.weight: 600
+                                    color: root.editingAction === "direct" ? "#FFFFFF" : FBLinkStyle.color.lightGray
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: root.canManageProfiles
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.editingAction = "direct"
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+
+                                LabelTextType {
+                                    anchors.centerIn: parent
+                                    text: qsTr("Через VPN")
+                                    font.pixelSize: 16
+                                    font.weight: 600
+                                    color: root.editingAction === "proxy" ? "#FFFFFF" : FBLinkStyle.color.lightGray
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: root.canManageProfiles
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.editingAction = "proxy"
+                                }
+                            }
                         }
                     }
 
@@ -245,34 +344,6 @@ PageType {
                         placeholderText: qsTr("CIDR-подсети, по одной на строку")
                     }
 
-                    Flow {
-                        Layout.fillWidth: true
-                        width: parent ? parent.width : 0
-                        spacing: 10
-
-                        BasicButtonType {
-                            width: root.wideLayout ? 220 : parent.width
-                            implicitHeight: 44
-                            enabled: root.canManageProfiles
-                            text: root.isEditMode ? qsTr("Сохранить") : qsTr("Создать профиль")
-                            defaultColor: "#EAB308"
-                            hoveredColor: "#FACC15"
-                            pressedColor: "#CA8A04"
-                            textColor: "#FFFFFF"
-                            clickedFunc: root.submitProfile
-                        }
-
-                        BasicButtonType {
-                            width: root.wideLayout ? 220 : parent.width
-                            implicitHeight: 44
-                            text: qsTr("Отмена")
-                            defaultColor: Qt.rgba(1, 1, 1, 0.08)
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.12)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.18)
-                            textColor: FBLinkStyle.color.paleGray
-                            clickedFunc: root.goBack
-                        }
-                    }
                 }
 
                 Item {

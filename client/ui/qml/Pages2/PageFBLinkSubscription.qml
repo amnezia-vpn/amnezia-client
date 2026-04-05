@@ -63,36 +63,36 @@ PageType {
             id: "basic",
             title: qsTr("Premium"),
             heroTitle: qsTr("Premium"),
-            heroSubtitle: qsTr("Быстрая защита на базе AWG"),
+            heroSubtitle: qsTr("Стабильная защита для ежедневной работы"),
             price: "199 ₽",
             period: qsTr("/ 30 дней"),
             badge: qsTr("ОСНОВА"),
-            saving: qsTr("Надёжное подключение и полный доступ к серверам"),
-            cta: qsTr("Оплатить 199 ₽ / Premium"),
+            saving: qsTr("Надёжный AWG и все базовые функции безопасности без ограничений трафика"),
+            cta: qsTr("Выбрать Premium — 199 ₽"),
             features: [
-                { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Безлимитный трафик") },
-                { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("10+ стран и регионов") },
-                { icon: "qrc:/images/controls/monitor.svg",     text: qsTr("До 5 устройств одновременно") },
-                { icon: "qrc:/images/controls/info.svg",        text: qsTr("Защита Kill Switch") },
-                { icon: "qrc:/images/controls/history.svg",     text: qsTr("AWG-протокол для ежедневного использования") }
+                { icon: "qrc:/images/controls/gauge.svg",       text: qsTr("Стабильный AWG-протокол с низкой задержкой") },
+                { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Безлимитный трафик и автопереподключение") },
+                { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("Серверы в 10+ странах и регионах") },
+                { icon: "qrc:/images/controls/monitor.svg",     text: qsTr("До 5 устройств в одном аккаунте") },
+                { icon: "qrc:/images/controls/info.svg",        text: qsTr("Kill Switch и базовая защита DNS") }
             ]
         },
         {
             id: "vip",
             title: qsTr("VIP"),
             heroTitle: qsTr("VIP"),
-            heroSubtitle: qsTr("VLESS, split tunneling и маршрутизация без компромиссов"),
+            heroSubtitle: qsTr("Максимальный контроль трафика и приоритетная сеть"),
             price: "399 ₽",
             period: qsTr("/ 30 дней"),
             badge: qsTr("МАКС"),
-            saving: qsTr("XRay VLESS, direct/proxy VIP-пресеты и маршрутизация без перегруза"),
-            cta: qsTr("Оплатить 399 ₽ / VIP"),
+            saving: qsTr("XRay VLESS, VIP-маршрутизация и AdBlock DNS в одном плане"),
+            cta: qsTr("Выбрать VIP — 399 ₽"),
             features: [
-                { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Протокол XRay VLESS для скорости и стабильности") },
-                { icon: "qrc:/images/controls/map-pin.svg",     text: qsTr("Готовые direct-пресеты: RU, банки, локальные медиа и игры") },
-                { icon: "qrc:/images/controls/monitor.svg",     text: qsTr("Раздельное туннелирование для сайтов и приложений") },
-                { icon: "qrc:/images/controls/info.svg",        text: qsTr("Proxy-пресеты для AI и медиа без ручного набора доменов") },
-                { icon: "qrc:/images/controls/history.svg",     text: qsTr("Все возможности Premium + VIP-управление трафиком") }
+                { icon: "qrc:/images/controls/gauge.svg",       text: qsTr("XRay VLESS (Reality) для сложных сетей и DPI") },
+                { icon: "qrc:/images/controls/split-tunneling.svg", text: qsTr("Профили маршрутизации direct/proxy по сервисам") },
+                { icon: "qrc:/images/controls/server.svg",      text: qsTr("Раздельное туннелирование сайтов и приложений") },
+                { icon: "qrc:/images/controls/shield.svg",      text: qsTr("AdBlock DNS профиль для VIP-трафика") },
+                { icon: "qrc:/images/controls/crown.svg",       text: qsTr("Все преимущества Premium и приоритетный маршрут") }
             ]
         }
     ]
@@ -127,65 +127,48 @@ PageType {
             }
 
             // ── Hero section ──────────────────────────────────────
-            Item {
+            PremiumPanel {
                 Layout.fillWidth: true
                 Layout.topMargin: 24
-                implicitHeight: heroColumn.implicitHeight
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                padding: root.wideLayout ? 20 : 16
+                radius: 18
+                fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                accentVisible: false
 
-                // Glow behind shield
-                Rectangle {
-                    anchors.centerIn: heroColumn
-                    width: 120; height: 120
-                    radius: 60
-                    color: "#EAB308"
-                    opacity: 0.18
-
-                    layer.enabled: true
-                    layer.effect: DropShadow {
-                        color: "#EAB308"
-                        radius: 40; samples: 81; spread: 0.05
-                        transparentBorder: true
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    PremiumBadge { text: qsTr("ПОДПИСКА"); tone: "neutral"; compact: true }
+                    PremiumBadge { text: root.selectedPlanData.id === "vip" ? qsTr("ПРИОРИТЕТ") : qsTr("СТАНДАРТ"); tone: root.selectedPlanData.id === "vip" ? "success" : "warning"; compact: true }
+                    Item { Layout.fillWidth: true }
+                    PremiumBadge {
+                        text: root.selectedPlanData.price + " " + root.selectedPlanData.period
+                        tone: root.selectedPlanData.id === "vip" ? "success" : "warning"
+                        compact: true
                     }
                 }
 
-                ColumnLayout {
-                    id: heroColumn
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 12
-
-                    // Shield icon
-                    Image {
-                        Layout.alignment: Qt.AlignHCenter
-                        source: "qrc:/images/controls/shield-tick.svg"
-                        sourceSize: Qt.size(64, 64)
-
-                        layer.enabled: true
-                        layer.effect: ColorOverlay { color: "#EAB308" }
-
-                        SequentialAnimation on scale {
-                            loops: Animation.Infinite
-                            PropertyAnimation { to: 1.04; duration: 1800; easing.type: Easing.InOutSine }
-                            PropertyAnimation { to: 1.0;  duration: 1800; easing.type: Easing.InOutSine }
-                        }
-                    }
-
-                    // Title
-                    LabelTextType {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("FBLink VPN %1").arg(root.selectedPlanData.heroTitle)
-                        font.pixelSize: 24
-                        font.weight: 700
-                        color: FBLinkStyle.color.paleGray
-                    }
-
-                    // Subtitle
-                    LabelTextType {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: root.selectedPlanData.heroSubtitle
-                        font.pixelSize: 14
-                        color: FBLinkStyle.color.mutedGray
-                    }
+                LabelTextType {
+                    Layout.fillWidth: true
+                    text: qsTr("FBLink VPN %1").arg(root.selectedPlanData.heroTitle)
+                    font.pixelSize: root.wideLayout ? 28 : 24
+                    font.weight: 700
+                    color: FBLinkStyle.color.paleGray
+                    wrapMode: Text.WordWrap
                 }
+
+                CaptionTextType {
+                    Layout.fillWidth: true
+                    text: root.selectedPlanData.heroSubtitle
+                    color: FBLinkStyle.color.mutedGray
+                    font.pixelSize: 13
+                    wrapMode: Text.WordWrap
+                }
+
+                // intentionally minimal hero: badges + title + subtitle only
             }
 
             // ── Trial banner ──────────────────────────────────────
@@ -491,17 +474,25 @@ PageType {
                 spacing: 0
 
                 LabelTextType {
-                    text: qsTr("Что входит в подписку")
+                    text: qsTr("Преимущества тарифа")
                     font.pixelSize: 13
                     font.weight: 600
                     color: FBLinkStyle.color.mutedGray
                     Layout.bottomMargin: 12
                 }
 
-                Repeater {
-                    model: root.selectedPlanData.features
+                PremiumPanel {
+                    Layout.fillWidth: true
+                    padding: 14
+                    radius: 14
+                    fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    outlineColor: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    accentVisible: false
 
-                    delegate: RowLayout {
+                    Repeater {
+                        model: root.selectedPlanData.features
+
+                        delegate: RowLayout {
                         Layout.fillWidth: true
                         spacing: 12
                         Layout.bottomMargin: 10
@@ -514,7 +505,7 @@ PageType {
 
                             Image {
                                 anchors.centerIn: parent
-                                source: "qrc:/images/controls/shield-tick.svg"
+                                source: modelData.icon || "qrc:/images/controls/shield-tick.svg"
                                 sourceSize: Qt.size(14, 14)
                                 layer.enabled: true
                                 layer.effect: ColorOverlay { color: "#10B981" }
@@ -528,6 +519,7 @@ PageType {
                             Layout.fillWidth: true
                         }
                     }
+                }
                 }
             }
 
@@ -638,9 +630,11 @@ PageType {
                 visible: !root.isWaitingForPayment
                 enabled: !root.isLoading && root.selectedPlan > root.currentPlanLevel
 
-                defaultColor: root.selectedPlan > root.currentPlanLevel ? "#EAB308" : FBLinkStyle.color.charcoalGray
-                hoveredColor: "#FACC15"
-                pressedColor: "#CA8A04"
+                defaultColor: root.selectedPlan > root.currentPlanLevel
+                    ? (root.selectedPlanData.id === "vip" ? "#10B981" : "#EAB308")
+                    : FBLinkStyle.color.charcoalGray
+                hoveredColor: root.selectedPlanData.id === "vip" ? "#34D399" : "#FACC15"
+                pressedColor: root.selectedPlanData.id === "vip" ? "#059669" : "#CA8A04"
                 disabledColor: FBLinkStyle.color.charcoalGray
                 textColor: "#FFFFFF"
 
