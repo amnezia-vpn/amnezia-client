@@ -196,29 +196,6 @@ endif()
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
-# deploy artifacts required to run the application to the debug build folder
-if(WIN32)
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(DEPLOY_PLATFORM_PATH "windows/x64")
-    else()
-        set(DEPLOY_PLATFORM_PATH "windows/x32")
-    endif()
-elseif(LINUX)
-    set(DEPLOY_PLATFORM_PATH "linux/client")
-elseif(APPLE AND NOT IOS)
-    set(DEPLOY_PLATFORM_PATH "macos")
-endif()
-
-if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-        ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}
-        $<TARGET_FILE_DIR:${PROJECT}>
-        COMMAND_EXPAND_LISTS
-    )
-endif()
-
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 
 # Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).
@@ -240,10 +217,16 @@ install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}>
     COMPONENT client
 )
 
+set(deploy_tool_options "")
+if(WIN32)
+    set(deploy_tool_options "--force-openssl --force")
+endif()
+
 qt_generate_deploy_qml_app_script(
     TARGET ${PROJECT}
     OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
     NO_UNSUPPORTED_PLATFORM_ERROR
+    DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
 )
 install(SCRIPT ${QT_DEPLOY_SCRIPT}
     COMPONENT client

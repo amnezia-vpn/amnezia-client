@@ -1,0 +1,8 @@
+if(WIN32)
+    if (CPACK_PACKAGE_FILES)
+        include(${CMAKE_CURRENT_LIST_DIR}/util/signtool.cmake)
+        foreach(PACKAGE_FILE IN LISTS CPACK_PACKAGE_FILES)
+            signtool_sign_files("${PACKAGE_FILE}" "${SIGNTOOL_SUBJECT_NAME}")
+        endforeach()
+    endif()
+endif()
