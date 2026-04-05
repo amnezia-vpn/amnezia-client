@@ -160,26 +160,19 @@ Component.prototype.createOperations = function()
 
         let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"
         
-        var cleanupScript = "\"" + pu_path + "cleanup_services.cmd\"";
-        var postUninstallScript = "\"" + pu_path + "post_uninstall.cmd\"";
-        var postInstallScript = "\"" + pu_path + "post_install.cmd\"";
-        var serviceExePath = "\"" + pu_path + serviceExecutableFileName() + "\"";
-
-        // Clean service state before (re)install to keep updates idempotent.
-        component.addElevatedOperation("Execute", "cmd", "/c", cleanupScript);
-
-        // Create service on clean installs, or reconfigure it if it already exists.
-        // This avoids hard-failing updates where Service Control Manager still has
-        // stale service metadata from previous versions.
-        var serviceCreateCmd = "sc create \"" + serviceName() + "\" binpath= " + serviceExePath + " start= auto depend= BFE/nsi";
-        var serviceConfigCmd = "sc config \"" + serviceName() + "\" binpath= " + serviceExePath + " start= auto depend= BFE/nsi";
-        var serviceEnsureCmd = "(" + serviceCreateCmd + ") || (" + serviceConfigCmd + ")";
+        var installServiceScript = pu_path + "install_service.cmd";
+        var postUninstallScript = pu_path + "post_uninstall.cmd";
+        var postInstallScript = pu_path + "post_install.cmd";
+        var installServiceCommand = "call \"" + installServiceScript + "\"";
+        var postUninstallCommand = "call \"" + postUninstallScript + "\"";
+        var postInstallCommand = "call \"" + postInstallScript + "\"";
+        // Install flow uses install_service.cmd with create/config/start checks.
 
         component.addElevatedOperation("Execute",
-                                       "cmd", "/c", serviceEnsureCmd,
-                                       "UNDOEXECUTE", "cmd", "/c", postUninstallScript);
+                                       "cmd", "/c", installServiceCommand,
+                                       "UNDOEXECUTE", "cmd", "/c", postUninstallCommand);
 										
-        component.addElevatedOperation("Execute", "cmd", "/c", postInstallScript);
+        component.addElevatedOperation("Execute", "cmd", "/c", postInstallCommand);
     } else if (runningOnMacOS()) {
         component.addElevatedOperation("Execute", "@TargetDir@/post_install.sh", "UNDOEXECUTE", "@TargetDir@/post_uninstall.sh");
     } else if (runningOnLinux()) {

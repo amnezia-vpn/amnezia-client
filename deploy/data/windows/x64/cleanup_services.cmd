@@ -23,8 +23,8 @@ for %%S in (%LEGACY_SERVICE_LIST%) do (
 )
 
 if "%FAILED%"=="1" (
-  echo ERROR: one or more critical services could not be removed.
-  exit /b 1
+  echo WARNING: one or more critical services could not be removed. Installation will continue and service configuration will be repaired.
+  exit /b 0
 )
 
 exit /b 0
@@ -39,7 +39,7 @@ for /L %%I in (1,1,30) do (
   sc query "%SVC%" >nul 2>nul
   set "RC=!errorlevel!"
   if "!RC!"=="1060" exit /b 0
-  timeout /t 1 /nobreak >nul
+  ping -n 2 127.0.0.1 >nul
   sc stop "%SVC%" >nul 2>nul
   sc delete "%SVC%" >nul 2>nul
 )
@@ -50,5 +50,5 @@ if "!RC!"=="1060" (
   exit /b 0
 )
 
-echo ERROR: failed to remove service "%SVC%".
+echo WARN: failed to fully remove service "%SVC%".
 exit /b 1

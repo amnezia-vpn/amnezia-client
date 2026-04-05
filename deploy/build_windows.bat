@@ -115,6 +115,28 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 cd %SCRIPT_DIR%
 xcopy %SCRIPT_DIR:"=%\installer  %WORK_DIR:"=%\installer /s /e /y /i /f
+
+set COMPONENT_SCRIPT=%WORK_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\meta\componentscript.js
+if not exist "%COMPONENT_SCRIPT%" (
+    echo "ERROR: componentscript.js not found in installer package."
+    exit /b 1
+)
+
+findstr /C:"install_service.cmd" "%COMPONENT_SCRIPT%" >nul
+if %errorlevel% neq 0 (
+    echo "ERROR: installer package is missing install_service.cmd flow in componentscript.js"
+    exit /b 1
+)
+
+findstr /C:"sc create" "%COMPONENT_SCRIPT%" >nul
+if %errorlevel% equ 0 (
+    findstr /C:"|| (sc config" "%COMPONENT_SCRIPT%" >nul
+    if %errorlevel% equ 0 (
+        echo "ERROR: stale installer script detected (legacy sc create/config inline command)."
+        exit /b 1
+    )
+)
+
 mkdir %INSTALLER_DATA_DIR%
 
 echo "Deploy finished, content:"
