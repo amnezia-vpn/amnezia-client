@@ -163,10 +163,26 @@ Component.prototype.createOperations = function()
         var installServiceScript = pu_path + "install_service.cmd";
         var postUninstallScript = pu_path + "post_uninstall.cmd";
         var postInstallScript = pu_path + "post_install.cmd";
-        var installServiceCommand = "call \"" + installServiceScript + "\"";
-        var postUninstallCommand = "call \"" + postUninstallScript + "\"";
-        var postInstallCommand = "call \"" + postInstallScript + "\"";
-        // Install flow uses install_service.cmd with create/config/start checks.
+        var installerLog = "%TEMP%\\FBLinkVPN-installer.log";
+        var installServiceCommand =
+                "if exist \"" + installServiceScript + "\" (" +
+                "call \"" + installServiceScript + "\" >> \"" + installerLog + "\" 2>&1" +
+                ") else (" +
+                "echo WARN: missing install_service.cmd >> \"" + installerLog + "\" 2>&1" +
+                ") & exit /b 0";
+        var postUninstallCommand =
+                "if exist \"" + postUninstallScript + "\" (" +
+                "call \"" + postUninstallScript + "\" >> \"" + installerLog + "\" 2>&1" +
+                ") else (" +
+                "echo WARN: missing post_uninstall.cmd >> \"" + installerLog + "\" 2>&1" +
+                ") & exit /b 0";
+        var postInstallCommand =
+                "if exist \"" + postInstallScript + "\" (" +
+                "call \"" + postInstallScript + "\" >> \"" + installerLog + "\" 2>&1" +
+                ") else (" +
+                "echo WARN: missing post_install.cmd >> \"" + installerLog + "\" 2>&1" +
+                ") & exit /b 0";
+        // Install flow is best-effort during IFW operations; final readiness is checked at finish.
 
         component.addElevatedOperation("Execute",
                                        "cmd", "/c", installServiceCommand,
