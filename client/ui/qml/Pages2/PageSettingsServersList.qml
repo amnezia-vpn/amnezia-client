@@ -17,6 +17,7 @@ import "../Components"
 
 PageType {
     id: root
+    readonly property bool hasLocationsAccess: FBLinkController.isSubscribed
 
     function guessCountryCode(serverName) {
         const name = (serverName || "").toLowerCase()
@@ -56,6 +57,7 @@ PageType {
     ListViewType {
         id: servers
         objectName: "servers"
+        visible: root.hasLocationsAccess
 
         width: parent.width
         anchors.top: header.bottom
@@ -170,6 +172,102 @@ PageType {
                 }
 
                 DividerType {}
+            }
+        }
+    }
+
+    Item {
+        id: noSubscriptionState
+        visible: !root.hasLocationsAccess
+        anchors.top: header.bottom
+        anchors.topMargin: 18
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        Rectangle {
+            width: Math.min(560, parent.width - 32)
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            radius: 16
+            color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+            border.width: 1
+            border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+            implicitHeight: emptyStateCol.implicitHeight + 28
+
+            ColumnLayout {
+                id: emptyStateCol
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 16
+                spacing: 12
+
+                Rectangle {
+                    Layout.preferredWidth: 44
+                    Layout.preferredHeight: 44
+                    Layout.alignment: Qt.AlignHCenter
+                    radius: 22
+                    color: Qt.rgba(234/255, 179/255, 8/255, 0.16)
+                    border.width: 1
+                    border.color: Qt.rgba(234/255, 179/255, 8/255, 0.35)
+
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/images/controls/crown.svg"
+                        sourceSize: Qt.size(20, 20)
+                    }
+                }
+
+                LabelTextType {
+                    Layout.fillWidth: true
+                    text: qsTr("Локации доступны по подписке")
+                    font.pixelSize: 20
+                    font.weight: 700
+                    color: FBLinkStyle.color.paleGray
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                }
+
+                CaptionTextType {
+                    Layout.fillWidth: true
+                    text: qsTr("Подключите Premium или VIP, чтобы выбирать страны и серверы.")
+                    color: FBLinkStyle.color.mutedGray
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 4
+                    implicitHeight: 44
+                    radius: 12
+                    color: upgradeMouse.pressed
+                        ? Qt.rgba(234/255, 179/255, 8/255, 0.75)
+                        : Qt.rgba(234/255, 179/255, 8/255, 0.95)
+
+                    LabelTextType {
+                        anchors.centerIn: parent
+                        text: qsTr("Оформить подписку")
+                        font.pixelSize: 14
+                        font.weight: 700
+                        color: "#0B0B0C"
+                    }
+
+                    MouseArea {
+                        id: upgradeMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (FBLinkController.isLoggedIn) {
+                                PageController.goToPage(PageEnum.PageFBLinkSubscription)
+                            } else {
+                                PageController.goToPage(PageEnum.PageFBLinkLogin)
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -68,11 +68,19 @@ PageType {
             PageController.goToPage(PageEnum.PageFBLinkLogin)
             return
         }
+        if (!FBLinkController.canManageRoutingProfiles) {
+            openSubscriptionPage()
+            return
+        }
         PageController.goToPage(PageEnum.PageSettingsVipRoutingProfiles)
     }
 
     function refreshNewFeaturesGuide() {
-        if (!root.visible || !FBLinkController.isSubscribed || !FBLinkController.showNewFeaturesGuide) {
+        if (!root.visible
+                || !FBLinkController.isSubscribed
+                || FBLinkController.subscriptionPlan.toLowerCase() !== "vip"
+                || !FBLinkController.canManageRoutingProfiles
+                || !FBLinkController.showNewFeaturesGuide) {
             return
         }
         if (!newFeaturesPopup.visible) {

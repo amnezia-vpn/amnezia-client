@@ -438,12 +438,20 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1298"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1310"/>
         <source>Не удалось отправить отчёт. Диагностика скопирована в буфер обмена. %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1495"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1363"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1424"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1477"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1521"/>
+        <source>Функция доступна только для VIP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1527"/>
         <source>Код системного пресета не задан</source>
         <translation type="unfinished"></translation>
     </message>
@@ -466,11 +474,11 @@
     </message>
     <message>
         <location filename="../ui/controllers/api/fblink_controller.cpp" line="772"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1236"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1352"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1408"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1456"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1501"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1248"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1369"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1430"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1483"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1533"/>
         <source>Необходимо войти в аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1067,283 +1075,328 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageFBLinkSubscription</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="50"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="51"/>
         <source>Время ожидания истекло. Если вы оплатили — нажмите «Проверить вручную».</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="67"/>
         <source>Стабильная защита для ежедневной работы</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="68"/>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="87"/>
         <source>/ 30 дней</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="218"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="223"/>
         <source>Пробный период — 7 дней</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="265"/>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="642"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="270"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="679"/>
         <source>Создание платежа...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="266"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="271"/>
         <source>Попробовать за 5 ₽</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="292"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="297"/>
         <source>Только для новых пользователей • Карта сохраняется</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="417"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="436"/>
         <source>АКТИВНА</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="582"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="613"/>
         <source>Ожидаем подтверждение оплаты...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="590"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="621"/>
         <source>Проверка %1 из %2. Это займёт до 2 минут.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="613"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="644"/>
         <source>Проверить вручную</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="644"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="681"/>
         <source>Уже активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="64"/>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="65"/>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="107"/>
         <source>Premium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="70"/>
         <source>ОСНОВА</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="82"/>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="83"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="84"/>
         <source>VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="88"/>
         <source>МАКС</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="70"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="71"/>
         <source>Надёжный AWG и все базовые функции безопасности без ограничений трафика</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="71"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="72"/>
         <source>Выбрать Premium — 199 ₽</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="74"/>
         <source>Стабильный AWG-протокол с низкой задержкой</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="74"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="75"/>
         <source>Безлимитный трафик и автопереподключение</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="75"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="76"/>
         <source>Серверы в 10+ странах и регионах</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="77"/>
         <source>До 5 устройств в одном аккаунте</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="77"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="78"/>
         <source>Kill Switch и базовая защита DNS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="84"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="85"/>
         <source>Максимальный контроль трафика и приоритетная сеть</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="89"/>
         <source>XRay VLESS, VIP-маршрутизация и AdBlock DNS в одном плане</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="90"/>
         <source>Выбрать VIP — 399 ₽</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="92"/>
         <source>XRay VLESS (Reality) для сложных сетей и DPI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="92"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="93"/>
         <source>Профили маршрутизации direct/proxy по сервисам</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="94"/>
         <source>Раздельное туннелирование сайтов и приложений</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="95"/>
         <source>AdBlock DNS профиль для VIP-трафика</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="96"/>
         <source>Все преимущества Premium и приоритетный маршрут</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="107"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="108"/>
         <source>Подписка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="145"/>
         <source>ПОДПИСКА</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="146"/>
         <source>ПРИОРИТЕТ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="146"/>
         <source>СТАНДАРТ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="156"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="150"/>
+        <source>5 ₽ / 7 дней</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="159"/>
         <source>FBLink VPN %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="225"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="169"/>
+        <source>Для новых пользователей: 7 дней Premium за 5 ₽, затем стандартный тариф</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="230"/>
         <source>Premium на 7 дней с полным доступом</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="477"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="412"/>
+        <source>Premium для новых пользователей</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="437"/>
+        <source>НОВЫЙ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="453"/>
+        <source>5 ₽</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="462"/>
+        <source>/ 7 дней</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="472"/>
+        <source>Затем 199 ₽ / 30 дней</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="481"/>
+        <source>Специальный запуск: полный Premium-доступ по сниженной цене на 7 дней</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="508"/>
         <source>Преимущества тарифа</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="674"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="683"/>
+        <source>Активировать 7 дней за 5 ₽</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="717"/>
         <source>Страница оплаты открыта. Ожидаем подтверждение...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="676"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="719"/>
         <source>Не удалось получить ссылку на оплату</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="691"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="734"/>
         <source>Подписка активирована! Добро пожаловать в %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="736"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="779"/>
         <source>Подписка «%1» активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="743"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="786"/>
         <source>Действует до: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="776"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="819"/>
         <source>Автопродление</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="784"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="827"/>
         <source>Спишем автоматически в день истечения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="785"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="828"/>
         <source>Подписка не продлится сама</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="856"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="899"/>
         <source>Способ оплаты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="864"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="907"/>
         <source>Карта привязана ✓</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="865"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="908"/>
         <source>Сохранится при следующей оплате</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="886"/>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="966"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="929"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="1009"/>
         <source>Удалить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="920"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="963"/>
         <source>Удалить привязанную карту и отключить автосписание?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="943"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="986"/>
         <source>Отмена</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="1010"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="1053"/>
         <source>Карта удалена, автосписание отключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="1031"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="1074"/>
         <source>Условия использования</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="1049"/>
+        <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="1092"/>
         <source>Политика конфиденциальности</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1395,7 +1448,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="37"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="226"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="234"/>
         <source>Обновление конфигураций...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1415,77 +1468,77 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="227"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="235"/>
         <source>Отпустите для обновления</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="227"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="235"/>
         <source>Потяните для обновления</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="286"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="294"/>
         <source>Безопасный запуск</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="296"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="304"/>
         <source>Автоподключение временно выключено до %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="297"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="305"/>
         <source>Автоподключение временно выключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="304"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="312"/>
         <source>SAFE</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="385"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="393"/>
         <source>Выбранная локация</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="396"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="404"/>
         <source>Выберите локацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="407"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="415"/>
         <source>%1 · %2 ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="497"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="505"/>
         <source>IP Адрес</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="709"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="717"/>
         <source>Настройте маршруты для нужных сервисов в пару касаний.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="550"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="558"/>
         <source>Протокол</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="558"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="566"/>
         <source>Неизвестно</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="652"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="660"/>
         <source>VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="313"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="321"/>
         <source>Вернуться в обычный режим</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1494,47 +1547,47 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete">အခမဲ့</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="732"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="740"/>
         <source>Настроить VIP маршруты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="747"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="755"/>
         <source>Позже</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="817"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="825"/>
         <source>Панель быстрого доступа</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="826"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="834"/>
         <source>Локация не выбрана</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="837"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="845"/>
         <source>Локации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="866"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="874"/>
         <source>Выбрать локацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="658"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="666"/>
         <source>Новое</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="700"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="708"/>
         <source>Новые возможности готовы</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="719"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="727"/>
         <source>Маршруты сервисов</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2523,7 +2576,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">အပလီကေးရှင်း</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="101"/>
         <source>Настройки</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2544,7 +2597,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="47"/>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="185"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="181"/>
         <source>VIP</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2554,127 +2607,127 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="151"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="147"/>
         <source>Аккаунт FBLink</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="199"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="195"/>
         <source>Email не получен</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="241"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="237"/>
         <source>ПОДКЛЮЧЕНИЕ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="292"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="288"/>
         <source>Kill Switch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="300"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="296"/>
         <source>Блокировать интернет при обрыве VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="370"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="366"/>
         <source>Профили маршрутизации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="380"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="376"/>
         <source>Управление split tunneling и маршрутами</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="456"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="452"/>
         <source>AdBlock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="467"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="463"/>
         <source>Доступно только для VIP аккаунта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="472"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="468"/>
         <source>Блокировка рекламы активна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="471"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="467"/>
         <source>Фильтрация временно недоступна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="473"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="469"/>
         <source>AdBlock выключен</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="500"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="496"/>
         <source>АККАУНТ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="550"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="546"/>
         <source>Управление подпиской</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="550"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="546"/>
         <source>Авторизуйтесь в FBLink ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="579"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="575"/>
         <source>ПРИЛОЖЕНИЕ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="630"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="626"/>
         <source>Автоподключение</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="638"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="634"/>
         <source>Подключаться при запуске приложения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="694"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="690"/>
         <source>Язык и параметры</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="702"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="698"/>
         <source>Дополнительные настройки приложения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="771"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="767"/>
         <source>Версия, лицензии и техническая информация</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="200"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="196"/>
         <source>Гость</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="542"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="538"/>
         <source>Подписка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="542"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="538"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="763"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="759"/>
         <source>О приложении</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4351,18 +4404,33 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">ဆာဗာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="53"/>
         <source>Локации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="162"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="164"/>
         <source>Нельзя менять сервер во время активного подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="169"/>
         <source>Локация выбрана</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="224"/>
+        <source>Локации доступны по подписке</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="234"/>
+        <source>Подключите Premium или VIP, чтобы выбирать страны и серверы.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="251"/>
+        <source>Оформить подписку</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -84,8 +84,39 @@ function serviceIsRunningWindows()
     return (output.indexOf("RUNNING") !== -1) || (output.match(/:\s*4\s+/) !== null);
 }
 
+function serviceExistsWindows()
+{
+    var result = installer.execute("sc", ["query", serviceName()]);
+    var exitCode = Number(result[1]);
+    return exitCode === 0;
+}
+
+function runInstallServiceScriptWindows()
+{
+    var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
+    var installServiceScript = targetDir + "\\install_service.cmd";
+    var result = installer.execute("cmd", ["/c", "call \"" + installServiceScript + "\""]);
+    var exitCode = Number(result[1]);
+    console.log(("install_service.cmd result: %1").arg(result));
+    return exitCode === 0;
+}
+
 function ensureServiceStartedAndRunningWindows()
 {
+    if (!serviceExistsWindows()) {
+        console.log(("%1 is missing, trying to install service again").arg(serviceName()));
+        runInstallServiceScriptWindows();
+        sleep(1200);
+    }
+
+    if (!serviceExistsWindows()) {
+        QMessageBox.critical("service.missing",
+                             appName(),
+                             qsTr("Service installation is incomplete: VPN service was not created.\n\nPlease run installer as Administrator and reinstall."),
+                             QMessageBox.Ok);
+        return false;
+    }
+
     var startResult = installer.execute("net", ["start", serviceName()]);
     console.log(("%1 start result: %2").arg(serviceName()).arg(startResult));
 
@@ -94,6 +125,11 @@ function ensureServiceStartedAndRunningWindows()
             return true;
         }
         sleep(1500);
+    }
+
+    if (serviceExistsWindows()) {
+        console.log(("%1 installed but not RUNNING yet; continuing").arg(serviceName()));
+        return true;
     }
 
     QMessageBox.critical("service.start.failed",

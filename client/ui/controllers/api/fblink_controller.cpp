@@ -1043,13 +1043,17 @@ bool FBLinkController::canUseAppSplitTunneling() const
 bool FBLinkController::canManageRoutingProfiles() const
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
-    return qSettings.value("subscriptionCanManageRoutingProfiles", false).toBool();
+    const bool featureEnabled = qSettings.value("subscriptionCanManageRoutingProfiles", false).toBool();
+    const QString plan = qSettings.value("subscriptionPlan", "").toString().trimmed();
+    return featureEnabled && plan.compare("vip", Qt::CaseInsensitive) == 0;
 }
 
 bool FBLinkController::canUseAdBlock() const
 {
     QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
-    return qSettings.value("subscriptionCanUseAdBlock", false).toBool();
+    const bool featureEnabled = qSettings.value("subscriptionCanUseAdBlock", false).toBool();
+    const QString plan = qSettings.value("subscriptionPlan", "").toString().trimmed();
+    return featureEnabled && plan.compare("vip", Qt::CaseInsensitive) == 0;
 }
 
 bool FBLinkController::vipAdBlockEnabled() const
@@ -1096,7 +1100,13 @@ QString FBLinkController::safeModeUntilText() const
 bool FBLinkController::showNewFeaturesGuide() const
 {
     QSettings qSettings = appSettings();
-    return qSettings.value(kShowNewFeaturesGuideKey, false).toBool();
+    const bool requested = qSettings.value(kShowNewFeaturesGuideKey, false).toBool();
+    if (!requested) {
+        return false;
+    }
+    const QString plan = qSettings.value("subscriptionPlan", "").toString().trimmed();
+    const bool canManageProfiles = qSettings.value("subscriptionCanManageRoutingProfiles", false).toBool();
+    return plan.compare("vip", Qt::CaseInsensitive) == 0 && canManageProfiles;
 }
 
 bool FBLinkController::isLoading() const
@@ -1130,7 +1140,9 @@ void FBLinkController::exitSafeMode()
 void FBLinkController::armNewFeaturesGuide()
 {
     QSettings qSettings = appSettings();
-    qSettings.setValue(kShowNewFeaturesGuideKey, true);
+    const QString plan = qSettings.value("subscriptionPlan", "").toString().trimmed();
+    const bool canManageProfiles = qSettings.value("subscriptionCanManageRoutingProfiles", false).toBool();
+    qSettings.setValue(kShowNewFeaturesGuideKey, plan.compare("vip", Qt::CaseInsensitive) == 0 && canManageProfiles);
     qSettings.sync();
     emit newFeaturesGuideChanged();
 }
@@ -1347,6 +1359,11 @@ void FBLinkController::fetchRoutingProfiles()
 
 void FBLinkController::fetchRoutingProfiles(bool allowRefreshRetry)
 {
+    if (!canManageRoutingProfiles()) {
+        emit routingProfilesError(tr("Функция доступна только для VIP"));
+        return;
+    }
+
     QString token = getJwtToken();
     if (token.isEmpty()) {
         emit routingProfilesError(tr("Необходимо войти в аккаунт"));
@@ -1403,6 +1420,11 @@ void FBLinkController::saveRoutingProfile(const QVariantMap &profile)
 
 void FBLinkController::saveRoutingProfile(const QVariantMap &profile, bool allowRefreshRetry)
 {
+    if (!canManageRoutingProfiles()) {
+        emit routingProfilesError(tr("Функция доступна только для VIP"));
+        return;
+    }
+
     QString token = getJwtToken();
     if (token.isEmpty()) {
         emit routingProfilesError(tr("Необходимо войти в аккаунт"));
@@ -1451,6 +1473,11 @@ void FBLinkController::deleteRoutingProfile(int id)
 
 void FBLinkController::deleteRoutingProfile(int id, bool allowRefreshRetry)
 {
+    if (!canManageRoutingProfiles()) {
+        emit routingProfilesError(tr("Функция доступна только для VIP"));
+        return;
+    }
+
     QString token = getJwtToken();
     if (token.isEmpty()) {
         emit routingProfilesError(tr("Необходимо войти в аккаунт"));
@@ -1490,6 +1517,11 @@ void FBLinkController::copySystemRoutingProfile(const QString &code)
 
 void FBLinkController::copySystemRoutingProfile(const QString &code, bool allowRefreshRetry)
 {
+    if (!canManageRoutingProfiles()) {
+        emit routingProfilesError(tr("Функция доступна только для VIP"));
+        return;
+    }
+
     const QString normalizedCode = code.trimmed();
     if (normalizedCode.isEmpty()) {
         emit routingProfilesError(tr("Код системного пресета не задан"));

@@ -18,7 +18,8 @@ if errorlevel 1 exit /b 1
 "%SC%" failure "%SERVICE_NAME%" reset= 100 actions= restart/2000/restart/2000/restart/2000 >nul 2>nul
 
 for /L %%I in (1,1,20) do (
-  "%SC%" query "%SERVICE_NAME%" | findstr /R /C:"STATE *: *4 *RUNNING" >nul && exit /b 0
+  call :is_service_running
+  if !errorlevel! EQU 0 exit /b 0
   "%SC%" start "%SERVICE_NAME%" >nul 2>nul
   if !errorlevel! EQU 1056 exit /b 0
   if !errorlevel! EQU 1058 (
@@ -29,9 +30,13 @@ for /L %%I in (1,1,20) do (
   ping -n 2 127.0.0.1 >nul
 )
 
-"%SC%" query "%SERVICE_NAME%" | findstr /R /C:"STATE *: *4 *RUNNING" >nul && exit /b 0
+call :service_exists
+if !errorlevel! EQU 0 (
+  echo WARN: service "%SERVICE_NAME%" is installed but not RUNNING yet. Continuing installation.
+  exit /b 0
+)
 
-echo ERROR: service "%SERVICE_NAME%" did not reach RUNNING state.
+echo ERROR: service "%SERVICE_NAME%" was not created.
 exit /b 1
 
 :upsert_service
@@ -79,3 +84,12 @@ if !errorlevel! EQU 0 exit /b 0
 
 echo ERROR: failed to configure service "%SERVICE_NAME%".
 exit /b 1
+
+:service_exists
+"%SC%" query "%SERVICE_NAME%" >nul 2>nul
+if !errorlevel! EQU 0 exit /b 0
+exit /b 1
+
+:is_service_running
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$s=Get-Service -Name '%SERVICE_NAME%' -ErrorAction SilentlyContinue; if ($null -ne $s -and $s.Status -eq 'Running') { exit 0 } else { exit 1 }" >nul 2>nul
+exit /b %errorlevel%

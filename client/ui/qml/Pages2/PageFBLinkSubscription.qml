@@ -34,6 +34,7 @@ PageType {
         if (FBLinkController.subscriptionPlan === "basic" || FBLinkController.subscriptionPlan === "trial") return 0
         return -1
     }
+    readonly property bool showNewUserOffer: FBLinkController.trialAvailable && !FBLinkController.isSubscribed
 
     readonly property var selectedPlanData: root.plans[Math.max(0, Math.min(root.selectedPlan, root.plans.length - 1))]
 
@@ -145,7 +146,9 @@ PageType {
                     PremiumBadge { text: root.selectedPlanData.id === "vip" ? qsTr("ПРИОРИТЕТ") : qsTr("СТАНДАРТ"); tone: root.selectedPlanData.id === "vip" ? "success" : "warning"; compact: true }
                     Item { Layout.fillWidth: true }
                     PremiumBadge {
-                        text: root.selectedPlanData.price + " " + root.selectedPlanData.period
+                        text: (root.showNewUserOffer && root.selectedPlanData.id === "basic")
+                            ? qsTr("5 ₽ / 7 дней")
+                            : (root.selectedPlanData.price + " " + root.selectedPlanData.period)
                         tone: root.selectedPlanData.id === "vip" ? "success" : "warning"
                         compact: true
                     }
@@ -162,7 +165,9 @@ PageType {
 
                 CaptionTextType {
                     Layout.fillWidth: true
-                    text: root.selectedPlanData.heroSubtitle
+                    text: (root.showNewUserOffer && root.selectedPlanData.id === "basic")
+                        ? qsTr("Для новых пользователей: 7 дней Premium за 5 ₽, затем стандартный тариф")
+                        : root.selectedPlanData.heroSubtitle
                     color: FBLinkStyle.color.mutedGray
                     font.pixelSize: 13
                     wrapMode: Text.WordWrap
@@ -177,7 +182,7 @@ PageType {
                 Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: FBLinkController.trialAvailable && !FBLinkController.isSubscribed
+                visible: false
                 implicitHeight: trialCol.implicitHeight + 24
                 radius: 16
 
@@ -318,6 +323,7 @@ PageType {
                         property bool isSelected: root.selectedPlan === index
                         property bool isCurrentPlan: FBLinkController.isSubscribed && FBLinkController.subscriptionPlan === modelData.id
                         property bool isBlocked: FBLinkController.isSubscribed && index <= root.currentPlanLevel
+                        property bool isNewUserDiscountCard: root.showNewUserOffer && modelData.id === "basic"
 
                         // Gradient fill
                         gradient: Gradient {
@@ -326,7 +332,9 @@ PageType {
                                 color: planCard.isCurrentPlan
                                     ? Qt.rgba(16/255, 185/255, 129/255, 0.18)
                                     : (planCard.isSelected
-                                        ? Qt.rgba(234/255, 179/255, 8/255, 0.22)
+                                        ? (planCard.isNewUserDiscountCard
+                                            ? Qt.rgba(16/255, 185/255, 129/255, 0.22)
+                                            : Qt.rgba(234/255, 179/255, 8/255, 0.22))
                                         : Qt.rgba(36/255, 36/255, 42/255, 1.0))
                             }
                             GradientStop {
@@ -336,7 +344,11 @@ PageType {
                         }
 
                         border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 2 : 1
-                        border.color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#EAB308" : FBLinkStyle.color.slateGray)
+                        border.color: planCard.isCurrentPlan
+                            ? "#10B981"
+                            : (planCard.isSelected
+                                ? (planCard.isNewUserDiscountCard ? "#10B981" : "#EAB308")
+                                : FBLinkStyle.color.slateGray)
 
                         opacity: (planCard.isBlocked && !planCard.isCurrentPlan) ? 0.52 : 1.0
 
@@ -368,7 +380,11 @@ PageType {
                                     anchors.verticalCenter: parent.verticalCenter
                                     border.width: (planCard.isSelected || planCard.isCurrentPlan) ? 0 : 2
                                     border.color: FBLinkStyle.color.slateGray
-                                    color: planCard.isCurrentPlan ? "#10B981" : (planCard.isSelected ? "#EAB308" : "transparent")
+                                    color: planCard.isCurrentPlan
+                                        ? "#10B981"
+                                        : (planCard.isSelected
+                                            ? (planCard.isNewUserDiscountCard ? "#10B981" : "#EAB308")
+                                            : "transparent")
 
                                     Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -392,7 +408,9 @@ PageType {
                                     LabelTextType {
                                         id: planTitleLabel
                                         width: Math.max(0, planMeta.width - (activeBadge.visible ? activeBadge.width + planMeta.spacing : 0))
-                                        text: modelData.title
+                                        text: planCard.isNewUserDiscountCard
+                                            ? qsTr("Premium для новых пользователей")
+                                            : modelData.title
                                         font.pixelSize: 15
                                         font.weight: 600
                                         color: planCard.isSelected ? FBLinkStyle.color.paleGray : FBLinkStyle.color.lightGray
@@ -403,18 +421,20 @@ PageType {
                                     // Badge: "АКТИВНА" overrides normal badge
                                     Rectangle {
                                         id: activeBadge
-                                        visible: planCard.isCurrentPlan || modelData.badge !== ""
+                                        visible: planCard.isCurrentPlan || modelData.badge !== "" || planCard.isNewUserDiscountCard
                                         height: 20
                                         width: activeBadgeText.implicitWidth + 12
                                         radius: 10
-                                        color: planCard.isCurrentPlan ? "#10B981" : "#EAB308"
+                                        color: planCard.isCurrentPlan ? "#10B981" : (planCard.isNewUserDiscountCard ? "#10B981" : "#EAB308")
 
                                         Text {
                                             id: activeBadgeText
                                             anchors.fill: parent
                                             horizontalAlignment: Text.AlignHCenter
                                             verticalAlignment: Text.AlignVCenter
-                                            text: planCard.isCurrentPlan ? qsTr("АКТИВНА") : modelData.badge
+                                            text: planCard.isCurrentPlan
+                                                ? qsTr("АКТИВНА")
+                                                : (planCard.isNewUserDiscountCard ? qsTr("НОВЫЙ") : modelData.badge)
                                             font.pixelSize: 10
                                             font.weight: 700
                                             font.family: "PT Root UI VF"
@@ -430,14 +450,16 @@ PageType {
                                 spacing: 4
 
                                 LabelTextType {
-                                    text: modelData.price
+                                    text: planCard.isNewUserDiscountCard ? qsTr("5 ₽") : modelData.price
                                     font.pixelSize: 26
                                     font.weight: 700
-                                    color: planCard.isSelected ? "#EAB308" : FBLinkStyle.color.mutedGray
+                                    color: planCard.isSelected
+                                        ? (planCard.isNewUserDiscountCard ? "#10B981" : "#EAB308")
+                                        : FBLinkStyle.color.mutedGray
                                 }
 
                                 LabelTextType {
-                                    text: modelData.period
+                                    text: planCard.isNewUserDiscountCard ? qsTr("/ 7 дней") : modelData.period
                                     font.pixelSize: 14
                                     color: FBLinkStyle.color.mutedGray
                                     Layout.alignment: Qt.AlignBottom
@@ -445,10 +467,19 @@ PageType {
                                 }
                             }
 
+                            LabelTextType {
+                                visible: planCard.isNewUserDiscountCard
+                                text: qsTr("Затем 199 ₽ / 30 дней")
+                                font.pixelSize: 12
+                                color: FBLinkStyle.color.mutedGray
+                            }
+
                             // Saving hint
                             LabelTextType {
                                 visible: modelData.saving !== ""
-                                text: modelData.saving
+                                text: planCard.isNewUserDiscountCard
+                                    ? qsTr("Специальный запуск: полный Premium-доступ по сниженной цене на 7 дней")
+                                    : modelData.saving
                                 font.pixelSize: 12
                                 color: "#10B981"
                                 Layout.fillWidth: true
@@ -631,10 +662,16 @@ PageType {
                 enabled: !root.isLoading && root.selectedPlan > root.currentPlanLevel
 
                 defaultColor: root.selectedPlan > root.currentPlanLevel
-                    ? (root.selectedPlanData.id === "vip" ? "#10B981" : "#EAB308")
+                    ? (root.selectedPlanData.id === "vip"
+                        ? "#10B981"
+                        : ((root.showNewUserOffer && root.selectedPlanData.id === "basic") ? "#10B981" : "#EAB308"))
                     : FBLinkStyle.color.charcoalGray
-                hoveredColor: root.selectedPlanData.id === "vip" ? "#34D399" : "#FACC15"
-                pressedColor: root.selectedPlanData.id === "vip" ? "#059669" : "#CA8A04"
+                hoveredColor: (root.selectedPlanData.id === "vip" || (root.showNewUserOffer && root.selectedPlanData.id === "basic"))
+                    ? "#34D399"
+                    : "#FACC15"
+                pressedColor: (root.selectedPlanData.id === "vip" || (root.showNewUserOffer && root.selectedPlanData.id === "basic"))
+                    ? "#059669"
+                    : "#CA8A04"
                 disabledColor: FBLinkStyle.color.charcoalGray
                 textColor: "#FFFFFF"
 
@@ -642,7 +679,9 @@ PageType {
                     ? qsTr("Создание платежа...")
                     : (root.selectedPlan <= root.currentPlanLevel
                         ? qsTr("Уже активна")
-                        : root.selectedPlanData.cta)
+                        : ((root.showNewUserOffer && root.selectedPlanData.id === "basic")
+                            ? qsTr("Активировать 7 дней за 5 ₽")
+                            : root.selectedPlanData.cta))
 
                 clickedFunc: function() {
                     root.errorMessage = ""
@@ -654,7 +693,11 @@ PageType {
 
                     root.isLoading = true
                     PageController.showBusyIndicator(true)
-                    FBLinkController.createPayment(root.plans[root.selectedPlan].id)
+                    var selectedPlanId = root.plans[root.selectedPlan].id
+                    if (root.showNewUserOffer && selectedPlanId === "basic") {
+                        selectedPlanId = "trial"
+                    }
+                    FBLinkController.createPayment(selectedPlanId)
                 }
             }
 
