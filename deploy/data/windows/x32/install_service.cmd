@@ -2,7 +2,7 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 set "SERVICE_NAME=FBLinkVPN-service"
-set "SERVICE_EXE=%~dp0FBLinkVPN-service.exe"
+set "SERVICE_EXE=%~dp0FBLink-service.exe"
 set "SC=%SystemRoot%\System32\sc.exe"
 
 if not exist "%SERVICE_EXE%" (
