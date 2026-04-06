@@ -5,9 +5,7 @@
 #include <QQmlContext>
 #include <QThread>
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    #include "ui/systemtray_notificationhandler.h"
-#endif
+#include "ui/notificationhandler.h"
 
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
@@ -50,10 +48,6 @@
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/sites_model.h"
 #include "ui/models/newsModel.h"
-
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    #include "ui/notificationhandler.h"
-#endif
 
 class CoreController : public QObject
 {
@@ -101,9 +95,7 @@ private:
     QSharedPointer<VpnConnection> m_vpnConnection;
     QSharedPointer<QTranslator> m_translator;
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     QScopedPointer<NotificationHandler> m_notificationHandler;
-#endif
 
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 

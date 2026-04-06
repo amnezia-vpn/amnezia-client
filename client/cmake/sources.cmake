@@ -45,9 +45,12 @@ if(NOT IOS AND NOT MACOS_NE)
     )
 endif()
 
-if(NOT ANDROID)
-    set(HEADERS ${HEADERS}
+set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/ui/notificationhandler.h
+)
+if(ANDROID)
+    set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/platforms/android/android_notificationhandler.h
     )
 endif()
 
@@ -109,9 +112,12 @@ if(APPLE AND NOT IOS)
     )
 endif()
 
-if(NOT ANDROID)
-    set(SOURCES ${SOURCES}
+set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/ui/notificationhandler.cpp
+)
+if(ANDROID)
+    set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/platforms/android/android_notificationhandler.cpp
     )
 endif()
 

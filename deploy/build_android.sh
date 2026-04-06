@@ -97,6 +97,17 @@ echo "Using Qt in $QT_BIN_DIR"
 echo "Using Android SDK in $ANDROID_SDK_ROOT"
 echo "Using Android NDK in $ANDROID_NDK_ROOT"
 
+if [[ -z "${ANDROID_NDK_ROOT:-}" ]]; then
+  echo "ANDROID_NDK_ROOT is not set. Example: export ANDROID_NDK_ROOT=\"\$HOME/Library/Android/sdk/ndk/<version>\""
+  exit 1
+fi
+NDK_TOOLCHAIN="$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake"
+if [[ ! -f "$NDK_TOOLCHAIN" ]]; then
+  echo "Missing NDK CMake toolchain: $NDK_TOOLCHAIN"
+  echo "Install a complete NDK (SDK Manager → NDK Side by side) or fix ANDROID_NDK_ROOT."
+  exit 1
+fi
+
 # Run qt-cmake to configure build
 qt_cmake_opts=()
 
@@ -105,6 +116,12 @@ if [[ -v AAB || "$ABIS" = "all" ]]; then
 else
   qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABIS")
 fi
+
+# Pin SDK/NDK on every configure so CMakeCache does not keep a stale NDK after you change ANDROID_NDK_ROOT.
+if [[ -n "${ANDROID_SDK_ROOT:-}" ]]; then
+  qt_cmake_opts+=(-DANDROID_SDK_ROOT="$ANDROID_SDK_ROOT")
+fi
+qt_cmake_opts+=(-DANDROID_NDK_ROOT="$ANDROID_NDK_ROOT")
 
 # QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL=ON - Skip building apks as part of the default 'ALL' target
 # We'll build apks during androiddeployqt

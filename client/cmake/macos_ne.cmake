@@ -32,6 +32,7 @@ set(LIBS ${LIBS}
 
 
 set(HEADERS ${HEADERS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macos_ne_vpn_notification.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.h
@@ -43,6 +44,7 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_contro
 
 
 set(SOURCES ${SOURCES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macos_ne_vpn_notification.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.mm

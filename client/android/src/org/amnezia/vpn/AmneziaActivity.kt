@@ -1006,6 +1006,12 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun isNotificationPermissionGranted(): Boolean = applicationContext.isNotificationPermissionGranted()
 
+    /** Called from Qt (AndroidController) — CLI-570 VPN connect/disconnect heads-up. */
+    @Suppress("unused")
+    fun showVpnStateNotification(title: String, message: String) {
+        ServiceNotification.showVpnStateEvent(applicationContext, title, message)
+    }
+
     @Suppress("unused")
     fun requestNotificationPermission() {
         val shouldShowPreRequest = shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)

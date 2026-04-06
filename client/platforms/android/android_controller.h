@@ -53,6 +53,7 @@ public:
     QPixmap getAppIcon(const QString &package, QSize *size, const QSize &requestedSize);
     bool isNotificationPermissionGranted();
     void requestNotificationPermission();
+    void showVpnStateNotification(const QString &title, const QString &message);
     bool requestAuthentication();
     void sendTouch(float x, float y);
 

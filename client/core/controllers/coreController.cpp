@@ -8,6 +8,11 @@
     #include "platforms/android/android_controller.h"
 #endif
 
+// SystemTrayNotificationHandler exists only on desktop + macOS NE builds (see client/cmake/sources.cmake).
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    #include "ui/systemtray_notificationhandler.h"
+#endif
+
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
     #include <AmneziaVPN-Swift.h>
@@ -242,7 +247,6 @@ void CoreController::initSignalHandlers()
 
 void CoreController::initNotificationHandler()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     m_notificationHandler.reset(NotificationHandler::create(nullptr));
 
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_notificationHandler.get(),
@@ -255,9 +259,11 @@ void CoreController::initNotificationHandler()
             &ConnectionController::closeConnection);
     connect(this, &CoreController::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
 
-    auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_notificationHandler.get());
-    connect(this, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
-#endif    
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (auto *trayHandler = qobject_cast<SystemTrayNotificationHandler *>(m_notificationHandler.get())) {
+        connect(this, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
+    }
+#endif
 }
 
 void CoreController::updateTranslator(const QLocale &locale)

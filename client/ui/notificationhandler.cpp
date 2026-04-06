@@ -5,16 +5,19 @@
 #include <QDebug>
 #include "notificationhandler.h"
 
-#if defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID)
+#  include "platforms/android/android_notificationhandler.h"
+#elif defined(Q_OS_IOS)
 #  include "platforms/ios/iosnotificationhandler.h"
 #else
 #  include "systemtray_notificationhandler.h"
 #endif
 
-
 // static
 NotificationHandler* NotificationHandler::create(QObject* parent) {
-#if defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID)
+    return new AndroidNotificationHandler(parent);
+#elif defined(Q_OS_IOS)
     return new IOSNotificationHandler(parent);
 #else
     return new SystemTrayNotificationHandler(parent);
