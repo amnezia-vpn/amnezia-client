@@ -21,11 +21,13 @@ PageType {
     property bool subscriptionExpired: false
     property bool subscriptionExpiringSoon: false
     property bool isSubscriptionRenewalAvailable: false
+    property bool isInAppPurchase: false
 
     function updateSubscriptionState() {
         root.subscriptionExpired = ServersModel.getProcessedServerData("isSubscriptionExpired")
         root.subscriptionExpiringSoon = ServersModel.getProcessedServerData("isSubscriptionExpiringSoon")
-        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isComponentVisible")
+        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
+        root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
     }
 
     Component.onCompleted: {
@@ -130,7 +132,7 @@ PageType {
 
             BasicButtonType {
                 visible: (root.subscriptionExpired || root.subscriptionExpiringSoon)
-                    && root.isSubscriptionRenewalAvailable
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16

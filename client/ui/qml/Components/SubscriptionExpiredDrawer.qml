@@ -12,6 +12,13 @@ import "../Controls2/TextTypes"
 DrawerType2 {
     id: root
 
+    property bool isRenewalActionAvailable: false
+
+    onOpened: {
+        isRenewalActionAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
+                && !ApiAccountInfoModel.data("isInAppPurchase")
+    }
+
     expandedStateContent: ColumnLayout {
         id: content
 
@@ -43,6 +50,8 @@ DrawerType2 {
         }
 
         ParagraphTextType {
+            visible: root.isRenewalActionAvailable
+
             Layout.fillWidth: true
             Layout.topMargin: 8
             Layout.rightMargin: 16
@@ -53,6 +62,8 @@ DrawerType2 {
         }
 
         BasicButtonType {
+            visible: root.isRenewalActionAvailable
+
             Layout.fillWidth: true
             Layout.topMargin: 16
             Layout.rightMargin: 16

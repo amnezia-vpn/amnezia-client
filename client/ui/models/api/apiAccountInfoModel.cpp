@@ -57,6 +57,11 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
                 || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium
                 || m_accountInfoData.configType == apiDefs::ConfigType::ExternalTrial;
     }
+    case IsSubscriptionRenewalAvailableRole: {
+        return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
+                || m_accountInfoData.configType == apiDefs::ConfigType::AmneziaTrialV2
+                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalTrial;
+    }
     case HasExpiredWorkerRole: {
         for (int i = 0; i < m_issuedConfigsInfo.size(); i++) {
             QJsonObject issuedConfigObject = m_issuedConfigsInfo.at(i).toObject();
@@ -195,6 +200,7 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[ConnectedDevicesRole] = "connectedDevices";
     roles[ServiceDescriptionRole] = "serviceDescription";
     roles[IsComponentVisibleRole] = "isComponentVisible";
+    roles[IsSubscriptionRenewalAvailableRole] = "isSubscriptionRenewalAvailable";
     roles[HasExpiredWorkerRole] = "hasExpiredWorker";
     roles[IsProtocolSelectionSupportedRole] = "isProtocolSelectionSupported";
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";

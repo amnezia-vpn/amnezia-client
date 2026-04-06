@@ -18,6 +18,7 @@ public:
         ServiceDescriptionRole,
         EndDateRole,
         IsComponentVisibleRole,
+        IsSubscriptionRenewalAvailableRole,
         HasExpiredWorkerRole,
         IsProtocolSelectionSupportedRole,
         IsSubscriptionExpiredRole,

@@ -60,7 +60,7 @@ PageType {
     function updateSubscriptionState() {
         root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
         root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
-        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isComponentVisible")
+        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
     }
 
