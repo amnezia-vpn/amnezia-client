@@ -91,6 +91,7 @@ class TestSelfHostedServerSetup;
 class TestMultipleExports;
 class TestSerialization;
 class TestUiLanguageModelAndController;
+class TestUiSitesModelAndController;
 
 class CoreController : public QObject
 {
@@ -111,6 +112,7 @@ class CoreController : public QObject
     friend class TestMultipleExports;
     friend class TestSerialization;
     friend class TestUiLanguageModelAndController;
+    friend class TestUiSitesModelAndController;
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
