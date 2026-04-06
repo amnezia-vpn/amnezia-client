@@ -91,6 +91,35 @@ function serviceExistsWindows()
     return exitCode === 0;
 }
 
+function expectedServiceExecutablePathWindows()
+{
+    var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
+    return targetDir + "\\" + serviceExecutableFileName();
+}
+
+function normalizeWindowsPath(path)
+{
+    if (!path) {
+        return "";
+    }
+    return String(path).replace(/"/g, "").replace(/\//g, "\\").trim().toLowerCase();
+}
+
+function currentServiceBinaryPathWindows()
+{
+    var result = installer.execute("sc", ["qc", serviceName()]);
+    var output = String(result[0]);
+    var exitCode = Number(result[1]);
+    if (exitCode !== 0) {
+        return "";
+    }
+    var match = output.match(/BINARY_PATH_NAME\s*:\s*(.*)/);
+    if (!match || match.length < 2) {
+        return "";
+    }
+    return normalizeWindowsPath(match[1]);
+}
+
 function runInstallServiceScriptWindows()
 {
     var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
@@ -103,16 +132,20 @@ function runInstallServiceScriptWindows()
 
 function ensureServiceStartedAndRunningWindows()
 {
-    if (!serviceExistsWindows()) {
-        console.log(("%1 is missing, trying to install service again").arg(serviceName()));
+    var expectedPath = normalizeWindowsPath(expectedServiceExecutablePathWindows());
+    var currentPath = currentServiceBinaryPathWindows();
+
+    if (!serviceExistsWindows() || currentPath.indexOf(expectedPath) < 0) {
+        console.log(("%1 is missing or points to stale path. Repairing service registration...").arg(serviceName()));
         runInstallServiceScriptWindows();
         sleep(1200);
+        currentPath = currentServiceBinaryPathWindows();
     }
 
-    if (!serviceExistsWindows()) {
+    if (!serviceExistsWindows() || currentPath.indexOf(expectedPath) < 0) {
         QMessageBox.critical("service.missing",
                              appName(),
-                             qsTr("Service installation is incomplete: VPN service was not created.\n\nPlease run installer as Administrator and reinstall."),
+                             qsTr("Service installation is incomplete: VPN service was not created or registered with an invalid path.\n\nPlease run installer as Administrator and reinstall."),
                              QMessageBox.Ok);
         return false;
     }
