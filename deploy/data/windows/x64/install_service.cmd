@@ -30,13 +30,7 @@ for /L %%I in (1,1,20) do (
   ping -n 2 127.0.0.1 >nul
 )
 
-call :service_exists
-if !errorlevel! EQU 0 (
-  echo WARN: service "%SERVICE_NAME%" is installed but not RUNNING yet. Continuing installation.
-  exit /b 0
-)
-
-echo ERROR: service "%SERVICE_NAME%" was not created.
+echo ERROR: service "%SERVICE_NAME%" did not reach RUNNING state.
 exit /b 1
 
 :upsert_service
@@ -83,11 +77,6 @@ if !errorlevel! EQU 0 exit /b 0
 if !errorlevel! EQU 0 exit /b 0
 
 echo ERROR: failed to configure service "%SERVICE_NAME%".
-exit /b 1
-
-:service_exists
-"%SC%" query "%SERVICE_NAME%" >nul 2>nul
-if !errorlevel! EQU 0 exit /b 0
 exit /b 1
 
 :is_service_running

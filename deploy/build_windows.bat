@@ -99,6 +99,19 @@ if not "%SIGN_CERT_THUMBPRINT%"=="" (
 "%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations --force-openssl "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
 "%QT_BIN_DIR:"=%\windeployqt" --release "%OUT_APP_DIR:"=%\%SERVICE_FILENAME:"=%"
 
+echo "Ensuring MinGW runtime DLLs are packaged..."
+for %%F in (libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll) do (
+    if exist "%QT_BIN_DIR:"=%\%%F" copy /Y "%QT_BIN_DIR:"=%\%%F" "%OUT_APP_DIR%\%%F" >nul
+)
+
+if not exist "%OUT_APP_DIR%\libgcc_s_seh-1.dll" (
+    for %%D in ("%QT_BIN_DIR:"=%\..\..\Tools\mingw*\bin") do (
+        if exist "%%~fD\libgcc_s_seh-1.dll" copy /Y "%%~fD\libgcc_s_seh-1.dll" "%OUT_APP_DIR%\libgcc_s_seh-1.dll" >nul
+        if exist "%%~fD\libstdc++-6.dll" copy /Y "%%~fD\libstdc++-6.dll" "%OUT_APP_DIR%\libstdc++-6.dll" >nul
+        if exist "%%~fD\libwinpthread-1.dll" copy /Y "%%~fD\libwinpthread-1.dll" "%OUT_APP_DIR%\libwinpthread-1.dll" >nul
+    )
+)
+
 if not "%SIGN_CERT_THUMBPRINT%"=="" (
     signtool sign /v /sha1 "%SIGN_CERT_THUMBPRINT%" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll || echo "Signing skipped (thumbprint signing failed)"
 ) else (

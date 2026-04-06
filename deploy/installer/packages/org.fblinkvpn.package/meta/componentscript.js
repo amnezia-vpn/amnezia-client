@@ -71,17 +71,10 @@ function sleep(milliseconds)
 
 function serviceIsRunningWindows()
 {
-    var result = installer.execute("sc", ["query", serviceName()]);
-    var output = String(result[0]);
+    var psCmd = "$s=Get-Service -Name '" + serviceName() + "' -ErrorAction SilentlyContinue; if ($null -ne $s -and $s.Status -eq 'Running') { exit 0 } else { exit 1 }";
+    var result = installer.execute("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", psCmd]);
     var exitCode = Number(result[1]);
-
-    if (exitCode !== 0) {
-        return false;
-    }
-
-    // `sc query` output can be localized, but "RUNNING" and numeric state 4
-    // are stable markers for a healthy service state.
-    return (output.indexOf("RUNNING") !== -1) || (output.match(/:\s*4\s+/) !== null);
+    return exitCode === 0;
 }
 
 function serviceExistsWindows()
@@ -158,11 +151,6 @@ function ensureServiceStartedAndRunningWindows()
             return true;
         }
         sleep(1500);
-    }
-
-    if (serviceExistsWindows()) {
-        console.log(("%1 installed but not RUNNING yet; continuing").arg(serviceName()));
-        return true;
     }
 
     QMessageBox.critical("service.start.failed",
