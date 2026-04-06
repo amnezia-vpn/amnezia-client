@@ -128,17 +128,17 @@ function ensureServiceStartedAndRunningWindows()
     var expectedPath = normalizeWindowsPath(expectedServiceExecutablePathWindows());
     var currentPath = currentServiceBinaryPathWindows();
 
-    if (!serviceExistsWindows() || currentPath.indexOf(expectedPath) < 0) {
-        console.log(("%1 is missing or points to stale path. Repairing service registration...").arg(serviceName()));
+    if (!serviceExistsWindows()) {
+        console.log(("%1 is missing. Repairing service registration...").arg(serviceName()));
         runInstallServiceScriptWindows();
         sleep(1200);
         currentPath = currentServiceBinaryPathWindows();
     }
 
-    if (!serviceExistsWindows() || currentPath.indexOf(expectedPath) < 0) {
+    if (!serviceExistsWindows()) {
         QMessageBox.critical("service.missing",
                              appName(),
-                             qsTr("Service installation is incomplete: VPN service was not created or registered with an invalid path.\n\nPlease run installer as Administrator and reinstall."),
+                             qsTr("Service installation is incomplete (" + serviceName() + " missing).\n\nDetails:\nExpected: " + expectedPath + "\nActual: " + currentPath + "\n\nPlease run installer as Administrator and reinstall."),
                              QMessageBox.Ok);
         return false;
     }
