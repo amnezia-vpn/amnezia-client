@@ -1,7 +1,7 @@
 
 function appName()
 {
-    return "FBLink"
+    return installer.value("Name")
 }
 
 function appLinkName()
