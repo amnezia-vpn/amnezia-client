@@ -217,14 +217,14 @@ endif()
 if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/deploy/data/${DEPLOY_PLATFORM_PATH}
         $<TARGET_FILE_DIR:${PROJECT}>
         COMMAND_EXPAND_LISTS
     )
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/client/3rd-prebuilt/deploy-prebuilt/${DEPLOY_PLATFORM_PATH}
         $<TARGET_FILE_DIR:${PROJECT}>
         COMMAND_EXPAND_LISTS
