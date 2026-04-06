@@ -13,6 +13,16 @@ import "../Components"
 
 PageType {
     id: root
+    property string trialEmailErrorMessage: ""
+
+    Connections {
+        target: ApiConfigsController
+
+        function onTrialEmailError(message) {
+            root.trialEmailErrorMessage = message
+            emailField.errorText = message
+        }
+    }
 
     BackButtonType {
         id: backButton
@@ -67,6 +77,17 @@ PageType {
                 headerText: qsTr("Email")
                 textField.placeholderText: qsTr("Email")
                 textField.inputMethodHints: Qt.ImhEmailCharactersOnly
+
+                Connections {
+                    target: emailField.textField
+
+                    function onTextChanged() {
+                        if (root.trialEmailErrorMessage !== "") {
+                            root.trialEmailErrorMessage = ""
+                            emailField.errorText = ""
+                        }
+                    }
+                }
             }
 
             ParagraphTextType {
@@ -97,6 +118,9 @@ PageType {
         text: qsTr("Continue")
 
         clickedFunc: function() {
+            root.trialEmailErrorMessage = ""
+            emailField.errorText = ""
+
             var raw = emailField.textField.text.trim()
             if (raw.length === 0 || raw.indexOf("@") < 0) {
                 PageController.showNotificationMessage(qsTr("Enter a valid email address"))

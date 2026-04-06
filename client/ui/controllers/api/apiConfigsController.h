@@ -49,6 +49,7 @@ public slots:
 
 signals:
     void errorOccurred(ErrorCode errorCode);
+    void trialEmailError(const QString &message);
     void subscriptionExpiredOnServer();
     void subscriptionRefreshNeeded();
 

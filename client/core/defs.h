@@ -125,6 +125,7 @@ namespace amnezia
         ApiPurchaseError = 1113,
         ApiSubscriptionNotActiveError = 1114,
         ApiNoPurchasedSubscriptionsError = 1115,
+        ApiTrialAlreadyUsedError = 1116,
 
         // QFile errors
         OpenError = 1200,

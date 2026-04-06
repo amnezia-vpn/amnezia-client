@@ -868,6 +868,8 @@ bool ApiConfigsController::importFreeFromGateway()
 
 bool ApiConfigsController::importTrialFromGateway(const QString &email)
 {
+    emit trialEmailError(QString());
+
     const QString trimmedEmail = email.trimmed();
     if (trimmedEmail.isEmpty()) {
         emit errorOccurred(ErrorCode::ApiConfigEmptyError);
@@ -899,6 +901,10 @@ bool ApiConfigsController::importTrialFromGateway(const QString &email)
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/trial"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError) {
+        if (errorCode == ErrorCode::ApiTrialAlreadyUsedError) {
+            emit trialEmailError(tr("This email has already been used for trial activation. If you like the service, you can buy Premium."));
+            return false;
+        }
         emit errorOccurred(errorCode);
         return false;
     }

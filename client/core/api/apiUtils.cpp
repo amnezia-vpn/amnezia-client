@@ -10,6 +10,7 @@ namespace
     const QByteArray AMNEZIA_CONFIG_SIGNATURE = QByteArray::fromHex("000000ff");
 
     constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
+    constexpr QLatin1String trialAlreadyUsedMessage("trial subscription already used");
 
     QDateTime subscriptionEndUtcFromString(const QString &subscriptionEndDate)
     {
@@ -168,6 +169,9 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         QJsonObject jsonObj = jsonDoc.object();
         const int httpStatusFromBody = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
         if (httpStatusFromBody == httpStatusCodeConflict) {
+            if (apiErrorMessageFromJson(jsonObj).contains(trialAlreadyUsedMessage, Qt::CaseInsensitive)) {
+                return amnezia::ErrorCode::ApiTrialAlreadyUsedError;
+            }
             return amnezia::ErrorCode::ApiConfigLimitError;
         }
         if (httpStatusFromBody == httpStatusCodeNotFound) {
