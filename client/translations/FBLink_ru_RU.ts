@@ -253,6 +253,10 @@
         <translation type="vanished">Невозможно отключиться во время подготовки конфигурации</translation>
     </message>
     <message>
+        <source>Connect</source>
+        <translation type="obsolete">Подключиться</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="58"/>
         <source>Войти</source>
         <translation type="unfinished"></translation>
@@ -283,22 +287,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="287"/>
+        <source>Нужна подписка</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="299"/>
         <source>Войдите в аккаунт для подключения</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Connect</source>
-        <translation type="obsolete">Подключиться</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="306"/>
         <source>Требуется активная подписка для подключения</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="287"/>
-        <source>Нужна подписка</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -589,22 +589,6 @@ Can&apos;t be disabled for current server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="77"/>
-        <source>Включено</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="77"/>
-        <source>Выключено</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="58"/>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="78"/>
-        <source>Доступно только в VIP</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="46"/>
         <source>Маршрутизация</source>
         <translation type="unfinished"></translation>
@@ -625,8 +609,24 @@ Can&apos;t be disabled for current server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="58"/>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="78"/>
+        <source>Доступно только в VIP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="75"/>
         <source>Раздельное туннелирование по приложениям</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="77"/>
+        <source>Включено</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="77"/>
+        <source>Выключено</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7092,6 +7092,34 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <location filename="../ui/qml/Controls2/TextFieldWithHeaderType.qml" line="139"/>
         <source>The field can&apos;t be empty</source>
         <translation>Поле не может быть пустым</translation>
+    </message>
+</context>
+<context>
+    <name>UpdatePopup</name>
+    <message>
+        <location filename="../ui/qml/Components/UpdatePopup.qml" line="61"/>
+        <source>Обновление</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdatePopup.qml" line="100"/>
+        <source>Доступна версия %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdatePopup.qml" line="109"/>
+        <source>Улучшена стабильность и скорость работы.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdatePopup.qml" line="119"/>
+        <source>Обновить сейчас</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdatePopup.qml" line="136"/>
+        <source>Позже</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

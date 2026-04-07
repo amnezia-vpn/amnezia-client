@@ -21,7 +21,7 @@ UpdateController::UpdateController(QObject *parent)
 void UpdateController::checkForUpdates()
 {
     // Hardcode fallback url for backend API
-    QString apiUrl = "https://api.fblink.ru";
+    QString apiUrl = "https://srv.frakebit.com";
 
 
     QUrl url(apiUrl + "/api/v1/client/latest-version");
