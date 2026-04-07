@@ -135,3 +135,5 @@ captures/
 # =========================
 client/3rd/OpenVPNAdpter/build/
 client/3rd/ShadowSocks/build/
+vpn-backend/.env
+
