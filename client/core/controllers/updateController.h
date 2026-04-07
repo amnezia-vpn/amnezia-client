@@ -25,6 +25,7 @@ private slots:
 private:
     QNetworkAccessManager *m_nam;
     QString m_downloadUrl;
+    bool m_hasChecked = false;
 
     bool isNewerVersion(const QString &current, const QString &latest);
 };

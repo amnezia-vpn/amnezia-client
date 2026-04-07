@@ -10,6 +10,7 @@
 #include <QStringList>
 
 #include "core/defs.h"
+#include "constants.h"
 
 UpdateController::UpdateController(QObject *parent)
     : QObject(parent)
@@ -20,6 +21,11 @@ UpdateController::UpdateController(QObject *parent)
 
 void UpdateController::checkForUpdates()
 {
+    if (m_hasChecked) {
+        return;
+    }
+    m_hasChecked = true;
+    
     // Hardcode fallback url for backend API
     QString apiUrl = "https://srv.frakebit.com";
 
@@ -55,7 +61,7 @@ void UpdateController::onVersionCheckFinished(QNetworkReply *reply)
     QString releaseNotes = obj.value("release_notes").toString();
     bool isCritical = obj.value("is_critical").toBool(false);
 
-    QString currentVersion = QCoreApplication::applicationVersion();
+    QString currentVersion = Constants::versionString();
 
     // If version is missing or we are in debug build where version might be empty
     if (latestVersion.isEmpty() || currentVersion.isEmpty()) {
