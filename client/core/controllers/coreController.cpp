@@ -161,6 +161,9 @@ void CoreController::initControllers()
 
     m_fbLinkController.reset(new FBLinkController(m_importController.get(), m_settings, m_serversModel.get(), this));
     m_engine->rootContext()->setContextProperty("FBLinkController", m_fbLinkController.get());
+
+    m_updateController.reset(new UpdateController(this));
+    m_engine->rootContext()->setContextProperty("UpdateController", m_updateController.get());
 }
 
 void CoreController::initAndroidController()
@@ -428,9 +431,38 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
-        // 3) Only AFTER network checks succeed, emit Preparing.
-        // If we emit Preparing earlier, strict kill switches or VPN adapters might drop the internet,
-        // causing the above HTTP requests to freeze the UI and timeout.
+        // 3) Defer connection if FBLinkController is currently fetching backend configuration
+        if (m_fbLinkController && (m_fbLinkController->isLoading() || m_fbLinkController->isConfigSyncing())) {
+            qDebug() << "[FBLink] prepareConfig: FBLinkController is syncing. Waiting for configFetched...";
+            
+            // Set state to Preparing IMMEDIATELY so the user sees a loading animation while waiting for API
+            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
+            m_connectionController->setConnectionStateText(tr("Обновление..."));
+
+            std::shared_ptr<bool> triggered = std::make_shared<bool>(false);
+            
+            auto proceed = [this, triggered]() {
+                if (*triggered) return;
+                *triggered = true;
+                qDebug() << "[FBLink] prepareConfig: deferred config fetched, calling openConnection()";
+                m_connectionController->openConnection();
+            };
+
+            auto errorProceed = [this, triggered](const QString &) {
+                if (*triggered) return;
+                *triggered = true;
+                emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error);
+            };
+
+            connect(m_fbLinkController.get(), &FBLinkController::configFetched, this, proceed, Qt::SingleShotConnection);
+            connect(m_fbLinkController.get(), &FBLinkController::configError, this, errorProceed, Qt::SingleShotConnection);
+            
+            // Fallback timeout
+            QTimer::singleShot(5000, this, proceed);
+            return;
+        }
+
+        // 4) Only AFTER network checks succeed, emit Preparing.
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
         qDebug() << "[FBLink] prepareConfig: both valid, calling openConnection()";

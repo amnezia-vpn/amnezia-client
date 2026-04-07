@@ -95,6 +95,9 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			authGroup.POST("/reset-password", authH.ResetPassword)
 		}
 
+		// Client Updates (Public)
+		api.GET("/client/latest-version", handlers.GetLatestClientVersion(cfg))
+
 		// Webhook — IP whitelist + rate limit
 		api.POST("/payments/webhook",
 			middleware.RateLimit(webhookLimiter),

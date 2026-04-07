@@ -40,6 +40,7 @@ class FBLinkController : public QObject
     Q_PROPERTY(QString safeModeUntilText READ safeModeUntilText NOTIFY subscriptionChanged)
     Q_PROPERTY(bool showNewFeaturesGuide READ showNewFeaturesGuide NOTIFY newFeaturesGuideChanged)
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY loadingChanged)
+    Q_PROPERTY(bool isConfigSyncing READ isConfigSyncing NOTIFY configSyncChanged)
 
 public:
     explicit FBLinkController(ImportController *importController, const std::shared_ptr<Settings> &settings,
@@ -89,6 +90,7 @@ public:
     QString safeModeUntilText() const;
     bool showNewFeaturesGuide() const;
     bool isLoading() const;
+    bool isConfigSyncing() const;
 
 signals:
     void loginSuccess();
@@ -121,6 +123,7 @@ signals:
     void newFeaturesGuideChanged();
     void requestError(const QString &errorMessage);
     void loadingChanged();
+    void configSyncChanged();
     void userEmailChanged();
 
 private:
@@ -135,6 +138,7 @@ private:
     void logApiFailure(const QString &operationName, QNetworkReply *reply) const;
     bool shouldRefreshToken(QNetworkReply *reply) const;
     void setLoadingState(bool isLoading);
+    void setConfigSyncState(bool isSyncing);
 
     void fetchConfig(bool allowRefreshRetry);
     void fetchSubscription(bool allowRefreshRetry);
@@ -157,13 +161,16 @@ private:
     void beginSessionSync();
     void saveSubscriptionInfo(const QString &status, const QString &plan, const QString &endDate,
                               bool autoRenew = true, bool cardSaved = false, bool trialAvailable = true,
-                              const QStringList &allowedProtocols = {}, bool canUseSiteSplitTunneling = false,
+                              const QStringList &allowedProtocols = {}, bool canUseSiteSplitTunneling = false,       
                               bool canUseAppSplitTunneling = false, bool canManageRoutingProfiles = false,
                               bool canUseAdBlock = false, bool vipAdBlockEnabled = false);
     void clearExistingFBLinkServers();
 
     bool m_isRefreshing = false;
     bool m_isLoading = false;
+    bool m_isConfigSyncing = false;
+    int m_loadingOperationsCount = 0;
+    int m_configSyncOperationsCount = 0;
     bool m_fetchConfigAfterSubscription = false;
     QVector<std::function<void()>> m_pendingRefreshCallbacks;
     // Защита от обхода подписки: время последней серверной верификации

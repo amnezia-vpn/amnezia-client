@@ -17,6 +17,7 @@
 #include <QGuiApplication>
 #include <QClipboard>
 #include <QLocale>
+#include <memory>
 
 // Backend API URL
 const QString BACKEND_URL = "https://srv.frakebit.com/api/v1";
@@ -203,8 +204,7 @@ FBLinkController::FBLinkController(ImportController *importController,
     // Lazy sync at startup: если пользователь уже залогинен — сразу идём в bootstrap
     // через текущий access token. Refresh произойдёт только при реальном 401 внутри
     // fetchSubscription()/fetchConfig(), что убирает лишний round-trip на каждый запуск.
-    if (isLoggedIn()) {
-        setLoadingState(true);
+    if (!getJwtToken().isEmpty()) {
         QTimer::singleShot(0, this, [this]() {
             beginSessionSync();
         });
@@ -220,7 +220,6 @@ void FBLinkController::beginSessionSync()
 void FBLinkController::syncAll()
 {
     if (isLoggedIn()) {
-        setLoadingState(true);
         beginSessionSync();
     }
 }
@@ -275,12 +274,38 @@ bool FBLinkController::shouldRefreshToken(QNetworkReply *reply) const
 
 void FBLinkController::setLoadingState(bool isLoading)
 {
-    if (m_isLoading == isLoading) {
-        return;
+    if (isLoading) {
+        m_loadingOperationsCount++;
+    } else {
+        m_loadingOperationsCount--;
+        if (m_loadingOperationsCount < 0) {
+            m_loadingOperationsCount = 0;
+        }
     }
+    
+    bool newIsLoading = (m_loadingOperationsCount > 0);
+    if (m_isLoading != newIsLoading) {
+        m_isLoading = newIsLoading;
+        emit loadingChanged();
+    }
+}
 
-    m_isLoading = isLoading;
-    emit loadingChanged();
+void FBLinkController::setConfigSyncState(bool isSyncing)
+{
+    if (isSyncing) {
+        m_configSyncOperationsCount++;
+    } else {
+        m_configSyncOperationsCount--;
+        if (m_configSyncOperationsCount < 0) {
+            m_configSyncOperationsCount = 0;
+        }
+    }
+    
+    bool currentlySyncing = m_configSyncOperationsCount > 0;
+    if (m_isConfigSyncing != currentlySyncing) {
+        m_isConfigSyncing = currentlySyncing;
+        emit configSyncChanged();
+    }
 }
 
 void FBLinkController::login(const QString &email, const QString &password)
@@ -312,14 +337,12 @@ void FBLinkController::login(const QString &email, const QString &password)
                     saveRefreshToken(obj["refresh_token"].toString());
                 setUserEmail(email);
                 saveSubscriptionInfo("", "", "");  // Clear stale data from previous user
-                setLoadingState(true);
                 emit loginSuccess();
                 emit loginStateChanged();
                 emit subscriptionChanged();
 
                 beginSessionSync();
             } else {
-                setLoadingState(false);
                 emit loginError(tr("Некорректный формат ответа сервера"));
             }
         } else {
@@ -330,7 +353,6 @@ void FBLinkController::login(const QString &email, const QString &password)
                 errStr = doc.object()["error"].toString();
             }
             logApiFailure("login", reply);
-            setLoadingState(false);
             emit loginError(errStr);
         }
     });
@@ -385,13 +407,11 @@ void FBLinkController::verifyEmail(const QString &email, const QString &code)
                     saveRefreshToken(obj["refresh_token"].toString());
                 setUserEmail(email);
                 saveSubscriptionInfo("", "", "");
-                setLoadingState(true);
                 emit verifySuccess();
                 emit loginStateChanged();
                 emit subscriptionChanged();
                 beginSessionSync();
             } else {
-                setLoadingState(false);
                 emit verifyError(tr("Неверный ответ сервера"));
             }
         } else {
@@ -401,7 +421,6 @@ void FBLinkController::verifyEmail(const QString &email, const QString &code)
             if (!doc.isNull() && doc.object().contains("error"))
                 errStr = doc.object()["error"].toString();
             logApiFailure("verify", reply);
-            setLoadingState(false);
             emit verifyError(errStr);
         }
     });
@@ -459,7 +478,6 @@ void FBLinkController::loginWithToken(const QString &token)
     saveJwtToken(token);
     setUserEmail("");
     saveSubscriptionInfo("", "", "");
-    setLoadingState(true);
     emit loginStateChanged();
     emit subscriptionChanged();
     beginSessionSync();
@@ -478,12 +496,14 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
         return;
     }
 
+    setConfigSyncState(true);
     QNetworkRequest request = createApiRequest("/me/config", false, true);
 
     QNetworkReply *reply = m_nam->get(request);
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, allowRefreshRetry]() {
         reply->deleteLater();
+        std::shared_ptr<void> guard(nullptr, [this](void*){ setConfigSyncState(false); });
 
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray responseData = reply->readAll();
@@ -715,11 +735,9 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
 
                     emit configFetched();
                 } else {
-                    setLoadingState(false);
                     emit configError(tr("Внутренняя ошибка: Контроллеры не инициализированы"));
                 }
             } else {
-                setLoadingState(false);
                 emit configError(tr("Сервер не вернул конфигурацию"));
             }
         } else {
@@ -738,7 +756,6 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                  return;
              }
 
-             setLoadingState(false);
              emit configError(errStr);
         }
     });
@@ -868,7 +885,6 @@ void FBLinkController::fetchSubscription(bool allowRefreshRetry)
             m_lastSubscriptionVerifiedAt = QDateTime::currentSecsSinceEpoch();
             const bool shouldFetchConfig = m_fetchConfigAfterSubscription;
             m_fetchConfigAfterSubscription = false;
-            setLoadingState(false);
             emit subscriptionChanged();
             emit subscriptionFetched();
             if (shouldFetchConfig) {
@@ -895,7 +911,6 @@ void FBLinkController::fetchSubscription(bool allowRefreshRetry)
             }
 
             m_fetchConfigAfterSubscription = false;
-            setLoadingState(false);
             emit subscriptionError(errStr);
         }
     });
@@ -1114,6 +1129,11 @@ bool FBLinkController::isLoading() const
     return m_isLoading;
 }
 
+bool FBLinkController::isConfigSyncing() const
+{
+    return m_isConfigSyncing;
+}
+
 void FBLinkController::setAutoRenew(bool enabled)
 {
     setAutoRenew(enabled, true);
@@ -1197,6 +1217,7 @@ void FBLinkController::setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry
     QString token = getJwtToken();
     if (token.isEmpty()) return;
 
+    setLoadingState(true);
     QNetworkRequest request = createApiRequest("/me/subscription/ad-block", true, true);
 
     QJsonObject json;
@@ -1206,6 +1227,7 @@ void FBLinkController::setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, enabled, allowRefreshRetry]() {
         reply->deleteLater();
+        std::shared_ptr<void> guard(nullptr, [this](void*){ setLoadingState(false); });
         if (reply->error() == QNetworkReply::NoError) {
             QSettings qSettings(QSettings::NativeFormat, QSettings::UserScope, "FBLinkVPN", "FBLinkVPN");
             qSettings.setValue("subscriptionVIPAdBlockEnabled", enabled);
@@ -1434,6 +1456,7 @@ void FBLinkController::saveRoutingProfile(const QVariantMap &profile, bool allow
     const int id = profile.value("id").toInt();
     const bool hasId = id > 0;
 
+    setLoadingState(true);
     QNetworkRequest request = createApiRequest(hasId ? QString("/me/routing-profiles/%1").arg(id)
                                                      : "/me/routing-profiles",
                                                true, true);
@@ -1445,6 +1468,7 @@ void FBLinkController::saveRoutingProfile(const QVariantMap &profile, bool allow
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, profile, allowRefreshRetry]() {
         reply->deleteLater();
+        std::shared_ptr<void> guard(nullptr, [this](void*){ setLoadingState(false); });
         if (reply->error() == QNetworkReply::NoError) {
             emit routingProfileSaved();
             fetchRoutingProfiles(true);
@@ -1484,11 +1508,13 @@ void FBLinkController::deleteRoutingProfile(int id, bool allowRefreshRetry)
         return;
     }
 
+    setLoadingState(true);
     QNetworkRequest request = createApiRequest(QString("/me/routing-profiles/%1").arg(id), false, true);
 
     QNetworkReply *reply = m_nam->deleteResource(request);
     connect(reply, &QNetworkReply::finished, this, [this, reply, id, allowRefreshRetry]() {
         reply->deleteLater();
+        std::shared_ptr<void> guard(nullptr, [this](void*){ setLoadingState(false); });
         if (reply->error() == QNetworkReply::NoError) {
             emit routingProfileDeleted();
             fetchRoutingProfiles(true);
@@ -1534,10 +1560,12 @@ void FBLinkController::copySystemRoutingProfile(const QString &code, bool allowR
         return;
     }
 
+    setLoadingState(true);
     QNetworkRequest request = createApiRequest(QString("/me/routing-profiles/system/%1/copy").arg(normalizedCode), true, true);
     QNetworkReply *reply = m_nam->post(request, QByteArrayLiteral("{}"));
     connect(reply, &QNetworkReply::finished, this, [this, reply, normalizedCode, allowRefreshRetry]() {
         reply->deleteLater();
+        std::shared_ptr<void> guard(nullptr, [this](void*){ setLoadingState(false); });
         if (reply->error() == QNetworkReply::NoError) {
             QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
             const QVariantMap profile = obj.value("profile").toObject().toVariantMap();

@@ -176,7 +176,21 @@ PageType {
     Component.onCompleted: {
         root.refreshNewFeaturesGuide()
         root.updateConnectionCards(ConnectionController.isConnected)
+        
+        // Let UI settle before checking updates
+        updateTimer.start()
     }
+    
+    Timer {
+        id: updateTimer
+        interval: 3000
+        repeat: false
+        onTriggered: {
+            // Check for client updates against API
+            UpdateController.checkForUpdates()
+        }
+    }
+
     onVisibleChanged: {
         if (visible) {
             root.refreshNewFeaturesGuide()
@@ -779,17 +793,6 @@ PageType {
             objectName: "ProtocolDrawerCollapsedContent"
 
             implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : root.height * 0.77
-            Component.onCompleted: {
-                drawer.expandedHeight = implicitHeight
-            }
-
-            ColumnLayout {
-                id: collapsed
-                objectName: "collapsedColumnLayout"
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                spacing: 0
 
                 Component.onCompleted: {
                     drawer.collapsedHeight = 0

@@ -26,6 +26,12 @@ type Config struct {
 
 	// Платежи
 	PaymentReturnURL string // URL для редиректа после оплаты
+
+	// Client Updater
+	ClientLatestVersion   string
+	ClientDownloadURL     string
+	ClientReleaseNotes    string
+	ClientUpdateCritical  bool
 }
 
 func Load() *Config {
@@ -59,6 +65,11 @@ func Load() *Config {
 		SMTPFrom:            getEnv("SMTP_FROM", ""),
 		BackupIntervalHours: backupInterval,
 		PaymentReturnURL:    getEnv("PAYMENT_RETURN_URL", "https://frakebit.com/payment/success"),
+
+		ClientLatestVersion:  getEnv("CLIENT_LATEST_VERSION", "1.0.0"),
+		ClientDownloadURL:    getEnv("CLIENT_DOWNLOAD_URL", "https://frakebit.com/download"),
+		ClientReleaseNotes:   getEnv("CLIENT_RELEASE_NOTES", "Улучшена стабильность и скорость."),
+		ClientUpdateCritical: getEnv("CLIENT_UPDATE_CRITICAL", "false") == "true",
 	}
 }
 

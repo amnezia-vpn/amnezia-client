@@ -13,6 +13,7 @@
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiNewsController.h"
 #include "ui/controllers/api/fblink_controller.h"
+#include "core/controllers/updateController.h"
 #include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/controllers/allowedDnsController.h"
 #include "ui/controllers/connectionController.h"
@@ -122,6 +123,7 @@ private:
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
     QScopedPointer<ApiNewsController> m_apiNewsController;
     QScopedPointer<FBLinkController> m_fbLinkController;
+    QScopedPointer<UpdateController> m_updateController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;

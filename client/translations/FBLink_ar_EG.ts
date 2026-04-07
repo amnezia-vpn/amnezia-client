@@ -284,7 +284,7 @@
         <translation type="vanished">غير قادر علي إنشاء تكوين</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="70"/>
+        <location filename="../ui/controllers/connectionController.h" line="71"/>
         <location filename="../ui/controllers/connectionController.cpp" line="124"/>
         <location filename="../ui/controllers/connectionController.cpp" line="139"/>
         <location filename="../ui/controllers/connectionController.cpp" line="145"/>
@@ -385,6 +385,11 @@
         <source>Ошибка: нет установленных контейнеров. Войдите в FBLink и получите конфигурацию.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../core/controllers/coreController.cpp" line="437"/>
+        <source>Обновление...</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ExportController</name>
@@ -396,93 +401,93 @@
 <context>
     <name>FBLinkController</name>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="356"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="378"/>
         <source>Ошибка регистрации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="395"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="415"/>
         <source>Неверный ответ сервера</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="400"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="420"/>
         <source>Неверный код</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="425"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="444"/>
         <source>Ошибка отправки кода</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="448"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="467"/>
         <source>Ошибка сброса пароля</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="477"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="819"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="495"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="836"/>
         <source>Не выполнен вход в систему</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="719"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="738"/>
         <source>Внутренняя ошибка: Контроллеры не инициализированы</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="723"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="741"/>
         <source>Сервер не вернул конфигурацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1310"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1332"/>
         <source>Не удалось отправить отчёт. Диагностика скопирована в буфер обмена. %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1363"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1424"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1477"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1521"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1385"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1446"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1501"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1547"/>
         <source>Функция доступна только для VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1527"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1553"/>
         <source>Код системного пресета не задан</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="328"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="728"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="884"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="351"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="746"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="900"/>
         <source>Ошибка сети: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="289"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="314"/>
         <source>Email и пароль не могут быть пустыми</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="323"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="346"/>
         <source>Некорректный формат ответа сервера</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="772"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1248"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1369"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1430"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1483"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1533"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="789"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1270"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1391"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1452"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1507"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="1559"/>
         <source>Необходимо войти в аккаунт</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="804"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="821"/>
         <source>Ошибка создания платежа: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -6871,18 +6876,18 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="160"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="161"/>
         <source>Выключен</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="165"/>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="172"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="166"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="173"/>
         <source>Работает</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/fblink_controller.cpp" line="168"/>
+        <location filename="../ui/controllers/api/fblink_controller.cpp" line="169"/>
         <source>Временно недоступен</source>
         <translation type="unfinished"></translation>
     </message>
