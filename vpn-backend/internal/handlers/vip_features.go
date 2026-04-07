@@ -295,6 +295,7 @@ func ensureDefaultRoutingProfiles(db *gorm.DB, userID uint) error {
 			"name":                 seed.Name,
 			"code":                 seed.Code,
 			"action":               seed.Action,
+			"enabled":              seed.EnabledByDefault, // kept in sync with seed definition
 			"description":          seed.Description,
 			"icon":                 seed.Icon,
 			"sort_order":           seed.SortOrder,

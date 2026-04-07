@@ -97,7 +97,11 @@ void alignManagedRoutingDefaultOutbound(QJsonObject &xrayConfig, Settings::Route
     for (const QJsonValue &ruleValue : rules) {
         const QJsonObject rule = ruleValue.toObject();
         const QString outboundTag = rule.value("outboundTag").toString();
-        const bool hasMatchers = !rule.value("domain").toArray().isEmpty() || !rule.value("ip").toArray().isEmpty();
+        // Only count rules with domain matchers as split-tunnel indicators.
+        // IP-only rules (e.g. system DNS proxy rules) are not user split-tunnel
+        // rules and must not affect the default-outbound heuristic.
+        const bool hasMatchers = !rule.value("domain").toArray().isEmpty()
+                              || !rule.value("domainSuffix").toArray().isEmpty();
         if (!hasMatchers) {
             continue;
         }
