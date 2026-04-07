@@ -789,10 +789,25 @@ PageType {
         collapsedHeight: 0
         expandedHeight: 0
 
+        UpdatePopup {
+            id: updatePopup
+        }
+
         collapsedStateContent: Item {
             objectName: "ProtocolDrawerCollapsedContent"
 
             implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : root.height * 0.77
+            Component.onCompleted: {
+                drawer.expandedHeight = implicitHeight
+            }
+
+            ColumnLayout {
+                id: collapsed
+                objectName: "collapsedColumnLayout"
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 0
 
                 Component.onCompleted: {
                     drawer.collapsedHeight = 0
