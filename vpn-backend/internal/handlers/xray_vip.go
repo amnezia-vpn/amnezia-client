@@ -694,7 +694,7 @@ func vipDNSProxyRules(dnsConfig vipDNSConfig) []map[string]interface{} {
 		{
 			"type":        "field",
 			"outboundTag": xrayProxyTag,
-			"ip":          ips,
+				"ip":          ips,
 		},
 	}
 }
@@ -754,8 +754,16 @@ func buildVLESSConfig(clientID string, server *models.VPNServer, template *model
 		},
 	}
 
-	if routingRules := buildVIPRoutingRules(profiles); len(routingRules) > 0 {
-		routingRules = append(vipDNSProxyRules(dnsConfig), routingRules...)
+	// For VIP configs we always inject a "routing" block so the client can
+	// detect managed routing (vipEnabledProfilesCount > 0) and not block the
+	// connection with "rules are missing". At minimum the DNS-proxy rules
+	// (which route the VIP DNS IPs through the tunnel) are always present.
+	routingRules := buildVIPRoutingRules(profiles)
+	dnsProxyRules := vipDNSProxyRules(dnsConfig)
+	allRules := append(dnsProxyRules, routingRules...)
+
+	if len(routingRules) > 0 {
+		// Enable domain sniffing only when there are per-domain split rules.
 		inbounds := xrayConfig["inbounds"].([]interface{})
 		inbound := inbounds[0].(map[string]interface{})
 		inbound["sniffing"] = map[string]interface{}{
@@ -765,23 +773,19 @@ func buildVLESSConfig(clientID string, server *models.VPNServer, template *model
 		}
 		inbounds[0] = inbound
 		xrayConfig["inbounds"] = inbounds
+	}
 
-		primaryOutbound["tag"] = xrayProxyTag
-		xrayConfig["outbounds"] = []interface{}{
-			primaryOutbound,
-			map[string]interface{}{
-				"tag":      xrayDirectTag,
-				"protocol": "freedom",
-			},
-		}
-		xrayConfig["routing"] = map[string]interface{}{
-			"domainStrategy": "IPIfNonMatch",
-			"rules":          routingRules,
-		}
-	} else {
-		// Keep the generated config as close as possible to the native VLESS import shape
-		// that the client already handles successfully.
-		xrayConfig["outbounds"] = []interface{}{primaryOutbound}
+	primaryOutbound["tag"] = xrayProxyTag
+	xrayConfig["outbounds"] = []interface{}{
+		primaryOutbound,
+		map[string]interface{}{
+			"tag":      xrayDirectTag,
+			"protocol": "freedom",
+		},
+	}
+	xrayConfig["routing"] = map[string]interface{}{
+		"domainStrategy": "IPIfNonMatch",
+		"rules":          allRules,
 	}
 
 	lastConfigJSON, _ := json.Marshal(xrayConfig)

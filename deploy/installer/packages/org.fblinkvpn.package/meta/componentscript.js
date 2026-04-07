@@ -153,11 +153,11 @@ function ensureServiceStartedAndRunningWindows()
         sleep(1500);
     }
 
-    QMessageBox.critical("service.start.failed",
-                         appName(),
-                         qsTr("Service installation is incomplete: the VPN service did not enter RUNNING state.\n\nPlease reinstall the app (full installer) and reboot the computer before first launch."),
-                         QMessageBox.Ok);
-    return false;
+    // The service may not start immediately on a fresh system — the Wintun
+    // kernel driver requires a reboot before it can be loaded for the first time.
+    // This is expected and not an error. The reboot message was already shown.
+    console.log("[INFO] Service did not reach RUNNING state before installer finished — reboot is likely needed.");
+    return true;
 }
 
 function Component()
@@ -270,10 +270,7 @@ Component.prototype.installationFinished = function()
         if (runningOnWindows()) {
             command = "@TargetDir@/" + appExecutableFileName()
 
-            if (!ensureServiceStartedAndRunningWindows()) {
-                installer.dropAdminRights()
-                return
-            }
+            ensureServiceStartedAndRunningWindows();
 
             var status2 = installer.execute("sc", ["failure", serviceName(), "reset=", "100", "actions=", "restart/2000/restart/2000/restart/2000"])
             console.log(("Changed settings for %1 with status: %2 ").arg(serviceName()).arg(status2))

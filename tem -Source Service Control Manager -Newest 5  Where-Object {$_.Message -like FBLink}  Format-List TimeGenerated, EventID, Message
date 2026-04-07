@@ -1,0 +1,9 @@
+[33m8fa97617[m 	modified:   deploy/data/windows/x32/install_service.cmd
+[33m95b50d05[m 	modified:   deploy/installer/packages/org.fblinkvpn.package/meta/componentscript.js
+[33m47eb28e9[m 	modified:   deploy/installer/packages/org.fblinkvpn.package/meta/componentscript.js
+[33m912745a6[m 	modified:   deploy/data/windows/x32/install_service.cmd 	modified:   deploy/data/windows/x64/install_service.cmd
+[33m3951bdc9[m Package MinGW DLLs and require service RUNNING state
+[33mb6ec489f[m Repair Windows service registration when binary path is stale
+[33m2bc5ef1e[m Gate VIP features and add new-user premium trial copy
+[33m3e5f3e3f[m Make installer service scripts best-effort with logging
+[33md18b3869[m Harden Windows service reinstall flow and validate installer scripts

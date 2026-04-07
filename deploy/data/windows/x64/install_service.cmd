@@ -71,7 +71,16 @@ exit /b 1
 
 :config_service
 "%SC%" config "%SERVICE_NAME%" binPath= "\"%SERVICE_EXE%\"" start= auto depend= BFE/nsi >nul 2>nul
-if !errorlevel! EQU 0 exit /b 0
+if !errorlevel! EQU 0 (
+  rem Verify the path was actually written - sc config returns 0 even in some
+  rem pending-delete states where the registry write is silently discarded.
+  for /f "tokens=2 delims=: " %%A in ('"%SC%" qc "%SERVICE_NAME%" 2^>nul ^| findstr /i "BINARY_PATH_NAME"') do set "ACTUAL_EXE=%%A"
+  echo "!ACTUAL_EXE!" | findstr /i /c:"%~dp0" >nul 2>nul
+  if !errorlevel! EQU 0 exit /b 0
+  rem Path mismatch - service is stale, force delete and let caller retry
+  "%SC%" delete "%SERVICE_NAME%" >nul 2>nul
+  exit /b 1
+)
 
 "%SC%" config "%SERVICE_NAME%" binPath= "\"%SERVICE_EXE%\"" start= auto >nul 2>nul
 if !errorlevel! EQU 0 exit /b 0
