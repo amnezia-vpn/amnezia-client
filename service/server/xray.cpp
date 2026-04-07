@@ -25,6 +25,7 @@
 #endif
 #ifdef Q_OS_LINUX
     #include <sys/socket.h>
+    #include "xray_defs.h"
 #endif
 
 bool Xray::startXray(const QString &cfg)
@@ -99,6 +100,7 @@ void Xray::sockCallback(uintptr_t fd)
 #ifdef Q_OS_LINUX
     if (!m_defaultIfaceName.isEmpty()) {
         setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, m_defaultIfaceName.data(), m_defaultIfaceName.size());
+        setsockopt(fd, SOL_SOCKET, SO_MARK, &amnezia::xray::xrayTrafficMark, sizeof(amnezia::xray::xrayTrafficMark));
     }
 #endif
 }
