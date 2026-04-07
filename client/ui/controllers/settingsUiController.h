@@ -112,7 +112,7 @@ signals:
 
     void restoreBackupFinished();
     void changeSettingsFinished(const QString &finishedMessage);
-    void changeSettingsErrorOccurred(const QString &errorMessage);
+    void errorOccurred(ErrorCode errorCode);
 
     void saveFile(const QString &fileName, const QString &data);
 

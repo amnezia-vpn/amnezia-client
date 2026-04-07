@@ -20,10 +20,6 @@ PageType {
     Connections {
         target: SettingsController
 
-        function onChangeSettingsErrorOccurred(errorMessage) {
-            PageController.showErrorMessage(errorMessage)
-        }
-
         function onRestoreBackupFinished() {
             PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
             PageController.goToPageHome()

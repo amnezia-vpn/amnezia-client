@@ -1,5 +1,6 @@
 #include "settingsUiController.h"
 
+#include <QDebug>
 #include <QStandardPaths>
 #include <QOperatingSystemVersion>
 #include <QFile>
@@ -137,12 +138,11 @@ void SettingsUiController::restoreAppConfig(const QString &fileName)
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly)) {
+        emit errorOccurred(ErrorCode::OpenError);
         return;
     }
 
-    QByteArray data = file.readAll();
-
-    restoreAppConfigFromData(data);
+    restoreAppConfigFromData(file.readAll());
 }
 
 void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
@@ -157,7 +157,7 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
 
         emit restoreBackupFinished();
     } else {
-        emit changeSettingsErrorOccurred(tr("Backup file is corrupted"));
+        emit errorOccurred(errorCode);
     }
 }
 

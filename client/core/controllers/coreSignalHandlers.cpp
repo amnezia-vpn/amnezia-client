@@ -93,6 +93,9 @@ void CoreSignalHandlers::initErrorMessagesHandler()
 
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::errorOccurred, m_coreController->m_pageController,
             qOverload<ErrorCode>(&PageController::showErrorMessage));
+
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::errorOccurred, m_coreController->m_pageController,
+            qOverload<ErrorCode>(&PageController::showErrorMessage));
 }
 
 void CoreSignalHandlers::initSettingsSplitTunnelingHandler()
