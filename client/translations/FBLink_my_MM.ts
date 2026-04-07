@@ -372,22 +372,22 @@
 <context>
     <name>CoreController</name>
     <message>
-        <location filename="../core/controllers/coreController.cpp" line="410"/>
+        <location filename="../core/controllers/coreController.cpp" line="413"/>
         <source>Безопасный режим активен. Отключите его на главной странице.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/controllers/coreController.cpp" line="418"/>
+        <location filename="../core/controllers/coreController.cpp" line="421"/>
         <source>Ошибка: конфигурация API недействительна</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/controllers/coreController.cpp" line="426"/>
+        <location filename="../core/controllers/coreController.cpp" line="429"/>
         <source>Ошибка: нет установленных контейнеров. Войдите в FBLink и получите конфигурацию.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/controllers/coreController.cpp" line="437"/>
+        <location filename="../core/controllers/coreController.cpp" line="440"/>
         <source>Обновление...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1453,7 +1453,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="37"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="234"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="248"/>
         <source>Обновление конфигураций...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1473,77 +1473,77 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="249"/>
         <source>Отпустите для обновления</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="249"/>
         <source>Потяните для обновления</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="294"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="308"/>
         <source>Безопасный запуск</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="304"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="318"/>
         <source>Автоподключение временно выключено до %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="305"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="319"/>
         <source>Автоподключение временно выключено</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="312"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="326"/>
         <source>SAFE</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="393"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="407"/>
         <source>Выбранная локация</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="404"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="418"/>
         <source>Выберите локацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="415"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="429"/>
         <source>%1 · %2 ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="505"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="519"/>
         <source>IP Адрес</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="717"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="731"/>
         <source>Настройте маршруты для нужных сервисов в пару касаний.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="558"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="572"/>
         <source>Протокол</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="566"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="580"/>
         <source>Неизвестно</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="660"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="674"/>
         <source>VIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="321"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="335"/>
         <source>Вернуться в обычный режим</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1552,47 +1552,47 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete">အခမဲ့</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="740"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="754"/>
         <source>Настроить VIP маршруты</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="755"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="769"/>
         <source>Позже</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="825"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="843"/>
         <source>Панель быстрого доступа</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="834"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="852"/>
         <source>Локация не выбрана</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="845"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="863"/>
         <source>Локации</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="874"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="892"/>
         <source>Выбрать локацию</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="666"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="680"/>
         <source>Новое</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="708"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="722"/>
         <source>Новые возможности готовы</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="727"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="741"/>
         <source>Маршруты сервисов</source>
         <translation type="unfinished"></translation>
     </message>
