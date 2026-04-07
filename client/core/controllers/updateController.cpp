@@ -20,11 +20,9 @@ UpdateController::UpdateController(QObject *parent)
 
 void UpdateController::checkForUpdates()
 {
-    // If BACKEND_URL is not defined or empty, fallback to safety
-    QString apiUrl = QStringLiteral(BACKEND_URL);
-    if(apiUrl.isEmpty()) {
-        apiUrl = "https://api.fblink.ru";
-    }
+    // Hardcode fallback url for backend API
+    QString apiUrl = "https://api.fblink.ru";
+
 
     QUrl url(apiUrl + "/api/v1/client/latest-version");
     QNetworkRequest request(url);
