@@ -76,7 +76,7 @@ func defaultRoutingProfileSeeds() []defaultRoutingProfileSeed {
 			Description:      "Базовый системный пресет для .ru, .xn--p1ai и локальных российских ресурсов.",
 			Icon:             "map-pin.svg",
 			SortOrder:        10,
-			EnabledByDefault: true,
+			EnabledByDefault: false,
 			DomainSuffixes:   []string{".ru", ".xn--p1ai"},
 			LegacyNames:      []string{legacyVIPRoutingProfileName},
 		},
