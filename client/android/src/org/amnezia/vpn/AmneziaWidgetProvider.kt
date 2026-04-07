@@ -6,10 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.net.VpnService
-import android.os.IBinder
-import android.os.Messenger
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
@@ -64,38 +61,44 @@ class AmneziaWidgetProvider : AppWidgetProvider() {
     }
 
     private fun handleToggle(context: Context) {
-        // Use global scope so the coroutine survives beyond broadcast receiver lifecycle
+        val pendingResult = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-            val vpnState = VpnStateStore.getVpnState()
-            val vpnProto = vpnState.vpnProto
-            val isVpnConfigExists = vpnState.serverName != null
+            try {
+                val vpnState = VpnStateStore.getVpnState()
+                val vpnProto = vpnState.vpnProto
+                val isVpnConfigExists = vpnState.serverName != null
 
-            if (!isVpnConfigExists || vpnProto == null) {
-                Log.d(TAG, "No VPN config, launching main activity")
-                Intent(context, AmneziaActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }.also {
-                    context.startActivity(it)
-                }
-                return@launch
-            }
-
-            when (vpnState.protocolState) {
-                DISCONNECTED, UNKNOWN -> {
-                    Log.d(TAG, "Starting VPN")
-                    VpnStateStore.store { it.copy(protocolState = CONNECTING) }
-                    startVpn(context, vpnProto)
+                if (!isVpnConfigExists || vpnProto == null) {
+                    Log.d(TAG, "No VPN config, launching main activity")
+                    Intent(context, AmneziaActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }.also {
+                        context.startActivity(it)
+                    }
+                    return@launch
                 }
 
-                CONNECTED -> {
-                    Log.d(TAG, "Stopping VPN")
-                    VpnStateStore.store { it.copy(protocolState = DISCONNECTING) }
-                    disconnectVpn(context, vpnProto)
-                }
+                when (vpnState.protocolState) {
+                    DISCONNECTED, UNKNOWN -> {
+                        Log.d(TAG, "Starting VPN")
+                        VpnStateStore.store { it.copy(protocolState = CONNECTING) }
+                        startVpn(context, vpnProto)
+                    }
 
-                CONNECTING, DISCONNECTING, RECONNECTING -> {
-                    Log.d(TAG, "VPN is in transitional state: ${vpnState.protocolState}, ignoring toggle")
+                    CONNECTED -> {
+                        Log.d(TAG, "Stopping VPN")
+                        VpnStateStore.store { it.copy(protocolState = DISCONNECTING) }
+                        // Delegate disconnect to the widget service (it has a longer lifecycle
+                        // than this BroadcastReceiver and can reliably bind to the VPN service)
+                        AmneziaWidgetService.sendDisconnect(context, vpnProto)
+                    }
+
+                    CONNECTING, DISCONNECTING, RECONNECTING -> {
+                        Log.d(TAG, "VPN is in transitional state: ${vpnState.protocolState}, ignoring toggle")
+                    }
                 }
+            } finally {
+                pendingResult.finish()
             }
         }
     }
@@ -119,47 +122,6 @@ class AmneziaWidgetProvider : AppWidgetProvider() {
             )
         } catch (e: SecurityException) {
             Log.e(TAG, "Failed to start ${vpnProto.serviceClass.simpleName}: $e")
-        }
-    }
-
-    /**
-     * Disconnect by binding directly to the VPN service and sending DISCONNECT.
-     * Uses a one-shot ServiceConnection that unbinds itself after sending.
-     */
-    private fun disconnectVpn(context: Context, vpnProto: VpnProto) {
-        val connection = object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                Log.d(TAG, "Bound to VPN service for disconnect: ${name?.flattenToString()}")
-                try {
-                    val messenger = IpcMessenger(
-                        Messenger(service),
-                        "WidgetDisconnect"
-                    )
-                    messenger.send(Action.DISCONNECT)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to send disconnect: $e")
-                }
-                // Unbind after sending
-                try {
-                    context.unbindService(this)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to unbind after disconnect: $e")
-                }
-            }
-
-            override fun onServiceDisconnected(name: ComponentName?) {
-                Log.w(TAG, "VPN service disconnected: ${name?.flattenToString()}")
-            }
-        }
-
-        try {
-            context.bindService(
-                Intent(context, vpnProto.serviceClass),
-                connection,
-                Context.BIND_AUTO_CREATE
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to bind for disconnect: $e")
         }
     }
 
