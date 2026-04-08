@@ -216,30 +216,40 @@ function runInstallServiceScriptWindows()
     return exitCode === 0;
 }
 
+function runCmdWindows(command)
+{
+    var result = installer.execute("cmd", ["/c", command]);
+    return {
+        output: String(result[0]),
+        exitCode: Number(result[1])
+    };
+}
+
 function registerServiceFallbackWindows()
 {
     var expectedPath = expectedServiceExecutablePathWindows();
     var normalizedExpected = normalizeWindowsPath(expectedPath);
 
-    var checkExe = installer.execute("cmd", ["/c", "if exist \"" + expectedPath + "\" (exit /b 0) else (exit /b 1)"]);
-    if (Number(checkExe[1]) !== 0) {
+    var checkExe = runCmdWindows("if exist \"" + expectedPath + "\" (exit /b 0) else (exit /b 1)");
+    if (checkExe.exitCode !== 0) {
         console.log("[ERROR] Service executable missing for fallback registration: " + expectedPath);
         return false;
     }
 
-    installer.execute("sc", ["stop", serviceName()]);
-    installer.execute("sc", ["delete", serviceName()]);
+    runCmdWindows("sc.exe stop \"" + serviceName() + "\" >nul 2>&1");
+    runCmdWindows("sc.exe delete \"" + serviceName() + "\" >nul 2>&1");
     sleep(1200);
 
-    var createRes = installer.execute("sc", ["create", serviceName(), "binPath=", "\"" + expectedPath + "\"", "start=", "auto"]);
-    console.log(("Fallback sc create result: %1").arg(createRes));
-    var createCode = Number(createRes[1]);
+    var createCmd = "sc.exe create \"" + serviceName() + "\" binPath= \"\\\"" + expectedPath + "\\\"\" start= auto";
+    var createRes = runCmdWindows(createCmd);
+    console.log(("Fallback sc create exit=%1 output=%2").arg(createRes.exitCode).arg(createRes.output));
+    var createCode = createRes.exitCode;
     if (createCode !== 0 && createCode !== 1073) {
         return false;
     }
 
-    installer.execute("sc", ["description", serviceName(), "FBLink VPN Service"]);
-    installer.execute("sc", ["failure", serviceName(), "reset=", "100", "actions=", "restart/2000/restart/2000/restart/2000"]);
+    runCmdWindows("sc.exe description \"" + serviceName() + "\" \"FBLink VPN Service\"");
+    runCmdWindows("sc.exe failure \"" + serviceName() + "\" reset= 100 actions= restart/2000/restart/2000/restart/2000");
 
     var resolvedPath = currentServiceBinaryPathWindows();
     if (!serviceExistsWindows() || resolvedPath !== normalizedExpected) {
@@ -247,7 +257,7 @@ function registerServiceFallbackWindows()
         return false;
     }
 
-    installer.execute("sc", ["start", serviceName()]);
+    runCmdWindows("sc.exe start \"" + serviceName() + "\"");
     for (var i = 0; i < 8; ++i) {
         if (serviceIsRunningWindows()) {
             return true;
