@@ -129,7 +129,14 @@ extension PacketTunnelProvider {
                 return
             }
 
-            let port = 10808
+            let port: Int = {
+                if let inbounds = jsonDict["inbounds"] as? [[String: Any]],
+                   let first = inbounds.first,
+                   let p = first["port"] as? Int, p > 0 {
+                    return p
+                }
+                return 10808
+            }()
             let address = "::1"
 
             // Extract existing SOCKS5 credentials or generate new ones per session.
