@@ -131,7 +131,7 @@ function serviceExistsWindows()
 
 function expectedServiceExecutablePathWindows()
 {
-    return resolveServiceExecutablePathWindows(8000);
+    return "C:\\Program Files\\FBLink VPN\\FBLinkVPN-service.exe";
 }
 
 function normalizeWindowsPath(path)
@@ -211,9 +211,12 @@ function currentServiceBinaryPathWindows()
 
 function fileExistsWindows(path)
 {
-    var canonicalPath = normalizeWindowsPath(path);
-    var result = installer.execute("cmd", ["/c", "if exist \"" + canonicalPath + "\" (exit /b 0) else (exit /b 1)"]);
-    return Number(result[1]) === 0;
+    var p = String(path || "").replace(/"/g, "").replace(/\r/g, "").replace(/\n/g, "").trim();
+    var psCmd =
+            "$p='" + psSingleQuote(p) + "'; " +
+            "if (Test-Path -LiteralPath $p) { exit 0 } else { exit 1 }";
+    var result = runPowerShellWindows(psCmd);
+    return Number(result.exitCode) === 0;
 }
 
 function serviceExecutablePathCandidatesWindows()
