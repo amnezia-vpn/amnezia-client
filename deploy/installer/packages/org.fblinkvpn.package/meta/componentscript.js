@@ -4,6 +4,8 @@ function appName()
     return installer.value("Name")
 }
 
+var rebootMessageShown = false;
+
 function appLinkName()
 {
     var title = installer.value("Title");
@@ -52,10 +54,30 @@ function runningOnLinux()
 
 function showRebootRequiredMessage()
 {
+    if (rebootMessageShown) {
+        return;
+    }
+    rebootMessageShown = true;
     QMessageBox.information("os.information",
                             appName(),
                             qsTr("Installation is complete. Please reboot your computer to apply VPN service and routing changes."),
                             QMessageBox.Ok);
+}
+
+function showServiceInstallIncompleteWindows(expectedPath, actualPath, details)
+{
+    var message = qsTr("Service installation is incomplete (%1 missing).\n\nDetails:\nExpected: %2\nActual: %3")
+            .arg(serviceName())
+            .arg(expectedPath || "<empty>")
+            .arg(actualPath || "<empty>");
+
+    if (details && details.length > 0) {
+        message += qsTr("\n\n%1").arg(details);
+    }
+
+    message += qsTr("\n\nPlease run installer as Administrator and reinstall.");
+
+    QMessageBox.critical("os.critical", appName(), message, QMessageBox.Ok);
 }
 
 function vcRuntimeIsInstalled()
@@ -157,6 +179,27 @@ function currentServiceBinaryPathWindows()
     return normalizeWindowsPath(extractExecutablePathWindows(match[1]));
 }
 
+function queryServiceStateWindows()
+{
+    var psCmd =
+            "$svc = Get-CimInstance Win32_Service -Filter \"Name='" + serviceName() + "'\" -ErrorAction SilentlyContinue; " +
+            "if ($null -eq $svc) { Write-Output '{\"exists\":false}'; exit 0 }; " +
+            "$obj = [pscustomobject]@{ exists = $true; PathName = $svc.PathName; State = $svc.State; Status = $svc.Status; ExitCode = $svc.ExitCode; ProcessId = $svc.ProcessId; StartMode = $svc.StartMode }; " +
+            "$obj | ConvertTo-Json -Compress";
+
+    var result = installer.execute("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", psCmd]);
+    if (Number(result[1]) !== 0) {
+        return { exists: false };
+    }
+
+    try {
+        return JSON.parse(String(result[0]));
+    } catch (e) {
+        console.log("[WARN] queryServiceStateWindows parse failed: " + e);
+        return { exists: false };
+    }
+}
+
 function runInstallServiceScriptWindows()
 {
     var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
@@ -170,38 +213,44 @@ function runInstallServiceScriptWindows()
 function ensureServiceStartedAndRunningWindows()
 {
     var expectedPath = normalizeWindowsPath(expectedServiceExecutablePathWindows());
-    var currentPath = currentServiceBinaryPathWindows();
+    var svc = queryServiceStateWindows();
+    var currentPath = normalizeWindowsPath(extractExecutablePathWindows(svc.PathName || currentServiceBinaryPathWindows()));
 
-    if (!serviceExistsWindows()) {
+    if (!svc.exists || (currentPath.length > 0 && currentPath !== expectedPath)) {
         console.log(("%1 is missing. Repairing service registration...").arg(serviceName()));
         runInstallServiceScriptWindows();
-        sleep(1200);
-        currentPath = currentServiceBinaryPathWindows();
+        sleep(1500);
+        svc = queryServiceStateWindows();
+        currentPath = normalizeWindowsPath(extractExecutablePathWindows(svc.PathName || currentServiceBinaryPathWindows()));
     }
 
-    if (!serviceExistsWindows()) {
-        // Service could not be registered (e.g. old service still in pending-delete state).
-        // This resolves itself on next reboot when the SCM releases handles.
-        console.log("[WARN] " + serviceName() + " not registered after install. Expected: " + expectedPath + " Actual: " + currentPath);
-        showRebootRequiredMessage();
+    if (!svc.exists || currentPath !== expectedPath) {
+        console.log("[ERROR] " + serviceName() + " not registered correctly. Expected: " + expectedPath + " Actual: " + currentPath);
+        showServiceInstallIncompleteWindows(expectedPath, currentPath, "");
+        return false;
+    }
+
+    if (serviceIsRunningWindows()) {
         return true;
     }
 
-    var startResult = installer.execute("net", ["start", serviceName()]);
+    var startResult = installer.execute("sc", ["start", serviceName()]);
     console.log(("%1 start result: %2").arg(serviceName()).arg(startResult));
 
-    for (var i = 0; i < 8; ++i) {
+    for (var i = 0; i < 10; ++i) {
         if (serviceIsRunningWindows()) {
             return true;
         }
-        sleep(1500);
+        sleep(1200);
     }
 
-    // The service may not start immediately on a fresh system — the Wintun
-    // kernel driver requires a reboot before it can be loaded for the first time.
-    // This is expected and not an error. The reboot message was already shown.
-    console.log("[INFO] Service did not reach RUNNING state before installer finished — reboot is likely needed.");
-    return true;
+    svc = queryServiceStateWindows();
+    var details = qsTr("Service status: %1, exit code: %2")
+            .arg(svc.State || "unknown")
+            .arg(String(svc.ExitCode || 0));
+    console.log("[WARN] Service did not reach RUNNING state: " + details);
+    showServiceInstallIncompleteWindows(expectedPath, currentPath, details);
+    return false;
 }
 
 function Component()
@@ -306,15 +355,18 @@ Component.prototype.installationFinished = function()
             return
         }
 
-        showRebootRequiredMessage()
-
         if (runningOnWindows()) {
             command = "@TargetDir@/" + appExecutableFileName()
 
-            ensureServiceStartedAndRunningWindows();
+            var serviceReady = ensureServiceStartedAndRunningWindows();
 
             var status2 = installer.execute("sc", ["failure", serviceName(), "reset=", "100", "actions=", "restart/2000/restart/2000/restart/2000"])
             console.log(("Changed settings for %1 with status: %2 ").arg(serviceName()).arg(status2))
+
+            if (!serviceReady) {
+                installer.dropAdminRights()
+                return
+            }
 
         } else if (runningOnMacOS()) {
             command = "/Applications/" + appName() + ".app/Contents/MacOS/" + appName();

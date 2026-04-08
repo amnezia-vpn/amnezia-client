@@ -35,14 +35,14 @@ goto :wait_gone
 rem -- Step 2: register the service fresh ---------------------------------------
 :create_service
 echo Registering %SERVICE_NAME% from "%SERVICE_EXE%"
-"%SC%" create "%SERVICE_NAME%" binPath= "\"%SERVICE_EXE%\"" start= auto depend= BFE/nsi
+"%SC%" create "%SERVICE_NAME%" binPath= "\"%SERVICE_EXE%\"" start= auto
 set "CREATE_RC=!errorlevel!"
 if !CREATE_RC! EQU 0 goto :configure_service
 if !CREATE_RC! EQU 1073 (
   rem Lost the race - another process created it between our delete and create.
   rem Reconfigure to ensure correct binary path.
   echo WARN: service already exists - reconfiguring
-  "%SC%" config "%SERVICE_NAME%" binPath= "\"%SERVICE_EXE%\"" start= auto depend= BFE/nsi
+  "%SC%" config "%SERVICE_NAME%" binPath= "\"%SERVICE_EXE%\"" start= auto
   if !errorlevel! EQU 0 goto :configure_service
 )
 echo ERROR: sc create failed with !CREATE_RC!

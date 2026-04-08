@@ -9,10 +9,7 @@
                 Start="auto"
                 Type="ownProcess"
                 ErrorControl="normal"
-                Vital="no">
-            <ServiceDependency Id="BFE" />
-            <ServiceDependency Id="nsi" />
-        </ServiceInstall>
+                Vital="no" />
         <ServiceControl
                 Id="FBLinkServiceControl"
                 Name="FBLinkVPN-service"
