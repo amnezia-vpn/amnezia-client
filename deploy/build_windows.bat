@@ -4,7 +4,46 @@ CHCP 1252
 
 REM %VAR:"=% mean dequoted %VAR%
 
-set PATH=%QT_BIN_DIR:"=%;%PATH%
+if "%QT_BIN_DIR%"=="" (
+    echo "QT_BIN_DIR is not set"
+    exit /b 1
+)
+
+if "%QIF_BIN_DIR%"=="" (
+    echo "QIF_BIN_DIR is not set"
+    exit /b 1
+)
+
+set QT_BIN_DIR_UNQUOTED=%QT_BIN_DIR:"=%
+set QIF_BIN_DIR_UNQUOTED=%QIF_BIN_DIR:"=%
+
+set QT_CMAKE_CMD=
+if exist "%QT_BIN_DIR_UNQUOTED%\qt-cmake.exe" (
+    set QT_CMAKE_CMD=%QT_BIN_DIR_UNQUOTED%\qt-cmake.exe
+    set QT_PREFIX_DIR=%QT_BIN_DIR_UNQUOTED%\..
+) else if exist "%QT_BIN_DIR_UNQUOTED%\qt-cmake.bat" (
+    set QT_CMAKE_CMD=%QT_BIN_DIR_UNQUOTED%\qt-cmake.bat
+    set QT_PREFIX_DIR=%QT_BIN_DIR_UNQUOTED%\..
+) else if exist "%QT_BIN_DIR_UNQUOTED%\bin\qt-cmake.exe" (
+    set QT_CMAKE_CMD=%QT_BIN_DIR_UNQUOTED%\bin\qt-cmake.exe
+    set QT_PREFIX_DIR=%QT_BIN_DIR_UNQUOTED%
+    set QT_BIN_DIR_UNQUOTED=%QT_PREFIX_DIR%\bin
+) else if exist "%QT_BIN_DIR_UNQUOTED%\bin\qt-cmake.bat" (
+    set QT_CMAKE_CMD=%QT_BIN_DIR_UNQUOTED%\bin\qt-cmake.bat
+    set QT_PREFIX_DIR=%QT_BIN_DIR_UNQUOTED%
+    set QT_BIN_DIR_UNQUOTED=%QT_PREFIX_DIR%\bin
+) else (
+    echo "qt-cmake(.exe/.bat) was not found under QT_BIN_DIR=%QT_BIN_DIR%"
+    exit /b 1
+)
+
+if not exist "%QT_PREFIX_DIR%\lib\cmake\Qt6\Qt6Config.cmake" (
+    echo "Qt6Config.cmake not found in: %QT_PREFIX_DIR%\lib\cmake\Qt6"
+    echo "Please set QT_BIN_DIR to Qt MSVC bin, e.g. C:\Qt\6.10.2\msvc2022_64\bin"
+    exit /b 1
+)
+
+set PATH=%QT_BIN_DIR_UNQUOTED%;%PATH%
 
 echo "Using Qt in %QT_BIN_DIR%"
 echo "Using QIF in %QIF_BIN_DIR%"
@@ -21,9 +60,39 @@ if "%WIX_BIN_DIR%"=="" (
 set WIX_BIN_DIR_UNQUOTED=%WIX_BIN_DIR:"=%
 
 set WIX_CLI=%WIX_BIN_DIR_UNQUOTED%\wix.exe
+set QIF_BINARYCREATOR_CMD=
+set QIF_ARCHIVEGEN_CMD=
+
+if exist "%QIF_BIN_DIR_UNQUOTED%\binarycreator.exe" (
+    set QIF_BINARYCREATOR_CMD=%QIF_BIN_DIR_UNQUOTED%\binarycreator.exe
+) else if exist "%QIF_BIN_DIR_UNQUOTED%\binarycreator.bat" (
+    set QIF_BINARYCREATOR_CMD=%QIF_BIN_DIR_UNQUOTED%\binarycreator.bat
+) else if exist "%QIF_BIN_DIR_UNQUOTED%\bin\binarycreator.exe" (
+    set QIF_BIN_DIR_UNQUOTED=%QIF_BIN_DIR_UNQUOTED%\bin
+    set QIF_BINARYCREATOR_CMD=%QIF_BIN_DIR_UNQUOTED%\binarycreator.exe
+) else if exist "%QIF_BIN_DIR_UNQUOTED%\bin\binarycreator.bat" (
+    set QIF_BIN_DIR_UNQUOTED=%QIF_BIN_DIR_UNQUOTED%\bin
+    set QIF_BINARYCREATOR_CMD=%QIF_BIN_DIR_UNQUOTED%\binarycreator.bat
+)
+
+if exist "%QIF_BIN_DIR_UNQUOTED%\archivegen.exe" (
+    set QIF_ARCHIVEGEN_CMD=%QIF_BIN_DIR_UNQUOTED%\archivegen.exe
+) else if exist "%QIF_BIN_DIR_UNQUOTED%\archivegen.bat" (
+    set QIF_ARCHIVEGEN_CMD=%QIF_BIN_DIR_UNQUOTED%\archivegen.bat
+)
 
 if not exist "%WIX_CLI%" (
     echo "WiX CLI (wix.exe) was not found in %WIX_BIN_DIR%"
+    exit /b 1
+)
+
+if "%QIF_BINARYCREATOR_CMD%"=="" (
+    echo "Qt IFW binarycreator(.exe/.bat) not found in %QIF_BIN_DIR%"
+    exit /b 1
+)
+
+if "%QIF_ARCHIVEGEN_CMD%"=="" (
+    echo "Qt IFW archivegen(.exe/.bat) not found in %QIF_BIN_DIR%"
     exit /b 1
 )
 
@@ -67,12 +136,26 @@ rmdir /Q /S "%STAGE_DIR%"
 
 mkdir %WORK_DIR%
 
-call "%QT_BIN_DIR:"=%\qt-cmake" --version
-"%QT_BIN_DIR:"=%\windeployqt" -v
+call "%QT_CMAKE_CMD%" --version
+"%QT_BIN_DIR_UNQUOTED%\windeployqt" -v
 cmake --version
 
 cd %PROJECT_DIR%
-call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%" "-DZLIB_ROOT=%ZLIB_ROOT%"
+call cmake . -B %WORK_DIR% -G "Visual Studio 17 2022" -A x64 "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_PREFIX_DIR%" "-DZLIB_ROOT=%ZLIB_ROOT%"
+if %errorlevel% neq 0 (
+    echo "CMake configure failed."
+    if exist "%WORK_DIR%\CMakeFiles\CMakeOutput.log" (
+        echo ---------- CMakeOutput.log ----------
+        type "%WORK_DIR%\CMakeFiles\CMakeOutput.log"
+        echo ---------- end CMakeOutput.log ----------
+    )
+    if exist "%WORK_DIR%\CMakeFiles\CMakeError.log" (
+        echo ---------- CMakeError.log ----------
+        type "%WORK_DIR%\CMakeFiles\CMakeError.log"
+        echo ---------- end CMakeError.log ----------
+    )
+    exit /b %errorlevel%
+)
 
 cd %WORK_DIR%
 cmake --build . --config release -- /p:UseMultiToolTask=true /m
@@ -96,16 +179,16 @@ if not "%SIGN_CERT_THUMBPRINT%"=="" (
     signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe || echo "Signing skipped (no certificate)"
 )
 
-"%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations --force-openssl "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
-"%QT_BIN_DIR:"=%\windeployqt" --release "%OUT_APP_DIR:"=%\%SERVICE_FILENAME:"=%"
+"%QT_BIN_DIR_UNQUOTED%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations --force-openssl "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
+"%QT_BIN_DIR_UNQUOTED%\windeployqt" --release "%OUT_APP_DIR:"=%\%SERVICE_FILENAME:"=%"
 
 echo "Ensuring MinGW runtime DLLs are packaged..."
 for %%F in (libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll) do (
-    if exist "%QT_BIN_DIR:"=%\%%F" copy /Y "%QT_BIN_DIR:"=%\%%F" "%OUT_APP_DIR%\%%F" >nul
+    if exist "%QT_BIN_DIR_UNQUOTED%\%%F" copy /Y "%QT_BIN_DIR_UNQUOTED%\%%F" "%OUT_APP_DIR%\%%F" >nul
 )
 
 if not exist "%OUT_APP_DIR%\libgcc_s_seh-1.dll" (
-    for %%D in ("%QT_BIN_DIR:"=%\..\..\Tools\mingw*\bin") do (
+    for %%D in ("%QT_BIN_DIR_UNQUOTED%\..\..\Tools\mingw*\bin") do (
         if exist "%%~fD\libgcc_s_seh-1.dll" copy /Y "%%~fD\libgcc_s_seh-1.dll" "%OUT_APP_DIR%\libgcc_s_seh-1.dll" >nul
         if exist "%%~fD\libstdc++-6.dll" copy /Y "%%~fD\libstdc++-6.dll" "%OUT_APP_DIR%\libstdc++-6.dll" >nul
         if exist "%%~fD\libwinpthread-1.dll" copy /Y "%%~fD\libwinpthread-1.dll" "%OUT_APP_DIR%\libwinpthread-1.dll" >nul
@@ -157,11 +240,11 @@ dir %OUT_APP_DIR%
 
 cd %OUT_APP_DIR%
 echo "Compressing data..."
-"%QIF_BIN_DIR:"=%\archivegen" -c 9 %INSTALLER_DATA_DIR:"=%\%APP_NAME:"=%.7z .
+call "%QIF_ARCHIVEGEN_CMD%" -c 9 %INSTALLER_DATA_DIR:"=%\%APP_NAME:"=%.7z .
 
 cd "%WORK_DIR:"=%\installer"
 echo "Creating installer..."
-"%QIF_BIN_DIR:"=%\binarycreator" --offline-only -v -c config\windows.xml -p packages -f %TARGET_FILENAME%
+call "%QIF_BINARYCREATOR_CMD%" --offline-only -v -c config\windows.xml -p packages -f %TARGET_FILENAME%
 
 timeout 5
 

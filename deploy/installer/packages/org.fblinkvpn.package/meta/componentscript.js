@@ -204,10 +204,58 @@ function runInstallServiceScriptWindows()
 {
     var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
     var installServiceScript = targetDir + "\\install_service.cmd";
+    var checkScript = installer.execute("cmd", ["/c", "if exist \"" + installServiceScript + "\" (exit /b 0) else (exit /b 1)"]);
+    if (Number(checkScript[1]) !== 0) {
+        console.log("[WARN] install_service.cmd is missing: " + installServiceScript);
+        return false;
+    }
+
     var result = installer.execute("cmd", ["/c", "call \"" + installServiceScript + "\""]);
     var exitCode = Number(result[1]);
     console.log(("install_service.cmd result: %1").arg(result));
     return exitCode === 0;
+}
+
+function registerServiceFallbackWindows()
+{
+    var expectedPath = expectedServiceExecutablePathWindows();
+    var normalizedExpected = normalizeWindowsPath(expectedPath);
+
+    var checkExe = installer.execute("cmd", ["/c", "if exist \"" + expectedPath + "\" (exit /b 0) else (exit /b 1)"]);
+    if (Number(checkExe[1]) !== 0) {
+        console.log("[ERROR] Service executable missing for fallback registration: " + expectedPath);
+        return false;
+    }
+
+    installer.execute("sc", ["stop", serviceName()]);
+    installer.execute("sc", ["delete", serviceName()]);
+    sleep(1200);
+
+    var createRes = installer.execute("sc", ["create", serviceName(), "binPath=", "\"" + expectedPath + "\"", "start=", "auto"]);
+    console.log(("Fallback sc create result: %1").arg(createRes));
+    var createCode = Number(createRes[1]);
+    if (createCode !== 0 && createCode !== 1073) {
+        return false;
+    }
+
+    installer.execute("sc", ["description", serviceName(), "FBLink VPN Service"]);
+    installer.execute("sc", ["failure", serviceName(), "reset=", "100", "actions=", "restart/2000/restart/2000/restart/2000"]);
+
+    var resolvedPath = currentServiceBinaryPathWindows();
+    if (!serviceExistsWindows() || resolvedPath !== normalizedExpected) {
+        console.log("[ERROR] Fallback registration failed path check. Expected: " + normalizedExpected + " Actual: " + resolvedPath);
+        return false;
+    }
+
+    installer.execute("sc", ["start", serviceName()]);
+    for (var i = 0; i < 8; ++i) {
+        if (serviceIsRunningWindows()) {
+            return true;
+        }
+        sleep(1000);
+    }
+
+    return serviceExistsWindows();
 }
 
 function ensureServiceStartedAndRunningWindows()
@@ -218,7 +266,11 @@ function ensureServiceStartedAndRunningWindows()
 
     if (!svc.exists || (currentPath.length > 0 && currentPath !== expectedPath)) {
         console.log(("%1 is missing. Repairing service registration...").arg(serviceName()));
-        runInstallServiceScriptWindows();
+        var repaired = runInstallServiceScriptWindows();
+        if (!repaired) {
+            console.log("[WARN] install_service.cmd failed, trying JS fallback service registration");
+            registerServiceFallbackWindows();
+        }
         sleep(1500);
         svc = queryServiceStateWindows();
         currentPath = normalizeWindowsPath(extractExecutablePathWindows(svc.PathName || currentServiceBinaryPathWindows()));
