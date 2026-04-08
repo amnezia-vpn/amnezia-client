@@ -101,7 +101,9 @@ bool AndroidController::initialize()
         {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)},
         {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)},
-        {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)}
+        {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)},
+        {"onActivityPaused", "()V", reinterpret_cast<void *>(onActivityPaused)},
+        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)}
     };
 
     QJniEnvironment env;
@@ -557,4 +559,23 @@ void AndroidController::onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jin
     qDebug() << "Android system bars insets changed: nav bar =" << navBarHeightDp << "dp, status bar =" << statusBarHeightDp << "dp";
     emit AndroidController::instance()->systemBarsInsetsChanged(navBarHeightDp, statusBarHeightDp);
 }
+
+// static
+void AndroidController::onActivityPaused(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->activityPaused();
+}
+
+// static
+void AndroidController::onActivityResumed(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->activityResumed();
+}
+
 

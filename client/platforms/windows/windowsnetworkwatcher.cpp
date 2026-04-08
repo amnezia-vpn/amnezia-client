@@ -41,7 +41,7 @@ LRESULT WindowsNetworkWatcher::PowerWndProcCallback(HWND hwnd, UINT uMsg, WPARAM
   switch (uMsg) {
   case WM_POWERBROADCAST:
     if (wParam == PBT_APMRESUMESUSPEND) {
-        emit obj->sleepMode();
+        emit obj->wakeup();
     }
     break;
   default:

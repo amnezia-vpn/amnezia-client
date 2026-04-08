@@ -225,9 +225,13 @@ PageType {
     Connections {
         target: ApiConfigsController
 
-        function onInstallServerFromApiFinished(message) {
+        function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
             if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
+                    ServersModel.setDefaultServerIndex(preferredDefaultIndex)
+                } else {
+                    ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1)
+                }
                 ServersModel.processedIndex = ServersModel.defaultIndex
             }
 
@@ -278,7 +282,6 @@ PageType {
         }
 
         Keys.onPressed: function(event) {
-            console.debug(">>>> ", event.key, " Event is caught by StartPage")
             switch (event.key) {
             case Qt.Key_Tab:
             case Qt.Key_Down:
@@ -304,7 +307,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        
+
         // Also adjust TabBar position when keyboard appears (Android 14+ workaround)
         anchors.bottomMargin: SettingsController.imeHeight
 
@@ -383,7 +386,7 @@ PageType {
             objectName: "settingsTabButton"
 
             isSelected: tabBar.currentIndex === 2
-            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
+            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
             Binding {
                 target: settingsTabButton
                 property: "defaultColor"

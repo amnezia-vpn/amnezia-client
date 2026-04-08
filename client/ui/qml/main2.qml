@@ -21,12 +21,24 @@ Window  {
         function onStateChanged() {
             if (Qt.platform.os === "android") {
                 if (Qt.application.state === Qt.ApplicationActive) {
+                    root.visible = true
                     refreshTimer.restart()
-                } else if (Qt.application.state === Qt.ApplicationSuspended || 
-                          Qt.application.state === Qt.ApplicationInactive) {
-                    console.log("QML: Application going to background, state:", Qt.application.state)
                 }
             }
+        }
+    }
+
+    // Hide the window immediately when Android Activity.onPause() fires so that
+    // Qt's render loop stops before the EGL surface is disconnected.  This
+    // prevents "QRhiGles2: Failed to make context current" and the resulting
+    // black screen that appears after swiping home and returning.
+    Connections {
+        target: SettingsController
+        function onActivityPaused() {
+            if (Qt.platform.os === "android") root.visible = false
+        }
+        function onActivityResumed() {
+            if (Qt.platform.os === "android") root.visible = true
         }
     }
 
@@ -56,6 +68,11 @@ Window  {
         PageController.closeWindow()
     }
 
+    onSceneGraphError: function(error, message) {
+        // Prevent qFatal crash on Android when EGL context is lost
+        console.warn("Scene graph error:", error, message)
+    }
+
     title: "AmneziaVPN"
 
     Item { // This item is needed for focus handling
@@ -81,6 +98,11 @@ Window  {
                 event.accepted = true
             }
         }
+    }
+
+    Loader {
+        active: Qt.platform.os === "android"
+        source: Qt.platform.os === "android" ? "Components/GamepadLoader.qml" : ""
     }
 
     Connections {
@@ -263,6 +285,34 @@ Window  {
             id: questionDrawer
 
             anchors.fill: parent
+        }
+    }
+
+    Item {
+        objectName: "subscriptionExpiredDrawerItem"
+
+        anchors.fill: parent
+
+        SubscriptionExpiredDrawer {
+            id: subscriptionExpiredDrawer
+
+            anchors.fill: parent
+        }
+    }
+
+    Connections {
+        target: ApiConfigsController
+
+        function onSubscriptionExpiredOnServer() {
+            subscriptionExpiredDrawer.openTriggered()
+        }
+    }
+
+    Connections {
+        target: ApiSettingsController
+
+        function onRenewalLinkReceived(url) {
+            Qt.openUrlExternally(url)
         }
     }
 

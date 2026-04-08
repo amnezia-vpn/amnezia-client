@@ -1,10 +1,13 @@
 #ifndef APICONFIGSCONTROLLER_H
 #define APICONFIGSCONTROLLER_H
 
+#include <QList>
 #include <QObject>
 
 #include "configurators/openvpn_configurator.h"
+#include "ui/models/api/apiBenefitsModel.h"
 #include "ui/models/api/apiServicesModel.h"
+#include "ui/models/api/apiSubscriptionPlansModel.h"
 #include "ui/models/servers_model.h"
 
 class ApiConfigsController : public QObject
@@ -12,7 +15,9 @@ class ApiConfigsController : public QObject
     Q_OBJECT
 public:
     ApiConfigsController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ApiServicesModel> &apiServicesModel,
-                         const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+                         const QSharedPointer<ApiSubscriptionPlansModel> &subscriptionPlansModel,
+                         const QSharedPointer<ApiBenefitsModel> &benefitsModel, const std::shared_ptr<Settings> &settings,
+                         QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY vpnKeyExportReady)
@@ -27,9 +32,10 @@ public slots:
 
     bool fillAvailableServices();
     bool importService();
-    bool importSerivceFromAppStore();
-    bool restoreSerivceFromAppStore();
-    bool importServiceFromGateway();
+    bool importPremiumFromAppStore(const QString &storeProductId);
+    bool restoreServiceFromAppStore();
+    bool importFreeFromGateway();
+    bool importTrialFromGateway(const QString &email);
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
     bool updateServiceFromTelegram(const int serverIndex);
@@ -43,8 +49,11 @@ public slots:
 
 signals:
     void errorOccurred(ErrorCode errorCode);
+    void trialEmailError(const QString &message);
+    void subscriptionExpiredOnServer();
+    void subscriptionRefreshNeeded();
 
-    void installServerFromApiFinished(const QString &message);
+    void installServerFromApiFinished(const QString &message, int preferredDefaultServerIndex = -1);
     void changeApiCountryFinished(const QString &message);
     void reloadServerFromApiFinished(const QString &message);
     void updateServerFromApiFinished();
@@ -57,7 +66,7 @@ private:
     QString getVpnKey();
 
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
-    ErrorCode importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase);
+    ErrorCode importServiceFromBilling(const QByteArray &responseBody, const bool isTestPurchase, int &duplicateServerIndex);
 
     QList<QString> m_qrCodes;
     QString m_vpnKey;
@@ -65,6 +74,9 @@ private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ApiServicesModel> m_apiServicesModel;
     std::shared_ptr<Settings> m_settings;
+
+    QSharedPointer<ApiSubscriptionPlansModel> m_subscriptionPlansModel;
+    QSharedPointer<ApiBenefitsModel> m_benefitsModel;
 };
 
-#endif // APICONFIGSCONTROLLER_H
+#endif

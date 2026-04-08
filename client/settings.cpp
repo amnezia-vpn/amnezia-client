@@ -21,10 +21,10 @@ Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_N
 {
     // Import old settings
     if (serversCount() == 0) {
-        QString user = value("Server/userName").toString();
-        QString password = value("Server/password").toString();
-        QString serverName = value("Server/serverName").toString();
-        int port = value("Server/serverPort").toInt();
+        QString user = m_settings.value("Server/userName").toString();
+        QString password = m_settings.value("Server/password").toString();
+        QString serverName = m_settings.value("Server/serverName").toString();
+        int port = m_settings.value("Server/serverPort").toInt();
 
         if (!user.isEmpty() && !password.isEmpty() && !serverName.isEmpty()) {
             QJsonObject server;
@@ -222,7 +222,7 @@ QString Settings::nextAvailableServerName() const
 
 void Settings::setSaveLogs(bool enabled)
 {
-    setValue("Conf/saveLogs", enabled);
+    m_settings.setValue("Conf/saveLogs", enabled);
 #ifndef Q_OS_ANDROID
     if (!isSaveLogs()) {
         Logger::deInit();
@@ -242,12 +242,12 @@ void Settings::setSaveLogs(bool enabled)
 
 QDateTime Settings::getLogEnableDate()
 {
-    return value("Conf/logEnableDate").toDateTime();
+    return m_settings.value("Conf/logEnableDate").toDateTime();
 }
 
 void Settings::setLogEnableDate(QDateTime date)
 {
-    setValue("Conf/logEnableDate", date);
+    m_settings.setValue("Conf/logEnableDate", date);
 }
 
 QString Settings::routeModeString(RouteMode mode) const
@@ -261,17 +261,17 @@ QString Settings::routeModeString(RouteMode mode) const
 
 Settings::RouteMode Settings::routeMode() const
 {
-    return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
+    return static_cast<RouteMode>(m_settings.value("Conf/routeMode", 0).toInt());
 }
 
 bool Settings::isSitesSplitTunnelingEnabled() const
 {
-    return value("Conf/sitesSplitTunnelingEnabled", false).toBool();
+    return m_settings.value("Conf/sitesSplitTunnelingEnabled", false).toBool();
 }
 
 void Settings::setSitesSplitTunnelingEnabled(bool enabled)
 {
-    setValue("Conf/sitesSplitTunnelingEnabled", enabled);
+    m_settings.setValue("Conf/sitesSplitTunnelingEnabled", enabled);
 }
 
 bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
@@ -359,12 +359,12 @@ void Settings::removeAllVpnSites(RouteMode mode)
 
 QString Settings::primaryDns() const
 {
-    return value("Conf/primaryDns", cloudFlareNs1).toString();
+    return m_settings.value("Conf/primaryDns", cloudFlareNs1).toString();
 }
 
 QString Settings::secondaryDns() const
 {
-    return value("Conf/secondaryDns", cloudFlareNs2).toString();
+    return m_settings.value("Conf/secondaryDns", cloudFlareNs2).toString();
 }
 
 void Settings::clearSettings()
@@ -386,18 +386,18 @@ QString Settings::appsRouteModeString(AppsRouteMode mode) const
 
 Settings::AppsRouteMode Settings::getAppsRouteMode() const
 {
-    return static_cast<AppsRouteMode>(value("Conf/appsRouteMode", 0).toInt());
+    return static_cast<AppsRouteMode>(m_settings.value("Conf/appsRouteMode", 0).toInt());
 }
 
 void Settings::setAppsRouteMode(AppsRouteMode mode)
 {
-    setValue("Conf/appsRouteMode", mode);
+    m_settings.setValue("Conf/appsRouteMode", mode);
 }
 
 QVector<InstalledAppInfo> Settings::getVpnApps(AppsRouteMode mode) const
 {
     QVector<InstalledAppInfo> apps;
-    auto appsArray = value("Conf/" + appsRouteModeString(mode)).toJsonArray();
+    auto appsArray = m_settings.value("Conf/" + appsRouteModeString(mode)).toJsonArray();
     for (const auto &app : appsArray) {
         InstalledAppInfo appInfo;
         appInfo.appName = app.toObject().value("appName").toString();
@@ -419,43 +419,42 @@ void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &a
         appInfo.insert("appPath", app.appPath);
         appsArray.push_back(appInfo);
     }
-    setValue("Conf/" + appsRouteModeString(mode), appsArray);
-    m_settings.sync();
+    m_settings.setValue("Conf/" + appsRouteModeString(mode), appsArray);
 }
 
 bool Settings::isAppsSplitTunnelingEnabled() const
 {
-    return value("Conf/appsSplitTunnelingEnabled", false).toBool();
+    return m_settings.value("Conf/appsSplitTunnelingEnabled", false).toBool();
 }
 
 void Settings::setAppsSplitTunnelingEnabled(bool enabled)
 {
-    setValue("Conf/appsSplitTunnelingEnabled", enabled);
+    m_settings.setValue("Conf/appsSplitTunnelingEnabled", enabled);
 }
 
 bool Settings::isKillSwitchEnabled() const
 {
-    return value("Conf/killSwitchEnabled", true).toBool();
+    return m_settings.value("Conf/killSwitchEnabled", true).toBool();
 }
 
 void Settings::setKillSwitchEnabled(bool enabled)
 {
-    setValue("Conf/killSwitchEnabled", enabled);
+    m_settings.setValue("Conf/killSwitchEnabled", enabled);
 }
 
 bool Settings::isStrictKillSwitchEnabled() const
 {
-    return value("Conf/strictKillSwitchEnabled", false).toBool();
+    return m_settings.value("Conf/strictKillSwitchEnabled", false).toBool();
 }
 
 void Settings::setStrictKillSwitchEnabled(bool enabled)
 {
-    setValue("Conf/strictKillSwitchEnabled", enabled);
+    m_settings.setValue("Conf/strictKillSwitchEnabled", enabled);
 }
 
 QString Settings::getInstallationUuid(const bool needCreate)
 {
-    auto uuid = value("Conf/installationUuid", "").toString();
+    auto uuid = m_settings.value("Conf/installationUuid", "").toString();
     if (needCreate && uuid.isEmpty()) {
         uuid = QUuid::createUuid().toString();
 
@@ -476,7 +475,7 @@ QString Settings::getInstallationUuid(const bool needCreate)
 
 void Settings::setInstallationUuid(const QString &uuid)
 {
-    setValue("Conf/installationUuid", uuid);
+    m_settings.setValue("Conf/installationUuid", uuid);
 }
 
 ServerCredentials Settings::defaultServerCredentials() const
@@ -495,28 +494,6 @@ ServerCredentials Settings::serverCredentials(int index) const
     credentials.port = s.value(config_key::port).toInt();
 
     return credentials;
-}
-
-QVariant Settings::value(const QString &key, const QVariant &defaultValue) const
-{
-    QVariant returnValue;
-    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
-        returnValue = m_settings.value(key, defaultValue);
-    } else {
-        QMetaObject::invokeMethod(&m_settings, "value", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, returnValue),
-                                  Q_ARG(const QString &, key), Q_ARG(const QVariant &, defaultValue));
-    }
-    return returnValue;
-}
-
-void Settings::setValue(const QString &key, const QVariant &value)
-{
-    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
-        m_settings.setValue(key, value);
-    } else {
-        QMetaObject::invokeMethod(&m_settings, "setValue", Qt::BlockingQueuedConnection, Q_ARG(const QString &, key),
-                                  Q_ARG(const QVariant &, value));
-    }
 }
 
 void Settings::resetGatewayEndpoint()
@@ -541,50 +518,50 @@ QString Settings::getGatewayEndpoint(bool isTestPurchase)
 
 bool Settings::isDevGatewayEnv(bool isTestPurchase)
 {
-    return isTestPurchase ? true : value("Conf/devGatewayEnv", false).toBool();
+    return isTestPurchase ? true : m_settings.value("Conf/devGatewayEnv", false).toBool();
 }
 
 void Settings::toggleDevGatewayEnv(bool enabled)
 {
-    setValue("Conf/devGatewayEnv", enabled);
+    m_settings.setValue("Conf/devGatewayEnv", enabled);
 }
 
 bool Settings::isHomeAdLabelVisible()
 {
-    return value("Conf/homeAdLabelVisible", true).toBool();
+    return m_settings.value("Conf/homeAdLabelVisible", true).toBool();
 }
 
 void Settings::disableHomeAdLabel()
 {
-    setValue("Conf/homeAdLabelVisible", false);
+    m_settings.setValue("Conf/homeAdLabelVisible", false);
 }
 
 bool Settings::isPremV1MigrationReminderActive()
 {
-    return value("Conf/premV1MigrationReminderActive", true).toBool();
+    return m_settings.value("Conf/premV1MigrationReminderActive", true).toBool();
 }
 
 void Settings::disablePremV1MigrationReminder()
 {
-    setValue("Conf/premV1MigrationReminderActive", false);
+    m_settings.setValue("Conf/premV1MigrationReminderActive", false);
 }
 
 QStringList Settings::allowedDnsServers() const
 {
-    return value("Conf/allowedDnsServers").toStringList();
+    return m_settings.value("Conf/allowedDnsServers").toStringList();
 }
 
 void Settings::setAllowedDnsServers(const QStringList &servers)
 {
-    setValue("Conf/allowedDnsServers", servers);
+    m_settings.setValue("Conf/allowedDnsServers", servers);
 }
 
 QStringList Settings::readNewsIds() const
 {
-    return value("News/readIds").toStringList();
+    return m_settings.value("News/readIds").toStringList();
 }
 
 void Settings::setReadNewsIds(const QStringList &ids)
 {
-    setValue("News/readIds", ids);
+    m_settings.setValue("News/readIds", ids);
 }

@@ -179,8 +179,9 @@ bool IosController::initialize()
     [NETunnelProviderManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETunnelProviderManager *> * _Nullable managers, NSError * _Nullable error) {
         @try {
             if (error) {
-                qDebug() << "IosController::initialize : Error:" << [error.localizedDescription UTF8String];
-                emit connectionStateChanged(Vpn::ConnectionState::Error);
+                qWarning() << "IosController::initialize : loadAllFromPreferences failed:"
+                           << [error.localizedDescription UTF8String]
+                           << "domain:" << [error.domain UTF8String] << "code:" << error.code;
                 ok = false;
                 return;
             }
@@ -397,8 +398,14 @@ void IosController::vpnStatusDidChange(void *pNotification)
 {
     NETunnelProviderSession *session = (NETunnelProviderSession *)pNotification;
 
-    if (session /* && session == TunnelManager.session */ ) {
-        qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
+    if (!session) {
+        return;
+    }
+    if (!m_currentTunnel || (NETunnelProviderSession *)m_currentTunnel.connection != session) {
+        return;
+    }
+
+    qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
 
         if (session.status == NEVPNStatusDisconnected) {
             if (@available(iOS 16.0, *)) {
@@ -512,7 +519,6 @@ void IosController::vpnStatusDidChange(void *pNotification)
             m_statusRequestInFlight = false;
         }
         emitConnectionStateIfChanged(nextState);
-    }
 }
 
 void IosController::vpnConfigurationDidChange(void *pNotification)
@@ -694,6 +700,15 @@ bool IosController::setupXray()
     QJsonObject finalConfig;
     finalConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1].toString());
     finalConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2].toString());
+    finalConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    finalConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
     finalConfig.insert(config_key::config, xrayConfigStr);
 
     QJsonDocument finalConfigDoc(finalConfig);
@@ -897,39 +912,49 @@ void IosController::startTunnel()
     m_rxBytes = 0;
     m_txBytes = 0;
 
-    [m_currentTunnel setEnabled:YES];
+    NETunnelProviderManager *tunnel = m_currentTunnel;
+    [tunnel setEnabled:YES];
 
-    [m_currentTunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [tunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (saveError) {
+                    qDebug().nospace() << "IosController::startTunnel" << protocolName << ": Connect " << protocolName
+                                       << " Tunnel Save Error" << saveError.localizedDescription.UTF8String << " domain:"
+                                       << saveError.domain.UTF8String << " code:" << saveError.code;
+                    emit connectionStateChanged(Vpn::ConnectionState::Error);
+                    return;
+                }
 
-            if (saveError) {
-                qDebug().nospace() << "IosController::startTunnel" << protocolName << ": Connect " << protocolName << " Tunnel Save Error" << saveError.localizedDescription.UTF8String;
-                emit connectionStateChanged(Vpn::ConnectionState::Error);
-                return;
-            }
+                [tunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (loadError) {
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                                               << ": Connect " << protocolName << " Tunnel Load Error"
+                                               << loadError.localizedDescription.UTF8String;
+                            emit connectionStateChanged(Vpn::ConnectionState::Error);
+                            return;
+                        }
 
-            [m_currentTunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
-                    if (loadError) {
-                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << ": Connect " << protocolName << " Tunnel Load Error" << loadError.localizedDescription.UTF8String;
-                        emit connectionStateChanged(Vpn::ConnectionState::Error);
-                        return;
-                    }
+                        NSError *startError = nil;
+                        qDebug() << iosStatusToState(tunnel.connection.status);
 
-                    NSError *startError = nil;
-                    qDebug() << iosStatusToState(m_currentTunnel.connection.status);
+                        BOOL started = [tunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
 
-                    BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
-
-                    if (!started || startError) {
-                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << " : Connect " << protocolName << " Tunnel Start Error"
-                            << (startError ? startError.localizedDescription.UTF8String : "");
-                        emit connectionStateChanged(Vpn::ConnectionState::Error);
-                    } else {
-                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << " : Starting the tunnel succeeded";
-                    }
-            }];
-        });
-    }];
+                        if (!started || startError) {
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                                               << " : Connect " << protocolName << " Tunnel Start Error"
+                                               << (startError ? startError.localizedDescription.UTF8String : "");
+                            emit connectionStateChanged(Vpn::ConnectionState::Error);
+                        } else {
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                                               << " : Starting the tunnel succeeded";
+                        }
+                    });
+                }];
+            });
+        }];
+    });
 }
 
 bool IosController::isOurManager(NETunnelProviderManager* manager) {
@@ -1184,14 +1209,26 @@ void IosController::fetchProducts(const QStringList &productIds,
                                                    NSArray<NSString *> * _Nonnull invalidIdentifiers,
                                                    NSError * _Nullable error) {
             QList<QVariantMap> outProducts;
-            for (NSDictionary *p in products) {
-                QVariantMap m;
-                m["productId"] = QString::fromUtf8([p[@"productId"] UTF8String]);
-                m["title"] = QString::fromUtf8([p[@"title"] UTF8String]);
-                m["description"] = QString::fromUtf8([p[@"description"] UTF8String]);
-                m["price"] = QString::fromUtf8([p[@"price"] UTF8String]);
-                m["currencyCode"] = QString::fromUtf8([p[@"currencyCode"] UTF8String]);
-                outProducts.push_back(m);
+            for (NSDictionary *productInfo in products) {
+                QVariantMap productData;
+                productData["productId"] = QString::fromUtf8([productInfo[@"productId"] UTF8String]);
+                productData["title"] = QString::fromUtf8([productInfo[@"title"] UTF8String]);
+                productData["description"] = QString::fromUtf8([productInfo[@"description"] UTF8String]);
+                productData["price"] = QString::fromUtf8([productInfo[@"price"] UTF8String]);
+                if (productInfo[@"displayPrice"]) {
+                    productData["displayPrice"] = QString::fromUtf8([productInfo[@"displayPrice"] UTF8String]);
+                }
+                productData["currencyCode"] = QString::fromUtf8([productInfo[@"currencyCode"] UTF8String]);
+                if (productInfo[@"priceAmount"]) {
+                    productData["priceAmount"] = [productInfo[@"priceAmount"] doubleValue];
+                }
+                if (productInfo[@"subscriptionBillingMonths"]) {
+                    productData["subscriptionBillingMonths"] = [productInfo[@"subscriptionBillingMonths"] doubleValue];
+                }
+                if (productInfo[@"displayPricePerMonth"]) {
+                    productData["displayPricePerMonth"] = QString::fromUtf8([productInfo[@"displayPricePerMonth"] UTF8String]);
+                }
+                outProducts.push_back(productData);
             }
 
             QStringList invalid;

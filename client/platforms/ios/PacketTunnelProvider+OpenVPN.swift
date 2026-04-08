@@ -230,8 +230,7 @@ extension PacketTunnelProvider {
 
 #if !os(macOS)
         vpnReachability.startTracking { [weak self] status in
-            guard status == .reachableViaWiFi else { return }
-            self?.ovpnAdapter?.reconnect(afterTimeInterval: 5)
+            self?.handleOpenVPNReachabilityChange(status)
         }
 #endif
 

@@ -3,10 +3,32 @@
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonValue>
 
 namespace
 {
     const QByteArray AMNEZIA_CONFIG_SIGNATURE = QByteArray::fromHex("000000ff");
+
+    constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
+    constexpr QLatin1String trialAlreadyUsedMessage("trial subscription already used");
+
+    QDateTime subscriptionEndUtcFromString(const QString &subscriptionEndDate)
+    {
+        if (subscriptionEndDate.isEmpty()) {
+            return {};
+        }
+        QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODateWithMs).toUTC();
+        if (!endDate.isValid()) {
+            endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODate).toUTC();
+        }
+        return endDate;
+    }
+
+    QString apiErrorMessageFromJson(const QJsonObject &jsonObj)
+    {
+        const QJsonValue value = jsonObj.value(QStringLiteral("message"));
+        return value.isString() ? value.toString().trimmed() : QString();
+    }
 
     QString escapeUnicode(const QString &input)
     {
@@ -24,9 +46,30 @@ namespace
 
 bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
 {
-    QDateTime now = QDateTime::currentDateTimeUtc();
-    QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODateWithMs);
-    return endDate < now;
+    if (subscriptionEndDate.isEmpty()) {
+        return false;
+    }
+    const QDateTime endDate = subscriptionEndUtcFromString(subscriptionEndDate);
+    if (!endDate.isValid()) {
+        return false;
+    }
+    return endDate <= QDateTime::currentDateTimeUtc();
+}
+
+bool apiUtils::isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays)
+{
+    if (subscriptionEndDate.isEmpty()) {
+        return false;
+    }
+    const QDateTime endDate = subscriptionEndUtcFromString(subscriptionEndDate);
+    if (!endDate.isValid()) {
+        return false;
+    }
+    const QDateTime nowUtc = QDateTime::currentDateTimeUtc();
+    if (endDate <= nowUtc) {
+        return false;
+    }
+    return endDate <= nowUtc.addDays(withinDays);
 }
 
 bool apiUtils::isServerFromApi(const QJsonObject &serverConfigObject)
@@ -58,18 +101,24 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
     };
     case apiDefs::ConfigSource::AmneziaGateway: {
         constexpr QLatin1String servicePremium("amnezia-premium");
+        constexpr QLatin1String serviceTrial("amnezia-trial");
         constexpr QLatin1String serviceFree("amnezia-free");
         constexpr QLatin1String serviceExternalPremium("external-premium");
+        constexpr QLatin1String serviceExternalTrial("external-trial");
 
         auto apiConfigObject = serverConfigObject.value(apiDefs::key::apiConfig).toObject();
         auto serviceType = apiConfigObject.value(apiDefs::key::serviceType).toString();
 
         if (serviceType == servicePremium) {
             return apiDefs::ConfigType::AmneziaPremiumV2;
+        } else if (serviceType == serviceTrial) {
+            return apiDefs::ConfigType::AmneziaTrialV2;
         } else if (serviceType == serviceFree) {
             return apiDefs::ConfigType::AmneziaFreeV3;
         } else if (serviceType == serviceExternalPremium) {
             return apiDefs::ConfigType::ExternalPremium;
+        } else if (serviceType == serviceExternalTrial) {
+            return apiDefs::ConfigType::ExternalTrial;
         }
     }
     default: {
@@ -90,38 +139,54 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     const int httpStatusCodeConflict = 409;
     const int httpStatusCodeNotFound = 404;
     const int httpStatusCodeNotImplemented = 501;
+    const int httpStatusCodePaymentRequired = 402;
+    const int httpStatusCodeUnprocessableEntity = 422;
 
     if (!sslErrors.empty()) {
         qDebug().noquote() << sslErrors;
         return amnezia::ErrorCode::ApiConfigSslError;
-    } else if (replyError == QNetworkReply::NoError) {
+    }
+    if (replyError == QNetworkReply::NoError) {
         return amnezia::ErrorCode::NoError;
-    } else if (replyError == QNetworkReply::NetworkError::OperationCanceledError
-               || replyError == QNetworkReply::NetworkError::TimeoutError) {
+    }
+    if (replyError == QNetworkReply::NetworkError::OperationCanceledError
+        || replyError == QNetworkReply::NetworkError::TimeoutError) {
         qDebug() << replyError;
         return amnezia::ErrorCode::ApiConfigTimeoutError;
-    } else if (replyError == QNetworkReply::NetworkError::OperationNotImplementedError) {
+    }
+    if (replyError == QNetworkReply::NetworkError::OperationNotImplementedError) {
         qDebug() << replyError;
         return amnezia::ErrorCode::ApiUpdateRequestError;
-    } else {
-        qDebug() << QString::fromUtf8(responseBody);
-        qDebug() << replyError;
-        qDebug() << replyErrorString;
-        qDebug() << httpStatusCode;
+    }
 
-        int httpStatusFromBody = -1;
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
-        if (jsonDoc.isObject()) {
-            QJsonObject jsonObj = jsonDoc.object();
-            httpStatusFromBody = jsonObj.value("http_status").toInt(-1);
-        }
+    qDebug() << QString::fromUtf8(responseBody);
+    qDebug() << replyError;
+    qDebug() << httpStatusCode;
 
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+    if (jsonDoc.isObject()) {
+        QJsonObject jsonObj = jsonDoc.object();
+        const int httpStatusFromBody = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
         if (httpStatusFromBody == httpStatusCodeConflict) {
+            if (apiErrorMessageFromJson(jsonObj).contains(trialAlreadyUsedMessage, Qt::CaseInsensitive)) {
+                return amnezia::ErrorCode::ApiTrialAlreadyUsedError;
+            }
             return amnezia::ErrorCode::ApiConfigLimitError;
-        } else if (httpStatusFromBody == httpStatusCodeNotFound) {
+        }
+        if (httpStatusFromBody == httpStatusCodeNotFound) {
             return amnezia::ErrorCode::ApiNotFoundError;
-        } else if (httpStatusFromBody == httpStatusCodeNotImplemented) {
+        }
+        if (httpStatusFromBody == httpStatusCodeNotImplemented) {
             return amnezia::ErrorCode::ApiUpdateRequestError;
+        }
+        if (httpStatusFromBody == httpStatusCodeUnprocessableEntity) {
+            if (apiErrorMessageFromJson(jsonObj) == unprocessableSubscriptionMessage) {
+                return amnezia::ErrorCode::ApiSubscriptionExpiredError;
+            }
+            return amnezia::ErrorCode::ApiConfigDownloadError;
+        }
+        if (httpStatusFromBody == httpStatusCodePaymentRequired) {
+            return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
         }
         return amnezia::ErrorCode::ApiConfigDownloadError;
     }
@@ -133,7 +198,8 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
 bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)
 {
     static const QSet<apiDefs::ConfigType> premiumTypes = { apiDefs::ConfigType::AmneziaPremiumV1, apiDefs::ConfigType::AmneziaPremiumV2,
-                                                            apiDefs::ConfigType::ExternalPremium };
+                                                            apiDefs::ConfigType::AmneziaTrialV2, apiDefs::ConfigType::ExternalPremium,
+                                                            apiDefs::ConfigType::ExternalTrial };
     return premiumTypes.contains(getConfigType(serverConfigObject));
 }
 
@@ -177,7 +243,9 @@ QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
 
 QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
 {
-    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV2) {
+    auto configType = apiUtils::getConfigType(serverConfigObject);
+    if (configType != apiDefs::ConfigType::AmneziaPremiumV2 && configType != apiDefs::ConfigType::AmneziaTrialV2
+        && configType != apiDefs::ConfigType::ExternalPremium && configType != apiDefs::ConfigType::ExternalTrial) {
         return {};
     }
 

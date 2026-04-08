@@ -73,6 +73,9 @@ public slots:
     bool isStartMinimizedEnabled();
     void toggleStartMinimized(bool enable);
 
+    bool isNewsNotificationsEnabled();
+    void toggleNewsNotificationsEnabled(bool enable);
+
     bool isScreenshotsEnabled();
     void toggleScreenshotsEnabled(bool enable);
 
@@ -137,6 +140,9 @@ signals:
     void imeHeightChanged(int height);
     void safeAreaTopMarginChanged();
     void safeAreaBottomMarginChanged();
+
+    void activityPaused();
+    void activityResumed();
 
     void isHomeAdLabelVisibleChanged(bool visible);
     void startMinimizedChanged();

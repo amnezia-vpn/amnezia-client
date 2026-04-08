@@ -222,6 +222,9 @@ PageType {
                 headerText: title
                 bodyText: description
 
+                showRecommendedBadge: featuredAmneziaConnection
+                recommendedText: featuredAmneziaConnection ? qsTr("Recommended") : ""
+
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: imageSource
 
@@ -275,8 +278,9 @@ PageType {
         id: amneziaVpn
 
         property string title: qsTr("VPN by Amnezia")
-        property string description: qsTr("Connect to classic paid and free VPN services from Amnezia")
+        property string description: qsTr("The easiest way to connect to VPN")
         property string imageSource: "qrc:/images/controls/amnezia.svg"
+        property bool featuredAmneziaConnection: true
         property bool isVisible: true
         property var handler: function() {
             PageController.showBusyIndicator(true)
@@ -291,6 +295,7 @@ PageType {
     QtObject {
         id: selfHostVpn
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("Self-hosted VPN")
         property string description: qsTr("Configure Amnezia VPN on your own server")
         property string imageSource: "qrc:/images/controls/server.svg"
@@ -303,6 +308,7 @@ PageType {
     QtObject {
         id: backupRestore
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("Restore from backup")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/archive-restore.svg"
@@ -321,6 +327,7 @@ PageType {
     QtObject {
         id: fileOpen
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("File with connection settings")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/folder-search-2.svg"
@@ -340,6 +347,7 @@ PageType {
     QtObject {
         id: qrScan
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("QR code")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/scan-line.svg"
@@ -355,13 +363,14 @@ PageType {
     QtObject {
         id: restorePurchases
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("Restore purchases")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/refresh-cw.svg"
         property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            ApiConfigsController.restoreSerivceFromAppStore()
+            ApiConfigsController.restoreServiceFromAppStore()
             PageController.showBusyIndicator(false)
         }
     }
@@ -369,6 +378,7 @@ PageType {
     QtObject {
         id: siteLink
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("I have nothing")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/help-circle.svg"

@@ -1,5 +1,6 @@
 #include "apiAccountInfoModel.h"
 
+#include <QDateTime>
 #include <QJsonObject>
 
 #include "core/api/apiUtils.h"
@@ -32,7 +33,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         }
 
         return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate) ? tr("<p><a style=\"color: #EB5757;\">Inactive</a>")
-                                                                                      : tr("Active");
+                                                                                      : tr("<p><a style=\"color: #28c840;\">Active</a>");
     }
     case EndDateRole: {
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
@@ -52,7 +53,14 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     }
     case IsComponentVisibleRole: {
         return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
-                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium;
+                || m_accountInfoData.configType == apiDefs::ConfigType::AmneziaTrialV2
+                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium
+                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalTrial;
+    }
+    case IsSubscriptionRenewalAvailableRole: {
+        return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
+                || m_accountInfoData.configType == apiDefs::ConfigType::AmneziaTrialV2
+                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalTrial;
     }
     case HasExpiredWorkerRole: {
         for (int i = 0; i < m_issuedConfigsInfo.size(); i++) {
@@ -73,6 +81,33 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         }
         return false;
     }
+    case IsSubscriptionExpiredRole: {
+        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
+            return false;
+        }
+        if (m_accountInfoData.isInAppPurchase) {
+            return false;
+        }
+        if (m_accountInfoData.subscriptionEndDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate);
+    }
+    case IsSubscriptionExpiringSoonRole: {
+        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
+            return false;
+        }
+        if (m_accountInfoData.isInAppPurchase) {
+            return false;
+        }
+        if (m_accountInfoData.subscriptionEndDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpiringSoon(m_accountInfoData.subscriptionEndDate);
+    }
+    case IsInAppPurchaseRole: {
+        return m_accountInfoData.isInAppPurchase;
+    }
     }
 
     return QVariant();
@@ -92,6 +127,9 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
     accountInfoData.subscriptionEndDate = accountInfoObject.value(apiDefs::key::subscriptionEndDate).toString();
 
     accountInfoData.configType = apiUtils::getConfigType(serverConfig);
+
+    const QJsonObject apiConfig = serverConfig.value(apiDefs::key::apiConfig).toObject();
+    accountInfoData.isInAppPurchase = apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false);
 
     accountInfoData.subscriptionDescription = accountInfoObject.value(apiDefs::key::subscriptionDescription).toString();
 
@@ -162,8 +200,12 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[ConnectedDevicesRole] = "connectedDevices";
     roles[ServiceDescriptionRole] = "serviceDescription";
     roles[IsComponentVisibleRole] = "isComponentVisible";
+    roles[IsSubscriptionRenewalAvailableRole] = "isSubscriptionRenewalAvailable";
     roles[HasExpiredWorkerRole] = "hasExpiredWorker";
     roles[IsProtocolSelectionSupportedRole] = "isProtocolSelectionSupported";
+    roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
+    roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
+    roles[IsInAppPurchaseRole] = "isInAppPurchase";
 
     return roles;
 }
