@@ -225,6 +225,44 @@ function runCmdWindows(command)
     };
 }
 
+function runPowerShellWindows(script)
+{
+    var result = installer.execute("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]);
+    return {
+        output: String(result[0]),
+        exitCode: Number(result[1])
+    };
+}
+
+function psSingleQuote(value)
+{
+    return String(value).replace(/'/g, "''");
+}
+
+function registerServiceViaPowerShellWindows(expectedPath)
+{
+    var psCmd =
+            "$ErrorActionPreference='Stop'; " +
+            "$svc='" + psSingleQuote(serviceName()) + "'; " +
+            "$exe='" + psSingleQuote(expectedPath) + "'; " +
+            "if (-not (Test-Path -LiteralPath $exe)) { Write-Output 'service_exe_missing'; exit 2 }; " +
+            "$existing = Get-Service -Name $svc -ErrorAction SilentlyContinue; " +
+            "if ($null -ne $existing) { " +
+            "  try { Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue } catch {}; " +
+            "  sc.exe delete $svc | Out-Null; " +
+            "  Start-Sleep -Milliseconds 800; " +
+            "}; " +
+            "New-Service -Name $svc -BinaryPathName ('\"' + $exe + '\"') -DisplayName 'FBLink VPN Service' -Description 'Service for FBLink VPN' -StartupType Automatic | Out-Null; " +
+            "sc.exe failure $svc reset= 100 actions= restart/2000/restart/2000/restart/2000 | Out-Null; " +
+            "try { Start-Service -Name $svc -ErrorAction SilentlyContinue } catch {}; " +
+            "Write-Output 'ok'; " +
+            "exit 0";
+
+    var result = runPowerShellWindows(psCmd);
+    console.log(("Fallback PowerShell New-Service exit=%1 output=%2").arg(result.exitCode).arg(result.output));
+    return result.exitCode === 0;
+}
+
 function registerServiceFallbackWindows()
 {
     var expectedPath = expectedServiceExecutablePathWindows();
@@ -240,21 +278,37 @@ function registerServiceFallbackWindows()
     runCmdWindows("sc.exe delete \"" + serviceName() + "\" >nul 2>&1");
     sleep(1200);
 
+    var createOk = false;
     var createCmd = "sc.exe create \"" + serviceName() + "\" binPath= \"\\\"" + expectedPath + "\\\"\" start= auto";
     var createRes = runCmdWindows(createCmd);
     console.log(("Fallback sc create exit=%1 output=%2").arg(createRes.exitCode).arg(createRes.output));
     var createCode = createRes.exitCode;
-    if (createCode !== 0 && createCode !== 1073) {
-        return false;
+    if (createCode === 0 || createCode === 1073) {
+        createOk = true;
+    } else {
+        console.log("[WARN] sc create failed, trying New-Service fallback");
+        createOk = registerServiceViaPowerShellWindows(expectedPath);
+        if (!createOk) {
+            return false;
+        }
     }
 
-    runCmdWindows("sc.exe description \"" + serviceName() + "\" \"FBLink VPN Service\"");
-    runCmdWindows("sc.exe failure \"" + serviceName() + "\" reset= 100 actions= restart/2000/restart/2000/restart/2000");
+    if (createOk) {
+        runCmdWindows("sc.exe description \"" + serviceName() + "\" \"FBLink VPN Service\"");
+        runCmdWindows("sc.exe failure \"" + serviceName() + "\" reset= 100 actions= restart/2000/restart/2000/restart/2000");
+    }
 
     var resolvedPath = currentServiceBinaryPathWindows();
     if (!serviceExistsWindows() || resolvedPath !== normalizedExpected) {
-        console.log("[ERROR] Fallback registration failed path check. Expected: " + normalizedExpected + " Actual: " + resolvedPath);
-        return false;
+        console.log("[WARN] Fallback path check failed after sc create. Trying New-Service fallback. Expected: " + normalizedExpected + " Actual: " + resolvedPath);
+        if (!registerServiceViaPowerShellWindows(expectedPath)) {
+            return false;
+        }
+        resolvedPath = currentServiceBinaryPathWindows();
+        if (!serviceExistsWindows() || resolvedPath !== normalizedExpected) {
+            console.log("[ERROR] Fallback registration failed path check. Expected: " + normalizedExpected + " Actual: " + resolvedPath);
+            return false;
+        }
     }
 
     runCmdWindows("sc.exe start \"" + serviceName() + "\"");
