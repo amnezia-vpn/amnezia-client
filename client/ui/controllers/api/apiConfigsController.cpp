@@ -488,8 +488,6 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
         return false;
     }
 
-    qDebug() << responseBody;
-
     QJsonObject jsonConfig = QJsonDocument::fromJson(responseBody).object();
     QString nativeConfig = jsonConfig.value(configKey::config).toString();
     nativeConfig.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", protocolData.wireGuardClientPrivKey);
