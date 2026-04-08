@@ -686,6 +686,14 @@ class FBLinkActivity : QtActivity() {
     }
 
     @Suppress("unused")
+    fun requestVpnStatus() {
+        Log.v(TAG, "Request VPN status")
+        mainScope.launch {
+            refreshVpnStateAndSyncBindingAsync()
+        }
+    }
+
+    @Suppress("unused")
     fun resetLastServer(index: Int) {
         Log.v(TAG, "Reset server: $index")
         mainScope.launch {

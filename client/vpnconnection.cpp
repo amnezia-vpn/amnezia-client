@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QFile>
+#include <QCoreApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QObject>
@@ -12,6 +13,10 @@
 #include <QStringList>
 #include <QTimer>
 #include <QThread>
+
+#ifdef Q_OS_ANDROID
+    #include <QGuiApplication>
+#endif
 
 #include <configurators/cloak_configurator.h>
 #include <configurators/openvpn_configurator.h>
@@ -82,6 +87,18 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent
         m_reconnectScheduled = false;
         connectToVpn(m_lastServerIndex, m_lastCredentials, m_lastContainer, m_lastVpnConfiguration);
     });
+
+#ifdef Q_OS_ANDROID
+    if (auto *app = qobject_cast<QGuiApplication *>(QCoreApplication::instance())) {
+        m_androidAppActive = (app->applicationState() == Qt::ApplicationActive);
+        connect(app, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
+            const bool isActive = (state == Qt::ApplicationActive);
+            QMetaObject::invokeMethod(this, [this, isActive]() {
+                setAndroidAppActive(isActive);
+            }, Qt::QueuedConnection);
+        });
+    }
+#endif
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     m_checkTimer.setInterval(1000);
@@ -586,6 +603,15 @@ void VpnConnection::setConnectionState(Vpn::ConnectionState state)
 
 void VpnConnection::armStateWatchdog(Vpn::ConnectionState state)
 {
+#ifdef Q_OS_ANDROID
+    if (!m_androidAppActive) {
+        if (m_stateWatchdogTimer.isActive()) {
+            m_stateWatchdogTimer.stop();
+        }
+        return;
+    }
+#endif
+
     switch (state) {
     case Vpn::ConnectionState::Preparing:
     case Vpn::ConnectionState::Connecting:
@@ -603,6 +629,13 @@ void VpnConnection::armStateWatchdog(Vpn::ConnectionState state)
 
 void VpnConnection::handleStateWatchdogTimeout()
 {
+#ifdef Q_OS_ANDROID
+    if (!m_androidAppActive) {
+        qDebug() << "Watchdog timeout ignored because Android app is in background";
+        return;
+    }
+#endif
+
     if (m_connectionState == Vpn::ConnectionState::Disconnecting) {
         qWarning() << "Disconnect watchdog timeout: forcing disconnected state";
         setConnectionState(Vpn::ConnectionState::Disconnected);
@@ -686,3 +719,28 @@ bool VpnConnection::hasMissingManagedRoutingRules() const
 {
     return m_vpnConfiguration.value("vipRoutingRulesMissing").toBool(false);
 }
+
+#ifdef Q_OS_ANDROID
+void VpnConnection::setAndroidAppActive(bool active)
+{
+    if (m_androidAppActive == active) {
+        return;
+    }
+
+    m_androidAppActive = active;
+
+    if (!m_androidAppActive) {
+        if (m_stateWatchdogTimer.isActive()) {
+            qDebug() << "Android app moved to background: pausing VPN watchdog";
+            m_stateWatchdogTimer.stop();
+        }
+        return;
+    }
+
+    qDebug() << "Android app returned to foreground: reconciling VPN state";
+
+    AndroidController::instance()->requestVpnStatus();
+
+    armStateWatchdog(m_connectionState);
+}
+#endif

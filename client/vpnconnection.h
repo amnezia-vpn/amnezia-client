@@ -79,9 +79,11 @@ private:
 
 #ifdef Q_OS_ANDROID
    AndroidVpnProtocol* androidVpnProtocol = nullptr;
+   bool m_androidAppActive = true;
 
    AndroidVpnProtocol* createDefaultAndroidVpnProtocol();
    void createAndroidConnections();
+   void setAndroidAppActive(bool active);
 #endif
 
    Vpn::ConnectionState m_connectionState;

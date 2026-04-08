@@ -147,6 +147,11 @@ void AndroidController::stop()
     callActivityMethod("stop", "()V");
 }
 
+void AndroidController::requestVpnStatus()
+{
+    callActivityMethod("requestVpnStatus", "()V");
+}
+
 void AndroidController::resetLastServer(int serverIndex)
 {
     callActivityMethod("resetLastServer", "(I)V", serverIndex);
@@ -557,4 +562,3 @@ void AndroidController::onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jin
     qDebug() << "Android system bars insets changed: nav bar =" << navBarHeightDp << "dp, status bar =" << statusBarHeightDp << "dp";
     emit AndroidController::instance()->systemBarsInsetsChanged(navBarHeightDp, statusBarHeightDp);
 }
-
