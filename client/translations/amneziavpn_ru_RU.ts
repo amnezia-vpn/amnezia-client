@@ -2583,12 +2583,22 @@ Thank you for staying with us!</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="127"/>
+        <source>Allow LAN access</source>
+        <translation>Разрешить доступ к локальной сети</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="128"/>
+        <source>Allow access to local network devices and DNS servers when KillSwitch is active</source>
+        <translation>Разрешить доступ к устройствам локальной сети и DNS-серверам при активном KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="145"/>
         <source>DNS Exceptions</source>
         <translation>Исключения для DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="146"/>
         <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
         <translation>DNS-серверы из этого списка останутся доступными при активном KillSwitch.</translation>
     </message>
@@ -3516,7 +3526,7 @@ Thank you for staying with us!</source>
 <context>
     <name>PageSetupWizardStart</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="42"/>
         <source>Let&apos;s get started</source>
         <translation>Приступим</translation>
     </message>
@@ -5007,6 +5017,11 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>SettingsController</name>
     <message>
+        <location filename="../ui/controllers/settingsController.cpp" line="184"/>
+        <source>Can&apos;t open file: %1</source>
+        <translation type="unfinished">Невозможно открыть файл: %1</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/settingsController.cpp" line="270"/>
         <source>All settings have been reset to default values</source>
         <translation>Все настройки сброшены до значений по умолчанию</translation>
@@ -5109,7 +5124,7 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="423"/>
+        <location filename="../vpnconnection.cpp" line="424"/>
         <source>Mbps</source>
         <translation>Мбит/с</translation>
     </message>
@@ -5173,12 +5188,12 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="230"/>
+        <location filename="../ui/qml/main2.qml" line="239"/>
         <source>Private key passphrase</source>
         <translation>Парольная фраза для закрытого ключа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="251"/>
+        <location filename="../ui/qml/main2.qml" line="260"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>

@@ -107,6 +107,7 @@ namespace amnezia
         constexpr char allowedDnsServers[] = "allowedDnsServers";
 
         constexpr char killSwitchOption[] = "killSwitchOption";
+        constexpr char killSwitchAllowLan[] = "killSwitchAllowLan";
 
         constexpr char crc[] = "crc";
 

@@ -243,6 +243,8 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   json.insert(amnezia::config_key::killSwitchOption, rawConfig.value(amnezia::config_key::killSwitchOption));
 
+  json.insert(amnezia::config_key::killSwitchAllowLan, rawConfig.value(amnezia::config_key::killSwitchAllowLan));
+
   if (protocolName == amnezia::config_key::awg) {
     json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
     json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));

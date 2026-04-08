@@ -2231,6 +2231,84 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
+    <name>PageSettingsKillSwitch</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="40"/>
+        <source>KillSwitch</source>
+        <translation>KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="41"/>
+        <source>Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="52"/>
+        <source>KillSwitch settings cannot be changed during an active connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
+        <source>Soft KillSwitch</source>
+        <translation>Soft KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
+        <source>Internet access is blocked if the VPN disconnects unexpectedly</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
+        <source>Strict KillSwitch</source>
+        <translation>Strict KillSwitch</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
+        <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="96"/>
+        <source>Just a little heads-up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="97"/>
+        <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="98"/>
+        <source>Continue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="99"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="127"/>
+        <source>Allow LAN access</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="128"/>
+        <source>Allow access to local network devices and DNS servers when KillSwitch is active</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="145"/>
+        <source>DNS Exceptions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="146"/>
+        <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PageSettingsDns</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="38"/>

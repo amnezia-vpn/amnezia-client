@@ -41,6 +41,7 @@ class InterfaceConfig {
   QStringList m_vpnDisabledApps;
   QStringList m_allowedDnsServers;
   bool m_killSwitchEnabled;
+  bool m_killSwitchAllowLan = false;
 #if defined(MZ_ANDROID) || defined(MZ_IOS)
   QString m_installationId;
 #endif

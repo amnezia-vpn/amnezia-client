@@ -288,6 +288,7 @@ void VpnConnection::appendKillSwitchConfig()
 {
     m_vpnConfiguration.insert(config_key::killSwitchOption, QVariant(m_settings->isKillSwitchEnabled()).toString());
     m_vpnConfiguration.insert(config_key::allowedDnsServers, QVariant(m_settings->allowedDnsServers()).toJsonValue());
+    m_vpnConfiguration.insert(config_key::killSwitchAllowLan, QVariant(m_settings->isKillSwitchAllowLanEnabled()).toString());
 }
 
 void VpnConnection::appendSplitTunnelingConfig()
@@ -353,12 +354,26 @@ void VpnConnection::appendSplitTunnelingConfig()
                 sitesJsonArray.append(site);
             }
 
-            if (sitesJsonArray.isEmpty()) {
+            if (sitesJsonArray.isEmpty() && routeMode == Settings::VpnOnlyForwardSites) {
                 routeMode = Settings::RouteMode::VpnAllSites;
             } else if (routeMode == Settings::VpnOnlyForwardSites) {
-                // Allow traffic to Amnezia DNS
-                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
-                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
+                // Allow traffic to Amnezia DNS, but skip LAN DNS servers
+                // to avoid routing local DNS through VPN tunnel
+                auto addDnsIfNotLan = [&sitesJsonArray](const QString &dns) {
+                    if (dns.isEmpty()) return;
+                    QHostAddress addr(dns);
+                    if (addr.isNull()) return;
+                    // Skip private/local addresses — they must stay on LAN
+                    if (addr.isInSubnet(QHostAddress("10.0.0.0"), 8)
+                        || addr.isInSubnet(QHostAddress("172.16.0.0"), 12)
+                        || addr.isInSubnet(QHostAddress("192.168.0.0"), 16)
+                        || addr.isInSubnet(QHostAddress("127.0.0.0"), 8)) {
+                        return;
+                    }
+                    sitesJsonArray.append(dns);
+                };
+                addDnsIfNotLan(m_vpnConfiguration.value(config_key::dns1).toString());
+                addDnsIfNotLan(m_vpnConfiguration.value(config_key::dns2).toString());
             }
         }
     }

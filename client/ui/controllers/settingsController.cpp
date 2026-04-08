@@ -173,6 +173,7 @@ void SettingsController::backupAppConfig(const QString &fileName)
     config["Conf/autoStart"] = Autostart::isAutostart();
     config["Conf/killSwitchEnabled"] = isKillSwitchEnabled();
     config["Conf/strictKillSwitchEnabled"] = isStrictKillSwitchEnabled();
+    config["Conf/killSwitchAllowLan"] = isKillSwitchAllowLanEnabled();
     config["Conf/useAmneziaDns"] = isAmneziaDnsEnabled();
 
     SystemController::saveFile(fileName, QJsonDocument(config).toJson());
@@ -376,6 +377,17 @@ void SettingsController::toggleStrictKillSwitch(bool enable)
 {
     m_settings->setStrictKillSwitchEnabled(enable);
     emit strictKillSwitchEnabledChanged(enable);
+}
+
+bool SettingsController::isKillSwitchAllowLanEnabled()
+{
+    return m_settings->isKillSwitchAllowLanEnabled();
+}
+
+void SettingsController::toggleKillSwitchAllowLan(bool enable)
+{
+    m_settings->setKillSwitchAllowLanEnabled(enable);
+    emit killSwitchAllowLanChanged();
 }
 
 bool SettingsController::isNotificationPermissionGranted()

@@ -114,6 +114,31 @@ PageType {
             DividerType {
                 visible: false
             }
+
+            SwitcherType {
+                id: allowLanSwitch
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: Qt.platform.os === "linux"
+                enabled: SettingsController.isKillSwitchEnabled && !ConnectionController.isConnected
+
+                text: qsTr("Allow LAN access")
+                descriptionText: qsTr("Allow access to local network devices and DNS servers when KillSwitch is active")
+
+                checked: SettingsController.killSwitchAllowLan
+                onCheckedChanged: {
+                    if (!ConnectionController.isConnected) {
+                        SettingsController.killSwitchAllowLan = checked
+                    }
+                }
+            }
+
+            DividerType {
+                visible: Qt.platform.os === "linux"
+            }
             
             LabelWithButtonType {
                 Layout.topMargin: 32
