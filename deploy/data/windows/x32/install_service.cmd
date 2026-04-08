@@ -3,19 +3,34 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 set "SERVICE_NAME=FBLinkVPN-service"
 set "SERVICE_EXE_NEW=%~dp0FBLinkVPN-service.exe"
+set "SERVICE_EXE_DASH=%~dp0FBLink-VPN-service.exe"
 set "SERVICE_EXE_LEGACY=%~dp0FBLink-service.exe"
 set "SERVICE_EXE="
 set "SC=%SystemRoot%\System32\sc.exe"
 
 if exist "%SERVICE_EXE_NEW%" (
   set "SERVICE_EXE=%SERVICE_EXE_NEW%"
+) else if exist "%SERVICE_EXE_DASH%" (
+  set "SERVICE_EXE=%SERVICE_EXE_DASH%"
+  echo WARN: using dashed service executable "%SERVICE_EXE%"
 ) else if exist "%SERVICE_EXE_LEGACY%" (
   set "SERVICE_EXE=%SERVICE_EXE_LEGACY%"
   echo WARN: using legacy service executable "%SERVICE_EXE%"
 )
 
 if not defined SERVICE_EXE (
-  echo ERROR: service executable not found: "%SERVICE_EXE_NEW%" or "%SERVICE_EXE_LEGACY%"
+  for %%F in ("%~dp0*service*.exe") do (
+    if exist "%%~fF" (
+      set "SERVICE_EXE=%%~fF"
+      echo WARN: using wildcard matched service executable "!SERVICE_EXE!"
+      goto :service_resolved
+    )
+  )
+)
+
+:service_resolved
+if not defined SERVICE_EXE (
+  echo ERROR: service executable not found: "%SERVICE_EXE_NEW%" or "%SERVICE_EXE_DASH%" or "%SERVICE_EXE_LEGACY%"
   exit /b 1
 )
 

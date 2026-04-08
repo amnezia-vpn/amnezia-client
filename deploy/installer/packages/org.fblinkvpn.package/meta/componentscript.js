@@ -28,6 +28,11 @@ function serviceExecutableFileName()
     return appName() + "-service.exe"
 }
 
+function dashedServiceExecutableFileName()
+{
+    return "FBLink-VPN-service.exe"
+}
+
 function legacyServiceExecutableFileName()
 {
     return "FBLink-service.exe"
@@ -55,6 +60,19 @@ function runningOnMacOS()
 function runningOnLinux()
 {
     return (systemInfo.kernelType === "linux");
+}
+
+function uniquePushString(list, value)
+{
+    if (!value || value.length === 0) {
+        return;
+    }
+    for (var i = 0; i < list.length; ++i) {
+        if (String(list[i]).toLowerCase() === String(value).toLowerCase()) {
+            return;
+        }
+    }
+    list.push(value);
 }
 
 function showRebootRequiredMessage()
@@ -113,19 +131,7 @@ function serviceExistsWindows()
 
 function expectedServiceExecutablePathWindows()
 {
-    var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
-    var preferred = targetDir + "\\" + serviceExecutableFileName();
-    if (fileExistsWindows(preferred)) {
-        return preferred;
-    }
-
-    var legacy = targetDir + "\\" + legacyServiceExecutableFileName();
-    if (fileExistsWindows(legacy)) {
-        console.log("[WARN] Using legacy service executable path: " + legacy);
-        return legacy;
-    }
-
-    return preferred;
+    return resolveServiceExecutablePathWindows(8000);
 }
 
 function normalizeWindowsPath(path)
@@ -199,6 +205,69 @@ function fileExistsWindows(path)
 {
     var result = installer.execute("cmd", ["/c", "if exist \"" + path + "\" (exit /b 0) else (exit /b 1)"]);
     return Number(result[1]) === 0;
+}
+
+function serviceExecutablePathCandidatesWindows()
+{
+    var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
+    var candidates = [];
+
+    uniquePushString(candidates, targetDir + "\\" + serviceExecutableFileName());
+    uniquePushString(candidates, targetDir + "\\" + dashedServiceExecutableFileName());
+    uniquePushString(candidates, targetDir + "\\" + legacyServiceExecutableFileName());
+    uniquePushString(candidates, targetDir + "\\FBLinkVPN-service.exe");
+    uniquePushString(candidates, targetDir + "\\FBLink-VPN-service.exe");
+    uniquePushString(candidates, targetDir + "\\FBLink-service.exe");
+    uniquePushString(candidates, targetDir + "\\AmneziaVPN-service.exe");
+
+    return candidates;
+}
+
+function findServiceExecutableByWildcardWindows(targetDir)
+{
+    var psCmd =
+            "$d='" + psSingleQuote(targetDir) + "'; " +
+            "if (-not (Test-Path -LiteralPath $d)) { exit 1 }; " +
+            "$files = Get-ChildItem -LiteralPath $d -File -Filter '*service*.exe' -ErrorAction SilentlyContinue; " +
+            "if ($null -eq $files -or $files.Count -eq 0) { exit 2 }; " +
+            "$preferred = $files | Where-Object { $_.Name -match 'fblink.*service\\.exe' } | Select-Object -First 1; " +
+            "if ($null -eq $preferred) { $preferred = $files | Select-Object -First 1 }; " +
+            "Write-Output $preferred.FullName; exit 0";
+
+    var result = runPowerShellWindows(psCmd);
+    if (result.exitCode !== 0) {
+        return "";
+    }
+    return String(result.output).replace(/\r/g, "").replace(/\n/g, "").trim();
+}
+
+function resolveServiceExecutablePathWindows(waitMs)
+{
+    var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
+    var candidates = serviceExecutablePathCandidatesWindows();
+    var checks = Math.max(1, Math.floor(waitMs / 500));
+
+    for (var attempt = 0; attempt < checks; ++attempt) {
+        for (var i = 0; i < candidates.length; ++i) {
+            if (fileExistsWindows(candidates[i])) {
+                if (i > 0) {
+                    console.log("[WARN] Using non-primary service executable path: " + candidates[i]);
+                }
+                return candidates[i];
+            }
+        }
+
+        var wildcard = findServiceExecutableByWildcardWindows(targetDir);
+        if (wildcard.length > 0 && fileExistsWindows(wildcard)) {
+            console.log("[WARN] Service executable resolved by wildcard lookup: " + wildcard);
+            return wildcard;
+        }
+
+        sleep(500);
+    }
+
+    // Return primary expected path for diagnostics if nothing is found.
+    return candidates[0];
 }
 
 function queryServiceStateWindows()
@@ -346,9 +415,14 @@ function registerServiceFallbackWindows()
 
 function ensureServiceStartedAndRunningWindows()
 {
-    var expectedPath = normalizeWindowsPath(expectedServiceExecutablePathWindows());
+    var expectedPathRaw = expectedServiceExecutablePathWindows();
+    var expectedPath = normalizeWindowsPath(expectedPathRaw);
     var svc = queryServiceStateWindows();
-    var currentPath = normalizeWindowsPath(extractExecutablePathWindows(svc.PathName || currentServiceBinaryPathWindows()));
+    var currentPathRaw = extractExecutablePathWindows(svc.PathName || "");
+    if (!currentPathRaw || currentPathRaw.length === 0) {
+        currentPathRaw = currentServiceBinaryPathWindows();
+    }
+    var currentPath = normalizeWindowsPath(currentPathRaw);
 
     if (!svc.exists || (currentPath.length > 0 && currentPath !== expectedPath)) {
         console.log(("%1 is missing. Repairing service registration...").arg(serviceName()));
@@ -359,16 +433,20 @@ function ensureServiceStartedAndRunningWindows()
         }
         sleep(1500);
         svc = queryServiceStateWindows();
-        currentPath = normalizeWindowsPath(extractExecutablePathWindows(svc.PathName || currentServiceBinaryPathWindows()));
+        currentPathRaw = extractExecutablePathWindows(svc.PathName || "");
+        if (!currentPathRaw || currentPathRaw.length === 0) {
+            currentPathRaw = currentServiceBinaryPathWindows();
+        }
+        currentPath = normalizeWindowsPath(currentPathRaw);
     }
 
     if (!svc.exists || currentPath !== expectedPath) {
         console.log("[ERROR] " + serviceName() + " not registered correctly. Expected: " + expectedPath + " Actual: " + currentPath);
         var pathDetails = "";
-        if (!fileExistsWindows(expectedPath)) {
-            pathDetails = qsTr("Service executable file is missing: %1").arg(expectedPath);
+        if (!fileExistsWindows(expectedPathRaw)) {
+            pathDetails = qsTr("Service executable file is missing: %1").arg(expectedPathRaw);
         }
-        showServiceInstallIncompleteWindows(expectedPath, currentPath, pathDetails);
+        showServiceInstallIncompleteWindows(expectedPathRaw, currentPathRaw, pathDetails);
         return false;
     }
 

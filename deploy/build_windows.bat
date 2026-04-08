@@ -169,6 +169,9 @@ set SERVICE_BUILD_EXE=
 if exist "%WORK_DIR%\service\server\release\%CMAKEOUT_SERVICE_FILENAME%" set SERVICE_BUILD_EXE=%WORK_DIR%\service\server\release\%CMAKEOUT_SERVICE_FILENAME%
 if "%SERVICE_BUILD_EXE%"=="" if exist "%WORK_DIR%\service\server\Release\%CMAKEOUT_SERVICE_FILENAME%" set SERVICE_BUILD_EXE=%WORK_DIR%\service\server\Release\%CMAKEOUT_SERVICE_FILENAME%
 if "%SERVICE_BUILD_EXE%"=="" if exist "%WORK_DIR%\service\server\%CMAKEOUT_SERVICE_FILENAME%" set SERVICE_BUILD_EXE=%WORK_DIR%\service\server\%CMAKEOUT_SERVICE_FILENAME%
+if "%SERVICE_BUILD_EXE%"=="" for %%F in ("%WORK_DIR%\service\server\release\*service*.exe") do if exist "%%~fF" set SERVICE_BUILD_EXE=%%~fF
+if "%SERVICE_BUILD_EXE%"=="" for %%F in ("%WORK_DIR%\service\server\Release\*service*.exe") do if exist "%%~fF" set SERVICE_BUILD_EXE=%%~fF
+if "%SERVICE_BUILD_EXE%"=="" for %%F in ("%WORK_DIR%\service\server\*service*.exe") do if exist "%%~fF" set SERVICE_BUILD_EXE=%%~fF
 
 if "%SERVICE_BUILD_EXE%"=="" (
     echo "ERROR: service executable was not found in build output."

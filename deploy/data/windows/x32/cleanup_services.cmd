@@ -3,7 +3,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 set "CRITICAL_SERVICE_LIST=FBLinkVPN-service FBLink-service AmneziaVPN-service"
 set "LEGACY_SERVICE_LIST=AmneziaWGTunnel$AmneziaVPN AmneziaWGTunnel$FBLink AmneziaVPNSplitTunnel FBLinkSplitTunnel"
-set "PROCESS_LIST=FBLinkVPN-service.exe FBLink-service.exe AmneziaVPN-service.exe FBLinkVPN.exe FBLink.exe AmneziaVPN.exe"
+set "PROCESS_LIST=FBLinkVPN-service.exe FBLink-VPN-service.exe FBLink-service.exe AmneziaVPN-service.exe FBLinkVPN.exe FBLink.exe AmneziaVPN.exe"
 set "FAILED=0"
 
 for %%P in (%PROCESS_LIST%) do (
