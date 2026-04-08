@@ -21,16 +21,16 @@ private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
 
-    QString getFilePath()
+    QString getPath()
     {
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        return env.value("TEST_FILE_PATH");
+        return env.value("TEST_PATH");
     }
 
     QString getExportPath()
     {
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        return env.value("TEST_SITES_LIST_EXPORT");
+        return env.value("TEST_EXPORT_PATH");
     }
 
 private slots:
@@ -78,7 +78,7 @@ private slots:
         auto dnsIp = m_coreController->m_allowedDnsModel->data(allowedDnsModelIndex, AllowedDnsModel::IpRole);
         QVERIFY(dnsIp == ip, QString("app path should be %1, got %2").arg(ip, appPath));
 
-        m_coreController->m_allowedDnsUiController->importDns(getFilePath(), true);
+        m_coreController->m_allowedDnsUiController->importDns(getPath(), true);
         m_coreController->m_allowedDnsUiController->updateModel();
         QVERIFY(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
         QVERIFY(finishedSpy.count() == 2, "finished signal should be emitted");

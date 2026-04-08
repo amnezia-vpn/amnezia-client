@@ -21,16 +21,10 @@ private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
 
-    QString getSHAdminConfig()
+    QString getPath()
     {
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        return env.value("TEST_SELF_HOSTED_CONFIG");
-    }
-
-    QString getAppPath()
-    {
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        return env.value("TEST_APP_PATH");
+        return env.value("TEST_PATH");
     }
 
 private slots:
@@ -42,22 +36,10 @@ private slots:
         auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
 
         m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
-
-        QString vpnKey = getSHAdminConfig();
-        QJsonObject importedConfig = m_coreController->m_importCoreController->extractConfigFromData(vpnKey).config;
-
-        m_coreController->m_importCoreController->importConfig(importedConfig);
-
-        qDebug() << "SELF-HOSTED ADMIN SERVER IMPORTED\n";
     }
 
     void cleanupTestCase()
     {
-        int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();
-        m_coreController->m_serversController->removeServer(serverIndex);
-
-        qDebug() << "\nSERVER REMOVED\n";
-
         m_settings->clearSettings();
         delete m_coreController;
         delete m_settings;
@@ -85,7 +67,7 @@ private slots:
         QVERIFY(isSplitTunnelingChangedSpy.count() == 2, "isSplitTunnelingChangedSpy signal should be emitted 2nd time");
         QVERIFY(m_coreController->m_appSplitTunnelingUiController->isTunnelingEnabled() == false, "AppSplitTunneling should be disabled");
 
-        QString app = getAppPath();
+        QString app = getPath();
 
         m_coreController->m_appSplitTunnelingUiController->addApp(app);
         m_coreController->m_appSplitTunnelingUiController->updateModel();
