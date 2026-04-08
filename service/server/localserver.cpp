@@ -28,11 +28,22 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
     m_server = QSharedPointer<QLocalServer>(new QLocalServer(this));
     m_server->setSocketOptions(QLocalServer::WorldAccessOption);
 
-    if (!m_server->listen(fblink::getIpcServiceUrl())) {
-        qDebug() << QString("Unable to start the server: %1.").arg(m_server->errorString());
-        QCoreApplication::exit(1);
-        ::exit(1);
-        return;
+    const QString ipcUrl = fblink::getIpcServiceUrl();
+    if (!m_server->listen(ipcUrl)) {
+        const QString firstError = m_server->errorString();
+        qWarning() << QString("Unable to start the server (%1): %2. Retrying after cleanup.")
+                              .arg(ipcUrl, firstError);
+
+        m_server->close();
+        QLocalServer::removeServer(ipcUrl);
+
+        if (!m_server->listen(ipcUrl)) {
+            qCritical() << QString("Unable to start the server after cleanup (%1): %2.")
+                                    .arg(ipcUrl, m_server->errorString());
+            QCoreApplication::exit(1);
+            ::exit(1);
+            return;
+        }
     }
 
     QObject::connect(m_server.data(), &QLocalServer::newConnection, this, [this]() {
@@ -79,4 +90,3 @@ LocalServer::~LocalServer()
 {
     qDebug() << "Local server stopped";
 }
-

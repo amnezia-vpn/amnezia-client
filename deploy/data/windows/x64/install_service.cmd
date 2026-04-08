@@ -60,7 +60,8 @@ for /L %%I in (1,1,20) do (
     echo Service %SERVICE_NAME% is RUNNING.
     exit /b 0
   )
-  "%SC%" start "%SERVICE_NAME%" >nul 2>nul
+  echo Attempt %%I: starting %SERVICE_NAME%...
+  "%SC%" start "%SERVICE_NAME%"
   set "START_RC=!errorlevel!"
   if !START_RC! EQU 1056 (
     echo Service %SERVICE_NAME% is already running.
@@ -74,8 +75,19 @@ for /L %%I in (1,1,20) do (
 )
 
 echo ERROR: service "%SERVICE_NAME%" did not reach RUNNING state after 40 s.
+call :print_service_diagnostics
 exit /b 1
 
 :is_service_running
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$s=Get-Service -Name '%SERVICE_NAME%' -ErrorAction SilentlyContinue; if ($null -ne $s -and $s.Status -eq 'Running') { exit 0 } else { exit 1 }" >nul 2>nul
 exit /b %errorlevel%
+
+:print_service_diagnostics
+echo ---- %SERVICE_NAME% diagnostics ----
+"%SC%" query "%SERVICE_NAME%"
+"%SC%" queryex "%SERVICE_NAME%"
+"%SC%" qc "%SERVICE_NAME%"
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$svc = Get-CimInstance Win32_Service -Filter \"Name='%SERVICE_NAME%'\" -ErrorAction SilentlyContinue; if ($null -eq $svc) { Write-Host 'Service object: not found'; exit 0 }; Write-Host ('PathName=' + $svc.PathName); Write-Host ('State=' + $svc.State); Write-Host ('Status=' + $svc.Status); Write-Host ('StartMode=' + $svc.StartMode); Write-Host ('ExitCode=' + $svc.ExitCode); Write-Host ('ProcessId=' + $svc.ProcessId)"
+echo ---- end diagnostics ----
+exit /b 0

@@ -98,23 +98,63 @@ function normalizeWindowsPath(path)
     return String(path).replace(/"/g, "").replace(/\//g, "\\").trim().toLowerCase();
 }
 
+function extractExecutablePathWindows(pathValue)
+{
+    if (!pathValue) {
+        return "";
+    }
+
+    var line = String(pathValue).trim();
+    if (line.length === 0) {
+        return "";
+    }
+
+    if (line.charAt(0) === "\"") {
+        var closeIdx = line.indexOf("\"", 1);
+        if (closeIdx > 1) {
+            return line.substring(1, closeIdx);
+        }
+    }
+
+    var exeMatch = line.match(/([A-Za-z]:\\[^\r\n]*?\.exe)/i);
+    if (exeMatch && exeMatch.length > 1) {
+        return exeMatch[1];
+    }
+
+    return line;
+}
+
 function currentServiceBinaryPathWindows()
 {
+    var psCmd =
+            "$svc = Get-CimInstance Win32_Service -Filter \"Name='" + serviceName() + "'\" -ErrorAction SilentlyContinue; " +
+            "if ($null -eq $svc) { exit 1 }; " +
+            "Write-Output $svc.PathName";
+    var psResult = installer.execute("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", psCmd]);
+    if (Number(psResult[1]) === 0) {
+        var fromWmi = extractExecutablePathWindows(String(psResult[0]));
+        if (fromWmi.length > 0) {
+            return normalizeWindowsPath(fromWmi);
+        }
+    }
+
     var result = installer.execute("sc", ["qc", serviceName()]);
     var output = String(result[0]);
     var exitCode = Number(result[1]);
     if (exitCode !== 0) {
         return "";
     }
-    // Match both English (BINARY_PATH_NAME) and Russian (Имя_двоичного_файла) sc qc output.
-    var match = output.match(/BINARY_PATH_NAME\s*:\s*(.*)/) ||
-                output.match(/[\u0418\u043c\u044f_\u0434\u0432\u043e\u0438\u0447\u043d\u043e\u0433\u043e_\u0444\u0430\u0439\u043b\u0430].*?:\s*(.*)/m) ||
-                output.match(/:\s*("[^"]+\.exe")/) ||
-                output.match(/:\s*([A-Za-z]:\\[^\r\n]+\.exe)/);
+
+    // Fallback for localized sc output.
+    var match = output.match(/BINARY_PATH_NAME\s*:\s*(.*)/i) ||
+                output.match(/Имя_двоичного_файла\s*:\s*(.*)/i) ||
+                output.match(/:\s*(\"[^\"]+\.exe\")/i) ||
+                output.match(/:\s*([A-Za-z]:\\[^\r\n]+\.exe)/i);
     if (!match || match.length < 2) {
         return "";
     }
-    return normalizeWindowsPath(match[1]);
+
+    return normalizeWindowsPath(extractExecutablePathWindows(match[1]));
 }
 
 function runInstallServiceScriptWindows()

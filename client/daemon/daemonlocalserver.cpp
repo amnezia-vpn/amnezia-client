@@ -42,8 +42,14 @@ bool DaemonLocalServer::initialize() {
   }
 
   if (!m_server.listen(path)) {
-    logger.error() << "Failed to listen the daemon path";
-    return false;
+    logger.warning() << "Failed to listen the daemon path, trying cleanup";
+    m_server.close();
+    QLocalServer::removeServer(path);
+
+    if (!m_server.listen(path)) {
+      logger.error() << "Failed to listen the daemon path after cleanup";
+      return false;
+    }
   }
 
   connect(&m_server, &QLocalServer::newConnection, [&] {

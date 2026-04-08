@@ -1,6 +1,7 @@
 #include "version.h"
 #include "localserver.h"
 #include "systemservice.h"
+#include <QTimer>
 
 
 #ifdef Q_OS_WIN
@@ -40,10 +41,18 @@ SystemService::SystemService(int argc, char **argv)
 void SystemService::start()
 {
     QCoreApplication* app = application();
-    m_localServer  = new LocalServer();
+    Q_UNUSED(app);
+
+    // Return control to SCM quickly; heavy init is deferred to event loop.
+    QTimer::singleShot(0, this, [this]() {
+        if (!m_localServer) {
+            m_localServer = new LocalServer();
+        }
+    });
 }
 
 void SystemService::stop()
 {
     delete m_localServer;
+    m_localServer = nullptr;
 }
