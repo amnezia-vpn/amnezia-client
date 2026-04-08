@@ -106,7 +106,11 @@ function currentServiceBinaryPathWindows()
     if (exitCode !== 0) {
         return "";
     }
-    var match = output.match(/BINARY_PATH_NAME\s*:\s*(.*)/);
+    // Match both English (BINARY_PATH_NAME) and Russian (Имя_двоичного_файла) sc qc output.
+    var match = output.match(/BINARY_PATH_NAME\s*:\s*(.*)/) ||
+                output.match(/[\u0418\u043c\u044f_\u0434\u0432\u043e\u0438\u0447\u043d\u043e\u0433\u043e_\u0444\u0430\u0439\u043b\u0430].*?:\s*(.*)/m) ||
+                output.match(/:\s*("[^"]+\.exe")/) ||
+                output.match(/:\s*([A-Za-z]:\\[^\r\n]+\.exe)/);
     if (!match || match.length < 2) {
         return "";
     }
@@ -136,11 +140,11 @@ function ensureServiceStartedAndRunningWindows()
     }
 
     if (!serviceExistsWindows()) {
-        QMessageBox.critical("service.missing",
-                             appName(),
-                             qsTr("Service installation is incomplete (" + serviceName() + " missing).\n\nDetails:\nExpected: " + expectedPath + "\nActual: " + currentPath + "\n\nPlease run installer as Administrator and reinstall."),
-                             QMessageBox.Ok);
-        return false;
+        // Service could not be registered (e.g. old service still in pending-delete state).
+        // This resolves itself on next reboot when the SCM releases handles.
+        console.log("[WARN] " + serviceName() + " not registered after install. Expected: " + expectedPath + " Actual: " + currentPath);
+        showRebootRequiredMessage();
+        return true;
     }
 
     var startResult = installer.execute("net", ["start", serviceName()]);
@@ -185,12 +189,9 @@ Component.prototype.createOperations = function()
 
     if (runningOnWindows()) {
         var shortcutFileName = appLinkName() + ".lnk";
-        var desktopShortcutPath = QDesktopServices.storageLocation(QDesktopServices.DesktopLocation) + "/" + shortcutFileName;
 
-        component.addOperation("CreateShortcut", "@TargetDir@/" + appExecutableFileName(),
-                               desktopShortcutPath,
-                               "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
-
+        // Create shortcut only on the public desktop (C:\Users\Public\Desktop) so that
+        // all users see exactly ONE shortcut. A personal-desktop shortcut would duplicate it.
         var publicDir = installer.environmentVariable("PUBLIC");
         if (publicDir && publicDir.length > 0) {
             var publicDesktopShortcutPath = publicDir.replace(/\\/g, "/") + "/Desktop/" + shortcutFileName;
