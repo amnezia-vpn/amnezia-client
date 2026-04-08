@@ -224,13 +224,11 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-findstr /C:"sc create" "%COMPONENT_SCRIPT%" >nul
-if %errorlevel% equ 0 (
-    findstr /C:"|| (sc config" "%COMPONENT_SCRIPT%" >nul
-    if %errorlevel% equ 0 (
-        echo "ERROR: stale installer script detected (legacy sc create/config inline command)."
-        exit /b 1
-    )
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$p='%COMPONENT_SCRIPT%'; $raw=Get-Content -LiteralPath $p -Raw; if($raw -match 'sc\s+create.*\|\|\s*\(sc\s+config'){ exit 1 } else { exit 0 }"
+if %errorlevel% neq 0 (
+    echo "ERROR: stale installer script detected (legacy sc create/config inline command)."
+    exit /b 1
 )
 
 mkdir %INSTALLER_DATA_DIR%
