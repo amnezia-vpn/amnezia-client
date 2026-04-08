@@ -41,10 +41,12 @@ SystemService::SystemService(int argc, char **argv)
 void SystemService::start()
 {
     QCoreApplication* app = application();
-    Q_UNUSED(app);
+    if (!app) {
+        app = QCoreApplication::instance();
+    }
 
     // Return control to SCM quickly; heavy init is deferred to event loop.
-    QTimer::singleShot(0, this, [this]() {
+    QTimer::singleShot(0, app, [this]() {
         if (!m_localServer) {
             m_localServer = new LocalServer();
         }
