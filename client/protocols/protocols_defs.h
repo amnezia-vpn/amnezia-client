@@ -165,11 +165,13 @@ namespace amnezia
             constexpr char PublicKeyPath[] = "/opt/amnezia/xray/xray_public.key";
             constexpr char PrivateKeyPath[] = "/opt/amnezia/xray/xray_private.key";
             constexpr char shortidPath[] = "/opt/amnezia/xray/xray_short_id.key";
+            constexpr char xhttpPathFile[] = "/opt/amnezia/xray/xray_xhttp_path.key";
             constexpr char defaultSite[] = "www.googletagmanager.com";
 
             constexpr char defaultPort[] = "443";
             constexpr char defaultLocalProxyPort[] = "10808";
             constexpr char defaultLocalAddr[] = "10.33.0.2";
+            constexpr char defaultTransport[] = "tcp";
         }
 
         namespace cloak

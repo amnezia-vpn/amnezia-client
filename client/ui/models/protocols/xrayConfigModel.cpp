@@ -21,6 +21,7 @@ bool XrayConfigModel::setData(const QModelIndex &index, const QVariant &value, i
     switch (role) {
     case Roles::SiteRole: m_protocolConfig.insert(config_key::site, value.toString()); break;
     case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
+    case Roles::TransportRole: m_protocolConfig.insert(config_key::transport_proto, value.toString()); break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -36,6 +37,7 @@ QVariant XrayConfigModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Roles::SiteRole: return m_protocolConfig.value(config_key::site).toString(protocols::xray::defaultSite);
     case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::xray::defaultPort);
+    case Roles::TransportRole: return m_protocolConfig.value(config_key::transport_proto).toString(protocols::xray::defaultTransport);
     }
 
     return QVariant();
@@ -70,6 +72,7 @@ QHash<int, QByteArray> XrayConfigModel::roleNames() const
 
     roles[SiteRole] = "site";
     roles[PortRole] = "port";
+    roles[TransportRole] = "transport";
 
     return roles;
 }

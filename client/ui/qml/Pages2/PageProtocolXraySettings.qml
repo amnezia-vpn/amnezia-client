@@ -57,11 +57,65 @@ PageType {
                 headerText: qsTr("XRay settings")
             }
 
+            CaptionTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                text: qsTr("Transport")
+            }
+
+            Rectangle {
+                id: transportSelector
+
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                implicitWidth: transportButtonGroup.implicitWidth
+                implicitHeight: transportButtonGroup.implicitHeight
+
+                color: AmneziaStyle.color.onyxBlack
+                radius: 16
+
+                RowLayout {
+                    id: transportButtonGroup
+                    spacing: 0
+
+                    HorizontalRadioButton {
+                        id: tcpButton
+                        checked: transport === "tcp"
+                        hoverEnabled: listView.enabled
+                        implicitWidth: (transportSelector.width - 32) / 2
+                        text: "TCP (Vision)"
+                        onClicked: {
+                            if (transport !== "tcp") {
+                                transport = "tcp"
+                            }
+                        }
+                    }
+
+                    HorizontalRadioButton {
+                        id: xhttpButton
+                        checked: transport === "xhttp"
+                        hoverEnabled: listView.enabled
+                        implicitWidth: (transportSelector.width - 32) / 2
+                        text: "XHTTP"
+                        onClicked: {
+                            if (transport !== "xhttp") {
+                                transport = "xhttp"
+                            }
+                        }
+                    }
+                }
+            }
+
             TextFieldWithHeaderType {
                 id: textFieldWithHeaderType
 
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

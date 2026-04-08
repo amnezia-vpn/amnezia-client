@@ -129,6 +129,7 @@
         <file>server_scripts/xray/run_container.sh</file>
         <file>server_scripts/xray/start.sh</file>
         <file>server_scripts/xray/template.json</file>
+        <file>server_scripts/xray/template_xhttp.json</file>
         <file>ui/qml/Components/AdLabel.qml</file>
         <file>ui/qml/Components/ConnectButton.qml</file>
         <file>ui/qml/Components/ConnectionTypeSelectionDrawer.qml</file>

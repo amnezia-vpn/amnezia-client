@@ -51,6 +51,7 @@ QString amnezia::scriptName(ProtocolScriptType type)
     case ProtocolScriptType::wireguard_template: return QLatin1String("template.conf");
     case ProtocolScriptType::awg_template: return QLatin1String("template.conf");
     case ProtocolScriptType::xray_template: return QLatin1String("template.json");
+    case ProtocolScriptType::xray_template_xhttp: return QLatin1String("template_xhttp.json");
     default: return QString();
     }
 }

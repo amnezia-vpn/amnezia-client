@@ -308,11 +308,16 @@ void ExportController::generateXrayConfig(const QString &clientName)
     vlessServer.address = server.value("address").toString();
     vlessServer.port = server.value("port").toInt();
     vlessServer.id = user.value("id").toString();
-    vlessServer.flow = user.value("flow").toString("xtls-rprx-vision");
+    vlessServer.flow = user.value("flow").toString();
     vlessServer.encryption = user.value("encryption").toString("none");
 
     vlessServer.network = streamSettings.value("network").toString("tcp");
     vlessServer.security = streamSettings.value("security").toString("reality");
+
+    if (vlessServer.network == "xhttp") {
+        QJsonObject xhttpSettings = streamSettings.value("xhttpSettings").toObject();
+        vlessServer.xhttpPath = xhttpSettings.value("path").toString();
+    }
 
     if (vlessServer.security == "reality") {
         QJsonObject realitySettings = streamSettings.value("realitySettings").toObject();
