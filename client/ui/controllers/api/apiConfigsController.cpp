@@ -886,12 +886,6 @@ bool ApiConfigsController::importTrialFromGateway(const QString &email)
                                             m_apiServicesModel->getSelectedServiceProtocol(),
                                             QJsonObject() };
 
-    if (m_serversModel->isServerFromApiAlreadyExists(gatewayRequestData.userCountryCode, gatewayRequestData.serviceType,
-                                                     gatewayRequestData.serviceProtocol)) {
-        emit errorOccurred(ErrorCode::ApiConfigAlreadyAdded);
-        return false;
-    }
-
     ProtocolData protocolData = generateProtocolData(gatewayRequestData.serviceProtocol);
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
