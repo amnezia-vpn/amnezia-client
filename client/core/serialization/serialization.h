@@ -60,7 +60,22 @@ namespace amnezia::serialization
 
     namespace inbounds
     {
+        struct InboundCredentials {
+            QString username;
+            QString password;
+            int port;
+        };
+
         QJsonObject GenerateInboundEntry();
+
+        // Reads existing SOCKS5 auth from inbounds[0].settings.accounts[0].
+        // Returns empty username/password if no auth is configured.
+        InboundCredentials GetInboundCredentials(const QJsonObject &xrayConfig);
+
+        // Ensures SOCKS5 auth is present in inbounds[0].
+        // Re-uses existing credentials if already set; otherwise generates random ones
+        // and writes them into the config. Returns the credentials that are now active.
+        InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig);
     }
 }
 

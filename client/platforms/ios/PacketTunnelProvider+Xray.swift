@@ -132,11 +132,8 @@ extension PacketTunnelProvider {
             let port = 10808
             let address = "::1"
 
-            if var inboundsArray = jsonDict["inbounds"] as? [[String: Any]], !inboundsArray.isEmpty {
-                inboundsArray[0]["port"] = port
-                inboundsArray[0]["listen"] = address
-                jsonDict["inbounds"] = inboundsArray
-            }
+            // Extract existing SOCKS5 credentials or generate new ones per session.
+            let socksCredentials = ensureInboundAuth(jsonDict: &jsonDict, port: port, address: address)
 
             let updatedData = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 
@@ -159,6 +156,8 @@ extension PacketTunnelProvider {
                     self?.setupAndRunTun2socks(configData: updatedData,
                                                address: address,
                                                port: port,
+                                               username: socksCredentials.username,
+                                               password: socksCredentials.password,
                                                completionHandler: completionHandler)
                 }
             }
@@ -181,6 +180,50 @@ extension PacketTunnelProvider {
                 setsockopt(Int32(fd), IPPROTO_IPV6, IPV6_BOUND_IF, ptr, socklen_t(MemoryLayout<UInt32>.size))
             }
         }
+    }
+
+    private struct SocksCredentials {
+        let username: String
+        let password: String
+    }
+
+    // Returns existing SOCKS5 credentials from the inbound config, or generates and injects
+    // new random ones. Also sets port and address on inbounds[0].
+    private func ensureInboundAuth(jsonDict: inout [String: Any], port: Int, address: String) -> SocksCredentials {
+        var inboundsArray = jsonDict["inbounds"] as? [[String: Any]] ?? []
+
+        if !inboundsArray.isEmpty {
+            var inbound = inboundsArray[0]
+            inbound["port"] = port
+            inbound["listen"] = address
+
+            var settings = inbound["settings"] as? [String: Any] ?? [:]
+            if let accounts = settings["accounts"] as? [[String: Any]],
+               let first = accounts.first,
+               let user = first["user"] as? String, !user.isEmpty,
+               let pass = first["pass"] as? String, !pass.isEmpty {
+                // Re-use existing credentials
+                inbound["settings"] = settings
+                inboundsArray[0] = inbound
+                jsonDict["inbounds"] = inboundsArray
+                return SocksCredentials(username: user, password: pass)
+            }
+
+            // Generate new random credentials for this session
+            let user = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(16)
+            let pass = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
+            settings["auth"] = "password"
+            settings["accounts"] = [["user": String(user), "pass": pass]]
+            inbound["settings"] = settings
+            inboundsArray[0] = inbound
+            jsonDict["inbounds"] = inboundsArray
+            return SocksCredentials(username: String(user), password: pass)
+        }
+
+        // Fallback: no inbounds array — generate credentials but can't inject
+        let user = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(16)
+        let pass = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
+        return SocksCredentials(username: String(user), password: pass)
     }
 
     private func setupAndStartXray(configData: Data,
@@ -214,6 +257,8 @@ extension PacketTunnelProvider {
     private func setupAndRunTun2socks(configData: Data,
                                       address: String,
                                       port: Int,
+                                      username: String,
+                                      password: String,
                                       completionHandler: @escaping (Error?) -> Void) {
         let config = """
         tunnel:
@@ -221,6 +266,8 @@ extension PacketTunnelProvider {
         socks5:
           port: \(port)
           address: \(address)
+          username: \(username)
+          password: \(password)
           udp: 'udp'
         misc:
           task-stack-size: 20480
