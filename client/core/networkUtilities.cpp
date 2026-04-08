@@ -292,116 +292,177 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
 #endif
 #ifdef Q_OS_LINUX
-    constexpr int BUFFER_SIZE = 100;
+    // The netlink route dump (NLM_F_DUMP) returns ALL routes from ALL tables.
+    // Each route message is ~60-120 bytes and a typical system has 10-30+ routes,
+    // especially with VPNs (Tailscale, WireGuard) adding their own routing tables.
+    // 16 KB handles even heavily-routed systems comfortably.
+    //
+    // NOTE: The previous 100-byte buffer was too small for virtually all systems,
+    // causing gateway detection to silently fail. This broke VPN server exclusion
+    // routes, leading to routing loops and "sendmmsg: message too long" errors.
+    constexpr int RECV_BUFFER_SIZE = 16384;
+
     int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
     int     sock = -1, msgseq = 0;
-    struct  nlmsghdr *nlh, *nlmsg;
+    struct  nlmsghdr *nlh;
     struct  rtmsg *route_entry;
-    // This struct contain route attributes (route type)
     struct  rtattr *route_attribute;
-    char    gateway_address[INET_ADDRSTRLEN], interface[IF_NAMESIZE];
-    char    msgbuf[BUFFER_SIZE], buffer[BUFFER_SIZE];
+    char    gateway_address[INET_ADDRSTRLEN] = {};
+    char    interface[IF_NAMESIZE] = {};
+
+    // Separate request buffer (only needs ~32 bytes) from the large receive buffer
+    char    msgbuf[NLMSG_SPACE(sizeof(struct rtmsg))] = {};
+    char    buffer[RECV_BUFFER_SIZE];
     char    *ptr = buffer;
-    struct timeval tv;
+    struct timeval tv = {};
 
     if ((sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE)) < 0) {
-        perror("socket failed");
+        qWarning() << "getGatewayAndIface: failed to create netlink socket:" << strerror(errno);
         return {};
     }
 
-    memset(msgbuf, 0, sizeof(msgbuf));
-    memset(gateway_address, 0, sizeof(gateway_address));
-    memset(interface, 0, sizeof(interface));
-    memset(buffer, 0, sizeof(buffer));
+    /* Point the header and the msg structure pointers into the buffer */
+    struct nlmsghdr *nlmsg = (struct nlmsghdr *)msgbuf;
 
-    /* point the header and the msg structure pointers into the buffer */
-    nlmsg = (struct nlmsghdr *)msgbuf;
-
-    /* Fill in the nlmsg header*/
+    /* Fill in the nlmsg header */
     nlmsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
-    nlmsg->nlmsg_type = RTM_GETROUTE; // Get the routes from kernel routing table .
-    nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST; // The message is a request for dump.
-    nlmsg->nlmsg_seq = msgseq++; // Sequence of the message packet.
-    nlmsg->nlmsg_pid = getpid(); // PID of process sending the request.
+    nlmsg->nlmsg_type = RTM_GETROUTE; // Get the routes from kernel routing table
+    nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST; // The message is a request for dump
+    nlmsg->nlmsg_seq = msgseq; // Sequence of the message packet
+    nlmsg->nlmsg_pid = getpid(); // PID of process sending the request
+
+    // Only request IPv4 routes — we only need the IPv4 default gateway
+    // and this significantly reduces the response size
+    auto *reqRtm = reinterpret_cast<struct rtmsg *>(NLMSG_DATA(nlmsg));
+    reqRtm->rtm_family = AF_INET;
 
     /* 1 Sec Timeout to avoid stall */
     tv.tv_sec = 1;
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv, sizeof(struct timeval));
-    /* send msg */
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv, sizeof(struct timeval)) < 0) {
+        qWarning() << "getGatewayAndIface: failed to set socket timeout:" << strerror(errno);
+    }
+
     if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0) {
-        perror("send failed");
+        qWarning() << "getGatewayAndIface: failed to send netlink request:" << strerror(errno);
+        close(sock);
         return {};
     }
 
-    /* receive response */
+    // Receive the complete multipart netlink response.
+    // The kernel sends route entries in batches, terminated by NLMSG_DONE.
+    bool recvDone = false;
     do
     {
-        received_bytes = recv(sock, ptr, sizeof(buffer) - msg_len, 0);
+        int space_left = RECV_BUFFER_SIZE - msg_len;
+        if (space_left <= 0) {
+            qWarning() << "getGatewayAndIface: netlink response exceeded buffer";
+            break;
+        }
+
+        received_bytes = recv(sock, ptr, space_left, 0);
         if (received_bytes < 0) {
-            perror("Error in recv");
+            qWarning() << "getGatewayAndIface: netlink recv failed:" << strerror(errno);
+            close(sock);
+            return {};
+        }
+        if (received_bytes == 0) {
+            break;
+        }
+
+        // Validate the first message header in this received chunk
+        nlh = (struct nlmsghdr *)ptr;
+        if (!NLMSG_OK(nlh, received_bytes)) {
+            qWarning() << "getGatewayAndIface: malformed netlink response"
+                       << "(received_bytes=" << received_bytes << ")";
+            close(sock);
+            return {};
+        }
+        if (nlh->nlmsg_type == NLMSG_ERROR) {
+            auto *err = reinterpret_cast<struct nlmsgerr *>(NLMSG_DATA(nlh));
+            qWarning() << "getGatewayAndIface: netlink error response:"
+                       << strerror(-err->error);
+            close(sock);
             return {};
         }
 
-        nlh = (struct nlmsghdr *) ptr;
-
-        /* Check if the header is valid */
-        if((NLMSG_OK(nlmsg, received_bytes) == 0) ||
-            (nlmsg->nlmsg_type == NLMSG_ERROR))
-        {
-            perror("Error in received packet");
-            return {};
+        // Verify the response sequence number matches our request.
+        // Note: nlmsg_pid in responses is the kernel-assigned netlink port ID
+        // (auto-assigned since we don't bind), NOT the getpid() we set in the request.
+        if (nlh->nlmsg_seq != (uint32_t)msgseq) {
+            qWarning() << "getGatewayAndIface: unexpected nlmsg_seq in response:"
+                       << nlh->nlmsg_seq << "(expected" << msgseq << ")";
         }
 
-        /* If we received all data break */
+        // Scan this chunk for NLMSG_DONE which marks end of the dump
+        struct nlmsghdr *scan = nlh;
+        int scanLen = received_bytes;
+        while (NLMSG_OK(scan, scanLen)) {
+            if (scan->nlmsg_type == NLMSG_DONE) {
+                recvDone = true;
+                break;
+            }
+            scan = NLMSG_NEXT(scan, scanLen);
+        }
+
+        ptr += received_bytes;
+        msg_len += received_bytes;
+    }
+    // Continue while it's a multi-part message and we haven't seen NLMSG_DONE
+    while (!recvDone && (nlh->nlmsg_flags & NLM_F_MULTI));
+
+    // Parse all received route messages from the beginning of the buffer.
+    // Find the first main-table route with both a gateway and interface (the default route).
+    nlh = (struct nlmsghdr *)buffer;
+    int remaining = msg_len;
+    for ( ; NLMSG_OK(nlh, remaining); nlh = NLMSG_NEXT(nlh, remaining))
+    {
         if (nlh->nlmsg_type == NLMSG_DONE)
             break;
-        else {
-            ptr += received_bytes;
-            msg_len += received_bytes;
-        }
 
-        /* Break if its not a multi part message */
-        if ((nlmsg->nlmsg_flags & NLM_F_MULTI) == 0)
-            break;
-    }
-    while ((nlmsg->nlmsg_seq != msgseq) || (nlmsg->nlmsg_pid != getpid()));
+        route_entry = reinterpret_cast<struct rtmsg *>(NLMSG_DATA(nlh));
 
-    /* parse response */
-    for ( ; NLMSG_OK(nlh, received_bytes); nlh = NLMSG_NEXT(nlh, received_bytes))
-    {
-        /* Get the route data */
-        route_entry = (struct rtmsg *) NLMSG_DATA(nlh);
-
-        /* We are just interested in main routing table */
+        // We are just interested in the main routing table
         if (route_entry->rtm_table != RT_TABLE_MAIN)
             continue;
 
-        route_attribute = (struct rtattr *) RTM_RTA(route_entry);
+        route_attribute = reinterpret_cast<struct rtattr *>(RTM_RTA(route_entry));
         route_attribute_len = RTM_PAYLOAD(nlh);
 
-        /* Loop through all attributes */
+        // Use per-route temporaries to avoid mixing attributes from different routes
+        char route_gw[INET_ADDRSTRLEN] = {};
+        char route_if[IF_NAMESIZE] = {};
+
         for ( ; RTA_OK(route_attribute, route_attribute_len);
              route_attribute = RTA_NEXT(route_attribute, route_attribute_len))
         {
             switch(route_attribute->rta_type) {
             case RTA_OIF:
-                if_indextoname(*(int *)RTA_DATA(route_attribute), interface);
+                if_indextoname(*reinterpret_cast<int *>(RTA_DATA(route_attribute)), route_if);
                 break;
             case RTA_GATEWAY:
                 inet_ntop(AF_INET, RTA_DATA(route_attribute),
-                          gateway_address, sizeof(gateway_address));
+                          route_gw, sizeof(route_gw));
                 break;
             default:
                 break;
             }
         }
 
-        if ((*gateway_address) && (*interface)) {
-            qDebug() << "Gateway " << gateway_address << " for interface " << interface;
+        if ((*route_gw) && (*route_if)) {
+            qDebug() << "Gateway" << route_gw << "for interface" << route_if;
+            snprintf(gateway_address, sizeof(gateway_address), "%s", route_gw);
+            snprintf(interface, sizeof(interface), "%s", route_if);
             break;
         }
     }
+
     close(sock);
+
+    if (!(*gateway_address) || !(*interface)) {
+        qWarning() << "getGatewayAndIface: no default gateway found"
+                   << "(received" << msg_len << "bytes of route data)";
+    }
+
     return { gateway_address, QNetworkInterface::interfaceFromName(interface) };
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
