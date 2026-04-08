@@ -139,7 +139,15 @@ function normalizeWindowsPath(path)
     if (!path) {
         return "";
     }
-    return String(path).replace(/"/g, "").replace(/\//g, "\\").trim().toLowerCase();
+    var p = String(path).replace(/"/g, "").replace(/\//g, "\\").trim();
+    var isUnc = p.indexOf("\\\\") === 0;
+    if (isUnc) {
+        p = "\\\\" + p.substring(2).replace(/\\+/g, "\\");
+    } else {
+        p = p.replace(/\\+/g, "\\");
+    }
+    p = p.replace(/^([A-Za-z]:)\\+/, "$1\\");
+    return p.toLowerCase();
 }
 
 function extractExecutablePathWindows(pathValue)
@@ -203,13 +211,14 @@ function currentServiceBinaryPathWindows()
 
 function fileExistsWindows(path)
 {
-    var result = installer.execute("cmd", ["/c", "if exist \"" + path + "\" (exit /b 0) else (exit /b 1)"]);
+    var canonicalPath = normalizeWindowsPath(path);
+    var result = installer.execute("cmd", ["/c", "if exist \"" + canonicalPath + "\" (exit /b 0) else (exit /b 1)"]);
     return Number(result[1]) === 0;
 }
 
 function serviceExecutablePathCandidatesWindows()
 {
-    var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
+    var targetDir = normalizeWindowsPath(installer.value("TargetDir"));
     var candidates = [];
 
     uniquePushString(candidates, targetDir + "\\" + serviceExecutableFileName());
@@ -438,6 +447,18 @@ function ensureServiceStartedAndRunningWindows()
             currentPathRaw = currentServiceBinaryPathWindows();
         }
         currentPath = normalizeWindowsPath(currentPathRaw);
+
+        if (!svc.exists || (currentPath.length > 0 && currentPath !== expectedPath)) {
+            console.log("[WARN] Service still not registered after install_service.cmd, forcing JS fallback registration");
+            registerServiceFallbackWindows();
+            sleep(1200);
+            svc = queryServiceStateWindows();
+            currentPathRaw = extractExecutablePathWindows(svc.PathName || "");
+            if (!currentPathRaw || currentPathRaw.length === 0) {
+                currentPathRaw = currentServiceBinaryPathWindows();
+            }
+            currentPath = normalizeWindowsPath(currentPathRaw);
+        }
     }
 
     if (!svc.exists || currentPath !== expectedPath) {
