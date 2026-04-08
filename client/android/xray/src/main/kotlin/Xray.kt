@@ -99,6 +99,13 @@ class Xray : Protocol() {
 
             val socksConfig = xrayJsonConfig.getJSONArray("inbounds")[0] as JSONObject
             socksConfig.getInt("port").let { setSocksPort(it) }
+            socksConfig.optJSONObject("settings")
+                ?.optJSONArray("accounts")
+                ?.optJSONObject(0)
+                ?.let {
+                    setSocksUser(it.optString("user"))
+                    setSocksPass(it.optString("pass"))
+                }
 
             configSplitTunneling(config)
             configAppSplitTunneling(config)
@@ -162,9 +169,12 @@ class Xray : Protocol() {
     }
 
     private fun runTun2Socks(config: XrayConfig, fd: Int) {
+        val auth = if (config.socksUser.isNotEmpty() && config.socksPass.isNotEmpty())
+                       "${config.socksUser}:${config.socksPass}@"
+                   else ""
         val tun2SocksConfig = Tun2SocksConfig().apply {
             mtu = config.mtu.toLong()
-            proxy = "socks5://127.0.0.1:${config.socksPort}"
+            proxy = "socks5://${auth}127.0.0.1:${config.socksPort}"
             device = "fd://$fd"
             logLevel = "warn"
         }

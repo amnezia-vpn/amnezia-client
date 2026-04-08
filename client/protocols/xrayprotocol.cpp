@@ -1,5 +1,5 @@
 #include "xrayprotocol.h"
-
+#include "core/serialization/serialization.h"
 #include "core/ipcclient.h"
 #include "ipc.h"
 #include "utilities.h"
@@ -122,7 +122,11 @@ ErrorCode XrayProtocol::startTun2Socks()
     }
 
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
-    m_tun2socksProcess->setArguments({"-device", QString("tun://%1").arg(tunName), "-proxy", "socks5://127.0.0.1:10808" });
+    const auto creds = amnezia::serialization::inbounds::GetInboundCredentials();
+    const QString proxyUrl = QString("socks5://%1:%2@%3:%4")
+                             .arg(creds.user, creds.pass, creds.listen)
+                             .arg(creds.port);
+    m_tun2socksProcess->setArguments({"-device", QString("tun://%1").arg(tunName), "-proxy", proxyUrl});
 
     connect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, [this]() {
         auto readAllStandardOutput = m_tun2socksProcess->readAllStandardOutput();

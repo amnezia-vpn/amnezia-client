@@ -132,9 +132,20 @@ extension PacketTunnelProvider {
             let port = 10808
             let address = "::1"
 
+            var socksUser: String? = nil
+            var socksPass: String? = nil
+
             if var inboundsArray = jsonDict["inbounds"] as? [[String: Any]], !inboundsArray.isEmpty {
                 inboundsArray[0]["port"] = port
                 inboundsArray[0]["listen"] = address
+
+                if let settings = inboundsArray[0]["settings"] as? [String: Any],
+                   let accounts = settings["accounts"] as? [[String: Any]],
+                   let first = accounts.first {
+                    socksUser = first["user"] as? String
+                    socksPass = first["pass"] as? String
+                }
+
                 jsonDict["inbounds"] = inboundsArray
             }
 
@@ -159,6 +170,8 @@ extension PacketTunnelProvider {
                     self?.setupAndRunTun2socks(configData: updatedData,
                                                address: address,
                                                port: port,
+                                               username: socksUser,
+                                               password: socksPass,
                                                completionHandler: completionHandler)
                 }
             }
@@ -214,7 +227,19 @@ extension PacketTunnelProvider {
     private func setupAndRunTun2socks(configData: Data,
                                       address: String,
                                       port: Int,
+                                      username: String?,
+                                      password: String?,
                                       completionHandler: @escaping (Error?) -> Void) {
+        let authLines: String
+        if let username, let password {
+            authLines = """
+              username: '\(username)'
+              password: '\(password)'
+            """
+        } else {
+            authLines = ""
+        }
+
         let config = """
         tunnel:
           mtu: 9000
@@ -222,6 +247,7 @@ extension PacketTunnelProvider {
           port: \(port)
           address: \(address)
           udp: 'udp'
+        \(authLines)
         misc:
           task-stack-size: 20480
           connect-timeout: 5000

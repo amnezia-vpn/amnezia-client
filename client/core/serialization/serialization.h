@@ -60,7 +60,24 @@ namespace amnezia::serialization
 
     namespace inbounds
     {
+        // Credentials of the local SOCKS5 inbound, needed by the tun2socks
+        // consumer so it can authenticate against the Xray core. The
+        // underlying user/pass are generated once per process via a CSPRNG
+        // and are only held in memory.
+        struct InboundCredentials
+        {
+            QString listen;
+            int port;
+            QString user;
+            QString pass;
+        };
+
         QJsonObject GenerateInboundEntry();
+
+        // Returns the credentials used by GenerateInboundEntry(). Must be
+        // called from the same process that started Xray, since credentials
+        // are generated per-process and not persisted.
+        InboundCredentials GetInboundCredentials();
     }
 }
 
