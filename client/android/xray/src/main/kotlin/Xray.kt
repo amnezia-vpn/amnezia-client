@@ -200,7 +200,12 @@ class Xray : Protocol() {
         if (accounts != null && accounts.length() > 0) {
             val account = accounts.getJSONObject(0)
             if (account.optString("user").isNotEmpty() && account.optString("pass").isNotEmpty()) {
-                return // already has valid auth
+                // Ensure auth mode is enforced even for imported configs that had accounts
+                // but auth: "noauth" (or no auth field).
+                settings.put("auth", "password")
+                inbound.put("settings", settings)
+                inbounds.put(0, inbound)
+                return
             }
         }
 

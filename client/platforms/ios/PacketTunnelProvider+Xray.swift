@@ -202,7 +202,9 @@ extension PacketTunnelProvider {
                let first = accounts.first,
                let user = first["user"] as? String, !user.isEmpty,
                let pass = first["pass"] as? String, !pass.isEmpty {
-                // Re-use existing credentials
+                // Re-use existing credentials, but always enforce auth mode in case the
+                // imported config had accounts but auth: "noauth" (or no auth field).
+                settings["auth"] = "password"
                 inbound["settings"] = settings
                 inboundsArray[0] = inbound
                 jsonDict["inbounds"] = inboundsArray

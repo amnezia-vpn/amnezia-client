@@ -71,28 +71,35 @@ InboundCredentials GetInboundCredentials(const QJsonObject &xrayConfig)
 
 InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig)
 {
-    InboundCredentials creds = GetInboundCredentials(xrayConfig);
-    if (!creds.username.isEmpty() && !creds.password.isEmpty())
-        return creds; // already has valid auth — reuse it
-
-    // Generate fresh credentials for this session (never persisted)
-    creds.username = generateRandomHex(8);  // 16 hex chars
-    creds.password = generateRandomHex(16); // 32 hex chars
-
     QJsonArray inbounds = xrayConfig.value("inbounds").toArray();
     if (inbounds.isEmpty())
-        return creds;
+        return GetInboundCredentials(xrayConfig); // degenerate config, nothing to patch
 
     QJsonObject inbound = inbounds.first().toObject();
+    InboundCredentials creds;
     creds.port = inbound.value("port").toInt(defaultPort);
 
     QJsonObject settings = inbound.value("settings").toObject();
-    settings["auth"] = QStringLiteral("password");
-    QJsonObject account;
-    account["user"] = creds.username;
-    account["pass"] = creds.password;
-    settings["accounts"] = QJsonArray{ account };
+    const QJsonArray accounts = settings.value("accounts").toArray();
+    if (!accounts.isEmpty()) {
+        const QJsonObject account = accounts.first().toObject();
+        creds.username = account.value("user").toString();
+        creds.password = account.value("pass").toString();
+    }
 
+    if (creds.username.isEmpty() || creds.password.isEmpty()) {
+        // Generate fresh credentials for this session (never persisted)
+        creds.username = generateRandomHex(8);  // 16 hex chars
+        creds.password = generateRandomHex(16); // 32 hex chars
+        QJsonObject account;
+        account["user"] = creds.username;
+        account["pass"] = creds.password;
+        settings["accounts"] = QJsonArray{ account };
+    }
+
+    // Always ensure auth mode is enforced, even for imported configs that had
+    // accounts but auth: "noauth" (or no auth field at all).
+    settings["auth"] = QStringLiteral("password");
     inbound["settings"] = settings;
     inbounds[0] = inbound;
     xrayConfig["inbounds"] = inbounds;
