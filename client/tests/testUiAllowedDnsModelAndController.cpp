@@ -1,0 +1,100 @@
+#include <QDebug>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QProcessEnvironment>
+#include <QSignalSpy>
+#include <QTest>
+#include <QUuid>
+
+#include "core/controllers/coreController.h"
+#include "core/models/serverConfig.h"
+#include "secureQSettings.h"
+#include "vpnConnection.h"
+
+using namespace amnezia;
+
+class TestUiAllowedDnsModelAndController : public QObject
+{
+    Q_OBJECT
+
+private:
+    CoreController *m_coreController;
+    SecureQSettings *m_settings;
+
+    QString getFilePath()
+    {
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        return env.value("TEST_FILE_PATH");
+    }
+
+    QString getExportPath()
+    {
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        return env.value("TEST_SITES_LIST_EXPORT");
+    }
+
+private slots:
+    void initTestCase()
+    {
+        QString testOrg = "AmneziaVPN-Test-" + QUuid::createUuid().toString();
+        m_settings = new SecureQSettings(testOrg, "amnezia-client", nullptr, false);
+
+        auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
+
+        m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
+    }
+
+    void cleanupTestCase()
+    {
+        m_settings->clearSettings();
+        delete m_coreController;
+        delete m_settings;
+    }
+
+    void init()
+    {
+        m_settings->clearSettings();
+        if (m_coreController->m_serversModel) {
+            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+        }
+    }
+
+    void testRolesAndSignals()
+    {
+        QSignalSpy finishedSpy(m_coreController->m_allowedDnsUiController, &AllowedDnsUiController::finished);
+        QSignalSpy errorOccurredSpy(m_coreController->m_allowedDnsUiController, &AllowedDnsUiController::errorOccurred);
+
+        QString ip = "188.40.167.81";
+
+        m_coreController->m_allowedDnsUiController->addDns(ip);
+        m_coreController->m_allowedDnsUiController->updateModel();
+        QVERIFY(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
+        QVERIFY(finishedSpy.count() == 1, "finished signal should be emitted");
+        QVERIFY(m_coreController->m_allowedDnsModel->rowCount() == 1, "AllowedDnsModel should have 1 row");
+
+        QModelIndex allowedDnsModelIndex = m_coreController->m_allowedDnsModel->index(0, 0);
+        QVERIFY2(allowedDnsModelIndex.isValid(), "Site model index should be valid");
+
+        auto dnsIp = m_coreController->m_allowedDnsModel->data(allowedDnsModelIndex, AllowedDnsModel::IpRole);
+        QVERIFY(dnsIp == ip, QString("app path should be %1, got %2").arg(ip, appPath));
+
+        m_coreController->m_allowedDnsUiController->importDns(getFilePath(), true);
+        m_coreController->m_allowedDnsUiController->updateModel();
+        QVERIFY(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
+        QVERIFY(finishedSpy.count() == 2, "finished signal should be emitted");
+        QVERIFY(m_coreController->m_allowedDnsModel->rowCount() > 1, "AllowedDnsModel should have more than 1 row");
+
+        m_coreController->m_allowedDnsUiController->exportDns(getExportPath() + "test_dns_export.json");
+        QVERIFY(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
+        QVERIFY(finishedSpy.count() == 3, "finished signal should be emitted");
+
+        m_coreController->m_allowedDnsUiController->removeDns(0);
+        m_coreController->m_allowedDnsUiController->updateModel();
+        QVERIFY(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
+        QVERIFY(finishedSpy.count() == 4, "finished signal should be emitted");
+        QVERIFY(m_coreController->m_allowedDnsModel->rowCount() == 0, "AllowedDnsModel should have 0 rows");
+    }
+};
+
+QTEST_MAIN(TestUiAllowedDnsModelAndController)
+#include "testUiAllowedDnsModelAndController.moc"
