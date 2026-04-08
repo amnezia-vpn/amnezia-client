@@ -164,8 +164,37 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 echo "Deploying..."
 
 mkdir "%OUT_APP_DIR%"
-copy "%WORK_DIR%\service\server\release\%CMAKEOUT_SERVICE_FILENAME%" "%OUT_APP_DIR%\%SERVICE_FILENAME%"
-copy "%WORK_DIR%\client\release\%CMAKEOUT_APP_FILENAME%" "%OUT_APP_DIR%\%APP_FILENAME%"
+
+set SERVICE_BUILD_EXE=
+if exist "%WORK_DIR%\service\server\release\%CMAKEOUT_SERVICE_FILENAME%" set SERVICE_BUILD_EXE=%WORK_DIR%\service\server\release\%CMAKEOUT_SERVICE_FILENAME%
+if "%SERVICE_BUILD_EXE%"=="" if exist "%WORK_DIR%\service\server\Release\%CMAKEOUT_SERVICE_FILENAME%" set SERVICE_BUILD_EXE=%WORK_DIR%\service\server\Release\%CMAKEOUT_SERVICE_FILENAME%
+if "%SERVICE_BUILD_EXE%"=="" if exist "%WORK_DIR%\service\server\%CMAKEOUT_SERVICE_FILENAME%" set SERVICE_BUILD_EXE=%WORK_DIR%\service\server\%CMAKEOUT_SERVICE_FILENAME%
+
+if "%SERVICE_BUILD_EXE%"=="" (
+    echo "ERROR: service executable was not found in build output."
+    exit /b 1
+)
+
+set APP_BUILD_EXE=
+if exist "%WORK_DIR%\client\release\%CMAKEOUT_APP_FILENAME%" set APP_BUILD_EXE=%WORK_DIR%\client\release\%CMAKEOUT_APP_FILENAME%
+if "%APP_BUILD_EXE%"=="" if exist "%WORK_DIR%\client\Release\%CMAKEOUT_APP_FILENAME%" set APP_BUILD_EXE=%WORK_DIR%\client\Release\%CMAKEOUT_APP_FILENAME%
+if "%APP_BUILD_EXE%"=="" if exist "%WORK_DIR%\client\%CMAKEOUT_APP_FILENAME%" set APP_BUILD_EXE=%WORK_DIR%\client\%CMAKEOUT_APP_FILENAME%
+
+if "%APP_BUILD_EXE%"=="" (
+    echo "ERROR: client executable was not found in build output."
+    exit /b 1
+)
+
+copy "%SERVICE_BUILD_EXE%" "%OUT_APP_DIR%\%SERVICE_FILENAME%"
+if %errorlevel% neq 0 exit /b %errorlevel%
+copy "%APP_BUILD_EXE%" "%OUT_APP_DIR%\%APP_FILENAME%"
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+if not exist "%OUT_APP_DIR%\%SERVICE_FILENAME%" (
+    echo "ERROR: service executable was not copied to deploy directory."
+    exit /b 1
+)
+
 del "%OUT_APP_DIR%\%CMAKEOUT_APP_FILENAME%"
 del "%OUT_APP_DIR%\%CMAKEOUT_SERVICE_FILENAME%" 2>nul
 

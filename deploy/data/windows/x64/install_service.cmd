@@ -2,11 +2,20 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 set "SERVICE_NAME=FBLinkVPN-service"
-set "SERVICE_EXE=%~dp0FBLinkVPN-service.exe"
+set "SERVICE_EXE_NEW=%~dp0FBLinkVPN-service.exe"
+set "SERVICE_EXE_LEGACY=%~dp0FBLink-service.exe"
+set "SERVICE_EXE="
 set "SC=%SystemRoot%\System32\sc.exe"
 
-if not exist "%SERVICE_EXE%" (
-  echo ERROR: service executable not found: "%SERVICE_EXE%"
+if exist "%SERVICE_EXE_NEW%" (
+  set "SERVICE_EXE=%SERVICE_EXE_NEW%"
+) else if exist "%SERVICE_EXE_LEGACY%" (
+  set "SERVICE_EXE=%SERVICE_EXE_LEGACY%"
+  echo WARN: using legacy service executable "%SERVICE_EXE%"
+)
+
+if not defined SERVICE_EXE (
+  echo ERROR: service executable not found: "%SERVICE_EXE_NEW%" or "%SERVICE_EXE_LEGACY%"
   exit /b 1
 )
 

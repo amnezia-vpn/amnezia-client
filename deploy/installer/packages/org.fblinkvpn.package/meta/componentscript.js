@@ -28,6 +28,11 @@ function serviceExecutableFileName()
     return appName() + "-service.exe"
 }
 
+function legacyServiceExecutableFileName()
+{
+    return "FBLink-service.exe"
+}
+
 function appExecutableFileName()
 {
     if (runningOnWindows()) {
@@ -109,7 +114,18 @@ function serviceExistsWindows()
 function expectedServiceExecutablePathWindows()
 {
     var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
-    return targetDir + "\\" + serviceExecutableFileName();
+    var preferred = targetDir + "\\" + serviceExecutableFileName();
+    if (fileExistsWindows(preferred)) {
+        return preferred;
+    }
+
+    var legacy = targetDir + "\\" + legacyServiceExecutableFileName();
+    if (fileExistsWindows(legacy)) {
+        console.log("[WARN] Using legacy service executable path: " + legacy);
+        return legacy;
+    }
+
+    return preferred;
 }
 
 function normalizeWindowsPath(path)
@@ -177,6 +193,12 @@ function currentServiceBinaryPathWindows()
     }
 
     return normalizeWindowsPath(extractExecutablePathWindows(match[1]));
+}
+
+function fileExistsWindows(path)
+{
+    var result = installer.execute("cmd", ["/c", "if exist \"" + path + "\" (exit /b 0) else (exit /b 1)"]);
+    return Number(result[1]) === 0;
 }
 
 function queryServiceStateWindows()
@@ -342,7 +364,11 @@ function ensureServiceStartedAndRunningWindows()
 
     if (!svc.exists || currentPath !== expectedPath) {
         console.log("[ERROR] " + serviceName() + " not registered correctly. Expected: " + expectedPath + " Actual: " + currentPath);
-        showServiceInstallIncompleteWindows(expectedPath, currentPath, "");
+        var pathDetails = "";
+        if (!fileExistsWindows(expectedPath)) {
+            pathDetails = qsTr("Service executable file is missing: %1").arg(expectedPath);
+        }
+        showServiceInstallIncompleteWindows(expectedPath, currentPath, pathDetails);
         return false;
     }
 
