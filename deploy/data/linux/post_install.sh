@@ -1,18 +1,19 @@
 #!/bin/bash
 
-APP_NAME=AmneziaVPN
+APP_NAME=FBLinkVPN
+APP_BIN_NAME=FBLink
 LOG_FOLDER=/var/log/$APP_NAME
 LOG_FILE="$LOG_FOLDER/post-install.log"
 APP_PATH=/opt/$APP_NAME
 
 if ! test -d "$LOG_FOLDER"; then
         sudo mkdir $LOG_FOLDER
-        echo "AmneziaVPN log dir created at /var/log/"
+echo "FBLinkVPN log dir created at /var/log/"
 fi
 
 if ! test -f "$LOG_FILE"; then
         touch "$LOG_FILE"
-        echo "AmneziaVPN log file created at /var/log/AmneziaVPN/post-install.log"
+        echo "FBLinkVPN log file created at /var/log/FBLinkVPN/post-install.log"
 fi
 
 date > $LOG_FILE
@@ -47,14 +48,41 @@ sudo chmod -R a-w $APP_PATH/
 sudo cp $APP_PATH/$APP_NAME.service /etc/systemd/system/ >> $LOG_FILE
 sudo systemctl daemon-reload >> $LOG_FILE 2>&1
 
-sudo systemctl start $APP_NAME >> $LOG_FILE
-sudo systemctl enable $APP_NAME >> $LOG_FILE
-sudo chmod 555 $APP_PATH/client/$APP_NAME.sh >> $LOG_FILE
-sudo ln -sfn $APP_PATH/client/$APP_NAME.sh /usr/local/sbin/$APP_NAME >> $LOG_FILE
-sudo ln -sfn $APP_PATH/client/$APP_NAME.sh /usr/local/bin/$APP_NAME >> $LOG_FILE
+# Install/enable service unit (fallback to legacy names if needed)
+SERVICE_UNIT_SRC="$APP_PATH/$APP_NAME.service"
+if [ ! -f "$SERVICE_UNIT_SRC" ] && [ -f "$APP_PATH/AmneziaVPN.service" ]; then
+        SERVICE_UNIT_SRC="$APP_PATH/AmneziaVPN.service"
+fi
+if [ -f "$SERVICE_UNIT_SRC" ]; then
+        sudo cp "$SERVICE_UNIT_SRC" /etc/systemd/system/ >> $LOG_FILE
+        sudo systemctl daemon-reload >> $LOG_FILE 2>&1
+        sudo systemctl start $APP_NAME >> $LOG_FILE
+        sudo systemctl enable $APP_NAME >> $LOG_FILE
+else
+        echo "WARN: service unit file not found at $APP_PATH" >> $LOG_FILE
+fi
+
+# Create app launchers
+APP_LAUNCHER="$APP_PATH/client/$APP_NAME.sh"
+ALT_LAUNCHER="$APP_PATH/client/$APP_BIN_NAME.sh"
+if [ -f "$ALT_LAUNCHER" ] && [ ! -f "$APP_LAUNCHER" ]; then
+        APP_LAUNCHER="$ALT_LAUNCHER"
+fi
+if [ -f "$APP_LAUNCHER" ]; then
+        sudo chmod 555 "$APP_LAUNCHER" >> $LOG_FILE
+        sudo ln -sfn "$APP_LAUNCHER" /usr/local/sbin/$APP_NAME >> $LOG_FILE
+        sudo ln -sfn "$APP_LAUNCHER" /usr/local/bin/$APP_NAME >> $LOG_FILE
+        sudo ln -sfn "$APP_LAUNCHER" /usr/local/bin/$APP_BIN_NAME >> $LOG_FILE
+else
+        echo "WARN: launcher not found in $APP_PATH/client" >> $LOG_FILE
+fi
 
 echo "user desktop creation loop started" >> $LOG_FILE
-sudo cp $APP_PATH/$APP_NAME.desktop /usr/share/applications/ >> $LOG_FILE
+if [ -f "$APP_PATH/$APP_NAME.desktop" ]; then
+        sudo cp "$APP_PATH/$APP_NAME.desktop" /usr/share/applications/ >> $LOG_FILE
+elif [ -f "$APP_PATH/FBLinkVPN.desktop" ]; then
+        sudo cp "$APP_PATH/FBLinkVPN.desktop" /usr/share/applications/ >> $LOG_FILE
+fi
 sudo cp $APP_PATH/FBLink.png /usr/share/pixmaps/ >> $LOG_FILE
 sudo chmod 555 /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
 
