@@ -729,7 +729,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const int index, const 
         QString containerClientId = containerCfg.protocolConfig.clientId();
 
         if (!clientId.isEmpty() && !containerClientId.isEmpty() && containerClientId.contains(clientId)) {
-            emit adminConfigRevoked(container);
+            emit adminConfigRevoked(serverIndex, container);
         }
 
         emit clientRevoked(index);
@@ -797,6 +797,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const ContainerConfig &
     }
 
     if (errorCode == ErrorCode::NoError) {
+        emit adminConfigRevoked(serverIndex, container);
         emit clientRevoked(row);
         emit clientsUpdated(m_clientsTable);
     }

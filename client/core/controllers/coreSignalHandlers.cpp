@@ -208,6 +208,9 @@ void CoreSignalHandlers::initAdminConfigRevokedHandler()
             [this](int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container) {
                 m_coreController->m_usersController->appendClient(serverIndex, clientId, clientName, container);
             });
+
+    connect(m_coreController->m_usersController, &UsersController::adminConfigRevoked, m_coreController->m_serversController,
+            &ServersController::clearCachedProfile);
 }
 
 void CoreSignalHandlers::initPassphraseRequestHandler()
