@@ -574,7 +574,11 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                     }
                     qSettings.sync();
                 }
-                setPendingRoutingSync(false);
+                if (!m_isLoading) {
+                    setPendingRoutingSync(false);
+                } else {
+                    qDebug() << "[FBLink] fetchConfig: keep pending routing sync because mutation request is still in progress";
+                }
                 emit subscriptionChanged();
 
                 if (m_importController && m_settings && m_serversModel) {
