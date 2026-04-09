@@ -149,6 +149,13 @@ PageType {
                 text: qsTr("Save")
 
                 clickedFunc: function() {
+                    if (primaryDns.textField.text === "") {
+                        primaryDns.errorText = qsTr("Primary DNS cannot be empty")
+                        return
+                    }
+                    primaryDns.errorText = ""
+                    secondaryDns.errorText = ""
+
                     if (primaryDns.textField.text !== SettingsController.primaryDns) {
                         SettingsController.primaryDns = primaryDns.textField.text
                     }
