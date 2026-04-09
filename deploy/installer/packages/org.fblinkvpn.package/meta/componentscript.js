@@ -703,8 +703,8 @@ Component.prototype.createOperations = function()
                 "if exist \"" + installServiceScript + "\" (" +
                 "call \"" + installServiceScript + "\" >> \"" + installerLog + "\" 2>&1" +
                 ") else (" +
-                "echo ERROR: missing install_service.cmd >> \"" + installerLog + "\" 2>&1 & exit /b 1" +
-                ")";
+                "echo WARN: missing install_service.cmd >> \"" + installerLog + "\" 2>&1" +
+                ") & exit /b 0";
         var postUninstallCommand =
                 "if exist \"" + postUninstallScript + "\" (" +
                 "call \"" + postUninstallScript + "\" >> \"" + installerLog + "\" 2>&1" +
