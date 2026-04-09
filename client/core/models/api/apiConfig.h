@@ -37,7 +37,7 @@ struct ApiConfig
     QJsonArray supportedProtocols;
     
     struct ServiceInfo {
-        bool isAdVisible;
+        bool isAdVisible = false;
         QString adHeader;
         QString adDescription;
         QString adEndpoint;
