@@ -126,7 +126,14 @@ function serviceExistsWindows()
 {
     var result = installer.execute("sc", ["query", serviceName()]);
     var exitCode = Number(result[1]);
-    return exitCode === 0;
+    if (exitCode === 0) {
+        return true;
+    }
+
+    // Fallback for environments where sc/WMI output is unreliable in installer context.
+    var regCmd = "reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\" + serviceName() + "\" >nul 2>&1";
+    var regResult = runCmdWindows(regCmd);
+    return regResult.exitCode === 0;
 }
 
 function expectedServiceExecutablePathWindows()
@@ -338,6 +345,22 @@ function runInstallServiceScriptWindows()
     return exitCode === 0;
 }
 
+function runPostInstallScriptWindows()
+{
+    var targetDir = installer.value("TargetDir").replace(/\//g, "\\");
+    var postInstallScript = targetDir + "\\post_install.cmd";
+    var checkScript = installer.execute("cmd", ["/c", "if exist \"" + postInstallScript + "\" (exit /b 0) else (exit /b 1)"]);
+    if (Number(checkScript[1]) !== 0) {
+        console.log("[WARN] post_install.cmd is missing: " + postInstallScript);
+        return false;
+    }
+
+    var result = installer.execute("cmd", ["/c", "call \"" + postInstallScript + "\""]);
+    var exitCode = Number(result[1]);
+    console.log(("post_install.cmd result: %1").arg(result));
+    return exitCode === 0;
+}
+
 function runCmdWindows(command)
 {
     var result = installer.execute("cmd", ["/c", command]);
@@ -373,7 +396,7 @@ function registerServiceViaPowerShellWindows(expectedPath)
             "if ($null -ne $existing) { " +
             "  try { Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue } catch {}; " +
             "  sc.exe delete $svc | Out-Null; " +
-            "  Start-Sleep -Milliseconds 800; " +
+            "  for($i=0; $i -lt 30; $i++){ sc.exe query $svc > $null 2>&1; if($LASTEXITCODE -eq 1060){ break }; Start-Sleep -Milliseconds 500 }; " +
             "}; " +
             "New-Service -Name $svc -BinaryPathName $binPath -DisplayName 'FBLink VPN Service' -Description 'Service for FBLink VPN' -StartupType Automatic | Out-Null; " +
             "sc.exe failure $svc reset= 100 actions= restart/2000/restart/2000/restart/2000 | Out-Null; " +
@@ -472,6 +495,35 @@ function registerServiceFallbackWindows()
     return false;
 }
 
+function forceCreateServiceKnownGoodWindows()
+{
+    var expectedPath = expectedServiceExecutablePathWindows();
+    if (!fileExistsWindows(expectedPath)) {
+        return false;
+    }
+
+    var psCmd =
+            "$ErrorActionPreference='Stop'; " +
+            "$svc='" + psSingleQuote(serviceName()) + "'; " +
+            "$exe='" + psSingleQuote(expectedPath) + "'; " +
+            "$binPath = ('\"{0}\"' -f $exe); " +
+            "$existing = Get-Service -Name $svc -ErrorAction SilentlyContinue; " +
+            "if ($null -eq $existing) { " +
+            "  New-Service -Name $svc -BinaryPathName $binPath -DisplayName 'FBLink VPN Service' -Description 'Service for FBLink VPN' -StartupType Automatic | Out-Null; " +
+            "} else { " +
+            "  sc.exe config $svc binPath= $binPath start= auto | Out-Null; " +
+            "}; " +
+            "sc.exe description $svc 'FBLink VPN Service' | Out-Null; " +
+            "sc.exe failure $svc reset= 100 actions= restart/2000/restart/2000/restart/2000 | Out-Null; " +
+            "try { Start-Service -Name $svc -ErrorAction SilentlyContinue } catch {}; " +
+            "$created = Get-Service -Name $svc -ErrorAction SilentlyContinue; " +
+            "if ($null -ne $created) { exit 0 } else { exit 1 }";
+
+    var res = runPowerShellWindows(psCmd);
+    console.log(("forceCreateServiceKnownGoodWindows exit=%1 output=%2").arg(res.exitCode).arg(res.output));
+    return res.exitCode === 0;
+}
+
 function ensureServiceStartedAndRunningWindows()
 {
     var expectedPathRaw = expectedServiceExecutablePathWindows();
@@ -521,6 +573,21 @@ function ensureServiceStartedAndRunningWindows()
     }
 
     if (!svc.exists) {
+        console.log("[WARN] Service still missing after normal registration flow, trying final known-good registration path.");
+        if (forceCreateServiceKnownGoodWindows()) {
+            sleep(1000);
+            if (serviceExistsWindows()) {
+                return true;
+            }
+        }
+
+        console.log("[WARN] Running post_install service recovery...");
+        runPostInstallScriptWindows();
+        sleep(1000);
+        if (serviceExistsWindows()) {
+            return true;
+        }
+
         console.log("[ERROR] " + serviceName() + " not registered. Expected: " + expectedPath + " Actual: " + currentPath);
         var missingDetails = "";
         var candidates = serviceExecutablePathCandidatesForRegistrationWindows();
@@ -636,8 +703,8 @@ Component.prototype.createOperations = function()
                 "if exist \"" + installServiceScript + "\" (" +
                 "call \"" + installServiceScript + "\" >> \"" + installerLog + "\" 2>&1" +
                 ") else (" +
-                "echo WARN: missing install_service.cmd >> \"" + installerLog + "\" 2>&1" +
-                ") & exit /b 0";
+                "echo ERROR: missing install_service.cmd >> \"" + installerLog + "\" 2>&1 & exit /b 1" +
+                ")";
         var postUninstallCommand =
                 "if exist \"" + postUninstallScript + "\" (" +
                 "call \"" + postUninstallScript + "\" >> \"" + installerLog + "\" 2>&1" +
