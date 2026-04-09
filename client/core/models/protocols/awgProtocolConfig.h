@@ -22,6 +22,7 @@ struct AwgServerConfig {
     QString transportProto;
     QString protocolVersion;
     QString subnetAddress;
+    QString subnetCidr;
     QString junkPacketCount;
     QString junkPacketMinSize;
     QString junkPacketMaxSize;

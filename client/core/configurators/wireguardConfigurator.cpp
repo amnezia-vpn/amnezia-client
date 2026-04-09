@@ -43,7 +43,7 @@ WireguardConfigurator::WireguardConfigurator(SshSession* sshSession, bool isAwg,
     m_configTemplate = m_isAwg ? ProtocolScriptType::awg_template : ProtocolScriptType::wireguard_template;
 
     m_protocolName = m_isAwg ? configKey::awg : configKey::wireguard;
-    m_defaultPort = m_isAwg ? protocols::wireguard::defaultPort : protocols::awg::defaultPort;
+    m_defaultPort = m_isAwg ? protocols::awg::defaultPort : protocols::wireguard::defaultPort;
 }
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()

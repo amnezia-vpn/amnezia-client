@@ -29,6 +29,9 @@ QJsonObject AwgServerConfig::toJson() const
     if (!subnetAddress.isEmpty()) {
         obj[configKey::subnetAddress] = subnetAddress;
     }
+    if (!subnetCidr.isEmpty()) {
+        obj[configKey::subnetCidr] = subnetCidr;
+    }
     
     if (!junkPacketCount.isEmpty()) {
         obj[configKey::junkPacketCount] = junkPacketCount;
@@ -86,6 +89,7 @@ AwgServerConfig AwgServerConfig::fromJson(const QJsonObject& json)
     config.transportProto = json.value(configKey::transportProto).toString();
     config.protocolVersion = json.value(configKey::protocolVersion).toString();
     config.subnetAddress = json.value(configKey::subnetAddress).toString();
+    config.subnetCidr = json.value(configKey::subnetCidr).toString();
     
     config.junkPacketCount = json.value(configKey::junkPacketCount).toString();
     config.junkPacketMinSize = json.value(configKey::junkPacketMinSize).toString();
