@@ -4,9 +4,13 @@
 #include <QJsonDocument>
 #include <QTimer>
 
+#include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "core/networkUtilities.h"
+#ifdef Q_OS_IOS
 #include "platforms/ios/ios_controller.h"
+#endif
 #include "version.h"
 
 namespace
@@ -57,8 +61,6 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     auto authData = serverConfig.value(configKey::authData).toObject();
 
     bool isTestPurchase = apiConfig.value(apiDefs::key::isTestPurchase).toBool(false);
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), m_settings->isDevGatewayEnv(isTestPurchase),
-                                        requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
 
     QJsonObject apiPayload;
     apiPayload[configKey::userCountryCode] = apiConfig.value(configKey::userCountryCode).toString();
@@ -68,8 +70,19 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
-
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/account_info"), apiPayload, responseBody);
+    QString endpoint = QString("%1v1/account_info");
+    
+    // Use GatewayController with parallel transports
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), 
+                                        m_settings->isDevGatewayEnv(isTestPurchase),
+                                        requestTimeoutMsecs, 
+                                        m_settings->isStrictKillSwitchEnabled());
+    
+    // Load transports config from file or env
+    gatewayController.loadTransportsConfig("gateway.json", "AMNEZIA_GATEWAY");
+    
+    ErrorCode errorCode = gatewayController.postParallel(endpoint, apiPayload, responseBody);
+    
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;

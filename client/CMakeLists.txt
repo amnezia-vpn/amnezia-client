@@ -227,6 +227,17 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     )
 endif()
 
+# Copy gateway.json to build directory if exists
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gateway.json")
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_LIST_DIR}/gateway.json
+        $<TARGET_FILE_DIR:${PROJECT}>
+        COMMENT "Copying gateway.json to build directory"
+    )
+endif()
+
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 
 # Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).

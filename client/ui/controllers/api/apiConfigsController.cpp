@@ -5,6 +5,7 @@
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "core/networkUtilities.h"
 #include "core/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"
@@ -1026,9 +1027,6 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     QThread::msleep(10);
 #endif
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
-
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto installationUuid = m_settings->getInstallationUuid(true);
 
@@ -1044,7 +1042,18 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     apiPayload[configKey::apiEndpoint] = serverConfig.value(configKey::apiEndpoint).toString();
 
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/proxy_config"), apiPayload, responseBody);
+    QString endpoint = QString("%1v1/proxy_config");
+    
+    // Use GatewayController with parallel transports
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), 
+                                        m_settings->isDevGatewayEnv(), 
+                                        apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
+    
+    // Load transports config from file or env
+    gatewayController.loadTransportsConfig("gateway.json", "AMNEZIA_GATEWAY");
+    
+    ErrorCode errorCode = gatewayController.postParallel(endpoint, apiPayload, responseBody);
 
     if (errorCode == ErrorCode::NoError) {
         errorCode = fillServerConfig(serviceProtocol, protocolData, responseBody, serverConfig);
@@ -1272,7 +1281,14 @@ ErrorCode ApiConfigsController::importServiceFromBilling(const QByteArray &respo
 ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody,
                                                bool isTestPurchase)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), m_settings->isDevGatewayEnv(isTestPurchase),
-                                        apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
-    return gatewayController.post(endpoint, apiPayload, responseBody);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), 
+                                        m_settings->isDevGatewayEnv(isTestPurchase),
+                                        apiDefs::requestTimeoutMsecs, 
+                                        m_settings->isStrictKillSwitchEnabled());
+    
+    // Load transports config from file or env
+    gatewayController.loadTransportsConfig("gateway.json", "AMNEZIA_GATEWAY");
+    
+    // Parallel request via all configured transports (HTTP + DNS)
+    return gatewayController.postParallel(endpoint, apiPayload, responseBody);
 }

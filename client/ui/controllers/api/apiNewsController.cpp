@@ -1,6 +1,8 @@
 #include "apiNewsController.h"
 
 #include "core/api/apiUtils.h"
+#include "core/controllers/gatewayController.h"
+#include "core/networkUtilities.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -31,8 +33,6 @@ void ApiNewsController::fetchNews(bool showError)
         return;
     }
 
-    auto gatewayController = QSharedPointer<GatewayController>::create(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
-                                                                       apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
     QJsonObject payload;
     payload.insert("locale", m_settings->getAppLanguage().name().split("_").first());
 
@@ -44,26 +44,36 @@ void ApiNewsController::fetchNews(bool showError)
         payload.insert(configKey::serviceType, stacksJson.value(configKey::serviceType));
     }
 
-    auto future = gatewayController->postAsync(QString("%1v1/news"), payload);
-    future.then(this, [this, showError, gatewayController](QPair<ErrorCode, QByteArray> result) {
-        auto [errorCode, responseBody] = result;
-        if (errorCode != ErrorCode::NoError) {
-            emit errorOccurred(errorCode, showError);
-            return;
+    QString endpoint = QString("%1v1/news");
+    
+    // Use GatewayController with parallel transports
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), 
+                                        m_settings->isDevGatewayEnv(),
+                                        apiDefs::requestTimeoutMsecs, 
+                                        m_settings->isStrictKillSwitchEnabled());
+    
+    // Load transports config from file or env
+    gatewayController.loadTransportsConfig("gateway.json", "AMNEZIA_GATEWAY");
+    
+    QByteArray responseBody;
+    ErrorCode errorCode = gatewayController.postParallel(endpoint, payload, responseBody);
+    
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode, showError);
+        return;
+    }
+    
+    // Parse response
+    QJsonDocument doc = QJsonDocument::fromJson(responseBody);
+    QJsonArray newsArray;
+    if (doc.isArray()) {
+        newsArray = doc.array();
+    } else if (doc.isObject()) {
+        QJsonObject obj = doc.object();
+        if (obj.value("news").isArray()) {
+            newsArray = obj.value("news").toArray();
         }
-
-        QJsonDocument doc = QJsonDocument::fromJson(responseBody);
-        QJsonArray newsArray;
-        if (doc.isArray()) {
-            newsArray = doc.array();
-        } else if (doc.isObject()) {
-            QJsonObject obj = doc.object();
-            if (obj.value("news").isArray()) {
-                newsArray = obj.value("news").toArray();
-            }
-        }
-
-        m_newsModel->updateModel(newsArray);
-        emit fetchNewsFinished();
-    });
+    }
+    m_newsModel->updateModel(newsArray);
+    emit fetchNewsFinished();
 }

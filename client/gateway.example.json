@@ -1,0 +1,44 @@
+{
+  "primary": "http",
+  "retry_count": 3,
+  "timeout_ms": 10000,
+  
+  "http": {
+    "enabled": true,
+    "endpoint": "https://your-gateway.example.com/"
+  },
+  
+  "dns_transports": [
+    {
+      "type": "udp",
+      "server": "your-gateway.example.com",
+      "domain": "gateway.example.com",
+      "port": 5453
+    },
+    {
+      "type": "tcp",
+      "server": "your-gateway.example.com",
+      "domain": "gateway.example.com",
+      "port": 5453
+    },
+    {
+      "type": "dot",
+      "server": "your-gateway.example.com",
+      "domain": "gateway.example.com",
+      "port": 8853
+    },
+    {
+      "type": "doh",
+      "server": "your-gateway.example.com",
+      "domain": "gateway.example.com",
+      "port": 443,
+      "path": "/dns-query"
+    },
+    {
+      "type": "doq",
+      "server": "your-gateway.example.com",
+      "domain": "gateway.example.com",
+      "port": 8854
+    }
+  ]
+}

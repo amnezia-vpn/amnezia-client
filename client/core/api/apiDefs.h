@@ -88,7 +88,7 @@ namespace apiDefs
         constexpr QLatin1String adEndpoint("ad_endpoint");
     }
 
-    const int requestTimeoutMsecs = 12 * 1000; // 12 secs
+    const int requestTimeoutMsecs = 30 * 1000; // 30 secs (increased for DNS transport testing)
 }
 
 #endif // APIDEFS_H
