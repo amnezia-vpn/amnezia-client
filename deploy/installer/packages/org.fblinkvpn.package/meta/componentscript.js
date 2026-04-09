@@ -349,13 +349,14 @@ function registerServiceViaPowerShellWindows(expectedPath)
             "$svc='" + psSingleQuote(serviceName()) + "'; " +
             "$exe='" + psSingleQuote(expectedPath) + "'; " +
             "if (-not (Test-Path -LiteralPath $exe)) { Write-Output 'service_exe_missing'; exit 2 }; " +
+            "$binPath = ('\"{0}\"' -f $exe); " +
             "$existing = Get-Service -Name $svc -ErrorAction SilentlyContinue; " +
             "if ($null -ne $existing) { " +
             "  try { Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue } catch {}; " +
             "  sc.exe delete $svc | Out-Null; " +
             "  Start-Sleep -Milliseconds 800; " +
             "}; " +
-            "New-Service -Name $svc -BinaryPathName ('\"' + $exe + '\"') -DisplayName 'FBLink VPN Service' -Description 'Service for FBLink VPN' -StartupType Automatic | Out-Null; " +
+            "New-Service -Name $svc -BinaryPathName $binPath -DisplayName 'FBLink VPN Service' -Description 'Service for FBLink VPN' -StartupType Automatic | Out-Null; " +
             "sc.exe failure $svc reset= 100 actions= restart/2000/restart/2000/restart/2000 | Out-Null; " +
             "try { Start-Service -Name $svc -ErrorAction SilentlyContinue } catch {}; " +
             "Write-Output 'ok'; " +
@@ -371,47 +372,43 @@ function registerServiceFallbackWindows()
     var expectedPath = expectedServiceExecutablePathWindows();
     var normalizedExpected = normalizeWindowsPath(expectedPath);
 
-    var checkExe = runCmdWindows("if exist \"" + expectedPath + "\" (exit /b 0) else (exit /b 1)");
-    if (checkExe.exitCode !== 0) {
+    var exists = false;
+    for (var waitI = 0; waitI < 20; ++waitI) {
+        var checkExe = runCmdWindows("if exist \"" + expectedPath + "\" (exit /b 0) else (exit /b 1)");
+        if (checkExe.exitCode === 0) {
+            exists = true;
+            break;
+        }
+        sleep(500);
+    }
+    if (!exists) {
         console.log("[ERROR] Service executable missing for fallback registration: " + expectedPath);
         return false;
     }
 
-    runCmdWindows("sc.exe stop \"" + serviceName() + "\" >nul 2>&1");
-    runCmdWindows("sc.exe delete \"" + serviceName() + "\" >nul 2>&1");
-    sleep(1200);
+    if (!registerServiceViaPowerShellWindows(expectedPath)) {
+        console.log("[WARN] New-Service fallback failed, trying sc create fallback");
+        runCmdWindows("sc.exe stop \"" + serviceName() + "\" >nul 2>&1");
+        runCmdWindows("sc.exe delete \"" + serviceName() + "\" >nul 2>&1");
+        sleep(1200);
 
-    var createOk = false;
-    var createCmd = "sc.exe create \"" + serviceName() + "\" binPath= \"\\\"" + expectedPath + "\\\"\" start= auto";
-    var createRes = runCmdWindows(createCmd);
-    console.log(("Fallback sc create exit=%1 output=%2").arg(createRes.exitCode).arg(createRes.output));
-    var createCode = createRes.exitCode;
-    if (createCode === 0 || createCode === 1073) {
-        createOk = true;
-    } else {
-        console.log("[WARN] sc create failed, trying New-Service fallback");
-        createOk = registerServiceViaPowerShellWindows(expectedPath);
-        if (!createOk) {
+        var createCmd = "sc.exe create \"" + serviceName() + "\" binPath= \"\\\"" + expectedPath + "\\\"\" start= auto";
+        var createRes = runCmdWindows(createCmd);
+        console.log(("Fallback sc create exit=%1 output=%2").arg(createRes.exitCode).arg(createRes.output));
+        if (createRes.exitCode !== 0 && createRes.exitCode !== 1073) {
             return false;
         }
-    }
-
-    if (createOk) {
         runCmdWindows("sc.exe description \"" + serviceName() + "\" \"FBLink VPN Service\"");
         runCmdWindows("sc.exe failure \"" + serviceName() + "\" reset= 100 actions= restart/2000/restart/2000/restart/2000");
     }
 
+    if (!serviceExistsWindows()) {
+        return false;
+    }
+
     var resolvedPath = currentServiceBinaryPathWindows();
-    if (!serviceExistsWindows() || resolvedPath !== normalizedExpected) {
-        console.log("[WARN] Fallback path check failed after sc create. Trying New-Service fallback. Expected: " + normalizedExpected + " Actual: " + resolvedPath);
-        if (!registerServiceViaPowerShellWindows(expectedPath)) {
-            return false;
-        }
-        resolvedPath = currentServiceBinaryPathWindows();
-        if (!serviceExistsWindows() || resolvedPath !== normalizedExpected) {
-            console.log("[ERROR] Fallback registration failed path check. Expected: " + normalizedExpected + " Actual: " + resolvedPath);
-            return false;
-        }
+    if (resolvedPath.length > 0 && resolvedPath !== normalizedExpected) {
+        console.log("[WARN] Service path differs after fallback registration. Expected: " + normalizedExpected + " Actual: " + resolvedPath);
     }
 
     runCmdWindows("sc.exe start \"" + serviceName() + "\"");
@@ -430,6 +427,9 @@ function ensureServiceStartedAndRunningWindows()
     var expectedPathRaw = expectedServiceExecutablePathWindows();
     var expectedPath = normalizeWindowsPath(expectedPathRaw);
     var svc = queryServiceStateWindows();
+    if (!svc.exists && serviceExistsWindows()) {
+        svc = { exists: true };
+    }
     var currentPathRaw = extractExecutablePathWindows(svc.PathName || "");
     if (!currentPathRaw || currentPathRaw.length === 0) {
         currentPathRaw = currentServiceBinaryPathWindows();
@@ -445,6 +445,9 @@ function ensureServiceStartedAndRunningWindows()
         }
         sleep(1500);
         svc = queryServiceStateWindows();
+        if (!svc.exists && serviceExistsWindows()) {
+            svc = { exists: true };
+        }
         currentPathRaw = extractExecutablePathWindows(svc.PathName || "");
         if (!currentPathRaw || currentPathRaw.length === 0) {
             currentPathRaw = currentServiceBinaryPathWindows();
@@ -456,6 +459,9 @@ function ensureServiceStartedAndRunningWindows()
             registerServiceFallbackWindows();
             sleep(1200);
             svc = queryServiceStateWindows();
+            if (!svc.exists && serviceExistsWindows()) {
+                svc = { exists: true };
+            }
             currentPathRaw = extractExecutablePathWindows(svc.PathName || "");
             if (!currentPathRaw || currentPathRaw.length === 0) {
                 currentPathRaw = currentServiceBinaryPathWindows();
@@ -464,7 +470,17 @@ function ensureServiceStartedAndRunningWindows()
         }
     }
 
-    if (!svc.exists || currentPath !== expectedPath) {
+    if (!svc.exists) {
+        console.log("[ERROR] " + serviceName() + " not registered. Expected: " + expectedPath + " Actual: " + currentPath);
+        var missingDetails = "";
+        if (!fileExistsWindows(expectedPathRaw)) {
+            missingDetails = qsTr("Service executable file is missing: %1").arg(expectedPathRaw);
+        }
+        showServiceInstallIncompleteWindows(expectedPathRaw, currentPathRaw, missingDetails);
+        return false;
+    }
+
+    if (currentPath.length > 0 && currentPath !== expectedPath) {
         console.log("[ERROR] " + serviceName() + " not registered correctly. Expected: " + expectedPath + " Actual: " + currentPath);
         var pathDetails = "";
         if (!fileExistsWindows(expectedPathRaw)) {

@@ -100,6 +100,11 @@ for /L %%I in (1,1,20) do (
 
 echo ERROR: service "%SERVICE_NAME%" did not reach RUNNING state after 40 s.
 call :print_service_diagnostics
+sc query "%SERVICE_NAME%" >nul 2>nul
+if !errorlevel! EQU 0 (
+  echo WARN: service is registered but not running yet. Continuing installer flow.
+  exit /b 0
+)
 exit /b 1
 
 :is_service_running
