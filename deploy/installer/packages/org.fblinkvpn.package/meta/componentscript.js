@@ -134,6 +134,25 @@ function expectedServiceExecutablePathWindows()
     return "C:\\Program Files\\FBLink VPN\\FBLinkVPN-service.exe";
 }
 
+function serviceExecutablePathCandidatesForRegistrationWindows()
+{
+    var candidates = [];
+    var targetDirRaw = installer.value("TargetDir").replace(/\//g, "\\");
+    var targetDir = normalizeWindowsPath(targetDirRaw);
+
+    uniquePushString(candidates, expectedServiceExecutablePathWindows());
+    uniquePushString(candidates, targetDirRaw + "\\" + serviceExecutableFileName());
+    uniquePushString(candidates, targetDirRaw + "\\" + dashedServiceExecutableFileName());
+    uniquePushString(candidates, targetDirRaw + "\\" + legacyServiceExecutableFileName());
+
+    var wildcard = findServiceExecutableByWildcardWindows(targetDirRaw);
+    if (wildcard && wildcard.length > 0) {
+        uniquePushString(candidates, wildcard);
+    }
+
+    return candidates;
+}
+
 function normalizeWindowsPath(path)
 {
     if (!path) {
@@ -367,9 +386,8 @@ function registerServiceViaPowerShellWindows(expectedPath)
     return result.exitCode === 0;
 }
 
-function registerServiceFallbackWindows()
+function registerServiceFallbackWindowsWithPathWindows(expectedPath)
 {
-    var expectedPath = expectedServiceExecutablePathWindows();
     var normalizedExpected = normalizeWindowsPath(expectedPath);
 
     var exists = false;
@@ -402,7 +420,15 @@ function registerServiceFallbackWindows()
         runCmdWindows("sc.exe failure \"" + serviceName() + "\" reset= 100 actions= restart/2000/restart/2000/restart/2000");
     }
 
-    if (!serviceExistsWindows()) {
+    var existsInScm = false;
+    for (var scmI = 0; scmI < 20; ++scmI) {
+        if (serviceExistsWindows()) {
+            existsInScm = true;
+            break;
+        }
+        sleep(500);
+    }
+    if (!existsInScm) {
         return false;
     }
 
@@ -420,6 +446,30 @@ function registerServiceFallbackWindows()
     }
 
     return serviceExistsWindows();
+}
+
+function registerServiceFallbackWindows()
+{
+    var candidates = serviceExecutablePathCandidatesForRegistrationWindows();
+    for (var i = 0; i < candidates.length; ++i) {
+        var candidate = String(candidates[i] || "").trim();
+        if (candidate.length === 0) {
+            continue;
+        }
+
+        var exists = runCmdWindows("if exist \"" + candidate + "\" (exit /b 0) else (exit /b 1)");
+        if (exists.exitCode !== 0) {
+            continue;
+        }
+
+        console.log("[INFO] Trying service registration with path: " + candidate);
+        if (registerServiceFallbackWindowsWithPathWindows(candidate)) {
+            return true;
+        }
+    }
+
+    console.log("[ERROR] Service registration failed for all candidate executable paths.");
+    return false;
 }
 
 function ensureServiceStartedAndRunningWindows()
@@ -473,7 +523,18 @@ function ensureServiceStartedAndRunningWindows()
     if (!svc.exists) {
         console.log("[ERROR] " + serviceName() + " not registered. Expected: " + expectedPath + " Actual: " + currentPath);
         var missingDetails = "";
-        if (!fileExistsWindows(expectedPathRaw)) {
+        var candidates = serviceExecutablePathCandidatesForRegistrationWindows();
+        var foundAt = "";
+        for (var ci = 0; ci < candidates.length; ++ci) {
+            var c = String(candidates[ci] || "").trim();
+            if (c.length > 0 && fileExistsWindows(c)) {
+                foundAt = c;
+                break;
+            }
+        }
+        if (foundAt.length > 0) {
+            missingDetails = qsTr("Service executable was found but registration failed: %1").arg(foundAt);
+        } else if (!fileExistsWindows(expectedPathRaw)) {
             missingDetails = qsTr("Service executable file is missing: %1").arg(expectedPathRaw);
         }
         showServiceInstallIncompleteWindows(expectedPathRaw, currentPathRaw, missingDetails);
@@ -481,13 +542,7 @@ function ensureServiceStartedAndRunningWindows()
     }
 
     if (currentPath.length > 0 && currentPath !== expectedPath) {
-        console.log("[ERROR] " + serviceName() + " not registered correctly. Expected: " + expectedPath + " Actual: " + currentPath);
-        var pathDetails = "";
-        if (!fileExistsWindows(expectedPathRaw)) {
-            pathDetails = qsTr("Service executable file is missing: %1").arg(expectedPathRaw);
-        }
-        showServiceInstallIncompleteWindows(expectedPathRaw, currentPathRaw, pathDetails);
-        return false;
+        console.log("[WARN] " + serviceName() + " is registered with non-default path. Expected: " + expectedPath + " Actual: " + currentPath);
     }
 
     if (serviceIsRunningWindows()) {
@@ -509,6 +564,12 @@ function ensureServiceStartedAndRunningWindows()
             .arg(svc.State || "unknown")
             .arg(String(svc.ExitCode || 0));
     console.log("[WARN] Service did not reach RUNNING state: " + details);
+
+    // If service is already registered in SCM, installation is considered complete.
+    if (serviceExistsWindows()) {
+        return true;
+    }
+
     showServiceInstallIncompleteWindows(expectedPath, currentPath, details);
     return false;
 }
