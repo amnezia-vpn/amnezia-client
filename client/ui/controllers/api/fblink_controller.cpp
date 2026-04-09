@@ -308,6 +308,16 @@ void FBLinkController::setConfigSyncState(bool isSyncing)
     }
 }
 
+void FBLinkController::setPendingRoutingSync(bool pending)
+{
+    if (m_hasPendingRoutingSync == pending) {
+        return;
+    }
+
+    m_hasPendingRoutingSync = pending;
+    emit routingSyncPendingChanged();
+}
+
 void FBLinkController::login(const QString &email, const QString &password)
 {
     if (email.isEmpty() || password.isEmpty()) {
@@ -564,6 +574,7 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                     }
                     qSettings.sync();
                 }
+                setPendingRoutingSync(false);
                 emit subscriptionChanged();
 
                 if (m_importController && m_settings && m_serversModel) {
@@ -921,6 +932,7 @@ void FBLinkController::logout()
     m_pendingRefreshCallbacks.clear();
     m_isRefreshing = false;
     setLoadingState(false);
+    setPendingRoutingSync(false);
     {
         QSettings qSettings = appSettings();
         qSettings.setValue(kVIPAdBlockStatusKey, "");
@@ -1134,6 +1146,11 @@ bool FBLinkController::isConfigSyncing() const
     return m_isConfigSyncing;
 }
 
+bool FBLinkController::hasPendingRoutingSync() const
+{
+    return m_hasPendingRoutingSync;
+}
+
 void FBLinkController::setAutoRenew(bool enabled)
 {
     setAutoRenew(enabled, true);
@@ -1217,6 +1234,7 @@ void FBLinkController::setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry
     QString token = getJwtToken();
     if (token.isEmpty()) return;
 
+    setPendingRoutingSync(true);
     setLoadingState(true);
     QNetworkRequest request = createApiRequest("/me/subscription/ad-block", true, true);
 
@@ -1245,6 +1263,8 @@ void FBLinkController::setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry
             emit subscriptionChanged();
             if (isSubscribed()) {
                 fetchConfig(true);
+            } else {
+                setPendingRoutingSync(false);
             }
         } else {
             logApiFailure("set-vip-ad-block", reply);
@@ -1254,6 +1274,8 @@ void FBLinkController::setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry
                 });
                 return;
             }
+
+            setPendingRoutingSync(false);
 
             QByteArray data = reply->readAll();
             QJsonDocument doc = QJsonDocument::fromJson(data);
@@ -1456,6 +1478,7 @@ void FBLinkController::saveRoutingProfile(const QVariantMap &profile, bool allow
     const int id = profile.value("id").toInt();
     const bool hasId = id > 0;
 
+    setPendingRoutingSync(true);
     setLoadingState(true);
     QNetworkRequest request = createApiRequest(hasId ? QString("/me/routing-profiles/%1").arg(id)
                                                      : "/me/routing-profiles",
@@ -1474,6 +1497,8 @@ void FBLinkController::saveRoutingProfile(const QVariantMap &profile, bool allow
             fetchRoutingProfiles(true);
             if (isSubscribed()) {
                 fetchConfig(true);
+            } else {
+                setPendingRoutingSync(false);
             }
         } else {
             logApiFailure("save-routing-profile", reply);
@@ -1484,6 +1509,7 @@ void FBLinkController::saveRoutingProfile(const QVariantMap &profile, bool allow
                 return;
             }
 
+            setPendingRoutingSync(false);
             QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
             emit routingProfilesError(obj.value("error").toString(reply->errorString()));
         }
@@ -1508,6 +1534,7 @@ void FBLinkController::deleteRoutingProfile(int id, bool allowRefreshRetry)
         return;
     }
 
+    setPendingRoutingSync(true);
     setLoadingState(true);
     QNetworkRequest request = createApiRequest(QString("/me/routing-profiles/%1").arg(id), false, true);
 
@@ -1520,6 +1547,8 @@ void FBLinkController::deleteRoutingProfile(int id, bool allowRefreshRetry)
             fetchRoutingProfiles(true);
             if (isSubscribed()) {
                 fetchConfig(true);
+            } else {
+                setPendingRoutingSync(false);
             }
         } else {
             logApiFailure("delete-routing-profile", reply);
@@ -1530,6 +1559,7 @@ void FBLinkController::deleteRoutingProfile(int id, bool allowRefreshRetry)
                 return;
             }
 
+            setPendingRoutingSync(false);
             QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
             emit routingProfilesError(obj.value("error").toString(reply->errorString()));
         }
@@ -1560,6 +1590,7 @@ void FBLinkController::copySystemRoutingProfile(const QString &code, bool allowR
         return;
     }
 
+    setPendingRoutingSync(true);
     setLoadingState(true);
     QNetworkRequest request = createApiRequest(QString("/me/routing-profiles/system/%1/copy").arg(normalizedCode), true, true);
     QNetworkReply *reply = m_nam->post(request, QByteArrayLiteral("{}"));
@@ -1574,6 +1605,8 @@ void FBLinkController::copySystemRoutingProfile(const QString &code, bool allowR
             fetchRoutingProfiles(true);
             if (isSubscribed()) {
                 fetchConfig(true);
+            } else {
+                setPendingRoutingSync(false);
             }
         } else {
             logApiFailure("copy-system-routing-profile", reply);
@@ -1584,6 +1617,7 @@ void FBLinkController::copySystemRoutingProfile(const QString &code, bool allowR
                 return;
             }
 
+            setPendingRoutingSync(false);
             QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
             emit routingProfilesError(obj.value("error").toString(reply->errorString()));
         }

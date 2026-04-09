@@ -431,34 +431,50 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
-        // 3) Defer connection if FBLinkController is currently fetching backend configuration
-        if (m_fbLinkController && (m_fbLinkController->isLoading() || m_fbLinkController->isConfigSyncing())) {
-            qDebug() << "[FBLink] prepareConfig: FBLinkController is syncing. Waiting for configFetched...";
+        // 3) Defer connection while backend config/routing sync is in progress.
+        const bool hasPendingRoutingSync = m_fbLinkController && m_fbLinkController->hasPendingRoutingSync();
+        const bool isBackendConfigSyncing = m_fbLinkController && m_fbLinkController->isConfigSyncing();
+        if (m_fbLinkController && (isBackendConfigSyncing || hasPendingRoutingSync)) {
+            qDebug() << "[FBLink] prepareConfig: backend config sync is in progress. Waiting for configFetched...";
             
             // Set state to Preparing IMMEDIATELY so the user sees a loading animation while waiting for API
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
             m_connectionController->setConnectionStateText(tr("Обновление..."));
 
+            if (hasPendingRoutingSync && !isBackendConfigSyncing) {
+                qDebug() << "[FBLink] prepareConfig: forcing fetchConfig() because routing sync is pending";
+                m_fbLinkController->fetchConfig();
+            }
+
             std::shared_ptr<bool> triggered = std::make_shared<bool>(false);
             
             auto proceed = [this, triggered]() {
                 if (*triggered) return;
+                if (m_fbLinkController && m_fbLinkController->hasPendingRoutingSync()) {
+                    *triggered = true;
+                    qWarning() << "[FBLink] prepareConfig: routing sync is still pending; refusing stale connection";
+                    emit m_pageController->showNotificationMessage(tr("Профили маршрутизации ещё обновляются. Повторите подключение через пару секунд."));
+                    emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+                    return;
+                }
                 *triggered = true;
                 qDebug() << "[FBLink] prepareConfig: deferred config fetched, calling openConnection()";
                 m_connectionController->openConnection();
             };
 
-            auto errorProceed = [this, triggered](const QString &) {
+            auto errorProceed = [this, triggered](const QString &errorText) {
                 if (*triggered) return;
                 *triggered = true;
+                qWarning() << "[FBLink] prepareConfig: config sync failed before connect:" << errorText;
+                emit m_pageController->showNotificationMessage(tr("Не удалось обновить конфигурацию перед подключением. Попробуйте ещё раз."));
                 emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error);
             };
 
             connect(m_fbLinkController.get(), &FBLinkController::configFetched, this, proceed, Qt::SingleShotConnection);
             connect(m_fbLinkController.get(), &FBLinkController::configError, this, errorProceed, Qt::SingleShotConnection);
             
-            // Fallback timeout
-            QTimer::singleShot(5000, this, proceed);
+            // Fallback timeout: do not connect if routing sync is still pending.
+            QTimer::singleShot(7000, this, proceed);
             return;
         }
 

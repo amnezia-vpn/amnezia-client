@@ -41,6 +41,7 @@ class FBLinkController : public QObject
     Q_PROPERTY(bool showNewFeaturesGuide READ showNewFeaturesGuide NOTIFY newFeaturesGuideChanged)
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY loadingChanged)
     Q_PROPERTY(bool isConfigSyncing READ isConfigSyncing NOTIFY configSyncChanged)
+    Q_PROPERTY(bool hasPendingRoutingSync READ hasPendingRoutingSync NOTIFY routingSyncPendingChanged)
 
 public:
     explicit FBLinkController(ImportController *importController, const std::shared_ptr<Settings> &settings,
@@ -91,6 +92,7 @@ public:
     bool showNewFeaturesGuide() const;
     bool isLoading() const;
     bool isConfigSyncing() const;
+    bool hasPendingRoutingSync() const;
 
 signals:
     void loginSuccess();
@@ -125,6 +127,7 @@ signals:
     void loadingChanged();
     void configSyncChanged();
     void userEmailChanged();
+    void routingSyncPendingChanged();
 
 private:
     QNetworkAccessManager *m_nam;
@@ -139,6 +142,7 @@ private:
     bool shouldRefreshToken(QNetworkReply *reply) const;
     void setLoadingState(bool isLoading);
     void setConfigSyncState(bool isSyncing);
+    void setPendingRoutingSync(bool pending);
 
     void fetchConfig(bool allowRefreshRetry);
     void fetchSubscription(bool allowRefreshRetry);
@@ -169,6 +173,7 @@ private:
     bool m_isRefreshing = false;
     bool m_isLoading = false;
     bool m_isConfigSyncing = false;
+    bool m_hasPendingRoutingSync = false;
     int m_loadingOperationsCount = 0;
     int m_configSyncOperationsCount = 0;
     bool m_fetchConfigAfterSubscription = false;
