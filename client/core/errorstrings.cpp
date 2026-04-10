@@ -82,7 +82,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiPurchaseError): errorMessage = QObject::tr("Unable to process purchase"); break;
     case (ErrorCode::ApiSubscriptionNotActiveError): errorMessage = QObject::tr("No active subscription found"); break;
     case (ErrorCode::ApiNoPurchasedSubscriptionsError): errorMessage = QObject::tr("No purchased subscriptions found. Please purchase a subscription first"); break;
-    case (ErrorCode::ApiTrialAlreadyUsedError): errorMessage = QObject::tr("This email has already been used for trial activation"); break;
+    case (ErrorCode::ApiTrialAlreadyUsedError): errorMessage = QObject::tr("This email address has already been used to activate a trial"); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

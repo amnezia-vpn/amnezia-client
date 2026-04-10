@@ -96,18 +96,18 @@
     <message>
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="664"/>
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="802"/>
-        <source>This subscription is already in the app.</source>
-        <translation>Эта подписка уже есть в приложении.</translation>
+        <source>This subscription has already been added</source>
+        <translation>Эта подписка уже добавлена</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="672"/>
-        <source>%1 was added to the app.</source>
-        <translation>%1 добавлено в приложение.</translation>
+        <source>%1 has been added to the app</source>
+        <translation>%1 добавлено в приложение</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="897"/>
-        <source>This email has already been used for trial activation. If you like the service, you can buy Premium.</source>
-        <translation>Этот адрес электронной почты уже использовался для активации пробного периода. Если вам понравился сервис, вы можете оформить Premium.</translation>
+        <source>This email address has already been used to activate a trial. If you like the service, you can upgrade to Premium</source>
+        <translation>Этот адрес электронной почты уже использовался для активации пробного периода. Если вам понравился сервис, вы можете оформить подписку Premium</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="998"/>
@@ -1722,12 +1722,12 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="129"/>
         <source>Subscription expired</source>
-        <translation>Подписка истекла</translation>
+        <translation>Подписка закончилась</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="129"/>
         <source>Subscription expiring soon</source>
-        <translation>Подписка скоро истечёт</translation>
+        <translation>Подписка скоро закончится</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="148"/>
@@ -2004,12 +2004,12 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="150"/>
         <source>Subscription expired</source>
-        <translation>Подписка истекла</translation>
+        <translation>Подписка закончилась</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="151"/>
         <source>Subscription expiring soon</source>
-        <translation>Подписка скоро истечёт</translation>
+        <translation>Подписка скоро закончится</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="181"/>
@@ -3282,8 +3282,8 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="102"/>
-        <source>We will create an account for your trial subscription and send important subscription updates to this email.</source>
-        <translation>Мы создадим учётную запись для пробной подписки и будем отправлять важные уведомления о подписке на этот адрес.</translation>
+        <source>We will create an account for your trial subscription and send important subscription updates to this email address</source>
+        <translation>Мы создадим учётную запись для вашей пробной подписки и будем отправлять на этот адрес электронной почты важные уведомления о подписке</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="118"/>
@@ -3385,7 +3385,7 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="281"/>
-        <source>The easiest way to connect to VPN</source>
+        <source>The easiest way to connect to the VPN</source>
         <translation>Самый простой способ подключиться к VPN</translation>
     </message>
     <message>
@@ -3493,8 +3493,8 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="97"/>
-        <source>SSH key requirements: supported ED25519 or RSA in PEM. Paste the private key including BEGIN/END lines. If your key doesn’t work, generate a compatible one.</source>
-        <translation>Требования к ключу SSH: поддерживаются ED25519 или RSA в формате PEM. Вставьте закрытый ключ целиком, включая строки BEGIN/END. Если ключ не подходит, создайте совместимый.</translation>
+        <source>SSH key requirements: supported key types are ED25519 and RSA in PEM format. Paste the private key, including the BEGIN/END lines. If your key doesn’t work, generate a compatible one</source>
+        <translation>Требования к SSH-ключу: поддерживаются ключи ED25519 и RSA в формате PEM. Вставьте закрытый ключ целиком, включая строки BEGIN/END. Если ваш ключ не подходит, создайте совместимый ключ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="144"/>
@@ -4473,11 +4473,11 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="84"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
-        <translation>Купленные подписки не найдены. Сначала оформите подписку</translation>
+        <translation>Платные подписки не найдены. Сначала оформите подписку</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="85"/>
-        <source>This email has already been used for trial activation</source>
+        <source>This email address has already been used to activate a trial</source>
         <translation>Этот адрес электронной почты уже использовался для активации пробного периода</translation>
     </message>
     <message>
@@ -5142,12 +5142,12 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
     <message>
         <location filename="../ui/qml/Components/ServersListView.qml" line="71"/>
         <source>Subscription expired. Please renew</source>
-        <translation>Подписка истекла. Пожалуйста, продлите её</translation>
+        <translation>Подписка закончилась. Пожалуйста, продлите её</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ServersListView.qml" line="71"/>
         <source>Subscription expiring soon</source>
-        <translation>Подписка скоро истечёт</translation>
+        <translation>Подписка скоро закончится</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ServersListView.qml" line="84"/>
@@ -5240,12 +5240,12 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="47"/>
         <source>Amnezia Premium subscription has expired</source>
-        <translation>Срок подписки Amnezia Premium истёк</translation>
+        <translation>Подписка Amnezia Premium закончилась</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="60"/>
-        <source>Renew your subscription to continue using VPN</source>
-        <translation>Продлите подписку, чтобы продолжить пользоваться VPN</translation>
+        <source>Renew to continue using VPN</source>
+        <translation>Продлите подписку, чтобы продолжить использовать VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="72"/>

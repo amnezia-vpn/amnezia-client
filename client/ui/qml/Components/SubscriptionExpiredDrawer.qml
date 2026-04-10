@@ -57,7 +57,7 @@ DrawerType2 {
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
-            text: qsTr("Renew your subscription to continue using VPN")
+            text: qsTr("Renew to continue using VPN")
             horizontalAlignment: Text.AlignLeft
         }
 

@@ -99,7 +99,7 @@ PageType {
                 wrapMode: Text.WordWrap
                 color: AmneziaStyle.color.mutedGray
                 font.pixelSize: 12
-                text: qsTr("We will create an account for your trial subscription and send important subscription updates to this email.")
+                text: qsTr("We will create an account for your trial subscription and send important subscription updates to this email address")
             }
         }
     }

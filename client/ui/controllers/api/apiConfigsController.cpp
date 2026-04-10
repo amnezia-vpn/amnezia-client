@@ -661,7 +661,7 @@ bool ApiConfigsController::importPremiumFromAppStore(const QString &storeProduct
     int duplicateServerIndex = -1;
     errorCode = importServiceFromBilling(responseBody, isTestPurchase, duplicateServerIndex);
     if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
-        emit installServerFromApiFinished(tr("This subscription is already in the app."), duplicateServerIndex);
+        emit installServerFromApiFinished(tr("This subscription has already been added"), duplicateServerIndex);
         return true;
     }
     if (errorCode != ErrorCode::NoError) {
@@ -669,7 +669,7 @@ bool ApiConfigsController::importPremiumFromAppStore(const QString &storeProduct
         return false;
     }
     emit installServerFromApiFinished(
-            tr("%1 was added to the app.").arg(m_apiServicesModel->getSelectedServiceName()));
+            tr("%1 has been added to the app").arg(m_apiServicesModel->getSelectedServiceName()));
     return true;
 #else
     Q_UNUSED(storeProductId);
@@ -799,7 +799,7 @@ bool ApiConfigsController::restoreServiceFromAppStore()
 
     if (!hasInstalledConfig) {
         if (duplicateConfigAlreadyPresent) {
-            emit installServerFromApiFinished(tr("This subscription is already in the app."), duplicateServerIndex);
+            emit installServerFromApiFinished(tr("This subscription has already been added"), duplicateServerIndex);
             return true;
         }
 
@@ -894,7 +894,7 @@ bool ApiConfigsController::importTrialFromGateway(const QString &email)
     ErrorCode errorCode = executeRequest(QString("%1v1/trial"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError) {
         if (errorCode == ErrorCode::ApiTrialAlreadyUsedError) {
-            emit trialEmailError(tr("This email has already been used for trial activation. If you like the service, you can buy Premium."));
+            emit trialEmailError(tr("This email address has already been used to activate a trial. If you like the service, you can upgrade to Premium"));
             return false;
         }
         emit errorOccurred(errorCode);
