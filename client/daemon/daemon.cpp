@@ -211,6 +211,11 @@ bool Daemon::addExclusionRoute(const IPAddress& prefix) {
     return true;
   }
   if (!wgutils()->addExclusionRoute(prefix)) {
+    if (!m_pendingExclusionRoutes.contains(prefix)) {
+      logger.warning() << "Exclusion route deferred (no gateway):"
+                       << prefix.toString();
+      m_pendingExclusionRoutes.append(prefix);
+    }
     return false;
   }
   m_excludedAddrSet[prefix] = 1;
@@ -476,6 +481,7 @@ bool Daemon::deactivate(bool emitSignals) {
     wgutils()->deleteExclusionRoute(iterator.key());
   }
   m_excludedAddrSet.clear();
+  m_pendingExclusionRoutes.clear();
 
   m_connections.clear();
   // Delete the interface
@@ -584,6 +590,19 @@ void Daemon::checkHandshake() {
   Q_ASSERT(wgutils() != nullptr);
 
   logger.debug() << "Checking for handshake...";
+
+  if (!m_pendingExclusionRoutes.isEmpty()) {
+    QList<IPAddress> stillPending;
+    for (const IPAddress& prefix : m_pendingExclusionRoutes) {
+      if (!wgutils()->addExclusionRoute(prefix)) {
+        stillPending.append(prefix);
+      } else {
+        logger.debug() << "Deferred exclusion route added:" << prefix.toString();
+        m_excludedAddrSet[prefix] = 1;
+      }
+    }
+    m_pendingExclusionRoutes = stillPending;
+  }
 
   int pendingHandshakes = 0;
   QList<WireguardUtils::PeerStatus> peers = wgutils()->getPeerStatus();
