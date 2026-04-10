@@ -192,7 +192,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     }
 
     qDebug() << "something went wrong";
-    return amnezia::ErrorCode::InternalError;
+    return amnezia::ErrorCode::ApiConfigDownloadError;
 }
 
 bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)

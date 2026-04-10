@@ -68,7 +68,7 @@ ListViewType {
 
                     text: name
                     descriptionText: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
-                        ? (isSubscriptionExpired ? qsTr("Subscription expired. Please renew.") : qsTr("Subscription expiring soon."))
+                        ? (isSubscriptionExpired ? qsTr("Subscription expired. Please renew") : qsTr("Subscription expiring soon"))
                         : serverDescription
                     descriptionColor: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
                         ? (isSubscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot)
