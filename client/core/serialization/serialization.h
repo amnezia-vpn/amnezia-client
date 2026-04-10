@@ -2,6 +2,7 @@
 #define SERIALIZATION_H
 
 #include <QJsonObject>
+#include <optional>
 #include "transfer.h"
 
 namespace amnezia::serialization
@@ -75,8 +76,8 @@ namespace amnezia::serialization
         // Ensures SOCKS5 auth is present on the inbound whose protocol is "socks".
         // Re-uses existing credentials if already set; otherwise generates random ones
         // and writes them into the config. Assigns a free loopback TCP port each session
-        // (OS-assigned when possible). Returns the credentials that are now active.
-        InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig);
+        // (OS-assigned when possible). Returns nullopt if the local port could not be acquired.
+        std::optional<InboundCredentials> EnsureInboundAuth(QJsonObject &xrayConfig);
     }
 }
 

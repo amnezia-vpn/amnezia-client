@@ -5,6 +5,7 @@
 #include <QHostAddress>
 #include <QRandomGenerator>
 #include <QTcpServer>
+#include <optional>
 #include "3rd/QJsonStruct/QJsonIO.hpp"
 #include "transfer.h"
 #include "serialization.h"
@@ -39,24 +40,16 @@ static int indexOfSocksInbound(const QJsonArray &inbounds)
     return -1;
 }
 
-// IANA dynamic/private port range (49152–65535) — fallback if OS cannot assign a port.
-static int generateEphemeralPort()
-{
-    constexpr int minPort = 49152;
-    constexpr int maxPort = 65535;
-    return QRandomGenerator::system()->bounded(minPort, maxPort + 1);
-}
-
 // Ask the OS for a free TCP port on loopback (same stack as inbound "listen": "127.0.0.1").
-static int acquireFreeLocalPort()
+static std::optional<int> acquireFreeLocalPort()
 {
-    QTcpServer probe;
-    if (!probe.listen(QHostAddress(QStringLiteral("127.0.0.1")), 0)) {
-        int port = generateEphemeralPort();
-        return port;
+    constexpr int kAttempts = 5;
+    for (int attempt = 0; attempt < kAttempts; ++attempt) {
+        QTcpServer probe;
+        if (probe.listen(QHostAddress(QStringLiteral("127.0.0.1")), 0))
+            return static_cast<int>(probe.serverPort());
     }
-    int port = static_cast<int>(probe.serverPort());
-    return port;
+    return std::nullopt;
 }
 
 // Generates a hex string of `byteCount` random bytes (URL-safe, no special chars).
@@ -102,16 +95,20 @@ InboundCredentials GetInboundCredentials(const QJsonObject &xrayConfig)
     return creds;
 }
 
-InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig)
+std::optional<InboundCredentials> EnsureInboundAuth(QJsonObject &xrayConfig)
 {
     QJsonArray inbounds = xrayConfig.value("inbounds").toArray();
     const int socksIdx = indexOfSocksInbound(inbounds);
     if (socksIdx < 0)
         return GetInboundCredentials(xrayConfig); // no SOCKS inbound to patch
 
+    const std::optional<int> portOpt = acquireFreeLocalPort();
+    if (!portOpt.has_value())
+        return std::nullopt;
+
     QJsonObject inbound = inbounds.at(socksIdx).toObject();
     InboundCredentials creds;
-    creds.port = acquireFreeLocalPort();
+    creds.port = portOpt.value();
     inbound["port"] = creds.port;
 
     QJsonObject settings = inbound.value("settings").toObject();

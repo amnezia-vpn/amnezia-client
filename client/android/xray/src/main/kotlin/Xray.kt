@@ -40,11 +40,12 @@ private fun findSocksInboundIndex(inbounds: JSONArray): Int {
 
 @Suppress("SwallowedException")
 private fun acquireFreeLocalPort(): Int {
-    return try {
-        ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { it.localPort }
-    } catch (_: Exception) {
-        (49152..65535).random()
+    repeat(5) {
+        try {
+            ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { return it.localPort }
+        } catch (_: Exception) { /* retry */ }
     }
+    throw VpnStartException("Failed to acquire free TCP port on 127.0.0.1 for SOCKS inbound")
 }
 
 class Xray : Protocol() {
