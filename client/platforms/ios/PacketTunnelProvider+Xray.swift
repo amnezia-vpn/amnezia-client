@@ -219,13 +219,23 @@ extension PacketTunnelProvider {
         let password: String
     }
 
+    private func indexOfSocksInbound(in inboundsArray: [[String: Any]]) -> Int? {
+        for (i, inbound) in inboundsArray.enumerated() {
+            guard let proto = inbound["protocol"] as? String else { continue }
+            if proto.caseInsensitiveCompare("socks") == .orderedSame {
+                return i
+            }
+        }
+        return nil
+    }
+
     // Returns existing SOCKS5 credentials from the inbound config, or generates and injects
-    // new random ones. Also sets port and address on inbounds[0].
+    // new random ones. Also sets port and address on the socks inbound entry.
     private func ensureInboundAuth(jsonDict: inout [String: Any], port: Int, address: String) -> SocksCredentials {
         var inboundsArray = jsonDict["inbounds"] as? [[String: Any]] ?? []
 
-        if !inboundsArray.isEmpty {
-            var inbound = inboundsArray[0]
+        if let socksIdx = indexOfSocksInbound(in: inboundsArray) {
+            var inbound = inboundsArray[socksIdx]
             inbound["port"] = port
             inbound["listen"] = address
 
@@ -238,7 +248,7 @@ extension PacketTunnelProvider {
                 // imported config had accounts but auth: "noauth" (or no auth field).
                 settings["auth"] = "password"
                 inbound["settings"] = settings
-                inboundsArray[0] = inbound
+                inboundsArray[socksIdx] = inbound
                 jsonDict["inbounds"] = inboundsArray
                 return SocksCredentials(username: user, password: pass)
             }
@@ -249,12 +259,12 @@ extension PacketTunnelProvider {
             settings["auth"] = "password"
             settings["accounts"] = [["user": String(user), "pass": pass]]
             inbound["settings"] = settings
-            inboundsArray[0] = inbound
+            inboundsArray[socksIdx] = inbound
             jsonDict["inbounds"] = inboundsArray
             return SocksCredentials(username: String(user), password: pass)
         }
 
-        // Fallback: no inbounds array — generate credentials but can't inject
+        // Fallback: no socks inbound — generate credentials but can't inject
         let user = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(16)
         let pass = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
         return SocksCredentials(username: String(user), password: pass)

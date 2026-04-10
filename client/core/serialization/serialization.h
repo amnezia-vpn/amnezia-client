@@ -68,11 +68,11 @@ namespace amnezia::serialization
 
         QJsonObject GenerateInboundEntry();
 
-        // Reads existing SOCKS5 auth from inbounds[0].settings.accounts[0].
-        // Returns empty username/password if no auth is configured.
+        // Reads existing SOCKS5 auth from the first inbound with protocol "socks"
+        // (.settings.accounts[0]). Returns empty username/password if none.
         InboundCredentials GetInboundCredentials(const QJsonObject &xrayConfig);
 
-        // Ensures SOCKS5 auth is present in inbounds[0].
+        // Ensures SOCKS5 auth is present on the inbound whose protocol is "socks".
         // Re-uses existing credentials if already set; otherwise generates random ones
         // and writes them into the config. Assigns a free loopback TCP port each session
         // (OS-assigned when possible). Returns the credentials that are now active.

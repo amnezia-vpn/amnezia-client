@@ -29,6 +29,16 @@ const static QString listen = "127.0.0.1";
 const static int defaultPort = 10808;
 const static QString protocol = "socks";
 
+static int indexOfSocksInbound(const QJsonArray &inbounds)
+{
+    for (int i = 0; i < inbounds.size(); ++i) {
+        const QString p = inbounds.at(i).toObject().value(QLatin1String("protocol")).toString();
+        if (p.compare(QLatin1String("socks"), Qt::CaseInsensitive) == 0)
+            return i;
+    }
+    return -1;
+}
+
 // IANA dynamic/private port range (49152–65535) — fallback if OS cannot assign a port.
 static int generateEphemeralPort()
 {
@@ -74,10 +84,11 @@ InboundCredentials GetInboundCredentials(const QJsonObject &xrayConfig)
     creds.port = defaultPort;
 
     const QJsonArray inbounds = xrayConfig.value("inbounds").toArray();
-    if (inbounds.isEmpty())
+    const int socksIdx = indexOfSocksInbound(inbounds);
+    if (socksIdx < 0)
         return creds;
 
-    const QJsonObject inbound = inbounds.first().toObject();
+    const QJsonObject inbound = inbounds.at(socksIdx).toObject();
     creds.port = inbound.value("port").toInt(defaultPort);
 
     const QJsonObject settings = inbound.value("settings").toObject();
@@ -94,14 +105,14 @@ InboundCredentials GetInboundCredentials(const QJsonObject &xrayConfig)
 InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig)
 {
     QJsonArray inbounds = xrayConfig.value("inbounds").toArray();
-    if (inbounds.isEmpty())
-        return GetInboundCredentials(xrayConfig); // degenerate config, nothing to patch
+    const int socksIdx = indexOfSocksInbound(inbounds);
+    if (socksIdx < 0)
+        return GetInboundCredentials(xrayConfig); // no SOCKS inbound to patch
 
-    QJsonObject inbound = inbounds.first().toObject();
+    QJsonObject inbound = inbounds.at(socksIdx).toObject();
     InboundCredentials creds;
     creds.port = acquireFreeLocalPort();
     inbound["port"] = creds.port;
-    // creds.port = inbound.value("port").toInt(defaultPort);
 
     QJsonObject settings = inbound.value("settings").toObject();
     const QJsonArray accounts = settings.value("accounts").toArray();
@@ -125,7 +136,7 @@ InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig)
     // accounts but auth: "noauth" (or no auth field at all).
     settings["auth"] = QStringLiteral("password");
     inbound["settings"] = settings;
-    inbounds[0] = inbound;
+    inbounds[socksIdx] = inbound;
     xrayConfig["inbounds"] = inbounds;
 
     return creds;

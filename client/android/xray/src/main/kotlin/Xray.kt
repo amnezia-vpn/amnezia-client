@@ -28,6 +28,16 @@ import org.json.JSONObject
 private const val TAG = "Xray"
 private const val LIBXRAY_TAG = "libXray"
 
+private fun findSocksInboundIndex(inbounds: JSONArray): Int {
+    for (i in 0 until inbounds.length()) {
+        val o = inbounds.optJSONObject(i) ?: continue
+        if (o.optString("protocol").equals("socks", ignoreCase = true)) {
+            return i
+        }
+    }
+    return -1
+}
+
 @Suppress("SwallowedException")
 private fun acquireFreeLocalPort(): Int {
     return try {
@@ -114,7 +124,12 @@ class Xray : Protocol() {
                 if (it.isNotBlank()) setMtu(it.toInt())
             }
 
-            val socksConfig = xrayJsonConfig.getJSONArray("inbounds")[0] as JSONObject
+            val inbounds = xrayJsonConfig.getJSONArray("inbounds")
+            val socksIdx = findSocksInboundIndex(inbounds)
+            if (socksIdx < 0) {
+                throw BadConfigException("socks inbound not found")
+            }
+            val socksConfig = inbounds.getJSONObject(socksIdx)
             socksConfig.getInt("port").let { setSocksPort(it) }
 
             val socksSettings = socksConfig.optJSONObject("settings")
@@ -199,13 +214,14 @@ class Xray : Protocol() {
         }
     }
 
-    // Ensures SOCKS5 auth is present in inbounds[0].settings.
+    // Ensures SOCKS5 auth is present on the socks inbound settings.
     // Re-uses existing credentials if already configured; otherwise generates random ones.
     private fun ensureInboundAuth(xrayConfig: JSONObject) {
         val inbounds = xrayConfig.optJSONArray("inbounds") ?: return
-        if (inbounds.length() == 0) return
+        val socksIdx = findSocksInboundIndex(inbounds)
+        if (socksIdx < 0) return
 
-        val inbound = inbounds.getJSONObject(0)
+        val inbound = inbounds.getJSONObject(socksIdx)
         inbound.put("port", acquireFreeLocalPort())
         val settings = inbound.optJSONObject("settings") ?: JSONObject().also { inbound.put("settings", it) }
         val accounts = settings.optJSONArray("accounts")
@@ -216,7 +232,7 @@ class Xray : Protocol() {
                 // but auth: "noauth" (or no auth field).
                 settings.put("auth", "password")
                 inbound.put("settings", settings)
-                inbounds.put(0, inbound)
+                inbounds.put(socksIdx, inbound)
                 return
             }
         }
@@ -226,7 +242,7 @@ class Xray : Protocol() {
         settings.put("auth", "password")
         settings.put("accounts", JSONArray().put(JSONObject().put("user", user).put("pass", pass)))
         inbound.put("settings", settings)
-        inbounds.put(0, inbound)
+        inbounds.put(socksIdx, inbound)
     }
 
     companion object {
