@@ -12,7 +12,7 @@ namespace configKey
     constexpr char title[] = "title";
     constexpr char body[] = "body";
     constexpr char icon[] = "icon";
-    constexpr char accent[] = "accent";
+    constexpr char link[] = "link";
 }
 
 QString gatewayIconKeyToUrl(const QString &iconKey)
@@ -62,8 +62,8 @@ QVariant ApiBenefitsModel::data(const QModelIndex &index, int role) const
         return item.title;
     case BodyRole:
         return item.body;
-    case AccentRole:
-        return item.accent;
+    case LinkRole:
+        return item.link;
     default:
         return {};
     }
@@ -75,7 +75,7 @@ QHash<int, QByteArray> ApiBenefitsModel::roleNames() const
         { IconRole, "icon" },
         { TitleRole, "title" },
         { BodyRole, "body" },
-        { AccentRole, "accent" },
+        { LinkRole, "link" },
     };
 }
 
@@ -90,7 +90,11 @@ void ApiBenefitsModel::updateModel(const QJsonArray &benefits)
         const QJsonObject benefitObject = benefitValue.toObject();
         QString title = benefitObject.value(configKey::title).toString();
         QString body = benefitObject.value(configKey::body).toString();
+        const bool isLink = benefitObject.value(configKey::link).toBool();
         const QString iconKey = benefitObject.value(configKey::icon).toString();
+        if (isLink) {
+            body = body.trimmed();
+        }
         if (title.isEmpty() && body.isEmpty()) {
             continue;
         }
@@ -98,7 +102,7 @@ void ApiBenefitsModel::updateModel(const QJsonArray &benefits)
         item.icon = gatewayIconKeyToUrl(iconKey);
         item.title = std::move(title);
         item.body = std::move(body);
-        item.accent = benefitObject.value(configKey::accent).toBool();
+        item.link = isLink;
         m_serviceBenefits.append(std::move(item));
     }
     endResetModel();

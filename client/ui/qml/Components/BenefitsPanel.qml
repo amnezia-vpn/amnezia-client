@@ -33,7 +33,7 @@ Rectangle {
                 iconSource: model.icon
                 titleText: model.title
                 bodyText: model.body
-                accent: !!model.accent
+                link: !!model.link
             }
         }
     }

@@ -28,12 +28,12 @@ Button {
 
     property string leftImageSource
 
-    property real textOpacity: 1.0
-
     property alias focusItem: rightImage
 
     hoverEnabled: true
     clip: false
+
+    readonly property real cardTextOpacity: !enabled ? 1.0 : pressed ? 0.7 : hovered ? 0.8 : 1.0
 
     background: Rectangle {
         id: backgroundRect
@@ -41,7 +41,7 @@ Button {
         anchors.fill: parent
         radius: 16
 
-        color: defaultColor
+        color: root.hovered && root.enabled ? root.hoveredColor : root.defaultColor
 
         Behavior on color {
             PropertyAnimation { duration: 200 }
@@ -51,6 +51,7 @@ Button {
     contentItem: Item {
         id: contentRoot
 
+        z: 1
         anchors.left: parent.left
         anchors.right: parent.right
 
@@ -129,7 +130,7 @@ Button {
                         Layout.topMargin: contentRoot.badgeVisible ? 0 : 16
                         Layout.bottomMargin: root.bodyText !== "" ? 0 : 16
 
-                        opacity: root.textOpacity
+                        opacity: root.cardTextOpacity
                     }
 
                     CaptionTextType {
@@ -138,13 +139,16 @@ Button {
 
                         color: root.bodyTextColor
                         textFormat: Text.RichText
+                        onLinkActivated: function(link) {
+                            Qt.openUrlExternally(link)
+                        }
 
                         Layout.fillWidth: true
                         Layout.rightMargin: 16
                         Layout.leftMargin: 16
                         Layout.bottomMargin: root.footerText !== "" ? 0 : 8
 
-                        opacity: root.textOpacity
+                        opacity: root.cardTextOpacity
                     }
 
                     ButtonTextType {
@@ -159,7 +163,7 @@ Button {
                         Layout.topMargin: 16
                         Layout.bottomMargin: 16
 
-                        opacity: root.textOpacity
+                        opacity: root.cardTextOpacity
                     }
                 }
 
@@ -184,7 +188,7 @@ Button {
 
                         anchors.fill: parent
                         radius: 12
-                        color: "transparent"
+                        color: root.pressed ? rightImage.pressedColor : root.hovered ? rightImage.hoveredColor : rightImage.defaultColor
 
                         Behavior on color {
                             PropertyAnimation { duration: 200 }
@@ -196,43 +200,6 @@ Button {
                     }
                 }
             }
-        }
-    }
-
-    MouseArea {
-        anchors.fill: parent
-
-        cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-        enabled: root.enabled
-
-        onEntered: {
-            backgroundRect.color = root.hoveredColor
-
-            if (rightImageSource) {
-                rightImageBackground.color = rightImage.hoveredColor
-            }
-            root.textOpacity = 0.8
-        }
-
-        onExited: {
-            backgroundRect.color = root.defaultColor
-
-            if (rightImageSource) {
-                rightImageBackground.color = rightImage.defaultColor
-            }
-            root.textOpacity = 1
-        }
-
-        onPressedChanged: {
-            if (rightImageSource) {
-                rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-            }
-            root.textOpacity = 0.7
-        }
-
-        onClicked: {
-            root.clicked()
         }
     }
 }

@@ -11,7 +11,11 @@ RowLayout {
     property string iconSource: ""
     property string titleText: ""
     property string bodyText: ""
-    property bool accent: false
+    property bool link: false
+
+    readonly property string bodyLineText: root.link && root.bodyText.length > 0 ? "@" + root.bodyText : root.bodyText
+
+    readonly property bool bodyClickable: root.link && root.bodyText.length > 0
 
     spacing: 12
 
@@ -43,22 +47,17 @@ RowLayout {
             LabelTextType {
                 id: bodyLabel
                 width: parent.width
-                text: root.bodyText
-                color: root.accent ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
+                text: root.bodyLineText
+                color: root.link ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
                 font.pixelSize: 14
                 wrapMode: Text.Wrap
             }
 
             MouseArea {
                 anchors.fill: bodyLabel
-                visible: root.accent && root.bodyText.length > 0
+                visible: root.bodyClickable
                 cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    var t = root.bodyText.trim()
-                    if (t.startsWith("@")) {
-                        Qt.openUrlExternally("https://t.me/" + t.substring(1))
-                    }
-                }
+                onClicked: Qt.openUrlExternally("https://t.me/" + root.bodyText)
             }
         }
     }

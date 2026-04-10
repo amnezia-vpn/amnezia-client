@@ -15,7 +15,7 @@ public:
         IconRole = Qt::UserRole + 1,
         TitleRole,
         BodyRole,
-        AccentRole
+        LinkRole
     };
     Q_ENUM(Roles)
 
@@ -34,7 +34,7 @@ private:
         QString icon;
         QString title;
         QString body;
-        bool accent = false;
+        bool link = false;
     };
 
     QVector<ServiceBenefitItem> m_serviceBenefits;
