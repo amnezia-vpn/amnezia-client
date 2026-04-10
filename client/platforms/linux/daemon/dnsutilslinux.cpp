@@ -4,20 +4,13 @@
 
 #include "dnsutilslinux.h"
 
-#include <net/if.h>
-
-#include <QDBusVariant>
-#include <QTimer>
-#include <QtDBus/QtDBus>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QProcess>
 
 #include "leakdetector.h"
 #include "logger.h"
-
-constexpr const char* DBUS_RESOLVE_SERVICE = "org.freedesktop.resolve1";
-constexpr const char* DBUS_RESOLVE_PATH = "/org/freedesktop/resolve1";
-constexpr const char* DBUS_RESOLVE_MANAGER = "org.freedesktop.resolve1.Manager";
-constexpr const char* DBUS_PROPERTY_INTERFACE =
-    "org.freedesktop.DBus.Properties";
 
 namespace {
 Logger logger("DnsUtilsLinux");
@@ -26,197 +19,147 @@ Logger logger("DnsUtilsLinux");
 DnsUtilsLinux::DnsUtilsLinux(QObject* parent) : DnsUtils(parent) {
   MZ_COUNT_CTOR(DnsUtilsLinux);
   logger.debug() << "DnsUtilsLinux created.";
-
-  QDBusConnection conn = QDBusConnection::systemBus();
-  m_resolver = new QDBusInterface(DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH,
-                                  DBUS_RESOLVE_MANAGER, conn, this);
 }
 
 DnsUtilsLinux::~DnsUtilsLinux() {
   MZ_COUNT_DTOR(DnsUtilsLinux);
-
-  for (auto iterator = m_linkDomains.constBegin();
-       iterator != m_linkDomains.constEnd(); ++iterator) {
-    QList<QVariant> argumentList;
-    argumentList << QVariant::fromValue(iterator.key());
-    argumentList << QVariant::fromValue(iterator.value());
-    m_resolver->asyncCallWithArgumentList(QStringLiteral("SetLinkDomains"),
-                                          argumentList);
-  }
-
-  if (m_ifindex > 0) {
-    m_resolver->asyncCall(QStringLiteral("RevertLink"), m_ifindex);
-  }
-
   logger.debug() << "DnsUtilsLinux destroyed.";
+}
+
+void DnsUtilsLinux::writeResolvConf(const QList<QHostAddress>& resolvers) {
+  if (resolvers.isEmpty()) return;
+
+  static const QString kPath = QStringLiteral("/etc/resolv.conf");
+
+  if (m_resolvConfOriginal.isEmpty()) {
+    QFileInfo fi(kPath);
+    if (fi.isSymLink()) {
+      m_resolvConfOriginal = fi.symLinkTarget();
+      logger.debug() << "Saved resolv.conf symlink target:"
+                     << m_resolvConfOriginal;
+      if (!m_stateFilePath.isEmpty()) {
+        QFile sf(m_stateFilePath);
+        if (sf.open(QIODevice::WriteOnly | QIODevice::Text))
+          sf.write(m_resolvConfOriginal.toUtf8());
+      }
+    } else {
+      QFile orig(kPath);
+      if (orig.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QByteArray content = orig.readAll();
+        orig.close();
+        m_resolvConfOriginal = QStringLiteral("__file__");
+        logger.debug() << "resolv.conf is a regular file; saved content for restore";
+        if (!m_stateFilePath.isEmpty()) {
+          QFile sf(m_stateFilePath);
+          if (sf.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            sf.write("__file__:");
+            sf.write(content);
+          }
+        }
+      } else {
+        m_resolvConfOriginal = QStringLiteral("__file__");
+      }
+    }
+  }
+
+  QFile::remove(kPath);
+  QFile f(kPath);
+  if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    logger.warning() << "Failed to write" << kPath << ":" << f.errorString();
+    if (m_resolvConfOriginal != QStringLiteral("__file__"))
+      QFile::link(m_resolvConfOriginal, kPath);
+    m_resolvConfOriginal.clear();
+    if (!m_stateFilePath.isEmpty()) QFile::remove(m_stateFilePath);
+    return;
+  }
+  for (const auto& r : resolvers) {
+    if (r.protocol() == QAbstractSocket::IPv4Protocol)
+      f.write(
+          QStringLiteral("nameserver %1\n").arg(r.toString()).toUtf8());
+  }
+  f.close();
+  logger.debug() << "Wrote resolv.conf with" << resolvers.size()
+                 << "DNS servers";
+}
+
+void DnsUtilsLinux::restoreResolvConf() {
+  if (m_resolvConfOriginal.isEmpty()) return;
+
+  const QString original = m_resolvConfOriginal;
+  m_resolvConfOriginal.clear();
+
+  if (!m_stateFilePath.isEmpty())
+    QFile::remove(m_stateFilePath);
+
+  static const char* kPath = "/etc/resolv.conf";
+
+  QFile::remove(kPath);
+
+  if (original == QStringLiteral("__file__")) {
+    if (!m_resolvConfSavedContent.isEmpty()) {
+      QFile f(kPath);
+      if (f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        f.write(m_resolvConfSavedContent.toUtf8());
+        logger.debug() << "Restored resolv.conf from saved content";
+      }
+      m_resolvConfSavedContent.clear();
+    } else if (QFile::exists(QStringLiteral("/run/systemd/resolve/stub-resolv.conf"))) {
+      QFile::link(QStringLiteral("/run/systemd/resolve/stub-resolv.conf"), kPath);
+      logger.debug() << "Restored resolv.conf symlink to stub-resolv.conf";
+    }
+  } else {
+    QFile::link(original, kPath);
+    logger.debug() << "Restored resolv.conf symlink to" << original;
+  }
 }
 
 bool DnsUtilsLinux::updateResolvers(const QString& ifname,
                                     const QList<QHostAddress>& resolvers) {
-  m_ifindex = if_nametoindex(qPrintable(ifname));
-  if (m_ifindex <= 0) {
-    logger.error() << "Unable to resolve ifindex for" << ifname;
-    return false;
-  }
+  m_stateFilePath = QStringLiteral("/run/amnezia-dns-%1").arg(ifname);
 
-  setLinkDNS(m_ifindex, resolvers);
-  setLinkDefaultRoute(m_ifindex, true);
-  setLinkDomains(m_ifindex, {DnsLinkDomain(".", true)});
-  updateLinkDomains();
+  writeResolvConf(resolvers);
   return true;
 }
 
 bool DnsUtilsLinux::restoreResolvers() {
-  for (auto iterator = m_linkDomains.constBegin();
-       iterator != m_linkDomains.constEnd(); ++iterator) {
-    setLinkDomains(iterator.key(), iterator.value());
+
+  if (m_resolvConfOriginal.isEmpty()) {
+    QStringList candidates;
+    if (!m_stateFilePath.isEmpty()) {
+      candidates << m_stateFilePath;
+    } else {
+
+      QDir runDir(QStringLiteral("/run"));
+      for (const QString& name : runDir.entryList(
+               {QStringLiteral("amnezia-dns-*")}, QDir::Files)) {
+        candidates << runDir.filePath(name);
+      }
+    }
+    for (const QString& path : candidates) {
+      QFile sf(path);
+      if (sf.open(QIODevice::ReadOnly)) {
+        QByteArray data = sf.readAll();
+        sf.close();
+        m_stateFilePath = path;
+        if (data.startsWith("__file__:")) {
+          m_resolvConfOriginal = QStringLiteral("__file__");
+          m_resolvConfSavedContent = QString::fromUtf8(data.mid(9));
+        } else {
+          m_resolvConfOriginal = QString::fromUtf8(data).trimmed();
+        }
+        logger.debug() << "Recovered DNS original from" << path << ":"
+                       << m_resolvConfOriginal;
+        break;
+      }
+    }
   }
-  m_linkDomains.clear();
 
-  /* Revert the VPN interface's DNS configuration */
-  if (m_ifindex > 0) {
-    QList<QVariant> argumentList = {QVariant::fromValue(m_ifindex)};
-    QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-        QStringLiteral("RevertLink"), argumentList);
+  const bool hadDnsState = !m_resolvConfOriginal.isEmpty();
+  restoreResolvConf();
 
-    QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-    QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                     SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
-
-    m_ifindex = 0;
+  if (hadDnsState && QFile::exists(QStringLiteral("/run/systemd/resolve"))) {
+    QProcess::startDetached("systemctl", {"restart", "systemd-resolved"});
   }
 
   return true;
 }
-
-void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
-  QDBusPendingReply<> reply = *call;
-  if (reply.isError()) {
-    logger.debug() << "DBus call failed (may be transient after systemd-resolved restart)";
-  }
-  delete call;
-}
-
-void DnsUtilsLinux::setLinkDNS(int ifindex,
-                               const QList<QHostAddress>& resolvers) {
-  QList<DnsResolver> resolverList;
-  char ifnamebuf[IF_NAMESIZE];
-  const char* ifname = if_indextoname(ifindex, ifnamebuf);
-  for (const auto& ip : resolvers) {
-    resolverList.append(ip);
-    if (ifname) {
-      logger.debug() << "Adding DNS resolver" << ip.toString() << "via"
-                     << ifname;
-    }
-  }
-
-  QList<QVariant> argumentList;
-  argumentList << QVariant::fromValue(ifindex);
-  argumentList << QVariant::fromValue(resolverList);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDNS"), argumentList);
-
-  QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-  QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                   SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
-}
-
-void DnsUtilsLinux::setLinkDomains(int ifindex,
-                                   const QList<DnsLinkDomain>& domains) {
-  char ifnamebuf[IF_NAMESIZE];
-  const char* ifname = if_indextoname(ifindex, ifnamebuf);
-  if (ifname) {
-    for (const auto& d : domains) {
-      // The DNS search domains often winds up revealing user's ISP which
-      // can correlate back to their location.
-      logger.debug() << "Setting DNS domain:" << logger.sensitive(d.domain)
-                     << "via" << ifname << (d.search ? "search" : "");
-    }
-  }
-
-  QList<QVariant> argumentList;
-  argumentList << QVariant::fromValue(ifindex);
-  argumentList << QVariant::fromValue(domains);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDomains"), argumentList);
-
-  QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-  QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                   SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
-}
-
-void DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
-  QList<QVariant> argumentList;
-  argumentList << QVariant::fromValue(ifindex);
-  argumentList << QVariant::fromValue(enable);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDefaultRoute"), argumentList);
-
-  QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-  QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                   SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
-}
-
-void DnsUtilsLinux::updateLinkDomains() {
-  /* Get the list of search domains, and remove any others that might conspire
-   * to satisfy DNS resolution. Unfortunately, this is a pain because Qt doesn't
-   * seem to be able to demarshall complex property types.
-   */
-  QDBusMessage message = QDBusMessage::createMethodCall(
-      DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_PROPERTY_INTERFACE, "Get");
-  message << QString(DBUS_RESOLVE_MANAGER);
-  message << QString("Domains");
-  QDBusPendingReply<QVariant> reply =
-      m_resolver->connection().asyncCall(message);
-
-  QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-  QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                   SLOT(dnsDomainsReceived(QDBusPendingCallWatcher*)));
-}
-
-void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
-    QDBusPendingReply<QVariant> reply = *call;
-    call->deleteLater();
-  if (reply.isError()) {
-    // systemd-resolved may still be starting up after a restart — retry a few times
-    if (m_domainRetries++ < 5) {
-      logger.debug() << "systemd-resolved not ready yet, retrying DNS setup ("
-                     << m_domainRetries << "/5)";
-      QTimer::singleShot(500, this, &DnsUtilsLinux::updateLinkDomains);
-    } else {
-      logger.warning() << "Failed to configure DNS after 5 retries";
-      m_domainRetries = 0;
-    }
-    return;
-  }
-  m_domainRetries = 0;
-
-  /* Update the state of the DNS domains */
-  m_linkDomains.clear();
-  QDBusArgument args = qvariant_cast<QDBusArgument>(reply.value());
-  QList<DnsDomain> list = qdbus_cast<QList<DnsDomain>>(args);
-  for (const auto& d : list) {
-    if (d.ifindex == 0) {
-      continue;
-    }
-    m_linkDomains[d.ifindex].append(DnsLinkDomain(d.domain, d.search));
-  }
-
-  /* Drop any competing root search domains. */
-  DnsLinkDomain root = DnsLinkDomain(".", true);
-  for (auto iterator = m_linkDomains.constBegin();
-       iterator != m_linkDomains.constEnd(); ++iterator) {
-    if (!iterator.value().contains(root)) {
-      continue;
-    }
-    QList<DnsLinkDomain> newlist = iterator.value();
-    newlist.removeAll(root);
-    setLinkDomains(iterator.key(), newlist);
-  }
-
-  /* Add a root search domain for the new interface. */
-  QList<DnsLinkDomain> newlist = {root};
-  setLinkDomains(m_ifindex, newlist);
-}
-
-static DnsMetatypeRegistrationProxy s_dnsMetatypeProxy;

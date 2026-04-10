@@ -120,18 +120,20 @@ bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, co
     ((struct sockaddr_in *)&route.rt_gateway)->sin_family = AF_INET;
     ((struct sockaddr_in *)&route.rt_gateway)->sin_addr.s_addr = inet_addr(gw.toStdString().c_str());
     ((struct sockaddr_in *)&route.rt_gateway)->sin_port = 0;
+
     // set host rejecting
     ((struct sockaddr_in *)&route.rt_dst)->sin_family = AF_INET;
     ((struct sockaddr_in *)&route.rt_dst)->sin_addr.s_addr = inet_addr(ip.toStdString().c_str());
     ((struct sockaddr_in *)&route.rt_dst)->sin_port = 0;
+
     // set mask
     ((struct sockaddr_in *)&route.rt_genmask)->sin_family = AF_INET;
     ((struct sockaddr_in *)&route.rt_genmask)->sin_addr.s_addr = inet_addr(mask.toStdString().c_str());
     ((struct sockaddr_in *)&route.rt_genmask)->sin_port = 0;
 
     route.rt_flags = RTF_UP | RTF_GATEWAY;
-    route.rt_metric = 0;
     //route.rt_dev = "ens33";
+    route.rt_metric = 0;
 
     if (ioctl(sock, SIOCDELRT, &route) < 0)
     {
@@ -155,36 +157,29 @@ bool RouterLinux::routeDeleteList(const QString &gw, const QStringList &ips)
 bool RouterLinux::isServiceActive(const QString &serviceName) {
     QProcess process;
     process.start("systemctl", { "is-active", "--quiet", serviceName });
-    process.waitForFinished();
-
+    if (!process.waitForFinished(2000)) {
+        process.kill();
+        process.waitForFinished(500);
+    }
     return process.exitCode() == 0;
 }
 
 bool RouterLinux::flushDns()
 {
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-
     //check what the dns manager use
     if (isServiceActive("nscd.service")) {
-        qDebug() << "Restarting nscd.service";
-        p.start("systemctl", { "restart", "nscd" });
+        qDebug() << "Flushing nscd cache";
+        QProcess::startDetached("nscd", { "--invalidate=hosts" });
+        return true;
     } else if (isServiceActive("systemd-resolved.service")) {
-        qDebug() << "Restarting systemd-resolved.service";
-        p.start("systemctl", { "restart", "systemd-resolved" });
+        qDebug() << "Flushing systemd-resolved cache";
+        QProcess::startDetached("resolvectl", { "flush-caches" });
+        qDebug().noquote() << "Flush dns requested (non-blocking)";
+        return true;
     } else {
         qDebug() << "No suitable DNS manager found.";
         return false;
     }
-
-    p.waitForFinished();
-    QByteArray output(p.readAll());
-    if (output.isEmpty())
-        qDebug().noquote() << "Flush dns completed";
-    else
-        qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
-
-    return true;
 }
 
 bool RouterLinux::createTun(const QString &dev, const QString &subnet) {

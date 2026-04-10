@@ -53,7 +53,9 @@ bool KillSwitch::refresh(bool enabled)
 #endif
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    m_appSettigns->setValue("Conf/strictKillSwitchEnabled", enabled);
+    if (!m_appSettigns.isNull()) {
+        m_appSettigns->setValue("Conf/strictKillSwitchEnabled", enabled);
+    }
 #endif
 
     if (isStrictKillSwitchEnabled()) {
@@ -71,6 +73,11 @@ bool KillSwitch::isStrictKillSwitchEnabled()
                              + "\\" + QString(APPLICATION_NAME), QSettings::NativeFormat);
     return RegHLM.value("strictKillSwitchEnabled", false).toBool();
 #endif
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    if (m_appSettigns.isNull()) {
+        return false;
+    }
+#endif
     return m_appSettigns->value("Conf/strictKillSwitchEnabled", false).toBool();
 }
 
@@ -86,7 +93,7 @@ bool KillSwitch::disableKillSwitch() {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), false);
-        LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), false);
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("320.allowDNS"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), false);
     } else {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
@@ -98,7 +105,7 @@ bool KillSwitch::disableKillSwitch() {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), false);
-        LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("320.allowDNS"), true);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), false);
         LinuxFirewall::uninstall();
     }
@@ -335,7 +342,7 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     }
     
     LinuxFirewall::updateDNSServers(dnsServers);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("320.allowDNS"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
 #endif
 

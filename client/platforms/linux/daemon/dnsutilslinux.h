@@ -5,11 +5,11 @@
 #ifndef DNSUTILSLINUX_H
 #define DNSUTILSLINUX_H
 
-#include <QDBusInterface>
-#include <QDBusPendingCallWatcher>
+#include <QHostAddress>
+#include <QList>
+#include <QString>
 
 #include "daemon/dnsutils.h"
-#include "dbustypeslinux.h"
 
 class DnsUtilsLinux final : public DnsUtils {
   Q_OBJECT
@@ -23,20 +23,14 @@ class DnsUtilsLinux final : public DnsUtils {
   bool restoreResolvers() override;
 
  private:
-  void setLinkDNS(int ifindex, const QList<QHostAddress>& resolvers);
-  void setLinkDomains(int ifindex, const QList<DnsLinkDomain>& domains);
-  void setLinkDefaultRoute(int ifindex, bool enable);
-  void updateLinkDomains();
-
- private slots:
-  void dnsCallCompleted(QDBusPendingCallWatcher*);
-  void dnsDomainsReceived(QDBusPendingCallWatcher*);
+  void writeResolvConf(const QList<QHostAddress>& resolvers);
+  void restoreResolvConf();
 
  private:
-  int m_ifindex = 0;
-  int m_domainRetries = 0;
-  QMap<int, DnsLinkDomainList> m_linkDomains;
-  QDBusInterface* m_resolver = nullptr;
+
+  QString m_resolvConfOriginal;
+  QString m_resolvConfSavedContent;
+  QString m_stateFilePath;
 };
 
-#endif  // DNSUTILSLINUX_H
+#endif
