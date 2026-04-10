@@ -49,7 +49,8 @@ extension PacketTunnelProvider {
             }
         }
         guard gr == 0 else { return Int.random(in: 49152...65535) }
-        return Int(ntohs(bound.sin6_port))
+        // sin6_port is network byte order; iOS is little-endian (same effect as C ntohs).
+        return Int(bound.sin6_port.byteSwapped)
     }
 
     private func applyXraySplitTunnel(_ xrayConfig: XrayConfig,
