@@ -41,15 +41,14 @@ bool RouterLinux::routeAdd(const QString &ipWithSubnet, const QString &gw, const
     struct rtentry route;
     memset(&route, 0, sizeof( route ));
 
-    // set gateway
     ((struct sockaddr_in *)&route.rt_gateway)->sin_family = AF_INET;
     ((struct sockaddr_in *)&route.rt_gateway)->sin_addr.s_addr = inet_addr(gw.toStdString().c_str());
     ((struct sockaddr_in *)&route.rt_gateway)->sin_port = 0;
-    // set host rejecting
+
     ((struct sockaddr_in *)&route.rt_dst)->sin_family = AF_INET;
     ((struct sockaddr_in *)&route.rt_dst)->sin_addr.s_addr = inet_addr(ip.toStdString().c_str());
     ((struct sockaddr_in *)&route.rt_dst)->sin_port = 0;
-    // set mask
+
     ((struct sockaddr_in *)&route.rt_genmask)->sin_family = AF_INET;
     ((struct sockaddr_in *)&route.rt_genmask)->sin_addr.s_addr = inet_addr(mask.toStdString().c_str());
     ((struct sockaddr_in *)&route.rt_genmask)->sin_port = 0;
@@ -116,22 +115,20 @@ bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, co
     struct rtentry route;
     memset(&route, 0, sizeof( route ));
 
-    // set gateway
     ((struct sockaddr_in *)&route.rt_gateway)->sin_family = AF_INET;
     ((struct sockaddr_in *)&route.rt_gateway)->sin_addr.s_addr = inet_addr(gw.toStdString().c_str());
     ((struct sockaddr_in *)&route.rt_gateway)->sin_port = 0;
-    // set host rejecting
+
     ((struct sockaddr_in *)&route.rt_dst)->sin_family = AF_INET;
     ((struct sockaddr_in *)&route.rt_dst)->sin_addr.s_addr = inet_addr(ip.toStdString().c_str());
     ((struct sockaddr_in *)&route.rt_dst)->sin_port = 0;
-    // set mask
+
     ((struct sockaddr_in *)&route.rt_genmask)->sin_family = AF_INET;
     ((struct sockaddr_in *)&route.rt_genmask)->sin_addr.s_addr = inet_addr(mask.toStdString().c_str());
     ((struct sockaddr_in *)&route.rt_genmask)->sin_port = 0;
 
     route.rt_flags = RTF_UP | RTF_GATEWAY;
     route.rt_metric = 0;
-    //route.rt_dev = "ens33";
 
     if (ioctl(sock, SIOCDELRT, &route) < 0)
     {
@@ -164,21 +161,10 @@ bool RouterLinux::isServiceActive(const QString &serviceName) {
 
 bool RouterLinux::flushDns()
 {
-    //check what the dns manager use
+
     if (isServiceActive("nscd.service")) {
-        qDebug() << "Restarting nscd.service";
-        QProcess p;
-        p.setProcessChannelMode(QProcess::MergedChannels);
-        p.start("systemctl", { "restart", "nscd" });
-        if (!p.waitForFinished(3000)) {
-            qDebug() << "nscd restart timed out, killing process";
-            p.kill();
-            p.waitForFinished(500);
-        }
-        QByteArray output(p.readAll());
-        if (!output.isEmpty())
-            qDebug().noquote() << "OUTPUT systemctl restart nscd: " + output;
-        qDebug().noquote() << "Flush dns completed";
+        qDebug() << "Flushing nscd cache";
+        QProcess::startDetached("nscd", { "--invalidate=hosts" });
         return true;
     } else if (isServiceActive("systemd-resolved.service")) {
         qDebug() << "Flushing systemd-resolved cache";

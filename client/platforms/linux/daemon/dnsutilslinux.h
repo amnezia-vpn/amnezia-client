@@ -1,6 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #ifndef DNSUTILSLINUX_H
 #define DNSUTILSLINUX_H
@@ -27,8 +24,10 @@ class DnsUtilsLinux final : public DnsUtils {
   void restoreResolvConf();
 
  private:
+
   QString m_resolvConfOriginal;
+  QString m_resolvConfSavedContent;
   QString m_stateFilePath;
 };
 
-#endif  // DNSUTILSLINUX_H
+#endif
