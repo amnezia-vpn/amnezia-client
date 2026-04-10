@@ -2,7 +2,9 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QList>
+#include <QHostAddress>
 #include <QRandomGenerator>
+#include <QTcpServer>
 #include "3rd/QJsonStruct/QJsonIO.hpp"
 #include "transfer.h"
 #include "serialization.h"
@@ -26,6 +28,26 @@ namespace amnezia::serialization::inbounds
 const static QString listen = "127.0.0.1";
 const static int defaultPort = 10808;
 const static QString protocol = "socks";
+
+// IANA dynamic/private port range (49152–65535) — fallback if OS cannot assign a port.
+static int generateEphemeralPort()
+{
+    constexpr int minPort = 49152;
+    constexpr int maxPort = 65535;
+    return QRandomGenerator::system()->bounded(minPort, maxPort + 1);
+}
+
+// Ask the OS for a free TCP port on loopback (same stack as inbound "listen": "127.0.0.1").
+static int acquireFreeLocalPort()
+{
+    QTcpServer probe;
+    if (!probe.listen(QHostAddress(QStringLiteral("127.0.0.1")), 0)) {
+        int port = generateEphemeralPort();
+        return port;
+    }
+    int port = static_cast<int>(probe.serverPort());
+    return port;
+}
 
 // Generates a hex string of `byteCount` random bytes (URL-safe, no special chars).
 static QString generateRandomHex(int byteCount)
@@ -77,7 +99,9 @@ InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig)
 
     QJsonObject inbound = inbounds.first().toObject();
     InboundCredentials creds;
-    creds.port = inbound.value("port").toInt(defaultPort);
+    creds.port = acquireFreeLocalPort();
+    inbound["port"] = creds.port;
+    // creds.port = inbound.value("port").toInt(defaultPort);
 
     QJsonObject settings = inbound.value("settings").toObject();
     const QJsonArray accounts = settings.value("accounts").toArray();

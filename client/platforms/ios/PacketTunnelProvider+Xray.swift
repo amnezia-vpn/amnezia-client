@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import NetworkExtension
 
@@ -21,6 +22,36 @@ extension Constants {
 }
 
 extension PacketTunnelProvider {
+    /// TCP port chosen by the OS on IPv6 loopback (::1), matching inbound listen address.
+    private func acquireFreeLocalPort() -> Int {
+        let fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP)
+        guard fd != -1 else { return Int.random(in: 49152...65535) }
+        defer { close(fd) }
+        var reuse: Int32 = 1
+        _ = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, socklen_t(MemoryLayout<Int32>.size))
+        var addr = sockaddr_in6()
+        addr.sin6_len = UInt8(MemoryLayout<sockaddr_in6>.size)
+        addr.sin6_family = sa_family_t(AF_INET6)
+        addr.sin6_port = in_port_t(0).bigEndian
+        addr.sin6_addr = in6addr_loopback
+        addr.sin6_scope_id = 0
+        let bindResult = withUnsafePointer(to: &addr) { ptr in
+            ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) { p in
+                bind(fd, p, socklen_t(MemoryLayout<sockaddr_in6>.size))
+            }
+        }
+        guard bindResult == 0 else { return Int.random(in: 49152...65535) }
+        var bound = sockaddr_in6()
+        var len = socklen_t(MemoryLayout<sockaddr_in6>.size)
+        let gr = withUnsafeMutablePointer(to: &bound) { p in
+            p.withMemoryRebound(to: sockaddr.self, capacity: 1) { bp in
+                getsockname(fd, bp, &len)
+            }
+        }
+        guard gr == 0 else { return Int.random(in: 49152...65535) }
+        return Int(ntohs(bound.sin6_port))
+    }
+
     private func applyXraySplitTunnel(_ xrayConfig: XrayConfig,
                                       settings: NEPacketTunnelNetworkSettings) {
         guard let splitTunnelType = xrayConfig.splitTunnelType else {
@@ -129,14 +160,7 @@ extension PacketTunnelProvider {
                 return
             }
 
-            let port: Int = {
-                if let inbounds = jsonDict["inbounds"] as? [[String: Any]],
-                   let first = inbounds.first,
-                   let p = first["port"] as? Int, p > 0 {
-                    return p
-                }
-                return 10808
-            }()
+            let port = acquireFreeLocalPort()
             let address = "::1"
 
             // Extract existing SOCKS5 credentials or generate new ones per session.

@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.VpnService.Builder
 import java.io.File
 import java.io.IOException
+import java.net.InetAddress
+import java.net.ServerSocket
 import java.util.UUID
 import go.Seq
 import org.amnezia.vpn.protocol.BadConfigException
@@ -25,6 +27,15 @@ import org.json.JSONObject
 
 private const val TAG = "Xray"
 private const val LIBXRAY_TAG = "libXray"
+
+@Suppress("SwallowedException")
+private fun acquireFreeLocalPort(): Int {
+    return try {
+        ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { it.localPort }
+    } catch (_: Exception) {
+        (49152..65535).random()
+    }
+}
 
 class Xray : Protocol() {
 
@@ -195,6 +206,7 @@ class Xray : Protocol() {
         if (inbounds.length() == 0) return
 
         val inbound = inbounds.getJSONObject(0)
+        inbound.put("port", acquireFreeLocalPort())
         val settings = inbound.optJSONObject("settings") ?: JSONObject().also { inbound.put("settings", it) }
         val accounts = settings.optJSONArray("accounts")
         if (accounts != null && accounts.length() > 0) {

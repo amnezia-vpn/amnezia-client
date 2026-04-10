@@ -74,7 +74,8 @@ namespace amnezia::serialization
 
         // Ensures SOCKS5 auth is present in inbounds[0].
         // Re-uses existing credentials if already set; otherwise generates random ones
-        // and writes them into the config. Returns the credentials that are now active.
+        // and writes them into the config. Assigns a free loopback TCP port each session
+        // (OS-assigned when possible). Returns the credentials that are now active.
         InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig);
     }
 }
