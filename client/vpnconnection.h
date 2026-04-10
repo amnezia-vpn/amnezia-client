@@ -44,7 +44,8 @@ public:
 #endif
 
 public slots:
-    void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void connectToVpn(int serverIndex, const amnezia::ServerCredentials &credentials,
+                      amnezia::DockerContainer container, const QJsonObject &vpnConfiguration);
     void reconnectToVpn();
     void disconnectFromVpn();
 

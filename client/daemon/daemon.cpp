@@ -142,10 +142,6 @@ bool Daemon::activate(const InterfaceConfig& config) {
     return false;
   }
 
-  if (!maybeUpdateResolvers(config)) {
-    return false;
-  }
-
   // set routing
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
     if (!wgutils()->updateRoutePrefix(ip)) {
@@ -605,6 +601,7 @@ void Daemon::checkHandshake() {
       }
       if (status.m_handshake != 0) {
         connection.m_date.setMSecsSinceEpoch(status.m_handshake);
+        maybeUpdateResolvers(config);
         emit connected(status.m_pubkey);
       }
     }

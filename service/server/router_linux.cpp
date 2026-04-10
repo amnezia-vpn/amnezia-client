@@ -155,36 +155,40 @@ bool RouterLinux::routeDeleteList(const QString &gw, const QStringList &ips)
 bool RouterLinux::isServiceActive(const QString &serviceName) {
     QProcess process;
     process.start("systemctl", { "is-active", "--quiet", serviceName });
-    process.waitForFinished();
-
+    if (!process.waitForFinished(2000)) {
+        process.kill();
+        process.waitForFinished(500);
+    }
     return process.exitCode() == 0;
 }
 
 bool RouterLinux::flushDns()
 {
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-
     //check what the dns manager use
     if (isServiceActive("nscd.service")) {
         qDebug() << "Restarting nscd.service";
+        QProcess p;
+        p.setProcessChannelMode(QProcess::MergedChannels);
         p.start("systemctl", { "restart", "nscd" });
+        if (!p.waitForFinished(3000)) {
+            qDebug() << "nscd restart timed out, killing process";
+            p.kill();
+            p.waitForFinished(500);
+        }
+        QByteArray output(p.readAll());
+        if (!output.isEmpty())
+            qDebug().noquote() << "OUTPUT systemctl restart nscd: " + output;
+        qDebug().noquote() << "Flush dns completed";
+        return true;
     } else if (isServiceActive("systemd-resolved.service")) {
-        qDebug() << "Restarting systemd-resolved.service";
-        p.start("systemctl", { "restart", "systemd-resolved" });
+        qDebug() << "Flushing systemd-resolved cache";
+        QProcess::startDetached("resolvectl", { "flush-caches" });
+        qDebug().noquote() << "Flush dns requested (non-blocking)";
+        return true;
     } else {
         qDebug() << "No suitable DNS manager found.";
         return false;
     }
-
-    p.waitForFinished();
-    QByteArray output(p.readAll());
-    if (output.isEmpty())
-        qDebug().noquote() << "Flush dns completed";
-    else
-        qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
-
-    return true;
 }
 
 bool RouterLinux::createTun(const QString &dev, const QString &subnet) {

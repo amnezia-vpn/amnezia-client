@@ -22,7 +22,7 @@ public:
     bool isStrictKillSwitchEnabled();
 
 private:
-    KillSwitch(QObject* parent) {};
+    explicit KillSwitch(QObject* parent) : QObject(parent) {}
     QStringList m_allowedRanges;
     QSharedPointer<SecureQSettings> m_appSettigns;
 
