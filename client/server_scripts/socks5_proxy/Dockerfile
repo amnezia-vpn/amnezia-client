@@ -1,4 +1,4 @@
-FROM 3proxy/3proxy:latest
+FROM 3proxy/3proxy:busybox
 
 LABEL maintainer="AmneziaVPN" 
 
