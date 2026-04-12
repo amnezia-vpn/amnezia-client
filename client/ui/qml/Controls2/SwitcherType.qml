@@ -153,7 +153,7 @@ Switch {
     Keys.onSpacePressed: event => handleSwitch(event)
 
     function handleSwitch(event) {
-        if (!event.isAutoRepeat) {
+        if (root.enabled && !event.isAutoRepeat) {
             root.checked = !root.checked
             root.toggled()
         }

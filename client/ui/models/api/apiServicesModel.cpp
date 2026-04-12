@@ -1,7 +1,11 @@
 #include "apiServicesModel.h"
 
+#include <QDateTime>
+#include <QHash>
+#include <QJsonArray>
 #include <QJsonObject>
 
+#include "core/api/apiDefs.h"
 #include "logger.h"
 
 namespace
@@ -17,15 +21,9 @@ namespace
         constexpr char serviceProtocol[] = "service_protocol";
         constexpr char serviceDescription[] = "service_description";
 
-        constexpr char name[] = "name";
-        constexpr char price[] = "price";
-        constexpr char speed[] = "speed";
-        constexpr char timelimit[] = "timelimit";
-        constexpr char region[] = "region";
-
         constexpr char description[] = "description";
         constexpr char cardDescription[] = "card_description";
-        constexpr char features[] = "features";
+        constexpr char serviceName[] = "service_name";
 
         constexpr char availableCountries[] = "available_countries";
 
@@ -33,19 +31,21 @@ namespace
 
         constexpr char isAvailable[] = "is_available";
 
-        constexpr char subscription[] = "subscription";
-        constexpr char endDate[] = "end_date";
+        constexpr char subscriptionPlans[] = "subscription_plans";
+        constexpr char minPriceLabel[] = "min_price_label";
+        constexpr char benefits[] = "benefits";
     }
 
     namespace serviceType
     {
         constexpr char amneziaFree[] = "amnezia-free";
         constexpr char amneziaPremium[] = "amnezia-premium";
-        constexpr char amneziaTrial[] = "amnezia-trial";
     }
 }
 
-ApiServicesModel::ApiServicesModel(QObject *parent) : QAbstractListModel(parent)
+ApiServicesModel::ApiServicesModel(QObject *parent)
+    : QAbstractListModel(parent)
+    , m_selectedServiceIndex(0)
 {
 }
 
@@ -69,9 +69,8 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         return apiServiceData.serviceInfo.name;
     }
     case CardDescriptionRole: {
-        auto speed = apiServiceData.serviceInfo.speed;
-        if (serviceType == serviceType::amneziaPremium || serviceType == serviceType::amneziaTrial) {
-            return apiServiceData.serviceInfo.cardDescription.arg(speed);
+        if (serviceType == serviceType::amneziaPremium) {
+            return apiServiceData.serviceInfo.cardDescription;
         } else if (serviceType == serviceType::amneziaFree) {
             QString description = apiServiceData.serviceInfo.cardDescription;
             if (!isServiceAvailable) {
@@ -92,44 +91,29 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         }
         return true;
     }
-    case SpeedRole: {
-        return tr("%1 MBit/s").arg(apiServiceData.serviceInfo.speed);
-    }
-    case TimeLimitRole: {
-        auto timeLimit = apiServiceData.serviceInfo.timeLimit;
-        if (timeLimit == "0") {
-            return "";
-        }
-        return tr("%1 days").arg(timeLimit);
-    }
-    case RegionRole: {
-        return apiServiceData.serviceInfo.region;
-    }
-    case FeaturesRole: {
-        return apiServiceData.serviceInfo.features;
-    }
     case PriceRole: {
-        auto price = apiServiceData.serviceInfo.price;
-        if (price == "free") {
-            return tr("Free");
-        }
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-        return tr("%1 $").arg(price);
-#else
-        return tr("%1 $/month").arg(price);
-#endif
+        return apiServiceData.minPriceLabel;
     }
     case EndDateRole: {
         return QDateTime::fromString(apiServiceData.subscription.endDate, Qt::ISODate).toLocalTime().toString("d MMM yyyy");
     }
+    case TermsOfUseUrlRole: {
+        return apiServiceData.serviceInfo.termsOfUseUrl;
+    }
+    case PrivacyPolicyUrlRole: {
+        return apiServiceData.serviceInfo.privacyPolicyUrl;
+    }
+    case ShowRecommendedRole: {
+        return serviceType == serviceType::amneziaPremium;
+    }
     case OrderRole: {
         if (serviceType == serviceType::amneziaPremium) {
             return 0;
-        } else if (serviceType == serviceType::amneziaTrial) {
-            return 1;
-        } else if (serviceType == serviceType::amneziaFree) {
-            return 2;
         }
+        if (serviceType == serviceType::amneziaFree) {
+            return 1;
+        }
+        return QVariant();
     }
     }
 
@@ -155,12 +139,27 @@ void ApiServicesModel::updateModel(const QJsonObject &data)
         }
     }
 
+    if (!m_services.isEmpty() && m_selectedServiceIndex >= m_services.size()) {
+        m_selectedServiceIndex = 0;
+    }
+
     endResetModel();
+
+    emit serviceSelectionChanged();
 }
 
 void ApiServicesModel::setServiceIndex(const int index)
 {
     m_selectedServiceIndex = index;
+    emit serviceSelectionChanged();
+}
+
+ApiServicesModel::ApiServicesData ApiServicesModel::selectedServiceData() const
+{
+    if (m_services.isEmpty() || m_selectedServiceIndex < 0 || m_selectedServiceIndex >= m_services.size()) {
+        return {};
+    }
+    return m_services.at(m_selectedServiceIndex);
 }
 
 QJsonObject ApiServicesModel::getSelectedServiceInfo()
@@ -217,6 +216,16 @@ QVariant ApiServicesModel::getSelectedServiceData(const QString roleString)
     return {};
 }
 
+int ApiServicesModel::serviceIndexForType(const QString &type) const
+{
+    for (int serviceIndex = 0; serviceIndex < m_services.size(); ++serviceIndex) {
+        if (m_services.at(serviceIndex).type == type) {
+            return serviceIndex;
+        }
+    }
+    return -1;
+}
+
 QHash<int, QByteArray> ApiServicesModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -224,12 +233,11 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[CardDescriptionRole] = "cardDescription";
     roles[ServiceDescriptionRole] = "serviceDescription";
     roles[IsServiceAvailableRole] = "isServiceAvailable";
-    roles[SpeedRole] = "speed";
-    roles[TimeLimitRole] = "timeLimit";
-    roles[RegionRole] = "region";
-    roles[FeaturesRole] = "features";
     roles[PriceRole] = "price";
     roles[EndDateRole] = "endDate";
+    roles[TermsOfUseUrlRole] = "termsOfUseUrl";
+    roles[PrivacyPolicyUrlRole] = "privacyPolicyUrl";
+    roles[ShowRecommendedRole] = "showRecommended";
     roles[OrderRole] = "order";
 
     return roles;
@@ -243,18 +251,22 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     auto availableCountries = data.value(configKey::availableCountries).toArray();
     auto serviceDescription = data.value(configKey::serviceDescription).toObject();
 
-    auto subscriptionObject = data.value(configKey::subscription).toObject();
+    auto subscriptionObject = data.value(apiDefs::key::subscription).toObject();
 
     ApiServicesData serviceData;
-    serviceData.serviceInfo.name = serviceInfo.value(configKey::name).toString();
-    serviceData.serviceInfo.price = serviceInfo.value(configKey::price).toString();
-    serviceData.serviceInfo.region = serviceInfo.value(configKey::region).toString();
-    serviceData.serviceInfo.speed = serviceInfo.value(configKey::speed).toString();
-    serviceData.serviceInfo.timeLimit = serviceInfo.value(configKey::timelimit).toString();
+    serviceData.serviceInfo.name = serviceDescription.value(configKey::serviceName).toString();
 
     serviceData.serviceInfo.cardDescription = serviceDescription.value(configKey::cardDescription).toString();
     serviceData.serviceInfo.description = serviceDescription.value(configKey::description).toString();
-    serviceData.serviceInfo.features = serviceDescription.value(configKey::features).toString();
+    serviceData.serviceInfo.termsOfUseUrl = serviceDescription.value(apiDefs::key::termsOfUseUrl).toString();
+    serviceData.serviceInfo.privacyPolicyUrl = serviceDescription.value(apiDefs::key::privacyPolicyUrl).toString();
+
+    serviceData.subscriptionPlansJson = serviceDescription.value(configKey::subscriptionPlans).toArray();
+    serviceData.benefits = serviceDescription.value(configKey::benefits).toArray();
+
+    serviceData.minPriceLabel = serviceDescription.value(configKey::minPriceLabel).toString().trimmed();
+
+    serviceData.supportInfo = data.value(apiDefs::key::supportInfo).toObject();
 
     serviceData.type = serviceType;
     serviceData.protocol = serviceProtocol;
@@ -270,7 +282,7 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     serviceData.serviceInfo.object = serviceInfo;
     serviceData.availableCountries = availableCountries;
 
-    serviceData.subscription.endDate = subscriptionObject.value(configKey::endDate).toString();
+    serviceData.subscription.endDate = subscriptionObject.value(apiDefs::key::endDate).toString();
 
     return serviceData;
 }

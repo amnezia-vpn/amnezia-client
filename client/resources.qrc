@@ -27,10 +27,12 @@
         <file>images/controls/folder-open.svg</file>
         <file>images/controls/folder-search-2.svg</file>
         <file>images/controls/gauge.svg</file>
+        <file>images/controls/globe-2.svg</file>
         <file>images/controls/github.svg</file>
         <file>images/controls/help-circle.svg</file>
         <file>images/controls/history.svg</file>
         <file>images/controls/home.svg</file>
+        <file>images/controls/infinity.svg</file>
         <file>images/controls/info.svg</file>
         <file>images/controls/mail.svg</file>
         <file>images/controls/map-pin.svg</file>
@@ -55,6 +57,7 @@
         <file>images/controls/settings-news.svg</file>
         <file>images/controls/share-2.svg</file>
         <file>images/controls/split-tunneling.svg</file>
+        <file>images/controls/smartphone.svg</file>
         <file>images/controls/tag.svg</file>
         <file>images/controls/telegram.svg</file>
         <file>images/controls/text-cursor.svg</file>
@@ -133,8 +136,13 @@
         <file>ui/qml/Components/HomeContainersListView.qml</file>
         <file>ui/qml/Components/HomeSplitTunnelingDrawer.qml</file>
         <file>ui/qml/Components/InstalledAppsDrawer.qml</file>
+        <file>ui/qml/Components/BenefitRow.qml</file>
+        <file>ui/qml/Components/BenefitsPanel.qml</file>
+        <file>ui/qml/Components/SubscriptionPlanCard.qml</file>
+        <file>ui/qml/Components/TermsAndPrivacyText.qml</file>
         <file>ui/qml/Components/QuestionDrawer.qml</file>
         <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
+        <file>ui/qml/Components/SubscriptionExpiredDrawer.qml</file>
         <file>ui/qml/Components/ServersListView.qml</file>
         <file>ui/qml/Components/SettingsContainersListView.qml</file>
         <file>ui/qml/Components/TransportProtoSelector.qml</file>
@@ -180,6 +188,7 @@
         <file>ui/qml/Controls2/TextTypes/LabelTextType.qml</file>
         <file>ui/qml/Controls2/TextTypes/ListItemTitleType.qml</file>
         <file>ui/qml/Controls2/TextTypes/ParagraphTextType.qml</file>
+        <file>ui/qml/Controls2/TextTypes/BadgeTextType.qml</file>
         <file>ui/qml/Controls2/TextTypes/SmallTextType.qml</file>
         <file>ui/qml/Controls2/TopCloseButtonType.qml</file>
         <file>ui/qml/Controls2/VerticalRadioButton.qml</file>
@@ -225,7 +234,9 @@
         <file>ui/qml/Pages2/PageSettingsNewsDetail.qml</file>
         <file>ui/qml/Pages2/PageProtocolAwgClientSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml</file>
-        <file>ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardApiFreeInfo.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardApiServicesList.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardConfigSource.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardCredentials.qml</file>

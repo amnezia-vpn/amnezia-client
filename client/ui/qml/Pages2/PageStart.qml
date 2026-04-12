@@ -225,9 +225,13 @@ PageType {
     Connections {
         target: ApiConfigsController
 
-        function onInstallServerFromApiFinished(message) {
+        function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
             if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
+                    ServersModel.setDefaultServerIndex(preferredDefaultIndex)
+                } else {
+                    ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1)
+                }
                 ServersModel.processedIndex = ServersModel.defaultIndex
             }
 

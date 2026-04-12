@@ -52,6 +52,30 @@ PageType {
 
     property var processedServer
 
+    property bool isSubscriptionExpired: false
+    property bool isSubscriptionExpiringSoon: false
+    property bool isSubscriptionRenewalAvailable: false
+    property bool isInAppPurchase: false
+
+    function updateSubscriptionState() {
+        root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
+        root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
+        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
+        root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
+    }
+
+    Component.onCompleted: {
+        root.updateSubscriptionState()
+    }
+
+    Connections {
+        target: ApiAccountInfoModel
+
+        function onModelReset() {
+            root.updateSubscriptionState()
+        }
+    }
+
     Connections {
         target: ServersModel
 
@@ -103,15 +127,66 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon ? 0 : 10
 
                 actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
                 headerText: root.processedServer.name
-                descriptionText: ApiAccountInfoModel.data("serviceDescription")
 
                 actionButtonFunction: function() {
                     serverNameEditDrawer.openTriggered()
+                }
+            }
+
+            ParagraphTextType {
+                visible: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                text: root.isSubscriptionExpired
+                    ? qsTr("Subscription expired")
+                    : qsTr("Subscription expiring soon")
+
+                color: root.isSubscriptionExpired
+                    ? AmneziaStyle.color.vibrantRed
+                    : AmneziaStyle.color.goldenApricot
+            }
+
+            ParagraphTextType {
+                visible: ApiAccountInfoModel.data("serviceDescription") !== ""
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 16
+                Layout.bottomMargin: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon ? 0 : 10
+
+                text: ApiAccountInfoModel.data("serviceDescription")
+                color: AmneziaStyle.color.mutedGray
+            }
+
+            BasicButtonType {
+                visible: (root.isSubscriptionExpired || root.isSubscriptionExpiringSoon)
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                Layout.bottomMargin: 8
+
+                text: qsTr("Renew subscription")
+
+                defaultColor: AmneziaStyle.color.paleGray
+                hoveredColor: AmneziaStyle.color.lightGray
+                pressedColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.midnightBlack
+
+                clickedFunc: function() {
+                    ApiSettingsController.getRenewalLink()
                 }
             }
         }
@@ -151,10 +226,71 @@ PageType {
 
             readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
 
+            BasicButtonType {
+                visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 16
+                Layout.bottomMargin: 16
+
+                implicitHeight: 25
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                textColor: AmneziaStyle.color.goldenApricot
+                leftImageSource: "qrc:/images/controls/refresh-cw.svg"
+                leftImageColor: AmneziaStyle.color.goldenApricot
+
+                text: qsTr("Renew subscription")
+
+                clickedFunc: function() {
+                    ApiSettingsController.getRenewalLink()
+                }
+            }
+
+            DividerType {
+                visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+            }
+
+            SwitcherType {
+                id: switcher
+
+                readonly property bool isVlessProtocol: ApiConfigsController.isVlessProtocol()
+                readonly property bool isProtocolSwitchBlocked: ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
+                enabled: !switcher.isProtocolSwitchBlocked
+
+                text: qsTr("Use VLESS protocol")
+                checked: switcher.isVlessProtocol
+                onToggled: function() {
+                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
+                    } else {
+                        PageController.showBusyIndicator(true)
+                        ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
+                        ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                        PageController.showBusyIndicator(false)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: footer.isVisibleForAmneziaFree
+            }
+
             WarningType {
                 id: warning
 
-                Layout.topMargin: 32
+                Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
                 Layout.fillWidth: true
@@ -178,7 +314,7 @@ PageType {
                 id: connectionSwitcher
 
                 Layout.fillWidth: true
-                Layout.topMargin: warning.visible ? 16 : 32
+                Layout.topMargin: warning.visible ? 16 : 0
                 text: qsTr("Connection")
                 descriptionText: SettingsController.isLocalProxySupported
                                   ? qsTr("Protocol selection and local proxy setup")

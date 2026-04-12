@@ -13,6 +13,8 @@ namespace apiUtils
 
     bool isSubscriptionExpired(const QString &subscriptionEndDate);
 
+    bool isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays = 10);
+
     bool isPremiumServer(const QJsonObject &serverConfigObject);
 
     apiDefs::ConfigType getConfigType(const QJsonObject &serverConfigObject);

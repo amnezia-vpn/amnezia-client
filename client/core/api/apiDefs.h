@@ -34,6 +34,7 @@ namespace apiDefs
         constexpr QLatin1String stackType("stack_type");
         constexpr QLatin1String serviceType("service_type");
         constexpr QLatin1String cliVersion("cli_version");
+        constexpr QLatin1String cliName("cli_name");
         constexpr QLatin1String supportedProtocols("supported_protocols");
 
         constexpr QLatin1String vpnKey("vpn_key");
@@ -55,8 +56,13 @@ namespace apiDefs
         constexpr QLatin1String activeDeviceCount("active_device_count");
         constexpr QLatin1String maxDeviceCount("max_device_count");
         constexpr QLatin1String subscriptionEndDate("subscription_end_date");
+        constexpr QLatin1String subscriptionExpiredByServer("subscription_expired_by_server");
+        constexpr QLatin1String subscription("subscription");
+        constexpr QLatin1String endDate("end_date");
         constexpr QLatin1String issuedConfigs("issued_configs");
         constexpr QLatin1String subscriptionDescription("subscription_description");
+        constexpr QLatin1String termsOfUseUrl("terms_of_use_url");
+        constexpr QLatin1String privacyPolicyUrl("privacy_policy_url");
 
         constexpr QLatin1String supportInfo("support_info");
         constexpr QLatin1String email("email");
@@ -71,6 +77,7 @@ namespace apiDefs
 
         constexpr QLatin1String transactionId("transaction_id");
         constexpr QLatin1String isTestPurchase("is_test_purchase");
+        constexpr QLatin1String isInAppPurchase("is_in_app_purchase");
 
         constexpr QLatin1String userCountryCode("user_country_code");
 

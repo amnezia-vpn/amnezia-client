@@ -296,9 +296,25 @@ class AmneziaActivity : QtActivity() {
         hasWindowFocus = hasFocus
         Log.d(TAG, "Window focus changed: hasFocus=$hasFocus")
 
-        // Cancel pending operations if window loses focus
         if (!hasFocus) {
+            // Cancel pending operations if window loses focus
             resumeHandler.removeCallbacksAndMessages(null)
+        } else if (isActivityResumed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            window.decorView.apply {
+                invalidate()
+                resumeHandler.postDelayed({
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        sendTouch(1f, 1f)
+                    }
+                }, 50)
+                resumeHandler.postDelayed({
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        sendTouch(2f, 2f)
+                        requestLayout()
+                        invalidate()
+                    }
+                }, 150)
+            }
         }
     }
 
@@ -337,6 +353,13 @@ class AmneziaActivity : QtActivity() {
     private external fun nativeGamepadKeyEvent(deviceId: Int, keyCode: Int, pressed: Boolean)
 
     override fun onPause() {
+        // Notify Qt to stop rendering BEFORE super.onPause() destroys the EGL surface.
+        // Using a coroutine here would be too late — the surface is gone by the time
+        // the coroutine runs. A direct synchronous call gives Qt's render thread the
+        // best chance to process visible=false before surface destruction.
+        if (qtInitialized.isCompleted) {
+            QtAndroidController.onActivityPaused()
+        }
         super.onPause()
         isActivityResumed = false
         // Cancel all pending operations when activity pauses
@@ -349,6 +372,9 @@ class AmneziaActivity : QtActivity() {
         super.onResume()
         isActivityResumed = true
         Log.d(TAG, "Resume Amnezia activity")
+        if (qtInitialized.isCompleted) {
+            QtAndroidController.onActivityResumed()
+        }
 
         if (pendingOpenFileUri != null && !openFileDeliveryScheduled) {
             val uri = pendingOpenFileUri!!

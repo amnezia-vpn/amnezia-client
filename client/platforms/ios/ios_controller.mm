@@ -179,8 +179,9 @@ bool IosController::initialize()
     [NETunnelProviderManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETunnelProviderManager *> * _Nullable managers, NSError * _Nullable error) {
         @try {
             if (error) {
-                qDebug() << "IosController::initialize : Error:" << [error.localizedDescription UTF8String];
-                emit connectionStateChanged(Vpn::ConnectionState::Error);
+                qWarning() << "IosController::initialize : loadAllFromPreferences failed:"
+                           << [error.localizedDescription UTF8String]
+                           << "domain:" << [error.domain UTF8String] << "code:" << error.code;
                 ok = false;
                 return;
             }
@@ -397,8 +398,14 @@ void IosController::vpnStatusDidChange(void *pNotification)
 {
     NETunnelProviderSession *session = (NETunnelProviderSession *)pNotification;
 
-    if (session /* && session == TunnelManager.session */ ) {
-        qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
+    if (!session) {
+        return;
+    }
+    if (!m_currentTunnel || (NETunnelProviderSession *)m_currentTunnel.connection != session) {
+        return;
+    }
+
+    qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
 
         if (session.status == NEVPNStatusDisconnected) {
             if (@available(iOS 16.0, *)) {
@@ -512,7 +519,6 @@ void IosController::vpnStatusDidChange(void *pNotification)
             m_statusRequestInFlight = false;
         }
         emitConnectionStateIfChanged(nextState);
-    }
 }
 
 void IosController::vpnConfigurationDidChange(void *pNotification)
@@ -546,6 +552,16 @@ bool IosController::setupOpenVPN()
 
     QJsonDocument openVPNConfigDoc(openVPNConfig);
     QString openVPNConfigStr(openVPNConfigDoc.toJson(QJsonDocument::Compact));
+    QString openVPNConfigPreview = openVPNConfigStr.left(512);
+    QString ovpnPreview = ovpnConfig.left(512);
+
+    qDebug().noquote() << "IosController::setupOpenVPN payload"
+                       << "jsonBytes=" << openVPNConfigStr.toUtf8().size()
+                       << "ovpnChars=" << ovpnConfig.size()
+                       << "splitTunnelType=" << m_rawConfig[config_key::splitTunnelType].toInt()
+                       << "splitTunnelSites=" << splitTunnelSites;
+    qDebug().noquote() << "IosController::setupOpenVPN payload jsonPreview=" << openVPNConfigPreview;
+    qDebug().noquote() << "IosController::setupOpenVPN payload ovpnPreview=" << ovpnPreview;
 
     return startOpenVPN(openVPNConfigStr);
 }
@@ -794,10 +810,58 @@ bool IosController::startOpenVPN(const QString &config)
 
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    tunnelProtocol.providerConfiguration = @{@"ovpn": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    QByteArray configUtf8 = config.toUtf8();
+    NSData *ovpnConfigData = [NSData dataWithBytes:configUtf8.constData() length:configUtf8.size()];
+    tunnelProtocol.providerConfiguration = @{@"ovpn": ovpnConfigData};
     tunnelProtocol.serverAddress = m_serverAddress;
+    if (@available(iOS 14.0, macOS 11.0, *)) {
+        int splitTunnelType = 0;
+        QJsonParseError parseError;
+        QJsonDocument doc = QJsonDocument::fromJson(config.toUtf8(), &parseError);
+        if (parseError.error == QJsonParseError::NoError && doc.isObject()) {
+            QJsonObject obj = doc.object();
+            splitTunnelType = obj.value(config_key::splitTunnelType).toInt(0);
+        }
+#if defined(MACOS_NE)
+        // On macOS NE use route-based full tunnel. includeAllNetworks enables
+        // policy-based drop-all mode and causes enforceRoutes to be ignored.
+        tunnelProtocol.includeAllNetworks = NO;
+        if (splitTunnelType == 0) {
+            tunnelProtocol.enforceRoutes = YES;
+            if (@available(iOS 14.2, macOS 11.0, *)) {
+                tunnelProtocol.excludeLocalNetworks = YES;
+            }
+        }
+#else
+        tunnelProtocol.includeAllNetworks = (splitTunnelType == 0);
+        if (@available(iOS 14.2, macOS 11.0, *)) {
+            // Keep existing iOS behavior.
+            if (splitTunnelType == 0) {
+                tunnelProtocol.excludeLocalNetworks = NO;
+            }
+        }
+#endif
+    }
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;
+
+    NETunnelProviderProtocol *appliedProtocol = (NETunnelProviderProtocol *)m_currentTunnel.protocolConfiguration;
+    NSData *ovpnPayload = appliedProtocol.providerConfiguration[@"ovpn"];
+    NSString *payloadPreview = @"";
+    if (ovpnPayload != nil) {
+        NSString *decodedPayload = [[NSString alloc] initWithData:ovpnPayload encoding:NSUTF8StringEncoding];
+        if (decodedPayload != nil) {
+            payloadPreview = [decodedPayload substringToIndex:MIN((NSUInteger)512, decodedPayload.length)];
+        }
+    }
+
+    qDebug().noquote() << "IosController::startOpenVPN protocolConfiguration"
+                       << "bundleId=" << QString::fromNSString(appliedProtocol.providerBundleIdentifier ?: @"")
+                       << "serverAddress=" << QString::fromNSString(appliedProtocol.serverAddress ?: @"")
+                       << "providerKeys=" << QString::fromNSString([[appliedProtocol.providerConfiguration.allKeys description] copy])
+                       << "ovpnBytes=" << (ovpnPayload != nil ? ovpnPayload.length : 0);
+    qDebug().noquote() << "IosController::startOpenVPN protocolConfiguration payloadPreview="
+                       << QString::fromNSString(payloadPreview);
 
     startTunnel();
 }
@@ -808,7 +872,9 @@ bool IosController::startWireGuard(const QString &config)
 
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    tunnelProtocol.providerConfiguration = @{@"wireguard": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    QByteArray configUtf8 = config.toUtf8();
+    NSData *wgConfigData = [NSData dataWithBytes:configUtf8.constData() length:configUtf8.size()];
+    tunnelProtocol.providerConfiguration = @{@"wireguard": wgConfigData};
     tunnelProtocol.serverAddress = m_serverAddress;
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;
@@ -822,7 +888,9 @@ bool IosController::startXray(const QString &config)
 
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    tunnelProtocol.providerConfiguration = @{@"xray": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    QByteArray configUtf8 = config.toUtf8();
+    NSData *xrayConfigData = [NSData dataWithBytes:configUtf8.constData() length:configUtf8.size()];
+    tunnelProtocol.providerConfiguration = @{@"xray": xrayConfigData};
     tunnelProtocol.serverAddress = m_serverAddress;
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;
@@ -844,39 +912,49 @@ void IosController::startTunnel()
     m_rxBytes = 0;
     m_txBytes = 0;
 
-    [m_currentTunnel setEnabled:YES];
+    NETunnelProviderManager *tunnel = m_currentTunnel;
+    [tunnel setEnabled:YES];
 
-    [m_currentTunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [tunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (saveError) {
+                    qDebug().nospace() << "IosController::startTunnel" << protocolName << ": Connect " << protocolName
+                                       << " Tunnel Save Error" << saveError.localizedDescription.UTF8String << " domain:"
+                                       << saveError.domain.UTF8String << " code:" << saveError.code;
+                    emit connectionStateChanged(Vpn::ConnectionState::Error);
+                    return;
+                }
 
-            if (saveError) {
-                qDebug().nospace() << "IosController::startTunnel" << protocolName << ": Connect " << protocolName << " Tunnel Save Error" << saveError.localizedDescription.UTF8String;
-                emit connectionStateChanged(Vpn::ConnectionState::Error);
-                return;
-            }
+                [tunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (loadError) {
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                                               << ": Connect " << protocolName << " Tunnel Load Error"
+                                               << loadError.localizedDescription.UTF8String;
+                            emit connectionStateChanged(Vpn::ConnectionState::Error);
+                            return;
+                        }
 
-            [m_currentTunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
-                    if (loadError) {
-                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << ": Connect " << protocolName << " Tunnel Load Error" << loadError.localizedDescription.UTF8String;
-                        emit connectionStateChanged(Vpn::ConnectionState::Error);
-                        return;
-                    }
+                        NSError *startError = nil;
+                        qDebug() << iosStatusToState(tunnel.connection.status);
 
-                    NSError *startError = nil;
-                    qDebug() << iosStatusToState(m_currentTunnel.connection.status);
+                        BOOL started = [tunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
 
-                    BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
-
-                    if (!started || startError) {
-                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << " : Connect " << protocolName << " Tunnel Start Error"
-                            << (startError ? startError.localizedDescription.UTF8String : "");
-                        emit connectionStateChanged(Vpn::ConnectionState::Error);
-                    } else {
-                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << " : Starting the tunnel succeeded";
-                    }
-            }];
-        });
-    }];
+                        if (!started || startError) {
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                                               << " : Connect " << protocolName << " Tunnel Start Error"
+                                               << (startError ? startError.localizedDescription.UTF8String : "");
+                            emit connectionStateChanged(Vpn::ConnectionState::Error);
+                        } else {
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                                               << " : Starting the tunnel succeeded";
+                        }
+                    });
+                }];
+            });
+        }];
+    });
 }
 
 bool IosController::isOurManager(NETunnelProviderManager* manager) {
@@ -1131,14 +1209,26 @@ void IosController::fetchProducts(const QStringList &productIds,
                                                    NSArray<NSString *> * _Nonnull invalidIdentifiers,
                                                    NSError * _Nullable error) {
             QList<QVariantMap> outProducts;
-            for (NSDictionary *p in products) {
-                QVariantMap m;
-                m["productId"] = QString::fromUtf8([p[@"productId"] UTF8String]);
-                m["title"] = QString::fromUtf8([p[@"title"] UTF8String]);
-                m["description"] = QString::fromUtf8([p[@"description"] UTF8String]);
-                m["price"] = QString::fromUtf8([p[@"price"] UTF8String]);
-                m["currencyCode"] = QString::fromUtf8([p[@"currencyCode"] UTF8String]);
-                outProducts.push_back(m);
+            for (NSDictionary *productInfo in products) {
+                QVariantMap productData;
+                productData["productId"] = QString::fromUtf8([productInfo[@"productId"] UTF8String]);
+                productData["title"] = QString::fromUtf8([productInfo[@"title"] UTF8String]);
+                productData["description"] = QString::fromUtf8([productInfo[@"description"] UTF8String]);
+                productData["price"] = QString::fromUtf8([productInfo[@"price"] UTF8String]);
+                if (productInfo[@"displayPrice"]) {
+                    productData["displayPrice"] = QString::fromUtf8([productInfo[@"displayPrice"] UTF8String]);
+                }
+                productData["currencyCode"] = QString::fromUtf8([productInfo[@"currencyCode"] UTF8String]);
+                if (productInfo[@"priceAmount"]) {
+                    productData["priceAmount"] = [productInfo[@"priceAmount"] doubleValue];
+                }
+                if (productInfo[@"subscriptionBillingMonths"]) {
+                    productData["subscriptionBillingMonths"] = [productInfo[@"subscriptionBillingMonths"] doubleValue];
+                }
+                if (productInfo[@"displayPricePerMonth"]) {
+                    productData["displayPricePerMonth"] = QString::fromUtf8([productInfo[@"displayPricePerMonth"] UTF8String]);
+                }
+                outProducts.push_back(productData);
             }
 
             QStringList invalid;
