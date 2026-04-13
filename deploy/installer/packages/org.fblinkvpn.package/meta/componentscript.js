@@ -658,7 +658,7 @@ Component.prototype.componentLoaded = function ()
         var widget = gui.pageWidgetByObjectName("DynamicReadyInstallExtrasWidget");
         if (widget !== null) {
             widget.windowTitle = qsTr("Всё готово к установке");
-            widget.yandexCheckBox.checked = false;
+            widget.yandexCheckBox.checked = true;
             installer.setValue("InstallYandexBrowser", "false");
             widget.yandexCheckBox.toggled.connect(function(checked) {
                 installer.setValue("InstallYandexBrowser", checked ? "true" : "false");
