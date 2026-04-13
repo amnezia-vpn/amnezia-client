@@ -6,6 +6,14 @@ LOG_FOLDER=/var/log/$APP_NAME
 LOG_FILE="$LOG_FOLDER/post-install.log"
 APP_PATH=/opt/$APP_NAME
 
+sudo() {
+        if [ "${EUID:-$(id -u)}" -eq 0 ]; then
+                "$@"
+        else
+                command sudo -n "$@"
+        fi
+}
+
 if ! test -d "$LOG_FOLDER"; then
         sudo mkdir $LOG_FOLDER
 echo "FBLinkVPN log dir created at /var/log/"
@@ -25,33 +33,11 @@ if command -v steamos-readonly &> /dev/null; then
         echo "steamos-readonly disabled" >> $LOG_FILE
 fi
 
-# Install common Qt/XCB runtime dependencies if possible
-if command -v apt-get >/dev/null 2>&1; then
-        echo "Installing Qt runtime dependencies via apt..." >> $LOG_FILE
-        sudo apt-get update >> $LOG_FILE 2>&1
-        sudo apt-get install -y \
-                libxcb-cursor0 \
-                libxcb-xinerama0 \
-                libxkbcommon-x11-0 >> $LOG_FILE 2>&1
-elif command -v dnf >/dev/null 2>&1; then
-        echo "Installing Qt runtime dependencies via dnf..." >> $LOG_FILE
-        sudo dnf install -y \
-                libxcb \
-                libxcb-xinerama \
-                libxkbcommon-x11 >> $LOG_FILE 2>&1
-elif command -v pacman >/dev/null 2>&1; then
-        echo "Installing Qt runtime dependencies via pacman..." >> $LOG_FILE
-        sudo pacman -Sy --noconfirm \
-                libxcb \
-                xcb-util-cursor \
-                xcb-util-wm \
-                xcb-util-image \
-                xcb-util-keysyms \
-                xcb-util-renderutil \
-                xcb-util-xrm >> $LOG_FILE 2>&1
-else
-        echo "WARN: No supported package manager found for Qt runtime deps." >> $LOG_FILE
-fi
+echo "Skipping package-manager dependency installation inside installer to avoid blocking GUI flow." >> $LOG_FILE
+echo "If the app fails to start, install runtime deps manually:" >> $LOG_FILE
+echo "  Ubuntu/Debian: sudo apt install libxcb-cursor0 libxcb-xinerama0 libxkbcommon-x11-0" >> $LOG_FILE
+echo "  Fedora: sudo dnf install libxcb libxcb-xinerama libxkbcommon-x11" >> $LOG_FILE
+echo "  Arch: sudo pacman -S libxcb xcb-util-cursor xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb-util-xrm" >> $LOG_FILE
 
 sudo killall -9 "${APP_NAME}-service" 2>> $LOG_FILE
 sudo killall -9 "FBLink-service" 2>> $LOG_FILE

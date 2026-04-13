@@ -31,6 +31,10 @@ static const QString tunName = "tun2";
 #endif
 
 namespace {
+#ifdef Q_OS_LINUX
+constexpr int kLinuxDirectBypassMark = 0x3211;
+#endif
+
 int transportOutboundIndex(const QJsonObject &xrayConfig)
 {
     const QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
@@ -302,15 +306,31 @@ void sanitizeDesktopXrayConfig(QJsonObject &xrayConfig)
     QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
     for (int i = 0; i < outbounds.size(); ++i) {
         QJsonObject outbound = outbounds.at(i).toObject();
-        if (outbound.value("protocol").toString() != "vless") {
+        QJsonObject streamSettings = outbound.value("streamSettings").toObject();
+        QJsonObject sockopt = streamSettings.value("sockopt").toObject();
+        const QString protocol = outbound.value("protocol").toString();
+        const QString tag = outbound.value("tag").toString();
+
+        if (protocol == QLatin1String("vless")) {
+            sockopt.insert("tcpFastOpen", true);
+            sockopt.insert("tcpKeepAliveIdle", 45);
+            sockopt.insert("tcpKeepAliveInterval", 45);
+        }
+
+#ifdef Q_OS_LINUX
+        // Linux kill switch allows "without VPN" traffic only when packets are
+        // explicitly marked for the amnvpnrt bypass table. Xray direct/freedom
+        // outbound sockets must therefore carry the same fwmark as the
+        // firewall's allowPIA/tagPkts path.
+        if (protocol == QLatin1String("freedom") || tag == QLatin1String("direct")) {
+            sockopt.insert("mark", kLinuxDirectBypassMark);
+        }
+#endif
+
+        if (sockopt.isEmpty()) {
             continue;
         }
 
-        QJsonObject streamSettings = outbound.value("streamSettings").toObject();
-        QJsonObject sockopt = streamSettings.value("sockopt").toObject();
-        sockopt.insert("tcpFastOpen", true);
-        sockopt.insert("tcpKeepAliveIdle", 45);
-        sockopt.insert("tcpKeepAliveInterval", 45);
         streamSettings.insert("sockopt", sockopt);
         outbound.insert("streamSettings", streamSettings);
         outbounds.replace(i, outbound);
