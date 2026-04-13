@@ -63,7 +63,12 @@ bool XrayController::stop()
     ProxyLogger::getInstance().info("Stopping Xray via IPC");
 
     const bool ipcResult = IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->xrayStop();
+        auto xrayStop = iface->xrayStop();
+        if (!xrayStop.waitForFinished() || !xrayStop.returnValue()) {
+            ProxyLogger::getInstance().warning("Failed to stop Xray via IPC");
+            return false;
+        }
+
         return true;
     }, []() {
         return false;
