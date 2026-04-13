@@ -1,5 +1,6 @@
 #include "coreController.h"
 
+#include <QCoreApplication>
 #include <QDirIterator>
 #include <QDebug>
 #include <QTranslator>
@@ -40,6 +41,12 @@ void CoreController::initLocalProxy()
     constexpr quint16 kLocalProxyApiPort = 49490;
 
     m_proxyServer.reset(new ProxyServer(m_settings, this));
+
+    QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this]() {
+        if (m_settings && m_settings->isLocalProxyHttpEnabled()) {
+            m_settings->setLocalProxyHttpEnabled(false);
+        }
+    });
 
     auto syncLocalProxy = [this]() {
         if (!m_proxyServer) {

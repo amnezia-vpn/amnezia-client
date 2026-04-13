@@ -8,6 +8,7 @@ ProxyServer::ProxyServer(const std::shared_ptr<Settings> &settings, QObject *par
     , m_settings(settings)
     , m_service(new ProxyService(settings, this))
 {
+    m_lastRestartToken = m_settings ? m_settings->localProxyRestartToken() : 0;
 }
 
 ProxyServer::~ProxyServer()
@@ -73,6 +74,7 @@ bool ProxyServer::syncSettings()
     }
 
     const quint16 newProxyPort = m_settings ? m_settings->localProxyPort() : 0;
+    const int restartToken = m_settings ? m_settings->localProxyRestartToken() : 0;
     const bool xrayRunning = m_service->isXrayRunning();
 
     if (!xrayRunning) {
@@ -80,8 +82,19 @@ bool ProxyServer::syncSettings()
         const bool started = startXrayProcess();
         if (started) {
             m_currentProxyPort = newProxyPort;
+            m_lastRestartToken = restartToken;
         }
         return started;
+    }
+
+    if (m_lastRestartToken != restartToken) {
+        qInfo() << "Local proxy: restarting Xray due to config change token";
+        const bool restarted = m_service->restartXray();
+        if (restarted) {
+            m_currentProxyPort = newProxyPort;
+            m_lastRestartToken = restartToken;
+        }
+        return restarted;
     }
 
     if (m_currentProxyPort != newProxyPort) {
@@ -89,6 +102,7 @@ bool ProxyServer::syncSettings()
         const bool restarted = m_service->restartXray();
         if (restarted) {
             m_currentProxyPort = newProxyPort;
+            m_lastRestartToken = restartToken;
         }
         return restarted;
     }

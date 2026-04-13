@@ -22,16 +22,9 @@ PageType {
     property int pendingStartAutoSelectedPort: -1
     property bool pendingStartVpnWasActive: false
 
-    Component.onCompleted: root.syncSwitchState()
-
     function getPortField() {
         var item = listView.itemAtIndex(0)
         return item !== null ? item.children[0] : null
-    }
-
-    function getHeaderBlock() {
-        var headerItem = listView.headerItem
-        return headerItem && headerItem.children.length > 0 ? headerItem.children[0] : null
     }
 
     function computePortErrorText() {
@@ -54,28 +47,22 @@ PageType {
         return ""
     }
 
-    function syncSwitchState() {
-        setSwitcherChecked(SettingsController.isLocalProxyHttpEnabled)
-    }
-
-    function setSwitcherChecked(value) {
-        var header = getHeaderBlock()
-        if (!header || header.switcher.checked === value) {
-            return
-        }
-        header.switcher.checked = value
-    }
-
     function handleLocalProxyToggle(checked) {
         if (checked) {
+            if (!ServersModel.processedServerIsPremium) {
+                PageController.showNotificationMessage(qsTr("Local proxy is available only for Amnezia Premium"))
+                return
+            }
             const wasVpnActive = ConnectionController.isConnected || ConnectionController.isConnectionInProgress
             if (wasVpnActive) {
                 ConnectionController.closeConnection()
             }
 
-            const serverUuid = ServersModel.processedServerUuid
+            let serverUuid = ServersModel.processedServerUuid
+            if (!serverUuid && ServersModel.defaultIndex !== undefined) {
+                serverUuid = ServersModel.getServerUuid(ServersModel.defaultIndex)
+            }
             if (!serverUuid) {
-                root.setSwitcherChecked(false)
                 PageController.showNotificationMessage(qsTr("Unable to determine the current server"))
                 return
             }
@@ -83,14 +70,12 @@ PageType {
             if (SettingsController.isLocalProxyHttpEnabled
                     && SettingsController.localProxyOwnerUuid
                     && SettingsController.localProxyOwnerUuid !== serverUuid) {
-                root.setSwitcherChecked(false)
                 PageController.showNotificationMessage(qsTr("Local proxy is already enabled for another server"))
                 return
             }
 
             const requestedPort = SettingsController.localProxyPort
             if (requestedPort < root.localProxyPortMin || requestedPort > root.localProxyPortMax) {
-                root.setSwitcherChecked(false)
                 PageController.showNotificationMessage(qsTr("Port must be between %1 and %2")
                     .arg(root.localProxyPortMin)
                     .arg(root.localProxyPortMax))
@@ -103,7 +88,6 @@ PageType {
                         || requestedPort !== root.defaultLocalProxyPort) {
                     PageController.showNotificationMessage(qsTr("Port %1 is already in use on this device. Choose another one")
                         .arg(requestedPort))
-                    root.setSwitcherChecked(false)
                     return
                 }
 
@@ -111,32 +95,28 @@ PageType {
                 if (autoSelectedPort <= 0) {
                     PageController.showNotificationMessage(qsTr("Port %1 is already in use on this device. Choose another one")
                         .arg(requestedPort))
-                    root.setSwitcherChecked(false)
                     return
                 }
             }
 
             const portToEnable = autoSelectedPort > 0 ? autoSelectedPort : requestedPort
             if (!SettingsController.enableLocalProxy(serverUuid, portToEnable)) {
-                root.setSwitcherChecked(false)
                 PageController.showNotificationMessage(qsTr("Failed to enable local proxy. Check the port (%1-%2).")
                     .arg(root.localProxyPortMin)
                     .arg(root.localProxyPortMax))
-                root.syncSwitchState()
                 return
             }
             root.pendingStartRequestedPort = requestedPort
             root.pendingStartAutoSelectedPort = autoSelectedPort
             root.pendingStartVpnWasActive = wasVpnActive
             startSuccessToastTimer.restart()
-            root.syncSwitchState()
         } else {
             startSuccessToastTimer.stop()
             root.pendingStartRequestedPort = -1
             root.pendingStartAutoSelectedPort = -1
             root.pendingStartVpnWasActive = false
             SettingsController.disableLocalProxy()
-            root.syncSwitchState()
+            PageController.showNotificationMessage(qsTr("Local proxy stopped"))
         }
     }
 
@@ -174,14 +154,20 @@ PageType {
                 Layout.rightMargin: 16
                 headerText: qsTr("Local Proxy")
                 descriptionText: qsTr("Use a proxy to route selected apps (for example, the CensorTracker extension) through Amnezia Premium.")
-                showSwitcher: true
-                Component.onCompleted: root.syncSwitchState()
+                showSwitcher: ServersModel.processedServerIsPremium
+                switcher {
+                    checked: SettingsController.isLocalProxyHttpEnabled
+                }
                 switcherFunction: function(checked) {
                     // Ignore UI sync toggles; react only to real state change intent.
                     if (checked === SettingsController.isLocalProxyHttpEnabled) {
                         return
                     }
                     root.handleLocalProxyToggle(checked)
+                    // Keep checked declaratively linked after any user interaction path.
+                    localProxyHeader.switcher.checked = Qt.binding(function() {
+                        return SettingsController.isLocalProxyHttpEnabled
+                    })
                 }
             }
 
@@ -209,11 +195,10 @@ PageType {
 
                 text: qsTr("Learn more")
                 clickedFunc: function() {
-                    const isRussian = LanguageModel.currentLanguageName === "Русский"
-                    const learnMoreUrl = isRussian
-                        ? "http://docs.amnezia.org/ru/documentation/instructions/local-proxy"
-                        : "http://docs.amnezia.org/documentation/instructions/local-proxy"
-                    Qt.openUrlExternally(learnMoreUrl)
+                    const path = LanguageModel.currentLanguageName === "Русский"
+                        ? "ru/documentation/instructions/local-proxy"
+                        : "documentation/instructions/local-proxy"
+                    Qt.openUrlExternally(LanguageModel.getCurrentDocsUrl(path))
                 }
             }
         }
@@ -245,9 +230,8 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Copied: 127.0.0.1:%1").arg(portText))
                 }
 
-                textField.validator: IntValidator {
-                    bottom: root.localProxyPortMin
-                    top: root.localProxyPortMax
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^[0-9]{0,5}$/
                 }
                 textField.leftPadding: portPrefix.implicitWidth
                 textField.placeholderText: root.defaultLocalProxyPort.toString()
@@ -256,7 +240,7 @@ PageType {
                 function syncPortValue() {
                     const port = SettingsController.localProxyPort
                     const isValidPort = port >= root.localProxyPortMin && port <= root.localProxyPortMax
-                    textField.text = (isValidPort && port !== root.defaultLocalProxyPort) ? port.toString() : ""
+                    textField.text = isValidPort ? port.toString() : ""
                 }
 
                 function portValue() {
@@ -309,6 +293,10 @@ PageType {
                 enabled: true
 
                 clickedFunc: function() {
+                    if (SettingsController.isLocalProxyHttpEnabled) {
+                        PageController.showNotificationMessage(qsTr("Disable Local Proxy to change the port"))
+                        return
+                    }
                     const validationError = root.computePortErrorText()
                     root.portValidationError = validationError
                     if (validationError !== "") {
@@ -361,7 +349,6 @@ PageType {
         target: SettingsController
 
         function onLocalProxySettingsUpdated() {
-            root.syncSwitchState()
             var portField = root.getPortField()
             if (portField !== null && !portField.textField.activeFocus) {
                 portField.syncPortValue()
@@ -374,7 +361,6 @@ PageType {
             root.pendingStartAutoSelectedPort = -1
             root.pendingStartVpnWasActive = false
             PageController.showNotificationMessage(message)
-            root.syncSwitchState()
         }
     }
 
@@ -382,7 +368,6 @@ PageType {
         target: ServersModel
 
         function onProcessedServerChanged() {
-            root.syncSwitchState()
             var portField = root.getPortField()
             if (portField !== null && !portField.textField.activeFocus) {
                 portField.syncPortValue()

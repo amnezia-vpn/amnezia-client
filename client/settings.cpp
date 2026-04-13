@@ -3,6 +3,8 @@
 #include "QCoreApplication"
 #include "QThread"
 
+#include <limits>
+
 #include "core/networkUtilities.h"
 #include "version.h"
 
@@ -84,8 +86,15 @@ void Settings::removeServer(int index)
     if (index >= servers.size())
         return;
 
+    const QString removedUuid = servers.at(index).toObject().value(config_key::server_uuid).toString();
     servers.removeAt(index);
     setServersArray(servers);
+
+    if (!removedUuid.isEmpty() && removedUuid == localProxyOwnerUuid()) {
+        m_settings.setValue("Conf/localProxyHttpEnabled", false);
+        m_settings.setValue("Conf/localProxyOwnerUuid", "");
+        emit localProxySettingsChanged();
+    }
     emit serverRemoved(index);
 }
 
@@ -642,5 +651,18 @@ bool Settings::isLocalProxyHttpEnabled() const
 void Settings::setLocalProxyHttpEnabled(bool enabled)
 {
     m_settings.setValue("Conf/localProxyHttpEnabled", enabled);
+    emit localProxySettingsChanged();
+}
+
+int Settings::localProxyRestartToken() const
+{
+    return m_settings.value("Conf/localProxyRestartToken", 0).toInt();
+}
+
+void Settings::bumpLocalProxyRestartToken()
+{
+    const int current = localProxyRestartToken();
+    const int next = (current == std::numeric_limits<int>::max()) ? 0 : (current + 1);
+    m_settings.setValue("Conf/localProxyRestartToken", next);
     emit localProxySettingsChanged();
 }

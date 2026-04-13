@@ -256,6 +256,8 @@ public:
     void setLocalProxyPortUserDefined(bool userDefined);
     bool isLocalProxyHttpEnabled() const;
     void setLocalProxyHttpEnabled(bool enabled);
+    int localProxyRestartToken() const;
+    void bumpLocalProxyRestartToken();
 
 signals:
     void saveLogsChanged(bool enabled);

@@ -933,6 +933,7 @@ bool ApiConfigsController::importTrialFromGateway(const QString &email)
 bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                                     bool reloadServiceConfig)
 {
+    const QString serverUuid = m_serversModel->getServerUuid(serverIndex);
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
@@ -994,6 +995,14 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
             emit subscriptionRefreshNeeded();
         }
 
+
+        if (!serverUuid.isEmpty()
+            && m_settings
+            && m_settings->isLocalProxyHttpEnabled()
+            && m_settings->localProxyOwnerUuid() == serverUuid) {
+            m_settings->bumpLocalProxyRestartToken();
+        }
+
         if (reloadServiceConfig) {
             emit reloadServerFromApiFinished(tr("API config reloaded"));
         } else if (newCountryName.isEmpty()) {
@@ -1030,6 +1039,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
                                         m_settings->isStrictKillSwitchEnabled());
 
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    const QString serverUuid = m_serversModel->getServerUuid(serverIndex);
     auto installationUuid = m_settings->getInstallationUuid(true);
 
     QString serviceProtocol = serverConfig.value(configKey::protocol).toString();
@@ -1054,6 +1064,14 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
         }
 
         m_serversModel->editServer(serverConfig, serverIndex);
+
+        if (!serverUuid.isEmpty()
+            && m_settings
+            && m_settings->isLocalProxyHttpEnabled()
+            && m_settings->localProxyOwnerUuid() == serverUuid) {
+            m_settings->bumpLocalProxyRestartToken();
+        }
+
         emit updateServerFromApiFinished();
         return true;
     } else {

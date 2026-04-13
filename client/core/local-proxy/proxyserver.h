@@ -32,4 +32,5 @@ private:
     bool m_isRunning {false};
     quint16 m_currentApiPort {0};
     quint16 m_currentProxyPort {0};
+    int m_lastRestartToken {0};
 };

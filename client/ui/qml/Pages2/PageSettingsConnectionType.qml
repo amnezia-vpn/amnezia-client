@@ -64,7 +64,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsConnectionProtocols)
+                    PageController.goToPage(PageEnum.PageSettingsServerProtocols)
                 }
             }
 
@@ -76,7 +76,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: SettingsController.isLocalProxySupported
+                visible: SettingsController.isLocalProxySupported && ServersModel.processedServerIsPremium
                 Layout.preferredHeight: visible ? implicitHeight : 0
 
                 text: qsTr("Local proxy")

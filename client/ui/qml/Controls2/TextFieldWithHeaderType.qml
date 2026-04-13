@@ -185,17 +185,18 @@ Item {
 
     BasicButtonType {
         visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
+        parent: backgroud
 
         focusPolicy: Qt.NoFocus
         text: root.buttonText
         leftImageSource: root.buttonImageSource
 
-        anchors.top: content.top
-        anchors.bottom: content.bottom
-        anchors.right: content.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
 
-        height: content.implicitHeight
-        width: content.implicitHeight
+        height: parent.height
+        width: Math.max(height, implicitWidth)
         squareLeftSide: true
 
         clickedFunc: function() {
