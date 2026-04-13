@@ -345,21 +345,15 @@ endif()
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
 
-# copy deploy artifacts required to run the application to the debug build folder
-if(WIN32)
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(DEPLOY_PLATFORM_PATH "windows/x64")
-    else()
-        set(DEPLOY_PLATFORM_PATH "windows/x32")
-    endif()
-elseif(LINUX)
-    list(APPEND CONAN_EXECS "${CMAKE_SOURCE_DIR}/deploy/data/linux/update-resolv-conf.sh")
-elseif(APPLE AND NOT IOS)
-    set(DEPLOY_PLATFORM_PATH "macos")
+if(APPLE)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/data/macos/pf
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT AmneziaVPN
+    )
 endif()
 
 # install non-linked dependencies
-if (WIN32)
+if(WIN32)
     find_package(awg-windows REQUIRED)
     list(APPEND CONAN_EXECS $<TARGET_FILE:amnezia::awg-windows>)
 
@@ -389,12 +383,12 @@ if(WIN32)
     # to the files so just omit it for it
     install(FILES ${CONAN_EXECS}
         DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT service
+        COMPONENT AmneziaVPN
     )
 else()
     install(FILES ${CONAN_EXECS}
         DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT service
+        COMPONENT AmneziaVPN
         PERMISSIONS
             OWNER_READ OWNER_EXECUTE
             GROUP_READ GROUP_EXECUTE
@@ -403,7 +397,7 @@ else()
 endif()
 install(FILES ${CONAN_BINS}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT service
+    COMPONENT AmneziaVPN
 )
 
 # install drivers
@@ -416,7 +410,7 @@ if (WIN32)
     )
     install(DIRECTORY "${TAP_WINDOWS6_BIN}/"
         DESTINATION "${CMAKE_INSTALL_BINDIR}/tap"
-        COMPONENT service
+        COMPONENT AmneziaVPN
     )
 
     find_package(win-split-tunnel REQUIRED)
@@ -427,18 +421,18 @@ if (WIN32)
     )
     install(DIRECTORY "${WIN_SPLIT_TUNNEL_BIN}/"
         DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT service
+        COMPONENT AmneziaVPN
     )
 endif()
 
 # install target
 install(TARGETS ${PROJECT}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT service
+    COMPONENT AmneziaVPN
 )
 install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}>
     DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT service
+    COMPONENT AmneziaVPN
 )
 
 qt_generate_deploy_app_script(
@@ -447,5 +441,5 @@ qt_generate_deploy_app_script(
     NO_UNSUPPORTED_PLATFORM_ERROR
 )
 install(SCRIPT ${QT_DEPLOY_SCRIPT}
-    COMPONENT service
+    COMPONENT AmneziaVPN
 )

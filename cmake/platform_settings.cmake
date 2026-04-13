@@ -25,6 +25,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
     CACHE STRING "" FORCE)
 endif()
 
-if (WIN32)
+if (WIN32 OR APPLE)
     set(CMAKE_INSTALL_BINDIR ".")
 endif()

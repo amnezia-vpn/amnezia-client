@@ -1,5 +1,5 @@
-if (CPACK_GENERATOR STREQUAL IFW)
-    set(CPACK_COMPONENTS_ALL client service auxiliary)
-else()
-    set(CPACK_MONOLITHIC_INSTALL TRUE)
+set(CPACK_COMPONENTS_ALL AmneziaVPN)
+
+if (CPACK_GENERATOR STREQUAL productbuild)
+    list(APPEND CPACK_COMPONENTS_ALL Uninstall)
 endif()
