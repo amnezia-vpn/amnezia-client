@@ -217,11 +217,11 @@ endif()
 
 install(TARGETS ${PROJECT}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT client
+    COMPONENT AmneziaVPN
 )
 install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}>
     DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT client
+    COMPONENT AmneziaVPN
 )
 
 set(deploy_tool_options "")
@@ -236,5 +236,5 @@ qt_generate_deploy_qml_app_script(
     DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
 )
 install(SCRIPT ${QT_DEPLOY_SCRIPT}
-    COMPONENT client
+    COMPONENT AmneziaVPN
 )
