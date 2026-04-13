@@ -1,0 +1,30 @@
+{
+    "name": "AmneziaVPN Qt6",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cmake-tools",
+                "ms-vscode.cpptools-extension-pack",
+                "llvm-vs-code-extensions.vscode-clangd"
+            ],
+            "settings": {
+                "cmake.configureOnOpen": false,
+                "cmake.buildDirectory": "${workspaceFolder}/deploy/build",
+                "C_Cpp.default.cppStandard": "c++17",
+                "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+            }
+        }
+    },
+    "remoteEnv": {
+        "QT_BIN_DIR": "/opt/qt/6.6.2/gcc_64/bin"
+    },
+    "runArgs": [
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined"
+    ],
+    "postCreateCommand": "mkdir -p deploy/build"
+}
