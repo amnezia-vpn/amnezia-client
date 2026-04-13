@@ -36,7 +36,12 @@ bool XrayController::start(const QString &configJson)
     }
 
     const bool ipcResult = IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->xrayStart(configJson);
+        auto xrayStart = iface->xrayStart(configJson);
+        if (!xrayStart.waitForFinished() || !xrayStart.returnValue()) {
+            ProxyLogger::getInstance().warning("Failed to start Xray via IPC");
+            return false;
+        }
+
         return true;
     }, []() {
         return false;
