@@ -89,6 +89,7 @@ bool KillSwitch::disableKillSwitch() {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), false);
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.tagPkts"), false, LinuxFirewall::kMangleTable);
     } else {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), false);
@@ -101,6 +102,7 @@ bool KillSwitch::disableKillSwitch() {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), false);
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.tagPkts"), false, LinuxFirewall::kMangleTable);
         LinuxFirewall::uninstall();
     }
 #endif
@@ -338,6 +340,7 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::updateDNSServers(dnsServers);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.tagPkts"), true, LinuxFirewall::kMangleTable);
 #endif
 
 #ifdef Q_OS_MACOS

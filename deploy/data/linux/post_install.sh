@@ -25,6 +25,34 @@ if command -v steamos-readonly &> /dev/null; then
         echo "steamos-readonly disabled" >> $LOG_FILE
 fi
 
+# Install common Qt/XCB runtime dependencies if possible
+if command -v apt-get >/dev/null 2>&1; then
+        echo "Installing Qt runtime dependencies via apt..." >> $LOG_FILE
+        sudo apt-get update >> $LOG_FILE 2>&1
+        sudo apt-get install -y \
+                libxcb-cursor0 \
+                libxcb-xinerama0 \
+                libxkbcommon-x11-0 >> $LOG_FILE 2>&1
+elif command -v dnf >/dev/null 2>&1; then
+        echo "Installing Qt runtime dependencies via dnf..." >> $LOG_FILE
+        sudo dnf install -y \
+                libxcb \
+                libxcb-xinerama \
+                libxkbcommon-x11 >> $LOG_FILE 2>&1
+elif command -v pacman >/dev/null 2>&1; then
+        echo "Installing Qt runtime dependencies via pacman..." >> $LOG_FILE
+        sudo pacman -Sy --noconfirm \
+                libxcb \
+                xcb-util-cursor \
+                xcb-util-wm \
+                xcb-util-image \
+                xcb-util-keysyms \
+                xcb-util-renderutil \
+                xcb-util-xrm >> $LOG_FILE 2>&1
+else
+        echo "WARN: No supported package manager found for Qt runtime deps." >> $LOG_FILE
+fi
+
 sudo killall -9 "${APP_NAME}-service" 2>> $LOG_FILE
 sudo killall -9 "FBLink-service" 2>> $LOG_FILE
 
@@ -56,6 +84,11 @@ fi
 if [ -f "$SERVICE_UNIT_SRC" ]; then
         sudo cp "$SERVICE_UNIT_SRC" /etc/systemd/system/ >> $LOG_FILE
         sudo systemctl daemon-reload >> $LOG_FILE 2>&1
+        if [ -f "$APP_PATH/service/${APP_NAME}-service.sh" ]; then
+                sudo chmod 555 "$APP_PATH/service/${APP_NAME}-service.sh" >> $LOG_FILE 2>&1
+        elif [ -f "$APP_PATH/service/FBLinkVPN-service.sh" ]; then
+                sudo chmod 555 "$APP_PATH/service/FBLinkVPN-service.sh" >> $LOG_FILE 2>&1
+        fi
         sudo systemctl start $APP_NAME >> $LOG_FILE
         sudo systemctl enable $APP_NAME >> $LOG_FILE
 else
@@ -87,6 +120,17 @@ sudo cp $APP_PATH/FBLink.png /usr/share/pixmaps/ >> $LOG_FILE
 sudo chmod 555 /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
 
 echo "user desktop creation loop ended" >> $LOG_FILE
+
+# Clean legacy icons and refresh caches
+if [ -f /usr/share/pixmaps/AmneziaVPN.png ]; then
+        sudo rm -f /usr/share/pixmaps/AmneziaVPN.png >> $LOG_FILE 2>&1
+fi
+if command -v update-desktop-database >/dev/null 2>&1; then
+        sudo update-desktop-database /usr/share/applications >> $LOG_FILE 2>&1
+fi
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+        sudo gtk-update-icon-cache -f /usr/share/icons/hicolor >> $LOG_FILE 2>&1 || true
+fi
 
 # Create a desktop launcher for the current user as well.
 TARGET_USER="$SUDO_USER"

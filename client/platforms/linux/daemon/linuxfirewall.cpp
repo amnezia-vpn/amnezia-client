@@ -66,6 +66,7 @@ static QString getCommand(LinuxFirewall::IPVersion ip)
     return ip == LinuxFirewall::IPv6 ? QStringLiteral("ip6tables") : QStringLiteral("iptables");
 }
 
+
 int LinuxFirewall::createChain(LinuxFirewall::IPVersion ip, const QString& chain, const QString& tableName)
 {
     if (ip == Both)
@@ -286,6 +287,13 @@ void LinuxFirewall::install()
 
     installAnchor(IPv4, QStringLiteral("110.allowNets"), {});
 
+    // Permit VPN-exempt traffic that was explicitly tagged in the mangle table.
+    // This is used by Xray/WireGuard direct-bypass flows; without this anchor,
+    // marked packets still fall through to blockAll and TLS handshakes fail.
+    installAnchor(Both, QStringLiteral("400.allowPIA"), {
+                                                            QStringLiteral("-m mark --mark %1 -j ACCEPT").arg(kPacketTag),
+                                                        });
+
     installAnchor(Both, QStringLiteral("100.blockAll"), {
                                                             QStringLiteral("-j REJECT"),
                                                         });
@@ -502,17 +510,58 @@ int LinuxFirewall::execute(const QString &command, bool ignoreErrors)
 
 void LinuxFirewall::setupTrafficSplitting()
 {
+    const QString routeTableId = QStringLiteral("200");
+    const QString ensureTableCmd = QStringLiteral(
+                "if ! grep -Eq '^[[:space:]]*%1[[:space:]]+%2$' /etc/iproute2/rt_tables ; then "
+                "  if ! grep -Eq '^[[:space:]]*[0-9]+[[:space:]]+%2$' /etc/iproute2/rt_tables ; then "
+                "    echo '%1 %2' >> /etc/iproute2/rt_tables ; "
+                "  fi ; "
+                "fi").arg(routeTableId, kRtableName);
+    if (execute(ensureTableCmd, true) != 0)
+    {
+        logger.warning() << "Failed to ensure routing table entry for" << kRtableName;
+    }
+
+    const QString netClsBase = QStringLiteral("/sys/fs/cgroup/net_cls");
+    const QString ensureNetClsCmd = QStringLiteral(
+                "if [ ! -d %1 ] ; then mkdir -p %1 && mount -t cgroup -o net_cls none %1 ; fi").arg(netClsBase);
+    if (execute(ensureNetClsCmd, true) != 0)
+    {
+        logger.warning() << "net_cls cgroup is not available; VPN exclusions will be disabled";
+        return;
+    }
+    const QString remountNetClsCmd = QStringLiteral(
+                "if [ ! -w %1 ] ; then mount -o remount,rw %1 ; fi").arg(netClsBase);
+    execute(remountNetClsCmd, true);
+
     auto cGroupDir = "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnexclusions/";
     logger.info() << "Should be setting up cgroup in" << cGroupDir << "for traffic splitting";
     execute(QStringLiteral("if [ ! -d %1 ] ; then mkdir %1 ; sleep 0.1 ; echo %2 > %1/net_cls.classid ; fi").arg(cGroupDir).arg(kCGroupId));
     // Set a rule with priority 100 (lower priority than local but higher than main/default, 0 is highest priority)
     execute(QStringLiteral("if ! ip rule list | grep -q %1 ; then ip rule add from all fwmark %1 lookup %2 pri 100 ; fi").arg(kPacketTag, kRtableName));
+
+    // Ensure the routing table has a default route (used for VPN-exempt traffic)
+    const QString ensureDefaultRouteCmd = QStringLiteral(
+                "def=$(ip -4 route show default | head -n1); "
+                "if [ -n \"$def\" ]; then "
+                "  gw=$(echo \"$def\" | awk '{for(i=1;i<=NF;i++){if($i==\"via\"){print $(i+1); exit}}}'); "
+                "  dev=$(echo \"$def\" | awk '{for(i=1;i<=NF;i++){if($i==\"dev\"){print $(i+1); exit}}}'); "
+                "  if [ -n \"$dev\" ]; then "
+                "    if [ -n \"$gw\" ]; then "
+                "      ip route replace default via \"$gw\" dev \"$dev\" table %1; "
+                "    else "
+                "      ip route replace default dev \"$dev\" table %1; "
+                "    fi; "
+                "  fi; "
+                "fi").arg(routeTableId);
+    execute(ensureDefaultRouteCmd, true);
 }
 
 void LinuxFirewall::teardownTrafficSplitting()
 {
+    const QString routeTableId = QStringLiteral("200");
     logger.info() << "Tearing down cgroup and routing rules";
     execute(QStringLiteral("if ip rule list | grep -q %1; then ip rule del from all fwmark %1 lookup %2 2> /dev/null ; fi").arg(kPacketTag, kRtableName));
-    execute(QStringLiteral("ip route flush table %1").arg(kRtableName));
+    execute(QStringLiteral("ip route flush table %1").arg(routeTableId), true);
     execute(QStringLiteral("ip route flush cache"));
 }
