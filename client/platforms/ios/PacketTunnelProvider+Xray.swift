@@ -25,35 +25,38 @@ extension Constants {
 extension PacketTunnelProvider {
     /// TCP port chosen by the OS on IPv6 loopback (::1), matching inbound listen address.
     private func acquireFreeLocalPort() throws -> Int {
-        for _ in 0..<5 {
-            let fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP)
-            guard fd != -1 else { continue }
-            defer { close(fd) }
-            var reuse: Int32 = 1
-            _ = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, socklen_t(MemoryLayout<Int32>.size))
-            var addr = sockaddr_in6()
-            addr.sin6_len = UInt8(MemoryLayout<sockaddr_in6>.size)
-            addr.sin6_family = sa_family_t(AF_INET6)
-            addr.sin6_port = in_port_t(0).bigEndian
-            addr.sin6_addr = in6addr_loopback
-            addr.sin6_scope_id = 0
-            let bindResult = withUnsafePointer(to: &addr) { ptr in
-                ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) { p in
-                    bind(fd, p, socklen_t(MemoryLayout<sockaddr_in6>.size))
-                }
-            }
-            guard bindResult == 0 else { continue }
-            var bound = sockaddr_in6()
-            var len = socklen_t(MemoryLayout<sockaddr_in6>.size)
-            let gr = withUnsafeMutablePointer(to: &bound) { p in
-                p.withMemoryRebound(to: sockaddr.self, capacity: 1) { bp in
-                    getsockname(fd, bp, &len)
-                }
-            }
-            guard gr == 0 else { continue }
-            return Int(bound.sin6_port.byteSwapped)
+        let fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP)
+        guard fd != -1 else {
+            throw XrayErrors.cantAcquireLocalPort
         }
-        throw XrayErrors.cantAcquireLocalPort
+        defer { close(fd) }
+        var reuse: Int32 = 1
+        _ = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, socklen_t(MemoryLayout<Int32>.size))
+        var addr = sockaddr_in6()
+        addr.sin6_len = UInt8(MemoryLayout<sockaddr_in6>.size)
+        addr.sin6_family = sa_family_t(AF_INET6)
+        addr.sin6_port = in_port_t(0).bigEndian
+        addr.sin6_addr = in6addr_loopback
+        addr.sin6_scope_id = 0
+        let bindResult = withUnsafePointer(to: &addr) { ptr in
+            ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) { p in
+                bind(fd, p, socklen_t(MemoryLayout<sockaddr_in6>.size))
+            }
+        }
+        guard bindResult == 0 else {
+            throw XrayErrors.cantAcquireLocalPort
+        }
+        var bound = sockaddr_in6()
+        var len = socklen_t(MemoryLayout<sockaddr_in6>.size)
+        let gr = withUnsafeMutablePointer(to: &bound) { p in
+            p.withMemoryRebound(to: sockaddr.self, capacity: 1) { bp in
+                getsockname(fd, bp, &len)
+            }
+        }
+        guard gr == 0 else {
+            throw XrayErrors.cantAcquireLocalPort
+        }
+        return Int(bound.sin6_port.byteSwapped)
     }
 
     private func applyXraySplitTunnel(_ xrayConfig: XrayConfig,
