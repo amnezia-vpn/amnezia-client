@@ -94,6 +94,7 @@ class TestUiSitesModelAndController;
 class TestUiAppSTModelAndController;
 class TestUiAllowedDnsModelAndController;
 class TestUiNewsModelAndController;
+class TestUiApiServicesModelAndController;
 
 class CoreController : public QObject
 {
@@ -118,6 +119,7 @@ class CoreController : public QObject
     friend class TestUiAppSTModelAndController;
     friend class TestUiAllowedDnsModelAndController;
     friend class TestUiNewsModelAndController;
+    friend class TestUiApiServicesModelAndController;
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,

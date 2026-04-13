@@ -196,6 +196,15 @@ target_link_libraries(test_ui_allowed_dns_model_and_controller PRIVATE
     test_common
 )
 
+add_executable(test_ui_api_services_model_and_controller
+    api/testUiApiServicesModelAndController.cpp
+)
+
+target_link_libraries(test_ui_api_services_model_and_controller PRIVATE
+    Qt6::Test
+    test_common
+)
+
 add_executable(test_ui_news_model_and_controller
     api/testUiNewsModelAndController.cpp
 )
@@ -224,4 +233,5 @@ add_test(NAME UiLanguageModelAndControllerTest COMMAND test_ui_language_model_an
 add_test(NAME UiSitesModelAndControllerTest COMMAND test_ui_sites_model_and_controller)
 add_test(NAME UiAppSTModelAndControllerTest COMMAND test_ui_app_st_model_and_controller)
 add_test(NAME UiAllowedDnsModelAndControllerTest COMMAND test_ui_allowed_dns_model_and_controller)
+add_test(NAME UiApiServicesModelAndControllerTest COMMAND test_ui_api_services_model_and_controller)
 add_test(NAME UiNewsModelAndControllerTest COMMAND test_ui_news_model_and_controller)
