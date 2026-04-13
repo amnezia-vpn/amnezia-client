@@ -120,6 +120,7 @@ bool KillSwitch::disableKillSwitch() {
         MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), false);
         MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), false);
         MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), false);
+        MacOSFirewall::setAnchorEnabled(QStringLiteral("400.allowPIA"), false);
     } else {
         MacOSFirewall::uninstall();
     }
@@ -385,6 +386,7 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     
     MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
     MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), dnsServers);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("400.allowPIA"), true);
 #endif
     return true;
 }
