@@ -34,7 +34,6 @@ class DnsUtilsLinux final : public DnsUtils {
 
  private:
   int m_ifindex = 0;
-  int m_domainRetries = 0;
   QMap<int, DnsLinkDomainList> m_linkDomains;
   QDBusInterface* m_resolver = nullptr;
 };

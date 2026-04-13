@@ -4,7 +4,6 @@
 
 #include "linuxnetworkwatcherworker.h"
 
-#include <QTimer>
 #include <QtDBus/QtDBus>
 
 #include "leakdetector.h"
@@ -124,12 +123,6 @@ void LinuxNetworkWatcherWorker::initialize() {
         SLOT(propertyChanged(QString, QVariantMap, QStringList)));
   }
 
-  QVariant currentState = nm.property("State");
-  if (currentState.isValid()) {
-    m_previousNMState = currentState.toUInt();
-    logger.debug() << "Initial NM state:" << m_previousNMState;
-  }
-
   QDBusConnection::systemBus().connect(DBUS_NETWORKMANAGER,
                                        DBUS_NETWORKMANAGER_PATH,
                                        DBUS_NETWORKMANAGER,
@@ -211,9 +204,7 @@ void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 
     if (state == NM_STATE_ASLEEP || state == NM_STATE_DISABLED) {
         emit wakeup();
-    } else if (state >= NM_STATE_CONNECTED_SITE && m_previousNMState < NM_STATE_CONNECTED_SITE) {
+    } else if (state == NM_STATE_CONNECTED_GLOBAL) {
         emit networkChanged();
     }
-
-    m_previousNMState = state;
 }

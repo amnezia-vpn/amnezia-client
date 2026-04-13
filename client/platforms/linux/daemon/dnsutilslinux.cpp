@@ -7,7 +7,6 @@
 #include <net/if.h>
 
 #include <QDBusVariant>
-#include <QTimer>
 #include <QtDBus/QtDBus>
 
 #include "leakdetector.h"
@@ -61,7 +60,6 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
 
   setLinkDNS(m_ifindex, resolvers);
   setLinkDefaultRoute(m_ifindex, true);
-  setLinkDomains(m_ifindex, {DnsLinkDomain(".", true)});
   updateLinkDomains();
   return true;
 }
@@ -92,7 +90,7 @@ bool DnsUtilsLinux::restoreResolvers() {
 void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<> reply = *call;
   if (reply.isError()) {
-    logger.debug() << "DBus call failed (may be transient after systemd-resolved restart)";
+    logger.error() << "Error received from the DBus service";
   }
   delete call;
 }
@@ -175,21 +173,12 @@ void DnsUtilsLinux::updateLinkDomains() {
 }
 
 void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
-    QDBusPendingReply<QVariant> reply = *call;
-    call->deleteLater();
+  QDBusPendingReply<QVariant> reply = *call;
   if (reply.isError()) {
-    // systemd-resolved may still be starting up after a restart — retry a few times
-    if (m_domainRetries++ < 5) {
-      logger.debug() << "systemd-resolved not ready yet, retrying DNS setup ("
-                     << m_domainRetries << "/5)";
-      QTimer::singleShot(500, this, &DnsUtilsLinux::updateLinkDomains);
-    } else {
-      logger.warning() << "Failed to configure DNS after 5 retries";
-      m_domainRetries = 0;
-    }
+    logger.error() << "Error retrieving the DNS  domains from the DBus service";
+    delete call;
     return;
   }
-  m_domainRetries = 0;
 
   /* Update the state of the DNS domains */
   m_linkDomains.clear();
@@ -217,6 +206,7 @@ void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
   /* Add a root search domain for the new interface. */
   QList<DnsLinkDomain> newlist = {root};
   setLinkDomains(m_ifindex, newlist);
+  delete call;
 }
 
 static DnsMetatypeRegistrationProxy s_dnsMetatypeProxy;
