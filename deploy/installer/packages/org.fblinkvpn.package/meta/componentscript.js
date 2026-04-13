@@ -650,7 +650,21 @@ function Component()
 
 Component.prototype.componentLoaded = function ()
 {
+    if (!runningOnWindows() || !installer.isInstaller()) {
+        return;
+    }
 
+    if (installer.addWizardPage(component, "ReadyInstallExtrasWidget", QInstaller.ReadyForInstallation)) {
+        var widget = gui.pageWidgetByObjectName("DynamicReadyInstallExtrasWidget");
+        if (widget !== null) {
+            widget.windowTitle = qsTr("Всё готово к установке");
+            widget.yandexCheckBox.checked = false;
+            installer.setValue("InstallYandexBrowser", "false");
+            widget.yandexCheckBox.toggled.connect(function(checked) {
+                installer.setValue("InstallYandexBrowser", checked ? "true" : "false");
+            });
+        }
+    }
 }
 
 Component.prototype.installationFinishedPageIsShown = function()
