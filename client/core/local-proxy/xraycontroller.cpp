@@ -55,6 +55,11 @@ bool XrayController::start(const QString &configJson)
 
 bool XrayController::stop()
 {
+    if (!m_isRunning) {
+        ProxyLogger::getInstance().debug("Skipping Xray stop via IPC: local proxy Xray is not running");
+        return true;
+    }
+
     ProxyLogger::getInstance().info("Stopping Xray via IPC");
 
     const bool ipcResult = IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
