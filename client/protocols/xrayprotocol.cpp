@@ -15,6 +15,8 @@
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qprocess.h>
 
+#include <exception>
+
 #ifdef Q_OS_MACOS
 static const QString tunName = "utun22";
 #else
@@ -56,12 +58,13 @@ ErrorCode XrayProtocol::start()
 
     // Inject SOCKS5 auth into the inbound before starting xray.
     // Re-uses existing credentials if the config already has them (e.g. imported config).
-    const auto credsOpt = amnezia::serialization::inbounds::EnsureInboundAuth(m_xrayConfig);
-    if (!credsOpt.has_value()) {
-        qCritical() << "Failed to acquire a free TCP port for local SOCKS inbound";
+    amnezia::serialization::inbounds::InboundCredentials creds;
+    try {
+        creds = amnezia::serialization::inbounds::EnsureInboundAuth(m_xrayConfig);
+    } catch (const std::exception &e) {
+        qCritical() << "EnsureInboundAuth failed:" << e.what();
         return ErrorCode::InternalError;
     }
-    const auto creds = credsOpt.value();
     m_socksUser     = creds.username;
     m_socksPassword = creds.password;
     m_socksPort     = creds.port;

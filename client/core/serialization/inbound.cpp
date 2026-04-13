@@ -5,7 +5,7 @@
 #include <QHostAddress>
 #include <QRandomGenerator>
 #include <QTcpServer>
-#include <optional>
+#include <stdexcept>
 #include "3rd/QJsonStruct/QJsonIO.hpp"
 #include "transfer.h"
 #include "serialization.h"
@@ -41,24 +41,28 @@ static int indexOfSocksInbound(const QJsonArray &inbounds)
 }
 
 // Ask the OS for a free TCP port on loopback (same stack as inbound "listen": "127.0.0.1").
-static std::optional<int> acquireFreeLocalPort()
+static int acquireFreeLocalPort()
 {
-    constexpr int kAttempts = 5;
-    for (int attempt = 0; attempt < kAttempts; ++attempt) {
-        QTcpServer probe;
-        if (probe.listen(QHostAddress(QStringLiteral("127.0.0.1")), 0))
-            return static_cast<int>(probe.serverPort());
+    QTcpServer probe;
+    if (!probe.listen(QHostAddress(QStringLiteral("127.0.0.1")), 0)) {
+        throw std::runtime_error(
+            "Failed to bind a local TCP port on 127.0.0.1 for SOCKS inbound "
+            "(QTcpServer::listen failed; possible permission or OS network error).");
     }
-    return std::nullopt;
+    return static_cast<int>(probe.serverPort());
 }
 
 // Generates a hex string of `byteCount` random bytes (URL-safe, no special chars).
 static QString generateRandomHex(int byteCount)
 {
-    QByteArray buf(byteCount, 0);
-    QRandomGenerator::system()->fillRange(reinterpret_cast<quint32 *>(buf.data()),
-                                          (byteCount + sizeof(quint32) - 1) / sizeof(quint32));
-    return QString::fromLatin1(buf.toHex()).left(byteCount * 2);
+    if (byteCount <= 0)
+        return {};
+    // fillRange writes full quint32 words; size the buffer to a multiple of 4 bytes to avoid
+    // overrunning a short buffer when byteCount is not divisible by 4.
+    const int numUint32 = (byteCount + int(sizeof(quint32)) - 1) / int(sizeof(quint32));
+    QByteArray buf(numUint32 * int(sizeof(quint32)), '\0');
+    QRandomGenerator::system()->fillRange(reinterpret_cast<quint32 *>(buf.data()), numUint32);
+    return QString::fromLatin1(buf.left(byteCount).toHex());
 }
 
 QJsonObject GenerateInboundEntry()
@@ -95,20 +99,16 @@ InboundCredentials GetInboundCredentials(const QJsonObject &xrayConfig)
     return creds;
 }
 
-std::optional<InboundCredentials> EnsureInboundAuth(QJsonObject &xrayConfig)
+InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig)
 {
     QJsonArray inbounds = xrayConfig.value("inbounds").toArray();
     const int socksIdx = indexOfSocksInbound(inbounds);
     if (socksIdx < 0)
         return GetInboundCredentials(xrayConfig); // no SOCKS inbound to patch
 
-    const std::optional<int> portOpt = acquireFreeLocalPort();
-    if (!portOpt.has_value())
-        return std::nullopt;
-
     QJsonObject inbound = inbounds.at(socksIdx).toObject();
     InboundCredentials creds;
-    creds.port = portOpt.value();
+    creds.port = acquireFreeLocalPort();
     inbound["port"] = creds.port;
 
     QJsonObject settings = inbound.value("settings").toObject();
