@@ -487,4 +487,5 @@ void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
   MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
   MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), params.dnsServers);
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("400.allowPIA"), true);
 }

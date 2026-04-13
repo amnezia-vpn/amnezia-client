@@ -88,8 +88,14 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                     QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
                     QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
 
+#ifdef Q_OS_MACOS
+                    if (!m_settings->isSitesSplitTunnelingEnabled() || m_settings->routeMode() != Settings::VpnAllExceptSites) {
+#endif
                     // TODO: add error code handling for all routeAddList (or rework the code below)
                     iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
+#ifdef Q_OS_MACOS
+                    }
+#endif
 
                     if (m_settings->isSitesSplitTunnelingEnabled()) {
                         iface->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
@@ -102,6 +108,9 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                             iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
 
                             iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
+#ifdef Q_OS_MACOS
+                            iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << dns1 << dns2);
+#endif
                             addSitesRoutes(m_vpnProtocol->routeGateway(), m_settings->routeMode());
                         }
                     }
