@@ -1128,7 +1128,7 @@ func (h *AdminHandler) ApprovePayment(c *gin.Context) {
 	now = time.Now()
 	var durationDays int
 	if p.Plan == models.PlanTrial {
-		durationDays = 7
+		durationDays = 3
 	} else {
 		durationDays = planPrices[p.Plan].DurationDays
 	}

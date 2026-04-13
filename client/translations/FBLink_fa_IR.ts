@@ -1101,7 +1101,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="223"/>
-        <source>Пробный период — 7 дней</source>
+        <source>Пробный период — 3 дня</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1265,7 +1265,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="150"/>
-        <source>5 ₽ / 7 дней</source>
+        <source>5 ₽ / 3 дня</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1275,12 +1275,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="169"/>
-        <source>Для новых пользователей: 7 дней Premium за 5 ₽, затем стандартный тариф</source>
+        <source>Для новых пользователей: 3 дня Premium за 5 ₽, затем стандартный тариф</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="230"/>
-        <source>Premium на 7 дней с полным доступом</source>
+        <source>Premium на 3 дня с полным доступом</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1300,7 +1300,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="462"/>
-        <source>/ 7 дней</source>
+        <source>/ 3 дня</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1310,7 +1310,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="481"/>
-        <source>Специальный запуск: полный Premium-доступ по сниженной цене на 7 дней</source>
+        <source>Специальный запуск: полный Premium-доступ по сниженной цене на 3 дня</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1320,7 +1320,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFBLinkSubscription.qml" line="683"/>
-        <source>Активировать 7 дней за 5 ₽</source>
+        <source>Активировать 3 дня за 5 ₽</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7673,3 +7673,4 @@ For more detailed information, you can
     </message>
 </context>
 </TS>
+

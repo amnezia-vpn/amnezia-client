@@ -80,7 +80,7 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 	// Проверяем доступность пробного периода
 	var trialCount int64
 	if err := h.db.Model(&models.Payment{}).
-		Where("user_id = ? AND plan = ?", userID, models.PlanTrial).
+		Where("user_id = ? AND plan = ? AND status = ?", userID, models.PlanTrial, models.PaymentSucceeded).
 		Count(&trialCount).Error; err != nil {
 		if isDatabaseBusyError(err) {
 			respondDatabaseBusy(c)

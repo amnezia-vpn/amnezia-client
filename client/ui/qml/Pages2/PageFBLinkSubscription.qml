@@ -147,7 +147,7 @@ PageType {
                     Item { Layout.fillWidth: true }
                     PremiumBadge {
                         text: (root.showNewUserOffer && root.selectedPlanData.id === "basic")
-                            ? qsTr("5 ₽ / 7 дней")
+                            ? qsTr("5 ₽ / 3 дня")
                             : (root.selectedPlanData.price + " " + root.selectedPlanData.period)
                         tone: root.selectedPlanData.id === "vip" ? "success" : "warning"
                         compact: true
@@ -166,7 +166,7 @@ PageType {
                 CaptionTextType {
                     Layout.fillWidth: true
                     text: (root.showNewUserOffer && root.selectedPlanData.id === "basic")
-                        ? qsTr("Для новых пользователей: 7 дней Premium за 5 ₽, затем стандартный тариф")
+                        ? qsTr("Для новых пользователей: 3 дня Premium за 5 ₽, затем стандартный тариф")
                         : root.selectedPlanData.heroSubtitle
                     color: FBLinkStyle.color.mutedGray
                     font.pixelSize: 13
@@ -220,14 +220,14 @@ PageType {
                             Layout.fillWidth: true
 
                             LabelTextType {
-                                text: qsTr("Пробный период — 7 дней")
+                                text: qsTr("Пробный период — 3 дня")
                                 font.pixelSize: 15
                                 font.weight: 700
                                 color: "#10B981"
                             }
 
                             LabelTextType {
-                                text: qsTr("Premium на 7 дней с полным доступом")
+                                text: qsTr("Premium на 3 дня с полным доступом")
                                 font.pixelSize: 12
                                 color: FBLinkStyle.color.mutedGray
                             }
@@ -459,7 +459,7 @@ PageType {
                                 }
 
                                 LabelTextType {
-                                    text: planCard.isNewUserDiscountCard ? qsTr("/ 7 дней") : modelData.period
+                                    text: planCard.isNewUserDiscountCard ? qsTr("/ 3 дня") : modelData.period
                                     font.pixelSize: 14
                                     color: FBLinkStyle.color.mutedGray
                                     Layout.alignment: Qt.AlignBottom
@@ -478,7 +478,7 @@ PageType {
                             LabelTextType {
                                 visible: modelData.saving !== ""
                                 text: planCard.isNewUserDiscountCard
-                                    ? qsTr("Специальный запуск: полный Premium-доступ по сниженной цене на 7 дней")
+                                    ? qsTr("Специальный запуск: полный Premium-доступ по сниженной цене на 3 дня")
                                     : modelData.saving
                                 font.pixelSize: 12
                                 color: "#10B981"
@@ -680,7 +680,7 @@ PageType {
                     : (root.selectedPlan <= root.currentPlanLevel
                         ? qsTr("Уже активна")
                         : ((root.showNewUserOffer && root.selectedPlanData.id === "basic")
-                            ? qsTr("Активировать 7 дней за 5 ₽")
+                            ? qsTr("Активировать 3 дня за 5 ₽")
                             : root.selectedPlanData.cta))
 
                 clickedFunc: function() {
@@ -1111,3 +1111,4 @@ PageType {
         }
     }
 }
+

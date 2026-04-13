@@ -39,7 +39,7 @@ var planPrices = map[models.PlanType]struct {
 	Amount       float64
 	DurationDays int
 }{
-	models.PlanTrial: {Amount: 5.00, DurationDays: 7},
+	models.PlanTrial: {Amount: 5.00, DurationDays: 3},
 	models.PlanBasic: {Amount: 199.00, DurationDays: 30},
 	models.PlanVIP:   {Amount: 399.00, DurationDays: 30},
 }
@@ -206,7 +206,7 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 func planLabel(plan models.PlanType) string {
 	switch plan {
 	case models.PlanTrial:
-		return "Пробный период (7 дней)"
+		return "Пробный период (3 дня)"
 	case models.PlanBasic:
 		return "Базовый (30 дней)"
 	case models.PlanVIP:
