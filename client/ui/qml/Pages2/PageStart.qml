@@ -224,9 +224,13 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
-        function onInstallServerFromApiFinished(message) {
+        function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
             if (!ConnectionController.isConnected) {
-                ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
+                    ServersUiController.setDefaultServerIndex(preferredDefaultIndex)
+                } else {
+                    ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                }
                 ServersUiController.processedIndex = ServersUiController.defaultIndex
             }
 

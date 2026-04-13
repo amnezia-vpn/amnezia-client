@@ -6,7 +6,6 @@
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
-#include "core/controllers/gatewayController.h"
 #include "core/utils/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"
@@ -15,6 +14,7 @@
 #include <QDebug>
 #include <QSet>
 #include <QEventLoop>
+#include <QFutureWatcher>
 #include <QTimer>
 
 namespace
@@ -54,24 +54,26 @@ namespace
         constexpr char isConnectEvent[] = "is_connect_event";
     }
 
-    namespace serviceType
-    {
-        constexpr char amneziaFree[] = "amnezia-free";
-        constexpr char amneziaPremium[] = "amnezia-premium";
-    }
 }
 
 SubscriptionUiController::SubscriptionUiController(ServersController* serversController,
                                            ApiServicesModel* apiServicesModel,
                                            ServicesCatalogController* servicesCatalogController,
                                            SubscriptionController* subscriptionController,
+                                           ApiSubscriptionPlansModel* apiSubscriptionPlansModel,
+                                           ApiBenefitsModel* apiBenefitsModel,
                                            ApiAccountInfoModel* apiAccountInfoModel,
                                            ApiCountryModel* apiCountryModel,
                                            ApiDevicesModel* apiDevicesModel,
                                            SettingsController* settingsController,
                                            QObject *parent)
-    : QObject(parent), m_serversController(serversController), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController), m_apiAccountInfoModel(apiAccountInfoModel), m_apiCountryModel(apiCountryModel), m_apiDevicesModel(apiDevicesModel), m_settingsController(settingsController)
+    : QObject(parent), m_serversController(serversController), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController), m_apiSubscriptionPlansModel(apiSubscriptionPlansModel), m_apiBenefitsModel(apiBenefitsModel), m_apiAccountInfoModel(apiAccountInfoModel), m_apiCountryModel(apiCountryModel), m_apiDevicesModel(apiDevicesModel), m_settingsController(settingsController)
 {
+    connect(m_apiServicesModel, &ApiServicesModel::serviceSelectionChanged, this, [this]() {
+        ApiServicesModel::ApiServicesData selectedServiceData = m_apiServicesModel->selectedServiceData();
+        m_apiSubscriptionPlansModel->updateModel(selectedServiceData.subscriptionPlansJson);
+        m_apiBenefitsModel->updateModel(selectedServiceData.benefits);
+    });
 }
 
 bool SubscriptionUiController::exportVpnKey(int serverIndex, const QString &fileName)
@@ -160,43 +162,34 @@ bool SubscriptionUiController::fillAvailableServices()
     return true;
 }
 
-bool SubscriptionUiController::importService()
+bool SubscriptionUiController::importPremiumFromAppStore(const QString &storeProductId)
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    bool isIosOrMacOsNe = true;
-#else
-    bool isIosOrMacOsNe = false;
-#endif
-
-    if (m_apiServicesModel->getSelectedServiceType() == serviceType::amneziaPremium) {
-        if (isIosOrMacOsNe) {
-            importServiceFromAppStore();
-            return true;
-        }
-    } else {
-        importServiceFromGateway();
-        return true;
+    QString productId = storeProductId.trimmed();
+    if (productId.isEmpty()) {
+        productId = QStringLiteral("amnezia_premium_6_month");
     }
-    return false;
-}
 
-bool SubscriptionUiController::importServiceFromAppStore()
-{
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
     ServerConfig serverConfig;
+    int duplicateServerIndex = -1;
     ErrorCode errorCode = m_subscriptionController->processAppStorePurchase(
         m_apiServicesModel->getCountryCode(),
         m_apiServicesModel->getSelectedServiceType(),
         m_apiServicesModel->getSelectedServiceProtocol(),
-        QStringLiteral("amnezia_premium_6_month"),
-        serverConfig);
+        productId,
+        serverConfig,
+        &duplicateServerIndex);
 
     if (errorCode != ErrorCode::NoError) {
+        if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
+            emit installServerFromApiFinished(tr("This subscription has already been added"), duplicateServerIndex);
+            return true;
+        }
         emit errorOccurred(errorCode);
         return false;
     }
 
-    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+    emit installServerFromApiFinished(tr("%1 has been added to the app").arg(m_apiServicesModel->getSelectedServiceName()));
 #endif
     return true;
 }
@@ -238,6 +231,10 @@ bool SubscriptionUiController::restoreServiceFromAppStore()
         m_apiServicesModel->getSelectedServiceProtocol());
 
     if (!result.hasInstalledConfig) {
+        if (result.duplicateConfigAlreadyPresent) {
+            emit installServerFromApiFinished(tr("This subscription has already been added"), result.duplicateServerIndex);
+            return true;
+        }
         emit errorOccurred(result.errorCode);
         return false;
     }
@@ -251,7 +248,7 @@ bool SubscriptionUiController::restoreServiceFromAppStore()
     return true;
 }
 
-bool SubscriptionUiController::importServiceFromGateway()
+bool SubscriptionUiController::importFreeFromGateway()
 {
     QString userCountryCode = m_apiServicesModel->getCountryCode();
     QString serviceType = m_apiServicesModel->getSelectedServiceType();
@@ -278,14 +275,48 @@ bool SubscriptionUiController::importServiceFromGateway()
     }
 }
 
+bool SubscriptionUiController::importTrialFromGateway(const QString &email)
+{
+    emit trialEmailError(QString());
+    ServerConfig serverConfig;
+    ErrorCode errorCode = m_subscriptionController->importTrialFromGateway(m_apiServicesModel->getCountryCode(),
+                                                                            m_apiServicesModel->getSelectedServiceType(),
+                                                                            m_apiServicesModel->getSelectedServiceProtocol(),
+                                                                            email,
+                                                                            serverConfig);
+    if (errorCode != ErrorCode::NoError) {
+        if (errorCode == ErrorCode::ApiTrialAlreadyUsedError) {
+            emit trialEmailError(
+                    tr("This email address has already been used to activate a trial. If you like the service, you can upgrade to Premium"));
+        } else {
+            emit errorOccurred(errorCode);
+        }
+        return false;
+    }
+
+    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+    return true;
+}
+
 bool SubscriptionUiController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                                     bool reloadServiceConfig)
 {
     bool isConnectEvent = newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig;
+    bool wasSubscriptionExpired = false;
+    ServerConfig oldServerConfig = m_serversController->getServerConfig(serverIndex);
+    if (oldServerConfig.isApiV2()) {
+        const ApiV2ServerConfig *oldApiV2 = oldServerConfig.as<ApiV2ServerConfig>();
+        if (oldApiV2) {
+            wasSubscriptionExpired = oldApiV2->apiConfig.isSubscriptionExpired();
+        }
+    }
 
     ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(serverIndex, newCountryCode, isConnectEvent);
 
     if (errorCode == ErrorCode::NoError) {
+        if (wasSubscriptionExpired) {
+            emit subscriptionRefreshNeeded();
+        }
         if (reloadServiceConfig) {
             emit reloadServerFromApiFinished(tr("API config reloaded"));
         } else if (newCountryName.isEmpty()) {
@@ -295,6 +326,9 @@ bool SubscriptionUiController::updateServiceFromGateway(const int serverIndex, c
         }
         return true;
     } else {
+        if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
+            emit subscriptionExpiredOnServer();
+        }
         emit errorOccurred(errorCode);
         return false;
     }
@@ -425,5 +459,25 @@ void SubscriptionUiController::updateApiCountryModel()
 void SubscriptionUiController::updateApiDevicesModel()
 {
     m_apiDevicesModel->updateModel(m_apiAccountInfoModel->getIssuedConfigsInfo(), m_settingsController->getInstallationUuid(false));
+}
+
+void SubscriptionUiController::getRenewalLink(int serverIndex)
+{
+    if (serverIndex < 0) {
+        emit errorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    auto *watcher = new QFutureWatcher<QPair<ErrorCode, QString>>(this);
+    connect(watcher, &QFutureWatcher<QPair<ErrorCode, QString>>::finished, this, [this, watcher]() {
+        const auto [errorCode, url] = watcher->result();
+        watcher->deleteLater();
+        if (errorCode != ErrorCode::NoError) {
+            emit errorOccurred(errorCode);
+            return;
+        }
+        emit renewalLinkReceived(url);
+    });
+    watcher->setFuture(m_subscriptionController->getRenewalLink(serverIndex));
 }
 

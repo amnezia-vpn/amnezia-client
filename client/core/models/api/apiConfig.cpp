@@ -165,6 +165,12 @@ QJsonObject ApiConfig::toJson() const
     if (isTestPurchase) {
         obj[apiDefs::key::isTestPurchase] = isTestPurchase;
     }
+    if (isInAppPurchase) {
+        obj[apiDefs::key::isInAppPurchase] = isInAppPurchase;
+    }
+    if (subscriptionExpiredByServer) {
+        obj[apiDefs::key::subscriptionExpiredByServer] = subscriptionExpiredByServer;
+    }
     
     return obj;
 }
@@ -205,6 +211,8 @@ ApiConfig ApiConfig::fromJson(const QJsonObject& json)
     config.stackType = json.value(apiDefs::key::stackType).toString();
     config.cliVersion = json.value(apiDefs::key::cliVersion).toString();
     config.isTestPurchase = json.value(apiDefs::key::isTestPurchase).toBool(false);
+    config.isInAppPurchase = json.value(apiDefs::key::isInAppPurchase).toBool(false);
+    config.subscriptionExpiredByServer = json.value(apiDefs::key::subscriptionExpiredByServer).toBool(false);
     
     return config;
 }

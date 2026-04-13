@@ -131,6 +131,9 @@ signals:
     void gatewayEndpointChanged(const QString &endpoint);
     void devGatewayEnvChanged(bool enabled);
 
+    void activityPaused();
+    void activityResumed();
+
     void isHomeAdLabelVisibleChanged(bool visible);
     void startMinimizedChanged();
 

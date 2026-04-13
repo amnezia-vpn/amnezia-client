@@ -21,6 +21,44 @@ extension Constants {
 }
 
 extension PacketTunnelProvider {
+    private func applyXraySplitTunnel(_ xrayConfig: XrayConfig,
+                                      settings: NEPacketTunnelNetworkSettings) {
+        guard let splitTunnelType = xrayConfig.splitTunnelType else {
+            return
+        }
+
+        guard let splitTunnelSites = xrayConfig.splitTunnelSites else {
+            xrayLog(.error, message: "Split tunnel sites are not set")
+            return
+        }
+
+        if splitTunnelType == 1 {
+            var ipv4IncludedRoutes = [NEIPv4Route]()
+
+            for allowedIPString in splitTunnelSites {
+                if let allowedIP = IPAddressRange(from: allowedIPString) {
+                    ipv4IncludedRoutes.append(NEIPv4Route(
+                        destinationAddress: "\(allowedIP.address)",
+                        subnetMask: "\(allowedIP.subnetMask())"))
+                }
+            }
+
+            settings.ipv4Settings?.includedRoutes = ipv4IncludedRoutes
+        } else if splitTunnelType == 2 {
+            var ipv4ExcludedRoutes = [NEIPv4Route]()
+
+            for excludedIPString in splitTunnelSites {
+                if let excludedIP = IPAddressRange(from: excludedIPString) {
+                    ipv4ExcludedRoutes.append(NEIPv4Route(
+                        destinationAddress: "\(excludedIP.address)",
+                        subnetMask: "\(excludedIP.subnetMask())"))
+                }
+            }
+
+            settings.ipv4Settings?.excludedRoutes = ipv4ExcludedRoutes
+        }
+    }
+
     func startXray(completionHandler: @escaping (Error?) -> Void) {
 
         // Xray configuration
@@ -72,6 +110,7 @@ extension PacketTunnelProvider {
             settings.dnsSettings = !dnsArray.isEmpty
             ? NEDNSSettings(servers: dnsArray)
             : NEDNSSettings(servers: ["1.1.1.1"])
+            applyXraySplitTunnel(xrayConfig, settings: settings)
 
             let xrayConfigData = xrayConfig.config.data(using: .utf8)
 

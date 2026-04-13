@@ -31,6 +31,8 @@ SettingsUiController::SettingsUiController(SettingsController* settingsControlle
 {
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsUiController::onNotificationStateChanged);
+    connect(AndroidController::instance(), &AndroidController::activityPaused, this, &SettingsUiController::activityPaused);
+    connect(AndroidController::instance(), &AndroidController::activityResumed, this, &SettingsUiController::activityResumed);
 #endif
 
     m_settingsController->checkIfNeedDisableLogs();

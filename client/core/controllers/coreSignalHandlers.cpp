@@ -63,6 +63,7 @@ void CoreSignalHandlers::initAllHandlers()
     initExportControllerHandler();
     initImportControllerHandler();
     initApiCountryModelUpdateHandler();
+    initSubscriptionRefreshHandler();
     initContainerModelUpdateHandler();
     initAdminConfigRevokedHandler();
     initPassphraseRequestHandler();
@@ -185,6 +186,16 @@ void CoreSignalHandlers::initApiCountryModelUpdateHandler()
         }
         
         m_coreController->m_apiCountryModel->updateModel(availableCountries, serverCountryCode);
+    });
+}
+
+void CoreSignalHandlers::initSubscriptionRefreshHandler()
+{
+    connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::subscriptionRefreshNeeded, this, [this]() {
+        const int defaultServerIndex = m_coreController->m_serversController->getDefaultServerIndex();
+        if (defaultServerIndex >= 0) {
+            m_coreController->m_subscriptionUiController->getAccountInfo(defaultServerIndex, false);
+        }
     });
 }
 

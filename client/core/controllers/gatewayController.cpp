@@ -35,8 +35,11 @@ namespace
 
     constexpr int httpStatusCodeNotFound = 404;
     constexpr int httpStatusCodeConflict = 409;
-
     constexpr int httpStatusCodeNotImplemented = 501;
+    constexpr int httpStatusCodePaymentRequired = 402;
+    constexpr int httpStatusCodeUnprocessableEntity = 422;
+
+    constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
@@ -327,10 +330,16 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
 
     QStringList baseUrls;
     if (m_isDevEnvironment) {
-        baseUrls = QString(DEV_S3_ENDPOINT).split(", ");
+        baseUrls = QString(DEV_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
     } else {
-        baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
+        baseUrls = QString(PROD_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
     }
+
+    if (baseUrls.empty()) {
+        qDebug() << "empty storage endpoint list";
+        return {};
+    }
+
     std::random_device randomDevice;
     std::mt19937 generator(randomDevice());
     std::shuffle(baseUrls.begin(), baseUrls.end(), generator);
@@ -409,12 +418,14 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
 {
     const QByteArray &responseBody = decryptedResponseBody;
 
-    int httpStatus = -1;
+    int apiHttpStatus = -1;
+    QString apiErrorMessage;
     if (isDecryptionSuccessful) {
         QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
         if (jsonDoc.isObject()) {
             QJsonObject jsonObj = jsonDoc.object();
-            httpStatus = jsonObj.value("http_status").toInt(-1);
+            apiHttpStatus = jsonObj.value("http_status").toInt(-1);
+            apiErrorMessage = jsonObj.value(QStringLiteral("message")).toString().trimmed();
         }
     } else {
         qDebug() << "failed to decrypt the data";
@@ -425,10 +436,12 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
         qDebug() << "timeout occurred";
         qDebug() << replyError;
         return true;
-    } else if (responseBody.contains("html")) {
+    } 
+    if (responseBody.contains("html")) {
         qDebug() << "the response contains an html tag";
         return true;
-    } else if (httpStatus == httpStatusCodeNotFound) {
+    } 
+    if (apiHttpStatus == httpStatusCodeNotFound) {
         if (responseBody.contains(errorResponsePattern1) || responseBody.contains(errorResponsePattern2)
             || responseBody.contains(errorResponsePattern3)) {
             return false;
@@ -436,16 +449,25 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
             qDebug() << replyError;
             return true;
         }
-    } else if (httpStatus == httpStatusCodeNotImplemented) {
+    } 
+    if (apiHttpStatus == httpStatusCodeNotImplemented) {
         if (responseBody.contains(updateRequestResponsePattern)) {
             return false;
         } else {
             qDebug() << replyError;
             return true;
         }
-    } else if (httpStatus == httpStatusCodeConflict) {
+    } 
+    if (apiHttpStatus == httpStatusCodeConflict) {
         return false;
-    } else if (replyError != QNetworkReply::NetworkError::NoError) {
+    } 
+    if (apiHttpStatus == httpStatusCodePaymentRequired) {
+        return false;
+    } 
+    if (apiHttpStatus == httpStatusCodeUnprocessableEntity) {
+        return apiErrorMessage != unprocessableSubscriptionMessage;
+    } 
+    if (replyError != QNetworkReply::NetworkError::NoError) {
         qDebug() << replyError;
         return true;
     }

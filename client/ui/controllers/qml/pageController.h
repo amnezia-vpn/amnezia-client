@@ -62,7 +62,7 @@ namespace PageLoader
         PageSetupWizardViewConfig,
         PageSetupWizardQrReader,
         PageSetupWizardApiServicesList,
-        PageSetupWizardApiServiceInfo,
+        PageSetupWizardApiFreeInfo,
 
         PageProtocolOpenVpnSettings,
         PageProtocolXraySettings,
@@ -76,6 +76,9 @@ namespace PageLoader
 
         PageShareFullAccess,
         PageShareConnection,
+
+        PageSetupWizardApiPremiumInfo,
+        PageSetupWizardApiTrialEmail,
 
         PageDevMenu
     };
