@@ -506,6 +506,15 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
         return;
     }
 
+    if (m_isFetchingConfig) {
+        m_pendingConfigFetch = true;
+        m_pendingConfigAllowRefreshRetry = m_pendingConfigAllowRefreshRetry || allowRefreshRetry;
+        qDebug() << "[FBLink API] fetch-config already in progress, coalescing request";
+        return;
+    }
+
+    m_isFetchingConfig = true;
+
     setConfigSyncState(true);
     QNetworkRequest request = createApiRequest("/me/config", false, true);
 
@@ -513,7 +522,21 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, allowRefreshRetry]() {
         reply->deleteLater();
+        m_isFetchingConfig = false;
         std::shared_ptr<void> guard(nullptr, [this](void*){ setConfigSyncState(false); });
+        const bool rerunFetch = m_pendingConfigFetch;
+        const bool rerunAllowRefreshRetry = m_pendingConfigAllowRefreshRetry;
+        m_pendingConfigFetch = false;
+        m_pendingConfigAllowRefreshRetry = true;
+
+        const auto rerunCoalescedFetch = [this, rerunFetch, rerunAllowRefreshRetry]() {
+            if (!rerunFetch) {
+                return;
+            }
+            QTimer::singleShot(0, this, [this, rerunAllowRefreshRetry]() {
+                fetchConfig(rerunAllowRefreshRetry);
+            });
+        };
 
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray responseData = reply->readAll();
@@ -755,6 +778,7 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
             } else {
                 emit configError(tr("Сервер не вернул конфигурацию"));
             }
+            rerunCoalescedFetch();
         } else {
              QByteArray responseData = reply->readAll();
              QJsonDocument doc = QJsonDocument::fromJson(responseData);
@@ -772,6 +796,7 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
              }
 
              emit configError(errStr);
+             rerunCoalescedFetch();
         }
     });
 }
@@ -852,12 +877,35 @@ void FBLinkController::fetchSubscription(bool allowRefreshRetry)
         return;
     }
 
+    if (m_isFetchingSubscription) {
+        m_pendingSubscriptionFetch = true;
+        m_pendingSubscriptionAllowRefreshRetry = m_pendingSubscriptionAllowRefreshRetry || allowRefreshRetry;
+        qDebug() << "[FBLink API] fetch-subscription already in progress, coalescing request";
+        return;
+    }
+
+    m_isFetchingSubscription = true;
+
     QNetworkRequest request = createApiRequest("/me/subscription", false, true);
 
     QNetworkReply *reply = m_nam->get(request);
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, allowRefreshRetry]() {
         reply->deleteLater();
+        m_isFetchingSubscription = false;
+        const bool rerunFetch = m_pendingSubscriptionFetch;
+        const bool rerunAllowRefreshRetry = m_pendingSubscriptionAllowRefreshRetry;
+        m_pendingSubscriptionFetch = false;
+        m_pendingSubscriptionAllowRefreshRetry = true;
+
+        const auto rerunCoalescedFetch = [this, rerunFetch, rerunAllowRefreshRetry]() {
+            if (!rerunFetch) {
+                return;
+            }
+            QTimer::singleShot(0, this, [this, rerunAllowRefreshRetry]() {
+                fetchSubscription(rerunAllowRefreshRetry);
+            });
+        };
 
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray responseData = reply->readAll();
@@ -909,6 +957,7 @@ void FBLinkController::fetchSubscription(bool allowRefreshRetry)
                     clearExistingFBLinkServers();
                 }
             }
+            rerunCoalescedFetch();
         } else {
             QByteArray responseData = reply->readAll();
             QJsonDocument doc = QJsonDocument::fromJson(responseData);
@@ -927,6 +976,7 @@ void FBLinkController::fetchSubscription(bool allowRefreshRetry)
 
             m_fetchConfigAfterSubscription = false;
             emit subscriptionError(errStr);
+            rerunCoalescedFetch();
         }
     });
 }

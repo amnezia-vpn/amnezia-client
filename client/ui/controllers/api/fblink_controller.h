@@ -171,6 +171,12 @@ private:
     void clearExistingFBLinkServers();
 
     bool m_isRefreshing = false;
+    bool m_isFetchingConfig = false;
+    bool m_isFetchingSubscription = false;
+    bool m_pendingConfigFetch = false;
+    bool m_pendingSubscriptionFetch = false;
+    bool m_pendingConfigAllowRefreshRetry = true;
+    bool m_pendingSubscriptionAllowRefreshRetry = true;
     bool m_isLoading = false;
     bool m_isConfigSyncing = false;
     bool m_hasPendingRoutingSync = false;

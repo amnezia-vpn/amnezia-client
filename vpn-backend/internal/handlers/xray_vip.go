@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 	"vpn-backend/internal/models"
 
 	"github.com/google/uuid"
@@ -17,6 +18,7 @@ const (
 	legacyXrayContainer  = "fblink-xray"
 	xrayProxyTag         = "proxy"
 	xrayDirectTag        = "direct"
+	vlessTemplateRefreshInterval = 10 * time.Minute
 )
 
 var xrayBasePaths = []string{
@@ -377,6 +379,13 @@ func ensureVLESSTemplate(db *gorm.DB, server *models.VPNServer) (*models.VLESSSe
 		xrayTemplateDefaults(server.VLESSTemplate, server)
 	}
 
+	if hasUsableVLESSTemplate(server.VLESSTemplate) {
+		templateAge := time.Since(server.VLESSTemplate.UpdatedAt)
+		if templateAge >= 0 && templateAge < vlessTemplateRefreshInterval {
+			return server.VLESSTemplate, nil
+		}
+	}
+
 	if server.SSHPassword != "" {
 		template, err := fetchVLESSTemplateFromServer(server, server.VLESSTemplate)
 		if err == nil {
@@ -408,9 +417,10 @@ func ensureVLESSCredential(tx *gorm.DB, userID uint, server *models.VPNServer, t
 	var credential models.VLESSCredential
 	if err := tx.Where("user_id = ? AND server_id = ?", userID, server.ID).First(&credential).Error; err == nil {
 		if credential.RevokedAt == nil {
-			if err := addXrayClient(server, template, credential.ClientID); err != nil {
-				return nil, err
-			}
+			// Fast path for config fetches: an already issued active credential
+			// should not trigger SSH/docker self-healing on every /me/config
+			// request. Re-adding the client here makes config refresh latency
+			// depend on remote server round-trips.
 			return &credential, nil
 		}
 		credential.RevokedAt = nil
