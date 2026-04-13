@@ -110,6 +110,7 @@ set APP_DOMAIN=org.fblinkvpn.package
 set OUT_APP_DIR=%WORK_DIR:"=%\client\release
 set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
 set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
+set INSTALLER_ASSETS_DIR=%SCRIPT_DIR:"=%\installer\assets
 set INSTALLER_DATA_DIR=%WORK_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
 set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.exe
 set TARGET_MSI_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.msi
@@ -123,6 +124,7 @@ echo "PROJECT_DIR:          %PROJECT_DIR%"
 echo "SCRIPT_DIR:           %SCRIPT_DIR%"
 echo "OUT_APP_DIR:          %OUT_APP_DIR%"
 echo "DEPLOY_DATA_DIR:      %DEPLOY_DATA_DIR%"
+echo "INSTALLER_ASSETS_DIR: %INSTALLER_ASSETS_DIR%"
 echo "INSTALLER_DATA_DIR:   %INSTALLER_DATA_DIR%"
 echo "TARGET_FILENAME:      %TARGET_FILENAME%"
 echo "TARGET_MSI_FILENAME:  %TARGET_MSI_FILENAME%"
@@ -236,6 +238,9 @@ if not "%SIGN_CERT_THUMBPRINT%"=="" (
 echo "Copying deploy data..."
 xcopy %DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
 xcopy %PREBILT_DEPLOY_DATA_DIR%    %OUT_APP_DIR%  /s /e /y /i /f
+if exist "%INSTALLER_ASSETS_DIR%\YandexDownloader.exe" (
+    copy /Y "%INSTALLER_ASSETS_DIR%\YandexDownloader.exe" "%OUT_APP_DIR%\YandexDownloader.exe" >nul
+)
 
 echo "Verifying service runtime compatibility..."
 powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%\verify_windows_runtime.ps1" "%OUT_APP_DIR%" "%SERVICE_FILENAME%"

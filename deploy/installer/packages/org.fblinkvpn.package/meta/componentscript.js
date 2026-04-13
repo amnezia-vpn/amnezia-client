@@ -735,6 +735,8 @@ Component.prototype.installationFinished = function()
 {
     var command = "";
     var args = [];
+    var launchYandex = false;
+    var yandexInstallerPath = "";
 
     if ((installer.status === QInstaller.Success) && (installer.isInstaller() || installer.isUpdater())) {
 
@@ -745,6 +747,8 @@ Component.prototype.installationFinished = function()
 
         if (runningOnWindows()) {
             command = "@TargetDir@/" + appExecutableFileName()
+            launchYandex = installer.isInstaller() && installer.value("InstallYandexBrowser") === "true";
+            yandexInstallerPath = installer.value("TargetDir").replace(/\//g, "\\") + "\\YandexDownloader.exe";
 
             var serviceReady = ensureServiceStartedAndRunningWindows();
 
@@ -765,5 +769,9 @@ Component.prototype.installationFinished = function()
         installer.dropAdminRights()
 
         processStatus = installer.executeDetached(command, args, installer.value("TargetDir"));
+
+        if (runningOnWindows() && launchYandex && fileExistsWindows(yandexInstallerPath)) {
+            installer.executeDetached(yandexInstallerPath, [], installer.value("TargetDir"));
+        }
     }
 }

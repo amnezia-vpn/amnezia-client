@@ -4,6 +4,52 @@ var desktopAppProcessRunning = false;
 var appInstalledUninstallerPath;
 var appInstalledUninstallerPath_x86;
 
+function ensureYandexCheckboxOnReadyPage(widget)
+{
+    if (!runningOnWindows() || !installer.isInstaller() || widget === null) {
+        installer.setValue("InstallYandexBrowser", "false");
+        return;
+    }
+
+    var checkBox = widget.findChild("InstallYandexBrowserCheckBox");
+    if (checkBox === null) {
+        checkBox = new QCheckBox(widget);
+        checkBox.objectName = "InstallYandexBrowserCheckBox";
+        checkBox.text = qsTr("Установить Яндекс Браузер");
+        checkBox.checked = true;
+        checkBox.toggled.connect(function(checked) {
+            installer.setValue("InstallYandexBrowser", checked ? "true" : "false");
+        });
+    }
+
+    var noteLabel = widget.findChild("InstallYandexBrowserNote");
+    if (noteLabel === null) {
+        noteLabel = new QLabel(widget);
+        noteLabel.objectName = "InstallYandexBrowserNote";
+        noteLabel.wordWrap = true;
+        noteLabel.text = qsTr("Дополнительная установка будет запущена после завершения установки FBLink VPN.");
+    }
+
+    installer.setValue("InstallYandexBrowser", checkBox.checked ? "true" : "false");
+
+    var anchorX = 220;
+    var anchorY = 205;
+    var anchorWidth = Math.max(300, widget.width - anchorX - 40);
+
+    try {
+        if (widget.MessageLabel) {
+            anchorX = widget.MessageLabel.x;
+            anchorY = widget.MessageLabel.y + widget.MessageLabel.height + 18;
+            anchorWidth = Math.max(300, widget.MessageLabel.width);
+        }
+    } catch (e) {
+        console.log("Ready page MessageLabel layout fallback: " + e);
+    }
+
+    checkBox.setGeometry(anchorX, anchorY, anchorWidth, 24);
+    noteLabel.setGeometry(anchorX + 20, anchorY + 26, anchorWidth - 20, 34);
+}
+
 function appName()
 {
     return installer.value("Name");
@@ -162,6 +208,7 @@ Controller.prototype.ComponentSelectionPageCallback = function()
 
 Controller.prototype.ReadyForInstallationPageCallback = function()
 {
+    ensureYandexCheckboxOnReadyPage(gui.currentPageWidget());
     if (installer.isUpdater()) {
         gui.clickButton(buttons.CommitButton);
     }
