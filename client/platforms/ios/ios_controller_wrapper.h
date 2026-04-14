@@ -1,6 +1,7 @@
 #import <NetworkExtension/NetworkExtension.h>
 #import <NetworkExtension/NETunnelProviderSession.h>
 #import <Foundation/Foundation.h>
+#include <TargetConditionals.h>
 
 #if !MACOS_NE
 #include <UIKit/UIKit.h>
@@ -21,7 +22,7 @@ class IosController;
 @end
 
 typedef void (^DocumentPickerClosedCallback)(NSString *path);
-#if !MACOS_NE
+#if !MACOS_NE && !TARGET_OS_TV
 @interface DocumentPickerDelegate : NSObject <UIDocumentPickerDelegate>
 
 @property (nonatomic, copy) DocumentPickerClosedCallback documentPickerClosedCallback;

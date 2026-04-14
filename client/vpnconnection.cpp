@@ -27,7 +27,7 @@
 
 #endif
 
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(MACOS_NE)
     #include "platforms/ios/ios_controller.h"
 #endif
 
@@ -37,7 +37,7 @@
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent)
     : QObject(parent), m_settings(settings), m_checkTimer(new QTimer(this))
 {
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(MACOS_NE)
     m_checkTimer.setInterval(1000);
     connect(IosController::Instance(), &IosController::connectionStateChanged, this, &VpnConnection::onConnectionStateChanged);
     connect(IosController::Instance(), &IosController::bytesChanged, this, &VpnConnection::onBytesChanged);
@@ -127,7 +127,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
     });
 #endif
 
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(MACOS_NE)
     if (state == Vpn::ConnectionState::Connected ||
         state == Vpn::ConnectionState::Connecting ||
         state == Vpn::ConnectionState::Reconnecting) {
@@ -243,7 +243,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
 
     appendSplitTunnelingConfig();
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_TVOS) && !defined(MACOS_NE)
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
     if (!m_vpnProtocol) {
         setConnectionState(Vpn::ConnectionState::Error);
@@ -255,7 +255,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     createAndroidConnections();
 
     m_vpnProtocol.reset(androidVpnProtocol);
-#elif defined Q_OS_IOS || defined(MACOS_NE)
+#elif defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(MACOS_NE)
     Proto proto = ContainerProps::defaultProtocol(container);
     IosController::Instance()->connectVpn(proto, m_vpnConfiguration);
     connect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
@@ -446,7 +446,7 @@ void VpnConnection::reconnectToVpn() {
 
 void VpnConnection::disconnectFromVpn()
 {
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(MACOS_NE)
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();
     disconnect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);

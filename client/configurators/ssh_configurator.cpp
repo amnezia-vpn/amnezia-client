@@ -1,6 +1,7 @@
 #include "ssh_configurator.h"
 
 #include <QDebug>
+#include <QCoreApplication>
 #include <QObject>
 #include <QProcess>
 #include <QString>
@@ -8,11 +9,6 @@
 #include <QTemporaryFile>
 #include <QThread>
 #include <qtimer.h>
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
-    #include <QGuiApplication>
-#else
-    #include <QApplication>
-#endif
 
 #include "core/server_defs.h"
 #include "utilities.h"
@@ -24,7 +20,7 @@ SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, const QShar
 
 QString SshConfigurator::convertOpenSShKey(const QString &key)
 {
-#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_IOS) && !defined(Q_OS_TVOS) && !defined(MACOS_NE)
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
@@ -70,13 +66,13 @@ QString SshConfigurator::convertOpenSShKey(const QString &key)
 // DEAD CODE.
 void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
 {
-#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_IOS) && !defined(Q_OS_TVOS) && !defined(MACOS_NE)
     QProcess *p = new QProcess();
     p->setProcessChannelMode(QProcess::SeparateChannels);
 
     #ifdef Q_OS_WIN
     p->setProcessEnvironment(prepareEnv());
-    p->setProgram(qApp->applicationDirPath() + "\\cygwin\\putty.exe");
+    p->setProgram(QCoreApplication::applicationDirPath() + "\\cygwin\\putty.exe");
 
     if (credentials.secretData.contains("PRIVATE KEY")) {
         // todo: connect by key
@@ -100,10 +96,10 @@ QProcessEnvironment SshConfigurator::prepareEnv()
 
 #ifdef Q_OS_WIN
     pathEnvVar.clear();
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\cygwin;");
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn;");
+    pathEnvVar.prepend(QDir::toNativeSeparators(QCoreApplication::applicationDirPath()) + "\\cygwin;");
+    pathEnvVar.prepend(QDir::toNativeSeparators(QCoreApplication::applicationDirPath()) + "\\openvpn;");
 #elif defined(Q_OS_MACX) && !defined(MACOS_NE)
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
+    pathEnvVar.prepend(QDir::toNativeSeparators(QCoreApplication::applicationDirPath()) + "/Contents/MacOS");
 #endif
 
     env.insert("PATH", pathEnvVar);

@@ -7,6 +7,24 @@
 #import <UserNotifications/UserNotifications.h>
 #import <Foundation/Foundation.h>
 
+#if defined(Q_OS_TVOS)
+
+IOSNotificationHandler::IOSNotificationHandler(QObject* parent) : NotificationHandler(parent) {}
+
+IOSNotificationHandler::~IOSNotificationHandler() {}
+
+void IOSNotificationHandler::notify(NotificationHandler::Message type,
+                                    const QString& title,
+                                    const QString& message,
+                                    int timerMsec) {
+  Q_UNUSED(type)
+  Q_UNUSED(title)
+  Q_UNUSED(message)
+  Q_UNUSED(timerMsec)
+}
+
+#else
+
 #if !MACOS_NE
 #import <UIKit/UIKit.h>
 
@@ -172,3 +190,5 @@ void IOSNotificationHandler::notify(NotificationHandler::Message type, const QSt
            }];
 }
 #endif
+
+#endif  // Q_OS_TVOS

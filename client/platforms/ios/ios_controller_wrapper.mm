@@ -26,7 +26,7 @@
 
 @end
 
-#if !MACOS_NE
+#if !MACOS_NE && !TARGET_OS_TV
 @implementation DocumentPickerDelegate
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {

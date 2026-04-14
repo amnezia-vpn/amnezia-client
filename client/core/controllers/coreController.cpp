@@ -8,7 +8,7 @@
     #include "platforms/android/android_controller.h"
 #endif
 
-#if defined(Q_OS_IOS)
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS)
     #include "platforms/ios/ios_controller.h"
     #include <AmneziaVPN-Swift.h>
 #endif
@@ -196,7 +196,7 @@ void CoreController::initAndroidController()
 
 void CoreController::initAppleController()
 {
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS)
     IosController::Instance()->initialize();
     connect(IosController::Instance(), &IosController::importConfigFromOutside, this, [this](QString data) {
         emit m_pageController->goToPageHome();
@@ -233,7 +233,7 @@ void CoreController::initSignalHandlers()
 
 void CoreController::initNotificationHandler()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_TVOS)
     m_notificationHandler.reset(NotificationHandler::create(nullptr));
 
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_notificationHandler.get(),
@@ -248,7 +248,7 @@ void CoreController::initNotificationHandler()
 
     auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_notificationHandler.get());
     connect(this, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
-#endif    
+#endif
 }
 
 void CoreController::updateTranslator(const QLocale &locale)

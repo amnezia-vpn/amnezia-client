@@ -1,4 +1,4 @@
-#if !MACOS_NE
+#if !MACOS_NE && !TARGET_OS_TV
 #include "QRCodeReaderBase.h"
 
 #import <UIKit/UIKit.h>

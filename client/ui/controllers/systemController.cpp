@@ -14,7 +14,7 @@
     #include "platforms/android/android_controller.h"
 #endif
 
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(MACOS_NE)
     #include "platforms/ios/ios_controller.h"
     #include <CoreFoundation/CoreFoundation.h>
 #endif
@@ -31,7 +31,7 @@ void SystemController::saveFile(const QString &fileName, const QString &data)
     return;
 #endif
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS)
     QUrl fileUrl = QDir::tempPath() + "/" + fileName;
     QFile file(fileUrl.toString());
 #else
@@ -43,7 +43,7 @@ void SystemController::saveFile(const QString &fileName, const QString &data)
     file.write(data.toUtf8());
     file.close();
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS)
     QStringList filesToSend;
     filesToSend.append(fileUrl.toString());
     // todo check if save successful
@@ -98,7 +98,7 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
     return AndroidController::instance()->openFile(nameFilter);
 #endif
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS)
 
     fileName = IosController::Instance()->openFile();
     if (fileName.isEmpty()) {

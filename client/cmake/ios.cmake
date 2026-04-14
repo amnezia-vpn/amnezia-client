@@ -7,8 +7,12 @@ if(AMNEZIA_IOS_APPLETV)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 17.0)
     set(QT_NO_SET_DEFAULT_IOS_LAUNCH_SCREEN TRUE)
     set(QT_NO_ADD_IOS_LAUNCH_SCREEN_TO_BUNDLE TRUE)
+    set(IOS_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Info-tvOS.plist.in)
+    set(IOS_LAUNCHSCREEN_STORYBOARD ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/tvOS/AmneziaVPNLaunchScreen.storyboard)
 else()
     message("Apple TV target mode is OFF")
+    set(IOS_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Info.plist.in)
+    set(IOS_LAUNCHSCREEN_STORYBOARD ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard)
 endif()
 
 enable_language(OBJC)
@@ -18,13 +22,21 @@ enable_language(Swift)
 find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
 set(LIBS ${LIBS} Qt6::ShaderTools)
 
-find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
-find_library(FW_UIKIT UIKit)
-find_library(FW_AVFOUNDATION AVFoundation)
-find_library(FW_FOUNDATION Foundation)
-find_library(FW_STOREKIT StoreKit)
-find_library(FW_USERNOTIFICATIONS UserNotifications)
-if(NOT AMNEZIA_IOS_APPLETV)
+if(AMNEZIA_IOS_APPLETV)
+    # Use framework linker flags directly for tvOS to avoid iPhoneOS SDK absolute paths.
+    set(FW_AUTHENTICATIONSERVICES "-framework AuthenticationServices")
+    set(FW_UIKIT "-framework UIKit")
+    set(FW_AVFOUNDATION "-framework AVFoundation")
+    set(FW_FOUNDATION "-framework Foundation")
+    set(FW_STOREKIT "-framework StoreKit")
+    set(FW_USERNOTIFICATIONS "-framework UserNotifications")
+else()
+    find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
+    find_library(FW_UIKIT UIKit)
+    find_library(FW_AVFOUNDATION AVFoundation)
+    find_library(FW_FOUNDATION Foundation)
+    find_library(FW_STOREKIT StoreKit)
+    find_library(FW_USERNOTIFICATIONS UserNotifications)
     find_library(FW_NETWORKEXTENSION NetworkExtension)
 endif()
 
@@ -70,7 +82,7 @@ target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
 set_target_properties(${PROJECT} PROPERTIES
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
-    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Info.plist.in
+    MACOSX_BUNDLE_INFO_PLIST ${IOS_INFO_PLIST}
     MACOSX_BUNDLE_ICON_FILE "AppIcon"
     MACOSX_BUNDLE_INFO_STRING "AmneziaVPN"
     MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPN"
@@ -103,6 +115,11 @@ if(AMNEZIA_IOS_APPLETV)
         XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS "$(inherited) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)"
         XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS[sdk=appletvos*] "$(inherited) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)"
         XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS[sdk=appletvsimulator*] "$(inherited) $(SDKROOT)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)"
+        XCODE_ATTRIBUTE_EXCLUDED_LIBRARY_SEARCH_PATHS "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk/usr/lib/swift"
+        XCODE_ATTRIBUTE_EXCLUDED_FRAMEWORK_SEARCH_PATHS "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk/System/Library/Frameworks"
+    )
+    set_target_properties(${PROJECT} PROPERTIES
+        QT_IOS_PERMISSIONS ""
     )
 else()
     set_target_properties(${PROJECT} PROPERTIES
@@ -141,6 +158,59 @@ target_compile_options(${PROJECT} PRIVATE
     -DVPN_NE_BUNDLEID=\"${BUILD_IOS_APP_IDENTIFIER}.network-extension\"
 )
 
+if(AMNEZIA_IOS_APPLETV)
+    # qscnetworkreachability plugin links IOKit, which is unavailable on tvOS.
+    qt_import_plugins(${PROJECT}
+        NO_DEFAULT
+        INCLUDE
+            QIOSIntegrationPlugin
+            QJpegPlugin
+            QSvgPlugin
+            QGifPlugin
+            QICOPlugin
+            QSvgIconPlugin
+            QSecureTransportBackendPlugin
+        EXCLUDE
+            QSCNetworkReachabilityNetworkInformationPlugin
+            QDarwinCameraPermissionPlugin
+    )
+
+    # Static tvOS Qt build doesn't auto-link these plugin archives into the
+    # Xcode target, but the app entry point lives in QIOSIntegrationPlugin.
+    set(_amnezia_tvos_static_plugins
+        Qt6::QIOSIntegrationPlugin
+        Qt6::QIOSIntegrationPlugin_init
+        Qt6::QJpegPlugin
+        Qt6::QJpegPlugin_init
+        Qt6::QSvgPlugin
+        Qt6::QSvgPlugin_init
+        Qt6::QGifPlugin
+        Qt6::QGifPlugin_init
+        Qt6::QICOPlugin
+        Qt6::QICOPlugin_init
+        Qt6::QSvgIconPlugin
+        Qt6::QSvgIconPlugin_init
+        Qt6::QSecureTransportBackendPlugin
+        Qt6::QSecureTransportBackendPlugin_init
+    )
+    foreach(_amnezia_tvos_static_plugin IN LISTS _amnezia_tvos_static_plugins)
+        if(TARGET ${_amnezia_tvos_static_plugin})
+            target_link_libraries(${PROJECT} PRIVATE ${_amnezia_tvos_static_plugin})
+        endif()
+    endforeach()
+    unset(_amnezia_tvos_static_plugin)
+    unset(_amnezia_tvos_static_plugins)
+
+    # Qt 6.9.2 iOS package links IOKit via Qt6::Core interface, but tvOS SDK
+    # does not provide IOKit. Strip this single framework for Apple TV builds.
+    get_target_property(_qtcore_iface_libs Qt6::Core INTERFACE_LINK_LIBRARIES)
+    if(_qtcore_iface_libs)
+        string(REPLACE "-framework IOKit;" "" _qtcore_iface_libs "${_qtcore_iface_libs}")
+        string(REPLACE ";-framework IOKit" "" _qtcore_iface_libs "${_qtcore_iface_libs}")
+        set_property(TARGET Qt6::Core PROPERTY INTERFACE_LINK_LIBRARIES "${_qtcore_iface_libs}")
+    endif()
+endif()
+
 set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
 
 target_sources(${PROJECT} PRIVATE
@@ -153,17 +223,29 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
 )
 
-target_sources(${PROJECT} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
-)
+if(IOS_LAUNCHSCREEN_STORYBOARD)
+    target_sources(${PROJECT} PRIVATE
+        ${IOS_LAUNCHSCREEN_STORYBOARD}
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
+    )
 
-set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
-)
+    set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
+        ${IOS_LAUNCHSCREEN_STORYBOARD}
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
+    )
+else()
+    target_sources(${PROJECT} PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
+    )
+
+    set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+        ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
+    )
+endif()
 
 add_subdirectory(ios/networkextension)
 add_dependencies(${PROJECT} networkextension)

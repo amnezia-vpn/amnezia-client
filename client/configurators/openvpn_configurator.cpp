@@ -1,17 +1,13 @@
 #include "openvpn_configurator.h"
 
 #include <QDebug>
+#include <QCoreApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcess>
 #include <QString>
 #include <QTemporaryDir>
 #include <QTemporaryFile>
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-    #include <QGuiApplication>
-#else
-    #include <QApplication>
-#endif
 
 #include "core/networkUtilities.h"
 #include "containers/containers_defs.h"
@@ -165,7 +161,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
     QString dnsConf = QString("\nscript-security 2\n"
                               "up %1/update-resolv-conf.sh\n"
                               "down %1/update-resolv-conf.sh\n")
-                              .arg(qApp->applicationDirPath());
+                              .arg(QCoreApplication::applicationDirPath());
 
     config.append(dnsConf);
 #endif

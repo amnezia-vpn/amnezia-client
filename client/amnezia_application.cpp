@@ -250,7 +250,7 @@ bool AmneziaApplication::parseCommands()
     return true;
 }
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_TVOS) && !defined(MACOS_NE)
 void AmneziaApplication::startLocalServer() {
     const QString serverName("AmneziaVPNInstance");
     QLocalServer::removeServer(serverName);
@@ -271,7 +271,7 @@ void AmneziaApplication::startLocalServer() {
 bool AmneziaApplication::eventFilter(QObject *watched, QEvent *event)
 {
     if (event->type() == QEvent::Close) {
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_TVOS)
         quit();
 #else
         if (m_forceQuit) {

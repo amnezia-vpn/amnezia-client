@@ -2,7 +2,9 @@
 #define INSTALLCONTROLLER_H
 
 #include <QObject>
-#include <QProcess>
+#if !defined(Q_OS_IOS) && !defined(Q_OS_TVOS)
+    #include <QProcess>
+#endif
 
 #include "containers/containers_defs.h"
 #include "core/defs.h"
@@ -111,7 +113,7 @@ private:
 
     QString m_privateKeyPassphrase;
 
-#ifndef Q_OS_IOS
+#if !defined(Q_OS_IOS) && !defined(Q_OS_TVOS)
     QList<QSharedPointer<QProcess>> m_sftpMountProcesses;
 #endif
 };
