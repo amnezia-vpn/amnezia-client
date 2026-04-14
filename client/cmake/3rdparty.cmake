@@ -26,7 +26,7 @@ if(WIN32)
         set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libssl.lib")
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
     endif()
-elseif(APPLE AND NOT IOS)
+elseif(APPLE AND NOT IOS AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
     if(MACOS_NE)
         set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/macos/universal2/libssh.a")
         set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/macos/universal2/libz.a")
@@ -39,6 +39,24 @@ elseif(APPLE AND NOT IOS)
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/macos/include")
     set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libssl.a")
     set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libcrypto.a")    
+elseif(CMAKE_SYSTEM_NAME STREQUAL "tvOS")
+    set(TVOS_3RD_ROOT "$ENV{HOME}/Qt_tv/3rd-tvos")
+    execute_process(
+        COMMAND xcrun --sdk appletvos --show-sdk-path
+        OUTPUT_VARIABLE TVOS_SDK_PATH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    set(LIBSSH_ROOT_DIR "${TVOS_3RD_ROOT}/libssh/0.10.6/appletvos-arm64")
+    set(OPENSSL_ROOT_DIR "${TVOS_3RD_ROOT}/openssl/3.0.13/appletvos-arm64")
+    set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
+
+    set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}")
+    set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/lib/libssh.a")
+    set(ZLIB_LIB_PATH "${TVOS_SDK_PATH}/usr/lib/libz.tbd")
+    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
+    set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/lib/libssl.a")
+    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/lib/libcrypto.a")
 elseif(IOS)
     set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/ios/arm64")
     set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libssh.a")
@@ -63,8 +81,10 @@ elseif(LINUX)
     set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libcrypto.a")
 endif()
 
-file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
-        DESTINATION ${OPENSSL_LIBRARIES_DIR})
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
+    file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
+            DESTINATION ${OPENSSL_LIBRARIES_DIR})
+endif()
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
   

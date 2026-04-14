@@ -6,7 +6,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_TVOS)
   #include <QGuiApplication>
 #else
   #include <QApplication>
@@ -19,7 +19,7 @@
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_TVOS)
   #define AMNEZIA_BASE_CLASS QGuiApplication
 #else
   #define AMNEZIA_BASE_CLASS QApplication
@@ -37,7 +37,7 @@ public:
     void loadFonts();
     bool parseCommands();
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_TVOS) && !defined(MACOS_NE)
     void startLocalServer();
 #endif
 

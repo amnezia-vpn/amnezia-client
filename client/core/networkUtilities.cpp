@@ -24,7 +24,7 @@
     #include <sys/socket.h>
     #include <unistd.h>
 #endif
-#if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(Q_OS_TVOS) && !defined(MACOS_NE)
     #include <sys/param.h>
     #include <sys/sysctl.h>
     #include <sys/socket.h>
@@ -404,7 +404,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     close(sock);
     return { gateway_address, QNetworkInterface::interfaceFromName(interface) };
 #endif
-#if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(Q_OS_TVOS) && !defined(MACOS_NE)
     QString gateway;
     int index = -1;
 

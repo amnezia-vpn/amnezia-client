@@ -1,11 +1,12 @@
 #include "pageController.h"
 #include "utils/converter.h"
 #include "core/errorstrings.h"
+#include <QCoreApplication>
 #if defined(MACOS_NE)
 #include "platforms/ios/ios_controller.h"
 #endif
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(MACOS_NE)
     #include <QGuiApplication>
 #else
     #include <QApplication>
@@ -14,7 +15,7 @@
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
-#if defined Q_OS_MAC
+#if defined(Q_OS_MACX) && !defined(Q_OS_TVOS)
     #include "ui/macos_util.h"
 #endif
 
@@ -27,7 +28,7 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
     AndroidController::instance()->setNavigationBarColor(initialPageNavigationBarColor);
 #endif
 
-#if defined Q_OS_MACX
+#if defined(Q_OS_MACX) && !defined(Q_OS_TVOS)
     connect(this, &PageController::raiseMainWindow, []() {
         setDockIconVisible(true);
     });
@@ -64,7 +65,7 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 void PageController::closeWindow()
 {
 // On mobile platforms, quit app on close; on desktop, just hide window
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_TVOS)
     qApp->quit();
 #else
     emit hideMainWindow();
@@ -118,7 +119,7 @@ void PageController::showOnStartup()
     } else {
 #if defined(Q_OS_WIN) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
         emit hideMainWindow();
-#elif defined(Q_OS_MACX)
+#elif defined(Q_OS_MACX) && !defined(Q_OS_TVOS)
         setDockIconVisible(false);
 #endif
     }

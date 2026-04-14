@@ -38,7 +38,7 @@ public slots:
     QString getConfigFileName();
     QString getMaliciousWarningText();
 
-#if defined Q_OS_ANDROID || defined Q_OS_IOS
+#if defined Q_OS_ANDROID || defined Q_OS_IOS || defined(Q_OS_TVOS)
     void startDecodingQr();
     bool parseQrCodeChunk(const QString &code);
 
@@ -70,7 +70,7 @@ private:
 
     void processAmneziaConfig(QJsonObject &config);
 
-#if defined Q_OS_ANDROID || defined Q_OS_IOS
+#if defined Q_OS_ANDROID || defined Q_OS_IOS || defined(Q_OS_TVOS)
     void stopDecodingQr();
 #endif
 
@@ -83,7 +83,7 @@ private:
     ConfigTypes m_configType;
     QString m_maliciousWarningText;
 
-#if defined Q_OS_ANDROID || defined Q_OS_IOS
+#if defined Q_OS_ANDROID || defined Q_OS_IOS || defined(Q_OS_TVOS)
     QMap<int, QByteArray> m_qrCodeChunks;
     bool m_isQrCodeProcessed;
     int m_totalQrCodeChunksCount;

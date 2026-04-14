@@ -24,6 +24,8 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
     set(MZ_PLATFORM_NAME "android")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
     set(MZ_PLATFORM_NAME "ios")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "tvOS")
+    set(MZ_PLATFORM_NAME "ios")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     set(MZ_PLATFORM_NAME "wasm")
 endif()
@@ -33,7 +35,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(APPLE)
-    if(IOS)
+    if(IOS OR CMAKE_SYSTEM_NAME STREQUAL "tvOS")
         set(CMAKE_OSX_ARCHITECTURES "arm64")
     elseif(MACOS_NE)
         set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
@@ -44,7 +46,7 @@ endif()
 
 add_subdirectory(client)
 
-if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
     add_subdirectory(service)
 
     include(${CMAKE_SOURCE_DIR}/deploy/installer/config.cmake)
@@ -52,7 +54,7 @@ endif()
 
 set(AMNEZIA_STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
 
-if(WIN32 AND NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+if(WIN32 AND NOT IOS AND NOT ANDROID AND NOT MACOS_NE AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
     file(TO_CMAKE_PATH "${AMNEZIA_STAGE_DIR}" AMNEZIA_STAGE_DIR_CMAKE)
 
     set(CPACK_GENERATOR "WIX")

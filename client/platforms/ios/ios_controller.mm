@@ -959,6 +959,10 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
 }
 
 bool IosController::shareText(const QStringList& filesToSend) {
+#if defined(Q_OS_TVOS)
+    Q_UNUSED(filesToSend)
+    return false;
+#else
     NSMutableArray *sharingItems = [NSMutableArray new];
 
     for (int i = 0; i < filesToSend.size(); i++) {
@@ -967,7 +971,7 @@ bool IosController::shareText(const QStringList& filesToSend) {
     }
 #if !MACOS_NE
     UIViewController *qtController = getViewController();
-    if (!qtController) return;
+    if (!qtController) return false;
 
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
 #endif
@@ -991,23 +995,25 @@ bool IosController::shareText(const QStringList& filesToSend) {
     wait.exec();
 
     return isAccepted;
+#endif
 }
 
 QString IosController::openFile() {
-#if !MACOS_NE
+#if defined(Q_OS_TVOS)
+    return QString();
+#elif !MACOS_NE
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.item"] inMode:UIDocumentPickerModeOpen];
 
     DocumentPickerDelegate *documentPickerDelegate = [[DocumentPickerDelegate alloc] init];
     documentPicker.delegate = documentPickerDelegate;
 
     UIViewController *qtController = getViewController();
-    if (!qtController) return;
+    if (!qtController) return QString();
 
     [qtController presentViewController:documentPicker animated:YES completion:nil];
-
 #endif
     __block QString filePath;
-#if !MACOS_NE
+#if !MACOS_NE && !defined(Q_OS_TVOS)
     documentPickerDelegate.documentPickerClosedCallback = ^(NSString *path) {
         if (path) {
             filePath = QString::fromUtf8(path.UTF8String);

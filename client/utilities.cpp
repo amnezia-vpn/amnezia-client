@@ -190,7 +190,7 @@ bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
     CloseHandle(hSnapshot);
     return false;
 
-#elif defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(MACOS_NE)
+#elif defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(Q_OS_ANDROID) || defined(MACOS_NE)
     return false;
 #else
     QProcess process;
@@ -250,7 +250,7 @@ bool Utils::killProcessByName(const QString &name)
 
     CloseHandle(hSnapshot);
     return success;
-#elif defined Q_OS_IOS || defined(Q_OS_ANDROID)
+#elif defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(Q_OS_ANDROID)
     return false;
 #else
     return QProcess::execute("pkill", { name }) == 0;

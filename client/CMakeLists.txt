@@ -33,7 +33,7 @@ add_definitions(-DDEV_S3_ENDPOINT="$ENV{DEV_S3_ENDPOINT}")
 add_definitions(-DFREE_V2_ENDPOINT="$ENV{FREE_V2_ENDPOINT}")
 add_definitions(-DPREM_V1_ENDPOINT="$ENV{PREM_V1_ENDPOINT}")
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS") OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
@@ -46,7 +46,7 @@ set(LIBS ${LIBS}
     Qt6::Core5Compat Qt6::Concurrent
 )
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS") OR (LINUX AND NOT ANDROID))
     set(LIBS ${LIBS} Qt6::Widgets)
 endif()
 
@@ -56,7 +56,7 @@ target_include_directories(${PROJECT} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
 
-if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS") OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_tun2socks.rep)
@@ -176,7 +176,7 @@ if(LINUX AND NOT ANDROID)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS") OR (LINUX AND NOT ANDROID))
     add_compile_definitions(AMNEZIA_DESKTOP)
 endif()
 
@@ -184,7 +184,7 @@ if(ANDROID)
     include(cmake/android.cmake)
 endif()
 
-if(IOS)
+if(IOS OR CMAKE_SYSTEM_NAME STREQUAL "tvOS")
     option(AMNEZIA_IOS_ENABLE_APPLETV_TARGET "Enable Apple TV target settings for iOS/Xcode projects" OFF)
     include(cmake/ios.cmake)
     include(cmake/ios-arch-fixup.cmake)
@@ -207,11 +207,11 @@ if(WIN32)
     endif()
 elseif(LINUX)
     set(DEPLOY_PLATFORM_PATH "linux/client")
-elseif(APPLE AND NOT IOS)
+elseif(APPLE AND NOT IOS AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
     set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
-if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>

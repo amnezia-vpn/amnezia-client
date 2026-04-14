@@ -1,11 +1,5 @@
 #include "connectionController.h"
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
-    #include <QGuiApplication>
-#else
-    #include <QApplication>
-#endif
-
 #include "utilities.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "version.h"
@@ -33,7 +27,7 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(Q_OS_TVOS) && !defined(MACOS_NE)
     if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
     {
         emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);

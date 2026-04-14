@@ -39,7 +39,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/mozilla/controllerimpl.h
 )
 
-if(NOT IOS AND NOT MACOS_NE)
+if(NOT IOS AND NOT MACOS_NE AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/platforms/ios/QRCodeReaderBase.h
     )
@@ -89,14 +89,14 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.cpp
 )
 
-if(NOT IOS AND NOT MACOS_NE)
+if(NOT IOS AND NOT MACOS_NE AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/platforms/ios/QRCodeReaderBase.cpp
     )
 endif()
 
 # Include native macOS platform helpers (dock/status-item)
-if(APPLE AND NOT IOS)
+if(APPLE AND NOT IOS AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
     list(APPEND HEADERS
         ${CLIENT_ROOT_DIR}/platforms/macos/macosutils.h
         ${CLIENT_ROOT_DIR}/platforms/macos/macosstatusicon.h
@@ -175,7 +175,7 @@ if(WIN32)
     )
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS") OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
 

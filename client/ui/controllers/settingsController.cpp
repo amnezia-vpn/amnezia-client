@@ -12,7 +12,7 @@
     #include "platforms/android/android_controller.h"
 #endif
 
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(MACOS_NE)
     #include <AmneziaVPN-Swift.h>
 #endif
 
@@ -57,6 +57,8 @@ QString getPlatformName()
     return "Windows";
 #elif defined(Q_OS_ANDROID)
     return "Android";
+#elif defined(Q_OS_TVOS)
+    return "tvOS";
 #elif defined(Q_OS_LINUX)
     return "Linux";
 #elif defined(Q_OS_MACX)
@@ -109,7 +111,7 @@ bool SettingsController::isLoggingEnabled()
 void SettingsController::toggleLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
-#if defined(Q_OS_IOS)
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS)
     AmneziaVPN::toggleLogging(enable);
 #endif
     if (enable == true) {
@@ -193,7 +195,7 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
     if (ok) {
         QJsonObject newConfigData = QJsonDocument::fromJson(data).object();
 
-#if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) || defined(Q_OS_MACX)
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) || (defined(Q_OS_MACX) && !defined(Q_OS_TVOS))
         bool autoStart = false;
         if (newConfigData.contains("Conf/autoStart")) {
             autoStart = newConfigData["Conf/autoStart"].toBool();
@@ -230,7 +232,7 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         m_sitesModel->setRouteMode(siteSplitTunnelingRouteMode);
         m_sitesModel->toggleSplitTunneling(siteSplittunnelingEnabled);
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(Q_OS_TVOS)
         m_settings->setAutoConnect(false);
         m_settings->setStartMinimized(false);
         m_settings->setKillSwitchEnabled(false);
@@ -269,7 +271,7 @@ void SettingsController::clearSettings()
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
+#if defined(Q_OS_IOS) || defined(Q_OS_TVOS) || defined(MACOS_NE)
     AmneziaVPN::clearSettings();
 #endif
 }
