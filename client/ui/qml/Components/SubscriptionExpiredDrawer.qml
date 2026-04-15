@@ -12,11 +12,10 @@ import "../Controls2/TextTypes"
 DrawerType2 {
     id: root
 
-    property bool isRenewalActionAvailable: false
+    property bool isRenewalAvailable: false
 
     onOpened: {
-        isRenewalActionAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
-                && !ApiAccountInfoModel.data("isInAppPurchase")
+        isRenewalAvailable = ServersModel.getProcessedServerData("isRenewalAvailable") && !ApiAccountInfoModel.data("isInAppPurchase")
     }
 
     expandedStateContent: ColumnLayout {
@@ -44,13 +43,13 @@ DrawerType2 {
                 anchors.left: parent.left
                 anchors.right: parent.right
 
-                text: qsTr("Amnezia Premium subscription has expired")
+                text: ServersModel.getProcessedServerData("name") + qsTr(" subscription has expired")
                 horizontalAlignment: Text.AlignLeft
             }
         }
 
         ParagraphTextType {
-            visible: root.isRenewalActionAvailable
+            visible: root.isRenewalAvailable
 
             Layout.fillWidth: true
             Layout.topMargin: 8
@@ -62,7 +61,7 @@ DrawerType2 {
         }
 
         BasicButtonType {
-            visible: root.isRenewalActionAvailable
+            visible: root.isRenewalAvailable
 
             Layout.fillWidth: true
             Layout.topMargin: 16
@@ -96,8 +95,13 @@ DrawerType2 {
             text: qsTr("Support")
 
             clickedFunc: function() {
-                root.closeTriggered()
-                PageController.goToPage(PageEnum.PageSettingsApiSupport)
+                PageController.showBusyIndicator(true)
+                let result = ApiSettingsController.getAccountInfo(false)
+                PageController.showBusyIndicator(false)
+                if (result) {
+                    root.closeTriggered()
+                    PageController.goToPage(PageEnum.PageSettingsApiSupport)
+                }
             }
         }
     }
