@@ -379,19 +379,8 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
-
-      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
-
-      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
-      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
-      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
-
-      MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
-      MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
-      MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
-
-      APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
-      APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+      KEYCHAIN_NAME: "build.keychain"
+      KEYCHAIN_PASSWORD: ""
 
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
@@ -420,7 +409,14 @@ jobs:
         set-env: 'true'
         aqtversion: '==3.3.0'       
         py7zrversion: '==0.22.*'  
-        extra: '--base ${{ env.QT_MIRROR }}' 
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+      
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -428,39 +424,33 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Get version from CMakeLists.txt'
-      id: get_version
-      run: |
-        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version: $VERSION"
-
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Install certs'
+      uses: ./.github/actions/setup-keychain
+      with:
+        keychain-path: ${{ env.KEYCHAIN_NAME }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+        app-cert-base64: ${{ secrets.MAC_APP_CERT_CERT }}
+        app-cert-password: ${{ secrets.MAC_APP_CERT_PW }}
+        installer-cert-base64: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
+        installer-cert-password: ${{ secrets.MAC_INSTALL_CERT_PW }}
 
     - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos.sh -n
-
-    - name: 'Pack macOS installer'
-      run: |
-        cd deploy/build/pkg
-        zip -r ../../AmneziaVPN_${VERSION}_macos.zip AmneziaVPN.pkg
-        cd ../../..
+      env:
+        CODESIGN_KEYCHAIN: ${{ env.KEYCHAIN_NAME }}
+        CODESIGN_SIGNATURE: ${{ secrets.MAC_SIGNER_ID }}
+        CODESIGN_INSTALLER_KEYCHAIN: ${{ env.KEYCHAIN_NAME }}
+        CODESIGN_INSTALLER_SIGNATURE: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
+        NOTARYTOOL_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
+        NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
+        NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+      shell: bash
+      run: deploy/build.sh
 
     - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_macos.zip
-        path: deploy/AmneziaVPN_${{ env.VERSION }}_macos.zip
-        retention-days: 7
-
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_MacOS_unpacked
-        path: deploy/build/client/AmneziaVPN.app
+        path: deploy/build/AmneziaVPN-*-Darwin.pkg
+        archive: false
         retention-days: 7
 
   Build-MacOS-NE:
