@@ -8,7 +8,7 @@ function(notarize_file file email team_id password)
         --wait
     )
 
-    set(cmd ${XCRUN_COMMAND} notarytool ${args} ${file})
+    set(cmd ${XCRUN_COMMAND} notarytool submit ${args} ${file})
 
     list(JOIN cmd " " cmd_str)
     message(STATUS ${cmd_str})
@@ -24,7 +24,7 @@ function(notarize_file file email team_id password)
 endfunction()
 
 function(staple_file file)
-    set(cmd ${XCRUN_COMMAND} staple ${file})
+    set(cmd ${XCRUN_COMMAND} stapler staple ${file})
 
     list(JOIN cmd " " cmd_str)
     message(STATUS ${cmd_str})
