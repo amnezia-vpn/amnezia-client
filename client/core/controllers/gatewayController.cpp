@@ -16,7 +16,9 @@
 #include <QPromise>
 #include <QUrl>
 #include <QHostAddress>
+#include <QHostInfo>
 #include <QDebug>
+#include <QThread>
 #include <QtConcurrent>
 
 #include "QBlockCipher.h"
@@ -250,6 +252,26 @@ ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonOb
         endpointName.chop(1);
     }
     
+    // Pre-resolve all DNS server hostnames to IPs (thread-safe: done before launching parallel threads)
+    QMap<QString, QString> resolvedHosts;
+    for (const auto &t : m_transportsConfig.dnsTransports) {
+        if (!t.server.isEmpty() && !resolvedHosts.contains(t.server)) {
+            QHostAddress addr(t.server);
+            if (addr.isNull()) {
+                QHostInfo info = QHostInfo::fromName(t.server);
+                if (!info.addresses().isEmpty()) {
+                    resolvedHosts[t.server] = info.addresses().first().toString();
+                    qDebug() << "[Transport] Resolved" << t.server << "->" << resolvedHosts[t.server];
+                } else {
+                    resolvedHosts[t.server] = t.server;
+                    qDebug() << "[Transport] Failed to resolve" << t.server;
+                }
+            } else {
+                resolvedHosts[t.server] = t.server;
+            }
+        }
+    }
+    
     // Helper: find DNS transport by type
     auto findDnsTransport = [&](NetworkUtilities::DnsTransport type) -> const DnsTransportEntry* {
         for (const auto &t : m_transportsConfig.dnsTransports) {
@@ -274,10 +296,13 @@ ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonOb
         
         QByteArray encryptedBody = reply->readAll();
         auto replyError = reply->error();
+        int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        QString errorStr = reply->errorString();
         reply->deleteLater();
         
         if (replyError != QNetworkReply::NoError || encryptedBody.isEmpty()) {
-            qDebug() << "[Transport] PRIMARY HTTP failed";
+            qDebug() << "[Transport] PRIMARY HTTP failed:" << replyError << errorStr
+                     << "status:" << httpStatus << "body size:" << encryptedBody.size();
             return ErrorCode::AmneziaServiceConnectionFailed;
         }
         
@@ -302,10 +327,13 @@ ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonOb
             case NetworkUtilities::DnsTransport::Quic: transportName = "DoQ"; break;
         }
         
+        bool needsHostname = (transport.type == NetworkUtilities::DnsTransport::Https ||
+                              transport.type == NetworkUtilities::DnsTransport::Tls);
+        QString serverAddr = needsHostname ? transport.server : resolvedHosts.value(transport.server, transport.server);
         qDebug() << "[Transport] PRIMARY: Trying DNS" << transportName;
         QByteArray dnsResponse = NetworkUtilities::sendViaDnsTunnel(
             encRequestData.requestBody, endpointName, transport.domain,
-            transport.server, transport.type, transport.port, m_requestTimeoutMsecs, transport.dohPath);
+            serverAddr, transport.type, transport.port, m_requestTimeoutMsecs, transport.dohPath);
         
         if (dnsResponse.isEmpty()) {
             qDebug() << "[Transport] PRIMARY DNS" << transportName << "failed";
@@ -358,15 +386,22 @@ ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonOb
     QByteArray successResult;
     QString successTransport;
     QMutex resultMutex;
-    QList<QFuture<void>> futures;
+    QList<QThread*> threads;
+    
+    auto launchThread = [&](std::function<void()> func) {
+        QThread *thread = QThread::create(std::move(func));
+        threads.append(thread);
+        thread->start();
+        QThread::msleep(10);
+    };
     
     // HTTP (if not primary and enabled)
     if (m_transportsConfig.primary != PrimaryTransport::Http && m_transportsConfig.httpEnabled) {
-        auto httpFuture = QtConcurrent::run([&]() {
+        launchThread([&]() {
             if (gotSuccess.load()) return;
             
             qDebug() << "[Transport] FALLBACK: Trying HTTP";
-            EncryptedRequestData httpRequestData = prepareRequest(endpoint, apiPayload, false);
+            EncryptedRequestData httpRequestData = prepareRequest(endpoint, apiPayload, true);
             if (httpRequestData.errorCode != ErrorCode::NoError) return;
             
             QNetworkAccessManager nam;
@@ -393,7 +428,6 @@ ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonOb
                 }
             } catch (...) {}
         });
-        futures.append(httpFuture);
     }
     
     // DNS transports (skip the one that was primary)
@@ -412,7 +446,7 @@ ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonOb
         }
         if (wasPrimary) continue;
         
-        auto dnsFuture = QtConcurrent::run([&, transport]() {
+        launchThread([&, transport]() {
             if (gotSuccess.load()) return;
             
             QString transportName;
@@ -424,10 +458,14 @@ ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonOb
                 case NetworkUtilities::DnsTransport::Quic: transportName = "DoQ"; break;
             }
             
+            // TLS-based transports need original hostname for certificate validation
+            bool needsHostname = (transport.type == NetworkUtilities::DnsTransport::Https ||
+                                  transport.type == NetworkUtilities::DnsTransport::Tls);
+            QString serverAddr = needsHostname ? transport.server : resolvedHosts.value(transport.server, transport.server);
             qDebug() << "[Transport] FALLBACK: Trying DNS" << transportName;
             QByteArray dnsResponse = NetworkUtilities::sendViaDnsTunnel(
                 encRequestData.requestBody, endpointName, transport.domain,
-                transport.server, transport.type, transport.port, m_requestTimeoutMsecs, transport.dohPath);
+                serverAddr, transport.type, transport.port, m_requestTimeoutMsecs, transport.dohPath);
             
             if (dnsResponse.isEmpty()) return;
             
@@ -441,13 +479,11 @@ ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonOb
                 }
             } catch (...) {}
         });
-        futures.append(dnsFuture);
     }
     
-    // CRITICAL: Wait for ALL futures to complete to prevent use-after-free
-    // (lambdas capture references to local variables like resultMutex, successResult)
-    for (auto &future : futures) {
-        future.waitForFinished();
+    for (auto *t : threads) {
+        t->wait();
+        delete t;
     }
     
     if (gotSuccess.load()) {
@@ -620,6 +656,7 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
         EVP_PKEY *publicKey = nullptr;
         try {
             QByteArray rsaKey = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
+            rsaKey.replace("\\n", "\n");
             QSimpleCrypto::QRsa rsa;
             publicKey = rsa.getPublicKeyFromByteArray(rsaKey);
         } catch (...) {

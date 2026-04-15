@@ -240,3 +240,9 @@ endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 qt_finalize_target(${PROJECT})
+
+option(BUILD_TESTS "Build transport integration tests" OFF)
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

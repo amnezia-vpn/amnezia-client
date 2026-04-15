@@ -63,6 +63,14 @@
 
 namespace
 {
+    QHostAddress resolveHostAddress(const QString &host) {
+        QHostAddress addr(host);
+        if (!addr.isNull()) return addr;
+        QHostInfo info = QHostInfo::fromName(host);
+        if (!info.addresses().isEmpty()) return info.addresses().first();
+        return QHostAddress();
+    }
+
     constexpr quint16 DNS_PORT = 53;
     constexpr quint16 DNS_TYPE_A = 1;      // A record
     constexpr quint16 DNS_CLASS_IN = 1;    // Internet class
@@ -716,7 +724,7 @@ QString NetworkUtilities::resolveDnsOverUdp(const QString &hostname, const QStri
     }
     
     // Отправляем запрос
-    QHostAddress dnsAddress(dnsServer);
+    QHostAddress dnsAddress = resolveHostAddress(dnsServer);
     if (dnsAddress.isNull()) {
         return QString();
     }
@@ -764,7 +772,7 @@ QString NetworkUtilities::resolveDnsOverTcp(const QString &hostname, const QStri
     QTcpSocket socket;
     
     // Подключаемся к DNS серверу
-    QHostAddress dnsAddress(dnsServer);
+    QHostAddress dnsAddress = resolveHostAddress(dnsServer);
     if (dnsAddress.isNull()) {
         return QString();
     }
@@ -848,12 +856,11 @@ QString NetworkUtilities::resolveDnsOverTls(const QString &hostname, const QStri
     QSslSocket socket;
     
     // Подключаемся к DNS серверу через TLS
-    QHostAddress dnsAddress(dnsServer);
+    QHostAddress dnsAddress = resolveHostAddress(dnsServer);
     if (dnsAddress.isNull()) {
         return QString();
     }
     
-    // Настраиваем SSL (отключаем проверку сертификата для простоты, можно добавить проверку позже)
     socket.setPeerVerifyMode(QSslSocket::QueryPeer);
     
     socket.connectToHostEncrypted(dnsAddress.toString(), port);
@@ -1001,7 +1008,7 @@ QString NetworkUtilities::resolveDnsOverQuic(const QString &hostname, const QStr
     
     QUdpSocket socket;
     
-    QHostAddress dnsAddress(dnsServer);
+    QHostAddress dnsAddress = resolveHostAddress(dnsServer);
     if (dnsAddress.isNull()) {
         return QString();
     }
@@ -1447,7 +1454,7 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdp(const QByteArray &payload, cons
         return QByteArray();
     }
     
-    QHostAddress dnsAddress(dnsServer);
+    QHostAddress dnsAddress = resolveHostAddress(dnsServer);
     if (dnsAddress.isNull()) {
         qDebug() << "[DNS Tunnel UDP] Invalid DNS server address:" << dnsServer;
         return QByteArray();
@@ -1461,37 +1468,23 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdp(const QByteArray &payload, cons
     
     qDebug() << "[DNS Tunnel UDP] Sent" << bytesWritten << "bytes to" << dnsServer << ":" << port;
     
-    QEventLoop loop;
-    QTimer timer;
-    timer.setSingleShot(true);
-    timer.setInterval(timeoutMsecs);
+    QElapsedTimer timer;
+    timer.start();
     
-    QByteArray response;
-    bool responseReceived = false;
-    
-    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    QObject::connect(&socket, &QUdpSocket::readyRead, [&]() {
-        while (socket.hasPendingDatagrams()) {
-            QNetworkDatagram datagram = socket.receiveDatagram();
-            if (datagram.isValid()) {
-                response = datagram.data();
-                responseReceived = true;
-                loop.quit();
+    while (timer.elapsed() < timeoutMsecs) {
+        if (socket.waitForReadyRead(qMax(1, timeoutMsecs - static_cast<int>(timer.elapsed())))) {
+            while (socket.hasPendingDatagrams()) {
+                QNetworkDatagram datagram = socket.receiveDatagram();
+                if (datagram.isValid()) {
+                    qDebug() << "[DNS Tunnel UDP] Received response:" << datagram.data().size() << "bytes";
+                    return parseDnsTxtResponse(datagram.data());
+                }
             }
         }
-    });
-    
-    timer.start();
-    loop.exec();
-    timer.stop();
-    
-    if (!responseReceived || response.isEmpty()) {
-        qDebug() << "[DNS Tunnel UDP] No response received (timeout)";
-        return QByteArray();
     }
     
-    qDebug() << "[DNS Tunnel UDP] Received response:" << response.size() << "bytes";
-    return parseDnsTxtResponse(response);
+    qDebug() << "[DNS Tunnel UDP] No response received (timeout)";
+    return QByteArray();
 }
 
 QByteArray NetworkUtilities::sendViaDnsTunnelTcp(const QByteArray &payload, const QString &queryName,
@@ -1499,7 +1492,7 @@ QByteArray NetworkUtilities::sendViaDnsTunnelTcp(const QByteArray &payload, cons
 {
     QTcpSocket socket;
     
-    QHostAddress dnsAddress(dnsServer);
+    QHostAddress dnsAddress = resolveHostAddress(dnsServer);
     if (dnsAddress.isNull()) {
         qDebug() << "[DNS Tunnel TCP] Invalid DNS server address:" << dnsServer;
         return QByteArray();
@@ -1535,44 +1528,47 @@ QByteArray NetworkUtilities::sendViaDnsTunnelTcp(const QByteArray &payload, cons
     
     qDebug() << "[DNS Tunnel TCP] Sent" << bytesWritten << "bytes to" << dnsServer << ":" << port;
     
-    // Wait for response
-    QEventLoop loop;
-    QTimer timer;
-    timer.setSingleShot(true);
-    timer.setInterval(timeoutMsecs);
-    
-    QByteArray response;
-    bool responseReceived = false;
-    
-    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    QObject::connect(&socket, &QTcpSocket::readyRead, [&]() {
-        if (socket.bytesAvailable() >= 2 && response.isEmpty()) {
-            QByteArray lengthBytes = socket.read(2);
-            if (lengthBytes.size() == 2) {
-                quint16 responseLength = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(lengthBytes.constData()));
-                while (socket.bytesAvailable() < responseLength) {
-                    if (!socket.waitForReadyRead(timeoutMsecs / 2)) {
-                        break;
-                    }
-                }
-                if (socket.bytesAvailable() >= responseLength) {
-                    response = socket.read(responseLength);
-                    responseReceived = true;
-                    loop.quit();
-                }
-            }
-        }
-    });
-    
+    // Synchronous read: first get 2-byte length prefix
+    QElapsedTimer timer;
     timer.start();
-    loop.exec();
-    timer.stop();
-    socket.close();
     
-    if (!responseReceived || response.isEmpty()) {
-        qDebug() << "[DNS Tunnel TCP] No response received (timeout)";
+    while (socket.bytesAvailable() < 2) {
+        int remaining = timeoutMsecs - timer.elapsed();
+        if (remaining <= 0 || !socket.waitForReadyRead(remaining)) {
+            qDebug() << "[DNS Tunnel TCP] Timeout waiting for response length";
+            socket.close();
+            return QByteArray();
+        }
+    }
+    
+    QByteArray lengthBytes = socket.read(2);
+    if (lengthBytes.size() != 2) {
+        qDebug() << "[DNS Tunnel TCP] Failed to read response length";
+        socket.close();
         return QByteArray();
     }
+    
+    quint16 responseLength = qFromBigEndian<quint16>(*reinterpret_cast<const quint16*>(lengthBytes.constData()));
+    
+    QByteArray response;
+    while (response.size() < responseLength) {
+        int remaining = timeoutMsecs - timer.elapsed();
+        if (remaining <= 0) {
+            qDebug() << "[DNS Tunnel TCP] Timeout waiting for response body";
+            socket.close();
+            return QByteArray();
+        }
+        
+        if (socket.bytesAvailable() > 0) {
+            response.append(socket.read(responseLength - response.size()));
+        } else if (!socket.waitForReadyRead(remaining)) {
+            qDebug() << "[DNS Tunnel TCP] Timeout waiting for more data";
+            socket.close();
+            return QByteArray();
+        }
+    }
+    
+    socket.close();
     
     qDebug() << "[DNS Tunnel TCP] Received response:" << response.size() << "bytes";
     return parseDnsTxtResponse(response);
@@ -1582,16 +1578,14 @@ QByteArray NetworkUtilities::sendViaDnsTunnelTls(const QByteArray &payload, cons
                                                   const QString &dnsServer, quint16 port, int timeoutMsecs)
 {
     QSslSocket socket;
-    
-    // Disable certificate verification for local testing
-    socket.setPeerVerifyMode(QSslSocket::VerifyNone);
-    
-    QHostAddress dnsAddress(dnsServer);
+    socket.setPeerVerifyMode(QSslSocket::VerifyPeer);
+
+    QHostAddress dnsAddress = resolveHostAddress(dnsServer);
     if (dnsAddress.isNull()) {
         qDebug() << "[DNS Tunnel DoT] Invalid DNS server address:" << dnsServer;
         return QByteArray();
     }
-    
+
     socket.connectToHostEncrypted(dnsServer, port);
     if (!socket.waitForEncrypted(timeoutMsecs)) {
         qDebug() << "[DNS Tunnel DoT] TLS handshake failed:" << socket.errorString();
@@ -1694,21 +1688,23 @@ QByteArray NetworkUtilities::sendViaDnsTunnelHttps(const QByteArray &payload, co
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/dns-message");
     request.setRawHeader("Accept", "application/dns-message");
     request.setTransferTimeout(timeoutMsecs);
-    
+
     QNetworkAccessManager manager;
     QNetworkReply *reply = manager.post(request, dnsQuery);
-    
+
+    // Synchronous wait using QEventLoop (safe since each thread gets its own)
     QEventLoop loop;
-    QTimer timer;
-    timer.setSingleShot(true);
-    timer.setInterval(timeoutMsecs);
-    
-    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
     QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     
-    timer.start();
+    QTimer::singleShot(timeoutMsecs, &loop, &QEventLoop::quit);
     loop.exec();
-    timer.stop();
+    
+    if (!reply->isFinished()) {
+        qDebug() << "[DNS Tunnel DoH] Timeout";
+        reply->abort();
+        reply->deleteLater();
+        return QByteArray();
+    }
     
     if (reply->error() != QNetworkReply::NoError) {
         qDebug() << "[DNS Tunnel DoH] HTTP error:" << reply->errorString();
@@ -1733,7 +1729,7 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payloa
 {
     qDebug() << "[DNS Tunnel UDP Chunked] Starting request to" << queryName;
     
-    QHostAddress dnsAddress(dnsServer);
+    QHostAddress dnsAddress = resolveHostAddress(dnsServer);
     if (dnsAddress.isNull()) {
         qDebug() << "[DNS Tunnel UDP Chunked] Invalid DNS server:" << dnsServer;
         return QByteArray();
@@ -1753,31 +1749,21 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payloa
             return QByteArray();
         }
         
-        QEventLoop loop;
-        QTimer timer;
-        timer.setSingleShot(true);
-        timer.setInterval(requestTimeoutMs);
+        QElapsedTimer timer;
+        timer.start();
         
-        QByteArray response;
-        bool responseReceived = false;
-        
-        QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        QObject::connect(&socket, &QUdpSocket::readyRead, [&]() {
-            while (socket.hasPendingDatagrams()) {
-                QNetworkDatagram datagram = socket.receiveDatagram();
-                if (datagram.isValid()) {
-                    response = datagram.data();
-                    responseReceived = true;
-                    loop.quit();
+        while (timer.elapsed() < requestTimeoutMs) {
+            if (socket.waitForReadyRead(qMax(1, requestTimeoutMs - static_cast<int>(timer.elapsed())))) {
+                while (socket.hasPendingDatagrams()) {
+                    QNetworkDatagram datagram = socket.receiveDatagram();
+                    if (datagram.isValid()) {
+                        return datagram.data();
+                    }
                 }
             }
-        });
+        }
         
-        timer.start();
-        loop.exec();
-        timer.stop();
-        
-        return responseReceived ? response : QByteArray();
+        return QByteArray();
     };
     
     // Helper lambda with retry and exponential backoff
@@ -1854,7 +1840,7 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payloa
         QMap<QUdpSocket*, int> socketToIndex;
         
         for (int idx : chunkIndices) {
-            if (chunks.contains(idx)) continue; // Already have this chunk
+            if (chunks.contains(idx)) continue;
             
             quint16 chunkTxId = static_cast<quint16>((QDateTime::currentMSecsSinceEpoch() + idx) & 0xFFFF);
             QByteArray chunkQuery = buildDnsChunkRequest(queryName, chunkTxId, meta.chunkId, idx);
@@ -1874,45 +1860,33 @@ QByteArray NetworkUtilities::sendViaDnsTunnelUdpChunked(const QByteArray &payloa
         
         qDebug() << "[DNS Tunnel UDP Chunked] Sent" << sockets.size() << "parallel requests";
         
-        // Wait for responses with deadline
-        QEventLoop loop;
-        QTimer deadline;
-        deadline.setSingleShot(true);
-        deadline.setInterval(batchTimeout);
-        
+        // Poll all sockets synchronously until timeout
+        QElapsedTimer deadline;
+        deadline.start();
         int receivedCount = 0;
         int expectedCount = sockets.size();
         
-        QObject::connect(&deadline, &QTimer::timeout, &loop, &QEventLoop::quit);
-        
-        for (auto &socket : sockets) {
-            QObject::connect(socket.data(), &QUdpSocket::readyRead, [&, sock = socket.data()]() {
-                while (sock->hasPendingDatagrams()) {
-                    QNetworkDatagram datagram = sock->receiveDatagram();
-                    if (datagram.isValid()) {
-                        QByteArray chunkTxtData = parseDnsTxtResponse(datagram.data());
-                        if (!chunkTxtData.isEmpty()) {
-                            ChunkMeta chunkMeta = parseChunkMeta(datagram.data());
-                            int idx = (chunkMeta.totalChunks > 0) ? chunkMeta.chunkIndex : socketToIndex.value(sock, -1);
-                            if (idx >= 0 && !chunks.contains(idx)) {
-                                chunks[idx] = chunkTxtData;
-                                qDebug() << "[DNS Tunnel UDP Chunked] Received chunk" << idx << ":" << chunkTxtData.size() << "bytes";
-                                receivedCount++;
+        while (deadline.elapsed() < batchTimeout && receivedCount < expectedCount && chunks.size() < meta.totalChunks) {
+            for (auto &socket : sockets) {
+                if (socket->waitForReadyRead(50)) {
+                    while (socket->hasPendingDatagrams()) {
+                        QNetworkDatagram datagram = socket->receiveDatagram();
+                        if (datagram.isValid()) {
+                            QByteArray chunkTxtData = parseDnsTxtResponse(datagram.data());
+                            if (!chunkTxtData.isEmpty()) {
+                                ChunkMeta chunkMeta = parseChunkMeta(datagram.data());
+                                int idx = (chunkMeta.totalChunks > 0) ? chunkMeta.chunkIndex : socketToIndex.value(socket.data(), -1);
+                                if (idx >= 0 && !chunks.contains(idx)) {
+                                    chunks[idx] = chunkTxtData;
+                                    qDebug() << "[DNS Tunnel UDP Chunked] Received chunk" << idx << ":" << chunkTxtData.size() << "bytes";
+                                    receivedCount++;
+                                }
                             }
                         }
                     }
                 }
-                
-                // Exit early if we have all chunks
-                if (receivedCount >= expectedCount || chunks.size() >= meta.totalChunks) {
-                    loop.quit();
-                }
-            });
+            }
         }
-        
-        deadline.start();
-        loop.exec();
-        deadline.stop();
     };
     
     // Process chunks in batches
