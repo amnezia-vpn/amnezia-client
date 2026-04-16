@@ -448,21 +448,13 @@ void CoreController::initPrepareConfigHandler()
             }
 
             std::shared_ptr<bool> triggered = std::make_shared<bool>(false);
-            
-            auto proceed = [this, triggered]() {
+
+            // When configFetched fires, fresh config is guaranteed — proceed directly
+            // without rechecking sync flags (the signal itself is the guarantee).
+            auto onConfigFetched = [this, triggered]() {
                 if (*triggered) return;
-                if (m_fbLinkController
-                    && (m_fbLinkController->hasPendingRoutingSync()
-                        || m_fbLinkController->isConfigSyncing()
-                        || m_fbLinkController->isLoading())) {
-                    *triggered = true;
-                    qWarning() << "[FBLink] prepareConfig: routing sync is still pending; refusing stale connection";
-                    emit m_pageController->showNotificationMessage(tr("Профили маршрутизации ещё обновляются. Повторите подключение через пару секунд."));
-                    emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-                    return;
-                }
                 *triggered = true;
-                qDebug() << "[FBLink] prepareConfig: deferred config fetched, calling openConnection()";
+                qDebug() << "[FBLink] prepareConfig: config fetched, calling openConnection()";
                 m_connectionController->openConnection();
             };
 
@@ -474,13 +466,19 @@ void CoreController::initPrepareConfigHandler()
                 emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error);
             };
 
-            connect(m_fbLinkController.get(), &FBLinkController::configFetched, this, proceed,
+            connect(m_fbLinkController.get(), &FBLinkController::configFetched, this, onConfigFetched,
                     static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
             connect(m_fbLinkController.get(), &FBLinkController::configError, this, errorProceed,
                     static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
-            
-            // Fallback timeout: do not connect if routing sync is still pending.
-            QTimer::singleShot(7000, this, proceed);
+
+            // Fallback timeout: if configFetched hasn't arrived yet (backend is slow),
+            // proceed anyway rather than refusing — forcing a double-click was bad UX.
+            QTimer::singleShot(7000, this, [this, triggered]() {
+                if (*triggered) return;
+                *triggered = true;
+                qWarning() << "[FBLink] prepareConfig: sync timeout reached, proceeding with cached config";
+                m_connectionController->openConnection();
+            });
             return;
         }
 

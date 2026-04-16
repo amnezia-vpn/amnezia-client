@@ -8,8 +8,10 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"vpn-backend/internal/models"
 
@@ -137,12 +139,8 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 			h.db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", userID).Update("revoked_at", &now)
 		}
 
-		if err := ensureRoutingProfileSchema(h.db); err != nil {
-			log.Printf("[ROUTING] failed to ensure routing profile schema for user %d during config fetch: %v", userID, err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
-			return
-		}
-
+		// ensureDefaultRoutingProfiles already calls ensureRoutingProfileSchema internally;
+		// calling it separately was causing ~22 duplicate DDL queries per request.
 		if err := ensureDefaultRoutingProfiles(h.db, userID); err != nil {
 			log.Printf("[ROUTING] failed to seed routing profiles for user %d during config fetch: %v", userID, err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
@@ -156,52 +154,79 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 			return
 		}
 
+		// Parallelize per-server config generation. Previously this was sequential:
+		// N servers × T(SSH) = N×T latency. Now it's ~T (worst-case single server).
+		type serverConfigEntry struct {
+			index  int
+			config map[string]interface{}
+		}
+		resultsCh := make(chan serverConfigEntry, len(servers))
+		var wg sync.WaitGroup
+
 		for i := range servers {
-			server := &servers[i]
-			template, err := ensureVLESSTemplate(h.db, server)
-			if err != nil {
-				fmt.Printf("[WARN] ensureVLESSTemplate failed for server %s: %v\n", server.Name, err)
-				continue
-			}
-			if template == nil || template.PublicKey == "" || template.ShortID == "" || template.ServerName == "" {
-				continue
-			}
-
-			clientID := strings.TrimSpace(template.ClientID)
-			issuedAt := time.Now()
-			if clientID == "" {
-				var credential *models.VLESSCredential
-				err = h.db.Transaction(func(tx *gorm.DB) error {
-					var txErr error
-					credential, txErr = ensureVLESSCredential(tx, userID, server, template)
-					return txErr
-				})
-				if err != nil || credential == nil {
-					fmt.Printf("[WARN] ensureVLESSCredential failed for server %s: %v\n", server.Name, err)
-					continue
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				server := &servers[i]
+				template, err := ensureVLESSTemplate(h.db, server)
+				if err != nil {
+					fmt.Printf("[WARN] ensureVLESSTemplate failed for server %s: %v\n", server.Name, err)
+					return
 				}
-				clientID = credential.ClientID
-				issuedAt = credential.CreatedAt
-			}
+				if template == nil || template.PublicKey == "" || template.ShortID == "" || template.ServerName == "" {
+					return
+				}
 
-			dnsConfig := resolveVIPDNSConfig(h.db, server, template, sub)
-			configJSON, err := json.Marshal(buildVLESSConfig(clientID, server, template, profiles, dnsConfig))
-			if err != nil {
-				continue
-			}
+				clientID := strings.TrimSpace(template.ClientID)
+				issuedAt := time.Now()
+				if clientID == "" {
+					var credential *models.VLESSCredential
+					err = h.db.Transaction(func(tx *gorm.DB) error {
+						var txErr error
+						credential, txErr = ensureVLESSCredential(tx, userID, server, template)
+						return txErr
+					})
+					if err != nil || credential == nil {
+						fmt.Printf("[WARN] ensureVLESSCredential failed for server %s: %v\n", server.Name, err)
+						return
+					}
+					clientID = credential.ClientID
+					issuedAt = credential.CreatedAt
+				}
 
-			responseConfigs = append(responseConfigs, map[string]interface{}{
-				"config":                      string(configJSON),
-				"server":                      server.Name,
-				"region":                      server.Region,
-				"issued_at":                   issuedAt,
-				"vip_ad_block_requested":      dnsConfig.Requested,
-				"vip_ad_block_applied":        dnsConfig.Applied,
-				"vip_ad_block_status":         dnsConfig.Status,
-				"vip_ad_block_dns_source":     dnsConfig.Source,
-				"vip_ad_block_degrade_reason": dnsConfig.DegradeReason,
-				"degrade_reason":              dnsConfig.DegradeReason,
-			})
+				dnsConfig := resolveVIPDNSConfig(h.db, server, template, sub)
+				configJSON, err := json.Marshal(buildVLESSConfig(clientID, server, template, profiles, dnsConfig))
+				if err != nil {
+					return
+				}
+				resultsCh <- serverConfigEntry{
+					index: i,
+					config: map[string]interface{}{
+						"config":                      string(configJSON),
+						"server":                      server.Name,
+						"region":                      server.Region,
+						"issued_at":                   issuedAt,
+						"vip_ad_block_requested":      dnsConfig.Requested,
+						"vip_ad_block_applied":        dnsConfig.Applied,
+						"vip_ad_block_status":         dnsConfig.Status,
+						"vip_ad_block_dns_source":     dnsConfig.Source,
+						"vip_ad_block_degrade_reason": dnsConfig.DegradeReason,
+						"degrade_reason":              dnsConfig.DegradeReason,
+					},
+				}
+			}(i)
+		}
+		wg.Wait()
+		close(resultsCh)
+
+		// Collect results preserving server order.
+		ordered := make([]serverConfigEntry, 0, len(servers))
+		for entry := range resultsCh {
+			ordered = append(ordered, entry)
+		}
+		sort.Slice(ordered, func(a, b int) bool { return ordered[a].index < ordered[b].index })
+		for _, entry := range ordered {
+			responseConfigs = append(responseConfigs, entry.config)
 		}
 	default:
 		var legacyVLESS []models.VLESSCredential

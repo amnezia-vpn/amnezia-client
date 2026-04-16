@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 	"vpn-backend/internal/models"
 
@@ -195,7 +196,20 @@ func defaultRoutingProfileSeeds() []defaultRoutingProfileSeed {
 	}
 }
 
+// routingProfileSchemaOnce caches the result of the schema migration check.
+// The DDL queries are only needed once per process lifetime — running them on
+// every /me/config request was the main source of latency for VIP users.
+var routingProfileSchemaOnce sync.Once
+var routingProfileSchemaErr error
+
 func ensureRoutingProfileSchema(db *gorm.DB) error {
+	routingProfileSchemaOnce.Do(func() {
+		routingProfileSchemaErr = doEnsureRoutingProfileSchema(db)
+	})
+	return routingProfileSchemaErr
+}
+
+func doEnsureRoutingProfileSchema(db *gorm.DB) error {
 	requiredColumns := []string{"Code", "TemplateCode", "Action", "Description", "Icon", "SortOrder"}
 	for _, column := range requiredColumns {
 		if db.Migrator().HasColumn(&models.RoutingProfile{}, column) {
