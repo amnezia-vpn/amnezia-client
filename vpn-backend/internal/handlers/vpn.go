@@ -81,6 +81,14 @@ func NewVPNHandler(db *gorm.DB) *VPNHandler {
 // GET /api/v1/me/config — получить FBLinkWG2 конфиг совместимый с клиентом
 func (h *VPNHandler) GetConfig(c *gin.Context) {
 	userID := c.GetUint("user_id")
+	reqStartedAt := time.Now()
+	activeServersCount := 0
+	generatedConfigsCount := 0
+	plan := "unknown"
+	defer func() {
+		log.Printf("[CONFIG] user=%d plan=%s active_servers=%d generated_configs=%d duration_ms=%d",
+			userID, plan, activeServersCount, generatedConfigsCount, time.Since(reqStartedAt).Milliseconds())
+	}()
 
 	// Проверяем активную подписку
 	sub, err := ensureDefaultSubscription(h.db, userID)
@@ -96,6 +104,7 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "subscription expired"})
 		return
 	}
+	plan = string(sub.Plan)
 
 	capabilities := buildSubscriptionCapabilities(sub)
 	if len(capabilities.AllowedProtocols) == 0 {
@@ -109,6 +118,7 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "no available VPN servers"})
 		return
 	}
+	activeServersCount = len(servers)
 
 	responseConfigs := make([]map[string]interface{}, 0, len(servers))
 	switch sub.Plan {
@@ -291,6 +301,7 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate any configs"})
 		return
 	}
+	generatedConfigsCount = len(responseConfigs)
 
 	// Возвращаем все конфиги через \n — Qt клиент split('\n') парсит каждый отдельно
 	var configLines []string

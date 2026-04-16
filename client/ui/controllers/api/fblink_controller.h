@@ -180,6 +180,8 @@ private:
     bool m_isLoading = false;
     bool m_isConfigSyncing = false;
     bool m_hasPendingRoutingSync = false;
+    int m_pendingRoutingSyncFetchFailures = 0;
+    qint64 m_pendingRoutingSyncSinceMs = 0;
     int m_loadingOperationsCount = 0;
     int m_configSyncOperationsCount = 0;
     bool m_fetchConfigAfterSubscription = false;

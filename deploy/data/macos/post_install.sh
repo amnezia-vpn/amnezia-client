@@ -6,6 +6,7 @@ LAUNCH_DAEMONS_PLIST_NAME=/Library/LaunchDaemons/$PLIST_NAME
 LOG_FOLDER=/var/log/$APP_NAME
 LOG_FILE="$LOG_FOLDER/post-install.log"
 APP_PATH=/Applications/$APP_NAME.app
+LEGACY_APP_PATH=/Applications/AmneziaVPN.app
 
 rm -rf "$LOG_FOLDER"
 mkdir -p "$LOG_FOLDER"
@@ -29,6 +30,12 @@ if [ -d "/Applications/${APP_NAME}.localized" ]; then
   run_cmd sudo rm -rf "$APP_PATH"
   run_cmd sudo mv "/Applications/${APP_NAME}.localized/${APP_NAME}.app" "$APP_PATH"
   run_cmd sudo rm -rf "/Applications/${APP_NAME}.localized"
+fi
+
+# Remove legacy app bundle so LaunchServices does not keep old branding/icon.
+if [ -d "$LEGACY_APP_PATH" ]; then
+  log "Removing legacy app bundle: $LEGACY_APP_PATH"
+  run_cmd sudo rm -rf "$LEGACY_APP_PATH"
 fi
 
 cleanup_launch_daemon() {
@@ -70,6 +77,14 @@ run_cmd launchctl bootstrap system "$LAUNCH_DAEMONS_PLIST_NAME" || run_cmd launc
 run_cmd launchctl enable "system/$APP_NAME-service" || true
 run_cmd launchctl kickstart -k "system/$APP_NAME-service" || true
 run_cmd launchctl print "system/$APP_NAME-service" || true
+
+# Force LaunchServices to refresh app metadata/icon after updates.
+LSREGISTER_BIN="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+if [ -x "$LSREGISTER_BIN" ]; then
+  run_cmd touch "$APP_PATH" || true
+  run_cmd "$LSREGISTER_BIN" -f "$APP_PATH" || true
+fi
+
 log "Launching ${APP_NAME} application"
 run_cmd open -a "$APP_PATH" || true
 

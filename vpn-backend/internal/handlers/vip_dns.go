@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 	"vpn-backend/internal/models"
 
 	"gorm.io/gorm"
@@ -61,6 +62,10 @@ const (
 	vipAdBlockDegradeReasonSyncStale   = "sync_stale"
 	vipAdBlockDegradeReasonDNSDown     = "dns_unreachable"
 	vipAdBlockDegradeReasonRulesMissed = "routing_rules_missing"
+
+	// Throttle expensive SSH self-heal attempts during config fetches when server
+	// is already in a degraded state.
+	vipDNSFailedSyncRetryInterval = 15 * time.Minute
 )
 
 func vipDNSCleanConfig(requested bool, status, degradeReason string) vipDNSConfig {
@@ -364,6 +369,14 @@ func resolveVIPDNSConfig(db *gorm.DB, server *models.VPNServer, template *models
 		}
 		log.Printf("[VIP DNS] using healthy cached Pi-hole on %s: dns=%s source=%s", server.Name, cachedIP, source)
 		return vipDNSPiHoleConfig(cachedIP, vipDNSPublicSecondary, source)
+	}
+
+	if strings.TrimSpace(server.PiHoleLastSyncError) != "" && server.PiHoleLastSyncAt != nil {
+		if time.Since(*server.PiHoleLastSyncAt) < vipDNSFailedSyncRetryInterval {
+			log.Printf("[VIP DNS] skipping self-heal on %s: last failed sync is too recent (%s ago)",
+				server.Name, time.Since(*server.PiHoleLastSyncAt).Truncate(time.Second))
+			return vipDNSCleanConfig(true, vipAdBlockStatusDegraded, vipAdBlockDegradeReasonSyncStale)
+		}
 	}
 
 	targetXrayContainer := resolvePiHoleTargetXrayFn(server, template.ContainerName)

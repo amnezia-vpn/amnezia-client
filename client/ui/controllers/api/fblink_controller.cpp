@@ -37,6 +37,9 @@ constexpr char kVIPAdBlockDegradeReasonKey[] = "subscriptionVIPAdBlockDegradeRea
 constexpr char kUserEmailKey[] = "accountEmail";
 constexpr char kSafeModeUntilEpochKey[] = "Conf/safeModeUntilEpochSec";
 constexpr char kShowNewFeaturesGuideKey[] = "Conf/showNewFeaturesGuide";
+constexpr int kPendingRoutingSyncRetryDelayMs = 1500;
+constexpr int kPendingRoutingSyncMaxFetchFailures = 3;
+constexpr int kPendingRoutingSyncMaxBlockMs = 30000;
 
 QSettings appSettings()
 {
@@ -310,6 +313,14 @@ void FBLinkController::setConfigSyncState(bool isSyncing)
 
 void FBLinkController::setPendingRoutingSync(bool pending)
 {
+    if (pending) {
+        m_pendingRoutingSyncSinceMs = QDateTime::currentMSecsSinceEpoch();
+        m_pendingRoutingSyncFetchFailures = 0;
+    } else {
+        m_pendingRoutingSyncSinceMs = 0;
+        m_pendingRoutingSyncFetchFailures = 0;
+    }
+
     if (m_hasPendingRoutingSync == pending) {
         return;
     }
@@ -793,6 +804,40 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                      fetchConfig(false);
                  });
                  return;
+             }
+
+             const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+             const bool authFailure = (httpStatus == 401)
+                                      || reply->error() == QNetworkReply::AuthenticationRequiredError
+                                      || reply->error() == QNetworkReply::ContentAccessDenied;
+             if (!authFailure && m_hasPendingRoutingSync && !m_isLoading) {
+                 m_pendingRoutingSyncFetchFailures++;
+                 const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+                 const qint64 pendingAgeMs =
+                         m_pendingRoutingSyncSinceMs > 0 ? (nowMs - m_pendingRoutingSyncSinceMs) : 0;
+                 const bool shouldDropPending =
+                         m_pendingRoutingSyncFetchFailures >= kPendingRoutingSyncMaxFetchFailures
+                         || pendingAgeMs >= kPendingRoutingSyncMaxBlockMs;
+
+                 qWarning() << "[FBLink] fetchConfig: pending routing sync fetch failed, attempt"
+                            << m_pendingRoutingSyncFetchFailures
+                            << "pending_age_ms=" << pendingAgeMs
+                            << "http=" << httpStatus
+                            << "network_error=" << reply->error();
+
+                 if (shouldDropPending) {
+                     qWarning() << "[FBLink] fetchConfig: dropping pending routing sync after repeated failures;"
+                                   " using last known config snapshot";
+                     setPendingRoutingSync(false);
+                 } else {
+                     QTimer::singleShot(kPendingRoutingSyncRetryDelayMs, this, [this]() {
+                         if (!m_hasPendingRoutingSync || m_isFetchingConfig || m_isLoading) {
+                             return;
+                         }
+                         qDebug() << "[FBLink] fetchConfig: retrying config fetch for pending routing sync";
+                         fetchConfig(false);
+                     });
+                 }
              }
 
              emit configError(errStr);

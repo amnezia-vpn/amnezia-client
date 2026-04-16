@@ -18,7 +18,9 @@ const (
 	legacyXrayContainer  = "fblink-xray"
 	xrayProxyTag         = "proxy"
 	xrayDirectTag        = "direct"
-	vlessTemplateRefreshInterval = 10 * time.Minute
+	// Keep /me/config fast: avoid frequent SSH/template refresh on user requests.
+	// Template refresh remains automatic, but much less aggressive.
+	vlessTemplateRefreshInterval = 24 * time.Hour
 )
 
 var xrayBasePaths = []string{
@@ -704,7 +706,7 @@ func vipDNSProxyRules(dnsConfig vipDNSConfig) []map[string]interface{} {
 		{
 			"type":        "field",
 			"outboundTag": xrayProxyTag,
-				"ip":          ips,
+			"ip":          ips,
 		},
 	}
 }
