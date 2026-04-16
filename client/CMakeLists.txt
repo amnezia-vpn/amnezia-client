@@ -10,7 +10,7 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 
 set(PACKAGES
     Core Gui Network Xml
-    RemoteObjects Quick Svg QuickControls2
+    Quick Svg QuickControls2
     Core5Compat Concurrent LinguistTools
 )
 
@@ -37,14 +37,22 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
+    set(PACKAGES ${PACKAGES} RemoteObjects)
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
-    Qt6::Network Qt6::Xml Qt6::RemoteObjects
+    Qt6::Network Qt6::Xml
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
 )
+
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
+    set(LIBS ${LIBS} Qt6::RemoteObjects)
+endif()
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(LIBS ${LIBS} Qt6::Widgets)
