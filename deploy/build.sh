@@ -4,9 +4,12 @@ set -o errexit
 PROJECT_DIR=$(pwd)
 BUILD_DIR="$PROJECT_DIR/deploy/build"
 
+bases=(~/Qt /opt/Qt)
+[ -n "${QT_INSTALL_DIR}" ] && bases+=("${QT_INSTALL_DIR}/Qt")
+
 qt_folders=()
 qif_folders=()
-for base in ~/Qt /opt/Qt; do
+for base in "${bases[@]}"; do
     for dir in "$base"/${QT_VERSION:-6.*}; do
         [ -d "$dir" ] && qt_folders+=("$dir")
     done
