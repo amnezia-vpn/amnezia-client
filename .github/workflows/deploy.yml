@@ -60,6 +60,8 @@ jobs:
 
     - name: 'Build project'
       shell: bash
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
       run: ./deploy/build.sh
 
     - name: 'Upload installer artifact'
@@ -430,6 +432,7 @@ jobs:
 
     - name: 'Build project'
       env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
         CODESIGN_KEYCHAIN: ${{ env.KEYCHAIN_NAME }}
         CODESIGN_SIGNATURE: ${{ secrets.MAC_SIGNER_ID }}
         CODESIGN_INSTALLER_KEYCHAIN: ${{ env.KEYCHAIN_NAME }}
