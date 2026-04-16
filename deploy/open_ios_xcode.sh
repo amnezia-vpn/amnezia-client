@@ -76,8 +76,15 @@ if ! command -v go >/dev/null 2>&1; then
 fi
 
 # Prefer full Xcode over CommandLineTools for -GXcode generator.
-if [ -z "${DEVELOPER_DIR:-}" ] && [ -d "/Applications/Xcode.app/Contents/Developer" ]; then
-  export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
+if [ -z "${DEVELOPER_DIR:-}" ]; then
+  if [ -d "/Applications/Xcode.app/Contents/Developer" ]; then
+    export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
+  else
+    XCODE_APP_CANDIDATE="$(ls -1d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -n1 || true)"
+    if [ -n "$XCODE_APP_CANDIDATE" ] && [ -d "$XCODE_APP_CANDIDATE/Contents/Developer" ]; then
+      export DEVELOPER_DIR="$XCODE_APP_CANDIDATE/Contents/Developer"
+    fi
+  fi
 fi
 
 if ! command -v xcodebuild >/dev/null 2>&1; then
@@ -88,7 +95,10 @@ fi
 XCODE_VERSION_LINE="$(xcodebuild -version 2>/dev/null | head -n1 || true)"
 if [ -z "$XCODE_VERSION_LINE" ]; then
   echo "Cannot read Xcode version."
-  echo "Run once manually: sudo xcodebuild -license accept"
+  echo "Most likely: active developer dir points to CommandLineTools and full Xcode is not installed."
+  echo "Install full Xcode (App Store) and run:"
+  echo "  sudo xcode-select -s /Applications/Xcode.app/Contents/Developer"
+  echo "  sudo xcodebuild -license accept"
   exit 1
 fi
 
