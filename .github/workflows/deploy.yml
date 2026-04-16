@@ -39,7 +39,18 @@ jobs:
         set-env: 'true'
         aqtversion: '==3.3.0'       
         py7zrversion: '==0.22.*'  
-        extra: '--base ${{ env.QT_MIRROR }}' 
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+      
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Install system packages'
+      run: sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -47,38 +58,15 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Get version from CMakeLists.txt'
-      id: get_version
-      run: |
-        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version: $VERSION"
-
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
-
     - name: 'Build project'
-      run: |
-        sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
-        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin
-        export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
-        bash deploy/build_linux.sh
-
-    - name: 'Pack installer'
-      run: cd deploy && tar -cf AmneziaVPN_Linux_Installer.tar AmneziaVPN_Linux_Installer.bin && zip AmneziaVPN_${VERSION}_linux_x64.tar.zip AmneziaVPN_Linux_Installer.tar
+      shell: bash
+      run: ./deploy/build.sh
 
     - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
-        path: deploy/AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
-        retention-days: 7
-
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_Linux_unpacked
-        path: deploy/AppDir
+        path: deploy/build/AmneziaVPN-*-Linux.run
+        archive: false
         retention-days: 7
 
     - name: 'Upload translations artifact'
@@ -416,10 +404,11 @@ jobs:
         py7zrversion: '==0.22.*'  
         extra: '--base ${{ env.QT_MIRROR }}'
 
-    - uses: actions/setup-python@v6
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
       with:
         python-version: 3.14
-      
+
     - name: 'Install conan'
       run: pip install "conan==2.26.2"
 
