@@ -37,10 +37,7 @@ class LibcapNg(ConanFile):
         pkgconf = PkgConfigDeps(self)
         pkgconf.generate()
         tc = AutotoolsToolchain(self)
-        if self.options.shared:
-            tc.configure_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            tc.configure_args.extend(["--disable-shared", "--enable-static"])
+        tc.configure_args += ["--without-python3", "--disable-cap-audit"]
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
