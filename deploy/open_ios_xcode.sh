@@ -75,11 +75,39 @@ if ! command -v go >/dev/null 2>&1; then
   exit 1
 fi
 
+# Prefer full Xcode over CommandLineTools for -GXcode generator.
+if [ -z "${DEVELOPER_DIR:-}" ] && [ -d "/Applications/Xcode.app/Contents/Developer" ]; then
+  export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
+fi
+
+if ! command -v xcodebuild >/dev/null 2>&1; then
+  echo "xcodebuild not found. Install full Xcode from App Store."
+  exit 1
+fi
+
+XCODE_VERSION_LINE="$(xcodebuild -version 2>/dev/null | head -n1 || true)"
+if [ -z "$XCODE_VERSION_LINE" ]; then
+  echo "Cannot read Xcode version."
+  echo "Run once manually: sudo xcodebuild -license accept"
+  exit 1
+fi
+
+XCODE_VERSION="$(echo "$XCODE_VERSION_LINE" | awk '{print $2}')"
+XCODE_MAJOR="$(echo "$XCODE_VERSION" | cut -d. -f1)"
+if [ -z "$XCODE_MAJOR" ] || [ "$XCODE_MAJOR" -lt 12 ]; then
+  echo "Unsupported Xcode version: $XCODE_VERSION_LINE"
+  echo "Install/update full Xcode (12+), then run:"
+  echo "  sudo xcode-select -s /Applications/Xcode.app/Contents/Developer"
+  exit 1
+fi
+
 go install golang.org/x/mobile/cmd/gomobile@latest
 gomobile init
 
 echo "Using qt-cmake: $QTCMAKE"
 echo "Using QT_HOST_PATH: $QT_MACOS_ROOT_DIR"
+echo "Using DEVELOPER_DIR: ${DEVELOPER_DIR:-$(xcode-select -p 2>/dev/null || echo 'not set')}"
+echo "Detected Xcode: $XCODE_VERSION_LINE"
 
 "$QTCMAKE" . -B build-ios -GXcode -DQT_HOST_PATH="$QT_MACOS_ROOT_DIR" -DDEPLOY=ON
 open build-ios/AmneziaVPN.xcodeproj
