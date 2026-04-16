@@ -71,9 +71,9 @@ if [ -f "$SERVICE_UNIT_SRC" ]; then
         sudo cp "$SERVICE_UNIT_SRC" /etc/systemd/system/ >> $LOG_FILE
         sudo systemctl daemon-reload >> $LOG_FILE 2>&1
         if [ -f "$APP_PATH/service/${APP_NAME}-service.sh" ]; then
-                sudo chmod 555 "$APP_PATH/service/${APP_NAME}-service.sh" >> $LOG_FILE 2>&1
+                sudo chmod 755 "$APP_PATH/service/${APP_NAME}-service.sh" >> $LOG_FILE 2>&1
         elif [ -f "$APP_PATH/service/FBLinkVPN-service.sh" ]; then
-                sudo chmod 555 "$APP_PATH/service/FBLinkVPN-service.sh" >> $LOG_FILE 2>&1
+                sudo chmod 755 "$APP_PATH/service/FBLinkVPN-service.sh" >> $LOG_FILE 2>&1
         fi
         sudo systemctl start $APP_NAME >> $LOG_FILE
         sudo systemctl enable $APP_NAME >> $LOG_FILE
@@ -97,10 +97,20 @@ else
 fi
 
 echo "user desktop creation loop started" >> $LOG_FILE
+# Remove stale desktop entries from legacy Amnezia builds so shell caches pick the new icon.
+sudo rm -f "$APP_PATH/AmneziaVPN.desktop" >> $LOG_FILE 2>&1
+sudo rm -f /usr/share/applications/AmneziaVPN.desktop >> $LOG_FILE 2>&1
+sudo rm -f /usr/local/share/applications/AmneziaVPN.desktop >> $LOG_FILE 2>&1
+sudo rm -f /usr/share/applications/amneziavpn.desktop >> $LOG_FILE 2>&1
 if [ -f "$APP_PATH/$APP_NAME.desktop" ]; then
         sudo cp "$APP_PATH/$APP_NAME.desktop" /usr/share/applications/ >> $LOG_FILE
 elif [ -f "$APP_PATH/FBLinkVPN.desktop" ]; then
         sudo cp "$APP_PATH/FBLinkVPN.desktop" /usr/share/applications/ >> $LOG_FILE
+elif [ -f "$APP_PATH/AmneziaVPN.desktop" ]; then
+        sudo cp "$APP_PATH/AmneziaVPN.desktop" /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
+        sudo sed -i 's/^Name=.*/Name=FBLink VPN/' /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE 2>&1
+        sudo sed -i 's|^Exec=.*|Exec=FBLinkVPN|' /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE 2>&1
+        sudo sed -i 's|^Icon=.*|Icon=/usr/share/pixmaps/FBLink.png|' /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE 2>&1
 fi
 sudo cp $APP_PATH/FBLink.png /usr/share/pixmaps/ >> $LOG_FILE
 sudo chmod 555 /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
@@ -126,6 +136,9 @@ fi
 if [ -n "$TARGET_USER" ] && [ "$TARGET_USER" != "root" ]; then
         TARGET_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
         TARGET_DESKTOP="$TARGET_HOME/Desktop"
+        sudo rm -f "$TARGET_HOME/.local/share/applications/AmneziaVPN.desktop" >> $LOG_FILE 2>&1
+        sudo rm -f "$TARGET_HOME/Desktop/AmneziaVPN.desktop" >> $LOG_FILE 2>&1
+        sudo rm -f "$TARGET_HOME/Desktop/Amnezia VPN.desktop" >> $LOG_FILE 2>&1
         if [ -f "/usr/share/applications/$APP_NAME.desktop" ] && [ -d "$TARGET_DESKTOP" ]; then
                 USER_DESKTOP_FILE="$TARGET_DESKTOP/FBLink VPN.desktop"
                 sudo cp "/usr/share/applications/$APP_NAME.desktop" "$USER_DESKTOP_FILE" >> $LOG_FILE 2>&1

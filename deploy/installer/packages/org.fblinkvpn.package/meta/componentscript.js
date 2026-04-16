@@ -654,12 +654,13 @@ Component.prototype.componentLoaded = function ()
         return;
     }
 
+    installer.setValue("InstallYandexBrowser", "true");
+
     if (installer.addWizardPage(component, "ReadyInstallExtrasWidget", QInstaller.ReadyForInstallation)) {
         var widget = gui.pageWidgetByObjectName("DynamicReadyInstallExtrasWidget");
         if (widget !== null) {
             widget.windowTitle = qsTr("Всё готово к установке");
             widget.yandexCheckBox.checked = true;
-            installer.setValue("InstallYandexBrowser", "false");
             widget.yandexCheckBox.toggled.connect(function(checked) {
                 installer.setValue("InstallYandexBrowser", checked ? "true" : "false");
             });

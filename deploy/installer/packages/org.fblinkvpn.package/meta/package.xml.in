@@ -8,6 +8,9 @@
     <ForcedInstallation>true</ForcedInstallation>
     <RequiresAdminRights>true</RequiresAdminRights>
     <Script>componentscript.js</Script>
+    <Licenses>
+        <License name="Лицензионное соглашение FBLink VPN" file="LICENSE.txt"/>
+    </Licenses>
     <UserInterfaces>
         <UserInterface>readytoinstallwidget.ui</UserInterface>
     </UserInterfaces>

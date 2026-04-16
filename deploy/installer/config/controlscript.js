@@ -131,7 +131,10 @@ Controller.prototype.PerformInstallationPageCallback = function()
 
 Controller.prototype.LicenseAgreementPageCallback = function()
 {
-    gui.clickButton(buttons.NextButton);
+    // For interactive installer flow let user explicitly accept the license.
+    if (installer.isUpdater()) {
+        gui.clickButton(buttons.NextButton);
+    }
 }
 
 Controller.prototype.FinishedPageCallback = function ()
@@ -239,10 +242,6 @@ function Controller () {
         installer.setDefaultPageVisible(QInstaller.ComponentSelection, false);
         installer.setDefaultPageVisible(QInstaller.TargetDirectory, false);
         installer.setDefaultPageVisible(QInstaller.StartMenuDirectoryPage, false);
-        installer.setDefaultPageVisible(QInstaller.LicenseCheck, false);
-        if (runningOnWindows()) {
-            installer.setDefaultPageVisible(QInstaller.ReadyForInstallation, false);
-        }
 
         isDesktopAppProcessRunningMessageLoop();
 

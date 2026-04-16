@@ -1316,7 +1316,8 @@ void FBLinkController::setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry
             emit vipAdBlockChanged(enabled);
             emit subscriptionChanged();
             if (isSubscribed()) {
-                fetchConfig(true);
+                // Ensure mutation loading-state is dropped before config reconciliation.
+                QTimer::singleShot(0, this, [this]() { fetchConfig(true); });
             } else {
                 setPendingRoutingSync(false);
             }
@@ -1550,7 +1551,8 @@ void FBLinkController::saveRoutingProfile(const QVariantMap &profile, bool allow
             emit routingProfileSaved();
             fetchRoutingProfiles(true);
             if (isSubscribed()) {
-                fetchConfig(true);
+                // Ensure mutation loading-state is dropped before config reconciliation.
+                QTimer::singleShot(0, this, [this]() { fetchConfig(true); });
             } else {
                 setPendingRoutingSync(false);
             }
@@ -1600,7 +1602,8 @@ void FBLinkController::deleteRoutingProfile(int id, bool allowRefreshRetry)
             emit routingProfileDeleted();
             fetchRoutingProfiles(true);
             if (isSubscribed()) {
-                fetchConfig(true);
+                // Ensure mutation loading-state is dropped before config reconciliation.
+                QTimer::singleShot(0, this, [this]() { fetchConfig(true); });
             } else {
                 setPendingRoutingSync(false);
             }
@@ -1658,7 +1661,8 @@ void FBLinkController::copySystemRoutingProfile(const QString &code, bool allowR
             emit routingSystemProfileCopied(profile, created);
             fetchRoutingProfiles(true);
             if (isSubscribed()) {
-                fetchConfig(true);
+                // Ensure mutation loading-state is dropped before config reconciliation.
+                QTimer::singleShot(0, this, [this]() { fetchConfig(true); });
             } else {
                 setPendingRoutingSync(false);
             }

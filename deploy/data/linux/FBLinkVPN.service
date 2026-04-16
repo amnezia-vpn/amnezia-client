@@ -7,7 +7,7 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-ExecStart=/opt/FBLinkVPN/service/FBLinkVPN-service.sh
+ExecStart=/bin/bash /opt/FBLinkVPN/service/FBLinkVPN-service.sh
 Environment=LD_LIBRARY_PATH=/opt/FBLinkVPN/client/lib
 
 [Install]

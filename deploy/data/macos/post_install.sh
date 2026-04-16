@@ -49,13 +49,17 @@ cleanup_launch_daemon "/Library/LaunchDaemons/AmneziaVPN.plist" "AmneziaVPN-serv
 run_cmd sudo chmod -R a-w "$APP_PATH/"
 run_cmd sudo chown -R root "$APP_PATH/"
 run_cmd sudo chgrp -R wheel "$APP_PATH/"
+run_cmd sudo chmod 755 "$APP_PATH/Contents/MacOS/${APP_NAME}-service" || true
 
 log "Requesting ${APP_NAME} to quit gracefully"
 run_cmd osascript -e 'tell application "FBLink" to quit' || true
 
 PLIST_SOURCE="$APP_PATH/Contents/Resources/$PLIST_NAME"
+if [ ! -f "$PLIST_SOURCE" ] && [ -f "$APP_PATH/Contents/MacOS/$PLIST_NAME" ]; then
+  PLIST_SOURCE="$APP_PATH/Contents/MacOS/$PLIST_NAME"
+fi
 if [ -f "$PLIST_SOURCE" ]; then
-  run_cmd mv -f "$PLIST_SOURCE" "$LAUNCH_DAEMONS_PLIST_NAME"
+  run_cmd cp -f "$PLIST_SOURCE" "$LAUNCH_DAEMONS_PLIST_NAME"
 else
   log "ERROR: service plist not found at $PLIST_SOURCE"
 fi

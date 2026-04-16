@@ -30,5 +30,8 @@ echo [post_install] ERROR: service is still missing after fallback >> "%LOG%" 2>
 exit /b 1
 
 :done
+del /f /q "%Public%\Desktop\AmneziaVPN.lnk" >nul 2>nul
+del /f /q "%ProgramData%\Microsoft\Windows\Start Menu\Programs\AmneziaVPN.lnk" >nul 2>nul
+del /f /q "%AppData%\Microsoft\Windows\Start Menu\Programs\AmneziaVPN.lnk" >nul 2>nul
 echo Installation complete. Please reboot your PC to apply VPN networking changes.
 exit /b 0

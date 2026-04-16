@@ -134,15 +134,10 @@ cp -Rv "$PREBUILT_DEPLOY_DATA_DIR"/* "$BUNDLE_DIR/Contents/macOS"
 cp -av "$BUILD_DIR/service/server/$APP_NAME-service" "$BUNDLE_DIR/Contents/macOS"
 rsync -av --exclude="$PLIST_NAME" --exclude=post_install.sh --exclude=post_uninstall.sh "$DEPLOY_DATA_DIR/" "$BUNDLE_DIR/Contents/macOS/"
 
-if [ -n "${MAC_APP_CERT_PW-}" ]; then
-
-  # Path to the p12 that contains the Developer ID *Application* certificate
-  CERTIFICATE_P12=$DEPLOY_DIR/DeveloperIdApplicationCertificate.p12
-
-  # Ensure launchd plist is bundled, but place it inside Resources so that
-  # the bundle keeps a valid structure (nothing but `Contents` at the root).
-  mkdir -p "$BUNDLE_DIR/Contents/Resources"
-  cp "$DEPLOY_DATA_DIR/$PLIST_NAME" "$BUNDLE_DIR/Contents/Resources/$PLIST_NAME"
+# Ensure launchd plist is always bundled in app resources
+# (service bootstrap on customer machines depends on it even for unsigned builds).
+mkdir -p "$BUNDLE_DIR/Contents/Resources"
+cp "$DEPLOY_DATA_DIR/$PLIST_NAME" "$BUNDLE_DIR/Contents/Resources/$PLIST_NAME"
 
 if [ -n "${MAC_APP_CERT_PW-}" ] && [ -n "${MAC_SIGNER_ID-}" ]; then
   # Show available signing identities (useful for debugging)
@@ -158,7 +153,6 @@ if [ -n "${MAC_APP_CERT_PW-}" ] && [ -n "${MAC_SIGNER_ID-}" ]; then
   fi
 else
   echo "MAC_APP_CERT_PW or MAC_SIGNER_ID not provided, skipping codesign."
-fi
 fi
 
 echo "Packaging installer..."
