@@ -110,9 +110,9 @@ echo "xcode build"
 xcodebuild \
 "OTHER_CODE_SIGN_FLAGS=--keychain '$KEYCHAIN_FILE'" \
 -configuration Release \
--scheme FBLink \
+-scheme FBLink.VPN \
 -destination "platform=macOS" \
--project $PROJECT_DIR/build-macos/FBLink.xcodeproj
+-project $PROJECT_DIR/build-macos/FBLink.VPN.xcodeproj
 
 
 # Restore keychain to default

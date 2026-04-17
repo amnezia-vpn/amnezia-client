@@ -87,7 +87,7 @@ else
   exit 1
 fi
 
-ARCHIVE_PATH=$BUILD_DIR/FBLink.xcarchive
+ARCHIVE_PATH=$BUILD_DIR/FBLink.VPN.xcarchive
 IPA_DIR=$BUILD_DIR/ipa
 EXPORT_OPTIONS=$BUILD_DIR/ExportOptions.plist
 
@@ -113,9 +113,9 @@ EOF
 xcodebuild \
 "OTHER_CODE_SIGN_FLAGS=--keychain '$KEYCHAIN_FILE'" \
 -configuration Release \
--scheme FBLink \
+-scheme FBLink.VPN \
 -destination "generic/platform=iOS" \
--project $BUILD_DIR/FBLink.xcodeproj \
+-project $BUILD_DIR/FBLink.VPN.xcodeproj \
 -archivePath $ARCHIVE_PATH \
 archive
 

@@ -120,6 +120,6 @@ echo "Using DEVELOPER_DIR: ${DEVELOPER_DIR:-$(xcode-select -p 2>/dev/null || ech
 echo "Detected Xcode: $XCODE_VERSION_LINE"
 
 "$QTCMAKE" . -B build-ios -GXcode -DQT_HOST_PATH="$QT_MACOS_ROOT_DIR" -DDEPLOY=ON
-open build-ios/FBLink.xcodeproj
+open build-ios/FBLink.VPN.xcodeproj
 
-echo "Done: build-ios/FBLink.xcodeproj"
+echo "Done: build-ios/FBLink.VPN.xcodeproj"
