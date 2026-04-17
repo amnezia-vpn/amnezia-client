@@ -24,6 +24,9 @@ set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY "YES"
     XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+    XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphonesimulator iphoneos"
+    XCODE_ATTRIBUTE_SUPPORTS_MACCATALYST "NO"
+    XCODE_ATTRIBUTE_SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD "NO"
 
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../Frameworks"
 )
@@ -39,6 +42,8 @@ if(DEPLOY)
 else()
     set_target_properties(networkextension PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
+        XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED[variant=Debug] "NO"
+        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED[variant=Debug] "NO"
     )
 endif()
 
@@ -61,12 +66,14 @@ find_library(FW_MOBILE_CORE MobileCoreServices)
 find_library(FW_UI_KIT UIKit)
 find_library(FW_FOUNDATION Foundation)
 find_library(FW_LIBRESOLV libresolv.9.tbd)
+find_library(FW_NETWORK Network)
 
 target_link_libraries(networkextension PRIVATE ${FW_ASSETS_LIBRARY})
 target_link_libraries(networkextension PRIVATE ${FW_MOBILE_CORE})
 target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
 target_link_libraries(networkextension PRIVATE ${FW_FOUNDATION})
 target_link_libraries(networkextension PRIVATE ${FW_LIBRESOLV})
+target_link_libraries(networkextension PRIVATE ${FW_NETWORK})
 
 target_compile_options(networkextension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(networkextension PRIVATE -DNETWORK_EXTENSION=1)

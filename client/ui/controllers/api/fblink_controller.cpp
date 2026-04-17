@@ -608,11 +608,6 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                     }
                     qSettings.sync();
                 }
-                if (!m_isLoading) {
-                    setPendingRoutingSync(false);
-                } else {
-                    qDebug() << "[FBLink] fetchConfig: keep pending routing sync because mutation request is still in progress";
-                }
                 emit subscriptionChanged();
 
                 if (m_importController && m_settings && m_serversModel) {
@@ -664,10 +659,26 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         return "FBLink VPN - " + hostName;
                     };
 
+                    const bool hasPinnedSelectedHost = !selectedFBLinkHostName.isEmpty();
+                    bool selectedConfigSeenInResponse = false;
+
                     for (const QString &configData : configStrings) {
                         if (m_importController->extractConfigFromData(configData)) {
                             QJsonObject newConfig = QJsonDocument::fromJson(m_importController->getConfig().toUtf8()).object();
                             QString newHostName = newConfig.value("hostName").toString();
+
+                            // Fast-path sync mode: when user already selected a server,
+                            // apply only that server config and ignore the rest.
+                            if (hasPinnedSelectedHost
+                                && newHostName.compare(selectedFBLinkHostName, Qt::CaseInsensitive) != 0) {
+                                m_importController->clearConfigFileName();
+                                continue;
+                            }
+                            if (hasPinnedSelectedHost
+                                && newHostName.compare(selectedFBLinkHostName, Qt::CaseInsensitive) == 0) {
+                                selectedConfigSeenInResponse = true;
+                            }
+
                             // Берём description из самого конфига (содержит region конкретного сервера)
                             // Fallback на makeDescription только если description отсутствует
                             QString description = newConfig.value("description").toString();
@@ -713,13 +724,32 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         }
                     }
 
-                    // Remove any FBLink VPN servers that were not in the new config
-                    // Iterate backwards so indices don't shift during removal
-                    for (int i = existingFBLinkServerIndices.size() - 1; i >= 0; --i) {
-                        int serverIndex = existingFBLinkServerIndices.at(i);
-                        if (!updatedIndices.contains(serverIndex)) {
-                            m_serversModel->removeServer(serverIndex);
+                    // Full cleanup is safe only when there is no pinned selected server.
+                    // With pinned selection we keep old servers untouched if backend
+                    // returned only a partial config set.
+                    if (!hasPinnedSelectedHost) {
+                        // Remove any FBLink VPN servers that were not in the new config
+                        // Iterate backwards so indices don't shift during removal
+                        for (int i = existingFBLinkServerIndices.size() - 1; i >= 0; --i) {
+                            int serverIndex = existingFBLinkServerIndices.at(i);
+                            if (!updatedIndices.contains(serverIndex)) {
+                                m_serversModel->removeServer(serverIndex);
+                            }
                         }
+                    } else if (!selectedConfigSeenInResponse) {
+                        qWarning() << "[FBLink] fetchConfig: selected server config was not returned, keeping current local snapshot:"
+                                   << selectedFBLinkHostName;
+                    }
+
+                    // Partial-response fallback:
+                    // if selected server config arrived, routing sync is considered complete
+                    // and connection can proceed immediately without waiting for other servers.
+                    if (hasPinnedSelectedHost && selectedConfigSeenInResponse) {
+                        setPendingRoutingSync(false);
+                    } else if (!m_isLoading) {
+                        setPendingRoutingSync(false);
+                    } else {
+                        qDebug() << "[FBLink] fetchConfig: keep pending routing sync because mutation request is still in progress";
                     }
 
                     const QStringList subscriptionProtocols = allowedProtocols();
