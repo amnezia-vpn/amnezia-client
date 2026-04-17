@@ -11,8 +11,14 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Autogen")
 set(PACKAGES
     Core Gui Network Xml
     Quick Svg QuickControls2
-    Core5Compat Concurrent LinguistTools
+    Concurrent LinguistTools
 )
+
+# Qt5 Compatibility module is not shipped with the default iOS Qt kit.
+# Desktop, Android and macOS builds still require it.
+if(NOT IOS)
+    set(PACKAGES ${PACKAGES} Core5Compat)
+endif()
 
 execute_process(
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
@@ -47,8 +53,12 @@ set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
-    Qt6::Core5Compat Qt6::Concurrent
+    Qt6::Concurrent
 )
+
+if(NOT IOS)
+    set(LIBS ${LIBS} Qt6::Core5Compat)
+endif()
 
 if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     set(LIBS ${LIBS} Qt6::RemoteObjects)

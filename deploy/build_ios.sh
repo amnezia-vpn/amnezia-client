@@ -12,9 +12,9 @@ mkdir -p $BUILD_DIR
 echo "Project dir: ${PROJECT_DIR}"
 echo "Build dir: ${BUILD_DIR}"
 
-APP_NAME=AmneziaVPN
+APP_NAME=FBLink
 APP_FILENAME=$APP_NAME.app
-APP_DOMAIN=org.amneziavpn.package
+APP_DOMAIN=org.fblinkvpn.package
 PLIST_NAME=$APP_NAME.plist
 
 
@@ -87,7 +87,7 @@ else
   exit 1
 fi
 
-ARCHIVE_PATH=$BUILD_DIR/AmneziaVPN.xcarchive
+ARCHIVE_PATH=$BUILD_DIR/FBLink.xcarchive
 IPA_DIR=$BUILD_DIR/ipa
 EXPORT_OPTIONS=$BUILD_DIR/ExportOptions.plist
 
@@ -113,9 +113,9 @@ EOF
 xcodebuild \
 "OTHER_CODE_SIGN_FLAGS=--keychain '$KEYCHAIN_FILE'" \
 -configuration Release \
--scheme AmneziaVPN \
+-scheme FBLink \
 -destination "generic/platform=iOS" \
--project $BUILD_DIR/AmneziaVPN.xcodeproj \
+-project $BUILD_DIR/FBLink.xcodeproj \
 -archivePath $ARCHIVE_PATH \
 archive
 
