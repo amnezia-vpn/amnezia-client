@@ -13,6 +13,7 @@ export QT_VERSION="${QT_VERSION:-6.6.2}"
 export QT_BIN_DIR="${QT_BIN_DIR:-$HOME/Qt/$QT_VERSION/ios/bin}"
 export QT_MACOS_ROOT_DIR="${QT_MACOS_ROOT_DIR:-$HOME/Qt/$QT_VERSION/macos}"
 export IOS_DEPLOY="${IOS_DEPLOY:-OFF}"
+export IOS_SIMULATOR_UI_ONLY="${IOS_SIMULATOR_UI_ONLY:-OFF}"
 export BUILD_IOS_DEVELOPMENT_TEAM="${BUILD_IOS_DEVELOPMENT_TEAM:-}"
 export PATH="$PATH:$HOME/go/bin"
 
@@ -121,8 +122,22 @@ echo "Using QT_HOST_PATH: $QT_MACOS_ROOT_DIR"
 echo "Using DEVELOPER_DIR: ${DEVELOPER_DIR:-$(xcode-select -p 2>/dev/null || echo 'not set')}"
 echo "Detected Xcode: $XCODE_VERSION_LINE"
 echo "Using IOS_DEPLOY: $IOS_DEPLOY"
+echo "Using IOS_SIMULATOR_UI_ONLY: $IOS_SIMULATOR_UI_ONLY"
 if [ -n "$BUILD_IOS_DEVELOPMENT_TEAM" ]; then
   echo "Using BUILD_IOS_DEVELOPMENT_TEAM: $BUILD_IOS_DEVELOPMENT_TEAM"
+fi
+
+IOS_SYSROOT="iphoneos"
+IOS_ARCH="arm64"
+IOS_NE="ON"
+if [ "$IOS_SIMULATOR_UI_ONLY" = "ON" ]; then
+  IOS_SYSROOT="iphonesimulator"
+  if [ "$(uname -m)" = "arm64" ]; then
+    IOS_ARCH="arm64"
+  else
+    IOS_ARCH="x86_64"
+  fi
+  IOS_NE="OFF"
 fi
 
 CMAKE_ARGS=(
@@ -130,8 +145,9 @@ CMAKE_ARGS=(
   -B build-ios
   -GXcode
   -DQT_HOST_PATH="$QT_MACOS_ROOT_DIR"
-  -DCMAKE_OSX_SYSROOT=iphoneos
-  -DCMAKE_OSX_ARCHITECTURES=arm64
+  -DCMAKE_OSX_SYSROOT="$IOS_SYSROOT"
+  -DCMAKE_OSX_ARCHITECTURES="$IOS_ARCH"
+  -DBUILD_IOS_NETWORK_EXTENSION="$IOS_NE"
 )
 
 if [ "$IOS_DEPLOY" = "ON" ]; then
