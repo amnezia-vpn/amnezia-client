@@ -117,7 +117,7 @@ set_property(TARGET FBLinkNetworkExtension APPEND PROPERTY RESOURCE
 ## Build wireguard-go-version.h
 execute_process(
     COMMAND go list -m golang.zx2c4.com/wireguard
-    WORKING_DIRECTORY ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo
+    WORKING_DIRECTORY ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources/WireGuardKitGo
     OUTPUT_VARIABLE WG_VERSION_FULL
 )
 string(REGEX REPLACE ".*v\([0-9.]*\).*" "\\1" WG_VERSION_STRING 1.1.1)

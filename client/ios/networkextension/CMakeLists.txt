@@ -50,9 +50,11 @@ set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
 )
 
-set_target_properties("networkextension" PROPERTIES
-    XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
-)
+if(DEFINED BUILD_IOS_DEVELOPMENT_TEAM AND NOT BUILD_IOS_DEVELOPMENT_TEAM STREQUAL "")
+    set_target_properties("networkextension" PROPERTIES
+        XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "${BUILD_IOS_DEVELOPMENT_TEAM}"
+    )
+endif()
 
 find_library(FW_ASSETS_LIBRARY AssetsLibrary)
 find_library(FW_MOBILE_CORE MobileCoreServices)
@@ -113,7 +115,7 @@ set_property(TARGET networkextension APPEND PROPERTY RESOURCE
 ## Build wireguard-go-version.h
 execute_process(
     COMMAND go list -m golang.zx2c4.com/wireguard
-    WORKING_DIRECTORY ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo
+    WORKING_DIRECTORY ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources/WireGuardKitGo
     OUTPUT_VARIABLE WG_VERSION_FULL
 )
 string(REGEX REPLACE ".*v\([0-9.]*\).*" "\\1" WG_VERSION_STRING 1.1.1)

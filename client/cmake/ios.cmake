@@ -81,7 +81,7 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_EMBED_APP_EXTENSIONS networkextension
 )
 
-if(DEFINED DEPLOY)
+if(DEPLOY)
     set_target_properties(${PROJECT} PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
@@ -102,9 +102,11 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_OBJC_INTERFACE_HEADER_NAME "FBLink-Swift.h"
     XCODE_ATTRIBUTE_SWIFT_OBJC_INTEROP_MODE "objcxx"
 )
-set_target_properties(${PROJECT} PROPERTIES
-    XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
-)
+if(DEFINED BUILD_IOS_DEVELOPMENT_TEAM AND NOT BUILD_IOS_DEVELOPMENT_TEAM STREQUAL "")
+    set_target_properties(${PROJECT} PROPERTIES
+        XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "${BUILD_IOS_DEVELOPMENT_TEAM}"
+    )
+endif()
 target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 target_compile_options(${PROJECT} PRIVATE
     -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\"
@@ -144,4 +146,3 @@ set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
 
 set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/)
 target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework")
-

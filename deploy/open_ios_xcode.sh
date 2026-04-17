@@ -12,6 +12,8 @@ git submodule update --init --recursive
 export QT_VERSION="${QT_VERSION:-6.6.2}"
 export QT_BIN_DIR="${QT_BIN_DIR:-$HOME/Qt/$QT_VERSION/ios/bin}"
 export QT_MACOS_ROOT_DIR="${QT_MACOS_ROOT_DIR:-$HOME/Qt/$QT_VERSION/macos}"
+export IOS_DEPLOY="${IOS_DEPLOY:-OFF}"
+export BUILD_IOS_DEVELOPMENT_TEAM="${BUILD_IOS_DEVELOPMENT_TEAM:-}"
 export PATH="$PATH:$HOME/go/bin"
 
 pick_latest_match() {
@@ -118,8 +120,42 @@ echo "Using qt-cmake: $QTCMAKE"
 echo "Using QT_HOST_PATH: $QT_MACOS_ROOT_DIR"
 echo "Using DEVELOPER_DIR: ${DEVELOPER_DIR:-$(xcode-select -p 2>/dev/null || echo 'not set')}"
 echo "Detected Xcode: $XCODE_VERSION_LINE"
+echo "Using IOS_DEPLOY: $IOS_DEPLOY"
+if [ -n "$BUILD_IOS_DEVELOPMENT_TEAM" ]; then
+  echo "Using BUILD_IOS_DEVELOPMENT_TEAM: $BUILD_IOS_DEVELOPMENT_TEAM"
+fi
 
-"$QTCMAKE" . -B build-ios -GXcode -DQT_HOST_PATH="$QT_MACOS_ROOT_DIR" -DDEPLOY=ON
-open build-ios/FBLink.VPN.xcodeproj
+CMAKE_ARGS=(
+  .
+  -B build-ios
+  -GXcode
+  -DQT_HOST_PATH="$QT_MACOS_ROOT_DIR"
+)
 
-echo "Done: build-ios/FBLink.VPN.xcodeproj"
+if [ "$IOS_DEPLOY" = "ON" ]; then
+  CMAKE_ARGS+=(-DDEPLOY=ON)
+fi
+
+if [ -n "$BUILD_IOS_DEVELOPMENT_TEAM" ]; then
+  CMAKE_ARGS+=(-DBUILD_IOS_DEVELOPMENT_TEAM="$BUILD_IOS_DEVELOPMENT_TEAM")
+fi
+
+"$QTCMAKE" "${CMAKE_ARGS[@]}"
+
+XCODEPROJ_PATH=""
+if [ -d "build-ios/AmneziaVPN.xcodeproj" ]; then
+  XCODEPROJ_PATH="build-ios/AmneziaVPN.xcodeproj"
+elif [ -d "build-ios/FBLink.xcodeproj" ]; then
+  XCODEPROJ_PATH="build-ios/FBLink.xcodeproj"
+else
+  XCODEPROJ_PATH="$(ls -1d build-ios/*.xcodeproj 2>/dev/null | head -n1 || true)"
+fi
+
+if [ -z "$XCODEPROJ_PATH" ] || [ ! -d "$XCODEPROJ_PATH" ]; then
+  echo "Failed to locate generated .xcodeproj under build-ios/"
+  exit 1
+fi
+
+open "$XCODEPROJ_PATH"
+
+echo "Done: $XCODEPROJ_PATH"
