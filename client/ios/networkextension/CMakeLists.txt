@@ -42,6 +42,8 @@ if(DEPLOY)
 else()
     set_target_properties(networkextension PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
+        XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
+        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
         XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED[variant=Debug] "NO"
         XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED[variant=Debug] "NO"
     )
