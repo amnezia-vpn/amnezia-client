@@ -25,7 +25,7 @@ set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY "YES"
     XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
-    XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphonesimulator iphoneos"
+    XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphoneos"
     XCODE_ATTRIBUTE_SUPPORTS_MACCATALYST "NO"
     XCODE_ATTRIBUTE_SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD "NO"
 
@@ -68,20 +68,13 @@ if(DEFINED BUILD_IOS_DEVELOPMENT_TEAM AND NOT BUILD_IOS_DEVELOPMENT_TEAM STREQUA
     )
 endif()
 
-find_library(FW_ASSETS_LIBRARY AssetsLibrary)
-find_library(FW_MOBILE_CORE MobileCoreServices)
-find_library(FW_UI_KIT UIKit)
-find_library(FW_FOUNDATION Foundation)
-find_library(FW_LIBRESOLV libresolv.9.tbd)
-find_library(FW_NETWORK Network)
-
-target_link_libraries(networkextension PRIVATE ${FW_ASSETS_LIBRARY})
-target_link_libraries(networkextension PRIVATE ${FW_MOBILE_CORE})
-target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
-target_link_libraries(networkextension PRIVATE ${FW_FOUNDATION})
-target_link_libraries(networkextension PRIVATE ${FW_LIBRESOLV})
-target_link_libraries(networkextension PRIVATE ${FW_NETWORK})
 target_link_options(networkextension PRIVATE
+    "-framework AssetsLibrary"
+    "-framework MobileCoreServices"
+    "-framework UIKit"
+    "-framework Foundation"
+    "-framework Network"
+    "-lresolv"
     "-lswiftCore"
     "-lswiftFoundation"
     "-lswiftDispatch"
@@ -150,6 +143,18 @@ target_sources(networkextension PRIVATE
 target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
+set(WIREGUARD_IOS_LIB "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a")
+if(NOT EXISTS "${WIREGUARD_IOS_LIB}")
+    message(FATAL_ERROR "WireGuard iOS library is missing: ${WIREGUARD_IOS_LIB}")
+endif()
+target_link_libraries(networkextension PRIVATE "${WIREGUARD_IOS_LIB}")
 
-target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework)
+set(HEV_XCFW_ROOT "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework")
+set(HEV_IOS_SLICE "ios-arm64")
+set(HEV_IOS_LIB "${HEV_XCFW_ROOT}/${HEV_IOS_SLICE}/libhev-socks5-tunnel.a")
+set(HEV_IOS_HEADERS "${HEV_XCFW_ROOT}/${HEV_IOS_SLICE}/Headers")
+if(NOT EXISTS "${HEV_IOS_LIB}")
+    message(FATAL_ERROR "HevSocks5Tunnel iOS library is missing: ${HEV_IOS_LIB}")
+endif()
+target_link_libraries(networkextension PRIVATE "${HEV_IOS_LIB}")
+target_include_directories(networkextension PRIVATE "${HEV_IOS_HEADERS}")

@@ -130,6 +130,8 @@ CMAKE_ARGS=(
   -B build-ios
   -GXcode
   -DQT_HOST_PATH="$QT_MACOS_ROOT_DIR"
+  -DCMAKE_OSX_SYSROOT=iphoneos
+  -DCMAKE_OSX_ARCHITECTURES=arm64
 )
 
 if [ "$IOS_DEPLOY" = "ON" ]; then
