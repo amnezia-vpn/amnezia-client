@@ -735,3 +735,40 @@ jobs:
         run: | 
           echo "Pull request:" >> $GITHUB_STEP_SUMMARY
           echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY
+
+# ------------------------------------------------------
+
+  Test-Linux:
+    runs-on: ubuntu-latest
+
+    needs: Build-Linux-Ubuntu
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+          path: build/AppDir
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'linux'
+          target: 'desktop'
+          arch: 'linux_gcc_64'
+          modules: 'qtremoteobjects qt5compat qtshadertools'
+          dir: ${{ runner.temp }}
+          setup-python: 'true'
+          tools: 'tools_ifw'
+          set-env: 'true'
+          aqtversion: '==3.3.0'       
+          py7zrversion: '==0.22.*'  
+          extra: '--base ${{ env.QT_MIRROR }}' 
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure
