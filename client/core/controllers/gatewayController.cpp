@@ -6,13 +6,11 @@
 #include <random>
 
 #include <QCryptographicHash>
-#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMutex>
 #include <QNetworkReply>
-#include <QProcessEnvironment>
 #include <QPromise>
 #include <QUrl>
 #include <QHostAddress>
@@ -194,39 +192,67 @@ void GatewayController::setTransportsConfig(const TransportsConfig &config)
              << "timeout=" << config.timeoutMs;
 }
 
-bool GatewayController::loadTransportsConfig(const QString &filePath, const QString &envVarName)
+TransportsConfig GatewayController::buildTransportsConfig()
 {
-    // Try environment variable first
-    QString envValue = QProcessEnvironment::systemEnvironment().value(envVarName);
-    if (!envValue.isEmpty()) {
-        QJsonParseError parseError;
-        QJsonDocument doc = QJsonDocument::fromJson(envValue.toUtf8(), &parseError);
-        if (parseError.error == QJsonParseError::NoError) {
-            setTransportsConfig(TransportsConfig::fromJson(doc.object()));
-            qDebug() << "[Transport] Loaded config from env:" << envVarName;
-            return true;
-        }
-        qWarning() << "[Transport] Failed to parse env" << envVarName << ":" << parseError.errorString();
+    TransportsConfig config;
+
+    QString server(AGW_DNS_SERVER);
+    QString domain(AGW_DNS_DOMAIN);
+
+    if (server.isEmpty() || domain.isEmpty()) {
+        qDebug() << "[Transport] DNS server/domain not configured, HTTP only";
+        return config;
     }
-    
-    // Try file
-    QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly)) {
-        QByteArray data = file.readAll();
-        file.close();
-        
-        QJsonParseError parseError;
-        QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
-        if (parseError.error == QJsonParseError::NoError) {
-            setTransportsConfig(TransportsConfig::fromJson(doc.object()));
-            qDebug() << "[Transport] Loaded config from file:" << filePath;
-            return true;
-        }
-        qWarning() << "[Transport] Failed to parse file" << filePath << ":" << parseError.errorString();
+
+    QString primaryStr = QString(AGW_DNS_PRIMARY).toLower();
+    if (primaryStr == "udp" || primaryStr == "dns_udp") {
+        config.primary = PrimaryTransport::DnsUdp;
+    } else if (primaryStr == "tcp" || primaryStr == "dns_tcp") {
+        config.primary = PrimaryTransport::DnsTcp;
+    } else if (primaryStr == "dot" || primaryStr == "dns_dot") {
+        config.primary = PrimaryTransport::DnsDot;
+    } else if (primaryStr == "doh" || primaryStr == "dns_doh") {
+        config.primary = PrimaryTransport::DnsDoh;
+    } else if (primaryStr == "doq" || primaryStr == "dns_doq") {
+        config.primary = PrimaryTransport::DnsDoq;
+    } else {
+        config.primary = PrimaryTransport::Http;
     }
-    
-    qDebug() << "[Transport] No config found, using defaults";
-    return false;
+
+    int retryCount = QString(AGW_DNS_RETRY_COUNT).toInt();
+    config.retryCount = (retryCount > 0) ? retryCount : 3;
+
+    int timeoutMs = QString(AGW_DNS_TIMEOUT_MS).toInt();
+    config.timeoutMs = (timeoutMs > 0) ? timeoutMs : 10000;
+
+    config.httpEnabled = true;
+
+    auto addTransport = [&](NetworkUtilities::DnsTransport type, const char *portDefine, quint16 defaultPort,
+                            const QString &dohPath = QString()) {
+        DnsTransportEntry entry;
+        entry.type = type;
+        entry.server = server;
+        entry.domain = domain;
+        quint16 port = QString(portDefine).toUShort();
+        entry.port = (port > 0) ? port : defaultPort;
+        if (!dohPath.isEmpty()) entry.dohPath = dohPath;
+        config.dnsTransports.append(entry);
+    };
+
+    addTransport(NetworkUtilities::DnsTransport::Udp, AGW_DNS_PORT_UDP, 5353);
+    addTransport(NetworkUtilities::DnsTransport::Tcp, AGW_DNS_PORT_UDP, 5353);
+    addTransport(NetworkUtilities::DnsTransport::Tls, AGW_DNS_PORT_DOT, 853);
+
+    QString dohPath = QString(AGW_DNS_DOH_PATH);
+    if (dohPath.isEmpty()) dohPath = "/dns-query";
+    addTransport(NetworkUtilities::DnsTransport::Https, AGW_DNS_PORT_DOH, 443, dohPath);
+
+    addTransport(NetworkUtilities::DnsTransport::Quic, AGW_DNS_PORT_DOQ, 8853);
+
+    qDebug() << "[Transport] Built config from env: server=" << server << "domain=" << domain
+             << "transports=" << config.dnsTransports.size() << "primary=" << static_cast<int>(config.primary);
+
+    return config;
 }
 
 ErrorCode GatewayController::postParallel(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)

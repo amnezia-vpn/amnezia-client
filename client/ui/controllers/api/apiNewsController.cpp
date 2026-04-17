@@ -52,8 +52,7 @@ void ApiNewsController::fetchNews(bool showError)
                                         apiDefs::requestTimeoutMsecs, 
                                         m_settings->isStrictKillSwitchEnabled());
     
-    // Load transports config from file or env
-    gatewayController.loadTransportsConfig("gateway.json", "AMNEZIA_GATEWAY");
+    gatewayController.setTransportsConfig(GatewayController::buildTransportsConfig());
     
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.postParallel(endpoint, payload, responseBody);

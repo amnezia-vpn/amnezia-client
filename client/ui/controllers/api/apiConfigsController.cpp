@@ -747,8 +747,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
                                         apiDefs::requestTimeoutMsecs,
                                         m_settings->isStrictKillSwitchEnabled());
     
-    // Load transports config from file or env
-    gatewayController.loadTransportsConfig("gateway.json", "AMNEZIA_GATEWAY");
+    gatewayController.setTransportsConfig(GatewayController::buildTransportsConfig());
     
     ErrorCode errorCode = gatewayController.postParallel(endpoint, apiPayload, responseBody);
 
@@ -962,9 +961,7 @@ ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJ
                                         apiDefs::requestTimeoutMsecs, 
                                         m_settings->isStrictKillSwitchEnabled());
     
-    // Load transports config from file or env
-    gatewayController.loadTransportsConfig("gateway.json", "AMNEZIA_GATEWAY");
+    gatewayController.setTransportsConfig(GatewayController::buildTransportsConfig());
     
-    // Parallel request via all configured transports (HTTP + DNS)
     return gatewayController.postParallel(endpoint, apiPayload, responseBody);
 }

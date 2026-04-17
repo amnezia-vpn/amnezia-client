@@ -30,6 +30,17 @@ endif()
 add_definitions(-DPROD_AGW_PUBLIC_KEY="$ENV{PROD_AGW_PUBLIC_KEY}")
 add_definitions(-DDEV_AGW_PUBLIC_KEY="$ENV{DEV_AGW_PUBLIC_KEY}")
 
+add_definitions(-DAGW_DNS_SERVER="$ENV{AGW_DNS_SERVER}")
+add_definitions(-DAGW_DNS_DOMAIN="$ENV{AGW_DNS_DOMAIN}")
+add_definitions(-DAGW_DNS_PRIMARY="$ENV{AGW_DNS_PRIMARY}")
+add_definitions(-DAGW_DNS_PORT_UDP="$ENV{AGW_DNS_PORT_UDP}")
+add_definitions(-DAGW_DNS_PORT_DOT="$ENV{AGW_DNS_PORT_DOT}")
+add_definitions(-DAGW_DNS_PORT_DOH="$ENV{AGW_DNS_PORT_DOH}")
+add_definitions(-DAGW_DNS_PORT_DOQ="$ENV{AGW_DNS_PORT_DOQ}")
+add_definitions(-DAGW_DNS_DOH_PATH="$ENV{AGW_DNS_DOH_PATH}")
+add_definitions(-DAGW_DNS_RETRY_COUNT="$ENV{AGW_DNS_RETRY_COUNT}")
+add_definitions(-DAGW_DNS_TIMEOUT_MS="$ENV{AGW_DNS_TIMEOUT_MS}")
+
 qt_add_executable(${PROJECT_NAME}
     tst_transports.cpp
     ${CLIENT_ROOT_DIR}/core/networkUtilities.cpp
@@ -63,16 +74,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 crypt32)
-endif()
-
-# Copy gateway.json next to the test binary
-if(EXISTS "${CLIENT_ROOT_DIR}/gateway.json")
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CLIENT_ROOT_DIR}/gateway.json"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-    )
 endif()
 
 add_test(NAME TransportTest COMMAND ${PROJECT_NAME})

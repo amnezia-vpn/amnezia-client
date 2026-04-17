@@ -2,12 +2,8 @@
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QEventLoop>
-#include <QFile>
 #include <QHostAddress>
 #include <QHostInfo>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -46,52 +42,44 @@ struct TestConfig {
     int timeoutMs = 15000;
 };
 
-static TestConfig loadConfig(const QString &path)
+static TestConfig buildConfigFromEnv()
 {
     TestConfig cfg;
-    QFile f(path);
-    if (!f.open(QIODevice::ReadOnly)) {
-        qWarning() << "Cannot open config:" << path;
-        return cfg;
-    }
-    QJsonObject json = QJsonDocument::fromJson(f.readAll()).object();
 
-    if (json.contains("http")) {
-        cfg.httpEndpoint = json["http"].toObject().value("endpoint").toString();
-    }
-    cfg.timeoutMs = json.value("timeout_ms").toInt(15000);
+    QString server(AGW_DNS_SERVER);
+    QString domain(AGW_DNS_DOMAIN);
 
-    if (json.contains("dns_transports")) {
-        for (const auto &v : json["dns_transports"].toArray()) {
-            QJsonObject obj = v.toObject();
-            TestConfig::DnsEntry e;
-            e.server = obj.value("server").toString();
-            e.domain = obj.value("domain").toString();
-            e.port = static_cast<quint16>(obj.value("port").toInt(5353));
-            e.dohPath = obj.value("path").toString("/dns-query");
+    cfg.httpEndpoint = QString(DEV_AGW_PUBLIC_KEY).isEmpty()
+        ? QString() : QString("http://%1/").arg(server);
 
-            QString t = obj.value("type").toString().toLower();
-            if (t == "udp") {
-                e.type = NetworkUtilities::DnsTransport::Udp;
-                e.name = "UDP";
-            } else if (t == "tcp") {
-                e.type = NetworkUtilities::DnsTransport::Tcp;
-                e.name = "TCP";
-            } else if (t == "dot" || t == "tls") {
-                e.type = NetworkUtilities::DnsTransport::Tls;
-                e.name = "DoT";
-            } else if (t == "doh" || t == "https") {
-                e.type = NetworkUtilities::DnsTransport::Https;
-                e.name = "DoH";
-            } else if (t == "doq" || t == "quic") {
-                e.type = NetworkUtilities::DnsTransport::Quic;
-                e.name = "DoQ";
-            } else {
-                continue;
-            }
-            cfg.dnsTransports.append(e);
-        }
-    }
+    int timeout = QString(AGW_DNS_TIMEOUT_MS).toInt();
+    cfg.timeoutMs = (timeout > 0) ? timeout : 15000;
+
+    if (server.isEmpty() || domain.isEmpty()) return cfg;
+
+    auto addEntry = [&](NetworkUtilities::DnsTransport type, const QString &name,
+                        const char *portDefine, quint16 defaultPort, const QString &dohPath = QString()) {
+        TestConfig::DnsEntry e;
+        e.type = type;
+        e.name = name;
+        e.server = server;
+        e.domain = domain;
+        quint16 port = QString(portDefine).toUShort();
+        e.port = (port > 0) ? port : defaultPort;
+        if (!dohPath.isEmpty()) e.dohPath = dohPath;
+        cfg.dnsTransports.append(e);
+    };
+
+    addEntry(NetworkUtilities::DnsTransport::Udp, "UDP", AGW_DNS_PORT_UDP, 5353);
+    addEntry(NetworkUtilities::DnsTransport::Tcp, "TCP", AGW_DNS_PORT_UDP, 5353);
+    addEntry(NetworkUtilities::DnsTransport::Tls, "DoT", AGW_DNS_PORT_DOT, 853);
+
+    QString dohPath = QString(AGW_DNS_DOH_PATH);
+    if (dohPath.isEmpty()) dohPath = "/dns-query";
+    addEntry(NetworkUtilities::DnsTransport::Https, "DoH", AGW_DNS_PORT_DOH, 443, dohPath);
+
+    addEntry(NetworkUtilities::DnsTransport::Quic, "DoQ", AGW_DNS_PORT_DOQ, 8853);
+
     return cfg;
 }
 
@@ -251,15 +239,10 @@ private:
 private slots:
     void initTestCase()
     {
-        QString configPath = QCoreApplication::applicationDirPath() + "/gateway.json";
-        if (!QFile::exists(configPath)) {
-            configPath = QString(CLIENT_SOURCE_DIR) + "/gateway.json";
-        }
-        qDebug() << "Loading config from:" << configPath;
-        m_config = loadConfig(configPath);
+        m_config = buildConfigFromEnv();
 
-        QVERIFY2(!m_config.httpEndpoint.isEmpty(), "gateway.json: http endpoint missing");
-        QVERIFY2(!m_config.dnsTransports.isEmpty(), "gateway.json: no dns_transports configured");
+        QVERIFY2(!m_config.dnsTransports.isEmpty(),
+                 "AGW_DNS_SERVER / AGW_DNS_DOMAIN not set — cannot run transport tests");
 
         qDebug() << "HTTP endpoint:" << m_config.httpEndpoint;
         qDebug() << "DNS transports:" << m_config.dnsTransports.size();

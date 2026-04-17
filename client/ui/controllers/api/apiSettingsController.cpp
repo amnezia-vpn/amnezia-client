@@ -77,8 +77,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
                                         requestTimeoutMsecs, 
                                         m_settings->isStrictKillSwitchEnabled());
     
-    // Load transports config from file or env
-    gatewayController.loadTransportsConfig("gateway.json", "AMNEZIA_GATEWAY");
+    gatewayController.setTransportsConfig(GatewayController::buildTransportsConfig());
     
     ErrorCode errorCode = gatewayController.postParallel(endpoint, apiPayload, responseBody);
     

@@ -33,6 +33,17 @@ add_definitions(-DDEV_S3_ENDPOINT="$ENV{DEV_S3_ENDPOINT}")
 add_definitions(-DFREE_V2_ENDPOINT="$ENV{FREE_V2_ENDPOINT}")
 add_definitions(-DPREM_V1_ENDPOINT="$ENV{PREM_V1_ENDPOINT}")
 
+add_definitions(-DAGW_DNS_SERVER="$ENV{AGW_DNS_SERVER}")
+add_definitions(-DAGW_DNS_DOMAIN="$ENV{AGW_DNS_DOMAIN}")
+add_definitions(-DAGW_DNS_PRIMARY="$ENV{AGW_DNS_PRIMARY}")
+add_definitions(-DAGW_DNS_PORT_UDP="$ENV{AGW_DNS_PORT_UDP}")
+add_definitions(-DAGW_DNS_PORT_DOT="$ENV{AGW_DNS_PORT_DOT}")
+add_definitions(-DAGW_DNS_PORT_DOH="$ENV{AGW_DNS_PORT_DOH}")
+add_definitions(-DAGW_DNS_PORT_DOQ="$ENV{AGW_DNS_PORT_DOQ}")
+add_definitions(-DAGW_DNS_DOH_PATH="$ENV{AGW_DNS_DOH_PATH}")
+add_definitions(-DAGW_DNS_RETRY_COUNT="$ENV{AGW_DNS_RETRY_COUNT}")
+add_definitions(-DAGW_DNS_TIMEOUT_MS="$ENV{AGW_DNS_TIMEOUT_MS}")
+
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
@@ -224,17 +235,6 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
         ${CMAKE_SOURCE_DIR}/client/3rd-prebuilt/deploy-prebuilt/${DEPLOY_PLATFORM_PATH}
         $<TARGET_FILE_DIR:${PROJECT}>
         COMMAND_EXPAND_LISTS
-    )
-endif()
-
-# Copy gateway.json to build directory if exists
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/gateway.json")
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_CURRENT_LIST_DIR}/gateway.json
-        $<TARGET_FILE_DIR:${PROJECT}>
-        COMMENT "Copying gateway.json to build directory"
     )
 endif()
 

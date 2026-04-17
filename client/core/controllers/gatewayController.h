@@ -62,8 +62,7 @@ public:
     // DNS tunneling - send request via DNS transport
     amnezia::ErrorCode postViaDns(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
     
-    // NEW: Load config from file or environment variable
-    bool loadTransportsConfig(const QString &filePath, const QString &envVarName = "AMNEZIA_GATEWAY");
+    static TransportsConfig buildTransportsConfig();
     void setTransportsConfig(const TransportsConfig &config);
     
     // NEW: Parallel request via all configured transports (primary first, then others)
