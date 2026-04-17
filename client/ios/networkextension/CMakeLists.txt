@@ -81,6 +81,13 @@ target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
 target_link_libraries(networkextension PRIVATE ${FW_FOUNDATION})
 target_link_libraries(networkextension PRIVATE ${FW_LIBRESOLV})
 target_link_libraries(networkextension PRIVATE ${FW_NETWORK})
+target_link_options(networkextension PRIVATE
+    "-lswiftCore"
+    "-lswiftFoundation"
+    "-lswiftDispatch"
+    "-lswiftObjectiveC"
+    "-Wl,-rpath,/usr/lib/swift"
+)
 
 target_compile_options(networkextension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(networkextension PRIVATE -DNETWORK_EXTENSION=1)
