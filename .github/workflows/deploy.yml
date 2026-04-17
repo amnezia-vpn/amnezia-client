@@ -750,7 +750,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: linux-build
-          path: build/AppDir
+          path: build/
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -769,6 +769,44 @@ jobs:
           extra: '--base ${{ env.QT_MIRROR }}' 
 
       - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure
+
+# ------------------------------------------------------
+
+  Test-Windows:
+    runs-on: windows-latest
+
+    needs: Build-Windows
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: build
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2019_64'
+          modules: 'qtremoteobjects qt5compat qtshadertools'
+          dir: ${{ runner.temp }}
+          setup-python: 'true'
+          tools: 'tools_ifw'
+          set-env: 'true'
+          aqtversion: '==3.3.0'
+          py7zrversion: '==0.22.*'
+          extra: '--base ${{ env.QT_MIRROR }}'
+
+      - name: Run tests
+        shell: bash
         run: |
           cd build
           ctest --output-on-failure
