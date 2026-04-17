@@ -3,6 +3,12 @@ public func toggleScreenshots(_ isEnabled: Bool) {
   
 }
 
+extension FBLinkIOSBridge {
+  @objc(toggleScreenshots:)
+  public static func toggleScreenshots(_ isEnabled: Bool) {
+  }
+}
+
 class ScreenProtection {
 
 
@@ -12,6 +18,13 @@ import UIKit
 
 public func toggleScreenshots(_ isEnabled: Bool) {
   ScreenProtection.shared.setScreenshotsEnabled(isEnabled)
+}
+
+extension FBLinkIOSBridge {
+  @objc(toggleScreenshots:)
+  public static func toggleScreenshots(_ isEnabled: Bool) {
+    ScreenProtection.shared.setScreenshotsEnabled(isEnabled)
+  }
 }
 
 extension UIApplication {

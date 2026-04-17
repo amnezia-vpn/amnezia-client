@@ -17,7 +17,7 @@
 #endif
 
 #ifdef Q_OS_IOS
-    #include <FBLink-Swift.h>
+    #include "platforms/ios/fblink_ios_bridge.h"
 #endif
 
 QFile Logger::m_file;

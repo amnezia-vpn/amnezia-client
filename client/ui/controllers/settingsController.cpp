@@ -12,7 +12,9 @@
     #include "platforms/android/android_controller.h"
 #endif
 
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
+#if defined(Q_OS_IOS)
+    #include "platforms/ios/fblink_ios_bridge.h"
+#elif defined(MACOS_NE)
     #include <FBLink-Swift.h>
 #endif
 

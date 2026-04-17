@@ -4,6 +4,7 @@ set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
 add_executable(networkextension)
 set_target_properties(networkextension PROPERTIES
+    LINKER_LANGUAGE Swift
     XCODE_PRODUCT_TYPE com.apple.product-type.app-extension
     BUNDLE_EXTENSION appex
 

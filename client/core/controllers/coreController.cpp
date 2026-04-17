@@ -12,7 +12,7 @@
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
-    #include <FBLink-Swift.h>
+    #include "platforms/ios/fblink_ios_bridge.h"
 #endif
 
 CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,

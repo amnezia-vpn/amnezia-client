@@ -64,6 +64,7 @@ target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
 
 set_target_properties(${PROJECT} PROPERTIES
+    LINKER_LANGUAGE Swift
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Info.plist.in
     MACOSX_BUNDLE_ICON_FILE "AppIcon"
@@ -132,6 +133,7 @@ set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
 target_sources(${PROJECT} PRIVATE
 #    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosvpnprotocol.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
+    ${CLIENT_ROOT_DIR}/platforms/ios/fblink_ios_bridge.mm
     ${CLIENT_ROOT_DIR}/platforms/ios/LogController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift

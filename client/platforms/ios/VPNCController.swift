@@ -1,25 +1,31 @@
 import Foundation
 import NetworkExtension
 
-public func removeVPNC(_ vpncName: std.string) {
-  let vpncName = String(describing: vpncName)
+extension FBLinkIOSBridge {
+  @objc(removeVPNC:)
+  public static func removeVPNC(_ vpncName: String) {
+    Task {
+      await getManagers()?.first { manager in
+        if let name = manager.localizedDescription, name == vpncName {
+          Task {
+            await remove(manager)
+          }
 
-  Task {
-    await getManagers()?.first { manager in
-      if let name = manager.localizedDescription, name == vpncName {
-        Task {
-          await remove(manager)
+          return true
+        } else {
+          return false
         }
-
-        return true
-      } else {
-        return false
       }
     }
   }
+
+  @objc(clearSettings)
+  public static func clearSettings() {
+    clearVpncSettings()
+  }
 }
 
-public func clearSettings() {
+private func clearVpncSettings() {
   Task {
     await getManagers()?.forEach { manager in
       Task {
