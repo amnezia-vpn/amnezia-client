@@ -141,11 +141,13 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 
 		// ensureDefaultRoutingProfiles already calls ensureRoutingProfileSchema internally;
 		// calling it separately was causing ~22 duplicate DDL queries per request.
+		routingSeedStartedAt := time.Now()
 		if err := ensureDefaultRoutingProfiles(h.db, userID); err != nil {
 			log.Printf("[ROUTING] failed to seed routing profiles for user %d during config fetch: %v", userID, err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to prepare routing profiles"})
 			return
 		}
+		log.Printf("[CONFIG] user=%d routing_seed_ms=%d", userID, time.Since(routingSeedStartedAt).Milliseconds())
 
 		var profiles []models.RoutingProfile
 		if err := h.db.Where("user_id = ?", userID).Order("sort_order asc, kind asc, id asc").Find(&profiles).Error; err != nil {

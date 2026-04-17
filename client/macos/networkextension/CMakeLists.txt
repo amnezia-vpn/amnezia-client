@@ -57,6 +57,7 @@ set_target_properties("FBLinkNetworkExtension" PROPERTIES
 find_library(FW_ASSETS_LIBRARY AssetsLibrary)
 find_library(FW_MOBILE_CORE MobileCoreServices)
 find_library(FW_UI_KIT UIKit)
+find_library(FW_FOUNDATION Foundation)
 find_library(FW_LIBRESOLV libresolv.9.tbd)
 
 
@@ -64,6 +65,7 @@ find_library(FW_LIBRESOLV libresolv.9.tbd)
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
 target_link_libraries(FBLinkNetworkExtension PRIVATE ${FW_LIBRESOLV})
+target_link_libraries(FBLinkNetworkExtension PRIVATE ${FW_FOUNDATION})
 
 target_compile_options(FBLinkNetworkExtension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(FBLinkNetworkExtension PRIVATE -DNETWORK_EXTENSION=1)

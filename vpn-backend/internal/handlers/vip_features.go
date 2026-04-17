@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -196,17 +197,43 @@ func defaultRoutingProfileSeeds() []defaultRoutingProfileSeed {
 	}
 }
 
-// routingProfileSchemaOnce caches the result of the schema migration check.
-// The DDL queries are only needed once per process lifetime — running them on
-// every /me/config request was the main source of latency for VIP users.
-var routingProfileSchemaOnce sync.Once
-var routingProfileSchemaErr error
+type routingProfileSchemaState struct {
+	once sync.Once
+	err  error
+}
+
+var routingProfileSchemaStateMu sync.Mutex
+var routingProfileSchemaStates = map[uintptr]*routingProfileSchemaState{}
+
+func routingProfileSchemaCacheKey(db *gorm.DB) (uintptr, bool) {
+	if db == nil {
+		return 0, false
+	}
+	sqlDB, err := db.DB()
+	if err != nil || sqlDB == nil {
+		return 0, false
+	}
+	return reflect.ValueOf(sqlDB).Pointer(), true
+}
 
 func ensureRoutingProfileSchema(db *gorm.DB) error {
-	routingProfileSchemaOnce.Do(func() {
-		routingProfileSchemaErr = doEnsureRoutingProfileSchema(db)
+	cacheKey, ok := routingProfileSchemaCacheKey(db)
+	if !ok {
+		return doEnsureRoutingProfileSchema(db)
+	}
+
+	routingProfileSchemaStateMu.Lock()
+	state, exists := routingProfileSchemaStates[cacheKey]
+	if !exists {
+		state = &routingProfileSchemaState{}
+		routingProfileSchemaStates[cacheKey] = state
+	}
+	routingProfileSchemaStateMu.Unlock()
+
+	state.once.Do(func() {
+		state.err = doEnsureRoutingProfileSchema(db)
 	})
-	return routingProfileSchemaErr
+	return state.err
 }
 
 func doEnsureRoutingProfileSchema(db *gorm.DB) error {
@@ -253,39 +280,53 @@ func doEnsureRoutingProfileSchema(db *gorm.DB) error {
 	return nil
 }
 
+func buildSeedRoutingJSON(seed defaultRoutingProfileSeed) (string, string, string) {
+	domainsJSON, _ := json.Marshal(normalizeRoutingProfileInput(seed.Domains))
+	domainSuffixesJSON, _ := json.Marshal(normalizeRoutingProfileInput(seed.DomainSuffixes))
+	cidrsJSON, _ := json.Marshal(normalizeRoutingProfileInput(seed.CIDRs))
+	return string(domainsJSON), string(domainSuffixesJSON), string(cidrsJSON)
+}
+
 func ensureDefaultRoutingProfiles(db *gorm.DB, userID uint) error {
 	if err := ensureRoutingProfileSchema(db); err != nil {
 		return err
 	}
 
-	for _, seed := range defaultRoutingProfileSeeds() {
-		var profile models.RoutingProfile
-		err := db.Where("user_id = ? AND kind = ? AND code = ?", userID, models.RoutingProfileSystem, seed.Code).
-			First(&profile).Error
-		if err != nil && err != gorm.ErrRecordNotFound {
-			return err
-		}
+	var systemProfiles []models.RoutingProfile
+	if err := db.Where("user_id = ? AND kind = ?", userID, models.RoutingProfileSystem).
+		Find(&systemProfiles).Error; err != nil {
+		return err
+	}
 
-		if err == gorm.ErrRecordNotFound {
+	systemByCode := make(map[string]*models.RoutingProfile, len(systemProfiles))
+	systemByName := make(map[string]*models.RoutingProfile, len(systemProfiles))
+	for i := range systemProfiles {
+		profile := &systemProfiles[i]
+		code := strings.TrimSpace(profile.Code)
+		if code != "" {
+			systemByCode[code] = profile
+		}
+		name := strings.TrimSpace(profile.Name)
+		if name != "" {
+			systemByName[name] = profile
+		}
+	}
+
+	for _, seed := range defaultRoutingProfileSeeds() {
+		profile := systemByCode[seed.Code]
+		if profile == nil {
 			for _, legacyName := range seed.LegacyNames {
-				legacyErr := db.Where("user_id = ? AND kind = ? AND name = ?", userID, models.RoutingProfileSystem, legacyName).
-					First(&profile).Error
-				if legacyErr == nil {
-					err = nil
+				if candidate, ok := systemByName[strings.TrimSpace(legacyName)]; ok {
+					profile = candidate
 					break
-				}
-				if legacyErr != nil && legacyErr != gorm.ErrRecordNotFound {
-					return legacyErr
 				}
 			}
 		}
 
-		domainsJSON, _ := json.Marshal(normalizeRoutingProfileInput(seed.Domains))
-		domainSuffixesJSON, _ := json.Marshal(normalizeRoutingProfileInput(seed.DomainSuffixes))
-		cidrsJSON, _ := json.Marshal(normalizeRoutingProfileInput(seed.CIDRs))
+		domainsJSON, domainSuffixesJSON, cidrsJSON := buildSeedRoutingJSON(seed)
 
-		if err == gorm.ErrRecordNotFound {
-			profile = models.RoutingProfile{
+		if profile == nil {
+			newProfile := models.RoutingProfile{
 				UserID:             userID,
 				Name:               seed.Name,
 				Code:               seed.Code,
@@ -295,31 +336,74 @@ func ensureDefaultRoutingProfiles(db *gorm.DB, userID uint) error {
 				Description:        seed.Description,
 				Icon:               seed.Icon,
 				SortOrder:          seed.SortOrder,
-				DomainsJSON:        string(domainsJSON),
-				DomainSuffixesJSON: string(domainSuffixesJSON),
-				CIDRsJSON:          string(cidrsJSON),
+				DomainsJSON:        domainsJSON,
+				DomainSuffixesJSON: domainSuffixesJSON,
+				CIDRsJSON:          cidrsJSON,
 			}
-			if createErr := db.Create(&profile).Error; createErr != nil {
-				return createErr
+			if err := db.Create(&newProfile).Error; err != nil {
+				return err
 			}
+			systemByCode[seed.Code] = &newProfile
 			continue
 		}
 
-		updates := map[string]interface{}{
-			"name":                 seed.Name,
-			"code":                 seed.Code,
-			"action":               seed.Action,
-			"enabled":              seed.EnabledByDefault, // kept in sync with seed definition
-			"description":          seed.Description,
-			"icon":                 seed.Icon,
-			"sort_order":           seed.SortOrder,
-			"domains_json":         string(domainsJSON),
-			"domain_suffixes_json": string(domainSuffixesJSON),
-			"cidrs_json":           string(cidrsJSON),
+		updates := make(map[string]interface{}, 10)
+		if profile.Name != seed.Name {
+			updates["name"] = seed.Name
 		}
-		if updateErr := db.Model(&profile).Updates(updates).Error; updateErr != nil {
-			return updateErr
+		if profile.Code != seed.Code {
+			updates["code"] = seed.Code
 		}
+		if profile.Action != seed.Action {
+			updates["action"] = seed.Action
+		}
+		// Preserve enabled=true on existing system profiles until migration
+		// converts them into custom copies. This avoids dropping user intent.
+		if seed.EnabledByDefault && !profile.Enabled {
+			updates["enabled"] = true
+		}
+		if profile.Description != seed.Description {
+			updates["description"] = seed.Description
+		}
+		if profile.Icon != seed.Icon {
+			updates["icon"] = seed.Icon
+		}
+		if profile.SortOrder != seed.SortOrder {
+			updates["sort_order"] = seed.SortOrder
+		}
+		if profile.DomainsJSON != domainsJSON {
+			updates["domains_json"] = domainsJSON
+		}
+		if profile.DomainSuffixesJSON != domainSuffixesJSON {
+			updates["domain_suffixes_json"] = domainSuffixesJSON
+		}
+		if profile.CIDRsJSON != cidrsJSON {
+			updates["cidrs_json"] = cidrsJSON
+		}
+		if profile.TemplateCode != "" {
+			updates["template_code"] = ""
+		}
+
+		if len(updates) == 0 {
+			continue
+		}
+
+		if err := db.Model(&models.RoutingProfile{}).
+			Where("id = ? AND user_id = ?", profile.ID, userID).
+			Updates(updates).Error; err != nil {
+			return err
+		}
+	}
+
+	var enabledSystemProfile models.RoutingProfile
+	if err := db.Select("id").
+		Where("user_id = ? AND kind = ? AND enabled = ?", userID, models.RoutingProfileSystem, true).
+		Limit(1).
+		First(&enabledSystemProfile).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil
+		}
+		return err
 	}
 
 	if err := migrateEnabledSystemProfilesToCustomCopies(db, userID); err != nil {
