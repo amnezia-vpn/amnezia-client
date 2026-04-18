@@ -657,6 +657,10 @@ Component.prototype.componentLoaded = function ()
     installer.setValue("InstallYandexBrowser", "true");
 
     if (installer.addWizardPage(component, "ReadyInstallExtrasWidget", QInstaller.ReadyForInstallation)) {
+        // Hide the default Ready page to avoid duplicate "Ready for installation"
+        // entries in the wizard sidebar (custom extras page replaces it for Windows installer).
+        installer.setDefaultPageVisible(QInstaller.ReadyForInstallation, false);
+
         var widget = gui.pageWidgetByObjectName("DynamicReadyInstallExtrasWidget");
         if (widget !== null) {
             widget.windowTitle = qsTr("Всё готово к установке");

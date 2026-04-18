@@ -96,8 +96,8 @@ Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
 namespace {
 constexpr int kHandshakeTimeoutMs = 12000;
 constexpr uint64_t kHandshakeRxThreshold = 4096;
-bool isWireGuardBasedProto(amnezia::Proto proto) {
-    return proto == amnezia::Proto::WireGuard || proto == amnezia::Proto::Awg;
+bool isWireGuardBasedProto(fblink::Proto proto) {
+    return proto == fblink::Proto::WireGuard || proto == fblink::Proto::Awg;
 }
 
 uint64_t uint64FromResponse(NSDictionary *response, NSString *key, uint64_t fallback = 0) {
@@ -211,7 +211,7 @@ bool IosController::initialize()
     return ok;
 }
 
-bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configuration)
+bool IosController::connectVpn(fblink::Proto proto, const QJsonObject& configuration)
 {
     m_proto = proto;
     m_rawConfig = configuration;
@@ -295,22 +295,22 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
             object:m_currentTunnel.connection];
 
 
-    if (proto == amnezia::Proto::OpenVpn) {
+    if (proto == fblink::Proto::OpenVpn) {
         return setupOpenVPN();
     }
-    if (proto == amnezia::Proto::Cloak) {
+    if (proto == fblink::Proto::Cloak) {
         return setupCloak();
     }
-    if (proto == amnezia::Proto::WireGuard) {
+    if (proto == fblink::Proto::WireGuard) {
         return setupWireGuard();
     }
-    if (proto == amnezia::Proto::Awg) {
+    if (proto == fblink::Proto::Awg) {
         return setupAwg();
     }
-    if (proto == amnezia::Proto::Xray) {
+    if (proto == fblink::Proto::Xray) {
         return setupXray();
     }
-    if (proto == amnezia::Proto::SSXray) {
+    if (proto == fblink::Proto::SSXray) {
         return setupSSXray();
     }
 
@@ -522,7 +522,7 @@ void IosController::vpnConfigurationDidChange(void *pNotification)
 
 bool IosController::setupOpenVPN()
 {
-    QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
+    QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(fblink::Proto::OpenVpn)].toObject();
     QString ovpnConfig = ovpn[config_key::config].toString();
 
     QJsonObject openVPNConfig {};
@@ -553,10 +553,10 @@ bool IosController::setupOpenVPN()
 bool IosController::setupCloak()
 {
     m_serverAddress = @"127.0.0.1";
-    QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
+    QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(fblink::Proto::OpenVpn)].toObject();
     QString ovpnConfig = ovpn[config_key::config].toString();
 
-    QJsonObject cloak = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Cloak)].toObject();
+    QJsonObject cloak = m_rawConfig[ProtocolProps::key_proto_config_data(fblink::Proto::Cloak)].toObject();
 
     cloak["NumConn"] = 1;
     if (cloak.contains("remote")) {
@@ -611,7 +611,7 @@ bool IosController::setupCloak()
 
 bool IosController::setupWireGuard()
 {
-    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(fblink::Proto::WireGuard)].toObject();
 
     QJsonObject wgConfig {};
     wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
@@ -676,7 +676,7 @@ bool IosController::setupWireGuard()
 
 bool IosController::setupXray()
 {
-    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Xray)].toObject();
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(fblink::Proto::Xray)].toObject();
     QJsonDocument xrayConfigDoc(config);
 
     QString xrayConfigStr(xrayConfigDoc.toJson(QJsonDocument::Compact));
@@ -694,7 +694,7 @@ bool IosController::setupXray()
 
 bool IosController::setupSSXray()
 {
-    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::SSXray)].toObject();
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(fblink::Proto::SSXray)].toObject();
     QJsonDocument ssXrayConfigDoc(config);
 
     QString ssXrayConfigStr(ssXrayConfigDoc.toJson(QJsonDocument::Compact));
@@ -712,7 +712,7 @@ bool IosController::setupSSXray()
 
 bool IosController::setupAwg()
 {
-    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Awg)].toObject();
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(fblink::Proto::Awg)].toObject();
 
     QJsonObject wgConfig {};
     wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
