@@ -1,7 +1,6 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
-#include <QRegExp>
 #include <QRegularExpression>
 #include <QString>
 #include <QJsonDocument>

@@ -2,7 +2,6 @@
 #define NETWORKUTILITIES_H
 
 #include <QRegularExpression>
-#include <QRegExp>
 #include <QString>
 #include <QHostAddress>
 #include <QNetworkReply>
@@ -23,10 +22,10 @@ public:
 
     static QRegularExpression ipAddressRegExp();
     static QRegularExpression ipAddressPortRegExp();
-    static QRegExp ipAddressWithSubnetRegExp();
-    static QRegExp ipNetwork24RegExp();
-    static QRegExp ipPortRegExp();
-    static QRegExp domainRegExp();
+    static QRegularExpression ipAddressWithSubnetRegExp();
+    static QRegularExpression ipNetwork24RegExp();
+    static QRegularExpression ipPortRegExp();
+    static QRegularExpression domainRegExp();
 
     static QString netMaskFromIpWithSubnet(const QString ip);
     static QString ipAddressFromIpWithSubnet(const QString ip);

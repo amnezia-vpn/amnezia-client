@@ -7,6 +7,13 @@
 #include "systemController.h"
 #include "core/networkUtilities.h"
 
+namespace {
+bool isIpWithOptionalSubnet(const QString &value)
+{
+    return NetworkUtilities::ipAddressWithSubnetRegExp().match(value).hasMatch();
+}
+}
+
 SitesController::SitesController(const std::shared_ptr<Settings> &settings,
                                  const QSharedPointer<VpnConnection> &vpnConnection,
                                  const QSharedPointer<SitesModel> &sitesModel, QObject *parent)
@@ -25,7 +32,7 @@ void SitesController::addSite(QString hostname)
         return;
     }
 
-    if (!NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
+    if (!isIpWithOptionalSubnet(hostname)) {
         // get domain name if it present
         hostname.replace("https://", "");
         hostname.replace("http://", "");
@@ -40,7 +47,7 @@ void SitesController::addSite(QString hostname)
         if (!ip.isEmpty()) {
             QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
                                       Q_ARG(QStringList, QStringList() << ip));
-        } else if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
+        } else if (isIpWithOptionalSubnet(hostname)) {
             QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
                                       Q_ARG(QStringList, QStringList() << hostname));
         }
@@ -56,7 +63,7 @@ void SitesController::addSite(QString hostname)
         }
     };
 
-    if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
+    if (isIpWithOptionalSubnet(hostname)) {
         processSite(hostname, "");
     } else {
         processSite(hostname, "");
@@ -113,7 +120,7 @@ void SitesController::importSites(const QString &fileName, bool replaceExisting)
         auto hostname = jsonObject.value("hostname").toString("");
         auto ip = jsonObject.value("ip").toString("");
 
-        if (!hostname.contains(".") && !NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
+        if (!hostname.contains(".") && !isIpWithOptionalSubnet(hostname)) {
             qDebug() << hostname << " not look like ip adress or domain name";
             continue;
         }
