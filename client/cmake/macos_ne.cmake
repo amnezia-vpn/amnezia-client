@@ -159,6 +159,22 @@ set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
 set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-macos)
 target_link_libraries("FBLinkNetworkExtension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-macos/OpenVPNAdapter.framework")
 
+# OpenVPNAdapter transitively uses OpenSSL/libssh/zlib symbols.
+# Link dependencies explicitly for the macOS network extension target.
+if(DEFINED LIBSSH_LIB_PATH AND EXISTS "${LIBSSH_LIB_PATH}")
+    target_link_libraries("FBLinkNetworkExtension" PRIVATE "${LIBSSH_LIB_PATH}")
+endif()
+if(DEFINED OPENSSL_LIB_SSL_PATH AND EXISTS "${OPENSSL_LIB_SSL_PATH}")
+    target_link_libraries("FBLinkNetworkExtension" PRIVATE "${OPENSSL_LIB_SSL_PATH}")
+endif()
+if(DEFINED OPENSSL_LIB_CRYPTO_PATH AND EXISTS "${OPENSSL_LIB_CRYPTO_PATH}")
+    target_link_libraries("FBLinkNetworkExtension" PRIVATE "${OPENSSL_LIB_CRYPTO_PATH}")
+endif()
+if(DEFINED ZLIB_LIB_PATH AND EXISTS "${ZLIB_LIB_PATH}")
+    target_link_libraries("FBLinkNetworkExtension" PRIVATE "${ZLIB_LIB_PATH}")
+endif()
+target_link_libraries("FBLinkNetworkExtension" PRIVATE z)
+
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory
             $<TARGET_BUNDLE_DIR:FBLink>/Contents/Frameworks

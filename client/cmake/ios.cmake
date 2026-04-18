@@ -181,4 +181,20 @@ set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
 if(BUILD_IOS_NETWORK_EXTENSION)
     set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/)
     target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework")
+
+    # OpenVPNAdapter transitively uses OpenSSL/libssh/zlib symbols.
+    # Link them explicitly for the extension target to avoid undefined symbols on iOS.
+    if(DEFINED LIBSSH_LIB_PATH AND EXISTS "${LIBSSH_LIB_PATH}")
+        target_link_libraries("networkextension" PRIVATE "${LIBSSH_LIB_PATH}")
+    endif()
+    if(DEFINED OPENSSL_LIB_SSL_PATH AND EXISTS "${OPENSSL_LIB_SSL_PATH}")
+        target_link_libraries("networkextension" PRIVATE "${OPENSSL_LIB_SSL_PATH}")
+    endif()
+    if(DEFINED OPENSSL_LIB_CRYPTO_PATH AND EXISTS "${OPENSSL_LIB_CRYPTO_PATH}")
+        target_link_libraries("networkextension" PRIVATE "${OPENSSL_LIB_CRYPTO_PATH}")
+    endif()
+    if(DEFINED ZLIB_LIB_PATH AND EXISTS "${ZLIB_LIB_PATH}")
+        target_link_libraries("networkextension" PRIVATE "${ZLIB_LIB_PATH}")
+    endif()
+    target_link_libraries("networkextension" PRIVATE z)
 endif()
