@@ -13,7 +13,14 @@ export QT_VERSION="${QT_VERSION:-6.6.2}"
 export QT_BIN_DIR="${QT_BIN_DIR:-$HOME/Qt/$QT_VERSION/ios/bin}"
 export QT_MACOS_ROOT_DIR="${QT_MACOS_ROOT_DIR:-$HOME/Qt/$QT_VERSION/macos}"
 export IOS_DEPLOY="${IOS_DEPLOY:-OFF}"
-export IOS_SIMULATOR_UI_ONLY="${IOS_SIMULATOR_UI_ONLY:-OFF}"
+if [ -z "${IOS_SIMULATOR_UI_ONLY+x}" ]; then
+  if [ "$(uname -m)" = "x86_64" ]; then
+    IOS_SIMULATOR_UI_ONLY="ON"
+  else
+    IOS_SIMULATOR_UI_ONLY="OFF"
+  fi
+fi
+export IOS_SIMULATOR_UI_ONLY
 export BUILD_IOS_DEVELOPMENT_TEAM="${BUILD_IOS_DEVELOPMENT_TEAM:-}"
 export PATH="$PATH:$HOME/go/bin"
 
@@ -140,9 +147,17 @@ if [ "$IOS_SIMULATOR_UI_ONLY" = "ON" ]; then
   IOS_NE="OFF"
 fi
 
+if [ -z "${BUILD_IOS_DIR+x}" ]; then
+  if [ "$IOS_SIMULATOR_UI_ONLY" = "ON" ]; then
+    BUILD_IOS_DIR="build-ios-sim"
+  else
+    BUILD_IOS_DIR="build-ios"
+  fi
+fi
+
 CMAKE_ARGS=(
   .
-  -B build-ios
+  -B "$BUILD_IOS_DIR"
   -GXcode
   -DQT_HOST_PATH="$QT_MACOS_ROOT_DIR"
   -DCMAKE_OSX_SYSROOT="$IOS_SYSROOT"
@@ -161,16 +176,16 @@ fi
 "$QTCMAKE" "${CMAKE_ARGS[@]}"
 
 XCODEPROJ_PATH=""
-if [ -d "build-ios/AmneziaVPN.xcodeproj" ]; then
-  XCODEPROJ_PATH="build-ios/AmneziaVPN.xcodeproj"
-elif [ -d "build-ios/FBLink.xcodeproj" ]; then
-  XCODEPROJ_PATH="build-ios/FBLink.xcodeproj"
+if [ -d "$BUILD_IOS_DIR/AmneziaVPN.xcodeproj" ]; then
+  XCODEPROJ_PATH="$BUILD_IOS_DIR/AmneziaVPN.xcodeproj"
+elif [ -d "$BUILD_IOS_DIR/FBLink.xcodeproj" ]; then
+  XCODEPROJ_PATH="$BUILD_IOS_DIR/FBLink.xcodeproj"
 else
-  XCODEPROJ_PATH="$(ls -1d build-ios/*.xcodeproj 2>/dev/null | head -n1 || true)"
+  XCODEPROJ_PATH="$(ls -1d "$BUILD_IOS_DIR"/*.xcodeproj 2>/dev/null | head -n1 || true)"
 fi
 
 if [ -z "$XCODEPROJ_PATH" ] || [ ! -d "$XCODEPROJ_PATH" ]; then
-  echo "Failed to locate generated .xcodeproj under build-ios/"
+  echo "Failed to locate generated .xcodeproj under $BUILD_IOS_DIR/"
   exit 1
 fi
 
