@@ -5,7 +5,6 @@
 #include <QMetaObject>
 #include <QString>
 #include <QScopedPointer>
-#include <QRemoteObjectNode>
 #include <QTimer>
 #include <QDateTime>
 
@@ -14,6 +13,7 @@
 #include "settings.h"
 
 #ifdef AMNEZIA_DESKTOP
+#include <QRemoteObjectNode>
 #include "core/ipcclient.h"
 #endif
 
