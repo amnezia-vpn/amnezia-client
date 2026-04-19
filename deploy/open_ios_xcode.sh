@@ -8,7 +8,7 @@ cd "$PROJECT_DIR"
 echo "Project dir: $PROJECT_DIR"
 
 if [ "${INSTALL_IOS_DEPS:-OFF}" = "ON" ]; then
-  "$PROJECT_DIR/deploy/install_ios_deps.sh" --yes
+  bash "$PROJECT_DIR/deploy/install_ios_deps.sh" --yes
 fi
 
 git submodule update --init --recursive
