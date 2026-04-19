@@ -6,7 +6,13 @@
 
 #include <fcntl.h>
 
+#ifdef FBLINK_IOS_SIMULATOR_UI_ONLY
+using ssh_session = void*;
+using ssh_channel = void*;
+using ssh_scp = void*;
+#else
 #include <libssh/libssh.h>
+#endif
 
 #include "defs.h"
 

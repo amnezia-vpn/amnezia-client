@@ -1,6 +1,7 @@
 #include "sshclient.h"
 
 #include <QEventLoop>
+#include <QDebug>
 #include <QtConcurrent>
 
 #include <fstream>
@@ -10,6 +11,87 @@ const uint32_t S_IRWXU = 0644;
 #endif
 
 namespace libssh {
+#ifdef FBLINK_IOS_SIMULATOR_UI_ONLY
+    std::function<QString()> Client::m_passphraseCallback;
+
+    int Client::callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata)
+    {
+        Q_UNUSED(prompt);
+        Q_UNUSED(buf);
+        Q_UNUSED(len);
+        Q_UNUSED(echo);
+        Q_UNUSED(verify);
+        Q_UNUSED(userdata);
+        return -1;
+    }
+
+    ErrorCode Client::connectToHost(const ServerCredentials &credentials)
+    {
+        Q_UNUSED(credentials);
+        qWarning() << "libssh is disabled in iOS simulator UI-only build.";
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
+    void Client::disconnectFromHost()
+    {
+    }
+
+    ErrorCode Client::executeCommand(const QString &data,
+                                     const std::function<ErrorCode (const QString &, Client &)> &cbReadStdOut,
+                                     const std::function<ErrorCode (const QString &, Client &)> &cbReadStdErr)
+    {
+        Q_UNUSED(data);
+        Q_UNUSED(cbReadStdOut);
+        Q_UNUSED(cbReadStdErr);
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
+    ErrorCode Client::writeResponse(const QString &data)
+    {
+        Q_UNUSED(data);
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
+    ErrorCode Client::closeChannel()
+    {
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
+    ErrorCode Client::scpFileCopy(const ScpOverwriteMode overwriteMode,
+                                  const QString &localPath,
+                                  const QString &remotePath,
+                                  const QString &fileDesc)
+    {
+        Q_UNUSED(overwriteMode);
+        Q_UNUSED(localPath);
+        Q_UNUSED(remotePath);
+        Q_UNUSED(fileDesc);
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
+    void Client::closeScpSession()
+    {
+    }
+
+    ErrorCode Client::fromLibsshErrorCode()
+    {
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
+    ErrorCode Client::fromFileErrorCode(QFileDevice::FileError fileError)
+    {
+        Q_UNUSED(fileError);
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
+    ErrorCode Client::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback)
+    {
+        Q_UNUSED(credentials);
+        Q_UNUSED(decryptedPrivateKey);
+        Q_UNUSED(passphraseCallback);
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+#else
     constexpr auto libsshTimeoutError{"Timeout connecting to"};
 
     std::function<QString()> Client::m_passphraseCallback;
@@ -361,4 +443,5 @@ namespace libssh {
         }
         return errorCode;
     }
+#endif
 }

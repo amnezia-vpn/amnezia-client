@@ -47,12 +47,32 @@ elseif(APPLE AND NOT IOS)
     set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libssl.a")
     set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libcrypto.a")    
 elseif(IOS)
-    set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/ios/arm64")
-    set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libssh.a")
-    set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libz.a")
-    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/ios/iphone/include")
-    set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libssl.a")
-    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libcrypto.a")
+    if(CMAKE_OSX_SYSROOT MATCHES "iphonesimulator")
+        if(IOS_SIMULATOR_UI_ONLY)
+            message(WARNING
+                "iOS Simulator UI-only build is enabled: skipping libssh prebuilt linkage.")
+            add_compile_definitions(FBLINK_IOS_SIMULATOR_UI_ONLY=1)
+            set(LIBSSH_INCLUDE_DIR "")
+            set(LIBSSH_LIB_PATH "")
+            set(ZLIB_LIB_PATH "")
+            set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/ios/simulator/include")
+            set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/ios/simulator/lib/libssl.a")
+            set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/ios/simulator/lib/libcrypto.a")
+        else()
+            message(FATAL_ERROR
+                "iOS Simulator build is not supported for full FBLink VPN at the moment: "
+                "missing simulator prebuilts for libssh/wireguard. "
+                "Use device build instead: -DCMAKE_OSX_SYSROOT=iphoneos -DCMAKE_OSX_ARCHITECTURES=arm64 "
+                "or explicitly enable UI-only mode: -DIOS_SIMULATOR_UI_ONLY=ON")
+        endif()
+    else()
+        set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/ios/arm64")
+        set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libssh.a")
+        set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libz.a")
+        set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/ios/iphone/include")
+        set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libssl.a")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/ios/iphone/lib/libcrypto.a")
+    endif()
 elseif(ANDROID)
     set(abi ${CMAKE_ANDROID_ARCH_ABI})
     set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/android/${abi}")
@@ -122,13 +142,20 @@ endif()
 
 set(LIBS ${LIBS} qt6keychain)
 
-include_directories(
+set(THIRD_PARTY_INCLUDE_DIRS
     ${OPENSSL_INCLUDE_DIR}
-    ${LIBSSH_INCLUDE_DIR}/include
-    ${LIBSSH_ROOT_DIR}/include
-    ${CLIENT_ROOT_DIR}/3rd/libssh/include
     ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/src/include
     ${CLIENT_ROOT_DIR}/3rd/qtkeychain/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
-    ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
 )
+
+if(LIBSSH_INCLUDE_DIR)
+    list(APPEND THIRD_PARTY_INCLUDE_DIRS
+        ${LIBSSH_INCLUDE_DIR}/include
+        ${LIBSSH_ROOT_DIR}/include
+        ${CLIENT_ROOT_DIR}/3rd/libssh/include
+        ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
+    )
+endif()
+
+include_directories(${THIRD_PARTY_INCLUDE_DIRS})

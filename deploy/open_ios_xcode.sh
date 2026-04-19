@@ -7,6 +7,10 @@ cd "$PROJECT_DIR"
 
 echo "Project dir: $PROJECT_DIR"
 
+if [ "${INSTALL_IOS_DEPS:-OFF}" = "ON" ]; then
+  "$PROJECT_DIR/deploy/install_ios_deps.sh" --yes
+fi
+
 git submodule update --init --recursive
 
 export QT_VERSION="${QT_VERSION:-6.6.2}"
@@ -14,11 +18,7 @@ export QT_BIN_DIR="${QT_BIN_DIR:-$HOME/Qt/$QT_VERSION/ios/bin}"
 export QT_MACOS_ROOT_DIR="${QT_MACOS_ROOT_DIR:-$HOME/Qt/$QT_VERSION/macos}"
 export IOS_DEPLOY="${IOS_DEPLOY:-OFF}"
 if [ -z "${IOS_SIMULATOR_UI_ONLY+x}" ]; then
-  if [ "$(uname -m)" = "x86_64" ]; then
-    IOS_SIMULATOR_UI_ONLY="ON"
-  else
-    IOS_SIMULATOR_UI_ONLY="OFF"
-  fi
+  IOS_SIMULATOR_UI_ONLY="OFF"
 fi
 export IOS_SIMULATOR_UI_ONLY
 export BUILD_IOS_DEVELOPMENT_TEAM="${BUILD_IOS_DEVELOPMENT_TEAM:-}"
@@ -145,6 +145,8 @@ if [ "$IOS_SIMULATOR_UI_ONLY" = "ON" ]; then
     IOS_ARCH="x86_64"
   fi
   IOS_NE="OFF"
+  echo "WARNING: IOS_SIMULATOR_UI_ONLY=ON selected."
+  echo "WARNING: Full VPN build may fail on simulator if simulator prebuilt libs are missing."
 fi
 
 if [ -z "${BUILD_IOS_DIR+x}" ]; then
@@ -163,6 +165,7 @@ CMAKE_ARGS=(
   -DCMAKE_OSX_SYSROOT="$IOS_SYSROOT"
   -DCMAKE_OSX_ARCHITECTURES="$IOS_ARCH"
   -DBUILD_IOS_NETWORK_EXTENSION="$IOS_NE"
+  -DIOS_SIMULATOR_UI_ONLY="$IOS_SIMULATOR_UI_ONLY"
 )
 
 if [ "$IOS_DEPLOY" = "ON" ]; then

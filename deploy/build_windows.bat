@@ -216,6 +216,11 @@ if not "%SIGN_CERT_THUMBPRINT%"=="" (
 "%QT_BIN_DIR_UNQUOTED%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations --force-openssl "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
 "%QT_BIN_DIR_UNQUOTED%\windeployqt" --release "%OUT_APP_DIR:"=%\%SERVICE_FILENAME:"=%"
 
+echo "Ensuring Qt runtime DLLs are packaged..."
+for %%F in (Qt6Core.dll Qt6Core5Compat.dll Qt6Gui.dll Qt6Network.dll Qt6RemoteObjects.dll) do (
+    if exist "%QT_BIN_DIR_UNQUOTED%\%%F" copy /Y "%QT_BIN_DIR_UNQUOTED%\%%F" "%OUT_APP_DIR%\%%F" >nul
+)
+
 echo "Ensuring MinGW runtime DLLs are packaged..."
 for %%F in (libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll) do (
     if exist "%QT_BIN_DIR_UNQUOTED%\%%F" copy /Y "%QT_BIN_DIR_UNQUOTED%\%%F" "%OUT_APP_DIR%\%%F" >nul

@@ -115,8 +115,10 @@ if (-not $isMinGwRuntimeExpected) {
     }
 }
 
+$candidateDirs = Get-CandidateRuntimeDirs -QtBinDir $qtBinDir
+Copy-MissingRuntimeFiles -DestinationDir $resolvedOutDir -RuntimeFiles $commonRuntimeFiles -SearchDirs $candidateDirs
+
 if ($isMinGwRuntimeExpected) {
-    $candidateDirs = Get-CandidateRuntimeDirs -QtBinDir $qtBinDir
     Copy-MissingRuntimeFiles -DestinationDir $resolvedOutDir -RuntimeFiles $mingwRuntimeFiles -SearchDirs $candidateDirs
 }
 

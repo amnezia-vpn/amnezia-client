@@ -41,7 +41,9 @@ bool KillSwitch::init()
         return disableAllTraffic();
     }
 
-    return true;
+    // Recover from unclean shutdowns: ensure stale kill switch rules are removed
+    // during service startup when strict mode is not enabled.
+    return disableKillSwitch();
 }
 
 bool KillSwitch::refresh(bool enabled)
