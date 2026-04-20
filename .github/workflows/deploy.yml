@@ -820,6 +820,10 @@ jobs:
     - name: 'Build'
       run: cmake --build build
 
+    - name: 'Add Qt to PATH'
+      run: |
+        echo "${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin" >> $env:GITHUB_PATH
+
     - name: 'Run tests'
       run: |
         cd build\client\tests
