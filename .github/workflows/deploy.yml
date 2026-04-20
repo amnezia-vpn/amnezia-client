@@ -823,5 +823,5 @@ jobs:
     - name: 'Run QTest binaries'
       shell: cmd
       run: |
-        build/client/tests/testSettingsSignals.exe
-        build/client/tests/testSignalOrder.exe
+        build\client\tests\testSettingsSignals.exe
+        build\client\tests\testSignalOrder.exe
