@@ -21,6 +21,7 @@ CLEAN_BUILD="${CLEAN_BUILD:-ON}"
 CLEAN_DERIVED_DATA="${CLEAN_DERIVED_DATA:-ON}"
 BUILD_VERBOSE="${BUILD_VERBOSE:-ON}"
 BUILD_LOG="${BUILD_LOG:-$BUILD_IOS_DIR/build-${BUILD_CONFIG}.log}"
+RETRY_ON_XCBUILD_LOCK="${RETRY_ON_XCBUILD_LOCK:-ON}"
 
 if [ -n "${IOS_ARCH:-}" ]; then
   SIM_ARCH="$IOS_ARCH"
@@ -58,15 +59,31 @@ bash "$PROJECT_DIR/deploy/open_ios_xcode.sh"
 echo "Build log: $BUILD_LOG"
 mkdir -p "$(dirname "$BUILD_LOG")"
 
-set +e
-if [ "$BUILD_VERBOSE" = "ON" ]; then
-  cmake --build "$BUILD_IOS_DIR" --config "$BUILD_CONFIG" --target "$BUILD_TARGET" --verbose 2>&1 | tee "$BUILD_LOG"
-  BUILD_RC=${PIPESTATUS[0]}
-else
-  cmake --build "$BUILD_IOS_DIR" --config "$BUILD_CONFIG" --target "$BUILD_TARGET" 2>&1 | tee "$BUILD_LOG"
-  BUILD_RC=${PIPESTATUS[0]}
+run_build_once() {
+  set +e
+  if [ "$BUILD_VERBOSE" = "ON" ]; then
+    cmake --build "$BUILD_IOS_DIR" --config "$BUILD_CONFIG" --target "$BUILD_TARGET" --verbose 2>&1 | tee "$BUILD_LOG"
+    BUILD_RC=${PIPESTATUS[0]}
+  else
+    cmake --build "$BUILD_IOS_DIR" --config "$BUILD_CONFIG" --target "$BUILD_TARGET" 2>&1 | tee "$BUILD_LOG"
+    BUILD_RC=${PIPESTATUS[0]}
+  fi
+  set -e
+  return "$BUILD_RC"
+}
+
+run_build_once || true
+
+if [ "$BUILD_RC" -ne 0 ] && [ "$RETRY_ON_XCBUILD_LOCK" = "ON" ]; then
+  if grep -q "build.db.*database is locked" "$BUILD_LOG"; then
+    echo
+    echo "Detected Xcode build database lock. Retrying once after cleanup..."
+    pkill -f "xcodebuild.*$BUILD_IOS_DIR" >/dev/null 2>&1 || true
+    rm -rf "$BUILD_IOS_DIR/build/XCBuildData"
+    sleep 1
+    run_build_once || true
+  fi
 fi
-set -e
 
 if [ "$BUILD_RC" -ne 0 ]; then
   echo
