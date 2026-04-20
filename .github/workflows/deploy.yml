@@ -822,5 +822,5 @@ jobs:
 
     - name: 'Run tests'
       run: |
-        cd build
+        cd build\client\tests
         ctest --output-on-failure
