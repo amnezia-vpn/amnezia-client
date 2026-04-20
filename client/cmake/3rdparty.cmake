@@ -104,10 +104,12 @@ set(LIBS ${LIBS}
     ${ZLIB_LIB_PATH}
 )
   
-set(LIBS ${LIBS}
-    ${OPENSSL_LIB_SSL_PATH}
-    ${OPENSSL_LIB_CRYPTO_PATH}
-)
+if(NOT (IOS AND CMAKE_OSX_SYSROOT MATCHES "iphonesimulator" AND IOS_SIMULATOR_UI_ONLY))
+    set(LIBS ${LIBS}
+        ${OPENSSL_LIB_SSL_PATH}
+        ${OPENSSL_LIB_CRYPTO_PATH}
+    )
+endif()
 
 # MinGW OpenSSL (libcrypto) requires zlib
 if(WIN32 AND MINGW)

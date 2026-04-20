@@ -216,6 +216,12 @@ elseif(APPLE)
     include(cmake/macos.cmake)
 endif()
 
+list(REMOVE_DUPLICATES SOURCES)
+list(REMOVE_DUPLICATES HEADERS)
+list(REMOVE_DUPLICATES RESOURCES)
+list(REMOVE_DUPLICATES QRC)
+list(REMOVE_DUPLICATES I18NQRC)
+
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 

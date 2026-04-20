@@ -174,9 +174,11 @@ if(BUILD_IOS_NETWORK_EXTENSION)
     )
 endif()
 
-set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework"
-)
+if(NOT (IOS_SIMULATOR_UI_ONLY AND CMAKE_OSX_SYSROOT MATCHES "iphonesimulator"))
+    set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
+        "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework"
+    )
+endif()
 
 if(BUILD_IOS_NETWORK_EXTENSION)
     set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/)
