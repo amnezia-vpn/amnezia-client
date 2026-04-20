@@ -740,6 +740,9 @@ jobs:
     steps:
     - name: 'Get sources'
       uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
@@ -782,6 +785,9 @@ jobs:
     steps:
     - name: 'Get sources'
       uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
@@ -805,10 +811,11 @@ jobs:
         choco install ninja -y
 
     - name: 'Configure'
+      shell: cmd
       run: |
         cmake -B build -G Ninja ^
-          -DCMAKE_BUILD_TYPE=Release ^
-          -DBUILD_TESTING=ON
+        -DCMAKE_BUILD_TYPE=Release ^
+        -DBUILD_TESTING=ON
 
     - name: 'Build'
       run: cmake --build build
