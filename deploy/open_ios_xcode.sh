@@ -17,6 +17,7 @@ export QT_VERSION="${QT_VERSION:-6.6.2}"
 export QT_BIN_DIR="${QT_BIN_DIR:-$HOME/Qt/$QT_VERSION/ios/bin}"
 export QT_MACOS_ROOT_DIR="${QT_MACOS_ROOT_DIR:-$HOME/Qt/$QT_VERSION/macos}"
 export IOS_DEPLOY="${IOS_DEPLOY:-OFF}"
+export OPEN_XCODE="${OPEN_XCODE:-ON}"
 if [ -z "${IOS_SIMULATOR_UI_ONLY+x}" ]; then
   IOS_SIMULATOR_UI_ONLY="OFF"
 fi
@@ -135,16 +136,24 @@ if [ -n "$BUILD_IOS_DEVELOPMENT_TEAM" ]; then
 fi
 
 IOS_SYSROOT="iphoneos"
-IOS_ARCH="arm64"
-IOS_NE="ON"
+if [ -n "${IOS_ARCH:-}" ]; then
+  IOS_ARCH_VALUE="$IOS_ARCH"
+else
+  IOS_ARCH_VALUE="arm64"
+fi
+IOS_NE="${BUILD_IOS_NETWORK_EXTENSION:-ON}"
 if [ "$IOS_SIMULATOR_UI_ONLY" = "ON" ]; then
   IOS_SYSROOT="iphonesimulator"
-  if [ "$(uname -m)" = "arm64" ]; then
-    IOS_ARCH="arm64"
-  else
-    IOS_ARCH="x86_64"
+  if [ -z "${IOS_ARCH:-}" ]; then
+    if [ "$(uname -m)" = "arm64" ]; then
+      IOS_ARCH_VALUE="arm64"
+    else
+      IOS_ARCH_VALUE="x86_64"
+    fi
   fi
-  IOS_NE="OFF"
+  if [ -z "${BUILD_IOS_NETWORK_EXTENSION+x}" ]; then
+    IOS_NE="OFF"
+  fi
   echo "WARNING: IOS_SIMULATOR_UI_ONLY=ON selected."
   echo "WARNING: Full VPN build may fail on simulator if simulator prebuilt libs are missing."
 fi
@@ -163,7 +172,7 @@ CMAKE_ARGS=(
   -GXcode
   -DQT_HOST_PATH="$QT_MACOS_ROOT_DIR"
   -DCMAKE_OSX_SYSROOT="$IOS_SYSROOT"
-  -DCMAKE_OSX_ARCHITECTURES="$IOS_ARCH"
+  -DCMAKE_OSX_ARCHITECTURES="$IOS_ARCH_VALUE"
   -DBUILD_IOS_NETWORK_EXTENSION="$IOS_NE"
   -DIOS_SIMULATOR_UI_ONLY="$IOS_SIMULATOR_UI_ONLY"
 )
@@ -192,6 +201,9 @@ if [ -z "$XCODEPROJ_PATH" ] || [ ! -d "$XCODEPROJ_PATH" ]; then
   exit 1
 fi
 
-open "$XCODEPROJ_PATH"
-
-echo "Done: $XCODEPROJ_PATH"
+if [ "$OPEN_XCODE" = "ON" ]; then
+  open "$XCODEPROJ_PATH"
+  echo "Done: $XCODEPROJ_PATH"
+else
+  echo "Configured: $XCODEPROJ_PATH"
+fi

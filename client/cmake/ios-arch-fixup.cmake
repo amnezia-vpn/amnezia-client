@@ -2,6 +2,18 @@ if(NOT XCODE)
     return()
 endif()
 
+# Determine simulator archs once and reuse for every target.
+# Prefer explicitly provided CMAKE_OSX_ARCHITECTURES, otherwise pick a sane
+# default from the host architecture (arm64 on Apple Silicon, x86_64 on Intel).
+if(DEFINED CMAKE_OSX_ARCHITECTURES AND NOT CMAKE_OSX_ARCHITECTURES STREQUAL "")
+    set(IOS_SIMULATOR_ARCHS "${CMAKE_OSX_ARCHITECTURES}")
+elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64)$")
+    set(IOS_SIMULATOR_ARCHS "arm64")
+else()
+    set(IOS_SIMULATOR_ARCHS "x86_64")
+endif()
+message(STATUS "iOS simulator ARCHS: ${IOS_SIMULATOR_ARCHS}")
+
 ## Enumerate all the targets in the project
 get_directory_property(IOS_SUBDIRS SUBDIRECTORIES)
 get_directory_property(IOS_TARGETS BUILDSYSTEM_TARGETS)
@@ -38,6 +50,6 @@ while(IOS_TARGETS)
     message("Patching architectures for ${TARGET_NAME}")
     set_target_properties(${TARGET_NAME} PROPERTIES
         XCODE_ATTRIBUTE_ARCHS[sdk=iphoneos*] "arm64"
-        XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] "x86_64"
+        XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] "${IOS_SIMULATOR_ARCHS}"
     )
 endwhile()
