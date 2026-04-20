@@ -86,7 +86,6 @@ jobs:
     env:
       QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
-      BUILD_ARCH: 64
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
@@ -102,17 +101,6 @@ jobs:
       with:
         submodules: 'true'
         fetch-depth: 10
-
-    - name: 'Get version from CMakeLists.txt'
-      id: get_version
-      shell: bash
-      run: |
-        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version: $VERSION"
-
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
@@ -150,39 +138,29 @@ jobs:
         $wixBinDir = Join-Path $env:USERPROFILE ".dotnet\tools"
         echo "WIX_BIN_DIR=$wixBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
     - name: 'Build project'
       shell: cmd
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
       run: |
-        set BUILD_ARCH=${{ env.BUILD_ARCH }}
-        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2022_64\\bin"
-        set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
-        set WIX_BIN_DIR=%USERPROFILE%\.dotnet\tools
-        call deploy\\build_windows.bat
+        set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
+        deploy\build.bat --installer all
 
-    - name: 'Rename Windows installer'
-      shell: cmd
-      run: |
-        copy AmneziaVPN_x${{ env.BUILD_ARCH }}.exe AmneziaVPN_%VERSION%_x64.exe
-
-    - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_x64.exe
-        path: AmneziaVPN_${{ env.VERSION }}_x64.exe
-        retention-days: 7
-
-    - name: 'Upload MSI installer artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_Windows_MSI_installer
-        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.msi
-        retention-days: 7
-
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_Windows_unpacked
-        path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
+        path: |
+          deploy/build/AmneziaVPN-*-win64.exe
+          deploy/build/AmneziaVPN-*-win64.msi
+        archive: false
         retention-days: 7
 
 # ------------------------------------------------------
