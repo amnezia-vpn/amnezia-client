@@ -736,14 +736,11 @@ jobs:
 
     needs: Build-Linux-Ubuntu
 
+    env:
+      QT_VERSION: 6.10.1
+
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
-          path: build/
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -761,6 +758,19 @@ jobs:
           py7zrversion: '==0.22.*'  
           extra: '--base ${{ env.QT_MIRROR }}' 
 
+      - name: 'Get version from CMakeLists.txt'
+        id: get_version
+        run: |
+          VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Version: $VERSION"
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
+          path: build/
+
       - name: Run tests
         run: |
           cd build
@@ -773,14 +783,11 @@ jobs:
 
     needs: Build-Windows
 
+    env:
+      QT_VERSION: 6.10.1
+
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: AmneziaVPN_${{ env.VERSION }}_x64.exe
-          path: build
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -797,6 +804,20 @@ jobs:
           aqtversion: '==3.3.0'
           py7zrversion: '==0.22.*'
           extra: '--base ${{ env.QT_MIRROR }}'
+
+      - name: 'Get version from CMakeLists.txt'
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Version: $VERSION"
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: AmneziaVPN_${{ env.VERSION }}_x64.exe
+          path: build
 
       - name: Run tests
         shell: bash
