@@ -827,8 +827,7 @@ jobs:
     - name: 'Build'
       run: cmake --build build
 
-    - name: 'Run QTest binaries'
-      shell: cmd
+    - name: 'Run tests'
       run: |
-        build/client/tests/testSettingsSignals.exe
-        build/client/tests/testSignalOrder.exe
+        cd build
+        ctest --output-on-failure
