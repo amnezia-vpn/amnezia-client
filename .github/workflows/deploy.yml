@@ -231,11 +231,13 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
 
-    - name: 'Install dependencies'
-      run: pip install jsonschema jinja2
+    - name: 'Install deps'
+      run: pip install "conan==2.26.2" jsonschema jinja2
 
     - name: 'Build project'
       run: |
@@ -397,8 +399,13 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
 
     - name: 'Build project'
       run: |
@@ -529,6 +536,14 @@ jobs:
       shell: bash
       run: |
         echo $KEYSTORE_BASE64 | base64 --decode > android.keystore
+
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
 
     - name: 'Build project'
       env:
