@@ -68,6 +68,33 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
+if(IOS AND IOS_SIMULATOR_UI_ONLY)
+    function(_fblink_strip_darwin_permissions _target)
+        if(NOT TARGET "${_target}")
+            return()
+        endif()
+
+        foreach(_prop IN ITEMS INTERFACE_LINK_LIBRARIES INTERFACE_SOURCES INTERFACE_LINK_OPTIONS)
+            get_target_property(_values "${_target}" "${_prop}")
+            if(NOT _values OR _values STREQUAL "_values-NOTFOUND")
+                continue()
+            endif()
+
+            set(_filtered "${_values}")
+            list(FILTER _filtered EXCLUDE REGEX "QDarwin.*PermissionPlugin")
+            list(FILTER _filtered EXCLUDE REGEX "[Pp]lugins/.*/permissions")
+            list(FILTER _filtered EXCLUDE REGEX "qdarwin.*permission")
+
+            if(NOT _filtered STREQUAL _values)
+                set_target_properties("${_target}" PROPERTIES "${_prop}" "${_filtered}")
+            endif()
+        endforeach()
+    endfunction()
+
+    _fblink_strip_darwin_permissions(Qt6::Core)
+    _fblink_strip_darwin_permissions(Qt::Core)
+endif()
+
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml
