@@ -154,12 +154,17 @@ jobs:
         set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
         deploy\build.bat --installer all
 
-    - name: 'Upload artifacts'
+    - name: 'Upload WIX installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: |
-          deploy/build/AmneziaVPN-*-win64.exe
-          deploy/build/AmneziaVPN-*-win64.msi
+        path: deploy/build/AmneziaVPN-*-win64.msi
+        archive: false
+        retention-days: 7
+      
+    - name: 'Upload IFW installer artifact'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/AmneziaVPN-*-win64.exe
         archive: false
         retention-days: 7
 
