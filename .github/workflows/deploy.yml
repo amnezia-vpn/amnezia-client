@@ -749,7 +749,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: linux-build
+          name: AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
           path: build/
 
       - name: Install Qt
@@ -786,7 +786,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: windows-build
+          name: AmneziaVPN_${{ env.VERSION }}_x64.exe
           path: build
 
       - name: Install Qt
