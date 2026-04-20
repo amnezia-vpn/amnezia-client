@@ -257,8 +257,10 @@ endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 
-# Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).
-if(COMMAND qt_import_qml_plugins)
+# Finalize the executable so Qt can gather/deploy QML modules and plugins correctly.
+# On iOS, qt_finalize_executable() already handles QML plugin import and a manual
+# qt_import_qml_plugins() call can produce duplicate static plugin symbols.
+if(NOT IOS AND COMMAND qt_import_qml_plugins)
     qt_import_qml_plugins(${PROJECT})
 endif()
 if(COMMAND qt_finalize_executable)
