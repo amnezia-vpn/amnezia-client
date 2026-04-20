@@ -734,105 +734,87 @@ jobs:
   Test-Linux:
     runs-on: ubuntu-latest
 
-    needs: Build-Linux-Ubuntu
-
     env:
       QT_VERSION: 6.10.1
 
     steps:
-      - uses: actions/checkout@v4
-  
-      - name: 'Get sources'
-        uses: actions/checkout@v4
-        with:
-          submodules: 'true'
-          fetch-depth: 10
+    - name: 'Get sources'
+      uses: actions/checkout@v4
 
-      - name: 'Get version from CMakeLists.txt'
-        id: get_version
-        run: |
-          VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Version: $VERSION"
+    - name: 'Install Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'desktop'
+        arch: 'linux_gcc_64'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        set-env: 'true'
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
-          path: build/
+    - name: 'Install dependencies'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build libxkbcommon-x11-0
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: 'linux'
-          target: 'desktop'
-          arch: 'linux_gcc_64'
-          modules: 'qtremoteobjects qt5compat qtshadertools'
-          dir: ${{ runner.temp }}
-          setup-python: 'true'
-          tools: 'tools_ifw'
-          set-env: 'true'
-          aqtversion: '==3.3.0'       
-          py7zrversion: '==0.22.*'  
-          extra: '--base ${{ env.QT_MIRROR }}' 
+    - name: 'Configure'
+      run: |
+        cmake -B build -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_TESTING=ON
 
-      - name: Run tests
-        run: |
-          cd build
-          ctest --output-on-failure
+    - name: 'Build'
+      run: cmake --build build
+
+    - name: 'Run QTest binaries'
+      run: |
+        ./build/client/tests/testSettingsSignals
+        ./build/client/tests/testSignalOrder
 
 # ------------------------------------------------------
 
   Test-Windows:
     runs-on: windows-latest
 
-    needs: Build-Windows
-
     env:
       QT_VERSION: 6.10.1
 
     steps:
-      - uses: actions/checkout@v4
-  
-      - name: 'Get sources'
-        uses: actions/checkout@v4
-        with:
-          submodules: 'true'
-          fetch-depth: 10
+    - name: 'Get sources'
+      uses: actions/checkout@v4
 
-      - name: 'Get version from CMakeLists.txt'
-        id: get_version
-        shell: bash
-        run: |
-          VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Version: $VERSION"
+    - name: 'Install Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_64'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        set-env: 'true'
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: AmneziaVPN_${{ env.VERSION }}_x64.exe
-          path: build
+    - name: 'Setup MSVC'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: 'x64'
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: 'windows'
-          target: 'desktop'
-          arch: 'win64_msvc2019_64'
-          modules: 'qtremoteobjects qt5compat qtshadertools'
-          dir: ${{ runner.temp }}
-          setup-python: 'true'
-          tools: 'tools_ifw'
-          set-env: 'true'
-          aqtversion: '==3.3.0'
-          py7zrversion: '==0.22.*'
-          extra: '--base ${{ env.QT_MIRROR }}'
+    - name: 'Install dependencies'
+      shell: bash
+      run: |
+        choco install ninja -y
 
-      - name: Run tests
-        shell: bash
-        run: |
-          cd build
-          ctest --output-on-failure
+    - name: 'Configure'
+      run: |
+        cmake -B build -G Ninja ^
+          -DCMAKE_BUILD_TYPE=Release ^
+          -DBUILD_TESTING=ON
+
+    - name: 'Build'
+      run: cmake --build build
+
+    - name: 'Run QTest binaries'
+      shell: cmd
+      run: |
+        build/client/tests/testSettingsSignals.exe
+        build/client/tests/testSignalOrder.exe
