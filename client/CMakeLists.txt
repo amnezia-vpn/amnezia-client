@@ -230,6 +230,31 @@ target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAM
 # fail to link for iphonesimulator.
 if(IOS AND IOS_SIMULATOR_UI_ONLY AND COMMAND qt_import_plugins)
     qt_import_plugins(${PROJECT} EXCLUDE_BY_TYPE permissions)
+
+    # Qt 6.11 iOS kit may still pull Darwin permission plugin init objects
+    # into simulator link step. Exclude known iOS-only permission backends
+    # explicitly when their imported targets are available.
+    set(_IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE "")
+    foreach(_perm_plugin IN ITEMS
+        QDarwinCameraPermissionPlugin
+        QDarwinMicrophonePermissionPlugin
+        QDarwinBluetoothPermissionPlugin
+        QDarwinCalendarPermissionPlugin
+        QDarwinContactsPermissionPlugin
+        QDarwinLocationPermissionPlugin
+        QDarwinMediaLibraryPermissionPlugin
+        QDarwinPhotoLibraryPermissionPlugin
+        QDarwinReminderPermissionPlugin
+        QDarwinRemindersPermissionPlugin
+    )
+        if(TARGET Qt6::${_perm_plugin})
+            list(APPEND _IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE Qt6::${_perm_plugin})
+        endif()
+    endforeach()
+
+    if(_IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE)
+        qt_import_plugins(${PROJECT} EXCLUDE ${_IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE})
+    endif()
 endif()
 
 # deploy artifacts required to run the application to the debug build folder
