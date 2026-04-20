@@ -225,6 +225,13 @@ list(REMOVE_DUPLICATES I18NQRC)
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
+# iOS UI-only simulator build: exclude Qt permissions static plugins.
+# With Qt 6.11 these plugin init objects may come from iOS-only slices and
+# fail to link for iphonesimulator.
+if(IOS AND IOS_SIMULATOR_UI_ONLY AND COMMAND qt_import_plugins)
+    qt_import_plugins(${PROJECT} EXCLUDE_BY_TYPE permissions)
+endif()
+
 # deploy artifacts required to run the application to the debug build folder
 if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
