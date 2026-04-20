@@ -72,6 +72,13 @@ set(SOURCES ${SOURCES}
 
 target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
+set(IOS_APP_OTHER_LDFLAGS "$(inherited) -ObjC")
+if(IOS_SIMULATOR_UI_ONLY AND CMAKE_OSX_SYSROOT MATCHES "iphonesimulator")
+    # Qt 6.11 + simulator can duplicate ObjC-bearing objects when Qt archives
+    # are listed multiple times. For UI-only simulator builds -ObjC is not needed.
+    set(IOS_APP_OTHER_LDFLAGS "$(inherited)")
+endif()
+
 
 set_target_properties(${PROJECT} PROPERTIES
     LINKER_LANGUAGE Swift
@@ -103,7 +110,7 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(SDKROOT)/usr/lib/swift"
     XCODE_ATTRIBUTE_ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES "YES"
     XCODE_ATTRIBUTE_EMBEDDED_CONTENT_CONTAINS_SWIFT "YES"
-    XCODE_ATTRIBUTE_OTHER_LDFLAGS "$(inherited) -ObjC"
+    XCODE_ATTRIBUTE_OTHER_LDFLAGS "${IOS_APP_OTHER_LDFLAGS}"
 )
 
 if(DEPLOY)

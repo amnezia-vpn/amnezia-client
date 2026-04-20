@@ -16,6 +16,8 @@ git submodule update --init --recursive
 export QT_VERSION="${QT_VERSION:-6.6.2}"
 export QT_BIN_DIR="${QT_BIN_DIR:-$HOME/Qt/$QT_VERSION/ios/bin}"
 export QT_MACOS_ROOT_DIR="${QT_MACOS_ROOT_DIR:-$HOME/Qt/$QT_VERSION/macos}"
+export REQUIRED_QT_VERSION_PREFIX="${REQUIRED_QT_VERSION_PREFIX:-6.6.2}"
+export ENFORCE_QT_VERSION="${ENFORCE_QT_VERSION:-OFF}"
 export IOS_DEPLOY="${IOS_DEPLOY:-OFF}"
 export OPEN_XCODE="${OPEN_XCODE:-ON}"
 if [ -z "${IOS_SIMULATOR_UI_ONLY+x}" ]; then
@@ -63,6 +65,28 @@ if [ -z "$QTCMAKE" ] || [ ! -x "$QTCMAKE" ]; then
   echo "  ~/Qt/<version>/macos/bin/qt-cmake"
   echo "Set QT_BIN_DIR (or QT_VERSION) and run again."
   exit 1
+fi
+
+QT_EFFECTIVE_VERSION="$("$QTCMAKE" --version 2>/dev/null | awk '/Using Qt version/{print $4; exit}')"
+if [ -z "$QT_EFFECTIVE_VERSION" ]; then
+  QT_EFFECTIVE_VERSION="$(echo "$QTCMAKE" | sed -nE 's@.*/Qt/([^/]+)/.*@\1@p')"
+fi
+
+if [ -n "$REQUIRED_QT_VERSION_PREFIX" ]; then
+  case "$QT_EFFECTIVE_VERSION" in
+    ${REQUIRED_QT_VERSION_PREFIX}*) ;;
+    *)
+      if [ "$ENFORCE_QT_VERSION" = "ON" ]; then
+        echo "Detected Qt version: ${QT_EFFECTIVE_VERSION:-unknown}"
+        echo "This project expects Qt ${REQUIRED_QT_VERSION_PREFIX} for iOS simulator builds."
+        echo "Set QT_BIN_DIR/QT_MACOS_ROOT_DIR to ${REQUIRED_QT_VERSION_PREFIX} kit and rerun."
+        exit 1
+      else
+        echo "WARNING: Detected Qt version: ${QT_EFFECTIVE_VERSION:-unknown}"
+        echo "WARNING: Recommended version for this project is ${REQUIRED_QT_VERSION_PREFIX}."
+      fi
+      ;;
+  esac
 fi
 
 if [ ! -d "$QT_MACOS_ROOT_DIR" ]; then
@@ -126,6 +150,7 @@ go install golang.org/x/mobile/cmd/gomobile@latest
 gomobile init
 
 echo "Using qt-cmake: $QTCMAKE"
+echo "Using Qt version: ${QT_EFFECTIVE_VERSION:-unknown}"
 echo "Using QT_HOST_PATH: $QT_MACOS_ROOT_DIR"
 echo "Using DEVELOPER_DIR: ${DEVELOPER_DIR:-$(xcode-select -p 2>/dev/null || echo 'not set')}"
 echo "Detected Xcode: $XCODE_VERSION_LINE"
