@@ -68,33 +68,6 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
-if(IOS AND IOS_SIMULATOR_UI_ONLY)
-    function(_fblink_strip_darwin_permissions _target)
-        if(NOT TARGET "${_target}")
-            return()
-        endif()
-
-        foreach(_prop IN ITEMS INTERFACE_LINK_LIBRARIES INTERFACE_SOURCES INTERFACE_LINK_OPTIONS)
-            get_target_property(_values "${_target}" "${_prop}")
-            if(NOT _values OR _values STREQUAL "_values-NOTFOUND")
-                continue()
-            endif()
-
-            set(_filtered "${_values}")
-            list(FILTER _filtered EXCLUDE REGEX "QDarwin.*PermissionPlugin")
-            list(FILTER _filtered EXCLUDE REGEX "[Pp]lugins/.*/permissions")
-            list(FILTER _filtered EXCLUDE REGEX "qdarwin.*permission")
-
-            if(NOT _filtered STREQUAL _values)
-                set_target_properties("${_target}" PROPERTIES "${_prop}" "${_filtered}")
-            endif()
-        endforeach()
-    endfunction()
-
-    _fblink_strip_darwin_permissions(Qt6::Core)
-    _fblink_strip_darwin_permissions(Qt::Core)
-endif()
-
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml
@@ -274,37 +247,58 @@ if(IOS AND IOS_SIMULATOR_UI_ONLY)
     target_compile_definitions(${PROJECT} PRIVATE QT_NO_PERMISSIONS)
 endif()
 
-# iOS UI-only simulator build: exclude Qt permissions static plugins.
-# With Qt 6.11 these plugin init objects may come from iOS-only slices and
-# fail to link for iphonesimulator.
+# iOS UI-only simulator build: avoid default static plugin set from Qt.
+# In Qt 6.11 the default set may include Darwin permission init objects built
+# for iphoneos, which breaks simulator linking.
 if(IOS AND IOS_SIMULATOR_UI_ONLY AND COMMAND qt_import_plugins)
-    qt_import_plugins(${PROJECT} EXCLUDE_BY_TYPE permissions)
-
-    # Qt 6.11 iOS kit may still pull Darwin permission plugin init objects
-    # into simulator link step. Exclude known iOS-only permission backends
-    # explicitly when their imported targets are available.
-    set(_IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE "")
-    foreach(_perm_plugin IN ITEMS
-        QDarwinCameraPermissionPlugin
-        QDarwinMicrophonePermissionPlugin
-        QDarwinBluetoothPermissionPlugin
-        QDarwinCalendarPermissionPlugin
-        QDarwinContactsPermissionPlugin
-        QDarwinLocationPermissionPlugin
-        QDarwinMediaLibraryPermissionPlugin
-        QDarwinPhotoLibraryPermissionPlugin
-        QDarwinReminderPermissionPlugin
-        QDarwinRemindersPermissionPlugin
+    qt_import_plugins(${PROJECT}
+        NO_DEFAULT
+        EXCLUDE_BY_TYPE permissions
+        EXCLUDE_BY_TYPE qmltooling
     )
-        if(TARGET Qt6::${_perm_plugin})
-            list(APPEND _IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE Qt6::${_perm_plugin})
-        elseif(TARGET Qt::${_perm_plugin})
-            list(APPEND _IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE Qt::${_perm_plugin})
-        endif()
-    endforeach()
 
-    if(_IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE)
-        qt_import_plugins(${PROJECT} EXCLUDE ${_IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE})
+    function(_fblink_append_plugin_if_exists _out_var _name)
+        if(TARGET Qt6::${_name})
+            list(APPEND ${_out_var} Qt6::${_name})
+            set(${_out_var} "${${_out_var}}" PARENT_SCOPE)
+        elseif(TARGET Qt::${_name})
+            list(APPEND ${_out_var} Qt::${_name})
+            set(${_out_var} "${${_out_var}}" PARENT_SCOPE)
+        endif()
+    endfunction()
+
+    set(_ios_platform_plugins "")
+    _fblink_append_plugin_if_exists(_ios_platform_plugins QIOSIntegrationPlugin)
+
+    set(_ios_image_plugins "")
+    _fblink_append_plugin_if_exists(_ios_image_plugins QGifPlugin)
+    _fblink_append_plugin_if_exists(_ios_image_plugins QICOPlugin)
+    _fblink_append_plugin_if_exists(_ios_image_plugins QJpegPlugin)
+    _fblink_append_plugin_if_exists(_ios_image_plugins QSvgPlugin)
+
+    set(_ios_icon_plugins "")
+    _fblink_append_plugin_if_exists(_ios_icon_plugins QSvgIconPlugin)
+
+    set(_ios_networkinfo_plugins "")
+    _fblink_append_plugin_if_exists(_ios_networkinfo_plugins QAppleNetworkInformationPlugin)
+
+    set(_ios_tls_plugins "")
+    _fblink_append_plugin_if_exists(_ios_tls_plugins QSecureTransportBackendPlugin)
+
+    if(_ios_platform_plugins)
+        qt_import_plugins(${PROJECT} INCLUDE_BY_TYPE platforms ${_ios_platform_plugins})
+    endif()
+    if(_ios_image_plugins)
+        qt_import_plugins(${PROJECT} INCLUDE_BY_TYPE imageformats ${_ios_image_plugins})
+    endif()
+    if(_ios_icon_plugins)
+        qt_import_plugins(${PROJECT} INCLUDE_BY_TYPE iconengines ${_ios_icon_plugins})
+    endif()
+    if(_ios_networkinfo_plugins)
+        qt_import_plugins(${PROJECT} INCLUDE_BY_TYPE networkinformation ${_ios_networkinfo_plugins})
+    endif()
+    if(_ios_tls_plugins)
+        qt_import_plugins(${PROJECT} INCLUDE_BY_TYPE tls ${_ios_tls_plugins})
     endif()
 endif()
 
