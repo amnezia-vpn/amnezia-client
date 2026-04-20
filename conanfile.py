@@ -2,7 +2,7 @@ from conan import ConanFile
 
 class AmneziaVPN(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeConfigDeps"
+    generators = "VirtualBuildEnv", "CMakeConfigDeps"
 
     options = {
         "macos_ne": [True, False]
