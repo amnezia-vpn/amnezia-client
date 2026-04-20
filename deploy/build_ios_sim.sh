@@ -19,6 +19,8 @@ BUILD_CONFIG="${BUILD_CONFIG:-Debug}"
 BUILD_TARGET="${BUILD_TARGET:-FBLink}"
 CLEAN_BUILD="${CLEAN_BUILD:-ON}"
 CLEAN_DERIVED_DATA="${CLEAN_DERIVED_DATA:-ON}"
+BUILD_VERBOSE="${BUILD_VERBOSE:-ON}"
+BUILD_LOG="${BUILD_LOG:-$BUILD_IOS_DIR/build-${BUILD_CONFIG}.log}"
 
 if [ -n "${IOS_ARCH:-}" ]; then
   SIM_ARCH="$IOS_ARCH"
@@ -53,6 +55,24 @@ QT_MACOS_ROOT_DIR="$QT_MACOS_ROOT_DIR" \
 BUILD_IOS_DIR="$BUILD_IOS_DIR" \
 bash "$PROJECT_DIR/deploy/open_ios_xcode.sh"
 
-cmake --build "$BUILD_IOS_DIR" --config "$BUILD_CONFIG" --target "$BUILD_TARGET"
+echo "Build log: $BUILD_LOG"
+mkdir -p "$(dirname "$BUILD_LOG")"
+
+set +e
+if [ "$BUILD_VERBOSE" = "ON" ]; then
+  cmake --build "$BUILD_IOS_DIR" --config "$BUILD_CONFIG" --target "$BUILD_TARGET" --verbose 2>&1 | tee "$BUILD_LOG"
+  BUILD_RC=${PIPESTATUS[0]}
+else
+  cmake --build "$BUILD_IOS_DIR" --config "$BUILD_CONFIG" --target "$BUILD_TARGET" 2>&1 | tee "$BUILD_LOG"
+  BUILD_RC=${PIPESTATUS[0]}
+fi
+set -e
+
+if [ "$BUILD_RC" -ne 0 ]; then
+  echo
+  echo "Build failed ($BUILD_RC). Extracting linker diagnostics..."
+  grep -E "duplicate symbol|undefined symbol|ld: |clang\\+\\+: error|The following build commands failed" "$BUILD_LOG" | tail -n 120 || true
+  exit "$BUILD_RC"
+fi
 
 echo "Done. iOS simulator build succeeded."
