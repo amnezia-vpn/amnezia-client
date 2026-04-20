@@ -17,7 +17,9 @@ enable_language(OBJC)
 enable_language(OBJCXX)
 enable_language(Swift)
 
-find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
+if(NOT TARGET Qt6::ShaderTools)
+    find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
+endif()
 set(LIBS ${LIBS} Qt6::ShaderTools)
 
 find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)

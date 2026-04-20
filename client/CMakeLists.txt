@@ -224,6 +224,9 @@ list(REMOVE_DUPLICATES I18NQRC)
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
+if(IOS AND IOS_SIMULATOR_UI_ONLY)
+    target_compile_definitions(${PROJECT} PRIVATE QT_NO_PERMISSIONS)
+endif()
 
 # iOS UI-only simulator build: exclude Qt permissions static plugins.
 # With Qt 6.11 these plugin init objects may come from iOS-only slices and
@@ -249,6 +252,8 @@ if(IOS AND IOS_SIMULATOR_UI_ONLY AND COMMAND qt_import_plugins)
     )
         if(TARGET Qt6::${_perm_plugin})
             list(APPEND _IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE Qt6::${_perm_plugin})
+        elseif(TARGET Qt::${_perm_plugin})
+            list(APPEND _IOS_PERMISSIONS_PLUGINS_TO_EXCLUDE Qt::${_perm_plugin})
         endif()
     endforeach()
 
