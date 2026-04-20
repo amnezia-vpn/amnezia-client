@@ -47,6 +47,25 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} RemoteObjects)
 endif()
 
+# Qt 6.11 iOS kit may expose Darwin permission plugin packages whose objects are
+# built for iphoneos only. In UI-only simulator builds they break linker input.
+if(IOS AND IOS_SIMULATOR_UI_ONLY)
+    foreach(_qt_perm_pkg IN ITEMS
+        Qt6QDarwinCameraPermissionPlugin
+        Qt6QDarwinMicrophonePermissionPlugin
+        Qt6QDarwinBluetoothPermissionPlugin
+        Qt6QDarwinCalendarPermissionPlugin
+        Qt6QDarwinContactsPermissionPlugin
+        Qt6QDarwinLocationPermissionPlugin
+        Qt6QDarwinMediaLibraryPermissionPlugin
+        Qt6QDarwinPhotoLibraryPermissionPlugin
+        Qt6QDarwinReminderPermissionPlugin
+        Qt6QDarwinRemindersPermissionPlugin
+    )
+        set(CMAKE_DISABLE_FIND_PACKAGE_${_qt_perm_pkg} TRUE)
+    endforeach()
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
 set(LIBS ${LIBS}
