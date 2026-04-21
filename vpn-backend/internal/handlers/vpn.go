@@ -490,18 +490,18 @@ func (h *VPNHandler) RevokeConfig(c *gin.Context) {
 	}
 
 	var wg sync.WaitGroup
-
-	for i := range keysToRevoke {
-		if keysToRevoke[i].PublicKey != "" {
+	for _, k := range keysToRevoke {
+		if k.PublicKey != "" {
 			wg.Add(1)
-			go func(server *models.VPNServer, pubKey string) {
+			go func(server models.VPNServer, pubKey string) {
 				defer wg.Done()
-				if err := removeAWGPeer(server, pubKey); err != nil {
+				if err := removeAWGPeer(&server, pubKey); err != nil {
 					fmt.Printf("[WARN] SSH removeAWGPeer failed for server %s: %v\n", server.Name, err)
 				}
-			}(&keysToRevoke[i].Server, keysToRevoke[i].PublicKey)
+			}(k.Server, k.PublicKey)
 		}
 	}
+	wg.Wait()
 
 	var xrayCredentials []models.VLESSCredential
 	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server.VLESSTemplate").Find(&xrayCredentials)
