@@ -824,7 +824,7 @@ jobs:
     - name: 'Deploy Qt dependencies'
       shell: cmd
       run: |
-        for %%f in (build\client\*.exe) do (windeployqt %%f)
+        for %%f in (build\client\test_*.exe) do (windeployqt %%f)
 
     - name: 'Run tests'
       run: |
