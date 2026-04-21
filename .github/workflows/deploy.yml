@@ -824,10 +824,17 @@ jobs:
         -DCMAKE_BUILD_TYPE=Release ^
         -DBUILD_TESTING=ON
 
-    - name: 'Build'
-      run: cmake --build build
+    - name: Deploy Qt dependencies
+      shell: cmd
+      run: |
+        for %%f in (build\client\tests\*.exe) do (windeployqt %%f)
+
+    - name: Find all exe files
+      shell: cmd
+      run: |
+        dir build /s *.exe
 
     - name: 'Run tests'
       run: |
-        cd build
+        cd build\client\tests
         ctest --output-on-failure
