@@ -15,6 +15,12 @@ project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         HOMEPAGE_URL "https://amnezia.org/"
 )
 
+if (PREBUILTS_ONLY)
+    # trigger conan to kick off `conan install`
+    find_package(OpenSSL REQUIRED)
+    return()
+endif()
+
 string(TIMESTAMP CURRENT_DATE "%Y-%m-%d")
 set(RELEASE_DATE "${CURRENT_DATE}")
 

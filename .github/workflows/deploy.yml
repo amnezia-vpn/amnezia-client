@@ -9,7 +9,53 @@ env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
 
 jobs:
+  Bake-Prebuilts:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            msvc-version: 19.5
+          - os: windows-latest
+            msvc-version: 19.4
+          - os: ubuntu-latest
+          - os: macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+      
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Install MSVC'
+      if: matrix.msvc-version != null
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        toolset: ${{ matrix.msvc-version }}
+
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -DPREBUILTS_ONLY=1
+
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
+    
+# ------------------------------------------------------
+
   Build-Linux-Ubuntu:
+    needs: Bake-Prebuilts
     runs-on: android-runner
 
     env:
@@ -81,6 +127,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Windows:
+    needs: Bake-Prebuilts
     runs-on: windows-latest
 
     env:
@@ -266,6 +313,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
+    needs: Bake-Prebuilts
     runs-on: macos-latest
 
     env:
