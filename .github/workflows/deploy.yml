@@ -813,6 +813,7 @@ jobs:
     - name: 'Configure'
       shell: cmd
       run: |
+        rmdir /s /q build
         cmake -B build -G Ninja ^
         -DCMAKE_BUILD_TYPE=Release ^
         -DBUILD_TESTING=ON
