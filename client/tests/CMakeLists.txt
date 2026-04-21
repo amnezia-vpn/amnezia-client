@@ -214,33 +214,6 @@ target_link_libraries(test_ui_news_model_and_controller PRIVATE
     test_common
 )
 
-foreach(test_target
-    test_import_export
-    test_multiple_imports
-    test_server_edit
-    test_default_server_change
-    test_server_edge_cases
-    test_signal_order
-    test_servers_model_sync
-    test_gateway_stacks
-    test_complex_operations
-    test_settings_signals
-    test_ui_servers_model_and_controller
-    test_self_hosted_server_setup
-    test_exports
-    test_serialization
-    test_ui_language_model_and_controller
-    test_ui_sites_model_and_controller
-    test_ui_app_st_model_and_controller
-    test_ui_allowed_dns_model_and_controller
-    test_ui_api_services_model_and_controller
-    test_ui_news_model_and_controller
-)
-    set_target_properties(${test_target} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    )
-endforeach()
-
 enable_testing()
 add_test(NAME ImportExportTest COMMAND test_import_export)
 add_test(NAME MultipleImportsTest COMMAND test_multiple_imports)
