@@ -787,52 +787,51 @@ jobs:
   Test-Windows:
     runs-on: windows-latest
 
-    needs: Build-Windows
-
     env:
       QT_VERSION: 6.10.1
 
     steps:
-      - uses: actions/checkout@v4
-  
-      - name: 'Get sources'
-        uses: actions/checkout@v4
-        with:
-          submodules: 'true'
-          fetch-depth: 10
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
 
-      - name: 'Get version from CMakeLists.txt'
-        id: get_version
-        shell: bash
-        run: |
-          VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Version: $VERSION"
+    - name: 'Install Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_64'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        set-env: 'true'
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: AmneziaVPN_${{ env.VERSION }}_x64.exe
-          path: build
+    - name: 'Setup MSVC'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: 'x64'
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: 'windows'
-          target: 'desktop'
-          arch: 'win64_msvc2019_64'
-          modules: 'qtremoteobjects qt5compat qtshadertools'
-          dir: ${{ runner.temp }}
-          setup-python: 'true'
-          tools: 'tools_ifw'
-          set-env: 'true'
-          aqtversion: '==3.3.0'
-          py7zrversion: '==0.22.*'
-          extra: '--base ${{ env.QT_MIRROR }}'
+    - name: 'Install dependencies'
+      shell: bash
+      run: |
+        choco install ninja -y
 
-      - name: Run tests
-        shell: bash
-        run: |
-          cd build
-          ctest --output-on-failure
+    - name: 'Configure'
+      shell: cmd
+      run: |
+        cmake -B build -G Ninja ^
+        -DCMAKE_BUILD_TYPE=Release ^
+        -DBUILD_TESTING=ON
+
+    - name: Deploy Qt dependencies
+      shell: cmd
+      run: |
+        for %%f in (build\client\tests\*.exe) do (windeployqt %%f)
+
+    - name: 'Run tests'
+      run: |
+        set PATH=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin;%PATH%
+        cd build\client\tests
+        ctest --output-on-failure
