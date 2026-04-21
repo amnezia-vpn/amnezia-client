@@ -28,13 +28,13 @@ Options:
 EOT
 }
 
-BUILD_TYPE="release"
+BUILD_TYPE="Release"
 
 opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,help -o "dua:b:mfh" -- "$@")
 eval set -- "$opts"
 while true; do
   case "$1" in
-    -d | --debug) BUILD_TYPE="debug"; shift;;
+    -d | --debug) BUILD_TYPE="Debug"; shift;;
     -u | --aab) AAB=1; shift;;
     -a | --apk) ABIS=$2; shift 2;;
     -b | --build-platform) ANDROID_BUILD_PLATFORM=$2; shift 2;;
@@ -129,7 +129,7 @@ if [ -v ANDROID_BUILD_PLATFORM ]; then
   deployqt_opts+=(--android-platform "$ANDROID_BUILD_PLATFORM")
 fi
 
-if [ "$BUILD_TYPE" = "release" ]; then
+if [ "$BUILD_TYPE" = "Release" ]; then
   deployqt_opts+=(--release)
 fi
 
