@@ -38,7 +38,7 @@ fi
 
 if [ "$CLEAN_DERIVED_DATA" = "ON" ]; then
   echo "Cleaning Xcode DerivedData (FBLink*)"
-  rm -rf "$HOME/Library/Developer/Xcode/DerivedData/FBLink"*
+  rm -rf "$HOME/Library/Developer/Xcode/DerivedData/FBLink"* 2>/dev/null || true
 fi
 
 echo "Project dir: $PROJECT_DIR"
