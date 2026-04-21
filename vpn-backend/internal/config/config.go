@@ -28,10 +28,10 @@ type Config struct {
 	PaymentReturnURL string // URL для редиректа после оплаты
 
 	// Client Updater
-	ClientLatestVersion   string
-	ClientDownloadURL     string
-	ClientReleaseNotes    string
-	ClientUpdateCritical  bool
+	ClientLatestVersion  string
+	ClientDownloadURL    string
+	ClientReleaseNotes   string
+	ClientUpdateCritical bool
 }
 
 func Load() *Config {

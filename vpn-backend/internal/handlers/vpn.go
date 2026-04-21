@@ -260,13 +260,26 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 
 			if existingKey, ok := keyMap[server.ID]; ok {
 				configText := existingKey.ConfigText
-				configMap := map[string]interface{}{}
-				if err := json.Unmarshal([]byte(configText), &configMap); err == nil {
-					configMap["country_code"] = existingKey.Server.CountryCode
-					if modified, err := json.Marshal(configMap); err == nil {
-						configText = string(modified)
+				text := strings.TrimSpace(configText)
+
+				// For legacy configs (which is the main target of this loop), "country_code"
+				// is entirely missing from the JSON string. Since we know our schema, we can safely
+				// append it without parsing the whole JSON object.
+				if len(text) >= 2 && text[0] == '{' && text[len(text)-1] == '}' && !strings.Contains(text, `"country_code"`) {
+					insertion := `,"country_code":"` + existingKey.Server.CountryCode + `"}`
+					configText = text[:len(text)-1] + insertion
+				} else {
+					// Fallback: Safe modification using json.RawMessage to avoid parsing nested structures
+					var configMap map[string]json.RawMessage
+					if err := json.Unmarshal([]byte(configText), &configMap); err == nil {
+						countryCodeBytes, _ := json.Marshal(existingKey.Server.CountryCode)
+						configMap["country_code"] = countryCodeBytes
+						if modified, err := json.Marshal(configMap); err == nil {
+							configText = string(modified)
+						}
 					}
 				}
+
 				responseConfigs = append(responseConfigs, map[string]interface{}{
 					"config":    configText,
 					"server":    existingKey.Server.Name,
