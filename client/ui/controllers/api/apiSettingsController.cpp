@@ -23,6 +23,19 @@ namespace
     }
 
     const int requestTimeoutMsecs = 12 * 1000; // 12 secs
+
+    QString getSubscriptionStatusForRenewal(const QSharedPointer<ApiAccountInfoModel> &accountInfoModel)
+    {
+        if (!accountInfoModel.isNull() && accountInfoModel->data(QStringLiteral("isSubscriptionExpired")).toBool()) {
+            return QStringLiteral("expired");
+        }
+
+        if (!accountInfoModel.isNull() && accountInfoModel->data(QStringLiteral("isSubscriptionExpiringSoon")).toBool()) {
+            return QStringLiteral("expire_soon");
+        }
+
+        return QStringLiteral("active");
+    }
 }
 
 ApiSettingsController::ApiSettingsController(const QSharedPointer<ServersModel> &serversModel,
@@ -105,6 +118,7 @@ void ApiSettingsController::getRenewalLink()
     apiPayload[configKey::authData] = authData;
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
     apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
+    apiPayload[apiDefs::key::subscriptionStatus] = getSubscriptionStatusForRenewal(m_apiAccountInfoModel);
 
     auto future = gatewayController->postAsync(QString("%1v1/renewal_link"), apiPayload);
     future.then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {

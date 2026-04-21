@@ -101,7 +101,6 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
     };
     case apiDefs::ConfigSource::AmneziaGateway: {
         constexpr QLatin1String servicePremium("amnezia-premium");
-        constexpr QLatin1String serviceTrial("amnezia-trial");
         constexpr QLatin1String serviceFree("amnezia-free");
         constexpr QLatin1String serviceExternalPremium("external-premium");
         constexpr QLatin1String serviceExternalTrial("external-trial");
@@ -111,8 +110,6 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
 
         if (serviceType == servicePremium) {
             return apiDefs::ConfigType::AmneziaPremiumV2;
-        } else if (serviceType == serviceTrial) {
-            return apiDefs::ConfigType::AmneziaTrialV2;
         } else if (serviceType == serviceFree) {
             return apiDefs::ConfigType::AmneziaFreeV3;
         } else if (serviceType == serviceExternalPremium) {
@@ -198,8 +195,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
 bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)
 {
     static const QSet<apiDefs::ConfigType> premiumTypes = { apiDefs::ConfigType::AmneziaPremiumV1, apiDefs::ConfigType::AmneziaPremiumV2,
-                                                            apiDefs::ConfigType::AmneziaTrialV2, apiDefs::ConfigType::ExternalPremium,
-                                                            apiDefs::ConfigType::ExternalTrial };
+                                                            apiDefs::ConfigType::ExternalPremium, apiDefs::ConfigType::ExternalTrial };
     return premiumTypes.contains(getConfigType(serverConfigObject));
 }
 
@@ -244,8 +240,8 @@ QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
 QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
 {
     auto configType = apiUtils::getConfigType(serverConfigObject);
-    if (configType != apiDefs::ConfigType::AmneziaPremiumV2 && configType != apiDefs::ConfigType::AmneziaTrialV2
-        && configType != apiDefs::ConfigType::ExternalPremium && configType != apiDefs::ConfigType::ExternalTrial) {
+    if (configType != apiDefs::ConfigType::AmneziaPremiumV2 && configType != apiDefs::ConfigType::ExternalPremium
+        && configType != apiDefs::ConfigType::ExternalTrial) {
         return {};
     }
 

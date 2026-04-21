@@ -54,14 +54,11 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     }
     case IsComponentVisibleRole: {
         return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
-                || m_accountInfoData.configType == apiDefs::ConfigType::AmneziaTrialV2
                 || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium
                 || m_accountInfoData.configType == apiDefs::ConfigType::ExternalTrial;
     }
     case IsSubscriptionRenewalAvailableRole: {
-        return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
-                || m_accountInfoData.configType == apiDefs::ConfigType::AmneziaTrialV2
-                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalTrial;
+        return m_accountInfoData.isRenewalAvailable;
     }
     case HasExpiredWorkerRole: {
         for (int i = 0; i < m_issuedConfigsInfo.size(); i++) {
@@ -133,6 +130,7 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
     accountInfoData.isInAppPurchase = apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false);
 
     accountInfoData.subscriptionDescription = accountInfoObject.value(apiDefs::key::subscriptionDescription).toString();
+    accountInfoData.isRenewalAvailable = accountInfoObject.value(apiDefs::key::isRenewalAvailable).toBool(false);
 
     for (const auto &protocol : accountInfoObject.value(apiDefs::key::supportedProtocols).toArray()) {
         accountInfoData.supportedProtocols.push_back(protocol.toString());

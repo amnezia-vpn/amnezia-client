@@ -13,7 +13,7 @@ namespace apiUtils
 
     bool isSubscriptionExpired(const QString &subscriptionEndDate);
 
-    bool isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays = 10);
+    bool isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays = 30);
 
     bool isPremiumServer(const QJsonObject &serverConfigObject);
 

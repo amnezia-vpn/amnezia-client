@@ -4,6 +4,9 @@ import android.content.Context
 import android.net.VpnService.Builder
 import java.io.File
 import java.io.IOException
+import java.net.InetAddress
+import java.net.ServerSocket
+import java.util.UUID
 import go.Seq
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.Protocol
@@ -19,10 +22,31 @@ import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.ip
 import org.amnezia.vpn.util.net.parseInetAddress
+import org.json.JSONArray
 import org.json.JSONObject
 
 private const val TAG = "Xray"
 private const val LIBXRAY_TAG = "libXray"
+
+private fun findSocksInboundIndex(inbounds: JSONArray): Int {
+    for (i in 0 until inbounds.length()) {
+        val o = inbounds.optJSONObject(i) ?: continue
+        if (o.optString("protocol").equals("socks", ignoreCase = true)) {
+            return i
+        }
+    }
+    return -1
+}
+
+private fun acquireFreeLocalPort(): Int {
+    try {
+        ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { return it.localPort }
+    } catch (e: Exception) {
+        throw VpnStartException(
+            "Failed to acquire free TCP port on 127.0.0.1 for SOCKS inbound: ${e.message}"
+        )
+    }
+}
 
 class Xray : Protocol() {
 
@@ -56,6 +80,10 @@ class Xray : Protocol() {
         val xrayJsonConfig = config.optJSONObject("xray_config_data")
             ?: config.optJSONObject("ssxray_config_data")
             ?: throw BadConfigException("config_data not found")
+
+        // Inject SOCKS5 auth before starting xray. Re-uses existing credentials if present.
+        ensureInboundAuth(xrayJsonConfig)
+
         val xrayConfig = parseConfig(config, xrayJsonConfig)
 
         (xrayJsonConfig.optJSONObject("log") ?: JSONObject().also { xrayJsonConfig.put("log", it) })
@@ -97,8 +125,21 @@ class Xray : Protocol() {
                 if (it.isNotBlank()) setMtu(it.toInt())
             }
 
-            val socksConfig = xrayJsonConfig.getJSONArray("inbounds")[0] as JSONObject
+            val inbounds = xrayJsonConfig.getJSONArray("inbounds")
+            val socksIdx = findSocksInboundIndex(inbounds)
+            if (socksIdx < 0) {
+                throw BadConfigException("socks inbound not found")
+            }
+            val socksConfig = inbounds.getJSONObject(socksIdx)
             socksConfig.getInt("port").let { setSocksPort(it) }
+
+            val socksSettings = socksConfig.optJSONObject("settings")
+            val accounts = socksSettings?.optJSONArray("accounts")
+            if (accounts != null && accounts.length() > 0) {
+                val account = accounts.getJSONObject(0)
+                setSocksUser(account.optString("user"))
+                setSocksPass(account.optString("pass"))
+            }
 
             configSplitTunneling(config)
             configAppSplitTunneling(config)
@@ -162,15 +203,47 @@ class Xray : Protocol() {
     }
 
     private fun runTun2Socks(config: XrayConfig, fd: Int) {
+        val proxyUrl = "socks5://${config.socksUser}:${config.socksPass}@127.0.0.1:${config.socksPort}"
         val tun2SocksConfig = Tun2SocksConfig().apply {
             mtu = config.mtu.toLong()
-            proxy = "socks5://127.0.0.1:${config.socksPort}"
+            proxy = proxyUrl
             device = "fd://$fd"
             logLevel = "warn"
         }
         LibXray.startTun2Socks(tun2SocksConfig, fd.toLong()).isNotNullOrBlank { err ->
             throw VpnStartException("Failed to start tun2socks: $err")
         }
+    }
+
+    // Ensures SOCKS5 auth is present on the socks inbound settings.
+    // Re-uses existing credentials if already configured; otherwise generates random ones.
+    private fun ensureInboundAuth(xrayConfig: JSONObject) {
+        val inbounds = xrayConfig.optJSONArray("inbounds") ?: return
+        val socksIdx = findSocksInboundIndex(inbounds)
+        if (socksIdx < 0) return
+
+        val inbound = inbounds.getJSONObject(socksIdx)
+        inbound.put("port", acquireFreeLocalPort())
+        val settings = inbound.optJSONObject("settings") ?: JSONObject().also { inbound.put("settings", it) }
+        val accounts = settings.optJSONArray("accounts")
+        if (accounts != null && accounts.length() > 0) {
+            val account = accounts.getJSONObject(0)
+            if (account.optString("user").isNotEmpty() && account.optString("pass").isNotEmpty()) {
+                // Ensure auth mode is enforced even for imported configs that had accounts
+                // but auth: "noauth" (or no auth field).
+                settings.put("auth", "password")
+                inbound.put("settings", settings)
+                inbounds.put(socksIdx, inbound)
+                return
+            }
+        }
+
+        val user = UUID.randomUUID().toString().replace("-", "").substring(0, 16)
+        val pass = UUID.randomUUID().toString().replace("-", "")
+        settings.put("auth", "password")
+        settings.put("accounts", JSONArray().put(JSONObject().put("user", user).put("pass", pass)))
+        inbound.put("settings", settings)
+        inbounds.put(socksIdx, inbound)
     }
 
     companion object {

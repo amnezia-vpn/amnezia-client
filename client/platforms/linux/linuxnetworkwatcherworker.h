@@ -24,6 +24,7 @@ class LinuxNetworkWatcherWorker final : public QObject {
  signals:
   void unsecuredNetwork(const QString& networkName, const QString& networkId);
   void wakeup();
+  void networkChanged();
 
  public slots:
   void initialize();
