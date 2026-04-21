@@ -131,9 +131,11 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 			now := time.Now()
 			for _, key := range legacyAWGKeys {
 				if key.PublicKey != "" {
-					if err := removeAWGPeer(&key.Server, key.PublicKey); err != nil {
-						fmt.Printf("[WARN] Failed to remove legacy AWG peer for VIP user %d on server %s: %v\n", userID, key.Server.Name, err)
-					}
+					go func(server models.VPNServer, pubKey string) {
+						if err := removeAWGPeer(&server, pubKey); err != nil {
+							fmt.Printf("[WARN] Failed to remove legacy AWG peer for VIP user %d on server %s: %v\n", userID, server.Name, err)
+						}
+					}(key.Server, key.PublicKey)
 				}
 			}
 			h.db.Model(&models.VPNKey{}).Where("user_id = ? AND revoked_at IS NULL", userID).Update("revoked_at", &now)
@@ -236,9 +238,11 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 		if len(legacyVLESS) > 0 {
 			now := time.Now()
 			for _, cred := range legacyVLESS {
-				if err := removeXrayClient(&cred.Server, cred.Server.VLESSTemplate, cred.ClientID); err != nil {
-					fmt.Printf("[WARN] Failed to remove legacy VLESS client for basic user %d on server %s: %v\n", userID, cred.Server.Name, err)
-				}
+				go func(server models.VPNServer, template *models.VLESSServerTemplate, clientID string) {
+					if err := removeXrayClient(&server, template, clientID); err != nil {
+						fmt.Printf("[WARN] Failed to remove legacy VLESS client for basic user %d on server %s: %v\n", userID, server.Name, err)
+					}
+				}(cred.Server, cred.Server.VLESSTemplate, cred.ClientID)
 			}
 			h.db.Model(&models.VLESSCredential{}).Where("user_id = ? AND revoked_at IS NULL", userID).Update("revoked_at", &now)
 		}
@@ -319,7 +323,9 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 					"issued_at": now,
 				})
 			} else {
-				_ = removeAWGPeer(server, publicKey)
+				go func(srv *models.VPNServer, pubKey string) {
+					_ = removeAWGPeer(srv, pubKey)
+				}(server, publicKey)
 			}
 		}
 	}
@@ -491,16 +497,20 @@ func (h *VPNHandler) RevokeConfig(c *gin.Context) {
 
 	for _, k := range keysToRevoke {
 		if k.PublicKey != "" {
-			if err := removeAWGPeer(&k.Server, k.PublicKey); err != nil {
-				fmt.Printf("[WARN] SSH removeAWGPeer failed for server %s: %v\n", k.Server.Name, err)
-			}
+			go func(server models.VPNServer, pubKey string) {
+				if err := removeAWGPeer(&server, pubKey); err != nil {
+					fmt.Printf("[WARN] SSH removeAWGPeer failed for server %s: %v\n", server.Name, err)
+				}
+			}(k.Server, k.PublicKey)
 		}
 	}
 
 	var xrayCredentials []models.VLESSCredential
 	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server.VLESSTemplate").Find(&xrayCredentials)
 	for _, credential := range xrayCredentials {
-		_ = removeXrayClient(&credential.Server, credential.Server.VLESSTemplate, credential.ClientID)
+		go func(server models.VPNServer, template *models.VLESSServerTemplate, clientID string) {
+			_ = removeXrayClient(&server, template, clientID)
+		}(credential.Server, credential.Server.VLESSTemplate, credential.ClientID)
 	}
 
 	now := time.Now()
