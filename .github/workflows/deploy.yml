@@ -820,9 +820,12 @@ jobs:
     - name: 'Build'
       run: cmake --build build
 
-    - name: 'Add Qt to PATH'
+    - name: 'Deploy Qt for tests'
+      shell: cmd
       run: |
-        echo "${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin" >> $env:GITHUB_PATH
+        for %%f in (build\client\tests\*.exe) do (
+          windeployqt --no-translations --no-compiler-runtime %%f
+        )
 
     - name: 'Run tests'
       run: |
