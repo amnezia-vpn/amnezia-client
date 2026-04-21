@@ -505,9 +505,15 @@ func (h *VPNHandler) RevokeConfig(c *gin.Context) {
 
 	var xrayCredentials []models.VLESSCredential
 	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server.VLESSTemplate").Find(&xrayCredentials)
-	for _, credential := range xrayCredentials {
-		_ = removeXrayClient(&credential.Server, credential.Server.VLESSTemplate, credential.ClientID)
+	for i := range xrayCredentials {
+		wg.Add(1)
+		go func(server *models.VPNServer, template *models.VLESSServerTemplate, clientID string) {
+			defer wg.Done()
+			_ = removeXrayClient(server, template, clientID)
+		}(&xrayCredentials[i].Server, xrayCredentials[i].Server.VLESSTemplate, xrayCredentials[i].ClientID)
 	}
+
+	wg.Wait()
 
 	now := time.Now()
 	result := h.db.Model(&models.VPNKey{}).
