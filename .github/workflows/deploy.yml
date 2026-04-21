@@ -827,6 +827,6 @@ jobs:
         for %%f in (build\client\test_*.exe) do (windeployqt %%f)
 
     - name: 'Run tests'
+      shell: cmd
       run: |
-        cd build\client
-        ctest --output-on-failure
+        ctest --test-dir build --output-on-failure
