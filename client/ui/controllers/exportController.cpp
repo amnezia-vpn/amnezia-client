@@ -98,6 +98,77 @@ void ExportController::generateConnectionConfig(const QString &clientName)
     emit exportConfigChanged();
 }
 
+void ExportController::generateMultiConnectionConfig(const QString &clientName)
+{
+    clearPreviousConfig();
+
+    int serverIndex = m_serversModel->getProcessedServerIndex();
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+
+    QJsonArray originalContainers = serverConfig.value(config_key::containers).toArray();
+    QJsonArray newContainers;
+
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
+
+    DockerContainer defaultContainer = DockerContainer::None;
+
+    for (int i = 0; i < originalContainers.size(); i++) {
+        QJsonObject containerConfig = originalContainers.at(i).toObject();
+        DockerContainer container = ContainerProps::containerFromString(
+            containerConfig.value(config_key::container).toString());
+
+        if (!ContainerProps::isShareable(container)) {
+            continue;
+        }
+
+        ErrorCode errorCode = vpnConfigurationController.createProtocolConfigForContainer(
+            credentials, container, containerConfig);
+        if (errorCode != ErrorCode::NoError) {
+            emit exportErrorOccurred(errorCode);
+            return;
+        }
+
+        errorCode = m_clientManagementModel->appendClient(
+            container, credentials, containerConfig, clientName, serverController);
+        if (errorCode != ErrorCode::NoError) {
+            emit exportErrorOccurred(errorCode);
+            return;
+        }
+
+        newContainers.append(containerConfig);
+
+        if (defaultContainer == DockerContainer::None) {
+            defaultContainer = container;
+        }
+    }
+
+    if (newContainers.isEmpty()) {
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    serverConfig.remove(config_key::userName);
+    serverConfig.remove(config_key::password);
+    serverConfig.remove(config_key::port);
+    serverConfig.insert(config_key::containers, newContainers);
+    serverConfig.insert(config_key::defaultContainer,
+        ContainerProps::containerToString(defaultContainer));
+
+    auto dns = m_serversModel->getDnsPair(serverIndex);
+    serverConfig.insert(config_key::dns1, dns.first);
+    serverConfig.insert(config_key::dns2, dns.second);
+
+    QByteArray compressedConfig = QJsonDocument(serverConfig).toJson();
+    compressedConfig = qCompress(compressedConfig, 8);
+    m_config = QString("vpn://%1").arg(QString(compressedConfig.toBase64(
+        QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)));
+
+    m_qrCodes = qrCodeUtils::generateQrCodeImageSeries(compressedConfig);
+    emit exportConfigChanged();
+}
+
 ErrorCode ExportController::generateNativeConfig(const DockerContainer container, const QString &clientName, const Proto &protocol,
                                                  QJsonObject &jsonNativeConfig)
 {

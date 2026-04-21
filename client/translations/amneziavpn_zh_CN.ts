@@ -3656,6 +3656,10 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>用户名</translation>
     </message>
     <message>
+        <source>Share all protocols</source>
+        <translation>共享所有协议</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="479"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="480"/>
         <source>Connection format</source>

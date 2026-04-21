@@ -3530,6 +3530,10 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>پروتکل</translation>
     </message>
     <message>
+        <source>Share all protocols</source>
+        <translation>اشتراک‌گذاری همه پروتکل‌ها</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="479"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="480"/>
         <source>Connection format</source>

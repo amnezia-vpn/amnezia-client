@@ -3758,6 +3758,10 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Протокол</translation>
     </message>
     <message>
+        <source>Share all protocols</source>
+        <translation>Поділитися всіма протоколами</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="479"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="480"/>
         <source>Connection format</source>

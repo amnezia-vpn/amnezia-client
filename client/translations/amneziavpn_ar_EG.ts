@@ -3384,6 +3384,10 @@ Already installed containers were found on the server. All installed containers 
         <translation>اسم المستخدم</translation>
     </message>
     <message>
+        <source>Share all protocols</source>
+        <translation>مشاركة جميع البروتوكولات</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="479"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="480"/>
         <source>Connection format</source>
