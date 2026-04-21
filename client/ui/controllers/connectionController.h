@@ -26,9 +26,11 @@ public:
     bool isConnected() const;
     bool isConnectionInProgress() const;
     QString connectionStateText() const;
+    void suppressNextQueuedToggle(int timeoutMs = 3000);
 
 public slots:
     void toggleConnection();
+    void toggleConnectionByShortcut();
 
     void openConnection();
     void closeConnection();
@@ -54,6 +56,7 @@ signals:
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();
+    bool hasReadyConnectionConfig() const;
 
     void continueConnection();
 
@@ -67,6 +70,8 @@ private:
 
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;
+    bool m_suppressNextQueuedToggle = false;
+    quint64 m_toggleSuppressionGeneration = 0;
     QString m_connectionStateText = tr("Connect");
 
     Vpn::ConnectionState m_state;

@@ -200,6 +200,42 @@ public:
         emit screenshotsEnabledChanged(enabled);
     }
 
+    bool isGlobalShortcutEnabled() const
+    {
+        return m_settings.value("Conf/globalShortcutEnabled", false).toBool();
+    }
+    void setGlobalShortcutEnabled(bool enabled)
+    {
+        m_settings.setValue("Conf/globalShortcutEnabled", enabled);
+    }
+
+    int globalShortcutKeyCode() const
+    {
+        return m_settings.value("Conf/globalShortcutKeyCode", 0).toInt();
+    }
+    void setGlobalShortcutKeyCode(int keyCode)
+    {
+        m_settings.setValue("Conf/globalShortcutKeyCode", keyCode);
+    }
+
+    int globalShortcutModifiers() const
+    {
+        return m_settings.value("Conf/globalShortcutModifiers", 0).toInt();
+    }
+    void setGlobalShortcutModifiers(int modifiers)
+    {
+        m_settings.setValue("Conf/globalShortcutModifiers", modifiers);
+    }
+
+    QString globalShortcutText() const
+    {
+        return m_settings.value("Conf/globalShortcutText").toString();
+    }
+    void setGlobalShortcutText(const QString &shortcutText)
+    {
+        m_settings.setValue("Conf/globalShortcutText", shortcutText);
+    }
+
     void clearSettings();
 
     enum AppsRouteMode {

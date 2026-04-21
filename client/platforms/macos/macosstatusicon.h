@@ -5,6 +5,7 @@
 #ifndef MACOSSTATUSICON_H
 #define MACOSSTATUSICON_H
 
+#include <QByteArray>
 #include <QMenu>
 #include <QObject>
 
@@ -18,6 +19,9 @@ class MacOSStatusIcon final : public QObject {
 
  public:
   void setIcon(const QString& iconUrl);
+  void setIconData(const QByteArray& imageData, bool isTemplate = false);
+  void setLength(qreal length);
+  void setImageSize(qreal width, qreal height);
   void setIndicatorColor(const QColor& indicatorColor);
   void setMenu(NSMenu* statusBarMenu);
   void setToolTip(const QString& tooltip);

@@ -21,6 +21,7 @@
 #include "ui/controllers/installController.h"
 #include "ui/controllers/pageController.h"
 #include "ui/controllers/settingsController.h"
+#include "ui/controllers/shortcutController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
 
@@ -68,6 +69,7 @@ public:
 
     void openConnectionByIndex(int serverIndex);
     void importConfigFromData(const QString &data);
+    void toggleConnectionByExternalCommand();
 
 signals:
     void translationsUpdated();
@@ -114,6 +116,7 @@ private:
     QScopedPointer<ImportController> m_importController;
     QScopedPointer<ExportController> m_exportController;
     QScopedPointer<SettingsController> m_settingsController;
+    QScopedPointer<ShortcutController> m_shortcutController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;

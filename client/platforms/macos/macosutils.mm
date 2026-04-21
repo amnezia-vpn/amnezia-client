@@ -123,6 +123,24 @@ void MacOSUtils::showDockIcon() {
   [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 }
 
+quint32 MacOSUtils::currentEventKeyCode() {
+  NSEvent* event = [NSApp currentEvent];
+  if (!event) {
+    logger.warning() << "currentEventKeyCode(): no current NSEvent";
+    return 0;
+  }
+
+  if (event.type != NSEventTypeKeyDown && event.type != NSEventTypeFlagsChanged) {
+    logger.warning() << "currentEventKeyCode(): unexpected NSEvent type:" << static_cast<uint64_t>(event.type);
+    return 0;
+  }
+
+  logger.debug() << "currentEventKeyCode(): event type:" << static_cast<uint64_t>(event.type)
+                 << "keyCode:" << static_cast<uint64_t>(event.keyCode)
+                 << "modifierFlags:" << static_cast<uint64_t>(event.modifierFlags);
+  return static_cast<quint32>(event.keyCode);
+}
+
 /**
  * Replace the setImage method on NSStatusBarButton with a method that scales
  * images proportionally before setting.

@@ -35,6 +35,7 @@ public:
     ErrorCode lastError() const;
 
     QSharedPointer<VpnProtocol> vpnProtocol() const;
+    Vpn::ConnectionState currentState() const;
 
     const QString &remoteAddress() const;
     void addSitesRoutes(const QString &gw, Settings::RouteMode mode);

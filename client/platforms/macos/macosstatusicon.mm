@@ -19,10 +19,15 @@
  */
 @interface MacOSStatusIconDelegate : NSObject
 @property(assign) NSStatusItem* statusItem;
-@property(assign) NSView* statusIndicator;
+@property(assign) NSSize preferredImageSize;
+@property(assign) BOOL hasPreferredImageSize;
 
 - (void)setIcon:(NSData*)imageData;
-- (void)setIndicator;
+- (void)setIcon:(NSData*)imageData isTemplate:(BOOL)isTemplate;
+- (void)setLength:(CGFloat)length;
+- (void)setImageSize:(NSSize)size;
+- (void)configureButton;
+- (void)logButtonMetrics:(NSString*)reason;
 - (void)setIndicatorColor:(NSColor*)color;
 - (void)setMenu:(NSMenu*)statusBarMenu;
 - (void)setToolTip:(NSString*)tooltip;
@@ -39,10 +44,9 @@
 
   // Create status item
   self.statusItem =
-      [[[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength] retain];
+      [[[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength] retain];
   self.statusItem.visible = true;
-  // Add the indicator as a subview
-  [self setIndicator];
+  [self configureButton];
 
   return self;
 }
@@ -53,28 +57,79 @@
  * @param iconPath The data for the icon image.
  */
 - (void)setIcon:(NSData*)imageData {
+  [self setIcon:imageData isTemplate:true];
+}
+
+- (void)setIcon:(NSData*)imageData isTemplate:(BOOL)isTemplate {
   NSImage* image = [[NSImage alloc] initWithData:imageData];
-  [image setTemplate:true];
+  [image setTemplate:isTemplate];
+  if (self.hasPreferredImageSize) {
+    [image setSize:self.preferredImageSize];
+  }
 
   [self.statusItem.button setImage:image];
+  [self.statusItem.button setImagePosition:NSImageOnly];
+  [self.statusItem.button setImageScaling:NSImageScaleProportionallyUpOrDown];
+  [self logButtonMetrics:@"setIcon"];
   [image release];
 }
 
+- (void)setLength:(CGFloat)length {
+  self.statusItem.length = length;
+  [self logButtonMetrics:@"setLength"];
+}
+
+- (void)setImageSize:(NSSize)size {
+  self.preferredImageSize = size;
+  self.hasPreferredImageSize = YES;
+
+  NSImage* image = self.statusItem.button.image;
+  if (!image) {
+    [self logButtonMetrics:@"setImageSize(pending)"];
+    return;
+  }
+
+  [image setSize:size];
+  [self.statusItem.button setImage:image];
+  [self logButtonMetrics:@"setImageSize"];
+}
+
 /**
- * Adds status indicator as a subview to the status item button.
+ * Configures the status item button to behave like a compact image-only menu
+ * bar item without AppKit's wide pressed highlight.
  */
-- (void)setIndicator {
-  float viewHeight = NSHeight([self.statusItem.button bounds]);
-  float dotSize = viewHeight * 0.35;
-  float dotOrigin = (viewHeight - dotSize) * 0.8;
+- (void)configureButton {
+  NSStatusBarButton* button = self.statusItem.button;
+  [button setImagePosition:NSImageOnly];
+  [button setImageScaling:NSImageScaleProportionallyUpOrDown];
+  [button setBordered:NO];
 
-  NSView* dot = [[NSView alloc] initWithFrame:NSMakeRect(dotOrigin, dotOrigin, dotSize, dotSize)];
-  self.statusIndicator = dot;
-  self.statusIndicator.wantsLayer = true;
-  self.statusIndicator.layer.cornerRadius = dotSize * 0.5;
+  NSButtonCell* cell = button.cell;
+  if ([cell respondsToSelector:@selector(setHighlightsBy:)]) {
+    [cell setHighlightsBy:NSNoCellMask];
+  }
 
-  [self.statusItem.button addSubview:self.statusIndicator];
-  [dot release];
+  [self logButtonMetrics:@"configureButton"];
+}
+
+- (void)logButtonMetrics:(NSString*)reason {
+  NSStatusBarButton* button = self.statusItem.button;
+  NSRect frame = button.frame;
+  NSRect bounds = button.bounds;
+  NSSize imageSize = button.image ? button.image.size : NSZeroSize;
+  NSLog(@"[DEBUG] Amnezia MacOSStatusIconDelegate : %@ length=%.2f frame=(%.2f %.2f %.2f %.2f) bounds=(%.2f %.2f %.2f %.2f) image=(%.2f %.2f)",
+        reason,
+        self.statusItem.length,
+        frame.origin.x,
+        frame.origin.y,
+        frame.size.width,
+        frame.size.height,
+        bounds.origin.x,
+        bounds.origin.y,
+        bounds.size.width,
+        bounds.size.height,
+        imageSize.width,
+        imageSize.height);
 }
 
 /**
@@ -83,9 +138,7 @@
  * @param color The indicator background color.
  */
 - (void)setIndicatorColor:(NSColor*)color {
-  if (self.statusIndicator) {
-    self.statusIndicator.layer.backgroundColor = color.CGColor;
-  }
+  Q_UNUSED(color);
 }
 
 /**
@@ -139,6 +192,21 @@ void MacOSStatusIcon::setIcon(const QString& iconPath) {
   Q_ASSERT(imageResource.isValid());
 
   [m_statusBarIcon setIcon:imageResource.uncompressedData().toNSData()];
+}
+
+void MacOSStatusIcon::setIconData(const QByteArray& imageData, bool isTemplate) {
+  logger.debug() << "Set icon data. Bytes:" << imageData.size() << "template:" << isTemplate;
+  [m_statusBarIcon setIcon:imageData.toNSData() isTemplate:isTemplate];
+}
+
+void MacOSStatusIcon::setLength(qreal length) {
+  logger.debug() << "Set status item length:" << length;
+  [m_statusBarIcon setLength:length];
+}
+
+void MacOSStatusIcon::setImageSize(qreal width, qreal height) {
+  logger.debug() << "Set status image size:" << width << "x" << height;
+  [m_statusBarIcon setImageSize:NSMakeSize(width, height)];
 }
 
 void MacOSStatusIcon::setIndicatorColor(const QColor& indicatorColor) {
