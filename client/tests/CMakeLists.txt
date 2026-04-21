@@ -4,6 +4,8 @@ project(AmneziaVPN_Tests)
 
 find_package(Qt6 REQUIRED COMPONENTS Test)
 
+include(CTest)
+enable_testing()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
