@@ -821,10 +821,10 @@ jobs:
       shell: cmd
       run: cmake --build build --config Release
 
-    - name: Deploy Qt dependencies
+    - name: 'Deploy Qt dependencies'
       shell: cmd
       run: |
-        for %%f in (build\client\tests\*.exe) do (windeployqt %%f)
+        for %%f in (build\client\*.exe) do (windeployqt %%f)
 
     - name: 'Run tests'
       run: |
