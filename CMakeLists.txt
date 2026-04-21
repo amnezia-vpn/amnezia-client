@@ -42,6 +42,27 @@ if(APPLE)
     endif()
 endif()
 
+if(APPLE AND NOT IOS)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(AMN_PF_RULE_IDENTITY "user { root }")
+    else()
+        set(AMN_PF_RULE_IDENTITY "group { amnvpn }")
+    endif()
+
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/deploy/data/pf-templates/amn.400.allowPIA.conf.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
+        @ONLY
+    )
+
+    file(COPY_FILE
+        "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
+        "${CMAKE_SOURCE_DIR}/deploy/data/macos/pf/amn.400.allowPIA.conf"
+        ONLY_IF_DIFFERENT
+    )
+endif()
+
+
 add_subdirectory(client)
 
 if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
