@@ -822,11 +822,6 @@ jobs:
       run: |
         for %%f in (build\client\tests\*.exe) do (windeployqt %%f)
 
-    - name: Show tests
-      run: |
-        cd build
-        ctest -N
-
     - name: 'Run tests'
       run: |
         cd build\client\tests
