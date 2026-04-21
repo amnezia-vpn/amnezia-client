@@ -73,13 +73,51 @@ func (h *AdminHandler) GetServers(c *gin.Context) {
 	h.db.Find(&servers)
 
 	result := make([]gin.H, 0, len(servers))
+	serverIDs := make([]uint, len(servers))
+	for i, s := range servers {
+		serverIDs[i] = s.ID
+	}
+
+	templates := make([]models.VLESSServerTemplate, 0)
+	h.db.Where("server_id IN ?", serverIDs).Find(&templates)
+	templateMap := make(map[uint]models.VLESSServerTemplate)
+	for _, t := range templates {
+		templateMap[t.ServerID] = t
+	}
+
+	type countResult struct {
+		ServerID uint
+		Count    int64
+	}
+
+	var peerCounts []countResult
+	h.db.Model(&models.VPNKey{}).
+		Select("server_id, count(*) as count").
+		Where("server_id IN ? AND revoked_at IS NULL", serverIDs).
+		Group("server_id").
+		Find(&peerCounts)
+
+	peersCountMap := make(map[uint]int64)
+	for _, pc := range peerCounts {
+		peersCountMap[pc.ServerID] = pc.Count
+	}
+
+	var vlessCounts []countResult
+	h.db.Model(&models.VLESSCredential{}).
+		Select("server_id, count(*) as count").
+		Where("server_id IN ? AND revoked_at IS NULL", serverIDs).
+		Group("server_id").
+		Find(&vlessCounts)
+
+	vlessCountMap := make(map[uint]int64)
+	for _, vc := range vlessCounts {
+		vlessCountMap[vc.ServerID] = vc.Count
+	}
+
 	for _, s := range servers {
-		var template models.VLESSServerTemplate
-		_ = h.db.Where("server_id = ?", s.ID).First(&template).Error
-		var peersCount int64
-		h.db.Model(&models.VPNKey{}).Where("server_id = ? AND revoked_at IS NULL", s.ID).Count(&peersCount)
-		var activeVLESS int64
-		h.db.Model(&models.VLESSCredential{}).Where("server_id = ? AND revoked_at IS NULL", s.ID).Count(&activeVLESS)
+		template := templateMap[s.ID]
+		peersCount := peersCountMap[s.ID]
+		activeVLESS := vlessCountMap[s.ID]
 		result = append(result, gin.H{
 			"id":                     s.ID,
 			"name":                   s.Name,

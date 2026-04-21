@@ -489,19 +489,31 @@ func (h *VPNHandler) RevokeConfig(c *gin.Context) {
 		return
 	}
 
+	var wg sync.WaitGroup
 	for _, k := range keysToRevoke {
 		if k.PublicKey != "" {
-			if err := removeAWGPeer(&k.Server, k.PublicKey); err != nil {
-				fmt.Printf("[WARN] SSH removeAWGPeer failed for server %s: %v\n", k.Server.Name, err)
-			}
+			wg.Add(1)
+			go func(server models.VPNServer, pubKey string) {
+				defer wg.Done()
+				if err := removeAWGPeer(&server, pubKey); err != nil {
+					fmt.Printf("[WARN] SSH removeAWGPeer failed for server %s: %v\n", server.Name, err)
+				}
+			}(k.Server, k.PublicKey)
 		}
 	}
+	wg.Wait()
 
 	var xrayCredentials []models.VLESSCredential
 	h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server.VLESSTemplate").Find(&xrayCredentials)
-	for _, credential := range xrayCredentials {
-		_ = removeXrayClient(&credential.Server, credential.Server.VLESSTemplate, credential.ClientID)
+	for i := range xrayCredentials {
+		wg.Add(1)
+		go func(server *models.VPNServer, template *models.VLESSServerTemplate, clientID string) {
+			defer wg.Done()
+			_ = removeXrayClient(server, template, clientID)
+		}(&xrayCredentials[i].Server, xrayCredentials[i].Server.VLESSTemplate, xrayCredentials[i].ClientID)
 	}
+
+	wg.Wait()
 
 	now := time.Now()
 	result := h.db.Model(&models.VPNKey{}).
