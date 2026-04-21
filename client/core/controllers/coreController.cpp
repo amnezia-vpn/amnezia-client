@@ -121,9 +121,6 @@ void CoreController::initControllers()
     m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
 
-    connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
-            &ConnectionController::onCurrentContainerUpdated); // TODO remove this
-
     connect(m_installController.get(), &InstallController::profileCleared,
             m_protocolsModel.get(), &ProtocolsModel::updateModel);
 

@@ -36,8 +36,6 @@ public slots:
     ErrorCode getLastConnectionError();
     void onConnectionStateChanged(Vpn::ConnectionState state);
 
-    void onCurrentContainerUpdated();
-
     void onTranslationsUpdated();
     void setConnectionStateText(const QString &text);
 
@@ -47,7 +45,6 @@ signals:
     void connectionStateChanged();
 
     void connectionErrorOccurred(ErrorCode errorCode);
-    void reconnectWithUpdatedContainer(const QString &message);
 
     void connectButtonClicked();
     void preparingConfig();

@@ -76,8 +76,6 @@ signals:
     void serverIsBusy(const bool isBusy);
     void cancelInstallation();
 
-    void currentContainerUpdated();
-
     void cachedProfileCleared(const QString &message);
     void apiConfigRemoved(const QString &message);
 
