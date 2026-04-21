@@ -218,16 +218,13 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     m_rawConfig = configuration;
     m_serverAddress = configuration.value(config_key::hostName).toString().toNSString();
 
+    const QString serverDescription = configuration.value(config_key::description).toString().trimmed();
     QString tunnelName;
-    if (configuration.value(config_key::description).toString().isEmpty()) {
+    if (serverDescription.isEmpty()) {
+        tunnelName = ProtocolProps::protoToString(proto);
+    } else {
         tunnelName = QString("%1 %2")
-          .arg(configuration.value(config_key::hostName).toString())
-          .arg(ProtocolProps::protoToString(proto));
-    }
-    else {
-        tunnelName = QString("%1 (%2) %3")
-          .arg(configuration.value(config_key::description).toString())
-          .arg(configuration.value(config_key::hostName).toString())
+          .arg(serverDescription)
           .arg(ProtocolProps::protoToString(proto));
     }
 

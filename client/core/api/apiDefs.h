@@ -10,7 +10,6 @@ namespace apiDefs
         AmneziaFreeV3,
         AmneziaPremiumV1,
         AmneziaPremiumV2,
-        AmneziaTrialV2,
         SelfHosted,
         ExternalPremium,
         ExternalTrial
@@ -57,6 +56,7 @@ namespace apiDefs
         constexpr QLatin1String maxDeviceCount("max_device_count");
         constexpr QLatin1String subscriptionEndDate("subscription_end_date");
         constexpr QLatin1String subscriptionExpiredByServer("subscription_expired_by_server");
+        constexpr QLatin1String subscriptionStatus("subscription_status");
         constexpr QLatin1String subscription("subscription");
         constexpr QLatin1String endDate("end_date");
         constexpr QLatin1String issuedConfigs("issued_configs");
@@ -83,6 +83,7 @@ namespace apiDefs
 
         constexpr QLatin1String serviceInfo("service_info");
         constexpr QLatin1String isAdVisible("is_ad_visible");
+        constexpr QLatin1String isRenewalAvailable("is_renewal_available");
         constexpr QLatin1String adHeader("ad_header");
         constexpr QLatin1String adDescription("ad_description");
         constexpr QLatin1String adEndpoint("ad_endpoint");

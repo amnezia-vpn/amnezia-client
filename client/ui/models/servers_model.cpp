@@ -179,6 +179,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case AdEndpointRole: {
         return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adEndpoint).toString();
     }
+    case IsRenewalAvailableRole: {
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::isRenewalAvailable).toBool(false);
+    }
     case IsSubscriptionExpiredRole: {
         if (configVersion != apiDefs::ConfigSource::AmneziaGateway) {
             return false;
@@ -473,6 +476,7 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[AdHeaderRole] = "adHeader";
     roles[AdDescriptionRole] = "adDescription";
     roles[AdEndpointRole] = "adEndpoint";
+    roles[IsRenewalAvailableRole] = "isRenewalAvailable";
 
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
     roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
