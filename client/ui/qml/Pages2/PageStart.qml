@@ -172,17 +172,6 @@ PageType {
     }
 
     Connections {
-        objectName: "connectionControllerConnections"
-
-        target: ConnectionController
-
-        function onReconnectWithUpdatedContainer(message) {
-            PageController.showNotificationMessage(message)
-            PageController.closePage()
-        }
-    }
-
-    Connections {
         objectName: "importControllerConnections"
 
         target: ImportController

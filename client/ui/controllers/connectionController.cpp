@@ -150,16 +150,6 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     emit connectionStateChanged();
 }
 
-void ConnectionController::onCurrentContainerUpdated()
-{
-    if (m_isConnected || m_isConnectionInProgress) {
-        emit reconnectWithUpdatedContainer(tr("Настройки успешно обновлены, выполняется переподключение..."));
-        emit prepareConfig();
-    } else {
-        emit reconnectWithUpdatedContainer(tr("Настройки успешно обновлены"));
-    }
-}
-
 void ConnectionController::onTranslationsUpdated()
 {
     // get translated text of current state
