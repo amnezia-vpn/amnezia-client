@@ -821,22 +821,9 @@ jobs:
     - name: Deploy Qt dependencies
       shell: cmd
       run: |
-        for %%f in (build\client\tests\*.exe) do (windeployqt %%f)
-
-    - name: Verify executables
-      shell: cmd
-      run: |
-        echo ==== build\client ====
-        dir build\client
-        echo ==== build\client\tests ====
-        dir build\client\tests
-
-    - name: List targets
-      shell: cmd
-      run: |
-        cmake --build build --target help
+        for %%f in (build\client\tests\Release\*.exe) do (windeployqt %%f)
 
     - name: 'Run tests'
       run: |
-        cd build\client\tests
+        cd build\client\tests\Release
         ctest --output-on-failure
