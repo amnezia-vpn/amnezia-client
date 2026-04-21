@@ -813,17 +813,22 @@ jobs:
     - name: 'Configure'
       shell: cmd
       run: |
-        rmdir /s /q build
         cmake -B build -G Ninja ^
         -DCMAKE_BUILD_TYPE=Release ^
         -DBUILD_TESTING=ON
 
+    - name: 'Build'
+      shell: cmd
+      run: cmake --build build --config Release
+
     - name: Deploy Qt dependencies
       shell: cmd
       run: |
-        for %%f in (out\build\client\tests\*.exe) do (windeployqt %%f)
+        for %%f in (build\client\tests\*.exe) do (windeployqt %%f)
 
     - name: 'Run tests'
       run: |
-        cd out\build\client\tests
+        dir build\client\tests
+        dir build\client
+        cd build\client\tests
         ctest --output-on-failure
