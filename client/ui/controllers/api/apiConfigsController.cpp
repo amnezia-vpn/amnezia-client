@@ -858,6 +858,28 @@ bool ApiConfigsController::importFreeFromGateway()
         m_serversModel->addServer(serverConfig);
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
         return true;
+    } else if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+        if (jsonDoc.isObject()) {
+            QJsonObject jsonObj = jsonDoc.object();
+            QString captchaId = jsonObj.value("captcha_id").toString();
+            QString captchaImage = jsonObj.value("captcha_image").toString();
+            QString hint = jsonObj.value("hint").toString(tr("Please solve the CAPTCHA to continue"));
+
+            m_captchaState.apiPayload = apiPayload;
+            m_captchaState.endpoint = QString("%1v1/config");
+            m_captchaState.serviceProtocol = gatewayRequestData.serviceProtocol;
+            m_captchaState.openvpnPrivKey = protocolData.certRequest.privKey;
+            m_captchaState.wireguardClientPrivKey = protocolData.wireGuardClientPrivKey;
+            m_captchaState.wireguardClientPubKey = protocolData.wireGuardClientPubKey;
+            m_captchaState.xrayUuid = protocolData.xrayUuid;
+            m_captchaState.isPending = true;
+
+            emit captchaRequired(captchaId, captchaImage, hint);
+            return false;
+        }
+        emit errorOccurred(errorCode);
+        return false;
     } else {
         emit errorOccurred(errorCode);
         return false;
@@ -1275,4 +1297,72 @@ ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJ
     GatewayController gatewayController(m_settings->getGatewayEndpoint(isTestPurchase), m_settings->isDevGatewayEnv(isTestPurchase),
                                         apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
     return gatewayController.post(endpoint, apiPayload, responseBody);
+}
+
+void ApiConfigsController::onCaptchaSolved(const QString &captchaId, const QString &solution)
+{
+    if (!m_captchaState.isPending) {
+        emit errorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    m_captchaState.isPending = false;
+
+    QJsonObject apiPayload = m_captchaState.apiPayload;
+    apiPayload.insert("captcha_id", captchaId);
+    apiPayload.insert("captcha_solution", solution);
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(m_captchaState.endpoint, apiPayload, responseBody);
+
+    if (errorCode == ErrorCode::ApiCaptchaInvalidError) {
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+        if (jsonDoc.isObject()) {
+            QJsonObject jsonObj = jsonDoc.object();
+            QString newCaptchaId = jsonObj.value("captcha_id").toString();
+            QString newCaptchaImage = jsonObj.value("captcha_image").toString();
+            QString hint = jsonObj.value("hint").toString(tr("Invalid CAPTCHA. Please try again"));
+
+            m_captchaState.apiPayload = apiPayload;
+            m_captchaState.isPending = true;
+
+            emit captchaRequired(newCaptchaId, newCaptchaImage, hint);
+            return;
+        }
+        emit errorOccurred(errorCode);
+        return;
+    }
+
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return;
+    }
+
+    // Reconstruct ProtocolData from saved state
+    ProtocolData protocolData;
+    protocolData.certRequest.privKey = m_captchaState.openvpnPrivKey;
+    protocolData.wireGuardClientPrivKey = m_captchaState.wireguardClientPrivKey;
+    protocolData.wireGuardClientPubKey = m_captchaState.wireguardClientPubKey;
+    protocolData.xrayUuid = m_captchaState.xrayUuid;
+
+    QJsonObject serverConfig;
+    errorCode = fillServerConfig(m_captchaState.serviceProtocol, protocolData, responseBody, serverConfig);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return;
+    }
+
+    QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+    apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
+    apiConfig.insert(configKey::serviceType, m_apiServicesModel->getSelectedServiceType());
+    apiConfig.insert(configKey::serviceProtocol, m_apiServicesModel->getSelectedServiceProtocol());
+
+    serverConfig.insert(configKey::apiConfig, apiConfig);
+
+    QJsonObject authData = serverConfig.value(configKey::authData).toObject();
+    authData.insert(QStringLiteral("captcha_solution"), solution);
+    serverConfig.insert(configKey::authData, authData);
+
+    m_serversModel->addServer(serverConfig);
+    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
 }

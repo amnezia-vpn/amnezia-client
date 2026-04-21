@@ -30,6 +30,15 @@ namespace
         return value.isString() ? value.toString().trimmed() : QString();
     }
 
+    QString apiErrorTokenFromJson(const QJsonObject &jsonObj)
+    {
+        const QString message = apiErrorMessageFromJson(jsonObj);
+        if (!message.isEmpty()) {
+            return message;
+        }
+        return jsonObj.value(QStringLiteral("error")).toString().trimmed();
+    }
+
     QString escapeUnicode(const QString &input)
     {
         QString output;
@@ -137,14 +146,12 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     const int httpStatusCodeNotFound = 404;
     const int httpStatusCodeNotImplemented = 501;
     const int httpStatusCodePaymentRequired = 402;
+    const int httpStatusCodeTooManyRequests = 429;
     const int httpStatusCodeUnprocessableEntity = 422;
 
     if (!sslErrors.empty()) {
         qDebug().noquote() << sslErrors;
         return amnezia::ErrorCode::ApiConfigSslError;
-    }
-    if (replyError == QNetworkReply::NoError) {
-        return amnezia::ErrorCode::NoError;
     }
     if (replyError == QNetworkReply::NetworkError::OperationCanceledError
         || replyError == QNetworkReply::NetworkError::TimeoutError) {
@@ -163,32 +170,59 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
     if (jsonDoc.isObject()) {
         QJsonObject jsonObj = jsonDoc.object();
-        const int httpStatusFromBody = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
-        if (httpStatusFromBody == httpStatusCodeConflict) {
+        int status = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
+        if (status < 0) {
+            status = httpStatusCode;
+        }
+
+        if (status == httpStatusCodeTooManyRequests) {
+            return amnezia::ErrorCode::ApiRateLimitError;
+        }
+        if (status == httpStatusCodeConflict) {
             if (apiErrorMessageFromJson(jsonObj).contains(trialAlreadyUsedMessage, Qt::CaseInsensitive)) {
                 return amnezia::ErrorCode::ApiTrialAlreadyUsedError;
             }
             return amnezia::ErrorCode::ApiConfigLimitError;
         }
-        if (httpStatusFromBody == httpStatusCodeNotFound) {
+        if (status == httpStatusCodeNotFound) {
             return amnezia::ErrorCode::ApiNotFoundError;
         }
-        if (httpStatusFromBody == httpStatusCodeNotImplemented) {
+        if (status == httpStatusCodeNotImplemented) {
             return amnezia::ErrorCode::ApiUpdateRequestError;
         }
-        if (httpStatusFromBody == httpStatusCodeUnprocessableEntity) {
+        if (status == httpStatusCodeUnprocessableEntity) {
             if (apiErrorMessageFromJson(jsonObj) == unprocessableSubscriptionMessage) {
                 return amnezia::ErrorCode::ApiSubscriptionExpiredError;
             }
             return amnezia::ErrorCode::ApiConfigDownloadError;
         }
-        if (httpStatusFromBody == httpStatusCodePaymentRequired) {
+        if (status == httpStatusCodePaymentRequired) {
+            const QString errorToken = apiErrorTokenFromJson(jsonObj);
+            if (errorToken.contains(QLatin1String("invalid_captcha"), Qt::CaseInsensitive)) {
+                return amnezia::ErrorCode::ApiCaptchaInvalidError;
+            }
+            if (jsonObj.contains(QStringLiteral("captcha_id")) || jsonObj.contains(QStringLiteral("captcha_image"))
+                || errorToken.compare(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive) == 0
+                || errorToken.contains(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive)) {
+                return amnezia::ErrorCode::ApiCaptchaRequiredError;
+            }
             return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
         }
-        return amnezia::ErrorCode::ApiConfigDownloadError;
+
+        if (replyError == QNetworkReply::NoError && status > 0 && status < 400) {
+            return amnezia::ErrorCode::NoError;
+        }
+
+        if (status >= 400) {
+            return amnezia::ErrorCode::ApiConfigDownloadError;
+        }
     }
 
-    qDebug() << "something went wrong";
+    if (replyError == QNetworkReply::NoError) {
+        return amnezia::ErrorCode::NoError;
+    }
+
+    qDebug() << "something went wrong" << replyErrorString;
     return amnezia::ErrorCode::ApiConfigDownloadError;
 }
 

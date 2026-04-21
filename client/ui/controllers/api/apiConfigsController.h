@@ -47,6 +47,8 @@ public slots:
     void setCurrentProtocol(const QString &protocolName);
     bool isVlessProtocol();
 
+    void onCaptchaSolved(const QString &captchaId, const QString &solution);
+
 signals:
     void errorOccurred(ErrorCode errorCode);
     void trialEmailError(const QString &message);
@@ -59,6 +61,7 @@ signals:
     void updateServerFromApiFinished();
 
     void vpnKeyExportReady();
+    void captchaRequired(const QString &captchaId, const QString &captchaImageBase64, const QString &hint);
 
 private:
     QList<QString> getQrCodes();
@@ -77,6 +80,18 @@ private:
 
     QSharedPointer<ApiSubscriptionPlansModel> m_subscriptionPlansModel;
     QSharedPointer<ApiBenefitsModel> m_benefitsModel;
+
+    // CAPTCHA handling state
+    struct CaptchaState {
+        QJsonObject apiPayload;
+        QString endpoint;
+        QString serviceProtocol;
+        QString openvpnPrivKey;
+        QString wireguardClientPrivKey;
+        QString wireguardClientPubKey;
+        QString xrayUuid;
+        bool isPending = false;
+    } m_captchaState;
 };
 
 #endif

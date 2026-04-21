@@ -202,6 +202,21 @@ Window  {
     }
 
     Item {
+        objectName: "captchaDialogItem"
+
+        anchors.fill: parent
+
+        CaptchaDialogType {
+            id: captchaDialog
+
+            onCaptchaSolved: function(captchaId, solution) {
+                captchaDialog.close()
+                ApiConfigsController.onCaptchaSolved(captchaId, solution)
+            }
+        }
+    }
+
+    Item {
         objectName: "privateKeyPassphraseDrawerItem"
 
         anchors.fill: parent
@@ -305,6 +320,13 @@ Window  {
 
         function onSubscriptionExpiredOnServer() {
             subscriptionExpiredDrawer.openTriggered()
+        }
+
+        function onCaptchaRequired(captchaId, captchaImageBase64, hint) {
+            captchaDialog.captchaId = captchaId
+            captchaDialog.captchaImageBase64 = captchaImageBase64
+            captchaDialog.hint = hint
+            captchaDialog.open()
         }
     }
 

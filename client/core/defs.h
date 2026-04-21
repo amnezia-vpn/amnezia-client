@@ -126,6 +126,9 @@ namespace amnezia
         ApiSubscriptionNotActiveError = 1114,
         ApiNoPurchasedSubscriptionsError = 1115,
         ApiTrialAlreadyUsedError = 1116,
+        ApiCaptchaRequiredError = 1117,
+        ApiCaptchaInvalidError = 1118,
+        ApiRateLimitError = 1119,
 
         // QFile errors
         OpenError = 1200,

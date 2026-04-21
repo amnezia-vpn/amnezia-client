@@ -216,6 +216,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     auto errorCode =
             apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, decryptionResult.decryptedBody);
     if (errorCode) {
+        responseBody = decryptionResult.decryptedBody;
         return errorCode;
     }
 
@@ -263,7 +264,7 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
             auto errorCode = apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode,
                                                                decryptionResult.decryptedBody);
             if (errorCode) {
-                promise->addResult(qMakePair(errorCode, QByteArray()));
+                promise->addResult(qMakePair(errorCode, decryptionResult.decryptedBody));
                 promise->finish();
                 return;
             }
@@ -434,6 +435,18 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
             apiErrorMessage = jsonObj.value(QStringLiteral("message")).toString().trimmed();
         }
     } else {
+        // Plaintext JSON error (e.g. HTTP 402 CAPTCHA) is not encrypted — do not treat as proxy failure.
+        const QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+        if (jsonDoc.isObject()) {
+            const QJsonObject jsonObj = jsonDoc.object();
+            if (jsonObj.contains(QStringLiteral("captcha_id")) || jsonObj.contains(QStringLiteral("captcha_image"))) {
+                return false;
+            }
+            const QString err = jsonObj.value(QStringLiteral("error")).toString();
+            if (err.contains(QLatin1String("captcha"), Qt::CaseInsensitive) || err == QLatin1String("rate_limit_exceeded")) {
+                return false;
+            }
+        }
         qDebug() << "failed to decrypt the data";
         return true;
     }
