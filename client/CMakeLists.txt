@@ -334,6 +334,22 @@ endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 
+if(IOS AND IOS_SIMULATOR_UI_ONLY AND CMAKE_GENERATOR STREQUAL "Xcode")
+    # Work around Qt 6.11 iOS package mixing device-only permission plugin
+    # objects into simulator link lists.
+    add_custom_command(TARGET ${PROJECT} PRE_LINK
+        COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_LIST_DIR}/cmake/ios-filter-linkfile.cmake"
+        VERBATIM
+    )
+endif()
+
+if(IOS AND IOS_SIMULATOR_UI_ONLY AND COMMAND qt_set_finalizer_mode)
+    # Avoid direct linking of static plugin initializer object libraries in
+    # simulator UI-only mode. Qt 6.11 can otherwise inject iOS-only permission
+    # plugin init objects (e.g. QDarwinCameraPermissionPlugin_init.cpp.o).
+    qt_set_finalizer_mode(${PROJECT} DISABLE MODES static_plugins)
+endif()
+
 # Finalize the executable so Qt can gather/deploy QML modules and plugins correctly.
 # On iOS, qt_finalize_executable() already handles QML plugin import and a manual
 # qt_import_qml_plugins() call can produce duplicate static plugin symbols.
