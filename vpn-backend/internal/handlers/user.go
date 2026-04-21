@@ -107,28 +107,20 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 			Order("created_at desc").
 			First(&pending).Error; err == nil {
 			if shouldSyncPendingPayment(pending) {
-				if status, err := verifyYooKassaPaymentStatus(h.cfg.YooKassaShopID, h.cfg.YooKassaKey, pending.YooKassaID); err == nil && status == "succeeded" {
-					_ = h.db.Transaction(func(tx *gorm.DB) error {
-						now := time.Now()
-						if err := tx.Model(&pending).Updates(map[string]interface{}{
-							"status":       models.PaymentSucceeded,
-							"confirmed_at": now,
-						}).Error; err != nil {
-							return err
-						}
-						return activateSubscriptionFromPayment(tx, &pending, "")
-					})
-
-					sub, err = ensureDefaultSubscription(h.db, userID)
-					if err != nil {
-						if isDatabaseBusyError(err) {
-							respondDatabaseBusy(c)
-							return
-						}
-						c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to reload subscription"})
-						return
+				go func(p models.Payment) {
+					if status, err := verifyYooKassaPaymentStatus(h.cfg.YooKassaShopID, h.cfg.YooKassaKey, p.YooKassaID); err == nil && status == "succeeded" {
+						_ = h.db.Transaction(func(tx *gorm.DB) error {
+							now := time.Now()
+							if err := tx.Model(&p).Updates(map[string]interface{}{
+								"status":       models.PaymentSucceeded,
+								"confirmed_at": now,
+							}).Error; err != nil {
+								return err
+							}
+							return activateSubscriptionFromPayment(tx, &p, "")
+						})
 					}
-				}
+				}(pending)
 			}
 		} else if !isRecordNotFoundError(err) {
 			if isDatabaseBusyError(err) {
