@@ -824,6 +824,5 @@ jobs:
 
     - name: 'Run tests'
       run: |
-        set PATH=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin;%PATH%
         cd build\client\tests
         ctest --output-on-failure
