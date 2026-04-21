@@ -7,3 +7,7 @@ foreach(RECIPE ${LOCAL_RECIPES})
         COMMAND ${CONAN_COMMAND} export ${RECIPE_DIR}
     )
 endforeach()
+
+execute_process(
+    COMMAND ${CONAN_COMMAND} remote add amnezia "https://artifactory.amnezia.org/artifactory/api/conan/client-prebuilts" --force
+)
