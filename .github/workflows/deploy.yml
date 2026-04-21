@@ -820,8 +820,20 @@ jobs:
     - name: 'Build'
       run: cmake --build build
 
+    - name: 'Check missing DLLs'
+      shell: powershell
+      run: |
+        Get-ChildItem -Recurse build -Filter *.exe | ForEach-Object {
+        Write-Host "==== $($_.FullName) ===="
+        & "dumpbin.exe" /dependents $_.FullName
+        }
+
+    - name: 'Copy OpenSSL DLLs'
+      shell: cmd
+      run: |
+        copy client\3rd-prebuilt\3rd-prebuilt\openssl\windows\win64\bin\*.dll build\client\tests\
+
     - name: 'Run tests'
       run: |
-        set PATH=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin;%PATH%
         cd build\client\tests
         ctest --output-on-failure
