@@ -827,14 +827,9 @@ jobs:
     - name: Deploy Qt dependencies
       shell: cmd
       run: |
-        for %%f in (build\client\tests\*.exe) do (windeployqt %%f)
-
-    - name: Find all exe files
-      shell: cmd
-      run: |
-        dir build /s *.exe
+        for %%f in (out\build\client\tests\*.exe) do (windeployqt %%f)
 
     - name: 'Run tests'
       run: |
-        cd build\client\tests
+        cd out\build\client\tests
         ctest --output-on-failure
