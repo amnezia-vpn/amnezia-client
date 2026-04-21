@@ -372,7 +372,7 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
                     } else {
                         PageController.showBusyIndicator(true)
-                        ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
+                        ApiConfigsController.setCurrentProtocol(checked ? "vless" : "awg")
                         ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
                         PageController.showBusyIndicator(false)
                     }

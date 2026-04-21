@@ -62,13 +62,14 @@ class Xray : Protocol() {
             .put("loglevel", "warning")
             .put("access", "none") // disable access log
 
-        var xrayJsonConfigString = xrayJsonConfig.toString()
         config.getString("hostName").let { hostName ->
             val ipAddress = parseInetAddress(hostName).ip
             if (hostName != ipAddress) {
-                xrayJsonConfigString = xrayJsonConfigString.replace(hostName, ipAddress)
+                forceResolvedOutboundAddress(xrayJsonConfig, ipAddress)
             }
         }
+
+        val xrayJsonConfigString = xrayJsonConfig.toString()
 
         start(xrayConfig, xrayJsonConfigString, vpnBuilder, protect)
         state.value = CONNECTED
@@ -142,6 +143,36 @@ class Xray : Protocol() {
                 LibXray.stopTun2Socks()
                 throw VpnStartException("Failed to start xray: $err")
             }
+        }
+    }
+
+    /**
+     * Pin only transport endpoint address to the resolved IP.
+     * Do not perform global string replacement: it breaks VLESS TLS/REALITY
+     * fields (for example serverName) when they contain the original host name.
+     */
+    private fun forceResolvedOutboundAddress(xrayConfig: JSONObject, resolvedAddress: String) {
+        val outbounds = xrayConfig.optJSONArray("outbounds") ?: return
+        for (i in 0 until outbounds.length()) {
+            val outbound = outbounds.optJSONObject(i) ?: continue
+            val settings = outbound.optJSONObject("settings") ?: continue
+            val vnext = settings.optJSONArray("vnext") ?: continue
+            if (vnext.length() == 0) continue
+
+            val firstHop = vnext.optJSONObject(0) ?: continue
+            val currentAddress = firstHop.optString("address")
+            if (currentAddress.equals(resolvedAddress, ignoreCase = true)) {
+                return
+            }
+
+            firstHop.put("address", resolvedAddress)
+            vnext.put(0, firstHop)
+            settings.put("vnext", vnext)
+            outbound.put("settings", settings)
+            outbounds.put(i, outbound)
+            xrayConfig.put("outbounds", outbounds)
+            Log.d(TAG, "Force outbound address to resolved IP: $resolvedAddress (was $currentAddress)")
+            return
         }
     }
 
