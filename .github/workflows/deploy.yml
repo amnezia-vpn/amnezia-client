@@ -828,7 +828,5 @@ jobs:
 
     - name: 'Run tests'
       run: |
-        dir build\client\tests
-        dir build\client
-        cd build\client\tests
+        cd build\client
         ctest --output-on-failure
