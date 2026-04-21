@@ -429,18 +429,45 @@ void CoreController::initPrepareConfigHandler()
         }
 
         // 3) Defer connection while backend config/routing sync is in progress.
+        // Also force a refresh when managed routing profiles are enabled and
+        // the user switched to another FBLink server since the last sync.
+        bool requiresServerConfigRefresh = false;
+        if (m_fbLinkController && m_fbLinkController->isLoggedIn()) {
+            const int enabledManagedProfilesCount = qSettings.value("Conf/vipEnabledProfilesCount", 0).toInt();
+            const int defaultServerIndex = m_serversModel->getDefaultServerIndex();
+            const int serversCount = m_serversModel->getServersCount();
+            if (enabledManagedProfilesCount > 0
+                && defaultServerIndex >= 0
+                && defaultServerIndex < serversCount) {
+                const QJsonObject defaultServer = m_serversModel->getServerConfig(defaultServerIndex);
+                const bool isFBLinkServer = defaultServer.value("fblink_server").toBool()
+                                            || defaultServer.value(config_key::description).toString().startsWith("FBLink VPN")
+                                            || defaultServer.value(config_key::name).toString().startsWith("FBLink VPN");
+                if (isFBLinkServer) {
+                    const QString currentHost = defaultServer.value(config_key::hostName).toString().trimmed();
+                    const QString syncedHost = qSettings.value("Conf/lastSelectedFBLinkHostName", "").toString().trimmed();
+                    if (!currentHost.isEmpty() && currentHost.compare(syncedHost, Qt::CaseInsensitive) != 0) {
+                        requiresServerConfigRefresh = true;
+                        qDebug() << "[FBLink] prepareConfig: selected FBLink host changed from" << syncedHost
+                                 << "to" << currentHost << "- forcing fetchConfig()";
+                    }
+                }
+            }
+        }
+
         const bool hasPendingRoutingSync = m_fbLinkController && m_fbLinkController->hasPendingRoutingSync();
         const bool isBackendConfigSyncing = m_fbLinkController && m_fbLinkController->isConfigSyncing();
         const bool isBackendMutationInFlight = m_fbLinkController && m_fbLinkController->isLoading();
-        if (m_fbLinkController && (isBackendConfigSyncing || hasPendingRoutingSync || isBackendMutationInFlight)) {
+        if (m_fbLinkController
+            && (isBackendConfigSyncing || hasPendingRoutingSync || isBackendMutationInFlight || requiresServerConfigRefresh)) {
             qDebug() << "[FBLink] prepareConfig: backend config sync is in progress. Waiting for configFetched...";
-            
+             
             // Set state to Preparing IMMEDIATELY so the user sees a loading animation while waiting for API
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
             m_connectionController->setConnectionStateText(tr("Обновление..."));
 
-            if (hasPendingRoutingSync && !isBackendConfigSyncing && !isBackendMutationInFlight) {
-                qDebug() << "[FBLink] prepareConfig: forcing fetchConfig() because routing sync is pending";
+            if ((hasPendingRoutingSync || requiresServerConfigRefresh) && !isBackendConfigSyncing && !isBackendMutationInFlight) {
+                qDebug() << "[FBLink] prepareConfig: forcing fetchConfig() before connect";
                 m_fbLinkController->fetchConfig();
             }
 
