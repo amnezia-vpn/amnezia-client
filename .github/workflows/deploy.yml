@@ -820,14 +820,8 @@ jobs:
     - name: 'Build'
       run: cmake --build build
 
-    - name: 'Deploy Qt for tests'
-      shell: cmd
-      run: |
-        for %%f in (build\client\tests\*.exe) do (
-          windeployqt --no-translations --no-compiler-runtime %%f
-        )
-
     - name: 'Run tests'
       run: |
+        set PATH=${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2022_64\bin;%PATH%
         cd build\client\tests
         ctest --output-on-failure
