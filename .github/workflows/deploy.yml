@@ -722,7 +722,7 @@ jobs:
           } >> "$GITHUB_ENV"
         fi
 
-    - name: 'Build Android arm64-v8a'
+    - name: 'Build Android universal APK + AAB'
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
@@ -730,26 +730,15 @@ jobs:
         ANDROID_KEYSTORE_KEY_ALIAS: ${{ env.ANDROID_KEYSTORE_KEY_ALIAS }}
         ANDROID_KEYSTORE_KEY_PASS: ${{ env.ANDROID_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh --aab --apk 'arm64-v8a' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+      run: ./deploy/build_android.sh --aab --apk 'all' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
-    - name: 'Build Android armeabi-v7a'
-      env:
-        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
-        QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
-        ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
-        ANDROID_KEYSTORE_KEY_ALIAS: ${{ env.ANDROID_KEYSTORE_KEY_ALIAS }}
-        ANDROID_KEYSTORE_KEY_PASS: ${{ env.ANDROID_KEYSTORE_KEY_PASS }}
-      shell: bash
-      run: ./deploy/build_android.sh --apk 'armeabi-v7a' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
-
-    - name: 'Rename Android APKs'
+    - name: 'Rename Android APK'
       run: |
         cd deploy/build
-        mv FBLink-arm64-v8a-release.apk FBLinkVPN_${VERSION}_android9+_arm64-v8a.apk
-        mv FBLink-armeabi-v7a-release.apk FBLinkVPN_${VERSION}_android9+_armeabi-v7a.apk
+        mv FBLink-release.apk FBLinkVPN_${VERSION}_android9+_universal.apk
         cd ../..
 
-    - name: 'Verify signed Android APKs'
+    - name: 'Verify signed Android APK'
       shell: bash
       run: |
         APKSIGNER=$(find "${ANDROID_HOME}/build-tools" -type f -name apksigner | sort -V | tail -1)
@@ -758,22 +747,13 @@ jobs:
           exit 1
         fi
 
-        "$APKSIGNER" verify --verbose "deploy/build/FBLinkVPN_${VERSION}_android9+_arm64-v8a.apk"
-        "$APKSIGNER" verify --verbose "deploy/build/FBLinkVPN_${VERSION}_android9+_armeabi-v7a.apk"
+        "$APKSIGNER" verify --verbose "deploy/build/FBLinkVPN_${VERSION}_android9+_universal.apk"
 
-    - name: 'Upload arm64-v8a apk'
+    - name: 'Upload universal apk'
       uses: actions/upload-artifact@v4
       with:
-        name: FBLinkVPN_${{ env.VERSION }}_android9+_arm64-v8a.apk
-        path: deploy/build/FBLinkVPN_${{ env.VERSION }}_android9+_arm64-v8a.apk
-        compression-level: 0
-        retention-days: 7
-
-    - name: 'Upload armeabi-v7a apk'
-      uses: actions/upload-artifact@v4
-      with:
-        name: FBLinkVPN_${{ env.VERSION }}_android9+_armeabi-v7a.apk
-        path: deploy/build/FBLinkVPN_${{ env.VERSION }}_android9+_armeabi-v7a.apk
+        name: FBLinkVPN_${{ env.VERSION }}_android9+_universal.apk
+        path: deploy/build/FBLinkVPN_${{ env.VERSION }}_android9+_universal.apk
         compression-level: 0
         retention-days: 7
 

@@ -292,54 +292,54 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
     APK_OUT_DIR=$ANDROID_BUILD_OUT_DIR/build/outputs/apk/$BUILD_TYPE
 
     # Qt 6.7+ with QT_ANDROID_BUILD_ALL_ABIS=ON produces a single universal APK
-    # instead of separate per-ABI files.  Detect which naming convention was used.
+    # instead of separate per-ABI files.
     UNIVERSAL_APK_SIGNED=$(find "$APK_OUT_DIR" -maxdepth 1 -type f -name "*$suffix*.apk" ! -name "*unsigned*.apk" 2>/dev/null | head -1)
     UNIVERSAL_APK_UNSIGNED=$(find "$APK_OUT_DIR" -maxdepth 1 -type f -name "*$suffix*unsigned*.apk" 2>/dev/null | head -1)
-    # resolve: prefer signed, fall back to unsigned
-    IFS=';' read -r -a abi_array <<< "$ABIS"
-    for ABI in "${abi_array[@]}"
-    do
-      PER_ABI_APK=$APK_OUT_DIR/AmneziaVPN-$ABI-$suffix.apk
-      PER_ABI_APK_UNSIGNED=$APK_OUT_DIR/AmneziaVPN-$ABI-$suffix-unsigned.apk
+    # Prefer a universal output when available.
+    if [ -f "$UNIVERSAL_APK_SIGNED" ]; then
+      mv -u "$UNIVERSAL_APK_SIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+    elif [ -f "$UNIVERSAL_APK_UNSIGNED" ] && [ -v FDROID ]; then
+      mv -u "$UNIVERSAL_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+    else
+      IFS=';' read -r -a abi_array <<< "$ABIS"
+      for ABI in "${abi_array[@]}"
+      do
+        PER_ABI_APK=$APK_OUT_DIR/AmneziaVPN-$ABI-$suffix.apk
+        PER_ABI_APK_UNSIGNED=$APK_OUT_DIR/AmneziaVPN-$ABI-$suffix-unsigned.apk
 
-      if [ -f "$PER_ABI_APK" ]; then
-        # Standard per-ABI APK (Qt < 6.7 behaviour)
-        mv -u "$PER_ABI_APK" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
-      elif [ -f "$PER_ABI_APK_UNSIGNED" ] && [ -v FDROID ]; then
-        # Unsigned APK (no signing key configured)
-        mv -u "$PER_ABI_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
-      else
-        # Try a broader find: ABI in filename OR in directory path (Qt 6.3+ sub-projects)
-        FOUND=$(find "$OUT_APP_DIR" -type f \( \
-                  -name "*${ABI}*${suffix}*.apk" -o \
-                  \( -name "*${suffix}*.apk" -path "*${ABI}*" \) \
-                \) 2>/dev/null | head -1)
-        if [ -n "$FOUND" ]; then
-          if [[ ! -v FDROID && "$FOUND" == *"unsigned.apk" ]]; then
-            echo "ERROR: Found only an unsigned APK for ABI=$ABI in release mode: $FOUND"
+        if [ -f "$PER_ABI_APK" ]; then
+          # Standard per-ABI APK (Qt < 6.7 behaviour)
+          mv -u "$PER_ABI_APK" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+        elif [ -f "$PER_ABI_APK_UNSIGNED" ] && [ -v FDROID ]; then
+          # Unsigned APK (no signing key configured)
+          mv -u "$PER_ABI_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+        else
+          # Try a broader find: ABI in filename OR in directory path (Qt 6.3+ sub-projects)
+          FOUND=$(find "$OUT_APP_DIR" -type f \( \
+                    -name "*${ABI}*${suffix}*.apk" -o \
+                    \( -name "*${suffix}*.apk" -path "*${ABI}*" \) \
+                  \) 2>/dev/null | head -1)
+          if [ -n "$FOUND" ]; then
+            if [[ ! -v FDROID && "$FOUND" == *"unsigned.apk" ]]; then
+              echo "ERROR: Found only an unsigned APK for ABI=$ABI in release mode: $FOUND"
+              exit 1
+            fi
+            mv -u "$FOUND" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+          else
+            if [ -f "$PER_ABI_APK_UNSIGNED" ] || [ -f "$UNIVERSAL_APK_UNSIGNED" ]; then
+              echo "ERROR: Only unsigned APK artifacts were produced for ABI=$ABI in release mode."
+              echo "Check ANDROID_RELEASE_KEYSTORE_* secrets and signing configuration."
+            else
+              echo "ERROR: APK not found for ABI=$ABI (tried $PER_ABI_APK and $UNIVERSAL_APK_SIGNED)"
+            fi
+            echo "Contents of $APK_OUT_DIR:"
+            ls -la "$APK_OUT_DIR" 2>/dev/null || echo "(directory does not exist)"
+            echo "All APKs under android-build:"
+            find "$ANDROID_BUILD_OUT_DIR" -name "*.apk" 2>/dev/null || true
             exit 1
           fi
-          mv -u "$FOUND" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
-        elif [ -f "$UNIVERSAL_APK_SIGNED" ]; then
-          # Qt 6.7+ universal APK: copy it once per requested ABI so the
-          # downstream rename/upload steps keep working as before.
-          cp "$UNIVERSAL_APK_SIGNED" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
-        elif [ -f "$UNIVERSAL_APK_UNSIGNED" ] && [ -v FDROID ]; then
-          cp "$UNIVERSAL_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
-        else
-          if [ -f "$PER_ABI_APK_UNSIGNED" ] || [ -f "$UNIVERSAL_APK_UNSIGNED" ]; then
-            echo "ERROR: Only unsigned APK artifacts were produced for ABI=$ABI in release mode."
-            echo "Check ANDROID_RELEASE_KEYSTORE_* secrets and signing configuration."
-          else
-            echo "ERROR: APK not found for ABI=$ABI (tried $PER_ABI_APK and $UNIVERSAL_APK_SIGNED)"
-          fi
-          echo "Contents of $APK_OUT_DIR:"
-          ls -la "$APK_OUT_DIR" 2>/dev/null || echo "(directory does not exist)"
-          echo "All APKs under android-build:"
-          find "$ANDROID_BUILD_OUT_DIR" -name "*.apk" 2>/dev/null || true
-          exit 1
         fi
-      fi
-    done
+      done
+    fi
   fi
 fi
