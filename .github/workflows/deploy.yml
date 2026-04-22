@@ -12,13 +12,7 @@ jobs:
   Bake-Prebuilts:
     strategy:
       matrix:
-        include:
-          - os: windows-latest
-            msvc-version: 14.5
-          - os: windows-latest
-            msvc-version: 14.4
-          - os: ubuntu-latest
-          - os: macos-latest
+        os: [ 'windows-latest', 'ubuntu-latest', 'macos-latest' ]
 
     runs-on: ${{ matrix.os }}
 
@@ -32,10 +26,8 @@ jobs:
       run: pip install "conan==2.26.2"
 
     - name: 'Install MSVC'
-      if: matrix.msvc-version != null
+      if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
-      with:
-        toolset: ${{ matrix.msvc-version }}
 
     - name: 'Get sources'
       uses: actions/checkout@v4
