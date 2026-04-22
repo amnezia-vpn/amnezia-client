@@ -1,0 +1,1289 @@
+Compiled from "QtLoader.java"
+abstract class org.qtproject.qt.android.QtLoader {
+  protected static final java.lang.String QtTAG;
+
+  private final android.content.res.Resources m_resources;
+
+  private final java.lang.String m_packageName;
+
+  private final java.lang.String m_preferredAbi;
+
+  private java.lang.String m_extractedNativeLibsDir;
+
+  private java.lang.ClassLoader m_classLoader;
+
+  protected android.content.pm.ComponentInfo m_contextInfo;
+
+  protected java.lang.String m_mainLibPath;
+
+  protected java.lang.String m_mainLibName;
+
+  protected java.lang.String m_applicationParameters;
+
+  protected final java.util.HashMap<java.lang.String, java.lang.String> m_environmentVariables;
+
+  protected static org.qtproject.qt.android.QtLoader m_instance;
+
+  protected boolean m_librariesLoaded;
+
+  org.qtproject.qt.android.QtLoader(android.content.ContextWrapper) throws java.lang.IllegalArgumentException;
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: aconst_null
+       6: putfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+       9: aload_0
+      10: ldc           #13                 // String
+      12: putfield      #15                 // Field m_applicationParameters:Ljava/lang/String;
+      15: aload_0
+      16: new           #18                 // class java/util/HashMap
+      19: dup
+      20: invokespecial #20                 // Method java/util/HashMap."<init>":()V
+      23: putfield      #21                 // Field m_environmentVariables:Ljava/util/HashMap;
+      26: aload_0
+      27: aload_1
+      28: invokevirtual #25                 // Method android/content/ContextWrapper.getResources:()Landroid/content/res/Resources;
+      31: putfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+      34: aload_0
+      35: aload_1
+      36: invokevirtual #35                 // Method android/content/ContextWrapper.getPackageName:()Ljava/lang/String;
+      39: putfield      #39                 // Field m_packageName:Ljava/lang/String;
+      42: aload_1
+      43: invokevirtual #42                 // Method android/content/ContextWrapper.getBaseContext:()Landroid/content/Context;
+      46: astore_2
+      47: aload_2
+      48: instanceof    #46                 // class android/app/Activity
+      51: ifne          71
+      54: aload_2
+      55: instanceof    #48                 // class android/app/Service
+      58: ifne          71
+      61: new           #50                 // class java/lang/IllegalArgumentException
+      64: dup
+      65: ldc           #52                 // String QtLoader: Context is not an instance of Activity or Service
+      67: invokespecial #54                 // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      70: athrow
+      71: aload_0
+      72: aload_2
+      73: invokespecial #57                 // Method initClassLoader:(Landroid/content/Context;)V
+      76: aload_0
+      77: aload_2
+      78: invokevirtual #61                 // Method initContextInfo:(Landroid/content/Context;)V
+      81: goto          96
+      84: astore_3
+      85: new           #50                 // class java/lang/IllegalArgumentException
+      88: dup
+      89: ldc           #66                 // String QtLoader: No ComponentInfo found for given Context
+      91: aload_3
+      92: invokespecial #68                 // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;Ljava/lang/Throwable;)V
+      95: athrow
+      96: aload_0
+      97: aload_0
+      98: invokespecial #71                 // Method resolvePreferredAbi:()Ljava/lang/String;
+     101: putfield      #74                 // Field m_preferredAbi:Ljava/lang/String;
+     104: return
+    Exception table:
+       from    to  target type
+          76    81    84   Class android/content/pm/PackageManager$NameNotFoundException
+
+  protected void initContextInfo(android.content.Context) throws android.content.pm.PackageManager$NameNotFoundException;
+    Code:
+       0: aload_1
+       1: instanceof    #46                 // class android/app/Activity
+       4: ifeq          31
+       7: aload_0
+       8: aload_1
+       9: invokevirtual #77                 // Method android/content/Context.getPackageManager:()Landroid/content/pm/PackageManager;
+      12: aload_1
+      13: checkcast     #46                 // class android/app/Activity
+      16: invokevirtual #83                 // Method android/app/Activity.getComponentName:()Landroid/content/ComponentName;
+      19: sipush        128
+      22: invokevirtual #89                 // Method android/content/pm/PackageManager.getActivityInfo:(Landroid/content/ComponentName;I)Landroid/content/pm/ActivityInfo;
+      25: putfield      #93                 // Field m_contextInfo:Landroid/content/pm/ComponentInfo;
+      28: goto          64
+      31: aload_1
+      32: instanceof    #48                 // class android/app/Service
+      35: ifeq          64
+      38: aload_0
+      39: aload_1
+      40: invokevirtual #77                 // Method android/content/Context.getPackageManager:()Landroid/content/pm/PackageManager;
+      43: new           #97                 // class android/content/ComponentName
+      46: dup
+      47: aload_1
+      48: aload_1
+      49: invokevirtual #99                 // Method java/lang/Object.getClass:()Ljava/lang/Class;
+      52: invokespecial #103                // Method android/content/ComponentName."<init>":(Landroid/content/Context;Ljava/lang/Class;)V
+      55: sipush        128
+      58: invokevirtual #106                // Method android/content/pm/PackageManager.getServiceInfo:(Landroid/content/ComponentName;I)Landroid/content/pm/ServiceInfo;
+      61: putfield      #93                 // Field m_contextInfo:Landroid/content/pm/ComponentInfo;
+      64: return
+
+  protected void extractContextMetaData(android.content.Context);
+    Code:
+       0: aload_0
+       1: ldc           #110                // String QT_ANDROID_FONTS
+       3: ldc           #112                // String Roboto;Droid Sans;Droid Sans Fallback
+       5: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+       8: ldc           #118                // String Droid Sans Mono;Droid Sans;Droid Sans Fallback
+      10: astore_2
+      11: aload_0
+      12: ldc           #120                // String QT_ANDROID_FONTS_MONOSPACE
+      14: aload_2
+      15: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+      18: aload_0
+      19: ldc           #122                // String QT_ANDROID_FONTS_SERIF
+      21: ldc           #124                // String Droid Serif
+      23: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+      26: aload_0
+      27: ldc           #126                // String HOME
+      29: aload_1
+      30: invokevirtual #128                // Method android/content/Context.getFilesDir:()Ljava/io/File;
+      33: invokevirtual #132                // Method java/io/File.getAbsolutePath:()Ljava/lang/String;
+      36: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+      39: aload_0
+      40: ldc           #137                // String TMPDIR
+      42: aload_1
+      43: invokevirtual #139                // Method android/content/Context.getCacheDir:()Ljava/io/File;
+      46: invokevirtual #132                // Method java/io/File.getAbsolutePath:()Ljava/lang/String;
+      49: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+      52: aload_0
+      53: ldc           #142                // String QT_BLOCK_EVENT_LOOPS_WHEN_SUSPENDED
+      55: aload_0
+      56: invokespecial #144                // Method isBackgroundRunningBlocked:()Ljava/lang/String;
+      59: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+      62: aload_0
+      63: ldc           #147                // String QTRACE_LOCATION
+      65: aload_0
+      66: ldc           #149                // String android.app.trace_location
+      68: invokevirtual #151                // Method getMetaData:(Ljava/lang/String;)Ljava/lang/String;
+      71: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+      74: aload_0
+      75: aload_0
+      76: ldc           #155                // String android.app.arguments
+      78: invokevirtual #151                // Method getMetaData:(Ljava/lang/String;)Ljava/lang/String;
+      81: invokevirtual #157                // Method appendApplicationParameters:(Ljava/lang/String;)V
+      84: aload_1
+      85: instanceof    #46                 // class android/app/Activity
+      88: ifeq          113
+      91: aload_1
+      92: checkcast     #46                 // class android/app/Activity
+      95: invokevirtual #160                // Method android/app/Activity.getIntent:()Landroid/content/Intent;
+      98: astore_3
+      99: aload_3
+     100: ifnull        113
+     103: aload_0
+     104: aload_3
+     105: ldc           #164                // String applicationArguments
+     107: invokevirtual #166                // Method android/content/Intent.getStringExtra:(Ljava/lang/String;)Ljava/lang/String;
+     110: invokevirtual #157                // Method appendApplicationParameters:(Ljava/lang/String;)V
+     113: return
+
+  private java.lang.String isBackgroundRunningBlocked();
+    Code:
+       0: aload_0
+       1: ldc           #171                // String android.app.background_running
+       3: invokevirtual #151                // Method getMetaData:(Ljava/lang/String;)Ljava/lang/String;
+       6: astore_1
+       7: aload_1
+       8: ldc           #173                // String true
+      10: invokevirtual #175                // Method java/lang/String.compareTo:(Ljava/lang/String;)I
+      13: ifne          19
+      16: ldc           #181                // String 0
+      18: areturn
+      19: ldc           #183                // String 1
+      21: areturn
+
+  private java.util.ArrayList<java.lang.String> preferredAbiLibs(java.lang.String[]);
+    Code:
+       0: new           #185                // class java/util/ArrayList
+       3: dup
+       4: invokespecial #187                // Method java/util/ArrayList."<init>":()V
+       7: astore_2
+       8: aload_1
+       9: astore_3
+      10: aload_3
+      11: arraylength
+      12: istore        4
+      14: iconst_0
+      15: istore        5
+      17: iload         5
+      19: iload         4
+      21: if_icmpge     87
+      24: aload_3
+      25: iload         5
+      27: aaload
+      28: astore        6
+      30: aload         6
+      32: ldc           #188                // String ;
+      34: iconst_2
+      35: invokevirtual #190                // Method java/lang/String.split:(Ljava/lang/String;I)[Ljava/lang/String;
+      38: astore        7
+      40: aload         7
+      42: ifnull        81
+      45: aload         7
+      47: arraylength
+      48: iconst_2
+      49: if_icmpge     55
+      52: goto          81
+      55: aload         7
+      57: iconst_0
+      58: aaload
+      59: aload_0
+      60: getfield      #74                 // Field m_preferredAbi:Ljava/lang/String;
+      63: invokevirtual #194                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      66: ifne          72
+      69: goto          81
+      72: aload_2
+      73: aload         7
+      75: iconst_1
+      76: aaload
+      77: invokevirtual #198                // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+      80: pop
+      81: iinc          5, 1
+      84: goto          17
+      87: aload_2
+      88: areturn
+
+  private java.lang.String resolvePreferredAbi();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+       4: ldc           #201                // String qt_libs
+       6: ldc           #203                // String array
+       8: aload_0
+       9: getfield      #39                 // Field m_packageName:Ljava/lang/String;
+      12: invokevirtual #205                // Method android/content/res/Resources.getIdentifier:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
+      15: istore_1
+      16: aload_0
+      17: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+      20: iload_1
+      21: invokevirtual #211                // Method android/content/res/Resources.getStringArray:(I)[Ljava/lang/String;
+      24: astore_2
+      25: new           #215                // class java/util/HashSet
+      28: dup
+      29: invokespecial #217                // Method java/util/HashSet."<init>":()V
+      32: astore_3
+      33: aload_2
+      34: astore        4
+      36: aload         4
+      38: arraylength
+      39: istore        5
+      41: iconst_0
+      42: istore        6
+      44: iload         6
+      46: iload         5
+      48: if_icmpge     100
+      51: aload         4
+      53: iload         6
+      55: aaload
+      56: astore        7
+      58: aload         7
+      60: ldc           #188                // String ;
+      62: iconst_2
+      63: invokevirtual #190                // Method java/lang/String.split:(Ljava/lang/String;I)[Ljava/lang/String;
+      66: astore        8
+      68: aload         8
+      70: ifnull        94
+      73: aload         8
+      75: arraylength
+      76: iconst_2
+      77: if_icmpge     83
+      80: goto          94
+      83: aload_3
+      84: aload         8
+      86: iconst_0
+      87: aaload
+      88: invokeinterface #218,  2          // InterfaceMethod java/util/Set.add:(Ljava/lang/Object;)Z
+      93: pop
+      94: iinc          6, 1
+      97: goto          44
+     100: invokestatic  #221                // Method android/os/Process.is64Bit:()Z
+     103: istore        4
+     105: getstatic     #227                // Field android/os/Build.SUPPORTED_ABIS:[Ljava/lang/String;
+     108: astore        5
+     110: aload         5
+     112: arraylength
+     113: istore        6
+     115: iconst_0
+     116: istore        7
+     118: iload         7
+     120: iload         6
+     122: if_icmpge     164
+     125: aload         5
+     127: iload         7
+     129: aaload
+     130: astore        8
+     132: aload_3
+     133: aload         8
+     135: invokeinterface #233,  2          // InterfaceMethod java/util/Set.contains:(Ljava/lang/Object;)Z
+     140: ifeq          158
+     143: aload         8
+     145: ldc           #236                // String 64
+     147: invokevirtual #238                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+     150: iload         4
+     152: if_icmpne     158
+     155: aload         8
+     157: areturn
+     158: iinc          7, 1
+     161: goto          118
+     164: getstatic     #227                // Field android/os/Build.SUPPORTED_ABIS:[Ljava/lang/String;
+     167: iconst_0
+     168: aaload
+     169: areturn
+
+  private void initClassLoader(android.content.Context);
+    Code:
+       0: aload_1
+       1: ldc           #241                // String outdex
+       3: iconst_0
+       4: invokevirtual #243                // Method android/content/Context.getDir:(Ljava/lang/String;I)Ljava/io/File;
+       7: invokevirtual #132                // Method java/io/File.getAbsolutePath:()Ljava/lang/String;
+      10: astore_2
+      11: aload_1
+      12: invokevirtual #247                // Method android/content/Context.getApplicationInfo:()Landroid/content/pm/ApplicationInfo;
+      15: getfield      #251                // Field android/content/pm/ApplicationInfo.sourceDir:Ljava/lang/String;
+      18: astore_3
+      19: aload_0
+      20: new           #256                // class dalvik/system/DexClassLoader
+      23: dup
+      24: aload_3
+      25: aload_2
+      26: aconst_null
+      27: aload_1
+      28: invokevirtual #258                // Method android/content/Context.getClassLoader:()Ljava/lang/ClassLoader;
+      31: invokespecial #262                // Method dalvik/system/DexClassLoader."<init>":(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)V
+      34: putfield      #265                // Field m_classLoader:Ljava/lang/ClassLoader;
+      37: aload_0
+      38: getfield      #265                // Field m_classLoader:Ljava/lang/ClassLoader;
+      41: invokestatic  #269                // Method org/qtproject/qt/android/QtNative.setClassLoader:(Ljava/lang/ClassLoader;)V
+      44: return
+
+  public java.lang.String getMainLibraryPath();
+    Code:
+       0: aload_0
+       1: getfield      #275                // Field m_mainLibPath:Ljava/lang/String;
+       4: areturn
+
+  public void setMainLibraryName(java.lang.String);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: putfield      #278                // Field m_mainLibName:Ljava/lang/String;
+       5: return
+
+  public java.lang.String getApplicationParameters();
+    Code:
+       0: aload_0
+       1: getfield      #15                 // Field m_applicationParameters:Ljava/lang/String;
+       4: areturn
+
+  public void appendApplicationParameters(java.lang.String);
+    Code:
+       0: aload_1
+       1: ifnull        11
+       4: aload_1
+       5: invokevirtual #281                // Method java/lang/String.isEmpty:()Z
+       8: ifeq          12
+      11: return
+      12: aload_0
+      13: getfield      #15                 // Field m_applicationParameters:Ljava/lang/String;
+      16: invokevirtual #281                // Method java/lang/String.isEmpty:()Z
+      19: ifne          49
+      22: new           #284                // class java/lang/StringBuilder
+      25: dup
+      26: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+      29: aload_0
+      30: dup_x1
+      31: getfield      #15                 // Field m_applicationParameters:Ljava/lang/String;
+      34: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      37: ldc_w         #291                // String
+      40: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      43: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      46: putfield      #15                 // Field m_applicationParameters:Ljava/lang/String;
+      49: new           #284                // class java/lang/StringBuilder
+      52: dup
+      53: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+      56: aload_0
+      57: dup_x1
+      58: getfield      #15                 // Field m_applicationParameters:Ljava/lang/String;
+      61: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      64: aload_1
+      65: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      68: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      71: putfield      #15                 // Field m_applicationParameters:Ljava/lang/String;
+      74: return
+
+  public void setEnvironmentVariable(java.lang.String, java.lang.String);
+    Code:
+       0: aload_1
+       1: aload_2
+       2: iconst_1
+       3: invokestatic  #296                // Method android/system/Os.setenv:(Ljava/lang/String;Ljava/lang/String;Z)V
+       6: aload_0
+       7: getfield      #21                 // Field m_environmentVariables:Ljava/util/HashMap;
+      10: aload_1
+      11: aload_2
+      12: invokevirtual #302                // Method java/util/HashMap.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      15: pop
+      16: goto          61
+      19: astore_3
+      20: ldc_w         #308                // String QtLoader
+      23: new           #284                // class java/lang/StringBuilder
+      26: dup
+      27: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+      30: ldc_w         #310                // String Could not set environment variable:
+      33: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      36: aload_1
+      37: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      40: ldc_w         #312                // String =
+      43: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      46: aload_2
+      47: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      50: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      53: invokestatic  #314                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;)I
+      56: pop
+      57: aload_3
+      58: invokevirtual #320                // Method java/lang/Exception.printStackTrace:()V
+      61: return
+    Exception table:
+       from    to  target type
+           0    16    19   Class java/lang/Exception
+
+  public void setEnvironmentVariables(java.lang.String);
+    Code:
+       0: aload_1
+       1: ifnull        11
+       4: aload_1
+       5: invokevirtual #281                // Method java/lang/String.isEmpty:()Z
+       8: ifeq          12
+      11: return
+      12: aload_1
+      13: ldc_w         #323                // String \t
+      16: ldc_w         #291                // String
+      19: invokevirtual #325                // Method java/lang/String.replaceAll:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+      22: astore_1
+      23: aload_1
+      24: ldc_w         #291                // String
+      27: invokevirtual #329                // Method java/lang/String.split:(Ljava/lang/String;)[Ljava/lang/String;
+      30: astore_2
+      31: aload_2
+      32: arraylength
+      33: istore_3
+      34: iconst_0
+      35: istore        4
+      37: iload         4
+      39: iload_3
+      40: if_icmpge     98
+      43: aload_2
+      44: iload         4
+      46: aaload
+      47: astore        5
+      49: aload         5
+      51: ldc_w         #312                // String =
+      54: iconst_2
+      55: invokevirtual #190                // Method java/lang/String.split:(Ljava/lang/String;I)[Ljava/lang/String;
+      58: astore        6
+      60: aload         6
+      62: arraylength
+      63: iconst_2
+      64: if_icmplt     92
+      67: aload         6
+      69: iconst_0
+      70: aaload
+      71: invokevirtual #281                // Method java/lang/String.isEmpty:()Z
+      74: ifeq          80
+      77: goto          92
+      80: aload_0
+      81: aload         6
+      83: iconst_0
+      84: aaload
+      85: aload         6
+      87: iconst_1
+      88: aaload
+      89: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+      92: iinc          4, 1
+      95: goto          37
+      98: return
+
+  private void parseNativeLibrariesDir();
+    Code:
+       0: aload_0
+       1: getfield      #93                 // Field m_contextInfo:Landroid/content/pm/ComponentInfo;
+       4: ifnonnull     8
+       7: return
+       8: aload_0
+       9: invokespecial #332                // Method isBundleQtLibs:()Z
+      12: ifeq          90
+      15: new           #284                // class java/lang/StringBuilder
+      18: dup
+      19: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+      22: aload_0
+      23: getfield      #93                 // Field m_contextInfo:Landroid/content/pm/ComponentInfo;
+      26: getfield      #335                // Field android/content/pm/ComponentInfo.applicationInfo:Landroid/content/pm/ApplicationInfo;
+      29: getfield      #341                // Field android/content/pm/ApplicationInfo.nativeLibraryDir:Ljava/lang/String;
+      32: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      35: ldc_w         #344                // String /
+      38: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      41: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      44: astore_1
+      45: new           #133                // class java/io/File
+      48: dup
+      49: aload_1
+      50: invokespecial #346                // Method java/io/File."<init>":(Ljava/lang/String;)V
+      53: astore_2
+      54: aload_2
+      55: invokevirtual #347                // Method java/io/File.exists:()Z
+      58: ifeq          87
+      61: aload_2
+      62: invokevirtual #350                // Method java/io/File.list:()[Ljava/lang/String;
+      65: astore_3
+      66: aload_2
+      67: invokevirtual #354                // Method java/io/File.isDirectory:()Z
+      70: ifeq          87
+      73: aload_3
+      74: ifnull        87
+      77: aload_3
+      78: arraylength
+      79: ifle          87
+      82: aload_0
+      83: aload_1
+      84: putfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+      87: goto          245
+      90: aload_0
+      91: ldc_w         #357                // String android.app.system_libs_prefix
+      94: invokespecial #359                // Method getApplicationMetaData:(Ljava/lang/String;)Ljava/lang/String;
+      97: astore_1
+      98: aload_1
+      99: invokevirtual #281                // Method java/lang/String.isEmpty:()Z
+     102: ifeq          110
+     105: aload_0
+     106: invokespecial #362                // Method getSystemLibsPrefix:()Ljava/lang/String;
+     109: astore_1
+     110: aload_1
+     111: invokevirtual #281                // Method java/lang/String.isEmpty:()Z
+     114: ifeq          131
+     117: ldc_w         #365                // String /system/lib/
+     120: astore_1
+     121: ldc_w         #308                // String QtLoader
+     124: ldc_w         #367                // String Using /system/lib/ as default libraries path. It looks like the app is deployed using Unbundled deployment. It may be necessary to specify the path to the directory where Qt libraries are installed using either android.app.system_libs_prefix metadata variable in your AndroidManifest.xml or QT_ANDROID_SYSTEM_LIBS_PATH in your CMakeLists.txt
+     127: invokestatic  #314                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;)I
+     130: pop
+     131: new           #133                // class java/io/File
+     134: dup
+     135: aload_1
+     136: invokespecial #346                // Method java/io/File."<init>":(Ljava/lang/String;)V
+     139: astore_2
+     140: aload_2
+     141: invokevirtual #350                // Method java/io/File.list:()[Ljava/lang/String;
+     144: astore_3
+     145: aload_2
+     146: invokevirtual #347                // Method java/io/File.exists:()Z
+     149: ifeq          212
+     152: aload_2
+     153: invokevirtual #354                // Method java/io/File.isDirectory:()Z
+     156: ifeq          176
+     159: aload_3
+     160: ifnull        176
+     163: aload_3
+     164: arraylength
+     165: ifle          176
+     168: aload_0
+     169: aload_1
+     170: putfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+     173: goto          245
+     176: ldc_w         #308                // String QtLoader
+     179: new           #284                // class java/lang/StringBuilder
+     182: dup
+     183: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+     186: ldc_w         #369                // String System library directory
+     189: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     192: aload_1
+     193: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     196: ldc_w         #371                // String  is empty.
+     199: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     202: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     205: invokestatic  #314                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;)I
+     208: pop
+     209: goto          245
+     212: ldc_w         #308                // String QtLoader
+     215: new           #284                // class java/lang/StringBuilder
+     218: dup
+     219: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+     222: ldc_w         #369                // String System library directory
+     225: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     228: aload_1
+     229: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     232: ldc_w         #373                // String  does not exist.
+     235: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     238: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     241: invokestatic  #314                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;)I
+     244: pop
+     245: aload_0
+     246: getfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+     249: ifnull        292
+     252: aload_0
+     253: getfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+     256: ldc_w         #344                // String /
+     259: invokevirtual #375                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+     262: ifne          292
+     265: new           #284                // class java/lang/StringBuilder
+     268: dup
+     269: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+     272: aload_0
+     273: dup_x1
+     274: getfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+     277: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     280: ldc_w         #344                // String /
+     283: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     286: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     289: putfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+     292: return
+
+  private java.lang.String getApplicationMetaData(java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #93                 // Field m_contextInfo:Landroid/content/pm/ComponentInfo;
+       4: getfield      #335                // Field android/content/pm/ComponentInfo.applicationInfo:Landroid/content/pm/ApplicationInfo;
+       7: astore_2
+       8: aload_2
+       9: ifnonnull     15
+      12: ldc           #13                 // String
+      14: areturn
+      15: aload_2
+      16: getfield      #379                // Field android/content/pm/ApplicationInfo.metaData:Landroid/os/Bundle;
+      19: astore_3
+      20: aload_3
+      21: ifnull        32
+      24: aload_3
+      25: aload_1
+      26: invokevirtual #383                // Method android/os/Bundle.containsKey:(Ljava/lang/String;)Z
+      29: ifne          35
+      32: ldc           #13                 // String
+      34: areturn
+      35: aload_3
+      36: aload_1
+      37: invokevirtual #388                // Method android/os/Bundle.getString:(Ljava/lang/String;)Ljava/lang/String;
+      40: areturn
+
+  protected java.lang.String getMetaData(java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #93                 // Field m_contextInfo:Landroid/content/pm/ComponentInfo;
+       4: ifnonnull     10
+       7: ldc           #13                 // String
+       9: areturn
+      10: aload_0
+      11: getfield      #93                 // Field m_contextInfo:Landroid/content/pm/ComponentInfo;
+      14: getfield      #391                // Field android/content/pm/ComponentInfo.metaData:Landroid/os/Bundle;
+      17: astore_2
+      18: aload_2
+      19: ifnull        30
+      22: aload_2
+      23: aload_1
+      24: invokevirtual #383                // Method android/os/Bundle.containsKey:(Ljava/lang/String;)Z
+      27: ifne          33
+      30: ldc           #13                 // String
+      32: areturn
+      33: aload_2
+      34: aload_1
+      35: invokevirtual #392                // Method android/os/Bundle.get:(Ljava/lang/String;)Ljava/lang/Object;
+      38: invokestatic  #396                // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+      41: areturn
+
+  private java.util.ArrayList<java.lang.String> getQtLibrariesList();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+       4: ldc           #201                // String qt_libs
+       6: ldc           #203                // String array
+       8: aload_0
+       9: getfield      #39                 // Field m_packageName:Ljava/lang/String;
+      12: invokevirtual #205                // Method android/content/res/Resources.getIdentifier:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
+      15: istore_1
+      16: aload_0
+      17: aload_0
+      18: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+      21: iload_1
+      22: invokevirtual #211                // Method android/content/res/Resources.getStringArray:(I)[Ljava/lang/String;
+      25: invokespecial #400                // Method preferredAbiLibs:([Ljava/lang/String;)Ljava/util/ArrayList;
+      28: areturn
+
+  private boolean useLocalQtLibs();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+       4: ldc_w         #404                // String use_local_qt_libs
+       7: ldc_w         #406                // String string
+      10: aload_0
+      11: getfield      #39                 // Field m_packageName:Ljava/lang/String;
+      14: invokevirtual #205                // Method android/content/res/Resources.getIdentifier:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
+      17: istore_1
+      18: aload_0
+      19: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+      22: iload_1
+      23: invokevirtual #408                // Method android/content/res/Resources.getString:(I)Ljava/lang/String;
+      26: invokestatic  #411                // Method java/lang/Integer.parseInt:(Ljava/lang/String;)I
+      29: iconst_1
+      30: if_icmpne     37
+      33: iconst_1
+      34: goto          38
+      37: iconst_0
+      38: ireturn
+
+  private boolean isBundleQtLibs();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+       4: ldc_w         #416                // String bundle_local_qt_libs
+       7: ldc_w         #406                // String string
+      10: aload_0
+      11: getfield      #39                 // Field m_packageName:Ljava/lang/String;
+      14: invokevirtual #205                // Method android/content/res/Resources.getIdentifier:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
+      17: istore_1
+      18: aload_0
+      19: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+      22: iload_1
+      23: invokevirtual #408                // Method android/content/res/Resources.getString:(I)Ljava/lang/String;
+      26: invokestatic  #411                // Method java/lang/Integer.parseInt:(Ljava/lang/String;)I
+      29: iconst_1
+      30: if_icmpne     37
+      33: iconst_1
+      34: goto          38
+      37: iconst_0
+      38: ireturn
+
+  private java.lang.String getSystemLibsPrefix();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+       4: ldc_w         #418                // String system_libs_prefix
+       7: ldc_w         #406                // String string
+      10: aload_0
+      11: getfield      #39                 // Field m_packageName:Ljava/lang/String;
+      14: invokevirtual #205                // Method android/content/res/Resources.getIdentifier:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
+      17: istore_1
+      18: aload_0
+      19: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+      22: iload_1
+      23: invokevirtual #408                // Method android/content/res/Resources.getString:(I)Ljava/lang/String;
+      26: areturn
+
+  private java.util.ArrayList<java.lang.String> getLocalLibrariesList();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+       4: ldc_w         #420                // String load_local_libs
+       7: ldc           #203                // String array
+       9: aload_0
+      10: getfield      #39                 // Field m_packageName:Ljava/lang/String;
+      13: invokevirtual #205                // Method android/content/res/Resources.getIdentifier:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
+      16: istore_1
+      17: new           #185                // class java/util/ArrayList
+      20: dup
+      21: invokespecial #187                // Method java/util/ArrayList."<init>":()V
+      24: astore_2
+      25: aload_0
+      26: aload_0
+      27: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+      30: iload_1
+      31: invokevirtual #211                // Method android/content/res/Resources.getStringArray:(I)[Ljava/lang/String;
+      34: invokespecial #400                // Method preferredAbiLibs:([Ljava/lang/String;)Ljava/util/ArrayList;
+      37: invokevirtual #422                // Method java/util/ArrayList.iterator:()Ljava/util/Iterator;
+      40: astore_3
+      41: aload_3
+      42: invokeinterface #426,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      47: ifeq          77
+      50: aload_3
+      51: invokeinterface #431,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      56: checkcast     #176                // class java/lang/String
+      59: astore        4
+      61: aload_2
+      62: aload         4
+      64: ldc_w         #435                // String :
+      67: invokevirtual #329                // Method java/lang/String.split:(Ljava/lang/String;)[Ljava/lang/String;
+      70: invokestatic  #437                // Method java/util/Collections.addAll:(Ljava/util/Collection;[Ljava/lang/Object;)Z
+      73: pop
+      74: goto          41
+      77: aload_2
+      78: areturn
+
+  private java.lang.String[] getBundledLibs();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+       4: ldc_w         #443                // String bundled_libs
+       7: ldc           #203                // String array
+       9: aload_0
+      10: getfield      #39                 // Field m_packageName:Ljava/lang/String;
+      13: invokevirtual #205                // Method android/content/res/Resources.getIdentifier:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
+      16: istore_1
+      17: aload_0
+      18: getfield      #31                 // Field m_resources:Landroid/content/res/Resources;
+      21: iload_1
+      22: invokevirtual #211                // Method android/content/res/Resources.getStringArray:(I)[Ljava/lang/String;
+      25: areturn
+
+  private static boolean isUncompressedNativeLibs();
+    Code:
+       0: invokestatic  #445                // Method org/qtproject/qt/android/QtNative.getContext:()Landroid/content/Context;
+       3: invokevirtual #247                // Method android/content/Context.getApplicationInfo:()Landroid/content/pm/ApplicationInfo;
+       6: getfield      #448                // Field android/content/pm/ApplicationInfo.flags:I
+       9: istore_0
+      10: iload_0
+      11: ldc_w         #452                // int 268435456
+      14: iand
+      15: ifne          22
+      18: iconst_1
+      19: goto          23
+      22: iconst_0
+      23: ireturn
+
+  private java.lang.String getApkNativeLibrariesDir();
+    Code:
+       0: new           #284                // class java/lang/StringBuilder
+       3: dup
+       4: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+       7: invokestatic  #453                // Method org/qtproject/qt/android/QtApkFileEngine.getAppApkFilePath:()Ljava/lang/String;
+      10: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      13: ldc_w         #458                // String !/lib/
+      16: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      19: aload_0
+      20: getfield      #74                 // Field m_preferredAbi:Ljava/lang/String;
+      23: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      26: ldc_w         #344                // String /
+      29: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      32: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      35: areturn
+
+  public org.qtproject.qt.android.QtLoader$LoadingResult loadQtLibraries();
+    Code:
+       0: aload_0
+       1: getfield      #460                // Field m_librariesLoaded:Z
+       4: ifeq          11
+       7: getstatic     #464                // Field org/qtproject/qt/android/QtLoader$LoadingResult.AlreadyLoaded:Lorg/qtproject/qt/android/QtLoader$LoadingResult;
+      10: areturn
+      11: aload_0
+      12: invokespecial #470                // Method useLocalQtLibs:()Z
+      15: ifne          32
+      18: ldc_w         #308                // String QtLoader
+      21: ldc_w         #473                // String Use local Qt libs is false
+      24: invokestatic  #475                // Method android/util/Log.w:(Ljava/lang/String;Ljava/lang/String;)I
+      27: pop
+      28: getstatic     #478                // Field org/qtproject/qt/android/QtLoader$LoadingResult.Failed:Lorg/qtproject/qt/android/QtLoader$LoadingResult;
+      31: areturn
+      32: aload_0
+      33: getfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+      36: ifnonnull     43
+      39: aload_0
+      40: invokespecial #481                // Method parseNativeLibrariesDir:()V
+      43: invokestatic  #484                // Method isUncompressedNativeLibs:()Z
+      46: ifeq          73
+      49: aload_0
+      50: invokespecial #487                // Method getApkNativeLibrariesDir:()Ljava/lang/String;
+      53: astore_1
+      54: aload_0
+      55: ldc_w         #490                // String QT_PLUGIN_PATH
+      58: aload_1
+      59: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+      62: aload_0
+      63: ldc_w         #492                // String QML_PLUGIN_PATH
+      66: aload_1
+      67: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+      70: goto          126
+      73: aload_0
+      74: getfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+      77: ifnull        90
+      80: aload_0
+      81: getfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+      84: invokevirtual #281                // Method java/lang/String.isEmpty:()Z
+      87: ifeq          104
+      90: ldc_w         #308                // String QtLoader
+      93: ldc_w         #494                // String The native libraries directory is null or empty
+      96: invokestatic  #314                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;)I
+      99: pop
+     100: getstatic     #478                // Field org/qtproject/qt/android/QtLoader$LoadingResult.Failed:Lorg/qtproject/qt/android/QtLoader$LoadingResult;
+     103: areturn
+     104: aload_0
+     105: ldc_w         #490                // String QT_PLUGIN_PATH
+     108: aload_0
+     109: getfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+     112: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+     115: aload_0
+     116: ldc_w         #492                // String QML_PLUGIN_PATH
+     119: aload_0
+     120: getfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+     123: invokevirtual #114                // Method setEnvironmentVariable:(Ljava/lang/String;Ljava/lang/String;)V
+     126: aload_0
+     127: invokespecial #496                // Method getQtLibrariesList:()Ljava/util/ArrayList;
+     130: astore_1
+     131: aload_1
+     132: aload_0
+     133: invokespecial #500                // Method getLocalLibrariesList:()Ljava/util/ArrayList;
+     136: invokevirtual #503                // Method java/util/ArrayList.addAll:(Ljava/util/Collection;)Z
+     139: pop
+     140: invokestatic  #506                // Method android/os/Debug.isDebuggerConnected:()Z
+     143: ifeq          229
+     146: sipush        3000
+     149: istore_2
+     150: ldc_w         #511                // String QT_ANDROID_DEBUGGER_MAIN_THREAD_SLEEP_MS
+     153: invokestatic  #513                // Method android/system/Os.getenv:(Ljava/lang/String;)Ljava/lang/String;
+     156: ifnull        173
+     159: ldc_w         #511                // String QT_ANDROID_DEBUGGER_MAIN_THREAD_SLEEP_MS
+     162: invokestatic  #513                // Method android/system/Os.getenv:(Ljava/lang/String;)Ljava/lang/String;
+     165: invokestatic  #411                // Method java/lang/Integer.parseInt:(Ljava/lang/String;)I
+     168: istore_2
+     169: goto          173
+     172: astore_3
+     173: iload_2
+     174: ifle          229
+     177: ldc_w         #308                // String QtLoader
+     180: new           #284                // class java/lang/StringBuilder
+     183: dup
+     184: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+     187: ldc_w         #518                // String Sleeping for
+     190: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     193: iload_2
+     194: invokevirtual #520                // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+     197: ldc_w         #523                // String ms, helping the native debugger to settle. Use the env
+     200: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     203: ldc_w         #511                // String QT_ANDROID_DEBUGGER_MAIN_THREAD_SLEEP_MS
+     206: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     209: ldc_w         #525                // String  variable to change this value.
+     212: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     215: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     218: invokestatic  #527                // Method android/util/Log.i:(Ljava/lang/String;Ljava/lang/String;)I
+     221: pop
+     222: invokestatic  #530                // Method org/qtproject/qt/android/QtNative.getQtThread:()Lorg/qtproject/qt/android/QtThread;
+     225: iload_2
+     226: invokevirtual #534                // Method org/qtproject/qt/android/QtThread.sleep:(I)V
+     229: aload_0
+     230: aload_1
+     231: invokespecial #540                // Method loadLibraries:(Ljava/util/ArrayList;)Z
+     234: ifne          251
+     237: ldc_w         #308                // String QtLoader
+     240: ldc_w         #544                // String Loading Qt native libraries failed
+     243: invokestatic  #314                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;)I
+     246: pop
+     247: getstatic     #478                // Field org/qtproject/qt/android/QtLoader$LoadingResult.Failed:Lorg/qtproject/qt/android/QtLoader$LoadingResult;
+     250: areturn
+     251: new           #185                // class java/util/ArrayList
+     254: dup
+     255: aload_0
+     256: aload_0
+     257: invokespecial #546                // Method getBundledLibs:()[Ljava/lang/String;
+     260: invokespecial #400                // Method preferredAbiLibs:([Ljava/lang/String;)Ljava/util/ArrayList;
+     263: invokespecial #549                // Method java/util/ArrayList."<init>":(Ljava/util/Collection;)V
+     266: astore_2
+     267: aload_0
+     268: aload_2
+     269: invokespecial #540                // Method loadLibraries:(Ljava/util/ArrayList;)Z
+     272: ifne          289
+     275: ldc_w         #308                // String QtLoader
+     278: ldc_w         #552                // String Loading Qt bundled libraries failed
+     281: invokestatic  #314                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;)I
+     284: pop
+     285: getstatic     #478                // Field org/qtproject/qt/android/QtLoader$LoadingResult.Failed:Lorg/qtproject/qt/android/QtLoader$LoadingResult;
+     288: areturn
+     289: aload_0
+     290: getfield      #278                // Field m_mainLibName:Ljava/lang/String;
+     293: ifnonnull     307
+     296: aload_0
+     297: aload_0
+     298: ldc_w         #554                // String android.app.lib_name
+     301: invokevirtual #151                // Method getMetaData:(Ljava/lang/String;)Ljava/lang/String;
+     304: putfield      #278                // Field m_mainLibName:Ljava/lang/String;
+     307: aload_0
+     308: new           #284                // class java/lang/StringBuilder
+     311: dup
+     312: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+     315: aload_0
+     316: getfield      #278                // Field m_mainLibName:Ljava/lang/String;
+     319: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     322: ldc_w         #556                // String _
+     325: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     328: aload_0
+     329: getfield      #74                 // Field m_preferredAbi:Ljava/lang/String;
+     332: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     335: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     338: invokespecial #558                // Method loadMainLibrary:(Ljava/lang/String;)Z
+     341: ifne          358
+     344: ldc_w         #308                // String QtLoader
+     347: ldc_w         #561                // String Loading main library failed
+     350: invokestatic  #314                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;)I
+     353: pop
+     354: getstatic     #478                // Field org/qtproject/qt/android/QtLoader$LoadingResult.Failed:Lorg/qtproject/qt/android/QtLoader$LoadingResult;
+     357: areturn
+     358: aload_0
+     359: iconst_1
+     360: putfield      #460                // Field m_librariesLoaded:Z
+     363: getstatic     #563                // Field org/qtproject/qt/android/QtLoader$LoadingResult.Succeeded:Lorg/qtproject/qt/android/QtLoader$LoadingResult;
+     366: areturn
+    Exception table:
+       from    to  target type
+         159   169   172   Class java/lang/NumberFormatException
+
+  private java.lang.String loadLibraryHelper(java.lang.String);
+    Code:
+       0: aconst_null
+       1: astore_2
+       2: new           #133                // class java/io/File
+       5: dup
+       6: aload_1
+       7: invokespecial #346                // Method java/io/File."<init>":(Ljava/lang/String;)V
+      10: astore_3
+      11: aload_1
+      12: ldc_w         #344                // String /
+      15: invokevirtual #566                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+      18: ifeq          73
+      21: aload_3
+      22: invokevirtual #347                // Method java/io/File.exists:()Z
+      25: ifeq          37
+      28: aload_1
+      29: invokestatic  #569                // Method java/lang/System.load:(Ljava/lang/String;)V
+      32: aload_1
+      33: astore_2
+      34: goto          79
+      37: ldc_w         #308                // String QtLoader
+      40: new           #284                // class java/lang/StringBuilder
+      43: dup
+      44: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+      47: ldc_w         #574                // String Can\'t find \'
+      50: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      53: aload_1
+      54: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      57: ldc_w         #576                // String \'
+      60: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      63: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      66: invokestatic  #314                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;)I
+      69: pop
+      70: goto          79
+      73: aload_1
+      74: invokestatic  #578                // Method java/lang/System.loadLibrary:(Ljava/lang/String;)V
+      77: aload_1
+      78: astore_2
+      79: goto          117
+      82: astore_3
+      83: ldc_w         #308                // String QtLoader
+      86: new           #284                // class java/lang/StringBuilder
+      89: dup
+      90: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+      93: ldc_w         #581                // String Can\'t load \'
+      96: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      99: aload_1
+     100: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     103: ldc_w         #576                // String \'
+     106: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     109: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     112: aload_3
+     113: invokestatic  #583                // Method android/util/Log.e:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
+     116: pop
+     117: aload_2
+     118: areturn
+    Exception table:
+       from    to  target type
+           2    79    82   Class java/lang/Exception
+
+  private java.util.ArrayList<java.lang.String> getLibrariesFullPaths(java.util.ArrayList<java.lang.String>);
+    Code:
+       0: aload_1
+       1: ifnonnull     6
+       4: aconst_null
+       5: areturn
+       6: new           #185                // class java/util/ArrayList
+       9: dup
+      10: invokespecial #187                // Method java/util/ArrayList."<init>":()V
+      13: astore_2
+      14: aload_1
+      15: invokevirtual #422                // Method java/util/ArrayList.iterator:()Ljava/util/Iterator;
+      18: astore_3
+      19: aload_3
+      20: invokeinterface #426,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      25: ifeq          165
+      28: aload_3
+      29: invokeinterface #431,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      34: checkcast     #176                // class java/lang/String
+      37: astore        4
+      39: invokestatic  #484                // Method isUncompressedNativeLibs:()Z
+      42: ifeq          81
+      45: aload         4
+      47: ldc_w         #586                // String .so
+      50: invokevirtual #375                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+      53: ifeq          71
+      56: aload         4
+      58: iconst_3
+      59: aload         4
+      61: invokevirtual #588                // Method java/lang/String.length:()I
+      64: iconst_3
+      65: isub
+      66: invokevirtual #592                // Method java/lang/String.substring:(II)Ljava/lang/String;
+      69: astore        4
+      71: aload_2
+      72: aload         4
+      74: invokevirtual #198                // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+      77: pop
+      78: goto          162
+      81: aload         4
+      83: ldc_w         #586                // String .so
+      86: invokevirtual #375                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+      89: ifne          121
+      92: new           #284                // class java/lang/StringBuilder
+      95: dup
+      96: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+      99: ldc_w         #596                // String lib
+     102: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     105: aload         4
+     107: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     110: ldc_w         #586                // String .so
+     113: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     116: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     119: astore        4
+     121: new           #133                // class java/io/File
+     124: dup
+     125: new           #284                // class java/lang/StringBuilder
+     128: dup
+     129: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+     132: aload_0
+     133: getfield      #7                  // Field m_extractedNativeLibsDir:Ljava/lang/String;
+     136: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     139: aload         4
+     141: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     144: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     147: invokespecial #346                // Method java/io/File."<init>":(Ljava/lang/String;)V
+     150: astore        5
+     152: aload_2
+     153: aload         5
+     155: invokevirtual #132                // Method java/io/File.getAbsolutePath:()Ljava/lang/String;
+     158: invokevirtual #198                // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     161: pop
+     162: goto          19
+     165: aload_2
+     166: areturn
+
+  private boolean loadMainLibrary(java.lang.String);
+    Code:
+       0: new           #185                // class java/util/ArrayList
+       3: dup
+       4: aload_1
+       5: invokestatic  #598                // Method java/util/Collections.singletonList:(Ljava/lang/Object;)Ljava/util/List;
+       8: invokespecial #549                // Method java/util/ArrayList."<init>":(Ljava/util/Collection;)V
+      11: astore_2
+      12: aload_0
+      13: aload_2
+      14: invokespecial #602                // Method getLibrariesFullPaths:(Ljava/util/ArrayList;)Ljava/util/ArrayList;
+      17: iconst_0
+      18: invokevirtual #606                // Method java/util/ArrayList.get:(I)Ljava/lang/Object;
+      21: checkcast     #176                // class java/lang/String
+      24: astore_3
+      25: iconst_1
+      26: newarray       boolean
+      28: dup
+      29: iconst_0
+      30: iconst_1
+      31: bastore
+      32: astore        4
+      34: invokestatic  #530                // Method org/qtproject/qt/android/QtNative.getQtThread:()Lorg/qtproject/qt/android/QtThread;
+      37: aload_0
+      38: aload_3
+      39: aload         4
+      41: invokedynamic #609,  0            // InvokeDynamic #0:run:(Lorg/qtproject/qt/android/QtLoader;Ljava/lang/String;[Z)Ljava/lang/Runnable;
+      46: invokevirtual #613                // Method org/qtproject/qt/android/QtThread.run:(Ljava/lang/Runnable;)V
+      49: aload         4
+      51: iconst_0
+      52: baload
+      53: ireturn
+
+  private boolean loadLibraries(java.util.ArrayList<java.lang.String>);
+    Code:
+       0: aload_1
+       1: ifnonnull     6
+       4: iconst_0
+       5: ireturn
+       6: aload_0
+       7: aload_1
+       8: invokespecial #602                // Method getLibrariesFullPaths:(Ljava/util/ArrayList;)Ljava/util/ArrayList;
+      11: astore_2
+      12: iconst_1
+      13: newarray       boolean
+      15: dup
+      16: iconst_0
+      17: iconst_1
+      18: bastore
+      19: astore_3
+      20: invokestatic  #530                // Method org/qtproject/qt/android/QtNative.getQtThread:()Lorg/qtproject/qt/android/QtThread;
+      23: aload_0
+      24: aload_2
+      25: aload_3
+      26: invokedynamic #616,  0            // InvokeDynamic #1:run:(Lorg/qtproject/qt/android/QtLoader;Ljava/util/ArrayList;[Z)Ljava/lang/Runnable;
+      31: invokevirtual #613                // Method org/qtproject/qt/android/QtThread.run:(Ljava/lang/Runnable;)V
+      34: aload_3
+      35: iconst_0
+      36: baload
+      37: ireturn
+
+  private void lambda$loadLibraries$1(java.util.ArrayList, boolean[]);
+    Code:
+       0: iconst_0
+       1: istore_3
+       2: iload_3
+       3: aload_1
+       4: invokevirtual #619                // Method java/util/ArrayList.size:()I
+       7: if_icmpge     42
+      10: aload_1
+      11: iload_3
+      12: invokevirtual #606                // Method java/util/ArrayList.get:(I)Ljava/lang/Object;
+      15: checkcast     #176                // class java/lang/String
+      18: astore        4
+      20: aload_0
+      21: aload         4
+      23: invokespecial #622                // Method loadLibraryHelper:(Ljava/lang/String;)Ljava/lang/String;
+      26: ifnonnull     36
+      29: aload_2
+      30: iconst_0
+      31: iconst_0
+      32: bastore
+      33: goto          42
+      36: iinc          3, 1
+      39: goto          2
+      42: return
+
+  private void lambda$loadMainLibrary$0(java.lang.String, boolean[]);
+    Code:
+       0: aload_0
+       1: aload_0
+       2: aload_1
+       3: invokespecial #622                // Method loadLibraryHelper:(Ljava/lang/String;)Ljava/lang/String;
+       6: putfield      #275                // Field m_mainLibPath:Ljava/lang/String;
+       9: aload_0
+      10: getfield      #275                // Field m_mainLibPath:Ljava/lang/String;
+      13: ifnonnull     23
+      16: aload_2
+      17: iconst_0
+      18: iconst_0
+      19: bastore
+      20: goto          69
+      23: invokestatic  #484                // Method isUncompressedNativeLibs:()Z
+      26: ifeq          69
+      29: aload_0
+      30: new           #284                // class java/lang/StringBuilder
+      33: dup
+      34: invokespecial #286                // Method java/lang/StringBuilder."<init>":()V
+      37: aload_0
+      38: invokespecial #487                // Method getApkNativeLibrariesDir:()Ljava/lang/String;
+      41: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      44: ldc_w         #596                // String lib
+      47: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      50: aload_0
+      51: getfield      #275                // Field m_mainLibPath:Ljava/lang/String;
+      54: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      57: ldc_w         #586                // String .so
+      60: invokevirtual #287                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      63: invokevirtual #293                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      66: putfield      #275                // Field m_mainLibPath:Ljava/lang/String;
+      69: return
+
+  static {};
+    Code:
+       0: aconst_null
+       1: putstatic     #625                // Field m_instance:Lorg/qtproject/qt/android/QtLoader;
+       4: return
+}

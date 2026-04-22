@@ -25,4 +25,5 @@
     <string name="openNotificationSettings">Open notification settings</string>
 
     <string name="tvNoFileBrowser">Please install a file management utility to browse files</string>
+    <string name="fatal_error_msg">Failed to initialize native Qt runtime.</string>
 </resources>

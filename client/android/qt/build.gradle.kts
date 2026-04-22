@@ -11,6 +11,12 @@ val qtAndroidDir: String by gradleProperties
 
 android {
     namespace = "org.qtproject.qt.android.binding"
+    buildFeatures {
+        // QtActivityBase relies on string resources from the Qt android binding
+        // (e.g. fatal_error_msg). Keep android resources enabled explicitly even
+        // if library defaults disable them globally.
+        androidResources = true
+    }
 
     sourceSets {
         getByName("main") {
