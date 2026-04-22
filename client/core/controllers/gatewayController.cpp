@@ -50,7 +50,7 @@ namespace
 
     constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
 
-#if AMNEZIA_GATEWAY_PLAINTEXT_MOCK
+#ifdef AMNEZIA_LOCAL_GATEWAY
     bool gatewayUrlIsPlaintextMockTarget(const QString &gatewayEndpoint, const QString &proxyUrl)
     {
         const auto hostOf = [](const QString &urlString) -> QString {
@@ -88,7 +88,7 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     encRequestData.request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
     encRequestData.request.setUrl(endpoint.arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
 
-#if AMNEZIA_GATEWAY_PLAINTEXT_MOCK
+#ifdef AMNEZIA_LOCAL_GATEWAY
     if (gatewayUrlIsPlaintextMockTarget(m_gatewayEndpoint, m_proxyUrl)) {
         encRequestData.requestBody = QJsonDocument(apiPayload).toJson();
         encRequestData.key.clear();
@@ -203,7 +203,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     reply->deleteLater();
 
-#if AMNEZIA_GATEWAY_PLAINTEXT_MOCK
+#ifdef AMNEZIA_LOCAL_GATEWAY
     const bool plaintextMock = encRequestData.key.isEmpty();
     DecryptionResult decryptionResult;
     decryptionResult.decryptedBody = encryptedResponseBody;
@@ -284,7 +284,7 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 
         reply->deleteLater();
 
-#if AMNEZIA_GATEWAY_PLAINTEXT_MOCK
+#ifdef AMNEZIA_LOCAL_GATEWAY
         const bool plaintextMock = encRequestData.key.isEmpty();
         DecryptionResult decryptionResult;
         decryptionResult.decryptedBody = encryptedResponseBody;
