@@ -83,7 +83,6 @@ private:
     QSharedPointer<ApiSubscriptionPlansModel> m_subscriptionPlansModel;
     QSharedPointer<ApiBenefitsModel> m_benefitsModel;
 
-    // CAPTCHA handling state
     struct CaptchaState {
         QJsonObject apiPayload;
         QString endpoint;
