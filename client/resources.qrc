@@ -152,6 +152,7 @@
         <file>ui/qml/Controls2/BackButtonType.qml</file>
         <file>ui/qml/Controls2/BasicButtonType.qml</file>
         <file>ui/qml/Controls2/BusyIndicatorType.qml</file>
+        <file>ui/qml/Controls2/CaptchaDialogType.qml</file>
         <file>ui/qml/Controls2/CardType.qml</file>
         <file>ui/qml/Controls2/CardWithIconsType.qml</file>
         <file>ui/qml/Controls2/CheckBoxType.qml</file>

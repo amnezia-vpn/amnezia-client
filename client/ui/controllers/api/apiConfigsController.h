@@ -19,6 +19,8 @@ public:
                          const QSharedPointer<ApiBenefitsModel> &benefitsModel, const std::shared_ptr<Settings> &settings,
                          QObject *parent = nullptr);
 
+    Q_INVOKABLE bool isCaptchaAwaitingUser() const;
+
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY vpnKeyExportReady)
     Q_PROPERTY(QString vpnKey READ getVpnKey NOTIFY vpnKeyExportReady)

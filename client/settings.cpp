@@ -14,7 +14,11 @@ namespace
     const char cloudFlareNs1[] = "1.1.1.1";
     const char cloudFlareNs2[] = "1.0.0.1";
 
+#if AMNEZIA_FORCE_DEV_GATEWAY
+    constexpr char gatewayEndpoint[] = DEFAULT_GATEWAY_ENDPOINT;
+#else
     constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
+#endif
 }
 
 Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this)
@@ -44,6 +48,10 @@ Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_N
     }
 
     m_gatewayEndpoint = gatewayEndpoint;
+#if AMNEZIA_FORCE_DEV_GATEWAY
+    m_settings.setValue(QStringLiteral("Conf/devGatewayEnv"), true);
+    m_gatewayEndpoint = QString::fromUtf8(DEV_AGW_ENDPOINT);
+#endif
 }
 
 int Settings::serversCount() const

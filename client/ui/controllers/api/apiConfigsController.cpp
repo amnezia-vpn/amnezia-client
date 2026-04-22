@@ -438,6 +438,11 @@ ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &s
     });
 }
 
+bool ApiConfigsController::isCaptchaAwaitingUser() const
+{
+    return m_captchaState.isPending;
+}
+
 bool ApiConfigsController::exportVpnKey(const QString &fileName)
 {
     if (fileName.isEmpty()) {
