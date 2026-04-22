@@ -14,9 +14,9 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            msvc-version: 19.5
+            msvc-version: 14.5
           - os: windows-latest
-            msvc-version: 19.4
+            msvc-version: 14.4
           - os: ubuntu-latest
           - os: macos-latest
 
