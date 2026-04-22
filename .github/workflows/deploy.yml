@@ -36,7 +36,9 @@ jobs:
         fetch-depth: 10
 
     - name: 'Build dependencies'
-      run: cmake -S . -B build -DPREBUILTS_ONLY=1
+      run: |
+        cmake -S . -B build_release -DPREBUILTS_ONLY=1 -DCMAKE_BUILD_TYPE=Release
+        cmake -S . -B build_debug   -DPREBUILTS_ONLY=1 -DCMAKE_BUILD_TYPE=Debug
 
     - name: 'Authorize in remote'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
