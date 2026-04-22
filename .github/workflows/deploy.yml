@@ -836,5 +836,7 @@ jobs:
     - name: 'Run tests'
       shell: cmd
       run: |
+        dir build\client\tests\*.dll
+        set PATH=%PATH%;%Qt6_DIR%\..\..\bin
         dir build\client\tests /s | findstr CTestTestfile.cmake
         ctest --test-dir build\client\tests --output-on-failure
