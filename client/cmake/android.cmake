@@ -1,6 +1,9 @@
 message("Client android ${CMAKE_ANDROID_ARCH_ABI} build")
 
-set(APP_ANDROID_MIN_SDK 28)
+# Qt 6.10 Android Java bindings reference API 30 classes
+# (for example WindowInsetsAnimation.Callback). Running with minSdk < 30
+# leads to startup class-loading failures on old Android versions.
+set(APP_ANDROID_MIN_SDK 30)
 set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
     "The minimum API level supported by the application or library" FORCE)
 
