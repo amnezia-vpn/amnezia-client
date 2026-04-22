@@ -836,4 +836,5 @@ jobs:
     - name: 'Run tests'
       shell: cmd
       run: |
-        ctest --test-dir build --output-on-failure
+        dir build\client\tests /s | findstr CTestTestfile.cmake
+        ctest --test-dir build\client\tests --output-on-failure

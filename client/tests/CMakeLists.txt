@@ -5,7 +5,6 @@ project(AmneziaVPN_Tests)
 find_package(Qt6 REQUIRED COMPONENTS Test)
 
 include(CTest)
-enable_testing()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -215,6 +214,69 @@ target_link_libraries(test_ui_news_model_and_controller PRIVATE
     Qt6::Test
     test_common
 )
+
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+    set_target_properties(test_import_export PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_multiple_imports PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_server_edit PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_default_server_change PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_server_edge_cases PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_signal_order PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_servers_model_sync PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_gateway_stacks PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_complex_operations PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_settings_signals PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_ui_servers_model_and_controller PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_self_hosted_server_setup PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_exports PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_serialization PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_ui_language_model_and_controller PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_ui_sites_model_and_controller PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_ui_app_st_model_and_controller PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_ui_allowed_dns_model_and_controller PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_ui_api_services_model_and_controller PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+    set_target_properties(test_ui_news_model_and_controller PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/client/tests"
+    )
+endif()
 
 enable_testing()
 add_test(NAME ImportExportTest COMMAND test_import_export)
