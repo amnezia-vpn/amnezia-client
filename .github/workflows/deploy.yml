@@ -12,7 +12,11 @@ jobs:
   Bake-Prebuilts:
     strategy:
       matrix:
-        os: [ 'windows-latest', 'ubuntu-latest', 'macos-latest' ]
+        include:
+        - { os: windows-latest }
+        - { os: ubuntu-latest }
+        - { os: macos-latest, xcode-version: 16 }
+        - { os: macos-latest, xcode-version: 26 }
 
     runs-on: ${{ matrix.os }}
 
@@ -28,6 +32,12 @@ jobs:
     - name: 'Install MSVC'
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
+
+    - name: 'Setup xcode'
+      if: matrix.xcode-version != null
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Get sources'
       uses: actions/checkout@v4
