@@ -15,8 +15,8 @@ jobs:
         include:
         - { os: windows-latest }
         - { os: ubuntu-latest }
-        - { os: macos-latest, xcode-version: 16 }
-        - { os: macos-latest, xcode-version: 26 }
+        - { os: macos-latest, xcode-version: 16.2 } # clang version 16
+        - { os: macos-latest, xcode-version: 16.4 } # clang version 17
 
     runs-on: ${{ matrix.os }}
 
