@@ -83,6 +83,9 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiSubscriptionNotActiveError): errorMessage = QObject::tr("No active subscription found"); break;
     case (ErrorCode::ApiNoPurchasedSubscriptionsError): errorMessage = QObject::tr("No purchased subscriptions found. Please purchase a subscription first"); break;
     case (ErrorCode::ApiTrialAlreadyUsedError): errorMessage = QObject::tr("This email address has already been used to activate a trial"); break;
+    case (ErrorCode::ApiCaptchaRequiredError): errorMessage = QObject::tr("CAPTCHA verification is required"); break;
+    case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
+    case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

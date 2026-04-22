@@ -174,6 +174,9 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         if (status < 0) {
             status = httpStatusCode;
         }
+        if (status == 0 && httpStatusCode >= 400) {
+            status = httpStatusCode;
+        }
 
         if (status == httpStatusCodeTooManyRequests) {
             return amnezia::ErrorCode::ApiRateLimitError;

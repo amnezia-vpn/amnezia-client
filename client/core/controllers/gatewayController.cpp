@@ -243,8 +243,9 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
         bypassProxy(endpoint, serviceType, userCountryCode, requestFunction, replyProcessingFunction);
     }
 
-    auto errorCode =
-            apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, decryptionResult.decryptedBody);
+    responseBody = decryptionResult.decryptedBody;
+    const auto errorCode =
+            apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, responseBody);
     if (errorCode) {
         return errorCode;
     }
@@ -254,7 +255,6 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
         return ErrorCode::ApiConfigDecryptionError;
     }
 
-    responseBody = decryptionResult.decryptedBody;
     return ErrorCode::NoError;
 }
 
