@@ -22,6 +22,7 @@ PageType {
 
     readonly property bool canManageProfiles: FBLinkController.canManageRoutingProfiles
     readonly property bool canUseAdBlock: FBLinkController.canUseAdBlock
+    readonly property bool isRoutingLocked: ConnectionController.isConnected || ConnectionController.isConnectionInProgress
     readonly property bool wideLayout: GC.isWideWidth(width)
     readonly property real sideMargin: GC.pageHorizontalMargin(width)
     readonly property real maxContentWidth: GC.pageMaxWidth(width)
@@ -31,6 +32,9 @@ PageType {
 
     function actionLabel(action) { return action === "proxy" ? qsTr("ЧЕРЕЗ VPN") : qsTr("БЕЗ VPN") }
     function actionTone(action) { return action === "proxy" ? "proxy" : "direct" }
+    function showRoutingLockedNotification() {
+        PageController.showNotificationMessage(qsTr("Нельзя менять профили маршрутизации во время активного подключения"))
+    }
     function adBlockStatusText() { return FBLinkController.vipAdBlockStatusLabel }
     function adBlockReasonText() {
         const reason = String(FBLinkController.vipAdBlockDegradeReason || "")
@@ -49,6 +53,10 @@ PageType {
     }
 
     function openCreateProfileEditor() {
+        if (root.isRoutingLocked) {
+            root.showRoutingLockedNotification()
+            return
+        }
         if (!canManageProfiles) {
             PageController.goToPage(PageEnum.PageFBLinkSubscription)
             return
@@ -67,6 +75,10 @@ PageType {
     }
 
     function openEditProfileEditor(profile) {
+        if (root.isRoutingLocked) {
+            root.showRoutingLockedNotification()
+            return
+        }
         if (!canManageProfiles) {
             PageController.goToPage(PageEnum.PageFBLinkSubscription)
             return
@@ -103,6 +115,10 @@ PageType {
     }
 
     function toggleProfile(profile) {
+        if (root.isRoutingLocked) {
+            root.showRoutingLockedNotification()
+            return
+        }
         const payload = {
             id: Number(profile.id || 0),
             enabled: !profile.enabled
@@ -120,6 +136,10 @@ PageType {
     }
 
     function deleteProfile(profile) {
+        if (root.isRoutingLocked) {
+            root.showRoutingLockedNotification()
+            return
+        }
         FBLinkController.deleteRoutingProfile(Number(profile.id))
     }
 
@@ -360,6 +380,8 @@ PageType {
                             visible: root.canManageProfiles
                             Layout.preferredHeight: 36
                             Layout.preferredWidth: 36
+                            enabled: !root.isRoutingLocked
+                            opacity: enabled ? 1.0 : 0.45
 
                             Image {
                                 anchors.centerIn: parent
@@ -371,6 +393,7 @@ PageType {
 
                             MouseArea {
                                 anchors.fill: parent
+                                enabled: !root.isRoutingLocked
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: root.openCreateProfileEditor()
@@ -399,6 +422,13 @@ PageType {
                         text: qsTr("Пока нет пользовательских профилей")
                         font.pixelSize: 13
                         color: FBLinkStyle.color.mutedGray
+                    }
+
+                    WarningType {
+                        Layout.fillWidth: true
+                        visible: root.canManageProfiles && root.isRoutingLocked
+                        textString: qsTr("Редактирование профилей временно заблокировано до отключения VPN.")
+                        iconPath: "qrc:/images/controls/alert-circle.svg"
                     }
 
                     BasicButtonType {
@@ -439,7 +469,7 @@ PageType {
                                 SwitcherType {
                                     text: ""
                                     visible: root.canManageProfiles
-                                    enabled: root.canManageProfiles && !FBLinkController.isLoading
+                                    enabled: root.canManageProfiles && !FBLinkController.isLoading && !root.isRoutingLocked
                                     checked: !!profileData.enabled
                                     onToggled: {
                                         if (checked !== !!profileData.enabled) {
@@ -461,6 +491,8 @@ PageType {
                                             : (editMouse.containsMouse ? Qt.rgba(255/255, 255/255, 255/255, 0.10) : Qt.rgba(255/255, 255/255, 255/255, 0.06))
                                         border.width: 1
                                         border.color: Qt.rgba(255/255, 255/255, 255/255, 0.12)
+                                        enabled: !root.isRoutingLocked
+                                        opacity: enabled ? 1.0 : 0.45
 
                                         Image {
                                             anchors.centerIn: parent
@@ -473,6 +505,7 @@ PageType {
                                         MouseArea {
                                             id: editMouse
                                             anchors.fill: parent
+                                            enabled: !root.isRoutingLocked
                                             hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: root.openEditProfileEditor(profileData)
@@ -488,6 +521,8 @@ PageType {
                                             : (deleteMouse.containsMouse ? Qt.rgba(239/255, 68/255, 68/255, 0.22) : Qt.rgba(239/255, 68/255, 68/255, 0.14))
                                         border.width: 1
                                         border.color: Qt.rgba(239/255, 68/255, 68/255, 0.45)
+                                        enabled: !root.isRoutingLocked
+                                        opacity: enabled ? 1.0 : 0.45
 
                                         Image {
                                             anchors.centerIn: parent
@@ -500,6 +535,7 @@ PageType {
                                         MouseArea {
                                             id: deleteMouse
                                             anchors.fill: parent
+                                            enabled: !root.isRoutingLocked
                                             hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: root.deleteProfile(profileData)

@@ -22,6 +22,7 @@ PageType {
     property string editingAction: "direct"
 
     readonly property bool canManageProfiles: FBLinkController.canManageRoutingProfiles
+    readonly property bool isRoutingLocked: ConnectionController.isConnected || ConnectionController.isConnectionInProgress
     readonly property bool wideLayout: GC.isWideWidth(width)
     readonly property real sideMargin: GC.pageHorizontalMargin(width)
     readonly property real maxContentWidth: GC.pageMaxWidth(width)
@@ -57,6 +58,13 @@ PageType {
     }
 
     function submitProfile() {
+        if (root.isRoutingLocked) {
+            const message = qsTr("Нельзя менять профили маршрутизации во время активного подключения")
+            statusMessage = message
+            statusIsError = true
+            PageController.showNotificationMessage(message)
+            return
+        }
         if (!canManageProfiles) {
             PageController.goToPage(PageEnum.PageFBLinkSubscription)
             return
@@ -105,6 +113,10 @@ PageType {
 
     Component.onCompleted: {
         applyDraft()
+        if (root.isRoutingLocked) {
+            root.statusMessage = qsTr("Редактирование профиля временно заблокировано до отключения VPN.")
+            root.statusIsError = true
+        }
     }
 
     Flickable {
@@ -159,8 +171,8 @@ PageType {
                         Item {
                             Layout.preferredHeight: 28
                             Layout.preferredWidth: 28
-                            enabled: root.canManageProfiles
-                            opacity: root.canManageProfiles ? 1.0 : 0.5
+                            enabled: root.canManageProfiles && !root.isRoutingLocked
+                            opacity: enabled ? 1.0 : 0.5
 
                             Image {
                                 anchors.centerIn: parent
@@ -172,7 +184,7 @@ PageType {
 
                             MouseArea {
                                 anchors.fill: parent
-                                enabled: root.canManageProfiles
+                                enabled: root.canManageProfiles && !root.isRoutingLocked
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: root.submitProfile()
                             }
@@ -240,7 +252,7 @@ PageType {
                         id: nameField
                         Layout.fillWidth: true
                         headerText: qsTr("Название")
-                        enabled: root.canManageProfiles
+                        enabled: root.canManageProfiles && !root.isRoutingLocked
                         textField.placeholderText: qsTr("Например, AI через VPN")
                     }
 
@@ -251,8 +263,8 @@ PageType {
                         color: Qt.rgba(1, 1, 1, 0.10)
                         border.width: 1
                         border.color: Qt.rgba(255, 255, 255, 0.12)
-                        enabled: root.canManageProfiles
-                        opacity: root.canManageProfiles ? 1.0 : 0.55
+                        enabled: root.canManageProfiles && !root.isRoutingLocked
+                        opacity: enabled ? 1.0 : 0.55
 
                         Rectangle {
                             id: actionThumb
@@ -292,7 +304,7 @@ PageType {
 
                                 MouseArea {
                                     anchors.fill: parent
-                                    enabled: root.canManageProfiles
+                                    enabled: root.canManageProfiles && !root.isRoutingLocked
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: root.editingAction = "direct"
                                 }
@@ -312,7 +324,7 @@ PageType {
 
                                 MouseArea {
                                     anchors.fill: parent
-                                    enabled: root.canManageProfiles
+                                    enabled: root.canManageProfiles && !root.isRoutingLocked
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: root.editingAction = "proxy"
                                 }
@@ -324,7 +336,7 @@ PageType {
                         id: domainsArea
                         Layout.fillWidth: true
                         Layout.preferredHeight: 84
-                        enabled: root.canManageProfiles
+                        enabled: root.canManageProfiles && !root.isRoutingLocked
                         placeholderText: qsTr("Домены, по одному на строку")
                     }
 
@@ -332,7 +344,7 @@ PageType {
                         id: suffixesArea
                         Layout.fillWidth: true
                         Layout.preferredHeight: 84
-                        enabled: root.canManageProfiles
+                        enabled: root.canManageProfiles && !root.isRoutingLocked
                         placeholderText: qsTr("Суффиксы доменов, по одному на строку")
                     }
 
@@ -340,7 +352,7 @@ PageType {
                         id: cidrsArea
                         Layout.fillWidth: true
                         Layout.preferredHeight: 84
-                        enabled: root.canManageProfiles
+                        enabled: root.canManageProfiles && !root.isRoutingLocked
                         placeholderText: qsTr("CIDR-подсети, по одной на строку")
                     }
 

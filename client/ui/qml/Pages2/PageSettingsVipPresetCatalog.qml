@@ -17,6 +17,7 @@ PageType {
 
     property var profiles: []
     readonly property bool canManageProfiles: FBLinkController.canManageRoutingProfiles
+    readonly property bool isRoutingLocked: ConnectionController.isConnected || ConnectionController.isConnectionInProgress
     readonly property bool wideLayout: GC.isWideWidth(width)
     readonly property real sideMargin: GC.pageHorizontalMargin(width)
     readonly property real maxContentWidth: GC.pageMaxWidth(width)
@@ -35,6 +36,10 @@ PageType {
     }
 
     function addPreset(profile) {
+        if (root.isRoutingLocked) {
+            PageController.showNotificationMessage(qsTr("Нельзя менять профили маршрутизации во время активного подключения"))
+            return
+        }
         if (!root.canManageProfiles) {
             PageController.goToPage(PageEnum.PageFBLinkSubscription)
             return
@@ -174,6 +179,7 @@ PageType {
 
                                 MouseArea {
                                     anchors.fill: parent
+                                    enabled: root.isAdded(profileData) || !root.isRoutingLocked
                                     cursorShape: Qt.PointingHandCursor
                                     hoverEnabled: true
                                     onClicked: {

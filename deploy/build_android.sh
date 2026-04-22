@@ -30,6 +30,7 @@ EOT
 
 BUILD_TYPE="release"
 DEFAULT_ANDROID_ABIS="armeabi-v7a;arm64-v8a"
+ALL_ANDROID_ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
 
 opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,help -o "dua:b:mfh" -- "$@")
 eval set -- "$opts"
@@ -89,12 +90,12 @@ if [[ -v AAB && -z "${ABIS:-}" ]]; then
 fi
 
 if [[ "${ABIS:-}" = "all" ]]; then
-  ABIS="$DEFAULT_ANDROID_ABIS"
+  ABIS="$ALL_ANDROID_ABIS"
 fi
 
 ANDROID_ABIS_FOR_PACKAGING="${ABIS:-}"
 CONFIGURE_ALL_ABIS=0
-if [[ -n "${ABIS:-}" && "${ABIS:-}" = "$DEFAULT_ANDROID_ABIS" ]]; then
+if [[ -n "${ABIS:-}" && "${ABIS:-}" == *";"* ]]; then
   CONFIGURE_ALL_ABIS=1
 fi
 
@@ -136,12 +137,9 @@ fi
 qt_cmake_opts=()
 
 if [[ $CONFIGURE_ALL_ABIS -eq 1 ]]; then
-  # Keep release packaging on physical-device ABIs only. x86/x86_64 emulator
-  # variants have been unstable in CI with Qt 6.10 and are not needed for
-  # published artifacts.
   qt_cmake_opts+=(
     -DQT_ANDROID_BUILD_ALL_ABIS=ON
-    -DQT_ANDROID_ABIS="$DEFAULT_ANDROID_ABIS"
+    -DQT_ANDROID_ABIS="$ABIS"
   )
 else
   qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABIS")

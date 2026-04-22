@@ -84,7 +84,8 @@ android {
 
     splits {
         abi {
-            isEnable = true
+            // Build a single APK instead of per-ABI split APKs.
+            isEnable = false
             reset()
             include(*qtTargetAbiList.split(',').toTypedArray())
             isUniversalApk = false
