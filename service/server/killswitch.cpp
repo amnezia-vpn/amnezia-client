@@ -3,6 +3,7 @@
 
 #include <QApplication>
 #include <QHostAddress>
+#include <QDebug>
 
 #include "../client/protocols/protocols_defs.h"
 #include "qjsonarray.h"
@@ -129,7 +130,12 @@ bool KillSwitch::disableKillSwitch() {
     if (isStrictKillSwitchEnabled()) {
         return disableAllTraffic();
     }
-    return WindowsFirewall::create(this)->allowAllTraffic();
+    auto *firewall = WindowsFirewall::create(this);
+    if (firewall == nullptr) {
+        qWarning() << "KillSwitch::disableKillSwitch: failed to create WindowsFirewall instance";
+        return false;
+    }
+    return firewall->allowAllTraffic();
 #endif
 
     m_allowedRanges.clear();
@@ -138,7 +144,12 @@ bool KillSwitch::disableKillSwitch() {
 
 bool KillSwitch::disableAllTraffic() {
 #ifdef Q_OS_WIN
-    WindowsFirewall::create(this)->enableInterface(-1);
+    auto *firewall = WindowsFirewall::create(this);
+    if (firewall == nullptr) {
+        qWarning() << "KillSwitch::disableAllTraffic: failed to create WindowsFirewall instance";
+        return false;
+    }
+    return firewall->enableInterface(-1);
 #endif
 #ifdef Q_OS_LINUX
     if (!LinuxFirewall::isInstalled()) {
@@ -178,9 +189,22 @@ bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
 
 #ifdef Q_OS_WIN
     if (isStrictKillSwitchEnabled()) {
-        WindowsFirewall::create(this)->enableInterface(-1);
+        auto *firewall = WindowsFirewall::create(this);
+        if (firewall == nullptr) {
+            qWarning() << "KillSwitch::resetAllowedRange: failed to create WindowsFirewall instance";
+            return false;
+        }
+        if (!firewall->enableInterface(-1)) {
+            qWarning() << "KillSwitch::resetAllowedRange: failed to enforce strict kill switch";
+            return false;
+        }
     }
-    WindowsFirewall::create(this)->allowTrafficRange(m_allowedRanges);
+    auto *firewall = WindowsFirewall::create(this);
+    if (firewall == nullptr) {
+        qWarning() << "KillSwitch::resetAllowedRange: failed to create WindowsFirewall instance";
+        return false;
+    }
+    return firewall->allowTrafficRange(m_allowedRanges);
 #endif
 
     return true;
@@ -258,7 +282,15 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 
     // killSwitch toggle
     if (QVariant(configStr.value(fblink::config_key::killSwitchOption).toString()).toBool()) {
-        WindowsFirewall::create(this)->enablePeerTraffic(config);
+        auto *firewall = WindowsFirewall::create(this);
+        if (firewall == nullptr) {
+            qWarning() << "KillSwitch::enablePeerTraffic: failed to create WindowsFirewall instance";
+            return false;
+        }
+        if (!firewall->enablePeerTraffic(config)) {
+            qWarning() << "KillSwitch::enablePeerTraffic: failed to enable peer traffic";
+            return false;
+        }
     }
 
     WindowsDaemon::instance()->prepareActivation(config, inetAdapterIndex);
@@ -269,10 +301,18 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 
 bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex) {
 #ifdef Q_OS_WIN
-    if (configStr.value("splitTunnelType").toInt() != 0) {
-        WindowsFirewall::create(this)->allowAllTraffic();
+    auto *firewall = WindowsFirewall::create(this);
+    if (firewall == nullptr) {
+        qWarning() << "KillSwitch::enableKillSwitch: failed to create WindowsFirewall instance";
+        return false;
     }
-    return WindowsFirewall::create(this)->enableInterface(vpnAdapterIndex);
+    if (configStr.value("splitTunnelType").toInt() != 0) {
+        if (!firewall->allowAllTraffic()) {
+            qWarning() << "KillSwitch::enableKillSwitch: failed to clear previous split-tunnel rules";
+            return false;
+        }
+    }
+    return firewall->enableInterface(vpnAdapterIndex);
 #endif
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)

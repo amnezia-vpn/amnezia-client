@@ -17,22 +17,21 @@ object LibraryLoader {
             sourceDir?.let { apks += it }
             splitSourceDirs?.let { apks += it }
         }
+        val mappedName = System.mapLibraryName(libraryName)
         for (abi in Build.SUPPORTED_ABIS) {
             for (apk in apks) {
                 ZipFile(File(apk), ZipFile.OPEN_READ).use { zipFile ->
-                    val mappedName = System.mapLibraryName(libraryName)
                     val libraryZipPath = listOf("lib", abi, mappedName).joinToString(File.separator)
                     val zipEntry = zipFile.getEntry(libraryZipPath)
-                    zipEntry?.let {
+                    if (zipEntry != null) {
                         Log.d(TAG, "Extracting apk:/$libraryZipPath to ${destination.absolutePath}")
                         FileOutputStream(destination).use { outStream ->
                             zipFile.getInputStream(zipEntry).use { inStream ->
                                 inStream.copyTo(outStream, 32 * 1024)
-                                outStream.fd.sync()
                             }
                         }
+                        return true
                     }
-                    return true
                 }
             }
         }

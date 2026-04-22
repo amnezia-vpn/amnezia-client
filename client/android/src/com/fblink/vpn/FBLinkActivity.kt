@@ -78,6 +78,8 @@ class FBLinkActivity : QtActivity() {
 
     private lateinit var mainScope: CoroutineScope
     private val qtInitialized = CompletableDeferred<Unit>()
+    @Volatile
+    private var nativeLibrariesPreloadStarted = false
     private var vpnProto: VpnProto? = null
     private var isWaitingStatus = true
     private var isServiceConnected = false
@@ -183,11 +185,11 @@ class FBLinkActivity : QtActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Create FBLink activity")
-        loadLibs()
 
         // Configure window for edge-to-edge display
         configureWindowForEdgeToEdge()
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        preloadLibrariesAsync()
         vpnServiceMessenger = IpcMessenger(
             "VpnService",
             onDeadObjectException = {
@@ -245,6 +247,25 @@ class FBLinkActivity : QtActivity() {
             "ssh"
         ).forEach {
             loadSharedLibrary(this.applicationContext, it)
+        }
+    }
+
+    private fun preloadLibrariesAsync() {
+        if (nativeLibrariesPreloadStarted) return
+        synchronized(this) {
+            if (nativeLibrariesPreloadStarted) return
+            nativeLibrariesPreloadStarted = true
+        }
+
+        mainScope.launch(Dispatchers.IO) {
+            val startedAt = System.currentTimeMillis()
+            runCatching { loadLibs() }
+                .onSuccess {
+                    Log.i(TAG, "Native libraries preloaded in ${System.currentTimeMillis() - startedAt} ms")
+                }
+                .onFailure {
+                    Log.e(TAG, "Failed to preload native libraries: ${it.message}")
+                }
         }
     }
 

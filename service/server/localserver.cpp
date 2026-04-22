@@ -8,6 +8,8 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QString>
+#include <QTimer>
+#include <functional>
 
 #include "ipc.h"
 #include "killswitch.h"
@@ -19,6 +21,8 @@
 
 namespace {
 Logger logger("WgDaemonServer");
+constexpr int kKillSwitchInitRetryDelayMs = 1500;
+constexpr int kKillSwitchInitMaxRetries = 20;
 }
 
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
@@ -65,7 +69,27 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
     m_networkWatcher.initialize();
     connect(&m_networkWatcher, &NetworkWatcher::networkChanged, &m_ipcServer, &IpcServer::networkChanged);
     connect(&m_networkWatcher, &NetworkWatcher::wakeup, &m_ipcServer, &IpcServer::wakeup);
-    KillSwitch::instance()->init();
+    auto retriesLeft = QSharedPointer<int>::create(kKillSwitchInitMaxRetries);
+    auto initKillSwitch = QSharedPointer<std::function<void()>>::create();
+    *initKillSwitch = [this, retriesLeft, initKillSwitch]() {
+        if (KillSwitch::instance()->init()) {
+            logger.info() << "Kill switch state recovered on service startup";
+            return;
+        }
+
+        if (*retriesLeft <= 0) {
+            logger.warning() << "Kill switch recovery failed after retries. Network may stay blocked until next recovery attempt.";
+            return;
+        }
+
+        (*retriesLeft)--;
+        logger.warning() << "Kill switch init failed, retrying in" << kKillSwitchInitRetryDelayMs
+                         << "ms, retries left:" << *retriesLeft;
+        QTimer::singleShot(kKillSwitchInitRetryDelayMs, this, [initKillSwitch]() {
+            (*initKillSwitch)();
+        });
+    };
+    (*initKillSwitch)();
 
 #ifdef Q_OS_LINUX
     // Signal handling for a proper shutdown.
