@@ -153,9 +153,6 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         qDebug().noquote() << sslErrors;
         return amnezia::ErrorCode::ApiConfigSslError;
     }
-    if (replyError == QNetworkReply::NoError) {
-        return amnezia::ErrorCode::NoError;
-    }
     if (replyError == QNetworkReply::NetworkError::OperationCanceledError
         || replyError == QNetworkReply::NetworkError::TimeoutError) {
         qDebug() << replyError;
