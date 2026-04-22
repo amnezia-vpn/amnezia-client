@@ -29,6 +29,12 @@ private:
         return env.value("TEST_SELF_HOSTED_CONFIG");
     }
 
+    QString getKey(QString name)
+    {
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        return env.value("TEST_KEY_" + name);
+    }
+
     QJsonObject extractXrayConfig(const QString &data, ConfigTypes configType, const QString &description = "") const
     {
         QJsonParseError parserErr;
@@ -116,9 +122,9 @@ private slots:
     {
         int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();
 
-        QString clientName = "Serialization Test Client";
+        QString clientName = "Test Client (vless (de)serialization)";
 
-        auto exportResult = m_coreController->m_exportController->generateXrayConfig(serverIndex, clientName);
+        ExportController::ExportResult exportResult = m_coreController->m_exportController->generateXrayConfig(serverIndex, clientName);
 
         ImportController::ImportResult importResult;
 
@@ -129,39 +135,151 @@ private slots:
 
         if (config.startsWith("vless://")) {
             configType = ConfigTypes::Xray;
-            importResult.config = extractXrayConfig(Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg),
-                                                    QJsonDocument::JsonFormat::Compact), configType, prefix);
+            importResult.config = extractXrayConfig(
+                Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                configType, prefix);
             QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
         } else {
             QSKIP("Config not starts with vless://");
         }
 
-        QCOMPARE(importResult.config, exportResult.config);
+        QCOMPARE(importResult.config, config);
     }
 
     void testVmessNew()
     {
-        QSKIP("test not completed");
+        QString clientName = "Test Client (vmess_new deserialization)";
+
+        ImportController::ImportResult importResult;
+        
+        m_coreController->m_importController->extractConfigFromData(getKey("VMESS_NEW"));
+
+        QString config = m_coreController->m_importController->getConfig();
+        QString prefix;
+        QString errormsg;
+        ConfigTypes configType = ConfigTypes::Invalid;
+
+        if (config.startsWith("vmess://") && config.contains("@")) {
+            configType = ConfigTypes::Xray;
+            importResult.config = extractXrayConfig(
+                Utils::JsonToString(serialization::vmess_new::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                configType, prefix);
+            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+        } else {
+            QSKIP("Config not starts with vmess:// or not contain @");
+        }
+
+        QCOMPARE(importResult.config, config);
     }
 
     void testVmess()
     {
-        QSKIP("test not completed");
+        QString clientName = "Test Client (vmess deserialization)";
+
+        ImportController::ImportResult importResult;
+
+        m_coreController->m_importController->extractConfigFromData(getKey("VMESS"));
+
+        QString config = m_coreController->m_importController->getConfig();
+        QString prefix;
+        QString errormsg;
+        ConfigTypes configType = ConfigTypes::Invalid;
+
+        if (config.startsWith("vmess://")) {
+            configType = ConfigTypes::Xray;
+            importResult.config = extractXrayConfig(
+                Utils::JsonToString(serialization::vmess::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                configType, prefix);
+            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+        } else {
+            QSKIP("Config not starts with vmess://");
+        }
+
+        QCOMPARE(importResult.config, config);
     }
 
     void testTrojan()
     {
-        QSKIP("test not completed");
+        QString clientName = "Test Client (trojan deserialization)";
+
+        ImportController::ImportResult importResult;
+
+        m_coreController->m_importController->extractConfigFromData(getKey("TROJAN"));
+
+        QString config = m_coreController->m_importController->getConfig();
+        QString prefix;
+        QString errormsg;
+        ConfigTypes configType = ConfigTypes::Invalid;
+
+        if (config.startsWith("trojan://")) {
+            configType = ConfigTypes::Xray;
+            importResult.config = extractXrayConfig(
+                Utils::JsonToString(serialization::trojan::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                configType, prefix);
+            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+        } else {
+            QSKIP("Config not starts with trojan://");
+        }
+
+        QCOMPARE(importResult.config, config);
     }
 
     void testSS()
     {
-        QSKIP("test not completed");
+        QString clientName = "Test Client (ss deserialization)";
+
+        ImportController::ImportResult importResult;
+
+        m_coreController->m_importController->extractConfigFromData(getKey("SS"));
+
+        QString config = m_coreController->m_importController->getConfig();
+        QString prefix;
+        QString errormsg;
+        ConfigTypes configType = ConfigTypes::Invalid;
+
+        if (config.startsWith("ss://") && !config.contains("plugin=")) {
+            configType = ConfigTypes::ShadowSocks;
+            importResult.config = extractXrayConfig(
+                Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                configType, prefix);
+            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+        } else {
+            QSKIP("Config not starts with ss:// or contain plugin=");
+        }
+
+        QCOMPARE(importResult.config, config);
     }
 
     void testSSd()
     {
-        QSKIP("test not completed");
+        QString clientName = "Test Client (ssd deserialization)";
+
+        ImportController::ImportResult importResult;
+
+        m_coreController->m_importController->extractConfigFromData(getKey("SSD"));
+
+        QString config = m_coreController->m_importController->getConfig();
+        QString prefix;
+        QString errormsg;
+        ConfigTypes configType = ConfigTypes::Invalid;
+
+        if (config.startsWith("ssd://")) {
+            QStringList tmp;
+            QList<std::pair<QString, QJsonObject>> servers = serialization::ssd::Deserialize(config, &prefix, &tmp);
+            configType = ConfigTypes::ShadowSocks;
+            // Took only first config from list
+            if (!servers.isEmpty()) {
+                importResult.config = extractXrayConfig(servers.first().first, configType);
+            }
+            if (!importResult.config.empty()) {
+                importResult.configType = configType;
+            }
+            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+        } else {
+            QSKIP("Config not starts with ssd://");
+        }
+
+        QCOMPARE(importResult.config, config);
     }
 };
 
