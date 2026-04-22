@@ -82,6 +82,60 @@ OUT_APP_DIR=$BUILD_DIR/client
 ANDROID_DEPLOY_SETTINGS=
 ANDROID_BUILD_OUT_DIR=$OUT_APP_DIR/android-build
 
+patch_legacy_awg_package_path() {
+  local target_dir=$1
+  local from_pkg="org.amnezia.vpn"
+  local to_pkg="com.fblink.vpn/"
+
+  if [[ ! -d "$target_dir" ]]; then
+    return 0
+  fi
+
+  local py_bin=""
+  if command -v python3 >/dev/null 2>&1; then
+    py_bin="python3"
+  elif command -v python >/dev/null 2>&1; then
+    py_bin="python"
+  else
+    echo "WARN: python not found; skip Android .so package-path patch"
+    return 0
+  fi
+
+  "$py_bin" - "$target_dir" "$from_pkg" "$to_pkg" <<'PY'
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+old = sys.argv[2].encode("utf-8")
+new = sys.argv[3].encode("utf-8")
+
+if len(old) != len(new):
+    print(f"ERROR: replacement length mismatch: {len(old)} != {len(new)}", file=sys.stderr)
+    sys.exit(1)
+
+scanned = 0
+patched_files = 0
+replaced_hits = 0
+
+for so_path in root.rglob("*.so"):
+    scanned += 1
+    data = so_path.read_bytes()
+    hit_count = data.count(old)
+    if hit_count:
+        so_path.write_bytes(data.replace(old, new))
+        patched_files += 1
+        replaced_hits += hit_count
+
+if replaced_hits:
+    print(
+        f"Patched legacy package path in Android libs: "
+        f"files={patched_files}, replacements={replaced_hits}, scanned={scanned}"
+    )
+else:
+    print(f"No legacy package path found in Android libs (scanned={scanned})")
+PY
+}
+
 echo "Project dir: $PROJECT_DIR"
 echo "Build dir: $BUILD_DIR"
 
@@ -252,6 +306,11 @@ $QT_HOST_PATH/bin/androiddeployqt \
   --input "$ANDROID_DEPLOY_SETTINGS" \
   --output "$ANDROID_BUILD_OUT_DIR" \
   "${deployqt_opts[@]}"
+
+# Some upstream AWG binaries still contain a hardcoded legacy package id
+# (org.amnezia.vpn), which breaks runtime startup in com.fblink.vpn builds.
+# Patch copied binaries in android-build before Gradle packaging.
+patch_legacy_awg_package_path "$ANDROID_BUILD_OUT_DIR"
 
 # run gradle
 gradle_opts=()

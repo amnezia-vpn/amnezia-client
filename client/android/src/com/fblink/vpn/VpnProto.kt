@@ -14,7 +14,7 @@ enum class VpnProto(
 ) {
     WIREGUARD(
         "WireGuard",
-        "com.fblink.vpn:amneziaAwgService",
+        "com.fblink.vpn:fblinkAwgService",
         AwgService::class.java
     ) {
         override fun createProtocol(): Protocol = Wireguard()
@@ -22,7 +22,7 @@ enum class VpnProto(
 
     AWG(
         "AmneziaWG",
-        "com.fblink.vpn:amneziaAwgService",
+        "com.fblink.vpn:fblinkAwgService",
         AwgService::class.java
     ) {
         override fun createProtocol(): Protocol = Awg()
@@ -30,7 +30,7 @@ enum class VpnProto(
 
     OPENVPN(
         "OpenVPN",
-        "com.fblink.vpn:amneziaOpenVpnService",
+        "com.fblink.vpn:fblinkOpenVpnService",
         OpenVpnService::class.java
     ) {
         override fun createProtocol(): Protocol = OpenVpn()
@@ -38,7 +38,7 @@ enum class VpnProto(
 
     CLOAK(
         "Cloak",
-        "com.fblink.vpn:amneziaOpenVpnService",
+        "com.fblink.vpn:fblinkOpenVpnService",
         OpenVpnService::class.java
     ) {
         override fun createProtocol(): Protocol = Cloak()
@@ -46,7 +46,7 @@ enum class VpnProto(
 
     XRAY(
         "XRay",
-        "com.fblink.vpn:amneziaXrayService",
+        "com.fblink.vpn:fblinkXrayService",
         XrayService::class.java
     ) {
         override fun createProtocol(): Protocol = Xray.instance
@@ -54,7 +54,7 @@ enum class VpnProto(
 
     SSXRAY(
         "SSXRay",
-        "com.fblink.vpn:amneziaXrayService",
+        "com.fblink.vpn:fblinkXrayService",
         XrayService::class.java
     ) {
         override fun createProtocol(): Protocol = Xray.instance
