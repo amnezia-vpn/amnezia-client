@@ -659,7 +659,12 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         return "FBLink VPN - " + hostName;
                     };
 
-                    const bool hasPinnedSelectedHost = !selectedFBLinkHostName.isEmpty();
+                    // Use pinned-host fast-path only when we already have a local FBLink server list.
+                    // After reinstall, Android Auto Backup may restore selected host in settings,
+                    // while local servers are empty. In that bootstrap case we must import full list.
+                    const bool hasLocalFBLinkSnapshot = !existingFBLinkServerIndices.isEmpty();
+                    const bool hasPinnedSelectedHost =
+                            hasLocalFBLinkSnapshot && !selectedFBLinkHostName.isEmpty();
                     bool selectedConfigSeenInResponse = false;
 
                     for (const QString &configData : configStrings) {
@@ -1848,12 +1853,19 @@ void FBLinkController::setUserEmail(const QString &email)
 {
     const QString normalized = email.trimmed();
     QSettings qSettings = appSettings();
-    const QString current = qSettings.value(kUserEmailKey, "").toString();
-    if (current == normalized) {
+    const QString current = qSettings.value(kUserEmailKey, "").toString().trimmed();
+    if (current.compare(normalized, Qt::CaseInsensitive) == 0) {
         return;
     }
 
+    // Email changed => switch account context.
+    // Drop pinned server selection so fetchConfig() does not sync only one host.
+    qSettings.remove(kLastSelectedFBLinkHostNameKey);
+    qSettings.remove(kLastSelectedServerIdKey);
     qSettings.setValue(kUserEmailKey, normalized);
     qSettings.sync();
+
+    // Prevent mixing stale servers from another account until fresh config arrives.
+    clearExistingFBLinkServers();
     emit userEmailChanged();
 }
