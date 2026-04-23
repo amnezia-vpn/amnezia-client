@@ -5,9 +5,11 @@
 #include <random>
 
 #include <QCryptographicHash>
+#include <QCoreApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPromise>
 #include <QUrl>
@@ -15,7 +17,6 @@
 #include "QBlockCipher.h"
 #include "QRsa.h"
 
-#include "amnezia_application.h"
 #include "core/api/apiUtils.h"
 #include "core/networkUtilities.h"
 #include "utilities.h"
@@ -23,6 +24,8 @@
 #ifdef AMNEZIA_DESKTOP
     #include "core/ipcclient.h"
 #endif
+
+using amnezia::ErrorCode;
 
 namespace
 {
@@ -49,6 +52,18 @@ namespace
     constexpr int httpStatusCodeUnprocessableEntity = 422;
 
     constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
+
+    QNetworkAccessManager *networkManager()
+    {
+        if (auto *app = QCoreApplication::instance()) {
+            if (auto *manager = app->findChild<QNetworkAccessManager *>()) {
+                return manager;
+            }
+        }
+
+        static QNetworkAccessManager fallbackManager;
+        return &fallbackManager;
+    }
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
@@ -165,7 +180,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
         return encRequestData.errorCode;
     }
 
-    QNetworkReply *reply = amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
+    QNetworkReply *reply = networkManager()->post(encRequestData.request, encRequestData.requestBody);
 
     QEventLoop wait;
     connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
@@ -187,7 +202,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     if (sslErrors.isEmpty() && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
         auto requestFunction = [&encRequestData, &encryptedResponseBody](const QString &url) {
             encRequestData.request.setUrl(url);
-            return amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
+            return networkManager()->post(encRequestData.request, encRequestData.requestBody);
         };
 
         auto replyProcessingFunction = [&encryptedResponseBody, &replyErrorString, &replyError, &httpStatusCode, &sslErrors, &encRequestData,
@@ -240,7 +255,7 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
         return promise->future();
     }
 
-    QNetworkReply *reply = amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
+    QNetworkReply *reply = networkManager()->post(encRequestData.request, encRequestData.requestBody);
 
     auto sslErrors = QSharedPointer<QList<QSslError>>::create();
 
@@ -365,7 +380,7 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
 
     for (const auto &proxyStorageUrl : proxyStorageUrls) {
         request.setUrl(proxyStorageUrl);
-        reply = amnApp->networkManager()->get(request);
+        reply = networkManager()->get(request);
 
         connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
         connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
@@ -520,7 +535,7 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
 
         for (const QString &proxyUrl : proxyUrls) {
             request.setUrl(proxyUrl + "lmbd-health");
-            reply = amnApp->networkManager()->get(request);
+            reply = networkManager()->get(request);
 
             connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
             connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
@@ -566,7 +581,7 @@ void GatewayController::getProxyUrlsAsync(const QStringList proxyStorageUrls, co
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setUrl(proxyStorageUrls[currentProxyStorageIndex]);
 
-    QNetworkReply *reply = amnApp->networkManager()->get(request);
+    QNetworkReply *reply = networkManager()->get(request);
 
     // connect(reply, &QNetworkReply::sslErrors, this, [state](const QList<QSslError> &e) { *(state->sslErrors) = e; });
 
@@ -636,7 +651,7 @@ void GatewayController::getProxyUrlAsync(const QStringList proxyUrls, const int 
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setUrl(proxyUrls[currentProxyIndex] + "lmbd-health");
 
-    QNetworkReply *reply = amnApp->networkManager()->get(request);
+    QNetworkReply *reply = networkManager()->get(request);
 
     // connect(reply, &QNetworkReply::sslErrors, this, [state](const QList<QSslError> &e) {
     //     *(state->sslErrors) = e;
@@ -669,7 +684,7 @@ void GatewayController::bypassProxyAsync(
     QNetworkRequest request = encRequestData.request;
     request.setUrl(endpoint.arg(proxyUrl));
 
-    QNetworkReply *reply = amnApp->networkManager()->post(request, encRequestData.requestBody);
+    QNetworkReply *reply = networkManager()->post(request, encRequestData.requestBody);
 
     connect(reply, &QNetworkReply::sslErrors, this, [sslErrors](const QList<QSslError> &errors) { *sslErrors = errors; });
 

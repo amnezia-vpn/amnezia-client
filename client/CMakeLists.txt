@@ -238,3 +238,5 @@ if(COMMAND qt_finalize_executable)
 else()
     qt_finalize_target(${PROJECT})
 endif()
+
+add_subdirectory(cli)

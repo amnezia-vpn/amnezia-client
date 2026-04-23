@@ -6,10 +6,27 @@
     #include <QApplication>
 #endif
 
-#include "amnezia_application.h"
+#include <QCoreApplication>
+#include <QNetworkAccessManager>
+
 #include "utilities.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "version.h"
+
+namespace
+{
+    QNetworkAccessManager *networkManager()
+    {
+        if (auto *app = QCoreApplication::instance()) {
+            if (auto *manager = app->findChild<QNetworkAccessManager *>()) {
+                return manager;
+            }
+        }
+
+        static QNetworkAccessManager fallbackManager;
+        return &fallbackManager;
+    }
+}
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
@@ -82,7 +99,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     m_connectionStateText = tr("Connecting...");
     switch (state) {
     case Vpn::ConnectionState::Connected: {
-        amnApp->networkManager()->clearConnectionCache();
+        networkManager()->clearConnectionCache();
 
         m_isConnectionInProgress = false;
         m_isConnected = true;

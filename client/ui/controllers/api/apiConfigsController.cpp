@@ -1,6 +1,5 @@
 #include "apiConfigsController.h"
 
-#include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
@@ -12,6 +11,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QEventLoop>
+#include <QGuiApplication>
 #include <QHash>
 #include <QJsonArray>
 #include <QSet>
@@ -417,6 +417,13 @@ namespace
         data.insert(configKey::services, services);
     }
 #endif
+
+    QClipboard *applicationClipboard()
+    {
+        auto *application = QCoreApplication::instance();
+        auto *guiApplication = qobject_cast<QGuiApplication *>(application);
+        return guiApplication ? guiApplication->clipboard() : nullptr;
+    }
 }
 
 ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &serversModel,
@@ -546,8 +553,9 @@ void ApiConfigsController::prepareVpnKeyExport()
 
 void ApiConfigsController::copyVpnKeyToClipboard()
 {
-    auto clipboard = amnApp->getClipboard();
-    clipboard->setText(m_vpnKey);
+    if (auto *clipboard = applicationClipboard()) {
+        clipboard->setText(m_vpnKey);
+    }
 }
 
 bool ApiConfigsController::fillAvailableServices()
