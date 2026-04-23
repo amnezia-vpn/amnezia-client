@@ -611,18 +611,6 @@ jobs:
         py7zrversion: '==0.22.*'
         extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install android_x86_64 Qt'
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'android'
-        arch: 'android_x86_64'
-        modules: ${{ env.QT_MODULES }}
-        dir: ${{ runner.temp }}
-        py7zrversion: '==0.22.*'
-        extra: '--base ${{ env.QT_MIRROR }}'
-
     - name: 'Install android_armv7 Qt'
       uses: jurplel/install-qt-action@v4
       with:
@@ -722,7 +710,7 @@ jobs:
           } >> "$GITHUB_ENV"
         fi
 
-    - name: 'Build Android universal APK + AAB'
+    - name: 'Build Android APK (arm64-v8a + armeabi-v7a) + AAB'
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
@@ -730,7 +718,7 @@ jobs:
         ANDROID_KEYSTORE_KEY_ALIAS: ${{ env.ANDROID_KEYSTORE_KEY_ALIAS }}
         ANDROID_KEYSTORE_KEY_PASS: ${{ env.ANDROID_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh --aab --apk 'all' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+      run: ./deploy/build_android.sh --aab --apk 'armeabi-v7a;arm64-v8a' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
     - name: 'Rename Android APK'
       run: |

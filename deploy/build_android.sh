@@ -305,7 +305,14 @@ fi
 
 # Determine path to qt bin folder with qt-cmake
 if [[ $CONFIGURE_ALL_ABIS -eq 1 ]]; then
-  qt_bin_dir_suffix="x86_64"
+  # For multi-ABI builds use qt-cmake from the first requested ABI
+  # instead of hardcoding x86_64 (allows CI without x86_64 Qt target).
+  if [[ "$ABIS" = *";"* ]]; then
+    first_abi=$(echo "$ABIS" | cut -d';' -f 1)
+  else
+    first_abi="$ABIS"
+  fi
+  qt_bin_dir_suffix=$(qt_android_dir_suffix_for_abi "$first_abi")
 else
   if [[ $ABIS = *";"* ]]; then
     oneOf=$(echo $ABIS | cut -d';' -f 1)

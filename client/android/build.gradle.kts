@@ -29,10 +29,9 @@ android {
     }
 
     packaging {
-        // Keep native libs uncompressed/in-apk (modern packaging).
-        // QtLoader then uses the apk lib path (!/lib/<abi>/) instead of
-        // relying on extracted /data/app/.../lib/<abi> files.
-        jniLibs.useLegacyPackaging = false
+        // Compress JNI libs in APK to reduce downloadable artifact size.
+        // This is preferable for direct APK distribution (outside Play split delivery).
+        jniLibs.useLegacyPackaging = true
     }
 
     defaultConfig {
