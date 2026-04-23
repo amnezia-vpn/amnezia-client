@@ -9,57 +9,38 @@ env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
 
 jobs:
-  Bake-Prebuilts:
+  Bake-Prebuilts-Linux:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-        - { os: windows-latest }
-        - { os: ubuntu-latest }
-        - { os: macos-latest, xcode-version: 16.2 } # clang version 16
-        - { os: macos-latest, xcode-version: 16.4 } # clang version 17
-
-    runs-on: ${{ matrix.os }}
+        build_type: [Release, Debug]
 
     steps:
-    - name: 'Setup python'
-      uses: actions/setup-python@v6
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+    
+    - uses: actions/setup-python@v6
       with:
         python-version: 3.14
       
     - name: 'Install conan'
       run: pip install "conan==2.26.2"
 
-    - name: 'Install MSVC'
-      if: runner.os == 'Windows'
-      uses: ilammy/msvc-dev-cmd@v1
-
-    - name: 'Setup xcode'
-      if: matrix.xcode-version != null
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: ${{ matrix.xcode-version }}
-
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
     - name: 'Build dependencies'
-      run: |
-        cmake -S . -B build_release -DPREBUILTS_ONLY=1 -DCMAKE_BUILD_TYPE=Release
-        cmake -S . -B build_debug   -DPREBUILTS_ONLY=1 -DCMAKE_BUILD_TYPE=Debug
-
+      run: cmake -S . -B build -DPREBUILTS_ONLY=1 -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+    
     - name: 'Authorize in remote'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
       run: conan upload -r amnezia "*" -c
-    
+
 # ------------------------------------------------------
 
   Build-Linux-Ubuntu:
-    needs: Bake-Prebuilts
+    needs: Bake-Prebuilts-Linux
     runs-on: android-runner
 
     env:
@@ -130,8 +111,37 @@ jobs:
 
 # ------------------------------------------------------
 
+  Bake-Prebuilts-Windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+    
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -G "Visual Studio 17 2022" -DPREBUILTS_ONLY=1
+    
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
+
+# ------------------------------------------------------
+
   Build-Windows:
-    needs: Bake-Prebuilts
+    needs: Bake-Prebuilts-Windows
     runs-on: windows-latest
 
     env:
@@ -221,7 +231,42 @@ jobs:
 
 # ------------------------------------------------------
 
+  Bake-Prebuilts-iOS:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        xcode-version: [16.2, 16.4]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+    
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: ${{ matrix.xcode-version }}
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos
+    
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
+
+# ------------------------------------------------------
+
   Build-iOS:
+    needs: Bake-Prebuilts-iOS
     runs-on: macos-latest
 
     env:
@@ -316,8 +361,42 @@ jobs:
 
 # ------------------------------------------------------
 
+  Bake-Prebuilts-MacOS:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        xcode-version: [16.2, 16.4]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+    
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: ${{ matrix.xcode-version }}
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1
+    
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
+
+# ------------------------------------------------------
+
   Build-MacOS:
-    needs: Bake-Prebuilts
+    needs: Bake-Prebuilts-MacOS
     runs-on: macos-latest
 
     env:
@@ -399,7 +478,44 @@ jobs:
         archive: false
         retention-days: 7
 
+# ------------------------------------------------------
+
+  Bake-Prebuilts-MacOS-NE:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        xcode-version: [16.2, 16.4]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+    
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: ${{ matrix.xcode-version }}
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DMACOS_NE=TRUE
+    
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
+
+# ------------------------------------------------------
+
   Build-MacOS-NE:
+    needs: Bake-Prebuilts-MacOS-NE
     runs-on: macos-latest
 
     env:

@@ -139,7 +139,6 @@ target_sources(${PROJECT} PRIVATE
 )
 
 set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
-    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Images.xcassets
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
