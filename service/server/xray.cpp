@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QStandardPaths>
 #include <QNetworkInterface>
 #include <QCoreApplication>
 #include <amnezia_xray.h>
