@@ -205,6 +205,59 @@ stage_missing_qt_platform_plugins() {
   done
 }
 
+stage_missing_qt_runtime_plugins() {
+  local android_build_out_dir=$1
+  local abi_list=$2
+
+  if [[ -z "$abi_list" ]]; then
+    return 0
+  fi
+
+  IFS=';' read -r -a abi_array <<< "$abi_list"
+  for abi in "${abi_array[@]}"
+  do
+    [[ -z "$abi" ]] && continue
+
+    local qt_suffix
+    qt_suffix=$(qt_android_dir_suffix_for_abi "$abi")
+    local qt_android_root="$QT_HOST_PATH/../android_${qt_suffix}"
+    local dest_dir="$android_build_out_dir/libs/$abi"
+    mkdir -p "$dest_dir"
+
+    # Format: "<relative plugin path>|<required:1/0>"
+    local plugin_specs=(
+      "plugins/imageformats/libplugins_imageformats_qsvg_${abi}.so|1"
+      "plugins/iconengines/libplugins_iconengines_qsvgicon_${abi}.so|1"
+      "plugins/tls/libplugins_tls_qopensslbackend_${abi}.so|1"
+      "plugins/tls/libplugins_tls_qcertonlybackend_${abi}.so|0"
+    )
+
+    for spec in "${plugin_specs[@]}"
+    do
+      local rel="${spec%%|*}"
+      local required="${spec##*|}"
+      local src="$qt_android_root/$rel"
+      local base
+      base=$(basename "$rel")
+      local dst="$dest_dir/$base"
+
+      if [[ -f "$dst" ]]; then
+        continue
+      fi
+
+      if [[ -f "$src" ]]; then
+        cp "$src" "$dst"
+        echo "Staged Qt runtime plugin for $abi: $src -> $dst"
+      elif [[ "$required" = "1" ]]; then
+        echo "ERROR: Required Qt runtime plugin not found for ABI=$abi: $src"
+        return 1
+      else
+        echo "WARN: Optional Qt runtime plugin not found for ABI=$abi: $src"
+      fi
+    done
+  done
+}
+
 stage_missing_gamepad_qml_libs() {
   local android_build_out_dir=$1
   local abi_list=$2
@@ -319,12 +372,19 @@ if requested_abis:
         sys.exit(0)
 
 for abi in abis_to_check:
-    expected = f"lib/{abi}/libplugins_platforms_qtforandroid_{abi}.so"
-    if expected not in names:
-        missing.append(expected)
+    expected_templates = [
+        "lib/{abi}/libplugins_platforms_qtforandroid_{abi}.so",
+        "lib/{abi}/libplugins_imageformats_qsvg_{abi}.so",
+        "lib/{abi}/libplugins_iconengines_qsvgicon_{abi}.so",
+        "lib/{abi}/libplugins_tls_qopensslbackend_{abi}.so",
+    ]
+    for tpl in expected_templates:
+        expected = tpl.format(abi=abi)
+        if expected not in names:
+            missing.append(expected)
 
 if missing:
-    print(f"ERROR: APK is missing required Qt platform plugin(s): {', '.join(missing)}")
+    print(f"ERROR: APK is missing required Qt runtime plugin(s): {', '.join(missing)}")
     print(f"APK: {apk_path}")
     print(f"Detected ABIs in APK: {', '.join(sorted(detected_abis))}")
     if requested_abis:
@@ -519,6 +579,8 @@ $QT_HOST_PATH/bin/androiddeployqt \
 patch_legacy_awg_package_path "$ANDROID_BUILD_OUT_DIR"
 # Ensure Qt platform plugins are present for all selected ABIs before Gradle.
 stage_missing_qt_platform_plugins "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}"
+# Ensure required Qt runtime plugins (SVG/TLS/icon engine) are present.
+stage_missing_qt_runtime_plugins "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}"
 # Ensure vendored QtGamepad QML runtime lib is present when gamepad support is enabled.
 stage_missing_gamepad_qml_libs "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}" "$BUILD_DIR"
 
