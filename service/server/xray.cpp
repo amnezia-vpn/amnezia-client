@@ -2,6 +2,7 @@
 #include "core/utils/networkUtilities.h"
 
 #include <QDebug>
+#include <QFile>
 #include <QNetworkInterface>
 #include <QCoreApplication>
 #include <amnezia_xray.h>
@@ -47,6 +48,32 @@ bool Xray::startXray(const QString &cfg)
     amnezia_xray_setloghandler(ctxLogHandler, this);
 
     QByteArray bytes = cfg.toUtf8();
+
+    // Temporary aid for manual verification of SOCKS auth (inbounds.settings.accounts).
+    // Debug: always writes. Release: set env AMNEZIA_SAVE_XRAY_CONFIG=1 (if the daemon inherits it).
+    {
+#if defined(MZ_DEBUG)
+        const bool saveForTest = true;
+#else
+        const bool saveForTest = !qgetenv("AMNEZIA_SAVE_XRAY_CONFIG").isEmpty();
+#endif
+        if (saveForTest) {
+#ifdef Q_OS_WIN
+            const QString debugPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation)
+                    + QStringLiteral("/amnezia-xray-config.json");
+#else
+            const QString debugPath = QStringLiteral("/tmp/amnezia-xray-config.json");
+#endif
+            QFile f(debugPath);
+            if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                f.write(bytes);
+                f.close();
+                qDebug() << "[xray] wrote last config for testing:" << debugPath;
+            } else {
+                qWarning() << "[xray] failed to write test config to" << debugPath;
+            }
+        }
+    }
     if (auto err = amnezia_xray_configure(bytes.data()); err != nullptr) {
         qDebug() << "[xray] configuration failed: " << err;
         amnezia_xray_free(err);
