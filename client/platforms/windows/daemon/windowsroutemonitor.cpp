@@ -19,8 +19,12 @@ Logger logger("WindowsRouteMonitor");
 // way to other routing entries.
 constexpr const ULONG EXCLUSION_ROUTE_METRIC = 0x5e72;
 
+// Coalesce bursts of NotifyRouteChange2 callbacks into a single rescan so that
+// exclusion install / tunnel bring-up does not starve the daemon event loop.
+constexpr int ROUTE_CHANGE_DEBOUNCE_MSEC = 50;
+
 // Called by the kernel on route changes - perform some basic filtering and
-// invoke the routeChanged slot to do the real work.
+// schedule a coalesced rescan on the Qt thread.
 static void routeChangeCallback(PVOID context, PMIB_IPFORWARD_ROW2 row,
                                 MIB_NOTIFICATION_TYPE type) {
   WindowsRouteMonitor* monitor = (WindowsRouteMonitor*)context;
@@ -35,8 +39,8 @@ static void routeChangeCallback(PVOID context, PMIB_IPFORWARD_ROW2 row,
     return;
   }
 
-  // Invoke the route changed signal to do the real work in Qt.
-  QMetaObject::invokeMethod(monitor, "routeChanged", Qt::QueuedConnection);
+  QMetaObject::invokeMethod(monitor, "scheduleRouteChanged",
+                            Qt::QueuedConnection);
 }
 
 // Perform prefix matching comparison on IP addresses in host order.
@@ -62,6 +66,11 @@ WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
     : QObject(parent), m_luid(luid) {
   MZ_COUNT_CTOR(WindowsRouteMonitor);
   logger.debug() << "WindowsRouteMonitor created.";
+
+  m_routeChangedDebounce.setSingleShot(true);
+  m_routeChangedDebounce.setInterval(ROUTE_CHANGE_DEBOUNCE_MSEC);
+  connect(&m_routeChangedDebounce, &QTimer::timeout, this,
+          &WindowsRouteMonitor::routeChanged);
 
   NotifyRouteChange2(AF_INET, routeChangeCallback, this, FALSE, &m_routeHandle);
 }
@@ -303,6 +312,9 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
       data->Age++;
       continue;
     }
+    if (m_captureBlacklist.contains(prefix)) {
+      continue;
+    }
     logger.debug() << "Capturing route to" << prefix.toString();
 
     // Clone the route and direct it into the VPN tunnel.
@@ -328,6 +340,11 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
     if (result != NO_ERROR) {
       logger.error() << "Failed to update route:" << result;
       delete data;
+      // Pin prefixes owned by someone else (e.g. Wintun's subnet-broadcast
+      // /32 entries) so we don't retry them on every notification.
+      if (result == ERROR_OBJECT_ALREADY_EXISTS) {
+        m_captureBlacklist.insert(prefix);
+      }
     } else {
       m_clonedRoutes.insert(prefix, data);
       data->Age++;
@@ -573,7 +590,14 @@ void WindowsRouteMonitor::setDetaultRouteCapture(bool enable) {
   // Flush any captured routes when disabling the feature.
   if (!m_defaultRouteCapture) {
     flushRouteTable(m_clonedRoutes);
+    m_captureBlacklist.clear();
     return;
+  }
+}
+
+void WindowsRouteMonitor::scheduleRouteChanged() {
+  if (!m_routeChangedDebounce.isActive()) {
+    m_routeChangedDebounce.start();
   }
 }
 
