@@ -205,6 +205,59 @@ stage_missing_qt_platform_plugins() {
   done
 }
 
+stage_missing_gamepad_qml_libs() {
+  local android_build_out_dir=$1
+  local abi_list=$2
+  local build_dir=$3
+
+  if [[ -z "$abi_list" ]]; then
+    return 0
+  fi
+
+  IFS=';' read -r -a abi_array <<< "$abi_list"
+  for abi in "${abi_array[@]}"
+  do
+    [[ -z "$abi" ]] && continue
+
+    local dest_dir="$android_build_out_dir/libs/$abi"
+    local dest_file="$dest_dir/libGamepadLegacyQuickPrivate_${abi}.so"
+    local abi_underscores="${abi//-/_}"
+
+    if [[ -f "$dest_file" ]]; then
+      continue
+    fi
+
+    mkdir -p "$dest_dir"
+
+    local src_file=""
+    for candidate in \
+      "$build_dir/client/3rd/qtgamepad/src/imports/gamepad/libGamepadLegacyQuickPrivate_${abi}.so" \
+      "$build_dir/client/3rd/qtgamepad/src/imports/gamepad/libGamepadLegacyQuickPrivate_${abi_underscores}.so" \
+      "$build_dir/3rd/qtgamepad/src/imports/gamepad/libGamepadLegacyQuickPrivate_${abi}.so" \
+      "$build_dir/3rd/qtgamepad/src/imports/gamepad/libGamepadLegacyQuickPrivate_${abi_underscores}.so"
+    do
+      if [[ -f "$candidate" ]]; then
+        src_file="$candidate"
+        break
+      fi
+    done
+
+    if [[ -z "$src_file" ]]; then
+      src_file=$(find "$build_dir" -type f \( \
+          -name "libGamepadLegacyQuickPrivate_${abi}.so" -o \
+          -name "libGamepadLegacyQuickPrivate_${abi_underscores}.so" \
+        \) 2>/dev/null | head -1 || true)
+    fi
+
+    if [[ -n "$src_file" && -f "$src_file" ]]; then
+      cp "$src_file" "$dest_file"
+      echo "Staged missing gamepad QML lib for $abi: $src_file -> $dest_file"
+    else
+      echo "WARN: Gamepad QML lib not found for ABI=$abi (libGamepadLegacyQuickPrivate)."
+    fi
+  done
+}
+
 verify_apk_contains_qt_platform_plugin() {
   local apk_path=$1
   local abi_list=$2
@@ -466,6 +519,8 @@ $QT_HOST_PATH/bin/androiddeployqt \
 patch_legacy_awg_package_path "$ANDROID_BUILD_OUT_DIR"
 # Ensure Qt platform plugins are present for all selected ABIs before Gradle.
 stage_missing_qt_platform_plugins "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}"
+# Ensure vendored QtGamepad QML runtime lib is present when gamepad support is enabled.
+stage_missing_gamepad_qml_libs "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}" "$BUILD_DIR"
 
 # run gradle
 gradle_opts=()
