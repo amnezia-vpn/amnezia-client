@@ -233,6 +233,8 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     )
 endif()
 
+include(CTest)
+
 if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_subdirectory(tests)
 endif()
