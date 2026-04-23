@@ -482,6 +482,7 @@ PageType {
 
                 headerText: qsTr("I5 - Special junk 5")
                 textField.text: serverSpecialJunk5
+                checkEmptyText: false
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverSpecialJunk5) {
