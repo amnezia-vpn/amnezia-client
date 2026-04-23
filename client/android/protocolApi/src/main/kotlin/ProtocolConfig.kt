@@ -40,7 +40,8 @@ open class ProtocolConfig protected constructor(
 
     open class Builder(blockingMode: Boolean) {
         internal val addresses: MutableSet<InetNetwork> = hashSetOf()
-        internal val dnsServers: MutableSet<InetAddress> = hashSetOf()
+        // Preserve insertion order: Android treats the first DNS as primary.
+        internal val dnsServers: MutableSet<InetAddress> = linkedSetOf()
         internal val routes: MutableSet<Route> = mutableSetOf()
         internal val includedAddresses: MutableSet<InetNetwork> = hashSetOf()
         internal val excludedAddresses: MutableSet<InetNetwork> = hashSetOf()

@@ -687,7 +687,13 @@ QPair<QString, QString> ServersModel::getDnsPair(int serverIndex)
 {
     QPair<QString, QString> dns;
 
-    const QJsonObject &server = m_servers.at(m_processedServerIndex).toObject();
+    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+        dns.first = m_settings->primaryDns();
+        dns.second = m_settings->secondaryDns();
+        return dns;
+    }
+
+    const QJsonObject &server = m_servers.at(serverIndex).toObject();
     const auto containers = server.value(config_key::containers).toArray();
     bool isDnsContainerInstalled = false;
     for (const QJsonValue &container : containers) {
@@ -696,8 +702,15 @@ QPair<QString, QString> ServersModel::getDnsPair(int serverIndex)
         }
     }
 
-    dns.first = server.value(config_key::dns1).toString();
-    dns.second = server.value(config_key::dns2).toString();
+    // For configs with configVersion == 0, prefer DNS from app settings.
+    const bool isApiConfig = server.value(config_key::configVersion).toInt() != 0;
+    if (isApiConfig) {
+        dns.first = server.value(config_key::dns1).toString();
+        dns.second = server.value(config_key::dns2).toString();
+    } else {
+        dns.first = m_settings->primaryDns();
+        dns.second = m_settings->secondaryDns();
+    }
 
     if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
         if (m_isAmneziaDnsEnabled && isDnsContainerInstalled) {
@@ -709,7 +722,8 @@ QPair<QString, QString> ServersModel::getDnsPair(int serverIndex)
         dns.second = m_settings->secondaryDns();
     }
 
-    qDebug() << "VpnConfigurator::getDnsForConfig" << dns.first << dns.second;
+    qDebug() << "VpnConfigurator::getDnsForConfig" << dns.first << dns.second
+             << "isApiConfig:" << isApiConfig << "serverIndex:" << serverIndex;
     return dns;
 }
 
