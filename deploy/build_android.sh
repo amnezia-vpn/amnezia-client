@@ -136,6 +136,50 @@ else:
 PY
 }
 
+verify_apk_contains_qt_platform_plugin() {
+  local apk_path=$1
+  local abi_list=$2
+
+  if [[ ! -f "$apk_path" ]]; then
+    echo "ERROR: APK not found for verification: $apk_path"
+    return 1
+  fi
+
+  local py_bin=""
+  if command -v python3 >/dev/null 2>&1; then
+    py_bin="python3"
+  elif command -v python >/dev/null 2>&1; then
+    py_bin="python"
+  else
+    echo "WARN: python not found; skip APK plugin verification for $apk_path"
+    return 0
+  fi
+
+  "$py_bin" - "$apk_path" "$abi_list" <<'PY'
+import sys
+import zipfile
+
+apk_path = sys.argv[1]
+abis = [x for x in sys.argv[2].split(";") if x]
+
+with zipfile.ZipFile(apk_path, "r") as zf:
+    names = set(zf.namelist())
+
+missing = []
+for abi in abis:
+    expected = f"lib/{abi}/libplugins_platforms_qtforandroid_{abi}.so"
+    if expected not in names:
+        missing.append(expected)
+
+if missing:
+    print(f"ERROR: APK is missing required Qt platform plugin(s): {', '.join(missing)}")
+    print(f"APK: {apk_path}")
+    sys.exit(1)
+
+print(f"Verified Qt platform plugin in APK: {apk_path}")
+PY
+}
+
 echo "Project dir: $PROJECT_DIR"
 echo "Build dir: $BUILD_DIR"
 
@@ -331,6 +375,25 @@ fi
   -DexplicitRun=1 \
   "${gradle_opts[@]}"
 
+if [ -v ABIS ]; then
+  APK_VERIFY_DIR="$ANDROID_BUILD_OUT_DIR/build/outputs/apk/$BUILD_TYPE"
+  if [[ ! -d "$APK_VERIFY_DIR" ]]; then
+    echo "ERROR: APK output directory not found: $APK_VERIFY_DIR"
+    exit 1
+  fi
+
+  mapfile -t BUILT_APKS < <(find "$APK_VERIFY_DIR" -maxdepth 1 -type f -name "*.apk" 2>/dev/null)
+  if [[ ${#BUILT_APKS[@]} -eq 0 ]]; then
+    echo "ERROR: No APK files found in $APK_VERIFY_DIR"
+    exit 1
+  fi
+
+  for APK_FILE in "${BUILT_APKS[@]}"
+  do
+    verify_apk_contains_qt_platform_plugin "$APK_FILE" "$ABIS"
+  done
+fi
+
 if [[ -v CI || -v MOVE_RESULT ]]; then
   echo "Moving APK/AAB..."
   if [ -v AAB ]; then
@@ -400,5 +463,12 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
         fi
       done
     fi
+  fi
+fi
+
+if [[ -v MOVE_RESULT || -v CI ]]; then
+  if [[ -d "$BUILD_DIR" ]]; then
+    echo "Cleaning temporary Android build workspace: $BUILD_DIR"
+    rm -rf "$BUILD_DIR"
   fi
 fi
