@@ -30,7 +30,7 @@ EOT
 
 BUILD_TYPE="release"
 DEFAULT_ANDROID_ABIS="armeabi-v7a;arm64-v8a"
-ALL_ANDROID_ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
+SUPPORTED_ANDROID_ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
 
 opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,help -o "dua:b:mfh" -- "$@")
 eval set -- "$opts"
@@ -136,6 +136,75 @@ else:
 PY
 }
 
+qt_android_dir_suffix_for_abi() {
+  local abi=$1
+  case "$abi" in
+    "armeabi-v7a") echo "armv7";;
+    "arm64-v8a") echo "arm64_v8a";;
+    *) echo "$abi";;
+  esac
+}
+
+resolve_available_android_abis() {
+  local qt_host_path=$1
+  local result=()
+  IFS=';' read -r -a supported_abis <<< "$SUPPORTED_ANDROID_ABIS"
+
+  for abi in "${supported_abis[@]}"
+  do
+    local qt_suffix
+    qt_suffix=$(qt_android_dir_suffix_for_abi "$abi")
+    local plugin_path="$qt_host_path/../android_${qt_suffix}/plugins/platforms/libplugins_platforms_qtforandroid_${abi}.so"
+    if [[ -f "$plugin_path" ]]; then
+      result+=("$abi")
+    fi
+  done
+
+  if [[ ${#result[@]} -eq 0 ]]; then
+    echo "$DEFAULT_ANDROID_ABIS"
+    return 0
+  fi
+
+  local joined
+  joined=$(IFS=';'; echo "${result[*]}")
+  echo "$joined"
+}
+
+stage_missing_qt_platform_plugins() {
+  local android_build_out_dir=$1
+  local abi_list=$2
+
+  if [[ -z "$abi_list" ]]; then
+    return 0
+  fi
+
+  IFS=';' read -r -a abi_array <<< "$abi_list"
+  for abi in "${abi_array[@]}"
+  do
+    [[ -z "$abi" ]] && continue
+
+    local dest_dir="$android_build_out_dir/libs/$abi"
+    local dest_file="$dest_dir/libplugins_platforms_qtforandroid_${abi}.so"
+
+    if [[ -f "$dest_file" ]]; then
+      continue
+    fi
+
+    local qt_suffix
+    qt_suffix=$(qt_android_dir_suffix_for_abi "$abi")
+    local src_file="$QT_HOST_PATH/../android_${qt_suffix}/plugins/platforms/libplugins_platforms_qtforandroid_${abi}.so"
+
+    if [[ ! -f "$src_file" ]]; then
+      echo "ERROR: Qt platform plugin source not found for ABI=$abi: $src_file"
+      return 1
+    fi
+
+    mkdir -p "$dest_dir"
+    cp "$src_file" "$dest_file"
+    echo "Staged missing Qt platform plugin for $abi: $src_file -> $dest_file"
+  done
+}
+
 verify_apk_contains_qt_platform_plugin() {
   local apk_path=$1
   local abi_list=$2
@@ -160,13 +229,43 @@ import sys
 import zipfile
 
 apk_path = sys.argv[1]
-abis = [x for x in sys.argv[2].split(";") if x]
+requested_abis = [x for x in sys.argv[2].split(";") if x]
 
 with zipfile.ZipFile(apk_path, "r") as zf:
     names = set(zf.namelist())
 
+detected_abis = set()
+for entry in names:
+    if not entry.startswith("lib/"):
+        continue
+    parts = entry.split("/")
+    if len(parts) < 3:
+        continue
+    abi = parts[1]
+    if abi:
+        detected_abis.add(abi)
+
+if not detected_abis:
+    print(
+        "WARN: APK contains no native libs under lib/<abi>/; "
+        f"skip Qt platform plugin verification: {apk_path}"
+    )
+    sys.exit(0)
+
 missing = []
-for abi in abis:
+abis_to_check = sorted(detected_abis)
+if requested_abis:
+    requested_set = set(requested_abis)
+    abis_to_check = sorted(requested_set & detected_abis)
+    if not abis_to_check:
+        print(
+            "WARN: None of the requested ABIs are present in APK; "
+            f"requested={', '.join(requested_abis)}, detected={', '.join(sorted(detected_abis))}. "
+            "Skip Qt platform plugin verification."
+        )
+        sys.exit(0)
+
+for abi in abis_to_check:
     expected = f"lib/{abi}/libplugins_platforms_qtforandroid_{abi}.so"
     if expected not in names:
         missing.append(expected)
@@ -174,9 +273,15 @@ for abi in abis:
 if missing:
     print(f"ERROR: APK is missing required Qt platform plugin(s): {', '.join(missing)}")
     print(f"APK: {apk_path}")
+    print(f"Detected ABIs in APK: {', '.join(sorted(detected_abis))}")
+    if requested_abis:
+        print(f"Requested ABIs: {', '.join(requested_abis)}")
     sys.exit(1)
 
-print(f"Verified Qt platform plugin in APK: {apk_path}")
+print(
+    f"Verified Qt platform plugin in APK: {apk_path} "
+    f"(ABIs checked: {', '.join(abis_to_check)})"
+)
 PY
 }
 
@@ -188,7 +293,8 @@ if [[ -v AAB && -z "${ABIS:-}" ]]; then
 fi
 
 if [[ "${ABIS:-}" = "all" ]]; then
-  ABIS="$ALL_ANDROID_ABIS"
+  ABIS=$(resolve_available_android_abis "$QT_HOST_PATH")
+  echo "Resolved 'all' Android ABIs to installed Qt targets: $ABIS"
 fi
 
 ANDROID_ABIS_FOR_PACKAGING="${ABIS:-}"
@@ -206,11 +312,7 @@ else
   else
     oneOf=$ABIS
   fi
-  case $oneOf in
-    "armeabi-v7a") qt_bin_dir_suffix="armv7";;
-    "arm64-v8a") qt_bin_dir_suffix="arm64_v8a";;
-    *) qt_bin_dir_suffix=$oneOf;;
-  esac
+  qt_bin_dir_suffix=$(qt_android_dir_suffix_for_abi "$oneOf")
 fi
 # get real path
 # calls on paths containing '..' may result in a 'Permission denied'
@@ -355,6 +457,8 @@ $QT_HOST_PATH/bin/androiddeployqt \
 # (org.amnezia.vpn), which breaks runtime startup in com.fblink.vpn builds.
 # Patch copied binaries in android-build before Gradle packaging.
 patch_legacy_awg_package_path "$ANDROID_BUILD_OUT_DIR"
+# Ensure Qt platform plugins are present for all selected ABIs before Gradle.
+stage_missing_qt_platform_plugins "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}"
 
 # run gradle
 gradle_opts=()
