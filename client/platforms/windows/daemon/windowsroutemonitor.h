@@ -27,6 +27,7 @@ class WindowsRouteMonitor final : public QObject {
   void setDetaultRouteCapture(bool enable);
 
   bool addExclusionRoute(const IPAddress& prefix);
+  int addExclusionRoutes(const QList<IPAddress>& prefixes);
   bool deleteExclusionRoute(const IPAddress& prefix);
   void flushExclusionRoutes() { return flushRouteTable(m_exclusionRoutes); };
 

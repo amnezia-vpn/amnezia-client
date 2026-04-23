@@ -8,6 +8,7 @@
 #include <iphlpapi.h>
 #include <windows.h>
 #include <winsock2.h>
+#include <winsvc.h>
 #include <ws2ipdef.h>
 
 #include <QFileInfo>
@@ -17,9 +18,132 @@
 #include "windowsfirewall.h"
 
 #pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "advapi32.lib")
 
 namespace {
 Logger logger("WireguardUtilsWindows");
+
+// Suspend wcmSvc for bulk route installs to avoid per-route stalls, matching
+constexpr int kWcmSuspendThreshold = 500;
+
+LONG (NTAPI* g_NtSuspendProcess)(HANDLE ProcessHandle) = nullptr;
+LONG (NTAPI* g_NtResumeProcess)(HANDLE ProcessHandle) = nullptr;
+
+#ifndef WG_STATUS_SUCCESS
+#define WG_STATUS_SUCCESS ((NTSTATUS)0x00000000L)
+#endif
+
+bool ensureNtFunctions() {
+  static bool initialized = false;
+  static bool ok = false;
+  if (initialized) {
+    return ok;
+  }
+  initialized = true;
+
+  HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+  if (!ntdll) {
+    return false;
+  }
+  g_NtSuspendProcess = reinterpret_cast<decltype(g_NtSuspendProcess)>(
+      GetProcAddress(ntdll, "NtSuspendProcess"));
+  g_NtResumeProcess = reinterpret_cast<decltype(g_NtResumeProcess)>(
+      GetProcAddress(ntdll, "NtResumeProcess"));
+  ok = (g_NtSuspendProcess != nullptr) && (g_NtResumeProcess != nullptr);
+  return ok;
+}
+
+bool ensureDebugPrivilege() {
+  static bool tried = false;
+  static bool ok = false;
+  if (tried) {
+    return ok;
+  }
+  tried = true;
+
+  HANDLE token = nullptr;
+  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token)) {
+    return false;
+  }
+  TOKEN_PRIVILEGES priv = {};
+  if (!LookupPrivilegeValueW(nullptr, SE_DEBUG_NAME,
+                             &priv.Privileges[0].Luid)) {
+    CloseHandle(token);
+    return false;
+  }
+  priv.PrivilegeCount = 1;
+  priv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+  ok = AdjustTokenPrivileges(token, FALSE, &priv, sizeof(priv), nullptr,
+                             nullptr) != 0;
+  CloseHandle(token);
+  return ok;
+}
+
+DWORD getServicePid(LPCWSTR serviceName) {
+  SC_HANDLE scm = OpenSCManagerW(nullptr, nullptr, SC_MANAGER_CONNECT);
+  if (!scm) {
+    return 0;
+  }
+  SC_HANDLE svc = OpenServiceW(scm, serviceName, SERVICE_QUERY_STATUS);
+  if (!svc) {
+    CloseServiceHandle(scm);
+    return 0;
+  }
+  SERVICE_STATUS_PROCESS ssp = {};
+  DWORD bytesNeeded = 0;
+  QueryServiceStatusEx(svc, SC_STATUS_PROCESS_INFO,
+                       reinterpret_cast<LPBYTE>(&ssp), sizeof(ssp),
+                       &bytesNeeded);
+  CloseServiceHandle(svc);
+  CloseServiceHandle(scm);
+  return ssp.dwProcessId;
+}
+
+class WcmSuspender {
+ public:
+  explicit WcmSuspender(int pendingRoutes) {
+    if (pendingRoutes < kWcmSuspendThreshold) {
+      return;
+    }
+    if (!ensureNtFunctions()) {
+      return;
+    }
+    ensureDebugPrivilege();
+
+    DWORD pid = getServicePid(L"wcmSvc");
+    if (pid == 0) {
+      return;
+    }
+    m_handle = OpenProcess(PROCESS_SUSPEND_RESUME, FALSE, pid);
+    if (!m_handle) {
+      return;
+    }
+    if (g_NtSuspendProcess(m_handle) == WG_STATUS_SUCCESS) {
+      m_suspended = true;
+      logger.debug() << "wcmSvc suspended for bulk route install"
+                     << "(pending:" << pendingRoutes << ")";
+    } else {
+      CloseHandle(m_handle);
+      m_handle = nullptr;
+    }
+  }
+  ~WcmSuspender() {
+    if (m_handle) {
+      if (m_suspended) {
+        g_NtResumeProcess(m_handle);
+        logger.debug() << "wcmSvc resumed";
+      }
+      CloseHandle(m_handle);
+    }
+  }
+  WcmSuspender(const WcmSuspender&) = delete;
+  WcmSuspender& operator=(const WcmSuspender&) = delete;
+
+ private:
+  HANDLE m_handle = nullptr;
+  bool m_suspended = false;
+};
+
 };  // namespace
 
 std::unique_ptr<WireguardUtilsWindows> WireguardUtilsWindows::create(
@@ -306,8 +430,57 @@ bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
   return result == NO_ERROR;
 }
 
+bool WireguardUtilsWindows::updateRoutePrefixes(
+    const QList<IPAddress>& prefixes) {
+  if (prefixes.isEmpty()) {
+    return true;
+  }
+
+  if (m_routeMonitor) {
+    for (const IPAddress& prefix : prefixes) {
+      if (prefix.prefixLength() == 0) {
+        m_routeMonitor->setDetaultRouteCapture(true);
+        break;
+      }
+    }
+  }
+
+  WcmSuspender suspender(prefixes.size());
+
+  bool ok = true;
+  for (const IPAddress& prefix : prefixes) {
+    MIB_IPFORWARD_ROW2 entry;
+    buildMibForwardRow(prefix, &entry);
+    DWORD result = CreateIpForwardEntry2(&entry);
+    if (result == ERROR_OBJECT_ALREADY_EXISTS) {
+      continue;
+    }
+    // IPv6 might be disabled on the host.
+    if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol &&
+        result == ERROR_NOT_FOUND) {
+      continue;
+    }
+    if (result != NO_ERROR) {
+      logger.error() << "Failed to create route to" << prefix.toString()
+                     << "result:" << result;
+      ok = false;
+    }
+  }
+  return ok;
+}
+
 bool WireguardUtilsWindows::addExclusionRoute(const IPAddress& prefix) {
   return m_routeMonitor->addExclusionRoute(prefix);
+}
+
+bool WireguardUtilsWindows::addExclusionRoutes(
+    const QList<IPAddress>& prefixes) {
+  if (!m_routeMonitor || prefixes.isEmpty()) {
+    return true;
+  }
+  WcmSuspender suspender(prefixes.size());
+  m_routeMonitor->addExclusionRoutes(prefixes);
+  return true;
 }
 
 bool WireguardUtilsWindows::deleteExclusionRoute(const IPAddress& prefix) {

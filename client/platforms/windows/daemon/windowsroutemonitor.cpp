@@ -432,6 +432,103 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
   return true;
 }
 
+int WindowsRouteMonitor::addExclusionRoutes(const QList<IPAddress>& prefixes) {
+  if (prefixes.isEmpty()) {
+    return 0;
+  }
+
+  // Group by address family so the routing-table snapshot and
+  // updateCapturedRoutes() run once per family instead of once per prefix
+  QVector<QPair<IPAddress, MIB_IPFORWARD_ROW2*>> pendingV4;
+  QVector<QPair<IPAddress, MIB_IPFORWARD_ROW2*>> pendingV6;
+  pendingV4.reserve(prefixes.size());
+  pendingV6.reserve(prefixes.size());
+
+  for (const IPAddress& prefix : prefixes) {
+    const QHostAddress addr = prefix.address();
+    if (addr.isLoopback() || addr.isBroadcast() || addr.isLinkLocal() ||
+        addr.isMulticast()) {
+      continue;
+    }
+    if (m_exclusionRoutes.contains(prefix)) {
+      continue;
+    }
+
+    MIB_IPFORWARD_ROW2* data = new MIB_IPFORWARD_ROW2;
+    InitializeIpForwardEntry(data);
+    if (addr.protocol() == QAbstractSocket::IPv6Protocol) {
+      Q_IPV6ADDR buf = addr.toIPv6Address();
+      memcpy(&data->DestinationPrefix.Prefix.Ipv6.sin6_addr, &buf, sizeof(buf));
+      data->DestinationPrefix.Prefix.Ipv6.sin6_family = AF_INET6;
+    } else {
+      quint32 buf = addr.toIPv4Address();
+      data->DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr = htonl(buf);
+      data->DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
+    }
+    data->DestinationPrefix.PrefixLength = prefix.prefixLength();
+    data->NextHop.si_family = data->DestinationPrefix.Prefix.si_family;
+
+    data->ValidLifetime = 0xffffffff;
+    data->PreferredLifetime = 0xffffffff;
+    data->Metric = EXCLUSION_ROUTE_METRIC;
+    data->Protocol = MIB_IPPROTO_NETMGMT;
+    data->Loopback = false;
+    data->AutoconfigureAddress = false;
+    data->Publish = false;
+    data->Immortal = false;
+    data->Age = 0;
+
+    if (data->DestinationPrefix.Prefix.si_family == AF_INET6) {
+      pendingV6.append(qMakePair(prefix, data));
+    } else {
+      pendingV4.append(qMakePair(prefix, data));
+    }
+    // Register up-front so the single updateCapturedRoutes() pass below
+    // sees the full exclusion set via isRouteExcluded().
+    m_exclusionRoutes[prefix] = data;
+  }
+
+  int added = 0;
+
+  auto processFamily =
+      [&](int family,
+          const QVector<QPair<IPAddress, MIB_IPFORWARD_ROW2*>>& pending) {
+        if (pending.isEmpty()) {
+          return;
+        }
+
+        logger.debug() << "Batch exclusion install:" << pending.size()
+                       << (family == AF_INET6 ? "IPv6" : "IPv4") << "routes";
+
+        PMIB_IPFORWARD_TABLE2 table = nullptr;
+        DWORD result = GetIpForwardTable2(family, &table);
+        if (result != NO_ERROR) {
+          logger.error() << "Failed to fetch routing table:" << result;
+          for (const auto& item : pending) {
+            MIB_IPFORWARD_ROW2* row = m_exclusionRoutes.take(item.first);
+            if (row != nullptr) {
+              delete row;
+            }
+          }
+          return;
+        }
+
+        updateInterfaceMetrics(family);
+        for (const auto& item : pending) {
+          updateExclusionRoute(item.second, table);
+          ++added;
+        }
+        updateCapturedRoutes(family, table);
+
+        FreeMibTable(table);
+      };
+
+  processFamily(AF_INET, pendingV4);
+  processFamily(AF_INET6, pendingV6);
+
+  return added;
+}
+
 bool WindowsRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
   logger.debug() << "Deleting exclusion route for"
                  << prefix.address().toString();
