@@ -826,15 +826,24 @@ jobs:
       run: |
         for %%f in (build\client\test_*.exe) do (windeployqt %%f)
 
+    - name: Install MSVC Redistributable
+      shell: cmd
+      run: |
+        build\client\vc_redist.x64.exe /install /quiet /norestart
+
     - name: 'Check directories'
       shell: cmd
       run: |
         dir build\client
         dir build\client\tests
+        dir build\client /s | findstr CTestTestfile.cmake
+        echo "===== check dependencies ====="
+        dumpbin /dependents build\client\test_*.exe
+        where Qt6Core.dll
+        where vcruntime140.dll
 
     - name: 'Run tests'
       shell: cmd
       run: |
         set PATH=%PATH%;%Qt6_DIR%\..\..\bin
-        dir build\client /s | findstr CTestTestfile.cmake
         ctest --test-dir build\client --output-on-failure
