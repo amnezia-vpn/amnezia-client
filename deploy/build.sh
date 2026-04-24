@@ -94,7 +94,7 @@ args=()
 : ${CMAKE_BUILD_TYPE:=Release}
 
 [[ -n "$FORCE" ]] && run_traced rm -rf "$BUILD_DIR"
-run_traced cmake -S "$PROJECT_DIR" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" "${args[@]}"
+run_traced cmake -S "$PROJECT_DIR" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" "${args[@]}" -DDEPLOY=1
 run_traced cmake --build "$BUILD_DIR" --config "$CMAKE_BUILD_TYPE"
 
 if [ -z "$no_installers" ]; then
