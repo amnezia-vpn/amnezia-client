@@ -59,6 +59,14 @@ jobs:
       run: |
         chmod +x ${{ runner.temp }}/Qt/6.10.1/android_arm64_v8a/bin/qt-cmake
         ln -s ${{ runner.temp }}/Qt/6.10.1/android_arm64_v8a ${{ runner.temp }}/Qt/6.10.1/gcc_64/../android_arm64_v8a
+        echo "androidCompileSdkVersion=android-34" > client/android/local.properties
+        echo "androidBuildToolsVersion=34.0.0" >> client/android/local.properties
+        echo "qtMinSdkVersion=26" >> client/android/local.properties
+        echo "qtTargetSdkVersion=34" >> client/android/local.properties
+        echo "androidNdkVersion=26.1.10909125" >> client/android/local.properties
+        echo "qtTargetAbiList=arm64-v8a" >> client/android/local.properties
+        echo "qtAndroidDir=${{ runner.temp }}/Qt/6.10.1/android_arm64_v8a/src/android/java" >> client/android/local.properties
+        echo "buildDir=build" >> client/android/local.properties
         ./deploy/build_android.sh --debug --apk arm64-v8a
 
     - name: 'Send APK to Telegram'
