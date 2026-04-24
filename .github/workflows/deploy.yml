@@ -832,10 +832,7 @@ jobs:
         dir build\client
         dir build\client\tests
         dir build\client /s | findstr CTestTestfile.cmake
-        echo "===== check dependencies ====="
-        dumpbin /dependents build\client\test_*.exe
-        where Qt6Core.dll
-        where vcruntime140.dll
+        where ssh.dll
 
     - name: 'Run tests'
       shell: cmd
