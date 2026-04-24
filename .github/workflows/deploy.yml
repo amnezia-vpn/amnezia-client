@@ -837,5 +837,4 @@ jobs:
       shell: cmd
       run: |
         set PATH=%PATH%;%Qt6_DIR%\..\..\bin
-        dir build\client /s | findstr CTestTestfile.cmake
         ctest --test-dir build\client --output-on-failure
