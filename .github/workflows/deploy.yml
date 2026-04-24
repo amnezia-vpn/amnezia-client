@@ -316,6 +316,18 @@ jobs:
       with:
         xcode-version: '26.1'
 
+    - name: 'Install desktop Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'desktop'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        arch: 'clang_64'
+        dir: ${{ runner.temp }}
+        set-env: 'true'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
     - name: 'Install iOS Qt'
       uses: jurplel/install-qt-action@v3
       with:
