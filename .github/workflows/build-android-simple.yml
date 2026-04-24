@@ -1,0 +1,61 @@
+name: 'Build Android (Simple)'
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  Build-Android-Debug:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+
+    - name: 'Setup Java'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: 'Setup Android NDK'
+      id: setup-ndk
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: 'r26b'
+
+    - name: 'Install Qt Desktop'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.10.1'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'linux_gcc_64'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+
+    - name: 'Install Qt Android ARM64'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.10.1'
+        host: 'linux'
+        target: 'android'
+        arch: 'android_arm64_v8a'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+
+    - name: 'Build Debug APK'
+      env:
+        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        QT_HOST_PATH: ${{ runner.temp }}/Qt/6.10.1/gcc_64
+      run: |
+        ./deploy/build_android.sh --debug --apk arm64-v8a
+
+    - name: 'Upload APK'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN-debug-arm64
+        path: deploy/build/AmneziaVPN-arm64-v8a-debug.apk
+        retention-days: 7
