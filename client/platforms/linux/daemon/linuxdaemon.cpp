@@ -15,6 +15,7 @@
 #include <QTextStream>
 #include <QtGlobal>
 
+#include "linuxfirewall.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -49,4 +50,18 @@ LinuxDaemon::~LinuxDaemon() {
 LinuxDaemon* LinuxDaemon::instance() {
     Q_ASSERT(s_daemon);
     return s_daemon;
+}
+
+bool LinuxDaemon::run(Op op, const InterfaceConfig& config) {
+    if (!config.m_killSwitchEnabled || !LinuxFirewall::isInstalled()) {
+        return true;
+    }
+
+    if (op == Up) {
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
+    } else if (op == Down) {
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), false);
+    }
+
+    return true;
 }

@@ -21,6 +21,7 @@ class LinuxDaemon final : public Daemon {
   static LinuxDaemon* instance();
 
  protected:
+  bool run(Op op, const InterfaceConfig& config) override;
   WireguardUtils* wgutils() const override { return m_wgutils; }
   DnsUtils* dnsutils() override { return m_dnsutils; }
   bool supportIPUtils() const override { return true; }
