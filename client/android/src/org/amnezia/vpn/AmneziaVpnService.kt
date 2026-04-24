@@ -383,12 +383,28 @@ open class AmneziaVpnService : VpnService() {
                         networkState.bindNetworkListener()
                         // if (isActivityConnected) launchSendingStatistics()
                         launchTrafficStatsUpdate()
+                        mainScope.launch {
+                            ServerNotifier.notifyServer(
+                                applicationContext,
+                                serverName,
+                                vpnProto?.label,
+                                isConnected = true
+                            )
+                        }
                     }
 
                     DISCONNECTED -> {
                         networkState.unbindNetworkListener()
                         stopTrafficStatsUpdateJob()
                         // stopSendingStatistics()
+                        mainScope.launch {
+                            ServerNotifier.notifyServer(
+                                applicationContext,
+                                serverName,
+                                vpnProto?.label,
+                                isConnected = false
+                            )
+                        }
                         if (!isServiceBound) stopService()
                     }
 
