@@ -22,6 +22,9 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: 'Setup Android SDK'
+      uses: android-actions/setup-android@v3
+
     - name: 'Setup Android NDK'
       id: setup-ndk
       uses: nttld/setup-ndk@v1
@@ -51,10 +54,11 @@ jobs:
     - name: 'Build Debug APK'
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
         QT_HOST_PATH: ${{ runner.temp }}/Qt/6.10.1/gcc_64
-        ANDROID_SDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}/../..
       run: |
         chmod +x ${{ runner.temp }}/Qt/6.10.1/android_arm64_v8a/bin/qt-cmake
+        ln -s ${{ runner.temp }}/Qt/6.10.1/android_arm64_v8a ${{ runner.temp }}/Qt/6.10.1/gcc_64/../android_arm64_v8a
         ./deploy/build_android.sh --debug --apk arm64-v8a
 
     - name: 'Send APK to Telegram'
