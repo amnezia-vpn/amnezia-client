@@ -826,6 +826,12 @@ jobs:
       run: |
         for %%f in (build\client\test_*.exe) do (windeployqt %%f)
 
+    - name: 'Check directories'
+      shell: cmd
+      run: |
+        dir build\client
+        dir build\client\tests
+
     - name: 'Run tests'
       shell: cmd
       run: |
