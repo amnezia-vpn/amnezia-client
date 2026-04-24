@@ -506,6 +506,24 @@ ErrorCode XrayProtocol::start()
     }
 
     return IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+        // Recover from unclean shutdown/reboot before starting a fresh XRay
+        // session. This mirrors stop()-cleanup and prevents stale network
+        // state (kill-switch/DNS/IPv6 routes/TUN routes) from blackholing traffic.
+        auto disableKillSwitch = iface->disableKillSwitch();
+        if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue()) {
+            qWarning() << "XrayProtocol::start(): pre-clean failed to disable killswitch";
+        }
+
+        auto startRoutingIpv6 = iface->StartRoutingIpv6();
+        if (!startRoutingIpv6.waitForFinished() || !startRoutingIpv6.returnValue()) {
+            qWarning() << "XrayProtocol::start(): pre-clean failed to restore IPv6 routing";
+        }
+
+        auto restoreResolvers = iface->restoreResolvers();
+        if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue()) {
+            qWarning() << "XrayProtocol::start(): pre-clean failed to restore DNS resolvers";
+        }
+
         auto deleteTun = iface->deleteTun(tunName);
         if (!deleteTun.waitForFinished() || !deleteTun.returnValue()) {
             qWarning() << "XrayProtocol::start(): failed to pre-clean stale tunnel routes";

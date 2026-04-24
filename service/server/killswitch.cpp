@@ -38,13 +38,22 @@ bool KillSwitch::init()
     m_appSettigns = QSharedPointer<SecureQSettings>(new SecureQSettings(ORGANIZATION_NAME, APPLICATION_NAME, nullptr));
 #endif
 
-    if (isStrictKillSwitchEnabled()) {
-        return disableAllTraffic();
+    const bool strictEnabled = isStrictKillSwitchEnabled();
+    if (strictEnabled) {
+        const bool ok = disableAllTraffic();
+        if (!ok) {
+            qWarning() << "KillSwitch::init: failed to enforce strict mode on startup";
+        }
+        return ok;
     }
 
     // Recover from unclean shutdowns: ensure stale kill switch rules are removed
     // during service startup when strict mode is not enabled.
-    return disableKillSwitch();
+    const bool ok = disableKillSwitch();
+    if (!ok) {
+        qWarning() << "KillSwitch::init: failed to recover kill switch state on startup";
+    }
+    return ok;
 }
 
 bool KillSwitch::refresh(bool enabled)
