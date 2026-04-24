@@ -504,24 +504,45 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data) const
 
 QJsonObject ImportController::extractWireGuardConfig(const QString &data, ConfigTypes &configType) const
 {
-    QMap<QString, QString> configMap;
-    auto configByLines = data.split("\n");
+    QMap<QString, QString> interfaceMap;
+    QList<QMap<QString, QString>> peerList;
+
+    enum class WgSection { None, Interface, Peer };
+    WgSection currentSection = WgSection::None;
+
+    const auto configByLines = data.split("\n");
     for (const QString &line : configByLines) {
-        QString trimmedLine = line.trimmed();
-        if (trimmedLine.startsWith("[") && trimmedLine.endsWith("]")) {
-            continue;
-        } else {
-            QStringList parts = trimmedLine.split(" = ");
+        const QString trimmedLine = line.trimmed();
+        if (trimmedLine == "[Interface]") {
+            currentSection = WgSection::Interface;
+        } else if (trimmedLine == "[Peer]") {
+            currentSection = WgSection::Peer;
+            peerList.append(QMap<QString, QString>());
+        } else if (!trimmedLine.isEmpty() && !trimmedLine.startsWith("#")) {
+            const QStringList parts = trimmedLine.split(" = ");
             if (parts.count() == 2) {
-                configMap[parts.at(0).trimmed()] = parts.at(1).trimmed();
+                const QString key = parts.at(0).trimmed();
+                const QString value = parts.at(1).trimmed();
+                if (currentSection == WgSection::Interface) {
+                    interfaceMap[key] = value;
+                } else if (currentSection == WgSection::Peer && !peerList.isEmpty()) {
+                    peerList.last()[key] = value;
+                }
             }
         }
     }
 
+    if (peerList.isEmpty()) {
+        qDebug() << "No [Peer] section found in WireGuard config";
+        return QJsonObject();
+    }
+
+    const QMap<QString, QString> &firstPeerMap = peerList.first();
+
     QJsonObject lastConfig;
     lastConfig[configKey::config] = data;
 
-    auto url { QUrl::fromUserInput(configMap.value(protocols::wireguard::Endpoint)) };
+    auto url { QUrl::fromUserInput(firstPeerMap.value(protocols::wireguard::Endpoint)) };
     QString hostName;
     QString port;
     if (!url.host().isEmpty()) {
@@ -540,36 +561,54 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     lastConfig[configKey::hostName] = hostName;
     lastConfig[configKey::port] = port.toInt();
 
-    if (!configMap.value(protocols::wireguard::PrivateKey).isEmpty()
-            && !configMap.value(protocols::wireguard::Address).isEmpty()
-            && !configMap.value(protocols::wireguard::PublicKey).isEmpty()) {
-        lastConfig[configKey::clientPrivKey] = configMap.value(protocols::wireguard::PrivateKey);
-        lastConfig[configKey::clientIp] = configMap.value(protocols::wireguard::Address);
+    if (!interfaceMap.value(protocols::wireguard::PrivateKey).isEmpty()
+            && !interfaceMap.value(protocols::wireguard::Address).isEmpty()
+            && !firstPeerMap.value(protocols::wireguard::PublicKey).isEmpty()) {
+        lastConfig[configKey::clientPrivKey] = interfaceMap.value(protocols::wireguard::PrivateKey);
+        lastConfig[configKey::clientIp] = interfaceMap.value(protocols::wireguard::Address);
 
-        if (!configMap.value(protocols::wireguard::PresharedKey).isEmpty()) {
-            lastConfig[configKey::pskKey] = configMap.value(protocols::wireguard::PresharedKey);
-        } else if (!configMap.value(protocols::wireguard::PreSharedKey).isEmpty()) {
-            lastConfig[configKey::pskKey] = configMap.value(protocols::wireguard::PreSharedKey);
+        if (!firstPeerMap.value(protocols::wireguard::PresharedKey).isEmpty()) {
+            lastConfig[configKey::pskKey] = firstPeerMap.value(protocols::wireguard::PresharedKey);
+        } else if (!firstPeerMap.value(protocols::wireguard::PreSharedKey).isEmpty()) {
+            lastConfig[configKey::pskKey] = firstPeerMap.value(protocols::wireguard::PreSharedKey);
         }
 
-        lastConfig[configKey::serverPubKey] = configMap.value(protocols::wireguard::PublicKey);
+        lastConfig[configKey::serverPubKey] = firstPeerMap.value(protocols::wireguard::PublicKey);
     } else {
         qDebug() << "One of the key parameters is missing (PrivateKey, Address, PublicKey)";
         return QJsonObject();
     }
 
-    if (!configMap.value(protocols::wireguard::MTU).isEmpty()) {
-        lastConfig[configKey::mtu] = configMap.value(protocols::wireguard::MTU);
-    }
-
-    if (!configMap.value(protocols::wireguard::PersistentKeepalive).isEmpty()) {
-        lastConfig[configKey::persistentKeepAlive] = configMap.value(protocols::wireguard::PersistentKeepalive);
+    if (!firstPeerMap.value(protocols::wireguard::PersistentKeepalive).isEmpty()) {
+        lastConfig[configKey::persistentKeepAlive] = firstPeerMap.value(protocols::wireguard::PersistentKeepalive);
     }
 
     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(
-                configMap.value(protocols::wireguard::AllowedIPs).split(", "));
+                firstPeerMap.value(protocols::wireguard::AllowedIPs).split(", "));
 
     lastConfig[configKey::allowedIps] = allowedIpsJsonArray;
+
+    if (peerList.size() > 1) {
+        QJsonArray peersArray;
+        for (const auto &peerMap : std::as_const(peerList)) {
+            QJsonObject peerObj;
+            const auto peerUrl = QUrl::fromUserInput(peerMap.value(protocols::wireguard::Endpoint));
+            peerObj[configKey::serverPubKey] = peerMap.value(protocols::wireguard::PublicKey);
+            if (!peerMap.value(protocols::wireguard::PresharedKey).isEmpty()) {
+                peerObj[configKey::pskKey] = peerMap.value(protocols::wireguard::PresharedKey);
+            } else if (!peerMap.value(protocols::wireguard::PreSharedKey).isEmpty()) {
+                peerObj[configKey::pskKey] = peerMap.value(protocols::wireguard::PreSharedKey);
+            }
+            peerObj[configKey::hostName] = peerUrl.host();
+            peerObj[configKey::port] = peerUrl.port() != -1 ? peerUrl.port() : QString(protocols::wireguard::defaultPort).toInt();
+            peerObj[configKey::allowedIps] = QJsonArray::fromStringList(peerMap.value(protocols::wireguard::AllowedIPs).split(", "));
+            if (!peerMap.value(protocols::wireguard::PersistentKeepalive).isEmpty()) {
+                peerObj[configKey::persistentKeepAlive] = peerMap.value(protocols::wireguard::PersistentKeepalive);
+            }
+            peersArray.append(peerObj);
+        }
+        lastConfig["peers"] = peersArray;
+    }
 
     QString protocolName = configKey::wireguard;
     QString protocolVersion;
@@ -588,25 +627,25 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     };
 
     bool hasAllRequiredFields = std::all_of(requiredJunkFields.begin(), requiredJunkFields.end(),
-                                            [&configMap](const QString &field) { return !configMap.value(field).isEmpty(); });
+                                            [&interfaceMap](const QString &field) { return !interfaceMap.value(field).isEmpty(); });
     if (hasAllRequiredFields) {
         for (const QString &field : requiredJunkFields) {
-            lastConfig[field] = configMap.value(field);
+            lastConfig[field] = interfaceMap.value(field);
         }
 
         for (const QString &field : optionalJunkFields) {
-            if (!configMap.value(field).isEmpty()) {
-                lastConfig[field] = configMap.value(field);
+            if (!interfaceMap.value(field).isEmpty()) {
+                lastConfig[field] = interfaceMap.value(field);
             }
         }
 
-        bool hasCookieReplyPacketJunkSize = !configMap.value(configKey::cookieReplyPacketJunkSize).isEmpty();
-        bool hasTransportPacketJunkSize = !configMap.value(configKey::transportPacketJunkSize).isEmpty();
-        bool hasSpecialJunk = !configMap.value(configKey::specialJunk1).isEmpty() ||
-                              !configMap.value(configKey::specialJunk2).isEmpty() ||
-                              !configMap.value(configKey::specialJunk3).isEmpty() ||
-                              !configMap.value(configKey::specialJunk4).isEmpty() ||
-                              !configMap.value(configKey::specialJunk5).isEmpty();
+        bool hasCookieReplyPacketJunkSize = !interfaceMap.value(configKey::cookieReplyPacketJunkSize).isEmpty();
+        bool hasTransportPacketJunkSize = !interfaceMap.value(configKey::transportPacketJunkSize).isEmpty();
+        bool hasSpecialJunk = !interfaceMap.value(configKey::specialJunk1).isEmpty() ||
+                              !interfaceMap.value(configKey::specialJunk2).isEmpty() ||
+                              !interfaceMap.value(configKey::specialJunk3).isEmpty() ||
+                              !interfaceMap.value(configKey::specialJunk4).isEmpty() ||
+                              !interfaceMap.value(configKey::specialJunk5).isEmpty();
 
         if (hasCookieReplyPacketJunkSize && hasTransportPacketJunkSize) {
             protocolVersion = "2";
@@ -617,8 +656,8 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
         detectedType = ConfigTypes::Awg;
     }
 
-    if (!configMap.value(protocols::wireguard::MTU).isEmpty()) {
-        lastConfig[configKey::mtu] = configMap.value(protocols::wireguard::MTU);
+    if (!interfaceMap.value(protocols::wireguard::MTU).isEmpty()) {
+        lastConfig[configKey::mtu] = interfaceMap.value(protocols::wireguard::MTU);
     } else {
         lastConfig[configKey::mtu] = (protocolName == configKey::awg) 
                                        ? protocols::awg::defaultMtu 

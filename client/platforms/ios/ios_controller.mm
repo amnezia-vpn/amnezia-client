@@ -595,6 +595,10 @@ bool IosController::setupWireGuard()
         wgConfig.insert(configKey::persistentKeepAlive, "25");
     }
 
+    if (config.contains("peers") && config["peers"].isArray()) {
+        wgConfig.insert("peers", config["peers"]);
+    }
+
     if (config.contains(configKey::isObfuscationEnabled) && config.value(configKey::isObfuscationEnabled).toBool()) {
         wgConfig.insert(configKey::initPacketMagicHeader, config[configKey::initPacketMagicHeader]);
         wgConfig.insert(configKey::responsePacketMagicHeader, config[configKey::responsePacketMagicHeader]);
@@ -674,7 +678,29 @@ bool IosController::setupAwg()
 
     wgConfig.insert(configKey::hostName, config[configKey::hostName]);
     wgConfig.insert(configKey::port, config[configKey::port]);
-    wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
+
+    bool isMultiPeer = config.contains("peers") && config["peers"].isArray()
+                       && !config["peers"].toArray().isEmpty();
+
+    if (isMultiPeer) {
+        // Use only the first client IP (peer 1's IP)
+        QString fullClientIp = config[configKey::clientIp].toString();
+        QStringList ipList = fullClientIp.split(",");
+        QString firstClientIp = ipList.isEmpty() ? fullClientIp : ipList.first().trimmed();
+        wgConfig.insert(configKey::clientIp, firstClientIp);
+        // Route all traffic through peer 1
+        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+        wgConfig.insert(configKey::allowedIps, allowed_ips);
+    } else {
+        wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
+        if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
+            wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
+        } else {
+            QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+            wgConfig.insert(configKey::allowedIps, allowed_ips);
+        }
+    }
+
     wgConfig.insert(configKey::clientPrivKey, config[configKey::clientPrivKey]);
     wgConfig.insert(configKey::serverPubKey, config[configKey::serverPubKey]);
     wgConfig.insert(configKey::pskKey, config[configKey::pskKey]);
@@ -687,13 +713,6 @@ bool IosController::setupAwg()
     }
 
     wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
-
-    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
-        wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
-    } else {
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
-        wgConfig.insert(configKey::allowedIps, allowed_ips);
-    }
 
     if (config.contains(configKey::persistentKeepAlive)) {
         wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);

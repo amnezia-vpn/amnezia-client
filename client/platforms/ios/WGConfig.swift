@@ -1,5 +1,23 @@
 import Foundation
 
+struct WGPeerConfig: Decodable {
+  let serverPublicKey: String
+  let presharedKey: String?
+  let allowedIPs: [String]
+  let hostName: String
+  let port: Int
+  let persistentKeepAlive: String?
+
+  enum CodingKeys: String, CodingKey {
+    case serverPublicKey = "server_pub_key"
+    case presharedKey = "psk_key"
+    case allowedIPs = "allowed_ips"
+    case hostName
+    case port
+    case persistentKeepAlive = "persistent_keep_alive"
+  }
+}
+
 struct WGConfig: Decodable {
   let initPacketMagicHeader, responsePacketMagicHeader: String?
   let underloadPacketMagicHeader, transportPacketMagicHeader: String?
@@ -19,6 +37,7 @@ struct WGConfig: Decodable {
   var persistentKeepAlive: String
   let splitTunnelType: Int
   let splitTunnelSites: [String]
+  let peers: [WGPeerConfig]?
 
   enum CodingKeys: String, CodingKey {
     case initPacketMagicHeader = "H1", responsePacketMagicHeader = "H2"
@@ -39,6 +58,7 @@ struct WGConfig: Decodable {
     case persistentKeepAlive = "persistent_keep_alive"
     case splitTunnelType
     case splitTunnelSites
+    case peers
   }
 
   var settings: String {
@@ -103,7 +123,7 @@ struct WGConfig: Decodable {
     return settingsLines.joined(separator: "\n")
   }
 
-  var str: String {
+  private var interfaceSection: String {
     """
     [Interface]
     Address = \(clientIP)
@@ -111,6 +131,27 @@ struct WGConfig: Decodable {
     MTU = \(mtu)
     PrivateKey = \(clientPrivateKey)
     \(settings)
+    """
+  }
+
+  var str: String {
+    if let peers = peers, !peers.isEmpty {
+      let peerSections = peers.map { peer -> String in
+        var lines = ["[Peer]", "PublicKey = \(peer.serverPublicKey)"]
+        if let psk = peer.presharedKey, !psk.isEmpty {
+          lines.append("PresharedKey = \(psk)")
+        }
+        lines.append("AllowedIPs = \(peer.allowedIPs.joined(separator: ", "))")
+        lines.append("Endpoint = \(peer.hostName):\(peer.port)")
+        if let ka = peer.persistentKeepAlive {
+          lines.append("PersistentKeepalive = \(ka)")
+        }
+        return lines.joined(separator: "\n")
+      }.joined(separator: "\n")
+      return interfaceSection + "\n" + peerSections
+    }
+    return """
+    \(interfaceSection)
     [Peer]
     PublicKey = \(serverPublicKey)
     \(presharedKey == nil ? "" : "PresharedKey = \(presharedKey!)")
@@ -121,19 +162,21 @@ struct WGConfig: Decodable {
   }
 
   var redux: String {
-    """
+    let peerCount = peers?.count ?? 1
+    let peerInfo = peers.map { peers in
+      peers.enumerated().map { i, peer in
+        "[Peer \(i + 1)] Endpoint = \(peer.hostName):\(peer.port), AllowedIPs = \(peer.allowedIPs.joined(separator: ", "))"
+      }.joined(separator: "\n")
+    } ?? "Endpoint = \(hostName):\(port), AllowedIPs = \(allowedIPs.joined(separator: ", "))"
+    return """
     [Interface]
     Address = \(clientIP)
     DNS = \(dns1), \(dns2)
     MTU = \(mtu)
     PrivateKey = ***
     \(settings)
-    [Peer]
-    PublicKey = ***
-    PresharedKey = ***
-    AllowedIPs = \(allowedIPs.joined(separator: ", "))
-    Endpoint = \(hostName):\(port)
-    PersistentKeepalive = \(persistentKeepAlive)
+    PeerCount = \(peerCount)
+    \(peerInfo)
 
     SplitTunnelType = \(splitTunnelType)
     SplitTunnelSites = \(splitTunnelSites.joined(separator: ", "))
