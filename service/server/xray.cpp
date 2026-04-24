@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QDir>
 #include <QStandardPaths>
 #include <QNetworkInterface>
 #include <QCoreApplication>
@@ -53,12 +54,23 @@ bool Xray::startXray(const QString &cfg)
     // Temporary aid for manual verification of SOCKS auth (inbounds.settings.accounts).
     // Debug: always writes. Release: set env AMNEZIA_SAVE_XRAY_CONFIG=1 (if the daemon inherits it).
     {
+        QString debugPath;
+
 #ifdef Q_OS_WIN
-        const QString debugPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation)
-                + QStringLiteral("/amnezia-xray-config.json");
+        const QString dirPath = QStringLiteral("C:/Temp");
+        QDir dir(dirPath);
+
+        if (!dir.exists()) {
+            if (!dir.mkpath(".")) {
+                qWarning() << "[xray] failed to create directory:" << dirPath;
+            }
+        }
+
+        debugPath = dir.filePath(QStringLiteral("amnezia-xray-config.json"));
 #else
-        const QString debugPath = QStringLiteral("/tmp/amnezia-xray-config.json");
+        debugPath = QStringLiteral("/tmp/amnezia-xray-config.json");
 #endif
+
         QFile f(debugPath);
         if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
             f.write(bytes);
