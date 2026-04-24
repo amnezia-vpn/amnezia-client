@@ -23,6 +23,7 @@ namespace {
 Logger logger("WgDaemonServer");
 constexpr int kKillSwitchInitRetryDelayMs = 1500;
 constexpr int kKillSwitchInitMaxRetries = 20;
+constexpr int kKillSwitchInitLongRetryDelayMs = 10000;
 }
 
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
@@ -77,15 +78,22 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
             return;
         }
 
-        if (*retriesLeft <= 0) {
-            logger.warning() << "Kill switch recovery failed after retries. Network may stay blocked until next recovery attempt.";
+        if (*retriesLeft > 0) {
+            (*retriesLeft)--;
+            logger.warning() << "Kill switch init failed, retrying in" << kKillSwitchInitRetryDelayMs
+                             << "ms, retries left:" << *retriesLeft;
+            QTimer::singleShot(kKillSwitchInitRetryDelayMs, this, [initKillSwitch]() {
+                (*initKillSwitch)();
+            });
             return;
         }
 
-        (*retriesLeft)--;
-        logger.warning() << "Kill switch init failed, retrying in" << kKillSwitchInitRetryDelayMs
-                         << "ms, retries left:" << *retriesLeft;
-        QTimer::singleShot(kKillSwitchInitRetryDelayMs, this, [initKillSwitch]() {
+        // Keep recovering in background for slow boot scenarios (e.g. WFP/BFE
+        // startup lag after system boot). Without this, stale kill-switch state
+        // can survive until next reboot.
+        logger.warning() << "Kill switch recovery still failing after fast retries,"
+                         << "continuing background retry in" << kKillSwitchInitLongRetryDelayMs << "ms";
+        QTimer::singleShot(kKillSwitchInitLongRetryDelayMs, this, [initKillSwitch]() {
             (*initKillSwitch)();
         });
     };

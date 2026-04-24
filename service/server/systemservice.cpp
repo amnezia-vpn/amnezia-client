@@ -19,6 +19,8 @@ SystemService::SystemService(int argc, char **argv)
     setServiceDescription("FBLink VPN Service");
 
 #ifdef Q_OS_WIN
+    setServiceFlags(QtServiceBase::NeedsStopOnShutdown);
+
     if(argc > 2){
         s_argc = argc;
         s_argv = argv;
