@@ -826,11 +826,6 @@ jobs:
       run: |
         for %%f in (build\client\test_*.exe) do (windeployqt %%f)
 
-    - name: Install MSVC Redistributable
-      shell: cmd
-      run: |
-        build\client\vc_redist.x64.exe /install /quiet /norestart
-
     - name: 'Check directories'
       shell: cmd
       run: |
@@ -845,5 +840,5 @@ jobs:
     - name: 'Run tests'
       shell: cmd
       run: |
-        set PATH=%PATH%;%Qt6_DIR%\..\..\bin
+        set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
         ctest --test-dir build\client --output-on-failure
