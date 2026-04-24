@@ -235,7 +235,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        xcode-version: [16.2, 16.4]
+        xcode-version: [26.0]
 
     steps:
     - uses: actions/checkout@v4
@@ -271,8 +271,8 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
-      CC: cc
-      CXX: c++
+      KEYCHAIN_PASSWORD: ""
+
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
@@ -283,22 +283,38 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - uses: ./.github/actions/apple-setup-keychain
+      id: setup-keychain
+      with:
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+
+    - name: 'Install signing certificate'
+      uses: ./.github/actions/apple-install-cert
+      with:
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        cert-base64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
+        cert-password: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
+
+    - name: 'Install app provisioning profile'
+      uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
+
+    - name: 'Install NE provisioning profile'
+      uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
+
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '26.1'
-
-    - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
-        arch: 'clang_64'
-        dir: ${{ runner.temp }}
-        set-env: 'true'
-        extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install iOS Qt'
       uses: jurplel/install-qt-action@v3
@@ -312,24 +328,6 @@ jobs:
         set-env: 'true'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install go'
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
-        cache: false
-
-    - name: 'Setup gomobile'
-      run: |
-          export PATH=$PATH:~/go/bin
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          gomobile init
-
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
     - name: 'Setup python'
       uses: actions/setup-python@v6
       with:
@@ -339,25 +337,17 @@ jobs:
       run: pip install "conan==2.26.2" jsonschema jinja2
 
     - name: 'Build project'
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
       run: |
-        git submodule update --init --recursive
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
-        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
-        export PATH=$PATH:~/go/bin
-        sh deploy/build_ios.sh | \
+        sh deploy/build.sh -t ios | \
           sed -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/d' | \
           sed -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/d' | \
           sed -e '/-DPROD_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DPROD_AGW_PUBLIC_KEY/d' | \
           sed -e '/-DDEV_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DDEV_AGW_PUBLIC_KEY/d'
-      env:
-        IOS_TRUST_CERT_BASE64: ${{ secrets.IOS_TRUST_CERT_BASE64 }}
-        IOS_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
-        IOS_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
-        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
-        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
-        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
-        IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
-        IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
 
 # ------------------------------------------------------
 
@@ -401,7 +391,6 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
-      KEYCHAIN_NAME: "build.keychain"
       KEYCHAIN_PASSWORD: ""
 
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
@@ -414,6 +403,29 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - uses: ./.github/actions/apple-setup-keychain
+      id: setup-keychain
+      with:
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+
+    - uses: ./.github/actions/apple-install-cert
+      with:
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        cert-base64: ${{ secrets.MAC_APP_CERT_CERT }}
+        cert-password: ${{ secrets.MAC_APP_CERT_PW }}
+
+    - uses: ./.github/actions/apple-install-cert
+      with:
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        cert-base64: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
+        cert-password: ${{ secrets.MAC_INSTALL_CERT_PW }}
+
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -442,28 +454,12 @@ jobs:
     - name: 'Install conan'
       run: pip install "conan==2.26.2"
 
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
-    - name: 'Install certs'
-      uses: ./.github/actions/setup-keychain
-      with:
-        keychain-path: ${{ env.KEYCHAIN_NAME }}
-        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
-        app-cert-base64: ${{ secrets.MAC_APP_CERT_CERT }}
-        app-cert-password: ${{ secrets.MAC_APP_CERT_PW }}
-        installer-cert-base64: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
-        installer-cert-password: ${{ secrets.MAC_INSTALL_CERT_PW }}
-
     - name: 'Build project'
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
-        CODESIGN_KEYCHAIN: ${{ env.KEYCHAIN_NAME }}
+        CODESIGN_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-name }}
         CODESIGN_SIGNATURE: ${{ secrets.MAC_SIGNER_ID }}
-        CODESIGN_INSTALLER_KEYCHAIN: ${{ env.KEYCHAIN_NAME }}
+        CODESIGN_INSTALLER_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-name }}
         CODESIGN_INSTALLER_SIGNATURE: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
         NOTARYTOOL_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
         NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
@@ -537,6 +533,14 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
+
+    - uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.MAC_NE_PROVISIONING_PROFILE }}
+
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
