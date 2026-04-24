@@ -50,6 +50,26 @@ PageType {
             ]
         }
 
+        footer: ColumnLayout {
+            width: settingsContainersListView.width
+            visible: ServersUiController.isProcessedServerHasWriteAccess()
+            height: visible ? implicitHeight : 0
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+
+                text: qsTr("Server routing rules")
+                descriptionText: qsTr("Configure domains and IPs that this server adds to client split tunneling")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsServerManagedSplitTunneling)
+                }
+            }
+
+            DividerType {}
+        }
+
         Component.onCompleted: {
             settingsContainersListView.isFocusable = true
             settingsContainersListView.interactive = true

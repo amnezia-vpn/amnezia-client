@@ -60,6 +60,9 @@ public:
     ErrorCode mountSftpDrive(const ServerCredentials &credentials, const QString &port, const QString &password, const QString &username);
     void stopAllSftpMounts();
 
+    ErrorCode publishServerRoutingRules(const ServerCredentials &credentials, const QJsonObject &rules,
+                                        DockerContainer container = DockerContainer::None);
+
     void cancelInstallation();
 
     void clearCachedProfile(int serverIndex, DockerContainer container);

@@ -2,6 +2,7 @@
 
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QRegularExpression>
 
 #include "core/utils/api/apiEnums.h"
 #include "core/utils/constants/apiKeys.h"
@@ -12,6 +13,126 @@
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
+#include "core/utils/networkUtilities.h"
+
+using namespace amnezia;
+
+namespace
+{
+QStringList managedSitesKeys(RouteMode mode)
+{
+    switch (mode) {
+    case RouteMode::VpnAllExceptSites:
+        return { QString(configKey::managedSplitTunnelExceptSourceSites),
+                 QString(configKey::managedSplitTunnelExceptSites) };
+    case RouteMode::VpnOnlyForwardSites:
+    case RouteMode::VpnAllSites:
+    default:
+        return {};
+    }
+}
+
+QVariantMap normalizedManagedSites(const QJsonValue &value)
+{
+    QVariantMap sites;
+    if (value.isObject()) {
+        return value.toObject().toVariantMap();
+    }
+    if (!value.isArray()) {
+        return sites;
+    }
+
+    const QJsonArray items = value.toArray();
+    for (const QJsonValue &item : items) {
+        if (!item.isObject()) {
+            continue;
+        }
+        const QJsonObject siteObject = item.toObject();
+        const QString site = siteObject.value("hostname").toString(siteObject.value("url").toString()).trimmed();
+        if (!site.isEmpty()) {
+            sites.insert(site, siteObject.value("ip").toString());
+        }
+    }
+    return sites;
+}
+
+void mergeSitesMap(QVariantMap &target, const QVariantMap &source)
+{
+    for (auto it = source.constBegin(); it != source.constEnd(); ++it) {
+        target.insert(it.key(), it.value());
+    }
+}
+
+QStringList splitTunnelStoredIps(const QString &value)
+{
+    QStringList ips;
+    const QStringList tokens = value.split(QRegularExpression("[,;\\s]+"), Qt::SkipEmptyParts);
+    for (const QString &token : tokens) {
+        const QString ip = token.trimmed();
+        if (NetworkUtilities::checkIpSubnetFormat(ip) && !ips.contains(ip)) {
+            ips.append(ip);
+        }
+    }
+    return ips;
+}
+
+QString mergeSplitTunnelIpValues(const QStringList &values)
+{
+    QStringList ips;
+    for (const QString &value : values) {
+        const QStringList storedIps = splitTunnelStoredIps(value);
+        for (const QString &ip : storedIps) {
+            if (!ips.contains(ip)) {
+                ips.append(ip);
+            }
+        }
+    }
+    return ips.join(QStringLiteral(", "));
+}
+
+QVariantMap sourceManagedVpnSites(const QJsonObject &serverConfig, RouteMode mode)
+{
+    if (mode != RouteMode::VpnAllExceptSites) {
+        return {};
+    }
+    if (serverConfig.contains(configKey::managedSplitTunnelExceptSourceSites)) {
+        return normalizedManagedSites(serverConfig.value(configKey::managedSplitTunnelExceptSourceSites));
+    }
+    if (serverConfig.contains(configKey::managedSplitTunnelExceptSites)) {
+        return normalizedManagedSites(serverConfig.value(configKey::managedSplitTunnelExceptSites));
+    }
+    return normalizedManagedSites(serverConfig.value(configKey::serverExcept));
+}
+
+QVariantMap routingManagedVpnSites(const QJsonObject &serverConfig, RouteMode mode)
+{
+    if (mode != RouteMode::VpnAllExceptSites) {
+        return {};
+    }
+
+    const QVariantMap sourceSites = sourceManagedVpnSites(serverConfig, mode);
+    QVariantMap resolvedSites = normalizedManagedSites(serverConfig.value(configKey::serverExcept));
+    const QVariantMap clientResolvedSites =
+            normalizedManagedSites(serverConfig.value(configKey::managedSplitTunnelClientResolvedExceptSites));
+
+    if (serverConfig.contains(configKey::managedSplitTunnelExceptSourceSites)
+        || serverConfig.contains(configKey::managedSplitTunnelExceptSites)) {
+        QVariantMap sites;
+        for (auto it = sourceSites.constBegin(); it != sourceSites.constEnd(); ++it) {
+            const QString mergedIps = mergeSplitTunnelIpValues({ it.value().toString(),
+                                                                 resolvedSites.value(it.key()).toString(),
+                                                                 clientResolvedSites.value(it.key()).toString() });
+            sites.insert(it.key(), mergedIps);
+        }
+        return sites;
+    }
+
+    QVariantMap sites = sourceSites;
+    mergeSitesMap(sites, resolvedSites);
+    mergeSitesMap(sites, clientResolvedSites);
+    return sites;
+}
+}
 
 SecureServersRepository::SecureServersRepository(SecureQSettings* settings, QObject *parent)
     : QObject(parent), m_settings(settings)
@@ -174,6 +295,141 @@ void SecureServersRepository::clearLastConnectionConfig(int serverIndex, DockerC
     containerCfg.protocolConfig.clearClientConfig();
     
     setContainerConfig(serverIndex, container, containerCfg);
+}
+
+QJsonObject SecureServersRepository::serverJson(int index) const
+{
+    if (index < 0 || index >= m_servers.size()) {
+        return {};
+    }
+    return m_servers.at(index).toJson();
+}
+
+void SecureServersRepository::editServerJson(int index, const QJsonObject &serverJson)
+{
+    editServer(index, ServerConfig::fromJson(serverJson));
+}
+
+QVariantMap SecureServersRepository::managedVpnSites(int serverIndex, RouteMode mode) const
+{
+    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+        return {};
+    }
+    return sourceManagedVpnSites(serverJson(serverIndex), mode);
+}
+
+QVariantMap SecureServersRepository::managedVpnSitesForRouting(int serverIndex, RouteMode mode) const
+{
+    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+        return {};
+    }
+    return routingManagedVpnSites(serverJson(serverIndex), mode);
+}
+
+void SecureServersRepository::setManagedVpnSites(int serverIndex, RouteMode mode, const QVariantMap &sites)
+{
+    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+        return;
+    }
+
+    const QStringList keys = managedSitesKeys(mode);
+    if (keys.isEmpty()) {
+        return;
+    }
+
+    QJsonObject config = serverJson(serverIndex);
+    const QJsonObject jsonSites = QJsonObject::fromVariantMap(sites);
+    for (const QString &key : keys) {
+        config.insert(key, jsonSites);
+    }
+    config.remove(configKey::serverExcept);
+    config.remove(configKey::managedSplitTunnelClientResolvedExceptSites);
+    config.remove(configKey::managedSplitTunnelClientResolvedAt);
+    editServerJson(serverIndex, config);
+}
+
+bool SecureServersRepository::addManagedVpnSite(int serverIndex, RouteMode mode, const QString &site, const QString &ip)
+{
+    QVariantMap sites = managedVpnSites(serverIndex, mode);
+    if (sites.contains(site) && ip.isEmpty()) {
+        return false;
+    }
+
+    sites.insert(site, ip);
+    setManagedVpnSites(serverIndex, mode, sites);
+    return true;
+}
+
+void SecureServersRepository::addManagedVpnSites(int serverIndex, RouteMode mode, const QMap<QString, QString> &sites)
+{
+    QVariantMap allSites = managedVpnSites(serverIndex, mode);
+    for (auto it = sites.constBegin(); it != sites.constEnd(); ++it) {
+        if (allSites.contains(it.key()) && allSites.value(it.key()) == it.value()) {
+            continue;
+        }
+        allSites.insert(it.key(), it.value());
+    }
+
+    setManagedVpnSites(serverIndex, mode, allSites);
+}
+
+void SecureServersRepository::removeManagedVpnSite(int serverIndex, RouteMode mode, const QString &site)
+{
+    QVariantMap sites = managedVpnSites(serverIndex, mode);
+    if (!sites.contains(site)) {
+        return;
+    }
+
+    sites.remove(site);
+    setManagedVpnSites(serverIndex, mode, sites);
+}
+
+void SecureServersRepository::removeAllManagedVpnSites(int serverIndex, RouteMode mode)
+{
+    setManagedVpnSites(serverIndex, mode, {});
+}
+
+bool SecureServersRepository::isManagedSplitTunnelingForceEnabled(int serverIndex) const
+{
+    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+        return false;
+    }
+    return serverJson(serverIndex).value(configKey::managedSplitTunnelForceEnabled).toBool(false);
+}
+
+void SecureServersRepository::setManagedSplitTunnelingForceEnabled(int serverIndex, bool enabled)
+{
+    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+        return;
+    }
+
+    QJsonObject config = serverJson(serverIndex);
+    if (enabled) {
+        config.insert(configKey::managedSplitTunnelForceEnabled, true);
+    } else {
+        config.remove(configKey::managedSplitTunnelForceEnabled);
+    }
+    editServerJson(serverIndex, config);
+}
+
+RouteMode SecureServersRepository::effectiveSiteRouteMode(int serverIndex, bool localSplitEnabled, RouteMode localRouteMode) const
+{
+    if (localSplitEnabled) {
+        const RouteMode currentMode = localRouteMode == RouteMode::VpnAllSites
+                ? RouteMode::VpnOnlyForwardSites
+                : localRouteMode;
+        if (currentMode == RouteMode::VpnOnlyForwardSites || currentMode == RouteMode::VpnAllExceptSites) {
+            return currentMode;
+        }
+        return RouteMode::VpnAllSites;
+    }
+
+    if (isManagedSplitTunnelingForceEnabled(serverIndex)
+        && !managedVpnSitesForRouting(serverIndex, RouteMode::VpnAllExceptSites).isEmpty()) {
+        return RouteMode::VpnAllExceptSites;
+    }
+
+    return RouteMode::VpnAllSites;
 }
 
 ServerCredentials SecureServersRepository::serverCredentials(int index) const

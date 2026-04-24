@@ -6,6 +6,7 @@
 #include <QString>
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
+#include <QStringList>
 #include <QTimer>
 
 #include "core/protocols/vpnProtocol.h"
@@ -41,10 +42,13 @@ public:
     QSharedPointer<VpnProtocol> vpnProtocol() const;
 
     const QString &remoteAddress() const;
+    int serverIndex() const;
+    QString serverRoutingRulesSyncHost() const;
     void addSitesRoutes(const QString &gw, amnezia::RouteMode mode);
 
 #ifdef Q_OS_ANDROID
-    void restoreConnection();
+    void restoreConnection(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration,
+                           Vpn::ConnectionState state);
 #endif
 
 public slots:
@@ -79,6 +83,11 @@ private:
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
+    int m_serverIndex = -1;
+    DockerContainer m_container = DockerContainer::None;
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    bool m_reconnectPending = false;
+#endif
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
@@ -93,6 +102,10 @@ private:
    Vpn::ConnectionState m_connectionState;
 
    void createProtocolConnections();
+   QStringList serverRoutingRulesSyncHosts() const;
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+   void startIosVpnWithCurrentConfig();
+#endif
 
    void appendSplitTunnelingConfig();
    void appendKillSwitchConfig();

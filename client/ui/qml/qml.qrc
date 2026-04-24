@@ -97,6 +97,7 @@
         <file>Pages2/PageSettingsServerProtocol.qml</file>
         <file>Pages2/PageSettingsServerProtocols.qml</file>
         <file>Pages2/PageSettingsServerServices.qml</file>
+        <file>Pages2/PageSettingsServerManagedSplitTunneling.qml</file>
         <file>Pages2/PageSettingsServersList.qml</file>
         <file>Pages2/PageSettingsSplitTunneling.qml</file>
         <file>Pages2/PageSettingsNewsNotifications.qml</file>

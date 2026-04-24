@@ -5311,4 +5311,140 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation>Зберегти</translation>
     </message>
 </context>
+<context>
+    <name>PageSettingsServerServices</name>
+    <message>
+        <source>Server routing rules</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Configure domains and IPs that this server adds to client split tunneling</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsServerManagedSplitTunneling</name>
+    <message>
+        <source>Server routing rules</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>These rules are stored with the server config and are applied in Amnezia VPN only when this server is active.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Force split tunneling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>For clients with split tunneling disabled, enable bypass mode and apply these server bypass rules. Clients using the opposite split tunneling mode keep their own settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>website or IP/subnet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Additional options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save site list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save sites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sites files (*.json)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clear site list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clear site list?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All sites will be removed from list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import a list of sites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Replace site list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open sites file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add imported sites to existing ones</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsSplitTunneling</name>
+    <message>
+        <source>Managed by server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server-managed rules are locked. They are used only when this server is active and the current split tunneling mode applies this list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SitesController</name>
+    <message>
+        <source>Failed to parse JSON data: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The JSON data is not an array</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server routing rules are available only for server admins</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Site should be a domain, IP address, or subnet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Managed site updated: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Managed site removed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to publish server routing rules for clients</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

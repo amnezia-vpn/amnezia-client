@@ -49,7 +49,7 @@ public:
     virtual ~IosController() override = default;
 
     bool initialize();
-    bool connectVpn(amnezia::Proto proto, const QJsonObject &configuration);
+    bool connectVpn(amnezia::Proto proto, const QJsonObject &configuration, bool restart = false);
     void disconnectVpn();
 
     void vpnStatusDidChange(void *pNotification);

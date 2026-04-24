@@ -22,12 +22,12 @@ namespace
 AndroidController::AndroidController() : QObject()
 {
     connect(this, &AndroidController::status, this,
-            [this](AndroidController::ConnectionState state) {
+            [this](AndroidController::ConnectionState state, int serverIndex) {
                 qDebug() << "Android event: status =" << textConnectionState(state);
                 if (isWaitingStatus) {
                     qDebug() << "Initialization by service status";
                     isWaitingStatus = false;
-                    emit initConnectionState(convertState(state));
+                    emit initConnectionState(convertState(state), serverIndex);
                 }
             },
             Qt::QueuedConnection);
@@ -37,7 +37,8 @@ AndroidController::AndroidController() : QObject()
         [this]() {
             qDebug() << "Android event: service disconnected";
             isWaitingStatus = true;
-            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            // This is the Android Activity-to-service binding state, not the VPN
+            // tunnel state. Actual tunnel updates arrive via vpnStateChanged/status.
         },
         Qt::QueuedConnection);
 
@@ -89,7 +90,7 @@ bool AndroidController::initialize()
     qDebug() << "Initialize AndroidController";
 
     const JNINativeMethod methods[] = {
-        {"onStatus", "(I)V", reinterpret_cast<void *>(onStatus)},
+        {"onStatus", "(II)V", reinterpret_cast<void *>(onStatus)},
         {"onServiceDisconnected", "()V", reinterpret_cast<void *>(onServiceDisconnected)},
         {"onServiceError", "()V", reinterpret_cast<void *>(onServiceError)},
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
@@ -443,14 +444,14 @@ QString AndroidController::textConnectionState(AndroidController::ConnectionStat
 
 // JNI functions called by Android
 // static
-void AndroidController::onStatus(JNIEnv *env, jobject thiz, jint stateCode)
+void AndroidController::onStatus(JNIEnv *env, jobject thiz, jint stateCode, jint serverIndex)
 {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
 
     auto state = ConnectionState(stateCode);
 
-    emit AndroidController::instance()->status(state);
+    emit AndroidController::instance()->status(state, serverIndex);
 }
 
 // static

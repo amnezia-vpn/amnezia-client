@@ -26,6 +26,7 @@ struct ApiV2ServerConfig {
     DockerContainer defaultContainer;
     QString dns1;
     QString dns2;
+    QJsonObject serverRoutingRules;
     
     QString name;
     bool nameOverriddenByUser = false;

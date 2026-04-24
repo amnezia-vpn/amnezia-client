@@ -44,6 +44,7 @@ public slots:
 
 signals:
     void connectionStateChanged();
+    void serverRoutingRulesChanged(int serverIndex);
 
     void connectionErrorOccurred(ErrorCode errorCode);
     void reconnectWithUpdatedContainer(const QString &message);

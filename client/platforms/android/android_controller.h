@@ -61,7 +61,7 @@ public:
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
-    void status(ConnectionState state);
+    void status(ConnectionState state, int serverIndex);
     void serviceDisconnected();
     void serviceError();
     void vpnPermissionRejected();
@@ -71,7 +71,7 @@ signals:
     void fileOpened(QString uri);
     void configImported(QString config);
     void importConfigFromOutside(QString config);
-    void initConnectionState(Vpn::ConnectionState state);
+    void initConnectionState(Vpn::ConnectionState state, int serverIndex);
     void authenticationResult(bool result);
     void imeInsetsChanged(int heightDp);
     void systemBarsInsetsChanged(int navBarHeightDp, int statusBarHeightDp);
@@ -94,7 +94,7 @@ private:
     static QString textConnectionState(ConnectionState state);
 
     // JNI functions called by Android
-    static void onStatus(JNIEnv *env, jobject thiz, jint stateCode);
+    static void onStatus(JNIEnv *env, jobject thiz, jint stateCode, jint serverIndex);
     static void onServiceDisconnected(JNIEnv *env, jobject thiz);
     static void onServiceError(JNIEnv *env, jobject thiz);
     static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);

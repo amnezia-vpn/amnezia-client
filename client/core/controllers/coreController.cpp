@@ -66,6 +66,9 @@ void CoreController::initModels()
     m_ipSplitTunnelingModel = new IpSplitTunnelingModel(this);
     setQmlContextProperty("IpSplitTunnelingModel", m_ipSplitTunnelingModel);
 
+    m_managedExceptSitesModel = new IpSplitTunnelingModel(this);
+    setQmlContextProperty("ManagedExceptSitesModel", m_managedExceptSitesModel);
+
     m_allowedDnsModel = new AllowedDnsModel(this);
     setQmlContextProperty("AllowedDnsModel", m_allowedDnsModel);
 
@@ -189,6 +192,19 @@ void CoreController::initControllers()
 
     m_serversUiController = new ServersUiController(m_serversController, m_settingsController, m_serversModel, m_containersModel, m_defaultServerContainersModel, this);
     setQmlContextProperty("ServersUiController", m_serversUiController);
+
+    m_sitesController = new SitesController(m_serversRepository, m_serversUiController, m_installController, m_managedExceptSitesModel, this);
+    setQmlContextProperty("SitesController", m_sitesController);
+    connect(m_serversUiController, &ServersUiController::processedServerIndexChanged,
+            m_sitesController, [this]() { m_sitesController->reloadManagedSites(); });
+    connect(m_connectionController, &ConnectionController::serverRoutingRulesChanged,
+            m_sitesController, [this](int serverIndex) {
+                if (m_serversUiController && serverIndex == m_serversUiController->getProcessedServerIndex()) {
+                    m_sitesController->reloadManagedSites();
+                }
+            });
+    connect(m_sitesController, &SitesController::managedSplitTunnelingRulesPublished,
+            m_connectionController, &ConnectionController::onManagedSplitTunnelingRulesPublished);
 
     m_ipSplitTunnelingUiController = new IpSplitTunnelingUiController(m_ipSplitTunnelingController, m_ipSplitTunnelingModel, this);
     setQmlContextProperty("IpSplitTunnelingController", m_ipSplitTunnelingUiController);

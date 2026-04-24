@@ -214,7 +214,7 @@ bool IosController::initialize()
     return ok;
 }
 
-bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configuration)
+bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configuration, bool restart)
 {
     m_proto = proto;
     m_rawConfig = configuration;
@@ -256,8 +256,13 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
                     m_currentTunnel = manager;
                     qDebug() << "IosController::connectVpn : Using existing tunnel:" << manager.localizedDescription;
                     if (manager.connection.status == NEVPNStatusConnected) {
-                        emit connectionStateChanged(Vpn::ConnectionState::Connected);
-                        return;
+                        if (!restart) {
+                            emit connectionStateChanged(Vpn::ConnectionState::Connected);
+                            return;
+                        }
+                        if ([manager.connection isKindOfClass:[NETunnelProviderSession class]]) {
+                            [(NETunnelProviderSession *)manager.connection stopTunnel];
+                        }
                     }
 
                     break;
@@ -650,6 +655,14 @@ bool IosController::setupSSXray()
     QJsonObject finalConfig;
     finalConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1]);
     finalConfig.insert(configKey::dns2, m_rawConfig[configKey::dns2]);
+    finalConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
+    for (int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    finalConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
     finalConfig.insert(configKey::config, ssXrayConfigStr);
 
     QJsonDocument finalConfigDoc(finalConfig);

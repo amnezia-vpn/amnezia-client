@@ -10,6 +10,8 @@ class IpSplitTunnelingModel : public QAbstractListModel
     Q_OBJECT
 
 public:
+    Q_PROPERTY(int count READ count NOTIFY countChanged)
+
     enum Roles {
         UrlRole = Qt::UserRole + 1,
         IpRole
@@ -20,9 +22,13 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    int count() const;
 
 public slots:
     void updateModel(const QVector<QPair<QString, QString>> &sites);
+
+signals:
+    void countChanged();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

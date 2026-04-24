@@ -21,6 +21,7 @@ struct NativeServerConfig {
     DockerContainer defaultContainer;
     QString dns1;
     QString dns2;
+    QJsonObject serverRoutingRules;
     
     bool hasContainers() const;
     ContainerConfig containerConfig(DockerContainer container) const;

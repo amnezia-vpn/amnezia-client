@@ -24,7 +24,8 @@ struct ApiV1ServerConfig {
     DockerContainer defaultContainer;
     QString dns1;
     QString dns2;
-    
+    QJsonObject serverRoutingRules;
+
     QString name;
     QString protocol;
     QString apiEndpoint;

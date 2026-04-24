@@ -95,6 +95,15 @@ namespace amnezia
 
         constexpr QLatin1String splitTunnelSites("splitTunnelSites");
         constexpr QLatin1String splitTunnelType("splitTunnelType");
+        constexpr QLatin1String serverForward("server.forward");
+        constexpr QLatin1String serverExcept("server.except");
+        constexpr QLatin1String managedSplitTunnelForwardSites("managedSplitTunnelForwardSites");
+        constexpr QLatin1String managedSplitTunnelExceptSites("managedSplitTunnelExceptSites");
+        constexpr QLatin1String managedSplitTunnelExceptSourceSites("managedSplitTunnelExceptSourceSites");
+        constexpr QLatin1String managedSplitTunnelClientResolvedExceptSites("managedSplitTunnelClientResolvedExceptSites");
+        constexpr QLatin1String managedSplitTunnelClientResolvedAt("managedSplitTunnelClientResolvedAt");
+        constexpr QLatin1String managedSplitTunnelForceEnabled("managedSplitTunnelForceEnabled");
+        constexpr QLatin1String serverRoutingRulesSyncHost("serverRoutingRulesSyncHost");
 
         constexpr QLatin1String splitTunnelApps("splitTunnelApps");
         constexpr QLatin1String appSplitTunnelType("appSplitTunnelType");

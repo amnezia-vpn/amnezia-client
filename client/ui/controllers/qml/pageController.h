@@ -25,6 +25,7 @@ namespace PageLoader
         PageSettingsServerInfo,
         PageSettingsServerProtocols,
         PageSettingsServerServices,
+        PageSettingsServerManagedSplitTunneling,
         PageSettingsServerProtocol,
         PageSettingsConnection,
         PageSettingsDns,

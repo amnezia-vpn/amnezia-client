@@ -1,5 +1,7 @@
 #include "serverConfig.h"
 
+#include <QStringList>
+
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/networkUtilities.h"
 #include "core/models/selfhosted/selfHostedServerConfig.h"
@@ -15,6 +17,50 @@ namespace amnezia
 {
 
 using namespace ContainerEnumNS;
+
+namespace
+{
+QStringList serverRoutingRuleKeys()
+{
+    return {
+        QString(configKey::serverForward),
+        QString(configKey::serverExcept),
+        QString(configKey::managedSplitTunnelForwardSites),
+        QString(configKey::managedSplitTunnelExceptSites),
+        QString(configKey::managedSplitTunnelExceptSourceSites),
+        QString(configKey::managedSplitTunnelClientResolvedExceptSites),
+        QString(configKey::managedSplitTunnelClientResolvedAt),
+        QString(configKey::managedSplitTunnelForceEnabled),
+        QString(configKey::serverRoutingRulesSyncHost)
+    };
+}
+
+QJsonObject extractServerRoutingRules(const QJsonObject &json)
+{
+    QJsonObject rules;
+    for (const QString &key : serverRoutingRuleKeys()) {
+        if (json.contains(key)) {
+            rules.insert(key, json.value(key));
+        }
+    }
+    return rules;
+}
+
+void appendServerRoutingRules(QJsonObject &json, const QJsonObject &rules)
+{
+    for (auto it = rules.constBegin(); it != rules.constEnd(); ++it) {
+        json.insert(it.key(), it.value());
+    }
+}
+
+void loadServerRoutingRules(ServerConfig &config, const QJsonObject &json)
+{
+    const QJsonObject rules = extractServerRoutingRules(json);
+    config.visit([&rules](auto &server) {
+        server.serverRoutingRules = rules;
+    });
+}
+}
 
 QString ServerConfig::description() const
 {
@@ -122,12 +168,17 @@ bool ServerConfig::isApiConfig() const
 
 QJsonObject ServerConfig::toJson() const
 {
-    return std::visit([](const auto& v) { return v.toJson(); }, data);
+    QJsonObject json = std::visit([](const auto& v) { return v.toJson(); }, data);
+    std::visit([&json](const auto& v) {
+        appendServerRoutingRules(json, v.serverRoutingRules);
+    }, data);
+    return json;
 }
 
 ServerConfig ServerConfig::fromJson(const QJsonObject& json)
 {
     apiDefs::ConfigType configType = apiUtils::getConfigType(json);
+    ServerConfig result;
     
     switch (configType) {
     case apiDefs::ConfigType::SelfHosted: {
@@ -152,18 +203,24 @@ ServerConfig ServerConfig::fromJson(const QJsonObject& json)
         }
         
         if (hasThirdPartyConfig) {
-            return ServerConfig{NativeServerConfig::fromJson(json)};
+            result = ServerConfig{NativeServerConfig::fromJson(json)};
         } else {
-            return ServerConfig{SelfHostedServerConfig::fromJson(json)};
+            result = ServerConfig{SelfHostedServerConfig::fromJson(json)};
         }
+        loadServerRoutingRules(result, json);
+        return result;
     }
     case apiDefs::ConfigType::AmneziaPremiumV1:
     case apiDefs::ConfigType::AmneziaFreeV2:
-        return ServerConfig{ApiV1ServerConfig::fromJson(json)};
+        result = ServerConfig{ApiV1ServerConfig::fromJson(json)};
+        loadServerRoutingRules(result, json);
+        return result;
     case apiDefs::ConfigType::AmneziaPremiumV2:
     case apiDefs::ConfigType::AmneziaFreeV3:
     case apiDefs::ConfigType::ExternalPremium:
-        return ServerConfig{ApiV2ServerConfig::fromJson(json)};
+        result = ServerConfig{ApiV2ServerConfig::fromJson(json)};
+        loadServerRoutingRules(result, json);
+        return result;
     default: {
         // Check if any container has isThirdPartyConfig
         bool hasThirdPartyConfig = false;
@@ -188,10 +245,12 @@ ServerConfig ServerConfig::fromJson(const QJsonObject& json)
         }
         
         if (hasThirdPartyConfig) {
-            return ServerConfig{NativeServerConfig::fromJson(json)};
+            result = ServerConfig{NativeServerConfig::fromJson(json)};
         } else {
-            return ServerConfig{SelfHostedServerConfig::fromJson(json)};
+            result = ServerConfig{SelfHostedServerConfig::fromJson(json)};
         }
+        loadServerRoutingRules(result, json);
+        return result;
     }
     }
 }

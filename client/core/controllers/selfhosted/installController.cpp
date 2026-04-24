@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QFutureWatcher>
+#include <QJsonArray>
 #include <QRegularExpression>
 #include <QThread>
 #include <QtConcurrent>
@@ -54,6 +55,299 @@ using namespace ProtocolUtils;
 namespace
 {
     Logger logger("InstallController");
+    constexpr char serverRoutingRulesPublishErrorMarker[] = "__AMNEZIA_ROUTING_RULES_PUBLISH_ERROR__";
+    constexpr char serverRoutingRulesImage[] = "busybox:1.36.1";
+    constexpr char serverRoutingRulesSourceFileName[] = "rules-source.txt";
+    constexpr char serverRoutingRulesScriptFileName[] = "rules-server.sh";
+    constexpr char serverRoutingRulesReadyFileName[] = "rules-ready";
+    constexpr int serverRoutingRulesResolveIntervalSeconds = 24 * 60 * 60;
+    constexpr int serverRoutingRulesResolveJitterSeconds = 60 * 60;
+    constexpr int serverRoutingRulesInitialResolveTimeoutSeconds = 90;
+    constexpr int serverRoutingRulesInitialResolveRetrySeconds = 5;
+
+    QString serverRoutingRulesTunnelInterface(DockerContainer container)
+    {
+        if (container == DockerContainer::Awg2) {
+            return QStringLiteral("awg0");
+        }
+        if (container == DockerContainer::Awg || container == DockerContainer::WireGuard) {
+            return QStringLiteral("wg0");
+        }
+        if (container == DockerContainer::OpenVpn) {
+            return QStringLiteral("tun0");
+        }
+        return {};
+    }
+
+    QJsonObject normalizedServerRoutingRulesSites(const QJsonValue &value)
+    {
+        QJsonObject sites;
+        if (value.isObject()) {
+            return value.toObject();
+        }
+        if (!value.isArray()) {
+            return sites;
+        }
+
+        const QJsonArray items = value.toArray();
+        for (const QJsonValue &item : items) {
+            if (!item.isObject()) {
+                continue;
+            }
+            const QJsonObject siteObject = item.toObject();
+            const QString site = siteObject.value("hostname").toString(siteObject.value("url").toString()).trimmed();
+            if (!site.isEmpty()) {
+                sites.insert(site, siteObject.value("ip").toString());
+            }
+        }
+        return sites;
+    }
+
+    QJsonObject serverRoutingRulesSourceSites(const QJsonObject &rules)
+    {
+        QJsonValue sitesValue = rules.value(configKey::managedSplitTunnelExceptSourceSites);
+        if (!sitesValue.isObject() && !sitesValue.isArray()) {
+            sitesValue = rules.value(configKey::managedSplitTunnelExceptSites);
+        }
+        if (!sitesValue.isObject() && !sitesValue.isArray()) {
+            sitesValue = rules.value(configKey::serverExcept);
+        }
+        return normalizedServerRoutingRulesSites(sitesValue);
+    }
+
+    QStringList splitTunnelStoredIps(const QString &value)
+    {
+        QStringList ips;
+        const QStringList tokens = value.split(QRegularExpression("[,;\\s]+"), Qt::SkipEmptyParts);
+        for (const QString &token : tokens) {
+            const QString ip = token.trimmed();
+            if (NetworkUtilities::checkIpSubnetFormat(ip) && !ips.contains(ip)) {
+                ips.append(ip);
+            }
+        }
+        return ips;
+    }
+
+    QByteArray serverRoutingRulesSourceData(const QJsonObject &rules)
+    {
+        QByteArray data;
+        const QJsonObject sites = serverRoutingRulesSourceSites(rules);
+        for (auto it = sites.constBegin(); it != sites.constEnd(); ++it) {
+            const QString sourceValue = it.key().trimmed().toLower();
+            if (sourceValue.isEmpty()) {
+                continue;
+            }
+
+            const QString fallback = splitTunnelStoredIps(it.value().toString()).join(QStringLiteral(", "));
+
+            const bool isIp = NetworkUtilities::checkIpSubnetFormat(sourceValue);
+            data.append(isIp ? "I|" : "D|");
+            data.append(sourceValue.toUtf8());
+            data.append('|');
+            data.append(fallback.toUtf8());
+            data.append('\n');
+        }
+        return data;
+    }
+
+    QByteArray serverRoutingRulesResolverScript(const QJsonObject &rules)
+    {
+        const bool forceEnabled = rules.value(configKey::managedSplitTunnelForceEnabled).toBool(false);
+        QString script = QStringLiteral(R"SERVER_RULES_SH(#!/bin/sh
+RULES_FILE="/www/__RULES_FILE__"
+SOURCE_FILE="/www/__SOURCE_FILE__"
+READY_FILE="/www/__READY_FILE__"
+SERVER_EXCEPT_KEY="__SERVER_EXCEPT_KEY__"
+MANAGED_EXCEPT_KEY="__MANAGED_EXCEPT_KEY__"
+SOURCE_EXCEPT_KEY="__SOURCE_EXCEPT_KEY__"
+FORCE_KEY="__FORCE_KEY__"
+FORCE_ENABLED="__FORCE_ENABLED__"
+RESOLVE_INTERVAL_SECONDS=__RESOLVE_INTERVAL_SECONDS__
+RESOLVE_JITTER_SECONDS=__RESOLVE_JITTER_SECONDS__
+INITIAL_RESOLVE_TIMEOUT_SECONDS=__INITIAL_RESOLVE_TIMEOUT_SECONDS__
+INITIAL_RESOLVE_RETRY_SECONDS=__INITIAL_RESOLVE_RETRY_SECONDS__
+resolve_deadline_seconds=0
+
+json_escape() {
+    printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+regex_escape() {
+    printf '%s' "$1" | sed 's#[][\\.^$*]#\\&#g'
+}
+
+stored_rule_ips() {
+    [ -s "$RULES_FILE" ] || {
+        printf ''
+        return 0
+    }
+    server_key="$(regex_escape "$(json_escape "$SERVER_EXCEPT_KEY")")"
+    lookup_key="$(regex_escape "$(json_escape "$1")")"
+    server_rules_body="$(sed -n 's#.*"'"$server_key"'":{\([^}]*\)}.*#\1#p' "$RULES_FILE" | head -n 1)"
+    printf '%s\n' "$server_rules_body" | sed -n 's#.*"'"$lookup_key"'":"\([^"]*\)".*#\1#p' | head -n 1
+}
+
+current_time_seconds() {
+    date +%s 2>/dev/null || echo 0
+}
+
+resolve_timed_out() {
+    [ "${resolve_deadline_seconds:-0}" -gt 0 ] || return 1
+    now="$(current_time_seconds)"
+    [ "$now" -gt 0 ] || return 1
+    [ "$now" -ge "$resolve_deadline_seconds" ]
+}
+
+resolve_domain_ips() {
+    if command -v timeout >/dev/null 2>&1; then
+        resolver_output="$(timeout 3 nslookup "$1" 2>/dev/null || true)"
+    else
+        resolver_output="$(nslookup "$1" 2>/dev/null || true)"
+    fi
+    resolved_list="$(printf '%s\n' "$resolver_output" | awk '/^Address[0-9 ]*:/ {print $NF}' | grep -E '^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$' | sort -u)"
+    resolved_ips=""
+    for resolved_ip in $resolved_list; do
+        if [ -z "$resolved_ips" ]; then
+            resolved_ips="$resolved_ip"
+        else
+            resolved_ips="$resolved_ips, $resolved_ip"
+        fi
+    done
+    printf '%s' "$resolved_ips"
+}
+
+append_rule_entry() {
+    file_var="$1"
+    key="$(json_escape "$2")"
+    value="$(json_escape "$3")"
+    eval first=\"\${${file_var}_first}\"
+    if [ "$first" = "1" ]; then
+        eval ${file_var}_first=0
+    else
+        printf ',' >> "$(eval echo \$$file_var)"
+    fi
+    printf '"%s":"%s"' "$key" "$value" >> "$(eval echo \$$file_var)"
+}
+
+build_rules() {
+    allow_unresolved="${1:-0}"
+    [ -f "$SOURCE_FILE" ] || return 0
+
+    resolved_body_file="/tmp/server-routing-rules-resolved.$$"
+    source_body_file="/tmp/server-routing-rules-source.$$"
+    : > "$resolved_body_file" || return 1
+    : > "$source_body_file" || {
+        rm -f "$resolved_body_file"
+        return 1
+    }
+    resolved_body_file_first=1
+    source_body_file_first=1
+    unresolved_count=0
+
+    while IFS='|' read -r source_kind source_value source_fallback; do
+        [ -z "$source_value" ] && continue
+        if [ "$source_kind" = "I" ]; then
+            append_rule_entry resolved_body_file "$source_value" ""
+            append_rule_entry source_body_file "$source_value" ""
+        elif [ "$source_kind" = "D" ]; then
+            append_rule_entry source_body_file "$source_value" "$source_fallback"
+            resolved_ips=""
+            if ! resolve_timed_out; then
+                resolved_ips="$(resolve_domain_ips "$source_value")"
+            fi
+            if [ -z "$resolved_ips" ]; then
+                resolved_ips="$(stored_rule_ips "$source_value")"
+            fi
+            if [ -z "$resolved_ips" ]; then
+                resolved_ips="$source_fallback"
+            fi
+            if [ -z "$resolved_ips" ]; then
+                unresolved_count=$((unresolved_count + 1))
+                continue
+            fi
+            append_rule_entry resolved_body_file "$source_value" "$resolved_ips"
+        fi
+    done < "$SOURCE_FILE"
+
+    if [ "$unresolved_count" -ne 0 ] && [ "$allow_unresolved" != "1" ]; then
+        rm -f "$resolved_body_file" "$source_body_file"
+        return 2
+    fi
+
+    tmp_file="${RULES_FILE}.tmp"
+    if {
+        printf '{"version":1,"%s":{' "$SERVER_EXCEPT_KEY"
+        cat "$resolved_body_file"
+        printf '},"%s":{' "$MANAGED_EXCEPT_KEY"
+        cat "$source_body_file"
+        printf '},"%s":{' "$SOURCE_EXCEPT_KEY"
+        cat "$source_body_file"
+        printf '}'
+        if [ "$FORCE_ENABLED" = "1" ]; then
+            printf ',"%s":true' "$FORCE_KEY"
+        fi
+        printf '}'
+    } > "$tmp_file" && mv "$tmp_file" "$RULES_FILE"; then
+        printf 'ready\n' > "$READY_FILE"
+        rm -f "$resolved_body_file" "$source_body_file"
+        return 0
+    fi
+
+    rm -f "$resolved_body_file" "$source_body_file" "$tmp_file"
+    return 1
+}
+
+random_jitter() {
+    jitter_seed="$(od -An -N2 -tu2 /dev/urandom 2>/dev/null | awk '{print $1}')"
+    [ -n "$jitter_seed" ] || jitter_seed="$$"
+    echo $((jitter_seed % RESOLVE_JITTER_SECONDS))
+}
+
+initial_start_seconds="$(current_time_seconds)"
+if [ "$initial_start_seconds" -gt 0 ]; then
+    resolve_deadline_seconds=$((initial_start_seconds + INITIAL_RESOLVE_TIMEOUT_SECONDS))
+    while ! build_rules 0; do
+        if resolve_timed_out; then
+            build_rules 1 && break
+        fi
+        sleep "$INITIAL_RESOLVE_RETRY_SECONDS"
+    done
+else
+    build_rules 0 || build_rules 1
+fi
+resolve_deadline_seconds=0
+
+while [ ! -s "$READY_FILE" ]; do
+    build_rules 1 && break
+    sleep 1
+done
+
+(
+    while :; do
+        jitter="$(random_jitter)"
+        sleep $((RESOLVE_INTERVAL_SECONDS + jitter))
+        build_rules 0 || true
+    done
+) &
+
+busybox httpd -f -p __SYNC_PORT__ -h /www
+)SERVER_RULES_SH");
+
+        script.replace("__RULES_FILE__", QString::fromLatin1(protocols::serverRoutingRules::fileName));
+        script.replace("__SOURCE_FILE__", QString::fromLatin1(serverRoutingRulesSourceFileName));
+        script.replace("__READY_FILE__", QString::fromLatin1(serverRoutingRulesReadyFileName));
+        script.replace("__SERVER_EXCEPT_KEY__", QString(configKey::serverExcept));
+        script.replace("__MANAGED_EXCEPT_KEY__", QString(configKey::managedSplitTunnelExceptSites));
+        script.replace("__SOURCE_EXCEPT_KEY__", QString(configKey::managedSplitTunnelExceptSourceSites));
+        script.replace("__FORCE_KEY__", QString(configKey::managedSplitTunnelForceEnabled));
+        script.replace("__FORCE_ENABLED__", forceEnabled ? QStringLiteral("1") : QStringLiteral("0"));
+        script.replace("__SYNC_PORT__", QString::number(protocols::serverRoutingRules::syncPort));
+        script.replace("__RESOLVE_INTERVAL_SECONDS__", QString::number(serverRoutingRulesResolveIntervalSeconds));
+        script.replace("__RESOLVE_JITTER_SECONDS__", QString::number(serverRoutingRulesResolveJitterSeconds));
+        script.replace("__INITIAL_RESOLVE_TIMEOUT_SECONDS__", QString::number(serverRoutingRulesInitialResolveTimeoutSeconds));
+        script.replace("__INITIAL_RESOLVE_RETRY_SECONDS__", QString::number(serverRoutingRulesInitialResolveRetrySeconds));
+        return script.toUtf8();
+    }
 }
 
 InstallController::InstallController(SecureServersRepository *serversRepository,
@@ -69,6 +363,84 @@ InstallController::InstallController(SecureServersRepository *serversRepository,
 InstallController::~InstallController()
 {
     stopAllSftpMounts();
+}
+
+ErrorCode InstallController::publishServerRoutingRules(const ServerCredentials &credentials, const QJsonObject &rules,
+                                                       DockerContainer container)
+{
+    const QByteArray sourceData = serverRoutingRulesSourceData(rules);
+    SshSession sshSession;
+    ErrorCode errorCode = ErrorCode::NoError;
+
+    const QString sourceTmpFileName = QStringLiteral("/tmp/%1.txt").arg(Utils::getRandomString(16));
+    errorCode = sshSession.uploadFileToHost(credentials, sourceData, sourceTmpFileName);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    const QString scriptTmpFileName = QStringLiteral("/tmp/%1.sh").arg(Utils::getRandomString(16));
+    errorCode = sshSession.uploadFileToHost(credentials, serverRoutingRulesResolverScript(rules), scriptTmpFileName);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    const QString tunnelInterface = serverRoutingRulesTunnelInterface(container);
+    const bool publishTunnelEndpoint = !tunnelInterface.isEmpty();
+    const QString tunnelContainerName = QStringLiteral("%1-%2")
+            .arg(QString::fromLatin1(protocols::serverRoutingRules::tunnelContainerName),
+                 ContainerUtils::containerToString(container));
+
+    QString script = QStringLiteral(R"(
+sudo mkdir -p '__HOST_DIRECTORY__' || echo __ERROR_MARKER__:mkdir
+sudo install -m 0644 '__SOURCE_TMP_FILE__' '__HOST_DIRECTORY__/__SOURCE_FILE__' || echo __ERROR_MARKER__:source_install
+sudo install -m 0755 '__SCRIPT_TMP_FILE__' '__HOST_DIRECTORY__/__SCRIPT_FILE__' || echo __ERROR_MARKER__:script_install
+sudo rm -f '__SOURCE_TMP_FILE__' '__SCRIPT_TMP_FILE__' || true
+sudo rm -f '__HOST_DIRECTORY__/__READY_FILE__' || true
+if ! sudo docker network inspect amnezia-dns-net >/dev/null 2>&1; then sudo docker network create --driver bridge --subnet=172.29.172.0/24 --opt com.docker.network.bridge.name=amn0 amnezia-dns-net || echo __ERROR_MARKER__:network_create; fi
+sudo docker rm -f '__BRIDGE_CONTAINER__' >/dev/null 2>&1 || true
+if ! sudo docker image inspect '__ROUTING_RULES_IMAGE__' >/dev/null 2>&1; then sudo docker pull '__ROUTING_RULES_IMAGE__' >/dev/null || echo __ERROR_MARKER__:image_pull; fi
+sudo docker run -d --log-driver none --restart always --network amnezia-dns-net --ip=__BRIDGE_HOST__ --name '__BRIDGE_CONTAINER__' -v __HOST_DIRECTORY__:/www:rw --entrypoint sh '__ROUTING_RULES_IMAGE__' -c 'sh /www/__SCRIPT_FILE__' || echo __ERROR_MARKER__:bridge_run
+i=0; while [ $i -lt 120 ]; do sudo test -s '__HOST_DIRECTORY__/__READY_FILE__' && break; i=$((i + 1)); sleep 1; done
+sudo test -s '__HOST_DIRECTORY__/__READY_FILE__' || echo __ERROR_MARKER__:rules_ready
+if [ '__PUBLISH_TUNNEL__' = '1' ] && sudo test -s '__HOST_DIRECTORY__/__READY_FILE__'; then if sudo docker ps --format '{{.Names}}' | grep -qx '__VPN_CONTAINER__'; then sudo docker rm -f '__TUNNEL_CONTAINER__' >/dev/null 2>&1 || true; sudo docker exec -i '__VPN_CONTAINER__' sh -c 'while iptables -t nat -D PREROUTING -i __TUNNEL_IFACE__ -p tcp --dport __SYNC_PORT__ -j DNAT --to-destination __BRIDGE_HOST__:__SYNC_PORT__ 2>/dev/null; do :; done' >/dev/null 2>&1 || true; sudo docker run -d --log-driver none --restart always --network container:__VPN_CONTAINER__ --name '__TUNNEL_CONTAINER__' -v __HOST_DIRECTORY__:/www:ro --entrypoint sh '__ROUTING_RULES_IMAGE__' -c 'busybox httpd -f -p __SYNC_PORT__ -h /www' || echo __ERROR_MARKER__:tunnel_run; else echo __ERROR_MARKER__:missing_vpn_container; fi; fi
+sleep 1
+sudo docker ps --format '{{.Names}}' | grep -qx '__BRIDGE_CONTAINER__' || echo __ERROR_MARKER__:missing_bridge_container
+if [ '__PUBLISH_TUNNEL__' = '1' ] && sudo test -s '__HOST_DIRECTORY__/__READY_FILE__'; then sudo docker ps --format '{{.Names}}' | grep -qx '__TUNNEL_CONTAINER__' || echo __ERROR_MARKER__:missing_tunnel_container; fi
+)");
+
+    script.replace("__HOST_DIRECTORY__", QString::fromLatin1(protocols::serverRoutingRules::hostDirectory));
+    script.replace("__SOURCE_TMP_FILE__", sourceTmpFileName);
+    script.replace("__SCRIPT_TMP_FILE__", scriptTmpFileName);
+    script.replace("__SOURCE_FILE__", QString::fromLatin1(serverRoutingRulesSourceFileName));
+    script.replace("__SCRIPT_FILE__", QString::fromLatin1(serverRoutingRulesScriptFileName));
+    script.replace("__READY_FILE__", QString::fromLatin1(serverRoutingRulesReadyFileName));
+    script.replace("__BRIDGE_CONTAINER__", QString::fromLatin1(protocols::serverRoutingRules::containerName));
+    script.replace("__TUNNEL_CONTAINER__", tunnelContainerName);
+    script.replace("__ROUTING_RULES_IMAGE__", QString::fromLatin1(serverRoutingRulesImage));
+    script.replace("__BRIDGE_HOST__", QString::fromLatin1(protocols::serverRoutingRules::syncHost));
+    script.replace("__SYNC_PORT__", QString::number(protocols::serverRoutingRules::syncPort));
+    script.replace("__PUBLISH_TUNNEL__", publishTunnelEndpoint ? QStringLiteral("1") : QStringLiteral("0"));
+    script.replace("__VPN_CONTAINER__", ContainerUtils::containerToString(container));
+    script.replace("__TUNNEL_IFACE__", tunnelInterface);
+    script.replace("__ERROR_MARKER__", QString::fromLatin1(serverRoutingRulesPublishErrorMarker));
+
+    QString publishOutput;
+    auto cbReadOutput = [&publishOutput](const QString &data, libssh::Client &) {
+        publishOutput += data + QStringLiteral("\n");
+        return ErrorCode::NoError;
+    };
+
+    errorCode = sshSession.runScript(credentials, script, cbReadOutput, cbReadOutput);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    if (publishOutput.contains(QString::fromLatin1(serverRoutingRulesPublishErrorMarker))) {
+        qWarning().noquote() << "InstallController::publishServerRoutingRules failed:" << publishOutput;
+        return ErrorCode::ServerDockerFailedError;
+    }
+
+    return ErrorCode::NoError;
 }
 
 ErrorCode InstallController::setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config,

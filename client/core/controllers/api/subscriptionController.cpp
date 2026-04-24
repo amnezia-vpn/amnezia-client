@@ -56,6 +56,27 @@ QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 
     return QStringLiteral("active");
 }
+
+void preserveServerRoutingRules(const QJsonObject &oldConfig, QJsonObject &newConfig)
+{
+    const QStringList keys {
+        QString(configKey::serverForward),
+        QString(configKey::serverExcept),
+        QString(configKey::managedSplitTunnelForwardSites),
+        QString(configKey::managedSplitTunnelExceptSites),
+        QString(configKey::managedSplitTunnelExceptSourceSites),
+        QString(configKey::managedSplitTunnelClientResolvedExceptSites),
+        QString(configKey::managedSplitTunnelClientResolvedAt),
+        QString(configKey::managedSplitTunnelForceEnabled),
+        QString(configKey::serverRoutingRulesSyncHost)
+    };
+
+    for (const QString &key : keys) {
+        if (!newConfig.contains(key) && oldConfig.contains(key)) {
+            newConfig.insert(key, oldConfig.value(key));
+        }
+    }
+}
 }
 
 
@@ -465,6 +486,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     }
     
     updateApiConfigInJson(serverConfigJson, apiV2->apiConfig.serviceType, serviceProtocol, apiV2->apiConfig.userCountryCode, responseBody);
+    preserveServerRoutingRules(serverConfigModel.toJson(), serverConfigJson);
     
     ServerConfig newServerConfigModel = ServerConfig::fromJson(serverConfigJson);
     

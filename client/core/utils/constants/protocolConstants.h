@@ -11,6 +11,17 @@ namespace amnezia
             constexpr char amneziaDnsIp[] = "172.29.172.254";
         }
 
+        namespace serverRoutingRules
+        {
+            constexpr char syncHost[] = "172.29.172.253";
+            constexpr char syncPath[] = "/rules.json";
+            constexpr char containerName[] = "amnezia-routing-rules";
+            constexpr char tunnelContainerName[] = "amnezia-routing-rules-vpn";
+            constexpr char hostDirectory[] = "/opt/amnezia/server-routing-rules";
+            constexpr char fileName[] = "rules.json";
+            constexpr int syncPort = 17864;
+        }
+
         namespace openvpn
         {
             constexpr char defaultSubnetAddress[] = "10.8.0.0";

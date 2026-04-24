@@ -9,6 +9,7 @@
 
 #include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
+#include "core/utils/routeModes.h"
 #include "secureQSettings.h"
 
 using namespace amnezia;
@@ -34,6 +35,19 @@ public:
     ContainerConfig containerConfig(int serverIndex, DockerContainer container) const;
     void setContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config);
     void clearLastConnectionConfig(int serverIndex, DockerContainer container);
+    QJsonObject serverJson(int index) const;
+    void editServerJson(int index, const QJsonObject &serverJson);
+
+    QVariantMap managedVpnSites(int serverIndex, RouteMode mode) const;
+    QVariantMap managedVpnSitesForRouting(int serverIndex, RouteMode mode) const;
+    void setManagedVpnSites(int serverIndex, RouteMode mode, const QVariantMap &sites);
+    bool addManagedVpnSite(int serverIndex, RouteMode mode, const QString &site, const QString &ip = "");
+    void addManagedVpnSites(int serverIndex, RouteMode mode, const QMap<QString, QString> &sites);
+    void removeManagedVpnSite(int serverIndex, RouteMode mode, const QString &site);
+    void removeAllManagedVpnSites(int serverIndex, RouteMode mode);
+    bool isManagedSplitTunnelingForceEnabled(int serverIndex) const;
+    void setManagedSplitTunnelingForceEnabled(int serverIndex, bool enabled);
+    RouteMode effectiveSiteRouteMode(int serverIndex, bool localSplitEnabled, RouteMode localRouteMode) const;
 
     ServerCredentials serverCredentials(int index) const;
     bool hasServerWithVpnKey(const QString &vpnKey) const;

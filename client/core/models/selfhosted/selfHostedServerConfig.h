@@ -25,6 +25,7 @@ struct SelfHostedServerConfig {
     DockerContainer defaultContainer;
     QString dns1;
     QString dns2;
+    QJsonObject serverRoutingRules;
     
     std::optional<QString> userName;
     std::optional<QString> password;

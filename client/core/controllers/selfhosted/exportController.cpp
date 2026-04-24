@@ -18,6 +18,15 @@
 
 using namespace amnezia;
 
+namespace
+{
+void removeClientResolvedServerRoutingRules(QJsonObject &serverConfig)
+{
+    serverConfig.remove(configKey::managedSplitTunnelClientResolvedExceptSites);
+    serverConfig.remove(configKey::managedSplitTunnelClientResolvedAt);
+}
+}
+
 ExportController::ExportController(SecureServersRepository* serversRepository,
                                    SecureAppSettingsRepository* appSettingsRepository,
                                    QObject *parent)
@@ -39,6 +48,7 @@ ExportController::ExportResult ExportController::generateFullAccessConfig(int se
     });
 
     QJsonObject serverJson = serverConfig.toJson();
+    removeClientResolvedServerRoutingRules(serverJson);
     QByteArray compressedConfig = QJsonDocument(serverJson).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = generateVpnUrl(compressedConfig);
@@ -103,6 +113,7 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
     });
 
     QJsonObject serverJson = serverConfig.toJson();
+    removeClientResolvedServerRoutingRules(serverJson);
     QByteArray compressedConfig = QJsonDocument(serverJson).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = generateVpnUrl(compressedConfig);

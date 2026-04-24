@@ -115,7 +115,12 @@ class AmneziaActivity : QtActivity() {
                     ServiceEvent.STATUS -> {
                         if (isWaitingStatus) {
                             isWaitingStatus = false
-                            msg.data?.getStatus()?.let { QtAndroidController.onStatus(it) }
+                            msg.data?.getStatus()?.let { (state) ->
+                                mainScope.launch {
+                                    val serverIndex = VpnStateStore.getVpnState().serverIndex
+                                    QtAndroidController.onStatus(state.ordinal, serverIndex)
+                                }
+                            }
                         }
                     }
 

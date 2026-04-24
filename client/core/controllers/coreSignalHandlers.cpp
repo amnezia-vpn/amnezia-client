@@ -354,9 +354,9 @@ void CoreSignalHandlers::initAndroidSettingsHandler()
 void CoreSignalHandlers::initAndroidConnectionHandler()
 {
 #ifdef Q_OS_ANDROID
-    connect(AndroidController::instance(), &AndroidController::initConnectionState, this, [this](Vpn::ConnectionState state) {
+    connect(AndroidController::instance(), &AndroidController::initConnectionState, this, [this](Vpn::ConnectionState state, int serverIndex) {
         m_coreController->m_connectionUiController->onConnectionStateChanged(state);
-        m_coreController->m_connectionController->restoreConnection();
+        m_coreController->m_connectionController->restoreConnection(state, serverIndex);
     });
     connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, this, [this](QString data) {
         emit m_coreController->m_pageController->goToPageHome();

@@ -170,9 +170,16 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   QJsonArray jsAllowedIPAddesses;
 
   QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
-  QJsonArray defaultAllowedIP = { "0.0.0.0/0", "::/0" };
+  bool hasDefaultIpv4Route = plainAllowedIP.isEmpty();
+  bool hasDefaultIpv6Route = plainAllowedIP.isEmpty();
+  for (const auto &allowedIpValue : plainAllowedIP) {
+    const QString allowedIp = allowedIpValue.toString().trimmed();
+    hasDefaultIpv4Route = hasDefaultIpv4Route || allowedIp == QStringLiteral("0.0.0.0/0");
+    hasDefaultIpv6Route = hasDefaultIpv6Route || allowedIp == QStringLiteral("::/0");
+  }
+  const bool hasDefaultAllowedRoute = hasDefaultIpv4Route || hasDefaultIpv6Route;
 
-  if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
+  if (!hasDefaultAllowedRoute && !plainAllowedIP.isEmpty()) {
     // Use AllowedIP list from WG config because of higher priority
     for (auto v : plainAllowedIP) {
       QString ipRange = v.toString();
@@ -194,17 +201,21 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
     // Use APP split tunnel
       if (splitTunnelType == 0 || splitTunnelType == 2) {
+        if (hasDefaultIpv4Route) {
           QJsonObject range_ipv4;
           range_ipv4.insert("address", "0.0.0.0");
           range_ipv4.insert("range", 0);
           range_ipv4.insert("isIpv6", false);
           jsAllowedIPAddesses.append(range_ipv4);
+        }
 
+        if (hasDefaultIpv6Route) {
           QJsonObject range_ipv6;
           range_ipv6.insert("address", "::");
           range_ipv6.insert("range", 0);
           range_ipv6.insert("isIpv6", true);
           jsAllowedIPAddesses.append(range_ipv6);
+        }
       }
 
       if (splitTunnelType == 1) {

@@ -9,10 +9,10 @@ import org.amnezia.vpn.protocol.Status
  */
 object QtAndroidController {
 
-    fun onStatus(status: Status) = onStatus(status.state)
-    fun onStatus(protocolState: ProtocolState) = onStatus(protocolState.ordinal)
+    fun onStatus(status: Status, serverIndex: Int) = onStatus(status.state, serverIndex)
+    fun onStatus(protocolState: ProtocolState, serverIndex: Int) = onStatus(protocolState.ordinal, serverIndex)
 
-    external fun onStatus(stateCode: Int)
+    external fun onStatus(stateCode: Int, serverIndex: Int)
     external fun onServiceDisconnected()
     external fun onServiceError()
 

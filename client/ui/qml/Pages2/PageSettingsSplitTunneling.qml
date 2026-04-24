@@ -23,8 +23,15 @@ PageType {
     property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
     
     property bool pageEnabled
+    property bool defaultManagedSplitTunnelingForceEnabled: false
+
+    function reloadDefaultManagedRules() {
+        SitesController.reloadDefaultManagedSites()
+        root.defaultManagedSplitTunnelingForceEnabled = SitesController.isDefaultManagedSplitTunnelingForceEnabled()
+    }
 
     Component.onCompleted: {
+        root.reloadDefaultManagedRules()
         if (ConnectionController.isConnected) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
             root.pageEnabled = false
@@ -33,6 +40,32 @@ PageType {
             root.pageEnabled = false
         } else {
             root.pageEnabled = true
+        }
+    }
+
+    Connections {
+        target: ServersUiController
+
+        function onDefaultServerIndexChanged() {
+            root.reloadDefaultManagedRules()
+        }
+    }
+
+    Connections {
+        target: ConnectionController
+
+        function onServerRoutingRulesChanged(serverIndex) {
+            if (serverIndex === ServersUiController.defaultIndex) {
+                root.reloadDefaultManagedRules()
+            }
+        }
+    }
+
+    Connections {
+        target: SitesController
+
+        function onManagedSplitTunnelingForceChanged() {
+            root.defaultManagedSplitTunnelingForceEnabled = SitesController.isDefaultManagedSplitTunnelingForceEnabled()
         }
     }
 
@@ -78,6 +111,13 @@ PageType {
         } else if (routeMode.allExceptSites === currentRouteMode) {
             return 1
         }
+    }
+
+    function isManagedExceptListVisible() {
+        return proxyManagedExceptSitesModel.count > 0
+                && (getRouteModesModelIndex() === 1
+                    || (!IpSplitTunnelingController.isSplitTunnelingEnabled
+                        && root.defaultManagedSplitTunnelingForceEnabled))
     }
 
     ColumnLayout {
@@ -175,7 +215,26 @@ PageType {
         enabled: root.pageEnabled
         clip: true
 
-        model: SortFilterProxyModel {
+        SortFilterProxyModel {
+            id: proxyManagedExceptSitesModel
+            sourceModel: ManagedExceptSitesModel
+            filters: [
+                AnyOf {
+                    RegExpFilter {
+                        roleName: "url"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
+                    RegExpFilter {
+                        roleName: "ip"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
+                }
+            ]
+        }
+
+        SortFilterProxyModel {
             id: proxyIpSplitTunnelingModel
             sourceModel: IpSplitTunnelingModel
             filters: [
@@ -194,40 +253,114 @@ PageType {
             ]
         }
 
-        delegate: ColumnLayout {
+        model: (root.isManagedExceptListVisible() ? proxyManagedExceptSitesModel.count + 1 : 0)
+               + proxyIpSplitTunnelingModel.count
+
+        delegate: Loader {
+            id: rowLoader
+
             width: listView.width
 
-            LabelWithButtonType {
-                id: site
-                Layout.fillWidth: true
+            readonly property bool managedListVisible: root.isManagedExceptListVisible()
+            readonly property int managedHeaderRows: managedListVisible ? 1 : 0
+            readonly property int managedRows: managedListVisible ? proxyManagedExceptSitesModel.count : 0
+            readonly property int managedModelIndex: index - managedHeaderRows
+            readonly property int localModelIndex: index - managedHeaderRows - managedRows
 
-                text: url
-                descriptionText: ip
-                rightImageSource: "qrc:/images/controls/trash.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+            sourceComponent: managedListVisible && index === 0
+                             ? managedHeaderDelegate
+                             : (managedListVisible && index <= managedRows ? managedRuleDelegate : localRuleDelegate)
+        }
 
-                clickedFunction: function() {
-                    var headerText = qsTr("Remove ") + url + "?"
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
+        Component {
+            id: managedHeaderDelegate
 
-                    var yesButtonFunction = function() {
-                        IpSplitTunnelingController.removeSite(proxyIpSplitTunnelingModel.mapToSource(index))
-                        if (!GC.isMobile()) {
-                            site.rightButton.forceActiveFocus()
-                        }
-                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            site.rightButton.forceActiveFocus()
-                        }
-                    }
+            ColumnLayout {
+                width: listView.width
 
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                Header2Type {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 8
+                    Layout.bottomMargin: 4
+
+                    headerText: qsTr("Managed by server")
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.bottomMargin: 8
+
+                    wrapMode: Text.WordWrap
+                    color: AmneziaStyle.color.mutedGray
+                    text: qsTr("Server-managed rules are locked. They are used only when this server is active and the current split tunneling mode applies this list.")
                 }
             }
+        }
 
-            DividerType {}
+        Component {
+            id: managedRuleDelegate
+
+            ColumnLayout {
+                width: listView.width
+
+                readonly property var managedRule: proxyManagedExceptSitesModel.get(rowLoader.managedModelIndex)
+
+                LabelWithButtonType {
+                    Layout.fillWidth: true
+
+                    enabled: false
+                    text: managedRule.url
+                    descriptionText: managedRule.ip
+                }
+
+                DividerType {}
+            }
+        }
+
+        Component {
+            id: localRuleDelegate
+
+            ColumnLayout {
+                width: listView.width
+
+                readonly property var localRule: proxyIpSplitTunnelingModel.get(rowLoader.localModelIndex)
+
+                LabelWithButtonType {
+                    id: site
+                    Layout.fillWidth: true
+
+                    text: localRule.url
+                    descriptionText: localRule.ip
+                    rightImageSource: "qrc:/images/controls/trash.svg"
+                    rightImageColor: AmneziaStyle.color.paleGray
+
+                    clickedFunction: function() {
+                        var headerText = qsTr("Remove ") + localRule.url + "?"
+                        var yesButtonText = qsTr("Continue")
+                        var noButtonText = qsTr("Cancel")
+
+                        var yesButtonFunction = function() {
+                            IpSplitTunnelingController.removeSite(proxyIpSplitTunnelingModel.mapToSource(rowLoader.localModelIndex))
+                            if (!GC.isMobile()) {
+                                site.rightButton.forceActiveFocus()
+                            }
+                        }
+                        var noButtonFunction = function() {
+                            if (!GC.isMobile()) {
+                                site.rightButton.forceActiveFocus()
+                            }
+                        }
+
+                        showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    }
+                }
+
+                DividerType {}
+            }
         }
     }
 
