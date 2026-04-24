@@ -217,6 +217,8 @@ bool ImportController::extractConfigFromData(QString data)
 
 bool ImportController::extractConfigFromQr(const QByteArray &data)
 {
+    m_configType = checkConfigFormat(QString::fromUtf8(data));
+
     QJsonObject dataObj = QJsonDocument::fromJson(data).object();
     if (!dataObj.isEmpty()) {
         m_config = dataObj;
@@ -226,10 +228,13 @@ bool ImportController::extractConfigFromQr(const QByteArray &data)
     QByteArray ba_uncompressed = qUncompress(data);
     if (!ba_uncompressed.isEmpty()) {
         m_config = QJsonDocument::fromJson(ba_uncompressed).object();
+        if (m_config.isEmpty()) {
+            return false;
+        }
+        m_configType = checkConfigFormat(QString::fromUtf8(ba_uncompressed));
         return true;
     }
 
-    m_configType = checkConfigFormat(data);
     if (m_configType == ConfigTypes::Invalid) {
         QByteArray ba = QByteArray::fromBase64(data, QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
         QByteArray baUncompressed = qUncompress(ba);
@@ -240,6 +245,10 @@ bool ImportController::extractConfigFromQr(const QByteArray &data)
 
         if (!ba.isEmpty()) {
             m_config = QJsonDocument::fromJson(ba).object();
+            if (m_config.isEmpty()) {
+                return false;
+            }
+            m_configType = checkConfigFormat(QString::fromUtf8(ba));
             return true;
         }
     }
