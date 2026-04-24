@@ -36,6 +36,7 @@ jobs:
         target: 'desktop'
         arch: 'linux_gcc_64'
         modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
 
     - name: 'Install Qt Android ARM64'
       uses: jurplel/install-qt-action@v4
@@ -45,12 +46,15 @@ jobs:
         target: 'android'
         arch: 'android_arm64_v8a'
         modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
 
     - name: 'Build Debug APK'
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         QT_HOST_PATH: ${{ runner.temp }}/Qt/6.10.1/gcc_64
+        ANDROID_SDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}/../..
       run: |
+        chmod +x ${{ runner.temp }}/Qt/6.10.1/android_arm64_v8a/bin/qt-cmake
         ./deploy/build_android.sh --debug --apk arm64-v8a
 
     - name: 'Send APK to Telegram'
