@@ -74,7 +74,10 @@ case "$TARGET" in
     iOS|ios)
         no_installers=1
         : ${CMAKE_GENERATOR:="Xcode"}
-        [[ -n "${QT_ROOT_PATH}" ]] && : ${CMAKE_TOOLCHAIN_FILE:="$QT_ROOT_PATH/ios/lib/cmake/Qt6/qt.toolchain.cmake"}
+        if [[ -n "${QT_ROOT_PATH}" ]]; then
+            : ${QT_HOST_PATH:="$QT_ROOT_PATH/macos"}
+            : ${CMAKE_TOOLCHAIN_FILE:="$QT_ROOT_PATH/ios/lib/cmake/Qt6/qt.toolchain.cmake"}
+        fi
         : ${CMAKE_OSX_SYSROOT=iphoneos}
         ;;
 esac
@@ -83,6 +86,7 @@ args=()
 [[ -n "${CMAKE_GENERATOR}" ]]      && args+=("-G" "$CMAKE_GENERATOR")
 [[ -n "${QT_PREFIX_PATH}" ]]       && args+=("-DCMAKE_PREFIX_PATH=$QT_PREFIX_PATH")
 [[ -n "${CMAKE_TOOLCHAIN_FILE}" ]] && args+=("-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE")
+[[ -n "${QT_HOST_PATH}" ]]         && args+=("-DQT_HOST_PATH=$QT_HOST_PATH")
 [[ -n "${CMAKE_OSX_SYSROOT}" ]]    && args+=("-DCMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT")
 [[ -n "${MACOS_NE}" ]]             && args+=("-DMACOS_NE=$MACOS_NE")
 [[ -n "${KEYCHAIN}" ]]             && args+=("-DBUILD_VPN_KEYCHAIN=$KEYCHAIN")
