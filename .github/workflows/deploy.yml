@@ -836,5 +836,5 @@ jobs:
     - name: 'Run tests'
       shell: cmd
       run: |
-        set PATH=%PATH%;%Qt6_DIR%\..\..\bin
+        set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
         ctest --test-dir build\client --output-on-failure
