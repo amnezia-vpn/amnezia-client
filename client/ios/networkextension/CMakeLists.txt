@@ -1,6 +1,7 @@
 enable_language(Swift)
 
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+set(AMNEZIA_THIRDPARTY_ROOT "${CLIENT_ROOT_DIR}/3rd" CACHE PATH "Path to Amnezia client/3rd sources")
 set(AMNEZIA_IOS_APPLETV ${AMNEZIA_IOS_ENABLE_APPLETV_TARGET})
 
 if(AMNEZIA_IOS_APPLETV)
@@ -94,7 +95,7 @@ endif()
 target_compile_options(networkextension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(networkextension PRIVATE -DNETWORK_EXTENSION=1)
 
-set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources)
+set(WG_APPLE_SOURCE_DIR ${AMNEZIA_THIRDPARTY_ROOT}/amneziawg-apple/Sources)
 
 set(NE_COMMON_SOURCES
     ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift

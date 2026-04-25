@@ -1,5 +1,6 @@
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
-set(QSIMPLECRYPTO_DIR ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/src)
+set(AMNEZIA_THIRDPARTY_ROOT "${CLIENT_ROOT_DIR}/3rd" CACHE PATH "Path to Amnezia client/3rd sources")
+set(QSIMPLECRYPTO_DIR ${AMNEZIA_THIRDPARTY_ROOT}/QSimpleCrypto/src)
 
 include_directories(${QSIMPLECRYPTO_DIR})
 

@@ -14,7 +14,7 @@ class AmneziaVPN(ConanFile):
     def requirements(self):
         os = str(self.settings.os)
 
-        has_ne = os == "iOS" or (os == "Macos" and self.options.macos_ne)
+        has_ne = os in ["iOS", "tvOS"] or (os == "Macos" and self.options.macos_ne)
         has_service = os == "Windows" or os == "Linux" or (os == "Macos" and not has_ne)
 
         if has_service:
@@ -33,8 +33,9 @@ class AmneziaVPN(ConanFile):
 
         if has_ne:
             self.requires("awg-apple/2.0.1")
-            self.requires("hev-socks5-tunnel/2.14.4", options={"as_framework": True})
-            self.requires("openvpnadapter/1.0.0")
+            if os != "tvOS":
+                self.requires("hev-socks5-tunnel/2.14.4", options={"as_framework": True})
+                self.requires("openvpnadapter/1.0.0")
 
         if os == "Android":
             self.requires("amnezia-libxray/1.0.0")
@@ -42,4 +43,4 @@ class AmneziaVPN(ConanFile):
             self.requires("openvpn-pt-android/1.0.0")
 
         self.requires("libssh/0.11.3@amnezia")
-        self.requires("openssl/3.6.1")
+        self.requires("openssl/3.6.1", options={"no_apps": os == "tvOS"}, force=os == "tvOS")

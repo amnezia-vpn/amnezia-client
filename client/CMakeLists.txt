@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
+set(AMNEZIA_THIRDPARTY_ROOT "${CMAKE_CURRENT_LIST_DIR}/3rd" CACHE PATH "Path to Amnezia client/3rd sources")
+get_filename_component(AMNEZIA_THIRDPARTY_CLIENT_ROOT "${AMNEZIA_THIRDPARTY_ROOT}/.." ABSOLUTE)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
@@ -108,6 +111,7 @@ include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../ipc
     ${CMAKE_CURRENT_LIST_DIR}/../common/logger
     ${CMAKE_CURRENT_LIST_DIR}
+    ${AMNEZIA_THIRDPARTY_CLIENT_ROOT}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -209,26 +213,28 @@ else()
     qt_finalize_target(${PROJECT})
 endif()
 
-install(TARGETS ${PROJECT}
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT AmneziaVPN
-)
-install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}>
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT AmneziaVPN
-)
+if(NOT IOS AND NOT CMAKE_SYSTEM_NAME STREQUAL "tvOS")
+    install(TARGETS ${PROJECT}
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT AmneziaVPN
+    )
+    install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}>
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT AmneziaVPN
+    )
 
-set(deploy_tool_options "")
-if(WIN32)
-    set(deploy_tool_options "--force-openssl --force")
+    set(deploy_tool_options "")
+    if(WIN32)
+        set(deploy_tool_options "--force-openssl --force")
+    endif()
+
+    qt_generate_deploy_qml_app_script(
+        TARGET ${PROJECT}
+        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
+    )
+    install(SCRIPT ${QT_DEPLOY_SCRIPT}
+        COMPONENT AmneziaVPN
+    )
 endif()
-
-qt_generate_deploy_qml_app_script(
-    TARGET ${PROJECT}
-    OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
-    NO_UNSUPPORTED_PLATFORM_ERROR
-    DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
-)
-install(SCRIPT ${QT_DEPLOY_SCRIPT}
-    COMPONENT AmneziaVPN
-)

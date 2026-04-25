@@ -1,18 +1,19 @@
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
+set(AMNEZIA_THIRDPARTY_ROOT "${CLIENT_ROOT_DIR}/3rd" CACHE PATH "Path to Amnezia client/3rd sources")
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules;${CMAKE_MODULE_PATH}")
 
-add_subdirectory(${CLIENT_ROOT_DIR}/3rd/SortFilterProxyModel)
+add_subdirectory(${AMNEZIA_THIRDPARTY_ROOT}/SortFilterProxyModel ${CMAKE_CURRENT_BINARY_DIR}/3rd/SortFilterProxyModel)
 set(LIBS ${LIBS} SortFilterProxyModel)
 include(${CLIENT_ROOT_DIR}/cmake/QSimpleCrypto.cmake)
 
-include(${CLIENT_ROOT_DIR}/3rd/qrcodegen/qrcodegen.cmake)
+include(${AMNEZIA_THIRDPARTY_ROOT}/qrcodegen/qrcodegen.cmake)
 
 add_compile_definitions(_WINSOCKAPI_)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(BUILD_WITH_QT6 ON)
-add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain EXCLUDE_FROM_ALL)
+add_subdirectory(${AMNEZIA_THIRDPARTY_ROOT}/qtkeychain ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain EXCLUDE_FROM_ALL)
 
 if(ANDROID)
     # Use qtgamepad from amnezia-vpn/qtgamepad repository
@@ -36,8 +37,8 @@ endif()
 set(LIBS ${LIBS} qt6keychain)
 
 include_directories(
-    ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/src/include
-    ${CLIENT_ROOT_DIR}/3rd/qtkeychain/qtkeychain
+    ${AMNEZIA_THIRDPARTY_ROOT}/QSimpleCrypto/src/include
+    ${AMNEZIA_THIRDPARTY_ROOT}/qtkeychain/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
 )
 

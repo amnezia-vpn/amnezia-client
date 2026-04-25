@@ -211,7 +211,8 @@ if(AMNEZIA_IOS_APPLETV)
     endif()
 endif()
 
-set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
+set(AMNEZIA_THIRDPARTY_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd" CACHE PATH "Path to Amnezia client/3rd sources")
+set(WG_APPLE_SOURCE_DIR ${AMNEZIA_THIRDPARTY_ROOT}/amneziawg-apple/Sources)
 
 target_sources(${PROJECT} PRIVATE
 #    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosvpnprotocol.swift

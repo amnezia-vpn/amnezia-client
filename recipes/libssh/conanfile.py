@@ -78,6 +78,8 @@ class LibSSHRecipe(ConanFile):
         tc.cache_variables["WITH_MBEDTLS"] = self.options.crypto_backend == "mbedtls"
         tc.cache_variables["WITH_NACL"] = False
         tc.cache_variables["WITH_SYMBOL_VERSIONING"] = self.options.get_safe("with_symbol_versioning", True)
+        if self.settings.os == "tvOS":
+            tc.cache_variables["WITH_EXEC"] = False
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
         if is_msvc(self):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
