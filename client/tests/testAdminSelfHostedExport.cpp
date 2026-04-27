@@ -1,4 +1,3 @@
-#include <QTest>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -6,6 +5,12 @@
 #include <QDebug>
 #include <QUuid>
 #include <QSignalSpy>
+
+#ifdef Q_OS_WIN
+    #include <QTest>
+#else
+    #include <QtTest/qtest.h>
+#endif
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"

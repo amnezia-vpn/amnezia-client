@@ -3,8 +3,13 @@
 #include <QJsonObject>
 #include <QProcessEnvironment>
 #include <QSignalSpy>
-#include <QTest>
 #include <QUuid>
+
+#ifdef Q_OS_WIN
+    #include <QTest>
+#else
+    #include <QtTest/qtest.h>
+#endif
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"
