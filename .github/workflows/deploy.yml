@@ -765,7 +765,11 @@ jobs:
     - name: 'Install dependencies'
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake ninja-build libxkbcommon-x11-0
+        sudo apt-get install -y \
+          cmake \
+          ninja-build \
+          libxkbcommon-x11-0 \
+          libsecret-1-dev
 
     - name: 'Configure'
       run: |
