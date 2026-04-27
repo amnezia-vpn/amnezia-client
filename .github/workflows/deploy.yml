@@ -761,8 +761,21 @@ jobs:
         sudo apt-get install -y \
           cmake \
           ninja-build \
+          libsecret-1-dev \
+          libxcb-cursor0 \
           libxkbcommon-x11-0 \
-          libsecret-1-dev
+          libxcb-xinerama0 \
+          libxcb-icccm4 \
+          libxcb-image0 \
+          libxcb-keysyms1 \
+          libxcb-randr0 \
+          libxcb-render-util0 \
+          libxcb-xfixes0 \
+          libxcb-shape0 \
+          libxcb-sync1 \
+          libxcb-xkb1 \
+          libgl1 \
+          libglib2.0-0
 
     - name: 'Configure'
       run: |
