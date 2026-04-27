@@ -143,7 +143,7 @@ private slots:
             importResult.config = extractXrayConfig(
                 Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
                 configType, prefix);
-            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+            QVERIFY2(!importResult.config.empty(), "Config shouldn't be empty");
         } else {
             QSKIP("Config not starts with vless://");
         }
@@ -169,7 +169,7 @@ private slots:
             importResult.config = extractXrayConfig(
                 Utils::JsonToString(serialization::vmess_new::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
                 configType, prefix);
-            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+            QVERIFY2(!importResult.config.empty(), "Config shouldn't be empty");
         } else {
             QSKIP("Config not starts with vmess:// or not contain @");
         }
@@ -195,7 +195,7 @@ private slots:
             importResult.config = extractXrayConfig(
                 Utils::JsonToString(serialization::vmess::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
                 configType, prefix);
-            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+            QVERIFY2(!importResult.config.empty(), "Config shouldn't be empty");
         } else {
             QSKIP("Config not starts with vmess://");
         }
@@ -221,7 +221,7 @@ private slots:
             importResult.config = extractXrayConfig(
                 Utils::JsonToString(serialization::trojan::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
                 configType, prefix);
-            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+            QVERIFY2(!importResult.config.empty(), "Config shouldn't be empty");
         } else {
             QSKIP("Config not starts with trojan://");
         }
@@ -247,7 +247,7 @@ private slots:
             importResult.config = extractXrayConfig(
                 Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
                 configType, prefix);
-            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+            QVERIFY2(!importResult.config.empty(), "Config shouldn't be empty");
         } else {
             QSKIP("Config not starts with ss:// or contain plugin=");
         }
@@ -279,7 +279,7 @@ private slots:
             if (!importResult.config.empty()) {
                 importResult.configType = configType;
             }
-            QVERIFY(!importResult.config.empty(), "Config shouldn't be empty");
+            QVERIFY2(!importResult.config.empty(), "Config shouldn't be empty");
         } else {
             QSKIP("Config not starts with ssd://");
         }
