@@ -243,6 +243,13 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
                                      : m_settings->useAmneziaDns();
         emit amneziaDnsToggled(amneziaDnsEnabled);
 
+        emit killSwitchEnabledChanged();
+        if (isKillSwitchEnabled()) {
+            emit strictKillSwitchEnabledChanged(isStrictKillSwitchEnabled());
+        } else {
+            emit strictKillSwitchEnabledChanged(false);
+        }
+
         emit restoreBackupFinished();
     } else {
         emit changeSettingsErrorOccurred(tr("Backup file is corrupted"));
@@ -267,6 +274,9 @@ void SettingsController::clearSettings()
     m_appSplitTunnelingModel->toggleSplitTunneling(false);
 
     toggleAutoStart(false);
+
+    emit killSwitchEnabledChanged();
+    emit strictKillSwitchEnabledChanged(false);
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
