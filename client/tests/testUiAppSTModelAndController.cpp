@@ -65,41 +65,41 @@ private slots:
         QSignalSpy isSplitTunnelingChangedSpy(m_coreController->m_appSplitTunnelingUiController, &AppSplitTunnelingUiController::isTunnelingEnabledChanged);
 
         m_coreController->m_appSplitTunnelingUiController->toggleSplitTunneling(true);
-        QVERIFY(isSplitTunnelingChangedSpy.count() == 1, "isSplitTunnelingChangedSpy signal should be emitted");
-        QVERIFY(m_coreController->m_appSplitTunnelingUiController->isTunnelingEnabled() == true, "AppSplitTunneling should be enabled");
+        QVERIFY2(isSplitTunnelingChangedSpy.count() == 1, "isSplitTunnelingChangedSpy signal should be emitted");
+        QVERIFY2(m_coreController->m_appSplitTunnelingUiController->isTunnelingEnabled() == true, "AppSplitTunneling should be enabled");
 
         m_coreController->m_appSplitTunnelingUiController->toggleSplitTunneling(false);
-        QVERIFY(isSplitTunnelingChangedSpy.count() == 2, "isSplitTunnelingChangedSpy signal should be emitted 2nd time");
-        QVERIFY(m_coreController->m_appSplitTunnelingUiController->isTunnelingEnabled() == false, "AppSplitTunneling should be disabled");
+        QVERIFY2(isSplitTunnelingChangedSpy.count() == 2, "isSplitTunnelingChangedSpy signal should be emitted 2nd time");
+        QVERIFY2(m_coreController->m_appSplitTunnelingUiController->isTunnelingEnabled() == false, "AppSplitTunneling should be disabled");
 
         QString app = getPath();
 
         m_coreController->m_appSplitTunnelingUiController->addApp(app);
         m_coreController->m_appSplitTunnelingUiController->updateModel();
-        QVERIFY(finishedSpy.count() == 1, "finished signal should be emitted");
-        QVERIFY(m_coreController->m_appSplitTunnelingModel->rowCount() == 1, "AppSplitTunnelingModel should have 1 row");
+        QVERIFY2(finishedSpy.count() == 1, "finished signal should be emitted");
+        QVERIFY2(m_coreController->m_appSplitTunnelingModel->rowCount() == 1, "AppSplitTunnelingModel should have 1 row");
 
         QModelIndex appSTModelIndex = m_coreController->m_appSplitTunnelingModel->index(0, 0);
         QVERIFY2(appSTModelIndex.isValid(), "Site model index should be valid");
 
         auto appPath = m_coreController->m_appSplitTunnelingModel->data(appSTModelIndex, AppSplitTunnelingModel::AppPathRole);
-        QVERIFY(app.contains(appPath.toString()) == true, QString("app path should be %1, got %2").arg(app, appPath));
+        QVERIFY2(app.contains(appPath.toString()) == true, QString("app path should be %1, got %2").arg(app, appPath));
 
         auto pkgAppName = m_coreController->m_appSplitTunnelingModel->data(appSTModelIndex, AppSplitTunnelingModel::PackageAppNameRole);
-        QVERIFY(pkgAppName == true, "app name should be set");
+        QVERIFY2(pkgAppName == true, "app name should be set");
 
         auto pkgAppIcon = m_coreController->m_appSplitTunnelingModel->data(appSTModelIndex, AppSplitTunnelingModel::PackageAppIconRole);
-        QVERIFY(pkgAppIcon == true, "app image should be set");
+        QVERIFY2(pkgAppIcon == true, "app image should be set");
 
         m_coreController->m_appSplitTunnelingUiController->addApp(app);
         m_coreController->m_appSplitTunnelingUiController->updateModel();
-        QVERIFY(errorOccurredSpy.count() == 1, "errorOccurred signal should be emitted");
-        QVERIFY(m_coreController->m_appSplitTunnelingModel->rowCount() == 1, "AppSplitTunnelingModel should have 3 rows (same app should not be added)");
+        QVERIFY2(errorOccurredSpy.count() == 1, "errorOccurred signal should be emitted");
+        QVERIFY2(m_coreController->m_appSplitTunnelingModel->rowCount() == 1, "AppSplitTunnelingModel should have 3 rows (same app should not be added)");
 
         m_coreController->m_appSplitTunnelingUiController->removeApp(0);
         m_coreController->m_appSplitTunnelingUiController->updateModel();
-        QVERIFY(finishedSpy.count() == 2, "finished signal should be emitted");
-        QVERIFY(m_coreController->m_appSplitTunnelingModel->rowCount() == 0, "AppSplitTunnelingModel should have 0 rows");
+        QVERIFY2(finishedSpy.count() == 2, "finished signal should be emitted");
+        QVERIFY2(m_coreController->m_appSplitTunnelingModel->rowCount() == 0, "AppSplitTunnelingModel should have 0 rows");
     }
 };
 
