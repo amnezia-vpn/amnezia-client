@@ -83,7 +83,8 @@ private slots:
         QVERIFY2(appSTModelIndex.isValid(), "Site model index should be valid");
 
         auto appPath = m_coreController->m_appSplitTunnelingModel->data(appSTModelIndex, AppSplitTunnelingModel::AppPathRole);
-        QVERIFY2(app.contains(appPath.toString()) == true, QString("app path should be %1, got %2").arg(app, appPath));
+        QString msg = QString("app path should be %1, got %2").arg(app, appPath.toString());
+        QVERIFY2(app.contains(appPath.toString()) == true, msg.toLocal8Bit().constData());
 
         auto pkgAppName = m_coreController->m_appSplitTunnelingModel->data(appSTModelIndex, AppSplitTunnelingModel::PackageAppNameRole);
         QVERIFY2(pkgAppName == true, "app name should be set");
