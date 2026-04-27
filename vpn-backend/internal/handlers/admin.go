@@ -764,10 +764,12 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 	var subscriptions []models.Subscription
 	h.db.Find(&subscriptions)
 	planBreakdown := map[string]int{
-		string(models.PlanFree):  0,
-		string(models.PlanTrial): 0,
-		string(models.PlanBasic): 0,
-		string(models.PlanVIP):   0,
+		string(models.PlanFree):     0,
+		string(models.PlanTrial):    0,
+		string(models.PlanBasic):    0,
+		string(models.PlanBasic3M):  0,
+		string(models.PlanVIP):      0,
+		string(models.PlanVIP3M):    0,
 	}
 	statusBreakdown := map[string]int{
 		string(models.SubActive):    0,
@@ -968,7 +970,7 @@ func (h *AdminHandler) UpgradeUser(c *gin.Context) {
 	if plan == "" {
 		plan = models.PlanBasic
 	}
-	if plan != models.PlanBasic && plan != models.PlanVIP {
+	if plan != models.PlanBasic && plan != models.PlanBasic3M && plan != models.PlanVIP && plan != models.PlanVIP3M {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported plan"})
 		return
 	}

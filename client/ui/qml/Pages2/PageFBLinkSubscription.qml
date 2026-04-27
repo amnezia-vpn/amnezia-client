@@ -20,6 +20,7 @@ PageType {
     property bool isLoading: false
     property string errorMessage: ""
     property bool isWaitingForPayment: false
+    property int selectedPeriod: 0  // 0 = 1 месяц, 1 = 3 месяца
     property int pollCount: 0
     property bool confirmDeleteCard: false
     property string mgmtError: ""
@@ -30,8 +31,8 @@ PageType {
 
     readonly property int currentPlanLevel: {
         if (!FBLinkController.isSubscribed) return -1
-        if (FBLinkController.subscriptionPlan === "vip") return 1
-        if (FBLinkController.subscriptionPlan === "basic" || FBLinkController.subscriptionPlan === "trial") return 0
+        if (FBLinkController.subscriptionPlan === "vip" || FBLinkController.subscriptionPlan === "vip_3m") return 1
+        if (FBLinkController.subscriptionPlan === "basic" || FBLinkController.subscriptionPlan === "trial" || FBLinkController.subscriptionPlan === "basic_3m") return 0
         return -1
     }
     readonly property bool showNewUserOffer: FBLinkController.trialAvailable && !FBLinkController.isSubscribed
@@ -65,11 +66,13 @@ PageType {
             title: qsTr("Premium"),
             heroTitle: qsTr("Premium"),
             heroSubtitle: qsTr("Стабильная защита для ежедневной работы"),
-            price: "199 ₽",
-            period: qsTr("/ 30 дней"),
+            idByPeriod:     ["basic",                      "basic_3m"],
+            priceByPeriod:  ["199 ₽",                      "505 ₽"],
+            periodByPeriod: [qsTr("/ мес"),                qsTr("/ 3 мес")],
+            savingByPeriod: [qsTr("Надёжный AWG и все базовые функции безопасности без ограничений трафика"),
+                             qsTr("Экономия 92 ₽ — скидка 15% при оплате за 3 месяца")],
+            ctaByPeriod:    [qsTr("Выбрать Premium — 199 ₽"), qsTr("Premium 3 мес — 505 ₽")],
             badge: qsTr("ОСНОВА"),
-            saving: qsTr("Надёжный AWG и все базовые функции безопасности без ограничений трафика"),
-            cta: qsTr("Выбрать Premium — 199 ₽"),
             features: [
                 { icon: "qrc:/images/controls/gauge.svg",       text: qsTr("Стабильный AWG-протокол с низкой задержкой") },
                 { icon: "qrc:/images/controls/shield-tick.svg", text: qsTr("Безлимитный трафик и автопереподключение") },
@@ -83,11 +86,13 @@ PageType {
             title: qsTr("VIP"),
             heroTitle: qsTr("VIP"),
             heroSubtitle: qsTr("Максимальный контроль трафика и приоритетная сеть"),
-            price: "399 ₽",
-            period: qsTr("/ 30 дней"),
+            idByPeriod:     ["vip",                         "vip_3m"],
+            priceByPeriod:  ["399 ₽",                       "1 015 ₽"],
+            periodByPeriod: [qsTr("/ мес"),                 qsTr("/ 3 мес")],
+            savingByPeriod: [qsTr("XRay VLESS, VIP-маршрутизация и AdBlock DNS в одном плане"),
+                             qsTr("Экономия 182 ₽ — скидка 15% при оплате за 3 месяца")],
+            ctaByPeriod:    [qsTr("Выбрать VIP — 399 ₽"), qsTr("VIP 3 мес — 1 015 ₽")],
             badge: qsTr("МАКС"),
-            saving: qsTr("XRay VLESS, VIP-маршрутизация и AdBlock DNS в одном плане"),
-            cta: qsTr("Выбрать VIP — 399 ₽"),
             features: [
                 { icon: "qrc:/images/controls/gauge.svg",       text: qsTr("XRay VLESS (Reality) для сложных сетей и DPI") },
                 { icon: "qrc:/images/controls/split-tunneling.svg", text: qsTr("Профили маршрутизации direct/proxy по сервисам") },
@@ -100,8 +105,9 @@ PageType {
 
     function planTitleById(planId) {
         for (var i = 0; i < root.plans.length; i++) {
-            if (root.plans[i].id === planId) {
-                return root.plans[i].title
+            if (root.plans[i].id === planId) return root.plans[i].title
+            for (var j = 0; j < root.plans[i].idByPeriod.length; j++) {
+                if (root.plans[i].idByPeriod[j] === planId) return root.plans[i].title
             }
         }
         if (planId === "trial") return qsTr("Premium")
@@ -148,7 +154,7 @@ PageType {
                     PremiumBadge {
                         text: (root.showNewUserOffer && root.selectedPlanData.id === "basic")
                             ? qsTr("5 ₽ / 3 дня")
-                            : (root.selectedPlanData.price + " " + root.selectedPlanData.period)
+                            : (root.selectedPlanData.priceByPeriod[root.selectedPeriod] + " " + root.selectedPlanData.periodByPeriod[root.selectedPeriod])
                         tone: root.selectedPlanData.id === "vip" ? "success" : "warning"
                         compact: true
                     }
@@ -302,7 +308,79 @@ PageType {
                 }
             }
 
-            // ── Plan cards ────────────────────────────────────────
+            // ── Period selector ──────────────────────────────────
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: 20
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                height: 48
+                radius: 14
+                color: Qt.rgba(36/255, 36/255, 42/255, 1.0)
+                border.color: Qt.rgba(255, 255, 255, 0.08)
+                border.width: 1
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 4
+                    spacing: 4
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        radius: 10
+                        color: root.selectedPeriod === 0 ? "#EAB308" : "transparent"
+                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Text {
+                            anchors.centerIn: parent
+                            text: qsTr("1 месяц")
+                            font.pixelSize: 13
+                            font.weight: root.selectedPeriod === 0 ? 700 : 400
+                            font.family: "PT Root UI VF"
+                            color: root.selectedPeriod === 0 ? "#111" : "#A0A0A8"
+                        }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.selectedPeriod = 0 }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        radius: 10
+                        color: root.selectedPeriod === 1 ? "#EAB308" : "transparent"
+                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 6
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: qsTr("3 месяца")
+                                font.pixelSize: 13
+                                font.weight: root.selectedPeriod === 1 ? 700 : 400
+                                font.family: "PT Root UI VF"
+                                color: root.selectedPeriod === 1 ? "#111" : "#A0A0A8"
+                            }
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: discLbl.implicitWidth + 10
+                                height: 18; radius: 6
+                                color: root.selectedPeriod === 1 ? Qt.rgba(0,0,0,0.25) : "#10B981"
+                                Behavior on color { ColorAnimation { duration: 180 } }
+                                Text {
+                                    id: discLbl
+                                    anchors.centerIn: parent
+                                    text: "−15%"
+                                    font.pixelSize: 10; font.weight: 700
+                                    font.family: "PT Root UI VF"
+                                    color: root.selectedPeriod === 1 ? "#111" : "white"
+                                }
+                            }
+                        }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.selectedPeriod = 1 }
+                    }
+                }
+            }
+
+            // ── Plan cards ──────────────────────────────────────────
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -321,7 +399,7 @@ PageType {
                         clip: true
 
                         property bool isSelected: root.selectedPlan === index
-                        property bool isCurrentPlan: FBLinkController.isSubscribed && FBLinkController.subscriptionPlan === modelData.id
+                        property bool isCurrentPlan: FBLinkController.isSubscribed && (FBLinkController.subscriptionPlan === modelData.idByPeriod[0] || FBLinkController.subscriptionPlan === modelData.idByPeriod[1])
                         property bool isBlocked: FBLinkController.isSubscribed && index <= root.currentPlanLevel
                         property bool isNewUserDiscountCard: root.showNewUserOffer && modelData.id === "basic"
 
@@ -450,7 +528,7 @@ PageType {
                                 spacing: 4
 
                                 LabelTextType {
-                                    text: planCard.isNewUserDiscountCard ? qsTr("5 ₽") : modelData.price
+                                    text: planCard.isNewUserDiscountCard ? qsTr("5 ₽") : modelData.priceByPeriod[root.selectedPeriod]
                                     font.pixelSize: 26
                                     font.weight: 700
                                     color: planCard.isSelected
@@ -459,7 +537,7 @@ PageType {
                                 }
 
                                 LabelTextType {
-                                    text: planCard.isNewUserDiscountCard ? qsTr("/ 3 дня") : modelData.period
+                                    text: planCard.isNewUserDiscountCard ? qsTr("/ 3 дня") : modelData.periodByPeriod[root.selectedPeriod]
                                     font.pixelSize: 14
                                     color: FBLinkStyle.color.mutedGray
                                     Layout.alignment: Qt.AlignBottom
@@ -476,12 +554,12 @@ PageType {
 
                             // Saving hint
                             LabelTextType {
-                                visible: modelData.saving !== ""
+                                visible: true
                                 text: planCard.isNewUserDiscountCard
                                     ? qsTr("Специальный запуск: полный Premium-доступ по сниженной цене на 3 дня")
-                                    : modelData.saving
+                                    : modelData.savingByPeriod[root.selectedPeriod]
                                 font.pixelSize: 12
-                                color: "#10B981"
+                                color: root.selectedPeriod === 1 ? "#EAB308" : "#10B981"
                                 Layout.fillWidth: true
                                 wrapMode: Text.WordWrap
                             }
@@ -681,7 +759,7 @@ PageType {
                         ? qsTr("Уже активна")
                         : ((root.showNewUserOffer && root.selectedPlanData.id === "basic")
                             ? qsTr("Активировать 3 дня за 5 ₽")
-                            : root.selectedPlanData.cta))
+                            : root.selectedPlanData.ctaByPeriod[root.selectedPeriod]))
 
                 clickedFunc: function() {
                     root.errorMessage = ""
@@ -693,7 +771,7 @@ PageType {
 
                     root.isLoading = true
                     PageController.showBusyIndicator(true)
-                    var selectedPlanId = root.plans[root.selectedPlan].id
+                    var selectedPlanId = root.plans[root.selectedPlan].idByPeriod[root.selectedPeriod]
                     if (root.showNewUserOffer && selectedPlanId === "basic") {
                         selectedPlanId = "trial"
                     }

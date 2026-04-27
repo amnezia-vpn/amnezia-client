@@ -124,7 +124,7 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 
 	responseConfigs := make([]map[string]interface{}, 0, len(servers))
 	switch sub.Plan {
-	case models.PlanVIP:
+	case models.PlanVIP, models.PlanVIP3M:
 		var legacyAWGKeys []models.VPNKey
 		h.db.Where("user_id = ? AND revoked_at IS NULL", userID).Preload("Server").Find(&legacyAWGKeys)
 		if len(legacyAWGKeys) > 0 {

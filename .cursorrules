@@ -1,0 +1,11 @@
+# Cursor bootstrap rules
+
+Use `AGENTS.md` as the single authoritative behavior file.
+
+If include syntax is supported, include `@AGENTS.md`.
+
+Then load dynamic context from `.antigravity/`:
+- `.antigravity/conventions.md`
+- `.antigravity/structure.md`
+- `.antigravity/decisions/log.md`
+- `.antigravity/memory/`

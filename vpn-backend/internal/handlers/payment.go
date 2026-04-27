@@ -32,16 +32,18 @@ func (h *PaymentHandler) verifyYooKassaPayment(paymentID string) (string, error)
 }
 
 type createPaymentRequest struct {
-	Plan string `json:"plan" binding:"required,oneof=trial basic vip"`
+	Plan string `json:"plan" binding:"required,oneof=trial basic basic_3m vip vip_3m"`
 }
 
 var planPrices = map[models.PlanType]struct {
 	Amount       float64
 	DurationDays int
 }{
-	models.PlanTrial: {Amount: 5.00, DurationDays: 3},
-	models.PlanBasic: {Amount: 199.00, DurationDays: 30},
-	models.PlanVIP:   {Amount: 399.00, DurationDays: 30},
+	models.PlanTrial:   {Amount: 5.00,    DurationDays: 3},
+	models.PlanBasic:   {Amount: 199.00,  DurationDays: 30},
+	models.PlanBasic3M: {Amount: 505.00,  DurationDays: 90},
+	models.PlanVIP:     {Amount: 399.00,  DurationDays: 30},
+	models.PlanVIP3M:   {Amount: 1015.00, DurationDays: 90},
 }
 
 // POST /api/v1/payments/create
@@ -209,8 +211,12 @@ func planLabel(plan models.PlanType) string {
 		return "Пробный период (3 дня)"
 	case models.PlanBasic:
 		return "Базовый (30 дней)"
+	case models.PlanBasic3M:
+		return "Premium 3 месяца (90 дней)"
 	case models.PlanVIP:
 		return "VIP (30 дней)"
+	case models.PlanVIP3M:
+		return "VIP 3 месяца (90 дней)"
 	default:
 		return string(plan)
 	}

@@ -34,11 +34,11 @@ func buildSubscriptionCapabilities(sub models.Subscription) subscriptionCapabili
 	}
 
 	switch sub.Plan {
-	case models.PlanTrial, models.PlanBasic:
+	case models.PlanTrial, models.PlanBasic, models.PlanBasic3M:
 		return subscriptionCapabilities{
 			AllowedProtocols: []string{"awg"},
 		}
-	case models.PlanVIP:
+	case models.PlanVIP, models.PlanVIP3M:
 		return subscriptionCapabilities{
 			AllowedProtocols:         []string{"vless"},
 			CanUseSiteSplitTunnel:    false, // deprecated: site routing now only via VIP profiles

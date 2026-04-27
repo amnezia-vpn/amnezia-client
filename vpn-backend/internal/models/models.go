@@ -27,10 +27,12 @@ type User struct {
 type PlanType string
 
 const (
-	PlanFree  PlanType = "free"
-	PlanTrial PlanType = "trial"
-	PlanBasic PlanType = "basic"
-	PlanVIP   PlanType = "vip"
+	PlanFree     PlanType = "free"
+	PlanTrial    PlanType = "trial"
+	PlanBasic    PlanType = "basic"
+	PlanBasic3M  PlanType = "basic_3m"
+	PlanVIP      PlanType = "vip"
+	PlanVIP3M    PlanType = "vip_3m"
 )
 
 type SubscriptionStatus string
