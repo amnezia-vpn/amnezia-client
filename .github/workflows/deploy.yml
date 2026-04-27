@@ -832,6 +832,7 @@ jobs:
         dir build\client
         dir build\client\tests
         dir build\client /s | findstr CTestTestfile.cmake
+        dir /s /b ssh.dll
         where ssh.dll
 
     - name: 'Run tests'
