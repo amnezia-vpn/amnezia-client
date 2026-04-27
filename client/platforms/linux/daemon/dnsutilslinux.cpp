@@ -302,6 +302,7 @@ void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
   if (m_ifindex > 0) {
     QList<DnsLinkDomain> newlist = {root};
     setLinkDomains(m_ifindex, newlist);
+    updateLinkDefaultRoutes();
   }
 }
 
