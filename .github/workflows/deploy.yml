@@ -833,10 +833,11 @@ jobs:
         dir build\client\tests
         dir build\client /s | findstr CTestTestfile.cmake
         dir /s /b ssh.dll
-        where ssh.dll
 
     - name: 'Run tests'
       shell: cmd
       run: |
+        set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x6
         set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
+        where ssh.dll
         ctest --test-dir build\client --output-on-failure
