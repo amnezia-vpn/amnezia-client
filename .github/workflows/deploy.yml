@@ -826,18 +826,9 @@ jobs:
       run: |
         for %%f in (build\client\test_*.exe) do (windeployqt %%f)
 
-    - name: 'Check directories'
-      shell: cmd
-      run: |
-        dir build\client
-        dir build\client\tests
-        dir build\client /s | findstr CTestTestfile.cmake
-        dir /s /b ssh.dll
-
     - name: 'Run tests'
       shell: cmd
       run: |
         set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
         set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
-        where ssh.dll
         ctest --test-dir build\client --output-on-failure
