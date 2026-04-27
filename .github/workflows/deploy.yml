@@ -769,10 +769,15 @@ jobs:
     - name: 'Build'
       run: cmake --build build
 
-    - name: 'Run QTest binaries'
+    - name: 'Run tests'
       run: |
-        ./build/client/tests/testSettingsSignals
-        ./build/client/tests/testSignalOrder
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
+        ${{ env.Qt6_DIR }}/../../../lib:\
+        $PWD/client/3rd-prebuilt/deploy-prebuilt/linux/x64
+
+        ldd build/client/tests/testSettingsSignals || true
+
+        ctest --test-dir build/client --output-on-failure
 
 # ------------------------------------------------------
 
