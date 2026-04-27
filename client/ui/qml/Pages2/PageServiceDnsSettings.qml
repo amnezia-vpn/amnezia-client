@@ -60,6 +60,8 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
+                id: removeButton
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16

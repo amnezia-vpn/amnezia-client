@@ -530,7 +530,7 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
 
 ErrorCode ServerController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
-    QString script = amnezia::scriptData(ProtocolScriptType::container_startup, container);
+    QString script = amnezia::scriptDataIfExists(ProtocolScriptType::container_startup, container);
 
     if (script.isEmpty()) {
         return ErrorCode::NoError;
