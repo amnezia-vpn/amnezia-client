@@ -23,6 +23,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
     "-c=tools.build:sharedlinkflags=['-Wl,-z,max-page-size=16384']"
     "-c=tools.build:exelinkflags=['-Wl,-z,max-page-size=16384']"
     CACHE STRING "" FORCE)
+    set(CMAKE_ANDROID_STL_TYPE "c++_shared" CACHE STRING "")
 endif()
 
 if (WIN32 OR APPLE)

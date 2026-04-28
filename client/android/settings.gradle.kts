@@ -26,7 +26,6 @@ plugins {
     id("settings-property-delegate")
 }
 
-rootProject.name = "AmneziaVPN"
 rootProject.buildFileName = "build.gradle.kts"
 
 include(":qt")
@@ -50,12 +49,4 @@ configure<SettingsExtension> {
     compileSdk = androidCompileSdkVersion.substringAfter('-').toInt()
     minSdk = qtMinSdkVersion.toInt()
     ndkVersion = androidNdkVersion
-}
-
-// stop Gradle running by androiddeployqt
-gradle.taskGraph.whenReady {
-    if (providers.environmentVariable("ANDROIDDEPLOYQT_RUN").isPresent
-        && !providers.systemProperty("explicitRun").isPresent) {
-        allTasks.forEach { it.enabled = false }
-    }
 }

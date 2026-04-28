@@ -2,9 +2,12 @@ from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv, Environment
 
 import os
 import stat
+
+from pathlib import Path
 
 class AmneziaLibxray(ConanFile):
     name = "amnezia-libxray"
@@ -26,6 +29,17 @@ class AmneziaLibxray(ConanFile):
         get(self, "https://github.com/amnezia-vpn/amnezia-libxray/archive/refs/tags/v1.0.0.zip",
             sha256="0c50c5acd5063a9fc3cfbb5b3e11481d30cfa3762b3cb1d72130248ff498e9df", strip_root=True
         )
+
+    def generate(self):
+        VirtualBuildEnv(self).generate()
+        env = Environment()
+        ndk_path_str = self.conf.get("tools.android:ndk_path")
+        if ndk_path_str:
+            ndk_path = Path(ndk_path_str)
+            if len(ndk_path.parts) > 2:
+                sdk_path = ndk_path.parents[1]
+                env.define("ANDROID_HOME", str(sdk_path))
+        env.vars(self).save_script("conan_provide_androidhome")
 
     def _patch_sources(self):
         build_path = os.path.join(self.build_folder, "build.sh")

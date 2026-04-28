@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(PROJECT AmneziaVPN)
 set(AMNEZIAVPN_VERSION 4.8.15.4)
 
@@ -42,8 +45,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 endif()
 
 set(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(client)
 
