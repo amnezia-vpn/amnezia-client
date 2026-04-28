@@ -12,12 +12,15 @@
 #include <QTest>
 #include <QUrl>
 
-#include "networkUtilities.h"
+#include "transport/dns/dnsResolver.h"
+#include "transport/dns/dnsTunnel.h"
 #include "QBlockCipher.h"
 #include "QRsa.h"
 
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
+
+using amnezia::transport::dns::DnsProtocol;
 
 struct TransportResult {
     QString name;
@@ -32,7 +35,7 @@ struct TestConfig {
     QString httpEndpoint;
     struct DnsEntry {
         QString name;
-        NetworkUtilities::DnsTransport type;
+        DnsProtocol type;
         QString server;
         QString domain;
         quint16 port;
@@ -57,7 +60,7 @@ static TestConfig buildConfigFromEnv()
 
     if (server.isEmpty() || domain.isEmpty()) return cfg;
 
-    auto addEntry = [&](NetworkUtilities::DnsTransport type, const QString &name,
+    auto addEntry = [&](DnsProtocol type, const QString &name,
                         const char *portDefine, quint16 defaultPort, const QString &dohPath = QString()) {
         TestConfig::DnsEntry e;
         e.type = type;
@@ -70,15 +73,15 @@ static TestConfig buildConfigFromEnv()
         cfg.dnsTransports.append(e);
     };
 
-    addEntry(NetworkUtilities::DnsTransport::Udp, "UDP", AGW_DNS_PORT_UDP, 5353);
-    addEntry(NetworkUtilities::DnsTransport::Tcp, "TCP", AGW_DNS_PORT_UDP, 5353);
-    addEntry(NetworkUtilities::DnsTransport::Tls, "DoT", AGW_DNS_PORT_DOT, 853);
+    addEntry(DnsProtocol::Udp, "UDP", AGW_DNS_PORT_UDP, 5353);
+    addEntry(DnsProtocol::Tcp, "TCP", AGW_DNS_PORT_UDP, 5353);
+    addEntry(DnsProtocol::Tls, "DoT", AGW_DNS_PORT_DOT, 853);
 
     QString dohPath = QString(AGW_DNS_DOH_PATH);
     if (dohPath.isEmpty()) dohPath = "/dns-query";
-    addEntry(NetworkUtilities::DnsTransport::Https, "DoH", AGW_DNS_PORT_DOH, 443, dohPath);
+    addEntry(DnsProtocol::Https, "DoH", AGW_DNS_PORT_DOH, 443, dohPath);
 
-    addEntry(NetworkUtilities::DnsTransport::Quic, "DoQ", AGW_DNS_PORT_DOQ, 8853);
+    addEntry(DnsProtocol::Quic, "DoQ", AGW_DNS_PORT_DOQ, 8853);
 
     return cfg;
 }
@@ -93,7 +96,6 @@ static QString resolveHost(const QString &host)
     return host;
 }
 
-// Replicate the RSA+AES encryption from GatewayController::prepareRequest
 struct EncryptedPayload {
     QByteArray body;
     QByteArray key;
@@ -220,11 +222,10 @@ private:
         QElapsedTimer timer;
         timer.start();
 
-        bool needsHostname = (entry.type == NetworkUtilities::DnsTransport::Https ||
-                              entry.type == NetworkUtilities::DnsTransport::Tls);
+        bool needsHostname = (entry.type == DnsProtocol::Https || entry.type == DnsProtocol::Tls);
         QString serverAddr = needsHostname ? entry.server : resolvedIp;
 
-        r.responseBody = NetworkUtilities::sendViaDnsTunnel(
+        r.responseBody = amnezia::transport::dns::DnsTunnel::send(
             payload, "services", entry.domain,
             serverAddr, entry.type, entry.port,
             m_config.timeoutMs, entry.dohPath);
@@ -242,7 +243,7 @@ private slots:
         m_config = buildConfigFromEnv();
 
         QVERIFY2(!m_config.dnsTransports.isEmpty(),
-                 "AGW_DNS_SERVER / AGW_DNS_DOMAIN not set — cannot run transport tests");
+                 "AGW_DNS_SERVER / AGW_DNS_DOMAIN not set -- cannot run transport tests");
 
         qDebug() << "HTTP endpoint:" << m_config.httpEndpoint;
         qDebug() << "DNS transports:" << m_config.dnsTransports.size();
@@ -263,8 +264,6 @@ private slots:
         }
     }
 
-    // ========== Transport-level tests (raw payload, no encryption) ==========
-
     void test_transport_http()
     {
         QByteArray payload = R"({"test":true})";
@@ -280,7 +279,7 @@ private slots:
         QTest::addColumn<int>("transportIndex");
         for (int i = 0; i < m_config.dnsTransports.size(); ++i) {
             const auto &e = m_config.dnsTransports[i];
-            if (e.type == NetworkUtilities::DnsTransport::Quic) continue;
+            if (e.type == DnsProtocol::Quic) continue;
             QTest::newRow(qPrintable(e.name)) << i;
         }
     }
@@ -302,8 +301,6 @@ private slots:
             qWarning() << "DNS" << entry.name << "transport failed (server may be down):" << r.error;
         }
     }
-
-    // ========== E2E tests (RSA+AES encryption, full round-trip) ==========
 
     void test_e2e_http()
     {
@@ -339,7 +336,7 @@ private slots:
         QTest::addColumn<int>("transportIndex");
         for (int i = 0; i < m_config.dnsTransports.size(); ++i) {
             const auto &e = m_config.dnsTransports[i];
-            if (e.type == NetworkUtilities::DnsTransport::Quic) continue;
+            if (e.type == DnsProtocol::Quic) continue;
             QTest::newRow(qPrintable(QString("E2E-%1").arg(e.name))) << i;
         }
     }
@@ -381,8 +378,6 @@ private slots:
             qWarning() << "E2E DNS" << entry.name << "failed:" << r.error;
         }
     }
-
-    // ========== Summary ==========
 
     void cleanupTestCase()
     {

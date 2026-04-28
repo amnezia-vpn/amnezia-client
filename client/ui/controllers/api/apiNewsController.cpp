@@ -55,7 +55,7 @@ void ApiNewsController::fetchNews(bool showError)
     gatewayController.setTransportsConfig(GatewayController::buildTransportsConfig());
     
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.postParallel(endpoint, payload, responseBody);
+    ErrorCode errorCode = gatewayController.post(endpoint, payload, responseBody);
     
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode, showError);

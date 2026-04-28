@@ -79,7 +79,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     
     gatewayController.setTransportsConfig(GatewayController::buildTransportsConfig());
     
-    ErrorCode errorCode = gatewayController.postParallel(endpoint, apiPayload, responseBody);
+    ErrorCode errorCode = gatewayController.post(endpoint, apiPayload, responseBody);
     
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);

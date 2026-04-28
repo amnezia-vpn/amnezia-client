@@ -749,7 +749,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     
     gatewayController.setTransportsConfig(GatewayController::buildTransportsConfig());
     
-    ErrorCode errorCode = gatewayController.postParallel(endpoint, apiPayload, responseBody);
+    ErrorCode errorCode = gatewayController.post(endpoint, apiPayload, responseBody);
 
     if (errorCode == ErrorCode::NoError) {
         errorCode = fillServerConfig(serviceProtocol, protocolData, responseBody, serverConfig);
@@ -963,5 +963,5 @@ ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJ
     
     gatewayController.setTransportsConfig(GatewayController::buildTransportsConfig());
     
-    return gatewayController.postParallel(endpoint, apiPayload, responseBody);
+    return gatewayController.post(endpoint, apiPayload, responseBody);
 }

@@ -43,8 +43,9 @@ add_definitions(-DAGW_DNS_TIMEOUT_MS="$ENV{AGW_DNS_TIMEOUT_MS}")
 
 qt_add_executable(${PROJECT_NAME}
     tst_transports.cpp
-    ${CLIENT_ROOT_DIR}/core/networkUtilities.cpp
-    ${CLIENT_ROOT_DIR}/core/networkUtilities.h
+    ${CLIENT_ROOT_DIR}/core/transport/dns/dnsResolver.cpp
+    ${CLIENT_ROOT_DIR}/core/transport/dns/dnsTunnel.cpp
+    ${CLIENT_ROOT_DIR}/core/transport/dns/dnsPacket.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QBlockCipher.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QRsa.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QX509.cpp
@@ -55,6 +56,7 @@ qt_add_executable(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CLIENT_ROOT_DIR}
     ${CLIENT_ROOT_DIR}/core
+    ${CLIENT_ROOT_DIR}/core/transport
     ${QSIMPLECRYPTO_DIR}
     ${QSIMPLECRYPTO_DIR}/include
     ${OPENSSL_INCLUDE_DIR}

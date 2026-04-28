@@ -23,6 +23,12 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CLIENT_ROOT_DIR}/core/sshclient.h
     ${CLIENT_ROOT_DIR}/core/networkUtilities.h
+    ${CLIENT_ROOT_DIR}/core/transport/igatewaytransport.h
+    ${CLIENT_ROOT_DIR}/core/transport/httpGatewayTransport.h
+    ${CLIENT_ROOT_DIR}/core/transport/dnsGatewayTransport.h
+    ${CLIENT_ROOT_DIR}/core/transport/dns/dnsResolver.h
+    ${CLIENT_ROOT_DIR}/core/transport/dns/dnsTunnel.h
+    ${CLIENT_ROOT_DIR}/core/transport/dns/dnsPacket_p.h
     ${CLIENT_ROOT_DIR}/core/serialization/serialization.h
     ${CLIENT_ROOT_DIR}/core/serialization/transfer.h
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
@@ -68,6 +74,11 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp
     ${CLIENT_ROOT_DIR}/core/sshclient.cpp
     ${CLIENT_ROOT_DIR}/core/networkUtilities.cpp
+    ${CLIENT_ROOT_DIR}/core/transport/httpGatewayTransport.cpp
+    ${CLIENT_ROOT_DIR}/core/transport/dnsGatewayTransport.cpp
+    ${CLIENT_ROOT_DIR}/core/transport/dns/dnsResolver.cpp
+    ${CLIENT_ROOT_DIR}/core/transport/dns/dnsTunnel.cpp
+    ${CLIENT_ROOT_DIR}/core/transport/dns/dnsPacket.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/outbound.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/inbound.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/ss.cpp
