@@ -1,6 +1,7 @@
 #include "amnezia_application.h"
 
 #include <QClipboard>
+#include <QCryptographicHash>
 #include <QFontDatabase>
 #include <QLocalServer>
 #include <QLocalSocket>
@@ -14,7 +15,9 @@
 #include <QTranslator>
 #include <QEvent>
 #include <QDir>
+#include <QFileInfo>
 #include <QSettings>
+#include <memory>
 
 #include "logger.h"
 #include "ui/controllers/pageController.h"
@@ -33,7 +36,9 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
       m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
       m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
-      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data"))
+      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data")),
+      m_optToggleVpn({QStringLiteral("toggle-vpn")}, QStringLiteral("Toggle VPN in the running instance or after startup")),
+      m_optSummonWindow({QStringLiteral("summon-window")}, QStringLiteral("Raise the main window in the running instance or after startup"))
 {
     setDesktopFileName(QStringLiteral(APPLICATION_NAME));
     setQuitOnLastWindowClosed(false);
@@ -169,8 +174,15 @@ void AmneziaApplication::init()
     else
         emit m_coreController->pageController()->raiseMainWindow();
 #else
-    m_coreController->pageController()->showOnStartup();
+    const bool hasHeadlessStartupCommand =
+            m_pendingLocalCommands.contains(QStringLiteral("toggle-vpn"))
+            && !m_pendingLocalCommands.contains(QStringLiteral("raise-window"));
+    if (!hasHeadlessStartupCommand) {
+        m_coreController->pageController()->showOnStartup();
+    }
 #endif
+
+    dispatchPendingLocalCommands();
 
 // Android TextArea clipboard workaround
 // Text from TextArea always has "text/html" mime-type:
@@ -248,6 +260,8 @@ bool AmneziaApplication::parseCommands()
     m_parser.addOption(m_optCleanup);
     m_parser.addOption(m_optConnect);
     m_parser.addOption(m_optImport);
+    m_parser.addOption(m_optToggleVpn);
+    m_parser.addOption(m_optSummonWindow);
     
     m_parser.process(*this);
 
@@ -257,26 +271,113 @@ bool AmneziaApplication::parseCommands()
         exec();
         return false;
     }
+
+    if (m_parser.isSet(m_optToggleVpn)) {
+        m_pendingLocalCommands.append(QStringLiteral("toggle-vpn"));
+    }
+
+    if (m_parser.isSet(m_optSummonWindow)) {
+        m_pendingLocalCommands.append(QStringLiteral("raise-window"));
+    }
+
     return true;
 }
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+QString AmneziaApplication::localServerName()
+{
+    const QString appPath = QFileInfo(QCoreApplication::applicationFilePath()).canonicalFilePath();
+    const QByteArray pathBytes = (appPath.isEmpty() ? QCoreApplication::applicationFilePath() : appPath).toUtf8();
+    const QString pathHash = QString::fromLatin1(QCryptographicHash::hash(pathBytes, QCryptographicHash::Sha256).toHex().left(12));
+    return QStringLiteral("/tmp/AmneziaVPNInstance_%1.sock").arg(pathHash);
+}
+
 void AmneziaApplication::startLocalServer() {
-    const QString serverName("AmneziaVPNInstance");
-    QLocalServer::removeServer(serverName);
+    const QString serverName = localServerName();
 
     QLocalServer *server = new QLocalServer(this);
-    server->listen(serverName);
+    if (!server->listen(serverName)) {
+        qWarning() << "Failed to listen on local server" << serverName << ":" << server->errorString();
+
+        if (server->serverError() == QAbstractSocket::AddressInUseError) {
+            qWarning() << "Trying to remove stale local server socket:" << serverName;
+            QLocalServer::removeServer(serverName);
+
+            if (!server->listen(serverName)) {
+                qWarning() << "Failed to recover local server" << serverName << ":" << server->errorString();
+                server->deleteLater();
+                return;
+            }
+        } else {
+            server->deleteLater();
+            return;
+        }
+    }
+
+    qInfo() << "Local server started:" << serverName;
 
     QObject::connect(server, &QLocalServer::newConnection, this, [server, this]() {
         if (server) {
             QLocalSocket *clientConnection = server->nextPendingConnection();
-            clientConnection->deleteLater();
+            if (!clientConnection) {
+                return;
+            }
+
+            qInfo() << "Accepted local command connection";
+
+            auto buffer = std::make_shared<QByteArray>();
+            connect(clientConnection, &QLocalSocket::readyRead, this, [clientConnection, buffer]() {
+                buffer->append(clientConnection->readAll());
+            });
+
+            connect(clientConnection, &QLocalSocket::disconnected, this, [this, clientConnection, buffer]() {
+                const QString command = QString::fromUtf8(buffer->trimmed());
+                qInfo() << "Local command payload received:" << command;
+                handleLocalCommand(command);
+                clientConnection->deleteLater();
+            });
         }
-        emit m_coreController->pageController()->raiseMainWindow(); //TODO
     });
 }
 #endif
+
+void AmneziaApplication::handleLocalCommand(const QString &command)
+{
+    const QString normalizedCommand = command.trimmed().isEmpty() ? QStringLiteral("raise-window") : command.trimmed();
+    qInfo() << "Received local command:" << normalizedCommand;
+
+    if (!m_coreController) {
+        m_pendingLocalCommands.append(normalizedCommand);
+        qInfo() << "Core controller is not ready yet, queued local command:" << normalizedCommand;
+        return;
+    }
+
+    if (normalizedCommand == QStringLiteral("raise-window")) {
+        emit m_coreController->pageController()->raiseMainWindow();
+        return;
+    }
+
+    if (normalizedCommand == QStringLiteral("toggle-vpn")) {
+        m_coreController->toggleConnectionByExternalCommand();
+        return;
+    }
+
+    qWarning() << "Unknown local command:" << normalizedCommand;
+}
+
+void AmneziaApplication::dispatchPendingLocalCommands()
+{
+    if (!m_coreController || m_pendingLocalCommands.isEmpty()) {
+        return;
+    }
+
+    const QStringList commands = m_pendingLocalCommands;
+    m_pendingLocalCommands.clear();
+
+    for (const QString &command : commands) {
+        handleLocalCommand(command);
+    }
+}
 
 bool AmneziaApplication::eventFilter(QObject *watched, QEvent *event)
 {

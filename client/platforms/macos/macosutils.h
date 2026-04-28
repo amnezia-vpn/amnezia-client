@@ -22,6 +22,8 @@ class MacOSUtils final {
   static void hideDockIcon();
   static void showDockIcon();
 
+  static quint32 currentEventKeyCode();
+
   static void patchNSStatusBarSetImageForBigSur();
 };
 

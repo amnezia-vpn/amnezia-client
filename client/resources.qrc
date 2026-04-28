@@ -223,6 +223,7 @@
         <file>ui/qml/Pages2/PageSettingsKillSwitch.qml</file>
         <file>ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml</file>
         <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
+        <file>ui/qml/Pages2/PageSettingsShortcut.qml</file>
         <file>ui/qml/Pages2/PageSettingsServerData.qml</file>
         <file>ui/qml/Pages2/PageSettingsServerInfo.qml</file>
         <file>ui/qml/Pages2/PageSettingsServerProtocol.qml</file>

@@ -1,12 +1,12 @@
 #include <QDebug>
+#include <QFileInfo>
+#include <QLocalSocket>
 #include <QTimer>
 
 #include "amnezia_application.h"
 #include "core/osSignalHandler.h"
 #include "migrations.h"
 #include "version.h"
-
-#include <QTimer>
 
 #ifdef Q_OS_WIN
     #include "Windows.h"
@@ -17,15 +17,45 @@
 #endif
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-bool isAnotherInstanceRunning()
+QByteArray forwardedCommandFromArguments(int argc, char *argv[])
+{
+    for (int i = 1; i < argc; ++i) {
+        const QByteArray argument(argv[i]);
+        if (argument == "--toggle-vpn") {
+            return "toggle-vpn";
+        }
+        if (argument == "--summon-window") {
+            return "raise-window";
+        }
+    }
+
+    return "raise-window";
+}
+
+bool sendCommandToRunningInstance(const QByteArray &command)
 {
     QLocalSocket socket;
-    socket.connectToServer("AmneziaVPNInstance");
-    if (socket.waitForConnected(500)) {
-        qWarning() << "AmneziaVPN is already running";
-        return true;
+    const QString serverName = AmneziaApplication::localServerName();
+    if (!QFileInfo::exists(serverName)) {
+        return false;
     }
-    return false;
+
+    socket.connectToServer(serverName);
+    if (!socket.waitForConnected(500)) {
+        qWarning() << "Could not connect to running instance on" << serverName << ":" << socket.errorString();
+        return false;
+    }
+
+    qWarning() << "AmneziaVPN is already running, forwarding command to" << serverName << ":" << command;
+    socket.write(command);
+    socket.write("\n");
+    socket.flush();
+    socket.waitForBytesWritten(500);
+    socket.disconnectFromServer();
+    if (socket.state() != QLocalSocket::UnconnectedState) {
+        socket.waitForDisconnected(500);
+    }
+    return true;
 }
 #endif
 
@@ -48,9 +78,8 @@ int main(int argc, char *argv[])
     OsSignalHandler::setup();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    if (isAnotherInstanceRunning()) {
-        QTimer::singleShot(1000, &app, [&]() { app.quit(); });
-        return app.exec();
+    if (sendCommandToRunningInstance(forwardedCommandFromArguments(argc, argv))) {
+        return 0;
     }
     app.startLocalServer();
 #endif

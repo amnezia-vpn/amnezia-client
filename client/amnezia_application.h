@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QStringList>
 #include <QThread>
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
   #include <QGuiApplication>
@@ -38,6 +39,7 @@ public:
     bool parseCommands();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    static QString localServerName();
     void startLocalServer();
 #endif
 
@@ -49,6 +51,9 @@ public slots:
     void forceQuit();
 
 private:
+    void handleLocalCommand(const QString &command);
+    void dispatchPendingLocalCommands();
+
     static bool m_forceQuit;
     QQmlApplicationEngine *m_engine {};
     std::shared_ptr<Settings> m_settings;
@@ -64,11 +69,14 @@ private:
     QCommandLineOption m_optCleanup;
     QCommandLineOption m_optConnect;
     QCommandLineOption m_optImport;
+    QCommandLineOption m_optToggleVpn;
+    QCommandLineOption m_optSummonWindow;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;
 
     QNetworkAccessManager *m_nam;
+    QStringList m_pendingLocalCommands;
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 };

@@ -26,6 +26,7 @@ namespace PageLoader
         PageSettingsConnection,
         PageSettingsDns,
         PageSettingsApplication,
+        PageSettingsShortcut,
         PageSettingsNewsNotifications,
         PageSettingsNewsDetail,
         PageSettingsBackup,

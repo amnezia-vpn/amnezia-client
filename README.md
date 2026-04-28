@@ -1,13 +1,23 @@
 # Amnezia VPN
 
-### _The best client for self-hosted VPN_
+---
 
+## Fork Feature: macOS Shortcut and Status Bar
+
+This fork adds native macOS controls for Amnezia VPN:
+
+- status bar indicator for the current VPN state;
+- configurable global shortcut to connect or disconnect without opening the main app;
+- direct shortcut handling for quick VPN toggling.
+
+---
+
+### _The best client for self-hosted VPN_
 
 [![Build Status](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml/badge.svg?branch=dev)](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml?query=branch:dev)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/amnezia-vpn/amnezia-client)
 
 ### [English]([https://github.com/amnezia-vpn/amnezia-client/blob/dev/README_RU.md](https://github.com/amnezia-vpn/amnezia-client/tree/dev?tab=readme-ov-file#)) | [Русский](https://github.com/amnezia-vpn/amnezia-client/blob/dev/README_RU.md)
-
 
 [Amnezia](https://amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-en) is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
 
@@ -40,10 +50,10 @@
 
 - [https://amnezia.org](https://amnezia.org) - Project website | [Alternative link (mirror)](https://storage.googleapis.com/kldscp/amnezia.org)
 - [https://docs.amnezia.org](https://docs.amnezia.org) - Documentation
-- [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
-- [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
-- [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
-- [https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)  
+- [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit
+- [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)
+- [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi)
+- [https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)
 - [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)
 - [https://vpnpay.io/en/amnezia-premium/](https://vpnpay.io/en/amnezia-premium/) - Amnezia Premium
 
@@ -74,7 +84,7 @@ Want to contribute? Welcome!
 
 Download the most actual translation files.
 
-Go to ["Actions" tab](https://github.com/amnezia-vpn/amnezia-client/actions?query=is%3Asuccess+branch%3Adev), click on the first line.
+Go to [&#34;Actions&#34; tab](https://github.com/amnezia-vpn/amnezia-client/actions?query=is%3Asuccess+branch%3Adev), click on the first line.
 Then scroll down to the "Artifacts" section and download "AmneziaVPN_translations".
 
 Unzip this file.
@@ -85,13 +95,13 @@ You can do it via a web-interface or any other method you're familiar with.
 
 ### Building sources and deployment
 
-Check deploy folder for build scripts. 
+Check deploy folder for build scripts.
 
 ### How to build an iOS app from source code on MacOS
 
 1. First, make sure you have [XCode](https://developer.apple.com/xcode/) installed, at least version 14 or higher.
-
 2. We use QT to generate the XCode project. We need QT version 6.6.2. Install QT for MacOS [here](https://doc.qt.io/qt-6/macos.html) or [QT Online Installer](https://www.qt.io/download-open-source). Required modules:
+
    - MacOS
    - iOS
    - Qt 5 Compatibility Module
@@ -99,13 +109,12 @@ Check deploy folder for build scripts.
    - Additional Libraries:
      - Qt Image Formats
      - Qt Multimedia
-     - Qt Remote Objects 
-
+     - Qt Remote Objects
 3. Install CMake if required. We recommend CMake version 3.25. You can install CMake [here](https://cmake.org/download/)
-
 4. You also need to install go >= v1.16. If you don't have it installed already,
-download go from the [official website](https://golang.org/dl/) or use Homebrew. 
-The latest version is recommended. Install gomobile
+   download go from the [official website](https://golang.org/dl/) or use Homebrew.
+   The latest version is recommended. Install gomobile
+
 ```bash
 export PATH=$PATH:~/go/bin
 go install golang.org/x/mobile/cmd/gomobile@latest
@@ -113,6 +122,7 @@ gomobile init
 ```
 
 5. Build the project
+
 ```bash
 export QT_BIN_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/ios/bin"
 export QT_MACOS_ROOT_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/macos"
@@ -121,11 +131,12 @@ export PATH=$PATH:~/go/bin
 mkdir build-ios
 $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 ```
+
 Replace PATH-TO-QT-FOLDER and QT-VERSION to your environment
 
-
-If you get `gomobile: command not found` make sure to set PATH to the location 
+If you get `gomobile: command not found` make sure to set PATH to the location
 of the bin folder where gomobile was installed. Usually, it's in `GOPATH`.
+
 ```bash
 export PATH=$(PATH):/path/to/GOPATH/bin
 ```
@@ -133,15 +144,18 @@ export PATH=$(PATH):/path/to/GOPATH/bin
 6. Open the XCode project. You can then run /test/archive/ship the app.
 
 If the build fails with the following error
+
 ```
 make: *** 
 [$(PROJECTDIR)/client/build/AmneziaVPN.build/Debug-iphoneos/wireguard-go-bridge/goroot/.prepared] 
 Error 1
 ```
+
 Add a user-defined variable to both AmneziaVPN and WireGuardNetworkExtension targets' build settings with
 key `PATH` and value `${PATH}/path/to/bin/folder/with/go/executable`, e.g. `${PATH}:/usr/local/go/bin`.
 
-if the above error persists on your M1 Mac, then most probably you need to install arch based CMake 
+if the above error persists on your M1 Mac, then most probably you need to install arch based CMake
+
 ```
 arch -arm64 brew install cmake
 ```
@@ -154,6 +168,7 @@ require them. In this case, simply restart the build.
 _Tested on Mac OS_
 
 The Android app has the following requirements:
+
 * JDK 11
 * Android platform SDK 33
 * CMake 3.25.0
@@ -185,11 +200,12 @@ This project is licensed under the GNU General Public License v3.0 (see LICENSE)
 
 Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)
 
-Bitcoin: bc1qmhtgcf9637rl3kqyy22r2a8wa8laka4t9rx2mf <br>
-USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4 <br>
-USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d <br>
-XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3 <br> 
+Bitcoin: bc1qmhtgcf9637rl3kqyy22r2a8wa8laka4t9rx2mf `<br>`
+USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4 `<br>`
+USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d `<br>`
+XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3 `<br>`
 TON: UQDpU1CyKRmg7L8mNScKk9FRc2SlESuI7N-Hby4nX-CcVmns
+
 ## Acknowledgments
 
 This project is tested with BrowserStack.

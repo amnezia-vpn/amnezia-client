@@ -105,6 +105,7 @@ PageType {
         servers,
         connection,
         application,
+        shortcut,
         news,
         backup,
         about,
@@ -141,6 +142,17 @@ PageType {
         property bool isVisible: true
         readonly property var clickedHandler: function() {
             PageController.goToPage(PageEnum.PageSettingsApplication)
+        }
+    }
+
+    QtObject {
+        id: shortcut
+
+        property string title: qsTr("Keyboard shortcut")
+        readonly property string leftImagePath: "qrc:/images/controls/text-cursor.svg"
+        property bool isVisible: GC.isDesktop() && Qt.platform.os === "osx"
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsShortcut)
         }
     }
 

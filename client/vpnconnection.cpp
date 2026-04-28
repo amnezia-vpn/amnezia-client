@@ -199,6 +199,11 @@ QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
     return m_vpnProtocol;
 }
 
+Vpn::ConnectionState VpnConnection::currentState() const
+{
+    return m_connectionState;
+}
+
 void VpnConnection::disconnectSlots()
 {
     if (m_vpnProtocol) {

@@ -7,6 +7,7 @@ find_library(FW_COREWLAN CoreWLAN)
 find_library(FW_NETWORK Network)
 find_library(FW_USER_NOTIFICATIONS UserNotifications)
 find_library(FW_NETWORK_EXTENSION NetworkExtension)
+find_library(FW_CARBON Carbon)
 
 set(LIBS ${LIBS}
     ${FW_SYSTEMCONFIG}
@@ -16,6 +17,7 @@ set(LIBS ${LIBS}
     ${FW_NETWORK}
     ${FW_USER_NOTIFICATIONS}
     ${FW_NETWORK_EXTENSION}
+    ${FW_CARBON}
 )
 
 set_target_properties(${PROJECT} PROPERTIES 
@@ -54,4 +56,3 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 message("OSX_SDK_PATH is: ${OSX_SDK_PATH}")
-

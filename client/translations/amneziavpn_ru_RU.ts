@@ -264,45 +264,45 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="82"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="104"/>
         <source>Connecting...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="89"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="111"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="113"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="135"/>
         <source>Preparing...</source>
         <translation>Подготовка...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="135"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="157"/>
         <source>Settings updated successfully, reconnnection...</source>
         <translation>Настройки успешно обновлены, переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="138"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="160"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="98"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="120"/>
         <source>Reconnecting...</source>
         <translation>Переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="70"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="103"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="118"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="124"/>
+        <location filename="../ui/controllers/connectionController.h" line="75"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="125"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="140"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="146"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="108"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="130"/>
         <source>Disconnecting...</source>
         <translation>Отключение...</translation>
     </message>
@@ -595,7 +595,17 @@ Already installed containers were found on the server. All installed containers 
         <translation>Gateway endpoint</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="77"/>
+        <source>Save</source>
+        <translation type="unfinished">Сохранить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="85"/>
+        <source>Settings saved</source>
+        <translation type="unfinished">Настройки сохранены</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="99"/>
         <source>Dev gateway environment</source>
         <translation>Dev gateway environment</translation>
     </message>
@@ -1589,37 +1599,42 @@ Thank you for staying with us!</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="118"/>
         <source>Servers</source>
         <translation>Серверы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="129"/>
         <source>Connection</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="140"/>
         <source>Application</source>
         <translation>Приложение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="150"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="151"/>
+        <source>Keyboard shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="162"/>
         <source>News &amp; Notifications</source>
         <translation>Новости и Уведомления</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="178"/>
         <source>Backup</source>
         <translation>Резервное копирование</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="177"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="189"/>
         <source>About AmneziaVPN</source>
         <translation>Об AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="188"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="200"/>
         <source>Dev console</source>
         <translation>Dev console</translation>
     </message>
@@ -1977,12 +1992,12 @@ Thank you for staying with us!</source>
 <context>
     <name>PageSettingsApiServerInfo</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="298"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="300"/>
         <source>Configurations have been updated for some countries. Download and install the updated configuration files</source>
         <translation>Сетевые адреса одного или нескольких серверов были обновлены. Пожалуйста, удалите старые конфигурацию и загрузите новые файлы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="343"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="345"/>
         <source>Manage configuration files</source>
         <translation>Управление файлами конфигурации</translation>
     </message>
@@ -2018,106 +2033,106 @@ Thank you for staying with us!</source>
         <translation>Продлить подписку</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="270"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="272"/>
         <source>Use VLESS protocol</source>
         <translation>Использовать протокол VLESS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="274"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="276"/>
         <source>Cannot change protocol during active connection</source>
         <translation>Невозможно изменить протокол во время активного соединения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="319"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="321"/>
         <source>Subscription Key</source>
         <translation>Ключ для подключения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="341"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="343"/>
         <source>Configuration Files</source>
         <translation>Файлы конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="361"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="363"/>
         <source>Active Devices</source>
         <translation>Активные устройства</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="363"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="365"/>
         <source>Manage currently connected devices</source>
         <translation>Управление подключенными устройствами</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="380"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="382"/>
         <source>Support</source>
         <translation>Поддержка</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="395"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="397"/>
         <source>How to connect on another device</source>
         <translation>Как подключить другие устройства</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="420"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="422"/>
         <source>Reload API config</source>
         <translation>Перезагрузить конфигурацию API</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="423"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="425"/>
         <source>Reload API config?</source>
         <translation>Перезагрузить конфигурацию API?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="424"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="462"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="499"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="426"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="464"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="501"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="425"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="463"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="500"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="427"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="465"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="502"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="429"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="431"/>
         <source>Cannot reload API config during active connection</source>
         <translation>Невозможно перзагрузить API конфигурацию при активном соединении</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="457"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="459"/>
         <source>Unlink this device</source>
         <translation>Отвязать это устройство</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="460"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="462"/>
         <source>Are you sure you want to unlink this device?</source>
         <translation>Вы уверены, что хотите отвязать это устройство?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="461"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="463"/>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
         <translation>Это отключит устройство от вашей подписки. Вы можете повторно подключить его в любое время, нажав &quot;Перезагрузить конфигурацию API&quot; в настройках подписки на устройстве.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="467"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="469"/>
         <source>Cannot unlink device during active connection</source>
         <translation>Невозможно отвязать устройство во время активного соединения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="495"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="497"/>
         <source>Remove from application</source>
         <translation>Удалить из приложения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="498"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="500"/>
         <source>Remove from application?</source>
         <translation>Удалить из приложения?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="504"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="506"/>
         <source>Cannot remove server during active connection</source>
         <translation>Невозможно удалить сервер во время активного соединения</translation>
     </message>
@@ -3047,6 +3062,64 @@ Thank you for staying with us!</source>
     </message>
 </context>
 <context>
+    <name>PageSettingsShortcut</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="54"/>
+        <source>Keyboard shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="55"/>
+        <source>Configure a global shortcut that toggles the VPN even when the AmneziaVPN window is not focused.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="73"/>
+        <source>Enable global shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="74"/>
+        <source>Toggles the VPN from anywhere in the system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="89"/>
+        <source>Shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="92"/>
+        <source>Not configured</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="172"/>
+        <source>Press the desired shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="178"/>
+        <source>Use a combination with Command, Option, Control or Shift. Press Esc to cancel.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="185"/>
+        <source>Cancel</source>
+        <translation type="unfinished">Отменить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="204"/>
+        <source>Clear shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsShortcut.qml" line="226"/>
+        <source>Global shortcut configuration is currently available only for the macOS desktop build.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PageSettingsSplitTunneling</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="33"/>
@@ -3257,7 +3330,7 @@ Thank you for staying with us!</source>
         <translation>Выберите VPN-сервис, который подходит именно вам.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="91"/>
         <source>Recommended</source>
         <translation>Рекомендуется</translation>
     </message>
@@ -5188,6 +5261,40 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
     </message>
 </context>
 <context>
+    <name>ShortcutController</name>
+    <message>
+        <location filename="../ui/controllers/shortcutController.cpp" line="108"/>
+        <location filename="../ui/controllers/shortcutController.cpp" line="290"/>
+        <source>Set a keyboard shortcut first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/shortcutController.cpp" line="130"/>
+        <source>Global shortcuts are only available on macOS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/shortcutController.cpp" line="223"/>
+        <source>Unable to detect the pressed key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/shortcutController.cpp" line="229"/>
+        <source>Use at least one modifier key in the shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/shortcutController.cpp" line="235"/>
+        <source>Unable to save the selected keyboard shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/shortcutController.cpp" line="305"/>
+        <source>The selected keyboard shortcut is unavailable or already in use</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SitesController</name>
     <message>
         <location filename="../ui/controllers/sitesController.cpp" line="22"/>
@@ -5261,32 +5368,32 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>SystemTrayNotificationHandler</name>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="28"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="62"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="110"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="150"/>
         <source>Show</source>
         <translation>Показать</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="32"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="63"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="114"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="151"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="33"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="64"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="115"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="152"/>
         <source>Disconnect</source>
         <translation>Отключиться</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="37"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="65"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="119"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="153"/>
         <source>Visit Website</source>
         <translation>Посетить сайт</translation>
     </message>
     <message>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="43"/>
-        <location filename="../ui/systemtray_notificationhandler.cpp" line="66"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="125"/>
+        <location filename="../ui/systemtray_notificationhandler.cpp" line="154"/>
         <source>Quit</source>
         <translation>Закрыть</translation>
     </message>
@@ -5310,7 +5417,7 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="423"/>
+        <location filename="../vpnconnection.cpp" line="428"/>
         <source>Mbps</source>
         <translation>Мбит/с</translation>
     </message>

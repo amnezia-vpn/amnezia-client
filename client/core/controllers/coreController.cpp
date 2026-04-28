@@ -3,6 +3,8 @@
 #include <QDirIterator>
 #include <QTranslator>
 
+#include "logger.h"
+
 #if defined(Q_OS_ANDROID)
     #include "core/installedAppsImageProvider.h"
     #include "platforms/android/android_controller.h"
@@ -12,6 +14,11 @@
     #include "platforms/ios/ios_controller.h"
     #include <AmneziaVPN-Swift.h>
 #endif
+
+namespace
+{
+    Logger logger("CoreController");
+}
 
 CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
                                QQmlApplicationEngine *engine, QObject *parent)
@@ -140,6 +147,11 @@ void CoreController::initControllers()
     m_settingsController.reset(
             new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
+
+    m_shortcutController.reset(new ShortcutController(m_settings, m_connectionController.get(), this));
+    m_engine->rootContext()->setContextProperty("ShortcutController", m_shortcutController.get());
+    connect(m_shortcutController.get(), &ShortcutController::shortcutRegistrationError,
+            m_pageController.get(), &PageController::showNotificationMessage);
 
     m_sitesController.reset(new SitesController(m_settings, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
@@ -300,6 +312,7 @@ void CoreController::updateTranslator(const QLocale &locale)
 void CoreController::initErrorMessagesHandler()
 {
     connect(m_connectionController.get(), &ConnectionController::connectionErrorOccurred, this, [this](ErrorCode errorCode) {
+        logger.error() << "Connection error occurred:" << errorCode;
         emit m_pageController->showErrorMessage(errorCode);
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
     });
@@ -370,22 +383,27 @@ void CoreController::initAmneziaDnsToggledHandler()
 void CoreController::initPrepareConfigHandler()
 {
     connect(m_connectionController.get(), &ConnectionController::prepareConfig, this, [this]() {
+        logger.debug() << "prepareConfig signal received";
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
         if (!m_apiConfigsController->isConfigValid()) {
+            logger.warning() << "Config validation precheck failed";
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }
 
+        logger.debug() << "Config validation precheck passed, invoking validateConfig";
         m_installController->validateConfig();
     });
 
     connect(m_installController.get(), &InstallController::configValidated, this, [this](bool isValid) {
+        logger.debug() << "InstallController::configValidated:" << isValid;
         if (!isValid) {
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }
 
+        logger.debug() << "Config validated successfully, opening connection";
         m_connectionController->openConnection();
     });
 }
@@ -418,4 +436,35 @@ void CoreController::importConfigFromData(const QString &data)
     if (m_importController->extractConfigFromData(data)) {
         m_importController->importConfig();
     }
+}
+
+void CoreController::toggleConnectionByExternalCommand()
+{
+    if (!m_vpnConnection || !m_connectionController) {
+        logger.warning() << "toggleConnectionByExternalCommand skipped. vpnConnection ready:"
+                         << (m_vpnConnection != nullptr)
+                         << "connection controller ready:" << (m_connectionController != nullptr);
+        return;
+    }
+
+    const Vpn::ConnectionState actualVpnState = m_vpnConnection->currentState();
+    const bool controllerActive = m_connectionController->isConnected() || m_connectionController->isConnectionInProgress();
+    const bool actualVpnActive =
+            actualVpnState != Vpn::ConnectionState::Disconnected
+            && actualVpnState != Vpn::ConnectionState::Error
+            && actualVpnState != Vpn::ConnectionState::Unknown;
+
+    logger.debug() << "toggleConnectionByExternalCommand invoked. actual vpn state:" << actualVpnState
+                   << "controllerActive:" << controllerActive
+                   << "actualVpnActive:" << actualVpnActive;
+
+    if (actualVpnActive || controllerActive) {
+        logger.debug() << "External command requests direct disconnect via VpnConnection";
+        m_connectionController->suppressNextQueuedToggle();
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::QueuedConnection);
+        return;
+    }
+
+    logger.debug() << "External command falls back to ConnectionController toggle";
+    m_connectionController->toggleConnectionByShortcut();
 }
