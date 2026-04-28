@@ -213,6 +213,10 @@ Window  {
                 captchaDialog.close()
                 ApiConfigsController.onCaptchaSolved(captchaId, solution)
             }
+
+            onRefreshCaptchaRequested: function() {
+                ApiConfigsController.onRefreshCaptchaRequested()
+            }
         }
     }
 

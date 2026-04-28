@@ -482,7 +482,7 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
                 return false;
             }
             const QString err = jsonObj.value(QStringLiteral("error")).toString();
-            if (err.contains(QLatin1String("captcha"), Qt::CaseInsensitive) || err == QLatin1String("rate_limit_exceeded")) {
+            if (err.contains(QLatin1String("captcha"), Qt::CaseInsensitive) || err == QLatin1String("rate_limit_exceeded") || err == QLatin1String("refresh_captcha")) {
                 return false;
             }
         }

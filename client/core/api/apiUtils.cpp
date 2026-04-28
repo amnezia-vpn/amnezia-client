@@ -201,6 +201,9 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         }
         if (status == httpStatusCodePaymentRequired) {
             const QString errorToken = apiErrorTokenFromJson(jsonObj);
+            if (errorToken.contains(QLatin1String("refresh_captcha"), Qt::CaseInsensitive)) {
+                return amnezia::ErrorCode::ApiCaptchaRefreshError;
+            }
             if (errorToken.contains(QLatin1String("invalid_captcha"), Qt::CaseInsensitive)) {
                 return amnezia::ErrorCode::ApiCaptchaInvalidError;
             }

@@ -15,6 +15,7 @@ Popup {
     property string hint: "Please solve the CAPTCHA to continue"
 
     signal captchaSolved(string captchaId, string solution)
+    signal refreshCaptchaRequested()
 
     leftMargin: 25
     rightMargin: 25
@@ -115,6 +116,26 @@ Popup {
                 BusyIndicator {
                     anchors.centerIn: parent
                     running: captchaImage.status === Image.Loading
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                ParagraphTextType {
+                    text: qsTr("Can't read the image?")
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignLeft
+                }
+
+                BasicButtonType {
+                    text: qsTr("Refresh")
+                    implicitHeight: 32
+
+                    onClicked: {
+                        root.refreshCaptchaRequested()
+                    }
                 }
             }
 

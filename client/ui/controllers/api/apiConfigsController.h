@@ -50,6 +50,7 @@ public slots:
     bool isVlessProtocol();
 
     void onCaptchaSolved(const QString &captchaId, const QString &solution);
+    void onRefreshCaptchaRequested();
 
 signals:
     void errorOccurred(ErrorCode errorCode);

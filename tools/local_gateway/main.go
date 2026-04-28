@@ -104,6 +104,26 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 
 	captchaID, _ := body["captcha_id"].(string)
 	solution, _ := body["captcha_solution"].(string)
+    refresh, _ := body["refresh_captcha"].(bool)
+
+    if refresh {
+        var buf bytes.Buffer
+        id := captcha.NewLen(6)
+        _ = captcha.WriteImage(&buf, id, 240, 80)
+        b64 := base64.StdEncoding.EncodeToString(buf.Bytes())
+
+        log.Printf("captcha REFRESH id=%s uuid=%s", shortID(id), uuid)
+
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+
+        _ = json.NewEncoder(w).Encode(map[string]string{
+            "captcha_id":    id,
+            "captcha_image": b64,
+            "hint":          "Refreshed CAPTCHA",
+        })
+        return
+    }
 
 	if captchaID != "" && solution != "" {
 		if captcha.VerifyString(captchaID, solution) {

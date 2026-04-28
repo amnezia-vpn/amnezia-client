@@ -1371,3 +1371,39 @@ void ApiConfigsController::onCaptchaSolved(const QString &captchaId, const QStri
     m_serversModel->addServer(serverConfig);
     emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
 }
+
+void ApiConfigsController::onRefreshCaptchaRequested() {
+    if (!m_captchaState.isPending) {
+        emit errorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject apiPayload = m_captchaState.apiPayload;
+    apiPayload.insert("refresh_captcha", true);
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(m_captchaState.endpoint, apiPayload, responseBody);
+
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return;
+    }
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+    if (!jsonDoc.isObject()) {
+        emit errorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject jsonObj = jsonDoc.object();
+
+    QString newCaptchaId = jsonObj.value("captcha_id").toString();
+    QString newCaptchaImage = jsonObj.value("captcha_image").toString();
+    QString hint = jsonObj.value("hint").toString(tr("CAPTCHA refreshed"));
+
+    // Обновляем state (важно!)
+    m_captchaState.apiPayload = apiPayload;
+    m_captchaState.isPending = true;
+
+    emit captchaRequired(newCaptchaId, newCaptchaImage, hint);
+}
