@@ -339,9 +339,12 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
     // line looks like
     // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart
     // 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
+    qDebug() << "[DBG] updateVpnGateway called";
     QStringList params = line.split(",");
     for (const QString &l : params) {
+        qDebug() << "[DBG] param:" << l;
         if (l.contains("ifconfig")) {
+            qDebug() << "[DBG] ifconfig hit, size=" << l.split(" ").size();
             if (l.split(" ").size() == 3) {
                 m_vpnLocalAddress = l.split(" ").at(1);
                 m_vpnGateway = l.split(" ").at(2);
@@ -367,8 +370,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                     }
                 });
 #endif
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-                // killSwitch toggle
+#ifdef Q_OS_MACOS
                 if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
                     m_configData.insert("vpnServer",
                                         NetworkUtilities::getIPAddress(m_configData.value(amnezia::config_key::hostName).toString()));
@@ -378,6 +380,28 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                             qWarning() << "OpenVpnProtocol::updateVpnGateway(): Failed to enable killswitch";
                         }
                     });
+                }
+#endif
+#ifdef Q_OS_LINUX
+                // Always call on Linux: kill switch firewall rules are gated inside,
+                // but split tunneling must activate regardless of kill switch setting.
+                m_configData.insert("vpnServer",
+                                    NetworkUtilities::getIPAddress(m_configData.value(amnezia::config_key::hostName).toString()));
+                qDebug() << "[SplitTunnel] Linux: calling enableKillSwitch, splitTunnelApps="
+                         << m_configData.value(amnezia::config_key::splitTunnelApps).toArray().size() << "apps";
+                bool ifaceOk = false;
+                IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+                    ifaceOk = true;
+                    qDebug() << "[SplitTunnel] IPC iface obtained, sending enableKillSwitch";
+                    QRemoteObjectPendingReply<bool> reply = iface->enableKillSwitch(m_configData, 0);
+                    if (!reply.waitForFinished(1000) || !reply.returnValue()) {
+                        qWarning() << "[SplitTunnel] enableKillSwitch IPC call failed or returned false";
+                    } else {
+                        qDebug() << "[SplitTunnel] enableKillSwitch IPC call succeeded";
+                    }
+                });
+                if (!ifaceOk) {
+                    qWarning() << "[SplitTunnel] IpcClient::withInterface failed — no IPC connection";
                 }
 #endif
                 qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());

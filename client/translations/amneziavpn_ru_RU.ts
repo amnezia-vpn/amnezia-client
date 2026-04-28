@@ -595,7 +595,17 @@ Already installed containers were found on the server. All installed containers 
         <translation>Gateway endpoint</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="77"/>
+        <source>Save</source>
+        <translation type="unfinished">Сохранить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="85"/>
+        <source>Settings saved</source>
+        <translation type="unfinished">Настройки сохранены</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="99"/>
         <source>Dev gateway environment</source>
         <translation>Dev gateway environment</translation>
     </message>
@@ -1977,12 +1987,12 @@ Thank you for staying with us!</source>
 <context>
     <name>PageSettingsApiServerInfo</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="298"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="300"/>
         <source>Configurations have been updated for some countries. Download and install the updated configuration files</source>
         <translation>Сетевые адреса одного или нескольких серверов были обновлены. Пожалуйста, удалите старые конфигурацию и загрузите новые файлы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="343"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="345"/>
         <source>Manage configuration files</source>
         <translation>Управление файлами конфигурации</translation>
     </message>
@@ -2018,106 +2028,106 @@ Thank you for staying with us!</source>
         <translation>Продлить подписку</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="270"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="272"/>
         <source>Use VLESS protocol</source>
         <translation>Использовать протокол VLESS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="274"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="276"/>
         <source>Cannot change protocol during active connection</source>
         <translation>Невозможно изменить протокол во время активного соединения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="319"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="321"/>
         <source>Subscription Key</source>
         <translation>Ключ для подключения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="341"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="343"/>
         <source>Configuration Files</source>
         <translation>Файлы конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="361"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="363"/>
         <source>Active Devices</source>
         <translation>Активные устройства</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="363"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="365"/>
         <source>Manage currently connected devices</source>
         <translation>Управление подключенными устройствами</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="380"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="382"/>
         <source>Support</source>
         <translation>Поддержка</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="395"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="397"/>
         <source>How to connect on another device</source>
         <translation>Как подключить другие устройства</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="420"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="422"/>
         <source>Reload API config</source>
         <translation>Перезагрузить конфигурацию API</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="423"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="425"/>
         <source>Reload API config?</source>
         <translation>Перезагрузить конфигурацию API?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="424"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="462"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="499"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="426"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="464"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="501"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="425"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="463"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="500"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="427"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="465"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="502"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="429"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="431"/>
         <source>Cannot reload API config during active connection</source>
         <translation>Невозможно перзагрузить API конфигурацию при активном соединении</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="457"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="459"/>
         <source>Unlink this device</source>
         <translation>Отвязать это устройство</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="460"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="462"/>
         <source>Are you sure you want to unlink this device?</source>
         <translation>Вы уверены, что хотите отвязать это устройство?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="461"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="463"/>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
         <translation>Это отключит устройство от вашей подписки. Вы можете повторно подключить его в любое время, нажав &quot;Перезагрузить конфигурацию API&quot; в настройках подписки на устройстве.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="467"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="469"/>
         <source>Cannot unlink device during active connection</source>
         <translation>Невозможно отвязать устройство во время активного соединения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="495"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="497"/>
         <source>Remove from application</source>
         <translation>Удалить из приложения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="498"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="500"/>
         <source>Remove from application?</source>
         <translation>Удалить из приложения?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="504"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="506"/>
         <source>Cannot remove server during active connection</source>
         <translation>Невозможно удалить сервер во время активного соединения</translation>
     </message>
@@ -2264,6 +2274,11 @@ Thank you for staying with us!</source>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="257"/>
         <source>Executable files (*.*)</source>
         <translation>Исполняемые файлы (*.*)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="281"/>
+        <source>Select executable</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3257,7 +3272,7 @@ Thank you for staying with us!</source>
         <translation>Выберите VPN-сервис, который подходит именно вам.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="91"/>
         <source>Recommended</source>
         <translation>Рекомендуется</translation>
     </message>
@@ -5238,22 +5253,26 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>SubscriptionExpiredDrawer</name>
     <message>
-        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="47"/>
         <source>Amnezia Premium subscription has expired</source>
-        <translation>Подписка Amnezia Premium закончилась</translation>
+        <translation type="vanished">Подписка Amnezia Premium закончилась</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="60"/>
+        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="46"/>
+        <source> subscription has expired</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="59"/>
         <source>Renew to continue using VPN</source>
         <translation>Продлите подписку, чтобы продолжить использовать VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="72"/>
+        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="71"/>
         <source>Renew</source>
         <translation>Продлить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="96"/>
+        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="95"/>
         <source>Support</source>
         <translation>Поддержка</translation>
     </message>

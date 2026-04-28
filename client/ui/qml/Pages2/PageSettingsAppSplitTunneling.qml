@@ -260,6 +260,8 @@ PageType {
                         }
                     } else if (Qt.platform.os === "android"){
                         installedAppDrawer.openTriggered()
+                    } else if (Qt.platform.os === "linux") {
+                        linuxFileDialog.open()
                     }
 
                     PageController.showBusyIndicator(false)
@@ -272,5 +274,14 @@ PageType {
         id: installedAppDrawer
 
         anchors.fill: parent
+    }
+
+    FileDialog {
+        id: linuxFileDialog
+        title: qsTr("Select executable")
+        onAccepted: {
+            var path = selectedFile.toString().replace("file://", "")
+            AppSplitTunnelingController.addApp(path)
+        }
     }
 }

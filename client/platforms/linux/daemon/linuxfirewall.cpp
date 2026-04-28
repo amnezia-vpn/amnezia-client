@@ -282,6 +282,12 @@ void LinuxFirewall::install()
                                                             QStringLiteral("-o tun2+ -j ACCEPT"),
                                                         });
 
+    // Accept cgroup-marked packets before blockAll — these are bypass-app packets
+    // routed via the physical interface by the ip rule set up in setupTrafficSplitting().
+    installAnchor(Both, QStringLiteral("150.allowBypassApps"), {
+        QStringLiteral("-m mark --mark %1 -j ACCEPT").arg(kPacketTag)
+    });
+
     installAnchor(IPv4, QStringLiteral("120.blockNets"), {});
 
     installAnchor(IPv4, QStringLiteral("110.allowNets"), {});
@@ -357,6 +363,7 @@ void LinuxFirewall::uninstall()
     uninstallAnchor(Both, QStringLiteral("290.allowDHCP"));
     uninstallAnchor(IPv6, QStringLiteral("250.blockIPv6"));
     uninstallAnchor(Both, QStringLiteral("200.allowVPN"));
+    uninstallAnchor(Both, QStringLiteral("150.allowBypassApps"));
     uninstallAnchor(IPv4, QStringLiteral("120.blockNets"));
     uninstallAnchor(IPv4, QStringLiteral("110.allowNets"));
     uninstallAnchor(Both, QStringLiteral("100.blockAll"));
@@ -452,6 +459,13 @@ void LinuxFirewall::updateDNSServers(const QStringList& servers)
     for (const QString& rule : getDNSRules(servers))
         execute(QStringLiteral("iptables -A %1.320.allowDNS %2").arg(kAnchorName, rule));
 }
+
+QString LinuxFirewall::cgroupPath() {
+    return QStringLiteral("/sys/fs/cgroup/net_cls/%1vpnexclusions").arg(BRAND_CODE);
+}
+
+QString LinuxFirewall::packetTag() { return kPacketTag; }
+QString LinuxFirewall::cgroupId()  { return kCGroupId; }
 
 void LinuxFirewall::updateAllowNets(const QStringList& servers)
 {

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "linuxdaemon.h"
+#include "linuxfirewall.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -49,4 +50,32 @@ LinuxDaemon::~LinuxDaemon() {
 LinuxDaemon* LinuxDaemon::instance() {
     Q_ASSERT(s_daemon);
     return s_daemon;
+}
+
+void LinuxDaemon::prepareActivation(const InterfaceConfig& config, int) {
+    // Discover the physical route to the VPN server before the VPN tunnel
+    // takes over the default route. The /32 route to the server stays pinned
+    // to the physical interface so ip route get still returns the right path.
+    if (!LinuxSplitTunnel::findPhysicalRoute(config.m_serverIpv4AddrIn,
+                                              m_physicalGateway, m_physicalInterface)) {
+        logger.warning() << "Could not find physical route to" << config.m_serverIpv4AddrIn;
+    }
+}
+
+void LinuxDaemon::activateSplitTunnel(const InterfaceConfig& config, int) {
+    if (config.m_vpnDisabledApps.isEmpty()) {
+        if (m_splitTunnel) m_splitTunnel->stop();
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both,
+                                        QStringLiteral("150.allowBypassApps"), false);
+        return;
+    }
+
+    if (!m_splitTunnel) {
+        m_splitTunnel = new LinuxSplitTunnel(this);
+    }
+
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both,
+                                    QStringLiteral("150.allowBypassApps"), true);
+    m_splitTunnel->setExcludedApps(config.m_vpnDisabledApps);
+    m_splitTunnel->start(m_physicalGateway, m_physicalInterface);
 }

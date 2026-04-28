@@ -10,6 +10,7 @@
 #include "dnsutilslinux.h"
 #include "iputilslinux.h"
 #include "wireguardutilslinux.h"
+#include "linuxsplittunnel.h"
 
 class LinuxDaemon final : public Daemon {
   friend class IPUtilsMacos;
@@ -19,6 +20,9 @@ class LinuxDaemon final : public Daemon {
   ~LinuxDaemon();
 
   static LinuxDaemon* instance();
+
+  void prepareActivation(const InterfaceConfig& config, int inetAdapterIndex = 0) override;
+  void activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex = 0) override;
 
  protected:
   WireguardUtils* wgutils() const override { return m_wgutils; }
@@ -30,6 +34,9 @@ class LinuxDaemon final : public Daemon {
   WireguardUtilsLinux* m_wgutils = nullptr;
   DnsUtilsLinux* m_dnsutils = nullptr;
   IPUtilsLinux* m_iputils = nullptr;
+  LinuxSplitTunnel* m_splitTunnel = nullptr;
+  QString m_physicalGateway;
+  QString m_physicalInterface;
 };
 
 #endif  // LINUXDAEMON_H
