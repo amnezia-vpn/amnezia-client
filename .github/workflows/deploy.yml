@@ -795,11 +795,13 @@ jobs:
 
     - name: 'Run tests'
       run: |
+        QT_ROOT=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
+
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
-        ${{ env.Qt6_DIR }}/../../../lib:\
+        $QT_ROOT/lib:\
         $PWD/client/3rd-prebuilt/deploy-prebuilt/linux/x64
 
-        ldd build/client/tests/testSettingsSignals || true
+        export QT_QPA_PLATFORM=offscreen
 
         ctest --test-dir build/client --output-on-failure
 
