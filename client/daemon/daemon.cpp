@@ -441,6 +441,37 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
     config.m_specialJunk["I5"] = obj.value("I5").toString();
   }
 
+  if (obj.contains("primaryPeerAllowedIPAddressRanges") &&
+      obj.value("primaryPeerAllowedIPAddressRanges").isArray()) {
+    for (const QJsonValue& ipVal : obj.value("primaryPeerAllowedIPAddressRanges").toArray()) {
+      if (!ipVal.isObject()) continue;
+      QJsonObject ipObj = ipVal.toObject();
+      config.m_primaryPeerAllowedIPRanges.append(
+          IPAddress(QHostAddress(ipObj.value("address").toString()),
+                    ipObj.value("range").toInt()));
+    }
+  }
+
+  if (obj.contains("additionalPeers") && obj.value("additionalPeers").isArray()) {
+    for (const QJsonValue& peerVal : obj.value("additionalPeers").toArray()) {
+      if (!peerVal.isObject()) continue;
+      QJsonObject peerObj = peerVal.toObject();
+      InterfaceConfig::AdditionalPeerConfig peer;
+      peer.m_serverPublicKey = peerObj.value("serverPublicKey").toString();
+      peer.m_serverPskKey = peerObj.value("serverPskKey").toString();
+      peer.m_serverIpv4AddrIn = peerObj.value("serverIpv4AddrIn").toString();
+      peer.m_serverPort = peerObj.value("serverPort").toInt();
+      for (const QJsonValue& ipVal : peerObj.value("allowedIPAddressRanges").toArray()) {
+        if (!ipVal.isObject()) continue;
+        QJsonObject ipObj = ipVal.toObject();
+        peer.m_allowedIPAddressRanges.append(
+            IPAddress(QHostAddress(ipObj.value("address").toString()),
+                      ipObj.value("range").toInt()));
+      }
+      config.m_additionalPeers.append(peer);
+    }
+  }
+
   return true;
 }
 

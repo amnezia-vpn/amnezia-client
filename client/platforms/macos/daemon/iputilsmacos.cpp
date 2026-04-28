@@ -80,7 +80,9 @@ bool IPUtilsMacos::setMTUAndUp(const InterfaceConfig& config) {
 }
 
 bool IPUtilsMacos::addIP4AddressToDevice(const InterfaceConfig& config) {
-  Q_UNUSED(config);
+  if (config.m_deviceIpv4Address.isEmpty()) {
+    return true;
+  }
   QString ifname = MacOSDaemon::instance()->m_wgutils->interfaceName();
   struct ifaliasreq ifr;
   struct sockaddr_in* ifrAddr = (struct sockaddr_in*)&ifr.ifra_addr;
@@ -91,25 +93,28 @@ bool IPUtilsMacos::addIP4AddressToDevice(const InterfaceConfig& config) {
   memset(&ifr, 0, sizeof(ifr));
   strncpy(ifr.ifra_name, qPrintable(ifname), IFNAMSIZ);
 
-  // Get the device address to add to interface
-  QPair<QHostAddress, int> parsedAddr =
-      QHostAddress::parseSubnet(config.m_deviceIpv4Address);
-  QByteArray _deviceAddr = parsedAddr.first.toString().toLocal8Bit();
+  // Extract the host IP from CIDR notation (e.g. "10.8.0.2/24" → "10.8.0.2").
+  // parseSubnet() zeroes host bits so we split manually to preserve the host address.
+  QByteArray _deviceAddr = config.m_deviceIpv4Address.split('/').first().toLocal8Bit();
   char* deviceAddr = _deviceAddr.data();
   ifrAddr->sin_family = AF_INET;
   ifrAddr->sin_len = sizeof(struct sockaddr_in);
-  inet_pton(AF_INET, deviceAddr, &ifrAddr->sin_addr);
+  if (inet_pton(AF_INET, deviceAddr, &ifrAddr->sin_addr) != 1) {
+    logger.error() << "Failed to parse IPv4 address:" << deviceAddr;
+    return false;
+  }
 
   // Set the netmask to /32
   ifrMask->sin_family = AF_INET;
   ifrMask->sin_len = sizeof(struct sockaddr_in);
   memset(&ifrMask->sin_addr, 0xff, sizeof(ifrMask->sin_addr));
 
-  // Set the broadcast address.
+  // For P2P (utun) interfaces, ifra_broadaddr is the destination address.
+  // Set it equal to the local address to create only a host route (not a network
+  // route that would cause a routing loop).
   ifrBcast->sin_family = AF_INET;
   ifrBcast->sin_len = sizeof(struct sockaddr_in);
-  ifrBcast->sin_addr.s_addr =
-      (ifrAddr->sin_addr.s_addr | ~ifrMask->sin_addr.s_addr);
+  ifrBcast->sin_addr.s_addr = ifrAddr->sin_addr.s_addr;
 
   // Create an IPv4 socket to perform the ioctl operations on
   int sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);

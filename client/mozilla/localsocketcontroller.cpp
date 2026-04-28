@@ -169,68 +169,96 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   QJsonArray jsAllowedIPAddesses;
 
-  QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
-  QJsonArray defaultAllowedIP = { "0.0.0.0/0", "::/0" };
+  auto ipRangeToJson = [](const QString& ipRange) -> QJsonObject {
+    QJsonObject range;
+    const QStringList parts = ipRange.split('/');
+    range.insert("address", parts[0]);
+    range.insert("range", parts.size() > 1 ? parts[1].toInt() : 32);
+    range.insert("isIpv6", ipRange.contains(':'));
+    return range;
+  };
 
-  if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
-    // Use AllowedIP list from WG config because of higher priority
-    for (auto v : plainAllowedIP) {
-      QString ipRange = v.toString();
-      if (ipRange.split('/').size() > 1){
-          QJsonObject range;
-          range.insert("address", ipRange.split('/')[0]);
-          range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-          range.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range);
-      } else {
-          QJsonObject range;
-          range.insert("address",ipRange);
-          range.insert("range", 32);
-          range.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range);
+  QJsonArray peersArray = wgConfig.value("peers").toArray();
+  bool isMultiPeer = peersArray.size() > 1;
+
+  if (isMultiPeer) {
+    // Union of all peers' IPs goes into allowedIPAddressRanges (used for route setup).
+    QSet<QString> seenIps;
+    for (const QJsonValue& peerVal : std::as_const(peersArray)) {
+      for (const QJsonValue& ipVal : peerVal.toObject().value(amnezia::configKey::allowedIps).toArray()) {
+        const QString ipRange = ipVal.toString().trimmed();
+        if (seenIps.contains(ipRange)) continue;
+        seenIps.insert(ipRange);
+        jsAllowedIPAddesses.append(ipRangeToJson(ipRange));
       }
     }
+
+    // Primary peer's own IPs only — used for UAPI allowed_ips to avoid trie conflicts.
+    QJsonArray primaryPeerIpsJson;
+    for (const QJsonValue& ipVal : peersArray[0].toObject().value(amnezia::configKey::allowedIps).toArray()) {
+      primaryPeerIpsJson.append(ipRangeToJson(ipVal.toString().trimmed()));
+    }
+    json.insert("primaryPeerAllowedIPAddressRanges", primaryPeerIpsJson);
+
+    QJsonArray additionalPeersJson;
+    for (int i = 1; i < peersArray.size(); ++i) {
+      const QJsonObject peerObj = peersArray[i].toObject();
+      QJsonObject additionalPeer;
+      additionalPeer.insert("serverPublicKey", peerObj.value(amnezia::configKey::serverPubKey));
+      additionalPeer.insert("serverPskKey", peerObj.value(amnezia::configKey::pskKey));
+      additionalPeer.insert("serverIpv4AddrIn", peerObj.value(amnezia::configKey::hostName));
+      additionalPeer.insert("serverPort", peerObj.value(amnezia::configKey::port).toInt());
+      QJsonArray additionalPeerIps;
+      for (const QJsonValue& ipVal : peerObj.value(amnezia::configKey::allowedIps).toArray()) {
+        additionalPeerIps.append(ipRangeToJson(ipVal.toString().trimmed()));
+      }
+      additionalPeer.insert("allowedIPAddressRanges", additionalPeerIps);
+      additionalPeersJson.append(additionalPeer);
+    }
+    json.insert("additionalPeers", additionalPeersJson);
   } else {
+    QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
+    QJsonArray defaultAllowedIP = { "0.0.0.0/0", "::/0" };
 
-    // Use APP split tunnel
+    if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
+      // Use AllowedIP list from WG config because of higher priority
+      for (auto v : plainAllowedIP) {
+        jsAllowedIPAddesses.append(ipRangeToJson(v.toString().trimmed()));
+      }
+    } else {
+      // Use APP split tunnel
       if (splitTunnelType == 0 || splitTunnelType == 2) {
-          QJsonObject range_ipv4;
-          range_ipv4.insert("address", "0.0.0.0");
-          range_ipv4.insert("range", 0);
-          range_ipv4.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range_ipv4);
+        QJsonObject range_ipv4;
+        range_ipv4.insert("address", "0.0.0.0");
+        range_ipv4.insert("range", 0);
+        range_ipv4.insert("isIpv6", false);
+        jsAllowedIPAddesses.append(range_ipv4);
 
-          QJsonObject range_ipv6;
-          range_ipv6.insert("address", "::");
-          range_ipv6.insert("range", 0);
-          range_ipv6.insert("isIpv6", true);
-          jsAllowedIPAddesses.append(range_ipv6);
+        QJsonObject range_ipv6;
+        range_ipv6.insert("address", "::");
+        range_ipv6.insert("range", 0);
+        range_ipv6.insert("isIpv6", true);
+        jsAllowedIPAddesses.append(range_ipv6);
       }
 
       if (splitTunnelType == 1) {
-          for (auto v : splitTunnelSites) {
-              QString ipRange = v.toString();
-              if (ipRange.split('/').size() > 1){
-                  QJsonObject range;
-                  range.insert("address", ipRange.split('/')[0]);
-                  range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-                  range.insert("isIpv6", false);
-                  jsAllowedIPAddesses.append(range);
-              } else {
-                  QJsonObject range;
-                  range.insert("address",ipRange);
-                  range.insert("range", 32);
-                  range.insert("isIpv6", false);
-                  jsAllowedIPAddesses.append(range);
-              }
-          }
+        for (auto v : splitTunnelSites) {
+          jsAllowedIPAddesses.append(ipRangeToJson(v.toString().trimmed()));
+        }
       }
+    }
   }
 
   json.insert("allowedIPAddressRanges", jsAllowedIPAddesses);
 
   QJsonArray jsExcludedAddresses;
-  jsExcludedAddresses.append(wgConfig.value(amnezia::configKey::hostName));
+  if (isMultiPeer) {
+    for (const QJsonValue& peerVal : std::as_const(peersArray)) {
+      jsExcludedAddresses.append(peerVal.toObject().value(amnezia::configKey::hostName));
+    }
+  } else {
+    jsExcludedAddresses.append(wgConfig.value(amnezia::configKey::hostName));
+  }
   if (splitTunnelType == 2) {
     for (auto v : splitTunnelSites) {
           QString ipRange = v.toString();
