@@ -662,6 +662,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
+    needs: Bake-Prebuilts-Android
     runs-on: android-runner
 
     env:
