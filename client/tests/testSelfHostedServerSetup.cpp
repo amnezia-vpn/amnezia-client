@@ -4,12 +4,7 @@
 #include <QSignalSpy>
 #include <QProcessEnvironment>
 #include <QDebug>
-
-#ifdef Q_OS_WIN
-    #include <QTest>
-#else
-    #include <QtTest/qtest.h>
-#endif
+#include <QTest>
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"

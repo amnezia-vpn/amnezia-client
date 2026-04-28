@@ -4,12 +4,7 @@
 #include <QSignalSpy>
 #include <QUuid>
 #include <QProcessEnvironment>
-
-#ifdef Q_OS_WIN
-    #include <QTest>
-#else
-    #include <QtTest/qtest.h>
-#endif
+#include <QTest>
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"
@@ -28,8 +23,7 @@ private:
 
     QString getSHAdminConfig()
     {
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        return env.value("TEST_SELF_HOSTED_CONFIG");
+        return QProcessEnvironment::systemEnvironment().value("TEST_SELF_HOSTED_CONFIG");
     }
 
 private slots:
@@ -53,6 +47,10 @@ private slots:
     void cleanupTestCase()
     {
         int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();
+        
+        for (int containerIndex = 1; containerIndex < 7; ++containerIndex)
+            m_coreController->m_installUiController->clearCachedProfile(serverIndex, containerIndex);
+
         m_coreController->m_serversController->removeServer(serverIndex);
 
         qDebug() << "SERVER REMOVED\n";
