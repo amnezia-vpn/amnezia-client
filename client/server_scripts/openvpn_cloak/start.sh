@@ -7,6 +7,11 @@ ifconfig eth0:0 $SERVER_IP_ADDRESS netmask 255.255.255.255 up
 
 if [ ! -c /dev/net/tun ]; then mkdir -p /dev/net; mknod /dev/net/tun c 10 200; fi
 
+# check if nf_tables is loaded
+if lsmod | grep -qw nf_tables; then
+    ln -sf /sbin/xtables-nft-multi /sbin/iptables
+fi
+
 # Allow traffic on the TUN interface.
 iptables -A INPUT -i tun0 -j ACCEPT
 iptables -A FORWARD -i tun0 -j ACCEPT

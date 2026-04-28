@@ -11,6 +11,11 @@ wg-quick down /opt/amnezia/wireguard/wg0.conf
 # start daemons if configured
 if [ -f /opt/amnezia/wireguard/wg0.conf ]; then (wg-quick up /opt/amnezia/wireguard/wg0.conf); fi
 
+# check if nf_tables is loaded
+if lsmod | grep -qw nf_tables; then
+    ln -sf /sbin/xtables-nft-multi /sbin/iptables
+fi
+
 # Allow traffic on the TUN interface.
 iptables -A INPUT -i wg0 -j ACCEPT
 iptables -A FORWARD -i wg0 -j ACCEPT
