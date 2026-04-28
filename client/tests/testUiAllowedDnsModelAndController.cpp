@@ -4,12 +4,7 @@
 #include <QProcessEnvironment>
 #include <QSignalSpy>
 #include <QUuid>
-
-#ifdef Q_OS_WIN
-    #include <QTest>
-#else
-    #include <QtTest/qtest.h>
-#endif
+#include <QTest>
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"
@@ -28,14 +23,12 @@ private:
 
     QString getPath()
     {
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        return env.value("TEST_PATH");
+        return QProcessEnvironment::systemEnvironment().value("TEST_DNS_LIST_PATH");
     }
 
     QString getExportPath()
     {
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        return env.value("TEST_EXPORT_PATH");
+        return QProcessEnvironment::systemEnvironment().value("TEST_EXPORT_PATH");
     }
 
 private slots:

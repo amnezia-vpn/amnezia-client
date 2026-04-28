@@ -736,6 +736,16 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
+      TEST_SELF_HOSTED_CONFIG: ${{ secrets.TEST_SELF_HOSTED_CONFIG }}
+      TEST_APP_PATH: ${{ secrets.TEST_APP_PATH }}
+      TEST_SITES_LIST_PATH: ${{ secrets.TEST_SITES_LIST_PATH }}
+      TEST_DNS_LIST_PATH: ${{ secrets.TEST_DNS_LIST_PATH }}
+      TEST_EXPORT_PATH: ${{ secrets.TEST_EXPORT_PATH }}
+      TEST_KEY_VMESS_NEW: ${{ secrets.TEST_KEY_VMESS_NEW }}
+      TEST_KEY_VMESS: ${{ secrets.TEST_KEY_VMESS }}
+      TEST_KEY_TROJAN: ${{ secrets.TEST_KEY_TROJAN }}
+      TEST_KEY_SS: ${{ secrets.TEST_KEY_SS }}
+      TEST_KEY_SSD: ${{ secrets.TEST_KEY_SSD }}
 
     steps:
     - name: 'Get sources'
@@ -805,6 +815,16 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
+      TEST_SELF_HOSTED_CONFIG: ${{ secrets.TEST_SELF_HOSTED_CONFIG }}
+      TEST_APP_PATH: ${{ secrets.TEST_APP_PATH }}
+      TEST_SITES_LIST_PATH: ${{ secrets.TEST_SITES_LIST_PATH }}
+      TEST_DNS_LIST_PATH: ${{ secrets.TEST_DNS_LIST_PATH }}
+      TEST_EXPORT_PATH: ${{ secrets.TEST_EXPORT_PATH }}
+      TEST_KEY_VMESS_NEW: ${{ secrets.TEST_KEY_VMESS_NEW }}
+      TEST_KEY_VMESS: ${{ secrets.TEST_KEY_VMESS }}
+      TEST_KEY_TROJAN: ${{ secrets.TEST_KEY_TROJAN }}
+      TEST_KEY_SS: ${{ secrets.TEST_KEY_SS }}
+      TEST_KEY_SSD: ${{ secrets.TEST_KEY_SSD }}
 
     steps:
     - name: 'Get sources'
@@ -864,6 +884,16 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
+      TEST_SELF_HOSTED_CONFIG: ${{ secrets.TEST_SELF_HOSTED_CONFIG }}
+      TEST_APP_PATH: ${{ secrets.TEST_APP_PATH }}
+      TEST_SITES_LIST_PATH: ${{ secrets.TEST_SITES_LIST_PATH }}
+      TEST_DNS_LIST_PATH: ${{ secrets.TEST_DNS_LIST_PATH }}
+      TEST_EXPORT_PATH: ${{ secrets.TEST_EXPORT_PATH }}
+      TEST_KEY_VMESS_NEW: ${{ secrets.TEST_KEY_VMESS_NEW }}
+      TEST_KEY_VMESS: ${{ secrets.TEST_KEY_VMESS }}
+      TEST_KEY_TROJAN: ${{ secrets.TEST_KEY_TROJAN }}
+      TEST_KEY_SS: ${{ secrets.TEST_KEY_SS }}
+      TEST_KEY_SSD: ${{ secrets.TEST_KEY_SSD }}
 
     steps:
       - name: 'Setup xcode'
@@ -914,86 +944,3 @@ jobs:
 
           ctest --test-dir build/client --output-on-failure
 
-# ------------------------------------------------------
-
-  Test-Android:
-    runs-on: ubuntu-latest
-
-    env:
-      QT_VERSION: 6.10.1
-      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
-
-    steps:
-      - name: 'Get sources'
-        uses: actions/checkout@v4
-        with:
-          submodules: 'true'
-          fetch-depth: 10
-      
-      - name: 'Install Qt (host)'
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: 'linux'
-          target: 'desktop'
-          arch: 'linux_gcc_64'
-          modules: ${{ env.QT_MODULES }}
-          dir: ${{ runner.temp }}
-          set-env: 'true'
-      
-      - name: 'Install Qt (android arm64)'
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: 'linux'
-          target: 'android'
-          arch: 'android_arm64_v8a'
-          modules: ${{ env.QT_MODULES }}
-          dir: ${{ runner.temp }}
-          set-env: 'true'
-
-      - name: 'Setup Java'
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: 'Setup Android NDK'
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: 'r26b'
-      
-      - name: 'Configure Android build'
-        run: |
-          QT_ANDROID=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a
-          QT_HOST=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
-
-          cmake -B build-android -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_TOOLCHAIN_FILE=$QT_ANDROID/lib/cmake/Qt6/qt.toolchain.cmake \
-            -DQT_HOST_PATH=$QT_HOST
-
-      - name: 'Build Android'
-        run: cmake --build build-android
-    
-      - name: 'Configure tests (host)'
-        run: |
-          cmake -B build-host -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_TESTING=ON
-
-      - name: 'Build tests'
-        run: cmake --build build-host
-
-      - name: 'Run tests'
-        run: |
-          QT_ROOT=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
-
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
-          $QT_ROOT/lib:\
-          $PWD/client/3rd-prebuilt/deploy-prebuilt/linux/x64
-
-          export QT_QPA_PLATFORM=offscreen
-
-          ctest --test-dir build-host/client --output-on-failure

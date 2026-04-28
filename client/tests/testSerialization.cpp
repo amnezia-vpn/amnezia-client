@@ -4,12 +4,7 @@
 #include <QProcessEnvironment>
 #include <QSignalSpy>
 #include <QUuid>
-
-#ifdef Q_OS_WIN
-    #include <QTest>
-#else
-    #include <QtTest/qtest.h>
-#endif
+#include <QTest>
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverConfig.h"
@@ -30,14 +25,12 @@ private:
 
     QString getSHAdminConfig()
     {
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        return env.value("TEST_SELF_HOSTED_CONFIG");
+        return QProcessEnvironment::systemEnvironment().value("TEST_SELF_HOSTED_CONFIG");
     }
 
     QString getKey(QString name)
     {
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        return env.value("TEST_KEY_" + name);
+        return QProcessEnvironment::systemEnvironment().value("TEST_KEY_" + name);
     }
 
     QJsonObject extractXrayConfig(const QString &data, ConfigTypes configType, const QString &description = "") const
@@ -106,6 +99,10 @@ private slots:
     void cleanupTestCase()
     {
         int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();
+
+        for (int containerIndex = 1; containerIndex < 7; ++containerIndex)
+            m_coreController->m_installUiController->clearCachedProfile(serverIndex, containerIndex);
+
         m_coreController->m_serversController->removeServer(serverIndex);
 
         qDebug() << "SERVER REMOVED\n";
