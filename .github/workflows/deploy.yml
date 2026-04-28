@@ -863,3 +863,60 @@ jobs:
         set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
         set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
         ctest --test-dir build\client --output-on-failure
+
+# ------------------------------------------------------
+
+  Test-MacOS:
+    runs-on: macos-latest
+
+    env:
+      QT_VERSION: 6.10.1
+
+    steps:
+      - name: 'Setup xcode'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.2.0'
+
+      - name: 'Get sources'
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          fetch-depth: 10
+
+      - name: 'Install Qt'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'mac'
+          target: 'desktop'
+          arch: 'clang_64'
+          modules: 'qtremoteobjects qt5compat qtshadertools'
+          dir: ${{ runner.temp }}
+          set-env: 'true'
+
+      - name: 'Install dependencies'
+        run: |
+          brew update
+          brew install cmake ninja
+
+      - name: 'Configure'
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTING=ON
+
+      - name: 'Build'
+        run: cmake --build build
+
+      - name: 'Run tests'
+        run: |
+          QT_ROOT=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos
+
+          export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:\
+          $QT_ROOT/lib:\
+          $PWD/client/3rd-prebuilt/deploy-prebuilt/macos
+
+          export QT_QPA_PLATFORM=offscreen
+
+          ctest --test-dir build/client --output-on-failure
