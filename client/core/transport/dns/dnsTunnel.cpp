@@ -403,11 +403,6 @@ QByteArray sendOverTcp(const QByteArray &payload, const QString &queryName,
         return QByteArray();
     }
     qDebug() << "[DNS-TCP] built DNS query bytes=" << query.size() << "txid=" << transactionId;
-    qDebug() << "[DNS-TCP] query head hex (first 64 bytes):"
-             << query.left(64).toHex(' ');
-    qDebug() << "[DNS-TCP] query tail hex (last 32 bytes):"
-             << query.right(32).toHex(' ');
-
     quint16 length = qToBigEndian<quint16>(static_cast<quint16>(query.size()));
     QByteArray tcpQuery;
     tcpQuery.append(reinterpret_cast<const char *>(&length), sizeof(quint16));
