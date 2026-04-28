@@ -615,7 +615,7 @@ jobs:
     runs-on: android-runner
 
     env:
-      ANDROID_PLATFORM: android-36
+      ANDROID_PLATFORM: android-28
       NDK_VERSION: 27.0.11718014
 
     steps:
