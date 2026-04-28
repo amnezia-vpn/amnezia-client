@@ -368,17 +368,17 @@ Can&apos;t be disabled for current server</source>
         <translation type="vanished">ملف تكوين غير صحيح</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="692"/>
+        <location filename="../ui/controllers/importController.cpp" line="701"/>
         <source>Scanned %1 of %2.</source>
         <translation>تم فحص%1 من %2.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="727"/>
+        <location filename="../ui/controllers/importController.cpp" line="736"/>
         <source>This configuration contains an OpenVPN setup. OpenVPN configurations can include malicious scripts, so only add it if you fully trust the provider of this config. </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="731"/>
+        <location filename="../ui/controllers/importController.cpp" line="740"/>
         <source>&lt;br&gt;In the imported configuration, potentially dangerous lines were found:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -726,17 +726,17 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="545"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="546"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="551"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="552"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>جميع المستخدمين الذين شاركت معهم اتصال لن يكونو قادرين علي الاتصال مرة اخري.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="522"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="523"/>
         <source>Save</source>
         <translation>احفظ</translation>
     </message>
@@ -801,7 +801,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>H3 - رأس حزمة السحر غير المحمل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="537"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="538"/>
         <source>The values of the H1-H4 fields must be unique</source>
         <translation>يجب أن تكون قيم الحقول H1-H4 فريدة</translation>
     </message>
@@ -810,22 +810,22 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">يجب ألا تساوي قيمة الحقل S1 + حجم بدء الرسالة (148) S2 + حجم استجابة الرسالة (92)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="550"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="551"/>
         <source>Save settings?</source>
         <translation>احفظ الإعدادات؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="552"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="553"/>
         <source>Continue</source>
         <translation>واصل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="553"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="554"/>
         <source>Cancel</source>
         <translation>إلغاء</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="557"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="558"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>لا يمكن تغيير الإعدادات أثناء وجود اتصال نشط</translation>
     </message>

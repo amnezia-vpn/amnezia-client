@@ -324,17 +324,17 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="692"/>
+        <location filename="../ui/controllers/importController.cpp" line="701"/>
         <source>Scanned %1 of %2.</source>
         <translation>扫描 %1 of %2.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="727"/>
+        <location filename="../ui/controllers/importController.cpp" line="736"/>
         <source>This configuration contains an OpenVPN setup. OpenVPN configurations can include malicious scripts, so only add it if you fully trust the provider of this config. </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="731"/>
+        <location filename="../ui/controllers/importController.cpp" line="740"/>
         <source>&lt;br&gt;In the imported configuration, potentially dangerous lines were found:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -671,12 +671,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">从服务上移除AmneziaWG？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="551"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="552"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="522"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="523"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
@@ -736,7 +736,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="545"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="546"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -771,27 +771,27 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="537"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="538"/>
         <source>The values of the H1-H4 fields must be unique</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="550"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="551"/>
         <source>Save settings?</source>
         <translation>保存设置？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="552"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="553"/>
         <source>Continue</source>
         <translation>继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="553"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="554"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="557"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="558"/>
         <source>Unable change settings while there is an active connection</source>
         <translation type="unfinished"></translation>
     </message>

@@ -333,17 +333,17 @@ Can&apos;t be disabled for current server</source>
         <translation type="vanished">अमान्य कॉन्फ़िगरेशन फ़ाइल</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="692"/>
+        <location filename="../ui/controllers/importController.cpp" line="701"/>
         <source>Scanned %1 of %2.</source>
         <translation>%2 में से %1 स्कैन किया गया.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="727"/>
+        <location filename="../ui/controllers/importController.cpp" line="736"/>
         <source>This configuration contains an OpenVPN setup. OpenVPN configurations can include malicious scripts, so only add it if you fully trust the provider of this config. </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="731"/>
+        <location filename="../ui/controllers/importController.cpp" line="740"/>
         <source>&lt;br&gt;In the imported configuration, potentially dangerous lines were found:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -738,12 +738,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="522"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="523"/>
         <source>Save</source>
         <translation>सहेजें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="537"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="538"/>
         <source>The values of the H1-H4 fields must be unique</source>
         <translation>H1-H4 फ़ील्ड का मान अद्वितीय होना चाहिए</translation>
     </message>
@@ -752,32 +752,32 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">फ़ील्ड S1 + संदेश आरंभ आकार (148) का मान S2 + संदेश प्रतिक्रिया आकार (92) के बराबर नहीं होना चाहिए</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="550"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="551"/>
         <source>Save settings?</source>
         <translation>सेटिंग्स सेव करें?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="551"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="552"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>वे सभी उपयोगकर्ता जिनके साथ आपने कनेक्शन साझा किया था, वे अब इससे कनेक्ट नहीं हो पाएंगे.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="557"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="558"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>सक्रिय कनेक्शन होने पर सेटिंग बदलने में असमर्थ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="552"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="553"/>
         <source>Continue</source>
         <translation>जारी रखना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="545"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="546"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="553"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="554"/>
         <source>Cancel</source>
         <translation>रद्द करना</translation>
     </message>

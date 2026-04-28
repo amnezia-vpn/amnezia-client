@@ -407,17 +407,17 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="692"/>
+        <location filename="../ui/controllers/importController.cpp" line="701"/>
         <source>Scanned %1 of %2.</source>
         <translation>Отсканировано %1 из %2.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="727"/>
+        <location filename="../ui/controllers/importController.cpp" line="736"/>
         <source>This configuration contains an OpenVPN setup. OpenVPN configurations can include malicious scripts, so only add it if you fully trust the provider of this config. </source>
         <translation>Эта конфигурация содержит настройки OpenVPN. Конфигурации OpenVPN могут содержать вредоносные скрипты, поэтому добавляйте их только в том случае, если полностью доверяете источнику этого файла. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="731"/>
+        <location filename="../ui/controllers/importController.cpp" line="740"/>
         <source>&lt;br&gt;In the imported configuration, potentially dangerous lines were found:</source>
         <translation>&lt;br&gt;В импортированной конфигурации обнаружены потенциально опасные строки:</translation>
     </message>
@@ -773,17 +773,17 @@ Thank you for staying with us!</source>
         <translation>I5 - Special junk 5</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="545"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="546"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)</source>
         <translation>Значение поля S1 + размер инициализации сообщения (148) не должно равняться S2 + размер ответа сообщения (92) + S3 + размер ответа cookie (64) + S4 + размер транспортного пакета (32)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="551"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="552"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>Все пользователи, с которыми вы поделились конфигурацией вашего VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="522"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="523"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
@@ -848,27 +848,27 @@ Thank you for staying with us!</source>
         <translation>H3 - Underload packet magic header</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="537"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="538"/>
         <source>The values of the H1-H4 fields must be unique</source>
         <translation>Значения в полях H1-H4 должны быть уникальными</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="550"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="551"/>
         <source>Save settings?</source>
         <translation>Сохранить настройки?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="552"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="553"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="553"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="554"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="557"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="558"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>Невозможно изменить настройки во время активного соединения</translation>
     </message>
