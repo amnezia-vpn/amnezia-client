@@ -237,7 +237,11 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     // Exclude the server address, except for multihop exit servers.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+        if (!config.m_serverIpv4AddrIn.isEmpty() &&
+            !m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn))) {
+            logger.error() << "No gateway — cannot add server exclusion route";
+            return false;
+        }
         m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
     }
 
