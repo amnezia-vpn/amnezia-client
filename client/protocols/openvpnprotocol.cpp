@@ -41,18 +41,34 @@ QString OpenVpnProtocol::defaultConfigPath()
 void OpenVpnProtocol::stop()
 {
     qDebug() << "OpenVpnProtocol::stop()";
+
+    // Capture the previous state BEFORE setConnectionState() mutates it.
+    // VpnProtocol::setConnectionState() synchronously assigns m_connectionState,
+    // so checking m_connectionState after the assignment to Disconnecting will
+    // never match Connected/Connecting/Reconnecting/Preparing — the entire
+    // shutdown block was effectively dead code in the original implementation.
+    const Vpn::ConnectionState prevState = m_connectionState;
     setConnectionState(Vpn::ConnectionState::Disconnecting);
 
-    // TODO: need refactoring
-    // sendTermSignal() will even return true while server connected ???
-    if ((m_connectionState == Vpn::ConnectionState::Preparing) || (m_connectionState == Vpn::ConnectionState::Connecting)
-        || (m_connectionState == Vpn::ConnectionState::Connected)
-        || (m_connectionState == Vpn::ConnectionState::Reconnecting)) {
-        if (!sendTermSignal()) {
-            killOpenVpnProcess();
-        }
-        QThread::msleep(10);
+    if (prevState == Vpn::ConnectionState::Preparing || prevState == Vpn::ConnectionState::Connecting
+        || prevState == Vpn::ConnectionState::Connected || prevState == Vpn::ConnectionState::Reconnecting) {
+        // Try graceful shutdown via management interface first.
+        // sendTermSignal() returns true as soon as bytes are written to the
+        // management socket, NOT when openvpn actually processes SIGTERM, so
+        // we cannot rely on its return value to decide whether to fall back
+        // to killing the process.
+        sendTermSignal();
+        // Give openvpn enough time to read and process the SIGTERM command
+        // before we tear down the management socket. Otherwise it interprets
+        // the closed management socket as a connection-reset and enters a
+        // SIGUSR1[soft,connection-reset] reconnect loop ("Restart pause, 5
+        // second(s)") that the UI cannot escape.
+        QThread::msleep(200);
         m_managementServer.stop();
+        // Always force-kill afterwards. If SIGTERM was processed in time the
+        // process is already gone and this is a no-op; if it wasn't, this
+        // breaks the reconnect loop.
+        killOpenVpnProcess();
     }
 
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
