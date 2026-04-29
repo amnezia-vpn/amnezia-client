@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QTimer>
+#include <QLocalSocket>
 #include <libssh/libssh.h>
 
 #include "amneziaApplication.h"

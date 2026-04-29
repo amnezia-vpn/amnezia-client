@@ -30,13 +30,11 @@
 #endif
 
 #include "core/utils/networkUtilities.h"
-#include "core/utils/serverConfigUtils.h"
-#include "vpnConnection.h"
 
 using namespace ProtocolUtils;
 
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
-    : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(this)
+    : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(this), m_trafficGuard(new VpnTrafficGuard(appSettingsRepository, this))
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     m_checkTimer.setInterval(1000);
@@ -70,112 +68,17 @@ void VpnConnection::onKillSwitchModeChanged(bool enabled)
 void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
 #ifdef AMNEZIA_DESKTOP
-    if (!m_serversRepository || !m_appSettingsRepository) {
-        qCritical() << "VpnConnection::onConnectionStateChanged: repositories not initialized";
-        return;
+    switch (state) {
+        case Vpn::ConnectionState::Connected: {
+            m_trafficGuard->setupRoutes(m_vpnConfiguration, m_vpnProtocol, remoteAddress());
+        } break;
+        case Vpn::ConnectionState::Disconnected:
+        case Vpn::ConnectionState::Error: {
+            m_trafficGuard->teardown();
+        } break;
+        default:
+            break;
     }
-
-    const QString defaultServerId = m_serversRepository->defaultServerId();
-    DockerContainer container = DockerContainer::None;
-    switch (m_serversRepository->serverKind(defaultServerId)) {
-    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
-        const auto cfg = m_serversRepository->selfHostedAdminConfig(defaultServerId);
-        if (cfg.has_value()) {
-            container = cfg->defaultContainer;
-        }
-        break;
-    }
-    case serverConfigUtils::ConfigType::SelfHostedUser: {
-        const auto cfg = m_serversRepository->selfHostedUserConfig(defaultServerId);
-        if (cfg.has_value()) {
-            container = cfg->defaultContainer;
-        }
-        break;
-    }
-    case serverConfigUtils::ConfigType::Native: {
-        const auto cfg = m_serversRepository->nativeConfig(defaultServerId);
-        if (cfg.has_value()) {
-            container = cfg->defaultContainer;
-        }
-        break;
-    }
-    case serverConfigUtils::ConfigType::AmneziaPremiumV2:
-    case serverConfigUtils::ConfigType::AmneziaFreeV3:
-    case serverConfigUtils::ConfigType::ExternalPremium: {
-        const auto cfg = m_serversRepository->apiV2Config(defaultServerId);
-        if (cfg.has_value()) {
-            container = cfg->defaultContainer;
-        }
-        break;
-    }
-    case serverConfigUtils::ConfigType::AmneziaPremiumV1:
-    case serverConfigUtils::ConfigType::AmneziaFreeV2:
-        break;
-    case serverConfigUtils::ConfigType::Invalid:
-    default:
-        break;
-    }
-
-    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        switch (state) {
-            case Vpn::ConnectionState::Connected: {
-                iface->resetIpStack();
-
-                auto flushDns = iface->flushDns();
-                if (flushDns.waitForFinished() && flushDns.returnValue())
-                    qDebug() << "VpnConnection::onConnectionStateChanged: Successfully flushed DNS";
-                else
-                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS";
-
-                if (!ContainerUtils::isAwgContainer(container) && container != DockerContainer::WireGuard) {
-                    QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
-                    QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
-
-#ifdef Q_OS_MACOS
-                    if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
-                        iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
-                    }
-#else
-                    iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
-#endif
-
-                    if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
-                        iface->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
-                        RouteMode routeMode = m_appSettingsRepository->routeMode();
-                        if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
-                            QTimer::singleShot(1000, m_vpnProtocol.data(),
-                                               [this, routeMode]() { addSitesRoutes(m_vpnProtocol->vpnGateway(), routeMode); });
-                        } else if (routeMode == amnezia::RouteMode::VpnAllExceptSites) {
-                            iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
-                            iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
-
-                            iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
-#ifdef Q_OS_MACOS
-                            iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << dns1 << dns2);
-#endif
-                            addSitesRoutes(m_vpnProtocol->routeGateway(), routeMode);
-                        }
-                    }
-                }
-            } break;
-            case Vpn::ConnectionState::Disconnected:
-            case Vpn::ConnectionState::Error: {
-                auto flushDns = iface->flushDns();
-                if (flushDns.waitForFinished() && flushDns.returnValue())
-                    qDebug() << "VpnConnection::onConnectionStateChanged: Successfully flushed DNS";
-                else
-                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS";
-
-                auto clearSavedRoutes = iface->clearSavedRoutes();
-                if (clearSavedRoutes.waitForFinished() && clearSavedRoutes.returnValue())
-                    qDebug() << "VpnConnection::onConnectionStateChanged: Successfully cleared saved routes";
-                else
-                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to clear saved routes";
-            } break;
-            default:
-                break;
-        }
-    });
 #endif
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
@@ -198,62 +101,6 @@ void VpnConnection::setRepositories(SecureServersRepository* serversRepository, 
 {
     m_serversRepository = serversRepository;
     m_appSettingsRepository = appSettingsRepository;
-}
-
-void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
-{
-#ifdef AMNEZIA_DESKTOP
-    if (!m_appSettingsRepository) {
-        qCritical() << "VpnConnection::addSitesRoutes: repositories not initialized";
-        return;
-    }
-
-    QStringList ips;
-    QStringList sites;
-    const QVariantMap &m = m_appSettingsRepository->vpnSites(mode);
-    for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
-        if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
-            ips.append(i.key());
-        } else {
-            if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
-                ips.append(i.value().toString());
-            }
-            sites.append(i.key());
-        }
-    }
-    ips.removeDuplicates();
-
-    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->routeAddList(gw, ips);
-    });
-
-    // re-resolve domains
-    for (const QString &site : sites) {
-        const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
-            const QList<QHostAddress> &addresses = hostInfo.addresses();
-            QString ipv4Addr;
-            for (const QHostAddress &addr : hostInfo.addresses()) {
-                if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-                    const QString &ip = addr.toString();
-                    // qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
-                    if (!ips.contains(ip)) {
-                        IpcClient::withInterface([&gw, &ip](QSharedPointer<IpcInterfaceReplica> iface) {
-                            iface->routeAddList(gw, QStringList() << ip);
-                        });
-                        m_appSettingsRepository->addVpnSite(mode, site, ip);
-                    }
-                    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-                        auto reply = iface->flushDns();
-                        if (reply.waitForFinished() || !reply.returnValue())
-                            qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
-                    });
-                    break;
-                }
-            }
-        };
-        QHostInfo::lookupHost(site, this, cbResolv);
-    }
-#endif
 }
 
 QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
@@ -300,6 +147,13 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
              << m_appSettingsRepository->routeMode();
 
     m_remoteAddress = NetworkUtilities::getIPAddress(vpnConfiguration.value(configKey::hostName).toString());
+#ifdef AMNEZIA_DESKTOP
+    if (!m_trafficGuard->allowEndpoint(m_remoteAddress)) {
+        setConnectionState(Vpn::ConnectionState::Error);
+        emit vpnProtocolError(ErrorCode::AmneziaServiceConnectionFailed);
+        return;
+    }
+#endif
     setConnectionState(Vpn::ConnectionState::Connecting);
 
     m_vpnConfiguration = vpnConfiguration;
@@ -322,6 +176,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
         return;
     }
     m_vpnProtocol->prepare();
+    m_trafficGuard->setConfig(m_vpnConfiguration);
 #elif defined Q_OS_ANDROID
     androidVpnProtocol = createDefaultAndroidVpnProtocol();
     createAndroidConnections();
@@ -347,6 +202,7 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     connect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState);
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
+    connect(m_vpnProtocol.data(), &VpnProtocol::tunnelAddressesUpdated, m_trafficGuard.data(), &VpnTrafficGuard::applyFirewall);
 
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
