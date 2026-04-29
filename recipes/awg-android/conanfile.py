@@ -35,6 +35,8 @@ class AwgAndroid(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["GRADLE_USER_HOME"] = os.path.join(self.build_folder, "gradle_user_home")
         tc.variables["CMAKE_LIBRARY_OUTPUT_DIRECTORY"] = os.path.join(self.build_folder, "out")
+        # not to warn in case of strtok() usage
+        tc.extra_cflags = ["-Wno-deprecated-declarations"]
         tc.generate()
 
     def _patch_sources(self):

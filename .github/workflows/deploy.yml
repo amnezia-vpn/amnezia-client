@@ -773,7 +773,7 @@ jobs:
 
     - name: 'Build project'
       env:
-        QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
+        QT_INSTALL_DIR: ${{ runner.temp }}
         QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
         QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}

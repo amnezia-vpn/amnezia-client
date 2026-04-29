@@ -70,8 +70,6 @@ qt6_add_resources(QRC ${QRC}
 )
 
 # -- i18n begin
-set(CMAKE_AUTORCC ON)
-
 set(AMNEZIAVPN_TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru_RU.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
@@ -83,20 +81,10 @@ set(AMNEZIAVPN_TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_hi_IN.ts
 )
 
-file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
-list(FILTER AMNEZIAVPN_TS_SOURCES EXCLUDE REGEX "qtgamepad/examples")
-
-qt_create_translation(AMNEZIAVPN_QM_FILES ${AMNEZIAVPN_TS_SOURCES} ${AMNEZIAVPN_TS_FILES})
-
-set(QM_FILE_LIST "")
-foreach(FILE ${AMNEZIAVPN_QM_FILES})
-    get_filename_component(QM_FILE_NAME ${FILE} NAME)
-    list(APPEND QM_FILE_LIST "<file>${QM_FILE_NAME}</file>")
-endforeach()
-string(REPLACE ";" "" QM_FILE_LIST ${QM_FILE_LIST})
-
-configure_file(${CMAKE_CURRENT_LIST_DIR}/translations/translations.qrc.in ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
-qt6_add_resources(QRC ${I18NQRC} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
+qt6_add_translations(${PROJECT}
+    TS_FILES ${AMNEZIAVPN_TS_FILES}
+    RESOURCE_PREFIX "/translations"
+)
 # -- i18n end
 
 set(IS_CI ${CI})

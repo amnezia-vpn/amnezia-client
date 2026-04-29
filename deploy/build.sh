@@ -60,13 +60,13 @@ for base in "${bases[@]}"; do
     done
 done
 
-: ${QT_ROOT_PATH:=$(printf '%s\n' "${qt_folders[@]}" | sort -V | tail -1)}
-: ${QIF_ROOT_PATH:=$(printf '%s\n' "${qif_folders[@]}" | sort -V | tail -1)}
+: ${QT_ROOT_PATH:=$(printf '%s\n' "${qt_folders[@]}" | awk -F'/' '{print $NF, $0}' | sort -V | tail -1 | awk '{print $2}')}
+: ${QIF_ROOT_PATH:=$(printf '%s\n' "${qif_folders[@]}" | awk -F'/' '{print $NF, $0}' | sort -V | tail -1 | awk '{print $2}')}
 
 if [[ -z "$QT_ROOT_PATH" ]]; then
     echo "Qt not found in standard paths and in QT_INSTALL_DIR"
     echo "  Please install the suitable version of Qt"
-    echo "  or specify it by using QIF_ROOT_PATH/QT_INSTALL_DIR variables"
+    echo "  or specify it by using QT_ROOT_PATH/QT_INSTALL_DIR variables"
     exit 1
 fi
 
@@ -83,8 +83,8 @@ case "$TARGET" in
         : ${CMAKE_PREFIX_PATH:="$QT_ROOT_PATH"/gcc_64}
         ;;
     darwin|macos)
-        [ "$INSTALLERS" = "all" ] && INSTALLERS="IFW"
-        : ${CMAKE_GENERATOR:="Xcode"}
+        [ "$INSTALLERS" = "all" ] && INSTALLERS="productbuild"
+        : ${CMAKE_GENERATOR:="Unix Makefiles"}
         : ${CMAKE_PREFIX_PATH:="$QT_ROOT_PATH"/macos}
         ;;
     macos-ne)
@@ -161,7 +161,7 @@ if [[ "$TARGET" == "android" ]]; then
         done
     done
 
-    : ${ANDROID_NDK_ROOT:=$(printf '%s\n' "${ndk_dirs[@]}" | sort -V | tail -1)}
+    : ${ANDROID_NDK_ROOT:=$(printf '%s\n' "${ndk_dirs[@]}" | awk -F'/' '{print $NF, $0}' | sort -V | tail -1 | awk '{print $2}')}
     : ${ANDROID_SDK_ROOT:="$ANDROID_NDK_ROOT/../.."}
 fi
 
@@ -190,7 +190,7 @@ if [[ -n "$FORCE" ]]; then
     run_traced rm -rf "$BUILD_PATH"
 fi
 
-run_traced cmake -S "$PROJECT_DIR" -B "$BUILD_PATH" "${args[@]}"
+run_traced cmake -S "$PROJECT_DIR" -B "$BUILD_PATH" "${args[@]}" -DQT_ENABLE_VERBOSE_DEPLOYMENT=1
 
 args=()
 [[ -n "$CMAKE_BUILD_TARGET" ]] && args+=("-t" $CMAKE_BUILD_TARGET)
@@ -199,7 +199,7 @@ args=()
 run_traced cmake --build "$BUILD_PATH" "${args[@]}"
 
 if [ -z "$no_installers" ]; then
-    for installer in "$INSTALLERS"; do
+    for installer in $INSTALLERS; do
         (cd "$BUILD_PATH" && run_traced cpack -G "$installer" -D QTIFWDIR="$QIF_ROOT_PATH")
     done
 fi
