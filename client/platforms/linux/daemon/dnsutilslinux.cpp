@@ -66,14 +66,8 @@ DnsUtilsLinux::~DnsUtilsLinux() {
   MZ_COUNT_DTOR(DnsUtilsLinux);
 
   if (m_resolver) {
-    for (auto iterator = m_linkDefaultRoutes.constBegin();
-         iterator != m_linkDefaultRoutes.constEnd(); ++iterator) {
-      QList<QVariant> argumentList;
-      argumentList << QVariant::fromValue(iterator.key());
-      argumentList << QVariant::fromValue(iterator.value());
-      m_resolver->asyncCallWithArgumentList(QStringLiteral("SetLinkDefaultRoute"),
-                                            argumentList);
-    }
+    if (m_gatewayIfindex > 0)
+      setLinkDefaultRoute(m_gatewayIfindex, true);
 
     for (auto iterator = m_linkDomains.constBegin();
          iterator != m_linkDomains.constEnd(); ++iterator) {
@@ -93,11 +87,10 @@ DnsUtilsLinux::~DnsUtilsLinux() {
 
 bool DnsUtilsLinux::updateResolvers(const QString& ifname,
                                     const QList<QHostAddress>& resolvers) {
-  for (auto iterator = m_linkDefaultRoutes.constBegin();
-       iterator != m_linkDefaultRoutes.constEnd(); ++iterator) {
-    setLinkDefaultRoute(iterator.key(), iterator.value());
+  if (m_gatewayIfindex > 0) {
+    setLinkDefaultRoute(m_gatewayIfindex, true);
+    m_gatewayIfindex = 0;
   }
-  m_linkDefaultRoutes.clear();
 
   m_ifindex = if_nametoindex(qPrintable(ifname));
   if (m_ifindex <= 0) {
@@ -113,7 +106,12 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
     return true;
   }
 
-  updateLinkDefaultRoutes();
+  const int gwIdx = NetworkUtilities::getGatewayAndIface().second.index();
+  if (gwIdx > 0 && gwIdx != m_ifindex && gwIdx != m_gatewayIfindex) {
+    m_gatewayIfindex = gwIdx;
+    setLinkDefaultRoute(gwIdx, false);
+  }
+
   setLinkDNS(m_ifindex, resolvers);
   setLinkDefaultRoute(m_ifindex, true);
   updateLinkDomains();
@@ -124,11 +122,10 @@ bool DnsUtilsLinux::restoreResolvers() {
   m_pendingIfname.clear();
   m_pendingResolvers.clear();
 
-  for (auto iterator = m_linkDefaultRoutes.constBegin();
-       iterator != m_linkDefaultRoutes.constEnd(); ++iterator) {
-    setLinkDefaultRoute(iterator.key(), iterator.value());
+  if (m_gatewayIfindex > 0) {
+    setLinkDefaultRoute(m_gatewayIfindex, true);
+    m_gatewayIfindex = 0;
   }
-  m_linkDefaultRoutes.clear();
 
   for (auto iterator = m_linkDomains.constBegin();
        iterator != m_linkDomains.constEnd(); ++iterator) {
@@ -155,7 +152,7 @@ bool DnsUtilsLinux::restoreResolvers() {
 void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<> reply = *call;
   if (reply.isError()) {
-    logger.error() << "Error received from the DBus service";
+    logger.debug() << "DBus call failed (may be transient after systemd-resolved restart)";
   }
   delete call;
 }
@@ -223,23 +220,6 @@ void DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
                    SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
 }
 
-void DnsUtilsLinux::updateLinkDefaultRoutes() {
-  const QNetworkInterface defaultIface = NetworkUtilities::getGatewayAndIface().second;
-  const int ifindex = defaultIface.index();
-  if (ifindex <= 0) {
-    logger.warning() << "Unable to determine default route interface";
-    return;
-  }
-  if ((ifindex == m_ifindex) || m_linkDefaultRoutes.contains(ifindex)) {
-    return;
-  }
-
-  // Gateway link normally has DefaultRoute=yes. Keep behavior simple:
-  // disable it while VPN DNS is active and restore to yes on teardown.
-  m_linkDefaultRoutes[ifindex] = true;
-  setLinkDefaultRoute(ifindex, false);
-}
-
 void DnsUtilsLinux::updateLinkDomains() {
   if (!m_resolver) return;
   /* Get the list of search domains, and remove any others that might conspire
@@ -300,9 +280,15 @@ void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
 
   /* Add a root search domain for the new interface. */
   if (m_ifindex > 0) {
-    QList<DnsLinkDomain> newlist = {root};
-    setLinkDomains(m_ifindex, newlist);
-    updateLinkDefaultRoutes();
+    setLinkDomains(m_ifindex, {root});
+
+    /* Disable DefaultRoute on the physical gateway so systemd-resolved
+     * routes all DNS through the VPN interface. */
+    const int gwIdx = NetworkUtilities::getGatewayAndIface().second.index();
+    if (gwIdx > 0 && gwIdx != m_ifindex && gwIdx != m_gatewayIfindex) {
+      m_gatewayIfindex = gwIdx;
+      setLinkDefaultRoute(gwIdx, false);
+    }
   }
 }
 
