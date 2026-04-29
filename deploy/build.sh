@@ -106,10 +106,6 @@ case "$TARGET" in
         : ${CMAKE_GENERATOR:="Ninja"}
         : ${ANDROID_PLATFORM:="android-28"}
 
-        cmake_targets=("all")
-        [[ -n "$BUILD_AAB" ]] && cmake_targets+=("aab")
-        : ${CMAKE_BUILD_TARGET:="${cmake_targets[@]}"}
-
         if [[ -n "$SIGN" ]]; then
             QT_ANDROID_SIGN_APK=TRUE
             QT_ANDROID_SIGN_AAB=TRUE
@@ -191,12 +187,9 @@ if [[ -n "$FORCE" ]]; then
 fi
 
 run_traced cmake -S "$PROJECT_DIR" -B "$BUILD_PATH" "${args[@]}"
+run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE"
 
-args=()
-[[ -n "$CMAKE_BUILD_TARGET" ]] && args+=("-t" $CMAKE_BUILD_TARGET)
-[[ -n "$CMAKE_BUILD_TYPE" ]]   && args+=("--config" "$CMAKE_BUILD_TYPE")
-
-run_traced cmake --build "$BUILD_PATH" "${args[@]}"
+[[ -n "$BUILD_AAB" ]] && run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" -t "aab"
 
 if [ -z "$no_installers" ]; then
     for installer in $INSTALLERS; do
