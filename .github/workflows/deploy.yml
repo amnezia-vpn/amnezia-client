@@ -9,8 +9,25 @@ env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
 
 jobs:
+  Detect-Changes:
+    runs-on: ubuntu-latest
+    outputs:
+      recipes_changed: ${{ steps.filter.outputs.recipes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.event.before }}
+          filters: |
+            recipes:
+              - 'recipes/**'
+              - 'conanfile.py'
+
   Bake-Prebuilts-Linux:
     runs-on: ubuntu-latest
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     steps:
     - uses: actions/checkout@v4
@@ -114,6 +131,8 @@ jobs:
 
   Bake-Prebuilts-Windows:
     runs-on: windows-latest
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     steps:
     - uses: actions/checkout@v4
@@ -234,6 +253,9 @@ jobs:
 
   Bake-Prebuilts-iOS:
     runs-on: macos-latest
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+
     strategy:
       matrix:
         xcode-version: [26.0]
@@ -366,6 +388,10 @@ jobs:
 
   Bake-Prebuilts-MacOS:
     runs-on: macos-latest
+
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+
     strategy:
       matrix:
         xcode-version: [16.2, 16.4]
@@ -491,6 +517,9 @@ jobs:
 
   Bake-Prebuilts-MacOS-NE:
     runs-on: macos-latest
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+
     strategy:
       matrix:
         xcode-version: [16.2, 16.4]
@@ -613,6 +642,8 @@ jobs:
 
   Bake-Prebuilts-Android:
     runs-on: android-runner
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     env:
       ANDROID_PLATFORM: android-28
