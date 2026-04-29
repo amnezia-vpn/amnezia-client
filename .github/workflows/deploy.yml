@@ -327,6 +327,7 @@ jobs:
       uses: ./.github/actions/apple-install-cert
       with:
         keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
         cert-base64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
         cert-password: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
 
@@ -464,12 +465,14 @@ jobs:
     - uses: ./.github/actions/apple-install-cert
       with:
         keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
         cert-base64: ${{ secrets.MAC_APP_CERT_CERT }}
         cert-password: ${{ secrets.MAC_APP_CERT_PW }}
 
     - uses: ./.github/actions/apple-install-cert
       with:
         keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
         cert-base64: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
         cert-password: ${{ secrets.MAC_INSTALL_CERT_PW }}
 
