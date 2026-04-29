@@ -46,7 +46,7 @@ val qtMinSdkVersion: String by gradleProperties
 // set default values for all modules
 configure<SettingsExtension> {
     buildToolsVersion = androidBuildToolsVersion
-    compileSdk = androidCompileSdkVersion.substringBefore('-').toInt()
+    compileSdk = androidCompileSdkVersion.split('-')[1].toInt()
     minSdk = qtMinSdkVersion.toInt()
     ndkVersion = androidNdkVersion
 }

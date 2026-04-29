@@ -190,7 +190,7 @@ if [[ -n "$FORCE" ]]; then
     run_traced rm -rf "$BUILD_PATH"
 fi
 
-run_traced cmake -S "$PROJECT_DIR" -B "$BUILD_PATH" "${args[@]}" -DQT_ENABLE_VERBOSE_DEPLOYMENT=1
+run_traced cmake -S "$PROJECT_DIR" -B "$BUILD_PATH" "${args[@]}"
 
 args=()
 [[ -n "$CMAKE_BUILD_TARGET" ]] && args+=("-t" $CMAKE_BUILD_TARGET)
