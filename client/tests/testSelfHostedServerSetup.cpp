@@ -40,10 +40,10 @@ private:
     ServerCredentials getCredentialsFromEnv() {
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
         
-        QString hostName = getValueFromIni("TEST_SERVER_HOST");
-        QString userName = getValueFromIni("TEST_SERVER_USER");
-        QString password = getValueFromIni("TEST_SERVER_PASSWORD");
-        QString portStr = getValueFromIni("TEST_SERVER_PORT");
+        QString hostName = getValueFromIni("secrets/TEST_SERVER_HOST");
+        QString userName = getValueFromIni("secrets/TEST_SERVER_USER");
+        QString password = getValueFromIni("secrets/TEST_SERVER_PASSWORD");
+        QString portStr = getValueFromIni("secrets/TEST_SERVER_PORT");
         int port = portStr.toInt();
         
         ServerCredentials credentials;
