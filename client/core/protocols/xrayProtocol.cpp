@@ -121,14 +121,6 @@ void XrayProtocol::stop()
     qDebug() << "XrayProtocol::stop()";
 
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-        auto disableKillSwitch = iface->disableKillSwitch();
-        if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue())
-            qWarning() << "Failed to disable killswitch";
-
-        auto StartRoutingIpv6 = iface->StartRoutingIpv6();
-        if (!StartRoutingIpv6.waitForFinished() || !StartRoutingIpv6.returnValue())
-            qWarning() << "Failed to start routing ipv6";
-
         auto restoreResolvers = iface->restoreResolvers();
         if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue())
             qWarning() << "Failed to restore resolvers";
@@ -267,66 +259,7 @@ ErrorCode XrayProtocol::setupRouting()
                     return ErrorCode::InternalError;
                 }
 
-#ifdef Q_OS_WIN
-                int vpnAdapterIndex = -1;
-                QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
-                for (auto &netInterface : netInterfaces) {
-                    for (auto &address : netInterface.addressEntries()) {
-                        if (m_vpnLocalAddress == address.ip().toString())
-                            vpnAdapterIndex = netInterface.index();
-                    }
-                }
-#else
-                static const int vpnAdapterIndex = 0;
-#endif
-                const bool killSwitchEnabled = QVariant(m_rawConfig.value(configKey::killSwitchOption).toString()).toBool();
-                if (killSwitchEnabled) {
-                    if (vpnAdapterIndex != -1) {
-                        QJsonObject config = m_rawConfig;
-                        config.insert("vpnServer", m_remoteAddress);
-
-                        auto enableKillSwitch = IpcClient::Interface()->enableKillSwitch(config, vpnAdapterIndex);
-                        if (!enableKillSwitch.waitForFinished() || !enableKillSwitch.returnValue()) {
-                            qCritical() << "Failed to enable killswitch";
-                            return ErrorCode::InternalError;
-                        }
-                    } else
-                        qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
-                }
-
-                if (m_routeMode == amnezia::RouteMode::VpnAllSites) {
-                    static const QStringList subnets = { "1.0.0.0/8",  "2.0.0.0/7",  "4.0.0.0/6",  "8.0.0.0/5",
-                                                         "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
-
-                    auto routeAddList = iface->routeAddList(m_vpnGateway, subnets);
-                    if (!routeAddList.waitForFinished() || routeAddList.returnValue() != subnets.count()) {
-                        qCritical() << "Failed to set routes for TUN";
-                        return ErrorCode::InternalError;
-                    }
-                }
-
-                auto StopRoutingIpv6 = iface->StopRoutingIpv6();
-                if (!StopRoutingIpv6.waitForFinished() || !StopRoutingIpv6.returnValue()) {
-                    qCritical() << "Failed to disable IPv6 routing";
-                    return ErrorCode::InternalError;
-                }
-
-#ifdef Q_OS_WIN
-                if (inetAdapterIndex != -1 && vpnAdapterIndex != -1) {
-                    QJsonObject config = m_rawConfig;
-                    config.insert("inetAdapterIndex", inetAdapterIndex);
-                    config.insert("vpnAdapterIndex", vpnAdapterIndex);
-                    config.insert("vpnGateway", m_vpnGateway);
-                    config.insert("vpnServer", m_remoteAddress);
-
-                    auto enablePeerTraffic = iface->enablePeerTraffic(config);
-                    if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
-                        qCritical() << "Failed to enable peer traffic";
-                        return ErrorCode::InternalError;
-                    }
-                } else
-                    qWarning() << "Failed to get adapter indexes. Split-tunneling disabled";
-#endif
+                emit tunnelAddressesUpdated(m_vpnGateway, m_vpnLocalAddress);
                 return ErrorCode::NoError;
             },
             []() { return ErrorCode::AmneziaServiceConnectionFailed; });

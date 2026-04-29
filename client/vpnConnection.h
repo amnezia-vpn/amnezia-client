@@ -15,9 +15,7 @@
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 
-#ifdef AMNEZIA_DESKTOP
-#include "core/utils/ipcClient.h"
-#endif
+#include "core/vpnTrafficGuard.h"
 
 #ifdef Q_OS_ANDROID
 #include "core/protocols/androidVpnProtocol.h"
@@ -41,7 +39,6 @@ public:
     QSharedPointer<VpnProtocol> vpnProtocol() const;
 
     const QString &remoteAddress() const;
-    void addSitesRoutes(const QString &gw, amnezia::RouteMode mode);
 
 #ifdef Q_OS_ANDROID
     void restoreConnection();
@@ -75,6 +72,7 @@ protected:
 private:
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
+    QScopedPointer<VpnTrafficGuard> m_trafficGuard;
 
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
