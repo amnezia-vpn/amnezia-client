@@ -790,7 +790,7 @@ jobs:
     - name: 'Upload fat AAB'
       uses: actions/upload-artifact@v7
       with:
-        path: ./build/client/android-build/build/outputs/bundle/release/android-build-release.aab
+        path: deploy/build/client/android-build/build/outputs/bundle/release/android-build-release.aab
         archive: false
         retention-days: 7
 
