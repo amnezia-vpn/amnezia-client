@@ -58,8 +58,10 @@ jobs:
 # ------------------------------------------------------
 
   Build-Linux-Ubuntu:
-    needs: Bake-Prebuilts-Linux
     runs-on: android-runner
+
+    needs: Bake-Prebuilts-Linux
+    if: ${{ always() }}
 
     env:
       QT_VERSION: 6.10.1
@@ -161,8 +163,10 @@ jobs:
 # ------------------------------------------------------
 
   Build-Windows:
-    needs: Bake-Prebuilts-Windows
     runs-on: windows-latest
+
+    needs: Bake-Prebuilts-Windows
+    if: ${{ always() }}
 
     env:
       QT_VERSION: 6.10.1
@@ -289,8 +293,10 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
-    needs: Bake-Prebuilts-iOS
     runs-on: macos-latest
+
+    needs: Bake-Prebuilts-iOS
+    if: ${{ always() }}
 
     env:
       QT_VERSION: 6.10.1
@@ -425,8 +431,10 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    needs: Bake-Prebuilts-MacOS
     runs-on: macos-latest
+
+    needs: Bake-Prebuilts-MacOS
+    if: ${{ always() }}
 
     env:
       QT_VERSION: 6.10.1
@@ -553,8 +561,10 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS-NE:
-    needs: Bake-Prebuilts-MacOS-NE
     runs-on: macos-latest
+
+    needs: Bake-Prebuilts-MacOS-NE
+    if: ${{ always() }}
 
     env:
       QT_VERSION: 6.10.1
@@ -693,8 +703,10 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
-    needs: Bake-Prebuilts-Android
     runs-on: android-runner
+
+    needs: Bake-Prebuilts-Android
+    if: ${{ always() }}
 
     env:
       ANDROID_PLATFORM: android-28
