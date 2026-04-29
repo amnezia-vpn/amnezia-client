@@ -507,9 +507,7 @@ jobs:
     - name: 'Build project'
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
-        CODESIGN_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-name }}
         CODESIGN_SIGNATURE: ${{ secrets.MAC_SIGNER_ID }}
-        CODESIGN_INSTALLER_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-name }}
         CODESIGN_INSTALLER_SIGNATURE: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
         NOTARYTOOL_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
         NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
