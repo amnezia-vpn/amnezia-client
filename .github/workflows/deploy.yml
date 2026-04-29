@@ -94,7 +94,7 @@ jobs:
       shell: bash
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
-      run: ./deploy/build.sh
+      run: deploy/build.sh -i all
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
@@ -478,7 +478,7 @@ jobs:
         NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
         NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
       shell: bash
-      run: deploy/build.sh
+      run: deploy/build.sh -i all
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
@@ -778,7 +778,7 @@ jobs:
         QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build.sh -t android --abi all --aab --sign
+      run: deploy/build.sh -t android --abi all --aab --sign
 
     - name: 'Upload fat APK'
       uses: actions/upload-artifact@v7
