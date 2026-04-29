@@ -21,9 +21,10 @@ private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
 
-    QString getPath()
+    QString getValueFromIni(const QString &key)
     {
-        return QProcessEnvironment::systemEnvironment().value("TEST_APP_PATH");
+        QSettings settings("test_vars.ini", QSettings::IniFormat);
+        return settings.value(key).toString();
     }
 
 private slots:
@@ -66,7 +67,7 @@ private slots:
         QVERIFY2(isSplitTunnelingChangedSpy.count() == 2, "isSplitTunnelingChangedSpy signal should be emitted 2nd time");
         QVERIFY2(m_coreController->m_appSplitTunnelingUiController->isTunnelingEnabled() == false, "AppSplitTunneling should be disabled");
 
-        QString app = getPath();
+        QString app = getValueFromIni("paths/TEST_APP_PATH");
 
         m_coreController->m_appSplitTunnelingUiController->addApp(app);
         m_coreController->m_appSplitTunnelingUiController->updateModel();

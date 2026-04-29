@@ -21,14 +21,10 @@ private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
 
-    QString getPath()
+    QString getValueFromIni(const QString &key)
     {
-        return QProcessEnvironment::systemEnvironment().value("TEST_SITES_LIST_PATH");
-    }
-
-    QString getExportPath()
-    {
-        return QProcessEnvironment::systemEnvironment().value("TEST_EXPORT_PATH");
+        QSettings settings("test_vars.ini", QSettings::IniFormat);
+        return settings.value(key).toString();
     }
 
     QString normalizeHostname(const QString &hostname) const
@@ -103,13 +99,13 @@ private slots:
         QVERIFY2(finishedSpy.count() == 3, "finished signal should be emitted");
         QVERIFY2(m_coreController->m_sitesModel->rowCount() == 1, "SitesModel should have 1 row");
 
-        m_coreController->m_sitesUiController->importSites(getPath(), true);
+        m_coreController->m_sitesUiController->importSites(getValueFromIni("paths/TEST_SITES_LIST_PATH"), true);
         m_coreController->m_sitesUiController->updateModel();
         QVERIFY2(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
         QVERIFY2(finishedSpy.count() == 4, "finished signal should be emitted");
         QVERIFY2(m_coreController->m_sitesModel->rowCount() > 1, "SitesModel should have more than 1 row");
 
-        m_coreController->m_sitesUiController->exportSites(getExportPath() + "test_sites_export.json");
+        m_coreController->m_sitesUiController->exportSites(getValueFromIni("paths/TEST_EXPORT_PATH") + "test_sites_export.json");
         QVERIFY2(finishedSpy.count() == 5, "finished signal should be emitted");
 
         m_coreController->m_sitesUiController->removeSites();
