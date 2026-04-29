@@ -19,6 +19,12 @@ private:
     CoreController* m_coreController;
     SecureQSettings* m_settings;
 
+    QString getValueFromIni(const QString &key)
+    {
+        QSettings settings("test_vars.ini", QSettings::IniFormat);
+        return settings.value(key).toString();
+    }
+
 private slots:
     void initTestCase() {
         QString testOrg = "AmneziaVPN-Test-" + QUuid::createUuid().toString();
@@ -42,7 +48,7 @@ private slots:
     }
 
     void testGatewayStacksRecomputeOnServerOperations() {
-        QString awgKey = "vpn://AAABFHjadZBBT4QwEIX_ipkzS2wBJdyMB1cPXvbgwRgyQnclgZa0RTYS_rszXRa52Mt77TfzOu0EldEeG62sg-J9AhxPUEywF1CAuF3WTl4dRLCXhJIVpVuUEMpWdLdFKaH7FeUb9Mx3scpFk0XTRbOLvlSkKZsOz-Gi4BsdRiV_EGEydhwlg0tWynEZmd5Yz1bkoaK3xpvKtOU3_UFjOE3SsRs-tfIl1rVVzoWQOI9FzC3eonYcU4ZmgkPdwxz9fSYdYafVT4M7-lEJ80cEtTri0PrH_2q4wlW26f1lioe3p5uDsjQWoS_j_Ct2ipvGU6zO2PWtiivT8RPQudHYmqBXzl-3Yn2slBEMTtklgYt4C_Mv3ROMwA";
+        QString awgKey = getValueFromIni("configs/TEST_CONFIG_AWG");
 
         QSignalSpy gatewayStacksExpandedSpy(m_coreController->m_serversController, &ServersController::gatewayStacksExpanded);
         QSignalSpy serverAddedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded);

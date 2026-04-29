@@ -23,14 +23,10 @@ private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
 
-    QString getSHAdminConfig()
+    QString getValueFromIni(const QString &key)
     {
-        return QProcessEnvironment::systemEnvironment().value("TEST_SELF_HOSTED_CONFIG");
-    }
-
-    QString getKey(QString name)
-    {
-        return QProcessEnvironment::systemEnvironment().value("TEST_KEY_" + name);
+        QSettings settings("test_vars.ini", QSettings::IniFormat);
+        return settings.value(key).toString();
     }
 
     QJsonObject extractXrayConfig(const QString &data, ConfigTypes configType, const QString &description = "") const
@@ -88,7 +84,7 @@ private slots:
 
         m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
 
-        QString vpnKey = getSHAdminConfig();
+        QString vpnKey = getValueFromIni("configs/TEST_SELF_HOSTED_CONFIG");
         QJsonObject importedConfig = m_coreController->m_importCoreController->extractConfigFromData(vpnKey).config;
 
         m_coreController->m_importCoreController->importConfig(importedConfig);
@@ -154,7 +150,7 @@ private slots:
 
         ImportController::ImportResult importResult;
         
-        m_coreController->m_importController->extractConfigFromData(getKey("VMESS_NEW"));
+        m_coreController->m_importController->extractConfigFromData(getValueFromIni("configs/TEST_CONFIG_VMESS_NEW"));
 
         QString config = m_coreController->m_importController->getConfig();
         QString prefix;
@@ -180,7 +176,7 @@ private slots:
 
         ImportController::ImportResult importResult;
 
-        m_coreController->m_importController->extractConfigFromData(getKey("VMESS"));
+        m_coreController->m_importController->extractConfigFromData(getValueFromIni("configs/TEST_CONFIG_VMESS"));
 
         QString config = m_coreController->m_importController->getConfig();
         QString prefix;
@@ -206,7 +202,7 @@ private slots:
 
         ImportController::ImportResult importResult;
 
-        m_coreController->m_importController->extractConfigFromData(getKey("TROJAN"));
+        m_coreController->m_importController->extractConfigFromData(getValueFromIni("configs/TEST_CONFIG_TROJAN"));
 
         QString config = m_coreController->m_importController->getConfig();
         QString prefix;
@@ -232,7 +228,7 @@ private slots:
 
         ImportController::ImportResult importResult;
 
-        m_coreController->m_importController->extractConfigFromData(getKey("SS"));
+        m_coreController->m_importController->extractConfigFromData(getValueFromIni("configs/TEST_CONFIG_SS"));
 
         QString config = m_coreController->m_importController->getConfig();
         QString prefix;
@@ -258,7 +254,7 @@ private slots:
 
         ImportController::ImportResult importResult;
 
-        m_coreController->m_importController->extractConfigFromData(getKey("SSD"));
+        m_coreController->m_importController->extractConfigFromData(getValueFromIni("configs/TEST_CONFIG_SSD"));
 
         QString config = m_coreController->m_importController->getConfig();
         QString prefix;

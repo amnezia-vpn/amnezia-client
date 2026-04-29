@@ -21,14 +21,10 @@ private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
 
-    QString getPath()
+    QString getValueFromIni(const QString &key)
     {
-        return QProcessEnvironment::systemEnvironment().value("TEST_DNS_LIST_PATH");
-    }
-
-    QString getExportPath()
-    {
-        return QProcessEnvironment::systemEnvironment().value("TEST_EXPORT_PATH");
+        QSettings settings("test_vars.ini", QSettings::IniFormat);
+        return settings.value(key).toString();
     }
 
 private slots:
@@ -77,13 +73,13 @@ private slots:
         QString msg = QString("dns ip should be %1, got %2").arg(ip, dnsIp.toString());
         QVERIFY2(dnsIp == ip, msg.toLocal8Bit().constData());
 
-        m_coreController->m_allowedDnsUiController->importDns(getPath(), true);
+        m_coreController->m_allowedDnsUiController->importDns(getValueFromIni("paths/TEST_DNS_LIST_PATH"), true);
         m_coreController->m_allowedDnsUiController->updateModel();
         QVERIFY2(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
         QVERIFY2(finishedSpy.count() == 2, "finished signal should be emitted");
         QVERIFY2(m_coreController->m_allowedDnsModel->rowCount() > 1, "AllowedDnsModel should have more than 1 row");
 
-        m_coreController->m_allowedDnsUiController->exportDns(getExportPath() + "test_dns_export.json");
+        m_coreController->m_allowedDnsUiController->exportDns(getValueFromIni("paths/TEST_EXPORT_PATH") + "test_dns_export.json");
         QVERIFY2(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
         QVERIFY2(finishedSpy.count() == 3, "finished signal should be emitted");
 

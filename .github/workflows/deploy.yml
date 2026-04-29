@@ -743,16 +743,6 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
-      TEST_SELF_HOSTED_CONFIG: ${{ secrets.TEST_SELF_HOSTED_CONFIG }}
-      TEST_APP_PATH: ${{ secrets.TEST_APP_PATH }}
-      TEST_SITES_LIST_PATH: ${{ secrets.TEST_SITES_LIST_PATH }}
-      TEST_DNS_LIST_PATH: ${{ secrets.TEST_DNS_LIST_PATH }}
-      TEST_EXPORT_PATH: ${{ secrets.TEST_EXPORT_PATH }}
-      TEST_KEY_VMESS_NEW: ${{ secrets.TEST_KEY_VMESS_NEW }}
-      TEST_KEY_VMESS: ${{ secrets.TEST_KEY_VMESS }}
-      TEST_KEY_TROJAN: ${{ secrets.TEST_KEY_TROJAN }}
-      TEST_KEY_SS: ${{ secrets.TEST_KEY_SS }}
-      TEST_KEY_SSD: ${{ secrets.TEST_KEY_SSD }}
 
     steps:
     - name: 'Get sources'
@@ -822,16 +812,6 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
-      TEST_SELF_HOSTED_CONFIG: ${{ secrets.TEST_SELF_HOSTED_CONFIG }}
-      TEST_APP_PATH: ${{ secrets.TEST_APP_PATH }}
-      TEST_SITES_LIST_PATH: ${{ secrets.TEST_SITES_LIST_PATH }}
-      TEST_DNS_LIST_PATH: ${{ secrets.TEST_DNS_LIST_PATH }}
-      TEST_EXPORT_PATH: ${{ secrets.TEST_EXPORT_PATH }}
-      TEST_KEY_VMESS_NEW: ${{ secrets.TEST_KEY_VMESS_NEW }}
-      TEST_KEY_VMESS: ${{ secrets.TEST_KEY_VMESS }}
-      TEST_KEY_TROJAN: ${{ secrets.TEST_KEY_TROJAN }}
-      TEST_KEY_SS: ${{ secrets.TEST_KEY_SS }}
-      TEST_KEY_SSD: ${{ secrets.TEST_KEY_SSD }}
 
     steps:
     - name: 'Get sources'
@@ -891,16 +871,6 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
-      TEST_SELF_HOSTED_CONFIG: ${{ secrets.TEST_SELF_HOSTED_CONFIG }}
-      TEST_APP_PATH: ${{ secrets.TEST_APP_PATH }}
-      TEST_SITES_LIST_PATH: ${{ secrets.TEST_SITES_LIST_PATH }}
-      TEST_DNS_LIST_PATH: ${{ secrets.TEST_DNS_LIST_PATH }}
-      TEST_EXPORT_PATH: ${{ secrets.TEST_EXPORT_PATH }}
-      TEST_KEY_VMESS_NEW: ${{ secrets.TEST_KEY_VMESS_NEW }}
-      TEST_KEY_VMESS: ${{ secrets.TEST_KEY_VMESS }}
-      TEST_KEY_TROJAN: ${{ secrets.TEST_KEY_TROJAN }}
-      TEST_KEY_SS: ${{ secrets.TEST_KEY_SS }}
-      TEST_KEY_SSD: ${{ secrets.TEST_KEY_SSD }}
 
     steps:
       - name: 'Setup xcode'

@@ -31,13 +31,19 @@ private:
     CoreController* m_coreController;
     SecureQSettings* m_settings;
 
+    QString getValueFromIni(const QString &key)
+    {
+        QSettings settings("test_vars.ini", QSettings::IniFormat);
+        return settings.value(key).toString();
+    }
+
     ServerCredentials getCredentialsFromEnv() {
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
         
-        QString hostName = env.value("TEST_SERVER_HOST");
-        QString userName = env.value("TEST_SERVER_USER");
-        QString password = env.value("TEST_SERVER_PASSWORD");
-        QString portStr = env.value("TEST_SERVER_PORT", "22");
+        QString hostName = getValueFromIni("TEST_SERVER_HOST");
+        QString userName = getValueFromIni("TEST_SERVER_USER");
+        QString password = getValueFromIni("TEST_SERVER_PASSWORD");
+        QString portStr = getValueFromIni("TEST_SERVER_PORT");
         int port = portStr.toInt();
         
         ServerCredentials credentials;

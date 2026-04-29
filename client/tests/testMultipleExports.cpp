@@ -21,9 +21,10 @@ private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
 
-    QString getSHAdminConfig()
+    QString getValueFromIni(const QString &key)
     {
-        return QProcessEnvironment::systemEnvironment().value("TEST_SELF_HOSTED_CONFIG");
+        QSettings settings("test_vars.ini", QSettings::IniFormat);
+        return settings.value(key).toString();
     }
 
 private slots:
@@ -36,7 +37,7 @@ private slots:
 
         m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
 
-        QString vpnKey = getSHAdminConfig();
+        QString vpnKey = getValueFromIni("configs/TEST_SELF_HOSTED_CONFIG");
         QJsonObject importedConfig = m_coreController->m_importCoreController->extractConfigFromData(vpnKey).config;
 
         m_coreController->m_importCoreController->importConfig(importedConfig);
