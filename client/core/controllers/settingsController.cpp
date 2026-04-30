@@ -121,9 +121,8 @@ QByteArray SettingsController::backupAppConfig() const
 
 ErrorCode SettingsController::restoreAppConfigFromData(const QByteArray &data)
 {
-    bool ok = m_appSettingsRepository->restoreAppConfig(data);
-    if (!ok) {
-        return ErrorCode::InternalError;
+    if (!m_appSettingsRepository->restoreAppConfig(data)) {
+        return ErrorCode::RestoreBackupInvalidError;
     }
 
     m_serversRepository->invalidateCache();

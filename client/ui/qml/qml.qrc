@@ -11,6 +11,11 @@
         <file>Components/SelectLanguageDrawer.qml</file>
         <file>Components/ServersListView.qml</file>
         <file>Components/SettingsContainersListView.qml</file>
+        <file>Components/BenefitRow.qml</file>
+        <file>Components/BenefitsPanel.qml</file>
+        <file>Components/SubscriptionExpiredDrawer.qml</file>
+        <file>Components/SubscriptionPlanCard.qml</file>
+        <file>Components/TermsAndPrivacyText.qml</file>
         <file>Components/TransportProtoSelector.qml</file>
         <file>Components/AddSitePanel.qml</file>
         <file>Config/GlobalConfig.qml</file>
@@ -54,6 +59,7 @@
         <file>Controls2/TextTypes/LabelTextType.qml</file>
         <file>Controls2/TextTypes/ListItemTitleType.qml</file>
         <file>Controls2/TextTypes/ParagraphTextType.qml</file>
+        <file>Controls2/TextTypes/BadgeTextType.qml</file>
         <file>Controls2/TextTypes/SmallTextType.qml</file>
         <file>Controls2/TopCloseButtonType.qml</file>
         <file>Controls2/VerticalRadioButton.qml</file>
@@ -108,6 +114,9 @@
         <file>Pages2/PageProtocolAwgClientSettings.qml</file>
         <file>Pages2/PageProtocolWireGuardClientSettings.qml</file>
         <file>Pages2/PageSetupWizardApiServiceInfo.qml</file>
+        <file>Pages2/PageSetupWizardApiFreeInfo.qml</file>
+        <file>Pages2/PageSetupWizardApiPremiumInfo.qml</file>
+        <file>Pages2/PageSetupWizardApiTrialEmail.qml</file>
         <file>Pages2/PageSetupWizardApiServicesList.qml</file>
         <file>Pages2/PageSetupWizardConfigSource.qml</file>
         <file>Pages2/PageSetupWizardCredentials.qml</file>

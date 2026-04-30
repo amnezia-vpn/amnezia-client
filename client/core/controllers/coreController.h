@@ -53,9 +53,11 @@
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
 #include "ui/models/api/apiAccountInfoModel.h"
+#include "ui/models/api/apiBenefitsModel.h"
 #include "ui/models/api/apiCountryModel.h"
 #include "ui/models/api/apiDevicesModel.h"
 #include "ui/models/api/apiServicesModel.h"
+#include "ui/models/api/apiSubscriptionPlansModel.h"
 #include "ui/models/appSplitTunnelingModel.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/protocols/awgConfigModel.h"
@@ -192,6 +194,8 @@ private:
     ClientManagementModel* m_clientManagementModel;
 
     ApiServicesModel* m_apiServicesModel;
+    ApiSubscriptionPlansModel* m_apiSubscriptionPlansModel;
+    ApiBenefitsModel* m_apiBenefitsModel;
     ApiCountryModel* m_apiCountryModel;
     ApiAccountInfoModel* m_apiAccountInfoModel;
     ApiDevicesModel* m_apiDevicesModel;

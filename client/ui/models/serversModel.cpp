@@ -170,6 +170,43 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         }
         return QString();
     }
+    case IsRenewalAvailableRole: {
+        if (server.isApiV2()) {
+            return server.as<ApiV2ServerConfig>()->apiConfig.serviceInfo.isRenewalAvailable;
+        }
+        return false;
+    }
+    case IsSubscriptionExpiredRole: {
+        if (!server.isApiV2()) {
+            return false;
+        }
+
+        const ApiConfig &apiConfig = server.as<ApiV2ServerConfig>()->apiConfig;
+        if (apiConfig.isInAppPurchase) {
+            return false;
+        }
+        if (apiConfig.subscriptionExpiredByServer) {
+            return true;
+        }
+        if (apiConfig.subscription.endDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpired(apiConfig.subscription.endDate);
+    }
+    case IsSubscriptionExpiringSoonRole: {
+        if (!server.isApiV2()) {
+            return false;
+        }
+
+        const ApiConfig &apiConfig = server.as<ApiV2ServerConfig>()->apiConfig;
+        if (apiConfig.isInAppPurchase) {
+            return false;
+        }
+        if (apiConfig.subscription.endDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpiringSoon(apiConfig.subscription.endDate);
+    }
     }
 
     return QVariant();
@@ -309,6 +346,9 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[AdHeaderRole] = "adHeader";
     roles[AdDescriptionRole] = "adDescription";
     roles[AdEndpointRole] = "adEndpoint";
+    roles[IsRenewalAvailableRole] = "isRenewalAvailable";
+    roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
+    roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
 
     return roles;
 }

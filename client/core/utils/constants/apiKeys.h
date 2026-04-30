@@ -2,6 +2,7 @@
 #define APIKEYS_H
 
 #include <QLatin1String>
+#include "core/utils/api/apiEnums.h"
 
 namespace apiDefs
 {
@@ -17,6 +18,7 @@ namespace apiDefs
         constexpr QLatin1String vpnKey("vpn_key");
         constexpr QLatin1String stackType("stack_type");
         constexpr QLatin1String cliVersion("cli_version");
+        constexpr QLatin1String cliName("cli_name");
         constexpr QLatin1String supportedProtocols("supported_protocols");
         constexpr QLatin1String availableCountries("available_countries");
         constexpr QLatin1String installationUuid("installation_uuid");
@@ -43,8 +45,12 @@ namespace apiDefs
         constexpr QLatin1String activeDeviceCount("active_device_count");
         constexpr QLatin1String maxDeviceCount("max_device_count");
         constexpr QLatin1String subscriptionEndDate("subscription_end_date");
+        constexpr QLatin1String subscriptionExpiredByServer("subscription_expired_by_server");
+        constexpr QLatin1String subscriptionStatus("subscription_status");
         constexpr QLatin1String issuedConfigs("issued_configs");
         constexpr QLatin1String subscriptionDescription("subscription_description");
+        constexpr QLatin1String termsOfUseUrl("terms_of_use_url");
+        constexpr QLatin1String privacyPolicyUrl("privacy_policy_url");
 
         constexpr QLatin1String supportInfo("support_info");
         constexpr QLatin1String email("email");
@@ -58,8 +64,11 @@ namespace apiDefs
         constexpr QLatin1String migrationCode("migration_code");
         constexpr QLatin1String transactionId("transaction_id");
         constexpr QLatin1String isTestPurchase("is_test_purchase");
+        constexpr QLatin1String isInAppPurchase("is_in_app_purchase");
+        constexpr QLatin1String config("config");
 
         constexpr QLatin1String isAdVisible("is_ad_visible");
+        constexpr QLatin1String isRenewalAvailable("is_renewal_available");
         constexpr QLatin1String adHeader("ad_header");
         constexpr QLatin1String adDescription("ad_description");
         constexpr QLatin1String adEndpoint("ad_endpoint");

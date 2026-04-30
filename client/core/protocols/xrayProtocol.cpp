@@ -1,22 +1,21 @@
 #include "xrayProtocol.h"
 
 #include "core/utils/constants/configKeys.h"
-#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/ipcClient.h"
-#include "core/utils/utilities.h"
 #include "core/utils/networkUtilities.h"
 #include "core/protocols/protocolUtils.h"
+#include "core/utils/serialization/serialization.h"
 #include "ipc.h"
 
 #include <QCryptographicHash>
-#include <QJsonDocument>
-#include <QTimer>
 #include <QJsonObject>
 #include <QNetworkInterface>
 #include <QJsonDocument>
 #include <QtCore/qlogging.h>
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qprocess.h>
+
+#include <exception>
 
 #ifdef Q_OS_MACOS
 static const QString tunName = "utun22";
@@ -57,7 +56,20 @@ ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
 
-    QString xrayConfigStr = m_xrayConfig.value(amnezia::configKey::config).toString();
+    // Inject SOCKS5 auth into the inbound before starting xray.
+    // Re-uses existing credentials if the config already has them (e.g. imported config).
+    amnezia::serialization::inbounds::InboundCredentials creds;
+    try {
+        creds = amnezia::serialization::inbounds::EnsureInboundAuth(m_xrayConfig);
+    } catch (const std::exception &e) {
+        qCritical() << "EnsureInboundAuth failed:" << e.what();
+        return ErrorCode::InternalError;
+    }
+    m_socksUser     = creds.username;
+    m_socksPassword = creds.password;
+    m_socksPort     = creds.port;
+
+    QString xrayConfigStr = QJsonDocument(m_xrayConfig).toJson(QJsonDocument::Compact);
     if (xrayConfigStr.isEmpty()) {
         qCritical() << "Xray config is empty";
         return ErrorCode::XrayExecutableCrashed;
@@ -148,8 +160,11 @@ ErrorCode XrayProtocol::startTun2Socks()
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
 
+    const QString proxyUrl = QString("socks5://%1:%2@127.0.0.1:%3")
+                                 .arg(m_socksUser, m_socksPassword, QString::number(m_socksPort));
+
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
-    m_tun2socksProcess->setArguments({"-device", QString("tun://%1").arg(tunName), "-proxy", "socks5://127.0.0.1:10808" });
+    m_tun2socksProcess->setArguments({"-device", QString("tun://%1").arg(tunName), "-proxy", proxyUrl});
 
     connect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, [this]() {
         auto readAllStandardOutput = m_tun2socksProcess->readAllStandardOutput();
@@ -163,7 +178,7 @@ ErrorCode XrayProtocol::startTun2Socks()
         if (!line.contains("[TCP]") && !line.contains("[UDP]"))
             qDebug() << "[tun2socks]:" << line;
         
-        if (line.contains("[STACK] tun://") && line.contains("<-> socks5://127.0.0.1")) {
+        if (line.contains("[STACK] tun://") && line.contains("<-> socks5://")) {
             disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, nullptr);
 
             if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {

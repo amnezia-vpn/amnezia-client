@@ -42,6 +42,9 @@ public:
         AdHeaderRole,
         AdDescriptionRole,
         AdEndpointRole,
+        IsRenewalAvailableRole,
+        IsSubscriptionExpiredRole,
+        IsSubscriptionExpiringSoonRole,
 
         HasAmneziaDns
     };

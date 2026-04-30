@@ -67,8 +67,11 @@ PageType {
         }
 
         delegate: ColumnLayout {
+            property bool hideCard: isPremium && !hasSubscriptionPlans
 
             width: listView.width
+            visible: !hideCard
+            height: hideCard ? 0 : implicitHeight
 
             enabled: isServiceAvailable
 
@@ -84,12 +87,19 @@ PageType {
                 bodyText: cardDescription
                 footerText: price
 
+                showRecommendedBadge: showRecommended && isServiceAvailable
+                recommendedText: qsTr("Recommended")
+
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: {
                     if (isServiceAvailable) {
                         ApiServicesModel.setServiceIndex(proxyApiServicesModel.mapToSource(index))
-                        PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
+                        if (ApiServicesModel.getSelectedServiceType() === "amnezia-premium") {
+                            PageController.goToPage(PageEnum.PageSetupWizardApiPremiumInfo)
+                        } else {
+                            PageController.goToPage(PageEnum.PageSetupWizardApiFreeInfo)
+                        }
                     }
                 }
                 

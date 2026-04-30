@@ -164,7 +164,13 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
     }
 
     if (auto* awgConfig = config.getAwgProtocolConfig()) {
-        awgConfig->serverConfig.subnetAddress = serverConfigMap.value("Address").remove("/24");
+        QString addressValue = serverConfigMap.value("Address");
+        QStringList addressParts = addressValue.split("/");
+        awgConfig->serverConfig.subnetAddress = addressParts.value(0);
+        if (addressParts.size() > 1) {
+            awgConfig->serverConfig.subnetCidr = addressParts.value(1);
+        }
+
         awgConfig->serverConfig.junkPacketCount = serverConfigMap.value(configKey::junkPacketCount);
         awgConfig->serverConfig.junkPacketMinSize = serverConfigMap.value(configKey::junkPacketMinSize);
         awgConfig->serverConfig.junkPacketMaxSize = serverConfigMap.value(configKey::junkPacketMaxSize);

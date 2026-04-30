@@ -1,5 +1,6 @@
 #include "settingsUiController.h"
 
+#include <QDebug>
 #include <QStandardPaths>
 #include <QOperatingSystemVersion>
 #include <QFile>
@@ -30,6 +31,8 @@ SettingsUiController::SettingsUiController(SettingsController* settingsControlle
 {
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsUiController::onNotificationStateChanged);
+    connect(AndroidController::instance(), &AndroidController::activityPaused, this, &SettingsUiController::activityPaused);
+    connect(AndroidController::instance(), &AndroidController::activityResumed, this, &SettingsUiController::activityResumed);
 #endif
 
     m_settingsController->checkIfNeedDisableLogs();
@@ -137,12 +140,11 @@ void SettingsUiController::restoreAppConfig(const QString &fileName)
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly)) {
+        emit errorOccurred(ErrorCode::OpenError);
         return;
     }
 
-    QByteArray data = file.readAll();
-
-    restoreAppConfigFromData(data);
+    restoreAppConfigFromData(file.readAll());
 }
 
 void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
@@ -157,7 +159,7 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
 
         emit restoreBackupFinished();
     } else {
-        emit changeSettingsErrorOccurred(tr("Backup file is corrupted"));
+        emit errorOccurred(errorCode);
     }
 }
 

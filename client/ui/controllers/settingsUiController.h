@@ -112,7 +112,7 @@ signals:
 
     void restoreBackupFinished();
     void changeSettingsFinished(const QString &finishedMessage);
-    void changeSettingsErrorOccurred(const QString &errorMessage);
+    void errorOccurred(ErrorCode errorCode);
 
     void saveFile(const QString &fileName, const QString &data);
 
@@ -130,6 +130,9 @@ signals:
     void devModeEnabled();
     void gatewayEndpointChanged(const QString &endpoint);
     void devGatewayEnvChanged(bool enabled);
+
+    void activityPaused();
+    void activityResumed();
 
     void isHomeAdLabelVisibleChanged(bool visible);
     void startMinimizedChanged();

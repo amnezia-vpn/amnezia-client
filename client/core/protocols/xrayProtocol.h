@@ -30,6 +30,10 @@ private:
     QList<QHostAddress> m_dnsServers;
     QString m_remoteAddress;
 
+    QString m_socksUser;
+    QString m_socksPassword;
+    int m_socksPort = 10808;
+
     QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
     int m_tun2socksRetryCount = 0;
     static constexpr int maxTun2SocksRetries = 5;

@@ -3,7 +3,9 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QEventLoop>
+#include <QFutureWatcher>
 #include <QJsonDocument>
+#include <QPromise>
 #include <QSet>
 #include <QSysInfo>
 #include <QUuid>
@@ -35,6 +37,26 @@
 
 using namespace amnezia;
 
+namespace
+{
+QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
+{
+    if (apiConfig.subscriptionExpiredByServer) {
+        return QStringLiteral("expired");
+    }
+
+    if (!apiConfig.subscription.endDate.isEmpty()) {
+        if (apiUtils::isSubscriptionExpired(apiConfig.subscription.endDate)) {
+            return QStringLiteral("expired");
+        }
+        if (apiUtils::isSubscriptionExpiringSoon(apiConfig.subscription.endDate)) {
+            return QStringLiteral("expire_soon");
+        }
+    }
+
+    return QStringLiteral("active");
+}
+}
 
 SubscriptionController::SubscriptionController(SecureServersRepository* serversRepository,
                                                SecureAppSettingsRepository* appSettingsRepository)
@@ -235,10 +257,65 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     return ErrorCode::NoError;
 }
 
+ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                                         const QString &serviceProtocol, const QString &email,
+                                                         ServerConfig &serverConfig)
+{
+    const QString trimmedEmail = email.trimmed();
+    if (trimmedEmail.isEmpty()) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
+                                            userCountryCode,
+                                            "",
+                                            serviceType,
+                                            serviceProtocol,
+                                            QJsonObject() };
+
+    ProtocolData protocolData = generateProtocolData(serviceProtocol);
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
+    apiPayload.insert(apiDefs::key::email, trimmedEmail);
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/trial"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
+    QString key = responseObject.value(apiDefs::key::config).toString();
+    if (key.isEmpty()) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+
+    key.replace(QStringLiteral("vpn://"), QString());
+    QByteArray configBytes = QByteArray::fromBase64(key.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QByteArray uncompressed = qUncompress(configBytes);
+    if (!uncompressed.isEmpty()) {
+        configBytes = uncompressed;
+    }
+
+    if (configBytes.isEmpty()) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+
+    QJsonObject configObject = QJsonDocument::fromJson(configBytes).object();
+    ServerConfig serverConfigModel = ServerConfig::fromJson(configObject);
+    m_serversRepository->addServer(serverConfigModel);
+    serverConfig = serverConfigModel;
+    return ErrorCode::NoError;
+}
+
 ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
                                                             const QString &transactionId, bool isTestPurchase,
-                                                            ServerConfig &serverConfig)
+                                                            ServerConfig &serverConfig,
+                                                            int *duplicateServerIndex)
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -285,6 +362,9 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
             existingVpnKey = apiV2 ? apiV2->vpnKey() : QString();
         }
         if (existingVpnKey == key) {
+            if (duplicateServerIndex) {
+                *duplicateServerIndex = i;
+            }
             qInfo().noquote() << "[IAP] Subscription config with the same vpn_key already exists";
             return ErrorCode::ApiConfigAlreadyAdded;
         }
@@ -320,6 +400,8 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
     }
     apiV2->apiConfig.vpnKey = normalizedKey;
     apiV2->apiConfig.isTestPurchase = isTestPurchase;
+    apiV2->apiConfig.isInAppPurchase = true;
+    apiV2->apiConfig.subscriptionExpiredByServer = false;
     apiV2->crc = crc;
 
     m_serversRepository->addServer(serverConfigModel);
@@ -364,6 +446,14 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError) {
+        if (errorCode == ErrorCode::ApiSubscriptionExpiredError && !apiV2->apiConfig.isInAppPurchase) {
+            ServerConfig expiredServerConfig = serverConfigModel;
+            ApiV2ServerConfig *expiredApiV2 = expiredServerConfig.as<ApiV2ServerConfig>();
+            if (expiredApiV2) {
+                expiredApiV2->apiConfig.subscriptionExpiredByServer = true;
+                m_serversRepository->editServer(serverIndex, expiredServerConfig);
+            }
+        }
         return errorCode;
     }
 
@@ -387,7 +477,10 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     }
     
     newApiV2->apiConfig.vpnKey = apiV2->apiConfig.vpnKey;
-    
+    newApiV2->apiConfig.isTestPurchase = apiV2->apiConfig.isTestPurchase;
+    newApiV2->apiConfig.isInAppPurchase = apiV2->apiConfig.isInAppPurchase;
+    newApiV2->apiConfig.subscriptionExpiredByServer = false;
+
     newApiV2->authData = apiV2->authData;
     newApiV2->crc = apiV2->crc;
     
@@ -762,7 +855,8 @@ bool SubscriptionController::isVlessProtocol(int serverIndex) const
 
 ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
                                                           const QString &serviceProtocol, const QString &productId,
-                                                          ServerConfig &serverConfig)
+                                                          ServerConfig &serverConfig,
+                                                          int *duplicateServerIndex)
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     bool purchaseOk = false;
@@ -794,7 +888,8 @@ ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCou
     bool isTestPurchase = IosController::Instance()->isTestFlight();
 
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
-    return importServiceFromAppStore(userCountryCode, serviceType, serviceProtocol, protocolData, originalTransactionId, isTestPurchase, serverConfig);
+    return importServiceFromAppStore(userCountryCode, serviceType, serviceProtocol, protocolData,
+                                     originalTransactionId, isTestPurchase, serverConfig, duplicateServerIndex);
 #else
     Q_UNUSED(userCountryCode);
     Q_UNUSED(serviceType);
@@ -832,7 +927,7 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
 
     if (restoredTransactions.isEmpty()) {
         qInfo().noquote() << "[IAP] Restore completed, but no transactions were returned";
-        result.errorCode = ErrorCode::ApiPurchaseError;
+        result.errorCode = ErrorCode::ApiNoPurchasedSubscriptionsError;
         return result;
     }
 
@@ -860,11 +955,16 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
 
         ProtocolData protocolData = generateProtocolData(serviceProtocol);
         ServerConfig serverConfig;
+        int currentDuplicateServerIndex = -1;
         ErrorCode errorCode = importServiceFromAppStore(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                                        originalTransactionId, isTestPurchase, serverConfig);
+                                                        originalTransactionId, isTestPurchase, serverConfig,
+                                                        &currentDuplicateServerIndex);
 
         if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
             result.duplicateConfigAlreadyPresent = true;
+            if (result.duplicateServerIndex < 0) {
+                result.duplicateServerIndex = currentDuplicateServerIndex;
+            }
             qInfo().noquote() << "[IAP] Skipping restored transaction" << originalTransactionId
                               << "because subscription config with the same vpn_key already exists";
         } else if (errorCode != ErrorCode::NoError) {
@@ -916,6 +1016,7 @@ ErrorCode SubscriptionController::getAccountInfo(int serverIndex, QJsonObject &a
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::subscriptionStatus] = getSubscriptionStatusForRenewal(apiV2->apiConfig);
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/account_info"), apiPayload, responseBody, isTestPurchase);
@@ -927,3 +1028,65 @@ ErrorCode SubscriptionController::getAccountInfo(int serverIndex, QJsonObject &a
     return ErrorCode::NoError;
 }
 
+QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(int serverIndex)
+{
+    auto promise = QSharedPointer<QPromise<QPair<ErrorCode, QString>>>::create();
+    promise->start();
+
+    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
+    if (!serverConfigModel.isApiV2()) {
+        promise->addResult(qMakePair(ErrorCode::InternalError, QString()));
+        promise->finish();
+        return promise->future();
+    }
+
+    const ApiV2ServerConfig *apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (!apiV2) {
+        promise->addResult(qMakePair(ErrorCode::InternalError, QString()));
+        promise->finish();
+        return promise->future();
+    }
+
+    bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
+    QJsonObject authDataJson = apiV2->authData.toJson();
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
+                                            apiV2->apiConfig.userCountryCode,
+                                            "",
+                                            apiV2->serviceType(),
+                                            "",
+                                            authDataJson };
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+
+    auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+                                                                       m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
+                                                                       apiDefs::requestTimeoutMsecs,
+                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled());
+    auto postFuture = gatewayController->postAsync(QString("%1v1/renewal_link"), apiPayload);
+    auto *watcher = new QFutureWatcher<QPair<ErrorCode, QByteArray>>();
+    QObject::connect(watcher, &QFutureWatcher<QPair<ErrorCode, QByteArray>>::finished,
+                     [promise, watcher, gatewayController]() {
+                         const auto [errorCode, responseBody] = watcher->result();
+                         watcher->deleteLater();
+                         if (errorCode != ErrorCode::NoError) {
+                             promise->addResult(qMakePair(errorCode, QString()));
+                             promise->finish();
+                             return;
+                         }
+
+                         QJsonObject responseJson = QJsonDocument::fromJson(responseBody).object();
+                         const QString url = responseJson.value("renewal_url").toString();
+                         if (url.isEmpty()) {
+                             promise->addResult(qMakePair(ErrorCode::InternalError, QString()));
+                         } else {
+                             promise->addResult(qMakePair(ErrorCode::NoError, url));
+                         }
+                         promise->finish();
+                     });
+    watcher->setFuture(postFuture);
+    return promise->future();
+}

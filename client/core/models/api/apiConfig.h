@@ -37,7 +37,8 @@ struct ApiConfig
     QJsonArray supportedProtocols;
     
     struct ServiceInfo {
-        bool isAdVisible;
+        bool isAdVisible = false;
+        bool isRenewalAvailable = false;
         QString adHeader;
         QString adDescription;
         QString adEndpoint;
@@ -58,7 +59,9 @@ struct ApiConfig
     QString stackType;
     QString cliVersion;
     bool isTestPurchase;
-    
+    bool isInAppPurchase = false;
+    bool subscriptionExpiredByServer = false;
+
     bool isPremium() const;
     bool isFree() const;
     bool isExternalPremium() const;

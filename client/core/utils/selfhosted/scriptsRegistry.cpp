@@ -209,6 +209,7 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
         const AwgServerConfig& config = awgProtocolConfig->serverConfig;
         
         vars.append({ { "$AWG_SUBNET_IP", config.subnetAddress.isEmpty() ? protocols::wireguard::defaultSubnetAddress : config.subnetAddress } });
+        vars.append({ { "$WIREGUARD_SUBNET_CIDR", config.subnetCidr.isEmpty() ? protocols::wireguard::defaultSubnetCidr : config.subnetCidr } });
         vars.append({ { "$AWG_SERVER_PORT", config.port.isEmpty() ? protocols::awg::defaultPort : config.port } });
         vars.append({ { "$JUNK_PACKET_COUNT", config.junkPacketCount } });
         vars.append({ { "$JUNK_PACKET_MIN_SIZE", config.junkPacketMinSize } });

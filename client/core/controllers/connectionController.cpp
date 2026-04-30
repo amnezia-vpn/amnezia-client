@@ -31,6 +31,12 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
 {
     connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::connectionStateChanged);
     connect(this, &ConnectionController::openConnectionRequested, m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
+    connect(this, &ConnectionController::closeConnectionRequested, m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
+    connect(this, &ConnectionController::setConnectionStateRequested, m_vpnConnection, &VpnConnection::setConnectionState, Qt::QueuedConnection);
+    connect(this, &ConnectionController::killSwitchModeChangedRequested, m_vpnConnection, &VpnConnection::onKillSwitchModeChanged, Qt::QueuedConnection);
+#ifdef Q_OS_ANDROID
+    connect(this, &ConnectionController::restoreConnectionRequested, m_vpnConnection, &VpnConnection::restoreConnection, Qt::QueuedConnection);
+#endif
 }
 
 bool ConnectionController::isConnected() const
@@ -41,7 +47,7 @@ bool ConnectionController::isConnected() const
 void ConnectionController::setConnectionState(Vpn::ConnectionState state)
 {
     if (m_vpnConnection) {
-        m_vpnConnection->setConnectionState(state);
+        emit setConnectionStateRequested(state);
     }
 }
 
@@ -87,14 +93,16 @@ ErrorCode ConnectionController::openConnection(int serverIndex)
 
 void ConnectionController::closeConnection()
 {
-    m_vpnConnection->disconnectFromVpn();
+    if (m_vpnConnection) {
+        emit closeConnectionRequested();
+    }
 }
 
 #ifdef Q_OS_ANDROID
 void ConnectionController::restoreConnection()
 {
     if (m_vpnConnection) {
-        m_vpnConnection->restoreConnection();
+        emit restoreConnectionRequested();
     }
 }
 #endif
@@ -102,7 +110,7 @@ void ConnectionController::restoreConnection()
 void ConnectionController::onKillSwitchModeChanged(bool enabled)
 {
     if (m_vpnConnection) {
-        m_vpnConnection->onKillSwitchModeChanged(enabled);
+        emit killSwitchModeChangedRequested(enabled);
     }
 }
 

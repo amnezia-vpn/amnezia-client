@@ -164,8 +164,13 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
     }
 
     if (rtm->rtm_type == RTN_THROW) {
+    QString gateway = NetworkUtilities::getGatewayAndIface().first;
+    if (gateway.isEmpty()) {
+        logger.warning() << "No default gateway available, skipping exclusion route";
+        return false;
+    }
     struct in_addr ip4;
-    inet_pton(AF_INET, NetworkUtilities::getGatewayAndIface().first.toUtf8(), &ip4);
+    inet_pton(AF_INET, gateway.toUtf8(), &ip4);
     nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
     nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
     rtm->rtm_type = RTN_UNICAST;

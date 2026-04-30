@@ -7,6 +7,8 @@
 #include "core/controllers/settingsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
+#include "ui/models/api/apiSubscriptionPlansModel.h"
+#include "ui/models/api/apiBenefitsModel.h"
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiCountryModel.h"
@@ -19,6 +21,8 @@ public:
                          ApiServicesModel* apiServicesModel,
                          ServicesCatalogController* servicesCatalogController,
                          SubscriptionController* subscriptionController,
+                         ApiSubscriptionPlansModel* apiSubscriptionPlansModel,
+                         ApiBenefitsModel* apiBenefitsModel,
                          ApiAccountInfoModel* apiAccountInfoModel,
                          ApiCountryModel* apiCountryModel,
                          ApiDevicesModel* apiDevicesModel,
@@ -37,10 +41,12 @@ public slots:
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
-    bool importService();
-    bool importServiceFromAppStore();
+
+    bool importPremiumFromAppStore(const QString &storeProductId);
+    bool importFreeFromGateway();
     bool restoreServiceFromAppStore();
-    bool importServiceFromGateway();
+    bool importTrialFromGateway(const QString &email);
+
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
     bool updateServiceFromTelegram(const int serverIndex);
@@ -55,6 +61,7 @@ public slots:
     void removeApiConfig(int serverIndex);
 
     bool getAccountInfo(int serverIndex, bool reload);
+    void getRenewalLink(int serverIndex);
     void updateApiCountryModel();
     void updateApiDevicesModel();
 
@@ -62,10 +69,15 @@ signals:
     void configValidated(bool isValid);
     void errorOccurred(ErrorCode errorCode);
 
-    void installServerFromApiFinished(const QString &message);
+    void trialEmailError(const QString &message);
+    void subscriptionExpiredOnServer();
+    void renewalLinkReceived(const QString &url);
+
+    void installServerFromApiFinished(const QString &message, int preferredDefaultServerIndex = -1);
     void changeApiCountryFinished(const QString &message);
     void reloadServerFromApiFinished(const QString &message);
     void updateServerFromApiFinished();
+    void subscriptionRefreshNeeded();
 
     void apiConfigRemoved(const QString &message);
 
@@ -83,6 +95,8 @@ private:
     ApiServicesModel* m_apiServicesModel;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
+    ApiSubscriptionPlansModel* m_apiSubscriptionPlansModel;
+    ApiBenefitsModel* m_apiBenefitsModel;
     ApiAccountInfoModel* m_apiAccountInfoModel;
     ApiCountryModel* m_apiCountryModel;
     ApiDevicesModel* m_apiDevicesModel;

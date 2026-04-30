@@ -113,6 +113,12 @@ void CoreController::initModels()
     m_apiCountryModel = new ApiCountryModel(this);
     setQmlContextProperty("ApiCountryModel", m_apiCountryModel);
 
+    m_apiSubscriptionPlansModel = new ApiSubscriptionPlansModel(this);
+    setQmlContextProperty("ApiSubscriptionPlansModel", m_apiSubscriptionPlansModel);
+
+    m_apiBenefitsModel = new ApiBenefitsModel(this);
+    setQmlContextProperty("ApiBenefitsModel", m_apiBenefitsModel);
+
     m_apiAccountInfoModel = new ApiAccountInfoModel(this);
     setQmlContextProperty("ApiAccountInfoModel", m_apiAccountInfoModel);
 
@@ -127,11 +133,9 @@ void CoreController::initRepositories()
 {
     m_serversRepository = new SecureServersRepository(m_settings, this);
     m_appSettingsRepository = new SecureAppSettingsRepository(m_settings, this);
-    
+
     if (m_vpnConnection) {
-        QTimer::singleShot(0, m_vpnConnection.get(), [this]() {
-            m_vpnConnection->setRepositories(m_serversRepository, m_appSettingsRepository);
-        });
+        m_vpnConnection->setRepositories(m_serversRepository, m_appSettingsRepository);
     }
 }
 
@@ -204,7 +208,10 @@ void CoreController::initControllers()
     m_servicesCatalogUiController = new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this);
     setQmlContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);
 
-    m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settingsController, this);
+    m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController,
+                                                              m_apiSubscriptionPlansModel, m_apiBenefitsModel, m_apiAccountInfoModel,
+                                                              m_apiCountryModel, m_apiDevicesModel, m_settingsController, this);
+
     setQmlContextProperty("SubscriptionUiController", m_subscriptionUiController);
 
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);

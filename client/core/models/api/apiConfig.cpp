@@ -29,6 +29,7 @@ QJsonObject ApiConfig::ServiceInfo::toJson() const
 {
     QJsonObject obj;
     obj[apiDefs::key::isAdVisible] = isAdVisible;
+    obj[apiDefs::key::isRenewalAvailable] = isRenewalAvailable;
     if (!adHeader.isEmpty()) {
         obj[apiDefs::key::adHeader] = adHeader;
     }
@@ -45,6 +46,7 @@ ApiConfig::ServiceInfo ApiConfig::ServiceInfo::fromJson(const QJsonObject& json)
 {
     ServiceInfo info;
     info.isAdVisible = json.value(apiDefs::key::isAdVisible).toBool(false);
+    info.isRenewalAvailable = json.value(apiDefs::key::isRenewalAvailable).toBool(false);
     info.adHeader = json.value(apiDefs::key::adHeader).toString();
     info.adDescription = json.value(apiDefs::key::adDescription).toString();
     info.adEndpoint = json.value(apiDefs::key::adEndpoint).toString();
@@ -165,7 +167,13 @@ QJsonObject ApiConfig::toJson() const
     if (isTestPurchase) {
         obj[apiDefs::key::isTestPurchase] = isTestPurchase;
     }
-    
+    if (isInAppPurchase) {
+        obj[apiDefs::key::isInAppPurchase] = isInAppPurchase;
+    }
+    if (subscriptionExpiredByServer) {
+        obj[apiDefs::key::subscriptionExpiredByServer] = subscriptionExpiredByServer;
+    }
+
     return obj;
 }
 
@@ -205,7 +213,9 @@ ApiConfig ApiConfig::fromJson(const QJsonObject& json)
     config.stackType = json.value(apiDefs::key::stackType).toString();
     config.cliVersion = json.value(apiDefs::key::cliVersion).toString();
     config.isTestPurchase = json.value(apiDefs::key::isTestPurchase).toBool(false);
-    
+    config.isInAppPurchase = json.value(apiDefs::key::isInAppPurchase).toBool(false);
+    config.subscriptionExpiredByServer = json.value(apiDefs::key::subscriptionExpiredByServer).toBool(false);
+
     return config;
 }
 

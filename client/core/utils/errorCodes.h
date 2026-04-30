@@ -72,6 +72,7 @@ namespace amnezia
         // import and install errors
         ImportInvalidConfigError = 900,
         ImportBackupFileUseRestoreInstead = 903,
+        RestoreBackupInvalidError = 904,
         ImportOpenConfigError = 901,
         NoInstalledContainersError = 902,
 
@@ -93,6 +94,9 @@ namespace amnezia
         ApiUpdateRequestError = 1111,
         ApiSubscriptionExpiredError = 1112,
         ApiPurchaseError = 1113,
+        ApiSubscriptionNotActiveError = 1114,
+        ApiNoPurchasedSubscriptionsError = 1115,
+        ApiTrialAlreadyUsedError = 1116,
 
         // QFile errors
         OpenError = 1200,

@@ -37,7 +37,7 @@ signals:
     void clientAdded(const QJsonObject &client);
     void clientRenamed(int row, const QString &newName);
     void clientRevoked(int row);
-    void adminConfigRevoked(DockerContainer container);
+    void adminConfigRevoked(int serverIndex, DockerContainer container);
 
 public slots:
     ErrorCode updateClients(int serverIndex, const DockerContainer container);

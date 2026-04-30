@@ -63,6 +63,7 @@ void CoreSignalHandlers::initAllHandlers()
     initExportControllerHandler();
     initImportControllerHandler();
     initApiCountryModelUpdateHandler();
+    initSubscriptionRefreshHandler();
     initContainerModelUpdateHandler();
     initAdminConfigRevokedHandler();
     initPassphraseRequestHandler();
@@ -92,6 +93,9 @@ void CoreSignalHandlers::initErrorMessagesHandler()
     });
 
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::errorOccurred, m_coreController->m_pageController,
+            qOverload<ErrorCode>(&PageController::showErrorMessage));
+
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::errorOccurred, m_coreController->m_pageController,
             qOverload<ErrorCode>(&PageController::showErrorMessage));
 }
 
@@ -185,6 +189,16 @@ void CoreSignalHandlers::initApiCountryModelUpdateHandler()
     });
 }
 
+void CoreSignalHandlers::initSubscriptionRefreshHandler()
+{
+    connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::subscriptionRefreshNeeded, this, [this]() {
+        const int defaultServerIndex = m_coreController->m_serversController->getDefaultServerIndex();
+        if (defaultServerIndex >= 0) {
+            m_coreController->m_subscriptionUiController->getAccountInfo(defaultServerIndex, false);
+        }
+    });
+}
+
 void CoreSignalHandlers::initContainerModelUpdateHandler()
 {
     connect(m_coreController->m_serversController, &ServersController::gatewayStacksExpanded, this, [this]() {
@@ -205,6 +219,9 @@ void CoreSignalHandlers::initAdminConfigRevokedHandler()
             [this](int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container) {
                 m_coreController->m_usersController->appendClient(serverIndex, clientId, clientName, container);
             });
+
+    connect(m_coreController->m_usersController, &UsersController::adminConfigRevoked, m_coreController->m_serversController,
+            &ServersController::clearCachedProfile);
 }
 
 void CoreSignalHandlers::initPassphraseRequestHandler()

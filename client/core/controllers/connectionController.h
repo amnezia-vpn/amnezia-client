@@ -61,6 +61,13 @@ public:
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void openConnectionRequested(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void closeConnectionRequested();
+    void setConnectionStateRequested(Vpn::ConnectionState state);
+    void killSwitchModeChangedRequested(bool enabled);
+
+#ifdef Q_OS_ANDROID
+    void restoreConnectionRequested();
+#endif
 
 private:
     SecureServersRepository* m_serversRepository;

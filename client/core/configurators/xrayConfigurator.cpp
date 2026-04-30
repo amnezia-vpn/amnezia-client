@@ -206,6 +206,7 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     // Create configuration for new client
     QJsonObject clientConfig {
         {amnezia::protocols::xray::id, clientId},
+        {amnezia::protocols::xray::flow, "xtls-rprx-vision"}
     };
     clientConfig[amnezia::protocols::xray::id] = clientId;
     if (!flowValue.isEmpty()) {
@@ -436,6 +437,7 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
     QString xrayClientId = prepareServerConfig(credentials, container, containerConfig, dnsSettings, errorCode);
     if (errorCode != ErrorCode::NoError || xrayClientId.isEmpty()) {
         logger.error() << "Failed to prepare server config";
+        errorCode = ErrorCode::InternalError;
         return XrayProtocolConfig {};
     }
 
@@ -448,6 +450,7 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
                                                                amnezia::protocols::xray::PublicKeyPath, errorCode);
         if (errorCode != ErrorCode::NoError || xrayPublicKey.isEmpty()) {
             logger.error() << "Failed to get public key";
+            errorCode = ErrorCode::InternalError;
             return XrayProtocolConfig {};
         }
         xrayPublicKey.replace("\n", "");
@@ -456,6 +459,7 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
                                                              amnezia::protocols::xray::shortidPath, errorCode);
         if (errorCode != ErrorCode::NoError || xrayShortId.isEmpty()) {
             logger.error() << "Failed to get short ID";
+            errorCode = ErrorCode::InternalError;
             return XrayProtocolConfig {};
         }
         xrayShortId.replace("\n", "");
@@ -465,6 +469,7 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
     QJsonObject userObj;
     userObj[amnezia::protocols::xray::id] = xrayClientId;
     userObj[amnezia::protocols::xray::encryption] = "none";
+
     if (!srv.flow.isEmpty()) {
         userObj[amnezia::protocols::xray::flow] = srv.flow;
     }

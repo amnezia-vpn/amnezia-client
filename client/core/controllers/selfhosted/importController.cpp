@@ -257,6 +257,10 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
     QByteArray ba_uncompressed = qUncompress(data);
     if (!ba_uncompressed.isEmpty()) {
         result.config = QJsonDocument::fromJson(ba_uncompressed).object();
+        if (result.config.isEmpty()) {
+            result.errorCode = ErrorCode::ImportInvalidConfigError;
+            return result;
+        }
         result.configType = ConfigTypes::Amnezia;
         return result;
     }
@@ -270,6 +274,10 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
 
     if (!ba.isEmpty()) {
         result.config = QJsonDocument::fromJson(ba).object();
+        if (result.config.isEmpty()) {
+            result.errorCode = ErrorCode::ImportInvalidConfigError;
+            return result;
+        }
         result.configType = ConfigTypes::Amnezia;
         return result;
     }

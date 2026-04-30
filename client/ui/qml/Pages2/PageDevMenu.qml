@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import SortFilterProxyModel 0.2
-
 import PageEnum 1.0
 import Style 1.0
 
@@ -52,6 +50,8 @@ PageType {
             width: listView.width
 
             TextFieldWithHeaderType {
+                id: gatewayEndpointField
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
@@ -64,13 +64,25 @@ PageType {
 
                 clickedFunc: function() {
                     SettingsController.resetGatewayEndpoint()
+                    gatewayEndpointField.textField.text = SettingsController.gatewayEndpoint
                 }
+            }
 
-                textField.onEditingFinished: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                    if (textField.text !== SettingsController.gatewayEndpoint) {
-                        SettingsController.gatewayEndpoint = textField.text
+            BasicButtonType {
+                id: saveButton
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("Save")
+
+                clickedFunc: function() {
+                    var trimmed = gatewayEndpointField.textField.text.replace(/^\s+|\s+$/g, '')
+                    gatewayEndpointField.textField.text = trimmed
+                    if (trimmed !== SettingsController.gatewayEndpoint) {
+                        SettingsController.gatewayEndpoint = trimmed
                     }
+                    PageController.showNotificationMessage(qsTr("Settings saved"))
                 }
             }
         }

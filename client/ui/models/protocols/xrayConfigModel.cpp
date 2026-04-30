@@ -269,6 +269,11 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
         config.port = protocols::xray::defaultPort;
     }
 
+    if (config.transportProto.isEmpty()) {
+        config.transportProto = ProtocolUtils::transportProtoToString(
+                ProtocolUtils::defaultTransportProto(amnezia::Proto::Xray), amnezia::Proto::Xray);
+    }
+
     if (config.site.isEmpty()) {
         config.site = protocols::xray::defaultSite;
     }
@@ -336,8 +341,9 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
 
 amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
 {
-    if (!m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig))
-    {
+    bool serverSettingsChanged = !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+
+    if (serverSettingsChanged) {
         m_protocolConfig.clearClientConfig();
     }
     return m_protocolConfig;

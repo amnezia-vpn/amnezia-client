@@ -234,21 +234,29 @@ bool XrayServerConfig::hasEqualServerSettings(const XrayServerConfig &other) con
 QJsonObject XrayClientConfig::toJson() const
 {
     QJsonObject obj;
-    if (!nativeConfig.isEmpty()) obj[configKey::config]   = nativeConfig;
-    if (!localPort.isEmpty())    obj[configKey::localPort] = localPort;
-    if (!id.isEmpty())           obj[configKey::clientId]  = id;
+    if (!nativeConfig.isEmpty()) {
+        obj[configKey::config] = nativeConfig;
+    }
+    if (!localPort.isEmpty()) {
+        obj[configKey::localPort] = localPort;
+    }
+    if (!id.isEmpty()) {
+        obj[configKey::clientId] = id;
+    }
+
     return obj;
 }
 
 XrayClientConfig XrayClientConfig::fromJson(const QJsonObject &json)
 {
-    XrayClientConfig c;
-    c.nativeConfig = json.value(configKey::config).toString();
-    c.localPort    = json.value(configKey::localPort).toString();
-    c.id           = json.value(configKey::clientId).toString();
+    XrayClientConfig config;
 
-    if (c.id.isEmpty() && !c.nativeConfig.isEmpty()) {
-        QJsonDocument doc = QJsonDocument::fromJson(c.nativeConfig.toUtf8());
+    config.nativeConfig = json.value(configKey::config).toString();
+    config.localPort = json.value(configKey::localPort).toString();
+    config.id = json.value(configKey::clientId).toString();
+
+    if (config.id.isEmpty() && !config.nativeConfig.isEmpty()) {
+        QJsonDocument doc = QJsonDocument::fromJson(config.nativeConfig.toUtf8());
         if (!doc.isNull() && doc.isObject()) {
             QJsonObject configObj = doc.object();
             if (configObj.contains(protocols::xray::outbounds)) {
@@ -264,7 +272,10 @@ XrayClientConfig XrayClientConfig::fromJson(const QJsonObject &json)
                                 if (vnextObj.contains(protocols::xray::users)) {
                                     QJsonArray users = vnextObj[protocols::xray::users].toArray();
                                     if (!users.isEmpty()) {
-                                        c.id = users[0].toObject().value(protocols::xray::id).toString();
+                                        QJsonObject user = users[0].toObject();
+                                        if (user.contains(protocols::xray::id)) {
+                                            config.id = user[protocols::xray::id].toString();
+                                        }
                                     }
                                 }
                             }
@@ -275,7 +286,7 @@ XrayClientConfig XrayClientConfig::fromJson(const QJsonObject &json)
         }
     }
 
-    return c;
+    return config;
 }
 
 QJsonObject XrayProtocolConfig::toJson() const
@@ -283,6 +294,7 @@ QJsonObject XrayProtocolConfig::toJson() const
     QJsonObject obj = serverConfig.toJson();
 
     if (clientConfig.has_value()) {
+        // Third-party import: nativeConfig is raw Xray JSON (inbounds/outbounds)
         QJsonDocument doc = QJsonDocument::fromJson(clientConfig->nativeConfig.toUtf8());
         if (!doc.isNull() && doc.isObject() && doc.object().contains(protocols::xray::outbounds)
                 && !doc.object().contains(configKey::config)) {
@@ -296,34 +308,38 @@ QJsonObject XrayProtocolConfig::toJson() const
     return obj;
 }
 
-XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject &json)
+XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject& json)
 {
-    XrayProtocolConfig c;
-    c.serverConfig = XrayServerConfig::fromJson(json);
-
+    XrayProtocolConfig config;
+    
+    config.serverConfig = XrayServerConfig::fromJson(json);
+    
     QString lastConfigStr = json.value(configKey::lastConfig).toString();
     if (!lastConfigStr.isEmpty()) {
         QJsonDocument doc = QJsonDocument::fromJson(lastConfigStr.toUtf8());
         if (doc.isObject()) {
             QJsonObject parsed = doc.object();
+            // Third-party import stores raw Xray config (inbounds/outbounds) directly
             if (parsed.contains(protocols::xray::outbounds) && !parsed.contains(configKey::config)) {
                 XrayClientConfig clientCfg;
                 clientCfg.nativeConfig = lastConfigStr;
                 if (parsed.contains(protocols::xray::inbounds)) {
                     QJsonArray inbounds = parsed.value(protocols::xray::inbounds).toArray();
                     if (!inbounds.isEmpty()) {
-                        clientCfg.localPort = QString::number(
-                            inbounds[0].toObject().value(protocols::xray::port).toInt());
+                        QJsonObject inbound = inbounds[0].toObject();
+                        if (inbound.contains(protocols::xray::port)) {
+                            clientCfg.localPort = QString::number(inbound.value(protocols::xray::port).toInt());
+                        }
                     }
                 }
-                c.clientConfig = clientCfg;
+                config.clientConfig = clientCfg;
             } else {
-                c.clientConfig = XrayClientConfig::fromJson(parsed);
+                config.clientConfig = XrayClientConfig::fromJson(parsed);
             }
         }
     }
-
-    return c;
+    
+    return config;
 }
 
 bool XrayProtocolConfig::hasClientConfig() const
@@ -331,7 +347,7 @@ bool XrayProtocolConfig::hasClientConfig() const
     return clientConfig.has_value();
 }
 
-void XrayProtocolConfig::setClientConfig(const XrayClientConfig &config)
+void XrayProtocolConfig::setClientConfig(const XrayClientConfig& config)
 {
     clientConfig = config;
 }

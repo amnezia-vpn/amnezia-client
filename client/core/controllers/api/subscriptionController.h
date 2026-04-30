@@ -3,6 +3,7 @@
 
 #include <QJsonObject>
 #include <QByteArray>
+#include <QFuture>
 #include <QList>
 #include <QVariantMap>
 
@@ -52,11 +53,15 @@ public:
     ErrorCode importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                       const QString &serviceProtocol, const ProtocolData &protocolData,
                                       ServerConfig &serverConfig);
+    ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                     const QString &serviceProtocol, const QString &email,
+                                     ServerConfig &serverConfig);
 
     ErrorCode importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const ProtocolData &protocolData,
                                         const QString &transactionId, bool isTestPurchase,
-                                        ServerConfig &serverConfig);
+                                        ServerConfig &serverConfig,
+                                        int *duplicateServerIndex = nullptr);
 
     ErrorCode updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent);
 
@@ -80,18 +85,21 @@ public:
     bool isVlessProtocol(int serverIndex) const;
 
     ErrorCode getAccountInfo(int serverIndex, QJsonObject &accountInfo);
+    QFuture<QPair<ErrorCode, QString>> getRenewalLink(int serverIndex);
 
     struct AppStoreRestoreResult
     {
         bool hasInstalledConfig = false;
         bool duplicateConfigAlreadyPresent = false;
         int duplicateCount = 0;
+        int duplicateServerIndex = -1;
         ErrorCode errorCode = ErrorCode::NoError;
     };
 
     ErrorCode processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &productId,
-                                     ServerConfig &serverConfig);
+                                     ServerConfig &serverConfig,
+                                     int *duplicateServerIndex = nullptr);
 
     AppStoreRestoreResult processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,
                                                   const QString &serviceProtocol);

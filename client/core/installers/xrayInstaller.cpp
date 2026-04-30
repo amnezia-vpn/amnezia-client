@@ -73,6 +73,7 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
     }
 
     QJsonObject streamSettings = inbound[protocols::xray::streamSettings].toObject();
+
     auto *xrayConfig = config.getXrayProtocolConfig();
     if (!xrayConfig) {
         logger.error() << "No XrayProtocolConfig in ContainerConfig";
@@ -318,6 +319,18 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         srv.mkcp.congestion = kcp.value("congestion").toBool(true);
     }
 
+    QJsonObject realitySettings = streamSettings[protocols::xray::realitySettings].toObject();
+    if (!realitySettings.contains(protocols::xray::serverNames)) {
+        logger.error() << "Settings missing 'serverNames' field";
+        return ErrorCode::InternalError;
+    }
+
+    QString siteName = realitySettings[protocols::xray::serverNames][0].toString();
+
+    if (auto* xrayConfig = config.getXrayProtocolConfig()) {
+        xrayConfig->serverConfig.site = siteName;
+    }
+    
     return ErrorCode::NoError;
 }
 

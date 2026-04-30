@@ -6,6 +6,7 @@
     #include <QApplication>
 #endif
 
+#include "amneziaApplication.h"
 #include "core/controllers/serversController.h"
 
 ConnectionUiController::ConnectionUiController(ConnectionController* connectionController,
@@ -52,6 +53,8 @@ void ConnectionUiController::onConnectionStateChanged(Vpn::ConnectionState state
     m_connectionStateText = tr("Connecting...");
     switch (state) {
     case Vpn::ConnectionState::Connected: {
+        amnApp->networkManager()->clearConnectionCache();
+
         m_isConnectionInProgress = false;
         m_isConnected = true;
         m_connectionStateText = tr("Connected");

@@ -35,8 +35,13 @@ namespace
 
     constexpr int httpStatusCodeNotFound = 404;
     constexpr int httpStatusCodeConflict = 409;
-
     constexpr int httpStatusCodeNotImplemented = 501;
+    constexpr int httpStatusCodePaymentRequired = 402;
+    constexpr int httpStatusCodeUnprocessableEntity = 422;
+
+    constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
+
+    constexpr int proxyStorageRequestTimeoutMsecs = 3000;
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
@@ -272,26 +277,34 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
             auto serviceType = apiPayload.value(apiDefs::key::serviceType).toString("");
             auto userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString("");
 
-            QStringList baseUrls;
+            QStringList primaryBaseUrls;
+            QStringList fallbackBaseUrls;
             if (m_isDevEnvironment) {
-                baseUrls = QString(DEV_S3_ENDPOINT).split(", ");
+                primaryBaseUrls = QString(DEV_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
             } else {
-                baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
+                primaryBaseUrls = QString(PROD_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
+                fallbackBaseUrls = QString(FALLBACK_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
             }
             std::random_device randomDevice;
             std::mt19937 generator(randomDevice());
-            std::shuffle(baseUrls.begin(), baseUrls.end(), generator);
+            std::shuffle(primaryBaseUrls.begin(), primaryBaseUrls.end(), generator);
+            std::shuffle(fallbackBaseUrls.begin(), fallbackBaseUrls.end(), generator);
+
+            auto appendStorageUrls = [&serviceType, &userCountryCode](const QStringList &baseUrls, QStringList &target) {
+                if (!serviceType.isEmpty()) {
+                    for (const auto &baseUrl : baseUrls) {
+                        QByteArray path = ("endpoints-" + serviceType + "-" + userCountryCode).toUtf8();
+                        target.push_back(baseUrl + path.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals) + ".json");
+                    }
+                }
+                for (const auto &baseUrl : baseUrls) {
+                    target.push_back(baseUrl + "endpoints.json");
+                }
+            };
 
             QStringList proxyStorageUrls;
-            if (!serviceType.isEmpty()) {
-                for (const auto &baseUrl : baseUrls) {
-                    QByteArray path = ("endpoints-" + serviceType + "-" + userCountryCode).toUtf8();
-                    proxyStorageUrls.push_back(baseUrl + path.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)
-                                               + ".json");
-                }
-            }
-            for (const auto &baseUrl : baseUrls)
-                proxyStorageUrls.push_back(baseUrl + "endpoints.json");
+            appendStorageUrls(primaryBaseUrls, proxyStorageUrls);
+            appendStorageUrls(fallbackBaseUrls, proxyStorageUrls);
 
             getProxyUrlsAsync(proxyStorageUrls, 0, [this, encRequestData, endpoint, processResponse](const QStringList &proxyUrls) {
                 getProxyUrlAsync(proxyUrls, 0, [this, encRequestData, endpoint, processResponse](const QString &proxyUrl) {
@@ -318,34 +331,48 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 QStringList GatewayController::getProxyUrls(const QString &serviceType, const QString &userCountryCode)
 {
     QNetworkRequest request;
-    request.setTransferTimeout(m_requestTimeoutMsecs);
+    request.setTransferTimeout(proxyStorageRequestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     QEventLoop wait;
     QList<QSslError> sslErrors;
     QNetworkReply *reply;
 
-    QStringList baseUrls;
+    QStringList primaryBaseUrls;
+    QStringList fallbackBaseUrls;
     if (m_isDevEnvironment) {
-        baseUrls = QString(DEV_S3_ENDPOINT).split(", ");
+        primaryBaseUrls = QString(DEV_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
     } else {
-        baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
+        primaryBaseUrls = QString(PROD_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
+        fallbackBaseUrls = QString(FALLBACK_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
     }
+
     std::random_device randomDevice;
     std::mt19937 generator(randomDevice());
-    std::shuffle(baseUrls.begin(), baseUrls.end(), generator);
+    std::shuffle(primaryBaseUrls.begin(), primaryBaseUrls.end(), generator);
+    std::shuffle(fallbackBaseUrls.begin(), fallbackBaseUrls.end(), generator);
 
     QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
 
-    QStringList proxyStorageUrls;
-    if (!serviceType.isEmpty()) {
-        for (const auto &baseUrl : baseUrls) {
-            QByteArray path = ("endpoints-" + serviceType + "-" + userCountryCode).toUtf8();
-            proxyStorageUrls.push_back(baseUrl + path.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals) + ".json");
+    auto appendStorageUrls = [&serviceType, &userCountryCode](const QStringList &baseUrls, QStringList &target) {
+        if (!serviceType.isEmpty()) {
+            for (const auto &baseUrl : baseUrls) {
+                QByteArray path = ("endpoints-" + serviceType + "-" + userCountryCode).toUtf8();
+                target.push_back(baseUrl + path.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals) + ".json");
+            }
         }
-    }
-    for (const auto &baseUrl : baseUrls) {
-        proxyStorageUrls.push_back(baseUrl + "endpoints.json");
+        for (const auto &baseUrl : baseUrls) {
+            target.push_back(baseUrl + "endpoints.json");
+        }
+    };
+
+    QStringList proxyStorageUrls;
+    appendStorageUrls(primaryBaseUrls, proxyStorageUrls);
+    appendStorageUrls(fallbackBaseUrls, proxyStorageUrls);
+
+    if (proxyStorageUrls.empty()) {
+        qDebug() << "empty storage endpoint list";
+        return {};
     }
 
     for (const auto &proxyStorageUrl : proxyStorageUrls) {
@@ -409,12 +436,14 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
 {
     const QByteArray &responseBody = decryptedResponseBody;
 
-    int httpStatus = -1;
+    int apiHttpStatus = -1;
+    QString apiErrorMessage;
     if (isDecryptionSuccessful) {
         QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
         if (jsonDoc.isObject()) {
             QJsonObject jsonObj = jsonDoc.object();
-            httpStatus = jsonObj.value("http_status").toInt(-1);
+            apiHttpStatus = jsonObj.value("http_status").toInt(-1);
+            apiErrorMessage = jsonObj.value(QStringLiteral("message")).toString().trimmed();
         }
     } else {
         qDebug() << "failed to decrypt the data";
@@ -425,10 +454,12 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
         qDebug() << "timeout occurred";
         qDebug() << replyError;
         return true;
-    } else if (responseBody.contains("html")) {
+    } 
+    if (responseBody.contains("html")) {
         qDebug() << "the response contains an html tag";
         return true;
-    } else if (httpStatus == httpStatusCodeNotFound) {
+    } 
+    if (apiHttpStatus == httpStatusCodeNotFound) {
         if (responseBody.contains(errorResponsePattern1) || responseBody.contains(errorResponsePattern2)
             || responseBody.contains(errorResponsePattern3)) {
             return false;
@@ -436,16 +467,25 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
             qDebug() << replyError;
             return true;
         }
-    } else if (httpStatus == httpStatusCodeNotImplemented) {
+    } 
+    if (apiHttpStatus == httpStatusCodeNotImplemented) {
         if (responseBody.contains(updateRequestResponsePattern)) {
             return false;
         } else {
             qDebug() << replyError;
             return true;
         }
-    } else if (httpStatus == httpStatusCodeConflict) {
+    } 
+    if (apiHttpStatus == httpStatusCodeConflict) {
         return false;
-    } else if (replyError != QNetworkReply::NetworkError::NoError) {
+    } 
+    if (apiHttpStatus == httpStatusCodePaymentRequired) {
+        return false;
+    } 
+    if (apiHttpStatus == httpStatusCodeUnprocessableEntity) {
+        return apiErrorMessage != unprocessableSubscriptionMessage;
+    } 
+    if (replyError != QNetworkReply::NetworkError::NoError) {
         qDebug() << replyError;
         return true;
     }
@@ -534,7 +574,7 @@ void GatewayController::getProxyUrlsAsync(const QStringList proxyStorageUrls, co
     }
 
     QNetworkRequest request;
-    request.setTransferTimeout(m_requestTimeoutMsecs);
+    request.setTransferTimeout(proxyStorageRequestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setUrl(proxyStorageUrls[currentProxyStorageIndex]);
 
