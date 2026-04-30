@@ -170,7 +170,6 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
         if (addressParts.size() > 1) {
             awgConfig->serverConfig.subnetCidr = addressParts.value(1);
         }
-
         awgConfig->serverConfig.junkPacketCount = serverConfigMap.value(configKey::junkPacketCount);
         awgConfig->serverConfig.junkPacketMinSize = serverConfigMap.value(configKey::junkPacketMinSize);
         awgConfig->serverConfig.junkPacketMaxSize = serverConfigMap.value(configKey::junkPacketMaxSize);

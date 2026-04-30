@@ -46,7 +46,7 @@ PageType {
         delegate: ColumnLayout {
             width: listView.width
 
-            property alias focusItemId: portTextField.textField
+            property alias focusItemId: textFieldWithHeaderType.textField
 
             spacing: 0
 
@@ -87,7 +87,7 @@ PageType {
             }
 
             TextFieldWithHeaderType {
-                id: portTextField
+                id: textFieldWithHeaderType
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -112,7 +112,7 @@ PageType {
                 descriptionText: transport
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
-                clickedFunction: function () {
+                clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageProtocolXrayTransportSettings)
                 }
             }
@@ -126,7 +126,7 @@ PageType {
                 descriptionText: security
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
-                clickedFunction: function () {
+                clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageProtocolXraySecuritySettings)
                 }
             }
@@ -140,7 +140,7 @@ PageType {
                 descriptionText: flow
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
-                clickedFunction: function () {
+                clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageProtocolXrayFlowSettings)
                 }
             }
@@ -158,15 +158,15 @@ PageType {
                 Layout.bottomMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                enabled: portTextField.errorText === ""
+                enabled: textFieldWithHeaderType.errorText === ""
                 text: qsTr("Save")
-                onClicked: function () {
+                onClicked: function() {
                     forceActiveFocus()
                     var headerText = qsTr("Save settings?")
                     var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
-                    var yesButtonFunction = function () {
+                    var yesButtonFunction = function() {
                         if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
                             PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                             return
@@ -174,7 +174,7 @@ PageType {
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
                     }
-                    var noButtonFunction = function () {
+                    var noButtonFunction = function() {
                         if (!GC.isMobile()) saveButton.forceActiveFocus()
                     }
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -188,12 +188,12 @@ PageType {
                 text: qsTr("Reset settings")
                 textColor: AmneziaStyle.color.vibrantRed
                 visible: listView.enabled
-                clickedFunction: function () {
-                    var yesButtonFunction = function () {
+                clickedFunction: function() {
+                    var yesButtonFunction = function() {
                         XrayConfigModel.resetToDefaults()
                     }
                     showQuestionDrawer(qsTr("Reset settings?"), qsTr("All XRay settings will be restored to defaults."),
-                        qsTr("Reset"), qsTr("Cancel"), yesButtonFunction, function () {
+                        qsTr("Reset"), qsTr("Cancel"), yesButtonFunction, function() {
                         })
                 }
             }

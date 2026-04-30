@@ -93,26 +93,26 @@ struct XrayMkcpConfig {
 
 // ── Server config (settings editable by user) ─────────────────────────────────
 struct XrayServerConfig {
-    // Existing fields
     QString port;
     QString transportProto;
     QString subnetAddress;
     QString site;
-    bool    isThirdPartyConfig = false;
+    bool isThirdPartyConfig = false;
 
     // New: Security
-    QString security    = protocols::xray::defaultSecurity;
-    QString flow        = protocols::xray::defaultFlow;
+    QString security = protocols::xray::defaultSecurity;
+    QString flow = protocols::xray::defaultFlow;
     QString fingerprint = protocols::xray::defaultFingerprint;
-    QString sni         = protocols::xray::defaultSni;
-    QString alpn        = protocols::xray::defaultAlpn;
+    QString sni = protocols::xray::defaultSni;
+    QString alpn = protocols::xray::defaultAlpn;
 
     // New: Transport
     QString transport = protocols::xray::defaultTransport;
     XrayXhttpConfig xhttp;
-    XrayMkcpConfig  mkcp;
+    XrayMkcpConfig mkcp;
 
     QJsonObject toJson() const;
+
     static XrayServerConfig fromJson(const QJsonObject &json);
 
     bool hasEqualServerSettings(const XrayServerConfig &other) const;
@@ -130,7 +130,7 @@ struct XrayClientConfig {
 
 // ── Top-level protocol config ──────────────────────────────────────────────────
 struct XrayProtocolConfig {
-    XrayServerConfig              serverConfig;
+    XrayServerConfig serverConfig;
     std::optional<XrayClientConfig> clientConfig;
 
     QJsonObject toJson() const;

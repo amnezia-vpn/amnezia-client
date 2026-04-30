@@ -170,23 +170,46 @@ QJsonObject XrayServerConfig::toJson() const
     QJsonObject obj;
 
     // Existing fields
-    if (!port.isEmpty())           obj[configKey::port]           = port;
-    if (!transportProto.isEmpty()) obj[configKey::transportProto] = transportProto;
-    if (!subnetAddress.isEmpty())  obj[configKey::subnetAddress]  = subnetAddress;
-    if (!site.isEmpty())           obj[configKey::site]           = site;
-    if (isThirdPartyConfig)        obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
+    if (!port.isEmpty()) {
+        obj[configKey::port] = port;
+    }
+    if (!transportProto.isEmpty()) {
+        obj[configKey::transportProto] = transportProto;
+    }
+    if (!subnetAddress.isEmpty()) {
+        obj[configKey::subnetAddress] = subnetAddress;
+    }
+    if (!site.isEmpty()) {
+        obj[configKey::site] = site;
+    }
+
+    if (isThirdPartyConfig) {
+        obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
+    }
 
     // New: Security
-    if (!security.isEmpty())    obj[configKey::xraySecurity]    = security;
-    if (!flow.isEmpty())        obj[configKey::xrayFlow]        = flow;
-    if (!fingerprint.isEmpty()) obj[configKey::xrayFingerprint] = fingerprint;
-    if (!sni.isEmpty())         obj[configKey::xraySni]         = sni;
-    if (!alpn.isEmpty())        obj[configKey::xrayAlpn]        = alpn;
+    if (!security.isEmpty()) {
+        obj[configKey::xraySecurity] = security;
+    }
+    if (!flow.isEmpty()) {
+        obj[configKey::xrayFlow] = flow;
+    }
+    if (!fingerprint.isEmpty()) {
+        obj[configKey::xrayFingerprint] = fingerprint;
+    }
+    if (!sni.isEmpty()) {
+        obj[configKey::xraySni] = sni;
+    }
+    if (!alpn.isEmpty()) {
+        obj[configKey::xrayAlpn] = alpn;
+    }
 
     // New: Transport
-    if (!transport.isEmpty()) obj[configKey::xrayTransport] = transport;
+    if (!transport.isEmpty()) {
+        obj[configKey::xrayTransport] = transport;
+    }
     obj["xhttp"] = xhttp.toJson();
-    obj["mkcp"]  = mkcp.toJson();
+    obj["mkcp"] = mkcp.toJson();
 
     return obj;
 }
@@ -196,39 +219,39 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject &json)
     XrayServerConfig c;
 
     // Existing fields
-    c.port              = json.value(configKey::port).toString();
-    c.transportProto    = json.value(configKey::transportProto).toString();
-    c.subnetAddress     = json.value(configKey::subnetAddress).toString();
-    c.site              = json.value(configKey::site).toString();
+    c.port = json.value(configKey::port).toString();
+    c.transportProto = json.value(configKey::transportProto).toString();
+    c.subnetAddress = json.value(configKey::subnetAddress).toString();
+    c.site = json.value(configKey::site).toString();
     c.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
 
     // New: Security
-    c.security    = json.value(configKey::xraySecurity).toString(protocols::xray::defaultSecurity);
-    c.flow        = json.value(configKey::xrayFlow).toString(protocols::xray::defaultFlow);
+    c.security = json.value(configKey::xraySecurity).toString(protocols::xray::defaultSecurity);
+    c.flow = json.value(configKey::xrayFlow).toString(protocols::xray::defaultFlow);
     c.fingerprint = json.value(configKey::xrayFingerprint).toString(protocols::xray::defaultFingerprint);
     if (c.fingerprint.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
         c.fingerprint = QString::fromLatin1(protocols::xray::defaultFingerprint);
     }
-    c.sni         = json.value(configKey::xraySni).toString(protocols::xray::defaultSni);
-    c.alpn        = json.value(configKey::xrayAlpn).toString(protocols::xray::defaultAlpn);
+    c.sni = json.value(configKey::xraySni).toString(protocols::xray::defaultSni);
+    c.alpn = json.value(configKey::xrayAlpn).toString(protocols::xray::defaultAlpn);
 
     // New: Transport
     c.transport = json.value(configKey::xrayTransport).toString(protocols::xray::defaultTransport);
-    c.xhttp     = XrayXhttpConfig::fromJson(json.value("xhttp").toObject());
-    c.mkcp      = XrayMkcpConfig::fromJson(json.value("mkcp").toObject());
+    c.xhttp = XrayXhttpConfig::fromJson(json.value("xhttp").toObject());
+    c.mkcp = XrayMkcpConfig::fromJson(json.value("mkcp").toObject());
 
     return c;
 }
 
 bool XrayServerConfig::hasEqualServerSettings(const XrayServerConfig &other) const
 {
-    return port        == other.port
-        && site        == other.site
-        && security    == other.security
-        && flow        == other.flow
-        && transport   == other.transport
-        && fingerprint == other.fingerprint
-        && sni         == other.sni;
+    return port == other.port
+           && site == other.site
+           && security == other.security
+           && flow == other.flow
+           && transport == other.transport
+           && fingerprint == other.fingerprint
+           && sni == other.sni;
 }
 
 QJsonObject XrayClientConfig::toJson() const

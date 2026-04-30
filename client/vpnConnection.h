@@ -72,7 +72,7 @@ protected slots:
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
 
-public:
+private:
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
 

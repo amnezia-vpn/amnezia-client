@@ -8,8 +8,6 @@
 
 using namespace amnezia;
 
-using namespace amnezia;
-
 namespace
 {
     const QByteArray AMNEZIA_CONFIG_SIGNATURE = QByteArray::fromHex("000000ff");
