@@ -273,6 +273,19 @@ PageType {
             sourceComponent: managedListVisible && index === 0
                              ? managedHeaderDelegate
                              : (managedListVisible && index <= managedRows ? managedRuleDelegate : localRuleDelegate)
+
+            function syncItemIndexes() {
+                if (!item) {
+                    return
+                }
+
+                item.managedModelIndex = managedModelIndex
+                item.localModelIndex = localModelIndex
+            }
+
+            onLoaded: syncItemIndexes()
+            onManagedModelIndexChanged: syncItemIndexes()
+            onLocalModelIndexChanged: syncItemIndexes()
         }
 
         Component {
@@ -280,6 +293,8 @@ PageType {
 
             ColumnLayout {
                 width: listView.width
+                property int managedModelIndex: -1
+                property int localModelIndex: -1
 
                 Header2Type {
                     Layout.fillWidth: true
@@ -309,15 +324,19 @@ PageType {
 
             ColumnLayout {
                 width: listView.width
+                property int managedModelIndex: -1
+                property int localModelIndex: -1
 
-                readonly property var managedRule: proxyManagedExceptSitesModel.get(rowLoader.managedModelIndex)
+                readonly property var managedRule: managedModelIndex >= 0 && managedModelIndex < proxyManagedExceptSitesModel.count
+                                                   ? proxyManagedExceptSitesModel.get(managedModelIndex)
+                                                   : { "url": "", "ip": "" }
 
                 LabelWithButtonType {
                     Layout.fillWidth: true
 
                     enabled: false
-                    text: managedRule.url
-                    descriptionText: managedRule.ip
+                    text: managedRule.url || ""
+                    descriptionText: managedRule.ip || ""
                 }
 
                 DividerType {}
@@ -329,25 +348,29 @@ PageType {
 
             ColumnLayout {
                 width: listView.width
+                property int managedModelIndex: -1
+                property int localModelIndex: -1
 
-                readonly property var localRule: proxyIpSplitTunnelingModel.get(rowLoader.localModelIndex)
+                readonly property var localRule: localModelIndex >= 0 && localModelIndex < proxyIpSplitTunnelingModel.count
+                                                 ? proxyIpSplitTunnelingModel.get(localModelIndex)
+                                                 : { "url": "", "ip": "" }
 
                 LabelWithButtonType {
                     id: site
                     Layout.fillWidth: true
 
-                    text: localRule.url
-                    descriptionText: localRule.ip
+                    text: localRule.url || ""
+                    descriptionText: localRule.ip || ""
                     rightImageSource: "qrc:/images/controls/trash.svg"
                     rightImageColor: AmneziaStyle.color.paleGray
 
                     clickedFunction: function() {
-                        var headerText = qsTr("Remove ") + localRule.url + "?"
+                        var headerText = qsTr("Remove ") + (localRule.url || "") + "?"
                         var yesButtonText = qsTr("Continue")
                         var noButtonText = qsTr("Cancel")
 
                         var yesButtonFunction = function() {
-                            IpSplitTunnelingController.removeSite(proxyIpSplitTunnelingModel.mapToSource(rowLoader.localModelIndex))
+                            IpSplitTunnelingController.removeSite(proxyIpSplitTunnelingModel.mapToSource(localModelIndex))
                             if (!GC.isMobile()) {
                                 site.rightButton.forceActiveFocus()
                             }
