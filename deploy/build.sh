@@ -9,23 +9,34 @@ run_traced() {
     { set +o xtrace; } 2>/dev/null
 }
 
-: ${PROJECT_DIR:=$(pwd)}
-: ${BUILD_DIR:=build}
-BUILD_PATH="$PROJECT_DIR/deploy/$BUILD_DIR"
+all_abis_set="arm64-v8a armeabi-v7a x86_64 x86"
+get_abi_folder() {
+    case $1 in
+        arm64-v8a)   echo "android_arm64_v8a" ;;
+        armeabi-v7a) echo "android_armv7"     ;;
+        x86)         echo "android_x86"       ;;
+        all|x86_64)  echo "android_x86_64"    ;;
+        *)           echo ""                  ;;
+    esac
+}
 
 abis=()
 installers=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -t|--target)        TARGET="$2";         shift 2 ;;
-        -f|--force)         : ${FORCE=true};     shift   ;;
-        --installer)        installers+=("$2");  shift 2 ;;
-        --abi)              abis+=("$2");        shift 2 ;;
-        --sign)             : ${SIGN:=true};     shift   ;;
-        --aab)              : ${BUILD_AAB=true}; shift   ;;
+        -b|--build)         : ${BUILD_PATH:="$2"};  shift 2 ;;
+        -s|--source)        : ${SOURCE_PATH:="$2"}; shift 2 ;;
+        -t|--target)        TARGET="$2";            shift 2 ;;
+        -f|--force)         : ${FORCE=true};        shift   ;;
+        --installer)        installers+=("$2");     shift 2 ;;
+        --abi)              abis+=("$2");           shift 2 ;;
+        --sign)             : ${SIGN:=true};        shift   ;;
+        --aab)              : ${BUILD_AAB=true};    shift   ;;
         --help|-h|?)
             echo "Usage: $0 [options]"
             echo "  Options:"
+            echo "  -b|--build <path>         - specify build folder"
+            echo "  -s|--source <path>        - specify path to amnezia-client root folder"
             echo "  -t|--target <name>        - specify build target"
             echo "  -f|--force                - force removal of build folder prior cmake configuration"
             echo "  --installer <name|all>    - specify an installer(s) to build. allowed to be used multiple times"
@@ -38,13 +49,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+: ${SOURCE_PATH:=$(pwd)}
+: ${BUILD_PATH:="$SOURCE_PATH/deploy/build"}
 : ${INSTALLERS:="${installers[@]}"}
 : ${ABIS:="${abis[@]}"}
 : ${ABIS:="all"}
-
 : ${HOST:="$(uname -s)"}
-HOST=$(echo "$HOST" | tr '[:upper:]' '[:lower:]')
 : ${TARGET:="$HOST"}
+
+HOST=$(echo "$HOST" | tr '[:upper:]' '[:lower:]')
 TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]')
 
 bases=(~/Qt /opt/Qt)
@@ -115,28 +128,25 @@ case "$TARGET" in
             QT_ANDROID_SIGN_AAB=TRUE
         fi
 
-        if [[ -z "$ABIS" ]]; then
-            echo "No ABIs specified. Specify at least one using --abi option"
-            exit 1
-        fi
+        [[ "$ABIS" == "all" ]] && ABIS="$all_abis_set"
 
-        toolchain_dir=""
+        toolchain_abi=""
         for abi in $ABIS; do
-            case "$abi" in
-                armeabi-v7a) : ${toolchain_dir:="android_armv7"}         ;;
-                arm64-v8a)   : ${toolchain_dir:="android_arm64_v8a"}     ;;
-                x86)         : ${toolchain_dir:="android_x86"}           ;;
-                all|x86_64)  : ${toolchain_dir:="android_x86_64"}        ;;
-                *) echo "Unsupported ABI \"${abi}\" encountered"; exit 1 ;;
-            esac
+            abi_exists=$(get_abi_folder "$abi")
+            if [[ -z "$abi_exists" ]]; then
+                echo "Unsupported ABI \"${abi}\""
+                exit 1
+            fi
+            : ${toolchain_abi:="$abi"}
         done
 
-        if [[ "$ABIS" == "all" ]]; then
+        if [[ "$ABIS" == "$all_abis_set" ]]; then
             QT_ANDROID_BUILD_ALL_ABIS=TRUE
         else
             QT_ANDROID_ABIS="${ABIS// /;}"
         fi
 
+        toolchain_dir=$(get_abi_folder "$toolchain_abi")
         : ${CMAKE_PREFIX_PATH:="$QT_ROOT_PATH/$toolchain_dir/lib/cmake/Qt6/qt.toolchain.cmake"}
         : ${CMAKE_TOOLCHAIN_FILE:="$QT_ROOT_PATH/$toolchain_dir/lib/cmake/Qt6/qt.toolchain.cmake"}
         ;;
@@ -160,10 +170,8 @@ if [[ "$TARGET" == "android" ]]; then
     [[ -n "$ANDROID_HOME" ]] && bases=("$ANDROID_HOME" "${bases[@]}")
 
     ndk_dirs=()
-    for sdk_dir in "${bases[@]}"; do
-        [[ -d "$sdk_dir" ]] && sdk_dirs+=("$sdk_dir")
-
-        for ndk_dir in "$sdk_dir"/ndk/${ANDROID_NDK_VERSION:-*}; do
+    for base in "${bases[@]}"; do
+        for ndk_dir in "$base"/ndk/${ANDROID_NDK_VERSION:-*}; do
             [[ -d "$ndk_dir" ]] && ndk_dirs+=("$ndk_dir")
         done
     done
@@ -196,7 +204,7 @@ if [[ -n "$FORCE" ]]; then
     run_traced rm -rf "$BUILD_PATH"
 fi
 
-run_traced cmake -S "$PROJECT_DIR" -B "$BUILD_PATH" "${args[@]}"
+run_traced cmake -S "$SOURCE_PATH" -B "$BUILD_PATH" "${args[@]}"
 run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE"
 
 [[ -n "$BUILD_AAB" ]] && run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" -t "aab"
