@@ -15,10 +15,30 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
     m_impl.reset(new LocalSocketController());
     connect(m_impl.get(), &ControllerImpl::connected, this,
             [this](const QString &pubkey, const QDateTime &connectionTimestamp) {
-                emit connectionStateChanged(Vpn::ConnectionState::Connected);
+                setConnectionState(Vpn::ConnectionState::Connected);
             });
+    connect(m_impl.get(), &ControllerImpl::statusUpdated, this,
+            [this](const QString& serverIpv4Gateway,
+                   const QString& deviceIpv4Address, uint64_t txBytes,
+                   uint64_t rxBytes) {
+                const QString previousGateway = m_vpnGateway;
+                const QString previousLocal = m_vpnLocalAddress;
+
+                if (!serverIpv4Gateway.isEmpty()) {
+                    m_vpnGateway = serverIpv4Gateway;
+                }
+                if (!deviceIpv4Address.isEmpty()) {
+                    m_vpnLocalAddress = deviceIpv4Address;
+                }
+
+                if ((!m_vpnGateway.isEmpty() && m_vpnGateway != previousGateway) ||
+                    (!m_vpnLocalAddress.isEmpty() && m_vpnLocalAddress != previousLocal)) {
+                    emit tunnelAddressesUpdated(m_vpnGateway, m_vpnLocalAddress);
+                }
+            });
+
     connect(m_impl.get(), &ControllerImpl::disconnected, this,
-            [this]() { emit connectionStateChanged(Vpn::ConnectionState::Disconnected); });
+            [this]() { setConnectionState(Vpn::ConnectionState::Disconnected); });
     m_impl->initialize(nullptr, nullptr);
 }
 
@@ -57,4 +77,3 @@ ErrorCode WireguardProtocol::start()
 {
     return startMzImpl();
 }
-

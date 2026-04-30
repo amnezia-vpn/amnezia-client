@@ -12,6 +12,7 @@
 
 #include "controllerimpl.h"
 
+
 class QJsonObject;
 
 class LocalSocketController final : public ControllerImpl {
@@ -58,6 +59,7 @@ class LocalSocketController final : public ControllerImpl {
 
   QByteArray m_buffer;
 
+  QString m_deviceIpv4;
   std::function<void(const QString&)> m_logCallback = nullptr;
 
   QTimer m_initializingTimer;

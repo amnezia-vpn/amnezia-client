@@ -99,7 +99,11 @@ bool AndroidController::initialize()
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
-        {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)}
+        {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)},
+        {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)},
+        {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)},
+        {"onActivityPaused", "()V", reinterpret_cast<void *>(onActivityPaused)},
+        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)}
     };
 
     QJniEnvironment env;
@@ -200,6 +204,21 @@ bool AndroidController::isCameraPresent()
 bool AndroidController::isOnTv()
 {
     return callActivityMethod<jboolean>("isOnTv", "()Z");
+}
+
+bool AndroidController::isEdgeToEdgeEnabled()
+{
+    return callActivityMethod<jboolean>("isEdgeToEdgeEnabled", "()Z");
+}
+
+int AndroidController::getStatusBarHeight()
+{
+    return callActivityMethod<jint>("getStatusBarHeight", "()I");
+}
+
+int AndroidController::getNavigationBarHeight()
+{
+    return callActivityMethod<jint>("getNavigationBarHeight", "()I");
 }
 
 void AndroidController::startQrReaderActivity()
@@ -521,3 +540,42 @@ bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
 
     return ImportController::decodeQrCode(AndroidUtils::convertJString(env, data));
 }
+// static
+void AndroidController::onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    qDebug() << "Android IME insets changed: height =" << heightDp << "dp";
+    emit AndroidController::instance()->imeInsetsChanged(heightDp);
+}
+
+// static
+void AndroidController::onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jint navBarHeightDp, jint statusBarHeightDp)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    qDebug() << "Android system bars insets changed: nav bar =" << navBarHeightDp << "dp, status bar =" << statusBarHeightDp << "dp";
+    emit AndroidController::instance()->systemBarsInsetsChanged(navBarHeightDp, statusBarHeightDp);
+}
+
+// static
+void AndroidController::onActivityPaused(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->activityPaused();
+}
+
+// static
+void AndroidController::onActivityResumed(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->activityResumed();
+}
+
+

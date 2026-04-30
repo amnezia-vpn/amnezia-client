@@ -42,6 +42,25 @@ struct VMessServerObject
 };
 
 
+struct VlessServerObject
+{
+    QString address;
+    QString id;  // UUID
+    int port;
+    QString flow = "xtls-rprx-vision";
+    QString encryption = "none";
+    QString network = "tcp";
+    QString security = "reality";
+    QString serverName;  // SNI
+    QString publicKey;
+    QString shortId;
+    QString fingerprint = "chrome";
+    QString spiderX = "";
+    JSONSTRUCT_COMPARE(VlessServerObject, address, id, port, flow, encryption)
+    JSONSTRUCT_REGISTER(VlessServerObject, F(address, id, port, flow, encryption, network, security, serverName, publicKey, shortId, fingerprint, spiderX))
+};
+
+
 namespace transfer
 {
 

@@ -74,6 +74,18 @@ Item {
         FocusController.nextKeyRightItem()
     }
 
+    Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.application.state !== Qt.ApplicationActive) {
+                if (!menu.isClosed) {
+                    menu.closeTriggered()
+                }
+            }
+        }
+    }
+
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
 

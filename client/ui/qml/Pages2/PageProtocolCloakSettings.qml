@@ -22,7 +22,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -140,6 +140,16 @@ PageType {
                         ListElement { name : "aes-128-gcm" }
                     }
 
+                    function updateSelectedIndex() {
+                        cipherDropDown.text = cipher
+                        for (var i = 0; i < cipherListView.model.count; i++) {
+                            if (cipherListView.model.get(i).name === cipher) {
+                                selectedIndex = i
+                                break
+                            }
+                        }
+                    }
+
                     clickedFunction: function() {
                         cipherDropDown.text = selectedText
                         cipher = cipherDropDown.text
@@ -147,13 +157,14 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        cipherDropDown.text = cipher
+                        updateSelectedIndex()
+                    }
+                }
 
-                        for (var i = 0; i < cipherListView.model.count; i++) {
-                            if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                selectedIndex = i
-                            }
-                        }
+                Connections {
+                    target: listView.model
+                    function onDataChanged() {
+                        cipherListView.updateSelectedIndex()
                     }
                 }
             }

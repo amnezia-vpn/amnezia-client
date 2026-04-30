@@ -1,11 +1,34 @@
 #include "apiUtils.h"
 
 #include <QDateTime>
+#include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonValue>
 
 namespace
 {
     const QByteArray AMNEZIA_CONFIG_SIGNATURE = QByteArray::fromHex("000000ff");
+
+    constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
+    constexpr QLatin1String trialAlreadyUsedMessage("trial subscription already used");
+
+    QDateTime subscriptionEndUtcFromString(const QString &subscriptionEndDate)
+    {
+        if (subscriptionEndDate.isEmpty()) {
+            return {};
+        }
+        QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODateWithMs).toUTC();
+        if (!endDate.isValid()) {
+            endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODate).toUTC();
+        }
+        return endDate;
+    }
+
+    QString apiErrorMessageFromJson(const QJsonObject &jsonObj)
+    {
+        const QJsonValue value = jsonObj.value(QStringLiteral("message"));
+        return value.isString() ? value.toString().trimmed() : QString();
+    }
 
     QString escapeUnicode(const QString &input)
     {
@@ -23,9 +46,30 @@ namespace
 
 bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
 {
-    QDateTime now = QDateTime::currentDateTime();
-    QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODateWithMs);
-    return endDate < now;
+    if (subscriptionEndDate.isEmpty()) {
+        return false;
+    }
+    const QDateTime endDate = subscriptionEndUtcFromString(subscriptionEndDate);
+    if (!endDate.isValid()) {
+        return false;
+    }
+    return endDate <= QDateTime::currentDateTimeUtc();
+}
+
+bool apiUtils::isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays)
+{
+    if (subscriptionEndDate.isEmpty()) {
+        return false;
+    }
+    const QDateTime endDate = subscriptionEndUtcFromString(subscriptionEndDate);
+    if (!endDate.isValid()) {
+        return false;
+    }
+    const QDateTime nowUtc = QDateTime::currentDateTimeUtc();
+    if (endDate <= nowUtc) {
+        return false;
+    }
+    return endDate <= nowUtc.addDays(withinDays);
 }
 
 bool apiUtils::isServerFromApi(const QJsonObject &serverConfigObject)
@@ -59,6 +103,7 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
         constexpr QLatin1String servicePremium("amnezia-premium");
         constexpr QLatin1String serviceFree("amnezia-free");
         constexpr QLatin1String serviceExternalPremium("external-premium");
+        constexpr QLatin1String serviceExternalTrial("external-trial");
 
         auto apiConfigObject = serverConfigObject.value(apiDefs::key::apiConfig).toObject();
         auto serviceType = apiConfigObject.value(apiDefs::key::serviceType).toString();
@@ -69,6 +114,8 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
             return apiDefs::ConfigType::AmneziaFreeV3;
         } else if (serviceType == serviceExternalPremium) {
             return apiDefs::ConfigType::ExternalPremium;
+        } else if (serviceType == serviceExternalTrial) {
+            return apiDefs::ConfigType::ExternalTrial;
         }
     }
     default: {
@@ -82,46 +129,73 @@ apiDefs::ConfigSource apiUtils::getConfigSource(const QJsonObject &serverConfigO
     return static_cast<apiDefs::ConfigSource>(serverConfigObject.value(apiDefs::key::configVersion).toInt());
 }
 
-amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)
+amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
+                                                     const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
+                                                     const QByteArray &responseBody)
 {
     const int httpStatusCodeConflict = 409;
     const int httpStatusCodeNotFound = 404;
+    const int httpStatusCodeNotImplemented = 501;
+    const int httpStatusCodePaymentRequired = 402;
+    const int httpStatusCodeUnprocessableEntity = 422;
 
     if (!sslErrors.empty()) {
         qDebug().noquote() << sslErrors;
         return amnezia::ErrorCode::ApiConfigSslError;
-    } else if (reply->error() == QNetworkReply::NoError) {
+    }
+    if (replyError == QNetworkReply::NoError) {
         return amnezia::ErrorCode::NoError;
-    } else if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
-               || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
-        qDebug() << reply->error();
+    }
+    if (replyError == QNetworkReply::NetworkError::OperationCanceledError
+        || replyError == QNetworkReply::NetworkError::TimeoutError) {
+        qDebug() << replyError;
         return amnezia::ErrorCode::ApiConfigTimeoutError;
-    } else if (reply->error() == QNetworkReply::NetworkError::OperationNotImplementedError) {
-        qDebug() << reply->error();
+    }
+    if (replyError == QNetworkReply::NetworkError::OperationNotImplementedError) {
+        qDebug() << replyError;
         return amnezia::ErrorCode::ApiUpdateRequestError;
-    } else {
-        QString err = reply->errorString();
-        int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        qDebug() << QString::fromUtf8(reply->readAll());
-        qDebug() << reply->error();
-        qDebug() << err;
-        qDebug() << httpStatusCode;
-        if (httpStatusCode == httpStatusCodeConflict) {
+    }
+
+    qDebug() << QString::fromUtf8(responseBody);
+    qDebug() << replyError;
+    qDebug() << httpStatusCode;
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+    if (jsonDoc.isObject()) {
+        QJsonObject jsonObj = jsonDoc.object();
+        const int httpStatusFromBody = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
+        if (httpStatusFromBody == httpStatusCodeConflict) {
+            if (apiErrorMessageFromJson(jsonObj).contains(trialAlreadyUsedMessage, Qt::CaseInsensitive)) {
+                return amnezia::ErrorCode::ApiTrialAlreadyUsedError;
+            }
             return amnezia::ErrorCode::ApiConfigLimitError;
-        } else if (httpStatusCode == httpStatusCodeNotFound) {
+        }
+        if (httpStatusFromBody == httpStatusCodeNotFound) {
             return amnezia::ErrorCode::ApiNotFoundError;
+        }
+        if (httpStatusFromBody == httpStatusCodeNotImplemented) {
+            return amnezia::ErrorCode::ApiUpdateRequestError;
+        }
+        if (httpStatusFromBody == httpStatusCodeUnprocessableEntity) {
+            if (apiErrorMessageFromJson(jsonObj) == unprocessableSubscriptionMessage) {
+                return amnezia::ErrorCode::ApiSubscriptionExpiredError;
+            }
+            return amnezia::ErrorCode::ApiConfigDownloadError;
+        }
+        if (httpStatusFromBody == httpStatusCodePaymentRequired) {
+            return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
         }
         return amnezia::ErrorCode::ApiConfigDownloadError;
     }
 
     qDebug() << "something went wrong";
-    return amnezia::ErrorCode::InternalError;
+    return amnezia::ErrorCode::ApiConfigDownloadError;
 }
 
 bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)
 {
     static const QSet<apiDefs::ConfigType> premiumTypes = { apiDefs::ConfigType::AmneziaPremiumV1, apiDefs::ConfigType::AmneziaPremiumV2,
-                                                            apiDefs::ConfigType::ExternalPremium };
+                                                            apiDefs::ConfigType::ExternalPremium, apiDefs::ConfigType::ExternalTrial };
     return premiumTypes.contains(getConfigType(serverConfigObject));
 }
 
@@ -161,4 +235,54 @@ QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
     QByteArray signedData = AMNEZIA_CONFIG_SIGNATURE + vpnKeyCompressed;
 
     return QString("vpn://%1").arg(QString(signedData.toBase64(QByteArray::Base64UrlEncoding)));
+}
+
+QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
+{
+    auto configType = apiUtils::getConfigType(serverConfigObject);
+    if (configType != apiDefs::ConfigType::AmneziaPremiumV2 && configType != apiDefs::ConfigType::ExternalPremium
+        && configType != apiDefs::ConfigType::ExternalTrial) {
+        return {};
+    }
+
+    QString vpnKeyText = "";
+
+    auto apiConfig = serverConfigObject.value(apiDefs::key::apiConfig).toObject();
+    auto authData = serverConfigObject.value(QLatin1String("auth_data")).toObject();
+
+    const QString name = serverConfigObject.value(apiDefs::key::name).toString();
+    const QString description = serverConfigObject.value(apiDefs::key::description).toString();
+    const double configVersion = serverConfigObject.value(apiDefs::key::configVersion).toDouble();
+
+    const QString serviceType = apiConfig.value(apiDefs::key::serviceType).toString();
+    const QString serviceProtocol = apiConfig.value(QLatin1String("service_protocol")).toString();
+    const QString userCountryCode = apiConfig.value(QLatin1String("user_country_code")).toString();
+
+    const QString apiKey = authData.value(apiDefs::key::apiKey).toString();
+
+    QString vpnKeyStr = "{";
+    vpnKeyStr += "\"" + QString(apiDefs::key::name) + "\": \"" + name + "\", ";
+    vpnKeyStr += "\"" + QString(apiDefs::key::description) + "\": \"" + description + "\", ";
+    vpnKeyStr += "\"" + QString(apiDefs::key::configVersion) + "\": " + QString::number(static_cast<int>(configVersion)) + ", ";
+
+    vpnKeyStr += "\"" + QString(apiDefs::key::apiConfig) + "\": {";
+    vpnKeyStr += "\"" + QString(apiDefs::key::serviceType) + "\": \"" + serviceType + "\", ";
+    vpnKeyStr += "\"service_protocol\": \"" + serviceProtocol + "\", ";
+    vpnKeyStr += "\"user_country_code\": \"" + userCountryCode + "\"";
+    vpnKeyStr += "}, ";
+
+    vpnKeyStr += "\"auth_data\": {";
+    vpnKeyStr += "\"" + QString(apiDefs::key::apiKey) + "\": \"" + apiKey + "\"";
+    vpnKeyStr += "}";
+
+    vpnKeyStr += "}";
+
+    QByteArray vpnKeyCompressed = escapeUnicode(vpnKeyStr).toUtf8();
+    vpnKeyCompressed = qCompress(vpnKeyCompressed, 6);
+    vpnKeyCompressed = vpnKeyCompressed.mid(4);
+
+    QByteArray signedData = AMNEZIA_CONFIG_SIGNATURE + vpnKeyCompressed;
+    vpnKeyText = QString("vpn://%1").arg(QString(signedData.toBase64(QByteArray::Base64UrlEncoding)));
+
+    return vpnKeyText;
 }

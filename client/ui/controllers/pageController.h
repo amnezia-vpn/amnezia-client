@@ -26,6 +26,8 @@ namespace PageLoader
         PageSettingsConnection,
         PageSettingsDns,
         PageSettingsApplication,
+        PageSettingsNewsNotifications,
+        PageSettingsNewsDetail,
         PageSettingsBackup,
         PageSettingsAbout,
         PageSettingsLogging,
@@ -40,7 +42,7 @@ namespace PageLoader
         PageSettingsApiDevices,
         PageSettingsApiSubscriptionKey,
         PageSettingsKillSwitchExceptions,
-        
+
         PageServiceSftpSettings,
         PageServiceTorWebsiteSettings,
         PageServiceDnsSettings,
@@ -57,7 +59,7 @@ namespace PageLoader
         PageSetupWizardViewConfig,
         PageSetupWizardQrReader,
         PageSetupWizardApiServicesList,
-        PageSetupWizardApiServiceInfo,
+        PageSetupWizardApiFreeInfo,
 
         PageProtocolOpenVpnSettings,
         PageProtocolShadowSocksSettings,
@@ -73,6 +75,9 @@ namespace PageLoader
 
         PageShareFullAccess,
         PageShareConnection,
+
+        PageSetupWizardApiPremiumInfo,
+        PageSetupWizardApiTrialEmail,
 
         PageDevMenu
     };
@@ -125,6 +130,8 @@ signals:
     void goToPageViewConfig();
     void goToPageSettingsServerServices();
     void goToPageSettingsBackup();
+    void goToShareConnectionPage(QString headerText, QString configContentHeaderText, QString configCaption, QString configExtension,
+                                 QString configFileName);
 
     void closePage();
 

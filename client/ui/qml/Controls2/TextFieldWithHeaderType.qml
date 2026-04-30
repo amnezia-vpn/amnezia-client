@@ -37,6 +37,22 @@ Item {
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
+
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+
     ColumnLayout {
         id: content
         anchors.fill: parent
@@ -105,7 +121,7 @@ Item {
 
                         background: Rectangle {
                             anchors.fill: parent
-                            color: root.enabled ? root.backgroundColor : root.backgroundDisabledColor
+                            color: root.backgroundDisabledColor
                         }
 
                         onTextChanged: {
@@ -118,15 +134,7 @@ Item {
                             }
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.RightButton
-                            onClicked: contextMenu.open()
-                            enabled: true
-                        }
-
-                        ContextMenuType {
-                            id: contextMenu
+                        ContextMenu.menu: ContextMenuType {
                             textObj: textField
                         }
 

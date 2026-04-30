@@ -28,6 +28,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.h
+    ${CLIENT_ROOT_DIR}/core/osSignalHandler.h
 )
 
 # Mozilla headres
@@ -36,7 +37,6 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.h
     ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.h
     ${CLIENT_ROOT_DIR}/mozilla/controllerimpl.h
-    ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.h
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -79,6 +79,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/../common/logger/logger.cpp
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/osSignalHandler.cpp
 )
 
 # Mozilla sources
@@ -86,7 +87,6 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/mozilla/models/server.cpp
     ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.cpp
     ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.cpp
-    ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -175,13 +175,12 @@ if(WIN32)
     )
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
 
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/ipcclient.h
-        ${CLIENT_ROOT_DIR}/core/privileged_process.h
         ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.h
@@ -189,11 +188,12 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.h
         ${CLIENT_ROOT_DIR}/protocols/awgprotocol.h
+        ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/core/ipcclient.cpp
-        ${CLIENT_ROOT_DIR}/core/privileged_process.cpp
+        ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/openvpnovercloakprotocol.cpp
@@ -201,5 +201,16 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/protocols/wireguardprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/xrayprotocol.cpp
         ${CLIENT_ROOT_DIR}/protocols/awgprotocol.cpp
+    )
+endif()
+
+if(APPLE AND MACOS_NE)
+    # Include only the tray notification handler in NE builds
+    set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.h
+    )
+
+    set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/ui/systemtray_notificationhandler.cpp
     )
 endif()

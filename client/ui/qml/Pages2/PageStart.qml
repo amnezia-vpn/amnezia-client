@@ -44,6 +44,19 @@ PageType {
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
         }
 
+        function onGoToShareConnectionPage(headerText, configContentHeaderText, configCaption, configExtension, configFileName) {
+            var pagePath = PageController.getPagePath(PageEnum.PageShareConnection)
+            tabBarStackView.push(pagePath,
+                                 { "objectName" : pagePath,
+                                     "headerText" : headerText,
+                                     "configContentHeaderText" : configContentHeaderText,
+                                     "configCaption" : configCaption,
+                                     "configExtension" : configExtension,
+                                     "configFileName" : configFileName
+                                 },
+                                 StackView.PushTransition)
+        }
+
         function onDisableControls(disabled) {
             isControlsDisabled = disabled
         }
@@ -212,9 +225,13 @@ PageType {
     Connections {
         target: ApiConfigsController
 
-        function onInstallServerFromApiFinished(message) {
+        function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
             if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
+                    ServersModel.setDefaultServerIndex(preferredDefaultIndex)
+                } else {
+                    ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1)
+                }
                 ServersModel.processedIndex = ServersModel.defaultIndex
             }
 
@@ -265,7 +282,6 @@ PageType {
         }
 
         Keys.onPressed: function(event) {
-            console.debug(">>>> ", event.key, " Event is caught by StartPage")
             switch (event.key) {
             case Qt.Key_Tab:
             case Qt.Key_Down:
@@ -292,8 +308,11 @@ PageType {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
 
+        // Also adjust TabBar position when keyboard appears (Android 14+ workaround)
+        anchors.bottomMargin: SettingsController.imeHeight
+
         topPadding: 8
-        bottomPadding: 8
+        bottomPadding: 8 + SettingsController.safeAreaBottomMargin
         leftPadding: 96
         rightPadding: 96
 
@@ -367,7 +386,13 @@ PageType {
             objectName: "settingsTabButton"
 
             isSelected: tabBar.currentIndex === 2
-            image: "qrc:/images/controls/settings.svg"
+            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
+            Binding {
+                target: settingsTabButton
+                property: "defaultColor"
+                value: "transparent"
+                when: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread)
+            }
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
                 tabBar.currentIndex = 2

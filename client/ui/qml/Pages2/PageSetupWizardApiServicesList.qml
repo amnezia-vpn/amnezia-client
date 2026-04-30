@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
+import SortFilterProxyModel 0.2
+
 import PageEnum 1.0
 import Style 1.0
 
@@ -20,7 +22,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        Layout.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -54,11 +56,22 @@ PageType {
 
         spacing: 0
 
-        model: ApiServicesModel
+        model: SortFilterProxyModel {
+            id: proxyApiServicesModel
+
+            sourceModel: ApiServicesModel
+            sorters: RoleSorter {
+                roleName: "order"
+                sortOrder: Qt.AscendingOrder
+            }
+        }
 
         delegate: ColumnLayout {
+            property bool hideCard: isPremium && !hasSubscriptionPlans
 
             width: listView.width
+            visible: !hideCard
+            height: hideCard ? 0 : implicitHeight
 
             enabled: isServiceAvailable
 
@@ -74,12 +87,19 @@ PageType {
                 bodyText: cardDescription
                 footerText: price
 
+                showRecommendedBadge: showRecommended && isServiceAvailable
+                recommendedText: qsTr("Recommended")
+
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: {
                     if (isServiceAvailable) {
-                        ApiServicesModel.setServiceIndex(index)
-                        PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
+                        ApiServicesModel.setServiceIndex(proxyApiServicesModel.mapToSource(index))
+                        if (ApiServicesModel.getSelectedServiceType() === "amnezia-premium") {
+                            PageController.goToPage(PageEnum.PageSetupWizardApiPremiumInfo)
+                        } else {
+                            PageController.goToPage(PageEnum.PageSetupWizardApiFreeInfo)
+                        }
                     }
                 }
                 

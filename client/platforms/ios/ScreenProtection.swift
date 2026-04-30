@@ -11,13 +11,7 @@ class ScreenProtection {
 import UIKit
 
 public func toggleScreenshots(_ isEnabled: Bool) {
-  let window = UIApplication.shared.keyWindows.first!
-
-  if isEnabled {
-    ScreenProtection.shared.disable(for: window.rootViewController!.view)
-  } else {
-    ScreenProtection.shared.enable(for: window.rootViewController!.view)
-  }
+  ScreenProtection.shared.setScreenshotsEnabled(isEnabled)
 }
 
 extension UIApplication {
@@ -45,6 +39,45 @@ class ScreenProtection {
 
   private var blurView: UIVisualEffectView?
   private var recordingObservation: NSKeyValueObservation?
+  private var desiredScreenshotsEnabled: Bool?
+  private var retryCount = 0
+  private var retryWorkItem: DispatchWorkItem?
+
+  public func setScreenshotsEnabled(_ isEnabled: Bool) {
+    DispatchQueue.main.async {
+      self.desiredScreenshotsEnabled = isEnabled
+      self.applyScreenshotsSettingOrRetry()
+    }
+  }
+
+  private func applyScreenshotsSettingOrRetry() {
+    assert(Thread.isMainThread)
+
+    guard let desiredScreenshotsEnabled else { return }
+    guard let window = UIApplication.shared.keyWindows.first,
+          let rootView = window.rootViewController?.view else {
+      retryCount += 1
+      guard retryCount <= 50 else { return } // ~5s total
+
+      retryWorkItem?.cancel()
+      let item = DispatchWorkItem { [weak self] in
+        self?.applyScreenshotsSettingOrRetry()
+      }
+      retryWorkItem = item
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: item)
+      return
+    }
+
+    retryWorkItem?.cancel()
+    retryWorkItem = nil
+    retryCount = 0
+
+    if desiredScreenshotsEnabled {
+      disable(for: rootView)
+    } else {
+      enable(for: rootView)
+    }
+  }
 
   public func enable(for view: UIView) {
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {

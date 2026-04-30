@@ -35,13 +35,12 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
             }
         }
         m_settings.setValue("Conf/encrypted", true);
-        m_settings.sync();
     }
 }
 
 QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue) const
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&m_mutex);
 
     if (m_cache.contains(key)) {
         return m_cache.value(key);
@@ -85,7 +84,7 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
 
 void SecureQSettings::setValue(const QString &key, const QVariant &value)
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&m_mutex);
 
     if (encryptionRequired() && encryptedKeys.contains(key)) {
         if (!getEncKey().isEmpty() && !getEncIv().isEmpty()) {
@@ -107,26 +106,20 @@ void SecureQSettings::setValue(const QString &key, const QVariant &value)
     }
 
     m_cache.insert(key, value);
-    sync();
 }
 
 void SecureQSettings::remove(const QString &key)
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&m_mutex);
 
     m_settings.remove(key);
     m_cache.remove(key);
-
-    sync();
-}
-
-void SecureQSettings::sync()
-{
-    m_settings.sync();
 }
 
 QByteArray SecureQSettings::backupAppConfig() const
 {
+    QMutexLocker locker(&m_mutex);
+
     QJsonObject cfg;
 
     const auto needToBackup = [this](const auto &key) {
@@ -161,6 +154,8 @@ QByteArray SecureQSettings::backupAppConfig() const
 
 bool SecureQSettings::restoreAppConfig(const QByteArray &json)
 {
+    QMutexLocker locker(&m_mutex);
+
     QJsonObject cfg = QJsonDocument::fromJson(json).object();
     if (cfg.isEmpty())
         return false;
@@ -173,8 +168,14 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
         setValue(key, cfg.value(key).toVariant());
     }
 
-    sync();
     return true;
+}
+
+void SecureQSettings::clearSettings()
+{
+    QMutexLocker locker(&m_mutex);
+    m_settings.clear();
+    m_cache.clear();
 }
 
 QByteArray SecureQSettings::encryptText(const QByteArray &value) const
@@ -293,12 +294,4 @@ void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
     if (job->error()) {
         qCritical() << "SecureQSettings::setSecTag Error:" << job->errorString();
     }
-}
-
-void SecureQSettings::clearSettings()
-{
-    QMutexLocker locker(&mutex);
-    m_settings.clear();
-    m_cache.clear();
-    sync();
 }

@@ -1,5 +1,6 @@
 #include "apiAccountInfoModel.h"
 
+#include <QDateTime>
 #include <QJsonObject>
 
 #include "core/api/apiUtils.h"
@@ -31,7 +32,9 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
             return tr("Active");
         }
 
-        return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate) ? tr("Inactive") : tr("Active");
+        return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate)
+                ? QStringLiteral("<p><a style=\"color: #EB5757;\">%1</a>").arg(tr("Inactive"))
+                : QStringLiteral("<p><a style=\"color: #28c840;\">%1</a>").arg(tr("Active"));
     }
     case EndDateRole: {
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
@@ -47,20 +50,15 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         return tr("%1 out of %2").arg(m_accountInfoData.activeDeviceCount).arg(m_accountInfoData.maxDeviceCount);
     }
     case ServiceDescriptionRole: {
-        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2) {
-            return tr("Classic VPN for seamless work, downloading large files, and watching videos. Access all websites and online "
-                      "resources. "
-                      "Speeds up to 200 Mbps");
-        } else if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
-            return tr("Free unlimited access to a basic set of websites such as Facebook, Instagram, Twitter (X), Discord, Telegram and "
-                      "more. YouTube is not included in the free plan.");
-        } else {
-            return "";
-        }
+        return m_accountInfoData.subscriptionDescription;
     }
     case IsComponentVisibleRole: {
         return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
-                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium;
+                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium
+                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalTrial;
+    }
+    case IsSubscriptionRenewalAvailableRole: {
+        return m_accountInfoData.isRenewalAvailable;
     }
     case HasExpiredWorkerRole: {
         for (int i = 0; i < m_issuedConfigsInfo.size(); i++) {
@@ -81,6 +79,33 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         }
         return false;
     }
+    case IsSubscriptionExpiredRole: {
+        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
+            return false;
+        }
+        if (m_accountInfoData.isInAppPurchase) {
+            return false;
+        }
+        if (m_accountInfoData.subscriptionEndDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate);
+    }
+    case IsSubscriptionExpiringSoonRole: {
+        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
+            return false;
+        }
+        if (m_accountInfoData.isInAppPurchase) {
+            return false;
+        }
+        if (m_accountInfoData.subscriptionEndDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpiringSoon(m_accountInfoData.subscriptionEndDate);
+    }
+    case IsInAppPurchaseRole: {
+        return m_accountInfoData.isInAppPurchase;
+    }
     }
 
     return QVariant();
@@ -100,6 +125,12 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
     accountInfoData.subscriptionEndDate = accountInfoObject.value(apiDefs::key::subscriptionEndDate).toString();
 
     accountInfoData.configType = apiUtils::getConfigType(serverConfig);
+
+    const QJsonObject apiConfig = serverConfig.value(apiDefs::key::apiConfig).toObject();
+    accountInfoData.isInAppPurchase = apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false);
+
+    accountInfoData.subscriptionDescription = accountInfoObject.value(apiDefs::key::subscriptionDescription).toString();
+    accountInfoData.isRenewalAvailable = accountInfoObject.value(apiDefs::key::isRenewalAvailable).toBool(false);
 
     for (const auto &protocol : accountInfoObject.value(apiDefs::key::supportedProtocols).toArray()) {
         accountInfoData.supportedProtocols.push_back(protocol.toString());
@@ -168,8 +199,12 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[ConnectedDevicesRole] = "connectedDevices";
     roles[ServiceDescriptionRole] = "serviceDescription";
     roles[IsComponentVisibleRole] = "isComponentVisible";
+    roles[IsSubscriptionRenewalAvailableRole] = "isSubscriptionRenewalAvailable";
     roles[HasExpiredWorkerRole] = "hasExpiredWorker";
     roles[IsProtocolSelectionSupportedRole] = "isProtocolSelectionSupported";
+    roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
+    roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
+    roles[IsInAppPurchaseRole] = "isInAppPurchase";
 
     return roles;
 }

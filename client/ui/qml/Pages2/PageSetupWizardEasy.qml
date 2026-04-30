@@ -40,7 +40,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -107,6 +107,7 @@ PageType {
 
                 onClicked: function() {
                     isEasySetup = true
+                    checked = true
                     var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
                     listView.dockerContainer = dockerContainer

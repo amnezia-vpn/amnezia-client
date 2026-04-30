@@ -1,12 +1,13 @@
+import Darwin
 import Foundation
 import NetworkExtension
-import WireGuardKitGo
 
 enum XrayErrors: Error {
     case noXrayConfig
     case xrayConfigIsWrong
     case cantSaveXrayConfig
     case cantParseListenAndPort
+    case cantAcquireLocalPort
     case cantSaveHevSocksConfig
 }
 
@@ -22,6 +23,80 @@ extension Constants {
 }
 
 extension PacketTunnelProvider {
+    /// TCP port chosen by the OS on IPv6 loopback (::1), matching inbound listen address.
+    private func acquireFreeLocalPort() throws -> Int {
+        let fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP)
+        guard fd != -1 else {
+            throw XrayErrors.cantAcquireLocalPort
+        }
+        defer { close(fd) }
+        var reuse: Int32 = 1
+        _ = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, socklen_t(MemoryLayout<Int32>.size))
+        var addr = sockaddr_in6()
+        addr.sin6_len = UInt8(MemoryLayout<sockaddr_in6>.size)
+        addr.sin6_family = sa_family_t(AF_INET6)
+        addr.sin6_port = in_port_t(0).bigEndian
+        addr.sin6_addr = in6addr_loopback
+        addr.sin6_scope_id = 0
+        let bindResult = withUnsafePointer(to: &addr) { ptr in
+            ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) { p in
+                bind(fd, p, socklen_t(MemoryLayout<sockaddr_in6>.size))
+            }
+        }
+        guard bindResult == 0 else {
+            throw XrayErrors.cantAcquireLocalPort
+        }
+        var bound = sockaddr_in6()
+        var len = socklen_t(MemoryLayout<sockaddr_in6>.size)
+        let gr = withUnsafeMutablePointer(to: &bound) { p in
+            p.withMemoryRebound(to: sockaddr.self, capacity: 1) { bp in
+                getsockname(fd, bp, &len)
+            }
+        }
+        guard gr == 0 else {
+            throw XrayErrors.cantAcquireLocalPort
+        }
+        return Int(bound.sin6_port.byteSwapped)
+    }
+
+    private func applyXraySplitTunnel(_ xrayConfig: XrayConfig,
+                                      settings: NEPacketTunnelNetworkSettings) {
+        guard let splitTunnelType = xrayConfig.splitTunnelType else {
+            return
+        }
+
+        guard let splitTunnelSites = xrayConfig.splitTunnelSites else {
+            xrayLog(.error, message: "Split tunnel sites are not set")
+            return
+        }
+
+        if splitTunnelType == 1 {
+            var ipv4IncludedRoutes = [NEIPv4Route]()
+
+            for allowedIPString in splitTunnelSites {
+                if let allowedIP = IPAddressRange(from: allowedIPString) {
+                    ipv4IncludedRoutes.append(NEIPv4Route(
+                        destinationAddress: "\(allowedIP.address)",
+                        subnetMask: "\(allowedIP.subnetMask())"))
+                }
+            }
+
+            settings.ipv4Settings?.includedRoutes = ipv4IncludedRoutes
+        } else if splitTunnelType == 2 {
+            var ipv4ExcludedRoutes = [NEIPv4Route]()
+
+            for excludedIPString in splitTunnelSites {
+                if let excludedIP = IPAddressRange(from: excludedIPString) {
+                    ipv4ExcludedRoutes.append(NEIPv4Route(
+                        destinationAddress: "\(excludedIP.address)",
+                        subnetMask: "\(excludedIP.subnetMask())"))
+                }
+            }
+
+            settings.ipv4Settings?.excludedRoutes = ipv4ExcludedRoutes
+        }
+    }
+
     func startXray(completionHandler: @escaping (Error?) -> Void) {
 
         // Xray configuration
@@ -73,6 +148,7 @@ extension PacketTunnelProvider {
             settings.dnsSettings = !dnsArray.isEmpty
             ? NEDNSSettings(servers: dnsArray)
             : NEDNSSettings(servers: ["1.1.1.1"])
+            applyXraySplitTunnel(xrayConfig, settings: settings)
 
             let xrayConfigData = xrayConfig.config.data(using: .utf8)
 
@@ -91,14 +167,11 @@ extension PacketTunnelProvider {
                 return
             }
 
-            let port = 10808
+            let port = try acquireFreeLocalPort()
             let address = "::1"
 
-            if var inboundsArray = jsonDict["inbounds"] as? [[String: Any]], !inboundsArray.isEmpty {
-                inboundsArray[0]["port"] = port
-                inboundsArray[0]["listen"] = address
-                jsonDict["inbounds"] = inboundsArray
-            }
+            // Extract existing SOCKS5 credentials or generate new ones per session.
+            let socksCredentials = ensureInboundAuth(jsonDict: &jsonDict, port: port, address: address)
 
             let updatedData = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 
@@ -107,6 +180,8 @@ extension PacketTunnelProvider {
                     completionHandler(error)
                     return
                 }
+
+                self?.updateActiveInterfaceIndexForCurrentPath()
 
                 // Launch xray
                 self?.setupAndStartXray(configData: updatedData) { xrayError in
@@ -119,6 +194,8 @@ extension PacketTunnelProvider {
                     self?.setupAndRunTun2socks(configData: updatedData,
                                                address: address,
                                                port: port,
+                                               username: socksCredentials.username,
+                                               password: socksCredentials.password,
                                                completionHandler: completionHandler)
                 }
             }
@@ -134,6 +211,71 @@ extension PacketTunnelProvider {
         completionHandler()
     }
 
+    func sockCallback(fd: uintptr_t) {
+        if activeIfaceIdx != 0 {
+            withUnsafePointer(to: activeIfaceIdx) { ptr in
+                setsockopt(Int32(fd), IPPROTO_IP, IP_BOUND_IF, ptr, socklen_t(MemoryLayout<UInt32>.size))
+                setsockopt(Int32(fd), IPPROTO_IPV6, IPV6_BOUND_IF, ptr, socklen_t(MemoryLayout<UInt32>.size))
+            }
+        }
+    }
+
+    private struct SocksCredentials {
+        let username: String
+        let password: String
+    }
+
+    private func indexOfSocksInbound(in inboundsArray: [[String: Any]]) -> Int? {
+        for (i, inbound) in inboundsArray.enumerated() {
+            guard let proto = inbound["protocol"] as? String else { continue }
+            if proto.caseInsensitiveCompare("socks") == .orderedSame {
+                return i
+            }
+        }
+        return nil
+    }
+
+    // Returns existing SOCKS5 credentials from the inbound config, or generates and injects
+    // new random ones. Also sets port and address on the socks inbound entry.
+    private func ensureInboundAuth(jsonDict: inout [String: Any], port: Int, address: String) -> SocksCredentials {
+        var inboundsArray = jsonDict["inbounds"] as? [[String: Any]] ?? []
+
+        if let socksIdx = indexOfSocksInbound(in: inboundsArray) {
+            var inbound = inboundsArray[socksIdx]
+            inbound["port"] = port
+            inbound["listen"] = address
+
+            var settings = inbound["settings"] as? [String: Any] ?? [:]
+            if let accounts = settings["accounts"] as? [[String: Any]],
+               let first = accounts.first,
+               let user = first["user"] as? String, !user.isEmpty,
+               let pass = first["pass"] as? String, !pass.isEmpty {
+                // Re-use existing credentials, but always enforce auth mode in case the
+                // imported config had accounts but auth: "noauth" (or no auth field).
+                settings["auth"] = "password"
+                inbound["settings"] = settings
+                inboundsArray[socksIdx] = inbound
+                jsonDict["inbounds"] = inboundsArray
+                return SocksCredentials(username: user, password: pass)
+            }
+
+            // Generate new random credentials for this session
+            let user = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(16)
+            let pass = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
+            settings["auth"] = "password"
+            settings["accounts"] = [["user": String(user), "pass": pass]]
+            inbound["settings"] = settings
+            inboundsArray[socksIdx] = inbound
+            jsonDict["inbounds"] = inboundsArray
+            return SocksCredentials(username: String(user), password: pass)
+        }
+
+        // Fallback: no socks inbound — generate credentials but can't inject
+        let user = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(16)
+        let pass = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
+        return SocksCredentials(username: String(user), password: pass)
+    }
+
     private func setupAndStartXray(configData: Data,
                                    completionHandler: @escaping (Error?) -> Void) {
         let path = Constants.cachesDirectory.appendingPathComponent("config.json", isDirectory: false).path
@@ -142,6 +284,17 @@ extension PacketTunnelProvider {
             completionHandler(XrayErrors.cantSaveXrayConfig)
             return
         }
+
+        updateActiveInterfaceIndexForCurrentPath()
+
+        let ctx = Unmanaged.passUnretained(self).toOpaque()
+        let cb: libxray_sockcallback = { (fd, ctx) in
+            guard let ctx = ctx else { return }
+            let instance = Unmanaged<PacketTunnelProvider>.fromOpaque(ctx).takeUnretainedValue()
+
+            instance.sockCallback(fd: fd)
+        }
+        LibXraySetSockCallback(cb, ctx)
 
         LibXrayRunXray(nil,
                        path,
@@ -154,6 +307,8 @@ extension PacketTunnelProvider {
     private func setupAndRunTun2socks(configData: Data,
                                       address: String,
                                       port: Int,
+                                      username: String,
+                                      password: String,
                                       completionHandler: @escaping (Error?) -> Void) {
         let config = """
         tunnel:
@@ -161,6 +316,8 @@ extension PacketTunnelProvider {
         socks5:
           port: \(port)
           address: \(address)
+          username: \(username)
+          password: \(password)
           udp: 'udp'
         misc:
           task-stack-size: 20480

@@ -30,12 +30,16 @@ PageType {
             if (!ConnectionController.isConnected && !ContainersModel.isServiceContainer(containerIndex)) {
                 ServersModel.setDefaultContainer(ServersModel.processedIndex, containerIndex)
             }
-
+            
             PageController.closePage() // close installing page
             PageController.closePage() // close protocol settings page
 
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState(true)
+            }
+
+            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardProtocols)) {
+                PageController.goToPage(PageEnum.PageHome)
             }
 
             PageController.showNotificationMessage(finishedMessage)
@@ -99,7 +103,7 @@ PageType {
 
             BaseHeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20
+                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -143,6 +147,7 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
+                Layout.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

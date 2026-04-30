@@ -5,13 +5,13 @@
 #include <QQmlContext>
 #include <QThread>
 
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/systemtray_notificationhandler.h"
 #endif
 
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
-#include "ui/controllers/api/apiPremV1MigrationController.h"
+#include "ui/controllers/api/apiNewsController.h"
 #include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/controllers/allowedDnsController.h"
 #include "ui/controllers/connectionController.h"
@@ -32,9 +32,11 @@
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
 #include "ui/models/api/apiAccountInfoModel.h"
+#include "ui/models/api/apiBenefitsModel.h"
 #include "ui/models/api/apiCountryModel.h"
 #include "ui/models/api/apiDevicesModel.h"
 #include "ui/models/api/apiServicesModel.h"
+#include "ui/models/api/apiSubscriptionPlansModel.h"
 #include "ui/models/appSplitTunnelingModel.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/protocols/awgConfigModel.h"
@@ -47,8 +49,9 @@
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/sites_model.h"
+#include "ui/models/newsModel.h"
 
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/notificationhandler.h"
 #endif
 
@@ -62,6 +65,9 @@ public:
 
     QSharedPointer<PageController> pageController() const;
     void setQmlRoot();
+
+    void openConnectionByIndex(int serverIndex);
+    void importConfigFromData(const QString &data);
 
 signals:
     void translationsUpdated();
@@ -88,8 +94,6 @@ private:
     void initAutoConnectHandler();
     void initAmneziaDnsToggledHandler();
     void initPrepareConfigHandler();
-    void initImportPremiumV2VpnKeyHandler();
-    void initShowMigrationDrawerHandler();
     void initStrictKillSwitchHandler();
 
     QQmlApplicationEngine *m_engine {}; // TODO use parent child system here?
@@ -97,7 +101,7 @@ private:
     QSharedPointer<VpnConnection> m_vpnConnection;
     QSharedPointer<QTranslator> m_translator;
 
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     QScopedPointer<NotificationHandler> m_notificationHandler;
 #endif
 
@@ -117,7 +121,7 @@ private:
 
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
-    QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
+    QScopedPointer<ApiNewsController> m_apiNewsController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;
@@ -125,11 +129,14 @@ private:
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<ProtocolsModel> m_protocolsModel;
     QSharedPointer<SitesModel> m_sitesModel;
+    QSharedPointer<NewsModel> m_newsModel;
     QSharedPointer<AllowedDnsModel> m_allowedDnsModel;
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
     QSharedPointer<ApiServicesModel> m_apiServicesModel;
+    QSharedPointer<ApiSubscriptionPlansModel> m_apiSubscriptionPlansModel;
+    QSharedPointer<ApiBenefitsModel> m_apiBenefitsModel;
     QSharedPointer<ApiCountryModel> m_apiCountryModel;
     QSharedPointer<ApiAccountInfoModel> m_apiAccountInfoModel;
     QSharedPointer<ApiDevicesModel> m_apiDevicesModel;

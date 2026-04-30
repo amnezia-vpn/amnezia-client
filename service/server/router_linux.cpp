@@ -160,7 +160,7 @@ bool RouterLinux::isServiceActive(const QString &serviceName) {
     return process.exitCode() == 0;
 }
 
-void RouterLinux::flushDns()
+bool RouterLinux::flushDns()
 {
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
@@ -174,7 +174,7 @@ void RouterLinux::flushDns()
         p.start("systemctl", { "restart", "systemd-resolved" });
     } else {
         qDebug() << "No suitable DNS manager found.";
-        return;
+        return false;
     }
 
     p.waitForFinished();
@@ -183,6 +183,8 @@ void RouterLinux::flushDns()
         qDebug().noquote() << "Flush dns completed";
     else
         qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
+
+    return true;
 }
 
 bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
@@ -279,7 +281,11 @@ bool RouterLinux::updateResolvers(const QString& ifname, const QList<QHostAddres
     return m_dnsUtil->updateResolvers(ifname, resolvers);
 }
 
-void RouterLinux::StartRoutingIpv6()
+bool RouterLinux::restoreResolvers() {
+    return m_dnsUtil->restoreResolvers();
+}
+
+bool RouterLinux::StartRoutingIpv6()
 {
     QProcess process;
     QStringList commands;
@@ -289,12 +295,12 @@ void RouterLinux::StartRoutingIpv6()
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start activate ipv6\n";
-        return;
+        return false;
     }
     else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not activate ipv6\n";
-        return;
+        return false;
     }
     commands.clear();
 
@@ -303,19 +309,20 @@ void RouterLinux::StartRoutingIpv6()
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start activate ipv6\n";
-        return;
+        return false;
     }
     else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not activate ipv6\n";
-        return;
+        return false;
     }
     commands.clear();
 
     qDebug().noquote() << "StartRoutingIpv6 OK";
+    return true;
 }
 
-void RouterLinux::StopRoutingIpv6()
+bool RouterLinux::StopRoutingIpv6()
 {
     QProcess process;
     QStringList commands;
@@ -325,12 +332,12 @@ void RouterLinux::StopRoutingIpv6()
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start disable ipv6\n";
-        return;
+        return false;
     }
     else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not disable ipv6\n";
-        return;
+        return false;
     }
     commands.clear();
 
@@ -339,14 +346,15 @@ void RouterLinux::StopRoutingIpv6()
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start disable ipv6\n";
-        return;
+        return false;
     }
     else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not disable ipv6\n";
-        return;
+        return false;
     }
     commands.clear();
 
     qDebug().noquote() << "StopRoutingIpv6 OK";
+    return true;
 }

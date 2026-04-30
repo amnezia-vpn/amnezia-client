@@ -3,9 +3,10 @@
 
 #include "QProcess"
 
-#include "containers/containers_defs.h"
-#include "openvpnprotocol.h"
+#include "core/ipcclient.h"
+#include "vpnprotocol.h"
 #include "settings.h"
+#include <QtCore/qsharedpointer.h>
 
 class XrayProtocol : public VpnProtocol
 {
@@ -14,32 +15,22 @@ public:
     virtual ~XrayProtocol() override;
 
     ErrorCode start() override;
-    ErrorCode startTun2Sock();
     void stop() override;
 
-protected:
-    void readXrayConfiguration(const QJsonObject &configuration);
+private:
+    ErrorCode setupRouting();
+    ErrorCode startTun2Socks();
 
-protected:
     QJsonObject m_xrayConfig;
-
-private:
-    static QString xrayExecPath();
-    static QString tun2SocksExecPath();
-
-private:
-    int m_localPort;
-    QString m_remoteHost;
-    QString m_remoteAddress;
     Settings::RouteMode m_routeMode;
-    QJsonObject m_configData;
-    QString m_primaryDNS;
-    QString m_secondaryDNS;
-#ifndef Q_OS_IOS
-    QProcess m_xrayProcess;
-    QSharedPointer<IpcProcessTun2SocksReplica> m_t2sProcess;
-#endif
-    QTemporaryFile m_xrayCfgFile;
+    QList<QHostAddress> m_dnsServers;
+    QString m_remoteAddress;
+
+    QString m_socksUser;
+    QString m_socksPassword;
+    int m_socksPort = 10808;
+
+    QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
 };
 
 #endif // XRAYPROTOCOL_H

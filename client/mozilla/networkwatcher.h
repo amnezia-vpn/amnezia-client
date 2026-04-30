@@ -32,7 +32,8 @@ public:
     QNetworkInformation::Reachability getReachability();
 
 signals:
-    void networkChange();
+    void networkChanged();
+    void wakeup();
 
 private:
     void settingsChanged();

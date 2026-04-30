@@ -49,6 +49,71 @@ Item {
         return drawerContent.state === stateName
     }
 
+    function isDrawerType2(obj) {
+        return obj && typeof obj.drawerExpandedStateName !== "undefined" && 
+               typeof obj.drawerCollapsedStateName !== "undefined"
+    }
+
+    function isDescendantOfDrawer(obj) {
+        var current = obj
+        while (current && current !== root.parent) {
+            if (isDrawerType2(current)) {
+                return true
+            }
+            current = current.parent
+        }
+        return false
+    }
+
+    function findComponent(obj, typeCtor) {
+        if (!obj)
+            return null
+
+        if (isDrawerType2(obj) || isDescendantOfDrawer(obj))
+            return null
+
+        if (obj instanceof typeCtor)
+            return obj
+
+        if (obj.children && obj.children.length > 0) {
+            for (var i = 0; i < obj.children.length; i++) {
+                var matchingChildren = findComponent(obj.children[i], typeCtor)
+                if (matchingChildren) return matchingChildren
+            }
+        }
+
+        if (obj.contentItem) {
+            var matchingContentItem = findComponent(obj.contentItem, typeCtor)
+            if (matchingContentItem) return matchingContentItem
+        }
+
+        return null
+    }
+
+    function setParentInteractive(value) {
+        var flickableType = findComponent(root.parent, Flickable)
+        var listViewType = findComponent(root.parent, ListView)
+
+        if (flickableType) flickableType.interactive = value
+        if (listViewType) listViewType.interactive = value
+    }
+
+    Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.application.state !== Qt.ApplicationActive) {
+                if (dragArea.drag.active) {
+                    dragArea.drag.target = null
+                    dragArea.drag.target = drawerContent
+                }
+                if (isOpened && !isCollapsedStateActive()) {
+                    root.closeTriggered()
+                }
+            }
+        }
+    }
+
     Connections {
         target: PageController
 
@@ -77,6 +142,8 @@ Item {
 
             aboutToHide()
 
+            setParentInteractive(true)
+
             closed()
         }
 
@@ -101,6 +168,8 @@ Item {
             }
 
             root.aboutToShow()
+
+            setParentInteractive(false)
 
             root.opened()
         }

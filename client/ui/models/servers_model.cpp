@@ -26,6 +26,15 @@ namespace
         constexpr char publicKeyInfo[] = "public_key";
         constexpr char expiresAt[] = "expires_at";
     }
+
+    QString normalizeVpnKey(const QString &vpnKey)
+    {
+        QString normalized = vpnKey.trimmed();
+        if (normalized.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+            normalized = normalized.mid(QStringLiteral("vpn://").size());
+        }
+        return normalized;
+    }
 }
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
@@ -44,6 +53,8 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
 
     connect(this, &ServersModel::processedServerIndexChanged, this, &ServersModel::processedServerChanged);
     connect(this, &ServersModel::dataChanged, this, &ServersModel::processedServerChanged);
+
+    connect(this, &QAbstractItemModel::modelReset, this, &ServersModel::recomputeGatewayStacks);
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -156,6 +167,52 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         QString primaryDns = server.value(config_key::dns1).toString();
         return primaryDns == protocols::dns::amneziaDnsIp;
     }
+    case IsAdVisibleRole: {
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::isAdVisible).toBool(false);
+    }
+    case AdHeaderRole: {
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adHeader).toString();
+    }
+    case AdDescriptionRole: {
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adDescription).toString();
+    }
+    case AdEndpointRole: {
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adEndpoint).toString();
+    }
+    case IsRenewalAvailableRole: {
+        return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::isRenewalAvailable).toBool(false);
+    }
+    case IsSubscriptionExpiredRole: {
+        if (configVersion != apiDefs::ConfigSource::AmneziaGateway) {
+            return false;
+        }
+        if (apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false)) {
+            return false;
+        }
+        if (apiConfig.value(apiDefs::key::subscriptionExpiredByServer).toBool(false)) {
+            return true;
+        }
+        const QString endDate =
+                apiConfig.value(apiDefs::key::subscription).toObject().value(apiDefs::key::endDate).toString();
+        if (endDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpired(endDate);
+    }
+    case IsSubscriptionExpiringSoonRole: {
+        if (configVersion != apiDefs::ConfigSource::AmneziaGateway) {
+            return false;
+        }
+        if (apiConfig.value(apiDefs::key::isInAppPurchase).toBool(false)) {
+            return false;
+        }
+        const QString endDate =
+                apiConfig.value(apiDefs::key::subscription).toObject().value(apiDefs::key::endDate).toString();
+        if (endDate.isEmpty()) {
+            return false;
+        }
+        return apiUtils::isSubscriptionExpiringSoon(endDate);
+    }
     }
 
     return QVariant();
@@ -173,6 +230,7 @@ void ServersModel::resetModel()
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
     m_processedServerIndex = m_defaultServerIndex;
+    m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
 }
@@ -219,16 +277,29 @@ QString ServersModel::getServerDescription(const QJsonObject &server, const int 
 
 const QString ServersModel::getDefaultServerDescriptionCollapsed()
 {
-    const QJsonObject server = m_servers.at(m_defaultServerIndex).toObject();
-    const auto configVersion = server.value(config_key::configVersion).toInt();
-    auto description = getServerDescription(server, m_defaultServerIndex);
+    const QJsonObject serverConfig = m_servers.at(m_defaultServerIndex).toObject();
+    const auto configVersion = serverConfig.value(config_key::configVersion).toInt();
+    auto description = getServerDescription(serverConfig, m_defaultServerIndex);
     if (configVersion) {
         return description;
     }
 
-    auto container = ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
+    auto container = ContainerProps::containerFromString(serverConfig.value(config_key::defaultContainer).toString());
+    QString protocolVersion;
+    QString containerName = ContainerProps::containerHumanNames().value(container);
 
-    return description += ContainerProps::containerHumanNames().value(container) + " | " + server.value(config_key::hostName).toString();
+    if (ContainerProps::isAwgContainer(container)) {
+        QJsonObject containerConfig = m_settings->containerConfig(m_defaultServerIndex, container);
+        QJsonObject serverProtocolConfig = containerConfig.value(ContainerProps::containerTypeToProtocolString(container)).toObject();
+        protocolVersion = ProtocolProps::getProtocolVersionString(serverProtocolConfig);
+
+        auto isThirdPartyConfig = serverProtocolConfig.value(config_key::isThirdPartyConfig).toBool();
+        if (container == DockerContainer::Awg && !isThirdPartyConfig) {
+            containerName = "AmneziaWG Legacy";
+        }
+    }
+
+    return description += containerName + protocolVersion + " | " + serverConfig.value(config_key::hostName).toString();
 }
 
 const QString ServersModel::getDefaultServerDescriptionExpanded()
@@ -374,7 +445,6 @@ QHash<int, QByteArray> ServersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
 
-    roles[NameRole] = "serverName";
     roles[NameRole] = "name";
     roles[ServerDescriptionRole] = "serverDescription";
     roles[CollapsedServerDescriptionRole] = "collapsedServerDescription";
@@ -401,6 +471,16 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[IsCountrySelectionAvailableRole] = "isCountrySelectionAvailable";
     roles[ApiAvailableCountriesRole] = "apiAvailableCountries";
     roles[ApiServerCountryCodeRole] = "apiServerCountryCode";
+
+    roles[IsAdVisibleRole] = "isAdVisible";
+    roles[AdHeaderRole] = "adHeader";
+    roles[AdDescriptionRole] = "adDescription";
+    roles[AdEndpointRole] = "adEndpoint";
+    roles[IsRenewalAvailableRole] = "isRenewalAvailable";
+
+    roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
+    roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
+
     return roles;
 }
 
@@ -502,7 +582,22 @@ void ServersModel::setDefaultContainer(const int serverIndex, const int containe
 const QString ServersModel::getDefaultServerDefaultContainerName()
 {
     auto defaultContainer = qvariant_cast<DockerContainer>(getDefaultServerData("defaultContainer"));
-    return ContainerProps::containerHumanNames().value(defaultContainer);
+
+    QString protocolVersion;
+    QString containerName = ContainerProps::containerHumanNames().value(defaultContainer);
+
+    if (ContainerProps::isAwgContainer(defaultContainer)) {
+        QJsonObject containerConfig = m_settings->containerConfig(m_defaultServerIndex, defaultContainer);
+        QJsonObject serverProtocolConfig = containerConfig.value(ContainerProps::containerTypeToProtocolString(defaultContainer)).toObject();
+        protocolVersion = ProtocolProps::getProtocolVersionString(serverProtocolConfig);
+
+        auto isThirdPartyConfig = serverProtocolConfig.value(config_key::isThirdPartyConfig).toBool();
+        if (defaultContainer == DockerContainer::Awg && !isThirdPartyConfig) {
+            containerName = "AmneziaWG Legacy";
+        }
+    }
+
+    return containerName + protocolVersion;
 }
 
 ErrorCode ServersModel::removeAllContainers(const QSharedPointer<ServerController> &serverController)
@@ -670,6 +765,23 @@ bool ServersModel::isServerFromApiAlreadyExists(const QString &userCountryCode, 
     return false;
 }
 
+int ServersModel::indexOfServerWithVpnKey(const QString &vpnKey) const
+{
+    const QString normalizedInput = normalizeVpnKey(vpnKey);
+    if (normalizedInput.isEmpty()) {
+        return -1;
+    }
+
+    for (int i = 0; i < m_servers.size(); ++i) {
+        const auto apiConfig = m_servers.at(i).toObject().value(configKey::apiConfig).toObject();
+        const QString existingKey = normalizeVpnKey(apiConfig.value(apiDefs::key::vpnKey).toString());
+        if (!existingKey.isEmpty() && existingKey == normalizedInput) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
 {
     QJsonObject server = m_servers.at(serverIndex).toObject();
@@ -733,8 +845,8 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
         if (container.value(config_key::container).toString() != ContainerProps::containerToString(defaultContainer)) {
             continue;
         }
-        if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-            QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
+        if (ContainerProps::isAwgContainer(defaultContainer) || defaultContainer == DockerContainer::WireGuard) {
+            QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToProtocolString(defaultContainer)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             QJsonObject clientProtocolConfig = QJsonDocument::fromJson(clientProtocolConfigString.toUtf8()).object();
             return (clientProtocolConfigString.contains("AllowedIPs") && !clientProtocolConfigString.contains("AllowedIPs = 0.0.0.0/0, ::/0"))
@@ -742,7 +854,7 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
                         && !clientProtocolConfig.value(config_key::allowed_ips).toArray().contains("0.0.0.0/0"));
         } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
                    || defaultContainer == DockerContainer::ShadowSocks) {
-            auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
+            auto serverProtocolConfig = container.value(ContainerProps::containerTypeToProtocolString(DockerContainer::OpenVpn)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             return !clientProtocolConfigString.isEmpty() && !clientProtocolConfigString.contains("redirect-gateway");
         }
@@ -753,6 +865,68 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
 bool ServersModel::isServerFromApi(const int serverIndex)
 {
     return data(serverIndex, IsServerFromTelegramApiRole).toBool() || data(serverIndex, IsServerFromGatewayApiRole).toBool();
+}
+
+bool ServersModel::hasServersFromGatewayApi()
+{
+    return !m_gatewayStacks.isEmpty();
+}
+
+bool ServersModel::GatewayStacks::operator==(const GatewayStacks &other) const
+{
+    return userCountryCodes == other.userCountryCodes && serviceTypes == other.serviceTypes;
+}
+
+QJsonObject ServersModel::GatewayStacks::toJson() const
+{
+    QJsonObject obj;
+    if (!userCountryCodes.isEmpty()) {
+        obj.insert(configKey::userCountryCode, QJsonArray::fromStringList(userCountryCodes.values()));
+    }
+    if (!serviceTypes.isEmpty()) {
+        obj.insert(configKey::serviceType, QJsonArray::fromStringList(serviceTypes.values()));
+    }
+    return obj;
+}
+
+void ServersModel::recomputeGatewayStacks()
+{
+    const bool wasEmpty = m_gatewayStacks.isEmpty();
+    GatewayStacks computed;
+    bool hasNewTags = false;
+
+    for (int i = 0; i < m_servers.count(); ++i) {
+        if (data(i, IsServerFromGatewayApiRole).toBool()) {
+            const QJsonObject server = m_servers.at(i).toObject();
+            const QJsonObject apiConfig = server.value(configKey::apiConfig).toObject();
+
+            const QString userCountryCode = apiConfig.value(configKey::userCountryCode).toString();
+            const QString serviceType = apiConfig.value(configKey::serviceType).toString();
+
+            if (!userCountryCode.isEmpty()) {
+                if (!m_gatewayStacks.userCountryCodes.contains(userCountryCode)) {
+                    hasNewTags = true;
+                }
+                computed.userCountryCodes.insert(userCountryCode);
+            }
+
+            if (!serviceType.isEmpty()) {
+                if (!m_gatewayStacks.serviceTypes.contains(serviceType)) {
+                    hasNewTags = true;
+                }
+                computed.serviceTypes.insert(serviceType);
+            }
+        }
+    }
+
+    m_gatewayStacks = std::move(computed);
+    if (hasNewTags) {
+        emit gatewayStacksExpanded();
+    }
+
+    if (wasEmpty != m_gatewayStacks.isEmpty()) {
+        emit hasServersFromGatewayApiChanged();
+    }
 }
 
 bool ServersModel::isApiKeyExpired(const int serverIndex)
@@ -820,4 +994,19 @@ const QString ServersModel::getDefaultServerImagePathCollapsed()
 bool ServersModel::processedServerIsPremium() const
 {
     return apiUtils::isPremiumServer(getServerConfig(m_processedServerIndex));
+}
+
+bool ServersModel::isAdVisible()
+{
+    return data(m_defaultServerIndex, IsAdVisibleRole).toBool();
+}
+
+QString ServersModel::adHeader()
+{
+    return data(m_defaultServerIndex, AdHeaderRole).toString();
+}
+
+QString ServersModel::adDescription()
+{
+    return data(m_defaultServerIndex, AdDescriptionRole).toString();
 }

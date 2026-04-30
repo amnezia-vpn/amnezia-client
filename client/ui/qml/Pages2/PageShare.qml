@@ -29,56 +29,78 @@ PageType {
         Xray
     }
 
-    signal revokeConfig(int index)
-    onRevokeConfig: function(index) {
-        PageController.showBusyIndicator(true)
-        ExportController.revokeConfig(index,
-                                      ContainersModel.getProcessedContainerIndex(),
-                                      ServersModel.getProcessedServerCredentials())
-        PageController.showBusyIndicator(false)
-        PageController.showNotificationMessage(qsTr("Config revoked"))
-    }
-
     Connections {
         target: ExportController
+
+        function onRevokeConfigCompleted() {
+            PageController.showBusyIndicator(false)
+            PageController.showNotificationMessage(qsTr("Config revoked"))
+        }
 
         function onGenerateConfig(type) {
             PageController.showBusyIndicator(true)
 
+            var configCaption
+            var configExtension
+            var configFileName
+
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
                 ExportController.generateConnectionConfig(clientNameTextField.textField.text);
+                configCaption = qsTr("Save AmneziaVPN config")
+                configExtension = ".vpn"
+                configFileName = "amnezia_config"
                 break;
             }
             case PageShare.ConfigType.OpenVpn: {
                 ExportController.generateOpenVpnConfig(clientNameTextField.textField.text)
+                configCaption = qsTr("Save OpenVPN config")
+                configExtension = ".ovpn"
+                configFileName = "amnezia_for_openvpn"
                 break
             }
             case PageShare.ConfigType.WireGuard: {
                 ExportController.generateWireGuardConfig(clientNameTextField.textField.text)
+                configCaption = qsTr("Save WireGuard config")
+                configExtension = ".conf"
+                configFileName = "amnezia_for_wireguard"
                 break
             }
             case PageShare.ConfigType.Awg: {
                 ExportController.generateAwgConfig(clientNameTextField.textField.text)
+                configCaption = qsTr("Save AmneziaWG config")
+                configExtension = ".conf"
+                configFileName = "amnezia_for_awg"
                 break
             }
             case PageShare.ConfigType.ShadowSocks: {
                 ExportController.generateShadowSocksConfig()
+                configCaption = qsTr("Save Shadowsocks config")
+                configExtension = ".json"
+                configFileName = "amnezia_for_shadowsocks"
                 break
             }
             case PageShare.ConfigType.Cloak: {
                 ExportController.generateCloakConfig()
+                configCaption = qsTr("Save Cloak config")
+                configExtension = ".json"
+                configFileName = "amnezia_for_cloak"
                 break
             }
             case PageShare.ConfigType.Xray: {
                 ExportController.generateXrayConfig(clientNameTextField.textField.text)
+                configCaption = qsTr("Save XRay config")
+                configExtension = ".json"
+                configFileName = "amnezia_for_xray"
                 break
             }
             }
 
             PageController.showBusyIndicator(false)
             
-            PageController.goToPage(PageEnum.PageShareConnection)
+            var headerText = qsTr("Connection to ") + serverSelector.text
+            var configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
+            PageController.goToShareConnectionPage(headerText, configContentHeaderText, configCaption, configExtension, configFileName)
         }
 
         function onExportErrorOccurred(error) {
@@ -151,7 +173,7 @@ PageType {
             HeaderTypeWithButton {
                 id: header
                 Layout.fillWidth: true
-                Layout.topMargin: 24
+                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
 
                 headerText: qsTr("Share VPN Access")
 
@@ -289,7 +311,7 @@ PageType {
             DropDownType {
                 id: serverSelector
 
-                signal severSelectorIndexChanged
+                signal serverSelectorIndexChanged
                 property int currentIndex: -1
 
                 Layout.fillWidth: true
@@ -326,7 +348,7 @@ PageType {
 
                         if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
                             serverSelector.currentIndex = serverSelectorListView.selectedIndex
-                            serverSelector.severSelectorIndexChanged()
+                            serverSelector.serverSelectorIndexChanged()
                         }
 
                         serverSelector.closeTriggered()
@@ -352,6 +374,8 @@ PageType {
 
             DropDownType {
                 id: protocolSelector
+
+                signal protocolSelectorTextChanged
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -392,7 +416,7 @@ PageType {
                     Connections {
                         target: serverSelector
 
-                        function onSeverSelectorIndexChanged() {
+                        function onServerSelectorIndexChanged() {
                             var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
                             protocolSelectorListView.selectedIndex = defaultContainer
                             protocolSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
@@ -414,17 +438,14 @@ PageType {
 
                         fillConnectionTypeModel()
 
-                        if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
-                            exportTypeSelector.currentIndex = 0
-                            exportTypeSelector.text = root.connectionTypesModel[0].name
-                        }
-
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
+
+                        protocolSelector.protocolSelectorTextChanged()
                     }
 
                     function fillConnectionTypeModel() {
@@ -437,6 +458,8 @@ PageType {
                         } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
+                            root.connectionTypesModel.push(awgConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg2")) {
                             root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
@@ -477,6 +500,20 @@ PageType {
                         exportTypeSelector.text = exportTypeSelectorListView.selectedText
                     }
 
+                    onModelChanged: {
+                        if (exportTypeSelector.currentIndex >= model.length || exportTypeSelector.currentIndex < 0) {
+                            exportTypeSelector.currentIndex = 0
+                        }
+                        selectedIndex = exportTypeSelector.currentIndex
+                        if (model.length > 0 && model[selectedIndex] && model[selectedIndex].name !== undefined) {
+                            exportTypeSelectorListView.selectedText = model[selectedIndex].name
+                            exportTypeSelector.text = model[selectedIndex].name
+                        } else {
+                            exportTypeSelectorListView.selectedText = ""
+                            exportTypeSelector.text = ""
+                        }
+                    }
+
                     rootWidth: root.width
 
                     imageSource: "qrc:/images/controls/check.svg"
@@ -484,15 +521,22 @@ PageType {
                     model: root.connectionTypesModel
                     currentIndex: 0
 
+                    Connections {
+                        target: protocolSelector
+
+                        function onProtocolSelectorTextChanged() {
+                            if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
+                                exportTypeSelectorListView.selectedIndex = 0
+                                exportTypeSelector.currentIndex = 0
+                                exportTypeSelector.text = root.connectionTypesModel[0].name
+                            }
+                        }
+                    }
+
                     clickedFunction: function() {
                         exportTypeSelector.text = exportTypeSelectorListView.selectedText
                         exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
                         exportTypeSelector.closeTriggered()
-                    }
-
-                    Component.onCompleted: {
-                        exportTypeSelector.text = exportTypeSelectorListView.selectedText
-                        exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
                     }
                 }
             }
@@ -544,6 +588,7 @@ PageType {
                     textField.placeholderText: qsTr("Search")
 
                     Keys.onEscapePressed: {
+                        searchTextField.textField.text = ""
                         root.isSearchBarVisible = false
                     }
 
@@ -564,6 +609,7 @@ PageType {
                     imageColor: AmneziaStyle.color.paleGray
 
                     function clickedFunc() {
+                        searchTextField.textField.text = ""
                         root.isSearchBarVisible = false
                     }
 
@@ -580,14 +626,18 @@ PageType {
 
                 visible: accessTypeSelector.currentIndex === 1
 
+                function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
+
                 property bool isFocusable: true
+                property bool freezeFilter: false
 
                 model: SortFilterProxyModel {
                     id: proxyClientManagementModel
                     sourceModel: ClientManagementModel
                     filters: RegExpFilter {
                         roleName: "clientName"
-                        pattern: ".*" + searchTextField.textField.text + ".*"
+                        enabled: !clientsListView.freezeFilter
+                        pattern: ".*" + clientsListView.escapeRe(searchTextField.textField.text) + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
                 }
@@ -769,12 +819,14 @@ PageType {
                                                     }
 
                                                     if (clientNameEditor.textField.text !== clientName) {
+                                                        clientsListView.freezeFilter = true
                                                         PageController.showBusyIndicator(true)
-                                                        ExportController.renameClient(index,
+                                                        ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
                                                                                       clientNameEditor.textField.text,
                                                                                       ContainersModel.getProcessedContainerIndex(),
                                                                                       ServersModel.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
+                                                        Qt.callLater(function(){ clientsListView.freezeFilter = false })
                                                         clientNameEditDrawer.closeTriggered()
                                                     }
                                                 }
@@ -805,7 +857,10 @@ PageType {
 
                                         var yesButtonFunction = function() {
                                             clientInfoDrawer.closeTriggered()
-                                            root.revokeConfig(index)
+                                            PageController.showBusyIndicator(true)
+                                            ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
+                                                                          ContainersModel.getProcessedContainerIndex(),
+                                                                          ServersModel.getProcessedServerCredentials())
                                         }
                                         var noButtonFunction = function() {
                                         }

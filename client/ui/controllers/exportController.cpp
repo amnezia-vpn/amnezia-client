@@ -7,10 +7,12 @@
 #include <QFileInfo>
 #include <QImage>
 #include <QStandardPaths>
-
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/qrCodeUtils.h"
+#include "core/serialization/serialization.h"
+#include "core/serialization/transfer.h"
 #include "systemController.h"
+#include <QDebug>
 
 ExportController::ExportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                    const QSharedPointer<ClientManagementModel> &clientManagementModel,
@@ -167,8 +169,7 @@ void ExportController::generateWireGuardConfig(const QString &clientName)
         m_config.append(line + "\n");
     }
 
-    auto qr = qrCodeUtils::generateQrCode(m_config.toUtf8());
-    m_qrCodes << qrCodeUtils::svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
+    m_qrCodes = qrCodeUtils::generateQrCodeImageSeries(m_config.toUtf8());
 
     emit exportConfigChanged();
 }
@@ -176,7 +177,8 @@ void ExportController::generateWireGuardConfig(const QString &clientName)
 void ExportController::generateAwgConfig(const QString &clientName)
 {
     QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::Awg, clientName, Proto::Awg, nativeConfig);
+    ErrorCode errorCode = generateNativeConfig(static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex()), clientName,
+                                               Proto::Awg, nativeConfig);
     if (errorCode) {
         emit exportErrorOccurred(errorCode);
         return;
@@ -187,8 +189,7 @@ void ExportController::generateAwgConfig(const QString &clientName)
         m_config.append(line + "\n");
     }
 
-    auto qr = qrCodeUtils::generateQrCode(m_config.toUtf8());
-    m_qrCodes << qrCodeUtils::svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
+    m_qrCodes = qrCodeUtils::generateQrCodeImageSeries(m_config.toUtf8());
 
     emit exportConfigChanged();
 }
@@ -249,6 +250,7 @@ void ExportController::generateCloakConfig()
 
 void ExportController::generateXrayConfig(const QString &clientName)
 {
+    // Xray data
     QJsonObject nativeConfig;
     ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, clientName, Proto::Xray, nativeConfig);
     if (errorCode) {
@@ -260,6 +262,68 @@ void ExportController::generateXrayConfig(const QString &clientName)
     for (const QString &line : std::as_const(lines)) {
         m_config.append(line + "\n");
     }
+    // Xray data
+
+    // Parse the Xray data to extract VLESS parameters and generate string
+    QString configString = QString(QJsonDocument(nativeConfig).toJson(QJsonDocument::Compact));
+
+    QJsonDocument doc = QJsonDocument::fromJson(configString.toUtf8());
+    if (doc.isNull() || !doc.isObject()) {
+        qDebug() << "ERROR: Failed to parse config JSON";
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject xrayConfig = doc.object();
+    QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+
+    if (outbounds.isEmpty()) {
+        qDebug() << "ERROR: Outbounds array is empty";
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject outbound = outbounds[0].toObject();
+    QJsonObject settings = outbound.value("settings").toObject();
+    QJsonObject streamSettings = outbound.value("streamSettings").toObject();
+
+    QJsonArray vnext = settings.value("vnext").toArray();
+    if (vnext.isEmpty()) {
+        qDebug() << "ERROR: vnext array is empty";
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject server = vnext[0].toObject();
+    QJsonArray users = server.value("users").toArray();
+    if (users.isEmpty()) {
+        qDebug() << "ERROR: users array is empty";
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject user = users[0].toObject();
+
+    amnezia::serialization::VlessServerObject vlessServer;
+    vlessServer.address = server.value("address").toString();
+    vlessServer.port = server.value("port").toInt();
+    vlessServer.id = user.value("id").toString();
+    vlessServer.flow = user.value("flow").toString("xtls-rprx-vision");
+    vlessServer.encryption = user.value("encryption").toString("none");
+
+    vlessServer.network = streamSettings.value("network").toString("tcp");
+    vlessServer.security = streamSettings.value("security").toString("reality");
+
+    if (vlessServer.security == "reality") {
+        QJsonObject realitySettings = streamSettings.value("realitySettings").toObject();
+        vlessServer.serverName = realitySettings.value("serverName").toString();
+        vlessServer.publicKey = realitySettings.value("publicKey").toString();
+        vlessServer.shortId = realitySettings.value("shortId").toString();
+        vlessServer.fingerprint = realitySettings.value("fingerprint").toString("chrome");
+        vlessServer.spiderX = realitySettings.value("spiderX").toString("");
+    }
+
+    m_nativeConfigString = amnezia::serialization::vless::Serialize(vlessServer, "AmneziaVPN");
 
     emit exportConfigChanged();
 }
@@ -301,6 +365,7 @@ void ExportController::revokeConfig(const int row, const DockerContainer contain
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorCode);
     }
+    emit revokeConfigCompleted();
 }
 
 void ExportController::renameClient(const int row, const QString &clientName, const DockerContainer container, ServerCredentials credentials)

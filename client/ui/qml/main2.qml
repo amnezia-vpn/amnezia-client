@@ -16,6 +16,43 @@ Window  {
     id: root
     objectName: "mainWindow"
 
+    Connections {
+        target: Qt.application
+        function onStateChanged() {
+            if (Qt.platform.os === "android") {
+                if (Qt.application.state === Qt.ApplicationActive) {
+                    root.visible = true
+                    refreshTimer.restart()
+                }
+            }
+        }
+    }
+
+    // Hide the window immediately when Android Activity.onPause() fires so that
+    // Qt's render loop stops before the EGL surface is disconnected.  This
+    // prevents "QRhiGles2: Failed to make context current" and the resulting
+    // black screen that appears after swiping home and returning.
+    Connections {
+        target: SettingsController
+        function onActivityPaused() {
+            if (Qt.platform.os === "android") root.visible = false
+        }
+        function onActivityResumed() {
+            if (Qt.platform.os === "android") root.visible = true
+        }
+    }
+
+    Timer {
+        id: refreshTimer
+        interval: 150
+        repeat: false
+        onTriggered: {
+            if (Qt.platform.os === "android" && SettingsController.isEdgeToEdgeEnabled()) {
+                console.log("QML: Application resumed with edge-to-edge")
+            }
+        }
+    }
+
     visible: true
     width: GC.screenWidth
     height: GC.screenHeight
@@ -29,6 +66,11 @@ Window  {
     onClosing: function(close) {
         close.accepted = false
         PageController.closeWindow()
+    }
+
+    onSceneGraphError: function(error, message) {
+        // Prevent qFatal crash on Android when EGL context is lost
+        console.warn("Scene graph error:", error, message)
     }
 
     title: "AmneziaVPN"
@@ -56,6 +98,11 @@ Window  {
                 event.accepted = true
             }
         }
+    }
+
+    Loader {
+        active: Qt.platform.os === "android"
+        source: Qt.platform.os === "android" ? "Components/GamepadLoader.qml" : ""
     }
 
     Connections {
@@ -111,7 +158,6 @@ Window  {
 
     PageStart {
         objectName: "pageStart"
-
         width: root.width
         height: root.height
     }
@@ -164,7 +210,7 @@ Window  {
             id: privateKeyPassphraseDrawer
 
             anchors.fill: parent
-            expandedHeight: root.height * 0.35
+            expandedHeight: root.height * 0.35 + SettingsController.safeAreaBottomMargin + SettingsController.imeHeight
 
             expandedStateContent: ColumnLayout {
                 anchors.top: parent.top
@@ -239,6 +285,34 @@ Window  {
             id: questionDrawer
 
             anchors.fill: parent
+        }
+    }
+
+    Item {
+        objectName: "subscriptionExpiredDrawerItem"
+
+        anchors.fill: parent
+
+        SubscriptionExpiredDrawer {
+            id: subscriptionExpiredDrawer
+
+            anchors.fill: parent
+        }
+    }
+
+    Connections {
+        target: ApiConfigsController
+
+        function onSubscriptionExpiredOnServer() {
+            subscriptionExpiredDrawer.openTriggered()
+        }
+    }
+
+    Connections {
+        target: ApiSettingsController
+
+        function onRenewalLinkReceived(url) {
+            Qt.openUrlExternally(url)
         }
     }
 

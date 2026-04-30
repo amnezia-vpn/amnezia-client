@@ -39,6 +39,9 @@ public:
     QString getFileName(const QString &uri);
     bool isCameraPresent();
     bool isOnTv();
+    bool isEdgeToEdgeEnabled();
+    int getStatusBarHeight();
+    int getNavigationBarHeight();
     void startQrReaderActivity();
     void setSaveLogs(bool enabled);
     void exportLogsFile(const QString &fileName);
@@ -70,6 +73,10 @@ signals:
     void importConfigFromOutside(QString config);
     void initConnectionState(Vpn::ConnectionState state);
     void authenticationResult(bool result);
+    void imeInsetsChanged(int heightDp);
+    void systemBarsInsetsChanged(int navBarHeightDp, int statusBarHeightDp);
+    void activityPaused();
+    void activityResumed();
 
 private:
     bool isWaitingStatus = true;
@@ -98,6 +105,10 @@ private:
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
     static void onAuthResult(JNIEnv *env, jobject thiz, jboolean result);
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
+    static void onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp);
+    static void onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jint navBarHeightDp, jint statusBarHeightDp);
+    static void onActivityPaused(JNIEnv *env, jobject thiz);
+    static void onActivityResumed(JNIEnv *env, jobject thiz);
 
     template <typename Ret, typename ...Args>
     static auto callActivityMethod(const char *methodName, const char *signature, Args &&...args);

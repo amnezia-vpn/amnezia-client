@@ -26,9 +26,8 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 
     initNotificationHandler();
 
-    auto locale = m_settings->getAppLanguage();
     m_translator.reset(new QTranslator());
-    updateTranslator(locale);
+    updateTranslator(m_settings->getAppLanguage());
 }
 
 void CoreController::initModels()
@@ -92,6 +91,12 @@ void CoreController::initModels()
     m_apiServicesModel.reset(new ApiServicesModel(this));
     m_engine->rootContext()->setContextProperty("ApiServicesModel", m_apiServicesModel.get());
 
+    m_apiSubscriptionPlansModel.reset(new ApiSubscriptionPlansModel(this));
+    m_engine->rootContext()->setContextProperty("ApiSubscriptionPlansModel", m_apiSubscriptionPlansModel.get());
+
+    m_apiBenefitsModel.reset(new ApiBenefitsModel(this));
+    m_engine->rootContext()->setContextProperty("ApiBenefitsModel", m_apiBenefitsModel.get());
+
     m_apiCountryModel.reset(new ApiCountryModel(this));
     m_engine->rootContext()->setContextProperty("ApiCountryModel", m_apiCountryModel.get());
 
@@ -100,6 +105,9 @@ void CoreController::initModels()
 
     m_apiDevicesModel.reset(new ApiDevicesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiDevicesModel", m_apiDevicesModel.get());
+
+    m_newsModel.reset(new NewsModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("NewsModel", m_newsModel.get());
 }
 
 void CoreController::initControllers()
@@ -133,7 +141,7 @@ void CoreController::initControllers()
             new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
-    m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
+    m_sitesController.reset(new SitesController(m_settings, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
 
     m_allowedDnsController.reset(new AllowedDnsController(m_settings, m_allowedDnsModel));
@@ -149,11 +157,14 @@ void CoreController::initControllers()
             new ApiSettingsController(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsController.get());
 
-    m_apiConfigsController.reset(new ApiConfigsController(m_serversModel, m_apiServicesModel, m_settings));
+    m_apiConfigsController.reset(
+            new ApiConfigsController(m_serversModel, m_apiServicesModel, m_apiSubscriptionPlansModel, m_apiBenefitsModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController.get());
+    connect(m_apiConfigsController.get(), &ApiConfigsController::subscriptionRefreshNeeded,
+            this, [this]() { m_apiSettingsController->getAccountInfo(false); });
 
-    m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
-    m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
+    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
+    m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
 }
 
 void CoreController::initAndroidController()
@@ -226,14 +237,12 @@ void CoreController::initSignalHandlers()
     initAutoConnectHandler();
     initAmneziaDnsToggledHandler();
     initPrepareConfigHandler();
-    initImportPremiumV2VpnKeyHandler();
-    initShowMigrationDrawerHandler();
     initStrictKillSwitchHandler();
 }
 
 void CoreController::initNotificationHandler()
 {
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     m_notificationHandler.reset(NotificationHandler::create(nullptr));
 
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_notificationHandler.get(),
@@ -317,6 +326,11 @@ void CoreController::initContainerModelUpdateHandler()
     connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(), &ContainersModel::updateModel);
     connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
             &ContainersModel::updateModel);
+    connect(m_serversModel.get(), &ServersModel::gatewayStacksExpanded, this, [this]() {
+        if (m_serversModel->hasServersFromGatewayApi()) {
+            m_apiNewsController->fetchNews(false);
+        }
+    });
     m_serversModel->resetModel();
 }
 
@@ -363,31 +377,16 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
-        if (!m_installController->isConfigValid()) {
+        m_installController->validateConfig();
+    });
+
+    connect(m_installController.get(), &InstallController::configValidated, this, [this](bool isValid) {
+        if (!isValid) {
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }
 
         m_connectionController->openConnection();
-    });
-}
-
-void CoreController::initImportPremiumV2VpnKeyHandler()
-{
-    connect(m_apiPremV1MigrationController.get(), &ApiPremV1MigrationController::importPremiumV2VpnKey, this, [this](const QString &vpnKey) {
-        m_importController->extractConfigFromData(vpnKey);
-        m_importController->importConfig();
-
-        emit m_apiPremV1MigrationController->migrationFinished();
-    });
-}
-
-void CoreController::initShowMigrationDrawerHandler()
-{
-    QTimer::singleShot(1000, this, [this]() {
-        if (m_apiPremV1MigrationController->isPremV1MigrationReminderActive() && m_apiPremV1MigrationController->hasConfigsToMigration()) {
-            m_apiPremV1MigrationController->showMigrationDrawer();
-        }
     });
 }
 
@@ -400,4 +399,23 @@ void CoreController::initStrictKillSwitchHandler()
 QSharedPointer<PageController> CoreController::pageController() const
 {
     return m_pageController;
+}
+
+void CoreController::openConnectionByIndex(int serverIndex)
+{
+    if (m_serversModel) {
+        m_serversModel->setProcessedServerIndex(serverIndex);
+        m_serversModel->setDefaultServerIndex(serverIndex);
+    }
+    m_connectionController->toggleConnection();
+}
+
+void CoreController::importConfigFromData(const QString &data)
+{
+    if (!m_importController)
+        return;
+
+    if (m_importController->extractConfigFromData(data)) {
+        m_importController->importConfig();
+    }
 }

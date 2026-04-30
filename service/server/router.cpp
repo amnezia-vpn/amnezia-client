@@ -42,14 +42,14 @@ int Router::routeDeleteList(const QString &gw, const QStringList &ips)
 #endif
 }
 
-void Router::flushDns()
+bool Router::flushDns()
 {
 #ifdef Q_OS_WIN
-    RouterWin::Instance().flushDns();
+    return RouterWin::Instance().flushDns();
 #elif defined (Q_OS_MAC)
-    RouterMac::Instance().flushDns();
+    return RouterMac::Instance().flushDns();
 #elif defined Q_OS_LINUX
-    RouterLinux::Instance().flushDns();
+    return RouterLinux::Instance().flushDns();
 #endif
 }
 
@@ -66,6 +66,9 @@ void Router::resetIpStack()
 
 bool Router::createTun(const QString &dev, const QString &subnet)
 {
+#ifdef Q_OS_WIN
+    return RouterWin::Instance().createTun(dev, subnet);
+#endif
 #ifdef Q_OS_LINUX
     return RouterLinux::Instance().createTun(dev, subnet);
 #endif
@@ -99,26 +102,37 @@ bool Router::updateResolvers(const QString& ifname, const QList<QHostAddress>& r
 #endif
 }
 
-
-void Router::StopRoutingIpv6()
-{
+bool Router::restoreResolvers() {
+#ifdef Q_OS_LINUX
+    return RouterLinux::Instance().restoreResolvers();
+#endif
+#ifdef Q_OS_MACOS
+    return RouterMac::Instance().restoreResolvers();
+#endif
 #ifdef Q_OS_WIN
-    RouterWin::Instance().StopRoutingIpv6();
-#elif defined (Q_OS_MAC)
-    // todo fixme
-#elif defined Q_OS_LINUX
-    RouterLinux::Instance().StopRoutingIpv6();
+    return RouterWin::Instance().restoreResolvers();
 #endif
 }
 
-void Router::StartRoutingIpv6()
+bool Router::StopRoutingIpv6()
 {
 #ifdef Q_OS_WIN
-    RouterWin::Instance().StartRoutingIpv6();
+    return RouterWin::Instance().StopRoutingIpv6();
 #elif defined (Q_OS_MAC)
-    // todo fixme
+    return true;// todo fixme
 #elif defined Q_OS_LINUX
-    RouterLinux::Instance().StartRoutingIpv6();
+    return RouterLinux::Instance().StopRoutingIpv6();
+#endif
+}
+
+bool Router::StartRoutingIpv6()
+{
+#ifdef Q_OS_WIN
+    return RouterWin::Instance().StartRoutingIpv6();
+#elif defined (Q_OS_MAC)
+    return true;// todo fixme
+#elif defined Q_OS_LINUX
+    return RouterLinux::Instance().StartRoutingIpv6();
 #endif
 }
 

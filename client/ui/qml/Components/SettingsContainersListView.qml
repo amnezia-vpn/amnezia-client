@@ -33,12 +33,10 @@ ListViewType {
                     var containerIndex = root.model.mapToSource(index)
                     ContainersModel.setProcessedContainerIndex(containerIndex)
 
-                    if (serviceType !== ProtocolEnum.Other) {
-                        if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
-                            ProtocolsModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageProtocolRaw)
-                            return
-                        }
+                    if (serviceType !== ProtocolEnum.Other && isThirdPartyConfig) {
+                        ProtocolsModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageProtocolRaw)
+                        return
                     }
 
                     switch (containerIndex) {

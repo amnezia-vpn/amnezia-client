@@ -20,7 +20,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -66,7 +66,7 @@ PageType {
                 text: qsTr("Allow application screenshots")
 
                 checked: SettingsController.isScreenshotsEnabled()
-                onCheckedChanged: {
+                onToggled: function() {
                     if (checked !== SettingsController.isScreenshotsEnabled()) {
                         SettingsController.toggleScreenshotsEnabled(checked)
                     }
@@ -109,7 +109,7 @@ PageType {
                 descriptionText: qsTr("Launch the application every time the device is starts")
 
                 checked: SettingsController.isAutoStartEnabled()
-                onCheckedChanged: {
+                onToggled: function() {
                     if (checked !== SettingsController.isAutoStartEnabled()) {
                         SettingsController.toggleAutoStart(checked)
                     }
@@ -132,7 +132,7 @@ PageType {
                 descriptionText: qsTr("Connect to VPN on app start")
 
                 checked: SettingsController.isAutoConnectEnabled()
-                onCheckedChanged: {
+                onToggled: function() {
                     if (checked !== SettingsController.isAutoConnectEnabled()) {
                         SettingsController.toggleAutoConnect(checked)
                     }
@@ -157,10 +157,33 @@ PageType {
                 enabled: switcherAutoStart.checked
                 opacity: enabled ? 1.0 : 0.5
 
-                checked: SettingsController.isStartMinimizedEnabled()
-                onCheckedChanged: {
-                    if (checked !== SettingsController.isStartMinimizedEnabled()) {
+                checked: SettingsController.startMinimized
+                onToggled: function() {
+                    if (checked !== SettingsController.startMinimized) {
                         SettingsController.toggleStartMinimized(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: !GC.isMobile()
+            }
+
+            SwitcherType {
+                id: switcherNewsNotificationEnabled
+
+                visible: ServersModel.hasServersFromGatewayApi
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("News Notification")
+                descriptionText: qsTr("Show a notification icon for unread news")
+
+                checked: SettingsController.isNewsNotificationsEnabled()
+                onToggled: function() {
+                    if (checked !== SettingsController.isNewsNotificationsEnabled()) {
+                        SettingsController.toggleNewsNotificationsEnabled(checked)
                     }
                 }
             }

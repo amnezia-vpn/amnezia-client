@@ -1,11 +1,15 @@
+#include "localserver.h"
+
 #include <QCoreApplication>
+#include <QDebug>
 #include <QFileInfo>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QObject>
+#include <QSharedPointer>
+#include <QString>
 
 #include "ipc.h"
-#include "localserver.h"
-
 #include "killswitch.h"
 #include "logger.h"
 
@@ -36,7 +40,6 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
         if (!m_isRemotingEnabled) {
             m_isRemotingEnabled = true;
             m_serverNode.enableRemoting(&m_ipcServer);
-            m_serverNode.enableRemoting(&m_tun2socks);
         }
     });
 
@@ -46,6 +49,9 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
         return;
     }
 
+    m_networkWatcher.initialize();
+    connect(&m_networkWatcher, &NetworkWatcher::networkChanged, &m_ipcServer, &IpcServer::networkChanged);
+    connect(&m_networkWatcher, &NetworkWatcher::wakeup, &m_ipcServer, &IpcServer::wakeup);
     KillSwitch::instance()->init();
 
 #ifdef Q_OS_LINUX

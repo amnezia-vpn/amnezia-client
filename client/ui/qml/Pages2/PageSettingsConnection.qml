@@ -20,7 +20,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -66,7 +66,7 @@ PageType {
                 descriptionText: qsTr("If AmneziaDNS is installed on the server")
 
                 checked: SettingsController.isAmneziaDnsEnabled()
-                onCheckedChanged: {
+                onToggled: function() {
                     if (checked !== SettingsController.isAmneziaDnsEnabled()) {
                         SettingsController.toggleAmneziaDns(checked)
                     }
