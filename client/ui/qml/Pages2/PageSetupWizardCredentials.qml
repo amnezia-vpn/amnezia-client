@@ -19,7 +19,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -116,12 +116,12 @@ PageType {
                         return
                     }
 
-                    InstallController.setShouldCreateServer(true)
                     var _hostname = listView.itemAtIndex(vars.hostnameIndex).children[0].textField.text
                     var _username = listView.itemAtIndex(vars.usernameIndex).children[0].textField.text
                     var _secretData = listView.itemAtIndex(vars.secretDataIndex).children[0].textField.text
 
                     InstallController.setProcessedServerCredentials(_hostname, _username, _secretData)
+                    ServersUiController.processedIndex = -1
 
                     PageController.showBusyIndicator(true)
                     var isConnectionOpened = InstallController.checkSshConnection()
@@ -159,7 +159,7 @@ PageType {
                 leftImageSource: "qrc:/images/controls/help-circle.svg"
 
                 onClicked: {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl("starter-guide"))
+                    Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl("starter-guide"))
                 }
 
                 Keys.onEnterPressed: this.clicked()

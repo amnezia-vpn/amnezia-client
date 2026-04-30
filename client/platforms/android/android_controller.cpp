@@ -8,7 +8,7 @@
 
 #include "android_controller.h"
 #include "android_utils.h"
-#include "ui/controllers/importController.h"
+#include "ui/controllers/importUiController.h"
 
 namespace
 {
@@ -538,7 +538,7 @@ bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
 
-    return ImportController::decodeQrCode(AndroidUtils::convertJString(env, data));
+    return ImportUiController::decodeQrCode(AndroidUtils::convertJString(env, data));
 }
 // static
 void AndroidController::onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp)

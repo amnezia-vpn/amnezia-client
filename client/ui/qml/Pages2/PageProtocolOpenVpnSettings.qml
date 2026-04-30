@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ContainerEnum 1.0
+import ProtocolEnum 1.0
 import Style 1.0
 
 import "./"
@@ -23,7 +23,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
         
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -40,7 +40,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
 
-        enabled: ServersModel.isProcessedServerHasWriteAccess()
+        enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
         header: ColumnLayout {
             width: listView.width
@@ -428,13 +428,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
                             PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                             return
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateContainer(OpenVpnConfigModel.getConfig())
+                        InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.OpenVpn)
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {

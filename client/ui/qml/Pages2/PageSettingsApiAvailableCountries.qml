@@ -90,7 +90,7 @@ PageType {
                 id: backButton
                 objectName: "backButton"
 
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
@@ -108,7 +108,7 @@ PageType {
 
                 actionButtonFunction: function() {
                     PageController.showBusyIndicator(true)
-                    let result = ApiSettingsController.getAccountInfo(false)
+                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
                     PageController.showBusyIndicator(false)
                     if (!result) {
                         return
@@ -148,7 +148,7 @@ PageType {
                 text: qsTr("Renew subscription")
 
                 clickedFunc: function() {
-                    ApiSettingsController.getRenewalLink()
+                    SubscriptionUiController.getRenewalLink(ServersUiController.getProcessedServerIndex())
                 }
             }
 
@@ -200,7 +200,7 @@ PageType {
                             PageController.showBusyIndicator(true)
                             var prevIndex = ApiCountryModel.currentIndex
                             ApiCountryModel.currentIndex = index
-                            if (!ApiConfigsController.updateServiceFromGateway(ServersModel.defaultIndex, countryCode, countryName)) {
+                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.getProcessedServerIndex(), countryCode, countryName)) {
                                 ApiCountryModel.currentIndex = prevIndex
                             }
                             PageController.showBusyIndicator(false)

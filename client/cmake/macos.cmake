@@ -28,11 +28,11 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
 
 
 set(HEADERS ${HEADERS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/utils/macosUtil.h
 )
 
 set(SOURCES ${SOURCES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/utils/macosUtil.mm
 )
 
 

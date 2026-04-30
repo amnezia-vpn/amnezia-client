@@ -5,8 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
-import ContainerEnum 1.0
 import ContainerProps 1.0
 import Style 1.0
 
@@ -25,7 +23,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -173,7 +171,7 @@ PageType {
 
                 width: parent.width
 
-                visible: ServersModel.isProcessedServerHasWriteAccess()
+                visible: ServersUiController.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: AmneziaStyle.color.vibrantRed
@@ -186,7 +184,7 @@ PageType {
 
                     var yesButtonFunction = function() {
                         PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeProcessedContainer()
+                        InstallController.removeContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
                     }
                     var noButtonFunction = function() {}
 

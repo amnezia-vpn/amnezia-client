@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import Style 1.0
 
 import "../Controls2"
@@ -18,7 +17,7 @@ PageType {
 
     signal lastItemTabClickedSignal()
 
-    property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
+    property bool isServerWithWriteAccess: ServersUiController.isProcessedServerHasWriteAccess()
 
     Connections {
         target: InstallController
@@ -34,7 +33,7 @@ PageType {
             PageController.showErrorMessage(message)
         }
 
-        function onRebootProcessedServerFinished(finishedMessage) {
+        function onRebootServerFinished(finishedMessage) {
             PageController.showNotificationMessage(finishedMessage)
         }
 
@@ -43,7 +42,7 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onRemoveProcessedContainerFinished(finishedMessage) {
+        function onRemoveContainerFinished(finishedMessage) {
             PageController.closePage() // close deInstalling page
             PageController.closePage() // close page with remove button
             PageController.showNotificationMessage(finishedMessage)
@@ -58,10 +57,10 @@ PageType {
     }
 
     Connections {
-        target: ServersModel
+        target: ServersUiController
 
         function onProcessedServerIndexChanged() {
-            root.isServerWithWriteAccess = ServersModel.isProcessedServerHasWriteAccess()
+            root.isServerWithWriteAccess = ServersUiController.isProcessedServerHasWriteAccess()
         }
     }
 
@@ -112,7 +111,7 @@ PageType {
         readonly property var tColor: AmneziaStyle.color.paleGray
         readonly property var clickedHandler: function() {
             PageController.showBusyIndicator(true)
-            InstallController.scanServerForInstalledContainers()
+            InstallController.scanServerForInstalledContainers(ServersUiController.processedIndex)
             PageController.showBusyIndicator(false)
         }
     }
@@ -131,11 +130,11 @@ PageType {
             var noButtonText = qsTr("Cancel")
 
             var yesButtonFunction = function() {
-                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                     PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.rebootProcessedServer()
+                    InstallController.rebootServer(ServersUiController.processedIndex)
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -161,11 +160,11 @@ PageType {
             var noButtonText = qsTr("Cancel")
 
             var yesButtonFunction = function() {
-                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                     PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.removeProcessedServer()
+                    InstallController.removeServer(ServersUiController.processedIndex)
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -191,11 +190,11 @@ PageType {
             var noButtonText = qsTr("Cancel")
 
             var yesButtonFunction = function() {
-                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                     PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
                 } else {
                     PageController.goToPage(PageEnum.PageDeinstalling)
-                    InstallController.removeAllContainers()
+                    InstallController.removeAllContainers(ServersUiController.processedIndex)
                 }
             }
             var noButtonFunction = function() {
@@ -220,11 +219,11 @@ PageType {
             var noButtonText = qsTr("Cancel")
 
             var yesButtonFunction = function() {
-                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                     PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.removeApiConfig(ServersModel.processedIndex)
+                    SubscriptionUiController.removeApiConfig(ServersUiController.processedIndex)
                     PageController.showBusyIndicator(false)
                 }
             }

@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -59,10 +58,9 @@ ListViewType {
 
                     if (checked) {
                         containersDropDown.closeTriggered()
-                        ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
+                        ServersUiController.setDefaultContainer(ServersUiController.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
                     } else {
-                        ContainersModel.setProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
-                        InstallController.setShouldCreateServer(false)
+                        ServersUiController.processedContainerIndex = proxyDefaultServerContainersModel.mapToSource(index)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.closeTriggered()
                     }

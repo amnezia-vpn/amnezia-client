@@ -2,7 +2,9 @@
 
 #include <QJsonObject>
 
-#include "core/api/apiDefs.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 #include "logger.h"
 
 namespace
@@ -12,7 +14,7 @@ namespace
     constexpr QLatin1String gatewayAccount("gateway_account");
 }
 
-ApiDevicesModel::ApiDevicesModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
+ApiDevicesModel::ApiDevicesModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
 
@@ -43,17 +45,18 @@ QVariant ApiDevicesModel::data(const QModelIndex &index, int role) const
         return QDateTime::fromString(issuedConfigInfo.lastDownloaded, Qt::ISODate).toLocalTime().toString("d MMM yyyy");
     }
     case IsCurrentDeviceRole: {
-        return issuedConfigInfo.installationUuid == m_settings->getInstallationUuid(false);
+        return issuedConfigInfo.installationUuid == m_currentInstallationUuid;
     }
     }
 
     return QVariant();
 }
 
-void ApiDevicesModel::updateModel(const QJsonArray &issuedConfigs)
+void ApiDevicesModel::updateModel(const QJsonArray &issuedConfigs, const QString &currentInstallationUuid)
 {
     beginResetModel();
 
+    m_currentInstallationUuid = currentInstallationUuid;
     m_issuedConfigs.clear();
     for (int i = 0; i < issuedConfigs.size(); i++) {
         IssuedConfigInfo issuedConfigInfo;

@@ -5,8 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
-import ContainerEnum 1.0
 import ContainerProps 1.0
 import Style 1.0
 
@@ -19,7 +17,7 @@ import "../Components"
 PageType {
     id: root
 
-    property bool isClearCacheVisible: ServersModel.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
+    property bool isClearCacheVisible: ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ServersUiController.processedContainerIndex)
 
     BackButtonType {
         id: backButton
@@ -27,7 +25,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
         
         onFocusChanged: {
             if (this.activeFocus) {
@@ -64,8 +62,8 @@ PageType {
 
             width: listView.width
 
-            property bool isClientSettingsVisible: (protocolIndex === ProtocolEnum.WireGuard) || (protocolIndex === ProtocolEnum.Awg)
-            property bool isServerSettingsVisible: ServersModel.isProcessedServerHasWriteAccess()
+            property bool isClientSettingsVisible: isWireGuard || isAwg
+            property bool isServerSettingsVisible: ServersUiController.isProcessedServerHasWriteAccess()
 
             LabelWithButtonType {
                 id: clientSettings
@@ -78,10 +76,7 @@ PageType {
 
                 clickedFunction: function() {
                     if (isClientProtocolExists) {
-                        switch (protocolIndex) {
-                        case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                        case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                        }
+                        InstallController.openClientSettings(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, protocolIndex)
                         PageController.goToPage(clientProtocolPage);
                     } else {
                         PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
@@ -109,17 +104,7 @@ PageType {
                 visible: delegateContent.isServerSettingsVisible
 
                 clickedFunction: function() {
-                    switch (protocolIndex) {
-                    case ProtocolEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Cloak: CloakConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    }
+                    InstallController.openServerSettings(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, protocolIndex)
                     PageController.goToPage(serverProtocolPage);
                 }
 
@@ -155,14 +140,14 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
                             var message = qsTr("Unable to clear %1 profile while there is an active connection").arg(ContainersModel.getProcessedContainerName())
                             PageController.showNotificationMessage(message)
                             return
                         }
 
                         PageController.showBusyIndicator(true)
-                        InstallController.clearCachedProfile()
+                        InstallController.clearCachedProfile(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
                         PageController.showBusyIndicator(false)
                     }
 
@@ -188,7 +173,7 @@ PageType {
 
                 Layout.fillWidth: true
 
-                visible: ServersModel.isProcessedServerHasWriteAccess()
+                visible: ServersUiController.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ")
                 textColor: AmneziaStyle.color.vibrantRed
@@ -200,13 +185,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
-                                && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                                && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
                             PageController.showNotificationMessage(qsTr("Cannot remove active container"))
                         } else
                         {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeProcessedContainer()
+                            InstallController.removeContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
                         }
                     }
                     var noButtonFunction = function() {
@@ -224,7 +209,7 @@ PageType {
             }
 
             DividerType {
-                visible: ServersModel.isProcessedServerHasWriteAccess()
+                visible: ServersUiController.isProcessedServerHasWriteAccess()
             }
         }
     }

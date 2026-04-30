@@ -20,10 +20,6 @@ PageType {
     Connections {
         target: SettingsController
 
-        function onChangeSettingsErrorOccurred(errorMessage) {
-            PageController.showErrorMessage(errorMessage)
-        }
-
         function onRestoreBackupFinished() {
             PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
             PageController.goToPageHome()
@@ -40,7 +36,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {

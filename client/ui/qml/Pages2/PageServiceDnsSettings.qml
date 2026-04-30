@@ -22,7 +22,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
         
         onFocusChanged: {
             if (this.activeFocus) {
@@ -60,6 +60,7 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
+                id: removeButton
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -73,12 +74,12 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
                                 && SettingsController.isAmneziaDnsEnabled()) {
                             PageController.showNotificationMessage(qsTr("Cannot remove AmneziaDNS from running server"))
                         } else {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeProcessedContainer()
+                            InstallController.removeContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
                         }
                     }
                     var noButtonFunction = function() {}

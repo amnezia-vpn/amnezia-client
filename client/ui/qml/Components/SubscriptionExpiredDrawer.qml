@@ -76,7 +76,7 @@ DrawerType2 {
             textColor: AmneziaStyle.color.midnightBlack
 
             clickedFunc: function() {
-                ApiSettingsController.getRenewalLink()
+                SubscriptionUiController.getRenewalLink(ServersUiController.getProcessedServerIndex())
             }
         }
 

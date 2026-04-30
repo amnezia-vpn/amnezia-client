@@ -24,15 +24,13 @@ PageType {
         OpenVpn,
         WireGuard,
         Awg,
-        ShadowSocks,
-        Cloak,
         Xray
     }
 
     Connections {
         target: ExportController
 
-        function onRevokeConfigCompleted() {
+        function onRevokeConfigFinished() {
             PageController.showBusyIndicator(false)
             PageController.showNotificationMessage(qsTr("Config revoked"))
         }
@@ -44,51 +42,40 @@ PageType {
             var configExtension
             var configFileName
 
+            var serverIndex = ServersUiController.processedIndex
+            var containerIndex = ServersUiController.processedContainerIndex
+
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
-                ExportController.generateConnectionConfig(clientNameTextField.textField.text);
+                ExportController.generateConnectionConfig(serverIndex, containerIndex, clientNameTextField.textField.text);
                 configCaption = qsTr("Save AmneziaVPN config")
                 configExtension = ".vpn"
                 configFileName = "amnezia_config"
                 break;
             }
             case PageShare.ConfigType.OpenVpn: {
-                ExportController.generateOpenVpnConfig(clientNameTextField.textField.text)
+                ExportController.generateOpenVpnConfig(serverIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save OpenVPN config")
                 configExtension = ".ovpn"
                 configFileName = "amnezia_for_openvpn"
                 break
             }
             case PageShare.ConfigType.WireGuard: {
-                ExportController.generateWireGuardConfig(clientNameTextField.textField.text)
+                ExportController.generateWireGuardConfig(serverIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save WireGuard config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_wireguard"
                 break
             }
             case PageShare.ConfigType.Awg: {
-                ExportController.generateAwgConfig(clientNameTextField.textField.text)
+                ExportController.generateAwgConfig(serverIndex, containerIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save AmneziaWG config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_awg"
                 break
             }
-            case PageShare.ConfigType.ShadowSocks: {
-                ExportController.generateShadowSocksConfig()
-                configCaption = qsTr("Save Shadowsocks config")
-                configExtension = ".json"
-                configFileName = "amnezia_for_shadowsocks"
-                break
-            }
-            case PageShare.ConfigType.Cloak: {
-                ExportController.generateCloakConfig()
-                configCaption = qsTr("Save Cloak config")
-                configExtension = ".json"
-                configFileName = "amnezia_for_cloak"
-                break
-            }
             case PageShare.ConfigType.Xray: {
-                ExportController.generateXrayConfig(clientNameTextField.textField.text)
+                ExportController.generateXrayConfig(serverIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save XRay config")
                 configExtension = ".json"
                 configFileName = "amnezia_for_xray"
@@ -136,16 +123,6 @@ PageType {
         readonly property int type: PageShare.ConfigType.Awg
     }
     QtObject {
-        id: shadowSocksConnectionFormat
-        readonly property string name: qsTr("Shadowsocks native format")
-        readonly property int type: PageShare.ConfigType.ShadowSocks
-    }
-    QtObject {
-        id: cloakConnectionFormat
-        readonly property string name: qsTr("Cloak native format")
-        readonly property int type: PageShare.ConfigType.Cloak
-    }
-    QtObject {
         id: xrayConnectionFormat
         readonly property string name: qsTr("XRay native format")
         readonly property int type: PageShare.ConfigType.Xray
@@ -173,7 +150,7 @@ PageType {
             HeaderTypeWithButton {
                 id: header
                 Layout.fillWidth: true
-                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 24 + PageController.safeAreaTopMargin
 
                 headerText: qsTr("Share VPN Access")
 
@@ -272,8 +249,8 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
-                                                                         ServersModel.getProcessedServerCredentials())
+                            ExportController.updateClientManagementModel(ServersUiController.processedIndex,
+                                                                         ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
 
@@ -356,7 +333,7 @@ PageType {
 
                     Component.onCompleted: {
                         if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
-                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersModel.defaultIndex)
+                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersUiController.defaultIndex)
                         } else {
                             serverSelectorListView.selectedIndex = 0
                         }
@@ -367,15 +344,15 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
+                        ServersUiController.processedIndex = proxyServersModel.mapToSource(selectedIndex)
                     }
                 }
             }
 
             DropDownType {
-                id: protocolSelector
+                id: containerSelector
 
-                signal protocolSelectorTextChanged
+                signal containerSelectorTextChanged
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
@@ -387,7 +364,7 @@ PageType {
                 headerText: qsTr("Protocol")
 
                 listView: ListViewWithRadioButtonType {
-                    id: protocolSelectorListView
+                    id: containerSelectorListView
 
                     rootWidth: root.width
                     imageSource: "qrc:/images/controls/check.svg"
@@ -410,7 +387,7 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        protocolSelector.closeTriggered()
+                        containerSelector.closeTriggered()
                     }
 
                     Connections {
@@ -418,9 +395,9 @@ PageType {
 
                         function onServerSelectorIndexChanged() {
                             var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
-                            protocolSelectorListView.selectedIndex = defaultContainer
-                            protocolSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
-                            protocolSelectorListView.triggerCurrentItem()
+                            containerSelectorListView.selectedIndex = defaultContainer
+                            containerSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
+                            containerSelectorListView.triggerCurrentItem()
                         }
                     }
 
@@ -432,20 +409,20 @@ PageType {
                             root.shareButtonEnabled = true
                         }
 
-                        protocolSelector.text = selectedText
+                        containerSelector.text = selectedText
 
-                        ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(selectedIndex))
+                        ServersUiController.processedContainerIndex = proxyContainersModel.mapToSource(selectedIndex)
 
                         fillConnectionTypeModel()
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
-                                                                         ServersModel.getProcessedServerCredentials())
+                            ExportController.updateClientManagementModel(ServersUiController.processedIndex,
+                                                                         ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
 
-                        protocolSelector.protocolSelectorTextChanged()
+                        containerSelector.containerSelectorTextChanged()
                     }
 
                     function fillConnectionTypeModel() {
@@ -461,13 +438,6 @@ PageType {
                             root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-awg2")) {
                             root.connectionTypesModel.push(awgConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
-                            root.connectionTypesModel.push(openVpnConnectionFormat)
-                            root.connectionTypesModel.push(shadowSocksConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-openvpn-cloak")) {
-                            root.connectionTypesModel.push(openVpnConnectionFormat)
-                            root.connectionTypesModel.push(shadowSocksConnectionFormat)
-                            root.connectionTypesModel.push(cloakConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-xray")) {
                             root.connectionTypesModel.push(xrayConnectionFormat)
                         }
@@ -522,9 +492,9 @@ PageType {
                     currentIndex: 0
 
                     Connections {
-                        target: protocolSelector
+                        target: containerSelector
 
-                        function onProtocolSelectorTextChanged() {
+                        function onContainerSelectorTextChanged() {
                             if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
                                 exportTypeSelectorListView.selectedIndex = 0
                                 exportTypeSelector.currentIndex = 0
@@ -823,8 +793,8 @@ PageType {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
                                                                                       clientNameEditor.textField.text,
-                                                                                      ContainersModel.getProcessedContainerIndex(),
-                                                                                      ServersModel.getProcessedServerCredentials())
+                                                                                      ServersUiController.processedIndex,
+                                                                                      ServersUiController.processedContainerIndex)
                                                         PageController.showBusyIndicator(false)
                                                         Qt.callLater(function(){ clientsListView.freezeFilter = false })
                                                         clientNameEditDrawer.closeTriggered()
@@ -859,8 +829,8 @@ PageType {
                                             clientInfoDrawer.closeTriggered()
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
-                                                                          ContainersModel.getProcessedContainerIndex(),
-                                                                          ServersModel.getProcessedServerCredentials())
+                                                                          ServersUiController.processedIndex,
+                                                                          ServersUiController.processedContainerIndex)
                                         }
                                         var noButtonFunction = function() {
                                         }

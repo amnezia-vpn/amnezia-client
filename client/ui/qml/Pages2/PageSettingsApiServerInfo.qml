@@ -117,7 +117,7 @@ PageType {
                 id: backButton
                 objectName: "backButton"
 
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
@@ -186,7 +186,7 @@ PageType {
                 textColor: AmneziaStyle.color.midnightBlack
 
                 clickedFunc: function() {
-                    ApiSettingsController.getRenewalLink()
+                    SubscriptionUiController.getRenewalLink(ServersUiController.getProcessedServerIndex())
                 }
             }
         }
@@ -246,7 +246,7 @@ PageType {
                 text: qsTr("Renew subscription")
 
                 clickedFunc: function() {
-                    ApiSettingsController.getRenewalLink()
+                    SubscriptionUiController.getRenewalLink(ServersUiController.getProcessedServerIndex())
                 }
             }
 
@@ -258,7 +258,7 @@ PageType {
             SwitcherType {
                 id: switcher
 
-                readonly property bool isVlessProtocol: ApiConfigsController.isVlessProtocol()
+                readonly property bool isVlessProtocol: SubscriptionUiController.isVlessProtocol(ServersUiController.getProcessedServerIndex())
                 readonly property bool isProtocolSwitchBlocked: ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
 
                 Layout.fillWidth: true
@@ -272,12 +272,12 @@ PageType {
                 text: qsTr("Use VLESS protocol")
                 checked: switcher.isVlessProtocol
                 onToggled: function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
                     } else {
                         PageController.showBusyIndicator(true)
-                        ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
-                        ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                        SubscriptionUiController.setCurrentProtocol(ServersUiController.getProcessedServerIndex(), switcher.isVlessProtocol ? "awg" : "vless")
+                        SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedIndex, "", "", true)
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -325,7 +325,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
                     PageController.showBusyIndicator(true)
 
-                    ApiConfigsController.prepareVpnKeyExport()
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
 
                     PageController.showBusyIndicator(false)
                 }
@@ -346,7 +346,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    ApiSettingsController.updateApiCountryModel()
+                    SubscriptionUiController.updateApiCountryModel()
                     PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
                 }
             }
@@ -366,7 +366,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    ApiSettingsController.updateApiDevicesModel()
+                    SubscriptionUiController.updateApiDevicesModel()
                     PageController.goToPage(PageEnum.PageSettingsApiDevices)
                 }
             }
@@ -427,11 +427,11 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot reload API config during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                            SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedIndex, "", "", true)
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -465,12 +465,12 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (ApiConfigsController.deactivateDevice(false)) {
-                                ApiSettingsController.getAccountInfo(true)
+                            if (SubscriptionUiController.deactivateDevice(ServersUiController.getProcessedServerIndex(), false)) {
+                                SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
                             }
                             PageController.showBusyIndicator(false)
                         }
@@ -502,11 +502,11 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            InstallController.removeProcessedServer()
+                            InstallController.removeServer(ServersUiController.getProcessedServerIndex())
                             PageController.showBusyIndicator(false)
                         }
                     }

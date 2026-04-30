@@ -22,7 +22,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
         
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -53,11 +53,6 @@ PageType {
 
         function onImportFinished() {
             PageController.showBusyIndicator(false)
-            if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.processedIndex = ServersModel.defaultIndex
-            }
-
             PageController.goToPageHome()
         }
     }
@@ -128,7 +123,7 @@ PageType {
                 id: cloakingCheckBox
                 objectName: "cloakingCheckBox"
 
-                visible: ImportController.isNativeWireGuardConfig()
+                visible: ImportController.isNativeWireGuardConfig
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -149,7 +144,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                textString: ImportController.getMaliciousWarningText()
+                textString: ImportController.maliciousWarningText
                 textFormat: Qt.RichText
                 visible: textString !== ""
 

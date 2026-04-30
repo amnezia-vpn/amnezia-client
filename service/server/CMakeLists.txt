@@ -69,9 +69,9 @@ include_directories(
 )
 
 set(HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.h
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/secure_qsettings.h
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/core/networkUtilities.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/utilities.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/secureQSettings.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/networkUtilities.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.h
@@ -91,9 +91,9 @@ set(HEADERS
 )
 
 set(SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/secure_qsettings.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../client/core/networkUtilities.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/utilities.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/secureQSettings.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/networkUtilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.cpp
     ${CMAKE_CURRENT_LIST_DIR}/localserver.cpp

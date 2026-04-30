@@ -1,6 +1,12 @@
 #include "xrayConfigModel.h"
 
-#include "protocols/protocols_defs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
+
+using namespace amnezia;
+using namespace ProtocolUtils;
 
 XrayConfigModel::XrayConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -14,13 +20,17 @@ int XrayConfigModel::rowCount(const QModelIndex &parent) const
 
 bool XrayConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
         return false;
     }
 
+    QString strValue = value.toString();
+
     switch (role) {
-    case Roles::SiteRole: m_protocolConfig.insert(config_key::site, value.toString()); break;
-    case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
+    case Roles::SiteRole: m_protocolConfig.serverConfig.site = strValue; break;
+    case Roles::PortRole: m_protocolConfig.serverConfig.port = strValue; break;
+    default:
+        return false;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -30,38 +40,54 @@ bool XrayConfigModel::setData(const QModelIndex &index, const QVariant &value, i
 QVariant XrayConfigModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return false;
+        return QVariant();
     }
 
     switch (role) {
-    case Roles::SiteRole: return m_protocolConfig.value(config_key::site).toString(protocols::xray::defaultSite);
-    case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::xray::defaultPort);
+    case Roles::SiteRole: return m_protocolConfig.serverConfig.site;
+    case Roles::PortRole: return m_protocolConfig.serverConfig.port;
     }
 
     return QVariant();
 }
 
-void XrayConfigModel::updateModel(const QJsonObject &config)
+void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig &protocolConfig)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
-
-    m_fullConfig = config;
-    QJsonObject protocolConfig = config.value(config_key::xray).toObject();
-
-    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Xray), Proto::Xray);
-    m_protocolConfig.insert(config_key::transport_proto,
-                            protocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
-    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::xray::defaultPort));
-    m_protocolConfig.insert(config_key::site, protocolConfig.value(config_key::site).toString(protocols::xray::defaultSite));
-
+    m_container = container;
+    
+    m_protocolConfig = protocolConfig;
+    
+    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+    
+    m_originalProtocolConfig = m_protocolConfig;
+    
     endResetModel();
 }
 
-QJsonObject XrayConfigModel::getConfig()
+void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig& config)
 {
-    m_fullConfig.insert(config_key::xray, m_protocolConfig);
-    return m_fullConfig;
+    if (config.port.isEmpty()) {
+        config.port = protocols::xray::defaultPort;
+    }
+    if (config.transportProto.isEmpty()) {
+        config.transportProto = ProtocolUtils::transportProtoToString(
+            ProtocolUtils::defaultTransportProto(amnezia::Proto::Xray), amnezia::Proto::Xray);
+    }
+    if (config.site.isEmpty()) {
+        config.site = protocols::xray::defaultSite;
+    }
+}
+
+amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
+{
+    bool serverSettingsChanged = !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+    
+    if (serverSettingsChanged) {
+        m_protocolConfig.clearClientConfig();
+    }
+    
+    return m_protocolConfig;
 }
 
 QHash<int, QByteArray> XrayConfigModel::roleNames() const

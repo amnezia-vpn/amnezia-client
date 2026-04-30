@@ -1,14 +1,12 @@
 #ifndef NEWSMODEL_H
 #define NEWSMODEL_H
 
-#include "settings.h"
 #include <QAbstractListModel>
 #include <QDateTime>
 #include <QJsonArray>
 #include <QSet>
 #include <QString>
 #include <QVector>
-#include <memory>
 
 struct NewsItem
 {
@@ -31,7 +29,7 @@ public:
         IsReadRole,
         IsProcessedRole
     };
-    explicit NewsModel(const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+    explicit NewsModel(class SecureAppSettingsRepository* appSettingsRepository, QObject *parent = nullptr);
     Q_INVOKABLE void markAsRead(int index);
 
     Q_PROPERTY(int processedIndex READ processedIndex WRITE setProcessedIndex NOTIFY processedIndexChanged)
@@ -53,7 +51,7 @@ signals:
 private:
     QVector<NewsItem> m_items;
     int m_processedIndex = -1;
-    std::shared_ptr<Settings> m_settings;
+    class SecureAppSettingsRepository* m_appSettingsRepository;
     QSet<QString> m_readIds;
     void loadReadIds();
     void saveReadIds() const;

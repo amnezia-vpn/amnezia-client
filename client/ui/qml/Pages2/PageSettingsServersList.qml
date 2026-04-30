@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import ContainerProps 1.0
 import Style 1.0
 
@@ -25,7 +24,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         BackButtonType {
             id: backButton
@@ -73,7 +72,7 @@ PageType {
 
                     descriptionText: {
                         var servicesNameString = ""
-                        var servicesName = ServersModel.getAllInstalledServicesName(index)
+                        var servicesName = ServersUiController.getAllInstalledServicesName(index)
                         for (var i = 0; i < servicesName.length; i++) {
                             servicesNameString += servicesName[i] + " · "
                         }
@@ -87,11 +86,11 @@ PageType {
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                     clickedFunction: function() {
-                        ServersModel.processedIndex = index
+                        ServersUiController.processedIndex = index
 
                         if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
                             PageController.showBusyIndicator(true)
-                            let result = ApiSettingsController.getAccountInfo(false)
+                            let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
                             PageController.showBusyIndicator(false)
                             if (!result) {
                                 return

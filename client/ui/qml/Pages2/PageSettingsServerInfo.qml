@@ -5,9 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import ContainerProps 1.0
-import ProtocolProps 1.0
 import Style 1.0
 
 import "./"
@@ -62,7 +60,7 @@ PageType {
         objectName: "mainLayout"
 
         anchors.fill: parent
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         spacing: 4
 

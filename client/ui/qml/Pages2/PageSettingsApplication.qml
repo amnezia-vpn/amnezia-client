@@ -20,7 +20,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -172,7 +172,7 @@ PageType {
             SwitcherType {
                 id: switcherNewsNotificationEnabled
 
-                visible: ServersModel.hasServersFromGatewayApi
+                visible: ServersUiController.hasServersFromGatewayApi
 
                 Layout.fillWidth: true
                 Layout.margins: 16
@@ -203,7 +203,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Language")
-                descriptionText: LanguageModel.currentLanguageName
+                descriptionText: LanguageUiController.currentLanguageName
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -245,7 +245,7 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot reset settings during active connection"))
                         } else
                         {

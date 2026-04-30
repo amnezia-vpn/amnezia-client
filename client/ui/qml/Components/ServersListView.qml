@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import ContainerProps 1.0
 import ContainersModelFilters 1.0
 import Style 1.0
@@ -18,7 +17,7 @@ import "../Config"
 ListViewType {
     id: root
 
-    property int selectedIndex: ServersModel.defaultIndex
+    property int selectedIndex: ServersUiController.defaultIndex
 
     anchors.top: serversMenuHeader.bottom
     anchors.right: parent.right
@@ -29,7 +28,7 @@ ListViewType {
     model: ServersModel
 
     Connections {
-        target: ServersModel
+        target: ServersUiController
         function onDefaultServerIndexChanged(serverIndex) {
             root.selectedIndex = serverIndex
         }
@@ -87,7 +86,7 @@ ListViewType {
 
                         root.selectedIndex = index
 
-                        ServersModel.defaultIndex = index
+                        ServersUiController.setDefaultServerIndex(index)
                     }
 
                     Keys.onEnterPressed: serverRadioButton.clicked()
@@ -107,14 +106,14 @@ ListViewType {
                     z: 1
 
                     onClicked: function() {
-                        ServersModel.processedIndex = index
+                        ServersUiController.processedIndex = index
 
                         if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
                             if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
                                 PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
                             } else {
                                 PageController.showBusyIndicator(true)
-                                let result = ApiSettingsController.getAccountInfo(false)
+                                let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
                                 PageController.showBusyIndicator(false)
                                 if (!result) {
                                     return

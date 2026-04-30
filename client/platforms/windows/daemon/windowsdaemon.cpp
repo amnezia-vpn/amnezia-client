@@ -24,7 +24,7 @@
 #include "platforms/windows/daemon/windowssplittunnel.h"
 #include "windowsfirewall.h"
 
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 
 namespace {
 Logger logger("WindowsDaemon");

@@ -30,7 +30,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -47,7 +47,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
 
-        enabled: ServersModel.isProcessedServerHasWriteAccess()
+        enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
         model: SftpConfigModel
 
@@ -173,7 +173,7 @@ PageType {
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
-                    InstallController.mountSftpDrive(port, password, username)
+                    InstallController.mountSftpDrive(ServersUiController.processedIndex, port, password, username)
                     PageController.showBusyIndicator(false)
                 }
             }

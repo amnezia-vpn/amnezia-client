@@ -41,7 +41,7 @@ PageType {
                 property bool isVisible: SettingsController.getInstallationUuid() !== "" || PageController.isStartPageVisible()
                 
                 Layout.fillWidth: true
-                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 24 + PageController.safeAreaTopMargin
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
@@ -258,7 +258,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+                    Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
                 }
             }
         }
@@ -284,7 +284,7 @@ PageType {
         property bool isVisible: true
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            var result = ApiConfigsController.fillAvailableServices()
+            var result = SubscriptionUiController.fillAvailableServices()
             PageController.showBusyIndicator(false)
             if (result) {
                 PageController.goToPage(PageEnum.PageSetupWizardApiServicesList)
@@ -333,8 +333,7 @@ PageType {
         property string imageSource: "qrc:/images/controls/folder-search-2.svg"
         property bool isVisible: true
         property var handler: function() {
-            var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
-                                                               "Config files (*.vpn *.ovpn *.conf *.json)"
+            var nameFilter = "Config files (*.vpn *.ovpn *.conf *.json)"
             var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
             if (fileName !== "") {
                 if (ImportController.extractConfigFromFile(fileName)) {
@@ -370,7 +369,7 @@ PageType {
         property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            ApiConfigsController.restoreServiceFromAppStore()
+            SubscriptionUiController.restoreServiceFromAppStore()
             PageController.showBusyIndicator(false)
         }
     }
@@ -384,7 +383,7 @@ PageType {
         property string imageSource: "qrc:/images/controls/help-circle.svg"
         property bool isVisible: PageController.isStartPageVisible() && Qt.platform.os !== "ios" && !IsMacOsNeBuild
         property var handler: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+            Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
         }
     }
 }
