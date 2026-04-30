@@ -29,6 +29,7 @@ QJsonObject ApiConfig::ServiceInfo::toJson() const
 {
     QJsonObject obj;
     obj[apiDefs::key::isAdVisible] = isAdVisible;
+    obj[apiDefs::key::isRenewalAvailable] = isRenewalAvailable;
     if (!adHeader.isEmpty()) {
         obj[apiDefs::key::adHeader] = adHeader;
     }
@@ -45,6 +46,7 @@ ApiConfig::ServiceInfo ApiConfig::ServiceInfo::fromJson(const QJsonObject& json)
 {
     ServiceInfo info;
     info.isAdVisible = json.value(apiDefs::key::isAdVisible).toBool(false);
+    info.isRenewalAvailable = json.value(apiDefs::key::isRenewalAvailable).toBool(false);
     info.adHeader = json.value(apiDefs::key::adHeader).toString();
     info.adDescription = json.value(apiDefs::key::adDescription).toString();
     info.adEndpoint = json.value(apiDefs::key::adEndpoint).toString();

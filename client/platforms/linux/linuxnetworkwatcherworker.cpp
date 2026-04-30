@@ -37,6 +37,7 @@
 enum NMState {
     NM_STATE_UNKNOWN = 0,
     NM_STATE_ASLEEP = 10,
+    NM_STATE_DISABLED = 10,
     NM_STATE_DISCONNECTED = 20,
     NM_STATE_DISCONNECTING = 30,
     NM_STATE_CONNECTING = 40,
@@ -199,10 +200,11 @@ void LinuxNetworkWatcherWorker::checkDevices() {
 
 void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 {
-  if (state == NM_STATE_ASLEEP) {
-    emit wakeup();
-  }
+    logger.debug() << "NMStateChanged " << state;
 
-  logger.debug() << "NMStateChanged " << state;
+    if (state == NM_STATE_ASLEEP || state == NM_STATE_DISABLED) {
+        emit wakeup();
+    } else if (state == NM_STATE_CONNECTED_GLOBAL) {
+        emit networkChanged();
+    }
 }
-

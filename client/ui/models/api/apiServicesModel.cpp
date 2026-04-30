@@ -91,6 +91,12 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         }
         return true;
     }
+    case IsPremiumRole: {
+        return serviceType == serviceType::amneziaPremium;
+    }
+    case HasSubscriptionPlansRole: {
+        return !apiServiceData.subscriptionPlansJson.isEmpty();
+    }
     case PriceRole: {
         return apiServiceData.minPriceLabel;
     }
@@ -233,6 +239,8 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[CardDescriptionRole] = "cardDescription";
     roles[ServiceDescriptionRole] = "serviceDescription";
     roles[IsServiceAvailableRole] = "isServiceAvailable";
+    roles[IsPremiumRole] = "isPremium";
+    roles[HasSubscriptionPlansRole] = "hasSubscriptionPlans";
     roles[PriceRole] = "price";
     roles[EndDateRole] = "endDate";
     roles[TermsOfUseUrlRole] = "termsOfUseUrl";

@@ -67,8 +67,11 @@ PageType {
         }
 
         delegate: ColumnLayout {
+            property bool hideCard: isPremium && !hasSubscriptionPlans
 
             width: listView.width
+            visible: !hideCard
+            height: hideCard ? 0 : implicitHeight
 
             enabled: isServiceAvailable
 

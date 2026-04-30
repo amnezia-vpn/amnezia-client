@@ -37,6 +37,27 @@
 
 using namespace amnezia;
 
+namespace
+{
+QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
+{
+    if (apiConfig.subscriptionExpiredByServer) {
+        return QStringLiteral("expired");
+    }
+
+    if (!apiConfig.subscription.endDate.isEmpty()) {
+        if (apiUtils::isSubscriptionExpired(apiConfig.subscription.endDate)) {
+            return QStringLiteral("expired");
+        }
+        if (apiUtils::isSubscriptionExpiringSoon(apiConfig.subscription.endDate)) {
+            return QStringLiteral("expire_soon");
+        }
+    }
+
+    return QStringLiteral("active");
+}
+}
+
 
 SubscriptionController::SubscriptionController(SecureServersRepository* serversRepository,
                                                SecureAppSettingsRepository* appSettingsRepository)
@@ -996,6 +1017,7 @@ ErrorCode SubscriptionController::getAccountInfo(int serverIndex, QJsonObject &a
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::subscriptionStatus] = getSubscriptionStatusForRenewal(apiV2->apiConfig);
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/account_info"), apiPayload, responseBody, isTestPurchase);

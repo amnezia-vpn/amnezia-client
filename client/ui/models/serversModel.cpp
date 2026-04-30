@@ -170,6 +170,12 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         }
         return QString();
     }
+    case IsRenewalAvailableRole: {
+        if (server.isApiV2()) {
+            return server.as<ApiV2ServerConfig>()->apiConfig.serviceInfo.isRenewalAvailable;
+        }
+        return false;
+    }
     case IsSubscriptionExpiredRole: {
         if (!server.isApiV2()) {
             return false;
@@ -340,6 +346,7 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[AdHeaderRole] = "adHeader";
     roles[AdDescriptionRole] = "adDescription";
     roles[AdEndpointRole] = "adEndpoint";
+    roles[IsRenewalAvailableRole] = "isRenewalAvailable";
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
     roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
 

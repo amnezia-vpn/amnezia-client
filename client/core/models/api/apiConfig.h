@@ -38,6 +38,7 @@ struct ApiConfig
     
     struct ServiceInfo {
         bool isAdVisible = false;
+        bool isRenewalAvailable = false;
         QString adHeader;
         QString adDescription;
         QString adEndpoint;

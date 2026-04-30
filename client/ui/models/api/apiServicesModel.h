@@ -54,6 +54,8 @@ public:
         CardDescriptionRole,
         ServiceDescriptionRole,
         IsServiceAvailableRole,
+        IsPremiumRole,
+        HasSubscriptionPlansRole,
         PriceRole,
         EndDateRole,
         TermsOfUseUrlRole,

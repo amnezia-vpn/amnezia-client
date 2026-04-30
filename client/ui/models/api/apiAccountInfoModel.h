@@ -63,6 +63,7 @@ private:
         QString subscriptionDescription;
 
         bool isInAppPurchase = false;
+        bool isRenewalAvailable = false;
     };
 
     AccountInfoData m_accountInfoData;
