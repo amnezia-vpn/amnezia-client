@@ -287,7 +287,8 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
             }
             std::random_device randomDevice;
             std::mt19937 generator(randomDevice());
-            std::shuffle(baseUrls.begin(), baseUrls.end(), generator);
+            std::shuffle(primaryBaseUrls.begin(), primaryBaseUrls.end(), generator);
+            std::shuffle(fallbackBaseUrls.begin(), fallbackBaseUrls.end(), generator);
 
             auto appendStorageUrls = [&serviceType, &userCountryCode](const QStringList &baseUrls, QStringList &target) {
                 if (!serviceType.isEmpty()) {
