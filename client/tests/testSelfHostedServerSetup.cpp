@@ -106,9 +106,10 @@ private:
                 const AwgProtocolConfig* awgProtocolConfig = containerConfig.protocolConfig.as<AwgProtocolConfig>();
                 QVERIFY2(awgProtocolConfig != nullptr, "Protocol config should be AwgProtocolConfig");
                 QVERIFY2(awgProtocolConfig->hasClientConfig(), "AwgProtocolConfig should have client config");
-                QVERIFY2(awgProtocolConfig->clientConfig.has_value(), "Awg client config should exist");
-                
-                const AwgClientConfig& awgClientConfig = awgProtocolConfig->clientConfig.value();
+                const std::optional<AwgClientConfig>& clientCfgOpt = awgProtocolConfig->clientConfig;
+                QVERIFY2(clientCfgOpt.has_value(), "Awg client config should exist");
+
+                const AwgClientConfig& awgClientConfig = *clientCfgOpt;
                 QVERIFY2(!awgClientConfig.hostName.isEmpty(), "Awg client config should have hostName");
                 QVERIFY2(awgClientConfig.port > 0, "Awg client config should have valid port");
                 QVERIFY2(!awgClientConfig.clientPrivateKey.isEmpty(), "Awg client config should have clientPrivateKey");

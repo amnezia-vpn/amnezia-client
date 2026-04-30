@@ -25,8 +25,6 @@
 #include "ui/controllers/serversUiController.h"
 #include "ui/controllers/ipSplitTunnelingUiController.h"
 #include "ui/controllers/systemController.h"
-#include "ui/controllers/appSplitTunnelingUiController.h"
-#include "ui/controllers/allowedDnsUiController.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/controllers/api/servicesCatalogUiController.h"
 
@@ -69,7 +67,6 @@
 #include "ui/models/serversModel.h"
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
-#include "ui/models/services/torConfigModel.h"
 #include "ui/models/ipSplitTunnelingModel.h"
 #include "ui/models/newsModel.h"
 

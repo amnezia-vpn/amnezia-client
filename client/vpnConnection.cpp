@@ -69,6 +69,11 @@ void VpnConnection::onKillSwitchModeChanged(bool enabled)
 void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
 #ifdef AMNEZIA_DESKTOP
+    if (!m_serversRepository || !m_appSettingsRepository) {
+        qCritical() << "VpnConnection::onConnectionStateChanged: repositories not initialized";
+        return;
+    }
+
     ServerConfig defaultServer = m_serversRepository->server(m_serversRepository->defaultServerIndex());
     DockerContainer container = defaultServer.defaultContainer();
 
@@ -150,6 +155,11 @@ void VpnConnection::setRepositories(SecureServersRepository* serversRepository, 
 void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
 {
 #ifdef AMNEZIA_DESKTOP
+    if (!m_appSettingsRepository) {
+        qCritical() << "VpnConnection::addSitesRoutes: repositories not initialized";
+        return;
+    }
+
     QStringList ips;
     QStringList sites;
     const QVariantMap &m = m_appSettingsRepository->vpnSites(mode);
@@ -230,6 +240,12 @@ Vpn::ConnectionState VpnConnection::connectionState() const
 
 void VpnConnection::connectToVpn(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration)
 {
+    if (!m_appSettingsRepository || !m_serversRepository) {
+        qCritical() << "VpnConnection::connectToVpn: repositories not initialized";
+        setConnectionState(Vpn::ConnectionState::Error);
+        return;
+    }
+
     qDebug() << QString("Trying to connect to VPN, server index is %1, container is %2, route mode is")
                         .arg(serverIndex)
                         .arg(ContainerUtils::containerToString(container))
@@ -294,12 +310,22 @@ void VpnConnection::createProtocolConnections()
 
 void VpnConnection::appendKillSwitchConfig()
 {
+    if (!m_appSettingsRepository) {
+        qCritical() << "VpnConnection::appendKillSwitchConfig: repositories not initialized";
+        return;
+    }
+
     m_vpnConfiguration.insert(configKey::killSwitchOption, QVariant(m_appSettingsRepository->isKillSwitchEnabled()).toString());
     m_vpnConfiguration.insert(configKey::allowedDnsServers, QVariant(m_appSettingsRepository->getAllowedDnsServers()).toJsonValue());
 }
 
 void VpnConnection::appendSplitTunnelingConfig()
 {
+    if (!m_appSettingsRepository) {
+        qCritical() << "VpnConnection::appendSplitTunnelingConfig: repositories not initialized";
+        return;
+    }
+
     bool allowSiteBasedSplitTunneling = true;
 
     // this block is for old native configs and for old self-hosted configs

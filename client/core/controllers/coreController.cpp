@@ -130,11 +130,9 @@ void CoreController::initRepositories()
 {
     m_serversRepository = new SecureServersRepository(m_settings, this);
     m_appSettingsRepository = new SecureAppSettingsRepository(m_settings, this);
-    
+
     if (m_vpnConnection) {
-        QTimer::singleShot(0, m_vpnConnection.get(), [this]() {
-            m_vpnConnection->setRepositories(m_serversRepository, m_appSettingsRepository);
-        });
+        m_vpnConnection->setRepositories(m_serversRepository, m_appSettingsRepository);
     }
 }
 
