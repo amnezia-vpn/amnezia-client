@@ -185,7 +185,9 @@ void SitesController::addManagedSite(int routeMode, const QString &hostname)
         return;
     }
 
-    m_serversRepository->addManagedVpnSite(serverIndex, mode, normalizedHostname, QString());
+    if (!m_serversRepository->addManagedVpnSite(serverIndex, mode, normalizedHostname, QString())) {
+        return;
+    }
     reloadManagedSites();
     publishManagedSplitTunnelingRules(serverIndex);
     emit finished(tr("Managed site updated: %1").arg(normalizedHostname));

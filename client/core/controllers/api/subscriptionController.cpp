@@ -60,9 +60,7 @@ QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 void preserveServerRoutingRules(const QJsonObject &oldConfig, QJsonObject &newConfig)
 {
     const QStringList keys {
-        QString(configKey::serverForward),
         QString(configKey::serverExcept),
-        QString(configKey::managedSplitTunnelForwardSites),
         QString(configKey::managedSplitTunnelExceptSites),
         QString(configKey::managedSplitTunnelExceptSourceSites),
         QString(configKey::managedSplitTunnelClientResolvedExceptSites),
@@ -76,6 +74,17 @@ void preserveServerRoutingRules(const QJsonObject &oldConfig, QJsonObject &newCo
             newConfig.insert(key, oldConfig.value(key));
         }
     }
+}
+
+QJsonObject currentServerRoutingRulesSource(int serverIndex,
+                                            const ServerConfig &fallbackConfig,
+                                            SecureServersRepository *serversRepository)
+{
+    QJsonObject currentConfig = serversRepository->serverJson(serverIndex);
+    if (currentConfig.isEmpty()) {
+        currentConfig = fallbackConfig.toJson();
+    }
+    return currentConfig;
 }
 }
 
@@ -486,7 +495,8 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     }
     
     updateApiConfigInJson(serverConfigJson, apiV2->apiConfig.serviceType, serviceProtocol, apiV2->apiConfig.userCountryCode, responseBody);
-    preserveServerRoutingRules(serverConfigModel.toJson(), serverConfigJson);
+    preserveServerRoutingRules(currentServerRoutingRulesSource(serverIndex, serverConfigModel, m_serversRepository),
+                               serverConfigJson);
     
     ServerConfig newServerConfigModel = ServerConfig::fromJson(serverConfigJson);
     
@@ -720,6 +730,8 @@ ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex)
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
+    preserveServerRoutingRules(currentServerRoutingRulesSource(serverIndex, serverConfigModel, m_serversRepository),
+                               serverConfigJson);
     
     ServerConfig newServerConfigModel = ServerConfig::fromJson(serverConfigJson);
     

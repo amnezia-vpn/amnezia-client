@@ -23,9 +23,7 @@ namespace
 QStringList serverRoutingRuleKeys()
 {
     return {
-        QString(configKey::serverForward),
         QString(configKey::serverExcept),
-        QString(configKey::managedSplitTunnelForwardSites),
         QString(configKey::managedSplitTunnelExceptSites),
         QString(configKey::managedSplitTunnelExceptSourceSites),
         QString(configKey::managedSplitTunnelClientResolvedExceptSites),

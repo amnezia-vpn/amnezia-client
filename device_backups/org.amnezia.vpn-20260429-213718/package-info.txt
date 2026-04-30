@@ -1,0 +1,4 @@
+versionCode=2119 minSdk=28 targetSdk=36
+versionName=4.8.15.2
+lastUpdateTime=2026-04-26 20:03:44
+firstInstallTime=2026-04-26 20:03:44

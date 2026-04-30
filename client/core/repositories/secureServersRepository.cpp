@@ -90,6 +90,17 @@ QString mergeSplitTunnelIpValues(const QStringList &values)
     return ips.join(QStringLiteral(", "));
 }
 
+bool hasSplitTunnelRouteValues(const QVariantMap &sites)
+{
+    for (auto it = sites.constBegin(); it != sites.constEnd(); ++it) {
+        if (NetworkUtilities::checkIpSubnetFormat(it.key())
+            || !splitTunnelStoredIps(it.value().toString()).isEmpty()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 QVariantMap sourceManagedVpnSites(const QJsonObject &serverConfig, RouteMode mode)
 {
     if (mode != RouteMode::VpnAllExceptSites) {
@@ -425,7 +436,7 @@ RouteMode SecureServersRepository::effectiveSiteRouteMode(int serverIndex, bool 
     }
 
     if (isManagedSplitTunnelingForceEnabled(serverIndex)
-        && !managedVpnSitesForRouting(serverIndex, RouteMode::VpnAllExceptSites).isEmpty()) {
+        && hasSplitTunnelRouteValues(managedVpnSitesForRouting(serverIndex, RouteMode::VpnAllExceptSites))) {
         return RouteMode::VpnAllExceptSites;
     }
 

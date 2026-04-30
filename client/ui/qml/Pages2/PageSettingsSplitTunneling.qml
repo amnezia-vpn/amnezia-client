@@ -114,10 +114,13 @@ PageType {
     }
 
     function isManagedExceptListVisible() {
-        return proxyManagedExceptSitesModel.count > 0
-                && (getRouteModesModelIndex() === 1
-                    || (!IpSplitTunnelingController.isSplitTunnelingEnabled
-                        && root.defaultManagedSplitTunnelingForceEnabled))
+        if (proxyManagedExceptSitesModel.count === 0) {
+            return false
+        }
+        if (!IpSplitTunnelingController.isSplitTunnelingEnabled) {
+            return root.defaultManagedSplitTunnelingForceEnabled
+        }
+        return getRouteModesModelIndex() === 1
     }
 
     ColumnLayout {

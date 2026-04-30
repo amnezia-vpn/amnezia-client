@@ -843,18 +843,26 @@ void ConnectionController::resolveNextClientManagedSite()
             return;
         }
 
-        const QStringList resolvedIps = hostInfoIpv4Addresses(hostInfo);
-        if (resolvedIps.isEmpty()) {
-            qDebug() << "ConnectionController: client-side managed site resolve produced no IPv4 addresses for" << domain;
+        if (hostInfo.error() != QHostInfo::NoError) {
+            qDebug() << "ConnectionController: client-side managed site resolve failed for" << domain
+                     << hostInfo.errorString();
             resolveNextClientManagedSite();
             return;
         }
 
-        const QString mergedIps =
-                mergedStoredIps({ m_clientManagedSitesResolvedCache.value(domain).toString(),
-                                  resolvedIps.join(QStringLiteral(", ")) });
+        const QStringList resolvedIps = hostInfoIpv4Addresses(hostInfo);
+        if (resolvedIps.isEmpty()) {
+            qDebug() << "ConnectionController: client-side managed site resolve produced no IPv4 addresses for" << domain;
+            m_clientManagedSitesResolvedCache.remove(domain);
+            resolveNextClientManagedSite();
+            return;
+        }
+
+        const QString mergedIps = mergedStoredIps({ resolvedIps.join(QStringLiteral(", ")) });
         if (!mergedIps.isEmpty()) {
             m_clientManagedSitesResolvedCache.insert(domain, mergedIps);
+        } else {
+            m_clientManagedSitesResolvedCache.remove(domain);
         }
         qDebug() << "ConnectionController: client-side managed site resolved" << domain << resolvedIps;
         resolveNextClientManagedSite();
