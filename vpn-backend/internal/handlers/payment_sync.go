@@ -47,7 +47,7 @@ func verifyYooKassaPaymentStatus(shopID, key, paymentID string) (string, error) 
 func activateSubscriptionFromPayment(tx *gorm.DB, payment *models.Payment, paymentMethodID string) error {
 	now := time.Now()
 	priceInfo := planPrices[payment.Plan]
-	autoRenew := payment.Plan != models.PlanTrial
+	autoRenew := payment.Plan != models.PlanTrial && paymentMethodID != ""
 
 	var sub models.Subscription
 	if err := tx.Where("user_id = ?", payment.UserID).First(&sub).Error; err != nil {

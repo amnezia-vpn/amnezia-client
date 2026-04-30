@@ -899,10 +899,15 @@ void FBLinkController::clearExistingFBLinkServers()
 
 void FBLinkController::createPayment(const QString &plan)
 {
-    createPayment(plan, true);
+    createPayment(plan, QString(), true);
 }
 
-void FBLinkController::createPayment(const QString &plan, bool allowRefreshRetry)
+void FBLinkController::createPaymentWithPromo(const QString &plan, const QString &promoCode)
+{
+    createPayment(plan, promoCode, true);
+}
+
+void FBLinkController::createPayment(const QString &plan, const QString &promoCode, bool allowRefreshRetry)
 {
     QString token = getJwtToken();
     if (token.isEmpty()) {
@@ -914,10 +919,14 @@ void FBLinkController::createPayment(const QString &plan, bool allowRefreshRetry
 
     QJsonObject json;
     json["plan"] = plan;
+    const QString normalizedPromoCode = promoCode.trimmed().toUpper();
+    if (!normalizedPromoCode.isEmpty()) {
+        json["promo_code"] = normalizedPromoCode;
+    }
 
     QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, plan, allowRefreshRetry]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, plan, normalizedPromoCode, allowRefreshRetry]() {
         reply->deleteLater();
 
         QByteArray responseData = reply->readAll();
@@ -926,13 +935,19 @@ void FBLinkController::createPayment(const QString &plan, bool allowRefreshRetry
 
         if (reply->error() == QNetworkReply::NoError) {
             QString confirmUrl = obj.value("confirmation_url").toString();
-            emit paymentCreated(confirmUrl);
+            QString status = obj.value("status").toString();
+            if (confirmUrl.isEmpty() && status == "succeeded") {
+                fetchSubscription();
+                emit paymentActivated();
+            } else {
+                emit paymentCreated(confirmUrl);
+            }
         } else {
             logApiFailure("create-payment", reply);
 
             if (allowRefreshRetry && shouldRefreshToken(reply)) {
-                refreshAccessToken([this, plan]() {
-                    createPayment(plan, false);
+                refreshAccessToken([this, plan, normalizedPromoCode]() {
+                    createPayment(plan, normalizedPromoCode, false);
                 });
                 return;
             }

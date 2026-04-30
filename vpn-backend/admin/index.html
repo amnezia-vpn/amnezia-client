@@ -60,7 +60,7 @@
     }
     .field { margin-bottom: 16px; }
     .field label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
-    .field input {
+    .field input, .field select {
       width: 100%;
       padding: 14px 16px;
       color: var(--text);
@@ -69,6 +69,7 @@
       border-radius: 14px;
       outline: none;
     }
+    .field select option { color: var(--text); background: #111722; }
     .btn {
       border: none;
       border-radius: 14px;
@@ -270,6 +271,9 @@
     }
     .modal h3 { margin: 0 0 16px; font-size: 22px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .switch-field { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: var(--muted); font-size: 14px; }
+    .switch-field input { width: auto; }
+    .promo-summary { color: var(--muted); font-size: 13px; line-height: 1.45; }
     @keyframes button-spin { to { transform: rotate(360deg); } }
     @media (max-width: 1180px) { .hero, .analytics-grid { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
     @media (max-width: 860px) {
@@ -312,6 +316,7 @@
         <button onclick="showPage('users', this)">Пользователи</button>
         <button onclick="showPage('servers', this)">Серверы</button>
         <button onclick="showPage('payments', this)">Платежи</button>
+        <button onclick="showPage('promo-codes', this)">Промокоды</button>
       </div>
       <div class="sidebar-footer">Панель использует фирменную палитру и SVG-ассеты из VPN-клиента.</div>
       <button class="btn btn-secondary" onclick="logout()">Выйти</button>
@@ -375,7 +380,8 @@
 
       <section id="page-users" class="page hidden"><div class="section-head"><h2>Пользователи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadUsers()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('users')">Экспорт CSV</button></div></div><div class="table-toolbar"><input id="usersSearch" type="text" placeholder="Поиск по email" oninput="renderUsers()"><select id="usersRoleFilter" onchange="renderUsers()"><option value="">Все роли</option><option value="admin">Администратор</option><option value="user">Пользователь</option></select><select id="usersStatusFilter" onchange="renderUsers()"><option value="">Все статусы</option><option value="active">Активные</option><option value="expired">Истекшие</option><option value="cancelled">Отменённые</option><option value="none">Без подписки</option></select></div><div class="glass users-table-wrap"><div class="users-table-scroll"><table><thead><tr><th>ID</th><th>Email</th><th>Роль</th><th>Тариф</th><th>Статус</th><th>Истекает</th><th>Действия</th></tr></thead><tbody id="usersBody"><tr><td colspan="7" class="empty">Загрузка пользователей...</td></tr></tbody></table></div></div></section>
       <section id="page-servers" class="page hidden"><div class="section-head"><h2>Серверы</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadServers()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('servers')">Экспорт CSV</button><button class="btn btn-primary" onclick="openAddServerModal()">Добавить сервер</button><button class="btn btn-success" id="piholeBtn" onclick="runPiholeSync()">🛡 Pi-hole Sync</button></div></div><div class="table-toolbar"><input id="serversSearch" type="text" placeholder="Поиск по названию, региону, endpoint" oninput="renderServers()"><select id="serversStatusFilter" onchange="renderServers()"><option value="">Все статусы</option><option value="active">Активные</option><option value="inactive">Отключённые</option></select><select id="serversCountryFilter" onchange="renderServers()"><option value="">Все страны</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Сервер</th><th>Регион</th><th>Endpoint</th><th>Ключи</th><th>Лимит</th><th>Pi-hole</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="serversBody"><tr><td colspan="9" class="empty">Загрузка серверов...</td></tr></tbody></table></div></section>
-      <section id="page-payments" class="page hidden"><div class="section-head"><h2>Платежи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadPayments()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('payments')">Экспорт CSV</button></div></div><div class="table-toolbar"><input id="paymentsSearch" type="text" placeholder="Поиск по email" oninput="renderPayments()"><select id="paymentsPlanFilter" onchange="renderPayments()"><option value="">Все планы</option><option value="trial">Trial</option><option value="basic">Premium</option><option value="vip">VIP</option><option value="free">Free</option></select><select id="paymentsStatusFilter" onchange="renderPayments()"><option value="">Все статусы</option><option value="pending">Ожидают</option><option value="succeeded">Успешные</option><option value="failed">Неуспешные</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Сумма</th><th>План</th><th>Статус</th><th>Создан</th><th>Действия</th></tr></thead><tbody id="paymentsBody"><tr><td colspan="7" class="empty">Загрузка платежей...</td></tr></tbody></table></div></section>
+      <section id="page-payments" class="page hidden"><div class="section-head"><h2>Платежи</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadPayments()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('payments')">Экспорт CSV</button></div></div><div class="table-toolbar"><input id="paymentsSearch" type="text" placeholder="Поиск по email" oninput="renderPayments()"><select id="paymentsPlanFilter" onchange="renderPayments()"><option value="">Все планы</option><option value="trial">Trial</option><option value="basic">Premium</option><option value="vip">VIP</option><option value="free">Free</option></select><select id="paymentsStatusFilter" onchange="renderPayments()"><option value="">Все статусы</option><option value="pending">Ожидают</option><option value="succeeded">Успешные</option><option value="failed">Неуспешные</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>ID</th><th>Email</th><th>Сумма</th><th>Скидка</th><th>Промокод</th><th>План</th><th>Статус</th><th>Создан</th><th>Действия</th></tr></thead><tbody id="paymentsBody"><tr><td colspan="9" class="empty">Загрузка платежей...</td></tr></tbody></table></div></section>
+      <section id="page-promo-codes" class="page hidden"><div class="section-head"><h2>Промокоды</h2><div class="btn-row"><button class="btn btn-secondary" onclick="loadPromoCodes()">Обновить</button><button class="btn btn-primary" onclick="exportCSV('promo-codes')">Экспорт CSV</button><button class="btn btn-primary" onclick="openPromoModal()">Добавить промокод</button></div></div><div class="table-toolbar"><input id="promoSearch" type="text" placeholder="Поиск по коду или описанию" oninput="renderPromoCodes()"><select id="promoStatusFilter" onchange="renderPromoCodes()"><option value="">Все статусы</option><option value="active">Активные</option><option value="inactive">Отключённые</option></select></div><div class="glass" style="overflow:hidden"><table><thead><tr><th>Код</th><th>Скидка</th><th>Использовано</th><th>Тарифы</th><th>Истекает</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="promoCodesBody"><tr><td colspan="7" class="empty">Загрузка промокодов...</td></tr></tbody></table></div></section>
     </main>
   </div>
 
@@ -437,6 +443,24 @@
     </div>
   </div>
 
+  <div id="promoModalWrap" class="modal-overlay">
+    <div class="modal glass" style="max-width:760px">
+      <h3 id="promoModalTitle">Добавить промокод</h3>
+      <div class="form-grid">
+        <div class="field"><label>Код</label><input id="promoCode" type="text" placeholder="WELCOME30"></div>
+        <div class="field"><label>Скидка, %</label><input id="promoDiscountPercent" type="number" min="1" max="100" placeholder="30"></div>
+        <div class="field"><label>Лимит использований</label><input id="promoMaxUses" type="number" min="0" placeholder="0 = без лимита"></div>
+        <div class="field"><label>Действует до</label><input id="promoExpiresAt" type="datetime-local"></div>
+        <div class="field" style="grid-column:1 / -1"><label>Тарифы</label><input id="promoApplicablePlans" type="text" placeholder="all или basic,basic_3m,vip,vip_3m"></div>
+        <div class="field" style="grid-column:1 / -1"><label>Описание</label><input id="promoDescription" type="text" placeholder="Запусковая скидка для новых пользователей"></div>
+      </div>
+      <label class="switch-field"><input id="promoActive" type="checkbox"> Активен</label>
+      <label class="switch-field"><input id="promoOncePerUser" type="checkbox"> Один раз на пользователя</label>
+      <div id="promoModalHint" class="promo-summary"></div>
+      <div class="btn-row" style="margin-top:14px"><button id="promoSaveButton" class="btn btn-primary" onclick="submitPromoModal()">Сохранить</button><button class="btn btn-secondary" onclick="closePromoModal()">Отмена</button></div>
+    </div>
+  </div>
+
   <script>
     const API = '';
     let token = localStorage.getItem('fblink_admin_token') || '';
@@ -445,6 +469,8 @@
     let usersData = [];
     let serversData = [];
     let paymentsData = [];
+    let promoCodesData = [];
+    let editingPromoCodeId = null;
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -468,6 +494,8 @@
         free: 'Free',
         trial: 'Trial',
         basic: 'Premium',
+        basic_3m: 'Premium 3 мес',
+        vip_3m: 'VIP 3 мес',
         vip: 'VIP'
       })[plan] || (plan || '—');
     }
@@ -829,7 +857,7 @@
         return matchesSearch && matchesPlan && matchesStatus;
       });
       if (!filtered.length) {
-        body.innerHTML = '<tr><td colspan="7" class="empty">Платежи по этим фильтрам не найдены</td></tr>';
+        body.innerHTML = '<tr><td colspan="9" class="empty">Платежи по этим фильтрам не найдены</td></tr>';
         return;
       }
       body.innerHTML = filtered.map(payment => `
@@ -837,12 +865,128 @@
           <td>${payment.id}</td>
           <td>${escapeHtml(payment.user_email || '—')}</td>
           <td>${fmtMoney(payment.amount)}</td>
+          <td>${Number(payment.discount_amount || 0) > 0 ? `${fmtMoney(payment.discount_amount)} из ${fmtMoney(payment.original_amount || payment.amount)}` : '—'}</td>
+          <td>${payment.promo_code ? badge(payment.promo_code, 'info') : '—'}</td>
           <td>${escapeHtml(planLabel(payment.plan))}</td>
           <td>${badge(payment.status, payment.status === 'succeeded' ? 'ok' : (payment.status === 'pending' ? 'warn' : 'bad'))}</td>
           <td>${fmtDate(payment.created_at)}</td>
           <td>${payment.status === 'pending' ? `<button class="btn btn-success" onclick="approvePayment(${payment.id})">Подтвердить вручную</button>` : ''}</td>
         </tr>
       `).join('');
+    }
+
+    function promoPlansLabel(value) {
+      const normalized = String(value || 'all').trim();
+      if (!normalized || normalized === 'all') return 'Все тарифы';
+      return normalized.split(',').map(plan => planLabel(plan.trim())).join(', ');
+    }
+
+    function renderPromoCodes() {
+      const body = document.getElementById('promoCodesBody');
+      const search = normalizeText(document.getElementById('promoSearch')?.value);
+      const statusFilter = document.getElementById('promoStatusFilter')?.value || '';
+      const filtered = promoCodesData.filter(promo => {
+        const blob = normalizeText([promo.code, promo.description, promo.applicable_plans].join(' '));
+        return (!search || blob.includes(search))
+          && (!statusFilter || (statusFilter === 'active' ? !!promo.active : !promo.active));
+      });
+      if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="7" class="empty">Промокоды по этим фильтрам не найдены</td></tr>';
+        return;
+      }
+      body.innerHTML = filtered.map(promo => {
+        const usage = Number(promo.max_uses || 0) > 0 ? `${promo.used_count || 0}/${promo.max_uses}` : `${promo.used_count || 0}/∞`;
+        const expires = promo.expires_at ? fmtDate(promo.expires_at) : 'Без срока';
+        return `
+          <tr>
+            <td><strong>${escapeHtml(promo.code)}</strong><div class="promo-summary">${escapeHtml(promo.description || '')}</div></td>
+            <td>${promo.discount_percent}%</td>
+            <td>${escapeHtml(usage)}</td>
+            <td>${escapeHtml(promoPlansLabel(promo.applicable_plans))}</td>
+            <td>${escapeHtml(expires)}</td>
+            <td>${badge(promo.active ? 'Активен' : 'Отключён', promo.active ? 'ok' : 'warn')}</td>
+            <td><div class="table-actions">
+              <button class="btn btn-secondary" onclick='openPromoModal(${JSON.stringify(promo).replace(/'/g, "&apos;")})'>Редактировать</button>
+              <button class="btn btn-danger" onclick="deletePromoCode(${promo.id})">Отключить</button>
+            </div></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function loadPromoCodes() {
+      const res = await api('/api/v1/admin/promo-codes');
+      const data = await res.json();
+      promoCodesData = data.promo_codes || [];
+      if (!promoCodesData.length) {
+        document.getElementById('promoCodesBody').innerHTML = '<tr><td colspan="7" class="empty">Промокодов пока нет</td></tr>';
+        return;
+      }
+      renderPromoCodes();
+    }
+
+    function toDatetimeLocal(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      const pad = n => String(n).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function openPromoModal(promo = null) {
+      editingPromoCodeId = promo ? promo.id : null;
+      document.getElementById('promoModalTitle').textContent = promo ? 'Редактировать промокод' : 'Добавить промокод';
+      document.getElementById('promoCode').value = promo ? (promo.code || '') : '';
+      document.getElementById('promoDescription').value = promo ? (promo.description || '') : '';
+      document.getElementById('promoDiscountPercent').value = promo ? (promo.discount_percent || '') : '';
+      document.getElementById('promoMaxUses').value = promo ? (promo.max_uses || '') : '';
+      document.getElementById('promoApplicablePlans').value = promo ? (promo.applicable_plans || 'all') : 'all';
+      document.getElementById('promoExpiresAt').value = toDatetimeLocal(promo ? promo.expires_at : null);
+      document.getElementById('promoActive').checked = promo ? !!promo.active : true;
+      document.getElementById('promoOncePerUser').checked = promo ? !!promo.once_per_user : true;
+      document.getElementById('promoModalHint').textContent = promo ? `Использовано: ${promo.used_count || 0}` : 'Код применится на сервере при создании платежа.';
+      document.getElementById('promoModalWrap').style.display = 'grid';
+    }
+
+    function closePromoModal() {
+      document.getElementById('promoModalWrap').style.display = 'none';
+    }
+
+    function promoPayload() {
+      const expiresValue = document.getElementById('promoExpiresAt').value;
+      return {
+        code: document.getElementById('promoCode').value.trim().toUpperCase(),
+        description: document.getElementById('promoDescription').value.trim(),
+        discount_percent: Number(document.getElementById('promoDiscountPercent').value || 0),
+        max_uses: Number(document.getElementById('promoMaxUses').value || 0),
+        active: document.getElementById('promoActive').checked,
+        applicable_plans: document.getElementById('promoApplicablePlans').value.trim() || 'all',
+        once_per_user: document.getElementById('promoOncePerUser').checked,
+        expires_at: expiresValue ? new Date(expiresValue).toISOString() : null
+      };
+    }
+
+    async function submitPromoModal() {
+      const payload = promoPayload();
+      if (!payload.code || payload.discount_percent < 1 || payload.discount_percent > 100) {
+        return alert('Укажите код и скидку от 1 до 100%.');
+      }
+      const url = editingPromoCodeId ? `/api/v1/admin/promo-codes/${editingPromoCodeId}` : '/api/v1/admin/promo-codes';
+      const method = editingPromoCodeId ? 'PUT' : 'POST';
+      const res = await api(url, { method, body: JSON.stringify(payload) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return alert(data.error || 'Не удалось сохранить промокод');
+      closePromoModal();
+      loadPromoCodes();
+      loadPayments();
+    }
+
+    async function deletePromoCode(id) {
+      if (!confirm('Отключить промокод? Уже созданные платежи сохранят историю скидки.')) return;
+      const res = await api(`/api/v1/admin/promo-codes/${id}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return alert(data.error || 'Не удалось отключить промокод');
+      loadPromoCodes();
     }
 
     async function loadStats() {
@@ -907,7 +1051,7 @@
       const data = await res.json();
       paymentsData = data.payments || [];
       if (!paymentsData.length) {
-        document.getElementById('paymentsBody').innerHTML = '<tr><td colspan="7" class="empty">Платежей пока нет</td></tr>';
+        document.getElementById('paymentsBody').innerHTML = '<tr><td colspan="9" class="empty">Платежей пока нет</td></tr>';
         return;
       }
       renderPayments();
@@ -1106,7 +1250,7 @@
 
     async function refreshAll() {
       try {
-        await Promise.all([loadStats(), loadUsers(), loadServers(), loadPayments()]);
+        await Promise.all([loadStats(), loadUsers(), loadServers(), loadPayments(), loadPromoCodes()]);
       } catch (err) {
         console.error(err);
         alert('Не удалось загрузить часть данных админ-панели');

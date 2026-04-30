@@ -661,18 +661,21 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 // GET /api/v1/admin/payments
 func (h *AdminHandler) GetPayments(c *gin.Context) {
 	var payments []models.Payment
-	h.db.Preload("User").Order("created_at desc").Limit(100).Find(&payments)
+	h.db.Preload("User").Preload("PromoCode").Order("created_at desc").Limit(100).Find(&payments)
 
 	result := make([]gin.H, 0, len(payments))
 	for _, p := range payments {
 		result = append(result, gin.H{
-			"id":           p.ID,
-			"user_email":   p.User.Email,
-			"amount":       p.Amount,
-			"plan":         p.Plan,
-			"status":       p.Status,
-			"created_at":   p.CreatedAt,
-			"confirmed_at": p.ConfirmedAt,
+			"id":              p.ID,
+			"user_email":      p.User.Email,
+			"amount":          p.Amount,
+			"original_amount": p.OriginalAmount,
+			"discount_amount": p.DiscountAmount,
+			"promo_code":      promoCodeLabel(p),
+			"plan":            p.Plan,
+			"status":          p.Status,
+			"created_at":      p.CreatedAt,
+			"confirmed_at":    p.ConfirmedAt,
 		})
 	}
 
@@ -902,9 +905,9 @@ func (h *AdminHandler) ExportCSV(c *gin.Context) {
 			})
 		}
 	case "payments":
-		_ = writer.Write([]string{"id", "user_id", "amount", "currency", "status", "plan", "created_at", "confirmed_at"})
+		_ = writer.Write([]string{"id", "user_id", "amount", "original_amount", "discount_amount", "currency", "status", "plan", "promo_code", "created_at", "confirmed_at"})
 		var payments []models.Payment
-		h.db.Order("id desc").Find(&payments)
+		h.db.Preload("PromoCode").Order("id desc").Find(&payments)
 		for _, p := range payments {
 			confirmedAt := ""
 			if p.ConfirmedAt != nil {
@@ -914,11 +917,37 @@ func (h *AdminHandler) ExportCSV(c *gin.Context) {
 				fmt.Sprint(p.ID),
 				fmt.Sprint(p.UserID),
 				fmt.Sprintf("%.2f", p.Amount),
+				fmt.Sprintf("%.2f", p.OriginalAmount),
+				fmt.Sprintf("%.2f", p.DiscountAmount),
 				p.Currency,
 				string(p.Status),
 				string(p.Plan),
+				promoCodeLabel(p),
 				p.CreatedAt.Format(time.RFC3339),
 				confirmedAt,
+			})
+		}
+	case "promo-codes":
+		_ = writer.Write([]string{"id", "code", "description", "discount_percent", "max_uses", "used_count", "active", "applicable_plans", "once_per_user", "expires_at", "created_at"})
+		var promoCodes []models.PromoCode
+		h.db.Order("id asc").Find(&promoCodes)
+		for _, promo := range promoCodes {
+			expiresAt := ""
+			if promo.ExpiresAt != nil {
+				expiresAt = promo.ExpiresAt.Format(time.RFC3339)
+			}
+			_ = writer.Write([]string{
+				fmt.Sprint(promo.ID),
+				promo.Code,
+				promo.Description,
+				fmt.Sprint(promo.DiscountPercent),
+				fmt.Sprint(promo.MaxUses),
+				fmt.Sprint(promo.UsedCount),
+				fmt.Sprint(promo.Active),
+				promo.ApplicablePlans,
+				fmt.Sprint(promo.OncePerUser),
+				expiresAt,
+				promo.CreatedAt.Format(time.RFC3339),
 			})
 		}
 	case "servers":
@@ -1156,32 +1185,30 @@ func (h *AdminHandler) ApprovePayment(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "payment not found"})
 		return
 	}
-	p.Status = "succeeded"
+	if p.Status == models.PaymentSucceeded {
+		c.JSON(http.StatusOK, gin.H{"message": "payment already approved"})
+		return
+	}
+
 	now := time.Now()
-	p.ConfirmedAt = &now
-	h.db.Save(&p)
-
-	// Upgrade user subscription immediately
-	var sub models.Subscription
-	h.db.Where("user_id = ?", p.UserID).FirstOrInit(&sub, models.Subscription{UserID: p.UserID})
-
-	now = time.Now()
-	var durationDays int
-	if p.Plan == models.PlanTrial {
-		durationDays = 3
-	} else {
-		durationDays = planPrices[p.Plan].DurationDays
+	err := h.db.Transaction(func(tx *gorm.DB) error {
+		if p.OriginalAmount == 0 {
+			p.OriginalAmount = p.Amount + p.DiscountAmount
+		}
+		p.Status = models.PaymentSucceeded
+		p.ConfirmedAt = &now
+		if err := tx.Save(&p).Error; err != nil {
+			return err
+		}
+		if err := activateSubscriptionFromPayment(tx, &p, ""); err != nil {
+			return err
+		}
+		return markPromoCodeUsed(tx, &p)
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to approve payment"})
+		return
 	}
-
-	newExpiry := now.AddDate(0, 0, durationDays)
-	if p.Plan != models.PlanTrial && sub.ExpiresAt.After(now) && sub.Plan != models.PlanFree {
-		newExpiry = sub.ExpiresAt.AddDate(0, 0, durationDays)
-	}
-
-	sub.Status = models.SubActive
-	sub.Plan = p.Plan
-	sub.ExpiresAt = newExpiry
-	h.db.Save(&sub)
 
 	c.JSON(http.StatusOK, gin.H{"message": "payment manually approved and subscription issued"})
 }

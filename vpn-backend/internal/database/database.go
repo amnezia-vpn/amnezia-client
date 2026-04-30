@@ -59,6 +59,7 @@ func AutoMigrate(db *gorm.DB) {
 		&models.VLESSServerTemplate{},
 		&models.VLESSCredential{},
 		&models.RoutingProfile{},
+		&models.PromoCode{},
 		&models.Payment{},
 		&models.VerificationCode{},
 	)

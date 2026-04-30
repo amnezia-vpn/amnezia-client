@@ -19,6 +19,8 @@ PageType {
     property int selectedPlan: 0
     property bool isLoading: false
     property string errorMessage: ""
+    property string promoCode: ""
+    property string promoHint: ""
     property bool isWaitingForPayment: false
     property int selectedPeriod: 0  // 0 = 1 месяц, 1 = 3 месяца
     property int pollCount: 0
@@ -632,6 +634,137 @@ PageType {
                 }
             }
 
+            PremiumPanel {
+                Layout.fillWidth: true
+                Layout.topMargin: 18
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                padding: 14
+                radius: 14
+                fillColor: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                outlineColor: root.promoCode.trim() !== "" ? Qt.rgba(16/255, 185/255, 129/255, 0.55) : Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                accentVisible: false
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        Rectangle {
+                            width: 34
+                            height: 34
+                            radius: 10
+                            color: Qt.rgba(16/255, 185/255, 129/255, 0.16)
+
+                            LabelTextType {
+                                anchors.centerIn: parent
+                                text: "%"
+                                font.pixelSize: 16
+                                font.weight: 700
+                                color: "#10B981"
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: qsTr("Промокод")
+                                font.pixelSize: 14
+                                font.weight: 700
+                                color: FBLinkStyle.color.paleGray
+                            }
+
+                            CaptionTextType {
+                                Layout.fillWidth: true
+                                text: root.promoHint !== "" ? root.promoHint : qsTr("Если у вас есть код, применим скидку при создании платежа.")
+                                color: root.promoHint !== "" ? "#10B981" : FBLinkStyle.color.mutedGray
+                                font.pixelSize: 12
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 46
+                        radius: 12
+                        color: Qt.rgba(36/255, 36/255, 42/255, 1.0)
+                        border.width: 1
+                        border.color: root.promoCode.trim() !== "" ? Qt.rgba(16/255, 185/255, 129/255, 0.55) : Qt.rgba(255, 255, 255, 0.08)
+
+                        TextInput {
+                            id: promoInput
+                            anchors.fill: parent
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: clearPromoButton.visible ? 48 : 14
+                            verticalAlignment: TextInput.AlignVCenter
+                            text: root.promoCode
+                            selectByMouse: true
+                            inputMethodHints: Qt.ImhUppercaseOnly | Qt.ImhNoPredictiveText
+                            font.pixelSize: 14
+                            font.family: "PT Root UI VF"
+                            color: FBLinkStyle.color.paleGray
+                            onTextChanged: {
+                                var normalized = text.toUpperCase().replace(/[^A-Z0-9_-]/g, "")
+                                if (text !== normalized) {
+                                    text = normalized
+                                    return
+                                }
+                                root.promoCode = normalized
+                                root.promoHint = normalized === "" ? "" : qsTr("Код будет проверен перед оплатой.")
+                            }
+                        }
+
+                        Text {
+                            anchors.left: promoInput.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: promoInput.text === ""
+                            text: qsTr("Введите промокод")
+                            font.pixelSize: 14
+                            font.family: "PT Root UI VF"
+                            color: FBLinkStyle.color.mutedGray
+                        }
+
+                        Rectangle {
+                            id: clearPromoButton
+                            width: 34
+                            height: 34
+                            radius: 10
+                            anchors.right: parent.right
+                            anchors.rightMargin: 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: root.promoCode !== ""
+                            color: clearPromoMouse.pressed ? Qt.rgba(255,255,255,0.16) : Qt.rgba(255,255,255,0.07)
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "×"
+                                font.pixelSize: 18
+                                font.family: "PT Root UI VF"
+                                color: FBLinkStyle.color.paleGray
+                            }
+
+                            MouseArea {
+                                id: clearPromoMouse
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    root.promoCode = ""
+                                    root.promoHint = ""
+                                    promoInput.text = ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // ── Error message ─────────────────────────────────────
             Rectangle {
                 Layout.fillWidth: true
@@ -775,7 +908,7 @@ PageType {
                     if (root.showNewUserOffer && selectedPlanId === "basic") {
                         selectedPlanId = "trial"
                     }
-                    FBLinkController.createPayment(selectedPlanId)
+                    FBLinkController.createPaymentWithPromo(selectedPlanId, root.promoCode)
                 }
             }
 
@@ -796,6 +929,15 @@ PageType {
                     } else {
                         root.errorMessage = qsTr("Не удалось получить ссылку на оплату")
                     }
+                }
+
+                function onPaymentActivated() {
+                    root.isLoading = false
+                    root.isWaitingForPayment = false
+                    root.promoHint = qsTr("Промокод применён, подписка активирована.")
+                    PageController.showBusyIndicator(false)
+                    PageController.showNotificationMessage(qsTr("Подписка активирована по промокоду"))
+                    FBLinkController.fetchSubscription()
                 }
 
                 function onPaymentError(errorMessage) {

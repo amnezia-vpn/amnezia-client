@@ -194,16 +194,35 @@ const (
 
 type Payment struct {
 	gorm.Model
-	UserID      uint          `gorm:"not null"`
-	YooKassaID  string        `gorm:"uniqueIndex"`
-	Amount      float64       `gorm:"not null"`
-	Currency    string        `gorm:"default:RUB"`
-	Status      PaymentStatus `gorm:"default:pending"`
-	Plan        PlanType      `gorm:"not null"`
-	ConfirmURL  string        // URL для оплаты (от ЮKassa)
-	ConfirmedAt *time.Time
+	UserID         uint          `gorm:"not null"`
+	YooKassaID     string        `gorm:"uniqueIndex"`
+	Amount         float64       `gorm:"not null"`
+	OriginalAmount float64       `gorm:"not null;default:0"`
+	DiscountAmount float64       `gorm:"not null;default:0"`
+	Currency       string        `gorm:"default:RUB"`
+	Status         PaymentStatus `gorm:"default:pending"`
+	Plan           PlanType      `gorm:"not null"`
+	ConfirmURL     string // URL для оплаты (от ЮKassa)
+	ConfirmedAt    *time.Time
+	PromoCodeID    *uint
 
-	User User
+	User      User
+	PromoCode *PromoCode
+}
+
+type PromoCode struct {
+	gorm.Model
+	Code            string `gorm:"uniqueIndex;not null"`
+	Description     string `gorm:"default:''"`
+	DiscountPercent int    `gorm:"not null"`
+	MaxUses         int    `gorm:"default:0"`
+	UsedCount       int    `gorm:"default:0"`
+	Active          bool   `gorm:"default:true"`
+	ApplicablePlans string `gorm:"default:'all'"`
+	OncePerUser     bool   `gorm:"default:true"`
+	ExpiresAt       *time.Time
+
+	Payments []Payment
 }
 
 type VerificationCode struct {
