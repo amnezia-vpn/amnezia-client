@@ -218,7 +218,8 @@ ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const 
 
 ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
-                                                            ServerConfig &serverConfig)
+                                                            ServerConfig &serverConfig,
+                                                            CaptchaInfo &captchaInfo)
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -235,6 +236,19 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+
+    if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+        if (jsonDoc.isObject()) {
+            QJsonObject jsonObj = jsonDoc.object();
+            captchaInfo.captchaId = jsonObj.value("captcha_id").toString();
+            captchaInfo.captchaImageBase64 = jsonObj.value("captcha_image").toString();
+            captchaInfo.hint = jsonObj.value("hint").toString();
+            captchaInfo.isRequired = true;
+        }
+        return errorCode;
+    }
+
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -244,11 +258,11 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
-    
+
     updateApiConfigInJson(serverConfigJson, serviceType, serviceProtocol, userCountryCode, responseBody);
-    
+
     ServerConfig serverConfigModel = ServerConfig::fromJson(serverConfigJson);
-    
+
     if (!serverConfigModel.isApiV2()) {
         return ErrorCode::InternalError;
     }
@@ -1092,3 +1106,50 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(int se
     return promise->future();
 }
 
+ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &userCountryCode,
+                                                              const QString &serviceType,
+                                                              const QString &serviceProtocol,
+                                                              const ProtocolData &protocolData,
+                                                              const QString &captchaId,
+                                                              const QString &captchaSolution,
+                                                              ServerConfig &serverConfig) {
+    GatewayRequestData gatewayRequestData{QSysInfo::productType(),
+                                          QString(APP_VERSION),
+                                          m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                          m_appSettingsRepository->getInstallationUuid(true),
+                                          userCountryCode,
+                                          "",
+                                          serviceType,
+                                          serviceProtocol,
+                                          QJsonObject()};
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
+
+    apiPayload["captcha_id"] = captchaId;
+    apiPayload["captcha_solution"] = captchaSolution;
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    QJsonObject serverConfigJson;
+    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    updateApiConfigInJson(serverConfigJson, serviceType, serviceProtocol, userCountryCode, responseBody);
+
+    ServerConfig serverConfigModel = ServerConfig::fromJson(serverConfigJson);
+
+    if (!serverConfigModel.isApiV2()) {
+        return ErrorCode::InternalError;
+    }
+
+    m_serversRepository->addServer(serverConfigModel);
+    serverConfig = serverConfigModel;
+    return ErrorCode::NoError;
+}

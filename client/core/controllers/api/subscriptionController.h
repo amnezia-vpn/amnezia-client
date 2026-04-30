@@ -43,6 +43,13 @@ public:
         QJsonObject toJsonObject() const;
     };
 
+    struct CaptchaInfo {
+        QString captchaId;
+        QString captchaImageBase64;
+        QString hint;
+        bool isRequired = false;
+    };
+
     explicit SubscriptionController(SecureServersRepository* serversRepository,
                                      SecureAppSettingsRepository* appSettingsRepository);
 
@@ -52,7 +59,8 @@ public:
 
     ErrorCode importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                       const QString &serviceProtocol, const ProtocolData &protocolData,
-                                      ServerConfig &serverConfig);
+                                      ServerConfig &serverConfig,
+                                      CaptchaInfo &captchaInfo);
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email,
                                      ServerConfig &serverConfig);
@@ -103,6 +111,11 @@ public:
 
     AppStoreRestoreResult processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,
                                                   const QString &serviceProtocol);
+
+    ErrorCode resolveImportServiceCaptcha(const QString &userCountryCode, const QString &serviceType,
+                                          const QString &serviceProtocol, const ProtocolData &protocolData,
+                                          const QString &captchaId, const QString &captchaSolution,
+                                          ServerConfig &serverConfig);
 
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);

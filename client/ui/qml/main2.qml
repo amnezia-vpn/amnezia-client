@@ -211,11 +211,11 @@ Window  {
 
             onCaptchaSolved: function(captchaId, solution) {
                 captchaDialog.close()
-                ApiConfigsController.onCaptchaSolved(captchaId, solution)
+                SubscriptionUiController.onCaptchaSolved(captchaId, solution)
             }
 
             onRefreshCaptchaRequested: function() {
-                ApiConfigsController.onRefreshCaptchaRequested()
+                SubscriptionUiController.onRefreshCaptchaRequested()
             }
         }
     }

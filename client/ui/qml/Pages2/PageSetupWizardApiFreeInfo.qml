@@ -130,7 +130,7 @@ PageType {
             PageController.showBusyIndicator(false)
 
             if (!result) {
-                if (ApiConfigsController.isCaptchaAwaitingUser()) {
+                if (SubscriptionUiController.isCaptchaAwaitingUser()) {
                     return
                 }
                 var endpoint = ApiServicesModel.getStoreEndpoint()
