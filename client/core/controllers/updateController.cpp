@@ -8,13 +8,13 @@
 #include <QSysInfo>
 #include <QTimer>
 
-#include "amnezia_application.h"
-#include "core/api/apiDefs.h"
-#include "core/errorstrings.h"
-#include "core/scripts_registry.h"
+#include "amneziaApplication.h"
 #include "logger.h"
 #include "version.h"
 #include "core/controllers/gatewayController.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/errorStrings.h"
+#include "core/utils/selfhosted/scriptsRegistry.h"
 
 namespace
 {
@@ -32,49 +32,19 @@ namespace
 #endif
 }
 
-UpdateController::UpdateController(const std::shared_ptr<Settings> &settings, QObject *parent) : QObject(parent), m_settings(settings)
+UpdateController::UpdateController(SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
+    : QObject(parent), m_appSettingsRepository(appSettingsRepository)
 {
 }
 
-QString UpdateController::getHeaderText()
+QString UpdateController::getRawChangelogText() const
 {
-    if (m_releaseDate.trimmed().isEmpty()) {
-        return tr("New version released: %1").arg(m_version);
-    } else {
-        return tr("New version released: %1 (%2)").arg(m_version, m_releaseDate);
-    }
+    return m_changelogText;
 }
 
-QString UpdateController::getChangelogText()
+QString UpdateController::getReleaseDate() const
 {
-    QStringList lines = m_changelogText.split("\n");
-    QStringList filteredChangeLogText;
-    bool add = false;
-    QString osSection;
-
-#ifdef Q_OS_WINDOWS
-    osSection = "### Windows";
-#elif defined(Q_OS_MACOS)
-    osSection = "### macOS";
-#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    osSection = "### Linux";
-#endif
-
-    for (const QString &line : lines) {
-        if (line.startsWith("### General")) {
-            add = true;
-        } else if (line.startsWith("### ") && line != osSection) {
-            add = false;
-        } else if (line == osSection) {
-            add = true;
-        }
-
-        if (add) {
-            filteredChangeLogText.append(line);
-        }
-    }
-
-    return filteredChangeLogText.join("\n");
+    return m_releaseDate;
 }
 
 QString UpdateController::getVersion() const
@@ -84,8 +54,7 @@ QString UpdateController::getVersion() const
 
 void UpdateController::checkForUpdates()
 {
-
-    if (m_updateCheckRunning) {
+    if (m_updateCheckRunning || !m_appSettingsRepository) {
         return;
     }
     m_updateCheckRunning = true;
@@ -124,20 +93,20 @@ void UpdateController::doGetAsync(const QString &endpoint, std::function<void(bo
 
 void UpdateController::fetchGatewayUrl()
 {
-    auto gatewayController = QSharedPointer<GatewayController>::create(m_settings->getGatewayEndpoint(),
-                                                                       m_settings->isDevGatewayEnv(),
+    auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(),
+                                                                       m_appSettingsRepository->isDevGatewayEnv(),
                                                                        7000,
-                                                                       m_settings->isStrictKillSwitchEnabled());
+                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled());
 
     QJsonObject apiPayload;
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
     apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
-    apiPayload[apiDefs::key::installationUuid] = m_settings->getInstallationUuid(true);
+    apiPayload[apiDefs::key::installationUuid] = m_appSettingsRepository->getInstallationUuid(true);
 
     // Workaround: wait before contacting gateway to avoid rate limit triggered by other requests (news etc.)
     QTimer::singleShot(1000, this, [this, gatewayController, apiPayload]() {
         gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload)
-            .then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {
+            .then(this, [this](QPair<ErrorCode, QByteArray> result) {
                 auto [err, gatewayResponse] = result;
                 if (err != ErrorCode::NoError) {
                     logger.error() << errorString(err);
@@ -179,7 +148,7 @@ void UpdateController::fetchChangelog()
 {
     doGetAsync("/CHANGELOG", [this](bool ok, QByteArray data) {
         if (!ok) {
-            m_changelogText = tr("Failed to load changelog text");
+            m_changelogText.clear();
         } else {
             m_changelogText = QString::fromUtf8(data);
         }
@@ -202,7 +171,7 @@ void UpdateController::fetchReleaseDate()
     });
 }
 
-bool UpdateController::isNewVersionAvailable()
+bool UpdateController::isNewVersionAvailable() const
 {
     auto currentVersion = QVersionNumber::fromString(QString(APP_VERSION));
     auto newVersion = QVersionNumber::fromString(m_version);
@@ -211,12 +180,12 @@ bool UpdateController::isNewVersionAvailable()
 
 void UpdateController::setupNetworkErrorHandling(QNetworkReply* reply, const QString& operation)
 {
-    QObject::connect(reply, &QNetworkReply::errorOccurred, [this, reply, operation](QNetworkReply::NetworkError error) {
+    QObject::connect(reply, &QNetworkReply::errorOccurred, [reply, operation](QNetworkReply::NetworkError error) {
         logger.error() << QString("Network error occurred while fetching %1: %2 %3")
                           .arg(operation, reply->errorString(), QString::number(error));
     });
     
-    QObject::connect(reply, &QNetworkReply::sslErrors, [this, reply, operation](const QList<QSslError> &errors) {
+    QObject::connect(reply, &QNetworkReply::sslErrors, [operation](const QList<QSslError> &errors) {
         QStringList errorStrings;
         for (const QSslError &err : errors) {
             errorStrings << err.errorString();
@@ -239,7 +208,7 @@ void UpdateController::handleNetworkError(QNetworkReply* reply, const QString& o
     }
 }
 
-QString UpdateController::composeDownloadUrl()
+QString UpdateController::composeDownloadUrl() const
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     const QString fileName = QString(kInstallerRemoteFileNamePattern).arg(m_version);

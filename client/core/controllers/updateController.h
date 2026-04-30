@@ -5,23 +5,22 @@
 #include <QObject>
 #include <QNetworkReply>
 
-#include "settings.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 
 class UpdateController : public QObject
 {
     Q_OBJECT
 public:
-    explicit UpdateController(const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+    explicit UpdateController(SecureAppSettingsRepository* appSettingsRepository, QObject *parent = nullptr);
 
-    Q_PROPERTY(QString changelogText READ getChangelogText NOTIFY updateFound)
-    Q_PROPERTY(QString headerText READ getHeaderText NOTIFY updateFound)
-public slots:
-    QString getHeaderText();
-    QString getChangelogText();
+    QString getRawChangelogText() const;
+    QString getReleaseDate() const;
     QString getVersion() const;
 
+public slots:
     void checkForUpdates();
     void runInstaller();
+
 signals:
     void updateFound();
 
@@ -32,12 +31,12 @@ private:
     void fetchChangelog();
     void fetchReleaseDate();
     void doGetAsync(const QString &endpoint, std::function<void(bool, QByteArray)> onDone);
-    bool isNewVersionAvailable();
+    bool isNewVersionAvailable() const;
     void setupNetworkErrorHandling(QNetworkReply* reply, const QString& operation);
     void handleNetworkError(QNetworkReply* reply, const QString& operation);
-    QString composeDownloadUrl();
-    
-    std::shared_ptr<Settings> m_settings;
+    QString composeDownloadUrl() const;
+
+    SecureAppSettingsRepository* m_appSettingsRepository;
 
     QString m_baseUrl;
     QString m_changelogText;
