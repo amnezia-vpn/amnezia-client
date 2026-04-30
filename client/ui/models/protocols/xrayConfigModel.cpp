@@ -167,8 +167,7 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
 
 QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount())
-    {
+    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
         return QVariant();
     }
 
@@ -252,14 +251,18 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void XrayConfigModel::updateModel(amnezia::DockerContainer container,
-                                  const amnezia::XrayProtocolConfig& protocolConfig)
+void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig)
 {
     beginResetModel();
+
     m_container = container;
+
     m_protocolConfig = protocolConfig;
+
     applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+
     m_originalProtocolConfig = m_protocolConfig;
+
     endResetModel();
 }
 
@@ -267,6 +270,11 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
 {
     if (config.port.isEmpty()) {
         config.port = protocols::xray::defaultPort;
+    }
+
+    if (config.transportProto.isEmpty()) {
+        config.transportProto = ProtocolUtils::transportProtoToString(
+            ProtocolUtils::defaultTransportProto(amnezia::Proto::Xray), amnezia::Proto::Xray);
     }
 
     if (config.site.isEmpty()) {
