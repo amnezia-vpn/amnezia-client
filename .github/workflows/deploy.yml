@@ -113,7 +113,7 @@ jobs:
       shell: bash
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
-      run: deploy/build.sh -i all
+      run: deploy/build.sh --installer all
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
@@ -513,7 +513,7 @@ jobs:
         NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
         NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
       shell: bash
-      run: deploy/build.sh -i all
+      run: deploy/build.sh --installer all
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7

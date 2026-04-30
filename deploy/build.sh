@@ -19,36 +19,38 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         -t|--target)        TARGET="$2";         shift 2 ;;
         -f|--force)         : ${FORCE=true};     shift   ;;
-        -i|--installer)     installers+=("$2");  shift 2 ;;
-        -k|--keychain)      KEYCHAIN="$2";       shift 2 ;;
-        -a|--abi)           abis+=("$2");        shift 2 ;;
-        -s|--sign)          : ${SIGN:=true};     shift   ;;
+        --installer)        installers+=("$2");  shift 2 ;;
+        --abi)              abis+=("$2");        shift 2 ;;
+        --sign)             : ${SIGN:=true};     shift   ;;
         --aab)              : ${BUILD_AAB=true}; shift   ;;
         --help|-h|?)
-            echo "Usage: $0 [options] 
-Options:
-    -t|--target <name>        - specify build target
-    -f|--force                - force removal of build folder prior cmake configuration
-    -i|--installer <name|all> - specify an installer to build. allowed to be used multiple times
-    --qt-install-dir <path>   - specify Qt install path to be used during building
-            "
+            echo "Usage: $0 [options]"
+            echo "  Options:"
+            echo "  -t|--target <name>        - specify build target"
+            echo "  -f|--force                - force removal of build folder prior cmake configuration"
+            echo "  --installer <name|all>    - specify an installer(s) to build. allowed to be used multiple times"
+            echo "  --abi                     - specify Android ABIs for target to build for. all by default"
+            echo "  --sign                    - whether to sign the resulting files. only appicable to Android"
+            echo "  --aab                     - whether to build AAB. only applicable to Android"
             exit 0
             ;;
-            *) echo "Unknown arg"; exit 1 ;;
+        *) echo "Unknown arg \"$1\". Use $0 -h to get help"; exit 1 ;;
     esac
 done
+
+: ${INSTALLERS:="${installers[@]}"}
+: ${ABIS:="${abis[@]}"}
+: ${ABIS:="all"}
 
 : ${HOST:="$(uname -s)"}
 HOST=$(echo "$HOST" | tr '[:upper:]' '[:lower:]')
 : ${TARGET:="$HOST"}
 TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]')
 
-: ${INSTALLERS:="${installers[@]}"}
-: ${ABIS:="${abis[@]}"}
-
 bases=(~/Qt /opt/Qt)
 [ -n "${QT_INSTALL_DIR}" ] && bases=("${QT_INSTALL_DIR}/Qt" "${bases[@]}")
 
+# seek for Qt installation in bases folders
 qt_folders=()
 qif_folders=()
 for base in "${bases[@]}"; do
@@ -64,18 +66,20 @@ done
 : ${QIF_ROOT_PATH:=$(printf '%s\n' "${qif_folders[@]}" | awk -F'/' '{print $NF, $0}' | sort -V | tail -1 | awk '{print $2}')}
 
 if [[ -z "$QT_ROOT_PATH" ]]; then
-    echo "Qt not found in standard paths and in QT_INSTALL_DIR"
+    echo "* Qt not found in standard paths and in QT_INSTALL_DIR"
     echo "  Please install the suitable version of Qt"
     echo "  or specify it by using QT_ROOT_PATH/QT_INSTALL_DIR variables"
     exit 1
 fi
 
+# add host options
 case "$HOST" in
     linux)  [[ "$HOST" != "$TARGET" ]] && [[ -n "${QT_ROOT_PATH}" ]] && : ${QT_HOST_PATH:="$QT_ROOT_PATH/gcc_64"} ;;
     darwin) [[ "$HOST" != "$TARGET" ]] && [[ -n "${QT_ROOT_PATH}" ]] && : ${QT_HOST_PATH:="$QT_ROOT_PATH/macos"} ;;
-    *) echo "Unsupported host \"$HOST\""; exit 1;;
+    *) echo "Unsupported host \"$HOST\""; exit 1 ;;
 esac
 
+# add custom per-target options
 case "$TARGET" in
     linux)
         [ "$INSTALLERS" = "all" ] && INSTALLERS="IFW"
@@ -136,8 +140,15 @@ case "$TARGET" in
         : ${CMAKE_PREFIX_PATH:="$QT_ROOT_PATH/$toolchain_dir/lib/cmake/Qt6/qt.toolchain.cmake"}
         : ${CMAKE_TOOLCHAIN_FILE:="$QT_ROOT_PATH/$toolchain_dir/lib/cmake/Qt6/qt.toolchain.cmake"}
         ;;
-    *) echo "Unsupported target \"$TARGET\""; exit 1;;
+    *) echo "Unsupported target \"$TARGET\""; exit 1 ;;
 esac
+
+if [[ "$INSTALLERS" =~ IFW ]] && [[ -z "$QIF_ROOT_PATH" ]]; then
+    echo "* Qt Installer Framework not found in standard paths and in QT_INSTALL_DIR"
+    echo "  Please install the suitable version of Qt Installer Framework"
+    echo "  or specify it by using QIF_ROOT_PATH/QT_INSTALL_DIR variables"
+    exit 1
+fi
 
 # search for Android SDK and NDK
 if [[ "$TARGET" == "android" ]]; then
@@ -172,7 +183,6 @@ args=()
 [[ -n "$CMAKE_OSX_SYSROOT" ]]         && args+=("-DCMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT")
 [[ -n "$MACOS_NE" ]]                  && args+=("-DMACOS_NE=$MACOS_NE")
 [[ -n "$DEPLOY" ]]                    && args+=("-DDEPLOY=$DEPLOY")
-[[ -n "$KEYCHAIN" ]]                  && args+=("-DBUILD_VPN_KEYCHAIN=$KEYCHAIN")
 [[ -n "$ANDROID_ABI" ]]               && args+=("-DANDROID_ABI=$ANDROID_ABI")
 [[ -n "$ANDROID_SDK_ROOT" ]]          && args+=("-DANDROID_SDK_ROOT=$ANDROID_SDK_ROOT")
 [[ -n "$ANDROID_NDK_ROOT" ]]          && args+=("-DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT")
@@ -193,6 +203,9 @@ run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE"
 
 if [ -z "$no_installers" ]; then
     for installer in $INSTALLERS; do
-        (cd "$BUILD_PATH" && run_traced cpack -G "$installer" -D QTIFWDIR="$QIF_ROOT_PATH")
+        args=()
+        [[ "$installer" == IFW ]] && args+=(-D "QTIFWDIR=$QIF_ROOT_PATH")
+
+        (cd "$BUILD_PATH" && run_traced cpack -G "$installer" "${args[@]}")
     done
 fi
