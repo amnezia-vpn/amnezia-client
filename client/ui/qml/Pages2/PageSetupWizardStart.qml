@@ -13,6 +13,7 @@ import "../Components"
 
 PageType {
     id: root
+    enableTimer: (SettingsController.isOnTv()) ? false : true
 
     ColumnLayout {
         id: content
@@ -25,7 +26,7 @@ PageType {
             source: "qrc:/images/amneziaBigLogo.png"
 
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            Layout.topMargin: 32 + SettingsController.safeAreaTopMargin
+            Layout.topMargin: 32 + PageController.safeAreaTopMargin
             Layout.preferredWidth: 360
             Layout.preferredHeight: 287
         }
@@ -33,7 +34,7 @@ PageType {
         BasicButtonType {
             id: startButton
             Layout.fillWidth: true
-            Layout.bottomMargin: 48 + SettingsController.safeAreaBottomMargin
+            Layout.bottomMargin: 48 + PageController.safeAreaBottomMargin
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.alignment: Qt.AlignBottom
@@ -43,6 +44,24 @@ PageType {
             clickedFunc: function() {
                 PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
             }
+        }
+    }
+
+    Timer {
+        interval: 250
+        running: SettingsController.isOnTv()
+        repeat: true
+        onTriggered: {
+            startButton.forceActiveFocus()
+            if (startButton.activeFocus) {
+                running = false
+            }
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible && SettingsController.isOnTv()) {
+            startButton.forceActiveFocus()
         }
     }
 }

@@ -45,5 +45,6 @@ class IpcInterface
     SLOT( bool stopNetworkCheck() );
 
     SIGNAL( connectionLose() );
-    SIGNAL( networkChange() );
+    SIGNAL( wakeup() );
+    SIGNAL( networkChanged() );
 };

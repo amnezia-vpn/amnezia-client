@@ -5,7 +5,9 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-#include "core/api/apiDefs.h"
+#include "core/utils/api/apiEnums.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 
 class ApiAccountInfoModel : public QAbstractListModel
 {
@@ -18,8 +20,12 @@ public:
         ServiceDescriptionRole,
         EndDateRole,
         IsComponentVisibleRole,
+        IsSubscriptionRenewalAvailableRole,
         HasExpiredWorkerRole,
-        IsProtocolSelectionSupportedRole
+        IsProtocolSelectionSupportedRole,
+        IsSubscriptionExpiredRole,
+        IsSubscriptionExpiringSoonRole,
+        IsInAppPurchaseRole
     };
 
     explicit ApiAccountInfoModel(QObject *parent = nullptr);
@@ -31,7 +37,6 @@ public:
 public slots:
     void updateModel(const QJsonObject &accountInfoObject, const QJsonObject &serverConfig);
     QVariant data(const QString &roleString);
-
     QJsonArray getAvailableCountries();
     QJsonArray getIssuedConfigsInfo();
 
@@ -56,6 +61,9 @@ private:
         QStringList supportedProtocols;
 
         QString subscriptionDescription;
+
+        bool isInAppPurchase = false;
+        bool isRenewalAvailable = false;
     };
 
     AccountInfoData m_accountInfoData;

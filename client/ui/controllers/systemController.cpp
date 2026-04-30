@@ -19,8 +19,8 @@
     #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-SystemController::SystemController(const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_settings(settings)
+SystemController::SystemController(QObject *parent)
+    : QObject(parent)
 {
 }
 
@@ -38,8 +38,9 @@ void SystemController::saveFile(const QString &fileName, const QString &data)
     QFile file(fileName);
 #endif
 
-    // todo check if save successful
-    file.open(QIODevice::WriteOnly);
+    if (!file.open(QIODevice::WriteOnly)) {
+        return;
+    }
     file.write(data.toUtf8());
     file.close();
 

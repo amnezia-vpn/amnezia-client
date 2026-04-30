@@ -3,7 +3,7 @@ import QtQuick
 import Style 1.0
 
 Text {
-    lineHeight: 21.6 + LanguageModel.getLineHeightAppend()
+    lineHeight: 21.6 + LanguageUiController.getLineHeightAppend()
     lineHeightMode: Text.FixedHeight
 
     color: AmneziaStyle.color.paleGray

@@ -5,8 +5,6 @@
 #include <QJsonArray>
 #include <QVector>
 
-#include "settings.h"
-
 class ApiDevicesModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -20,14 +18,14 @@ public:
         IsCurrentDeviceRole
     };
 
-    explicit ApiDevicesModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit ApiDevicesModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(const QJsonArray &issuedConfigs);
+    void updateModel(const QJsonArray &issuedConfigs, const QString &currentInstallationUuid);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -46,7 +44,6 @@ private:
     };
 
     QVector<IssuedConfigInfo> m_issuedConfigs;
-
-    std::shared_ptr<Settings> m_settings;
+    QString m_currentInstallationUuid;
 };
 #endif // APIDEVICESMODEL_H

@@ -141,11 +141,7 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
-        function onApiConfigRemoved(message) {
-            PageController.showNotificationMessage(message)
-        }
-
-        function onRemoveProcessedServerFinished(finishedMessage) {
+        function onRemoveServerFinished(finishedMessage) {
             if (!ServersModel.getServersCount()) {
                 PageController.goToPageHome()
             } else {
@@ -158,8 +154,7 @@ PageType {
         function onNoInstalledContainers() {
             PageController.setTriggeredByConnectButton(true)
 
-            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
-            InstallController.setShouldCreateServer(false)
+            ServersUiController.processedIndex = ServersUiController.defaultIndex
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
         }
     }
@@ -215,7 +210,7 @@ PageType {
     }
 
     Connections {
-        target: ApiSettingsController
+        target: SubscriptionUiController
 
         function onErrorOccurred(error) {
             PageController.showErrorMessage(error)
@@ -223,12 +218,20 @@ PageType {
     }
 
     Connections {
-        target: ApiConfigsController
+        target: SubscriptionUiController
 
-        function onInstallServerFromApiFinished(message) {
+        function onApiConfigRemoved(message) {
+            PageController.showNotificationMessage(message)
+        }
+
+        function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
             if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
+                    ServersUiController.setDefaultServerIndex(preferredDefaultIndex)
+                } else {
+                    ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                }
+                ServersUiController.processedIndex = ServersUiController.defaultIndex
             }
 
             PageController.goToPageHome()
@@ -271,14 +274,13 @@ PageType {
             } else {
                 tabBar.visible = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.processedIndex = ServersUiController.defaultIndex
             }
 
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
 
         Keys.onPressed: function(event) {
-            console.debug(">>>> ", event.key, " Event is caught by StartPage")
             switch (event.key) {
             case Qt.Key_Tab:
             case Qt.Key_Down:
@@ -304,12 +306,12 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        
+
         // Also adjust TabBar position when keyboard appears (Android 14+ workaround)
-        anchors.bottomMargin: SettingsController.imeHeight
+        anchors.bottomMargin: PageController.imeHeight
 
         topPadding: 8
-        bottomPadding: 8 + SettingsController.safeAreaBottomMargin
+        bottomPadding: 8 + PageController.safeAreaBottomMargin
         leftPadding: 96
         rightPadding: 96
 
@@ -346,7 +348,7 @@ PageType {
             image: "qrc:/images/controls/home.svg"
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.processedIndex = ServersUiController.defaultIndex
                 tabBar.currentIndex = 0
             }
         }
@@ -383,12 +385,12 @@ PageType {
             objectName: "settingsTabButton"
 
             isSelected: tabBar.currentIndex === 2
-            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
+            image: (ServersUiController.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
             Binding {
                 target: settingsTabButton
                 property: "defaultColor"
                 value: "transparent"
-                when: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread)
+                when: (ServersUiController.hasServersFromGatewayApi && NewsModel.hasUnread)
             }
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)

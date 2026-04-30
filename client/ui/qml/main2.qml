@@ -21,12 +21,24 @@ Window  {
         function onStateChanged() {
             if (Qt.platform.os === "android") {
                 if (Qt.application.state === Qt.ApplicationActive) {
+                    root.visible = true
                     refreshTimer.restart()
-                } else if (Qt.application.state === Qt.ApplicationSuspended || 
-                          Qt.application.state === Qt.ApplicationInactive) {
-                    console.log("QML: Application going to background, state:", Qt.application.state)
                 }
             }
+        }
+    }
+
+    // Hide the window immediately when Android Activity.onPause() fires so that
+    // Qt's render loop stops before the EGL surface is disconnected.  This
+    // prevents "QRhiGles2: Failed to make context current" and the resulting
+    // black screen that appears after swiping home and returning.
+    Connections {
+        target: SettingsController
+        function onActivityPaused() {
+            if (Qt.platform.os === "android") root.visible = false
+        }
+        function onActivityResumed() {
+            if (Qt.platform.os === "android") root.visible = true
         }
     }
 
@@ -35,7 +47,7 @@ Window  {
         interval: 150
         repeat: false
         onTriggered: {
-            if (Qt.platform.os === "android" && SettingsController.isEdgeToEdgeEnabled()) {
+            if (Qt.platform.os === "android" && PageController.isEdgeToEdgeEnabled()) {
                 console.log("QML: Application resumed with edge-to-edge")
             }
         }
@@ -54,6 +66,11 @@ Window  {
     onClosing: function(close) {
         close.accepted = false
         PageController.closeWindow()
+    }
+
+    onSceneGraphError: function(error, message) {
+        // Prevent qFatal crash on Android when EGL context is lost
+        console.warn("Scene graph error:", error, message)
     }
 
     title: "AmneziaVPN"
@@ -197,7 +214,7 @@ Window  {
             id: privateKeyPassphraseDrawer
 
             anchors.fill: parent
-            expandedHeight: root.height * 0.35 + SettingsController.safeAreaBottomMargin + SettingsController.imeHeight
+            expandedHeight: root.height * 0.35 + PageController.safeAreaBottomMargin + PageController.imeHeight
 
             expandedStateContent: ColumnLayout {
                 anchors.top: parent.top
@@ -272,6 +289,34 @@ Window  {
             id: questionDrawer
 
             anchors.fill: parent
+        }
+    }
+
+    Item {
+        objectName: "subscriptionExpiredDrawerItem"
+
+        anchors.fill: parent
+
+        SubscriptionExpiredDrawer {
+            id: subscriptionExpiredDrawer
+
+            anchors.fill: parent
+        }
+    }
+
+    Connections {
+        target: SubscriptionUiController
+
+        function onSubscriptionExpiredOnServer() {
+            subscriptionExpiredDrawer.openTriggered()
+        }
+    }
+
+    Connections {
+        target: SubscriptionUiController
+
+        function onRenewalLinkReceived(url) {
+            Qt.openUrlExternally(url)
         }
     }
 

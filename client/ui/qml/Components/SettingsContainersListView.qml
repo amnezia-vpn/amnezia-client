@@ -5,8 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
-import ContainerEnum 1.0
 import ContainerProps 1.0
 
 import "../Controls2"
@@ -31,33 +29,30 @@ ListViewType {
             clickedFunction: function() {
                 if (isInstalled) {
                     var containerIndex = root.model.mapToSource(index)
-                    ContainersModel.setProcessedContainerIndex(containerIndex)
+                    ServersUiController.processedContainerIndex = containerIndex
 
-                    if (serviceType !== ProtocolEnum.Other && isThirdPartyConfig) {
-                        ProtocolsModel.updateModel(config)
-                        PageController.goToPage(PageEnum.PageProtocolRaw)
-                        return
+                    if (isVpnContainer) {
+                        // var isThirdPartyConfig = root.model.data(index, ContainersModel.IsThirdPartyConfigRole)
+                        if (isThirdPartyConfig) {
+                            InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
+                            PageController.goToPage(PageEnum.PageProtocolRaw)
+                            return
+                        }
                     }
 
-                    switch (containerIndex) {
-                    case ContainerEnum.Ipsec: {
-                        ProtocolsModel.updateModel(config)
+                    if (isIpsec) {
+                        InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
                         PageController.goToPage(PageEnum.PageProtocolRaw)
-                        break
-                    }
-                    case ContainerEnum.Dns: {
+                    } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
-                        break
-                    }
-                    default: {
-                        ProtocolsModel.updateModel(config)
+                    } else {
+                        InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
-                    }
                     }
 
                 } else {
-                    ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
-                    InstallController.setShouldCreateServer(false)
+                    var containerIndex = root.model.mapToSource(index)
+                    ServersUiController.processedContainerIndex = containerIndex
                     PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 }
             }

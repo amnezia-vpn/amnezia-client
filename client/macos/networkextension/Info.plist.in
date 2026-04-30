@@ -8,7 +8,7 @@
 	<string>AmneziaVPNNetworkExtension</string>
 
 	<key>CFBundleIdentifier</key>
-	<string>org.amnezia.AmneziaVPN.network-extension</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -16,9 +16,9 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>${APPLE_PROJECT_VERSION}</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>${CMAKE_PROJECT_VERSION_TWEAK}</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
@@ -41,6 +41,6 @@
 	<string>group.org.amnezia.AmneziaVPN</string>
 
 	<key>com.wireguard.macos.app_group_id</key>
-	<string>${BUILD_VPN_DEVELOPMENT_TEAM}.group.org.amnezia.AmneziaVPN</string>
+	<string>$(DEVELOPMENT_TEAM).group.org.amnezia.AmneziaVPN</string>
 </dict>
 </plist>

@@ -9,17 +9,27 @@ private const val XRAY_DEFAULT_MAX_MEMORY: Long = 50 shl 20 // 50 MB
 class XrayConfig protected constructor(
     protocolConfigBuilder: ProtocolConfig.Builder,
     val socksPort: Int,
+    val socksUser: String,
+    val socksPass: String,
     val maxMemory: Long,
 ) : ProtocolConfig(protocolConfigBuilder) {
 
     protected constructor(builder: Builder) : this(
         builder,
         builder.socksPort,
+        builder.socksUser,
+        builder.socksPass,
         builder.maxMemory
     )
 
     class Builder : ProtocolConfig.Builder(false) {
         internal var socksPort: Int = 0
+            private set
+
+        internal var socksUser: String = ""
+            private set
+
+        internal var socksPass: String = ""
             private set
 
         internal var maxMemory: Long = XRAY_DEFAULT_MAX_MEMORY
@@ -28,6 +38,10 @@ class XrayConfig protected constructor(
         override var mtu: Int = XRAY_DEFAULT_MTU
 
         fun setSocksPort(port: Int) = apply { socksPort = port }
+
+        fun setSocksUser(user: String) = apply { socksUser = user }
+
+        fun setSocksPass(pass: String) = apply { socksPass = pass }
 
         fun setMaxMemory(maxMemory: Long) = apply { this.maxMemory = maxMemory }
 

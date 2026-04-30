@@ -18,12 +18,36 @@ PageType {
     id: root
 
     property var processedServer
+    property bool subscriptionExpired: false
+    property bool subscriptionExpiringSoon: false
+    property bool isSubscriptionRenewalAvailable: false
+    property bool isInAppPurchase: false
+
+    function updateSubscriptionState() {
+        root.subscriptionExpired = ServersModel.getProcessedServerData("isSubscriptionExpired")
+        root.subscriptionExpiringSoon = ServersModel.getProcessedServerData("isSubscriptionExpiringSoon")
+        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
+        root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
+    }
+
+    Component.onCompleted: {
+        root.updateSubscriptionState()
+    }
 
     Connections {
         target: ServersModel
 
         function onProcessedServerChanged() {
             root.processedServer = proxyServersModel.get(0)
+            root.updateSubscriptionState()
+        }
+    }
+
+    Connections {
+        target: ApiAccountInfoModel
+
+        function onModelReset() {
+            root.updateSubscriptionState()
         }
     }
 
@@ -66,7 +90,7 @@ PageType {
                 id: backButton
                 objectName: "backButton"
 
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
@@ -76,16 +100,15 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: root.subscriptionExpired || root.subscriptionExpiringSoon ? 0 : 4
 
                 actionButtonImage: "qrc:/images/controls/settings.svg"
 
                 headerText: root.processedServer.name
-                descriptionText: qsTr("Location for connection")
 
                 actionButtonFunction: function() {
                     PageController.showBusyIndicator(true)
-                    let result = ApiSettingsController.getAccountInfo(false)
+                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
                     PageController.showBusyIndicator(false)
                     if (!result) {
                         return
@@ -93,6 +116,51 @@ PageType {
 
                     PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
                 }
+            }
+
+            ParagraphTextType {
+                visible: root.subscriptionExpired || root.subscriptionExpiringSoon
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
+                color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
+            }
+
+            BasicButtonType {
+                visible: (root.subscriptionExpired || root.subscriptionExpiringSoon)
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 28
+                Layout.bottomMargin: 0
+
+                defaultColor: AmneziaStyle.color.paleGray
+                hoveredColor: AmneziaStyle.color.lightGray
+                pressedColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.midnightBlack
+
+                text: qsTr("Renew subscription")
+
+                clickedFunc: function() {
+                    SubscriptionUiController.getRenewalLink(ServersUiController.getProcessedServerIndex())
+                }
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: (root.subscriptionExpired || root.subscriptionExpiringSoon) ? 12 : 4
+                Layout.bottomMargin: 8
+
+                text: qsTr("Location for connection")
+                color: AmneziaStyle.color.mutedGray
             }
         }
 
@@ -132,7 +200,7 @@ PageType {
                             PageController.showBusyIndicator(true)
                             var prevIndex = ApiCountryModel.currentIndex
                             ApiCountryModel.currentIndex = index
-                            if (!ApiConfigsController.updateServiceFromGateway(ServersModel.defaultIndex, countryCode, countryName)) {
+                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.getProcessedServerIndex(), countryCode, countryName)) {
                                 ApiCountryModel.currentIndex = prevIndex
                             }
                             PageController.showBusyIndicator(false)

@@ -20,7 +20,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -37,7 +37,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
 
-        property var isServerFromApi: ServersModel.isServerFromApi(ServersModel.defaultIndex)
+        property var isServerFromApi: ServersModel.isServerFromApi(ServersUiController.defaultIndex)
 
         enabled: !isServerFromApi
 
@@ -149,6 +149,13 @@ PageType {
                 text: qsTr("Save")
 
                 clickedFunc: function() {
+                    if (primaryDns.textField.text === "") {
+                        primaryDns.errorText = qsTr("Primary DNS cannot be empty")
+                        return
+                    }
+                    primaryDns.errorText = ""
+                    secondaryDns.errorText = ""
+
                     if (primaryDns.textField.text !== SettingsController.primaryDns) {
                         SettingsController.primaryDns = primaryDns.textField.text
                     }

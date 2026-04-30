@@ -48,7 +48,7 @@ PageType {
 
     Component.onCompleted: {
         PageController.showBusyIndicator(true)
-        ApiConfigsController.prepareVpnKeyExport()
+        SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
         PageController.showBusyIndicator(false)
     }
 
@@ -61,7 +61,7 @@ PageType {
             width: root.width
 
             BackButtonType {
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             Label {
@@ -86,7 +86,7 @@ PageType {
                 leftImageSource: "qrc:/images/controls/copy.svg"
 
                 clickedFunc: function() {
-                    ApiConfigsController.copyVpnKeyToClipboard()
+                    SubscriptionUiController.copyVpnKeyToClipboard()
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
@@ -119,7 +119,7 @@ PageType {
 
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        ApiConfigsController.exportVpnKey(fileName)
+                        SubscriptionUiController.exportVpnKey(ServersUiController.getProcessedServerIndex(), fileName)
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -141,7 +141,7 @@ PageType {
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
-                    ApiConfigsController.prepareVpnKeyExport()
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
                     PageController.showBusyIndicator(false)
                     vpnKeyDrawer.openTriggered()
                 }
@@ -155,7 +155,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: ApiConfigsController.qrCodesCount > 0
+                visible: SubscriptionUiController.qrCodesCount > 0
                 color: "white"
                 radius: 12
 
@@ -165,7 +165,7 @@ PageType {
                     fillMode: Image.PreserveAspectFit
                     sourceSize.width: parent.width
                     sourceSize.height: parent.height
-                    source: ApiConfigsController.qrCodesCount > 0 && ApiConfigsController.qrCodes[0] ? ApiConfigsController.qrCodes[0] : ""
+                    source: SubscriptionUiController.qrCodesCount > 0 && SubscriptionUiController.qrCodes[0] ? SubscriptionUiController.qrCodes[0] : ""
                 }
             }
 
@@ -175,7 +175,7 @@ PageType {
                 Layout.bottomMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: ApiConfigsController.qrCodesCount > 0
+                visible: SubscriptionUiController.qrCodesCount > 0
                 horizontalAlignment: Text.AlignHCenter
                 text: qsTr("To read the QR code in the Amnezia app, tap + in the main menu → 'QR code'")
             }
@@ -219,7 +219,7 @@ PageType {
                     font.pixelSize: 16
                     font.weight: Font.Medium
                     font.family: "PT Root UI VF"
-                    text: ApiConfigsController.vpnKey
+                    text: SubscriptionUiController.vpnKey
                     wrapMode: Text.Wrap
                     background: Rectangle { color: AmneziaStyle.color.transparent }
                 }

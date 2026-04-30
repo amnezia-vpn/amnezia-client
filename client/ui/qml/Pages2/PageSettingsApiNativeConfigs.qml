@@ -28,7 +28,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
         
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -191,9 +191,9 @@ PageType {
         }
         if (fileName !== "") {
             PageController.showBusyIndicator(true)
-            let result = ApiConfigsController.exportNativeConfig(countryCode, fileName)
+            let result = SubscriptionUiController.exportNativeConfig(ServersUiController.getProcessedServerIndex(), countryCode, fileName)
             if (result) {
-                ApiSettingsController.getAccountInfo(true)
+                SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
             }
 
             PageController.showBusyIndicator(false)
@@ -205,9 +205,9 @@ PageType {
 
     function revokeConfig(countryCode) {
         PageController.showBusyIndicator(true)
-        let result = ApiConfigsController.revokeNativeConfig(countryCode)
+        let result = SubscriptionUiController.revokeNativeConfig(ServersUiController.getProcessedServerIndex(), countryCode)
         if (result) {
-            ApiSettingsController.getAccountInfo(true)
+            SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
         }
         PageController.showBusyIndicator(false)
 

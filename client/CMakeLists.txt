@@ -25,6 +25,7 @@ add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
 add_definitions(-DPROD_AGW_PUBLIC_KEY="$ENV{PROD_AGW_PUBLIC_KEY}")
 add_definitions(-DPROD_S3_ENDPOINT="$ENV{PROD_S3_ENDPOINT}")
+add_definitions(-DFALLBACK_S3_ENDPOINT="$ENV{FALLBACK_S3_ENDPOINT}")
 
 add_definitions(-DDEV_AGW_PUBLIC_KEY="$ENV{DEV_AGW_PUBLIC_KEY}")
 add_definitions(-DDEV_AGW_ENDPOINT="$ENV{DEV_AGW_ENDPOINT}")
@@ -61,7 +62,13 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
 endif()
 
-qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
+qt6_add_resources(QRC ${QRC}
+    ${CMAKE_CURRENT_LIST_DIR}/images/images.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/images/flagKit.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/client_scripts/clientScripts.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/ui/qml/qml.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/server_scripts/serverScripts.qrc
+)
 
 # -- i18n begin
 set(CMAKE_AUTORCC ON)
@@ -78,6 +85,7 @@ set(AMNEZIAVPN_TS_FILES
 )
 
 file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
+list(FILTER AMNEZIAVPN_TS_SOURCES EXCLUDE REGEX "qtgamepad/examples")
 
 qt_create_translation(AMNEZIAVPN_QM_FILES ${AMNEZIAVPN_TS_SOURCES} ${AMNEZIAVPN_TS_FILES})
 
@@ -225,6 +233,12 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
         COMMAND_EXPAND_LISTS
     )
 endif()
+
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+    add_subdirectory(tests)
+endif()
+
+list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 

@@ -4,7 +4,10 @@
 #include <QApplication>
 #include <QHostAddress>
 
-#include "../client/protocols/protocols_defs.h"
+#include "../client/core/utils/protocolEnum.h"
+#include "../client/core/protocols/protocolUtils.h"
+#include "../client/core/utils/constants/configKeys.h"
+#include "../client/core/utils/constants/protocolConstants.h"
 #include "qjsonarray.h"
 #include "version.h"
 
@@ -33,18 +36,10 @@ KillSwitch* KillSwitch::instance()
 
 bool KillSwitch::init()
 {
-#ifdef Q_OS_LINUX
-    if (!LinuxFirewall::isInstalled()) {
-        LinuxFirewall::install();
-    }
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     m_appSettigns = QSharedPointer<SecureQSettings>(new SecureQSettings(ORGANIZATION_NAME, APPLICATION_NAME, nullptr));
 #endif
-#ifdef Q_OS_MACOS
-    if (!MacOSFirewall::isInstalled()) {
-        MacOSFirewall::install();
-    }
-    m_appSettigns = QSharedPointer<SecureQSettings>(new SecureQSettings(ORGANIZATION_NAME, APPLICATION_NAME, nullptr));
-#endif
+
     if (isStrictKillSwitchEnabled()) {
         return disableAllTraffic();
     }
@@ -79,7 +74,6 @@ bool KillSwitch::isStrictKillSwitchEnabled()
                              + "\\" + QString(APPLICATION_NAME), QSettings::NativeFormat);
     return RegHLM.value("strictKillSwitchEnabled", false).toBool();
 #endif
-    m_appSettigns->sync();
     return m_appSettigns->value("Conf/strictKillSwitchEnabled", false).toBool();
 }
 
@@ -204,11 +198,11 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 #ifdef Q_OS_WIN
     InterfaceConfig config;
 
-    config.m_primaryDnsServer = configStr.value(amnezia::config_key::dns1).toString();
+    config.m_primaryDnsServer = configStr.value(amnezia::configKey::dns1).toString();
 
     // We don't use secondary DNS if primary DNS is AmneziaDNS
     if (!config.m_primaryDnsServer.contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        config.m_secondaryDnsServer = configStr.value(amnezia::config_key::dns2).toString();
+        config.m_secondaryDnsServer = configStr.value(amnezia::configKey::dns2).toString();
     }
 
     config.m_serverPublicKey = "openvpn";
@@ -246,14 +240,14 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
         }
     }
 
-    for (const QJsonValue &i : configStr.value(amnezia::config_key::splitTunnelApps).toArray()) {
+    for (const QJsonValue &i : configStr.value(amnezia::configKey::splitTunnelApps).toArray()) {
         if (!i.isString()) {
             break;
         }
         config.m_vpnDisabledApps.append(i.toString());
     }
 
-    for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
+    for (auto dns : configStr.value(amnezia::configKey::allowedDnsServers).toArray()) {
         if (!dns.isString()) {
             break;
         }
@@ -261,7 +255,7 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
     }
 
     // killSwitch toggle
-    if (QVariant(configStr.value(amnezia::config_key::killSwitchOption).toString()).toBool()) {
+    if (QVariant(configStr.value(amnezia::configKey::killSwitchOption).toString()).toBool()) {
         WindowsFirewall::create(this)->enablePeerTraffic(config);
     }
 
@@ -326,17 +320,17 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
     QStringList dnsServers;
 
-    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
+    dnsServers.append(configStr.value(amnezia::configKey::dns1).toString());
 
     // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!configStr.value(amnezia::config_key::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    if (!configStr.value(amnezia::configKey::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
+        dnsServers.append(configStr.value(amnezia::configKey::dns2).toString());
     }
 
     dnsServers.append("127.0.0.1");
     dnsServers.append("127.0.0.53");
     
-    for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
+    for (auto dns : configStr.value(amnezia::configKey::allowedDnsServers).toArray()) {
         if (!dns.isString()) {
             break;
         }
@@ -368,14 +362,14 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
 
     QStringList dnsServers;
-    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
+    dnsServers.append(configStr.value(amnezia::configKey::dns1).toString());
 
     // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!configStr.value(amnezia::config_key::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    if (!configStr.value(amnezia::configKey::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
+        dnsServers.append(configStr.value(amnezia::configKey::dns2).toString());
     }
     
-    for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
+    for (auto dns : configStr.value(amnezia::configKey::allowedDnsServers).toArray()) {
         if (!dns.isString()) {
             break;
         }
