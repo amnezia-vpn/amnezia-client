@@ -11,7 +11,7 @@
 #include <QTimer>
 #include <QtDBus/QtDBus>
 
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 #include "leakdetector.h"
 #include "logger.h"
 
