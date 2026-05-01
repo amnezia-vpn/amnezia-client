@@ -77,11 +77,9 @@ func (h *UserHandler) GetMe(c *gin.Context) {
 func (h *UserHandler) GetSubscription(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
-	// Проверяем доступность пробного периода
-	var trialCount int64
-	if err := h.db.Model(&models.Payment{}).
-		Where("user_id = ? AND plan = ? AND status = ?", userID, models.PlanTrial, models.PaymentSucceeded).
-		Count(&trialCount).Error; err != nil {
+	// Пробный период доступен только до первой успешной покупки подписки.
+	trialAvailable, err := trialAvailableForUser(h.db, userID)
+	if err != nil {
 		if isDatabaseBusyError(err) {
 			respondDatabaseBusy(c)
 			return
@@ -89,7 +87,6 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
 		return
 	}
-	trialAvailable := trialCount == 0
 
 	sub, err := ensureDefaultSubscription(h.db, userID)
 	if err != nil {

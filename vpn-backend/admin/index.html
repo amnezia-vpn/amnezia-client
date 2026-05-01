@@ -486,7 +486,14 @@
     }
 
     function fmtMoney(value) {
-      return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(Number(value || 0));
+      const amount = Number(value || 0);
+      const hasKopecks = Math.abs(amount - Math.round(amount)) > 0.001;
+      return new Intl.NumberFormat('ru-RU', {
+        style: 'currency',
+        currency: 'RUB',
+        minimumFractionDigits: hasKopecks ? 2 : 0,
+        maximumFractionDigits: hasKopecks ? 2 : 0
+      }).format(amount);
     }
 
     function planLabel(plan) {

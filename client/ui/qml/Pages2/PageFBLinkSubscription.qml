@@ -61,7 +61,9 @@ PageType {
     }
 
     function formatRub(value) {
-        return Math.round(Number(value || 0)).toLocaleString(Qt.locale("ru_RU")) + " ₽"
+        var amount = Number(value || 0)
+        var hasKopecks = Math.abs(amount - Math.round(amount)) > 0.001
+        return amount.toLocaleString(Qt.locale("ru_RU"), "f", hasKopecks ? 2 : 0) + " ₽"
     }
 
     function resetPromoPreview() {
@@ -892,6 +894,7 @@ PageType {
                     }
 
                     LabelTextType {
+                        Layout.fillWidth: true
                         text: qsTr("Платёж открылся в браузере. Подписка активируется автоматически, как только платёжная система пришлёт подтверждение.")
                         font.pixelSize: 11
                         color: FBLinkStyle.color.mutedGray

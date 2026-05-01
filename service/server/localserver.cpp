@@ -14,6 +14,8 @@
 #include "ipc.h"
 #include "killswitch.h"
 #include "logger.h"
+#include "router.h"
+#include "xray.h"
 
 #ifdef Q_OS_WIN
     #include "tapcontroller_win.h"
@@ -24,6 +26,35 @@ Logger logger("WgDaemonServer");
 constexpr int kKillSwitchInitRetryDelayMs = 1500;
 constexpr int kKillSwitchInitMaxRetries = 20;
 constexpr int kKillSwitchInitLongRetryDelayMs = 10000;
+
+#ifdef Q_OS_WIN
+constexpr int kWindowsWakeRecoveryDelayMs = 2500;
+
+void recoverWindowsNetworkState(WindowsDaemon &daemon, const char *reason)
+{
+    logger.info() << "Recovering Windows network state:" << reason;
+
+    daemon.recoverNetworkState();
+
+    if (!Router::clearSavedRoutes()) {
+        logger.warning() << "Windows network recovery: failed to clear saved routes";
+    }
+    if (!Router::StartRoutingIpv6()) {
+        logger.warning() << "Windows network recovery: failed to restore IPv6 routing";
+    }
+    if (!Router::restoreResolvers()) {
+        logger.warning() << "Windows network recovery: failed to restore DNS resolvers";
+    }
+    if (!Router::deleteTun(QStringLiteral("tun2"))) {
+        logger.warning() << "Windows network recovery: failed to delete stale TUN routes";
+    }
+    Router::flushDns();
+
+    if (!Xray::getInstance().stopXray()) {
+        logger.warning() << "Windows network recovery: failed to stop XRay cleanly";
+    }
+}
+#endif
 }
 
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
@@ -69,7 +100,22 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
     m_networkWatcher.initialize();
     connect(&m_networkWatcher, &NetworkWatcher::networkChanged, &m_ipcServer, &IpcServer::networkChanged);
-    connect(&m_networkWatcher, &NetworkWatcher::wakeup, &m_ipcServer, &IpcServer::wakeup);
+    connect(&m_networkWatcher, &NetworkWatcher::wakeup, this, [this]() {
+#ifdef Q_OS_WIN
+        recoverWindowsNetworkState(daemon, "wakeup");
+        QTimer::singleShot(kWindowsWakeRecoveryDelayMs, this, [this]() {
+            recoverWindowsNetworkState(daemon, "delayed wakeup");
+            QMetaObject::invokeMethod(&m_ipcServer, "wakeup", Qt::DirectConnection);
+        });
+#else
+        QMetaObject::invokeMethod(&m_ipcServer, "wakeup", Qt::DirectConnection);
+#endif
+    });
+
+#ifdef Q_OS_WIN
+    recoverWindowsNetworkState(daemon, "service startup");
+#endif
+
     auto retriesLeft = QSharedPointer<int>::create(kKillSwitchInitMaxRetries);
     auto initKillSwitch = QSharedPointer<std::function<void()>>::create();
     *initKillSwitch = [this, retriesLeft, initKillSwitch]() {

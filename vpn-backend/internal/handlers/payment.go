@@ -47,6 +47,20 @@ var planPrices = map[models.PlanType]struct {
 	models.PlanVIP3M:   {Amount: 1015.00, DurationDays: 90},
 }
 
+func trialAvailableForUser(db *gorm.DB, userID uint) (bool, error) {
+	var successfulPayments int64
+	err := db.Model(&models.Payment{}).
+		Where("user_id = ? AND status = ? AND plan IN ?", userID, models.PaymentSucceeded, []models.PlanType{
+			models.PlanTrial,
+			models.PlanBasic,
+			models.PlanBasic3M,
+			models.PlanVIP,
+			models.PlanVIP3M,
+		}).
+		Count(&successfulPayments).Error
+	return successfulPayments == 0, err
+}
+
 func paymentPreviewResponse(plan models.PlanType, promoCode string, app *promoApplication) gin.H {
 	applied := app.PromoCode != nil
 	return gin.H{
@@ -81,6 +95,17 @@ func (h *PaymentHandler) PreviewPayment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Неизвестный тариф"})
 		return
 	}
+	if plan == models.PlanTrial {
+		available, err := trialAvailableForUser(h.db, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось проверить доступность пробного периода"})
+			return
+		}
+		if !available {
+			c.JSON(http.StatusConflict, gin.H{"error": "Пробный период доступен только новым пользователям"})
+			return
+		}
+	}
 
 	app, err := validatePromoCode(h.db, userID, plan, req.PromoCode, priceInfo.Amount)
 	if err != nil {
@@ -103,14 +128,15 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 
 	plan := models.PlanType(req.Plan)
 
-	// Пробный период — только если не было успешных trial оплат
+	// Пробный период — только если пользователь ещё не покупал подписку.
 	if plan == models.PlanTrial {
-		var trialCount int64
-		h.db.Model(&models.Payment{}).
-			Where("user_id = ? AND plan = ? AND status = ?", userID, models.PlanTrial, models.PaymentSucceeded).
-			Count(&trialCount)
-		if trialCount > 0 {
-			c.JSON(http.StatusConflict, gin.H{"error": "Пробный период уже был использован"})
+		available, err := trialAvailableForUser(h.db, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось проверить доступность пробного периода"})
+			return
+		}
+		if !available {
+			c.JSON(http.StatusConflict, gin.H{"error": "Пробный период доступен только новым пользователям"})
 			return
 		}
 	}

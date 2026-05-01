@@ -57,6 +57,26 @@ WindowsDaemon::~WindowsDaemon() {
   logger.debug() << "Daemon released";
 }
 
+void WindowsDaemon::recoverNetworkState() {
+  logger.info() << "Recovering stale Windows VPN state";
+
+  if (m_splitTunnelManager) {
+    m_splitTunnelManager->stop();
+  }
+
+  if (m_wgutils) {
+    m_wgutils->deleteInterface();
+  } else if (m_firewallManager) {
+    m_firewallManager->disableKillSwitch();
+  }
+
+  if (m_dnsutils) {
+    m_dnsutils->restoreResolvers();
+  }
+
+  m_inetAdapterIndex = -1;
+}
+
 void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAdapterIndex) {
   // Before creating the interface we need to check which adapter
   // routes to the server endpoint
