@@ -25,7 +25,7 @@ class OpenVPNAdapter(ConanFile):
             "iphoneos": "iOS",
             "iphonesimulator": "iOS Simulator"
         }.get(self._sdk)
-    
+
     @property
     def _configuration(self):
         return "Debug" if self.settings.get_safe("build_type") == "Debug" else "Release"
@@ -64,7 +64,7 @@ class OpenVPNAdapter(ConanFile):
     def package(self):
         shutil.copytree(os.path.join(self.build_folder, "OpenVPNAdapter.framework"),
                         os.path.join(self.package_folder, "OpenVPNAdapter.framework"))
-        
+
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::openvpnadapter")
         self.cpp_info.type = PackageType.STATIC

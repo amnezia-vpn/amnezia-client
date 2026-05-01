@@ -8,7 +8,7 @@ import os
 class WinSplitTunnel(ConanFile):
     name = "win-split-tunnel"
     version = "1.2.5.0"
-    settings = "os", "arch", "build_type", "compiler"
+    settings = "os", "arch"
 
     @property
     def _arch(self):

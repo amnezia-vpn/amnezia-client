@@ -9,7 +9,7 @@ import os
 class AmneziaXrayBindings(ConanFile):
     name = "amnezia-xray-bindings"
     version = "1.1.0"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler"
 
     @property
     def _goos(self):
@@ -35,11 +35,12 @@ class AmneziaXrayBindings(ConanFile):
     def config_options(self):
         self.package_type = "shared-library" if self._is_windows else "static-library"
 
-    def validate(self):
-        if not self._goos or not self._goarch:
-            raise ConanInvalidConfiguration(
-                f"{self.name} v{self.version} does not support {self.settings.os} {self.settings.arch}"
-            )
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+        if self._is_windows:
+            # mingw-builds is being used on Windows
+            del self.settings.compiler
 
     def layout(self):
         basic_layout(self)
@@ -51,6 +52,12 @@ class AmneziaXrayBindings(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
             self.tool_requires("mingw-builds/15.1.0")
+
+    def validate(self):
+        if not self._goos or not self._goarch:
+            raise ConanInvalidConfiguration(
+                f"{self.name} v{self.version} does not support {self.settings.os} {self.settings.arch}"
+            )
 
     def source(self):
         get(self, "https://github.com/amnezia-vpn/amnezia-xray-bindings/archive/v1.1.0.zip",

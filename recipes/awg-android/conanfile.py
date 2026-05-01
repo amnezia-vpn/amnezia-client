@@ -11,7 +11,10 @@ class AwgAndroid(ConanFile):
     name = "awg-android"
     version = "1.1.7"
     settings = "os", "arch", "build_type", "compiler"
-    package_type = "shared-library"
+
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self)

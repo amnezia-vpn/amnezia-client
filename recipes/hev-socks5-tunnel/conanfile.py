@@ -16,7 +16,7 @@ required_conan_version = ">=2.26"
 class HevSocks5Tunnel(ConanFile):
     name = "hev-socks5-tunnel"
     version = "2.14.4"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler"
     options = {
         "shared": [True, False],
         "as_framework": [True, False],
@@ -31,6 +31,8 @@ class HevSocks5Tunnel(ConanFile):
             del self.options.as_framework
 
     def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
         if self.options.get_safe("as_framework"):
             self.options.shared = False
 

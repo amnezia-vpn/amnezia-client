@@ -10,13 +10,7 @@ import os
 class AwgApple(ConanFile):
     name = "awg-apple"
     version = "2.0.1"
-    settings = "os", "arch"
-    options = {
-        "as_framework": [True, False]
-    }
-    default_options = {
-        "as_framework": False
-    }
+    settings = "os", "arch", "compiler"
 
     @property
     def _goarch(self):
@@ -27,11 +21,15 @@ class AwgApple(ConanFile):
         archs = str(self.settings.arch).split("|")
         return " ".join(arch_map.get(arch, arch) for arch in archs)
 
-    def build_requirements(self):
-        self.tool_requires("go/1.26.0")
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, build_folder=os.path.join(self.folders.source, "Sources/WireGuardKitGo"))
+
+    def build_requirements(self):
+        self.tool_requires("go/1.26.0")
 
     def validate(self):
         if not is_apple_os(self):

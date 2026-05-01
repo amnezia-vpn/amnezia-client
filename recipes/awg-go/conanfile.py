@@ -28,6 +28,9 @@ class AwgGo(ConanFile):
             "armv8": "arm64"
         }.get(str(self.settings.arch))
 
+    def layout(self):
+        basic_layout(self, build_folder=".")
+
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
 
@@ -41,9 +44,6 @@ class AwgGo(ConanFile):
         get(self, f"https://github.com/amnezia-vpn/amneziawg-go/archive/refs/tags/v{self.version}.zip",
             sha256="34da7d4189f215f3930de441548bc2a0c89d54d347a4fb85cb9c715fce6413aa", strip_root=True
         )
-
-    def layout(self):
-        basic_layout(self, build_folder=".")
 
     def generate(self):
         tc = AutotoolsToolchain(self)

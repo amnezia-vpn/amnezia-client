@@ -36,14 +36,14 @@ class Openvpn(ConanFile):
             self.tool_requires("pkgconf/2.5.1")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1.0]", visible=False)
-        self.requires("lz4/[>=1.7.1]", visible=False)
+        self.requires("openssl/3.6.1", visible=False)
+        self.requires("lz4/1.10.0", visible=False)
         self.requires("lzo/2.10", visible=False)
+        if self.settings.os == "Linux":
+            self.requires("libnl/3.9.0", visible=False)
+            self.requires("libcap-ng/0.9.2", visible=False)
         if self._is_windows:
             self.requires("tap-windows6/[*]")
-        if self.settings.os == "Linux":
-            self.requires("libnl/3.9.0")
-            self.requires("libcap-ng/0.9.2")
 
     def source(self):
         get(self, f"https://github.com/OpenVPN/openvpn/archive/refs/tags/v{self.version}.zip",

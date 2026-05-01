@@ -12,8 +12,11 @@ from pathlib import Path
 class AmneziaLibxray(ConanFile):
     name = "amnezia-libxray"
     version = "1.0.0"
+    settings = "os", "arch", "compiler"
 
-    settings = "os", "arch"
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, build_folder=".")
