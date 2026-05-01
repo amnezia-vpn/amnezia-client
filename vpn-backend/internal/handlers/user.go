@@ -37,22 +37,8 @@ func sanitizeSupportText(value string) string {
 	return sanitized
 }
 
-const pendingPaymentSyncWindow = 30 * time.Minute
-
 func NewUserHandler(db *gorm.DB, cfg *config.Config) *UserHandler {
 	return &UserHandler{db: db, cfg: cfg}
-}
-
-func shouldSyncPendingPayment(payment models.Payment) bool {
-	if payment.YooKassaID == "" || payment.Status != models.PaymentPending {
-		return false
-	}
-
-	if payment.CreatedAt.IsZero() {
-		return true
-	}
-
-	return time.Since(payment.CreatedAt) <= pendingPaymentSyncWindow
 }
 
 // GET /api/v1/me
@@ -96,37 +82,6 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
 		return
-	}
-
-	if h.cfg != nil && h.cfg.YooKassaShopID != "" && h.cfg.YooKassaKey != "" {
-		var pending models.Payment
-		if err := h.db.Where("user_id = ? AND status = ?", userID, models.PaymentPending).
-			Order("created_at desc").
-			First(&pending).Error; err == nil {
-			if shouldSyncPendingPayment(pending) {
-				go func(p models.Payment) {
-					if status, err := verifyYooKassaPaymentStatus(h.cfg.YooKassaShopID, h.cfg.YooKassaKey, p.YooKassaID); err == nil && status == "succeeded" {
-						_ = h.db.Transaction(func(tx *gorm.DB) error {
-							now := time.Now()
-							if err := tx.Model(&p).Updates(map[string]interface{}{
-								"status":       models.PaymentSucceeded,
-								"confirmed_at": now,
-							}).Error; err != nil {
-								return err
-							}
-							return activateSubscriptionFromPayment(tx, &p, "")
-						})
-					}
-				}(pending)
-			}
-		} else if !isRecordNotFoundError(err) {
-			if isDatabaseBusyError(err) {
-				respondDatabaseBusy(c)
-				return
-			}
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
-			return
-		}
 	}
 
 	capabilities := buildSubscriptionCapabilities(sub)

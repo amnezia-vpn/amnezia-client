@@ -30,6 +30,9 @@ PageType {
     property real promoDiscountAmount: 0
     property int promoDiscountPercent: 0
     property bool isWaitingForPayment: false
+    property string pendingPaymentPlan: ""
+    property string pendingSubscriptionPlanBeforePayment: ""
+    property string pendingSubscriptionEndBeforePayment: ""
     property int selectedPeriod: 0  // 0 = 1 месяц, 1 = 3 месяца
     property int pollCount: 0
     property bool confirmDeleteCard: false
@@ -79,6 +82,37 @@ PageType {
 
     function promoIsReadyForPayment() {
         return root.promoCode.trim() === "" || root.promoPreviewReady
+    }
+
+    function capturePendingPayment(planId) {
+        root.pendingPaymentPlan = planId
+        root.pendingSubscriptionPlanBeforePayment = FBLinkController.subscriptionPlan
+        root.pendingSubscriptionEndBeforePayment = FBLinkController.subscriptionEndDate
+    }
+
+    function clearPendingPayment() {
+        root.pendingPaymentPlan = ""
+        root.pendingSubscriptionPlanBeforePayment = ""
+        root.pendingSubscriptionEndBeforePayment = ""
+    }
+
+    function subscriptionChangedAfterPendingPayment() {
+        if (!root.isWaitingForPayment || root.pendingPaymentPlan === "" || !FBLinkController.isSubscribed) {
+            return false
+        }
+
+        var currentPlan = FBLinkController.subscriptionPlan
+        var currentEndDate = FBLinkController.subscriptionEndDate
+        if (currentPlan === "" || currentEndDate === "") {
+            return false
+        }
+
+        if (root.pendingSubscriptionPlanBeforePayment === "" || root.pendingSubscriptionEndBeforePayment === "") {
+            return true
+        }
+
+        return currentPlan !== root.pendingSubscriptionPlanBeforePayment
+            || currentEndDate !== root.pendingSubscriptionEndBeforePayment
     }
 
     function schedulePromoPreview() {
@@ -968,6 +1002,7 @@ PageType {
                     root.isLoading = true
                     PageController.showBusyIndicator(true)
                     var selectedPlanId = root.selectedPaymentPlanId()
+                    root.capturePendingPayment(selectedPlanId)
                     FBLinkController.createPaymentWithPromo(selectedPlanId, root.promoCode)
                 }
             }
@@ -1013,6 +1048,7 @@ PageType {
                         PageController.showNotificationMessage(
                             qsTr("Страница оплаты открыта. Ожидаем подтверждение..."))
                     } else {
+                        root.clearPendingPayment()
                         root.errorMessage = qsTr("Не удалось получить ссылку на оплату")
                     }
                 }
@@ -1020,6 +1056,8 @@ PageType {
                 function onPaymentActivated() {
                     root.isLoading = false
                     root.isWaitingForPayment = false
+                    pollTimer.stop()
+                    root.clearPendingPayment()
                     root.promoHint = qsTr("Промокод применён, подписка активирована.")
                     PageController.showBusyIndicator(false)
                     PageController.showNotificationMessage(qsTr("Подписка активирована по промокоду"))
@@ -1028,14 +1066,18 @@ PageType {
 
                 function onPaymentError(errorMessage) {
                     root.isLoading = false
+                    root.isWaitingForPayment = false
+                    pollTimer.stop()
+                    root.clearPendingPayment()
                     PageController.showBusyIndicator(false)
                     root.errorMessage = errorMessage
                 }
 
                 function onSubscriptionChanged() {
-                    if (FBLinkController.isSubscribed && root.isWaitingForPayment) {
+                    if (root.subscriptionChangedAfterPendingPayment()) {
                         pollTimer.stop()
                         root.isWaitingForPayment = false
+                        root.clearPendingPayment()
                         root.selectedPlan = Math.max(root.currentPlanLevel, 0)
                         PageController.showNotificationMessage(qsTr("Подписка активирована! Добро пожаловать в %1.").arg(root.planTitleById(FBLinkController.subscriptionPlan)))
                         FBLinkController.armNewFeaturesGuide()
