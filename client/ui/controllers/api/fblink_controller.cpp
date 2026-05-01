@@ -907,6 +907,61 @@ void FBLinkController::createPaymentWithPromo(const QString &plan, const QString
     createPayment(plan, promoCode, true);
 }
 
+void FBLinkController::previewPaymentWithPromo(const QString &plan, const QString &promoCode)
+{
+    previewPaymentWithPromo(plan, promoCode, true);
+}
+
+void FBLinkController::previewPaymentWithPromo(const QString &plan, const QString &promoCode, bool allowRefreshRetry)
+{
+    QString token = getJwtToken();
+    if (token.isEmpty()) {
+        emit paymentPreviewError(tr("Необходимо войти в аккаунт"));
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest("/payments/preview", true, true);
+
+    QJsonObject json;
+    json["plan"] = plan;
+    const QString normalizedPromoCode = promoCode.trimmed().toUpper();
+    if (!normalizedPromoCode.isEmpty()) {
+        json["promo_code"] = normalizedPromoCode;
+    }
+
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, plan, normalizedPromoCode, allowRefreshRetry]() {
+        reply->deleteLater();
+
+        QByteArray responseData = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(responseData);
+        QJsonObject obj = doc.object();
+
+        if (reply->error() == QNetworkReply::NoError) {
+            emit paymentPreviewReady(
+                obj.value("amount").toDouble(),
+                obj.value("original_amount").toDouble(),
+                obj.value("discount_amount").toDouble(),
+                obj.value("discount_percent").toInt(),
+                obj.value("promo_applied").toBool());
+        } else {
+            logApiFailure("payment-preview", reply);
+
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this, plan, normalizedPromoCode]() {
+                    previewPaymentWithPromo(plan, normalizedPromoCode, false);
+                });
+                return;
+            }
+
+            QString errStr = obj.contains("error") ? obj["error"].toString()
+                                                    : tr("Не удалось проверить промокод");
+            emit paymentPreviewError(errStr);
+        }
+    });
+}
+
 void FBLinkController::createPayment(const QString &plan, const QString &promoCode, bool allowRefreshRetry)
 {
     QString token = getJwtToken();

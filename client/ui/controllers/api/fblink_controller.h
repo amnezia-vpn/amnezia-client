@@ -58,6 +58,7 @@ public:
     Q_INVOKABLE void syncAll();
     Q_INVOKABLE void createPayment(const QString &plan);
     Q_INVOKABLE void createPaymentWithPromo(const QString &plan, const QString &promoCode);
+    Q_INVOKABLE void previewPaymentWithPromo(const QString &plan, const QString &promoCode);
     Q_INVOKABLE void setAutoRenew(bool enabled);
     Q_INVOKABLE void setVipAdBlockEnabled(bool enabled);
     Q_INVOKABLE void deleteCard();
@@ -115,6 +116,8 @@ signals:
     void paymentCreated(const QString &confirmationUrl);
     void paymentActivated();
     void paymentError(const QString &errorMessage);
+    void paymentPreviewReady(double amount, double originalAmount, double discountAmount, int discountPercent, bool promoApplied);
+    void paymentPreviewError(const QString &errorMessage);
     void autoRenewChanged(bool enabled);
     void vipAdBlockChanged(bool enabled);
     void cardDeleted();
@@ -153,6 +156,7 @@ private:
     void deleteRoutingProfile(int id, bool allowRefreshRetry);
     void copySystemRoutingProfile(const QString &code, bool allowRefreshRetry);
     void submitBugReport(const QString &note, bool allowRefreshRetry);
+    void previewPaymentWithPromo(const QString &plan, const QString &promoCode, bool allowRefreshRetry);
     void createPayment(const QString &plan, const QString &promoCode, bool allowRefreshRetry);
     void setAutoRenew(bool enabled, bool allowRefreshRetry);
     void setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry);

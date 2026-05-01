@@ -21,6 +21,14 @@ PageType {
     property string errorMessage: ""
     property string promoCode: ""
     property string promoHint: ""
+    property bool promoPreviewLoading: false
+    property bool promoPreviewReady: false
+    property bool promoApplied: false
+    property string promoPreviewError: ""
+    property real promoPreviewAmount: 0
+    property real promoOriginalAmount: 0
+    property real promoDiscountAmount: 0
+    property int promoDiscountPercent: 0
     property bool isWaitingForPayment: false
     property int selectedPeriod: 0  // 0 = 1 месяц, 1 = 3 месяца
     property int pollCount: 0
@@ -30,6 +38,9 @@ PageType {
     readonly property bool wideLayout: GC.isWideWidth(width)
     readonly property real sideMargin: GC.pageHorizontalMargin(width)
     readonly property real maxContentWidth: GC.pageMaxWidth(width)
+
+    onSelectedPlanChanged: schedulePromoPreview()
+    onSelectedPeriodChanged: schedulePromoPreview()
 
     readonly property int currentPlanLevel: {
         if (!FBLinkController.isSubscribed) return -1
@@ -41,6 +52,47 @@ PageType {
 
     readonly property var selectedPlanData: root.plans[Math.max(0, Math.min(root.selectedPlan, root.plans.length - 1))]
 
+    function selectedPaymentPlanId() {
+        var planId = root.plans[root.selectedPlan].idByPeriod[root.selectedPeriod]
+        if (root.showNewUserOffer && planId === "basic") {
+            planId = "trial"
+        }
+        return planId
+    }
+
+    function formatRub(value) {
+        return Math.round(Number(value || 0)).toLocaleString(Qt.locale("ru_RU")) + " ₽"
+    }
+
+    function resetPromoPreview() {
+        root.promoPreviewLoading = false
+        root.promoPreviewReady = false
+        root.promoApplied = false
+        root.promoPreviewError = ""
+        root.promoPreviewAmount = 0
+        root.promoOriginalAmount = 0
+        root.promoDiscountAmount = 0
+        root.promoDiscountPercent = 0
+    }
+
+    function promoIsReadyForPayment() {
+        return root.promoCode.trim() === "" || root.promoPreviewReady
+    }
+
+    function schedulePromoPreview() {
+        promoPreviewTimer.stop()
+        if (root.promoCode.trim() === "") {
+            resetPromoPreview()
+            root.promoHint = ""
+            return
+        }
+        root.promoPreviewReady = false
+        root.promoApplied = false
+        root.promoPreviewError = ""
+        root.promoHint = qsTr("Проверяем промокод...")
+        promoPreviewTimer.restart()
+    }
+
     Timer {
         id: pollTimer
         interval: 2000
@@ -48,15 +100,21 @@ PageType {
         running: false
         onTriggered: {
             root.pollCount++
-            if (root.pollCount >= root.maxPolls) {
-                pollTimer.stop()
-                root.isWaitingForPayment = false
-                root.errorMessage = qsTr("Время ожидания истекло. Если вы оплатили — нажмите «Проверить вручную».")
-                return
-            }
             if (FBLinkController.isLoggedIn) {
                 FBLinkController.fetchSubscription()
             }
+        }
+    }
+
+    Timer {
+        id: promoPreviewTimer
+        interval: 350
+        repeat: false
+        onTriggered: {
+            if (!FBLinkController.isLoggedIn || root.promoCode.trim() === "") return
+            root.promoPreviewLoading = true
+            root.promoPreviewError = ""
+            FBLinkController.previewPaymentWithPromo(root.selectedPaymentPlanId(), root.promoCode)
         }
     }
 
@@ -682,8 +740,12 @@ PageType {
 
                             CaptionTextType {
                                 Layout.fillWidth: true
-                                text: root.promoHint !== "" ? root.promoHint : qsTr("Если у вас есть код, применим скидку при создании платежа.")
-                                color: root.promoHint !== "" ? "#10B981" : FBLinkStyle.color.mutedGray
+                                text: root.promoPreviewError !== ""
+                                    ? root.promoPreviewError
+                                    : (root.promoHint !== "" ? root.promoHint : qsTr("Если у вас есть код, применим скидку при создании платежа."))
+                                color: root.promoPreviewError !== ""
+                                    ? "#FF6B6B"
+                                    : (root.promoApplied ? "#10B981" : FBLinkStyle.color.mutedGray)
                                 font.pixelSize: 12
                                 wrapMode: Text.WordWrap
                             }
@@ -717,7 +779,7 @@ PageType {
                                     return
                                 }
                                 root.promoCode = normalized
-                                root.promoHint = normalized === "" ? "" : qsTr("Код будет проверен перед оплатой.")
+                                root.schedulePromoPreview()
                             }
                         }
 
@@ -756,10 +818,36 @@ PageType {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
                                     root.promoCode = ""
-                                    root.promoHint = ""
                                     promoInput.text = ""
+                                    root.resetPromoPreview()
                                 }
                             }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        visible: root.promoCode.trim() !== ""
+                        spacing: 10
+
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: root.promoPreviewLoading
+                                ? qsTr("Считаем итоговую цену...")
+                                : (root.promoPreviewReady
+                                    ? qsTr("К оплате: %1").arg(root.formatRub(root.promoPreviewAmount))
+                                    : qsTr("Итоговая цена появится после проверки кода"))
+                            font.pixelSize: 13
+                            font.weight: 700
+                            color: root.promoPreviewError !== "" ? "#FF6B6B" : FBLinkStyle.color.paleGray
+                            wrapMode: Text.WordWrap
+                        }
+
+                        LabelTextType {
+                            visible: root.promoPreviewReady && root.promoDiscountAmount > 0
+                            text: qsTr("скидка %1").arg(root.formatRub(root.promoDiscountAmount))
+                            font.pixelSize: 12
+                            color: "#10B981"
                         }
                     }
                 }
@@ -821,7 +909,7 @@ PageType {
                         }
 
                         LabelTextType {
-                            text: qsTr("Ожидаем подтверждение оплаты...")
+                            text: qsTr("Ожидаем оплату")
                             font.pixelSize: 13
                             font.weight: 600
                             color: "#FDE68A"
@@ -829,34 +917,10 @@ PageType {
                     }
 
                     LabelTextType {
-                        text: qsTr("Проверка %1 из %2. Это займёт до 2 минут.").arg(root.pollCount).arg(root.maxPolls)
+                        text: qsTr("Платёж открылся в браузере. Подписка активируется автоматически, как только платёжная система пришлёт подтверждение.")
                         font.pixelSize: 11
                         color: FBLinkStyle.color.mutedGray
-                    }
-                }
-            }
-
-            // Manual check button (always visible when waiting or after timeout)
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                implicitHeight: 44
-                visible: root.isWaitingForPayment || root.errorMessage !== ""
-
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(234/255, 179/255, 8/255, 0.12)
-                pressedColor: Qt.rgba(234/255, 179/255, 8/255, 0.2)
-                textColor: FBLinkStyle.color.paleGray
-                borderColor: Qt.rgba(234/255, 179/255, 8/255, 0.5)
-                borderWidth: 1
-
-                text: qsTr("Проверить вручную")
-
-                clickedFunc: function() {
-                    if (FBLinkController.isLoggedIn) {
-                        FBLinkController.fetchSubscription()
+                        wrapMode: Text.WordWrap
                     }
                 }
             }
@@ -870,7 +934,12 @@ PageType {
                 implicitHeight: 56
 
                 visible: !root.isWaitingForPayment
-                enabled: !root.isLoading && root.selectedPlan > root.currentPlanLevel
+                enabled: !root.isLoading
+                    && root.selectedPlan > root.currentPlanLevel
+                    && (!FBLinkController.isLoggedIn
+                        || (!root.promoPreviewLoading
+                            && root.promoPreviewError === ""
+                            && root.promoIsReadyForPayment()))
 
                 defaultColor: root.selectedPlan > root.currentPlanLevel
                     ? (root.selectedPlanData.id === "vip"
@@ -890,9 +959,11 @@ PageType {
                     ? qsTr("Создание платежа...")
                     : (root.selectedPlan <= root.currentPlanLevel
                         ? qsTr("Уже активна")
-                        : ((root.showNewUserOffer && root.selectedPlanData.id === "basic")
-                            ? qsTr("Активировать 3 дня за 5 ₽")
-                            : root.selectedPlanData.ctaByPeriod[root.selectedPeriod]))
+                        : (root.promoPreviewReady && root.promoCode.trim() !== ""
+                            ? qsTr("Оплатить %1").arg(root.formatRub(root.promoPreviewAmount))
+                            : ((root.showNewUserOffer && root.selectedPlanData.id === "basic")
+                                ? qsTr("Активировать 3 дня за 5 ₽")
+                                : root.selectedPlanData.ctaByPeriod[root.selectedPeriod])))
 
                 clickedFunc: function() {
                     root.errorMessage = ""
@@ -902,12 +973,16 @@ PageType {
                         return
                     }
 
+                    if (root.promoPreviewError !== "" || !root.promoIsReadyForPayment()) {
+                        root.errorMessage = root.promoPreviewError !== ""
+                            ? root.promoPreviewError
+                            : qsTr("Дождитесь проверки промокода")
+                        return
+                    }
+
                     root.isLoading = true
                     PageController.showBusyIndicator(true)
-                    var selectedPlanId = root.plans[root.selectedPlan].idByPeriod[root.selectedPeriod]
-                    if (root.showNewUserOffer && selectedPlanId === "basic") {
-                        selectedPlanId = "trial"
-                    }
+                    var selectedPlanId = root.selectedPaymentPlanId()
                     FBLinkController.createPaymentWithPromo(selectedPlanId, root.promoCode)
                 }
             }
@@ -915,6 +990,32 @@ PageType {
             // Connections handle payment result from C++
             Connections {
                 target: FBLinkController
+
+                function onPaymentPreviewReady(amount, originalAmount, discountAmount, discountPercent, promoApplied) {
+                    root.promoPreviewLoading = false
+                    root.promoPreviewReady = true
+                    root.promoApplied = promoApplied
+                    root.promoPreviewError = ""
+                    root.promoPreviewAmount = amount
+                    root.promoOriginalAmount = originalAmount
+                    root.promoDiscountAmount = discountAmount
+                    root.promoDiscountPercent = discountPercent
+                    root.promoHint = promoApplied
+                        ? qsTr("Промокод применён: скидка %1%.").arg(discountPercent)
+                        : ""
+                }
+
+                function onPaymentPreviewError(errorMessage) {
+                    root.promoPreviewLoading = false
+                    root.promoPreviewReady = false
+                    root.promoApplied = false
+                    root.promoPreviewAmount = 0
+                    root.promoOriginalAmount = 0
+                    root.promoDiscountAmount = 0
+                    root.promoDiscountPercent = 0
+                    root.promoPreviewError = errorMessage !== "" ? errorMessage : qsTr("Промокод не применён")
+                    root.promoHint = ""
+                }
 
                 function onPaymentCreated(confirmationUrl) {
                     root.isLoading = false

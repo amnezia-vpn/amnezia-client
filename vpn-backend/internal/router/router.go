@@ -131,6 +131,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 		payments := api.Group("/payments", auth)
 		{
+			payments.POST("/preview", payH.PreviewPayment)
 			payments.POST("/create", payH.CreatePayment)
 		}
 

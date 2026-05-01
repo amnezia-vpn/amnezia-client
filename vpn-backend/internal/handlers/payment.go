@@ -47,13 +47,57 @@ var planPrices = map[models.PlanType]struct {
 	models.PlanVIP3M:   {Amount: 1015.00, DurationDays: 90},
 }
 
+func paymentPreviewResponse(plan models.PlanType, promoCode string, app *promoApplication) gin.H {
+	applied := app.PromoCode != nil
+	return gin.H{
+		"plan":             plan,
+		"promo_code":       normalizePromoCode(promoCode),
+		"promo_applied":    applied,
+		"discount_percent": func() int {
+			if app.PromoCode == nil {
+				return 0
+			}
+			return app.PromoCode.DiscountPercent
+		}(),
+		"original_amount": app.OriginalAmount,
+		"discount_amount": app.DiscountAmount,
+		"amount":          app.FinalAmount,
+	}
+}
+
+// POST /api/v1/payments/preview
+func (h *PaymentHandler) PreviewPayment(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	var req createPaymentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Выберите тариф для оплаты"})
+		return
+	}
+
+	plan := models.PlanType(req.Plan)
+	priceInfo, ok := planPrices[plan]
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Неизвестный тариф"})
+		return
+	}
+
+	app, err := validatePromoCode(h.db, userID, plan, req.PromoCode, priceInfo.Amount)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, paymentPreviewResponse(plan, req.PromoCode, app))
+}
+
 // POST /api/v1/payments/create
 func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
 	var req createPaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Выберите тариф для оплаты"})
 		return
 	}
 
@@ -71,7 +115,11 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 		}
 	}
 
-	priceInfo := planPrices[plan]
+	priceInfo, ok := planPrices[plan]
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Неизвестный тариф"})
+		return
+	}
 	promoApplication, err := validatePromoCode(h.db, userID, plan, req.PromoCode, priceInfo.Amount)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -104,7 +152,7 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 			return markPromoCodeUsed(tx, &payment)
 		})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to apply promo code"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось применить промокод"})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
@@ -149,7 +197,7 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create payment"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось создать платёж"})
 		return
 	}
 	defer resp.Body.Close()
@@ -158,7 +206,7 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 	json.NewDecoder(resp.Body).Decode(&ykResp)
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "YooKassa error", "details": ykResp})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Платёжная система не приняла запрос", "details": ykResp})
 		return
 	}
 
@@ -182,7 +230,10 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 	if promoApplication.PromoCode != nil {
 		payment.PromoCodeID = &promoApplication.PromoCode.ID
 	}
-	h.db.Create(&payment)
+	if err := h.db.Create(&payment).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось сохранить платёж"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"payment_id":       payment.ID,
@@ -232,7 +283,7 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 		}
 
 		if payment.Status == models.PaymentSucceeded {
-			return nil // Уже обработано
+			return markPromoCodeUsed(tx, &payment)
 		}
 
 		now := time.Now()

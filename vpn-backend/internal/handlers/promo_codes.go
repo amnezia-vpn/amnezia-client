@@ -34,6 +34,10 @@ type promoApplication struct {
 	FinalAmount    float64
 }
 
+func promoError(message string) error {
+	return errors.New(message)
+}
+
 func normalizePromoCode(code string) string {
 	return strings.ToUpper(strings.TrimSpace(code))
 }
@@ -83,27 +87,28 @@ func validatePromoCode(db *gorm.DB, userID uint, plan models.PlanType, code stri
 		return &promoApplication{OriginalAmount: originalAmount, FinalAmount: originalAmount}, nil
 	}
 	if !promoCodePattern.MatchString(normalizedCode) {
-		return nil, errors.New("invalid promo code")
+		return nil, promoError("Промокод должен содержать 3-32 символа: латинские буквы, цифры, _ или -")
 	}
 
 	var promo models.PromoCode
 	if err := db.Where("code = ?", normalizedCode).First(&promo).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("promo code not found")
+			return nil, promoError("Промокод не найден")
 		}
 		return nil, err
 	}
 	if !promo.Active {
-		return nil, errors.New("promo code is disabled")
+		return nil, promoError("Промокод отключён")
 	}
 	if promo.ExpiresAt != nil && promo.ExpiresAt.Before(time.Now()) {
-		return nil, errors.New("promo code has expired")
+		return nil, promoError("Срок действия промокода истёк")
 	}
-	if promo.MaxUses > 0 && promo.UsedCount >= promo.MaxUses {
-		return nil, errors.New("promo code usage limit reached")
+	actualUsedCount := promoSuccessfulUseCount(db, promo.ID)
+	if promo.MaxUses > 0 && actualUsedCount >= int64(promo.MaxUses) {
+		return nil, promoError("Лимит использований промокода исчерпан")
 	}
 	if !promoAppliesToPlan(promo, plan) {
-		return nil, errors.New("promo code does not apply to this plan")
+		return nil, promoError("Промокод не действует на выбранный тариф")
 	}
 	if promo.OncePerUser {
 		var usedCount int64
@@ -111,7 +116,7 @@ func validatePromoCode(db *gorm.DB, userID uint, plan models.PlanType, code stri
 			Where("user_id = ? AND promo_code_id = ? AND status = ?", userID, promo.ID, models.PaymentSucceeded).
 			Count(&usedCount)
 		if usedCount > 0 {
-			return nil, errors.New("promo code has already been used")
+			return nil, promoError("Вы уже использовали этот промокод")
 		}
 	}
 
@@ -136,24 +141,34 @@ func validatePromoCode(db *gorm.DB, userID uint, plan models.PlanType, code stri
 	}, nil
 }
 
+func promoSuccessfulUseCount(db *gorm.DB, promoCodeID uint) int64 {
+	var count int64
+	db.Model(&models.Payment{}).
+		Where("promo_code_id = ? AND status = ?", promoCodeID, models.PaymentSucceeded).
+		Count(&count)
+	return count
+}
+
 func markPromoCodeUsed(tx *gorm.DB, payment *models.Payment) error {
 	if payment.PromoCodeID == nil {
 		return nil
 	}
+	usedCount := promoSuccessfulUseCount(tx, *payment.PromoCodeID)
 	return tx.Model(&models.PromoCode{}).
 		Where("id = ?", *payment.PromoCodeID).
-		UpdateColumn("used_count", gorm.Expr("used_count + ?", 1)).
+		UpdateColumn("used_count", usedCount).
 		Error
 }
 
-func promoCodeResponse(promo models.PromoCode) gin.H {
+func promoCodeResponse(db *gorm.DB, promo models.PromoCode) gin.H {
+	usedCount := promoSuccessfulUseCount(db, promo.ID)
 	return gin.H{
 		"id":               promo.ID,
 		"code":             promo.Code,
 		"description":      promo.Description,
 		"discount_percent": promo.DiscountPercent,
 		"max_uses":         promo.MaxUses,
-		"used_count":       promo.UsedCount,
+		"used_count":       usedCount,
 		"active":           promo.Active,
 		"applicable_plans": promo.ApplicablePlans,
 		"once_per_user":    promo.OncePerUser,
@@ -188,13 +203,13 @@ func buildPromoCodeFromRequest(req promoCodeRequest, existing *models.PromoCode)
 		code = existing.Code
 	}
 	if !promoCodePattern.MatchString(code) {
-		return models.PromoCode{}, errors.New("code must be 3-32 characters: A-Z, 0-9, _, -")
+		return models.PromoCode{}, errors.New("Код должен содержать 3-32 символа: A-Z, 0-9, _ или -")
 	}
 	if req.DiscountPercent < 1 || req.DiscountPercent > 100 {
-		return models.PromoCode{}, errors.New("discount_percent must be between 1 and 100")
+		return models.PromoCode{}, errors.New("Скидка должна быть от 1 до 100%")
 	}
 	if req.MaxUses < 0 {
-		return models.PromoCode{}, errors.New("max_uses cannot be negative")
+		return models.PromoCode{}, errors.New("Лимит использований не может быть отрицательным")
 	}
 
 	promo := models.PromoCode{
@@ -220,7 +235,7 @@ func (h *AdminHandler) GetPromoCodes(c *gin.Context) {
 
 	result := make([]gin.H, 0, len(promoCodes))
 	for _, promo := range promoCodes {
-		result = append(result, promoCodeResponse(promo))
+		result = append(result, promoCodeResponse(h.db, promo))
 	}
 	c.JSON(http.StatusOK, gin.H{"promo_codes": result, "total": len(result)})
 }
@@ -228,7 +243,7 @@ func (h *AdminHandler) GetPromoCodes(c *gin.Context) {
 func (h *AdminHandler) CreatePromoCode(c *gin.Context) {
 	var req promoCodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные промокода"})
 		return
 	}
 
@@ -238,22 +253,22 @@ func (h *AdminHandler) CreatePromoCode(c *gin.Context) {
 		return
 	}
 	if err := h.db.Create(&promo).Error; err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "promo code already exists"})
+		c.JSON(http.StatusConflict, gin.H{"error": "Промокод с таким кодом уже существует"})
 		return
 	}
-	c.JSON(http.StatusCreated, promoCodeResponse(promo))
+	c.JSON(http.StatusCreated, promoCodeResponse(h.db, promo))
 }
 
 func (h *AdminHandler) UpdatePromoCode(c *gin.Context) {
 	var existing models.PromoCode
 	if err := h.db.First(&existing, c.Param("id")).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "promo code not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Промокод не найден"})
 		return
 	}
 
 	var req promoCodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные промокода"})
 		return
 	}
 
@@ -273,23 +288,23 @@ func (h *AdminHandler) UpdatePromoCode(c *gin.Context) {
 		"once_per_user":    promo.OncePerUser,
 		"expires_at":       promo.ExpiresAt,
 	}).Error; err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "failed to update promo code"})
+		c.JSON(http.StatusConflict, gin.H{"error": "Не удалось сохранить промокод"})
 		return
 	}
 
 	h.db.First(&existing, existing.ID)
-	c.JSON(http.StatusOK, promoCodeResponse(existing))
+	c.JSON(http.StatusOK, promoCodeResponse(h.db, existing))
 }
 
 func (h *AdminHandler) DeletePromoCode(c *gin.Context) {
 	var promo models.PromoCode
 	if err := h.db.First(&promo, c.Param("id")).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "promo code not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Промокод не найден"})
 		return
 	}
 	if err := h.db.Model(&promo).Update("active", false).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to disable promo code"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось отключить промокод"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "promo code disabled"})
+	c.JSON(http.StatusOK, gin.H{"message": "Промокод отключён"})
 }
