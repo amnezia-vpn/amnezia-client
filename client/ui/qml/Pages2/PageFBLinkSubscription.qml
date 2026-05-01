@@ -825,31 +825,6 @@ PageType {
                         }
                     }
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        visible: root.promoCode.trim() !== ""
-                        spacing: 10
-
-                        LabelTextType {
-                            Layout.fillWidth: true
-                            text: root.promoPreviewLoading
-                                ? qsTr("Считаем итоговую цену...")
-                                : (root.promoPreviewReady
-                                    ? qsTr("К оплате: %1").arg(root.formatRub(root.promoPreviewAmount))
-                                    : qsTr("Итоговая цена появится после проверки кода"))
-                            font.pixelSize: 13
-                            font.weight: 700
-                            color: root.promoPreviewError !== "" ? "#FF6B6B" : FBLinkStyle.color.paleGray
-                            wrapMode: Text.WordWrap
-                        }
-
-                        LabelTextType {
-                            visible: root.promoPreviewReady && root.promoDiscountAmount > 0
-                            text: qsTr("скидка %1").arg(root.formatRub(root.promoDiscountAmount))
-                            font.pixelSize: 12
-                            color: "#10B981"
-                        }
-                    }
                 }
             }
 
@@ -954,13 +929,20 @@ PageType {
                     : "#CA8A04"
                 disabledColor: FBLinkStyle.color.charcoalGray
                 textColor: "#FFFFFF"
+                richText: root.promoPreviewReady
+                    && root.promoCode.trim() !== ""
+                    && root.promoDiscountAmount > 0
 
                 text: root.isLoading
                     ? qsTr("Создание платежа...")
                     : (root.selectedPlan <= root.currentPlanLevel
                         ? qsTr("Уже активна")
                         : (root.promoPreviewReady && root.promoCode.trim() !== ""
-                            ? qsTr("Оплатить %1").arg(root.formatRub(root.promoPreviewAmount))
+                            ? (root.promoDiscountAmount > 0
+                                ? qsTr("Оплатить %1&nbsp;&nbsp;<s><font color='#D1D5DB'>%2</font></s>")
+                                    .arg(root.formatRub(root.promoPreviewAmount))
+                                    .arg(root.formatRub(root.promoOriginalAmount))
+                                : qsTr("Оплатить %1").arg(root.formatRub(root.promoPreviewAmount)))
                             : ((root.showNewUserOffer && root.selectedPlanData.id === "basic")
                                 ? qsTr("Активировать 3 дня за 5 ₽")
                                 : root.selectedPlanData.ctaByPeriod[root.selectedPeriod])))
