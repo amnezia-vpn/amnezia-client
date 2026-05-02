@@ -159,31 +159,31 @@ ErrorCode XrayProtocol::startTun2Socks()
     m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(tunName), "-proxy", proxyUrl });
 
     connect(
-            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this,
-            [this]() {
-                auto readAllStandardOutput = m_tun2socksProcess->readAllStandardOutput();
-                if (!readAllStandardOutput.waitForFinished()) {
-                    qWarning() << "Failed to read output from tun2socks";
-                    return;
+        m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
+        [this]() {
+            auto readAllStandardError = m_tun2socksProcess->readAllStandardError();
+            if (!readAllStandardError.waitForFinished()) {
+                qWarning() << "Failed to read output from tun2socks";
+                return;
+            }
+
+            const QString line = readAllStandardError.returnValue();
+
+            if (!line.contains("[TCP]") && !line.contains("[UDP]"))
+                qDebug() << "[tun2socks]:" << line;
+
+            if (line.contains("[STACK] tun://") && line.contains("<-> socks5://")) {
+                disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, nullptr);
+
+                if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
+                    stop();
+                    setLastError(res);
+                } else {
+                    setConnectionState(Vpn::ConnectionState::Connected);
                 }
-
-                const QString line = readAllStandardOutput.returnValue();
-
-                if (!line.contains("[TCP]") && !line.contains("[UDP]"))
-                    qDebug() << "[tun2socks]:" << line;
-
-                if (line.contains("[STACK] tun://") && line.contains("<-> socks5://")) {
-                    disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, nullptr);
-
-                    if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
-                        stop();
-                        setLastError(res);
-                    } else {
-                        setConnectionState(Vpn::ConnectionState::Connected);
-                    }
-                }
-            },
-            Qt::QueuedConnection);
+            }
+        },
+        Qt::QueuedConnection);
 
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::finished, this,

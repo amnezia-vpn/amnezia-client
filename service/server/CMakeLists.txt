@@ -9,45 +9,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 REQUIRED COMPONENTS DBus Core Network Widgets RemoteObjects Core5Compat Concurrent)
 qt_standard_project_setup()
 
-find_package(amnezia-xray-bindings REQUIRED)
-
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
 set(QSIMPLECRYPTO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../client/3rd/QSimpleCrypto/src)
 
-
-set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../client/3rd-prebuilt/3rd-prebuilt/openssl/")
-set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
-
-set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
-if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-    set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libssl.lib")
-    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
-else()
-    set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libssl.lib")
-    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
-endif()
-
-
-if(WIN32)
-    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
-    else()
-        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
-    endif()
-elseif(APPLE AND NOT IOS)
-    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/macos/include")
-    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libcrypto.a")
-elseif(LINUX)
-    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/linux/include")
-    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libcrypto.a")
-endif()
-
-set(OPENSSL_USE_STATIC_LIBS TRUE)
-
 include_directories(
-    ${OPENSSL_INCLUDE_DIR}
     ${QSIMPLECRYPTO_DIR}
 )
 
@@ -223,7 +189,6 @@ if(WIN32)
         gdi32
         Advapi32
         Kernel32
-        ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
     )
 
@@ -272,7 +237,6 @@ if(APPLE)
 
     set(LIBS
         resolv
-        ${OPENSSL_LIB_CRYPTO_PATH}
         qt6keychain
     )
 
@@ -332,8 +296,13 @@ include_directories(
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES})
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::DBus Qt6::Concurrent ${LIBS})
-target_link_libraries(${PROJECT} PRIVATE amnezia::xray-bindings)
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
+
+find_package(amnezia-xray-bindings REQUIRED)
+target_link_libraries(${PROJECT} PRIVATE amnezia::xray-bindings)
+
+find_package(openssl REQUIRED)
+target_link_libraries(${PROJECT} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
@@ -389,10 +358,33 @@ add_custom_command(
     $<TARGET_FILE_DIR:${PROJECT}>
     COMMAND_EXPAND_LISTS
 )
-add_custom_command(
-    TARGET ${PROJECT} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
-    ${CMAKE_SOURCE_DIR}/client/3rd-prebuilt/deploy-prebuilt/${DEPLOY_PLATFORM_PATH}
-    $<TARGET_FILE_DIR:${PROJECT}>
-    COMMAND_EXPAND_LISTS
+# add_custom_command(
+#     TARGET ${PROJECT} POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+#     ${CMAKE_SOURCE_DIR}/client/3rd-prebuilt/deploy-prebuilt/${DEPLOY_PLATFORM_PATH}
+#     $<TARGET_FILE_DIR:${PROJECT}>
+#     COMMAND_EXPAND_LISTS
+# )
+
+if(NOT WIN32)
+    find_package(awg-go REQUIRED)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:amnezia::awg-go>
+            $<TARGET_FILE_DIR:${PROJECT}>
+    )
+endif()
+
+find_package(openvpn REQUIRED)
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:openvpn::openvpn>
+        $<TARGET_FILE_DIR:${PROJECT}>
+)
+
+find_package(tun2socks REQUIRED)
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:xjasonlyu::tun2socks>
+        $<TARGET_FILE_DIR:${PROJECT}>
 )
