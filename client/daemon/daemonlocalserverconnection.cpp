@@ -111,6 +111,11 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
       return;
     }
 
+    // === ДОБАВЛЕНО: Чтение режима раздельного туннелирования из JSON ===
+    // Если GUI передал splitMode, мы его читаем. Если нет — ставим 0 (Exclude) по умолчанию.
+    config.m_splitMode = static_cast<uint32_t>(obj.value("splitMode").toInt(0));
+    // ===================================================================
+
     if (!Daemon::instance()->activate(config)) {
       logger.error() << "Failed to activate the interface";
       emit disconnected();

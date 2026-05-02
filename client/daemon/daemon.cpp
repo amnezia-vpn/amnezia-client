@@ -384,6 +384,11 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!parseStringList(obj, "vpnDisabledApps", config.m_vpnDisabledApps)) {
     return false;
   }
+  
+  // === Наш флаг режима Include/Exclude ===
+  config.m_splitMode = obj.value("splitMode").toInt();
+  // =======================================
+  
   if (!parseStringList(obj, "allowedDnsServers", config.m_allowedDnsServers)) {
     return false;
   }
