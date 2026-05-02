@@ -179,9 +179,27 @@ cp "$DEPLOY_DATA_DIR/check_install.sh" "$RESOURCES_DIR/scripts/check_install.sh"
 cp "$DEPLOY_DATA_DIR/check_uninstall.sh" "$RESOURCES_DIR/scripts/check_uninstall.sh"
 
 cat > "$SCRIPTS_DIR/postinstall" <<'EOS'
-#!/bin/bash
 SCRIPT_DIR="$(dirname "$0")"
+
 bash "$SCRIPT_DIR/post_install.sh"
+
+# 2. FIX PERMISSIONS (ErrorCode 1200 fix)
+# The installer runs as root, so this folder is created with root ownership.
+# We need to give ownership to the current console user so the app can write to it.
+APP_SUPPORT_DIR="/Library/Application Support/AmneziaVPN"
+
+mkdir -p "$APP_SUPPORT_DIR"
+
+CURRENT_USER=$(scutil <<< "show State:/Users/ConsoleUser" | awk '/Name :/ && ! /loginwindow/ { print $3 }')
+
+if [ -n "$CURRENT_USER" ]; then
+    echo "Changing ownership of $APP_SUPPORT_DIR to $CURRENT_USER"
+    chown -R "$CURRENT_USER:staff" "$APP_SUPPORT_DIR"
+    chmod -R 755 "$APP_SUPPORT_DIR"
+else
+    chmod -R 777 "$APP_SUPPORT_DIR"
+fi
+
 exit 0
 EOS
 
