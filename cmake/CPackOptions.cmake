@@ -1,0 +1,5 @@
+if (CPACK_GENERATOR STREQUAL IFW)
+    set(CPACK_COMPONENTS_ALL client service auxiliary)
+else()
+    set(CPACK_MONOLITHIC_INSTALL TRUE)
+endif()

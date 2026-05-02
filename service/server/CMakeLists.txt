@@ -384,14 +384,23 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         ${CONAN_EXECS} ${CONAN_BINS}
         "$<TARGET_FILE_DIR:${PROJECT}>"
 )
-install(FILES ${CONAN_EXECS}
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT service
-    PERMISSIONS
-        OWNER_READ OWNER_EXECUTE
-        GROUP_READ GROUP_EXECUTE
-        WORLD_READ WORLD_EXECUTE
-)
+if(WIN32)
+    # using PERMISSIONS on Windows appends read-only flag
+    # to the files so just omit it for it
+    install(FILES ${CONAN_EXECS}
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT service
+    )
+else()
+    install(FILES ${CONAN_EXECS}
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT service
+        PERMISSIONS
+            OWNER_READ OWNER_EXECUTE
+            GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE
+    )
+endif()
 install(FILES ${CONAN_BINS}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT service
