@@ -11,6 +11,7 @@ namespace LanguageSettings
         English,
         Russian,
         China_cn,
+        Korean,
         Ukrainian,
         Persian,
         Arabic,

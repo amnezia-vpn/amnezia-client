@@ -28,6 +28,7 @@ int LanguageUiController::getCurrentLanguageIndex() const
     case QLocale::English: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     case QLocale::Russian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Russian); break;
     case QLocale::Chinese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::China_cn); break;
+    case QLocale::Korean: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Korean); break;
     case QLocale::Ukrainian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Ukrainian); break;
     case QLocale::Persian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Persian); break;
     case QLocale::Arabic: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Arabic); break;
@@ -59,6 +60,7 @@ LanguageSettings::AvailableLanguageEnum LanguageUiController::getSystemLanguageE
     switch (locale.language()) {
     case QLocale::Russian: return LanguageSettings::AvailableLanguageEnum::Russian;
     case QLocale::Chinese: return LanguageSettings::AvailableLanguageEnum::China_cn;
+    case QLocale::Korean: return LanguageSettings::AvailableLanguageEnum::Korean;
     case QLocale::Ukrainian: return LanguageSettings::AvailableLanguageEnum::Ukrainian;
     case QLocale::Persian: return LanguageSettings::AvailableLanguageEnum::Persian;
     case QLocale::Arabic: return LanguageSettings::AvailableLanguageEnum::Arabic;
@@ -96,6 +98,7 @@ QString LanguageUiController::getLocalLanguageName(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::Russian: strLanguage = "Русский"; break;
     case LanguageSettings::AvailableLanguageEnum::Ukrainian: strLanguage = "Українська"; break;
     case LanguageSettings::AvailableLanguageEnum::China_cn: strLanguage = "\347\256\200\344\275\223\344\270\255\346\226\207"; break;
+    case LanguageSettings::AvailableLanguageEnum::Korean: strLanguage = "한국어"; break;
     case LanguageSettings::AvailableLanguageEnum::Persian: strLanguage = "فارسی"; break;
     case LanguageSettings::AvailableLanguageEnum::Arabic: strLanguage = "العربية"; break;
     case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
@@ -113,6 +116,7 @@ QLocale LanguageUiController::languageEnumToLocale(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::English: return QLocale::English;
     case LanguageSettings::AvailableLanguageEnum::Russian: return QLocale::Russian;
     case LanguageSettings::AvailableLanguageEnum::China_cn: return QLocale::Chinese;
+    case LanguageSettings::AvailableLanguageEnum::Korean: return QLocale::Korean;
     case LanguageSettings::AvailableLanguageEnum::Ukrainian: return QLocale::Ukrainian;
     case LanguageSettings::AvailableLanguageEnum::Persian: return QLocale::Persian;
     case LanguageSettings::AvailableLanguageEnum::Arabic: return QLocale::Arabic;

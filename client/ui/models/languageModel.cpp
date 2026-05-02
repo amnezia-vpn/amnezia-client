@@ -43,6 +43,7 @@ QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLan
     case LanguageSettings::AvailableLanguageEnum::Russian: strLanguage = "Русский"; break;
     case LanguageSettings::AvailableLanguageEnum::Ukrainian: strLanguage = "Українська"; break;
     case LanguageSettings::AvailableLanguageEnum::China_cn: strLanguage = "\347\256\200\344\275\223\344\270\255\346\226\207"; break;
+    case LanguageSettings::AvailableLanguageEnum::Korean: strLanguage = "한국어"; break;
     case LanguageSettings::AvailableLanguageEnum::Persian: strLanguage = "فارسی"; break;
     case LanguageSettings::AvailableLanguageEnum::Arabic: strLanguage = "العربية"; break;
     case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
