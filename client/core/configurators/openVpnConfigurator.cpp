@@ -241,7 +241,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     connData.clientId = Utils::getRandomString(32);
 
     int ret = 0;
-    int nVersion = 1;
+    int nVersion = 0;
 
     QByteArray clientIdUtf8 = connData.clientId.toUtf8();
 
