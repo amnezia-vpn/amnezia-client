@@ -35,7 +35,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -243,22 +243,22 @@ PageType {
                     }
 
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                    InstallController.install(dockerContainer, port.textField.text, transportProtoSelector.currentIndex)
+                    InstallController.install(dockerContainer, port.textField.text, transportProtoSelector.currentIndex, ServersUiController.processedIndex)
                 }
             }
 
             Component.onCompleted: {
                 var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
-                if (ProtocolProps.defaultPort(defaultContainerProto) < 0) {
+                if (InstallController.defaultPort(defaultContainerProto) < 0) {
                     port.visible = false
                 } else {
-                    port.textField.text = ProtocolProps.getPortForInstall(defaultContainerProto)
+                    port.textField.text = InstallController.getPortForInstall(defaultContainerProto)
                 }
-                transportProtoSelector.currentIndex = ProtocolProps.defaultTransportProto(defaultContainerProto)
+                transportProtoSelector.currentIndex = InstallController.defaultTransportProto(defaultContainerProto)
 
-                port.enabled = ProtocolProps.defaultPortChangeable(defaultContainerProto)
-                var protocolSelectorVisible = ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
+                port.enabled = InstallController.defaultPortChangeable(defaultContainerProto)
+                var protocolSelectorVisible = InstallController.defaultTransportProtoChangeable(defaultContainerProto)
                 transportProtoSelector.visible = protocolSelectorVisible
                 transportProtoHeader.visible = protocolSelectorVisible
             }

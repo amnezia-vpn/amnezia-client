@@ -40,7 +40,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -111,8 +111,8 @@ PageType {
                     var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
                     listView.dockerContainer = dockerContainer
-                    listView.containerDefaultPort = ProtocolProps.getPortForInstall(defaultContainerProto)
-                    listView.containerDefaultTransportProto = ProtocolProps.defaultTransportProto(defaultContainerProto)
+                    listView.containerDefaultPort = InstallController.getPortForInstall(defaultContainerProto)
+                    listView.containerDefaultTransportProto = InstallController.defaultTransportProto(defaultContainerProto)
                 }
 
                 Keys.onReturnPressed: this.clicked()
@@ -160,11 +160,12 @@ PageType {
 
                 clickedFunc: function() {
                     if (root.isEasySetup) {
-                        ContainersModel.setProcessedContainerIndex(listView.dockerContainer)
+                        ServersUiController.processedContainerIndex = listView.dockerContainer
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.install(listView.dockerContainer,
                                                   listView.containerDefaultPort,
-                                                  listView.containerDefaultTransportProto)
+                                                  listView.containerDefaultTransportProto,
+                                                  ServersUiController.processedIndex)
                     } else {
                         PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                     }

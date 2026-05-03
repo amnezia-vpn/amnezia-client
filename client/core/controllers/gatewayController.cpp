@@ -15,27 +15,18 @@
 #include "QBlockCipher.h"
 #include "QRsa.h"
 
-#include "amnezia_application.h"
-#include "core/api/apiUtils.h"
-#include "core/networkUtilities.h"
-#include "utilities.h"
+#include "amneziaApplication.h"
+#include "core/utils/api/apiUtils.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/networkUtilities.h"
+#include "core/utils/utilities.h"
 
 #ifdef AMNEZIA_DESKTOP
-    #include "core/ipcclient.h"
+    #include "core/utils/ipcClient.h"
 #endif
 
 namespace
 {
-    namespace configKey
-    {
-        constexpr char aesKey[] = "aes_key";
-        constexpr char aesIv[] = "aes_iv";
-        constexpr char aesSalt[] = "aes_salt";
-
-        constexpr char apiPayload[] = "api_payload";
-        constexpr char keyPayload[] = "key_payload";
-    }
-
     constexpr QLatin1String errorResponsePattern1("No active configuration found for");
     constexpr QLatin1String errorResponsePattern2("No non-revoked public key found for");
     constexpr QLatin1String errorResponsePattern3("Account not found.");
@@ -99,9 +90,9 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     encRequestData.salt = blockCipher.generatePrivateSalt(8);
 
     QJsonObject keyPayload;
-    keyPayload[configKey::aesKey] = QString(encRequestData.key.toBase64());
-    keyPayload[configKey::aesIv] = QString(encRequestData.iv.toBase64());
-    keyPayload[configKey::aesSalt] = QString(encRequestData.salt.toBase64());
+    keyPayload[apiDefs::key::aesKey] = QString(encRequestData.key.toBase64());
+    keyPayload[apiDefs::key::aesIv] = QString(encRequestData.iv.toBase64());
+    keyPayload[apiDefs::key::aesSalt] = QString(encRequestData.salt.toBase64());
 
     QByteArray encryptedKeyPayload;
     QByteArray encryptedApiPayload;
@@ -133,8 +124,8 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     }
 
     QJsonObject requestBody;
-    requestBody[configKey::keyPayload] = QString(encryptedKeyPayload.toBase64());
-    requestBody[configKey::apiPayload] = QString(encryptedApiPayload.toBase64());
+    requestBody[apiDefs::key::keyPayload] = QString(encryptedKeyPayload.toBase64());
+    requestBody[apiDefs::key::apiPayload] = QString(encryptedApiPayload.toBase64());
 
     encRequestData.requestBody = QJsonDocument(requestBody).toJson();
     return encRequestData;
@@ -294,6 +285,10 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
                 primaryBaseUrls = QString(PROD_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
                 fallbackBaseUrls = QString(FALLBACK_S3_ENDPOINT).split(", ", Qt::SkipEmptyParts);
             }
+            std::random_device randomDevice;
+            std::mt19937 generator(randomDevice());
+            std::shuffle(primaryBaseUrls.begin(), primaryBaseUrls.end(), generator);
+            std::shuffle(fallbackBaseUrls.begin(), fallbackBaseUrls.end(), generator);
 
             auto appendStorageUrls = [&serviceType, &userCountryCode](const QStringList &baseUrls, QStringList &target) {
                 if (!serviceType.isEmpty()) {

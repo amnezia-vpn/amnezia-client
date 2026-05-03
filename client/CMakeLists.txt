@@ -62,7 +62,12 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
 endif()
 
-qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
+qt6_add_resources(QRC ${QRC}
+    ${CMAKE_CURRENT_LIST_DIR}/images/images.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/images/flagKit.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/ui/qml/qml.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/server_scripts/serverScripts.qrc
+)
 
 # -- i18n begin
 set(CMAKE_AUTORCC ON)
@@ -227,6 +232,12 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
         COMMAND_EXPAND_LISTS
     )
 endif()
+
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+    add_subdirectory(tests)
+endif()
+
+list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 

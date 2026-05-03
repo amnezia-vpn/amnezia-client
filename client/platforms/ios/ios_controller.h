@@ -1,7 +1,7 @@
 #ifndef IOS_CONTROLLER_H
 #define IOS_CONTROLLER_H
 
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 #include <functional>
 #include <QVariant>
 #include <QVariantMap>
@@ -94,7 +94,6 @@ private:
     explicit IosController();
 
     bool setupOpenVPN();
-    bool setupCloak();
     bool setupWireGuard();
     bool setupAwg();
     bool setupXray();

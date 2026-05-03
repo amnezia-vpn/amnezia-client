@@ -46,7 +46,7 @@ DrawerType2 {
                 }
 
                 if (serverName.textField.text !== root.serverNameText) {
-                    ServersModel.setProcessedServerData("name", serverName.textField.text);
+                    ServersUiController.editServerName(ServersUiController.processedIndex, serverName.textField.text);
                 }
                 root.closeTriggered()
             }

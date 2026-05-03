@@ -1,17 +1,7 @@
 #include "appSplitTunnelingModel.h"
 
-#include <QFileInfo>
-
-AppSplitTunnelingModel::AppSplitTunnelingModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : QAbstractListModel(parent), m_settings(settings)
+AppSplitTunnelingModel::AppSplitTunnelingModel(QObject *parent) : QAbstractListModel(parent)
 {
-    m_isSplitTunnelingEnabled = m_settings->isAppsSplitTunnelingEnabled();
-    m_currentRouteMode = m_settings->getAppsRouteMode();
-    if (m_currentRouteMode == Settings::VpnAllApps) { // for old split tunneling configs
-        m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(Settings::VpnAllExceptApps));
-        m_currentRouteMode = Settings::VpnAllExceptApps;
-    }
-    m_apps = m_settings->getVpnApps(m_currentRouteMode);
 }
 
 int AppSplitTunnelingModel::rowCount(const QModelIndex &parent) const
@@ -73,26 +63,11 @@ int AppSplitTunnelingModel::getRouteMode()
     return m_currentRouteMode;
 }
 
-void AppSplitTunnelingModel::setRouteMode(int routeMode)
+void AppSplitTunnelingModel::updateModel(const QVector<amnezia::InstalledAppInfo> &apps)
 {
     beginResetModel();
-    m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(routeMode));
-    m_currentRouteMode = m_settings->getAppsRouteMode();
-    m_apps = m_settings->getVpnApps(m_currentRouteMode);
+    m_apps = apps;
     endResetModel();
-    emit routeModeChanged();
-}
-
-bool AppSplitTunnelingModel::isSplitTunnelingEnabled()
-{
-    return m_isSplitTunnelingEnabled;
-}
-
-void AppSplitTunnelingModel::toggleSplitTunneling(bool enabled)
-{
-    m_settings->setAppsSplitTunnelingEnabled(enabled);
-    m_isSplitTunnelingEnabled = enabled;
-    emit splitTunnelingToggled();
 }
 
 QHash<int, QByteArray> AppSplitTunnelingModel::roleNames() const

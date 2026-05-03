@@ -4,7 +4,7 @@
 #include <QJniObject>
 #include <QPixmap>
 
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 
 using namespace amnezia;
 

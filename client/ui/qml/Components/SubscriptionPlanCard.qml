@@ -26,9 +26,10 @@ Rectangle {
     ColumnLayout {
         id: cardLayout
 
+        anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.topMargin: 14
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 

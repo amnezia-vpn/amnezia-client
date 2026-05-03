@@ -3,7 +3,7 @@
 #include <QDateTime>
 #include <QJsonObject>
 
-#include "core/api/apiUtils.h"
+#include "core/utils/api/apiUtils.h"
 #include "logger.h"
 
 namespace

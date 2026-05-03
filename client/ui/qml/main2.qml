@@ -47,7 +47,7 @@ Window  {
         interval: 150
         repeat: false
         onTriggered: {
-            if (Qt.platform.os === "android" && SettingsController.isEdgeToEdgeEnabled()) {
+            if (Qt.platform.os === "android" && PageController.isEdgeToEdgeEnabled()) {
                 console.log("QML: Application resumed with edge-to-edge")
             }
         }
@@ -210,7 +210,7 @@ Window  {
             id: privateKeyPassphraseDrawer
 
             anchors.fill: parent
-            expandedHeight: root.height * 0.35 + SettingsController.safeAreaBottomMargin + SettingsController.imeHeight
+            expandedHeight: root.height * 0.35 + PageController.safeAreaBottomMargin + PageController.imeHeight
 
             expandedStateContent: ColumnLayout {
                 anchors.top: parent.top
@@ -301,7 +301,7 @@ Window  {
     }
 
     Connections {
-        target: ApiConfigsController
+        target: SubscriptionUiController
 
         function onSubscriptionExpiredOnServer() {
             subscriptionExpiredDrawer.openTriggered()
@@ -309,7 +309,7 @@ Window  {
     }
 
     Connections {
-        target: ApiSettingsController
+        target: SubscriptionUiController
 
         function onRenewalLinkReceived(url) {
             Qt.openUrlExternally(url)

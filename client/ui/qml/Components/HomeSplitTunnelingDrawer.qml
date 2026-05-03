@@ -40,7 +40,7 @@ DrawerType2 {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
+            visible: ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling
 
             text: qsTr("Split tunneling on the server")
             descriptionText: qsTr("Enabled \nCan't be disabled for current server")
@@ -53,7 +53,7 @@ DrawerType2 {
         }
 
         DividerType {
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
+            visible: ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling
         }
 
         LabelWithButtonType {
@@ -62,7 +62,7 @@ DrawerType2 {
             Layout.topMargin: 16
 
             text: qsTr("Site-based split tunneling")
-            descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            descriptionText: enabled && IpSplitTunnelingController.isSplitTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
@@ -81,7 +81,7 @@ DrawerType2 {
             Layout.fillWidth: true
 
             text: qsTr("App-based split tunneling")
-            descriptionText: AppSplitTunnelingModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            descriptionText: AppSplitTunnelingController.isSplitTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {

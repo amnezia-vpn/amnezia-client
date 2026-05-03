@@ -26,9 +26,9 @@ PageType {
         target: InstallController
 
         function onInstallContainerFinished(finishedMessage, isServiceInstall) {
-            var containerIndex = ContainersModel.getProcessedContainerIndex()
+            var containerIndex = ServersUiController.processedContainerIndex
             if (!ConnectionController.isConnected && !ContainersModel.isServiceContainer(containerIndex)) {
-                ServersModel.setDefaultContainer(ServersModel.processedIndex, containerIndex)
+                ServersUiController.setDefaultContainer(ServersUiController.processedIndex, containerIndex)
             }
             
             PageController.closePage() // close installing page
@@ -47,8 +47,8 @@ PageType {
 
         function onInstallServerFinished(finishedMessage) {
             if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersUiController.processedIndex = ServersUiController.defaultIndex
             }
 
             PageController.goToPageHome()
@@ -57,7 +57,7 @@ PageType {
 
         function onServerAlreadyExists(serverIndex) {
             PageController.goToStartPage()
-            ServersModel.processedIndex = serverIndex
+            ServersUiController.processedIndex = serverIndex
             PageController.goToPage(PageEnum.PageSettingsServerInfo, false)
 
             PageController.showErrorMessage(qsTr("The server has already been added to the application"))
@@ -103,7 +103,7 @@ PageType {
 
             BaseHeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 20 + PageController.safeAreaTopMargin
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -147,7 +147,7 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
-                Layout.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
+                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

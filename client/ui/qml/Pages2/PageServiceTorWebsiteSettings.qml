@@ -31,7 +31,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
         
         onFocusChanged: {
             if (this.activeFocus) {
@@ -60,7 +60,7 @@ PageType {
             }
         }
 
-        model: 1 // fake model to force the ListView to be created without a model
+        model: TorConfigModel
 
         delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser after migrate to 6.9
             width: listView.width
@@ -73,11 +73,7 @@ PageType {
                 Layout.bottomMargin: 24
 
                 text: qsTr("Website address")
-                descriptionText: {
-                    var containerIndex = ContainersModel.getProcessedContainerIndex()
-                    var config = ContainersModel.getContainerConfig(containerIndex)
-                    return config[ContainerProps.containerTypeToString(containerIndex)]["site"]
-                }
+                descriptionText: site || ""
 
                 descriptionOnTop: true
                 textColor: AmneziaStyle.color.goldenApricot

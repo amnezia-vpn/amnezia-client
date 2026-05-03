@@ -23,7 +23,7 @@ PageType {
         id: listView
 
         anchors.fill: parent
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
         anchors.bottomMargin: 24
 
         model: ApiDevicesModel
@@ -71,7 +71,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/trash.svg"
 
                 clickedFunction: function() {
-                    if (isCurrentDevice && ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    if (isCurrentDevice && ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         return
                     }
@@ -82,7 +82,8 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        Qt.callLater(deactivateExternalDevice, supportTag, countryCode)
+                        var serverIndex = ServersUiController.getProcessedServerIndex()
+                        Qt.callLater(deactivateExternalDevice, serverIndex, supportTag, countryCode)
                     }
                     var noButtonFunction = function() {
                     }
@@ -95,10 +96,10 @@ PageType {
         }
     }
 
-    function deactivateExternalDevice(supportTag, countryCode) {
+    function deactivateExternalDevice(serverIndex, supportTag, countryCode) {
         PageController.showBusyIndicator(true)
-        if (ApiConfigsController.deactivateExternalDevice(supportTag, countryCode)) {
-            ApiSettingsController.getAccountInfo(true)
+        if (SubscriptionUiController.deactivateExternalDevice(serverIndex, supportTag, countryCode)) {
+            SubscriptionUiController.getAccountInfo(serverIndex, true)
         }
         PageController.showBusyIndicator(false)
     }
