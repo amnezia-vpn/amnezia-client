@@ -12,7 +12,8 @@ mkdir -p dist
 
 cd dist
 
-echo $VERSION >> VERSION
+echo $VERSION > VERSION
+curl -s https://api.github.com/repos/amnezia-vpn/amnezia-client/releases/tags/$VERSION | jq -r .published_at > RELEASE_DATE
 curl -s https://api.github.com/repos/amnezia-vpn/amnezia-client/releases/tags/$VERSION | jq -r .body | tr -d '\r' > CHANGELOG
 curl -s https://api.github.com/repos/amnezia-vpn/amnezia-client/releases/tags/$VERSION | jq -r .published_at > RELEASE_DATE
 

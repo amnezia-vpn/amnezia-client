@@ -20,6 +20,7 @@
 #include "ui/controllers/selfhosted/installUiController.h"
 #include "ui/controllers/importUiController.h"
 #include "ui/controllers/api/subscriptionUiController.h"
+#include "ui/controllers/updateUiController.h"
 #include "ui/models/serversModel.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/ipSplitTunnelingController.h"
@@ -83,6 +84,7 @@ void CoreSignalHandlers::initAllHandlers()
     initIosImportHandler();
     initIosSettingsHandler();
     initNotificationHandler();
+    initUpdateFoundHandler();
 }
 
 void CoreSignalHandlers::initErrorMessagesHandler()
@@ -408,5 +410,21 @@ void CoreSignalHandlers::initNotificationHandler()
     auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_coreController->m_notificationHandler);
     connect(m_coreController, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
 #endif    
+}
+
+void CoreSignalHandlers::initUpdateFoundHandler()
+{
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    connect(m_coreController->m_apiNewsUiController, &ApiNewsUiController::fetchNewsFinished, m_coreController->m_updateUiController,
+            &UpdateUiController::checkForUpdates);
+
+    connect(m_coreController->m_updateUiController, &UpdateUiController::updateFound, this, [this]() {
+        const QString version = m_coreController->m_updateUiController->getVersion();
+        const QString updateId = version.isEmpty() ? QStringLiteral("update") : QStringLiteral("update-%1").arg(version);
+        m_coreController->m_newsModel->setUpdateNotification(
+                updateId, m_coreController->m_updateUiController->getHeaderText(), m_coreController->m_updateUiController->getChangelogText());
+        emit m_coreController->m_pageController->showChangelogDrawer();
+    });
+#endif
 }
 

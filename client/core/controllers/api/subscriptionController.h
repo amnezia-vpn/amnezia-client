@@ -65,7 +65,7 @@ public:
 
     ErrorCode updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent);
 
-    ErrorCode deactivateDevice(int serverIndex, bool isRemoveEvent);
+    ErrorCode deactivateDevice(int serverIndex);
 
     ErrorCode deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode);
 

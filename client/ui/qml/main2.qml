@@ -144,6 +144,10 @@ Window  {
             busyIndicator.visible = visible
             PageController.disableControls(visible)
         }
+
+        function onShowChangelogDrawer() {
+            changelogDrawer.openTriggered()
+        }
     }
 
     Connections {
@@ -359,5 +363,15 @@ Window  {
 
         onAccepted: SystemController.fileDialogClosed(true)
         onRejected: SystemController.fileDialogClosed(false)
+    }
+
+    Item {
+        anchors.fill: parent
+
+        ChangelogDrawer {
+            id: changelogDrawer
+
+            anchors.fill: parent
+        }
     }
 }

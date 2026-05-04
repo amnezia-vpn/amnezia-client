@@ -307,7 +307,8 @@ bool SubscriptionUiController::updateServiceFromGateway(const int serverIndex, c
     if (oldServerConfig.isApiV2()) {
         const ApiV2ServerConfig *oldApiV2 = oldServerConfig.as<ApiV2ServerConfig>();
         if (oldApiV2) {
-            wasSubscriptionExpired = oldApiV2->apiConfig.isSubscriptionExpired();
+            wasSubscriptionExpired = oldApiV2->apiConfig.subscriptionExpiredByServer
+                    || oldApiV2->apiConfig.isSubscriptionExpired();
         }
     }
 
@@ -328,8 +329,9 @@ bool SubscriptionUiController::updateServiceFromGateway(const int serverIndex, c
     } else {
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
             emit subscriptionExpiredOnServer();
+        } else {
+            emit errorOccurred(errorCode);
         }
-        emit errorOccurred(errorCode);
         return false;
     }
 }
@@ -352,14 +354,10 @@ bool SubscriptionUiController::updateServiceFromTelegram(const int serverIndex)
     }
 }
 
-bool SubscriptionUiController::deactivateDevice(int serverIndex, const bool isRemoveEvent)
+bool SubscriptionUiController::deactivateDevice(int serverIndex)
 {
-
-    ErrorCode errorCode = m_subscriptionController->deactivateDevice(serverIndex, isRemoveEvent);
+    ErrorCode errorCode = m_subscriptionController->deactivateDevice(serverIndex);
     if (errorCode != ErrorCode::NoError) {
-        if (errorCode == ErrorCode::ApiSubscriptionExpiredError && isRemoveEvent) {
-            return true;
-        }
         emit errorOccurred(errorCode);
         return false;
     }
@@ -386,7 +384,11 @@ void SubscriptionUiController::validateConfig()
     ErrorCode errorCode = m_subscriptionController->validateAndUpdateConfig(serverIndex, hasInstalledContainers);
 
     if (errorCode != ErrorCode::NoError) {
-        emit errorOccurred(errorCode);
+        if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
+            emit subscriptionExpiredOnServer();
+        } else {
+            emit errorOccurred(errorCode);
+        }
         emit configValidated(false);
         return;
     }
@@ -474,6 +476,9 @@ void SubscriptionUiController::getRenewalLink(int serverIndex)
         watcher->deleteLater();
         if (errorCode != ErrorCode::NoError) {
             emit errorOccurred(errorCode);
+            return;
+        }
+        if (url.isEmpty()) {
             return;
         }
         emit renewalLinkReceived(url);
