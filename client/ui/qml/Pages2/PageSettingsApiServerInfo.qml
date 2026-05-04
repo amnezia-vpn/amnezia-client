@@ -469,7 +469,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (SubscriptionUiController.deactivateDevice(ServersUiController.getProcessedServerIndex(), false)) {
+                            if (SubscriptionUiController.deactivateDevice(ServersUiController.getProcessedServerIndex())) {
                                 SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
                             }
                             PageController.showBusyIndicator(false)
