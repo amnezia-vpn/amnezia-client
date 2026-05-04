@@ -9,8 +9,6 @@ if [ -n "$TELEMT_SECRET" ]; then
     SECRET="$TELEMT_SECRET"
 elif [ -f /data/secret ]; then
     SECRET=$(cat /data/secret)
-elif [ -f /data/.amnezia-secret ]; then
-    SECRET=$(cat /data/.amnezia-secret)
 else
     SECRET=$(openssl rand -hex 16)
 fi

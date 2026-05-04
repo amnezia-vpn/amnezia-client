@@ -188,7 +188,7 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
                       "bypassing DPI-based blocking.") },
         { DockerContainer::Telemt,
           QObject::tr("Telegram MTProto proxy powered by Telemt (Rust). "
-                      "Supports secure and TLS fronting modes with optional traffic masking.") }
+                      "Supports secure and TLS fronting modes with optional traffic masking.") },
     };
 }
 
