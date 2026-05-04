@@ -2,6 +2,20 @@
 
 ### _The best client for self-hosted VPN_
 
+---
+
+> [!WARNING]
+> **This is a development fork** focused on implementing **app-based split tunneling for Linux**.
+> It is currently in active development and may contain bugs or incomplete features.
+> Use in production at your own risk.
+>
+> **Key addition:** Linux app split tunneling using cgroup v2 + iptables policy routing.
+> Excluded apps bypass the VPN tunnel via the physical interface using MASQUERADE.
+> Supports snap, flatpak, and native applications.
+>
+> Upstream project: [amnezia-vpn/amnezia-client](https://github.com/amnezia-vpn/amnezia-client)
+
+---
 
 [![Build Status](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml/badge.svg?branch=dev)](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml?query=branch:dev)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/amnezia-vpn/amnezia-client)

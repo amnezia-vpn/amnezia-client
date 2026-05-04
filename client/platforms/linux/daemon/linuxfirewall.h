@@ -102,6 +102,9 @@ public:
     static void updateDNSServers(const QStringList& servers);
     static void updateAllowNets(const QStringList& servers);
     static void updateBlockNets(const QStringList& servers);
+    static QString cgroupPath();
+    static QString packetTag();
+    static QString cgroupId();
 };
 
 #endif // LINUXFIREWALL_H

@@ -11,7 +11,7 @@ import "../Config"
 DrawerType2 {
     id: root
 
-    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android" || Qt.platform.os === "linux"
 
     anchors.fill: parent
     expandedHeight: parent.height * 0.9
