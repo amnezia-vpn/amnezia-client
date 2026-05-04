@@ -73,6 +73,7 @@ InstallUiController::InstallUiController(InstallController *installController,
                                          SftpConfigModel *sftpConfigModel,
                                          Socks5ProxyConfigModel *socks5ConfigModel,
                                          MtProxyConfigModel* mtConfigModel,
+                                         TelemtConfigModel *telemtConfigModel,
                                          QObject *parent)
     : QObject(parent),
       m_installController(installController),
@@ -90,7 +91,8 @@ InstallUiController::InstallUiController(InstallController *installController,
 #endif
       m_sftpConfigModel(sftpConfigModel),
       m_socks5ConfigModel(socks5ConfigModel),
-      m_mtProxyConfigModel(mtConfigModel)
+      m_mtProxyConfigModel(mtConfigModel),
+      m_telemtConfigModel(telemtConfigModel)
 {
     connect(m_installController, &InstallController::configValidated, this, &InstallUiController::configValidated);
     connect(m_installController, &InstallController::validationErrorOccurred, this, [this](ErrorCode errorCode) {
@@ -250,6 +252,10 @@ void InstallUiController::updateContainer(int serverIndex, int containerIndex, i
         containerConfig.protocolConfig = m_mtProxyConfigModel->getProtocolConfig();
         break;
     }
+    case Proto::Telemt: {
+        containerConfig.protocolConfig = m_telemtConfigModel->getProtocolConfig();
+        break;
+    }
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: {
         containerConfig.protocolConfig = m_ikev2ConfigModel->getProtocolConfig();
@@ -261,7 +267,7 @@ void InstallUiController::updateContainer(int serverIndex, int containerIndex, i
     }
     ContainerConfig oldContainerConfig = m_serversController->getContainerConfig(serverIndex, container);
 
-    if (container == DockerContainer::MtProxy) {
+    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt) {
         emit serverIsBusy(true);
         auto *watcher = new QFutureWatcher<ErrorCode>(this);
         QObject::connect(watcher, &QFutureWatcher<ErrorCode>::finished, this,
@@ -336,6 +342,10 @@ void InstallUiController::setContainerEnabled(int serverIndex, int containerInde
         ContainerConfig currentConfig = m_serversController->getContainerConfig(serverIndex, container);
         if (auto *mtConfig = currentConfig.getMtProxyProtocolConfig()) {
             mtConfig->isEnabled = enabled;
+            m_serversController->updateContainerConfig(serverIndex, container, currentConfig);
+            m_protocolModel->updateModel(currentConfig);
+        } else if (auto *telemtConfig = currentConfig.getTelemtProtocolConfig()) {
+            telemtConfig->isEnabled = enabled;
             m_serversController->updateContainerConfig(serverIndex, container, currentConfig);
             m_protocolModel->updateModel(currentConfig);
         }
@@ -447,7 +457,8 @@ void InstallUiController::fetchContainerSecret(int serverIndex, int containerInd
     };
 
     SshSession sshSession(this);
-    const QString path = QStringLiteral("/data/secret");
+    const QString path = container == DockerContainer::Telemt ? QStringLiteral("/data/.amnezia-secret")
+                                                              : QStringLiteral("/data/secret");
     const QString cmd =
             QStringLiteral("sudo docker exec %1 cat %2").arg(containerName, path);
     const ErrorCode errorCode = sshSession.runScript(credentials, cmd, cbReadStdOut);
@@ -675,6 +686,7 @@ void InstallUiController::updateProtocolConfigModel(int serverIndex, int contain
     case Proto::Sftp: updateIfPresent(m_sftpConfigModel, containerConfig.getSftpProtocolConfig()); break;
     case Proto::Socks5Proxy: updateIfPresent(m_socks5ConfigModel, containerConfig.getSocks5ProxyProtocolConfig()); break;
     case Proto::MtProxy: updateIfPresent(m_mtProxyConfigModel, containerConfig.getMtProxyProtocolConfig()); break;
+    case Proto::Telemt: updateIfPresent(m_telemtConfigModel, containerConfig.getTelemtProtocolConfig()); break;
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: updateIfPresent(m_ikev2ConfigModel, containerConfig.getIkev2ProtocolConfig()); break;
 #endif

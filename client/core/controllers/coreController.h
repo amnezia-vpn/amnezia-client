@@ -71,6 +71,7 @@
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/services/mtProxyConfigModel.h"
+#include "ui/models/services/telemtConfigModel.h"
 
 #include "ui/models/ipSplitTunnelingModel.h"
 #include "ui/models/newsModel.h"
@@ -215,6 +216,7 @@ private:
     SftpConfigModel* m_sftpConfigModel;
     Socks5ProxyConfigModel* m_socks5ConfigModel;
     MtProxyConfigModel* m_mtProxyConfigModel;
+    TelemtConfigModel* m_telemtConfigModel;
 
     CoreSignalHandlers* m_signalHandlers;
 };

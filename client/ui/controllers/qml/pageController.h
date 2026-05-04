@@ -51,6 +51,7 @@ namespace PageLoader
         PageServiceDnsSettings,
         PageServiceSocksProxySettings,
         PageServiceMtProxySettings,
+        PageServiceTelemtSettings,
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,

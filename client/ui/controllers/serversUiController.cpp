@@ -484,6 +484,8 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
                 servicesName.append("SOCKS5");
             } else if (container == DockerContainer::MtProxy) {
                 servicesName.append("MTProxy");
+            } else if (container == DockerContainer::Telemt) {
+                servicesName.append("Telemt");
             }
         }
     }

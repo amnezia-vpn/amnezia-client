@@ -29,6 +29,7 @@
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "ui/models/services/mtProxyConfigModel.h"
+#include "ui/models/services/telemtConfigModel.h"
 
 class InstallUiController : public QObject
 {
@@ -50,6 +51,7 @@ public:
                                SftpConfigModel* sftpConfigModel,
                                Socks5ProxyConfigModel* socks5ConfigModel,
                                MtProxyConfigModel* mtConfigModel,
+                               TelemtConfigModel* telemtConfigModel,
                                QObject *parent = nullptr);
     ~InstallUiController();
 
@@ -152,6 +154,7 @@ private:
     SftpConfigModel* m_sftpConfigModel;
     Socks5ProxyConfigModel* m_socks5ConfigModel;
     MtProxyConfigModel* m_mtProxyConfigModel;
+    TelemtConfigModel* m_telemtConfigModel;
 
     ServerCredentials m_processedServerCredentials;
 

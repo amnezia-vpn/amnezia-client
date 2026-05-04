@@ -205,6 +205,40 @@ namespace amnezia
             constexpr char defaultTlsDomain[]      = "googletagmanager.com";
         }
 
+        namespace telemt
+        {
+            constexpr char secretKey[]            = "telemt_secret";
+            constexpr char tagKey[]               = "telemt_tag";
+            constexpr char tgLinkKey[]            = "telemt_tg_link";
+            constexpr char tmeLinkKey[]           = "telemt_tme_link";
+            constexpr char isEnabledKey[]         = "telemt_is_enabled";
+            constexpr char publicHostKey[]        = "telemt_public_host";
+            constexpr char transportModeKey[]     = "telemt_transport_mode";
+            constexpr char tlsDomainKey[]         = "telemt_tls_domain";
+            constexpr char maskEnabledKey[]       = "telemt_mask_enabled";
+            constexpr char tlsEmulationKey[]      = "telemt_tls_emulation";
+            constexpr char useMiddleProxyKey[]    = "telemt_use_middle_proxy";
+            constexpr char userNameKey[]          = "telemt_user_name";
+            // Stored for UI only (Telemt server ignores these; same controls as MTProxy page)
+            constexpr char additionalSecretsKey[] = "telemt_additional_secrets";
+            constexpr char workersKey[]           = "telemt_workers";
+            constexpr char workersModeKey[]       = "telemt_workers_mode";
+            constexpr char natEnabledKey[]        = "telemt_nat_enabled";
+            constexpr char natInternalIpKey[]     = "telemt_nat_internal_ip";
+            constexpr char natExternalIpKey[]     = "telemt_nat_external_ip";
+
+            constexpr char transportModeStandard[] = "standard";
+            constexpr char transportModeFakeTLS[]  = "faketls";
+
+            constexpr char defaultPort[]           = "443";
+            constexpr char defaultTlsDomain[]      = "googletagmanager.com";
+            constexpr char defaultUserName[]       = "amnezia";
+            constexpr char defaultWorkers[]        = "2";
+            constexpr char workersModeAuto[]       = "auto";
+            constexpr char workersModeManual[]     = "manual";
+            constexpr int  maxWorkers              = 32;
+        }
+
     } // namespace protocols
 }
 

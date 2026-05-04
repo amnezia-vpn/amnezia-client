@@ -50,6 +50,7 @@ public:
         IsTorWebsiteRole,
         IsSocks5ProxyRole,
         IsMtProxyRole,
+        IsTelemtRole,
     };
     
     Q_INVOKABLE void openContainerSettings(int containerIndex);

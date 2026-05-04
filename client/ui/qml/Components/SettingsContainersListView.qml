@@ -48,6 +48,9 @@ ListViewType {
                     } else if (isMtProxy) {
                         MtProxyConfigModel.updateModel(config)
                         PageController.goToPage(PageEnum.PageServiceMtProxySettings)
+                    } else if (isTelemt) {
+                        TelemtConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceTelemtSettings)
                     } else {
                         InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)

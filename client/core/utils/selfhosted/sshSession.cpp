@@ -103,7 +103,7 @@ ErrorCode SshSession::runContainerScript(const ServerCredentials &credentials, D
     if (e)
         return e;
 
-    const bool useSh = container == DockerContainer::Socks5Proxy || container == DockerContainer::MtProxy;
+    const bool useSh = container == DockerContainer::Socks5Proxy || container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
     QString runner = QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, useSh ? "sh" : "bash");
     e = runScript(credentials, replaceVars(runner, amnezia::genBaseVars(credentials, container, QString(), QString())), cbReadStdOut, cbReadStdErr);
 

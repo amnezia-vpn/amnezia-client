@@ -104,6 +104,9 @@ void CoreController::initModels()
     m_mtProxyConfigModel = new MtProxyConfigModel(this);
     setQmlContextProperty("MtProxyConfigModel", m_mtProxyConfigModel);
 
+    m_telemtConfigModel = new TelemtConfigModel(this);
+    setQmlContextProperty("TelemtConfigModel", m_telemtConfigModel);
+
     m_clientManagementModel = new ClientManagementModel(this);
     setQmlContextProperty("ClientManagementModel", m_clientManagementModel);
 
@@ -173,7 +176,7 @@ void CoreController::initControllers()
 #ifdef Q_OS_WINDOWS
                                                      m_ikev2ConfigModel,
 #endif
-                                                     m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, this);
+                                                     m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, m_telemtConfigModel, this);
     setQmlContextProperty("InstallController", m_installUiController);
 
     m_importController = new ImportUiController(m_importCoreController, this);

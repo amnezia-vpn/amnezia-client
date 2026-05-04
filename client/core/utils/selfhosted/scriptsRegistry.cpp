@@ -20,6 +20,7 @@
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/mtProxyProtocolConfig.h"
+#include "core/models/protocols/telemtProtocolConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -39,6 +40,7 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::Sftp: return QLatin1String("sftp");
     case DockerContainer::Socks5Proxy: return QLatin1String("socks5_proxy");
     case DockerContainer::MtProxy: return QLatin1String("mtproxy");
+    case DockerContainer::Telemt: return QLatin1String("telemt");
     default: return QString();
     }
 }
@@ -335,6 +337,37 @@ amnezia::ScriptVars amnezia::genMtProxyVars(const ContainerConfig &containerConf
     return vars;
 }
 
+amnezia::ScriptVars amnezia::genTelemtVars(const ContainerConfig &containerConfig)
+{
+    ScriptVars vars;
+
+    if (auto *telemtProtocolConfig = containerConfig.getTelemtProtocolConfig()) {
+        const TelemtProtocolConfig &c = *telemtProtocolConfig;
+
+        const QString transport = c.transportMode.isEmpty() ? QString(protocols::telemt::transportModeStandard)
+                                                            : c.transportMode;
+        const bool faketls = (transport == QLatin1String(protocols::telemt::transportModeFakeTLS));
+        vars.append({ { "$TELEMT_TOML_SECURE", faketls ? QLatin1String("false") : QLatin1String("true") } });
+        vars.append({ { "$TELEMT_TOML_TLS", faketls ? QLatin1String("true") : QLatin1String("false") } });
+        vars.append({ { "$TELEMT_PORT", c.port.isEmpty() ? QString(protocols::telemt::defaultPort) : c.port } });
+        vars.append({ { "$TELEMT_SECRET", c.secret } });
+        vars.append({ { "$TELEMT_TAG", c.tag } });
+        QString tlsDomain = c.tlsDomain;
+        if (tlsDomain.isEmpty()) {
+            tlsDomain = QString(protocols::telemt::defaultTlsDomain);
+        }
+        vars.append({ { "$TELEMT_TLS_DOMAIN", tlsDomain } });
+        vars.append({ { "$TELEMT_PUBLIC_HOST", c.publicHost } });
+        vars.append({ { "$TELEMT_USER_NAME",
+                         c.userName.isEmpty() ? QString::fromUtf8(protocols::telemt::defaultUserName) : c.userName } });
+        vars.append({ { "$TELEMT_USE_MIDDLE_PROXY", c.useMiddleProxy ? QLatin1String("true") : QLatin1String("false") } });
+        vars.append({ { "$TELEMT_MASK", c.maskEnabled ? QLatin1String("true") : QLatin1String("false") } });
+        vars.append({ { "$TELEMT_TLS_EMULATION", c.tlsEmulation ? QLatin1String("true") : QLatin1String("false") } });
+    }
+
+    return vars;
+}
+
 amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
@@ -361,6 +394,9 @@ amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer contain
         break;
     case Proto::MtProxy:
         vars.append(genMtProxyVars(containerConfig));
+        break;
+    case Proto::Telemt:
+        vars.append(genTelemtVars(containerConfig));
         break;
     default:
         break;

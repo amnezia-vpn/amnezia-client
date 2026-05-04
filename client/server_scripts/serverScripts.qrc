@@ -28,6 +28,10 @@
         <file>mtproxy/Dockerfile</file>
         <file>mtproxy/run_container.sh</file>
         <file>mtproxy/start.sh</file>
+        <file>telemt/configure_container.sh</file>
+        <file>telemt/Dockerfile</file>
+        <file>telemt/run_container.sh</file>
+        <file>telemt/start.sh</file>
         <file>openvpn/configure_container.sh</file>
         <file>openvpn/Dockerfile</file>
         <file>openvpn/run_container.sh</file>

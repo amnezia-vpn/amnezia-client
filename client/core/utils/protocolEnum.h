@@ -32,6 +32,7 @@ namespace amnezia
             Sftp,
             Socks5Proxy,
             MtProxy,
+            Telemt,
         };
         Q_ENUM_NS(Proto)
 
