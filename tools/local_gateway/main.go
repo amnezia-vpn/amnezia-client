@@ -174,7 +174,7 @@ func handleConfig(w http.ResponseWriter, r *http.Request) {
 			"error":         "rate_limit_exceeded",
 			"captcha_id":    id,
 			"captcha_image": b64,
-			"hint":          "Please solve the CAPTCHA to continue",
+			"hint":          "Enter the digits from the image to continue",
 		})
 		return
 	}

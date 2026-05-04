@@ -286,7 +286,7 @@ bool SubscriptionUiController::importFreeFromGateway()
         m_captchaState.isPending = true;
 
         emit captchaRequired(captchaInfo.captchaId, captchaInfo.captchaImageBase64,
-                             captchaInfo.hint.isEmpty() ? tr("Please solve the CAPTCHA to continue") : captchaInfo.hint);
+                             captchaInfo.hint.isEmpty() ? tr("Enter the digits from the image to continue") : captchaInfo.hint);
         return false;
     } else {
         emit errorOccurred(errorCode);
@@ -351,7 +351,7 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
 
     if (errorCode == ErrorCode::ApiCaptchaRequiredError && captchaInfo.isRequired) {
         emit captchaRequired(captchaInfo.captchaId, captchaInfo.captchaImageBase64,
-                             captchaInfo.hint.isEmpty() ? tr("Please solve the CAPTCHA to continue") : captchaInfo.hint);
+                             captchaInfo.hint.isEmpty() ? tr("Enter the digits from the image to continue") : captchaInfo.hint);
     } else if (errorCode != ErrorCode::NoError) {
         m_captchaState.isPending = false;
         emit errorOccurred(errorCode);
