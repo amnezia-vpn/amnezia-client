@@ -87,7 +87,7 @@ git submodule update --init --recursive
   - [Apple] [`Xcode`](https://developer.apple.com/xcode/) или [`Xcode command line tools`](https://developer.apple.com/xcode/)
   - [Windows] [`Visual Studio 2022`](https://aka.ms/vs/17/release/vs_community.exe) или [`VS 2022 Build Tools`](https://aka.ms/vs/17/release/vs_buildtools.exe)
   - [Android] [`Android SDK`](#установка-android-sdk) и [`Ninja`](https://ninja-build.org/)
-* [`Qt 6.7+`](https://www.qt.io/download-open-source) со следующими модулями:
+* [`Qt 6.10+`](https://www.qt.io/download-open-source) со следующими модулями:
   - Основные модули для таргета (Desktop/Android/iOS)
   - Qt 5 Compatibility module
   - Qt Remote Objects

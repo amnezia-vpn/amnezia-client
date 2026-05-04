@@ -93,7 +93,7 @@ Want to contribute? Welcome!
   - [Apple] [`Xcode`](https://developer.apple.com/xcode/) or [`Xcode command line tools`](https://developer.apple.com/xcode/)
   - [Windows] [`Visual Studio 2022`](https://aka.ms/vs/17/release/vs_community.exe) or [`VS 2022 Build Tools`](https://aka.ms/vs/17/release/vs_buildtools.exe)
   - [Android] [`Android SDK`](#installing-android-sdk) and [`Ninja`](https://ninja-build.org/)
-* [`Qt 6.7+`](https://www.qt.io/download-open-source) with the following modules:
+* [`Qt 6.10+`](https://www.qt.io/download-open-source) with the following modules:
   - Core module for targeting platform (Desktop/Android/iOS)
   - Qt 5 Compatibility module
   - Qt Remote Objects
