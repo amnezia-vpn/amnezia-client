@@ -287,7 +287,10 @@ XrayClientConfig XrayClientConfig::fromJson(const QJsonObject &json)
                                 if (vnextObj.contains(protocols::xray::users)) {
                                     QJsonArray users = vnextObj[protocols::xray::users].toArray();
                                     if (!users.isEmpty()) {
-                                        c.id = users[0].toObject().value(protocols::xray::id).toString();
+                                        QJsonObject user = users[0].toObject();
+                                        if (user.contains(protocols::xray::id)) {
+                                            c.id = user[protocols::xray::id].toString();
+                                        }
                                     }
                                 }
                             }
@@ -335,8 +338,10 @@ XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject &json)
                 if (parsed.contains(protocols::xray::inbounds)) {
                     QJsonArray inbounds = parsed.value(protocols::xray::inbounds).toArray();
                     if (!inbounds.isEmpty()) {
-                        clientCfg.localPort = QString::number(
-                            inbounds[0].toObject().value(protocols::xray::port).toInt());
+                        QJsonObject inbound = inbounds[0].toObject();
+                        if (inbound.contains(protocols::xray::port)) {
+                            clientCfg.localPort = QString::number(inbound.value(protocols::xray::port).toInt());
+                        }
                     }
                 }
                 c.clientConfig = clientCfg;

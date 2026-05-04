@@ -344,8 +344,10 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
 
 amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
 {
-    if (!m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig))
-    {
+    const bool serverSettingsChanged =
+            !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+
+    if (serverSettingsChanged) {
         m_protocolConfig.clearClientConfig();
     }
     return m_protocolConfig;
