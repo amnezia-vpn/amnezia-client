@@ -7,6 +7,8 @@ mkdir -p /data/tlsfront
 # Secret: substituted $TELEMT_SECRET -> saved file -> openssl (same rules as MTProxy configure)
 if [ -n "$TELEMT_SECRET" ]; then
     SECRET="$TELEMT_SECRET"
+elif [ -f /data/secret ]; then
+    SECRET=$(cat /data/secret)
 elif [ -f /data/.amnezia-secret ]; then
     SECRET=$(cat /data/.amnezia-secret)
 else
@@ -61,8 +63,8 @@ rm -f /data/config.toml
     echo "$TELEMT_USER_NAME = \"$SECRET\""
 } > /data/config.toml
 
-echo "$SECRET" > /data/.amnezia-secret
-chmod 600 /data/.amnezia-secret 2>/dev/null || true
+echo "$SECRET" > /data/secret
+chmod 600 /data/secret 2>/dev/null || true
 
 # Do not start telemt here: a long-lived process + curl loop inside `docker exec` can confuse SSH/Docker
 # timing and is unnecessary — start.sh runs telemt after configure. Links can be empty until the service

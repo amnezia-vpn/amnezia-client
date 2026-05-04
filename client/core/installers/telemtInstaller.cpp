@@ -18,7 +18,7 @@ using namespace amnezia;
 namespace {
     constexpr QLatin1String kTelemtClientJsonPath("/data/amnezia-telemt-client.json");
     constexpr QLatin1String kTelemtClientJsonUploadPath("data/amnezia-telemt-client.json");
-    constexpr QLatin1String kTelemtSecretPath("/data/.amnezia-secret");
+    constexpr QLatin1String kTelemtSecretPath("/data/secret");
 }
 
 TelemtInstaller::TelemtInstaller(QObject *parent) : InstallerBase(parent) {}
