@@ -95,8 +95,8 @@ if exist "%VCVARS_PATH%" (
 
 :: build project and installers
 @echo on
-cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" || goto :fail
-cmake --build "%BUILD_DIR%" --config Release  || goto :fail
+cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true" || goto :fail
+cmake --build "%BUILD_DIR%" --config Release -- /m  || goto :fail
 @echo off
 for %%I in (%ARG_BUILD_INSTALLERS%) do (
     if /i "%%I" == "ifw" call :do_ifw
