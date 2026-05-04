@@ -196,7 +196,11 @@ QString ServersUiController::getDefaultServerImagePathCollapsed() const
         if (countryCode.isEmpty()) {
             return "";
         }
-        return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode.toUpper());
+        const QString imageCode = apiUtils::countryCodeBaseForFlag(countryCode);
+        if (imageCode.isEmpty()) {
+            return QString();
+        }
+        return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(imageCode);
     }
     return "";
 }
