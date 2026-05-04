@@ -24,14 +24,15 @@ abis=()
 installers=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -b|--build)         : ${BUILD_PATH:="$2"};  shift 2 ;;
-        -s|--source)        : ${SOURCE_PATH:="$2"}; shift 2 ;;
-        -t|--target)        TARGET="$2";            shift 2 ;;
-        -f|--force)         : ${FORCE=true};        shift   ;;
-        --installer)        installers+=("$2");     shift 2 ;;
-        --abi)              abis+=("$2");           shift 2 ;;
-        --sign)             : ${SIGN:=true};        shift   ;;
-        --aab)              : ${BUILD_AAB=true};    shift   ;;
+        -b|--build)         : ${BUILD_PATH:="$2"};   shift 2 ;;
+        -s|--source)        : ${SOURCE_PATH:="$2"};  shift 2 ;;
+        -t|--target)        TARGET="$2";             shift 2 ;;
+        -f|--force)         : ${FORCE=true};         shift   ;;
+        -g|--generator)     : ${CMAKE_GENERATOR=$2}; shift 2 ;;
+        --installer)        installers+=("$2");      shift 2 ;;
+        --abi)              abis+=("$2");            shift 2 ;;
+        --sign)             : ${SIGN:=true};         shift   ;;
+        --aab)              : ${BUILD_AAB=true};     shift   ;;
         --help|-h|?)
             echo "Usage: $0 [options]"
             echo "  Options:"
@@ -39,6 +40,7 @@ while [[ $# -gt 0 ]]; do
             echo "  -s|--source <path>        - specify path to amnezia-client root folder"
             echo "  -t|--target <name>        - specify build target"
             echo "  -f|--force                - force removal of build folder prior cmake configuration"
+            echo "  -g|--generator <name>     - use specified generator for CMake"
             echo "  --installer <name|all>    - specify an installer(s) to build. allowed to be used multiple times"
             echo "  --abi                     - specify Android ABIs for target to build for. all by default"
             echo "  --sign                    - whether to sign the resulting files. only appicable to Android"
