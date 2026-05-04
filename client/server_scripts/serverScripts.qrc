@@ -24,6 +24,10 @@
         <file>ipsec/run_container.sh</file>
         <file>ipsec/start.sh</file>
         <file>ipsec/strongswan.profile</file>
+        <file>mtproxy/configure_container.sh</file>
+        <file>mtproxy/Dockerfile</file>
+        <file>mtproxy/run_container.sh</file>
+        <file>mtproxy/start.sh</file>
         <file>openvpn/configure_container.sh</file>
         <file>openvpn/Dockerfile</file>
         <file>openvpn/run_container.sh</file>
@@ -55,4 +59,3 @@
         <file>xray/template.json</file>
     </qresource>
 </RCC>
-
