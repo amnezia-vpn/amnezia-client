@@ -407,9 +407,12 @@ void CoreSignalHandlers::initNotificationHandler()
             &ConnectionUiController::closeConnection);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_notificationHandler, &NotificationHandler::onTranslationsUpdated);
 
-    auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_coreController->m_notificationHandler);
-    connect(m_coreController, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
-#endif    
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (auto *trayHandler = qobject_cast<SystemTrayNotificationHandler *>(m_coreController->m_notificationHandler)) {
+        connect(m_coreController, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
+    }
+#endif
+#endif
 }
 
 void CoreSignalHandlers::initUpdateFoundHandler()

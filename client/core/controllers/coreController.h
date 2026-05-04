@@ -5,9 +5,7 @@
 #include <QQmlContext>
 #include <QThread>
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    #include "ui/utils/systemTrayNotificationHandler.h"
-#endif
+#include "ui/utils/systemTrayNotificationHandler.h"
 
 #include "ui/controllers/api/subscriptionUiController.h"
 #include "ui/controllers/api/apiNewsUiController.h"
@@ -141,9 +139,7 @@ private:
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     NotificationHandler* m_notificationHandler;
-#endif
 
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 

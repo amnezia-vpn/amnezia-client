@@ -84,6 +84,10 @@ if(NOT ANDROID)
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/ui/utils/notificationHandler.h
     )
+else()
+    set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/platforms/android/android_notificationhandler.h
+    )
 endif()
 
 set(SOURCES ${SOURCES}
@@ -173,6 +177,10 @@ endif()
 if(NOT ANDROID)
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/ui/utils/notificationHandler.cpp
+    )
+else()
+    set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/platforms/android/android_notificationhandler.cpp
     )
 endif()
 
