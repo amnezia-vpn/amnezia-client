@@ -192,9 +192,6 @@ PageType {
         if (fileName !== "") {
             PageController.showBusyIndicator(true)
             let result = SubscriptionUiController.exportNativeConfig(ServersUiController.getProcessedServerIndex(), countryCode, fileName)
-            if (result) {
-                SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
-            }
 
             PageController.showBusyIndicator(false)
             if (result) {
