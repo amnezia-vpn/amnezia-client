@@ -103,8 +103,8 @@ ErrorCode SshSession::runContainerScript(const ServerCredentials &credentials, D
     if (e)
         return e;
 
-    QString runner =
-            QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, (container == DockerContainer::Socks5Proxy ? "sh" : "bash"));
+    const bool useSh = container == DockerContainer::Socks5Proxy || container == DockerContainer::MtProxy;
+    QString runner = QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, useSh ? "sh" : "bash");
     e = runScript(credentials, replaceVars(runner, amnezia::genBaseVars(credentials, container, QString(), QString())), cbReadStdOut, cbReadStdErr);
 
     QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);

@@ -48,7 +48,8 @@ public:
         IsDnsRole,
         IsSftpRole,
         IsTorWebsiteRole,
-        IsSocks5ProxyRole
+        IsSocks5ProxyRole,
+        IsMtProxyRole,
     };
     
     Q_INVOKABLE void openContainerSettings(int containerIndex);

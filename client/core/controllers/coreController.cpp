@@ -101,6 +101,9 @@ void CoreController::initModels()
     m_socks5ConfigModel = new Socks5ProxyConfigModel(this);
     setQmlContextProperty("Socks5ProxyConfigModel", m_socks5ConfigModel);
 
+    m_mtProxyConfigModel = new MtProxyConfigModel(this);
+    setQmlContextProperty("MtProxyConfigModel", m_mtProxyConfigModel);
+
     m_clientManagementModel = new ClientManagementModel(this);
     setQmlContextProperty("ClientManagementModel", m_clientManagementModel);
 
@@ -170,7 +173,7 @@ void CoreController::initControllers()
 #ifdef Q_OS_WINDOWS
                                                      m_ikev2ConfigModel,
 #endif
-                                                     m_sftpConfigModel, m_socks5ConfigModel, this);
+                                                     m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, this);
     setQmlContextProperty("InstallController", m_installUiController);
 
     m_importController = new ImportUiController(m_importCoreController, this);
@@ -202,6 +205,10 @@ void CoreController::initControllers()
 
     m_systemController = new SystemController(this);
     setQmlContextProperty("SystemController", m_systemController);
+
+    m_networkReachabilityController = new NetworkReachabilityController(this);
+    m_engine->rootContext()->setContextProperty("NetworkReachabilityController", m_networkReachabilityController);
+    m_engine->rootContext()->setContextProperty("NetworkReachability", m_networkReachabilityController);
 
     m_servicesCatalogUiController = new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this);
     setQmlContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);

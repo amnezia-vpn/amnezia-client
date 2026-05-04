@@ -74,6 +74,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case IsSftpRole: return container == DockerContainer::Sftp;
     case IsTorWebsiteRole: return container == DockerContainer::TorWebSite;
     case IsSocks5ProxyRole: return container == DockerContainer::Socks5Proxy;
+    case IsMtProxyRole: return container == DockerContainer::MtProxy;
     case InstallPageOrderRole: return ContainerUtils::installPageOrder(container);
     }
 
@@ -184,5 +185,6 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsSftpRole] = "isSftp";
     roles[IsTorWebsiteRole] = "isTorWebsite";
     roles[IsSocks5ProxyRole] = "isSocks5Proxy";
+    roles[IsMtProxyRole] = "isMtProxy";
     return roles;
 }

@@ -23,6 +23,7 @@ public slots:
     void generateWireGuardConfig(int serverIndex, const QString &clientName);
     void generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName);
     void generateXrayConfig(int serverIndex, const QString &clientName);
+    void generateQrFromString(const QString &text);
 
     QString getConfig();
     QString getNativeConfigString();

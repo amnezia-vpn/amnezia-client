@@ -113,6 +113,16 @@ const Socks5ProxyProtocolConfig* ContainerConfig::getSocks5ProxyProtocolConfig()
     return protocolConfig.as<Socks5ProxyProtocolConfig>();
 }
 
+MtProxyProtocolConfig* ContainerConfig::getMtProxyProtocolConfig()
+{
+    return protocolConfig.as<MtProxyProtocolConfig>();
+}
+
+const MtProxyProtocolConfig* ContainerConfig::getMtProxyProtocolConfig() const
+{
+    return protocolConfig.as<MtProxyProtocolConfig>();
+}
+
 Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig()
 {
     return protocolConfig.as<Ikev2ProtocolConfig>();

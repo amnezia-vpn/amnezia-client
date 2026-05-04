@@ -45,6 +45,9 @@ ListViewType {
                         PageController.goToPage(PageEnum.PageProtocolRaw)
                     } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
+                    } else if (isMtProxy) {
+                        MtProxyConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceMtProxySettings)
                     } else {
                         InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)

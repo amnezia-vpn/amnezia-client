@@ -50,6 +50,7 @@ namespace PageLoader
         PageServiceTorWebsiteSettings,
         PageServiceDnsSettings,
         PageServiceSocksProxySettings,
+        PageServiceMtProxySettings,
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,

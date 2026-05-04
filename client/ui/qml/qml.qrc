@@ -78,6 +78,7 @@
         <file>Pages2/PageProtocolWireGuardSettings.qml</file>
         <file>Pages2/PageProtocolXraySettings.qml</file>
         <file>Pages2/PageServiceDnsSettings.qml</file>
+        <file>Pages2/PageServiceMtProxySettings.qml</file>
         <file>Pages2/PageServiceSftpSettings.qml</file>
         <file>Pages2/PageServiceSocksProxySettings.qml</file>
         <file>Pages2/PageServiceTorWebsiteSettings.qml</file>

@@ -57,6 +57,9 @@ struct ContainerConfig {
     Socks5ProxyProtocolConfig* getSocks5ProxyProtocolConfig();
     const Socks5ProxyProtocolConfig* getSocks5ProxyProtocolConfig() const;
     
+    MtProxyProtocolConfig* getMtProxyProtocolConfig();
+    const MtProxyProtocolConfig* getMtProxyProtocolConfig() const;
+
     Ikev2ProtocolConfig* getIkev2ProtocolConfig();
     const Ikev2ProtocolConfig* getIkev2ProtocolConfig() const;
     

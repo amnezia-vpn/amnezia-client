@@ -9,7 +9,6 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
@@ -20,6 +19,7 @@
 #include "core/models/protocols/xrayProtocolConfig.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
+#include "core/models/protocols/mtProxyProtocolConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -38,6 +38,7 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::Dns: return QLatin1String("dns");
     case DockerContainer::Sftp: return QLatin1String("sftp");
     case DockerContainer::Socks5Proxy: return QLatin1String("socks5_proxy");
+    case DockerContainer::MtProxy: return QLatin1String("mtproxy");
     default: return QString();
     }
 }
@@ -285,6 +286,55 @@ amnezia::ScriptVars amnezia::genSocks5ProxyVars(const ContainerConfig &container
     return vars;
 }
 
+amnezia::ScriptVars amnezia::genMtProxyVars(const ContainerConfig &containerConfig) {
+    ScriptVars vars;
+
+    if (auto *mtProxyProtocolConfig = containerConfig.getMtProxyProtocolConfig()) {
+        const MtProxyProtocolConfig &c = *mtProxyProtocolConfig;
+
+        vars.append({{"$MTPROXY_PORT", c.port.isEmpty() ? QString(protocols::mtProxy::defaultPort) : c.port}});
+        vars.append({{"$MTPROXY_SECRET", c.secret}});
+        vars.append({{"$MTPROXY_TAG", c.tag}});
+        vars.append({{"$MTPROXY_TRANSPORT_MODE",
+                      c.transportMode.isEmpty() ? QString(protocols::mtProxy::transportModeStandard)
+                                                : c.transportMode}});
+
+        QString tlsDomain = c.tlsDomain;
+        if (tlsDomain.isEmpty()) {
+            tlsDomain = QString(protocols::mtProxy::defaultTlsDomain);
+        }
+        vars.append({{"$MTPROXY_TLS_DOMAIN", tlsDomain}});
+        vars.append({{"$MTPROXY_PUBLIC_HOST", c.publicHost}});
+
+        QStringList additionalList;
+        for (const QString &s: c.additionalSecrets) {
+            if (!s.isEmpty()) {
+                additionalList << s;
+            }
+        }
+        vars.append({{"$MTPROXY_ADDITIONAL_SECRETS", additionalList.join(QLatin1Char(','))}});
+
+        const QString workersMode = c.workersMode.isEmpty() ? QString(protocols::mtProxy::workersModeAuto)
+                                                            : c.workersMode;
+        QString workers;
+        if (workersMode == QLatin1String(protocols::mtProxy::workersModeManual)) {
+            workers = c.workers.isEmpty() ? QString(protocols::mtProxy::defaultWorkers) : c.workers;
+        } else {
+            const QString transportMode =
+                    c.transportMode.isEmpty() ? QString(protocols::mtProxy::transportModeStandard) : c.transportMode;
+            workers = (transportMode == QLatin1String(protocols::mtProxy::transportModeFakeTLS)) ? QStringLiteral("0")
+                                                                                                 : QStringLiteral("2");
+        }
+        vars.append({{"$MTPROXY_WORKERS", workers}});
+
+        vars.append({{"$MTPROXY_NAT_ENABLED", c.natEnabled ? QStringLiteral("1") : QStringLiteral("0")}});
+        vars.append({{"$MTPROXY_NAT_INTERNAL_IP", c.natInternalIp}});
+        vars.append({{"$MTPROXY_NAT_EXTERNAL_IP", c.natExternalIp}});
+    }
+
+    return vars;
+}
+
 amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
@@ -308,6 +358,9 @@ amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer contain
         break;
     case Proto::Socks5Proxy:
         vars.append(genSocks5ProxyVars(containerConfig));
+        break;
+    case Proto::MtProxy:
+        vars.append(genMtProxyVars(containerConfig));
         break;
     default:
         break;

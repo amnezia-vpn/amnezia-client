@@ -482,6 +482,8 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
                 servicesName.append("TOR");
             } else if (container == DockerContainer::Socks5Proxy) {
                 servicesName.append("SOCKS5");
+            } else if (container == DockerContainer::MtProxy) {
+                servicesName.append("MTProxy");
             }
         }
     }

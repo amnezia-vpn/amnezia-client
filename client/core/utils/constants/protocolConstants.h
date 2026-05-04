@@ -3,6 +3,7 @@
 
 namespace amnezia
 {
+
     namespace protocols
     {
 
@@ -174,9 +175,37 @@ namespace amnezia
             constexpr char proxyConfigPath[] = "/usr/local/3proxy/conf/3proxy.cfg";
         }
 
+        namespace mtProxy
+        {
+            constexpr char secretKey[]            = "mtproxy_secret";
+            constexpr char tagKey[]               = "mtproxy_tag";
+            constexpr char tgLinkKey[]            = "mtproxy_tg_link";
+            constexpr char tmeLinkKey[]           = "mtproxy_tme_link";
+            constexpr char isEnabledKey[]         = "mtproxy_is_enabled";
+            constexpr char publicHostKey[]        = "mtproxy_public_host";
+            constexpr char transportModeKey[]     = "mtproxy_transport_mode";
+            constexpr char tlsDomainKey[]         = "mtproxy_tls_domain";
+            constexpr char additionalSecretsKey[] = "mtproxy_additional_secrets";
+            constexpr char workersKey[]           = "mtproxy_workers";
+            constexpr char workersModeKey[]       = "mtproxy_workers_mode";
+            constexpr char natEnabledKey[]        = "mtproxy_nat_enabled";
+            constexpr char natInternalIpKey[]     = "mtproxy_nat_internal_ip";
+            constexpr char natExternalIpKey[]     = "mtproxy_nat_external_ip";
+
+            constexpr char transportModeStandard[] = "standard";
+            constexpr char transportModeFakeTLS[]  = "faketls";
+
+            constexpr char workersModeAuto[]       = "auto";
+            constexpr char workersModeManual[]     = "manual";
+
+            constexpr char defaultPort[]           = "443";
+            constexpr char defaultWorkers[]        = "2";
+            constexpr int  maxWorkers              = 32;
+            constexpr int  botTagHexLength         = 32;
+            constexpr char defaultTlsDomain[]      = "googletagmanager.com";
+        }
+
     } // namespace protocols
 }
 
 #endif // PROTOCOLCONSTANTS_H
-
-

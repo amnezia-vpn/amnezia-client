@@ -92,6 +92,7 @@ namespace amnezia
         constexpr QLatin1String xray("xray");
         constexpr QLatin1String ssxray("ssxray");
         constexpr QLatin1String socks5proxy("socks5proxy");
+        constexpr QLatin1String mtproxy("mtproxy");
 
         constexpr QLatin1String splitTunnelSites("splitTunnelSites");
         constexpr QLatin1String splitTunnelType("splitTunnelType");
