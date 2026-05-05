@@ -86,6 +86,7 @@ if(NOT ANDROID)
     )
 else()
     set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/ui/utils/notificationHandler.h
         ${CLIENT_ROOT_DIR}/platforms/android/android_notificationhandler.h
     )
 endif()
@@ -180,6 +181,7 @@ if(NOT ANDROID)
     )
 else()
     set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/ui/utils/notificationHandler.cpp
         ${CLIENT_ROOT_DIR}/platforms/android/android_notificationhandler.cpp
     )
 endif()
