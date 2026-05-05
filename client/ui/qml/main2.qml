@@ -214,7 +214,6 @@ Window  {
             id: captchaDialog
 
             onCaptchaSolved: function(captchaId, solution) {
-                captchaDialog.close()
                 SubscriptionUiController.onCaptchaSolved(captchaId, solution)
             }
 
@@ -335,6 +334,10 @@ Window  {
             captchaDialog.captchaImageBase64 = captchaImageBase64
             captchaDialog.hint = hint
             captchaDialog.open()
+        }
+
+        function onCaptchaFlowDismissRequested() {
+            captchaDialog.close()
         }
     }
 

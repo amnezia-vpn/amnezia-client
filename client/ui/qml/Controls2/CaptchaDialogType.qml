@@ -40,6 +40,18 @@ Popup {
         solutionField.textField.focus = true
     }
 
+    onCaptchaIdChanged: {
+        if (opened) {
+            solutionField.textField.text = ""
+        }
+    }
+
+    onCaptchaImageBase64Changed: {
+        if (opened) {
+            solutionField.textField.text = ""
+        }
+    }
+
     onClosed: {
         FocusController.dropRootObject(root)
     }

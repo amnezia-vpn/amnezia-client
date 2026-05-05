@@ -22,9 +22,11 @@ class GatewayController : public QObject
 
 public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
+                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr,
+                               const QString &reuseAgwRequestBase = QString());
 
-    amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
+    amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody,
+                            QString *outEffectiveRequestBase = nullptr);
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
@@ -49,7 +51,8 @@ private:
                                             const QByteArray &key, const QByteArray &iv, const QByteArray &salt);
 
     QStringList getProxyUrls(const QString &serviceType, const QString &userCountryCode);
-    bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody, bool isDecryptionSuccessful);
+    bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody,
+                           bool isDecryptionSuccessful, int httpStatusCode);
     void bypassProxy(const QString &endpoint, const QString &serviceType, const QString &userCountryCode,
                      std::function<QNetworkReply *(const QString &url)> requestFunction,
                      std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction);
@@ -61,12 +64,14 @@ private:
             const QString &endpoint, const QString &proxyUrl, EncryptedRequestData encRequestData,
             std::function<void(const QByteArray &, bool, const QList<QSslError> &, QNetworkReply::NetworkError, const QString &, int)> onComplete);
 
+    void writeEffectiveRequestBase(QString *outEffectiveRequestBase) const;
+
     int m_requestTimeoutMsecs;
     QString m_gatewayEndpoint;
     bool m_isDevEnvironment = false;
     bool m_isStrictKillSwitchEnabled = false;
 
-    inline static QString m_proxyUrl;
+    QString m_proxyUrl;
 };
 
 #endif // GATEWAYCONTROLLER_H

@@ -255,6 +255,10 @@ bool SubscriptionUiController::restoreServiceFromAppStore()
 
 bool SubscriptionUiController::importFreeFromGateway()
 {
+    if (!isCaptchaAwaitingUser()) {
+        m_subscriptionController->clearGatewayCaptchaSticky();
+    }
+
     QString userCountryCode = m_apiServicesModel->getCountryCode();
     QString serviceType = m_apiServicesModel->getSelectedServiceType();
     QString serviceProtocol = m_apiServicesModel->getSelectedServiceProtocol();
@@ -307,6 +311,7 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
     protocolData.xrayUuid = m_captchaState.xrayUuid;
 
     ServerConfig serverConfig;
+    SubscriptionController::CaptchaInfo retryCaptcha;
     ErrorCode errorCode = m_subscriptionController->resolveImportServiceCaptcha(
             m_captchaState.userCountryCode,
             m_captchaState.serviceType,
@@ -314,16 +319,26 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
             protocolData,
             captchaId,
             solution,
-            serverConfig);
-
-    m_captchaState.isPending = false;
+            serverConfig,
+            &retryCaptcha);
 
     if (errorCode == ErrorCode::NoError) {
+        m_captchaState.isPending = false;
+        emit captchaFlowDismissRequested();
         m_serversController->addServer(serverConfig);
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
-    } else {
-        emit errorOccurred(errorCode);
+        return;
     }
+
+    if ((errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError)
+        && retryCaptcha.isRequired) {
+        emit captchaRequired(retryCaptcha.captchaId, retryCaptcha.captchaImageBase64,
+                             retryCaptcha.hint.isEmpty() ? tr("Enter the digits from the image to continue") : retryCaptcha.hint);
+        return;
+    }
+
+    m_captchaState.isPending = false;
+    emit errorOccurred(errorCode);
 }
 
 void SubscriptionUiController::onRefreshCaptchaRequested()

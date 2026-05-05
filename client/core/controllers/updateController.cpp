@@ -37,6 +37,8 @@ UpdateController::UpdateController(SecureAppSettingsRepository* appSettingsRepos
 {
 }
 
+UpdateController::~UpdateController() = default;
+
 QString UpdateController::getRawChangelogText() const
 {
     return m_changelogText;
@@ -97,6 +99,7 @@ void UpdateController::fetchGatewayUrl()
                                                                        m_appSettingsRepository->isDevGatewayEnv(),
                                                                        7000,
                                                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
+    m_activeGatewayController = gatewayController;
 
     QJsonObject apiPayload;
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
@@ -107,6 +110,7 @@ void UpdateController::fetchGatewayUrl()
     QTimer::singleShot(1000, this, [this, gatewayController, apiPayload]() {
         gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload)
             .then(this, [this](QPair<ErrorCode, QByteArray> result) {
+                m_activeGatewayController.clear();
                 auto [err, gatewayResponse] = result;
                 if (err != ErrorCode::NoError) {
                     logger.error() << errorString(err);

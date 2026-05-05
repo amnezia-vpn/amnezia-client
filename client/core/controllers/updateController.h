@@ -7,11 +7,16 @@
 
 #include "core/repositories/secureAppSettingsRepository.h"
 
+#include <QSharedPointer>
+
+class GatewayController;
+
 class UpdateController : public QObject
 {
     Q_OBJECT
 public:
     explicit UpdateController(SecureAppSettingsRepository* appSettingsRepository, QObject *parent = nullptr);
+    ~UpdateController() override;
 
     QString getRawChangelogText() const;
     QString getReleaseDate() const;
@@ -37,6 +42,8 @@ private:
     QString composeDownloadUrl() const;
 
     SecureAppSettingsRepository* m_appSettingsRepository;
+
+    QSharedPointer<GatewayController> m_activeGatewayController;
 
     QString m_baseUrl;
     QString m_changelogText;

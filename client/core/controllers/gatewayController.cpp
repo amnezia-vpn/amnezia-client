@@ -56,13 +56,23 @@ namespace
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                                     const bool isStrictKillSwitchEnabled, QObject *parent)
+                                     const bool isStrictKillSwitchEnabled, QObject *parent, const QString &reuseAgwRequestBase)
     : QObject(parent),
       m_gatewayEndpoint(gatewayEndpoint),
       m_isDevEnvironment(isDevEnvironment),
       m_requestTimeoutMsecs(requestTimeoutMsecs),
       m_isStrictKillSwitchEnabled(isStrictKillSwitchEnabled)
 {
+    if (!reuseAgwRequestBase.isEmpty()) {
+        m_proxyUrl = reuseAgwRequestBase;
+    }
+}
+
+void GatewayController::writeEffectiveRequestBase(QString *outEffectiveRequestBase) const
+{
+    if (outEffectiveRequestBase) {
+        *outEffectiveRequestBase = m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl;
+    }
 }
 
 GatewayController::EncryptedRequestData GatewayController::prepareRequest(const QString &endpoint, const QJsonObject &apiPayload)
@@ -172,10 +182,12 @@ GatewayController::DecryptionResult GatewayController::tryDecryptResponseBody(co
     return result;
 }
 
-ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
+ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody,
+                                    QString *outEffectiveRequestBase)
 {
     EncryptedRequestData encRequestData = prepareRequest(endpoint, apiPayload);
     if (encRequestData.errorCode != ErrorCode::NoError) {
+        writeEffectiveRequestBase(outEffectiveRequestBase);
         return encRequestData.errorCode;
     }
 
@@ -206,7 +218,8 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
             tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
 #endif
 
-    if (!plaintextMock && sslErrors.isEmpty() && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
+    if (!plaintextMock && sslErrors.isEmpty()
+        && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, httpStatusCode)) {
         auto requestFunction = [&encRequestData, &encryptedResponseBody](const QString &url) {
             encRequestData.request.setUrl(url);
             return amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
@@ -223,7 +236,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
                     tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
 
             if (!sslErrors.isEmpty()
-                || shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
+                || shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, httpStatusCode)) {
                 sslErrors = nestedSslErrors;
                 return false;
             }
@@ -239,14 +252,17 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     const auto errorCode =
             apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, responseBody);
     if (errorCode) {
+        writeEffectiveRequestBase(outEffectiveRequestBase);
         return errorCode;
     }
 
     if (!decryptionResult.isDecryptionSuccessful) {
         qCritical() << "error when decrypting the request body";
+        writeEffectiveRequestBase(outEffectiveRequestBase);
         return ErrorCode::ApiConfigDecryptionError;
     }
 
+    writeEffectiveRequestBase(outEffectiveRequestBase);
     return ErrorCode::NoError;
 }
 
@@ -312,7 +328,8 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
             promise->finish();
         };
 
-        if (!plaintextMock && sslErrors->isEmpty() && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
+        if (!plaintextMock && sslErrors->isEmpty()
+            && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, httpStatusCode)) {
             auto serviceType = apiPayload.value(apiDefs::key::serviceType).toString("");
             auto userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString("");
 
@@ -471,7 +488,7 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
 }
 
 bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody,
-                                          bool isDecryptionSuccessful)
+                                          bool isDecryptionSuccessful, int httpStatusCode)
 {
     const QByteArray &responseBody = decryptedResponseBody;
 
@@ -496,6 +513,10 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
             if (err.contains(QLatin1String("captcha"), Qt::CaseInsensitive) || err == QLatin1String("rate_limit_exceeded") || err == QLatin1String("refresh_captcha")) {
                 return false;
             }
+        }
+        // Reverse proxy or unknown route returns plaintext (e.g. "404 page not found") — not a proxy/CDN issue.
+        if (httpStatusCode == httpStatusCodeNotFound || replyError == QNetworkReply::ContentNotFoundError) {
+            return false;
         }
         qDebug() << "failed to decrypt the data";
         return true;
@@ -562,6 +583,10 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
 
         qDebug() << "go to the next proxy endpoint";
         QNetworkReply *reply = requestFunction(endpoint.arg(proxyUrl));
+        if (!reply) {
+            qWarning() << "GatewayController::bypassProxy: requestFunction returned null";
+            return false;
+        }
 
         QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
         connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
@@ -584,6 +609,10 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
         for (const QString &proxyUrl : proxyUrls) {
             request.setUrl(proxyUrl + "lmbd-health");
             reply = amnApp->networkManager()->get(request);
+            if (!reply) {
+                qWarning() << "GatewayController::bypassProxy: health check get() returned null";
+                continue;
+            }
 
             connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
             connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });

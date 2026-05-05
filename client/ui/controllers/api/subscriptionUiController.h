@@ -84,6 +84,7 @@ signals:
 
     void vpnKeyExportReady();
     void captchaRequired(const QString &captchaId, const QString &captchaImageBase64, const QString &hint);
+    void captchaFlowDismissRequested();
 
 private:
     struct CaptchaState {
