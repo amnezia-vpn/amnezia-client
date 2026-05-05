@@ -81,6 +81,7 @@ client/.DS_Store
 ._.DS_Store
 ._*
 *.dmg
+deploy/data/macos/pf/amn.400.allowPIA.conf
 
 # tmp files
 *.*~

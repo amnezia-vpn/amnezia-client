@@ -26,6 +26,7 @@
 #include "ui/controllers/ipSplitTunnelingUiController.h"
 #include "ui/controllers/systemController.h"
 #include "ui/controllers/languageUiController.h"
+#include "ui/controllers/updateUiController.h"
 #include "ui/controllers/api/servicesCatalogUiController.h"
 
 #include "core/controllers/serversController.h"
@@ -39,6 +40,7 @@
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/settingsController.h"
 #include "core/controllers/connectionController.h"
+#include "core/controllers/updateController.h"
 
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
@@ -159,6 +161,7 @@ private:
     AppSplitTunnelingUiController* m_appSplitTunnelingUiController;
     AllowedDnsUiController* m_allowedDnsUiController;
     LanguageUiController* m_languageUiController;
+    UpdateUiController* m_updateUiController;
 
     SubscriptionUiController* m_subscriptionUiController;
     ApiNewsUiController* m_apiNewsUiController;
@@ -173,6 +176,7 @@ private:
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
     NewsController* m_newsController;
+    UpdateController* m_updateController;
     InstallController* m_installController;
     ExportController* m_exportController;
     ConnectionController* m_connectionController;

@@ -40,6 +40,7 @@ private:
     void initIosImportHandler();
     void initIosSettingsHandler();
     void initNotificationHandler();
+    void initUpdateFoundHandler();
 
     CoreController* m_coreController;
 };
