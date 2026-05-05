@@ -17,6 +17,10 @@
 #include <QFutureWatcher>
 #include <QTimer>
 
+#ifdef Q_OS_IOS
+    #include "platforms/ios/ios_controller.h"
+#endif
+
 namespace
 {
     namespace configKey
