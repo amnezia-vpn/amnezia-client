@@ -12,6 +12,8 @@
     <true/>
     <key>RunAtLoad</key>
     <true/>
+    <key>GroupName</key>
+    <string>amnvpn</string>
     <key>Sockets</key>
 	<dict>
 	    <key>Listeners</key>

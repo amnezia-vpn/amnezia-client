@@ -92,7 +92,13 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                     QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
                     QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
 
+#ifdef Q_OS_MACOS
+                    if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
+                        iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
+                    }
+#else
                     iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
+#endif
 
                     if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
                         iface->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
@@ -105,6 +111,9 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                             iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
 
                             iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
+#ifdef Q_OS_MACOS
+                            iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << dns1 << dns2);
+#endif
                             addSitesRoutes(m_vpnProtocol->routeGateway(), routeMode);
                         }
                     }

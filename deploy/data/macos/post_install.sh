@@ -1,6 +1,7 @@
 #!/bin/bash
 
 APP_NAME=AmneziaVPN
+SERVICE_GROUP=amnvpn
 PLIST_NAME=$APP_NAME.plist
 LAUNCH_DAEMONS_PLIST_NAME=/Library/LaunchDaemons/$PLIST_NAME
 LOG_FOLDER=/var/log/$APP_NAME
@@ -33,6 +34,18 @@ fi
 
 run_cmd launchctl bootout system "$LAUNCH_DAEMONS_PLIST_NAME" || run_cmd launchctl unload "$LAUNCH_DAEMONS_PLIST_NAME"
 run_cmd rm -f "$LAUNCH_DAEMONS_PLIST_NAME"
+
+# Add separate group for xray filtering
+if dscl . -read "/Groups/$SERVICE_GROUP" >/dev/null 2>&1; then
+  log "Group $SERVICE_GROUP already exists"
+  return 0
+else
+  local next_gid
+  next_gid=$(dscl . -list /Groups PrimaryGroupID 2>/dev/null | awk '{print $2}' | sort -n | awk '$1>=500{g=$1} END{print (g?g+1:501)}')
+  run_cmd dscl . -create "/Groups/$SERVICE_GROUP"
+  run_cmd dscl . -create "/Groups/$SERVICE_GROUP" PrimaryGroupID "$next_gid"
+  run_cmd dscl . -create "/Groups/$SERVICE_GROUP" RealName "Amnezia VPN Service Group"
+fi
 
 run_cmd sudo chmod -R a-w "$APP_PATH/"
 run_cmd sudo chown -R root "$APP_PATH/"

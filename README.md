@@ -53,24 +53,14 @@ AmneziaVPN uses several open-source projects to work:
 
 - [OpenSSL](https://www.openssl.org/)
 - [OpenVPN](https://openvpn.net/)
-- [Shadowsocks](https://shadowsocks.org/)
 - [Qt](https://www.qt.io/)
-- [LibSsh](https://libssh.org) - forked from Qt Creator
+- [LibSsh](https://libssh.org)
+- [WireGuard](https://www.wireguard.com/)
+- [Xray-core](https://xtls.github.io/en/)
+- [Conan](https://conan.io/)
 - and more...
 
-## Checking out the source code
-
-Make sure to pull all submodules after checking out the repo.
-
-```bash
-git submodule update --init --recursive
-```
-
-## Development
-
-Want to contribute? Welcome!
-
-### Help with translations
+## Help us with translations
 
 Download the most actual translation files.
 
@@ -83,99 +73,98 @@ Each *.ts file contains strings for one corresponding language.
 Translate or correct some strings in one or multiple *.ts files and commit them back to this repository into the ``client/translations`` folder.
 You can do it via a web-interface or any other method you're familiar with.
 
-### Building sources and deployment
+## Checking out the source code
 
-Check deploy folder for build scripts. 
+Make sure to pull all submodules after checking out the repo.
 
-### How to build an iOS app from source code on MacOS
-
-1. First, make sure you have [XCode](https://developer.apple.com/xcode/) installed, at least version 14 or higher.
-
-2. We use QT to generate the XCode project. We need QT version 6.6.2. Install QT for MacOS [here](https://doc.qt.io/qt-6/macos.html) or [QT Online Installer](https://www.qt.io/download-open-source). Required modules:
-   - MacOS
-   - iOS
-   - Qt 5 Compatibility Module
-   - Qt Shader Tools
-   - Additional Libraries:
-     - Qt Image Formats
-     - Qt Multimedia
-     - Qt Remote Objects 
-
-3. Install CMake if required. We recommend CMake version 3.25. You can install CMake [here](https://cmake.org/download/)
-
-4. You also need to install go >= v1.16. If you don't have it installed already,
-download go from the [official website](https://golang.org/dl/) or use Homebrew. 
-The latest version is recommended. Install gomobile
 ```bash
-export PATH=$PATH:~/go/bin
-go install golang.org/x/mobile/cmd/gomobile@latest
-gomobile init
+git submodule update --init --recursive
 ```
 
-5. Build the project
+## Hacking guide
+
+Want to contribute? Welcome!
+
+### Build requirements
+
+* [`CMake`](https://cmake.org/download/)
+* Compiler and underlying build system, depending on the target:
+  - [Linux] Any of `make` and `gcc`
+  - [Apple] [`Xcode`](https://developer.apple.com/xcode/) or [`Xcode command line tools`](https://developer.apple.com/xcode/)
+  - [Windows] [`Visual Studio 2022`](https://aka.ms/vs/17/release/vs_community.exe) or [`VS 2022 Build Tools`](https://aka.ms/vs/17/release/vs_buildtools.exe)
+  - [Android] [`Android SDK`](#installing-android-sdk) and [`Ninja`](https://ninja-build.org/)
+* [`Qt 6.10+`](https://www.qt.io/download-open-source) with the following modules:
+  - Core module for targeting platform (Desktop/Android/iOS)
+  - Qt 5 Compatibility module
+  - Qt Remote Objects
+* [`Conan`](https://conan.io/downloads) package manager
+  - On MacOS is enough just to use `homebrew` or install it in `.venv` in project root
+  - Other systems must have it in `PATH`
+* (Optional) Installer dependencies:
+  - [Windows/Linux] [`Qt Installer Framework`](https://www.qt.io/download-open-source)
+  - [Windows] [`WIX toolset`](https://github.com/wixtoolset/wix/releases)
+
+### Building the project using scripts
+
+* Run scripts located in `deploy` directory
+* Basically, if dependencies are located in default installation paths, the scripts will find them automatically.
+* If they differ, specify them using the following variables:
+  - `QT_INSTALL_DIR` - Qt root installation folder
+  - `QT_ROOT_PATH`   - Qt framework root directory
+  - `QIF_ROOT_PATH`  - Qt Installer Framework root path
+  - `ANDROID_HOME`   - Path to Android SDK root folder
+  - and others. Check scripts for more
+
+Unix-like:
 ```bash
-export QT_BIN_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/ios/bin"
-export QT_MACOS_ROOT_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/macos"
-export QT_IOS_BIN=$QT_BIN_DIR
-export PATH=$PATH:~/go/bin
-mkdir build-ios
-$QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
-```
-Replace PATH-TO-QT-FOLDER and QT-VERSION to your environment
+# Build executables for the host platform
+deploy/build.sh
 
+# Or just
+deploy/build.sh
 
-If you get `gomobile: command not found` make sure to set PATH to the location 
-of the bin folder where gomobile was installed. Usually, it's in `GOPATH`.
-```bash
-export PATH=$(PATH):/path/to/GOPATH/bin
-```
+# Build executables and installers for the host platform
+deploy/build.sh --installer all
 
-6. Open the XCode project. You can then run /test/archive/ship the app.
+# Build Android APK and AAB
+deploy/build.sh -t android --aab
 
-If the build fails with the following error
-```
-make: *** 
-[$(PROJECTDIR)/client/build/AmneziaVPN.build/Debug-iphoneos/wireguard-go-bridge/goroot/.prepared] 
-Error 1
-```
-Add a user-defined variable to both AmneziaVPN and WireGuardNetworkExtension targets' build settings with
-key `PATH` and value `${PATH}/path/to/bin/folder/with/go/executable`, e.g. `${PATH}:/usr/local/go/bin`.
-
-if the above error persists on your M1 Mac, then most probably you need to install arch based CMake 
-```
-arch -arm64 brew install cmake
+# Call for help
+deploy/build.sh -h
 ```
 
-Build might fail with the "source files not found" error the first time you try it, because the modern XCode build system compiles dependencies in parallel, and some dependencies end up being built after the ones that
-require them. In this case, simply restart the build.
+Windows:
+```batch
+:: Build executables for Windows
+deploy/build.bat
 
-## How to build the Android app
+:: Build executables with IFW installer for Windows
+deploy/build.bat --installer ifw
 
-_Tested on Mac OS_
+:: Build executables with IFW and WIX installer for Windows
+deploy/build.bat --installer ifw --installer wix
 
-The Android app has the following requirements:
-* JDK 11
-* Android platform SDK 33
-* CMake 3.25.0
+:: Or just
+deploy/build.bat --installer all
+```
 
-After you have installed QT, QT Creator, and Android Studio, you need to configure QT Creator correctly.
+### Developing the project in IDEs
 
-- Click in the top menu bar on `QT Creator` -> `Preferences` -> `Devices` and select the tab `Android`.
-- Set path to JDK 11
-- Set path to Android SDK (`$ANDROID_HOME`)
+* Basically, you can use any IDE that handles CMake and Qt kits properly to run configure and build steps, and to navigate through the code nicely. For example:
+  - `Qt Creator`
+  - `Visual Studio Code` with `Qt Extension Pack`
+  - and so on
 
-In case you get errors regarding missing SDK or 'SDK manager not running', you cannot fix them by correcting the paths. If you have some spare GBs on your disk, you can let QT Creator install all requirements by choosing an empty folder for `Android SDK location` and clicking on `Set Up SDK`. Be aware: This will install a second Android SDK and NDK on your machine! 
-Double-check that the right CMake version is configured:  Click on `QT Creator` -> `Preferences` and click on the side menu on `Kits`. Under the center content view's `Kits` tab, you'll find an entry for `CMake Tool`. If the default selected CMake version is lower than 3.25.0, install on your system CMake >= 3.25.0 and choose `System CMake at <path>` from the drop-down list. If this entry is missing, you either have not installed CMake yet or QT Creator hasn't found the path to it. In that case, click in the preferences window on the side menu item `CMake`, then on the tab `Tools` in the center content view, and finally on the button `Add` to set the path to your installed CMake. 
-Please make sure that you have selected Android Platform SDK 33 for your project: click in the main view's side menu on `Projects`, and on the left, you'll see a section `Build & Run` showing different Android build targets. You can select any of them, Amnezia VPN's project setup is designed in a way that all Android targets will be built. Click on the targets submenu item `Build` and scroll in the center content view to `Build Steps`. Click on `Details` at the end of the headline `Build Android APK` (the `Details` button might be hidden in case the QT Creator Window is not running in full screen!). Here we are: Choose `android-33` as `Android Build Platform SDK`.
+* To use `Xcode`, you have to configure project first by using `cmake`. The easiest way to do it is to use `Qt Creator` for configuration. Then open `AmneziaVPN.xcodeproj` file from the build folder by using `Xcode`. Note that none of the files changed are saved - the files actually getting changed in build directory. Copy them manually if necessary
 
-That's it! You should be ready to compile the project from QT Creator!
+* `Android studio` could be used in the same way - just configure the project by using `cmake` manually or by using `Qt Creator`. Open `<build-dir>/client/android-build` in `Android studio` then. Do not forget to copy the changes - everything you do is saved under the build directory actually.
 
-### Development flow
+### Installing Android SDK
 
-After you've hit the build button, QT-Creator copies the whole project to a folder in the repository parent directory. The folder should look something like `build-amnezia-client-Android_Qt_<version>_Clang_<architecture>-<BuildType>`.
-If you want to develop Amnezia VPNs Android components written in Kotlin, such as components using system APIs, you need to import the generated project in Android Studio with `build-amnezia-client-Android_Qt_<version>_Clang_<architecture>-<BuildType>/client/android-build` as the projects root directory. While you should be able to compile the generated project from Android Studio, you cannot work directly in the repository's Android project. So whenever you are confident with your work in the generated project, you'll need to copy and paste the affected files to the corresponding path in the repository's Android project so that you can add and commit your changes!
-
-You may face compiling issues in QT Creator after you've worked in Android Studio on the generated project. Just do a `./gradlew clean` in the generated project's root directory (`<path>/client/android-build/.`) and you should be good to go.
+* Android SDK could be installed using the following methods:
+  - Using `Qt Creator`. Use `Preferences`->`SDKs`
+  - Using `Android studio`. By default it installs necessary `SDKs` automatically during the installation
+  - Manually by using `sdk-manager`. Check [this](https://developer.android.com/tools) page for details
 
 ## License
 

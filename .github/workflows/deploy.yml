@@ -9,8 +9,59 @@ env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
 
 jobs:
+  Detect-Changes:
+    runs-on: ubuntu-latest
+    outputs:
+      recipes_changed: ${{ steps.filter.outputs.recipes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.event.before }}
+          filters: |
+            recipes:
+              - 'recipes/**'
+              - 'conanfile.py'
+
+  Bake-Prebuilts-Linux:
+    runs-on: ubuntu-latest
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build dependencies'
+      shell: bash
+      run: |
+        for build_type in Release Debug; do
+          cmake -S . -B build -DPREBUILTS_ONLY=1 "-DCMAKE_BUILD_TYPE=$build_type"
+        done
+
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
+
+# ------------------------------------------------------
+
   Build-Linux-Ubuntu:
     runs-on: android-runner
+
+    needs: Bake-Prebuilts-Linux
+    if: ${{ always() }}
 
     env:
       QT_VERSION: 6.10.1
@@ -39,7 +90,18 @@ jobs:
         set-env: 'true'
         aqtversion: '==3.3.0'       
         py7zrversion: '==0.22.*'  
-        extra: '--base ${{ env.QT_MIRROR }}' 
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+      
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Install system packages'
+      run: sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -47,38 +109,17 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Get version from CMakeLists.txt'
-      id: get_version
-      run: |
-        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version: $VERSION"
-
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
-
     - name: 'Build project'
-      run: |
-        sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
-        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin
-        export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
-        bash deploy/build_linux.sh
-
-    - name: 'Pack installer'
-      run: cd deploy && tar -cf AmneziaVPN_Linux_Installer.tar AmneziaVPN_Linux_Installer.bin && zip AmneziaVPN_${VERSION}_linux_x64.tar.zip AmneziaVPN_Linux_Installer.tar
+      shell: bash
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+      run: deploy/build.sh --generator Ninja --installer all
 
     - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
-        path: deploy/AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
-        retention-days: 7
-
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_Linux_unpacked
-        path: deploy/AppDir
+        path: deploy/build/AmneziaVPN-*-Linux.run
+        archive: false
         retention-days: 7
 
     - name: 'Upload translations artifact'
@@ -90,13 +131,46 @@ jobs:
 
 # ------------------------------------------------------
 
+  Bake-Prebuilts-Windows:
+    runs-on: windows-latest
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+    
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -G "Visual Studio 17 2022" -DPREBUILTS_ONLY=1
+    
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
+
+# ------------------------------------------------------
+
   Build-Windows:
     runs-on: windows-latest
+
+    needs: Bake-Prebuilts-Windows
+    if: ${{ always() }}
 
     env:
       QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
-      BUILD_ARCH: 64
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
@@ -112,17 +186,6 @@ jobs:
       with:
         submodules: 'true'
         fetch-depth: 10
-
-    - name: 'Get version from CMakeLists.txt'
-      id: get_version
-      shell: bash
-      run: |
-        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version: $VERSION"
-
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
@@ -160,50 +223,85 @@ jobs:
         $wixBinDir = Join-Path $env:USERPROFILE ".dotnet\tools"
         echo "WIX_BIN_DIR=$wixBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
     - name: 'Build project'
       shell: cmd
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
       run: |
-        set BUILD_ARCH=${{ env.BUILD_ARCH }}
-        set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2022_64\\bin"
-        set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
-        set WIX_BIN_DIR=%USERPROFILE%\.dotnet\tools
-        call deploy\\build_windows.bat
+        set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
+        deploy\build.bat --installer all
 
-    - name: 'Rename Windows installer'
-      shell: cmd
-      run: |
-        copy AmneziaVPN_x${{ env.BUILD_ARCH }}.exe AmneziaVPN_%VERSION%_x64.exe
-
-    - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
+    - name: 'Upload WIX installer artifact'
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_x64.exe
-        path: AmneziaVPN_${{ env.VERSION }}_x64.exe
+        path: deploy/build/AmneziaVPN-*-win64.msi
+        archive: false
+        retention-days: 7
+      
+    - name: 'Upload IFW installer artifact'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/AmneziaVPN-*-win64.exe
+        archive: false
         retention-days: 7
 
-    - name: 'Upload MSI installer artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_Windows_MSI_installer
-        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.msi
-        retention-days: 7
+# ------------------------------------------------------
 
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
+  Bake-Prebuilts-iOS:
+    runs-on: macos-latest
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+
+    strategy:
+      matrix:
+        xcode-version: [26.0]
+
+    steps:
+    - uses: actions/checkout@v4
       with:
-        name: AmneziaVPN_Windows_unpacked
-        path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
-        retention-days: 7
+        submodules: 'true'
+        fetch-depth: 10
+    
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: ${{ matrix.xcode-version }}
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos
+    
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
 
   Build-iOS:
     runs-on: macos-latest
 
+    needs: Bake-Prebuilts-iOS
+    if: ${{ always() }}
+
     env:
       QT_VERSION: 6.10.1
-      CC: cc
-      CXX: c++
+      KEYCHAIN_PASSWORD: ""
+
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
@@ -214,6 +312,35 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - uses: ./.github/actions/apple-setup-keychain
+      id: setup-keychain
+      with:
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+
+    - name: 'Install signing certificate'
+      uses: ./.github/actions/apple-install-cert
+      with:
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+        cert-base64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
+        cert-password: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
+
+    - name: 'Install app provisioning profile'
+      uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
+
+    - name: 'Install NE provisioning profile'
+      uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
+
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -243,159 +370,76 @@ jobs:
         set-env: 'true'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install go'
-      uses: actions/setup-go@v5
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
       with:
-        go-version: '1.24'
-        cache: false
+        python-version: 3.14
 
-    - name: 'Setup gomobile'
-      run: |
-          export PATH=$PATH:~/go/bin
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          gomobile init
-
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
-
-    - name: 'Install dependencies'
-      run: pip install jsonschema jinja2
+    - name: 'Install deps'
+      run: pip install "conan==2.26.2" jsonschema jinja2
 
     - name: 'Build project'
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
       run: |
-        git submodule update --init --recursive
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
-        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
-        export PATH=$PATH:~/go/bin
-        sh deploy/build_ios.sh | \
+        sh deploy/build.sh -t ios | \
           sed -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/d' | \
           sed -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/d' | \
           sed -e '/-DPROD_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DPROD_AGW_PUBLIC_KEY/d' | \
           sed -e '/-DDEV_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DDEV_AGW_PUBLIC_KEY/d'
-      env:
-        IOS_TRUST_CERT_BASE64: ${{ secrets.IOS_TRUST_CERT_BASE64 }}
-        IOS_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
-        IOS_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
-        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
-        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
-        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
-        IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
-        IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
-
-#    - name: 'Upload appstore .ipa and dSYMs to artifacts'
-#      uses: actions/upload-artifact@v4
-#      with:
-#        name: app-store ipa & dsyms
-#        path: |
-#          ${{ github.workspace }}/AmneziaVPN-iOS.ipa
-#          ${{ github.workspace }}/*.app.dSYM.zip
-#        retention-days: 7
 
 # ------------------------------------------------------
 
-  Build-MacOS-old:
+  Bake-Prebuilts-MacOS:
     runs-on: macos-latest
 
-    env:
-      # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
-      QT_VERSION: 6.4.3
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
-      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
-
-      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
-      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
-      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
-
-      MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
-      MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
-      MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
-
-      APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
-      APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
-
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
-      FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
-      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
-      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+    strategy:
+      matrix:
+        xcode-version: [16.2, 16.4]
 
     steps:
-    - name: 'Setup xcode'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '15.4.0'
-
-    - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
-
-
-    - name: 'Get sources'
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 10
-
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
-
-    - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos.sh -n
-
-    - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
+    
+    - uses: actions/setup-python@v6
       with:
-        name: AmneziaVPN_MacOS_old_installer
-        path: deploy/build/pkg/AmneziaVPN.pkg
-        retention-days: 7
+        python-version: 3.14
 
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
+    - uses: maxim-lobanov/setup-xcode@v1
       with:
-        name: AmneziaVPN_MacOS_old_unpacked
-        path: deploy/build/client/AmneziaVPN.app
-        retention-days: 7
+        xcode-version: ${{ matrix.xcode-version }}
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1
+    
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
 
   Build-MacOS:
     runs-on: macos-latest
 
+    needs: Bake-Prebuilts-MacOS
+    if: ${{ always() }}
+
     env:
       QT_VERSION: 6.10.1
-
-      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
-
-      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
-      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
-      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
-
-      MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
-      MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
-      MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
-
-      APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
-      APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+      KEYCHAIN_PASSWORD: ""
 
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
@@ -407,6 +451,31 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - uses: ./.github/actions/apple-setup-keychain
+      id: setup-keychain
+      with:
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+
+    - uses: ./.github/actions/apple-install-cert
+      with:
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+        cert-base64: ${{ secrets.MAC_APP_CERT_CERT }}
+        cert-password: ${{ secrets.MAC_APP_CERT_PW }}
+
+    - uses: ./.github/actions/apple-install-cert
+      with:
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+        cert-base64: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
+        cert-password: ${{ secrets.MAC_INSTALL_CERT_PW }}
+
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -425,51 +494,78 @@ jobs:
         set-env: 'true'
         aqtversion: '==3.3.0'       
         py7zrversion: '==0.22.*'  
-        extra: '--base ${{ env.QT_MIRROR }}' 
+        extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Get sources'
-      uses: actions/checkout@v4
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build project'
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+        CODESIGN_SIGNATURE: ${{ secrets.MAC_SIGNER_ID }}
+        CODESIGN_INSTALLER_SIGNATURE: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
+        NOTARYTOOL_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
+        NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
+        NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+      shell: bash
+      run: deploy/build.sh --generator Ninja --installer all
+
+    - name: 'Upload installer artifact'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/AmneziaVPN-*-Darwin.pkg
+        archive: false
+        retention-days: 7
+
+# ------------------------------------------------------
+
+  Bake-Prebuilts-MacOS-NE:
+    runs-on: macos-latest
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+
+    strategy:
+      matrix:
+        xcode-version: [16.2, 16.4]
+
+    steps:
+    - uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 10
-
-    - name: 'Get version from CMakeLists.txt'
-      id: get_version
-      run: |
-        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version: $VERSION"
-
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
-
-    - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos.sh -n
-
-    - name: 'Pack macOS installer'
-      run: |
-        cd deploy/build/pkg
-        zip -r ../../AmneziaVPN_${VERSION}_macos.zip AmneziaVPN.pkg
-        cd ../../..
-
-    - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
+    
+    - uses: actions/setup-python@v6
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_macos.zip
-        path: deploy/AmneziaVPN_${{ env.VERSION }}_macos.zip
-        retention-days: 7
+        python-version: 3.14
 
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
+    - uses: maxim-lobanov/setup-xcode@v1
       with:
-        name: AmneziaVPN_MacOS_unpacked
-        path: deploy/build/client/AmneziaVPN.app
-        retention-days: 7
+        xcode-version: ${{ matrix.xcode-version }}
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DMACOS_NE=TRUE
+    
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
+
+# ------------------------------------------------------
 
   Build-MacOS-NE:
     runs-on: macos-latest
+
+    needs: Bake-Prebuilts-MacOS-NE
+    if: ${{ always() }}
 
     env:
       QT_VERSION: 6.10.1
@@ -490,6 +586,14 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
+
+    - uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.MAC_NE_PROVISIONING_PROFILE }}
+
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -525,8 +629,13 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
 
     - name: 'Build project'
       run: |
@@ -542,11 +651,67 @@ jobs:
 
 # ------------------------------------------------------
 
+  Bake-Prebuilts-Android:
+    runs-on: android-runner
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+
+    env:
+      ANDROID_PLATFORM: android-28
+      NDK_VERSION: 27.0.11718014
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+    
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
+
+    - name: 'Setup Android SDK'
+      uses: android-actions/setup-android@v4
+      with:
+        packages: "platforms;${{ env.ANDROID_PLATFORM }} ndk;${{ env.NDK_VERSION }}"
+
+    - name: 'Build dependencies'
+      run: |
+        CMAKE_ANDROID_NDK="$ANDROID_HOME/ndk/$NDK_VERSION"
+        args=(
+          -G Ninja
+          -DPREBUILTS_ONLY=1
+          -DCMAKE_SYSTEM_NAME=Android
+          "-DANDROID_PLATFORM=$ANDROID_PLATFORM"
+          "-DCMAKE_ANDROID_NDK=$CMAKE_ANDROID_NDK"
+        )
+
+        for abi in arm64-v8a armeabi-v7a x86 x86_64; do
+          for build_type in Release Debug; do
+            cmake -S . -B build_${abi//-/_} "${args[@]}" "-DCMAKE_ANDROID_ARCH_ABI=$abi" "-DCMAKE_BUILD_TYPE=$build_type"
+          done
+        done
+
+    - name: 'Authorize in remote'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      run: conan upload -r amnezia "*" -c
+
+# ------------------------------------------------------
+
   Build-Android:
     runs-on: android-runner
 
+    needs: Bake-Prebuilts-Android
+    if: ${{ always() }}
+
     env:
-      ANDROID_BUILD_PLATFORM: android-36
+      ANDROID_PLATFORM: android-28
+      NDK_VERSION: 27.0.11718014
       QT_VERSION: 6.10.1
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
@@ -559,6 +724,11 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v4
       with:
@@ -619,38 +789,24 @@ jobs:
         py7zrversion: '==0.22.*'
         extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Grant execute permission for qt-cmake'
-      shell: bash
-      run: |
-        chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
-
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-
-    - name: 'Get version from CMakeLists.txt'
-      id: get_version
-      run: |
-        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version: $VERSION"
-
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
-
     - name: 'Setup Java'
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
-        # cache: 'gradle'
 
-    - name: 'Setup Android NDK'
-      id: setup-ndk
-      uses: nttld/setup-ndk@v1
+    - name: 'Setup Android SDK'
+      uses: android-actions/setup-android@v4
       with:
-        ndk-version: 'r26b'
+        packages: "platforms;${{ env.ANDROID_PLATFORM }} ndk;${{ env.NDK_VERSION }}"
+
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.26.2"
 
     - name: 'Decode keystore secret to file'
       env:
@@ -661,61 +817,64 @@ jobs:
 
     - name: 'Build project'
       env:
-        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
-        QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
-        ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
-        ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
-        ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        QT_INSTALL_DIR: ${{ runner.temp }}
+        QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
+        QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+        QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh --aab --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
-
-    - name: 'Rename Android APKs'
       run: |
-        cd deploy/build
-        mv AmneziaVPN-x86_64-release.apk AmneziaVPN_${VERSION}_android9+_x86_64.apk
-        mv AmneziaVPN-x86-release.apk AmneziaVPN_${VERSION}_android9+_x86.apk
-        mv AmneziaVPN-arm64-v8a-release.apk AmneziaVPN_${VERSION}_android9+_arm64-v8a.apk
-        mv AmneziaVPN-armeabi-v7a-release.apk AmneziaVPN_${VERSION}_android9+_armeabi-v7a.apk
-        cd ../..
+        deploy/build.sh -t android --sign --aab
 
-    - name: 'Upload x86_64 apk'
-      uses: actions/upload-artifact@v4
+        VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/CMakeCache.txt | cut -d= -f2)
+
+        (cd deploy/build/client/android-build && mv AmneziaVPN.apk AmneziaVPN_${VERSION}_android9+_universal.apk)
+        (cd deploy/build/client/android-build/build/outputs/bundle/release && mv android-build-release.aab AmneziaVPN_${VERSION}.aab)
+
+        for abi in arm64-v8a armeabi-v7a x86 x86_64; do
+          deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
+          (cd deploy/build/${abi}/client/android-build && mv AmneziaVPN.apk AmneziaVPN_${VERSION}_android9+_${abi}.apk)
+        done
+
+    - name: 'Upload universal APK'
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_android9+_x86_64.apk
-        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_android9+_x86_64.apk
-        compression-level: 0
+        path: deploy/build/client/android-build/*.apk
+        archive: false
         retention-days: 7
 
-    - name: 'Upload x86 apk'
-      uses: actions/upload-artifact@v4
+    - name: 'Upload AAB'
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_android9+_x86.apk
-        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_android9+_x86.apk
-        compression-level: 0
+        path: deploy/build/client/android-build/build/outputs/bundle/release/*.aab
+        archive: false
         retention-days: 7
 
-    - name: 'Upload arm64-v8a apk'
-      uses: actions/upload-artifact@v4
+    - name: 'Upload arm64-v8a APK'
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_android9+_arm64-v8a.apk
-        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_android9+_arm64-v8a.apk
-        compression-level: 0
+        path: deploy/build/arm64-v8a/client/android-build/*.apk
+        archive: false
         retention-days: 7
 
-    - name: 'Upload armeabi-v7a apk'
-      uses: actions/upload-artifact@v4
+    - name: 'Upload armeabi-v7a APK'
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN_${{ env.VERSION }}_android9+_armeabi-v7a.apk
-        path: deploy/build/AmneziaVPN_${{ env.VERSION }}_android9+_armeabi-v7a.apk
-        compression-level: 0
+        path: deploy/build/armeabi-v7a/client/android-build/*.apk
+        archive: false
         retention-days: 7
 
-    - name: 'Upload aab'
-      uses: actions/upload-artifact@v4
+    - name: 'Upload x86 APK'
+      uses: actions/upload-artifact@v7
       with:
-        name: AmneziaVPN-android
-        path: deploy/build/AmneziaVPN-release.aab
-        compression-level: 0
+        path: deploy/build/x86/client/android-build/*.apk
+        archive: false
+        retention-days: 7
+
+    - name: 'Upload x86_64 APK'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/x86_64/client/android-build/*.apk
+        archive: false
         retention-days: 7
 
   Extra:
