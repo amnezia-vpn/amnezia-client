@@ -252,13 +252,24 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                     QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
                     QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
 
-                    QStringList serviceRoutes = QStringList() << dns1 << dns2;
-                    serviceRoutes.append(serverRoutingRulesSyncHosts());
-                    iface->routeAddList(m_vpnProtocol->vpnGateway(), serviceRoutes);
-
                     const RouteMode effectiveRouteMode = m_serversRepository->effectiveSiteRouteMode(
                             activeServerIndex, m_appSettingsRepository->isSitesSplitTunnelingEnabled(),
                             m_appSettingsRepository->routeMode());
+
+                    QStringList vpnGatewayRoutes = serverRoutingRulesSyncHosts();
+#ifdef Q_OS_MACOS
+                    if (effectiveRouteMode != amnezia::RouteMode::VpnAllExceptSites) {
+                        vpnGatewayRoutes << dns1 << dns2;
+                    }
+#else
+                    vpnGatewayRoutes << dns1 << dns2;
+#endif
+                    vpnGatewayRoutes.removeAll(QString());
+                    vpnGatewayRoutes.removeDuplicates();
+                    if (!vpnGatewayRoutes.isEmpty()) {
+                        iface->routeAddList(m_vpnProtocol->vpnGateway(), vpnGatewayRoutes);
+                    }
+
                     if (effectiveRouteMode != RouteMode::VpnAllSites) {
                         iface->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                         if (effectiveRouteMode == RouteMode::VpnOnlyForwardSites) {
@@ -269,6 +280,9 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                             iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
 
                             iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
+#ifdef Q_OS_MACOS
+                            iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << dns1 << dns2);
+#endif
                             addSitesRoutes(m_vpnProtocol->routeGateway(), effectiveRouteMode);
                         }
                     }
