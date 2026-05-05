@@ -1,7 +1,7 @@
 #ifndef ANDROID_NOTIFICATIONHANDLER_H
 #define ANDROID_NOTIFICATIONHANDLER_H
 
-#include "ui/notificationhandler.h"
+#include "ui/utils/notificationHandler.h"
 
 class AndroidNotificationHandler final : public NotificationHandler {
     Q_OBJECT
