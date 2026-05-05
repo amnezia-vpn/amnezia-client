@@ -73,6 +73,15 @@ QString amnezia::scriptName(ProtocolScriptType type)
     }
 }
 
+QString amnezia::scriptName(ClientScriptType type)
+{
+    switch (type) {
+    case ClientScriptType::linux_installer: return QLatin1String("linux_installer.sh");
+    case ClientScriptType::mac_installer: return QLatin1String("mac_installer.sh");
+    default: return QString();
+    }
+}
+
 QString amnezia::scriptData(amnezia::SharedScriptType type)
 {
     QString fileName = QString(":/server_scripts/%1").arg(amnezia::scriptName(type));
@@ -97,6 +106,22 @@ QString amnezia::scriptData(amnezia::ProtocolScriptType type, DockerContainer co
         return "";
     }
     QByteArray data = file.readAll();
+    data.replace("\r", "");
+    return data;
+}
+
+QString amnezia::scriptData(ClientScriptType type)
+{
+    QString fileName = QString(":/client_scripts/%1").arg(amnezia::scriptName(type));
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "Warning: script missing" << fileName;
+        return "";
+    }
+    QByteArray data = file.readAll();
+    if (data.isEmpty()) {
+        qDebug() << "Warning: script is empty" << fileName;
+    }
     data.replace("\r", "");
     return data;
 }

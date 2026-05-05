@@ -23,6 +23,9 @@ bool ServicesCatalogUiController::fillAvailableServices()
     }
 
     m_apiServicesModel->updateModel(servicesData);
+    if (m_apiServicesModel->rowCount() > 0) {
+        m_apiServicesModel->setServiceIndex(0);
+    }
     return true;
 }
 

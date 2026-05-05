@@ -259,15 +259,7 @@ bool Utils::killProcessByName(const QString &name)
 
 QString Utils::openVpnExecPath()
 {
-#ifdef Q_OS_WIN
-    return Utils::executable("openvpn/openvpn", true);
-#elif defined Q_OS_LINUX
-    // We have service that runs OpenVPN on Linux. We need to make same
-    // path for client and service.
-    return Utils::executable("../../client/bin/openvpn", true);
-#else
-    return Utils::executable("/openvpn", true);
-#endif
+    return Utils::executable("openvpn", true);
 }
 
 QString Utils::wireguardExecPath()
@@ -295,15 +287,7 @@ QString Utils::certUtilPath()
 
 QString Utils::tun2socksPath()
 {
-#ifdef Q_OS_WIN
-    return Utils::executable("xray/tun2socks", true);
-#elif defined Q_OS_LINUX
-    // We have service that runs OpenVPN on Linux. We need to make same
-    // path for client and service.
-    return Utils::executable("../../client/bin/tun2socks", true);
-#else
-    return Utils::executable("/tun2socks", true);
-#endif
+    return Utils::executable("tun2socks", true);
 }
 
 #ifdef Q_OS_WIN

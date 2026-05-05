@@ -39,6 +39,7 @@ android {
 
         // keeps language resources for only the locales specified below
         resourceConfigurations += listOf("en", "ru", "b+zh+Hans")
+        ndk.abiFilters += qtTargetAbiList.split(",")
     }
 
     sourceSets {
@@ -52,50 +53,12 @@ android {
         }
     }
 
-    signingConfigs {
-        register("release") {
-            storeFile = providers.environmentVariable("ANDROID_KEYSTORE_PATH").orNull?.let { file(it) }
-            storePassword = providers.environmentVariable("ANDROID_KEYSTORE_KEY_PASS").orNull
-            keyAlias = providers.environmentVariable("ANDROID_KEYSTORE_KEY_ALIAS").orNull
-            keyPassword = providers.environmentVariable("ANDROID_KEYSTORE_KEY_PASS").orNull
-        }
-    }
-
     buildTypes {
         release {
             // exclude coroutine debug resource from release build
             packaging {
                 resources.excludes += "DebugProbesKt.bin"
             }
-            signingConfig = signingConfigs["release"]
-        }
-
-        create("fdroid") {
-            initWith(getByName("release"))
-            signingConfig = null
-            matchingFallbacks += "release"
-        }
-    }
-
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include(*qtTargetAbiList.split(',').toTypedArray())
-            isUniversalApk = false
-        }
-    }
-
-    // fix for Qt Creator to allow deploying the application to a device
-    // to enable this fix, add the line outputBaseName=android-build to local.properties
-    if (outputBaseName.isNotEmpty()) {
-        applicationVariants.all {
-            outputs.map { it as BaseVariantOutputImpl }
-                .forEach { output ->
-                    if (output.outputFileName.endsWith(".apk")) {
-                        output.outputFileName = "$outputBaseName-${buildType.name}.apk"
-                    }
-                }
         }
     }
 

@@ -170,11 +170,6 @@ ErrorCode OpenVpnProtocol::start()
 {
     OpenVpnProtocol::stop();
 
-    if (!QFileInfo::exists(Utils::openVpnExecPath())) {
-        setLastError(ErrorCode::OpenVpnExecutableMissing);
-        return lastError();
-    }
-
     if (!QFileInfo::exists(configPath())) {
         setLastError(ErrorCode::OpenVpnConfigMissing);
         return lastError();

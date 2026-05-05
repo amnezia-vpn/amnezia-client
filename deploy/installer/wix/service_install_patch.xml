@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CPackWiXPatch>
-    <CPackWiXFragment Id="CM_CP_AmneziaVPN_service.exe">
+    <CPackWiXFragment Id="CM_CP_AmneziaVPN.AmneziaVPN_service.exe">
         <ServiceInstall
                 Id="AmneziaServiceInstall"
                 Name="AmneziaVPN-service"

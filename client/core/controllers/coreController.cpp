@@ -146,6 +146,7 @@ void CoreController::initCoreControllers()
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
     m_newsController = new NewsController(m_appSettingsRepository, m_serversController);
+    m_updateController = new UpdateController(m_appSettingsRepository, this);
     
     m_installController = new InstallController(m_serversRepository, m_appSettingsRepository, this);
     m_exportController = new ExportController(m_serversRepository, m_appSettingsRepository, this);
@@ -212,6 +213,9 @@ void CoreController::initControllers()
 
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);
     setQmlContextProperty("ApiNewsController", m_apiNewsUiController);
+
+    m_updateUiController = new UpdateUiController(m_updateController, this);
+    setQmlContextProperty("UpdateController", m_updateUiController);
 }
 
 void CoreController::initAndroidController()
