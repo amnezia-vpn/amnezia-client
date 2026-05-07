@@ -72,10 +72,6 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
         case Vpn::ConnectionState::Connected: {
             m_trafficGuard->setupRoutes(m_vpnConfiguration, m_vpnProtocol, remoteAddress());
         } break;
-        case Vpn::ConnectionState::Disconnected:
-        case Vpn::ConnectionState::Error: {
-            m_trafficGuard->teardown();
-        } break;
         default:
             break;
     }
@@ -161,6 +157,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+        m_trafficGuard->teardown();
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
@@ -417,7 +414,9 @@ void VpnConnection::disconnectFromVpn()
                               }
                           });
 #endif
-
+#ifdef AMNEZIA_DESKTOP
+    m_trafficGuard->teardown();
+#endif
     m_vpnProtocol->stop();
 
 #if !defined(Q_OS_ANDROID) && !defined(AMNEZIA_DESKTOP)
