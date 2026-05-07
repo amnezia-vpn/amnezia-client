@@ -16,7 +16,12 @@
 using namespace amnezia;
 
 namespace {
+#ifdef AMNEZIA_LOCAL_GATEWAY
+    // Prefer 127.0.0.1 with local mock (tools/local_gateway listens on 0.0.0.0:8080); avoids LAN/IPv6 ambiguity in dev.
+    constexpr char gatewayEndpoint[] = "http://127.0.0.1:8080/";
+#else
     constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
+#endif
 }
 
 SecureAppSettingsRepository::SecureAppSettingsRepository(SecureQSettings* settings, QObject *parent)
@@ -246,6 +251,15 @@ void SecureAppSettingsRepository::setAppsSplitTunnelingEnabled(bool enabled)
 QString SecureAppSettingsRepository::getGatewayEndpoint(bool isTestPurchase) const
 {
     if (isTestPurchase) {
+        // App Store / sandbox subscriptions set isTestPurchase; the stock rule swaps the base URL to
+        // DEV_AGW_ENDPOINT. For tools/local_gateway (127.0.0.1 / localhost) that sends encrypted
+        // traffic to the wrong host, decryption fails, shouldBypassProxy pulls S3 — crash or "Send failed".
+        const QString &base = m_gatewayEndpoint;
+        if (base.contains(QStringLiteral("127.0.0.1"), Qt::CaseInsensitive)
+            || base.contains(QStringLiteral("localhost"), Qt::CaseInsensitive)
+            || base.contains(QStringLiteral("[::1]"), Qt::CaseInsensitive)) {
+            return m_gatewayEndpoint;
+        }
         return QString(DEV_AGW_ENDPOINT);
     }
     return m_gatewayEndpoint;

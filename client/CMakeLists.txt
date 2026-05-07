@@ -204,6 +204,10 @@ list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
+if(AMNEZIA_LOCAL_GATEWAY)
+    target_compile_definitions(${PROJECT} PRIVATE AMNEZIA_LOCAL_GATEWAY)
+endif()
+
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 
 # Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).

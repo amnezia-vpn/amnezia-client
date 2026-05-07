@@ -34,6 +34,9 @@ public:
     static amnezia::ErrorCode parseGenerateQrResponseBody(const QByteArray &responseBody, QrPairingConfigPayload &outPayload);
     static amnezia::ErrorCode parseScanQrResponseBody(const QByteArray &responseBody);
 
+    /** Length bounds before `scan_qr` (avoids huge JSON / abuse). */
+    static amnezia::ErrorCode validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey);
+
     amnezia::ErrorCode startPairing(const QString &qrUuid, QrPairingConfigPayload &outPayload);
     amnezia::ErrorCode completePairing(const QString &qrUuid, const QString &vpnConfig, const QJsonObject &serviceInfo,
                                        const QJsonArray &supportedProtocols, const QString &apiKey);

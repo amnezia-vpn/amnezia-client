@@ -9,6 +9,7 @@
 #include "android_controller.h"
 #include "android_utils.h"
 #include "ui/controllers/importUiController.h"
+#include "ui/controllers/api/pairingUiController.h"
 
 namespace
 {
@@ -538,7 +539,11 @@ bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
 
-    return ImportUiController::decodeQrCode(AndroidUtils::convertJString(env, data));
+    const QString code = AndroidUtils::convertJString(env, data);
+    if (PairingUiController::tryConsumeAndroidQrScan(code)) {
+        return true;
+    }
+    return ImportUiController::decodeQrCode(code);
 }
 // static
 void AndroidController::onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp)

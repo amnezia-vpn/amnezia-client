@@ -16,11 +16,16 @@ namespace
 {
 constexpr auto kGenerateQrEndpoint = "%1api/v1/generate_qr";
 constexpr auto kScanQrEndpoint = "%1api/v1/scan_qr";
+constexpr qsizetype kPairingMaxQrUuidChars = 128;
+constexpr qsizetype kPairingMaxVpnConfigChars = 256 * 1024;
+constexpr qsizetype kPairingMaxApiKeyChars = 8192;
 
 bool isLocalGatewayHost(const QString &gatewayUrl)
 {
     return gatewayUrl.contains(QStringLiteral("127.0.0.1"), Qt::CaseInsensitive)
-            || gatewayUrl.contains(QStringLiteral("localhost"), Qt::CaseInsensitive);
+            || gatewayUrl.contains(QStringLiteral("localhost"), Qt::CaseInsensitive)
+            || gatewayUrl.contains(QStringLiteral("[::1]"), Qt::CaseInsensitive)
+            || gatewayUrl.contains(QStringLiteral("::1"), Qt::CaseInsensitive);
 }
 
 ErrorCode applyGatewayOrOpenApiGenerateError(const QJsonObject &obj, PairingController::QrPairingConfigPayload &outPayload)
@@ -118,6 +123,20 @@ ErrorCode PairingController::parseScanQrResponseBody(const QByteArray &responseB
     return interpretScanQrJson(obj);
 }
 
+ErrorCode PairingController::validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey)
+{
+    if (qrUuid.size() > kPairingMaxQrUuidChars) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+    if (vpnConfig.size() > kPairingMaxVpnConfigChars) {
+        return ErrorCode::ApiPairingPayloadTooLargeError;
+    }
+    if (apiKey.size() > kPairingMaxApiKeyChars) {
+        return ErrorCode::ApiPairingPayloadTooLargeError;
+    }
+    return ErrorCode::NoError;
+}
+
 PairingController::PairingController(SecureAppSettingsRepository *appSettingsRepository)
     : m_appSettingsRepository(appSettingsRepository)
 {
@@ -185,6 +204,11 @@ ErrorCode PairingController::completePairing(const QString &qrUuid, const QStrin
 {
     if (qrUuid.isEmpty() || vpnConfig.isEmpty() || apiKey.isEmpty()) {
         return ErrorCode::ApiConfigEmptyError;
+    }
+
+    const ErrorCode fieldErr = validatePairingScanFields(qrUuid, vpnConfig, apiKey);
+    if (fieldErr != ErrorCode::NoError) {
+        return fieldErr;
     }
 
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(),

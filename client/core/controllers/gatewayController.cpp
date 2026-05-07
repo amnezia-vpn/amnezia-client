@@ -86,6 +86,18 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     }
 #endif
 
+#ifdef AMNEZIA_LOCAL_GATEWAY
+    {
+        const QUrl gatewayUrl(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl);
+        const QString host = gatewayUrl.host().toLower();
+        if (host == QLatin1String("localhost") || host == QLatin1String("127.0.0.1") || host == QLatin1String("::1")) {
+            encRequestData.isPlaintextLocalGateway = true;
+            encRequestData.requestBody = QJsonDocument(apiPayload).toJson();
+            return encRequestData;
+        }
+    }
+#endif
+
     QSimpleCrypto::QBlockCipher blockCipher;
     encRequestData.key = blockCipher.generatePrivateSalt(32);
     encRequestData.iv = blockCipher.generatePrivateSalt(32);
@@ -176,6 +188,16 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     reply->deleteLater();
 
+    if (encRequestData.isPlaintextLocalGateway) {
+        const auto errorCode =
+                apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, encryptedResponseBody);
+        if (errorCode) {
+            return errorCode;
+        }
+        responseBody = encryptedResponseBody;
+        return ErrorCode::NoError;
+    }
+
     auto decryptionResult =
             tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
 
@@ -223,7 +245,8 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     return ErrorCode::NoError;
 }
 
-QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString &endpoint, const QJsonObject apiPayload)
+QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString &endpoint, const QJsonObject &apiPayload,
+                                                                   QNetworkReply **activeReplyOut)
 {
     auto promise = QSharedPointer<QPromise<QPair<ErrorCode, QByteArray>>>::create();
     promise->start();
@@ -236,6 +259,9 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
     }
 
     QNetworkReply *reply = amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
+    if (activeReplyOut) {
+        *activeReplyOut = reply;
+    }
 
     auto sslErrors = QSharedPointer<QList<QSslError>>::create();
 
@@ -248,6 +274,18 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
         int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
         reply->deleteLater();
+
+        if (encRequestData.isPlaintextLocalGateway) {
+            const auto errorCode = apiUtils::checkNetworkReplyErrors(*sslErrors, replyErrorString, replyError, httpStatusCode,
+                                                                    encryptedResponseBody);
+            if (errorCode) {
+                promise->addResult(qMakePair(errorCode, QByteArray()));
+            } else {
+                promise->addResult(qMakePair(ErrorCode::NoError, encryptedResponseBody));
+            }
+            promise->finish();
+            return;
+        }
 
         auto decryptionResult =
                 tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);

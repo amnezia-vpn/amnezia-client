@@ -22,26 +22,45 @@ go run .
 
 После `git pull` обязательно **остановите старый процесс** на 8080 (`Ctrl+C` в терминале или `kill <PID>`), иначе будет крутиться бинарник без правок.
 
-В логах должно появиться сообщение вида:
+В логах при старте: `plaintext mock on tcp4 0.0.0.0:8080 — see ... README.md for paths`. Каждый запрос дополнительно пишется как `REQ <METHOD> <path>`.
 
-`plaintext mock listening on 0.0.0.0:8080  GET /  POST /v1/services  POST /v1/config  POST /api/v1/generate_qr  POST /api/v1/scan_qr`
+Проверка без клиента (mock должен быть запущен):
+
+```bash
+./verify.sh
+# или
+bash verify.sh http://127.0.0.1:8080
+```
 
 ## Эндпоинты
 
 | Метод | Путь | Назначение |
 |--------|------|------------|
 | `GET` | `/` | Короткий текст для проверки из браузера / телефона. |
-| `POST` | `/v1/services` | Минимальный ответ со списком сервисов (в т.ч. `amnezia-free` / `awg`). |
-| `POST` | `/v1/config` | Импорт конфига: лимит/CAPTCHA (`dchest/captcha`), проверка решения, мок-ответы. |
-| `POST` | `/api/v1/generate_qr` | Регистрация pairing-сессии по `qr_uuid` + long-poll (**120s** в этом mock; **30s** на production gateway). |
-| `POST` | `/api/v1/scan_qr` | Завершение pairing-сессии: передача `config` + `service_info` + `supported_protocols` по `qr_uuid`. |
+| `GET` | `/VERSION` | Версия для цепочки обновлений (`UpdateController`: после `updater_endpoint`). Значение `0.0.1` — ниже клиента, «обновление не найдено». |
+| `GET` | `/CHANGELOG` | Пустое тело, успех. |
+| `GET` | `/RELEASE_DATE` | Пустое тело, успех. |
+| `POST` | `/v1/account_info` | Экран API‑подписки (`getAccountInfo`). |
+| `POST` | `/v1/services` | Каталог сервисов (`ServicesCatalogController`). |
+| `POST` | `/v1/config` | Amnezia Free: CAPTCHA/лимит; иначе короткий мок‑ответ (полноценный premium `vpn://` здесь не строится). |
+| `POST` | `/v1/news` | Лента новостей (`NewsController`), пустой `news`. |
+| `POST` | `/v1/renewal_link` | Ссылка продления (`renewal_url`). |
+| `POST` | `/v1/updater_endpoint` | `{"url":"http://127.0.0.1:8080"}` → затем GET `/VERSION` на этом хосте. |
+| `POST` | `/v1/revoke_config` | Успех, тело не разбирается при `NoError`. |
+| `POST` | `/v1/revoke_native_config` | То же. |
+| `POST` | `/api/v1/generate_qr` | Pairing: long-poll (**120s** mock). |
+| `POST` | `/api/v1/scan_qr` | Pairing: завершение по `qr_uuid`. |
 
-Других маршрутов нет (кроме `GET /`).
+**Не реализовано** (нужен осмысленный `vpn://` / IAP): `POST /v1/trial`, `POST /v1/subscriptions`, `POST /v1/native_config`, `POST /v1/proxy_config` (Telegram). При необходимости — отдельная доработка или прод gateway.
+
+**Обновление premium** (`updateServiceFromGateway` → `POST /v1/config` с `amnezia-premium`) требует валидного поля `config` с `vpn://…` в ответе; текущий mock для premium не подменяет полный конфиг — избегайте «Reload API config» на полностью локальном стенде или расширяйте mock.
 
 ## Связка с клиентом AmneziaVPN
 
-1. Соберите клиент с флагом CMake **`AMNEZIA_LOCAL_GATEWAY=ON`** — тогда для `localhost` запросы к gateway уходят **plaintext JSON** без RSA/AES (см. `GatewayController`, `SecureAppSettingsRepository`).
-2. В настройках приложения endpoint gateway должен указывать на **`http://localhost:8080/`** (или `http://127.0.0.1:8080/`). При включённом `AMNEZIA_LOCAL_GATEWAY` дефолтный URL в коде уже `http://localhost:8080/`.
+1. Соберите клиент с определением **`AMNEZIA_LOCAL_GATEWAY`** (см. `client/CMakeLists.txt`, `target_compile_definitions`) — тогда для **`127.0.0.1`** и **`localhost`** запросы к gateway уходят **plaintext JSON** без RSA/AES (см. `GatewayController`, `SecureAppSettingsRepository`).
+2. В настройках приложения endpoint gateway: **`http://127.0.0.1:8080/`** (дефолт при `AMNEZIA_LOCAL_GATEWAY` в коде). Допустим и `http://localhost:8080/` — тоже plaintext.
+
+Пошаговый план (включая следующие этапы вроде `/v1/account_info`): **`docs/local-gateway-mock.md`**.
 
 После этого сценарии вроде **Amnezia Free → Continue** будут ходить в этот mock.
 

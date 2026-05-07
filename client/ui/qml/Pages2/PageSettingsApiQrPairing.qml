@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import QRCodeReader 1.0
 import PageEnum 1.0
 import Style 1.0
 
@@ -14,6 +15,18 @@ PageType {
     id: root
 
     property int qrImageIndex: 0
+    property bool pairingCameraOpen: false
+
+    Connections {
+        target: root
+        function onVisibleChanged() {
+            if (!root.visible) {
+                pairingQrReader.stopReading()
+                root.pairingCameraOpen = false
+                PairingUiController.cancelAllPairingActivity()
+            }
+        }
+    }
 
     FlickableType {
         anchors.fill: parent
@@ -74,8 +87,9 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                defaultColor: "transparent"
                 text: qsTr("Cancel receive")
+                // Do not use defaultColor: transparent here: when enabled, BasicButtonType paints that
+                // as the idle background, so midnightBlack label sits on the page — invisible until hover.
                 enabled: PairingUiController.tvPairingBusy
                 clickedFunc: function() {
                     PairingUiController.cancelTvQrSession()
@@ -91,21 +105,29 @@ PageType {
                 wrapMode: Text.Wrap
             }
 
-            Image {
-                id: qrImage
-                Layout.alignment: Qt.AlignHCenter
+            // SVG QR from qrCodeUtils has a tiny viewBox (~45px); without a sized container + sourceSize it stays small.
+            Item {
+                id: qrBox
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 8
+                implicitHeight: width
                 visible: PairingUiController.tvQrCodesCount > 0
-                width: Math.min(220, parent.width - 32)
-                height: width
-                fillMode: Image.PreserveAspectFit
-                source: PairingUiController.tvQrCodesCount > 0 ? PairingUiController.tvQrCodes[root.qrImageIndex] : ""
 
-                MouseArea {
+                Image {
+                    id: qrImage
                     anchors.fill: parent
-                    enabled: PairingUiController.tvQrCodesCount > 1
-                    onClicked: {
-                        root.qrImageIndex = (root.qrImageIndex + 1) % PairingUiController.tvQrCodesCount
+                    fillMode: Image.PreserveAspectFit
+                    sourceSize: Qt.size(2048, 2048)
+                    source: PairingUiController.tvQrCodesCount > 0 ? PairingUiController.tvQrCodes[root.qrImageIndex] : ""
+
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: PairingUiController.tvQrCodesCount > 1
+                        onClicked: {
+                            root.qrImageIndex = (root.qrImageIndex + 1) % PairingUiController.tvQrCodesCount
+                        }
                     }
                 }
             }
@@ -134,8 +156,66 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                visible: Qt.platform.os === "android" || Qt.platform.os === "ios"
+                text: {
+                    if (Qt.platform.os === "ios" && root.pairingCameraOpen) {
+                        return qsTr("Hide camera")
+                    }
+                    return qsTr("Scan QR code")
+                }
+                enabled: !PairingUiController.phonePairingBusy
+                clickedFunc: function() {
+                    if (Qt.platform.os === "android") {
+                        PairingUiController.openPairingQrScanner()
+                    } else {
+                        root.pairingCameraOpen = !root.pairingCameraOpen
+                    }
+                }
+            }
+
+            Item {
+                id: cameraSlot
+                Layout.fillWidth: true
+                Layout.preferredHeight: (root.pairingCameraOpen && Qt.platform.os === "ios") ? 220 : 0
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                visible: Layout.preferredHeight > 0
+                clip: true
+
+                // QRCodeReader is a QObject (not Item): no anchors; preview rect via setCameraSize like PageSetupWizardQrReader.
+                QRCodeReader {
+                    id: pairingQrReader
+
+                    onCodeReaded: function(code) {
+                        if (PairingUiController.applyScannedTextAsPairingUuid(code)) {
+                            pairingQrReader.stopReading()
+                            root.pairingCameraOpen = false
+                            PageController.showNotificationMessage(qsTr("Session ID filled from QR"))
+                        }
+                    }
+                }
+
+                onVisibleChanged: {
+                    if (!visible) {
+                        pairingQrReader.stopReading()
+                        return
+                    }
+                    if (Qt.platform.os === "ios") {
+                        Qt.callLater(function() {
+                            var p = cameraSlot.mapToItem(root, 0, 0)
+                            pairingQrReader.setCameraSize(Qt.rect(p.x, p.y, cameraSlot.width, cameraSlot.height))
+                            pairingQrReader.startReading()
+                        })
+                    }
+                }
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 text: PairingUiController.phonePairingBusy ? qsTr("Sending…") : qsTr("Send from current subscription")
-                enabled: !PairingUiController.tvPairingBusy && !PairingUiController.phonePairingBusy
+                enabled: !PairingUiController.phonePairingBusy
                 clickedFunc: function() {
                     PairingUiController.submitPhonePairing(uuidField.textField.text, ServersUiController.getProcessedServerIndex())
                 }
@@ -160,12 +240,21 @@ PageType {
             root.qrImageIndex = 0
         }
 
+        function onTvSessionUuidChanged() {
+            root.qrImageIndex = 0
+            uuidField.textField.text = PairingUiController.tvSessionUuid
+        }
+
         function onTvPairingConfigReceived() {
             PageController.showNotificationMessage(qsTr("Configuration received from gateway"))
         }
 
         function onPhonePairingSucceeded() {
             PageController.showNotificationMessage(qsTr("Configuration sent"))
+        }
+
+        function onPairingUuidFromScan(uuid) {
+            uuidField.textField.text = uuid
         }
     }
 }

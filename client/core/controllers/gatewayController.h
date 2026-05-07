@@ -25,7 +25,9 @@ public:
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
-    QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
+    /** If \a activeReplyOut is non-null, the underlying QNetworkReply is written for abort/cancel (not owned by caller). */
+    QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject &apiPayload,
+                                                            QNetworkReply **activeReplyOut = nullptr);
 
 private:
     struct EncryptedRequestData
@@ -36,6 +38,7 @@ private:
         QByteArray iv;
         QByteArray salt;
         amnezia::ErrorCode errorCode;
+        bool isPlaintextLocalGateway = false;
     };
 
     struct DecryptionResult

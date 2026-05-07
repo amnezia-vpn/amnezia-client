@@ -1,6 +1,7 @@
 #ifndef SUBSCRIPTIONCONTROLLER_H
 #define SUBSCRIPTIONCONTROLLER_H
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QByteArray>
 #include <QFuture>
@@ -56,6 +57,11 @@ public:
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email,
                                      ServerConfig &serverConfig);
+
+    /** Decode premium API (vpn://) bundle from QR pairing TV response, merge gateway fields, add server. */
+    ErrorCode importServerFromQrPairingResponse(const QString &vpnConfigKey, const QJsonObject &serviceInfo,
+                                                const QJsonArray &supportedProtocols, ServerConfig &serverConfig,
+                                                int *duplicateServerIndex = nullptr);
 
     ErrorCode importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const ProtocolData &protocolData,

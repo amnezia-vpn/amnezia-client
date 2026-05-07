@@ -87,6 +87,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiPairingConflictError): errorMessage = QObject::tr("This QR code has already been used"); break;
     case (ErrorCode::ApiPairingRateLimitedError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
     case (ErrorCode::ApiPairingServiceUnavailableError): errorMessage = QObject::tr("Service temporarily unavailable. Please try again later"); break;
+    case (ErrorCode::ApiPairingPayloadTooLargeError): errorMessage = QObject::tr("QR pairing data is too large to send"); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

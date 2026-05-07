@@ -312,6 +312,83 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
     return ErrorCode::NoError;
 }
 
+ErrorCode SubscriptionController::importServerFromQrPairingResponse(const QString &vpnConfigKey, const QJsonObject &serviceInfo,
+                                                                    const QJsonArray &supportedProtocols,
+                                                                    ServerConfig &serverConfig, int *duplicateServerIndex)
+{
+    if (vpnConfigKey.isEmpty()) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+
+    QString normalizedKey = vpnConfigKey;
+    normalizedKey.replace(QStringLiteral("vpn://"), QString());
+
+    for (int i = 0; i < m_serversRepository->serversCount(); ++i) {
+        ServerConfig existingServerConfig = m_serversRepository->server(i);
+        QString existingVpnKey;
+        if (existingServerConfig.isApiV1()) {
+            const ApiV1ServerConfig *apiV1 = existingServerConfig.as<ApiV1ServerConfig>();
+            existingVpnKey = apiV1 ? apiV1->vpnKey() : QString();
+        } else if (existingServerConfig.isApiV2()) {
+            const ApiV2ServerConfig *apiV2 = existingServerConfig.as<ApiV2ServerConfig>();
+            existingVpnKey = apiV2 ? apiV2->vpnKey() : QString();
+        }
+        existingVpnKey.replace(QStringLiteral("vpn://"), QString());
+        if (!existingVpnKey.isEmpty() && existingVpnKey == normalizedKey) {
+            if (duplicateServerIndex) {
+                *duplicateServerIndex = i;
+            }
+            return ErrorCode::ApiConfigAlreadyAdded;
+        }
+    }
+
+    QByteArray configString =
+            QByteArray::fromBase64(normalizedKey.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QByteArray configUncompressed = qUncompress(configString);
+    if (!configUncompressed.isEmpty()) {
+        configString = configUncompressed;
+    }
+    if (configString.isEmpty()) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+
+    QJsonObject serverJson = QJsonDocument::fromJson(configString).object();
+    if (serverJson.isEmpty()) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+
+    if (serverJson.value(configKey::configVersion).toInt() != apiDefs::ConfigSource::AmneziaGateway) {
+        return ErrorCode::InternalError;
+    }
+
+    QJsonObject apiConfig = serverJson.value(apiDefs::key::apiConfig).toObject();
+    if (!serviceInfo.isEmpty()) {
+        apiConfig.insert(apiDefs::key::serviceInfo, serviceInfo);
+    }
+    if (!supportedProtocols.isEmpty()) {
+        apiConfig.insert(apiDefs::key::supportedProtocols, supportedProtocols);
+    }
+    serverJson[apiDefs::key::apiConfig] = apiConfig;
+
+    ServerConfig serverConfigModel = ServerConfig::fromJson(serverJson);
+    if (!serverConfigModel.isApiV2()) {
+        return ErrorCode::InternalError;
+    }
+
+    ApiV2ServerConfig *apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
+    if (apiV2 && apiV2->apiConfig.vpnKey.isEmpty()) {
+        QString fullKey = vpnConfigKey.trimmed();
+        if (!fullKey.startsWith(QStringLiteral("vpn://"))) {
+            fullKey = QStringLiteral("vpn://") + fullKey;
+        }
+        apiV2->apiConfig.vpnKey = fullKey;
+    }
+
+    m_serversRepository->addServer(serverConfigModel);
+    serverConfig = serverConfigModel;
+    return ErrorCode::NoError;
+}
+
 ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
                                                             const QString &transactionId, bool isTestPurchase,

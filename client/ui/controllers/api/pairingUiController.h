@@ -2,6 +2,7 @@
 #define PAIRINGUICONTROLLER_H
 
 #include <QFutureWatcher>
+#include <QNetworkReply>
 #include <QObject>
 #include <QVariantList>
 #include <QPointer>
@@ -26,11 +27,14 @@ class PairingUiController : public QObject
 
     Q_PROPERTY(bool phonePairingBusy READ phonePairingBusy NOTIFY phonePairingBusyChanged)
     Q_PROPERTY(QString phoneStatusMessage READ phoneStatusMessage NOTIFY phoneStatusMessageChanged)
+    /** TV flow for QA: 0=idle, 1=waitingForPeer, 2=error, 3=sessionExpired */
+    Q_PROPERTY(int tvPairingUiPhase READ tvPairingUiPhase NOTIFY tvPairingUiPhaseChanged)
 
 public:
     PairingUiController(PairingController *pairingController, ServersController *serversController,
                         SubscriptionController *subscriptionController, SecureAppSettingsRepository *appSettingsRepository,
                         QObject *parent = nullptr);
+    ~PairingUiController() override;
 
     QVariantList tvQrCodes() const;
     int tvQrCodesCount() const;
@@ -40,13 +44,26 @@ public:
 
     bool phonePairingBusy() const;
     QString phoneStatusMessage() const;
+    int tvPairingUiPhase() const { return m_tvPairingUiPhase; }
+
+#if defined(Q_OS_ANDROID)
+    static bool tryConsumeAndroidQrScan(const QString &code);
+#endif
 
 public slots:
     void startTvQrSession();
     void cancelTvQrSession();
+    /** TV receive + phone send: call when leaving QR pairing (back / pop) so long-poll state does not stick. */
+    void cancelAllPairingActivity();
 
     /** Sends the current premium/free API config from \a serverIndex to the gateway for the given \a qrUuid. */
     void submitPhonePairing(const QString &qrUuid, int serverIndex);
+
+    /** Android: system camera activity. iOS: toggle camera from QML. */
+    void openPairingQrScanner();
+
+    /** If \a raw contains a session UUID (not vpn://), emits pairingUuidFromScan and returns true. */
+    bool applyScannedTextAsPairingUuid(const QString &raw);
 
 signals:
     void errorOccurred(amnezia::ErrorCode errorCode);
@@ -60,12 +77,18 @@ signals:
     void tvPairingConfigReceived();
     void phonePairingSucceeded();
 
+    void pairingUuidFromScan(const QString &uuid);
+    void tvPairingUiPhaseChanged();
+
 private:
     void setTvBusy(bool busy);
     void setPhoneBusy(bool busy);
     void resetTvQrDisplay();
-    void runPhonePairingRequest(const QString &qrUuid, bool isTestPurchase, const QString &vpnKey, const QJsonObject &serviceInfo,
-                                const QJsonArray &supportedProtocols, const QString &apiKey);
+    QString tvFailureMessage(amnezia::ErrorCode code) const;
+    void dispatchTvGenerateQrAttempt(quint64 generation, int retryAttempt);
+    void dispatchPhoneScanQrAttempt(const QString &qrUuid, bool isTestPurchase, const QString &vpnKey, const QJsonObject &serviceInfo,
+                                    const QJsonArray &supportedProtocols, const QString &apiKey, quint64 generation, int retryAttempt);
+    void setTvPairingUiPhase(int phase);
 
     PairingController *m_pairingController {};
     ServersController *m_serversController {};
@@ -77,10 +100,15 @@ private:
     bool m_tvPairingBusy = false;
     QString m_tvStatusMessage;
     QPointer<QFutureWatcher<QPair<amnezia::ErrorCode, QByteArray>>> m_tvWatcher;
+    QPointer<QNetworkReply> m_tvNetworkReply;
+    quint64 m_tvSessionGeneration { 0 };
+    int m_tvPairingUiPhase { 0 };
 
     bool m_phonePairingBusy = false;
     QString m_phoneStatusMessage;
     QPointer<QFutureWatcher<QPair<amnezia::ErrorCode, QByteArray>>> m_phoneWatcher;
+    QPointer<QNetworkReply> m_phoneNetworkReply;
+    quint64 m_phoneSessionGeneration { 0 };
 };
 
 #endif // PAIRINGUICONTROLLER_H

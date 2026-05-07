@@ -80,6 +80,19 @@ func writeJSON(w http.ResponseWriter, status int, body any) {
 	_ = json.NewEncoder(w).Encode(body)
 }
 
+func drainBody(r *http.Request) {
+	_, _ = io.Copy(io.Discard, r.Body)
+	_ = r.Body.Close()
+}
+
+// logReq logs every request (step 5 in docs/local-gateway-mock.md).
+func logReq(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("REQ %s %s", r.Method, r.URL.Path)
+		next(w, r)
+	}
+}
+
 func cleanupExpiredSessions(now time.Time) {
 	for uuid, session := range sessions {
 		if now.After(session.ExpiresAt) {
@@ -243,8 +256,7 @@ func handleServices(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method", http.StatusMethodNotAllowed)
 		return
 	}
-	_, _ = io.Copy(io.Discard, r.Body)
-	_ = r.Body.Close()
+	drainBody(r)
 
 	// Minimal shape for ApiServicesModel::updateModel + importFreeFromGateway (service_protocol "awg").
 	w.Header().Set("Content-Type", "application/json")
@@ -385,17 +397,124 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("local_gateway plaintext mock\nPOST /api/v1/generate_qr, /api/v1/scan_qr, /v1/services, /v1/config\n"))
+	_, _ = w.Write([]byte("local_gateway plaintext mock — full path list: tools/local_gateway/README.md\n"))
+}
+
+// POST /v1/account_info — same path as SubscriptionController::getAccountInfo (ApiAccountInfoModel::updateModel).
+func handleAccountInfo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method", http.StatusMethodNotAllowed)
+		return
+	}
+	drainBody(r)
+
+	// Keys match client/core/utils/constants/apiKeys.h (snake_case).
+	endDate := time.Now().UTC().AddDate(1, 0, 0).Format(time.RFC3339)
+	resp := map[string]any{
+		"active_device_count":      1,
+		"max_device_count":         5,
+		"subscription_end_date":    endDate,
+		"subscription_description": "Local mock (tools/local_gateway)",
+		"is_renewal_available":     false,
+		"supported_protocols":      []string{"awg", "vless"},
+		"available_countries":      []any{},
+		"issued_configs":           []any{},
+		"support_info": map[string]any{
+			"telegram":      "amnezia_support",
+			"email":         "support@example.com",
+			"billing_email": "billing@example.com",
+			"website":       "https://amnezia.org",
+			"website_name":  "Amnezia",
+		},
+	}
+	writeJSON(w, http.StatusOK, resp)
+}
+
+// POST /v1/news — NewsController::fetchNews (empty list is fine).
+func handleNews(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method", http.StatusMethodNotAllowed)
+		return
+	}
+	drainBody(r)
+	writeJSON(w, http.StatusOK, map[string]any{"news": []any{}})
+}
+
+// POST /v1/renewal_link — SubscriptionController::getRenewalLink.
+func handleRenewalLink(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method", http.StatusMethodNotAllowed)
+		return
+	}
+	drainBody(r)
+	writeJSON(w, http.StatusOK, map[string]string{"renewal_url": "https://amnezia.org/"})
+}
+
+// POST /v1/updater_endpoint — UpdateController::fetchGatewayUrl, then GET {url}/VERSION.
+func handleUpdaterEndpoint(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method", http.StatusMethodNotAllowed)
+		return
+	}
+	drainBody(r)
+	writeJSON(w, http.StatusOK, map[string]string{"url": "http://127.0.0.1:8080"})
+}
+
+// POST /v1/revoke_config, /v1/revoke_native_config — success body ignored if error is NoError.
+func handleRevokeNoop(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method", http.StatusMethodNotAllowed)
+		return
+	}
+	drainBody(r)
+	writeJSON(w, http.StatusOK, map[string]string{"message": "mock"})
+}
+
+func handleGetVersion(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("0.0.1"))
+}
+
+func handleGetChangelog(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleGetReleaseDate(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
-	http.HandleFunc("/", handleRoot)
-	http.HandleFunc("/v1/services", handleServices)
-	http.HandleFunc("/v1/config", handleConfig)
-	http.HandleFunc("/api/v1/generate_qr", handleGenerateQR)
-	http.HandleFunc("/api/v1/scan_qr", handleScanQR)
+	http.HandleFunc("/", logReq(handleRoot))
+	http.HandleFunc("/VERSION", logReq(handleGetVersion))
+	http.HandleFunc("/CHANGELOG", logReq(handleGetChangelog))
+	http.HandleFunc("/RELEASE_DATE", logReq(handleGetReleaseDate))
+	http.HandleFunc("/v1/account_info", logReq(handleAccountInfo))
+	http.HandleFunc("/v1/services", logReq(handleServices))
+	http.HandleFunc("/v1/config", logReq(handleConfig))
+	http.HandleFunc("/v1/news", logReq(handleNews))
+	http.HandleFunc("/v1/renewal_link", logReq(handleRenewalLink))
+	http.HandleFunc("/v1/updater_endpoint", logReq(handleUpdaterEndpoint))
+	http.HandleFunc("/v1/revoke_config", logReq(handleRevokeNoop))
+	http.HandleFunc("/v1/revoke_native_config", logReq(handleRevokeNoop))
+	http.HandleFunc("/api/v1/generate_qr", logReq(handleGenerateQR))
+	http.HandleFunc("/api/v1/scan_qr", logReq(handleScanQR))
 	const addr = "0.0.0.0:8080"
-	log.Printf("plaintext mock listening on tcp4 %s  GET /  POST /v1/services  POST /v1/config  POST /api/v1/generate_qr  POST /api/v1/scan_qr\n", addr)
+	log.Printf("plaintext mock on tcp4 %s — see tools/local_gateway/README.md for paths\n", addr)
 	ln, err := net.Listen("tcp4", addr)
 	if err != nil {
 		log.Fatal(err)

@@ -103,6 +103,7 @@ namespace amnezia
         ApiPairingConflictError = 1118,
         ApiPairingRateLimitedError = 1119,
         ApiPairingServiceUnavailableError = 1120,
+        ApiPairingPayloadTooLargeError = 1121,
 
         // QFile errors
         OpenError = 1200,
