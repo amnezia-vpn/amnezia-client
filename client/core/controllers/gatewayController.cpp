@@ -23,6 +23,10 @@
 #include "core/utils/networkUtilities.h"
 #include "core/utils/utilities.h"
 
+#ifdef Q_OS_IOS
+    #include "platforms/ios/ios_controller.h"
+#endif
+
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"
 #endif
