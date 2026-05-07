@@ -19,13 +19,14 @@ public:
 
     void teardown();
     bool allowEndpoint(const QString &remoteAddress);
+    void revokeEndpoint(const QString &remoteAddress);
     void applyFirewall(const QString &vpnGateway, const QString &vpnLocalAddress);
 private:
     void addSplitTunnelRoutes(const QString &gateway, amnezia::RouteMode mode);
     SecureAppSettingsRepository* m_appSettingsRepository;
     QJsonObject m_config;
     bool m_ipv6RoutingStopped = false;
-
+    QStringList m_allowedEndpoints;
 };
 
 #endif // VPNTRAFFICGUARD_H

@@ -35,6 +35,9 @@ bool VpnTrafficGuard::allowEndpoint(const QString &remoteAddress)
     if (remoteAddress.isEmpty()) {
         return false;
     }
+    if (!m_allowedEndpoints.contains(remoteAddress)) {
+        m_allowedEndpoints.append(remoteAddress);
+    }
     return IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList(remoteAddress));
         return reply.waitForFinished(1000) && reply.returnValue();
@@ -42,6 +45,18 @@ bool VpnTrafficGuard::allowEndpoint(const QString &remoteAddress)
 #else
     Q_UNUSED(remoteAddress)
     return true;
+#endif
+}
+
+void VpnTrafficGuard::revokeEndpoint(const QString &remoteAddress)
+{
+#ifdef AMNEZIA_DESKTOP
+    m_allowedEndpoints.removeAll(remoteAddress);
+    IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
+        iface->resetKillSwitchAllowedRange(m_allowedEndpoints);
+    });
+#else
+    Q_UNUSED(remoteAddress)
 #endif
 }
 
@@ -222,6 +237,7 @@ void VpnTrafficGuard::teardown()
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         QRemoteObjectPendingReply<bool> reply = iface->disableKillSwitch();
+        m_allowedEndpoints.clear();
         //TODO: why it takes so long?
         if (!reply.waitForFinished(5000) || !reply.returnValue()) {
             qWarning() << "VpnTrafficGuard::teardown: Failed to disable killswitch";
