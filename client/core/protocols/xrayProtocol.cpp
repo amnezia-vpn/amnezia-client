@@ -19,12 +19,6 @@
 
 #include <exception>
 
-#ifdef Q_OS_MACOS
-static const QString tunName = "utun22";
-#else
-static const QString tunName = "tun2";
-#endif
-
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
@@ -34,6 +28,11 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::configKey::splitTunnelType).toInt());
     m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::configKey::hostName).toString());
 
+#ifdef Q_OS_MACOS
+    m_tunName = configuration.value("tunName").toString("utun22");
+#else
+    m_tunName = configuration.value("tunName").toString("tun2");
+#endif
     const QString primaryDns = configuration.value(amnezia::configKey::dns1).toString();
     m_dnsServers.push_back(QHostAddress(primaryDns));
     if (primaryDns != amnezia::protocols::dns::amneziaDnsIp) {
@@ -120,12 +119,12 @@ void XrayProtocol::stop()
 {
     qDebug() << "XrayProtocol::stop()";
 
-    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+    IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
         auto restoreResolvers = iface->restoreResolvers();
         if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue())
             qWarning() << "Failed to restore resolvers";
 
-        auto deleteTun = iface->deleteTun(tunName);
+        auto deleteTun = iface->deleteTun(m_tunName);
         if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
             qWarning() << "Failed to delete tun";
 
@@ -167,7 +166,7 @@ ErrorCode XrayProtocol::startTun2Socks()
     const QString proxyUrl = QString("socks5://%1:%2@127.0.0.1:%3").arg(m_socksUser, m_socksPassword, QString::number(m_socksPort));
 
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
-    m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(tunName), "-proxy", proxyUrl });
+    m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(m_tunName), "-proxy", proxyUrl });
 
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
@@ -247,13 +246,13 @@ ErrorCode XrayProtocol::setupRouting()
 #ifdef Q_OS_WIN
                 const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
 #endif
-                auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
+                auto createTun = iface->createTun(m_tunName, amnezia::protocols::xray::defaultLocalAddr);
                 if (!createTun.waitForFinished() || !createTun.returnValue()) {
                     qCritical() << "Failed to assign IP address for TUN";
                     return ErrorCode::InternalError;
                 }
 
-                auto updateResolvers = iface->updateResolvers(tunName, m_dnsServers);
+                auto updateResolvers = iface->updateResolvers(m_tunName, m_dnsServers);
                 if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
                     qCritical() << "Failed to set DNS resolvers for TUN";
                     return ErrorCode::InternalError;
