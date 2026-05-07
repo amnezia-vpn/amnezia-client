@@ -16,7 +16,7 @@
 using namespace amnezia;
 
 namespace {
-#ifdef AMNEZIA_LOCAL_GATEWAY
+#ifdef AMNEZIA_QR_PAIRING_ALLOW
     // Prefer 127.0.0.1 with local mock (tools/local_gateway listens on 0.0.0.0:8080); avoids LAN/IPv6 ambiguity in dev.
     constexpr char gatewayEndpoint[] = "http://127.0.0.1:8080/";
 #else

@@ -3,7 +3,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import QRCodeReader 1.0
-import PageEnum 1.0
 import Style 1.0
 
 import "../Controls2"
@@ -14,7 +13,6 @@ import "../Components"
 PageType {
     id: root
 
-    property int qrImageIndex: 0
     property bool pairingCameraOpen: false
 
     Connections {
@@ -46,7 +44,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 8
-                text: qsTr("QR pairing")
+                text: qsTr("Transfer subscription (QR)")
                 font.pixelSize: 28
                 font.bold: true
                 color: AmneziaStyle.color.paleGray
@@ -57,7 +55,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                text: qsTr("Experimental: transfer API configuration to another device via gateway. Use “Receive” on the device that shows the QR code, and “Send” on the premium device.")
+                text: qsTr("Scan the session QR shown on the receiving device, then send this server’s Amnezia Premium configuration through the gateway.")
                 wrapMode: Text.Wrap
             }
 
@@ -66,78 +64,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
-                text: qsTr("Receive configuration (TV / second device)")
-                font.pixelSize: 18
-                font.bold: true
-                color: AmneziaStyle.color.mutedGray
-            }
-
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                text: PairingUiController.tvPairingBusy ? qsTr("Waiting…") : qsTr("Start and show QR")
-                enabled: !PairingUiController.tvPairingBusy && !PairingUiController.phonePairingBusy
-                clickedFunc: function() {
-                    PairingUiController.startTvQrSession()
-                }
-            }
-
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                text: qsTr("Cancel receive")
-                // Do not use defaultColor: transparent here: when enabled, BasicButtonType paints that
-                // as the idle background, so midnightBlack label sits on the page — invisible until hover.
-                enabled: PairingUiController.tvPairingBusy
-                clickedFunc: function() {
-                    PairingUiController.cancelTvQrSession()
-                }
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                visible: PairingUiController.tvStatusMessage.length > 0
-                text: PairingUiController.tvStatusMessage
-                wrapMode: Text.Wrap
-            }
-
-            // SVG QR from qrCodeUtils has a tiny viewBox (~45px); without a sized container + sourceSize it stays small.
-            Item {
-                id: qrBox
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 8
-                implicitHeight: width
-                visible: PairingUiController.tvQrCodesCount > 0
-
-                Image {
-                    id: qrImage
-                    anchors.fill: parent
-                    fillMode: Image.PreserveAspectFit
-                    sourceSize: Qt.size(2048, 2048)
-                    source: PairingUiController.tvQrCodesCount > 0 ? PairingUiController.tvQrCodes[root.qrImageIndex] : ""
-
-                    MouseArea {
-                        anchors.fill: parent
-                        enabled: PairingUiController.tvQrCodesCount > 1
-                        onClicked: {
-                            root.qrImageIndex = (root.qrImageIndex + 1) % PairingUiController.tvQrCodesCount
-                        }
-                    }
-                }
-            }
-
-            Label {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 24
-                text: qsTr("Send configuration (premium device)")
+                text: qsTr("Send from this subscription")
                 font.pixelSize: 18
                 font.bold: true
                 color: AmneziaStyle.color.mutedGray
@@ -149,7 +76,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 headerText: qsTr("QR session UUID")
-                textField.placeholderText: qsTr("Paste UUID from TV QR")
+                textField.placeholderText: qsTr("Paste UUID from the other device’s QR")
             }
 
             BasicButtonType {
@@ -182,7 +109,6 @@ PageType {
                 visible: Layout.preferredHeight > 0
                 clip: true
 
-                // QRCodeReader is a QObject (not Item): no anchors; preview rect via setCameraSize like PageSetupWizardQrReader.
                 QRCodeReader {
                     id: pairingQrReader
 
@@ -236,21 +162,13 @@ PageType {
     Connections {
         target: PairingUiController
 
-        function onTvQrCodesChanged() {
-            root.qrImageIndex = 0
-        }
-
-        function onTvSessionUuidChanged() {
-            root.qrImageIndex = 0
-            uuidField.textField.text = PairingUiController.tvSessionUuid
-        }
-
-        function onTvPairingConfigReceived() {
-            PageController.showNotificationMessage(qsTr("Configuration received from gateway"))
-        }
-
         function onPhonePairingSucceeded() {
+            root.pairingCameraOpen = false
+            pairingQrReader.stopReading()
             PageController.showNotificationMessage(qsTr("Configuration sent"))
+            Qt.callLater(function() {
+                PageController.closePage()
+            })
         }
 
         function onPairingUuidFromScan(uuid) {

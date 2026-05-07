@@ -24,6 +24,8 @@ class PairingUiController : public QObject
     Q_PROPERTY(QString tvSessionUuid READ tvSessionUuid NOTIFY tvSessionUuidChanged)
     Q_PROPERTY(bool tvPairingBusy READ tvPairingBusy NOTIFY tvPairingBusyChanged)
     Q_PROPERTY(QString tvStatusMessage READ tvStatusMessage NOTIFY tvStatusMessageChanged)
+    /** Long-poll window for generate_qr (seconds), for receive UI countdown. */
+    Q_PROPERTY(int tvPairingWaitWindowSeconds READ tvPairingWaitWindowSeconds NOTIFY tvQrCodesChanged)
 
     Q_PROPERTY(bool phonePairingBusy READ phonePairingBusy NOTIFY phonePairingBusyChanged)
     Q_PROPERTY(QString phoneStatusMessage READ phoneStatusMessage NOTIFY phoneStatusMessageChanged)
@@ -41,6 +43,7 @@ public:
     QString tvSessionUuid() const;
     bool tvPairingBusy() const;
     QString tvStatusMessage() const;
+    int tvPairingWaitWindowSeconds() const;
 
     bool phonePairingBusy() const;
     QString phoneStatusMessage() const;

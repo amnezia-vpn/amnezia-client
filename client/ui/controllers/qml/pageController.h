@@ -80,7 +80,9 @@ namespace PageLoader
         PageSetupWizardApiPremiumInfo,
         PageSetupWizardApiTrialEmail,
 
-        PageSettingsApiQrPairing,
+        PageSettingsApiQrPairingDev,
+        PageSettingsApiQrPairingSend,
+        PageSetupWizardApiQrPairingReceive,
 
         PageDevMenu
     };

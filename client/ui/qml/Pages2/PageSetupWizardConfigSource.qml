@@ -269,6 +269,7 @@ PageType {
         selfHostVpn,
         backupRestore,
         fileOpen,
+        gatewayQrPairingAddServer,
         qrScan,
         restorePurchases,
         siteLink
@@ -340,6 +341,19 @@ PageType {
                     PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                 }
             }
+        }
+    }
+
+    QtObject {
+        id: gatewayQrPairingAddServer
+
+        property bool featuredAmneziaConnection: false
+        property string title: qsTr("Get Premium server from mobile")
+        property string description: qsTr("Premium · QR transfer — steps inside")
+        property string imageSource: "qrc:/images/controls/qr-code.svg"
+        property bool isVisible: true
+        property var handler: function() {
+            PageController.goToPage(PageEnum.PageSetupWizardApiQrPairingReceive)
         }
     }
 

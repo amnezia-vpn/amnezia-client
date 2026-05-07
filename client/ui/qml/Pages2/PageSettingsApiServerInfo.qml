@@ -378,12 +378,12 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                text: qsTr("QR pairing (beta)")
-                descriptionText: qsTr("Transfer config via gateway using a QR code")
+                text: qsTr("Transfer by QR (send)")
+                descriptionText: qsTr("Scan the session QR from the receiving device and send this subscription via the gateway")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsApiQrPairing)
+                    PageController.goToPage(PageEnum.PageSettingsApiQrPairingSend)
                 }
             }
 

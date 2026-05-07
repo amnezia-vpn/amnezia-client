@@ -143,6 +143,15 @@ QString PairingUiController::tvStatusMessage() const
     return m_tvStatusMessage;
 }
 
+int PairingUiController::tvPairingWaitWindowSeconds() const
+{
+    if (!m_pairingController) {
+        return 30;
+    }
+    const int msec = m_pairingController->pairingLongPollTimeoutMsecs();
+    return qMax(1, (msec + 999) / 1000);
+}
+
 bool PairingUiController::phonePairingBusy() const
 {
     return m_phonePairingBusy;

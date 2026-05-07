@@ -86,7 +86,7 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     }
 #endif
 
-#ifdef AMNEZIA_LOCAL_GATEWAY
+#ifdef AMNEZIA_QR_PAIRING_ALLOW
     {
         const QUrl gatewayUrl(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl);
         const QString host = gatewayUrl.host().toLower();
