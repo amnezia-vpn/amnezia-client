@@ -1,6 +1,9 @@
 #if !MACOS_NE
 #include "QRCodeReaderBase.h"
 
+#include <QByteArray>
+#include <QDebug>
+
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 
@@ -27,13 +30,15 @@
 }
 
 - (BOOL)startReading {
-    NSError *error;
+    [self stopReading];
+
+    NSError *error = nil;
 
     AVCaptureDevice *captureDevice = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
     AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice: captureDevice error: &error];
 
-    if(!deviceInput) {
-        NSLog(@"Error %@", error.localizedDescription);
+    if (!deviceInput) {
+        NSLog(@"[QRCodeReader] deviceInput failed: %@", error.localizedDescription);
         return NO;
     }
 
@@ -66,14 +71,21 @@
 
     [_captureSession startRunning];
 
+    NSLog(@"[QRCodeReader] startReading OK frame=(%.1f,%.1f,%.1f,%.1f) statusBar=%.1f",
+          cameraCGRect.origin.x, cameraCGRect.origin.y, cameraCGRect.size.width, cameraCGRect.size.height, statusBarHeight);
+
     return YES;
 }
 
 - (void)stopReading {
-    [_captureSession stopRunning];
-    _captureSession = nil;
-
-    [_videoPreviewPlayer removeFromSuperlayer];
+    if (_captureSession) {
+        [_captureSession stopRunning];
+        _captureSession = nil;
+    }
+    if (_videoPreviewPlayer) {
+        [_videoPreviewPlayer removeFromSuperlayer];
+        _videoPreviewPlayer = nil;
+    }
 }
 
 - (void)captureOutput:(AVCaptureOutput *)output didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects fromConnection:(AVCaptureConnection *)connection {
@@ -82,7 +94,16 @@
         AVMetadataMachineReadableCodeObject *metadataObject = [metadataObjects objectAtIndex:0];
 
         if ([[metadataObject type] isEqualToString: AVMetadataObjectTypeQRCode]) {
-            _qrCodeReader->emit codeReaded([metadataObject stringValue].UTF8String);
+            NSString *value = [metadataObject stringValue];
+            if (value.length == 0) {
+                return;
+            }
+            NSLog(@"[QRCodeReader] metadata QR len=%lu", static_cast<unsigned long>(value.length));
+            QRCodeReader *cpp = _qrCodeReader;
+            const QByteArray utf8([value UTF8String]);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                cpp->notifyCodeRead(QString::fromUtf8(utf8));
+            });
         }
     }
 }
@@ -100,14 +121,23 @@ QRect QRCodeReader::cameraSize() {
 
 void QRCodeReader::setCameraSize(QRect value) {
     m_cameraSize = value;
+    qInfo() << "[QRCodeReader] setCameraSize" << value;
 }
 
 void QRCodeReader::startReading() {
-    [m_qrCodeReader startReading];
+    const BOOL ok = [m_qrCodeReader startReading];
+    if (!ok) {
+        qWarning() << "[QRCodeReader] startReading failed (see NSLogs)";
+    }
 }
 
 void QRCodeReader::stopReading() {
     [m_qrCodeReader stopReading];
+    qInfo() << "[QRCodeReader] stopReading";
+}
+
+void QRCodeReader::notifyCodeRead(const QString &code) {
+    emit codeReaded(code);
 }
 #else
 #include "QRCodeReaderBase.h"
@@ -124,4 +154,5 @@ QRect QRCodeReader::cameraSize() {
 void QRCodeReader::startReading() {}
 void QRCodeReader::stopReading() {}
 void QRCodeReader::setCameraSize(QRect) {}
+void QRCodeReader::notifyCodeRead(const QString &) {}
 #endif

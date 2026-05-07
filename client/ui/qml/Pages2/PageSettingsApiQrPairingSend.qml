@@ -15,14 +15,63 @@ PageType {
 
     property bool pairingCameraOpen: false
 
+    Timer {
+        id: pairingCameraKickTimer
+        interval: 180
+        repeat: false
+        onTriggered: root.restartPairingIosCamera()
+    }
+
+    function restartPairingIosCamera() {
+        if (Qt.platform.os !== "ios" || !root.pairingCameraOpen) {
+            return
+        }
+        if (cameraSlot.width < 32 || cameraSlot.height < 32) {
+            console.info("[PairingQr] cameraSlot too small wxh=", cameraSlot.width, cameraSlot.height, "retry")
+            pairingCameraKickTimer.restart()
+            return
+        }
+        var p = cameraSlot.mapToItem(root, 0, 0)
+        console.info("[PairingQr] start preview frame", p.x, p.y, cameraSlot.width, cameraSlot.height)
+        pairingQrReader.stopReading()
+        pairingQrReader.setCameraSize(Qt.rect(Math.round(p.x), Math.round(p.y), Math.round(cameraSlot.width), Math.round(cameraSlot.height)))
+        pairingQrReader.startReading()
+    }
+
     Connections {
         target: root
         function onVisibleChanged() {
             if (!root.visible) {
+                pairingCameraKickTimer.stop()
                 pairingQrReader.stopReading()
                 root.pairingCameraOpen = false
                 PairingUiController.cancelAllPairingActivity()
             }
+        }
+    }
+
+    Connections {
+        target: root
+        function onPairingCameraOpenChanged() {
+            if (!root.pairingCameraOpen) {
+                pairingCameraKickTimer.stop()
+                pairingQrReader.stopReading()
+                return
+            }
+            if (Qt.platform.os === "ios") {
+                pairingCameraKickTimer.restart()
+            }
+        }
+    }
+
+    Connections {
+        target: cameraSlot
+        enabled: Qt.platform.os === "ios" && root.pairingCameraOpen
+        function onWidthChanged() {
+            pairingCameraKickTimer.restart()
+        }
+        function onHeightChanged() {
+            pairingCameraKickTimer.restart()
         }
     }
 
@@ -111,6 +160,7 @@ PageType {
 
                 QRCodeReader {
                     id: pairingQrReader
+                    anchors.fill: parent
 
                     onCodeReaded: function(code) {
                         if (PairingUiController.applyScannedTextAsPairingUuid(code)) {
@@ -127,11 +177,7 @@ PageType {
                         return
                     }
                     if (Qt.platform.os === "ios") {
-                        Qt.callLater(function() {
-                            var p = cameraSlot.mapToItem(root, 0, 0)
-                            pairingQrReader.setCameraSize(Qt.rect(p.x, p.y, cameraSlot.width, cameraSlot.height))
-                            pairingQrReader.startReading()
-                        })
+                        pairingCameraKickTimer.restart()
                     }
                 }
             }

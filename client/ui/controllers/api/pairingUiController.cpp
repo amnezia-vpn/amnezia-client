@@ -1,5 +1,6 @@
 #include "pairingUiController.h"
 
+#include <QDebug>
 #include <QRegularExpression>
 #include <QTimer>
 #include <QUuid>
@@ -82,6 +83,7 @@ void PairingUiController::setTvPairingUiPhase(int phase)
 void PairingUiController::openPairingQrScanner()
 {
 #if defined(Q_OS_ANDROID)
+    qInfo() << "[PairingUi] openPairingQrScanner (Android native activity)";
     AndroidController::instance()->startQrReaderActivity();
 #endif
 }
@@ -89,16 +91,20 @@ void PairingUiController::openPairingQrScanner()
 bool PairingUiController::applyScannedTextAsPairingUuid(const QString &raw)
 {
     const QString t = raw.trimmed();
+    qInfo() << "[PairingUi] scan raw len=" << t.size();
     if (t.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+        qInfo() << "[PairingUi] scan rejected: looks like vpn:// bundle, not session UUID";
         return false;
     }
     static const QRegularExpression re(QStringLiteral(
             "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}"));
     const QRegularExpressionMatch m = re.match(t);
     if (!m.hasMatch()) {
+        qInfo() << "[PairingUi] scan rejected: no UUID v4 pattern in payload";
         return false;
     }
     const QString uuid = m.captured(0);
+    qInfo() << "[PairingUi] scan accepted uuid=" << uuid.left(13) << "...";
     emit pairingUuidFromScan(uuid);
     return true;
 }
@@ -367,24 +373,29 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     }
 
     const QString trimmedUuid = qrUuid.trimmed();
+    qInfo() << "[PairingUi] submitPhonePairing serverIndex=" << serverIndex << "uuidLen=" << trimmedUuid.size();
     if (trimmedUuid.isEmpty()) {
+        qWarning() << "[PairingUi] submitPhonePairing aborted: empty UUID (paste or scan first)";
         emit errorOccurred(ErrorCode::ApiConfigEmptyError);
         return;
     }
 
     if (serverIndex < 0 || serverIndex >= m_serversController->getServersCount()) {
+        qWarning() << "[PairingUi] submitPhonePairing invalid serverIndex";
         emit errorOccurred(ErrorCode::InternalError);
         return;
     }
 
     const ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
     if (!serverConfig.isApiV2()) {
+        qWarning() << "[PairingUi] submitPhonePairing server is not API v2";
         emit errorOccurred(ErrorCode::InternalError);
         return;
     }
 
     const ApiV2ServerConfig *apiV2 = serverConfig.as<ApiV2ServerConfig>();
     if (!apiV2) {
+        qWarning() << "[PairingUi] submitPhonePairing cast to ApiV2ServerConfig failed";
         emit errorOccurred(ErrorCode::InternalError);
         return;
     }
@@ -392,6 +403,7 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     QString vpnKey;
     const ErrorCode keyErr = m_subscriptionController->prepareVpnKeyExport(serverIndex, vpnKey);
     if (keyErr != ErrorCode::NoError) {
+        qWarning() << "[PairingUi] prepareVpnKeyExport failed" << static_cast<int>(keyErr);
         emit errorOccurred(keyErr);
         return;
     }
@@ -400,6 +412,7 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     const QJsonArray supportedProtocols = apiV2->apiConfig.supportedProtocols;
     const QString apiKey = apiV2->authData.apiKey;
     if (apiKey.isEmpty()) {
+        qWarning() << "[PairingUi] submitPhonePairing aborted: empty API key on server card";
         emit errorOccurred(ErrorCode::ApiConfigEmptyError);
         return;
     }

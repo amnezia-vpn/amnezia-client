@@ -33,6 +33,16 @@
 
 namespace
 {
+    void execNetworkWaitLoop(QEventLoop &wait)
+    {
+#ifdef Q_OS_IOS
+        // QEventLoop::ExcludeUserInputEvents is not supported on iOS (Qt warns; can break nested UI).
+        wait.exec();
+#else
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
+#endif
+    }
+
     constexpr QLatin1String errorResponsePattern1("No active configuration found for");
     constexpr QLatin1String errorResponsePattern2("No non-revoked public key found for");
     constexpr QLatin1String errorResponsePattern3("Account not found.");
@@ -189,7 +199,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     QList<QSslError> sslErrors;
     connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
-    wait.exec(QEventLoop::ExcludeUserInputEvents);
+    execNetworkWaitLoop(wait);
 
     QByteArray encryptedResponseBody = reply->readAll();
     QString replyErrorString = reply->errorString();
@@ -431,7 +441,7 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
 
         connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
         connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
-        wait.exec(QEventLoop::ExcludeUserInputEvents);
+        execNetworkWaitLoop(wait);
 
         if (reply->error() == QNetworkReply::NetworkError::NoError) {
             auto encryptedResponseBody = reply->readAll();
@@ -564,7 +574,7 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
 
         QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
         connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
-        wait.exec(QEventLoop::ExcludeUserInputEvents);
+        execNetworkWaitLoop(wait);
 
         auto result = replyProcessingFunction(reply, sslErrors);
         reply->deleteLater();
@@ -586,7 +596,7 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
 
             connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
             connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
-            wait.exec(QEventLoop::ExcludeUserInputEvents);
+            execNetworkWaitLoop(wait);
 
             if (reply->error() == QNetworkReply::NetworkError::NoError) {
                 reply->deleteLater();
