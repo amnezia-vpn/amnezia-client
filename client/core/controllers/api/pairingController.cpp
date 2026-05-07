@@ -2,12 +2,14 @@
 
 #include <QJsonDocument>
 #include <QSysInfo>
+#include <QUrl>
 
 #include "core/controllers/gatewayController.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/constants/apiKeys.h"
+#include "core/utils/networkUtilities.h"
 #include "version.h"
 
 using namespace amnezia;
@@ -22,10 +24,18 @@ constexpr qsizetype kPairingMaxApiKeyChars = 8192;
 
 bool isLocalGatewayHost(const QString &gatewayUrl)
 {
-    return gatewayUrl.contains(QStringLiteral("127.0.0.1"), Qt::CaseInsensitive)
-            || gatewayUrl.contains(QStringLiteral("localhost"), Qt::CaseInsensitive)
-            || gatewayUrl.contains(QStringLiteral("[::1]"), Qt::CaseInsensitive)
-            || gatewayUrl.contains(QStringLiteral("::1"), Qt::CaseInsensitive);
+    if (gatewayUrl.contains(QStringLiteral("127.0.0.1"), Qt::CaseInsensitive)
+        || gatewayUrl.contains(QStringLiteral("localhost"), Qt::CaseInsensitive)
+        || gatewayUrl.contains(QStringLiteral("[::1]"), Qt::CaseInsensitive)
+        || gatewayUrl.contains(QStringLiteral("::1"), Qt::CaseInsensitive)) {
+        return true;
+    }
+#ifdef AMNEZIA_LAN_PLAINTEXT_GATEWAY
+    const QUrl u(gatewayUrl);
+    return NetworkUtilities::hostIsPrivateLanAddress(u.host());
+#else
+    return false;
+#endif
 }
 
 ErrorCode applyGatewayOrOpenApiGenerateError(const QJsonObject &obj, PairingController::QrPairingConfigPayload &outPayload)

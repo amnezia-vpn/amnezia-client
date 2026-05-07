@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QUuid>
+#include <QUrl>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
@@ -260,6 +261,14 @@ QString SecureAppSettingsRepository::getGatewayEndpoint(bool isTestPurchase) con
             || base.contains(QStringLiteral("[::1]"), Qt::CaseInsensitive)) {
             return m_gatewayEndpoint;
         }
+#ifdef AMNEZIA_LAN_PLAINTEXT_GATEWAY
+        {
+            const QUrl gatewayUrl(base);
+            if (NetworkUtilities::hostIsPrivateLanAddress(gatewayUrl.host())) {
+                return m_gatewayEndpoint;
+            }
+        }
+#endif
         return QString(DEV_AGW_ENDPOINT);
     }
     return m_gatewayEndpoint;

@@ -5,6 +5,8 @@
 set -euo pipefail
 BASE="${1:-http://127.0.0.1:8080}"
 
+echo "== local_gateway verify base: ${BASE} =="
+
 echo "== GET / =="
 curl -sfS "$BASE/" | head -n 2
 

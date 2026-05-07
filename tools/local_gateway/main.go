@@ -1,4 +1,4 @@
-// Plaintext mock for AmneziaVPN client (CMake AMNEZIA_LOCAL_GATEWAY=ON + localhost DEV_AGW_ENDPOINT).
+// Plaintext mock for AmneziaVPN client (CMake AMNEZIA_QR_PAIRING_ALLOW; optional AMNEZIA_LAN_PLAINTEXT_GATEWAY for RFC1918 hosts).
 // No RSA/AES — POST JSON is the same object the client sends inside api_payload when encrypted.
 package main
 
@@ -6,10 +6,15 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -23,19 +28,17 @@ func shortID(id string) string {
 	return id[:10] + "…"
 }
 
-// Set to 5 to mimic "more than 5 requests per 24h". Set to 0 so the first amnezia-free request returns CAPTCHA (faster UI test).
-const rateLimitExcessAfter = 0
-
 var (
 	mu       sync.Mutex
 	requests = map[string][]time.Time{} // installation_uuid -> timestamps (sliding window simplified: count in session)
 	sessions = map[string]*pairingSession{}
-)
 
-// Local dev only: gateway team agreed 120s for mock vs 30s production (task_1 docs).
-const (
-	pairingTTL        = 120 * time.Second
-	longPollWaitLimit = 120 * time.Second
+	// Configured from flags / env in main().
+	pairingSessionTTL    = 120 * time.Second
+	longPollWaitLimit    = 120 * time.Second
+	rateLimitExcessAfter = 0 // Set to 5 to mimic "more than 5 requests per 24h". 0 = first amnezia-free request may return CAPTCHA.
+	// No trailing slash; used by POST /v1/updater_endpoint so remote clients (e.g. iOS) poll the Mac, not 127.0.0.1 on-device.
+	publicUpdaterBaseURL string
 )
 
 type generateQRRequest struct {
@@ -85,11 +88,40 @@ func drainBody(r *http.Request) {
 	_ = r.Body.Close()
 }
 
-// logReq logs every request (step 5 in docs/local-gateway-mock.md).
+// statusResponseWriter captures HTTP status for access-style logging.
+type statusResponseWriter struct {
+	http.ResponseWriter
+	status  int
+	written bool
+}
+
+func (w *statusResponseWriter) WriteHeader(code int) {
+	if !w.written {
+		w.status = code
+		w.written = true
+	}
+	w.ResponseWriter.WriteHeader(code)
+}
+
+func (w *statusResponseWriter) Write(b []byte) (int, error) {
+	if !w.written {
+		w.status = http.StatusOK
+		w.written = true
+	}
+	return w.ResponseWriter.Write(b)
+}
+
+// logReq logs every request with remote addr, UA, and final status (docs/local-gateway-mock.md).
 func logReq(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("REQ %s %s", r.Method, r.URL.Path)
-		next(w, r)
+		srw := &statusResponseWriter{ResponseWriter: w, status: http.StatusOK}
+		start := time.Now()
+		log.Printf("REQ start remote=%s method=%s path=%s query=%s ua=%q x_client_request_id=%q content_type=%q content_length=%d",
+			r.RemoteAddr, r.Method, r.URL.Path, r.URL.RawQuery, r.Header.Get("User-Agent"), r.Header.Get("X-Client-Request-ID"),
+			r.Header.Get("Content-Type"), r.ContentLength)
+		next(srw, r)
+		log.Printf("REQ end remote=%s method=%s path=%s status=%d dur=%s",
+			r.RemoteAddr, r.Method, r.URL.Path, srw.status, time.Since(start).Round(time.Millisecond))
 	}
 }
 
@@ -153,7 +185,7 @@ func handleGenerateQR(w http.ResponseWriter, r *http.Request) {
 
 	session := &pairingSession{
 		QRUUID:    req.QRUUID,
-		ExpiresAt: time.Now().Add(pairingTTL),
+		ExpiresAt: time.Now().Add(pairingSessionTTL),
 		Done:      make(chan struct{}),
 	}
 
@@ -162,7 +194,8 @@ func handleGenerateQR(w http.ResponseWriter, r *http.Request) {
 	sessions[req.QRUUID] = session
 	mu.Unlock()
 
-	log.Printf("pairing REGISTERED uuid=%s ttl=%s", shortID(req.QRUUID), pairingTTL)
+	log.Printf("pairing REGISTERED uuid=%s install=%s ttl=%s app=%s os=%s",
+		shortID(req.QRUUID), shortID(req.InstallationUUID), pairingSessionTTL, req.AppVersion, req.OSVersion)
 
 	timer := time.NewTimer(longPollWaitLimit)
 	defer timer.Stop()
@@ -247,7 +280,8 @@ func handleScanQR(w http.ResponseWriter, r *http.Request) {
 	close(session.Done)
 	mu.Unlock()
 
-	log.Printf("pairing COMPLETED uuid=%s config_len=%d", shortID(req.QRUUID), len(req.Config))
+	log.Printf("pairing COMPLETED uuid=%s phone_install=%s config_len=%d proto_count=%d",
+		shortID(req.QRUUID), shortID(req.InstallationUUID), len(req.Config), len(req.SupportedProto))
 	writeJSON(w, http.StatusOK, map[string]string{"message": "OK"})
 }
 
@@ -457,7 +491,8 @@ func handleUpdaterEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	drainBody(r)
-	writeJSON(w, http.StatusOK, map[string]string{"url": "http://127.0.0.1:8080"})
+	log.Printf("updater_endpoint response url=%q", publicUpdaterBaseURL)
+	writeJSON(w, http.StatusOK, map[string]string{"url": publicUpdaterBaseURL})
 }
 
 // POST /v1/revoke_config, /v1/revoke_native_config — success body ignored if error is NoError.
@@ -498,7 +533,148 @@ func handleGetReleaseDate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func envOrDefault(key, def string) string {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		return v
+	}
+	return def
+}
+
+func cloneIPv4(ip net.IP) net.IP {
+	x := make(net.IP, 4)
+	copy(x, ip.To4())
+	return x
+}
+
+// pickLANIPv4 returns a stable choice of non-loopback IPv4 for updater_endpoint / banners (prefers private ULA space).
+func pickLANIPv4() net.IP {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		log.Printf("net.Interfaces: %v", err)
+		return nil
+	}
+	type cand struct {
+		ip      net.IP
+		private bool
+		name    string
+	}
+	var cands []cand
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagUp == 0 {
+			continue
+		}
+		if iface.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, a := range addrs {
+			ipNet, ok := a.(*net.IPNet)
+			if !ok {
+				continue
+			}
+			ip4 := ipNet.IP.To4()
+			if ip4 == nil || ip4.IsLoopback() {
+				continue
+			}
+			priv := ip4.IsPrivate() || ip4.IsLinkLocalUnicast()
+			cands = append(cands, cand{ip: cloneIPv4(ip4), private: priv, name: iface.Name})
+			log.Printf("iface candidate name=%s ip=%s private_or_linklocal=%v", iface.Name, ip4, priv)
+		}
+	}
+	if len(cands) == 0 {
+		return nil
+	}
+	sort.SliceStable(cands, func(i, j int) bool {
+		if cands[i].private != cands[j].private {
+			return cands[i].private
+		}
+		if cands[i].name != cands[j].name {
+			return cands[i].name < cands[j].name
+		}
+		return bytes.Compare(cands[i].ip, cands[j].ip) < 0
+	})
+	chosen := cands[0].ip
+	log.Printf("pickLANIPv4: using %s (iface_hint=%s)", chosen, cands[0].name)
+	return chosen
+}
+
+func normalizePublicBase(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.TrimSuffix(s, "/")
+	return s
+}
+
+func logStartupURLs(listenAddr, portStr string) {
+	log.Printf("=== local_gateway (plaintext mock) ===")
+	log.Printf("listen tcp4: %s", listenAddr)
+	log.Printf("POST /v1/updater_endpoint will return: {\"url\": %q}", publicUpdaterBaseURL)
+	log.Printf("Point AmneziaVPN gateway setting to: %s/", publicUpdaterBaseURL)
+	log.Printf("Try from phone browser: %s/", publicUpdaterBaseURL)
+	log.Printf("Non-loopback IPv4 URLs (same listen port %s):", portStr)
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		log.Printf("  (could not enumerate interfaces: %v)", err)
+	} else {
+		for _, iface := range ifaces {
+			if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
+				continue
+			}
+			addrs, _ := iface.Addrs()
+			for _, a := range addrs {
+				ipNet, ok := a.(*net.IPNet)
+				if !ok {
+					continue
+				}
+				if ip4 := ipNet.IP.To4(); ip4 != nil && !ip4.IsLoopback() {
+					log.Printf("  http://%s:%s/  (iface %s)", ip4, portStr, iface.Name)
+				}
+			}
+		}
+	}
+	log.Printf("docs: tools/local_gateway/README.md tools/local_gateway/LAN_GATEWAY.md")
+	log.Printf("========================================")
+}
+
 func main() {
+	listenFlag := flag.String("listen", envOrDefault("LOCAL_GATEWAY_LISTEN", "0.0.0.0:8080"),
+		"TCP listen address (tcp4). Env: LOCAL_GATEWAY_LISTEN")
+	publicFlag := flag.String("public-base", strings.TrimSpace(os.Getenv("LOCAL_GATEWAY_PUBLIC_BASE")),
+		"Base URL without trailing slash for /v1/updater_endpoint (required for iOS-on-LAN). Env: LOCAL_GATEWAY_PUBLIC_BASE")
+	autoPublic := flag.Bool("auto-public", true, "If public-base empty, derive http://<first-lan-ipv4>:port")
+	pairTTL := flag.Duration("pairing-ttl", 120*time.Second, "QR pairing session TTL")
+	longPoll := flag.Duration("long-poll", 120*time.Second, "Long-poll max wait for POST /api/v1/generate_qr")
+	rateN := flag.Int("rate-limit-excess-after", 0, "Amnezia Free: allow N requests per 24h window before rate-limit/CAPTCHA (0=tight)")
+	flag.Parse()
+
+	listenAddr := strings.TrimSpace(*listenFlag)
+	if _, _, err := net.SplitHostPort(listenAddr); err != nil {
+		listenAddr = net.JoinHostPort(listenAddr, "8080")
+	}
+	_, portStr, err := net.SplitHostPort(listenAddr)
+	if err != nil {
+		log.Fatalf("listen address: %v", err)
+	}
+
+	pairingSessionTTL = *pairTTL
+	longPollWaitLimit = *longPoll
+	rateLimitExcessAfter = *rateN
+
+	pub := normalizePublicBase(*publicFlag)
+	if pub == "" && *autoPublic {
+		if ip := pickLANIPv4(); ip != nil {
+			pub = fmt.Sprintf("http://%s:%s", ip.String(), portStr)
+			log.Printf("auto-public: updater + docs base -> %s (override with -public-base or LOCAL_GATEWAY_PUBLIC_BASE)", pub)
+		}
+	}
+	if pub == "" {
+		pub = fmt.Sprintf("http://127.0.0.1:%s", portStr)
+		log.Printf("WARN: public-base not set and auto-public found no LAN IPv4; using %s (broken for remote phones). Set -public-base or LOCAL_GATEWAY_PUBLIC_BASE.", pub)
+	}
+	publicUpdaterBaseURL = pub
+
 	http.HandleFunc("/", logReq(handleRoot))
 	http.HandleFunc("/VERSION", logReq(handleGetVersion))
 	http.HandleFunc("/CHANGELOG", logReq(handleGetChangelog))
@@ -513,11 +689,13 @@ func main() {
 	http.HandleFunc("/v1/revoke_native_config", logReq(handleRevokeNoop))
 	http.HandleFunc("/api/v1/generate_qr", logReq(handleGenerateQR))
 	http.HandleFunc("/api/v1/scan_qr", logReq(handleScanQR))
-	const addr = "0.0.0.0:8080"
-	log.Printf("plaintext mock on tcp4 %s — see tools/local_gateway/README.md for paths\n", addr)
-	ln, err := net.Listen("tcp4", addr)
+
+	logStartupURLs(listenAddr, portStr)
+
+	ln, err := net.Listen("tcp4", listenAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("listening tcp4 %s (actual %v)", listenAddr, ln.Addr())
 	log.Fatal(http.Serve(ln, nil))
 }

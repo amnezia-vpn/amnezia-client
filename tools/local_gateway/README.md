@@ -13,16 +13,32 @@
 ```bash
 cd tools/local_gateway
 go mod download
-go run .
+go run -buildvcs=false .
 ```
 
-Сервер слушает **`0.0.0.0:8080`** (все IPv4‑интерфейсы): с этого Mac — `http://127.0.0.1:8080/`, с телефона в той же LAN — `http://<IP-это-машины>:8080/`.
+По умолчанию слушает **`0.0.0.0:8080`** (**`tcp4`** только — см. ниже). С Mac: `http://127.0.0.1:8080/`; с телефона в той же Wi‑Fi: `http://<LAN-IP-Mac>:8080/`.
 
-Сервер поднимается через **`net.Listen("tcp4", "0.0.0.0:8080")`**, чтобы на macOS не ловить пустой ответ при `curl`/браузере на **LAN‑IP** (частая нестыковка IPv4/IPv6 у `ListenAndServe(":8080", …)`).
+**Флаги и переменные окружения** (полный чеклист: **[LAN_GATEWAY.md](./LAN_GATEWAY.md)**):
 
-После `git pull` обязательно **остановите старый процесс** на 8080 (`Ctrl+C` в терминале или `kill <PID>`), иначе будет крутиться бинарник без правок.
+| Флаг / env | Назначение |
+|------------|------------|
+| `-listen` / `LOCAL_GATEWAY_LISTEN` | Адрес привязки, например `0.0.0.0:8080` (порт можно опустить — подставится `:8080`). |
+| `-public-base` / `LOCAL_GATEWAY_PUBLIC_BASE` | Базовый URL **без** хвостового `/` для тела **`POST /v1/updater_endpoint`** (`url`). Нужен для **iOS по LAN** (иначе `127.0.0.1` указывает на сам телефон). |
+| `-auto-public` (по умолчанию `true`) | Если `public-base` пуст, взять первый подходящий **не loopback** IPv4 и собрать `http://IP:порт`. |
+| `-pairing-ttl`, `-long-poll` | TTL сессии QR и long-poll (по умолчанию **120s**, как раньше). |
+| `-rate-limit-excess-after` | Порог для мока Amnezia Free / CAPTCHA (по умолчанию **0**). |
 
-В логах при старте: `plaintext mock on tcp4 0.0.0.0:8080 — see ... README.md for paths`. Каждый запрос дополнительно пишется как `REQ <METHOD> <path>`.
+Пример для iPhone + Mac:
+
+```bash
+LOCAL_GATEWAY_PUBLIC_BASE='http://192.168.1.10:8080' go run -buildvcs=false .
+```
+
+`net.Listen("tcp4", …)` оставлен, чтобы на macOS не ловить пустой ответ при `curl`/браузере на **LAN‑IPv4** (частая нестыковка IPv4/IPv6 у `ListenAndServe(":8080", …)`).
+
+После `git pull` обязательно **остановите старый процесс** на порту (`Ctrl+C` или `kill <PID>`).
+
+**Логи:** при старте печатается баннер с **`updater_endpoint` URL** и списком **`http://<ipv4>:порт/`** по интерфейсам. Каждый запрос: строки **`REQ start`** (remote addr, path, UA, `X-Client-Request-ID`, размер тела) и **`REQ end`** (HTTP status, длительность).
 
 Проверка без клиента (mock должен быть запущен):
 
@@ -45,7 +61,7 @@ bash verify.sh http://127.0.0.1:8080
 | `POST` | `/v1/config` | Amnezia Free: CAPTCHA/лимит; иначе короткий мок‑ответ (полноценный premium `vpn://` здесь не строится). |
 | `POST` | `/v1/news` | Лента новостей (`NewsController`), пустой `news`. |
 | `POST` | `/v1/renewal_link` | Ссылка продления (`renewal_url`). |
-| `POST` | `/v1/updater_endpoint` | `{"url":"http://127.0.0.1:8080"}` → затем GET `/VERSION` на этом хосте. |
+| `POST` | `/v1/updater_endpoint` | `{"url":"…"}` — база из **`-public-base` / `LOCAL_GATEWAY_PUBLIC_BASE`** или **`-auto-public`**; затем клиент делает GET `/VERSION` на этом хосте. |
 | `POST` | `/v1/revoke_config` | Успех, тело не разбирается при `NoError`. |
 | `POST` | `/v1/revoke_native_config` | То же. |
 | `POST` | `/api/v1/generate_qr` | Pairing: long-poll (**120s** mock). |
@@ -57,8 +73,9 @@ bash verify.sh http://127.0.0.1:8080
 
 ## Связка с клиентом AmneziaVPN
 
-1. Соберите клиент с определением **`AMNEZIA_LOCAL_GATEWAY`** (см. `client/CMakeLists.txt`, `target_compile_definitions`) — тогда для **`127.0.0.1`** и **`localhost`** запросы к gateway уходят **plaintext JSON** без RSA/AES (см. `GatewayController`, `SecureAppSettingsRepository`).
-2. В настройках приложения endpoint gateway: **`http://127.0.0.1:8080/`** (дефолт при `AMNEZIA_LOCAL_GATEWAY` в коде). Допустим и `http://localhost:8080/` — тоже plaintext.
+1. Включите **`AMNEZIA_QR_PAIRING_ALLOW=ON`** в CMake — тогда для **`127.0.0.1`**, **`localhost`**, **`::1`** запросы к gateway идут **plaintext JSON** без RSA/AES (`GatewayController`).
+2. Для **iOS / другого хоста по LAN-IP** (`192.168.x.x` и т.п.) дополнительно включите **`AMNEZIA_LAN_PLAINTEXT_GATEWAY=ON`** (требует `AMNEZIA_QR_PAIRING_ALLOW`). Иначе клиент шифрует тело как к прод gateway, mock его не поймёт. Подробности: **[LAN_GATEWAY.md](./LAN_GATEWAY.md)**.
+3. В настройках приложения укажите endpoint: **`http://127.0.0.1:8080/`** или **`http://<LAN-IP>:8080/`** (с завершающим `/`, как принято в репозитории).
 
 Пошаговый план (включая следующие этапы вроде `/v1/account_info`): **`docs/local-gateway-mock.md`**.
 

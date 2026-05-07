@@ -94,7 +94,13 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     {
         const QUrl gatewayUrl(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl);
         const QString host = gatewayUrl.host().toLower();
-        if (host == QLatin1String("localhost") || host == QLatin1String("127.0.0.1") || host == QLatin1String("::1")) {
+        bool usePlaintext = (host == QLatin1String("localhost") || host == QLatin1String("127.0.0.1") || host == QLatin1String("::1"));
+#ifdef AMNEZIA_LAN_PLAINTEXT_GATEWAY
+        if (!usePlaintext) {
+            usePlaintext = NetworkUtilities::hostIsPrivateLanAddress(host);
+        }
+#endif
+        if (usePlaintext) {
             encRequestData.isPlaintextLocalGateway = true;
             encRequestData.requestBody = QJsonDocument(apiPayload).toJson();
             return encRequestData;
