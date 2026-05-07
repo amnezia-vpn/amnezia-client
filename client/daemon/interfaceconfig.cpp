@@ -62,6 +62,8 @@ QJsonObject InterfaceConfig::toJson() const {
   }
   json.insert("vpnDisabledApps", disabledApps);
 
+  json.insert("ifname", m_ifname);
+
   return json;
 }
 

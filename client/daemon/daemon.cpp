@@ -440,6 +440,7 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!obj.value("I5").isNull()) {
     config.m_specialJunk["I5"] = obj.value("I5").toString();
   }
+  config.m_ifname = obj.value("ifname").toString(WG_INTERFACE);
 
   return true;
 }
