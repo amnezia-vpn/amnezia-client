@@ -57,6 +57,7 @@ class InterfaceConfig {
   QString m_underloadPacketMagicHeader;
   QString m_transportPacketMagicHeader;
   QMap<QString, QString> m_specialJunk;
+  QString m_ifname;
 
   QJsonObject toJson() const;
   QString toWgConf(
