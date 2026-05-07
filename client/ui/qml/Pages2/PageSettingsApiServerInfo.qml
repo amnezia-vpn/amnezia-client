@@ -377,6 +377,20 @@ PageType {
 
             LabelWithButtonType {
                 Layout.fillWidth: true
+
+                text: qsTr("QR pairing (beta)")
+                descriptionText: qsTr("Transfer config via gateway using a QR code")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsApiQrPairing)
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
                 Layout.topMargin: footer.isVisibleForAmneziaFree ? 0 : 32
 
                 text: qsTr("Support")

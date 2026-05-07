@@ -83,6 +83,10 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiSubscriptionNotActiveError): errorMessage = QObject::tr("No active subscription found"); break;
     case (ErrorCode::ApiNoPurchasedSubscriptionsError): errorMessage = QObject::tr("No purchased subscriptions found. Please purchase a subscription first"); break;
     case (ErrorCode::ApiTrialAlreadyUsedError): errorMessage = QObject::tr("This email address has already been used to activate a trial"); break;
+    case (ErrorCode::ApiPairingForbiddenError): errorMessage = QObject::tr("QR pairing was rejected (forbidden)"); break;
+    case (ErrorCode::ApiPairingConflictError): errorMessage = QObject::tr("This QR code has already been used"); break;
+    case (ErrorCode::ApiPairingRateLimitedError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
+    case (ErrorCode::ApiPairingServiceUnavailableError): errorMessage = QObject::tr("Service temporarily unavailable. Please try again later"); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

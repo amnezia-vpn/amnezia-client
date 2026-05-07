@@ -80,6 +80,8 @@ namespace PageLoader
         PageSetupWizardApiPremiumInfo,
         PageSetupWizardApiTrialEmail,
 
+        PageSettingsApiQrPairing,
+
         PageDevMenu
     };
     Q_ENUM_NS(PageEnum)

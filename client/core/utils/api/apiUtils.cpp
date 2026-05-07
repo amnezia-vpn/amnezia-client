@@ -132,6 +132,36 @@ apiDefs::ConfigSource apiUtils::getConfigSource(const QJsonObject &serverConfigO
     return static_cast<apiDefs::ConfigSource>(serverConfigObject.value(configKey::configVersion).toInt());
 }
 
+amnezia::ErrorCode apiUtils::errorCodeFromGatewayJsonHttpStatus(const QJsonObject &jsonObj)
+{
+    if (!jsonObj.contains(QStringLiteral("http_status"))) {
+        return amnezia::ErrorCode::NoError;
+    }
+    const int st = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
+    switch (st) {
+    case 200:
+        return amnezia::ErrorCode::NoError;
+    case 400:
+        return amnezia::ErrorCode::ApiConfigEmptyError;
+    case 403:
+        return amnezia::ErrorCode::ApiPairingForbiddenError;
+    case 404:
+        return amnezia::ErrorCode::ApiNotFoundError;
+    case 408:
+        return amnezia::ErrorCode::ApiConfigTimeoutError;
+    case 409:
+        return amnezia::ErrorCode::ApiPairingConflictError;
+    case 429:
+        return amnezia::ErrorCode::ApiPairingRateLimitedError;
+    case 500:
+        return amnezia::ErrorCode::ApiConfigDownloadError;
+    case 503:
+        return amnezia::ErrorCode::ApiPairingServiceUnavailableError;
+    default:
+        return amnezia::ErrorCode::ApiConfigDownloadError;
+    }
+}
+
 amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
                                                      const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
                                                      const QByteArray &responseBody)

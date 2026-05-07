@@ -15,6 +15,8 @@
 #include "QBlockCipher.h"
 #include "QRsa.h"
 
+#include "embedded_agw_public_keys.h"
+
 #include "amneziaApplication.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/constants/apiKeys.h"

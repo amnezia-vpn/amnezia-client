@@ -1,6 +1,7 @@
 #ifndef APIUTILS_H
 #define APIUTILS_H
 
+#include <QJsonObject>
 #include <QNetworkReply>
 #include <QObject>
 
@@ -27,6 +28,9 @@ namespace apiUtils
     amnezia::ErrorCode checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
                                                const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
                                                const QByteArray &responseBody);
+
+    /** Maps gateway JSON `http_status` field (when present) to ErrorCode. Returns NoError if field is missing. */
+    amnezia::ErrorCode errorCodeFromGatewayJsonHttpStatus(const QJsonObject &jsonObj);
 
     QString getPremiumV1VpnKey(const QJsonObject &serverConfigObject);
     QString getPremiumV2VpnKey(const QJsonObject &serverConfigObject);

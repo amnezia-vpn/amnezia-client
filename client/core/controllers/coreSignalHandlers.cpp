@@ -20,6 +20,7 @@
 #include "ui/controllers/selfhosted/installUiController.h"
 #include "ui/controllers/importUiController.h"
 #include "ui/controllers/api/subscriptionUiController.h"
+#include "ui/controllers/api/pairingUiController.h"
 #include "ui/controllers/updateUiController.h"
 #include "ui/models/serversModel.h"
 #include "core/controllers/serversController.h"
@@ -95,6 +96,9 @@ void CoreSignalHandlers::initErrorMessagesHandler()
     });
 
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::errorOccurred, m_coreController->m_pageController,
+            qOverload<ErrorCode>(&PageController::showErrorMessage));
+
+    connect(m_coreController->m_pairingUiController, &PairingUiController::errorOccurred, m_coreController->m_pageController,
             qOverload<ErrorCode>(&PageController::showErrorMessage));
 
     connect(m_coreController->m_settingsUiController, &SettingsUiController::errorOccurred, m_coreController->m_pageController,
