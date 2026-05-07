@@ -30,7 +30,7 @@ bool isLocalGatewayHost(const QString &gatewayUrl)
         || gatewayUrl.contains(QStringLiteral("::1"), Qt::CaseInsensitive)) {
         return true;
     }
-#ifdef AMNEZIA_LAN_PLAINTEXT_GATEWAY
+#ifdef AMNEZIA_QR_PAIRING_ALLOW
     const QUrl u(gatewayUrl);
     return NetworkUtilities::hostIsPrivateLanAddress(u.host());
 #else

@@ -214,14 +214,6 @@ if(AMNEZIA_QR_PAIRING_ALLOW_DUPLICATE_VPN_KEY)
     target_compile_definitions(${PROJECT} PRIVATE AMNEZIA_QR_PAIRING_ALLOW_DUPLICATE_VPN_KEY)
 endif()
 
-option(AMNEZIA_LAN_PLAINTEXT_GATEWAY "Dev: plaintext JSON to private LAN gateway hosts (requires AMNEZIA_QR_PAIRING_ALLOW)" OFF)
-if(AMNEZIA_LAN_PLAINTEXT_GATEWAY)
-    if(NOT AMNEZIA_QR_PAIRING_ALLOW)
-        message(FATAL_ERROR "AMNEZIA_LAN_PLAINTEXT_GATEWAY=ON requires AMNEZIA_QR_PAIRING_ALLOW=ON")
-    endif()
-    target_compile_definitions(${PROJECT} PRIVATE AMNEZIA_LAN_PLAINTEXT_GATEWAY)
-endif()
-
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 
 # Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).

@@ -14,6 +14,18 @@ PageType {
     id: root
 
     property bool pairingCameraOpen: false
+    /** iOS AVFoundation can fire the same QR repeatedly; avoid stacking identical toasts. */
+    property int lastPairingScanToastClockMs: 0
+
+    function notifyPairingScanSuccess() {
+        const now = new Date().getTime()
+        if (now - root.lastPairingScanToastClockMs < 1600) {
+            return
+        }
+        root.lastPairingScanToastClockMs = now
+        PageController.showNotificationMessage(
+                    qsTr("QR session ID captured. Tap Send from current subscription to complete pairing."))
+    }
 
     Timer {
         id: pairingCameraKickTimer
@@ -160,13 +172,12 @@ PageType {
 
                 QRCodeReader {
                     id: pairingQrReader
-                    anchors.fill: parent
 
                     onCodeReaded: function(code) {
                         if (PairingUiController.applyScannedTextAsPairingUuid(code)) {
                             pairingQrReader.stopReading()
                             root.pairingCameraOpen = false
-                            PageController.showNotificationMessage(qsTr("Session ID filled from QR"))
+                            root.notifyPairingScanSuccess()
                         }
                     }
                 }

@@ -221,6 +221,10 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         return amnezia::ErrorCode::ApiConfigDownloadError;
     }
 
+    if (httpStatusCode == httpStatusCodeNotFound) {
+        return amnezia::ErrorCode::ApiNotFoundError;
+    }
+
     qDebug() << "something went wrong";
     return amnezia::ErrorCode::ApiConfigDownloadError;
 }

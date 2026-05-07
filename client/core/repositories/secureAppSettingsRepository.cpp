@@ -261,7 +261,7 @@ QString SecureAppSettingsRepository::getGatewayEndpoint(bool isTestPurchase) con
             || base.contains(QStringLiteral("[::1]"), Qt::CaseInsensitive)) {
             return m_gatewayEndpoint;
         }
-#ifdef AMNEZIA_LAN_PLAINTEXT_GATEWAY
+#ifdef AMNEZIA_QR_PAIRING_ALLOW
         {
             const QUrl gatewayUrl(base);
             if (NetworkUtilities::hostIsPrivateLanAddress(gatewayUrl.host())) {

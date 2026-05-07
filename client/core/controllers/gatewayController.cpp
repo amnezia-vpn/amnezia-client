@@ -58,12 +58,25 @@ namespace
     constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
 
     constexpr int proxyStorageRequestTimeoutMsecs = 3000;
-}
+
+    /** Pairing/subscription paths use "%1api/v1/..." / "%1v1/..." — %1 must end with '/' or the host and path merge (404). */
+    QString normalizedGatewayBase(const QString &endpoint)
+    {
+        QString e = endpoint.trimmed();
+        if (e.isEmpty()) {
+            return e;
+        }
+        if (!e.endsWith(QLatin1Char('/'))) {
+            e.append(QLatin1Char('/'));
+        }
+        return e;
+    }
+} // namespace
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                      const bool isStrictKillSwitchEnabled, QObject *parent)
     : QObject(parent),
-      m_gatewayEndpoint(gatewayEndpoint),
+      m_gatewayEndpoint(normalizedGatewayBase(gatewayEndpoint)),
       m_isDevEnvironment(isDevEnvironment),
       m_requestTimeoutMsecs(requestTimeoutMsecs),
       m_isStrictKillSwitchEnabled(isStrictKillSwitchEnabled)
@@ -104,12 +117,10 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     {
         const QUrl gatewayUrl(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl);
         const QString host = gatewayUrl.host().toLower();
-        bool usePlaintext = (host == QLatin1String("localhost") || host == QLatin1String("127.0.0.1") || host == QLatin1String("::1"));
-#ifdef AMNEZIA_LAN_PLAINTEXT_GATEWAY
-        if (!usePlaintext) {
-            usePlaintext = NetworkUtilities::hostIsPrivateLanAddress(host);
-        }
-#endif
+        const bool loopback =
+                (host == QLatin1String("localhost") || host == QLatin1String("127.0.0.1") || host == QLatin1String("::1"));
+        // tools/local_gateway on a LAN IP (e.g. phone → Mac -auto-public): mock expects plaintext JSON.
+        const bool usePlaintext = loopback || NetworkUtilities::hostIsPrivateLanAddress(host);
         if (usePlaintext) {
             encRequestData.isPlaintextLocalGateway = true;
             encRequestData.requestBody = QJsonDocument(apiPayload).toJson();

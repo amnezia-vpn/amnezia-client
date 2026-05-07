@@ -1,6 +1,8 @@
 #include "pairingUiController.h"
 
+#include <QDataStream>
 #include <QDebug>
+#include <QIODevice>
 #include <QRegularExpression>
 #include <QTimer>
 #include <QUuid>
@@ -39,6 +41,50 @@ int pairingRetryDelayMs(int zeroBasedAttempt)
 {
     constexpr int baseMs = 500;
     return baseMs * (1 << zeroBasedAttempt);
+}
+
+/** Legacy TV QR: generateQrCodeImageSeries base64url-wrapped QDataStream chunk (see qrCodeUtils.cpp). */
+bool tryDecodeLegacyChunkedPairingQrPayload(const QString &t, QString *outUuid)
+{
+    static const QRegularExpression binUrlSafe(QStringLiteral("^[A-Za-z0-9_-]+$"));
+    if (!binUrlSafe.match(t).hasMatch() || t.size() < 16) {
+        return false;
+    }
+    QByteArray padded = t.toUtf8();
+    switch (padded.size() % 4) {
+    case 2:
+        padded += "==";
+        break;
+    case 3:
+        padded += "=";
+        break;
+    default:
+        break;
+    }
+    const QByteArray raw = QByteArray::fromBase64(padded, QByteArray::Base64UrlEncoding);
+    if (raw.isEmpty()) {
+        return false;
+    }
+    QDataStream ds(raw);
+    ds.setByteOrder(QDataStream::BigEndian);
+    qint16 magic = 0;
+    quint8 nChunks = 0;
+    quint8 chunkIndex = 0;
+    QByteArray pl;
+    ds >> magic >> nChunks >> chunkIndex >> pl;
+    if (ds.status() != QDataStream::Ok) {
+        return false;
+    }
+    if (magic != qrCodeUtils::qrMagicCode || nChunks < 1 || nChunks > 200 || chunkIndex >= nChunks) {
+        return false;
+    }
+    const QString candidate = QString::fromUtf8(pl).trimmed();
+    const QUuid u = QUuid::fromString(candidate);
+    if (u.isNull()) {
+        return false;
+    }
+    *outUuid = u.toString(QUuid::WithoutBraces);
+    return true;
 }
 } // namespace
 
@@ -96,17 +142,30 @@ bool PairingUiController::applyScannedTextAsPairingUuid(const QString &raw)
         qInfo() << "[PairingUi] scan rejected: looks like vpn:// bundle, not session UUID";
         return false;
     }
-    static const QRegularExpression re(QStringLiteral(
+    static const QRegularExpression reV4(QStringLiteral(
             "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}"));
-    const QRegularExpressionMatch m = re.match(t);
-    if (!m.hasMatch()) {
-        qInfo() << "[PairingUi] scan rejected: no UUID v4 pattern in payload";
-        return false;
+    const QRegularExpressionMatch m = reV4.match(t);
+    if (m.hasMatch()) {
+        const QString uuid = m.captured(0);
+        qInfo() << "[PairingUi] scan accepted uuid=" << uuid.left(13) << "...";
+        emit pairingUuidFromScan(uuid);
+        return true;
     }
-    const QString uuid = m.captured(0);
-    qInfo() << "[PairingUi] scan accepted uuid=" << uuid.left(13) << "...";
-    emit pairingUuidFromScan(uuid);
-    return true;
+    QString fromLegacy;
+    if (tryDecodeLegacyChunkedPairingQrPayload(t, &fromLegacy)) {
+        qInfo() << "[PairingUi] scan accepted legacy chunked QR uuid=" << fromLegacy.left(13) << "...";
+        emit pairingUuidFromScan(fromLegacy);
+        return true;
+    }
+    const QUuid parsed = QUuid::fromString(t);
+    if (!parsed.isNull()) {
+        const QString canon = parsed.toString(QUuid::WithoutBraces);
+        qInfo() << "[PairingUi] scan accepted QUuid::fromString uuid=" << canon.left(13) << "...";
+        emit pairingUuidFromScan(canon);
+        return true;
+    }
+    qInfo() << "[PairingUi] scan rejected: no session UUID recognized in payload";
+    return false;
 }
 
 #if defined(Q_OS_ANDROID)
@@ -201,6 +260,8 @@ QString PairingUiController::tvFailureMessage(ErrorCode code) const
         return tr("QR session expired. Tap Start to show a new QR code.");
     case ErrorCode::ApiConfigAlreadyAdded:
         return tr("This configuration is already on the device.");
+    case ErrorCode::ApiNotFoundError:
+        return tr("This gateway does not expose QR pairing (HTTP 404). Check the gateway URL or use the local mock (tools/local_gateway).");
     default:
         return tr("Pairing failed");
     }
@@ -226,7 +287,7 @@ void PairingUiController::startTvQrSession()
 
     m_tvSessionUuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
     const QByteArray qrPayload = m_tvSessionUuid.toUtf8();
-    m_tvQrCodes = qrCodeUtils::generateQrCodeImageSeries(qrPayload);
+    m_tvQrCodes = qrCodeUtils::generateQrCodeImageSeriesPlainText(qrPayload);
     emit tvQrCodesChanged();
     emit tvSessionUuidChanged();
 

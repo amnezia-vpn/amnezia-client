@@ -1,6 +1,5 @@
 #include "subscriptionController.h"
 
-#include <QCoreApplication>
 #include <QDebug>
 #include <QDateTime>
 #include <QEventLoop>
@@ -339,9 +338,7 @@ ErrorCode SubscriptionController::importServerFromQrPairingResponse(const QStrin
             if (duplicateServerIndex) {
                 *duplicateServerIndex = i;
             }
-#ifndef AMNEZIA_QR_PAIRING_ALLOW_DUPLICATE_VPN_KEY
             return ErrorCode::ApiConfigAlreadyAdded;
-#endif
         }
     }
 
@@ -386,24 +383,6 @@ ErrorCode SubscriptionController::importServerFromQrPairingResponse(const QStrin
         }
         apiV2->apiConfig.vpnKey = fullKey;
     }
-
-#ifdef AMNEZIA_QR_PAIRING_ALLOW_DUPLICATE_VPN_KEY
-    static int existingSameKeyCount = 0;
-    if (apiV2) {
-        ++existingSameKeyCount;
-        const QString suffix = QCoreApplication::translate("SubscriptionController", " (paired copy %1)")
-                .arg(existingSameKeyCount);
-
-        if (!apiV2->name.isEmpty()) {
-            apiV2->name += suffix;
-        } else if (!apiV2->description.isEmpty()) {
-            apiV2->description += suffix;
-        } else {
-            apiV2->name = QCoreApplication::translate("SubscriptionController", "Paired subscription %1")
-                    .arg(existingSameKeyCount);
-        }
-    }
-#endif
 
     m_serversRepository->addServer(serverConfigModel);
     serverConfig = serverConfigModel;
