@@ -26,7 +26,7 @@ PageType {
     ListViewType {
         id: listView
         anchors.top: backButton.bottom
-        anchors.bottom: saveButton.top
+        anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
 
@@ -44,6 +44,9 @@ PageType {
                 Layout.topMargin: 0
                 Layout.bottomMargin: 24
                 text: qsTr("Transport")
+                font.pixelSize: 36
+                lineHeight: 38 + LanguageUiController.getLineHeightAppend()
+                font.letterSpacing: -1.08
             }
 
             // ── Radio buttons ─────────────────────────────────────────
@@ -53,7 +56,7 @@ PageType {
                 Layout.rightMargin: 16
                 text: qsTr("RAW (TCP)")
                 checked: transport === "raw"
-                onClicked: transport = "raw"
+                onToggled: if (checked && transport !== "raw") transport = "raw"
             }
 
             DividerType {
@@ -66,7 +69,7 @@ PageType {
                 text: qsTr("XHTTP")
                 descriptionText: qsTr("Advanced users")
                 checked: transport === "xhttp"
-                onClicked: transport = "xhttp"
+                onToggled: if (checked && transport !== "xhttp") transport = "xhttp"
             }
 
             DividerType {
@@ -78,7 +81,7 @@ PageType {
                 Layout.rightMargin: 16
                 text: qsTr("mKCP")
                 checked: transport === "mkcp"
-                onClicked: transport = "mkcp"
+                onToggled: if (checked && transport !== "mkcp") transport = "mkcp"
             }
 
             DividerType {
@@ -185,20 +188,10 @@ PageType {
                 Layout.fillWidth: true
                 spacing: 0
 
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 8
-                    text: qsTr("Transport Mode")
-                    color: AmneziaStyle.color.mutedGray
-                }
-
                 DropDownType {
                     id: modeDropDown
                     Layout.fillWidth: true
-                    Layout.topMargin: 0
+                    Layout.topMargin: 16
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     text: xhttpMode
@@ -738,7 +731,8 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        enabled: listView.enabled
+        visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
+        enabled: visible
         text: qsTr("Save")
         clickedFunc: function () {
             var headerText = qsTr("Save settings?")

@@ -12,6 +12,7 @@
 class XrayConfigModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(bool hasUnsavedChanges READ hasUnsavedChanges NOTIFY hasUnsavedChangesChanged)
 
 public:
     enum Roles
@@ -120,9 +121,13 @@ public:
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig);
     amnezia::XrayProtocolConfig getProtocolConfig();
-    bool isServerSettingsEqual();
+    bool isServerSettingsEqual() const;
+    bool hasUnsavedChanges() const;
     void resetToDefaults();
     void applyServerConfig(const amnezia::XrayServerConfig &serverConfig);
+
+signals:
+    void hasUnsavedChangesChanged();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

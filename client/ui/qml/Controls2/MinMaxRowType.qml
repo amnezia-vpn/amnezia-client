@@ -30,7 +30,7 @@ Item {
     RowLayout {
         id: row
         anchors.fill: parent
-        spacing: 8
+        spacing: 10
 
         // Min field
         TextFieldWithHeaderType {

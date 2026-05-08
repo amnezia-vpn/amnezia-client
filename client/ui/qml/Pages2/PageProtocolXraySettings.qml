@@ -17,6 +17,20 @@ import "../Components"
 PageType {
     id: root
 
+    function formatTransport(value) {
+        if (value === "raw") return "RAW (TCP)"
+        if (value === "xhttp") return "XHTTP"
+        if (value === "mkcp") return "mKCP"
+        return value
+    }
+
+    function formatSecurity(value) {
+        if (value === "none") return "None"
+        if (value === "tls") return "TLS"
+        if (value === "reality") return "Reality"
+        return value
+    }
+
     BackButtonType {
         id: backButton
 
@@ -60,6 +74,9 @@ PageType {
                     Layout.fillWidth: true
                     text: qsTr("XRay VLESS settings")
                     wrapMode: Text.WordWrap
+                    font.pixelSize: 36
+                    lineHeight: 38 + LanguageUiController.getLineHeightAppend()
+                    font.letterSpacing: -1.08
                 }
 
                 ImageButtonType {
@@ -67,7 +84,7 @@ PageType {
                     implicitWidth: 40
                     implicitHeight: 40
                     image: "qrc:/images/controls/more-vertical.svg"
-                    imageColor: AmneziaStyle.color.mutedGray
+                    imageColor: AmneziaStyle.color.paleGray
                     onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
                 }
             }
@@ -78,7 +95,9 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 4
                 text: qsTr("More about settings")
-                color: AmneziaStyle.color.burntOrange
+                color: AmneziaStyle.color.goldenApricot
+                font.pixelSize: 16
+                lineHeight: 24 + LanguageUiController.getLineHeightAppend()
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -109,7 +128,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 text: qsTr("Transport")
-                descriptionText: transport
+                descriptionText: root.formatTransport(transport)
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
                 clickedFunction: function() {
@@ -123,7 +142,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("Security")
-                descriptionText: security
+                descriptionText: root.formatSecurity(security)
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
                 clickedFunction: function() {
@@ -158,7 +177,8 @@ PageType {
                 Layout.bottomMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                enabled: textFieldWithHeaderType.errorText === ""
+                visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
+                enabled: visible && textFieldWithHeaderType.errorText === ""
                 text: qsTr("Save")
                 onClicked: function() {
                     forceActiveFocus()

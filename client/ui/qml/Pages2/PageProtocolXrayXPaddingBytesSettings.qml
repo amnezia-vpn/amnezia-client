@@ -26,7 +26,7 @@ PageType {
     ListViewType {
         id: listView
         anchors.top: backButton.bottom
-        anchors.bottom: saveButton.top
+        anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
 
@@ -44,6 +44,9 @@ PageType {
                 Layout.topMargin: 0
                 Layout.bottomMargin: 24
                 text: qsTr("xPaddingBytes")
+                font.pixelSize: 36
+                lineHeight: 38 + LanguageUiController.getLineHeightAppend()
+                font.letterSpacing: -1.08
             }
 
             CaptionTextType {
@@ -81,7 +84,8 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        enabled: listView.enabled
+        visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
+        enabled: visible
         text: qsTr("Save")
         clickedFunc: function () {
             var headerText = qsTr("Save settings?")
