@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
 import Style 1.0
-import "../Controls2/TextTypes"
 
 Rectangle {
     id: root
@@ -77,6 +76,7 @@ Rectangle {
             visible: root.iconSource !== ""
             source: root.iconSource
             sourceSize: Qt.size(root.compact ? 10 : 12, root.compact ? 10 : 12)
+            Layout.alignment: Qt.AlignVCenter
 
             layer.enabled: true
             layer.effect: ColorOverlay {
@@ -84,11 +84,16 @@ Rectangle {
             }
         }
 
-        LabelTextType {
+        Text {
             text: root.text
             font.pixelSize: root.compact ? 10 : 11
             font.weight: 700
+            font.family: "PT Root UI VF"
+            font.letterSpacing: 0
             color: root.foregroundColor
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            Layout.alignment: Qt.AlignVCenter
         }
 
     }

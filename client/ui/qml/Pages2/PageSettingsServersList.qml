@@ -168,9 +168,7 @@ PageType {
 
                             CaptionTextType {
                                 Layout.fillWidth: true
-                                text: serverCard.lockedByPlan
-                                    ? qsTr("Р”РѕСЃС‚СѓРїРµРЅ С‚РѕР»СЊРєРѕ РґР»СЏ VIP")
-                                    : (hostName !== "" ? hostName : serverDescription)
+                                text: serverCard.lockedByPlan ? qsTr("VIP only") : (hostName !== "" ? hostName : serverDescription)
                                 color: FBLinkStyle.color.mutedGray
                                 elide: Text.ElideRight
                             }
@@ -193,7 +191,7 @@ PageType {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             if (serverCard.lockedByPlan) {
-                                PageController.showNotificationMessage(qsTr("Р­С‚РѕС‚ СЃРµСЂРІРµСЂ РґРѕСЃС‚СѓРїРµРЅ С‚РѕР»СЊРєРѕ РґР»СЏ VIP"))
+                                PageController.showNotificationMessage(qsTr("VIP only server"))
                                 return
                             }
                             if (ConnectionController.isConnected) {

@@ -98,7 +98,7 @@ ListViewType {
 
                         PremiumBadge {
                             visible: isVipOnly
-                            text: lockedByPlan ? qsTr("VIP") : qsTr("VIP server")
+                            text: qsTr("VIP")
                             tone: "accent"
                             iconSource: "qrc:/images/controls/crown.svg"
                             compact: true
@@ -106,9 +106,7 @@ ListViewType {
 
                         LabelTextType {
                             Layout.fillWidth: true
-                            text: lockedByPlan
-                                ? qsTr("Р”РѕСЃС‚СѓРїРµРЅ С‚РѕР»СЊРєРѕ РґР»СЏ VIP")
-                                : serverDescription
+                            text: lockedByPlan ? qsTr("VIP only") : serverDescription
                             font.pixelSize: 13
                             color: index === root.selectedIndex ? "#EAB308" : "#8A8A8E"
                             visible: text !== "" && text !== name
@@ -133,7 +131,7 @@ ListViewType {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     if (lockedByPlan) {
-                        PageController.showNotificationMessage(qsTr("Р­С‚РѕС‚ СЃРµСЂРІРµСЂ РґРѕСЃС‚СѓРїРµРЅ С‚РѕР»СЊРєРѕ РґР»СЏ VIP"))
+                        PageController.showNotificationMessage(qsTr("VIP only server"))
                         return
                     }
                     if (ConnectionController.isConnected) {
