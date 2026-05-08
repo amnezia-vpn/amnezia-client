@@ -476,14 +476,7 @@ fi
 # Run qt-cmake to configure build
 qt_cmake_opts=()
 
-if [[ $CONFIGURE_ALL_ABIS -eq 1 ]]; then
-  qt_cmake_opts+=(
-    -DQT_ANDROID_BUILD_ALL_ABIS=ON
-    -DQT_ANDROID_ABIS="$ABIS"
-  )
-else
-  qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABIS")
-fi
+qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABIS")
 
 # QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL=ON - Skip building apks as part of the default 'ALL' target
 # We'll build apks during androiddeployqt
