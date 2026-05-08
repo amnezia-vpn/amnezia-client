@@ -129,6 +129,12 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
     v.layer.masksToBounds = NO;
 }
 
+/** AmneziaStyle.color.paleGray — same as BackButtonType / BaseHeaderType on QML pages. */
+static UIColor *amneziaPaleGray(void)
+{
+    return [UIColor colorWithRed:(CGFloat)0xD7 / 255.0 green:(CGFloat)0xD8 / 255.0 blue:(CGFloat)0xDB / 255.0 alpha:1.0];
+}
+
 @interface AmneziaPairingQrOverlayViewController : UIViewController
 @end
 
@@ -220,17 +226,20 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
 
     UIButton *back = [UIButton buttonWithType:UIButtonTypeSystem];
     back.translatesAutoresizingMaskIntoConstraints = NO;
-    back.tintColor = [UIColor whiteColor];
+    back.tintColor = amneziaPaleGray();
     if (@available(iOS 13.0, *)) {
-        UIImage *img = [UIImage systemImageNamed:@"chevron.backward"];
-        [back setImage:img forState:UIControlStateNormal];
+        const CGFloat kBackArrowPt = 20.0;
+        UIImageSymbolConfiguration *sym =
+                [UIImageSymbolConfiguration configurationWithPointSize:kBackArrowPt weight:UIImageSymbolWeightMedium
+                                                                  scale:UIImageSymbolScaleDefault];
+        UIImage *img = [UIImage systemImageNamed:@"arrow.left" withConfiguration:sym];
+        [back setImage:[img imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
     } else {
         [back setTitle:@"<" forState:UIControlStateNormal];
     }
     [back addTarget:self action:@selector(backTapped) forControlEvents:UIControlEventTouchUpInside];
     self.backButton = back;
     [header addSubview:back];
-    amneziaApplyReadableOverCameraShadow(back);
 
     UILabel *title = [[UILabel alloc] init];
     title.translatesAutoresizingMaskIntoConstraints = NO;
@@ -287,14 +296,14 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
         [header.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
         [header.heightAnchor constraintGreaterThanOrEqualToConstant:120],
 
-        [back.leadingAnchor constraintEqualToAnchor:header.leadingAnchor constant:4],
-        [back.topAnchor constraintEqualToAnchor:header.topAnchor constant:2],
-        [back.widthAnchor constraintEqualToConstant:44],
-        [back.heightAnchor constraintEqualToConstant:44],
+        [back.leadingAnchor constraintEqualToAnchor:header.leadingAnchor constant:8],
+        [back.topAnchor constraintEqualToAnchor:header.topAnchor constant:20],
+        [back.widthAnchor constraintEqualToConstant:40],
+        [back.heightAnchor constraintEqualToConstant:40],
 
         [title.leadingAnchor constraintEqualToAnchor:header.leadingAnchor constant:16],
         [title.trailingAnchor constraintEqualToAnchor:header.trailingAnchor constant:-16],
-        [title.topAnchor constraintEqualToAnchor:back.bottomAnchor constant:2],
+        [title.topAnchor constraintEqualToAnchor:back.bottomAnchor],
 
         [sub.leadingAnchor constraintEqualToAnchor:title.leadingAnchor],
         [sub.trailingAnchor constraintEqualToAnchor:title.trailingAnchor],
