@@ -134,6 +134,7 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
 
 @interface AmneziaPairingQrOverlayViewController () <AVCaptureMetadataOutputObjectsDelegate>
 @property (nonatomic, strong) AVCaptureSession *captureSession;
+@property (nonatomic, strong) AVCaptureMetadataOutput *metadataOutput;
 @property (nonatomic, strong) AVCaptureVideoPreviewLayer *previewLayer;
 @property (nonatomic, strong) AVCaptureDevice *videoDevice;
 @property (nonatomic, strong) dispatch_queue_t sessionQueue;
@@ -312,6 +313,45 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
     [header setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisVertical];
 }
 
+/** Maps the on-screen scan hole to `AVCaptureMetadataOutput.rectOfInterest` (normalized), via preview layer. */
+- (void)applyMetadataRectOfInterestForScanHole:(CGRect)holeInScanDimBounds
+{
+    if (!self.previewLayer || !self.metadataOutput || !self.scanDimView || !self.cameraContainer) {
+        return;
+    }
+    if (CGRectIsEmpty(holeInScanDimBounds) || holeInScanDimBounds.size.width < 24.0 || holeInScanDimBounds.size.height < 24.0) {
+        return;
+    }
+
+    CGRect holeInCam = [self.scanDimView convertRect:holeInScanDimBounds toView:self.cameraContainer];
+    holeInCam = CGRectIntersection(holeInCam, self.cameraContainer.bounds);
+    if (CGRectIsEmpty(holeInCam)) {
+        return;
+    }
+
+    const CGRect plFrame = self.previewLayer.frame;
+    CGRect holeInPreview = CGRectOffset(holeInCam, -plFrame.origin.x, -plFrame.origin.y);
+    holeInPreview = CGRectIntersection(holeInPreview, self.previewLayer.bounds);
+    if (CGRectIsEmpty(holeInPreview)) {
+        return;
+    }
+
+    CGRect roi = [self.previewLayer metadataOutputRectOfInterestForRect:holeInPreview];
+    roi.origin.x = MAX(0.0, MIN(1.0, roi.origin.x));
+    roi.origin.y = MAX(0.0, MIN(1.0, roi.origin.y));
+    roi.size.width = MAX(0.02, MIN(1.0 - roi.origin.x, roi.size.width));
+    roi.size.height = MAX(0.02, MIN(1.0 - roi.origin.y, roi.size.height));
+
+    AVCaptureMetadataOutput *mo = self.metadataOutput;
+    dispatch_queue_t sq = self.sessionQueue;
+    if (!mo || !sq) {
+        return;
+    }
+    dispatch_async(sq, ^{
+        mo.rectOfInterest = roi;
+    });
+}
+
 - (void)layoutScanOverlayGeometry
 {
     if (!self.scanDimView || !self.scanDimMaskLayer || self.bracketBars.count != 8) {
@@ -395,6 +435,8 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
         torchCenterY = MAX(torchCenterY, hdr);
         self.torchCenterYConstraint.constant = torchCenterY;
     }
+
+    [self applyMetadataRectOfInterestForScanHole:hole];
 }
 
 - (void)backTapped
@@ -497,6 +539,7 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
 
     AVCaptureSession *session = self.captureSession;
     self.captureSession = nil;
+    self.metadataOutput = nil;
 
     if (self.previewLayer) {
         [self.previewLayer removeFromSuperlayer];
@@ -572,6 +615,7 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
     meta.metadataObjectTypes = @[ AVMetadataObjectTypeQRCode ];
 
     self.captureSession = session;
+    self.metadataOutput = meta;
 
     AVCaptureVideoPreviewLayer *preview = [[AVCaptureVideoPreviewLayer alloc] initWithSession:session];
     preview.videoGravity = AVLayerVideoGravityResizeAspectFill;
@@ -579,6 +623,9 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
     [self.cameraContainer.layer insertSublayer:preview atIndex:0];
     preview.frame = self.cameraContainer.bounds;
     NSLog(@"[PairingQrOverlay] previewLayer on host frame=%@", NSStringFromCGRect(preview.frame));
+
+    [self.view layoutIfNeeded];
+    [self layoutScanOverlayGeometry];
 
     AVCaptureSession *runningSession = session;
     __unsafe_unretained AmneziaPairingQrOverlayViewController *weakSelf = self;
