@@ -257,7 +257,7 @@ QString PairingUiController::tvFailureMessage(ErrorCode code) const
 {
     switch (code) {
     case ErrorCode::ApiConfigTimeoutError:
-        return tr("QR session expired. Tap Start to show a new QR code.");
+        return tr("QR session expired. A new QR code will appear automatically when the screen refreshes.");
     case ErrorCode::ApiConfigAlreadyAdded:
         return tr("This configuration is already on the device.");
     case ErrorCode::ApiNotFoundError:
@@ -290,9 +290,6 @@ void PairingUiController::startTvQrSession()
     m_tvQrCodes = qrCodeUtils::generateQrCodeImageSeriesPlainText(qrPayload);
     emit tvQrCodesChanged();
     emit tvSessionUuidChanged();
-
-    m_tvStatusMessage = tr("Waiting for premium device to confirm…");
-    emit tvStatusMessageChanged();
 
     setTvBusy(true);
     setTvPairingUiPhase(1);

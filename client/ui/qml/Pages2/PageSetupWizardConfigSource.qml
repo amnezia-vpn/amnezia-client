@@ -348,9 +348,9 @@ PageType {
         id: gatewayQrPairingAddServer
 
         property bool featuredAmneziaConnection: false
-        property string title: qsTr("Get Premium server from mobile")
-        property string description: qsTr("Premium · QR transfer — steps inside")
-        property string imageSource: "qrc:/images/controls/qr-code.svg"
+        property string title: qsTr("Scan a QR code")
+        property string description: qsTr("To connect to a self-hosted server")
+        property string imageSource: "qrc:/images/controls/folder-search-2.svg"
         property bool isVisible: true
         property var handler: function() {
             PageController.goToPage(PageEnum.PageSetupWizardApiQrPairingReceive)
