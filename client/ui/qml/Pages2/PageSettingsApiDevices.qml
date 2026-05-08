@@ -54,12 +54,6 @@ PageType {
     }
 
     function openAddDeviceViaQr() {
-        const maxC = ApiAccountInfoModel.data("maxDeviceCount")
-        const activeC = ApiAccountInfoModel.data("activeDeviceCount")
-        if (maxC > 0 && activeC >= maxC) {
-            PageController.goToPage(PageEnum.PageSettingsApiDeviceLimit)
-            return
-        }
         if (Qt.platform.os !== "android" && Qt.platform.os !== "ios") {
             PageController.goToPage(PageEnum.PageSettingsApiQrPairingSend)
             return
@@ -135,12 +129,6 @@ PageType {
             }
         }
 
-        function onPhonePairingRejectedDeviceLimit() {
-            if (!root.visible) {
-                return
-            }
-            PageController.goToPage(PageEnum.PageSettingsApiDeviceLimit)
-        }
     }
 
     ListViewType {

@@ -83,7 +83,6 @@ namespace PageLoader
         PageSettingsApiQrPairingDev,
         PageSettingsApiQrPairingSend,
         PageSetupWizardApiQrPairingReceive,
-        PageSettingsApiDeviceLimit,
 
         PageDevMenu
     };

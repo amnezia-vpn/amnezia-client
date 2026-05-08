@@ -781,14 +781,6 @@ void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, cons
                              return;
                          }
 
-                         if (logicalErr == ErrorCode::ApiConfigLimitError) {
-                             setPhoneBusy(false);
-                             m_phoneStatusMessage.clear();
-                             emit phoneStatusMessageChanged();
-                             emit phonePairingRejectedDeviceLimit();
-                             return;
-                         }
-
                          if (isPairingRetriableError(logicalErr) && retryAttempt + 1 < kPairingRetryMaxAttempts) {
                              const int delayMs = pairingRetryDelayMs(retryAttempt);
                              QTimer::singleShot(delayMs, this, [this, qrUuid, isTestPurchase, vpnKey, serviceInfo, supportedProtocols,

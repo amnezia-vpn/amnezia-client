@@ -126,8 +126,6 @@ signals:
 
     void tvPairingConfigReceived();
     void phonePairingSucceeded();
-    /** scan_qr rejected: subscription device quota full (no generic error dialog). */
-    void phonePairingRejectedDeviceLimit();
 
     void pairingUuidFromScan(const QString &uuid);
     void tvPairingUiPhaseChanged();
