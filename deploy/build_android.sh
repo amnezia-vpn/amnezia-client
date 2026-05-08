@@ -378,7 +378,21 @@ if requested_abis:
         sys.exit(0)
 
 for abi in abis_to_check:
+    abi_underscores = abi.replace("-", "_")
+    app_lib_candidates = [
+        f"lib/{abi}/libFBLink_{abi}.so",
+        f"lib/{abi}/libFBLink_{abi_underscores}.so",
+        f"lib/{abi}/libFBLink.so",
+    ]
+    if not any(candidate in names for candidate in app_lib_candidates):
+        missing.append(" or ".join(app_lib_candidates))
+
     expected_templates = [
+        "lib/{abi}/libQt6Core_{abi}.so",
+        "lib/{abi}/libQt6Gui_{abi}.so",
+        "lib/{abi}/libQt6Qml_{abi}.so",
+        "lib/{abi}/libQt6Quick_{abi}.so",
+        "lib/{abi}/libQt6Network_{abi}.so",
         "lib/{abi}/libplugins_platforms_qtforandroid_{abi}.so",
         "lib/{abi}/libplugins_imageformats_qsvg_{abi}.so",
         "lib/{abi}/libplugins_iconengines_qsvgicon_{abi}.so",
