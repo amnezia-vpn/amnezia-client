@@ -318,12 +318,30 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
+    - name: 'Check iOS signing inputs'
+      id: ios-signing
+      shell: bash
+      env:
+        IOS_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
+        IOS_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
+        IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
+        IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
+      run: |
+        if [[ -n "$IOS_SIGNING_CERT_BASE64" && -n "$IOS_SIGNING_CERT_PASSWORD" && -n "$IOS_APP_PROVISIONING_PROFILE" && -n "$IOS_NE_PROVISIONING_PROFILE" ]]; then
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::Skipping iOS deployment build because signing certificate or provisioning profile secrets are not configured."
+        fi
+
     - uses: ./.github/actions/apple-setup-keychain
+      if: steps.ios-signing.outputs.ready == 'true'
       id: setup-keychain
       with:
         keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
 
     - name: 'Install signing certificate'
+      if: steps.ios-signing.outputs.ready == 'true'
       uses: ./.github/actions/apple-install-cert
       with:
         keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
@@ -332,21 +350,25 @@ jobs:
         cert-password: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
 
     - name: 'Install app provisioning profile'
+      if: steps.ios-signing.outputs.ready == 'true'
       uses: ./.github/actions/apple-setup-provisioning-profile
       with:
         provisioning_profile_base64: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
 
     - name: 'Install NE provisioning profile'
+      if: steps.ios-signing.outputs.ready == 'true'
       uses: ./.github/actions/apple-setup-provisioning-profile
       with:
         provisioning_profile_base64: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
 
     - name: 'Setup xcode'
+      if: steps.ios-signing.outputs.ready == 'true'
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '26.1'
 
     - name: 'Install desktop Qt'
+      if: steps.ios-signing.outputs.ready == 'true'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
@@ -359,6 +381,7 @@ jobs:
         extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install iOS Qt'
+      if: steps.ios-signing.outputs.ready == 'true'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
@@ -371,14 +394,17 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Setup python'
+      if: steps.ios-signing.outputs.ready == 'true'
       uses: actions/setup-python@v6
       with:
         python-version: 3.14
 
     - name: 'Install deps'
+      if: steps.ios-signing.outputs.ready == 'true'
       run: pip install "conan==2.26.2" jsonschema jinja2
 
     - name: 'Build project'
+      if: steps.ios-signing.outputs.ready == 'true'
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
@@ -457,12 +483,32 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
+    - name: 'Check macOS signing inputs'
+      id: macos-signing
+      shell: bash
+      env:
+        MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
+        MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
+        MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
+        MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
+        MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
+        MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
+      run: |
+        if [[ -n "$MAC_APP_CERT_CERT" && -n "$MAC_APP_CERT_PW" && -n "$MAC_INSTALLER_SIGNER_CERT" && -n "$MAC_INSTALL_CERT_PW" && -n "$MAC_SIGNER_ID" && -n "$MAC_INSTALLER_SIGNER_ID" ]]; then
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::Building macOS without signing because Apple signing secrets are not fully configured."
+        fi
+
     - uses: ./.github/actions/apple-setup-keychain
+      if: steps.macos-signing.outputs.ready == 'true'
       id: setup-keychain
       with:
         keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
 
     - uses: ./.github/actions/apple-install-cert
+      if: steps.macos-signing.outputs.ready == 'true'
       with:
         keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
         keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
@@ -470,6 +516,7 @@ jobs:
         cert-password: ${{ secrets.MAC_APP_CERT_PW }}
 
     - uses: ./.github/actions/apple-install-cert
+      if: steps.macos-signing.outputs.ready == 'true'
       with:
         keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
         keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
@@ -507,11 +554,11 @@ jobs:
     - name: 'Build project'
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
-        CODESIGN_SIGNATURE: ${{ secrets.MAC_SIGNER_ID }}
-        CODESIGN_INSTALLER_SIGNATURE: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
-        NOTARYTOOL_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
-        NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
-        NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+        CODESIGN_SIGNATURE: ${{ steps.macos-signing.outputs.ready == 'true' && secrets.MAC_SIGNER_ID || '' }}
+        CODESIGN_INSTALLER_SIGNATURE: ${{ steps.macos-signing.outputs.ready == 'true' && secrets.MAC_INSTALLER_SIGNER_ID || '' }}
+        NOTARYTOOL_TEAM_ID: ${{ steps.macos-signing.outputs.ready == 'true' && secrets.MAC_TEAM_ID || '' }}
+        NOTARYTOOL_EMAIL: ${{ steps.macos-signing.outputs.ready == 'true' && secrets.APPLE_DEV_EMAIL || '' }}
+        NOTARYTOOL_PASSWORD: ${{ steps.macos-signing.outputs.ready == 'true' && secrets.APPLE_DEV_PASSWORD || '' }}
       shell: bash
       run: deploy/build.sh --generator Ninja --installer all
 
@@ -569,6 +616,7 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
+      KEYCHAIN_PASSWORD: ""
 
       MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
@@ -586,20 +634,61 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Check macOS NE signing inputs'
+      id: macos-ne-signing
+      shell: bash
+      env:
+        MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
+        MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
+        MAC_APP_PROVISIONING_PROFILE: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
+        MAC_NE_PROVISIONING_PROFILE: ${{ secrets.MAC_NE_PROVISIONING_PROFILE }}
+        MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
+      run: |
+        if [[ -n "$MAC_APP_CERT_CERT" && -n "$MAC_APP_CERT_PW" && -n "$MAC_APP_PROVISIONING_PROFILE" && -n "$MAC_NE_PROVISIONING_PROFILE" && -n "$MAC_SIGNER_ID" ]]; then
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::Skipping macOS NE deployment build because signing certificate or provisioning profile secrets are not configured."
+        fi
+
+    - uses: ./.github/actions/apple-setup-keychain
+      if: steps.macos-ne-signing.outputs.ready == 'true'
+      id: setup-keychain
+      with:
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+
+    - uses: ./.github/actions/apple-install-cert
+      if: steps.macos-ne-signing.outputs.ready == 'true'
+      with:
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+        cert-base64: ${{ secrets.MAC_APP_CERT_CERT }}
+        cert-password: ${{ secrets.MAC_APP_CERT_PW }}
+
     - uses: ./.github/actions/apple-setup-provisioning-profile
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       with:
         provisioning_profile_base64: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
 
     - uses: ./.github/actions/apple-setup-provisioning-profile
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       with:
         provisioning_profile_base64: ${{ secrets.MAC_NE_PROVISIONING_PROFILE }}
 
     - name: 'Setup xcode'
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '26.1'
 
     - name: 'Install desktop Qt'
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
@@ -612,37 +701,37 @@ jobs:
         extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install go'
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       uses: actions/setup-go@v5
       with:
         go-version: '1.24'
         cache: false
 
     - name: 'Setup gomobile'
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       run: |
           export PATH=$PATH:~/go/bin
           go install golang.org/x/mobile/cmd/gomobile@latest
           gomobile init
 
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
     - name: 'Setup python'
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       uses: actions/setup-python@v6
       with:
         python-version: 3.14
 
     - name: 'Install conan'
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       run: pip install "conan==2.26.2"
 
     - name: 'Build project'
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos_ne.sh
+        bash deploy/build.sh -t macos-ne
 
     - name: 'Upload unpacked artifact'
+      if: steps.macos-ne-signing.outputs.ready == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN_MacOS_unpacked

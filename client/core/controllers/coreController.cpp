@@ -204,6 +204,12 @@ void CoreController::initControllers()
                     m_sitesController->reloadManagedSites();
                 }
             });
+    connect(m_serversRepository, &SecureServersRepository::serverEdited,
+            m_sitesController, [this](int serverIndex, const ServerConfig &) {
+                if (m_serversUiController && serverIndex == m_serversUiController->getProcessedServerIndex()) {
+                    m_sitesController->reloadManagedSites();
+                }
+            });
     connect(m_sitesController, &SitesController::managedSplitTunnelingRulesPublished,
             m_connectionController, &ConnectionController::onManagedSplitTunnelingRulesPublished);
 

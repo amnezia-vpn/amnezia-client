@@ -6,6 +6,8 @@
 #include <QEventLoop>
 #include <QFutureWatcher>
 #include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonParseError>
 #include <QRegularExpression>
 #include <QThread>
 #include <QtConcurrent>
@@ -83,7 +85,14 @@ namespace
     {
         QJsonObject sites;
         if (value.isObject()) {
-            return value.toObject();
+            const QJsonObject object = value.toObject();
+            for (auto it = object.constBegin(); it != object.constEnd(); ++it) {
+                const QString site = it.key().trimmed().toLower();
+                if (!site.isEmpty()) {
+                    sites.insert(site, it.value().toString());
+                }
+            }
+            return sites;
         }
         if (!value.isArray()) {
             return sites;
@@ -95,12 +104,26 @@ namespace
                 continue;
             }
             const QJsonObject siteObject = item.toObject();
-            const QString site = siteObject.value("hostname").toString(siteObject.value("url").toString()).trimmed();
+            const QString site = siteObject.value("hostname").toString(siteObject.value("url").toString()).trimmed().toLower();
             if (!site.isEmpty()) {
                 sites.insert(site, siteObject.value("ip").toString());
             }
         }
         return sites;
+    }
+
+    bool isServerRoutingRulesSitesValue(const QJsonValue &value)
+    {
+        return value.isObject() || value.isArray();
+    }
+
+    QJsonObject serverRoutingRulesExceptSites(const QJsonObject &rules)
+    {
+        QJsonValue sitesValue = rules.value(configKey::serverExcept);
+        if (!isServerRoutingRulesSitesValue(sitesValue)) {
+            sitesValue = rules.value(configKey::managedSplitTunnelExceptSites);
+        }
+        return normalizedServerRoutingRulesSites(sitesValue);
     }
 
     QJsonObject serverRoutingRulesSourceSites(const QJsonObject &rules)
@@ -113,6 +136,107 @@ namespace
             sitesValue = rules.value(configKey::serverExcept);
         }
         return normalizedServerRoutingRulesSites(sitesValue);
+    }
+
+    bool hasServerRoutingRulesExceptSites(const QJsonObject &rules)
+    {
+        return isServerRoutingRulesSitesValue(rules.value(configKey::serverExcept))
+               || isServerRoutingRulesSitesValue(rules.value(configKey::managedSplitTunnelExceptSourceSites))
+               || isServerRoutingRulesSitesValue(rules.value(configKey::managedSplitTunnelExceptSites));
+    }
+
+    QJsonObject storedServerRoutingRules(const QJsonObject &payload)
+    {
+        QJsonObject rules;
+        if (!hasServerRoutingRulesExceptSites(payload)) {
+            return rules;
+        }
+
+        const QJsonObject exceptSites = serverRoutingRulesExceptSites(payload);
+        const QJsonObject sourceSites = serverRoutingRulesSourceSites(payload);
+        if (exceptSites.isEmpty() && sourceSites.isEmpty()) {
+            return rules;
+        }
+
+        rules.insert(configKey::serverExcept, exceptSites.isEmpty() ? sourceSites : exceptSites);
+        rules.insert(configKey::managedSplitTunnelExceptSourceSites, sourceSites.isEmpty() ? exceptSites : sourceSites);
+        rules.insert(configKey::managedSplitTunnelExceptSites, sourceSites.isEmpty() ? exceptSites : sourceSites);
+        if (payload.value(configKey::managedSplitTunnelForceEnabled).toBool(false)) {
+            rules.insert(configKey::managedSplitTunnelForceEnabled, true);
+        }
+        return rules;
+    }
+
+    QJsonObject loadStoredServerRoutingRules(const ServerCredentials &credentials, SshSession &sshSession)
+    {
+        QString stdOut;
+        auto cbReadStdOut = [&stdOut](const QString &data, libssh::Client &) {
+            stdOut.append(data);
+            return ErrorCode::NoError;
+        };
+
+        const QString rulesPath = QStringLiteral("%1/%2")
+                .arg(QString::fromLatin1(protocols::serverRoutingRules::hostDirectory),
+                     QString::fromLatin1(protocols::serverRoutingRules::fileName));
+        const QString script = QStringLiteral("sudo test -s '%1' && sudo cat '%1' || true").arg(rulesPath);
+        const ErrorCode errorCode = sshSession.runScript(credentials, script, cbReadStdOut);
+        if (errorCode != ErrorCode::NoError) {
+            qWarning() << "InstallController: unable to read server routing rules file" << errorCode;
+            return {};
+        }
+
+        const QByteArray payload = stdOut.trimmed().toUtf8();
+        if (payload.isEmpty()) {
+            return {};
+        }
+
+        QJsonParseError parseError;
+        const QJsonDocument document = QJsonDocument::fromJson(payload, &parseError);
+        if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
+            qWarning() << "InstallController: invalid server routing rules payload" << parseError.errorString();
+            return {};
+        }
+        return storedServerRoutingRules(document.object());
+    }
+
+    bool mergeServerRoutingRules(ServerConfig &serverConfig, const QJsonObject &rules)
+    {
+        if (rules.isEmpty()) {
+            return false;
+        }
+
+        QJsonObject serverJson = serverConfig.toJson();
+        bool changed = false;
+        const QStringList objectKeys = {
+            QString(configKey::serverExcept),
+            QString(configKey::managedSplitTunnelExceptSourceSites),
+            QString(configKey::managedSplitTunnelExceptSites),
+        };
+
+        for (const QString &key : objectKeys) {
+            const QJsonObject sites = rules.value(key).toObject();
+            if (!sites.isEmpty() && serverJson.value(key).toObject() != sites) {
+                serverJson.insert(key, sites);
+                changed = true;
+            }
+        }
+
+        const bool forceEnabled = rules.value(configKey::managedSplitTunnelForceEnabled).toBool(false);
+        if (serverJson.value(configKey::managedSplitTunnelForceEnabled).toBool(false) != forceEnabled) {
+            if (forceEnabled) {
+                serverJson.insert(configKey::managedSplitTunnelForceEnabled, true);
+            } else {
+                serverJson.remove(configKey::managedSplitTunnelForceEnabled);
+            }
+            changed = true;
+        }
+
+        if (!changed) {
+            return false;
+        }
+
+        serverConfig = ServerConfig::fromJson(serverJson);
+        return true;
     }
 
     QStringList splitTunnelStoredIps(const QString &value)
@@ -1225,7 +1349,10 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
         }
     }
 
-    if (hasNewContainers) {
+    const bool hasNewRoutingRules = mergeServerRoutingRules(serverConfigModel,
+                                                            loadStoredServerRoutingRules(credentials, sshSession));
+
+    if (hasNewContainers || hasNewRoutingRules) {
         serverConfigModel.visit([&containers](auto& arg) {
             arg.containers = containers;
         });
@@ -1284,7 +1411,10 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
 
     serverConfig.defaultContainer = container;
 
-    m_serversRepository->addServer(ServerConfig(serverConfig));
+    ServerConfig serverConfigModel(serverConfig);
+    mergeServerRoutingRules(serverConfigModel, loadStoredServerRoutingRules(credentials, sshSession));
+
+    m_serversRepository->addServer(serverConfigModel);
 
     int serverIndex = m_serversRepository->serversCount() - 1;
     QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());

@@ -13,11 +13,18 @@ runs:
   steps:
     - name: Setup provisioning profile
       shell: bash
+      env:
+        PROVISIONING_PROFILE_BASE64: ${{ inputs.provisioning_profile_base64 }}
       run: |
+        if [[ -z "$PROVISIONING_PROFILE_BASE64" ]]; then
+          echo "::notice::Skipping provisioning profile install because profile data is empty."
+          exit 0
+        fi
+
         PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
         TEMP_FILE=$(mktemp)
 
-        echo "${{ inputs.provisioning_profile_base64 }}" | base64 --decode > "$TEMP_FILE"
+        printf '%s' "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$TEMP_FILE"
 
         PROFILE_UUID=$(grep UUID -A1 -a "$TEMP_FILE" | grep -io "[-A-F0-9]\{36\}")
         if [[ -z "$PROFILE_UUID" ]]; then

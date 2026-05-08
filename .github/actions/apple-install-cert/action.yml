@@ -28,6 +28,11 @@ runs:
         CERT_BASE64: ${{ inputs.cert-base64 }}
         CERT_PASSWORD: ${{ inputs.cert-password }}
       run: |
+        if [[ -z "$CERT_BASE64" || -z "$CERT_PASSWORD" ]]; then
+          echo "::notice::Skipping Apple certificate import because certificate data or password is empty."
+          exit 0
+        fi
+
         CERT_PATH=$(mktemp /tmp/cert_XXXXXX.p12)
         trap "rm -f '$CERT_PATH'" EXIT
 
