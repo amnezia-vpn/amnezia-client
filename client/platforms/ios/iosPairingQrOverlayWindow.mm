@@ -3,6 +3,7 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <QuartzCore/QuartzCore.h>
+#import <math.h>
 
 #include <string>
 
@@ -135,6 +136,84 @@ static UIColor *amneziaPaleGray(void)
     return [UIColor colorWithRed:(CGFloat)0xD7 / 255.0 green:(CGFloat)0xD8 / 255.0 blue:(CGFloat)0xDB / 255.0 alpha:1.0];
 }
 
+/** Quarter circle from S to E on (C, r). Normalizes end angle vs start so Δ∈(−π,π]; clockwise from minor sign (same as working TR/TL). */
+static void amneziaAddCornerMinorArc(UIBezierPath *p, CGPoint C, CGFloat r, CGPoint S, CGPoint E)
+{
+    const CGFloat as = atan2f((float)(S.y - C.y), (float)(S.x - C.x));
+    CGFloat ae = atan2f((float)(E.y - C.y), (float)(E.x - C.x));
+    while (ae - as > (CGFloat)M_PI) {
+        ae -= (CGFloat)(2.0 * M_PI);
+    }
+    while (ae - as < (CGFloat)(-M_PI)) {
+        ae += (CGFloat)(2.0 * M_PI);
+    }
+    const CGFloat minor = ae - as;
+    const BOOL cw = minor > 0;
+    [p addArcWithCenter:C radius:r startAngle:as endAngle:ae clockwise:cw];
+}
+
+/**
+ * Stroked L per corner: own geometry + shared minor-arc helper.
+ * corner: 0=TL, 1=TR, 2=BL, 3=BR.
+ */
+static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloat y0, CGFloat s, CGFloat R, CGFloat L, CGFloat t)
+{
+    const CGFloat r = MAX(1.5, R - t * 0.5);
+    UIBezierPath *p = [UIBezierPath bezierPath];
+    const CGFloat yy = y0 + t * 0.5f;
+    const CGFloat yyb = y0 + s - t * 0.5f;
+    const CGFloat xx = x0 + t * 0.5f;
+    const CGFloat xxb = x0 + s - t * 0.5f;
+
+    switch (corner) {
+        case 0: { /* top-left */
+            const CGPoint cTL = CGPointMake(x0 + R, y0 + R);
+            const CGPoint sTL = CGPointMake(x0 + R, yy);
+            const CGPoint eTL = CGPointMake(xx, y0 + R);
+            [p moveToPoint:CGPointMake(x0 + R + L, yy)];
+            [p addLineToPoint:sTL];
+            amneziaAddCornerMinorArc(p, cTL, r, sTL, eTL);
+            const CGFloat yEndTL = MIN(y0 + R + L, y0 + s - R - t * 0.5f);
+            [p addLineToPoint:CGPointMake(xx, MAX(yEndTL, y0 + R + 2.f))];
+        } break;
+        case 1: { /* top-right — keep explicit angles (reference for helper tuning). */
+            const CGPoint cTR = CGPointMake(x0 + s - R, y0 + R);
+            const CGPoint sTR = CGPointMake(x0 + s - R, yy);
+            const CGPoint eTR = CGPointMake(xxb, y0 + R);
+            [p moveToPoint:CGPointMake(x0 + s - R - L, yy)];
+            [p addLineToPoint:sTR];
+            amneziaAddCornerMinorArc(p, cTR, r, sTR, eTR);
+            const CGFloat yEndTR = MIN(y0 + R + L, y0 + s - R - t * 0.5f);
+            [p addLineToPoint:CGPointMake(xxb, MAX(yEndTR, y0 + R + 2.f))];
+        } break;
+        case 2: { /* bottom-left — mirror TL: approach (R+L,yyb)→(R,yyb) like (R+L,yy)→(R,yy); leg Y = reflect top leg in y_mid=y0+s/2. */
+            const CGPoint cBL = CGPointMake(x0 + R, y0 + s - R);
+            const CGPoint sBL = CGPointMake(x0 + R, yyb);
+            const CGPoint eBL = CGPointMake(xx, y0 + s - R);
+            [p moveToPoint:CGPointMake(x0 + R + L, yyb)];
+            [p addLineToPoint:sBL];
+            amneziaAddCornerMinorArc(p, cBL, r, sBL, eBL);
+            const CGFloat yEndTopRef = MAX(MIN(y0 + R + L, y0 + s - R - t * 0.5f), y0 + R + 2.f);
+            const CGFloat yLegBL = y0 + s + y0 - yEndTopRef;
+            [p addLineToPoint:CGPointMake(xx, yLegBL)];
+        } break;
+        case 3: { /* bottom-right — mirror TR: (s-R-L,yyb)→(s-R,yyb); leg Y same reflection as BL. */
+            const CGPoint cBR = CGPointMake(x0 + s - R, y0 + s - R);
+            const CGPoint sBR = CGPointMake(x0 + s - R, yyb);
+            const CGPoint eBR = CGPointMake(xxb, y0 + s - R);
+            [p moveToPoint:CGPointMake(x0 + s - R - L, yyb)];
+            [p addLineToPoint:sBR];
+            amneziaAddCornerMinorArc(p, cBR, r, sBR, eBR);
+            const CGFloat yEndTopRef = MAX(MIN(y0 + R + L, y0 + s - R - t * 0.5f), y0 + R + 2.f);
+            const CGFloat yLegBR = y0 + s + y0 - yEndTopRef;
+            [p addLineToPoint:CGPointMake(xxb, yLegBR)];
+        } break;
+        default:
+            break;
+    }
+    return p;
+}
+
 @interface AmneziaPairingQrOverlayViewController : UIViewController
 @end
 
@@ -155,8 +234,12 @@ static UIColor *amneziaPaleGray(void)
 @property (nonatomic, copy) NSString *chromeSubtitleText;
 @property (nonatomic, strong) UIView *scanDimView;
 @property (nonatomic, strong) CAShapeLayer *scanDimMaskLayer;
+/** Milky highlight inside the scan hole (below dim), same rounded rect as mask. */
+@property (nonatomic, strong) UIView *scanHoleFillView;
+@property (nonatomic, strong) CAShapeLayer *scanHoleHighlightLayer;
 @property (nonatomic, strong) UIView *bracketContainer;
-@property (nonatomic, strong) NSMutableArray<UIView *> *bracketBars;
+/** Four CAShapeLayers: TL, TR, BL, BR — stroked L-brackets following scan hole corner radius. */
+@property (nonatomic, strong) NSMutableArray<CAShapeLayer *> *bracketCornerLayers;
 @end
 
 @implementation AmneziaPairingQrOverlayViewController
@@ -183,6 +266,19 @@ static UIColor *amneziaPaleGray(void)
     self.cameraContainer = cam;
     [self.view addSubview:cam];
 
+    UIView *holeFill = [[UIView alloc] init];
+    holeFill.translatesAutoresizingMaskIntoConstraints = NO;
+    holeFill.backgroundColor = [UIColor clearColor];
+    holeFill.opaque = NO;
+    holeFill.userInteractionEnabled = NO;
+    self.scanHoleFillView = holeFill;
+    CAShapeLayer *hi = [CAShapeLayer layer];
+    hi.fillColor = [UIColor colorWithWhite:1.0 alpha:0.14].CGColor;
+    hi.strokeColor = nil;
+    [holeFill.layer addSublayer:hi];
+    self.scanHoleHighlightLayer = hi;
+    [self.view addSubview:holeFill];
+
     UIView *dim = [[UIView alloc] init];
     dim.translatesAutoresizingMaskIntoConstraints = NO;
     dim.backgroundColor = [UIColor colorWithWhite:0.02 alpha:0.55];
@@ -205,15 +301,16 @@ static UIColor *amneziaPaleGray(void)
     self.bracketContainer = bracketHost;
     [self.view addSubview:bracketHost];
 
-    self.bracketBars = [NSMutableArray arrayWithCapacity:8];
-    for (NSInteger i = 0; i < 8; i++) {
-        UIView *seg = [[UIView alloc] init];
-        seg.backgroundColor = [UIColor colorWithWhite:0.94 alpha:1];
-        seg.layer.cornerRadius = 2.5;
-        seg.clipsToBounds = YES;
-        seg.userInteractionEnabled = NO;
-        [bracketHost addSubview:seg];
-        [self.bracketBars addObject:seg];
+    self.bracketCornerLayers = [NSMutableArray arrayWithCapacity:4];
+    for (NSInteger i = 0; i < 4; i++) {
+        CAShapeLayer *sl = [CAShapeLayer layer];
+        sl.fillColor = nil;
+        sl.strokeColor = [UIColor colorWithWhite:0.94 alpha:1].CGColor;
+        sl.lineWidth = 5.0;
+        sl.lineCap = kCALineCapRound;
+        sl.lineJoin = kCALineJoinRound;
+        [bracketHost.layer addSublayer:sl];
+        [self.bracketCornerLayers addObject:sl];
     }
 
     UIView *header = [[UIView alloc] init];
@@ -280,6 +377,11 @@ static UIColor *amneziaPaleGray(void)
         [cam.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
         [cam.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
         [cam.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+
+        [holeFill.topAnchor constraintEqualToAnchor:self.view.topAnchor],
+        [holeFill.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+        [holeFill.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+        [holeFill.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
 
         [dim.topAnchor constraintEqualToAnchor:self.view.topAnchor],
         [dim.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
@@ -363,7 +465,7 @@ static UIColor *amneziaPaleGray(void)
 
 - (void)layoutScanOverlayGeometry
 {
-    if (!self.scanDimView || !self.scanDimMaskLayer || self.bracketBars.count != 8) {
+    if (!self.scanDimView || !self.scanDimMaskLayer || !self.scanHoleHighlightLayer || self.bracketCornerLayers.count != 4) {
         return;
     }
     const CGRect vb = self.scanDimView.bounds;
@@ -393,40 +495,36 @@ static UIColor *amneziaPaleGray(void)
     sqY = MAX(headerBottom + 4.0, MIN(sqY, vb.size.height - sqSz - 8.0));
 
     const CGRect hole = CGRectMake(sqX, sqY, sqSz, sqSz);
+    /** Corner radius of the scan “window” (dim cut-out + inner highlight); matches reference UI. */
+    CGFloat holeR = MIN(28.0, MAX(10.0, sqSz * 0.056));
+    {
+        const CGFloat half = 0.5 * MIN(hole.size.width, hole.size.height);
+        holeR = MIN(holeR, MAX(6.0, half - 2.0));
+    }
+    UIBezierPath *holeRoundPath = [UIBezierPath bezierPathWithRoundedRect:hole cornerRadius:holeR];
 
     UIBezierPath *path = [UIBezierPath bezierPathWithRect:vb];
-    [path appendPath:[UIBezierPath bezierPathWithRect:hole]];
+    [path appendPath:holeRoundPath];
     self.scanDimMaskLayer.frame = vb;
     self.scanDimMaskLayer.path = path.CGPath;
 
-    const NSInteger bracketThick = 5;
-    const NSInteger bracketLen = MAX(28, (NSInteger)floor(sqSz * 0.13));
-    const CGFloat r = bracketThick * 0.5;
+    self.scanHoleHighlightLayer.frame = CGRectMake(0, 0, vb.size.width, vb.size.height);
+    self.scanHoleHighlightLayer.path = holeRoundPath.CGPath;
 
-    void (^setBar)(NSInteger, CGFloat, CGFloat, CGFloat, CGFloat) = ^(NSInteger idx, CGFloat x, CGFloat y, CGFloat w, CGFloat h) {
-        if (idx < 0 || idx >= 8) {
-            return;
-        }
-        UIView *v = self.bracketBars[(NSUInteger)idx];
-        v.frame = CGRectMake(x, y, w, h);
-        v.layer.cornerRadius = r;
-    };
-
+    const CGFloat bracketThick = 5.0;
+    const CGFloat bracketLen = (CGFloat)MAX(28, (NSInteger)floor(sqSz * 0.13));
     const CGFloat x0 = hole.origin.x;
     const CGFloat y0 = hole.origin.y;
     const CGFloat s = hole.size.width;
 
-    setBar(0, x0, y0, bracketLen, bracketThick);
-    setBar(1, x0, y0, bracketThick, bracketLen);
+    const CGFloat t = bracketThick;
+    const CGFloat L = bracketLen;
 
-    setBar(2, x0 + s - bracketLen, y0, bracketLen, bracketThick);
-    setBar(3, x0 + s - bracketThick, y0, bracketThick, bracketLen);
-
-    setBar(4, x0, y0 + s - bracketThick, bracketLen, bracketThick);
-    setBar(5, x0, y0 + s - bracketLen, bracketThick, bracketLen);
-
-    setBar(6, x0 + s - bracketLen, y0 + s - bracketThick, bracketLen, bracketThick);
-    setBar(7, x0 + s - bracketThick, y0 + s - bracketLen, bracketThick, bracketLen);
+    for (NSUInteger i = 0; i < 4; i++) {
+        CAShapeLayer *layer = self.bracketCornerLayers[i];
+        layer.lineWidth = t;
+        layer.path = amneziaScanBracketStrokePath((int)i, x0, y0, s, holeR, L, t).CGPath;
+    }
 
     /** Torch vertically centered between scan hole bottom and overlay bottom (top of Qt tab strip below window). */
     if (self.torchCenterYConstraint && self.torchButton) {
@@ -478,6 +576,9 @@ static UIColor *amneziaPaleGray(void)
         self.previewLayer.frame = self.cameraContainer.bounds;
     }
     [self layoutScanOverlayGeometry];
+    if (self.scanHoleFillView) {
+        [self.view bringSubviewToFront:self.scanHoleFillView];
+    }
     if (self.scanDimView) {
         [self.view bringSubviewToFront:self.scanDimView];
     }
