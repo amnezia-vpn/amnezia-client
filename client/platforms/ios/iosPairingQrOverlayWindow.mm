@@ -2,6 +2,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
+#import <QuartzCore/QuartzCore.h>
 
 #include <string>
 
@@ -142,8 +143,13 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UILabel *subtitleLabel;
 @property (nonatomic, strong) UIButton *torchButton;
+@property (nonatomic, strong) NSLayoutConstraint *torchCenterYConstraint;
 @property (nonatomic, copy) NSString *chromeTitleText;
 @property (nonatomic, copy) NSString *chromeSubtitleText;
+@property (nonatomic, strong) UIView *scanDimView;
+@property (nonatomic, strong) CAShapeLayer *scanDimMaskLayer;
+@property (nonatomic, strong) UIView *bracketContainer;
+@property (nonatomic, strong) NSMutableArray<UIView *> *bracketBars;
 @end
 
 @implementation AmneziaPairingQrOverlayViewController
@@ -169,6 +175,39 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
     cam.clipsToBounds = YES;
     self.cameraContainer = cam;
     [self.view addSubview:cam];
+
+    UIView *dim = [[UIView alloc] init];
+    dim.translatesAutoresizingMaskIntoConstraints = NO;
+    dim.backgroundColor = [UIColor colorWithWhite:0.02 alpha:0.55];
+    dim.userInteractionEnabled = NO;
+    dim.opaque = NO;
+    self.scanDimView = dim;
+    [self.view addSubview:dim];
+
+    CAShapeLayer *dimMask = [CAShapeLayer layer];
+    dimMask.fillRule = kCAFillRuleEvenOdd;
+    dimMask.fillColor = [UIColor blackColor].CGColor;
+    dim.layer.mask = dimMask;
+    self.scanDimMaskLayer = dimMask;
+
+    UIView *bracketHost = [[UIView alloc] init];
+    bracketHost.translatesAutoresizingMaskIntoConstraints = NO;
+    bracketHost.backgroundColor = [UIColor clearColor];
+    bracketHost.opaque = NO;
+    bracketHost.userInteractionEnabled = NO;
+    self.bracketContainer = bracketHost;
+    [self.view addSubview:bracketHost];
+
+    self.bracketBars = [NSMutableArray arrayWithCapacity:8];
+    for (NSInteger i = 0; i < 8; i++) {
+        UIView *seg = [[UIView alloc] init];
+        seg.backgroundColor = [UIColor colorWithWhite:0.94 alpha:1];
+        seg.layer.cornerRadius = 2.5;
+        seg.clipsToBounds = YES;
+        seg.userInteractionEnabled = NO;
+        [bracketHost addSubview:seg];
+        [self.bracketBars addObject:seg];
+    }
 
     UIView *header = [[UIView alloc] init];
     header.translatesAutoresizingMaskIntoConstraints = NO;
@@ -232,6 +271,16 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
         [cam.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
         [cam.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
 
+        [dim.topAnchor constraintEqualToAnchor:self.view.topAnchor],
+        [dim.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+        [dim.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+        [dim.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+
+        [bracketHost.topAnchor constraintEqualToAnchor:self.view.topAnchor],
+        [bracketHost.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+        [bracketHost.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+        [bracketHost.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+
         [header.topAnchor constraintEqualToAnchor:safe.topAnchor],
         [header.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
         [header.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
@@ -255,10 +304,97 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
         [torch.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
         [torch.widthAnchor constraintEqualToConstant:56],
         [torch.heightAnchor constraintEqualToConstant:56],
-        [torch.bottomAnchor constraintEqualToAnchor:safe.bottomAnchor constant:-10],
     ]];
+    NSLayoutConstraint *torchCy = [torch.centerYAnchor constraintEqualToAnchor:self.view.topAnchor constant:200.0];
+    self.torchCenterYConstraint = torchCy;
+    torchCy.active = YES;
     [header setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisVertical];
     [header setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisVertical];
+}
+
+- (void)layoutScanOverlayGeometry
+{
+    if (!self.scanDimView || !self.scanDimMaskLayer || self.bracketBars.count != 8) {
+        return;
+    }
+    const CGRect vb = self.scanDimView.bounds;
+    if (vb.size.width < 32 || vb.size.height < 32) {
+        return;
+    }
+
+    CGFloat sqSz = floor(MIN(vb.size.width, vb.size.height) * 0.72);
+    CGFloat sqX = (vb.size.width - sqSz) / 2.0;
+    CGFloat sqY = (vb.size.height - sqSz) / 2.0;
+
+    CGFloat headerBottom = CGRectGetMaxY(self.headerContainer.frame);
+    if (headerBottom < 8.0) {
+        headerBottom = 132.0 + self.view.safeAreaInsets.top;
+    }
+    sqY = MAX(sqY, headerBottom + 8.0);
+
+    /** Keep a band below the scan hole for the torch (avoids coupling hole layout to previous torch frame). */
+    const CGFloat kBottomBandForTorch = 80.0;
+    const CGFloat maxHoleBottom = vb.size.height - kBottomBandForTorch;
+    if (sqY + sqSz > maxHoleBottom) {
+        sqY = maxHoleBottom - sqSz;
+        sqY = MAX(sqY, headerBottom + 8.0);
+    }
+
+    sqX = MAX(8.0, MIN(sqX, vb.size.width - sqSz - 8.0));
+    sqY = MAX(headerBottom + 4.0, MIN(sqY, vb.size.height - sqSz - 8.0));
+
+    const CGRect hole = CGRectMake(sqX, sqY, sqSz, sqSz);
+
+    UIBezierPath *path = [UIBezierPath bezierPathWithRect:vb];
+    [path appendPath:[UIBezierPath bezierPathWithRect:hole]];
+    self.scanDimMaskLayer.frame = vb;
+    self.scanDimMaskLayer.path = path.CGPath;
+
+    const NSInteger bracketThick = 5;
+    const NSInteger bracketLen = MAX(28, (NSInteger)floor(sqSz * 0.13));
+    const CGFloat r = bracketThick * 0.5;
+
+    void (^setBar)(NSInteger, CGFloat, CGFloat, CGFloat, CGFloat) = ^(NSInteger idx, CGFloat x, CGFloat y, CGFloat w, CGFloat h) {
+        if (idx < 0 || idx >= 8) {
+            return;
+        }
+        UIView *v = self.bracketBars[(NSUInteger)idx];
+        v.frame = CGRectMake(x, y, w, h);
+        v.layer.cornerRadius = r;
+    };
+
+    const CGFloat x0 = hole.origin.x;
+    const CGFloat y0 = hole.origin.y;
+    const CGFloat s = hole.size.width;
+
+    setBar(0, x0, y0, bracketLen, bracketThick);
+    setBar(1, x0, y0, bracketThick, bracketLen);
+
+    setBar(2, x0 + s - bracketLen, y0, bracketLen, bracketThick);
+    setBar(3, x0 + s - bracketThick, y0, bracketThick, bracketLen);
+
+    setBar(4, x0, y0 + s - bracketThick, bracketLen, bracketThick);
+    setBar(5, x0, y0 + s - bracketLen, bracketThick, bracketLen);
+
+    setBar(6, x0 + s - bracketLen, y0 + s - bracketThick, bracketLen, bracketThick);
+    setBar(7, x0 + s - bracketThick, y0 + s - bracketLen, bracketThick, bracketLen);
+
+    /** Torch vertically centered between scan hole bottom and overlay bottom (top of Qt tab strip below window). */
+    if (self.torchCenterYConstraint && self.torchButton) {
+        const CGFloat holeBottom = CGRectGetMaxY(hole);
+        const CGFloat bandBottom = vb.size.height;
+        const CGFloat torchH = 56.0;
+        CGFloat torchCenterY = (holeBottom + bandBottom) * 0.5;
+        const CGFloat minC = holeBottom + torchH * 0.5 + 6.0;
+        const CGFloat maxC = bandBottom - torchH * 0.5 - MAX(6.0, self.view.safeAreaInsets.bottom);
+        torchCenterY = MAX(minC, MIN(maxC, torchCenterY));
+        if (minC > maxC) {
+            torchCenterY = (minC + maxC) * 0.5;
+        }
+        const CGFloat hdr = headerBottom + torchH * 0.5 + 10.0;
+        torchCenterY = MAX(torchCenterY, hdr);
+        self.torchCenterYConstraint.constant = torchCenterY;
+    }
 }
 
 - (void)backTapped
@@ -289,6 +425,13 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
     [super viewDidLayoutSubviews];
     if (self.previewLayer && self.cameraContainer) {
         self.previewLayer.frame = self.cameraContainer.bounds;
+    }
+    [self layoutScanOverlayGeometry];
+    if (self.scanDimView) {
+        [self.view bringSubviewToFront:self.scanDimView];
+    }
+    if (self.bracketContainer) {
+        [self.view bringSubviewToFront:self.bracketContainer];
     }
     if (self.headerContainer) {
         [self.view bringSubviewToFront:self.headerContainer];

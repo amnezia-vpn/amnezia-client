@@ -168,6 +168,9 @@ PageType {
         if (!GC.isMobile()) {
             return
         }
+        if (!root.visible) {
+            return
+        }
         console.warn("[PairingQrSend] startMobileScanner Qt.platform.os=", Qt.platform.os,
                        "iosNativePairingQrOverlayBuild=", PairingUiController.iosNativePairingQrOverlayBuild,
                        "useIosNativePairingQrOverlay=", root.useIosNativePairingQrOverlay)
@@ -264,7 +267,7 @@ PageType {
     onPairingWizardStepChanged: {
         if (pairingWizardStep !== 0) {
             stopMobileScanner()
-        } else {
+        } else if (root.visible) {
             Qt.callLater(startMobileScanner)
         }
     }
