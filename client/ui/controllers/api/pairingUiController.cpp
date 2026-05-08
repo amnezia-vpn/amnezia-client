@@ -25,7 +25,9 @@ namespace
 {
 constexpr auto kGenerateQrPath = "%1api/v1/generate_qr";
 constexpr auto kScanQrPath = "%1api/v1/scan_qr";
+constexpr auto kGatewayProbePath = "%1v1/news";
 constexpr int kPairingRetryMaxAttempts = 3;
+constexpr int kGatewayProbeTimeoutMsecs = 3000;
 
 bool isPairingRetriableError(ErrorCode code)
 {
@@ -280,6 +282,26 @@ void PairingUiController::setPhoneBusy(bool busy)
     }
     m_phonePairingBusy = busy;
     emit phonePairingBusyChanged();
+}
+
+bool PairingUiController::canOpenTvQrPairingPage()
+{
+    if (!m_appSettingsRepository) {
+        emit errorOccurred(ErrorCode::InternalError);
+        return false;
+    }
+
+    const bool isTestPurchase = false;
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+                                        m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), kGatewayProbeTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
+    QByteArray responseBody;
+    const ErrorCode err = gatewayController.post(QString::fromLatin1(kGatewayProbePath), QJsonObject {}, responseBody);
+    if (err != ErrorCode::NoError) {
+        emit errorOccurred(err);
+        return false;
+    }
+    return true;
 }
 
 void PairingUiController::resetTvQrDisplay()

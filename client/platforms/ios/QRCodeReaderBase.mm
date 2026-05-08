@@ -14,6 +14,7 @@
 @property (nonatomic) QRCodeReader* qrCodeReader;
 @property (nonatomic, strong) AVCaptureSession *captureSession;
 @property (nonatomic, strong) AVCaptureVideoPreviewLayer *videoPreviewPlayer;
+@property (nonatomic) dispatch_queue_t sessionQueue;
 @end
 
 
@@ -23,6 +24,9 @@
     [super viewDidLoad];
 
     _captureSession = nil;
+    if (!_sessionQueue) {
+        _sessionQueue = dispatch_queue_create("org.amnezia.qr.session", DISPATCH_QUEUE_SERIAL);
+    }
 }
 
 - (void)setQrCodeReader: (QRCodeReader*)value {
@@ -48,9 +52,10 @@
     AVCaptureMetadataOutput *capturedMetadataOutput = [[AVCaptureMetadataOutput alloc] init];
     [_captureSession addOutput:capturedMetadataOutput];
 
-    dispatch_queue_t dispatchQueue;
-    dispatchQueue = dispatch_queue_create("myQueue", NULL);
-    [capturedMetadataOutput setMetadataObjectsDelegate: self queue: dispatchQueue];
+    if (!_sessionQueue) {
+        _sessionQueue = dispatch_queue_create("org.amnezia.qr.session", DISPATCH_QUEUE_SERIAL);
+    }
+    [capturedMetadataOutput setMetadataObjectsDelegate: self queue: _sessionQueue];
     [capturedMetadataOutput setMetadataObjectTypes: [NSArray arrayWithObject:AVMetadataObjectTypeQRCode]];
 
     _videoPreviewPlayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession: _captureSession];
@@ -69,7 +74,10 @@
     CALayer* layer = [UIApplication sharedApplication].keyWindow.layer;
     [layer addSublayer: _videoPreviewPlayer];
 
-    [_captureSession startRunning];
+    AVCaptureSession *session = _captureSession;
+    dispatch_async(_sessionQueue, ^{
+        [session startRunning];
+    });
 
     NSLog(@"[QRCodeReader] startReading OK frame=(%.1f,%.1f,%.1f,%.1f) statusBar=%.1f",
           cameraCGRect.origin.x, cameraCGRect.origin.y, cameraCGRect.size.width, cameraCGRect.size.height, statusBarHeight);
@@ -79,7 +87,10 @@
 
 - (void)stopReading {
     if (_captureSession) {
-        [_captureSession stopRunning];
+        AVCaptureSession *session = _captureSession;
+        dispatch_async(_sessionQueue, ^{
+            [session stopRunning];
+        });
         _captureSession = nil;
     }
     if (_videoPreviewPlayer) {

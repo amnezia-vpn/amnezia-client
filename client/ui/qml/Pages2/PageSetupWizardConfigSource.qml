@@ -353,7 +353,12 @@ PageType {
         property string imageSource: "qrc:/images/controls/folder-search-2.svg"
         property bool isVisible: true
         property var handler: function() {
-            PageController.goToPage(PageEnum.PageSetupWizardApiQrPairingReceive)
+            PageController.showBusyIndicator(true)
+            var result = PairingUiController.canOpenTvQrPairingPage()
+            PageController.showBusyIndicator(false)
+            if (result) {
+                PageController.goToPage(PageEnum.PageSetupWizardApiQrPairingReceive)
+            }
         }
     }
 

@@ -33,12 +33,15 @@ PageType {
         target: PairingUiController
 
         function onPhonePairingSucceeded() {
+            const serverIndex = ServersUiController.getProcessedServerIndex()
+            if (serverIndex < 0) {
+                return
+            }
+            SubscriptionUiController.getAccountInfo(serverIndex, true)
+            SubscriptionUiController.updateApiDevicesModel()
             if (!root.visible) {
                 return
             }
-            const serverIndex = ServersUiController.getProcessedServerIndex()
-            SubscriptionUiController.getAccountInfo(serverIndex, true)
-            SubscriptionUiController.updateApiDevicesModel()
             const label = PairingUiController.lastSuccessfulPhonePairingDisplayName
             if (label.length > 0) {
                 PageController.showNotificationMessage(

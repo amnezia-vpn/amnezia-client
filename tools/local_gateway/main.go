@@ -32,6 +32,7 @@ var (
 	mu       sync.Mutex
 	requests = map[string][]time.Time{} // installation_uuid -> timestamps (sliding window simplified: count in session)
 	sessions = map[string]*pairingSession{}
+	issued   = map[string]issuedConfigInfo{} // installation_uuid -> issued config info shown in /v1/account_info
 
 	// Configured from flags / env in main().
 	pairingSessionTTL    = 30 * time.Second
@@ -70,11 +71,31 @@ type pairingResult struct {
 }
 
 type pairingSession struct {
-	QRUUID    string
-	ExpiresAt time.Time
-	Done       chan struct{}
-	Result     *pairingResult
-	Completed  bool
+	QRUUID             string
+	DesktopInstallUUID string
+	DesktopOSVersion   string
+	ExpiresAt          time.Time
+	Done               chan struct{}
+	Result             *pairingResult
+	Completed          bool
+}
+
+type issuedConfigInfo struct {
+	InstallationUUID  string `json:"installation_uuid"`
+	WorkerLastUpdated string `json:"worker_last_updated"`
+	LastDownloaded    string `json:"last_downloaded"`
+	SourceType        string `json:"source_type"`
+	OSVersion         string `json:"os_version"`
+	ServerCountryCode string `json:"server_country_code"`
+	ServerCountryName string `json:"server_country_name"`
+}
+
+func stringFromMap(m map[string]any, key string) string {
+	if m == nil {
+		return ""
+	}
+	v, _ := m[key].(string)
+	return strings.TrimSpace(v)
 }
 
 func writeJSON(w http.ResponseWriter, status int, body any) {
@@ -184,9 +205,11 @@ func handleGenerateQR(w http.ResponseWriter, r *http.Request) {
 	}
 
 	session := &pairingSession{
-		QRUUID:    req.QRUUID,
-		ExpiresAt: time.Now().Add(pairingSessionTTL),
-		Done:      make(chan struct{}),
+		QRUUID:             req.QRUUID,
+		DesktopInstallUUID: req.InstallationUUID,
+		DesktopOSVersion:   req.OSVersion,
+		ExpiresAt:          time.Now().Add(pairingSessionTTL),
+		Done:               make(chan struct{}),
 	}
 
 	mu.Lock()
@@ -276,12 +299,44 @@ func handleScanQR(w http.ResponseWriter, r *http.Request) {
 		ServiceInfo:    req.ServiceInfo,
 		SupportedProto: req.SupportedProto,
 	}
+	nowISO := time.Now().UTC().Format(time.RFC3339)
+	countryCode := stringFromMap(req.ServiceInfo, "server_country_code")
+	if countryCode == "" {
+		countryCode = stringFromMap(req.ServiceInfo, "country_code")
+	}
+	if countryCode == "" {
+		countryCode = "ZZ"
+	}
+	countryName := stringFromMap(req.ServiceInfo, "server_country_name")
+	if countryName == "" {
+		countryName = stringFromMap(req.ServiceInfo, "country_name")
+	}
+	if countryName == "" {
+		countryName = "Mock Country"
+	}
+	desktopUUID := strings.TrimSpace(session.DesktopInstallUUID)
+	if desktopUUID == "" {
+		desktopUUID = strings.TrimSpace(req.InstallationUUID)
+	}
+	desktopOS := strings.TrimSpace(session.DesktopOSVersion)
+	if desktopOS == "" {
+		desktopOS = strings.TrimSpace(req.OSVersion)
+	}
+	issued[desktopUUID] = issuedConfigInfo{
+		InstallationUUID:  desktopUUID,
+		WorkerLastUpdated: nowISO,
+		LastDownloaded:    nowISO,
+		SourceType:        "gateway_account",
+		OSVersion:         desktopOS,
+		ServerCountryCode: countryCode,
+		ServerCountryName: countryName,
+	}
 	session.Completed = true
 	close(session.Done)
 	mu.Unlock()
 
-	log.Printf("pairing COMPLETED uuid=%s phone_install=%s config_len=%d proto_count=%d",
-		shortID(req.QRUUID), shortID(req.InstallationUUID), len(req.Config), len(req.SupportedProto))
+	log.Printf("pairing COMPLETED uuid=%s phone_install=%s desktop_install=%s config_len=%d proto_count=%d",
+		shortID(req.QRUUID), shortID(req.InstallationUUID), shortID(desktopUUID), len(req.Config), len(req.SupportedProto))
 	writeJSON(w, http.StatusOK, map[string]string{"message": "OK"})
 }
 
@@ -442,17 +497,27 @@ func handleAccountInfo(w http.ResponseWriter, r *http.Request) {
 	}
 	drainBody(r)
 
+	mu.Lock()
+	issuedConfigs := make([]issuedConfigInfo, 0, len(issued))
+	for _, cfg := range issued {
+		issuedConfigs = append(issuedConfigs, cfg)
+	}
+	mu.Unlock()
+	sort.Slice(issuedConfigs, func(i, j int) bool {
+		return issuedConfigs[i].InstallationUUID < issuedConfigs[j].InstallationUUID
+	})
+
 	// Keys match client/core/utils/constants/apiKeys.h (snake_case).
 	endDate := time.Now().UTC().AddDate(1, 0, 0).Format(time.RFC3339)
 	resp := map[string]any{
-		"active_device_count":      1,
+		"active_device_count":      len(issuedConfigs),
 		"max_device_count":         5,
 		"subscription_end_date":    endDate,
 		"subscription_description": "Local mock (tools/local_gateway)",
 		"is_renewal_available":     false,
 		"supported_protocols":      []string{"awg", "vless"},
 		"available_countries":      []any{},
-		"issued_configs":           []any{},
+		"issued_configs":           issuedConfigs,
 		"support_info": map[string]any{
 			"telegram":      "amnezia_support",
 			"email":         "support@example.com",

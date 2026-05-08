@@ -61,6 +61,8 @@ public:
 #endif
 
 public slots:
+    /** Fast preflight before opening receive QR page; emits errorOccurred on failure. */
+    bool canOpenTvQrPairingPage();
     void startTvQrSession();
     void cancelTvQrSession();
     /** TV receive + phone send: call when leaving QR pairing (back / pop) so long-poll state does not stick. */
