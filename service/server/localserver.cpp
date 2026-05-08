@@ -114,6 +114,9 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
 #ifdef Q_OS_WIN
     recoverWindowsNetworkState(daemon, "service startup");
+    QTimer::singleShot(kWindowsWakeRecoveryDelayMs, this, [this]() {
+        recoverWindowsNetworkState(daemon, "delayed service startup");
+    });
 #endif
 
     auto retriesLeft = QSharedPointer<int>::create(kKillSwitchInitMaxRetries);
@@ -148,23 +151,47 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 #ifdef Q_OS_LINUX
     // Signal handling for a proper shutdown.
     QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { LinuxDaemon::instance()->deactivate(); });
+                     this, [this]() { shutdown(); });
 #endif
 
 #ifdef Q_OS_MAC
     // Signal handling for a proper shutdown.
     QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { MacOSDaemon::instance()->deactivate(); });
+                     this, [this]() { shutdown(); });
 #endif
 
 #ifdef Q_OS_WIN
     // Signal handling for a proper shutdown.
     QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { WindowsDaemon::instance()->deactivate(); });
+                     this, [this]() { shutdown(); });
 #endif
 }
 
 LocalServer::~LocalServer()
 {
+    shutdown();
     qDebug() << "Local server stopped";
+}
+
+void LocalServer::shutdown()
+{
+    if (m_shutdownStarted) {
+        return;
+    }
+    m_shutdownStarted = true;
+
+    logger.info() << "LocalServer shutdown: cleaning up VPN network state";
+
+#ifdef Q_OS_LINUX
+    LinuxDaemon::instance()->deactivate();
+#endif
+
+#ifdef Q_OS_MAC
+    MacOSDaemon::instance()->deactivate();
+#endif
+
+#ifdef Q_OS_WIN
+    daemon.deactivate();
+    recoverWindowsNetworkState(daemon, "service shutdown");
+#endif
 }
