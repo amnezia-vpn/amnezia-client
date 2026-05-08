@@ -2,14 +2,11 @@
 
 #include <QJsonDocument>
 #include <QSysInfo>
-#include <QUrl>
-
 #include "core/controllers/gatewayController.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/constants/apiKeys.h"
-#include "core/utils/networkUtilities.h"
 #include "version.h"
 
 using namespace amnezia;
@@ -21,22 +18,6 @@ constexpr auto kScanQrEndpoint = "%1api/v1/scan_qr";
 constexpr qsizetype kPairingMaxQrUuidChars = 128;
 constexpr qsizetype kPairingMaxVpnConfigChars = 256 * 1024;
 constexpr qsizetype kPairingMaxApiKeyChars = 8192;
-
-bool isLocalGatewayHost(const QString &gatewayUrl)
-{
-    if (gatewayUrl.contains(QStringLiteral("127.0.0.1"), Qt::CaseInsensitive)
-        || gatewayUrl.contains(QStringLiteral("localhost"), Qt::CaseInsensitive)
-        || gatewayUrl.contains(QStringLiteral("[::1]"), Qt::CaseInsensitive)
-        || gatewayUrl.contains(QStringLiteral("::1"), Qt::CaseInsensitive)) {
-        return true;
-    }
-#ifdef AMNEZIA_QR_PAIRING_ALLOW
-    const QUrl u(gatewayUrl);
-    return NetworkUtilities::hostIsPrivateLanAddress(u.host());
-#else
-    return false;
-#endif
-}
 
 ErrorCode applyGatewayOrOpenApiGenerateError(const QJsonObject &obj, PairingController::QrPairingConfigPayload &outPayload)
 {
@@ -76,6 +57,14 @@ ErrorCode applyGatewayOrOpenApiGenerateError(const QJsonObject &obj, PairingCont
 
 ErrorCode applyGatewayOrOpenApiScanError(const QJsonObject &obj)
 {
+    const QString msgProbe = obj.value(QStringLiteral("message")).toString();
+    if (msgProbe.contains(QStringLiteral("limit"), Qt::CaseInsensitive)
+        && (msgProbe.contains(QStringLiteral("device"), Qt::CaseInsensitive)
+            || msgProbe.contains(QStringLiteral("maximum"), Qt::CaseInsensitive)
+            || msgProbe.contains(QStringLiteral("max"), Qt::CaseInsensitive))) {
+        return ErrorCode::ApiConfigLimitError;
+    }
+
     ErrorCode apiStatus = apiUtils::errorCodeFromGatewayJsonHttpStatus(obj);
     if (apiStatus != ErrorCode::NoError) {
         return apiStatus;
@@ -127,10 +116,23 @@ ErrorCode PairingController::parseGenerateQrResponseBody(const QByteArray &respo
     return interpretGenerateQrJson(obj, outPayload);
 }
 
-ErrorCode PairingController::parseScanQrResponseBody(const QByteArray &responseBody)
+ErrorCode PairingController::parseScanQrResponseBody(const QByteArray &responseBody, QString *outOptionalDisplayName)
 {
+    if (outOptionalDisplayName) {
+        outOptionalDisplayName->clear();
+    }
     const QJsonObject obj = QJsonDocument::fromJson(responseBody).object();
-    return interpretScanQrJson(obj);
+    const ErrorCode err = interpretScanQrJson(obj);
+    if (err != ErrorCode::NoError) {
+        return err;
+    }
+    if (outOptionalDisplayName) {
+        const QString deviceName = obj.value(QStringLiteral("device_name")).toString().trimmed();
+        if (!deviceName.isEmpty()) {
+            *outOptionalDisplayName = deviceName;
+        }
+    }
+    return ErrorCode::NoError;
 }
 
 ErrorCode PairingController::validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey)
@@ -154,10 +156,6 @@ PairingController::PairingController(SecureAppSettingsRepository *appSettingsRep
 
 int PairingController::pairingLongPollTimeoutMsecs() const
 {
-    const QString endpoint = m_appSettingsRepository->getGatewayEndpoint();
-    if (isLocalGatewayHost(endpoint)) {
-        return 120 * 1000;
-    }
     return 30 * 1000;
 }
 

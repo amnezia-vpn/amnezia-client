@@ -377,20 +377,6 @@ PageType {
 
             LabelWithButtonType {
                 Layout.fillWidth: true
-
-                text: qsTr("Transfer by QR (send)")
-                descriptionText: qsTr("Scan the session QR from the receiving device and send this subscription via the gateway")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsApiQrPairingSend)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                Layout.fillWidth: true
                 Layout.topMargin: footer.isVisibleForAmneziaFree ? 0 : 32
 
                 text: qsTr("Support")

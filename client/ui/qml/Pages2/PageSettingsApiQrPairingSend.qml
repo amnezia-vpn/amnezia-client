@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import QRCodeReader 1.0
+import PageEnum 1.0
 import Style 1.0
 
 import "../Controls2"
@@ -13,19 +14,15 @@ import "../Components"
 PageType {
     id: root
 
-    property bool pairingCameraOpen: false
-    /** iOS AVFoundation can fire the same QR repeatedly; avoid stacking identical toasts. */
-    property int lastPairingScanToastClockMs: 0
+    /** 0 = scan QR, 1 = confirm before sending subscription */
+    property int pairingWizardStep: 0
+    /** True after optimistic close: keep request running in background while page is closing. */
+    property bool keepPhonePairingInBackgroundOnClose: false
 
-    function notifyPairingScanSuccess() {
-        const now = new Date().getTime()
-        if (now - root.lastPairingScanToastClockMs < 1600) {
-            return
-        }
-        root.lastPairingScanToastClockMs = now
-        PageController.showNotificationMessage(
-                    qsTr("QR session ID captured. Tap Send from current subscription to complete pairing."))
-    }
+    property bool pairingCameraOpen: false
+    property int lastInvalidPairingQrToastClockMs: 0
+    /** iOS may deliver many QR frames; guard duplicate step transitions. */
+    property bool addDeviceConfirmNavigationScheduled: false
 
     Timer {
         id: pairingCameraKickTimer
@@ -50,14 +47,25 @@ PageType {
         pairingQrReader.startReading()
     }
 
+    Component.onDestruction: {
+        if (!root.keepPhonePairingInBackgroundOnClose && !PairingUiController.phonePairingBusy) {
+            PairingUiController.cancelAllPairingActivity()
+        }
+    }
+
     Connections {
         target: root
         function onVisibleChanged() {
-            if (!root.visible) {
+            if (root.visible) {
+                root.addDeviceConfirmNavigationScheduled = false
+            } else {
                 pairingCameraKickTimer.stop()
                 pairingQrReader.stopReading()
                 root.pairingCameraOpen = false
-                PairingUiController.cancelAllPairingActivity()
+                root.pairingWizardStep = 0
+                if (!root.keepPhonePairingInBackgroundOnClose && !PairingUiController.phonePairingBusy) {
+                    PairingUiController.cancelAllPairingActivity()
+                }
             }
         }
     }
@@ -90,128 +98,197 @@ PageType {
     FlickableType {
         anchors.fill: parent
         contentHeight: layout.implicitHeight
+        interactive: contentHeight > height
 
         ColumnLayout {
             id: layout
             width: root.width
-            spacing: 8
+            spacing: 0
 
             BackButtonType {
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
-            }
-
-            Label {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 8
-                text: qsTr("Transfer subscription (QR)")
-                font.pixelSize: 28
-                font.bold: true
-                color: AmneziaStyle.color.paleGray
-                wrapMode: Text.Wrap
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                text: qsTr("Scan the session QR shown on the receiving device, then send this server’s Amnezia Premium configuration through the gateway.")
-                wrapMode: Text.Wrap
-            }
-
-            Label {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 16
-                text: qsTr("Send from this subscription")
-                font.pixelSize: 18
-                font.bold: true
-                color: AmneziaStyle.color.mutedGray
-            }
-
-            TextFieldWithHeaderType {
-                id: uuidField
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                headerText: qsTr("QR session UUID")
-                textField.placeholderText: qsTr("Paste UUID from the other device’s QR")
-            }
-
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                visible: Qt.platform.os === "android" || Qt.platform.os === "ios"
-                text: {
-                    if (Qt.platform.os === "ios" && root.pairingCameraOpen) {
-                        return qsTr("Hide camera")
-                    }
-                    return qsTr("Scan QR code")
-                }
-                enabled: !PairingUiController.phonePairingBusy
-                clickedFunc: function() {
-                    if (Qt.platform.os === "android") {
-                        PairingUiController.openPairingQrScanner()
+                backButtonFunction: function() {
+                    if (root.pairingWizardStep === 1) {
+                        PairingUiController.cancelAllPairingActivity()
+                        root.pairingWizardStep = 0
+                        root.addDeviceConfirmNavigationScheduled = false
                     } else {
-                        root.pairingCameraOpen = !root.pairingCameraOpen
+                        PageController.closePage()
                     }
                 }
             }
 
-            Item {
-                id: cameraSlot
+            StackLayout {
+                id: stepStack
                 Layout.fillWidth: true
-                Layout.preferredHeight: (root.pairingCameraOpen && Qt.platform.os === "ios") ? 220 : 0
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                visible: Layout.preferredHeight > 0
-                clip: true
+                currentIndex: root.pairingWizardStep
 
-                QRCodeReader {
-                    id: pairingQrReader
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
 
-                    onCodeReaded: function(code) {
-                        if (PairingUiController.applyScannedTextAsPairingUuid(code)) {
-                            pairingQrReader.stopReading()
-                            root.pairingCameraOpen = false
-                            root.notifyPairingScanSuccess()
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.topMargin: 8
+                        text: qsTr("Add device via QR")
+                        font.pixelSize: 28
+                        font.bold: true
+                        color: AmneziaStyle.color.paleGray
+                        wrapMode: Text.Wrap
+                    }
+
+                    ParagraphTextType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        text: qsTr("Scan the session QR shown on the device you want to add. You will confirm before the subscription is sent.")
+                        wrapMode: Text.Wrap
+                    }
+
+                    BasicButtonType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.topMargin: 16
+                        visible: Qt.platform.os === "android" || Qt.platform.os === "ios"
+                        text: {
+                            if (Qt.platform.os === "ios" && root.pairingCameraOpen) {
+                                return qsTr("Hide camera")
+                            }
+                            return qsTr("Scan QR code")
+                        }
+                        enabled: !PairingUiController.phonePairingBusy
+                        clickedFunc: function() {
+                            if (Qt.platform.os === "android") {
+                                PairingUiController.openPairingQrScanner()
+                            } else {
+                                root.pairingCameraOpen = !root.pairingCameraOpen
+                            }
                         }
                     }
-                }
 
-                onVisibleChanged: {
-                    if (!visible) {
-                        pairingQrReader.stopReading()
-                        return
+                    Item {
+                        id: cameraSlot
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: (root.pairingCameraOpen && Qt.platform.os === "ios") ? 220 : 0
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        visible: Layout.preferredHeight > 0
+                        clip: true
+
+                        QRCodeReader {
+                            id: pairingQrReader
+
+                            onCodeReaded: function(code) {
+                                if (root.addDeviceConfirmNavigationScheduled) {
+                                    return
+                                }
+                                if (PairingUiController.applyScannedTextAsPairingUuid(code)) {
+                                    root.addDeviceConfirmNavigationScheduled = true
+                                    pairingQrReader.stopReading()
+                                    root.pairingCameraOpen = false
+                                } else {
+                                    const now = new Date().getTime()
+                                    if (now - root.lastInvalidPairingQrToastClockMs >= 2200) {
+                                        root.lastInvalidPairingQrToastClockMs = now
+                                        PageController.showNotificationMessage(
+                                                    qsTr("This QR code is not a pairing session. Show the code from the other device’s “receive config” screen."))
+                                    }
+                                }
+                            }
+                        }
+
+                        onVisibleChanged: {
+                            if (!visible) {
+                                pairingQrReader.stopReading()
+                                return
+                            }
+                            if (Qt.platform.os === "ios") {
+                                pairingCameraKickTimer.restart()
+                            }
+                        }
                     }
-                    if (Qt.platform.os === "ios") {
-                        pairingCameraKickTimer.restart()
+
+                    ParagraphTextType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
+                        visible: root.pairingWizardStep === 0 && PairingUiController.phoneStatusMessage.length > 0
+                        text: PairingUiController.phoneStatusMessage
+                        wrapMode: Text.Wrap
                     }
                 }
-            }
 
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                text: PairingUiController.phonePairingBusy ? qsTr("Sending…") : qsTr("Send from current subscription")
-                enabled: !PairingUiController.phonePairingBusy
-                clickedFunc: function() {
-                    PairingUiController.submitPhonePairing(uuidField.textField.text, ServersUiController.getProcessedServerIndex())
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 16
+
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.topMargin: 8
+                        text: qsTr("Add a new device to the subscription?")
+                        font.pixelSize: 28
+                        font.bold: true
+                        color: AmneziaStyle.color.paleGray
+                        wrapMode: Text.Wrap
+                    }
+
+                    ParagraphTextType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        text: qsTr("Devices available with Amnezia Premium: %1").arg(ApiAccountInfoModel.data("availableDeviceSlots"))
+                        wrapMode: Text.Wrap
+                    }
+
+                    BasicButtonType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.topMargin: 16
+
+                        text: qsTr("Add Device")
+                        defaultColor: AmneziaStyle.color.paleGray
+                        hoveredColor: AmneziaStyle.color.lightGray
+                        pressedColor: AmneziaStyle.color.mutedGray
+                        textColor: AmneziaStyle.color.midnightBlack
+
+                        clickedFunc: function() {
+                            root.keepPhonePairingInBackgroundOnClose = true
+                            PairingUiController.submitPhonePairing(PairingUiController.pendingPhonePairingUuid,
+                                                                   ServersUiController.getProcessedServerIndex())
+                            Qt.callLater(function() {
+                                PageController.closePage()
+                            })
+                        }
+                    }
+
+                    BasicButtonType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        defaultColor: AmneziaStyle.color.transparent
+                        hoveredColor: AmneziaStyle.color.translucentWhite
+                        pressedColor: AmneziaStyle.color.sheerWhite
+                        textColor: AmneziaStyle.color.paleGray
+                        borderColor: AmneziaStyle.color.paleGray
+                        borderWidth: 1
+                        text: qsTr("Cancel")
+
+                        clickedFunc: function() {
+                            PairingUiController.cancelAllPairingActivity()
+                            root.pairingWizardStep = 0
+                            root.addDeviceConfirmNavigationScheduled = false
+                        }
+                    }
+
                 }
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
-                visible: PairingUiController.phoneStatusMessage.length > 0
-                text: PairingUiController.phoneStatusMessage
-                wrapMode: Text.Wrap
             }
         }
     }
@@ -219,17 +296,17 @@ PageType {
     Connections {
         target: PairingUiController
 
-        function onPhonePairingSucceeded() {
-            root.pairingCameraOpen = false
-            pairingQrReader.stopReading()
-            PageController.showNotificationMessage(qsTr("Configuration sent"))
-            Qt.callLater(function() {
-                PageController.closePage()
-            })
-        }
-
         function onPairingUuidFromScan(uuid) {
-            uuidField.textField.text = uuid
+            if (root.addDeviceConfirmNavigationScheduled) {
+                return
+            }
+            root.addDeviceConfirmNavigationScheduled = true
+            pairingQrReader.stopReading()
+            root.pairingCameraOpen = false
+            PairingUiController.pendingPhonePairingUuid = uuid
+            Qt.callLater(function() {
+                root.pairingWizardStep = 1
+            })
         }
     }
 }

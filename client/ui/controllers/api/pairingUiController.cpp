@@ -1,8 +1,10 @@
 #include "pairingUiController.h"
 
+#include <QCoreApplication>
 #include <QDataStream>
 #include <QDebug>
 #include <QIODevice>
+#include <QMetaObject>
 #include <QRegularExpression>
 #include <QTimer>
 #include <QUuid>
@@ -117,6 +119,25 @@ PairingUiController::~PairingUiController()
 #endif
 }
 
+void PairingUiController::setPendingPhonePairingUuid(const QString &uuid)
+{
+    const QString trimmed = uuid.trimmed();
+    if (m_pendingPhonePairingUuid == trimmed) {
+        return;
+    }
+    m_pendingPhonePairingUuid = trimmed;
+    emit pendingPhonePairingUuidChanged();
+}
+
+void PairingUiController::clearPendingPhonePairingUuid()
+{
+    if (m_pendingPhonePairingUuid.isEmpty()) {
+        return;
+    }
+    m_pendingPhonePairingUuid.clear();
+    emit pendingPhonePairingUuidChanged();
+}
+
 void PairingUiController::setTvPairingUiPhase(int phase)
 {
     if (m_tvPairingUiPhase == phase) {
@@ -172,9 +193,25 @@ bool PairingUiController::applyScannedTextAsPairingUuid(const QString &raw)
 bool PairingUiController::tryConsumeAndroidQrScan(const QString &code)
 {
     if (!g_pairingUiForAndroidQr) {
+        qWarning() << "[PairingUi] tryConsumeAndroidQrScan: no controller (g_pairingUiForAndroidQr null)";
         return false;
     }
-    return g_pairingUiForAndroidQr->applyScannedTextAsPairingUuid(code);
+    PairingUiController *const ctl = g_pairingUiForAndroidQr;
+    bool consumed = false;
+    const QString codeCopy = code;
+    QObject *const app = QCoreApplication::instance();
+    if (!app) {
+        return false;
+    }
+    // CameraActivity / ML Kit may invoke JNI from a non-Qt thread. Signals and QML must run on the Qt GUI thread.
+    QMetaObject::invokeMethod(
+            app,
+            [ctl, codeCopy, &consumed]() {
+                consumed = ctl->applyScannedTextAsPairingUuid(codeCopy);
+            },
+            Qt::BlockingQueuedConnection);
+    qInfo() << "[PairingUi] tryConsumeAndroidQrScan consumed=" << consumed << "rawLen=" << codeCopy.size();
+    return consumed;
 }
 #endif
 
@@ -418,6 +455,12 @@ void PairingUiController::cancelAllPairingActivity()
     m_phoneStatusMessage.clear();
     emit phoneStatusMessageChanged();
 
+    clearPendingPhonePairingUuid();
+    if (!m_lastSuccessfulPhonePairingDisplayName.isEmpty()) {
+        m_lastSuccessfulPhonePairingDisplayName.clear();
+        emit lastSuccessfulPhonePairingDisplayNameChanged();
+    }
+
     cancelTvQrSession();
 }
 
@@ -484,6 +527,11 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     ++m_phoneSessionGeneration;
     const quint64 phoneGeneration = m_phoneSessionGeneration;
 
+    if (!m_lastSuccessfulPhonePairingDisplayName.isEmpty()) {
+        m_lastSuccessfulPhonePairingDisplayName.clear();
+        emit lastSuccessfulPhonePairingDisplayNameChanged();
+    }
+
     m_phoneStatusMessage = tr("Sending…");
     emit phoneStatusMessageChanged();
     setPhoneBusy(true);
@@ -533,15 +581,29 @@ void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, cons
                          m_phoneNetworkReply.clear();
 
                          ErrorCode logicalErr = result.first;
+                         QString scanDisplayName;
                          if (logicalErr == ErrorCode::NoError) {
-                             logicalErr = PairingController::parseScanQrResponseBody(result.second);
+                             logicalErr = PairingController::parseScanQrResponseBody(result.second, &scanDisplayName);
                          }
 
                          if (logicalErr == ErrorCode::NoError) {
                              setPhoneBusy(false);
                              m_phoneStatusMessage = tr("Sent successfully");
                              emit phoneStatusMessageChanged();
+                             if (m_lastSuccessfulPhonePairingDisplayName != scanDisplayName) {
+                                 m_lastSuccessfulPhonePairingDisplayName = scanDisplayName;
+                                 emit lastSuccessfulPhonePairingDisplayNameChanged();
+                             }
+                             clearPendingPhonePairingUuid();
                              emit phonePairingSucceeded();
+                             return;
+                         }
+
+                         if (logicalErr == ErrorCode::ApiConfigLimitError) {
+                             setPhoneBusy(false);
+                             m_phoneStatusMessage.clear();
+                             emit phoneStatusMessageChanged();
+                             emit phonePairingRejectedDeviceLimit();
                              return;
                          }
 

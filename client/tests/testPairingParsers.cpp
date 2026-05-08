@@ -61,6 +61,26 @@ private slots:
         QCOMPARE(PairingController::parseScanQrResponseBody(body), ErrorCode::NoError);
     }
 
+    void scanQr_messageOk_extractsDeviceName()
+    {
+        QJsonObject o;
+        o[QStringLiteral("message")] = QStringLiteral("OK");
+        o[QStringLiteral("device_name")] = QStringLiteral("TestPhone");
+        const QByteArray body = QJsonDocument(o).toJson();
+        QString name;
+        QCOMPARE(PairingController::parseScanQrResponseBody(body, &name), ErrorCode::NoError);
+        QCOMPARE(name, QStringLiteral("TestPhone"));
+    }
+
+    void scanQr_deviceLimitMessage()
+    {
+        QJsonObject o;
+        o[QStringLiteral("message")] = QStringLiteral("Device limit reached for subscription");
+        const QByteArray body = QJsonDocument(o).toJson();
+
+        QCOMPARE(PairingController::parseScanQrResponseBody(body), ErrorCode::ApiConfigLimitError);
+    }
+
     void scanQr_http403()
     {
         QJsonObject o;

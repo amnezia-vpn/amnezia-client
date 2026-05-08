@@ -29,6 +29,10 @@ class PairingUiController : public QObject
 
     Q_PROPERTY(bool phonePairingBusy READ phonePairingBusy NOTIFY phonePairingBusyChanged)
     Q_PROPERTY(QString phoneStatusMessage READ phoneStatusMessage NOTIFY phoneStatusMessageChanged)
+    Q_PROPERTY(QString pendingPhonePairingUuid READ pendingPhonePairingUuid WRITE setPendingPhonePairingUuid NOTIFY
+                       pendingPhonePairingUuidChanged)
+    Q_PROPERTY(QString lastSuccessfulPhonePairingDisplayName READ lastSuccessfulPhonePairingDisplayName NOTIFY
+                       lastSuccessfulPhonePairingDisplayNameChanged)
     /** TV flow for QA: 0=idle, 1=waitingForPeer, 2=error, 3=sessionExpired */
     Q_PROPERTY(int tvPairingUiPhase READ tvPairingUiPhase NOTIFY tvPairingUiPhaseChanged)
 
@@ -47,6 +51,9 @@ public:
 
     bool phonePairingBusy() const;
     QString phoneStatusMessage() const;
+    QString pendingPhonePairingUuid() const { return m_pendingPhonePairingUuid; }
+    void setPendingPhonePairingUuid(const QString &uuid);
+    QString lastSuccessfulPhonePairingDisplayName() const { return m_lastSuccessfulPhonePairingDisplayName; }
     int tvPairingUiPhase() const { return m_tvPairingUiPhase; }
 
 #if defined(Q_OS_ANDROID)
@@ -68,6 +75,8 @@ public slots:
     /** If \a raw contains a session UUID (not vpn://), emits pairingUuidFromScan and returns true. */
     bool applyScannedTextAsPairingUuid(const QString &raw);
 
+    Q_INVOKABLE void clearPendingPhonePairingUuid();
+
 signals:
     void errorOccurred(amnezia::ErrorCode errorCode);
     void tvQrCodesChanged();
@@ -76,9 +85,13 @@ signals:
     void tvStatusMessageChanged();
     void phonePairingBusyChanged();
     void phoneStatusMessageChanged();
+    void pendingPhonePairingUuidChanged();
+    void lastSuccessfulPhonePairingDisplayNameChanged();
 
     void tvPairingConfigReceived();
     void phonePairingSucceeded();
+    /** scan_qr rejected: subscription device quota full (no generic error dialog). */
+    void phonePairingRejectedDeviceLimit();
 
     void pairingUuidFromScan(const QString &uuid);
     void tvPairingUiPhaseChanged();
@@ -109,6 +122,8 @@ private:
 
     bool m_phonePairingBusy = false;
     QString m_phoneStatusMessage;
+    QString m_pendingPhonePairingUuid;
+    QString m_lastSuccessfulPhonePairingDisplayName;
     QPointer<QFutureWatcher<QPair<amnezia::ErrorCode, QByteArray>>> m_phoneWatcher;
     QPointer<QNetworkReply> m_phoneNetworkReply;
     quint64 m_phoneSessionGeneration { 0 };

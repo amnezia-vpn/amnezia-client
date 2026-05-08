@@ -87,6 +87,7 @@
         <file>Pages2/PageSettingsApiServerInfo.qml</file>
         <file>Pages2/PageSettingsApiQrPairingDev.qml</file>
         <file>Pages2/PageSettingsApiQrPairingSend.qml</file>
+        <file>Pages2/PageSettingsApiDeviceLimit.qml</file>
         <file>Pages2/PageSetupWizardApiQrPairingReceive.qml</file>
         <file>Pages2/PageSettingsApplication.qml</file>
         <file>Pages2/PageSettingsAppSplitTunneling.qml</file>

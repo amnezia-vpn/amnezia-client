@@ -19,6 +19,43 @@ import "../Components"
 PageType {
     id: root
 
+    function openAddDeviceViaQr() {
+        const maxC = ApiAccountInfoModel.data("maxDeviceCount")
+        const activeC = ApiAccountInfoModel.data("activeDeviceCount")
+        if (maxC > 0 && activeC >= maxC) {
+            PageController.goToPage(PageEnum.PageSettingsApiDeviceLimit)
+        } else {
+            PageController.goToPage(PageEnum.PageSettingsApiQrPairingSend)
+        }
+    }
+
+    Connections {
+        target: PairingUiController
+
+        function onPhonePairingSucceeded() {
+            if (!root.visible) {
+                return
+            }
+            const serverIndex = ServersUiController.getProcessedServerIndex()
+            SubscriptionUiController.getAccountInfo(serverIndex, true)
+            SubscriptionUiController.updateApiDevicesModel()
+            const label = PairingUiController.lastSuccessfulPhonePairingDisplayName
+            if (label.length > 0) {
+                PageController.showNotificationMessage(
+                            qsTr("%1 has been added to your subscription").arg(label))
+            } else {
+                PageController.showNotificationMessage(qsTr("New device has been added to your subscription"))
+            }
+        }
+
+        function onPhonePairingRejectedDeviceLimit() {
+            if (!root.visible) {
+                return
+            }
+            PageController.goToPage(PageEnum.PageSettingsApiDeviceLimit)
+        }
+    }
+
     ListViewType {
         id: listView
 
@@ -44,6 +81,41 @@ PageType {
 
                 headerText: qsTr("Active Devices")
                 descriptionText: qsTr("Manage currently connected devices")
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 20
+
+                implicitHeight: 52
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                textColor: AmneziaStyle.color.paleGray
+                borderColor: AmneziaStyle.color.paleGray
+                borderWidth: 1
+
+                text: qsTr("Add Device via QR Code")
+
+                clickedFunc: function() {
+                    root.openAddDeviceViaQr()
+                }
+            }
+
+            Label {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                font.pixelSize: 13
+                color: AmneziaStyle.color.mutedGray
+                text: qsTr("On the other device, tap + at the bottom, then choose Connect to Amnezia Premium")
             }
 
             WarningType {

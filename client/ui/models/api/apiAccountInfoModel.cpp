@@ -1,5 +1,7 @@
 #include "apiAccountInfoModel.h"
 
+#include <QtGlobal>
+
 #include <QDateTime>
 #include <QJsonObject>
 
@@ -106,6 +108,19 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     case IsInAppPurchaseRole: {
         return m_accountInfoData.isInAppPurchase;
     }
+    case ActiveDeviceCountRole: {
+        return m_accountInfoData.activeDeviceCount;
+    }
+    case MaxDeviceCountRole: {
+        return m_accountInfoData.maxDeviceCount;
+    }
+    case AvailableDeviceSlotsRole: {
+        if (m_accountInfoData.maxDeviceCount <= 0) {
+            return 1 << 20;
+        }
+        const int spare = m_accountInfoData.maxDeviceCount - m_accountInfoData.activeDeviceCount;
+        return qMax(0, spare);
+    }
     }
 
     return QVariant();
@@ -205,6 +220,9 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
     roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
     roles[IsInAppPurchaseRole] = "isInAppPurchase";
+    roles[ActiveDeviceCountRole] = "activeDeviceCount";
+    roles[MaxDeviceCountRole] = "maxDeviceCount";
+    roles[AvailableDeviceSlotsRole] = "availableDeviceSlots";
 
     return roles;
 }

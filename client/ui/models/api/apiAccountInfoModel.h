@@ -25,7 +25,10 @@ public:
         IsProtocolSelectionSupportedRole,
         IsSubscriptionExpiredRole,
         IsSubscriptionExpiringSoonRole,
-        IsInAppPurchaseRole
+        IsInAppPurchaseRole,
+        ActiveDeviceCountRole,
+        MaxDeviceCountRole,
+        AvailableDeviceSlotsRole
     };
 
     explicit ApiAccountInfoModel(QObject *parent = nullptr);

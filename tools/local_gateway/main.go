@@ -34,8 +34,8 @@ var (
 	sessions = map[string]*pairingSession{}
 
 	// Configured from flags / env in main().
-	pairingSessionTTL    = 120 * time.Second
-	longPollWaitLimit    = 120 * time.Second
+	pairingSessionTTL    = 30 * time.Second
+	longPollWaitLimit    = 30 * time.Second
 	rateLimitExcessAfter = 0 // Set to 5 to mimic "more than 5 requests per 24h". 0 = first amnezia-free request may return CAPTCHA.
 	// No trailing slash; used by POST /v1/updater_endpoint so remote clients (e.g. iOS) poll the Mac, not 127.0.0.1 on-device.
 	publicUpdaterBaseURL string
@@ -644,8 +644,8 @@ func main() {
 	publicFlag := flag.String("public-base", strings.TrimSpace(os.Getenv("LOCAL_GATEWAY_PUBLIC_BASE")),
 		"Base URL without trailing slash for /v1/updater_endpoint (required for iOS-on-LAN). Env: LOCAL_GATEWAY_PUBLIC_BASE")
 	autoPublic := flag.Bool("auto-public", true, "If public-base empty, derive http://<first-lan-ipv4>:port")
-	pairTTL := flag.Duration("pairing-ttl", 120*time.Second, "QR pairing session TTL")
-	longPoll := flag.Duration("long-poll", 120*time.Second, "Long-poll max wait for POST /api/v1/generate_qr")
+	pairTTL := flag.Duration("pairing-ttl", 30*time.Second, "QR pairing session TTL")
+	longPoll := flag.Duration("long-poll", 30*time.Second, "Long-poll max wait for POST /api/v1/generate_qr")
 	rateN := flag.Int("rate-limit-excess-after", 0, "Amnezia Free: allow N requests per 24h window before rate-limit/CAPTCHA (0=tight)")
 	flag.Parse()
 

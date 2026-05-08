@@ -32,7 +32,7 @@ public:
                                    const QJsonArray &supportedProtocols, const QString &apiKey) const;
 
     static amnezia::ErrorCode parseGenerateQrResponseBody(const QByteArray &responseBody, QrPairingConfigPayload &outPayload);
-    static amnezia::ErrorCode parseScanQrResponseBody(const QByteArray &responseBody);
+    static amnezia::ErrorCode parseScanQrResponseBody(const QByteArray &responseBody, QString *outOptionalDisplayName = nullptr);
 
     /** Length bounds before `scan_qr` (avoids huge JSON / abuse). */
     static amnezia::ErrorCode validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey);
