@@ -24,5 +24,9 @@
     <string name="notificationSettingsDialogMessage">To show notifications, you must enable notifications in the system settings</string>
     <string name="openNotificationSettings">Open notification settings</string>
 
+    <string name="cameraPermissionDialogTitle">Camera access</string>
+    <string name="cameraPermissionDialogMessage">To scan a QR code for device pairing, Amnezia VPN needs access to the camera.</string>
+    <string name="cameraPermissionContinue">Continue</string>
+
     <string name="tvNoFileBrowser">Please install a file management utility to browse files</string>
 </resources>

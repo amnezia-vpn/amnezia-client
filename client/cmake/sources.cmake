@@ -65,6 +65,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/utilities.h
     ${CLIENT_ROOT_DIR}/core/utils/managementServer.h
     ${CLIENT_ROOT_DIR}/core/utils/constants.h
+    ${CLIENT_ROOT_DIR}/platforms/ios/iosPairingCameraAccess.h
 )
 
 # Mozilla headres
@@ -155,6 +156,7 @@ set(SOURCES ${SOURCES}
 if(NOT IOS AND NOT MACOS_NE)
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/platforms/ios/QRCodeReaderBase.cpp
+        ${CLIENT_ROOT_DIR}/platforms/ios/iosPairingCameraAccess_stub.cpp
     )
 endif()
 

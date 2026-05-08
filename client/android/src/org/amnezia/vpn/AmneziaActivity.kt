@@ -73,6 +73,7 @@ private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
 private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
+private const val CHECK_CAMERA_PERMISSION_ACTION_CODE = 5
 
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
@@ -881,6 +882,66 @@ class AmneziaActivity : QtActivity() {
     fun isCameraPresent(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
 
     @Suppress("unused")
+    fun isCameraPermissionGranted(): Boolean =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+
+    @Suppress("unused")
+    fun requestCameraPermissionForQrPairing() {
+        if (isCameraPermissionGranted()) {
+            mainScope.launch {
+                qtInitialized.await()
+                QtAndroidController.onCameraPermissionResult(true)
+            }
+            return
+        }
+        runOnUiThread {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.cameraPermissionDialogTitle)
+                .setMessage(R.string.cameraPermissionDialogMessage)
+                .setNegativeButton(R.string.cancel) { _, _ ->
+                    mainScope.launch {
+                        qtInitialized.await()
+                        QtAndroidController.onCameraPermissionResult(false)
+                    }
+                }
+                .setPositiveButton(R.string.cameraPermissionContinue) { _, _ ->
+                    requestPermission(
+                        Manifest.permission.CAMERA,
+                        CHECK_CAMERA_PERMISSION_ACTION_CODE,
+                        PermissionRequestHandler(
+                            onSuccess = {
+                                mainScope.launch {
+                                    qtInitialized.await()
+                                    QtAndroidController.onCameraPermissionResult(true)
+                                }
+                            },
+                            onFail = {
+                                mainScope.launch {
+                                    qtInitialized.await()
+                                    QtAndroidController.onCameraPermissionResult(false)
+                                }
+                            },
+                            onAny = {}
+                        )
+                    )
+                }
+                .show()
+        }
+    }
+
+    @Suppress("unused")
+    fun openApplicationDetailsSettings() {
+        try {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+                startActivity(this)
+            }
+        } catch (e: ActivityNotFoundException) {
+            Log.e(TAG, "openApplicationDetailsSettings: $e")
+        }
+    }
+
+    @Suppress("unused")
     fun isOnTv(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
 
     @Suppress("unused")
@@ -1179,6 +1240,7 @@ class AmneziaActivity : QtActivity() {
                 CREATE_FILE_ACTION_CODE -> "CREATE_FILE"
                 OPEN_FILE_ACTION_CODE -> "OPEN_FILE"
                 CHECK_NOTIFICATION_PERMISSION_ACTION_CODE -> "CHECK_NOTIFICATION_PERMISSION"
+                CHECK_CAMERA_PERMISSION_ACTION_CODE -> "CHECK_CAMERA_PERMISSION"
                 else -> actionCode.toString()
             }
     }

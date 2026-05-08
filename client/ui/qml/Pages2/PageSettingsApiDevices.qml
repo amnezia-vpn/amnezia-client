@@ -19,18 +19,102 @@ import "../Components"
 PageType {
     id: root
 
+    /** True after "Add Device via QR" until permission result or navigation. */
+    property bool pendingOpenQrPageAfterCamera: false
+    /** True after denial: user may enable camera in system settings; resume opens QR page when granted. */
+    property bool waitingSettingsReturnForQrPage: false
+
+    function proceedOpenQrPairingPage() {
+        PageController.goToPage(PageEnum.PageSettingsApiQrPairingSend)
+        pendingOpenQrPageAfterCamera = false
+        waitingSettingsReturnForQrPage = false
+    }
+
+    function showCameraDeniedDrawer() {
+        showQuestionDrawer(
+                    qsTr("Camera access is required"),
+                    qsTr("Allow camera access to scan the pairing QR code. You can enable it in the system settings for Amnezia VPN."),
+                    qsTr("Open settings"),
+                    qsTr("Cancel"),
+                    function() {
+                        PairingUiController.openPairingCameraAppSettings()
+                    },
+                    function() {
+                        waitingSettingsReturnForQrPage = false
+                    })
+    }
+
+    function tryResumeQrPageAfterCameraSettings() {
+        if (!waitingSettingsReturnForQrPage || !root.visible) {
+            return
+        }
+        if (PairingUiController.isPairingCameraAccessGranted()) {
+            proceedOpenQrPairingPage()
+        }
+    }
+
     function openAddDeviceViaQr() {
         const maxC = ApiAccountInfoModel.data("maxDeviceCount")
         const activeC = ApiAccountInfoModel.data("activeDeviceCount")
         if (maxC > 0 && activeC >= maxC) {
             PageController.goToPage(PageEnum.PageSettingsApiDeviceLimit)
-        } else {
+            return
+        }
+        if (Qt.platform.os !== "android" && Qt.platform.os !== "ios") {
             PageController.goToPage(PageEnum.PageSettingsApiQrPairingSend)
+            return
+        }
+        if (PairingUiController.isPairingCameraAccessGranted()) {
+            proceedOpenQrPairingPage()
+            return
+        }
+        pendingOpenQrPageAfterCamera = true
+        PairingUiController.requestPairingCameraAccess()
+    }
+
+    onVisibleChanged: {
+        if (!visible) {
+            pendingOpenQrPageAfterCamera = false
+            waitingSettingsReturnForQrPage = false
+        }
+    }
+
+    Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.application.state !== Qt.ApplicationActive) {
+                return
+            }
+            root.tryResumeQrPageAfterCameraSettings()
+        }
+    }
+
+    Connections {
+        target: SettingsController
+
+        enabled: Qt.platform.os === "android"
+
+        function onActivityResumed() {
+            root.tryResumeQrPageAfterCameraSettings()
         }
     }
 
     Connections {
         target: PairingUiController
+
+        function onPairingCameraAccessFinished(granted) {
+            if (!root.pendingOpenQrPageAfterCamera) {
+                return
+            }
+            root.pendingOpenQrPageAfterCamera = false
+            if (granted) {
+                root.proceedOpenQrPairingPage()
+            } else {
+                root.waitingSettingsReturnForQrPage = true
+                root.showCameraDeniedDrawer()
+            }
+        }
 
         function onPhonePairingSucceeded() {
             const serverIndex = ServersUiController.getProcessedServerIndex()

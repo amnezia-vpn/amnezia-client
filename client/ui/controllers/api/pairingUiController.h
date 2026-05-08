@@ -74,6 +74,13 @@ public slots:
     /** Android: system camera activity. iOS: toggle camera from QML. */
     void openPairingQrScanner();
 
+    /** Mobile: whether the app may use the camera for QR pairing (OS permission). Desktop: true. */
+    Q_INVOKABLE bool isPairingCameraAccessGranted() const;
+    /** Mobile: show rationale / system camera permission UI; emits pairingCameraAccessFinished. Desktop: emits granted. */
+    Q_INVOKABLE void requestPairingCameraAccess();
+    /** Open system settings for this app (camera can be enabled there). No-op on desktop. */
+    Q_INVOKABLE void openPairingCameraAppSettings();
+
     /** If \a raw contains a session UUID (not vpn://), emits pairingUuidFromScan and returns true. */
     bool applyScannedTextAsPairingUuid(const QString &raw);
 
@@ -97,6 +104,8 @@ signals:
 
     void pairingUuidFromScan(const QString &uuid);
     void tvPairingUiPhaseChanged();
+    /** After requestPairingCameraAccess(): true if OS granted camera access. */
+    void pairingCameraAccessFinished(bool granted);
 
 private:
     void setTvBusy(bool busy);

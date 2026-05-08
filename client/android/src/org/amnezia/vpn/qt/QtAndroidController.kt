@@ -34,4 +34,6 @@ object QtAndroidController {
 
     external fun onActivityPaused()
     external fun onActivityResumed()
+
+    external fun onCameraPermissionResult(granted: Boolean)
 }

@@ -6,6 +6,7 @@ import QRCodeReader 1.0
 import PageEnum 1.0
 import Style 1.0
 
+import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
@@ -23,12 +24,48 @@ PageType {
     property int lastInvalidPairingQrToastClockMs: 0
     /** iOS may deliver many QR frames; guard duplicate step transitions. */
     property bool addDeviceConfirmNavigationScheduled: false
+    /** Mobile: waiting for camera permission before starting scan UI / Android scanner. */
+    property bool awaitingCameraPermissionForScan: false
+    /** After denial on scan screen: user may enable camera in settings. */
+    property bool waitingSettingsReturnForScan: false
 
     Timer {
         id: pairingCameraKickTimer
         interval: 180
         repeat: false
         onTriggered: root.restartPairingIosCamera()
+    }
+
+    function startPairingScanAfterPermission() {
+        if (Qt.platform.os === "android") {
+            PairingUiController.openPairingQrScanner()
+        } else if (Qt.platform.os === "ios") {
+            root.pairingCameraOpen = true
+        }
+    }
+
+    function showScanCameraDeniedDrawer() {
+        showQuestionDrawer(
+                    qsTr("Camera access is required"),
+                    qsTr("Allow camera access to scan the pairing QR code. You can enable it in the system settings for Amnezia VPN."),
+                    qsTr("Open settings"),
+                    qsTr("Cancel"),
+                    function() {
+                        PairingUiController.openPairingCameraAppSettings()
+                    },
+                    function() {
+                        root.waitingSettingsReturnForScan = false
+                    })
+    }
+
+    function tryResumeScanAfterCameraSettings() {
+        if (!root.waitingSettingsReturnForScan || !root.visible || root.pairingWizardStep !== 0) {
+            return
+        }
+        if (PairingUiController.isPairingCameraAccessGranted()) {
+            root.waitingSettingsReturnForScan = false
+            root.startPairingScanAfterPermission()
+        }
     }
 
     function restartPairingIosCamera() {
@@ -63,10 +100,32 @@ PageType {
                 pairingQrReader.stopReading()
                 root.pairingCameraOpen = false
                 root.pairingWizardStep = 0
+                root.waitingSettingsReturnForScan = false
                 if (!root.keepPhonePairingInBackgroundOnClose && !PairingUiController.phonePairingBusy) {
                     PairingUiController.cancelAllPairingActivity()
                 }
             }
+        }
+    }
+
+    Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.application.state !== Qt.ApplicationActive) {
+                return
+            }
+            root.tryResumeScanAfterCameraSettings()
+        }
+    }
+
+    Connections {
+        target: SettingsController
+
+        enabled: Qt.platform.os === "android"
+
+        function onActivityResumed() {
+            root.tryResumeScanAfterCameraSettings()
         }
     }
 
@@ -161,6 +220,11 @@ PageType {
                         }
                         enabled: !PairingUiController.phonePairingBusy
                         clickedFunc: function() {
+                            if (!PairingUiController.isPairingCameraAccessGranted()) {
+                                root.awaitingCameraPermissionForScan = true
+                                PairingUiController.requestPairingCameraAccess()
+                                return
+                            }
                             if (Qt.platform.os === "android") {
                                 PairingUiController.openPairingQrScanner()
                             } else {
@@ -238,14 +302,6 @@ PageType {
                         wrapMode: Text.Wrap
                     }
 
-                    ParagraphTextType {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-                        text: qsTr("Devices available with Amnezia Premium: %1").arg(ApiAccountInfoModel.data("availableDeviceSlots"))
-                        wrapMode: Text.Wrap
-                    }
-
                     BasicButtonType {
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
@@ -295,6 +351,19 @@ PageType {
 
     Connections {
         target: PairingUiController
+
+        function onPairingCameraAccessFinished(granted) {
+            if (!root.awaitingCameraPermissionForScan) {
+                return
+            }
+            root.awaitingCameraPermissionForScan = false
+            if (granted) {
+                root.startPairingScanAfterPermission()
+            } else {
+                root.waitingSettingsReturnForScan = true
+                root.showScanCameraDeniedDrawer()
+            }
+        }
 
         function onPairingUuidFromScan(uuid) {
             if (root.addDeviceConfirmNavigationScheduled) {

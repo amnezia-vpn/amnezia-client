@@ -9,6 +9,8 @@
 #include <QTimer>
 #include <QUuid>
 
+#include "platforms/ios/iosPairingCameraAccess.h"
+
 #if defined(Q_OS_ANDROID)
     #include "platforms/android/android_controller.h"
 #endif
@@ -109,6 +111,8 @@ PairingUiController::PairingUiController(PairingController *pairingController, S
 {
 #if defined(Q_OS_ANDROID)
     g_pairingUiForAndroidQr = this;
+    connect(AndroidController::instance(), &AndroidController::cameraPermissionResult, this,
+            [this](bool granted) { emit pairingCameraAccessFinished(granted); });
 #endif
 }
 
@@ -154,6 +158,40 @@ void PairingUiController::openPairingQrScanner()
 #if defined(Q_OS_ANDROID)
     qInfo() << "[PairingUi] openPairingQrScanner (Android native activity)";
     AndroidController::instance()->startQrReaderActivity();
+#endif
+}
+
+bool PairingUiController::isPairingCameraAccessGranted() const
+{
+#if defined(Q_OS_ANDROID)
+    return AndroidController::instance()->isCameraPermissionGranted();
+#elif defined(Q_OS_IOS)
+    return amneziaIosPairingCameraAccessGranted();
+#else
+    return true;
+#endif
+}
+
+void PairingUiController::requestPairingCameraAccess()
+{
+#if defined(Q_OS_ANDROID)
+    AndroidController::instance()->requestCameraPermissionForQrPairing();
+#elif defined(Q_OS_IOS)
+    amneziaIosRequestPairingCameraAccess([this](bool granted) {
+        QMetaObject::invokeMethod(
+                this, [this, granted]() { emit pairingCameraAccessFinished(granted); }, Qt::QueuedConnection);
+    });
+#else
+    emit pairingCameraAccessFinished(true);
+#endif
+}
+
+void PairingUiController::openPairingCameraAppSettings()
+{
+#if defined(Q_OS_ANDROID)
+    AndroidController::instance()->openApplicationDetailsSettings();
+#elif defined(Q_OS_IOS)
+    amneziaIosOpenApplicationSettings();
 #endif
 }
 

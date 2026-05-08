@@ -104,7 +104,8 @@ bool AndroidController::initialize()
         {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)},
         {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)},
         {"onActivityPaused", "()V", reinterpret_cast<void *>(onActivityPaused)},
-        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)}
+        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)},
+        {"onCameraPermissionResult", "(Z)V", reinterpret_cast<void *>(onCameraPermissionResult)}
     };
 
     QJniEnvironment env;
@@ -200,6 +201,21 @@ QString AndroidController::getFileName(const QString &uri)
 bool AndroidController::isCameraPresent()
 {
     return callActivityMethod<jboolean>("isCameraPresent", "()Z");
+}
+
+bool AndroidController::isCameraPermissionGranted()
+{
+    return callActivityMethod<jboolean>("isCameraPermissionGranted", "()Z");
+}
+
+void AndroidController::requestCameraPermissionForQrPairing()
+{
+    callActivityMethod("requestCameraPermissionForQrPairing", "()V");
+}
+
+void AndroidController::openApplicationDetailsSettings()
+{
+    callActivityMethod("openApplicationDetailsSettings", "()V");
 }
 
 bool AndroidController::isOnTv()
@@ -581,6 +597,15 @@ void AndroidController::onActivityResumed(JNIEnv *env, jobject thiz)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->activityResumed();
+}
+
+// static
+void AndroidController::onCameraPermissionResult(JNIEnv *env, jobject thiz, jboolean granted)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->cameraPermissionResult(static_cast<bool>(granted));
 }
 
 
