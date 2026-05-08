@@ -162,6 +162,96 @@ bool RouterMac::restoreResolvers() {
     return m_dnsUtil->restoreResolvers();
 }
 
+bool RouterMac::routeAddXray(const QString& ifname, const QString& gateway)
+{
+    if (ifname.isEmpty() || gateway.isEmpty()) {
+        qWarning().noquote() << "routeAddXray: invalid iface/gateway:" << ifname << gateway;
+        return false;
+    }
+
+    QString cmd = QString("route add -net 0.0.0.0/1 %1 -ifscope %2").arg(gateway).arg(ifname);
+    QStringList parts = cmd.split(" ");
+
+    int argc = parts.size();
+    char **argv = new char*[argc];
+    for (int i = 0; i < argc; i++) {
+        argv[i] = new char[parts.at(i).toStdString().length() + 1];
+        strcpy(argv[i], parts.at(i).toStdString().c_str());
+    }
+    mainRouteIface(argc, argv);
+    for (int i = 0; i < argc; i++) {
+        delete [] argv[i];
+    }
+    delete[] argv;
+
+    cmd = QString("route add -net 128.0.0.0/1 %1 -ifscope %2").arg(gateway).arg(ifname);
+    parts = cmd.split(" ");
+
+    argc = parts.size();
+    argv = new char*[argc];
+    for (int i = 0; i < argc; i++) {
+        argv[i] = new char[parts.at(i).toStdString().length() + 1];
+        strcpy(argv[i], parts.at(i).toStdString().c_str());
+    }
+    mainRouteIface(argc, argv);
+    for (int i = 0; i < argc; i++) {
+        delete [] argv[i];
+    }
+    delete[] argv;
+
+    qDebug().noquote() << "Installed xray routes via" << gateway << "on" << ifname;
+    return true;
+}
+
+bool RouterMac::routeDeleteXray(const QString& ifname, const QString& gateway)
+{
+    if (ifname.isEmpty()) {
+        return false;
+    }
+
+    QString cmd;
+    if (!gateway.isEmpty()) {
+        cmd = QString("route delete -net 0.0.0.0/1 %1 -ifscope %2").arg(gateway).arg(ifname);
+    } else {
+        cmd = QString("route delete -net 0.0.0.0/1 -ifscope %1").arg(ifname);
+    }
+    QStringList parts = cmd.split(" ");
+
+    int argc = parts.size();
+    char **argv = new char*[argc];
+    for (int i = 0; i < argc; i++) {
+        argv[i] = new char[parts.at(i).toStdString().length() + 1];
+        strcpy(argv[i], parts.at(i).toStdString().c_str());
+    }
+    mainRouteIface(argc, argv);
+    for (int i = 0; i < argc; i++) {
+        delete [] argv[i];
+    }
+    delete[] argv;
+
+    if (!gateway.isEmpty()) {
+        cmd = QString("route delete -net 128.0.0.0/1 %1 -ifscope %2").arg(gateway).arg(ifname);
+    } else {
+        cmd = QString("route delete -net 128.0.0.0/1 -ifscope %1").arg(ifname);
+    }
+    parts = cmd.split(" ");
+
+    argc = parts.size();
+    argv = new char*[argc];
+    for (int i = 0; i < argc; i++) {
+        argv[i] = new char[parts.at(i).toStdString().length() + 1];
+        strcpy(argv[i], parts.at(i).toStdString().c_str());
+    }
+    mainRouteIface(argc, argv);
+    for (int i = 0; i < argc; i++) {
+        delete [] argv[i];
+    }
+    delete[] argv;
+
+    qDebug().noquote() << "Removed xray routes on" << ifname;
+    return true;
+}
+
 bool RouterMac::deleteTun(const QString &dev)
 {
     qDebug().noquote() << "deleteTun start";

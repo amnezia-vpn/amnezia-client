@@ -1,0 +1,38 @@
+# .github/actions/apple-install-cert/action.yml
+
+name: Setup apple keychain
+description: Creates and configures a temporary build keychain
+
+inputs:
+  keychain-path:
+    description: Path to the keychain
+    required: true
+  keychain-password:
+    description: Password to the keychain
+    required: true
+  cert-base64:
+    description: Base64-encoded certificate
+    required: true
+  cert-password:
+    description: Certificate password
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Create keychain
+      shell: bash
+      env:
+        KEYCHAIN_PATH: ${{ inputs.keychain-path }}
+        KEYCHAIN_PASSWORD: ${{ inputs.keychain-password }}
+        CERT_BASE64: ${{ inputs.cert-base64 }}
+        CERT_PASSWORD: ${{ inputs.cert-password }}
+      run: |
+        CERT_PATH=$(mktemp /tmp/cert_XXXXXX.p12)
+        trap "rm -f '$CERT_PATH'" EXIT
+
+        echo -n "$CERT_BASE64" | base64 --decode -o "$CERT_PATH"
+
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "$CERT_PASSWORD" -A -t cert -f pkcs12
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"

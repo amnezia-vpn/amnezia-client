@@ -1,7 +1,5 @@
 message("Client iOS build")
-set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 set(APPLE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
-
 
 enable_language(OBJC)
 enable_language(OBJCXX)
@@ -132,17 +130,8 @@ target_sources(${PROJECT} PRIVATE
 
 set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
 add_subdirectory(ios/networkextension)
 add_dependencies(${PROJECT} networkextension)
-
-set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework"
-)
-
-set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/)
-target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework")
-
