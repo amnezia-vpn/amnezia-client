@@ -28,6 +28,7 @@ set(LIBS ${LIBS}
 
 
 set(HEADERS ${HEADERS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosPairingQrOverlayWindow.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.h
@@ -45,6 +46,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosPairingCameraAccess.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosPairingQrOverlayWindow.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/StoreKitController.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/AmneziaSceneDelegateHooks.mm

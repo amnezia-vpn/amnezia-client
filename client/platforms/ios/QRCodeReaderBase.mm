@@ -295,14 +295,31 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     NSLog(@"[QRCodeReader] stopReadingOnMainThread thread=%@", amneziaQrThreadTag());
     [self applyTorchOnMainThread:NO];
     self.activeCaptureDevice = nil;
-    if (self.captureSession) {
-        AVCaptureSession *session = self.captureSession;
-        dispatch_async(_sessionQueue, ^{
-            NSLog(@"[QRCodeReader] session stopRunning session=%p", session);
-            [session stopRunning];
+
+    AVCaptureSession *session = self.captureSession;
+    self.captureSession = nil;
+
+    /**
+     * Must run stopRunning on the same serial queue as startRunning, synchronously before tearing down.
+     * Async stop + immediate start (e.g. foreground resume calling restartPairingIosCamera) left stopRunning
+     * racing startRunning's internal beginConfiguration/commitConfiguration → NSGenericException crash.
+     */
+    if (session) {
+        if (!_sessionQueue) {
+            _sessionQueue = dispatch_queue_create("org.amnezia.qr.session", DISPATCH_QUEUE_SERIAL);
+        }
+        dispatch_sync(_sessionQueue, ^{
+            @try {
+                if ([session isRunning]) {
+                    NSLog(@"[QRCodeReader] session stopRunning (sync) session=%p", session);
+                    [session stopRunning];
+                }
+            } @catch (NSException *ex) {
+                NSLog(@"[QRCodeReader] session stopRunning exception: %@", ex);
+            }
         });
-        self.captureSession = nil;
     }
+
     if (self.videoPreviewPlayer) {
         NSLog(@"[QRCodeReader] remove preview from superlayer");
         [self.videoPreviewPlayer removeFromSuperlayer];

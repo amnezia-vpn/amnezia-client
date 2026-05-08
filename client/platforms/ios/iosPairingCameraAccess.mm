@@ -263,6 +263,38 @@ static void amneziaApplyUnderlayTransparencyToView(UIView *view, BOOL transparen
     }
 }
 
+/** Qt's QUIMetalView often sits deeper than a shallow walk; render thread can reset layer flags after resize. */
+static void amneziaForceMetalViewsTransparent(UIView *view, NSUInteger depth, NSUInteger maxDepth)
+{
+    if (!view || depth > maxDepth) {
+        return;
+    }
+    NSString *cn = NSStringFromClass([view class]);
+    if ([cn rangeOfString:@"Metal"].location != NSNotFound) {
+        view.opaque = NO;
+        view.backgroundColor = [UIColor clearColor];
+        view.layer.opaque = NO;
+        if (view.layer) {
+            view.layer.backgroundColor = [UIColor clearColor].CGColor;
+        }
+        NSLog(@"[PairingCamera] forceMetalTransparent depth=%lu class=%@", (unsigned long)depth, cn);
+    }
+    if (depth < maxDepth) {
+        for (UIView *child in view.subviews) {
+            amneziaForceMetalViewsTransparent(child, depth + 1, maxDepth);
+        }
+    }
+}
+
+static void amneziaApplyPairingUnderlayWalk(UIView *root, BOOL enable)
+{
+    const NSUInteger kMaxDepth = 24;
+    amneziaApplyUnderlayTransparencyToView(root, enable ? YES : NO, 0, kMaxDepth);
+    if (enable) {
+        amneziaForceMetalViewsTransparent(root, 0, kMaxDepth);
+    }
+}
+
 bool amneziaIosPairingCameraAccessGranted()
 {
     const AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
@@ -341,14 +373,24 @@ void amneziaIosApplyEmbeddedCameraUnderlayToQtView(bool enable)
                 vc.extendedLayoutIncludesOpaqueBars = YES;
             }
         }
-        const NSUInteger kMaxDepth = 6;
-        amneziaApplyUnderlayTransparencyToView(root, enable ? YES : NO, 0, kMaxDepth);
+        amneziaApplyPairingUnderlayWalk(root, enable);
         if (enable && win) {
             amneziaInstallPairingSafeAreaDimStrips(win, root);
             amneziaLayoutPairingSafeAreaDimStrips();
         }
         NSLog(@"[PairingCamera] Qt view underlay transparency %@ subviews=%lu",
               enable ? @"ON" : @"OFF", (unsigned long)root.subviews.count);
+        /** QUIMetalView is often updated after QSG resize; repeat walk next runloop so camera shows below status bar. */
+        if (enable) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIViewController *vc2 = amneziaKeyWindowViewController();
+                if (!vc2 || !vc2.view) {
+                    return;
+                }
+                amneziaApplyPairingUnderlayWalk(vc2.view, YES);
+                NSLog(@"[PairingCamera] underlay repeat pass (post-runloop)");
+            });
+        }
     };
     if ([NSThread isMainThread]) {
         work();

@@ -8,8 +8,12 @@
 #include <QRegularExpression>
 #include <QTimer>
 #include <QUuid>
+#include <string>
 
 #include "platforms/ios/iosPairingCameraAccess.h"
+#if defined(Q_OS_IOS)
+    #include "platforms/ios/iosPairingQrOverlayWindow.h"
+#endif
 
 #if defined(Q_OS_ANDROID)
     #include "platforms/android/android_controller.h"
@@ -100,6 +104,15 @@ PairingUiController *g_pairingUiForAndroidQr = nullptr;
 }
 #endif
 
+bool PairingUiController::iosNativePairingQrOverlayBuild() const
+{
+#if defined(Q_OS_IOS)
+    return true;
+#else
+    return false;
+#endif
+}
+
 PairingUiController::PairingUiController(PairingController *pairingController, ServersController *serversController,
                                          SubscriptionController *subscriptionController,
                                          SecureAppSettingsRepository *appSettingsRepository, QObject *parent)
@@ -122,6 +135,9 @@ PairingUiController::~PairingUiController()
     if (g_pairingUiForAndroidQr == this) {
         g_pairingUiForAndroidQr = nullptr;
     }
+#endif
+#if defined(Q_OS_IOS)
+    amneziaIosPairingQrOverlayDismiss();
 #endif
 }
 
@@ -227,12 +243,75 @@ void PairingUiController::syncIosEmbeddedPairingQrNativeBottomExtra(int extraPt)
 #endif
 }
 
+void PairingUiController::refreshIosEmbeddedPairingQrChrome()
+{
+#if defined(Q_OS_IOS)
+    if (!m_embeddedPairingQrCameraActive) {
+        return;
+    }
+    qInfo() << "[PairingUi] refreshIosEmbeddedPairingQrChrome (reapply UIView underlay)";
+    amneziaIosApplyEmbeddedCameraUnderlayToQtView(true);
+#else
+    // no-op on non-iOS
+#endif
+}
+
 void PairingUiController::setPairingQrTorchEnabled(bool enabled)
 {
 #if defined(Q_OS_ANDROID)
     AndroidController::instance()->setPairingQrEmbeddedTorch(enabled);
+#elif defined(Q_OS_IOS)
+    amneziaIosPairingQrOverlaySetTorchEnabled(enabled);
 #else
     Q_UNUSED(enabled);
+#endif
+}
+
+void PairingUiController::presentIosPairingQrNativeOverlayScanner(const QString &title, const QString &subtitle)
+{
+#if defined(Q_OS_IOS)
+    qInfo() << "[PairingUi] presentIosPairingQrNativeOverlayScanner: scheduling native UIWindow overlay";
+    const std::string titleUtf8 = title.isEmpty() ? std::string() : title.toStdString();
+    const std::string subtitleUtf8 = subtitle.isEmpty() ? std::string() : subtitle.toStdString();
+    amneziaIosPairingQrOverlayPresent(
+            [this](const char *utf8) {
+                const QString code = QString::fromUtf8(utf8);
+                QMetaObject::invokeMethod(
+                        this,
+                        [this, code]() {
+                            if (!applyScannedTextAsPairingUuid(code)) {
+                                emit pairingSendQrScanRejectedInvalidPayload();
+                            }
+                        },
+                        Qt::QueuedConnection);
+            },
+            [this]() {
+                QMetaObject::invokeMethod(
+                        this,
+                        [this]() { emit pairingIosNativeQrOverlayBackRequested(); },
+                        Qt::QueuedConnection);
+            },
+            titleUtf8, subtitleUtf8);
+#else
+    Q_UNUSED(title);
+    Q_UNUSED(subtitle);
+    qInfo() << "[PairingUi] presentIosPairingQrNativeOverlayScanner: no-op (not iOS build)";
+#endif
+}
+
+void PairingUiController::dismissIosPairingQrNativeOverlayScanner()
+{
+#if defined(Q_OS_IOS)
+    qInfo() << "[PairingUi] dismissIosPairingQrNativeOverlayScanner";
+    amneziaIosPairingQrOverlayDismiss();
+#endif
+}
+
+void PairingUiController::restartIosPairingQrNativeOverlayCapture()
+{
+#if defined(Q_OS_IOS)
+    qInfo() << "[PairingUi] restartIosPairingQrNativeOverlayCapture";
+    amneziaIosPairingQrOverlayRestartCapture();
 #endif
 }
 

@@ -38,6 +38,8 @@ class PairingUiController : public QObject
     /** Full-screen pairing QR camera under QML (mobile); drives translucent main window. */
     Q_PROPERTY(bool embeddedPairingQrCameraActive READ embeddedPairingQrCameraActive WRITE setEmbeddedPairingQrCameraActive NOTIFY
                        embeddedPairingQrCameraActiveChanged)
+    /** True only on iOS builds: use native UIWindow QR overlay (not Qt.platform.os, which can differ). */
+    Q_PROPERTY(bool iosNativePairingQrOverlayBuild READ iosNativePairingQrOverlayBuild CONSTANT)
 
 public:
     PairingUiController(PairingController *pairingController, ServersController *serversController,
@@ -59,9 +61,25 @@ public:
     QString lastSuccessfulPhonePairingDisplayName() const { return m_lastSuccessfulPhonePairingDisplayName; }
     int tvPairingUiPhase() const { return m_tvPairingUiPhase; }
     bool embeddedPairingQrCameraActive() const { return m_embeddedPairingQrCameraActive; }
+    bool iosNativePairingQrOverlayBuild() const;
     Q_INVOKABLE void setEmbeddedPairingQrCameraActive(bool active);
     /** iOS: native dim strip height uses safe bottom + extraPt (see PageSettingsApiQrPairingSend scanDimBleedBottom). No-op elsewhere. */
     Q_INVOKABLE void syncIosEmbeddedPairingQrNativeBottomExtra(int extraPt);
+    /**
+     * iOS: reapply UIView transparency + safe-area dim strips when embedded pairing is already active.
+     * Needed after multitask resume: setEmbeddedPairingQrCameraActive(true) is a no-op if the flag stayed true,
+     * but QUIMetalView / hierarchy may have been rebuilt opaque so the camera only shows in the status bar band.
+     */
+    Q_INVOKABLE void refreshIosEmbeddedPairingQrChrome();
+
+    /**
+     * iOS: UIKit UIWindow QR scanner (see iosPairingQrOverlayWindow). Pass translated title/subtitle for native chrome.
+     * No-op on other platforms.
+     */
+    Q_INVOKABLE void presentIosPairingQrNativeOverlayScanner(const QString &title = QString(),
+                                                           const QString &subtitle = QString());
+    Q_INVOKABLE void dismissIosPairingQrNativeOverlayScanner();
+    Q_INVOKABLE void restartIosPairingQrNativeOverlayCapture();
 
 #if defined(Q_OS_ANDROID)
     static bool tryConsumeAndroidQrScan(const QString &code);
@@ -116,6 +134,10 @@ signals:
     /** After requestPairingCameraAccess(): true if OS granted camera access. */
     void pairingCameraAccessFinished(bool granted);
     void embeddedPairingQrCameraActiveChanged();
+    /** iOS native overlay scanner: payload was not a pairing session UUID (toast in QML). */
+    void pairingSendQrScanRejectedInvalidPayload();
+    /** Native overlay back chevron tapped — dismiss scanner and close page from QML. */
+    void pairingIosNativeQrOverlayBackRequested();
 
 private:
     void setTvBusy(bool busy);

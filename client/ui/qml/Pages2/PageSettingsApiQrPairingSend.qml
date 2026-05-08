@@ -22,6 +22,9 @@ PageType {
     /** iOS (and any non-Android mobile): native QRCodeReader; Qt may not always report os === "ios". */
     readonly property bool useIosStyleNativeQrReader: GC.isMobile() && Qt.platform.os !== "android"
 
+    /** iOS-only: full-screen UIKit UIWindow scanner (PairingUiController.iosNativePairingQrOverlayBuild — not Qt.platform.os). */
+    readonly property bool useIosNativePairingQrOverlay: PairingUiController.iosNativePairingQrOverlayBuild
+
     /** Let dimming draw into window chrome (status bar + tab bar) when camera underlay is active. */
     readonly property bool extendScanDimToScreenEdges: GC.isMobile() && pairingWizardStep === 0
                                                      && PairingUiController.embeddedPairingQrCameraActive
@@ -147,6 +150,11 @@ PageType {
 
     function stopMobileScanner() {
         torchOn = false
+        if (root.useIosNativePairingQrOverlay) {
+            PairingUiController.setPairingQrTorchEnabled(false)
+            PairingUiController.dismissIosPairingQrNativeOverlayScanner()
+            return
+        }
         if (Qt.platform.os === "android") {
             PairingUiController.setPairingQrTorchEnabled(false)
         } else if (root.useIosStyleNativeQrReader) {
@@ -160,9 +168,19 @@ PageType {
         if (!GC.isMobile()) {
             return
         }
+        console.warn("[PairingQrSend] startMobileScanner Qt.platform.os=", Qt.platform.os,
+                       "iosNativePairingQrOverlayBuild=", PairingUiController.iosNativePairingQrOverlayBuild,
+                       "useIosNativePairingQrOverlay=", root.useIosNativePairingQrOverlay)
         if (!PairingUiController.isPairingCameraAccessGranted()) {
             awaitingCameraPermissionForScan = true
             PairingUiController.requestPairingCameraAccess()
+            return
+        }
+        if (root.useIosNativePairingQrOverlay) {
+            PairingUiController.presentIosPairingQrNativeOverlayScanner(
+                        qsTr("Add device via QR"),
+                        qsTr("Scan the session QR shown on the device you want to add. You will confirm before the subscription is sent."))
+            /** Do not run pairingCameraKickTimer here: restartCapture during first startRunning races the session (torch needs 2–3 taps). */
             return
         }
         PairingUiController.embeddedPairingQrCameraActive = true
@@ -171,6 +189,10 @@ PageType {
             // torch/scan run before startReading and native layer never attaches.
             restartPairingIosCamera()
             pairingCameraKickTimer.restart()
+            /** After resume embedded can stay true so setEmbedded skips; QUIMetalView may be opaque again. */
+            Qt.callLater(function () {
+                PairingUiController.refreshIosEmbeddedPairingQrChrome()
+            })
         }
     }
 
@@ -203,6 +225,10 @@ PageType {
     }
 
     function restartPairingIosCamera() {
+        if (root.useIosNativePairingQrOverlay) {
+            PairingUiController.restartIosPairingQrNativeOverlayCapture()
+            return
+        }
         if (!root.useIosStyleNativeQrReader || pairingWizardStep !== 0) {
             return
         }
@@ -243,6 +269,18 @@ PageType {
         }
     }
 
+    /**
+     * StackView often instantiates the page already visible — onVisibleChanged(true) may never run, so
+     * startMobileScanner (and native overlay present) would be skipped; only stop/dismiss runs. Same pattern as
+     * PageSetupWizardApiQrPairingReceive (Component.onCompleted + visible).
+     */
+    Component.onCompleted: {
+        if (GC.isMobile() && root.visible && pairingWizardStep === 0) {
+            console.warn("[PairingQrSend] Component.onCompleted: schedule startMobileScanner (page created visible)")
+            Qt.callLater(startMobileScanner)
+        }
+    }
+
     Connections {
         target: Qt.application
 
@@ -251,6 +289,46 @@ PageType {
                 return
             }
             root.tryResumeScanAfterCameraSettings()
+            if (!root.useIosStyleNativeQrReader || root.pairingWizardStep !== 0
+                || !PairingUiController.isPairingCameraAccessGranted()) {
+                return
+            }
+            if (root.useIosNativePairingQrOverlay) {
+                Qt.callLater(function () {
+                    if (!root.visible || root.pairingWizardStep !== 0 || !GC.isMobile()) {
+                        return
+                    }
+                    PairingUiController.restartIosPairingQrNativeOverlayCapture()
+                })
+                return
+            }
+            /**
+             * No fixed ms delay: f1 reapply UIView transparency; f2 restart AVCapture; f3 refresh again —
+             * after restartPairingIosCamera, QUIMetalView / render thread often rebuilds opaque layers (same bug
+             * as status-bar-only camera) until underlay is reapplied once more.
+             */
+            Qt.callLater(function () {
+                if (!root.visible || root.pairingWizardStep !== 0 || !GC.isMobile()) {
+                    return
+                }
+                console.warn("[PairingQrResume] ApplicationActive f1 underlay")
+                PairingUiController.embeddedPairingQrCameraActive = true
+                PairingUiController.refreshIosEmbeddedPairingQrChrome()
+                Qt.callLater(function () {
+                    if (!root.visible || root.pairingWizardStep !== 0) {
+                        return
+                    }
+                    console.warn("[PairingQrResume] ApplicationActive f2 restart camera")
+                    root.restartPairingIosCamera()
+                    Qt.callLater(function () {
+                        if (!root.visible || root.pairingWizardStep !== 0) {
+                            return
+                        }
+                        console.warn("[PairingQrResume] ApplicationActive f3 underlay post-camera")
+                        PairingUiController.refreshIosEmbeddedPairingQrChrome()
+                    })
+                })
+            })
         }
     }
 
@@ -442,6 +520,8 @@ PageType {
                 anchors.topMargin: 8 + PageController.safeAreaTopMargin
                 spacing: 10
                 z: 2
+                /** Native iOS overlay draws its own header. */
+                visible: !GC.isMobile() || !root.useIosNativePairingQrOverlay
 
                 BackButtonType {
                     width: parent.width
@@ -475,7 +555,7 @@ PageType {
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottomMargin: 28 + PageController.safeAreaBottomMargin
-                visible: GC.isMobile()
+                visible: GC.isMobile() && !root.useIosNativePairingQrOverlay
 
                 Rectangle {
                     anchors.fill: parent
@@ -494,6 +574,8 @@ PageType {
                     onClicked: {
                         root.torchOn = !root.torchOn
                         if (Qt.platform.os === "android") {
+                            PairingUiController.setPairingQrTorchEnabled(root.torchOn)
+                        } else if (root.useIosNativePairingQrOverlay) {
                             PairingUiController.setPairingQrTorchEnabled(root.torchOn)
                         } else if (root.useIosStyleNativeQrReader) {
                             pairingQrReader.setTorchEnabled(root.torchOn)
@@ -526,6 +608,9 @@ PageType {
                     // Same idea as PageSetupWizardQrReader: ensure startReading runs even if
                     // StackView/onVisible timing skips startMobileScanner once.
                     Component.onCompleted: {
+                        if (root.useIosNativePairingQrOverlay) {
+                            return
+                        }
                         if (!root.useIosStyleNativeQrReader || root.pairingWizardStep !== 0) {
                             return
                         }
@@ -665,6 +750,23 @@ PageType {
             Qt.callLater(function() {
                 pairingWizardStep = 1
             })
+        }
+
+        function onPairingSendQrScanRejectedInvalidPayload() {
+            if (!root.useIosNativePairingQrOverlay || root.pairingWizardStep !== 0) {
+                return
+            }
+            const now = new Date().getTime()
+            if (now - lastInvalidPairingQrToastClockMs >= 2200) {
+                lastInvalidPairingQrToastClockMs = now
+                PageController.showNotificationMessage(
+                            qsTr("This QR code is not a pairing session. Show the code from the other device’s “receive config” screen."))
+            }
+        }
+
+        function onPairingIosNativeQrOverlayBackRequested() {
+            stopMobileScanner()
+            PageController.closePage()
         }
     }
 }

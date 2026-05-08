@@ -66,6 +66,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/managementServer.h
     ${CLIENT_ROOT_DIR}/core/utils/constants.h
     ${CLIENT_ROOT_DIR}/platforms/ios/iosPairingCameraAccess.h
+    ${CLIENT_ROOT_DIR}/platforms/ios/iosPairingQrOverlayWindow.h
 )
 
 # Mozilla headres
