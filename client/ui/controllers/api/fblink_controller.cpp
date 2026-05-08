@@ -662,12 +662,8 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         return "FBLink VPN - " + hostName;
                     };
 
-                    // Use pinned-host fast-path only when we already have a local FBLink server list.
-                    // After reinstall, Android Auto Backup may restore selected host in settings,
-                    // while local servers are empty. In that bootstrap case we must import full list.
-                    const bool hasLocalFBLinkSnapshot = !existingFBLinkServerIndices.isEmpty();
-                    const bool hasPinnedSelectedHost =
-                            hasLocalFBLinkSnapshot && !selectedFBLinkHostName.isEmpty();
+                    // Preserve the selected server while still reconciling the full backend list.
+                    const bool hasPinnedSelectedHost = !selectedFBLinkHostName.isEmpty();
                     bool selectedConfigSeenInResponse = false;
 
                     for (const QString &configData : configStrings) {
@@ -675,13 +671,6 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                             QJsonObject newConfig = QJsonDocument::fromJson(m_importController->getConfig().toUtf8()).object();
                             QString newHostName = newConfig.value("hostName").toString();
 
-                            // Fast-path sync mode: when user already selected a server,
-                            // apply only that server config and ignore the rest.
-                            if (hasPinnedSelectedHost
-                                && newHostName.compare(selectedFBLinkHostName, Qt::CaseInsensitive) != 0) {
-                                m_importController->clearConfigFileName();
-                                continue;
-                            }
                             if (hasPinnedSelectedHost
                                 && newHostName.compare(selectedFBLinkHostName, Qt::CaseInsensitive) == 0) {
                                 selectedConfigSeenInResponse = true;
@@ -732,20 +721,16 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         }
                     }
 
-                    // Full cleanup is safe only when there is no pinned selected server.
-                    // With pinned selection we keep old servers untouched if backend
-                    // returned only a partial config set.
-                    if (!hasPinnedSelectedHost) {
-                        // Remove any FBLink VPN servers that were not in the new config
-                        // Iterate backwards so indices don't shift during removal
-                        for (int i = existingFBLinkServerIndices.size() - 1; i >= 0; --i) {
-                            int serverIndex = existingFBLinkServerIndices.at(i);
-                            if (!updatedIndices.contains(serverIndex)) {
-                                m_serversModel->removeServer(serverIndex);
-                            }
+                    // Remove FBLink VPN servers that are no longer returned by backend.
+                    // Iterate backwards so indices don't shift during removal.
+                    for (int i = existingFBLinkServerIndices.size() - 1; i >= 0; --i) {
+                        int serverIndex = existingFBLinkServerIndices.at(i);
+                        if (!updatedIndices.contains(serverIndex)) {
+                            m_serversModel->removeServer(serverIndex);
                         }
-                    } else if (!selectedConfigSeenInResponse) {
-                        qWarning() << "[FBLink] fetchConfig: selected server config was not returned, keeping current local snapshot:"
+                    }
+                    if (hasPinnedSelectedHost && !selectedConfigSeenInResponse) {
+                        qWarning() << "[FBLink] fetchConfig: selected server config was not returned by backend:"
                                    << selectedFBLinkHostName;
                     }
 

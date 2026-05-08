@@ -18,6 +18,21 @@ import "../Components"
 PageType {
     id: root
     readonly property bool hasLocationsAccess: FBLinkController.isSubscribed
+    property double lastServersRefreshMs: 0
+
+    function refreshServersFromBackend() {
+        if (FBLinkController.isLoggedIn && FBLinkController.isSubscribed) {
+            const now = Date.now()
+            if (now - root.lastServersRefreshMs < 5000) {
+                return
+            }
+            root.lastServersRefreshMs = now
+            FBLinkController.fetchConfig()
+        }
+    }
+
+    Component.onCompleted: root.refreshServersFromBackend()
+    onVisibleChanged: if (visible) root.refreshServersFromBackend()
 
     function guessCountryCode(serverName) {
         const name = (serverName || "").toLowerCase()
