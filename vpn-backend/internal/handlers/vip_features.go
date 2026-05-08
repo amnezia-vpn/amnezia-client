@@ -51,6 +51,13 @@ func buildSubscriptionCapabilities(sub models.Subscription) subscriptionCapabili
 	}
 }
 
+func isVIPSubscription(sub models.Subscription) bool {
+	if sub.Status != models.SubActive || time.Now().After(sub.ExpiresAt) {
+		return false
+	}
+	return sub.Plan == models.PlanVIP || sub.Plan == models.PlanVIP3M
+}
+
 func canManageVIPFeatures(sub models.Subscription) bool {
 	return buildSubscriptionCapabilities(sub).CanManageRoutingProfiles
 }

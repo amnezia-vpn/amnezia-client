@@ -63,6 +63,7 @@ type VPNServer struct {
 	Region      string
 	CountryCode string `gorm:"default:''"` // ISO 3166-1 alpha-2, e.g. "RU", "US", "DE"
 	Active      bool   `gorm:"default:true"`
+	VIPOnly     bool   `gorm:"column:vip_only;default:false"`
 
 	// FBLinkWG 2 параметры (обфускация)
 	AWGPort  int    `gorm:"default:51820"`

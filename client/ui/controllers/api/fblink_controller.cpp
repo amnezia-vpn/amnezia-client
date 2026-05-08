@@ -624,7 +624,10 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                             selectedFBLinkContainer = currentDefaultServer.value("defaultContainer").toString();
                             if (!selectedFBLinkHostName.isEmpty()) {
                                 qSettings.setValue(kLastSelectedFBLinkHostNameKey, selectedFBLinkHostName);
-                                const QJsonValue serverIdValue = currentDefaultServer.value("id");
+                                QJsonValue serverIdValue = currentDefaultServer.value("server_id");
+                                if (serverIdValue.isUndefined()) {
+                                    serverIdValue = currentDefaultServer.value("id");
+                                }
                                 if (serverIdValue.isDouble()) {
                                     qSettings.setValue(kLastSelectedServerIdKey, serverIdValue.toInt());
                                 } else if (serverIdValue.isString()) {
@@ -804,7 +807,10 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                                 const QString finalHost = finalServer.value("hostName").toString();
                                 if (!finalHost.isEmpty()) {
                                     qSettings.setValue(kLastSelectedFBLinkHostNameKey, finalHost);
-                                    const QJsonValue serverIdValue = finalServer.value("id");
+                                    QJsonValue serverIdValue = finalServer.value("server_id");
+                                    if (serverIdValue.isUndefined()) {
+                                        serverIdValue = finalServer.value("id");
+                                    }
                                     if (serverIdValue.isDouble()) {
                                         qSettings.setValue(kLastSelectedServerIdKey, serverIdValue.toInt());
                                     } else if (serverIdValue.isString()) {
@@ -817,6 +823,7 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         }
                     }
 
+                    fetchServerMetadata(true);
                     emit configFetched();
                 } else {
                     emit configError(tr("Внутренняя ошибка: Контроллеры не инициализированы"));
@@ -875,6 +882,9 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                  }
              }
 
+             if (!authFailure) {
+                 fetchServerMetadata(true);
+             }
              emit configError(errStr);
              rerunCoalescedFetch();
         }
@@ -895,6 +905,151 @@ void FBLinkController::clearExistingFBLinkServers()
             m_serversModel->removeServer(i);
         }
     }
+}
+
+void FBLinkController::mergeServerMetadata(const QJsonArray &metadataServers)
+{
+    if (!m_settings || !m_serversModel) {
+        return;
+    }
+
+    for (const QJsonValue &value : metadataServers) {
+        const QJsonObject metadata = value.toObject();
+        const int serverId = metadata.value("id").toInt(-1);
+        const QString hostName = metadata.value("host_name").toString().trimmed();
+        const QString region = metadata.value("region").toString().trimmed();
+        const QString name = metadata.value("name").toString().trimmed();
+        const QString countryCode = metadata.value("country_code").toString().trimmed().toUpper();
+        const bool isVipOnly = metadata.value("is_vip_only").toBool(false);
+        const bool isAvailable = metadata.value("is_available").toBool(true);
+
+        int matchedIndex = -1;
+        QJsonArray servers = m_settings->serversArray();
+        for (int i = 0; i < servers.size(); ++i) {
+            const QJsonObject server = servers.at(i).toObject();
+            if (!isFBLinkServer(server)) {
+                continue;
+            }
+
+            bool matched = false;
+            const QJsonValue existingID = server.value("server_id");
+            if (serverId > 0) {
+                if (existingID.isDouble() && existingID.toInt() == serverId) {
+                    matched = true;
+                } else if (existingID.isString() && existingID.toString().toInt() == serverId) {
+                    matched = true;
+                }
+            }
+            if (!matched && !hostName.isEmpty()
+                && server.value("hostName").toString().compare(hostName, Qt::CaseInsensitive) == 0) {
+                matched = true;
+            }
+            if (!matched && !region.isEmpty()
+                && server.value("description").toString().compare("FBLink VPN - " + region, Qt::CaseInsensitive) == 0) {
+                matched = true;
+            }
+            if (!matched && !name.isEmpty()
+                && (server.value("name").toString().compare(name, Qt::CaseInsensitive) == 0
+                    || server.value("description").toString().compare(name, Qt::CaseInsensitive) == 0)) {
+                matched = true;
+            }
+
+            if (matched) {
+                matchedIndex = i;
+                break;
+            }
+        }
+
+        if (matchedIndex >= 0) {
+            QJsonObject server = m_settings->serversArray().at(matchedIndex).toObject();
+            if (serverId > 0) {
+                server["server_id"] = serverId;
+            }
+            server["is_vip_only"] = isVipOnly;
+            server["is_available"] = isAvailable;
+            server["fblink_server"] = true;
+            if (isVipOnly && !isAvailable) {
+                server["containers"] = QJsonArray();
+                server["defaultContainer"] = "";
+            }
+            if (!countryCode.isEmpty()) {
+                server["country_code"] = countryCode;
+                server["server_country_code"] = countryCode;
+            }
+            m_serversModel->editServer(server, matchedIndex);
+            continue;
+        }
+
+        if (!isVipOnly || isAvailable) {
+            continue;
+        }
+
+        QJsonObject lockedServer;
+        lockedServer["description"] = region.isEmpty() ? (name.isEmpty() ? hostName : name) : "FBLink VPN - " + region;
+        lockedServer["name"] = lockedServer.value("description").toString();
+        lockedServer["hostName"] = hostName;
+        lockedServer["server_id"] = serverId;
+        lockedServer["is_vip_only"] = true;
+        lockedServer["is_available"] = false;
+        lockedServer["fblink_server"] = true;
+        lockedServer["containers"] = QJsonArray();
+        lockedServer["defaultContainer"] = "";
+        if (!countryCode.isEmpty()) {
+            lockedServer["country_code"] = countryCode;
+            lockedServer["server_country_code"] = countryCode;
+        }
+        m_serversModel->addServer(lockedServer);
+    }
+
+    const int defaultIndex = m_serversModel->getDefaultServerIndex();
+    const QJsonArray currentServers = m_settings->serversArray();
+    if (defaultIndex >= 0 && defaultIndex < currentServers.size()) {
+        const QJsonObject defaultServer = currentServers.at(defaultIndex).toObject();
+        if (defaultServer.value("is_vip_only").toBool(false)
+            && !defaultServer.value("is_available").toBool(true)) {
+            for (int i = 0; i < currentServers.size(); ++i) {
+                const QJsonObject candidate = currentServers.at(i).toObject();
+                if (isFBLinkServer(candidate) && candidate.value("is_available").toBool(true)) {
+                    m_serversModel->setDefaultServerIndex(i);
+                    m_serversModel->setProcessedServerIndex(i);
+                    const QString hostName = candidate.value("hostName").toString();
+                    if (!hostName.isEmpty()) {
+                        QSettings qSettings = appSettings();
+                        qSettings.setValue(kLastSelectedFBLinkHostNameKey, hostName);
+                        qSettings.setValue(kLastSelectedServerIdKey, candidate.value("server_id").toVariant());
+                        qSettings.sync();
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void FBLinkController::fetchServerMetadata(bool allowRefreshRetry)
+{
+    const QString token = getJwtToken();
+    if (token.isEmpty()) {
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest("/me/servers", false, true);
+    QNetworkReply *reply = m_nam->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, allowRefreshRetry]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            const QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            mergeServerMetadata(obj.value("servers").toArray());
+            return;
+        }
+
+        logApiFailure("fetch-server-metadata", reply);
+        if (allowRefreshRetry && shouldRefreshToken(reply)) {
+            refreshAccessToken([this]() {
+                fetchServerMetadata(false);
+            });
+        }
+    });
 }
 
 void FBLinkController::createPayment(const QString &plan)

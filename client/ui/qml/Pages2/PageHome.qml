@@ -451,7 +451,7 @@ PageType {
                     }
 
                     Rectangle {
-                        visible: FBLinkController.isSubscribed && FBLinkController.subscriptionPlan === "vip"
+                        visible: ServersModel.defaultServerIsVipOnly
                         anchors.top: parent.top
                         anchors.right: parent.right
                         anchors.topMargin: 8
@@ -464,7 +464,7 @@ PageType {
                         CaptionTextType {
                             id: vipTagText
                             anchors.centerIn: parent
-                            text: "VIP"
+                            text: qsTr("VIP server")
                             color: "#111111"
                             font.bold: true
                             font.pixelSize: 9

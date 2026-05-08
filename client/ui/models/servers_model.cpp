@@ -147,6 +147,7 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
 
     connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerNameChanged);
     connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerEndpointHostChanged);
+    connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerVipOnlyChanged);
     connect(this, &ServersModel::defaultServerDefaultContainerChanged, this, [this](int) {
         emit defaultServerEndpointHostChanged();
     });
@@ -286,6 +287,12 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     }
     case AdEndpointRole: {
         return apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adEndpoint).toString();
+    }
+    case IsVipOnlyRole: {
+        return server.value("is_vip_only").toBool(false);
+    }
+    case IsAvailableForCurrentPlanRole: {
+        return server.value("is_available").toBool(true);
     }
     }
 
@@ -474,6 +481,7 @@ void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
     if (serverIndex == m_defaultServerIndex) {
         auto defaultContainer = qvariant_cast<DockerContainer>(getDefaultServerData("defaultContainer"));
         emit defaultServerDefaultContainerChanged(defaultContainer);
+        emit defaultServerVipOnlyChanged();
     }
 }
 
@@ -550,6 +558,8 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[AdHeaderRole] = "adHeader";
     roles[AdDescriptionRole] = "adDescription";
     roles[AdEndpointRole] = "adEndpoint";
+    roles[IsVipOnlyRole] = "isVipOnly";
+    roles[IsAvailableForCurrentPlanRole] = "isAvailableForCurrentPlan";
 
     return roles;
 }
@@ -914,6 +924,14 @@ QString ServersModel::getDefaultServerPingTarget()
 const QString ServersModel::getDefaultServerEndpointHost()
 {
     return endpointHostFromPingTarget(getDefaultServerPingTarget());
+}
+
+bool ServersModel::defaultServerIsVipOnly() const
+{
+    if (m_defaultServerIndex < 0 || m_defaultServerIndex >= static_cast<int>(m_servers.size())) {
+        return false;
+    }
+    return m_servers.at(m_defaultServerIndex).toObject().value("is_vip_only").toBool(false);
 }
 
 QVariant ServersModel::getProcessedServerData(const QString roleString)

@@ -116,6 +116,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		{
 			me.GET("", userH.GetMe)
 			me.GET("/subscription", userH.GetSubscription)
+			me.GET("/servers", userH.GetServers)
 			me.PATCH("/subscription/auto-renew", userH.SetAutoRenew)
 			me.PATCH("/subscription/ad-block", userH.SetVIPAdBlock)
 			me.DELETE("/card", userH.DeleteCard)

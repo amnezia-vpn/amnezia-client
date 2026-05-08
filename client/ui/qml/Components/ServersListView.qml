@@ -40,6 +40,7 @@ ListViewType {
         objectName: "menuContentDelegate"
 
         property variant delegateData: model
+        property bool lockedByPlan: isVipOnly && !isAvailableForCurrentPlan
 
         implicitWidth: root.width
         implicitHeight: 76 // 64 for card + 12 for spacing
@@ -53,6 +54,7 @@ ListViewType {
             anchors.rightMargin: 16
             anchors.leftMargin: 16
             height: 64
+            opacity: lockedByPlan ? 0.62 : 1.0
             
             radius: 12
             color: index === root.selectedIndex ? "#1F1F24" : (mouseArea.pressed ? "#2A2A30" : "transparent")
@@ -90,13 +92,28 @@ ListViewType {
                         elide: Text.ElideRight
                     }
 
-                    LabelTextType {
+                    RowLayout {
                         Layout.fillWidth: true
-                        text: serverDescription
-                        font.pixelSize: 13
-                        color: index === root.selectedIndex ? "#EAB308" : "#8A8A8E"
-                        visible: serverDescription !== "" && serverDescription !== name
-                        elide: Text.ElideRight
+                        spacing: 8
+
+                        PremiumBadge {
+                            visible: isVipOnly
+                            text: lockedByPlan ? qsTr("VIP") : qsTr("VIP server")
+                            tone: "accent"
+                            iconSource: "qrc:/images/controls/crown.svg"
+                            compact: true
+                        }
+
+                        LabelTextType {
+                            Layout.fillWidth: true
+                            text: lockedByPlan
+                                ? qsTr("Р”РѕСЃС‚СѓРїРµРЅ С‚РѕР»СЊРєРѕ РґР»СЏ VIP")
+                                : serverDescription
+                            font.pixelSize: 13
+                            color: index === root.selectedIndex ? "#EAB308" : "#8A8A8E"
+                            visible: text !== "" && text !== name
+                            elide: Text.ElideRight
+                        }
                     }
                 }
 
@@ -115,6 +132,10 @@ ListViewType {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
+                    if (lockedByPlan) {
+                        PageController.showNotificationMessage(qsTr("Р­С‚РѕС‚ СЃРµСЂРІРµСЂ РґРѕСЃС‚СѓРїРµРЅ С‚РѕР»СЊРєРѕ РґР»СЏ VIP"))
+                        return
+                    }
                     if (ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Нельзя менять сервер во время активного подключения"))
                         return

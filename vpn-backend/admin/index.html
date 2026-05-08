@@ -408,6 +408,7 @@
         <div class="field"><label>VLESS security</label><input id="serverVlessSecurity" type="text" placeholder="reality"></div>
         <div class="field"><label>VLESS spider_x</label><input id="serverVlessSpiderX" type="text" placeholder="/"></div>
         <div class="field"><label>VLESS container</label><input id="serverVlessContainerName" type="text" placeholder="amnezia-xray"></div>
+        <div class="field"><label style="display:flex;align-items:center;gap:10px;margin-top:25px"><input id="serverVipOnly" type="checkbox" style="width:auto"> VIP only</label></div>
         <div class="field" style="grid-column:1 / -1">
           <label style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
             <input id="serverBootstrapSelfHostedXray" type="checkbox" style="width:auto">
@@ -783,7 +784,7 @@
       const statusFilter = document.getElementById('serversStatusFilter')?.value || '';
       const countryFilter = document.getElementById('serversCountryFilter')?.value || '';
       const filtered = serversData.filter(server => {
-        const blob = normalizeText([server.name, server.region, server.endpoint, server.host, server.country_code].join(' '));
+        const blob = normalizeText([server.name, server.region, server.endpoint, server.host, server.country_code, server.is_vip_only ? 'vip vip only' : ''].join(' '));
         return (!search || blob.includes(search))
           && (!statusFilter || (statusFilter === 'active' ? !!server.active : !server.active))
           && (!countryFilter || String(server.country_code || '').toUpperCase() === countryFilter);
@@ -795,7 +796,7 @@
       body.innerHTML = filtered.map(server => `
         <tr>
           <td>${server.id}</td>
-          <td>${escapeHtml(server.name)}</td>
+          <td>${escapeHtml(server.name)} ${server.is_vip_only ? badge('VIP', 'warn') : ''}</td>
           <td>${escapeHtml(server.region || '—')} ${server.country_code ? badge(server.country_code, 'info') : ''}</td>
           <td>${escapeHtml(server.endpoint || server.host || '—')}</td>
           <td>AWG: ${server.active_keys}<br>VLESS: ${server.active_vless || 0}</td>
@@ -1146,6 +1147,7 @@
       document.getElementById('serverVlessNetwork').value = 'tcp';
       document.getElementById('serverVlessSecurity').value = 'reality';
       document.getElementById('serverVlessContainerName').value = 'amnezia-xray';
+      document.getElementById('serverVipOnly').checked = false;
       document.getElementById('serverBootstrapSelfHostedXray').checked = true;
       document.getElementById('serverBootstrapForceRegenerate').checked = false;
       document.getElementById('serverModalWrap').style.display = 'grid';
@@ -1178,6 +1180,7 @@
       document.getElementById('serverVlessSecurity').value = template.security || '';
       document.getElementById('serverVlessSpiderX').value = template.spider_x || '';
       document.getElementById('serverVlessContainerName').value = template.container_name || '';
+      document.getElementById('serverVipOnly').checked = !!server.is_vip_only;
       document.getElementById('serverBootstrapSelfHostedXray').checked = false;
       document.getElementById('serverBootstrapForceRegenerate').checked = false;
       document.getElementById('serverModalWrap').style.display = 'grid';
@@ -1202,6 +1205,7 @@
         name: document.getElementById('serverName').value.trim(),
         region: document.getElementById('serverRegion').value.trim(),
         country_code: document.getElementById('serverCountryCode').value.trim().toUpperCase(),
+        is_vip_only: document.getElementById('serverVipOnly').checked,
         host: document.getElementById('serverHost').value.trim(),
         endpoint: document.getElementById('serverEndpoint').value.trim(),
         max_peers: Number(document.getElementById('serverMaxPeers').value || 0),

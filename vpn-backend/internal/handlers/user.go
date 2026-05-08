@@ -112,6 +112,47 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 	})
 }
 
+// GET /api/v1/me/servers
+func (h *UserHandler) GetServers(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	sub, err := ensureDefaultSubscription(h.db, userID)
+	if err != nil {
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
+		return
+	}
+
+	isVIP := isVIPSubscription(sub)
+	var servers []models.VPNServer
+	if err := h.db.Where("active = ?", true).Order("id asc").Find(&servers).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load servers"})
+		return
+	}
+
+	result := make([]gin.H, 0, len(servers))
+	for _, server := range servers {
+		hostName := strings.TrimSpace(server.Endpoint)
+		if hostName == "" {
+			hostName = strings.TrimSpace(server.Host)
+		}
+		result = append(result, gin.H{
+			"id":           server.ID,
+			"name":         server.Name,
+			"region":       server.Region,
+			"country_code": server.CountryCode,
+			"host_name":    hostName,
+			"is_vip_only":  server.VIPOnly,
+			"is_available": !server.VIPOnly || isVIP,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"servers": result})
+}
+
 // PATCH /api/v1/me/subscription/auto-renew
 func (h *UserHandler) SetAutoRenew(c *gin.Context) {
 	userID := c.GetUint("user_id")

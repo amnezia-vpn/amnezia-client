@@ -126,6 +126,7 @@ func (h *AdminHandler) GetServers(c *gin.Context) {
 			"region":                 s.Region,
 			"country_code":           s.CountryCode,
 			"active":                 s.Active,
+			"is_vip_only":            s.VIPOnly,
 			"max_peers":              s.MaxPeers,
 			"active_keys":            peersCount,
 			"active_vless":           activeVLESS,
@@ -165,6 +166,7 @@ type addServerRequest struct {
 	PublicKey   string `json:"public_key"`
 	Region      string `json:"region"`
 	CountryCode string `json:"country_code"` // ISO 3166-1 alpha-2, e.g. "RU"
+	VIPOnly     bool   `json:"is_vip_only"`
 	MaxPeers    int    `json:"max_peers"`
 	AWGPort     int    `json:"awg_port"`
 	MTU         string `json:"mtu"`
@@ -292,6 +294,7 @@ func (h *AdminHandler) AddServer(c *gin.Context) {
 		PublicKey:    req.PublicKey,
 		Region:       req.Region,
 		CountryCode:  req.CountryCode,
+		VIPOnly:      req.VIPOnly,
 		MaxPeers:     maxPeers,
 		Active:       true,
 		AWGPort:      awgPort,
@@ -423,6 +426,7 @@ func (h *AdminHandler) UpdateServer(c *gin.Context) {
 		Name        string `json:"name"`
 		Region      string `json:"region"`
 		CountryCode string `json:"country_code"`
+		VIPOnly     *bool  `json:"is_vip_only"`
 		Endpoint    string `json:"endpoint"`
 		MaxPeers    int    `json:"max_peers"`
 		SSHPassword string `json:"ssh_password"`
@@ -459,6 +463,9 @@ func (h *AdminHandler) UpdateServer(c *gin.Context) {
 		updates["region"] = req.Region
 	}
 	updates["country_code"] = req.CountryCode // разрешаем очищать
+	if req.VIPOnly != nil {
+		updates["vip_only"] = *req.VIPOnly
+	}
 	if req.Endpoint != "" {
 		updates["endpoint"] = req.Endpoint
 	}
@@ -483,6 +490,9 @@ func (h *AdminHandler) UpdateServer(c *gin.Context) {
 		s.Region = req.Region
 	}
 	s.CountryCode = req.CountryCode
+	if req.VIPOnly != nil {
+		s.VIPOnly = *req.VIPOnly
+	}
 	if req.Endpoint != "" {
 		s.Endpoint = req.Endpoint
 	}
@@ -816,6 +826,7 @@ func (h *AdminHandler) GetStats(c *gin.Context) {
 			"region":       s.Region,
 			"country_code": s.CountryCode,
 			"active":       s.Active,
+			"is_vip_only":  s.VIPOnly,
 			"active_keys":  totalActive,
 			"active_awg":   peersCount,
 			"active_vless": vlessCount,
@@ -951,7 +962,7 @@ func (h *AdminHandler) ExportCSV(c *gin.Context) {
 			})
 		}
 	case "servers":
-		_ = writer.Write([]string{"id", "name", "region", "country_code", "host", "endpoint", "active", "max_peers", "awg_port"})
+		_ = writer.Write([]string{"id", "name", "region", "country_code", "host", "endpoint", "active", "is_vip_only", "max_peers", "awg_port"})
 		var servers []models.VPNServer
 		h.db.Order("id asc").Find(&servers)
 		for _, s := range servers {
@@ -963,6 +974,7 @@ func (h *AdminHandler) ExportCSV(c *gin.Context) {
 				s.Host,
 				s.Endpoint,
 				fmt.Sprint(s.Active),
+				fmt.Sprint(s.VIPOnly),
 				fmt.Sprint(s.MaxPeers),
 				fmt.Sprint(s.AWGPort),
 			})

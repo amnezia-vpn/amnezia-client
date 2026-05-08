@@ -116,7 +116,11 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 
 	// Получаем все активные серверы
 	var servers []models.VPNServer
-	if err := h.db.Where("active = ?", true).Preload("VLESSTemplate").Find(&servers).Error; err != nil || len(servers) == 0 {
+	serversQuery := h.db.Where("active = ?", true)
+	if !isVIPSubscription(sub) {
+		serversQuery = serversQuery.Where("vip_only = ?", false)
+	}
+	if err := serversQuery.Preload("VLESSTemplate").Find(&servers).Error; err != nil || len(servers) == 0 {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "no available VPN servers"})
 		return
 	}
@@ -205,8 +209,11 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 					index: i,
 					config: map[string]interface{}{
 						"config":                      string(configJSON),
+						"server_id":                   server.ID,
 						"server":                      server.Name,
 						"region":                      server.Region,
+						"country_code":                server.CountryCode,
+						"is_vip_only":                 server.VIPOnly,
 						"issued_at":                   issuedAt,
 						"vip_ad_block_requested":      dnsConfig.Requested,
 						"vip_ad_block_applied":        dnsConfig.Applied,
@@ -249,6 +256,16 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 
 		keyMap := make(map[uint]*models.VPNKey)
 		for i := range existingKeys {
+			if existingKeys[i].Server.VIPOnly && !isVIPSubscription(sub) {
+				now := time.Now()
+				if existingKeys[i].PublicKey != "" {
+					if err := removeAWGPeer(&existingKeys[i].Server, existingKeys[i].PublicKey); err != nil {
+						fmt.Printf("[WARN] Failed to remove AWG peer for non-VIP user %d on VIP-only server %s: %v\n", userID, existingKeys[i].Server.Name, err)
+					}
+				}
+				h.db.Model(&models.VPNKey{}).Where("id = ?", existingKeys[i].ID).Update("revoked_at", &now)
+				continue
+			}
 			keyMap[existingKeys[i].ServerID] = &existingKeys[i]
 		}
 
@@ -260,31 +277,30 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 
 			if existingKey, ok := keyMap[server.ID]; ok {
 				configText := existingKey.ConfigText
-				text := strings.TrimSpace(configText)
 
-				// For legacy configs (which is the main target of this loop), "country_code"
-				// is entirely missing from the JSON string. Since we know our schema, we can safely
-				// append it without parsing the whole JSON object.
-				if len(text) >= 2 && text[0] == '{' && text[len(text)-1] == '}' && !strings.Contains(text, `"country_code"`) {
-					insertion := `,"country_code":"` + existingKey.Server.CountryCode + `"}`
-					configText = text[:len(text)-1] + insertion
-				} else {
-					// Fallback: Safe modification using json.RawMessage to avoid parsing nested structures
-					var configMap map[string]json.RawMessage
-					if err := json.Unmarshal([]byte(configText), &configMap); err == nil {
-						countryCodeBytes, _ := json.Marshal(existingKey.Server.CountryCode)
-						configMap["country_code"] = countryCodeBytes
-						if modified, err := json.Marshal(configMap); err == nil {
-							configText = string(modified)
-						}
+				var configMap map[string]json.RawMessage
+				if err := json.Unmarshal([]byte(configText), &configMap); err == nil {
+					countryCodeBytes, _ := json.Marshal(existingKey.Server.CountryCode)
+					serverIDBytes, _ := json.Marshal(existingKey.Server.ID)
+					vipOnlyBytes, _ := json.Marshal(existingKey.Server.VIPOnly)
+					availableBytes, _ := json.Marshal(true)
+					configMap["country_code"] = countryCodeBytes
+					configMap["server_id"] = serverIDBytes
+					configMap["is_vip_only"] = vipOnlyBytes
+					configMap["is_available"] = availableBytes
+					if modified, err := json.Marshal(configMap); err == nil {
+						configText = string(modified)
 					}
 				}
 
 				responseConfigs = append(responseConfigs, map[string]interface{}{
-					"config":    configText,
-					"server":    existingKey.Server.Name,
-					"region":    existingKey.Server.Region,
-					"issued_at": existingKey.IssuedAt,
+					"config":       configText,
+					"server_id":    existingKey.Server.ID,
+					"server":       existingKey.Server.Name,
+					"region":       existingKey.Server.Region,
+					"country_code": existingKey.Server.CountryCode,
+					"is_vip_only":  existingKey.Server.VIPOnly,
+					"issued_at":    existingKey.IssuedAt,
 				})
 				continue
 			}
@@ -326,10 +342,13 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 
 			if err := h.db.Create(&key).Error; err == nil {
 				responseConfigs = append(responseConfigs, map[string]interface{}{
-					"config":    string(configJSON),
-					"server":    server.Name,
-					"region":    server.Region,
-					"issued_at": now,
+					"config":       string(configJSON),
+					"server_id":    server.ID,
+					"server":       server.Name,
+					"region":       server.Region,
+					"country_code": server.CountryCode,
+					"is_vip_only":  server.VIPOnly,
+					"issued_at":    now,
 				})
 			} else {
 				_ = removeAWGPeer(server, publicKey)
@@ -353,8 +372,11 @@ func (h *VPNHandler) GetConfig(c *gin.Context) {
 			region, _ = rc["region"].(string)
 		}
 		configStatuses = append(configStatuses, map[string]interface{}{
+			"server_id":                   rc["server_id"],
 			"server":                      rc["server"],
 			"region":                      rc["region"],
+			"country_code":                rc["country_code"],
+			"is_vip_only":                 rc["is_vip_only"],
 			"vip_ad_block_requested":      rc["vip_ad_block_requested"],
 			"vip_ad_block_applied":        rc["vip_ad_block_applied"],
 			"vip_ad_block_status":         rc["vip_ad_block_status"],
@@ -484,6 +506,9 @@ PersistentKeepalive = 25
 		"defaultContainer": "fblink-awg",
 		"description":      "FBLink VPN - " + server.Region,
 		"country_code":     server.CountryCode,
+		"server_id":        server.ID,
+		"is_vip_only":      server.VIPOnly,
+		"is_available":     true,
 		"dns1":             "1.1.1.1",
 		"dns2":             "8.8.8.8",
 		"hostName":         server.Host,

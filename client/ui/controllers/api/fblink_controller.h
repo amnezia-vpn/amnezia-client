@@ -150,6 +150,7 @@ private:
     void setPendingRoutingSync(bool pending);
 
     void fetchConfig(bool allowRefreshRetry);
+    void fetchServerMetadata(bool allowRefreshRetry);
     void fetchSubscription(bool allowRefreshRetry);
     void fetchRoutingProfiles(bool allowRefreshRetry);
     void saveRoutingProfile(const QVariantMap &profile, bool allowRefreshRetry);
@@ -175,6 +176,7 @@ private:
                               bool canUseAppSplitTunneling = false, bool canManageRoutingProfiles = false,
                               bool canUseAdBlock = false, bool vipAdBlockEnabled = false);
     void clearExistingFBLinkServers();
+    void mergeServerMetadata(const QJsonArray &metadataServers);
 
     bool m_isRefreshing = false;
     bool m_isFetchingConfig = false;
