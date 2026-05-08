@@ -39,6 +39,9 @@ func main() {
 			time.Sleep(1 * time.Hour)
 			db.Where("expires_at < ? OR used = true", time.Now().Add(-24*time.Hour)).
 				Delete(&models.VerificationCode{})
+			db.Where("expires_at < ? OR status IN ?", time.Now().Add(-24*time.Hour),
+				[]models.TVLoginStatus{models.TVLoginConsumed, models.TVLoginExpired}).
+				Delete(&models.TVLogin{})
 		}
 	})
 

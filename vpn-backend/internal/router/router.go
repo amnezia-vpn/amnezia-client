@@ -93,6 +93,9 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			authGroup.POST("/refresh", authH.Refresh)
 			authGroup.POST("/forgot-password", authH.ForgotPassword)
 			authGroup.POST("/reset-password", authH.ResetPassword)
+			authGroup.POST("/tv/start", authH.TVStart)
+			authGroup.POST("/tv/approve", authH.TVApprove)
+			authGroup.POST("/tv/token", authH.TVToken)
 		}
 
 		// Client Updates (Public)
@@ -170,6 +173,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	// Веб-панель администратора
 	r.Static("/admin", "./admin")
+	r.GET("/tv", authH.TVApprovePage)
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(302, "/admin/")
 	})

@@ -89,6 +89,10 @@ endif()
 
 qt_standard_project_setup()
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
+option(FBLINK_ANDROID_TV "Build Android TV interface variant" OFF)
+if(FBLINK_ANDROID_TV)
+    target_compile_definitions(${PROJECT} PRIVATE FBLINK_ANDROID_TV=1)
+endif()
 target_include_directories(${PROJECT} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )

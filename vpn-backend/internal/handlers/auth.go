@@ -2,11 +2,15 @@ package handlers
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/base64"
 	"fmt"
+	"html"
 	"math/big"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"vpn-backend/internal/config"
@@ -20,13 +24,22 @@ import (
 )
 
 type AuthHandler struct {
-	db        *gorm.DB
-	cfg       *config.Config
-	jwtSecret string
+	db                *gorm.DB
+	cfg               *config.Config
+	jwtSecret         string
+	tvRateLimitMu     sync.Mutex
+	tvApproveAttempts map[string][]time.Time
+	tvTokenAttempts   map[string][]time.Time
 }
 
 func NewAuthHandler(db *gorm.DB, cfg *config.Config) *AuthHandler {
-	return &AuthHandler{db: db, cfg: cfg, jwtSecret: cfg.JWTSecret}
+	return &AuthHandler{
+		db:                db,
+		cfg:               cfg,
+		jwtSecret:         cfg.JWTSecret,
+		tvApproveAttempts: make(map[string][]time.Time),
+		tvTokenAttempts:   make(map[string][]time.Time),
+	}
 }
 
 type registerRequest struct {
@@ -39,6 +52,25 @@ type loginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type tvStartResponse struct {
+	DeviceCode              string `json:"device_code"`
+	UserCode                string `json:"user_code"`
+	VerificationURI         string `json:"verification_uri"`
+	VerificationURIComplete string `json:"verification_uri_complete"`
+	ExpiresIn               int    `json:"expires_in"`
+	Interval                int    `json:"interval"`
+}
+
+type tvApproveRequest struct {
+	UserCode string `json:"user_code" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type tvTokenRequest struct {
+	DeviceCode string `json:"device_code" binding:"required"`
+}
+
 type tokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
@@ -47,6 +79,294 @@ type tokenResponse struct {
 func generateCode() string {
 	n, _ := rand.Int(rand.Reader, big.NewInt(900000))
 	return fmt.Sprintf("%06d", n.Int64()+100000)
+}
+
+func generateTVUserCode() string {
+	const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+	var out strings.Builder
+	for i := 0; i < 8; i++ {
+		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(alphabet))))
+		out.WriteByte(alphabet[n.Int64()])
+	}
+	return out.String()
+}
+
+func generateTVDeviceCode() string {
+	buf := make([]byte, 32)
+	if _, err := rand.Read(buf); err != nil {
+		return ""
+	}
+	return base64.RawURLEncoding.EncodeToString(buf)
+}
+
+func normalizeTVUserCode(code string) string {
+	return strings.ToUpper(strings.ReplaceAll(strings.TrimSpace(code), "-", ""))
+}
+
+func (h *AuthHandler) hashTVCode(code string) string {
+	sum := sha256.Sum256([]byte(h.jwtSecret + ":" + code))
+	return base64.RawURLEncoding.EncodeToString(sum[:])
+}
+
+func requestBaseURL(c *gin.Context) string {
+	proto := c.GetHeader("X-Forwarded-Proto")
+	if proto == "" {
+		if c.Request.TLS != nil {
+			proto = "https"
+		} else {
+			proto = "http"
+		}
+	}
+	host := c.GetHeader("X-Forwarded-Host")
+	if host == "" {
+		host = c.Request.Host
+	}
+	return proto + "://" + host
+}
+
+func (h *AuthHandler) expireStaleTVLogins() {
+	now := time.Now()
+	h.db.Model(&models.TVLogin{}).
+		Where("status IN ? AND expires_at <= ?", []models.TVLoginStatus{models.TVLoginPending, models.TVLoginApproved}, now).
+		Update("status", models.TVLoginExpired)
+}
+
+func (h *AuthHandler) allowTVAttempt(bucket map[string][]time.Time, key string, limit int, window time.Duration) bool {
+	now := time.Now()
+	cutoff := now.Add(-window)
+
+	h.tvRateLimitMu.Lock()
+	defer h.tvRateLimitMu.Unlock()
+
+	attempts := bucket[key]
+	kept := attempts[:0]
+	for _, at := range attempts {
+		if at.After(cutoff) {
+			kept = append(kept, at)
+		}
+	}
+	if len(kept) >= limit {
+		bucket[key] = kept
+		return false
+	}
+	bucket[key] = append(kept, now)
+	return true
+}
+
+// POST /api/v1/auth/tv/start
+func (h *AuthHandler) TVStart(c *gin.Context) {
+	h.expireStaleTVLogins()
+
+	deviceCode := generateTVDeviceCode()
+	if deviceCode == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate device code"})
+		return
+	}
+	userCode := generateTVUserCode()
+	now := time.Now()
+	login := models.TVLogin{
+		DeviceCodeHash: h.hashTVCode(deviceCode),
+		UserCodeHash:   h.hashTVCode(userCode),
+		Status:         models.TVLoginPending,
+		ExpiresAt:      now.Add(10 * time.Minute),
+	}
+	if err := h.db.Create(&login).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create tv login"})
+		return
+	}
+
+	baseURL := requestBaseURL(c)
+	verificationURI := baseURL + "/tv"
+	c.JSON(http.StatusOK, tvStartResponse{
+		DeviceCode:              deviceCode,
+		UserCode:                userCode[:4] + "-" + userCode[4:],
+		VerificationURI:         verificationURI,
+		VerificationURIComplete: verificationURI + "?code=" + userCode,
+		ExpiresIn:               600,
+		Interval:                8,
+	})
+}
+
+// POST /api/v1/auth/tv/approve
+func (h *AuthHandler) TVApprove(c *gin.Context) {
+	h.expireStaleTVLogins()
+
+	var req tvApproveRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userCode := normalizeTVUserCode(req.UserCode)
+	if !h.allowTVAttempt(h.tvApproveAttempts, "approve-ip:"+c.ClientIP(), 60, 10*time.Minute) ||
+		!h.allowTVAttempt(h.tvApproveAttempts, "approve-code:"+c.ClientIP()+":"+userCode, 6, 10*time.Minute) {
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": "too_many_attempts"})
+		return
+	}
+
+	var login models.TVLogin
+	if err := h.db.Where("user_code_hash = ? AND status = ? AND expires_at > ?",
+		h.hashTVCode(userCode), models.TVLoginPending, time.Now()).First(&login).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid or expired code"})
+		return
+	}
+
+	var user models.User
+	if err := h.db.Where("email = ?", req.Email).First(&user).Error; err != nil {
+		if isRecordNotFoundError(err) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+			return
+		}
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load user"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+		return
+	}
+
+	now := time.Now()
+	if err := h.db.Model(&login).Updates(map[string]interface{}{
+		"user_id":     user.ID,
+		"status":      models.TVLoginApproved,
+		"approved_at": &now,
+	}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to approve tv login"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "approved"})
+}
+
+// POST /api/v1/auth/tv/token
+func (h *AuthHandler) TVToken(c *gin.Context) {
+	h.expireStaleTVLogins()
+
+	var req tvTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	deviceHash := h.hashTVCode(req.DeviceCode)
+	if !h.allowTVAttempt(h.tvTokenAttempts, "token-ip:"+c.ClientIP(), 180, 10*time.Minute) {
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": "slow_down", "interval": 8})
+		return
+	}
+
+	var login models.TVLogin
+	if err := h.db.Where("device_code_hash = ?", deviceHash).First(&login).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid device code"})
+		return
+	}
+	if !h.allowTVAttempt(h.tvTokenAttempts, "token-device:"+deviceHash, 120, 10*time.Minute) {
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": "slow_down", "interval": 8})
+		return
+	}
+	if login.Status == models.TVLoginExpired || time.Now().After(login.ExpiresAt) {
+		h.db.Model(&login).Update("status", models.TVLoginExpired)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "expired_token"})
+		return
+	}
+	if login.Status == models.TVLoginConsumed {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "already_used"})
+		return
+	}
+	if login.Status == models.TVLoginPending {
+		now := time.Now()
+		if login.LastPolledAt != nil && now.Sub(*login.LastPolledAt) < 3*time.Second {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": "slow_down", "interval": 8})
+			return
+		}
+		h.db.Model(&login).Update("last_polled_at", &now)
+		c.JSON(http.StatusAccepted, gin.H{"status": "pending", "error": "authorization_pending"})
+		return
+	}
+	if login.UserID == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "approved login is missing user"})
+		return
+	}
+
+	var user models.User
+	if err := h.db.First(&user, *login.UserID).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+		return
+	}
+
+	now := time.Now()
+	result := h.db.Model(&models.TVLogin{}).Where("id = ? AND status = ?", login.ID, models.TVLoginApproved).Updates(map[string]interface{}{
+		"status":      models.TVLoginConsumed,
+		"consumed_at": &now,
+	})
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to consume tv login"})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "already_used"})
+		return
+	}
+
+	tokens, err := h.generateTokens(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate tokens"})
+		return
+	}
+	c.JSON(http.StatusOK, tokens)
+}
+
+// GET /tv
+func (h *AuthHandler) TVApprovePage(c *gin.Context) {
+	code := html.EscapeString(c.Query("code"))
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	c.String(http.StatusOK, `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FBLink TV Login</title>
+  <style>
+    body{margin:0;background:#09090b;color:#f4f4f5;font-family:system-ui,-apple-system,Segoe UI,sans-serif;display:grid;min-height:100vh;place-items:center}
+    form{width:min(420px,calc(100vw - 32px));background:#111114;border:1px solid #2f2f35;border-radius:18px;padding:24px;box-shadow:0 18px 60px rgba(0,0,0,.35)}
+    h1{margin:0 0 8px;font-size:26px} p{color:#a1a1aa;margin:0 0 18px;line-height:1.45}
+    label{display:block;margin-top:14px;color:#d4d4d8;font-size:14px} input{box-sizing:border-box;width:100%;margin-top:6px;padding:13px 14px;border-radius:12px;border:1px solid #3f3f46;background:#09090b;color:#fff;font-size:16px}
+    button{width:100%;margin-top:18px;padding:14px;border:0;border-radius:12px;background:#eab308;color:#111;font-weight:700;font-size:16px}
+    #msg{margin-top:14px;min-height:22px;color:#fbbf24}
+  </style>
+</head>
+<body>
+  <form id="form">
+    <h1>FBLink VPN TV</h1>
+    <p>Enter the code from your TV and your account credentials to sign in on Android TV.</p>
+    <label>Code</label><input id="code" autocomplete="one-time-code" value="`+code+`" required>
+    <label>Email</label><input id="email" type="email" autocomplete="email" required>
+    <label>Password</label><input id="password" type="password" autocomplete="current-password" required>
+    <button>Confirm sign in</button>
+    <div id="msg"></div>
+  </form>
+  <script>
+    const form = document.getElementById('form'), msg = document.getElementById('msg');
+    form.addEventListener('submit', async e => {
+      e.preventDefault(); msg.textContent = 'Checking...';
+      const res = await fetch('/api/v1/auth/tv/approve', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          user_code: document.getElementById('code').value,
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      msg.textContent = res.ok ? 'Done. You can return to the TV.' : (data.error || 'Confirmation failed');
+    });
+  </script>
+</body>
+</html>`)
 }
 
 // POST /api/v1/auth/register

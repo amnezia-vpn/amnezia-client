@@ -36,6 +36,7 @@ public:
     Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin NOTIFY safeAreaTopMarginChanged)
     Q_PROPERTY(int safeAreaBottomMargin READ getSafeAreaBottomMargin NOTIFY safeAreaBottomMarginChanged)
     Q_PROPERTY(int imeHeight READ getImeHeight NOTIFY imeHeightChanged)
+    Q_PROPERTY(bool isTvInterfaceActive READ isTvInterfaceActive CONSTANT)
 
 public slots:
     void toggleFBLinkDns(bool enable);
@@ -102,6 +103,7 @@ public slots:
     void toggleDevGatewayEnv(bool enabled);
 
     bool isOnTv();
+    bool isTvInterfaceActive();
     bool isEdgeToEdgeEnabled();
     int getStatusBarHeight();
     int getNavigationBarHeight();

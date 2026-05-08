@@ -23,16 +23,18 @@ Options:
                                   By default, the latest available platform is used
  -m, --move                       Move the build result to the root of the build directory
  -f, --fdroid                     Build for F-Droid
+ -t, --tv                         Build Android TV UI variant APK/AAB artifact
  -h, --help                       Display this help
 
 EOT
 }
 
 BUILD_TYPE="release"
+TV_BUILD=0
 DEFAULT_ANDROID_ABIS="armeabi-v7a;arm64-v8a"
 SUPPORTED_ANDROID_ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
 
-opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,help -o "dua:b:mfh" -- "$@")
+opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,tv,help -o "dua:b:mfth" -- "$@")
 eval set -- "$opts"
 while true; do
   case "$1" in
@@ -42,6 +44,7 @@ while true; do
     -b | --build-platform) ANDROID_BUILD_PLATFORM=$2; shift 2;;
     -m | --move) MOVE_RESULT=1; shift;;
     -f | --fdroid) FDROID=1; shift;;
+    -t | --tv) TV_BUILD=1; shift;;
     -h | --help) usage; exit 0;;
     --) shift; break;;
   esac
@@ -76,6 +79,9 @@ elif [[ -v AAB ]]; then
   build_suffix="aab"
 else
   build_suffix="android"
+fi
+if [[ $TV_BUILD -eq 1 ]]; then
+  build_suffix="tv-$build_suffix"
 fi
 BUILD_DIR=$ARTIFACT_DIR/work/$build_suffix
 OUT_APP_DIR=$BUILD_DIR/client
@@ -470,6 +476,7 @@ fi
 $QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -B $BUILD_DIR \
   -DQT_NO_GLOBAL_APK_TARGET_PART_OF_ALL=ON \
   -DQT_USE_TARGET_ANDROID_BUILD_DIR=ON \
+  -DFBLINK_ANDROID_TV=$([[ $TV_BUILD -eq 1 ]] && echo ON || echo OFF) \
   -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
   "${qt_cmake_opts[@]}"
 
@@ -631,6 +638,9 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
       exit 1
     fi
     mv -u "$AAB_FILE" $ARTIFACT_DIR/FBLink-$BUILD_TYPE.aab
+    if [[ $TV_BUILD -eq 1 ]]; then
+      mv -u $ARTIFACT_DIR/FBLink-$BUILD_TYPE.aab $ARTIFACT_DIR/FBLinkTV-$BUILD_TYPE.aab
+    fi
   fi
 
   if [ -v ABIS ]; then
@@ -647,9 +657,17 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
     UNIVERSAL_APK_UNSIGNED=$(find "$APK_OUT_DIR" -maxdepth 1 -type f -name "*$suffix*unsigned*.apk" 2>/dev/null | head -1)
     # Prefer a universal output when available.
     if [ -f "$UNIVERSAL_APK_SIGNED" ]; then
-      mv -u "$UNIVERSAL_APK_SIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+      if [[ $TV_BUILD -eq 1 ]]; then
+        mv -u "$UNIVERSAL_APK_SIGNED" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+      else
+        mv -u "$UNIVERSAL_APK_SIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+      fi
     elif [ -f "$UNIVERSAL_APK_UNSIGNED" ] && [ -v FDROID ]; then
-      mv -u "$UNIVERSAL_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+      if [[ $TV_BUILD -eq 1 ]]; then
+        mv -u "$UNIVERSAL_APK_UNSIGNED" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+      else
+        mv -u "$UNIVERSAL_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+      fi
     else
       IFS=';' read -r -a abi_array <<< "$ABIS"
       for ABI in "${abi_array[@]}"
@@ -659,10 +677,18 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
 
         if [ -f "$PER_ABI_APK" ]; then
           # Standard per-ABI APK (Qt < 6.7 behaviour)
-          mv -u "$PER_ABI_APK" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+          if [[ $TV_BUILD -eq 1 ]]; then
+            mv -u "$PER_ABI_APK" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+          else
+            mv -u "$PER_ABI_APK" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+          fi
         elif [ -f "$PER_ABI_APK_UNSIGNED" ] && [ -v FDROID ]; then
           # Unsigned APK (no signing key configured)
-          mv -u "$PER_ABI_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+          if [[ $TV_BUILD -eq 1 ]]; then
+            mv -u "$PER_ABI_APK_UNSIGNED" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+          else
+            mv -u "$PER_ABI_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+          fi
         else
           # Try a broader find: ABI in filename OR in directory path (Qt 6.3+ sub-projects)
           FOUND=$(find "$OUT_APP_DIR" -type f \( \
@@ -674,7 +700,11 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
               echo "ERROR: Found only an unsigned APK for ABI=$ABI in release mode: $FOUND"
               exit 1
             fi
-            mv -u "$FOUND" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+            if [[ $TV_BUILD -eq 1 ]]; then
+              mv -u "$FOUND" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+            else
+              mv -u "$FOUND" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+            fi
           else
             if [ -f "$PER_ABI_APK_UNSIGNED" ] || [ -f "$UNIVERSAL_APK_UNSIGNED" ]; then
               echo "ERROR: Only unsigned APK artifacts were produced for ABI=$ABI in release mode."

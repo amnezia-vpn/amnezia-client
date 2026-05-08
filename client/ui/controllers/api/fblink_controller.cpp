@@ -19,6 +19,8 @@
 #include <QLocale>
 #include <memory>
 
+#include "core/qrCodeUtils.h"
+
 // Backend API URL
 const QString BACKEND_URL = "https://srv.frakebit.com/api/v1";
 
@@ -1037,6 +1039,127 @@ void FBLinkController::fetchServerMetadata(bool allowRefreshRetry)
     });
 }
 
+void FBLinkController::clearTvLoginState()
+{
+    m_tvLoginDeviceCode.clear();
+    m_tvLoginUserCode.clear();
+    m_tvLoginVerificationUrl.clear();
+    m_tvLoginQrCodeImage.clear();
+    m_tvLoginStatus.clear();
+    m_tvLoginError.clear();
+    m_tvLoginPollIntervalMs = 8000;
+}
+
+void FBLinkController::completeTokenLogin(const QJsonObject &obj)
+{
+    saveJwtToken(obj["access_token"].toString());
+    if (obj.contains("refresh_token")) {
+        saveRefreshToken(obj["refresh_token"].toString());
+    }
+    setUserEmail("");
+    saveSubscriptionInfo("", "", "");
+    clearTvLoginState();
+    emit tvLoginChanged();
+    emit tvLoginApproved();
+    emit loginSuccess();
+    emit loginStateChanged();
+    emit subscriptionChanged();
+    beginSessionSync();
+}
+
+void FBLinkController::startTvLogin()
+{
+    clearTvLoginState();
+    m_tvLoginStatus = "starting";
+    emit tvLoginChanged();
+
+    QNetworkRequest request = createApiRequest("/auth/tv/start", true, false);
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(QJsonObject()).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        const QByteArray data = reply->readAll();
+        const QJsonObject obj = QJsonDocument::fromJson(data).object();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            m_tvLoginStatus = "error";
+            m_tvLoginError = obj.value("error").toString(reply->errorString());
+            logApiFailure("tv-login-start", reply);
+            emit tvLoginChanged();
+            return;
+        }
+
+        m_tvLoginDeviceCode = obj.value("device_code").toString();
+        m_tvLoginUserCode = obj.value("user_code").toString();
+        m_tvLoginVerificationUrl = obj.value("verification_uri_complete").toString();
+        if (m_tvLoginVerificationUrl.isEmpty()) {
+            m_tvLoginVerificationUrl = obj.value("verification_uri").toString();
+        }
+        const int intervalSec = obj.value("interval").toInt(8);
+        m_tvLoginPollIntervalMs = qMax(3000, intervalSec * 1000);
+
+        if (!m_tvLoginVerificationUrl.isEmpty()) {
+            const auto qr = qrCodeUtils::generateQrCode(m_tvLoginVerificationUrl.toUtf8());
+            m_tvLoginQrCodeImage = qrCodeUtils::svgToBase64(QString::fromStdString(toSvgString(qr, 4)));
+        }
+
+        m_tvLoginStatus = "pending";
+        m_tvLoginError.clear();
+        emit tvLoginChanged();
+    });
+}
+
+void FBLinkController::pollTvLogin()
+{
+    if (m_tvLoginDeviceCode.isEmpty() || m_tvLoginStatus == "approved") {
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest("/auth/tv/token", true, false);
+    QJsonObject json;
+    json["device_code"] = m_tvLoginDeviceCode;
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        const QByteArray data = reply->readAll();
+        const QJsonObject obj = QJsonDocument::fromJson(data).object();
+
+        if (reply->error() == QNetworkReply::NoError && obj.contains("access_token")) {
+            m_tvLoginStatus = "approved";
+            completeTokenLogin(obj);
+            return;
+        }
+
+        if (httpStatus == 202 || obj.value("status").toString() == "pending") {
+            m_tvLoginStatus = "pending";
+            m_tvLoginError.clear();
+            emit tvLoginChanged();
+            return;
+        }
+
+        if (httpStatus == 429) {
+            m_tvLoginStatus = "pending";
+            m_tvLoginPollIntervalMs = qMax(m_tvLoginPollIntervalMs, obj.value("interval").toInt(8) * 1000);
+            m_tvLoginError.clear();
+            emit tvLoginChanged();
+            return;
+        }
+
+        m_tvLoginStatus = "error";
+        m_tvLoginError = obj.value("error").toString(reply->errorString());
+        logApiFailure("tv-login-token", reply);
+        emit tvLoginChanged();
+    });
+}
+
+void FBLinkController::cancelTvLogin()
+{
+    clearTvLoginState();
+    emit tvLoginChanged();
+}
+
 void FBLinkController::createPayment(const QString &plan)
 {
     createPayment(plan, QString(), true);
@@ -1277,6 +1400,8 @@ void FBLinkController::logout()
     m_isRefreshing = false;
     setLoadingState(false);
     setPendingRoutingSync(false);
+    clearTvLoginState();
+    emit tvLoginChanged();
     {
         QSettings qSettings = appSettings();
         qSettings.setValue(kVIPAdBlockStatusKey, "");
@@ -1493,6 +1618,36 @@ bool FBLinkController::isConfigSyncing() const
 bool FBLinkController::hasPendingRoutingSync() const
 {
     return m_hasPendingRoutingSync;
+}
+
+QString FBLinkController::tvLoginUserCode() const
+{
+    return m_tvLoginUserCode;
+}
+
+QString FBLinkController::tvLoginVerificationUrl() const
+{
+    return m_tvLoginVerificationUrl;
+}
+
+QString FBLinkController::tvLoginQrCodeImage() const
+{
+    return m_tvLoginQrCodeImage;
+}
+
+QString FBLinkController::tvLoginStatus() const
+{
+    return m_tvLoginStatus;
+}
+
+QString FBLinkController::tvLoginError() const
+{
+    return m_tvLoginError;
+}
+
+int FBLinkController::tvLoginPollIntervalMs() const
+{
+    return m_tvLoginPollIntervalMs;
 }
 
 void FBLinkController::setAutoRenew(bool enabled)

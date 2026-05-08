@@ -86,8 +86,12 @@ Window  {
         }
     }
 
+    Component.onCompleted: {
+        console.log("main2.qml loaded, tvInterfaceActive =", SettingsController.isTvInterfaceActive)
+    }
+
     Loader {
-        active: Qt.platform.os === "android" && SettingsController.isOnTv()
+        active: Qt.platform.os === "android" && SettingsController.isTvInterfaceActive
         source: active ? "Components/GamepadLoader.qml" : ""
     }
 
@@ -142,10 +146,45 @@ Window  {
         }
     }
 
-    PageStart {
-        objectName: "pageStart"
-        width: root.width
-        height: root.height
+    Loader {
+        id: appStartLoader
+        objectName: "appStartLoader"
+        anchors.fill: parent
+        source: "Pages2/PageStart.qml"
+        onStatusChanged: {
+            console.log("PageStart loader status:", status, "source:", source)
+        }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        visible: appStartLoader.status === Loader.Error
+        color: FBLinkStyle.color.midnightBlack
+        z: 900
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            width: Math.min(parent.width - 64, 640)
+            spacing: 16
+
+            Label {
+                Layout.fillWidth: true
+                text: "UI failed to load"
+                color: "#F5F5F5"
+                font.pixelSize: 32
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Label {
+                Layout.fillWidth: true
+                text: "Source: " + appStartLoader.source + "\nStatus: " + appStartLoader.status
+                color: "#A1A1AA"
+                font.pixelSize: 18
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+            }
+        }
     }
 
     Item {

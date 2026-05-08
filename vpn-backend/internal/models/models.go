@@ -54,6 +54,29 @@ type Subscription struct {
 	VIPAdBlockEnabled bool   `gorm:"column:vip_ad_block_enabled;default:false"`
 }
 
+type TVLoginStatus string
+
+const (
+	TVLoginPending  TVLoginStatus = "pending"
+	TVLoginApproved TVLoginStatus = "approved"
+	TVLoginConsumed TVLoginStatus = "consumed"
+	TVLoginExpired  TVLoginStatus = "expired"
+)
+
+type TVLogin struct {
+	gorm.Model
+	DeviceCodeHash string        `gorm:"uniqueIndex;not null"`
+	UserCodeHash   string        `gorm:"index;not null"`
+	UserID         *uint
+	Status         TVLoginStatus `gorm:"default:pending;not null"`
+	ExpiresAt      time.Time     `gorm:"not null"`
+	LastPolledAt   *time.Time
+	ApprovedAt     *time.Time
+	ConsumedAt     *time.Time
+
+	User *User
+}
+
 type VPNServer struct {
 	gorm.Model
 	Name        string `gorm:"not null"`

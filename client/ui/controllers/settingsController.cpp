@@ -454,6 +454,17 @@ bool SettingsController::isOnTv()
 #endif
 }
 
+bool SettingsController::isTvInterfaceActive()
+{
+#ifdef FBLINK_ANDROID_TV
+    return true;
+#elif defined(Q_OS_ANDROID)
+    return isOnTv();
+#else
+    return false;
+#endif
+}
+
 bool SettingsController::isEdgeToEdgeEnabled()
 {
 #ifdef Q_OS_ANDROID
