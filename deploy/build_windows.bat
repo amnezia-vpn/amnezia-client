@@ -1,6 +1,7 @@
 @ECHO OFF
 
 CHCP 1252
+setlocal EnableDelayedExpansion
 
 REM %VAR:"=% mean dequoted %VAR%
 
@@ -131,19 +132,56 @@ echo "TARGET_MSI_FILENAME:  %TARGET_MSI_FILENAME%"
 echo "STAGE_DIR:            %STAGE_DIR%"
 
 echo "Cleanup..."
-rmdir /Q /S %WORK_DIR%
-del %TARGET_FILENAME%
-del %TARGET_MSI_FILENAME%
-rmdir /Q /S "%STAGE_DIR%"
+if exist "%WORK_DIR%" rmdir /Q /S "%WORK_DIR%"
+if exist "%TARGET_FILENAME%" del "%TARGET_FILENAME%"
+if exist "%TARGET_MSI_FILENAME%" del "%TARGET_MSI_FILENAME%"
+if exist "%STAGE_DIR%" rmdir /Q /S "%STAGE_DIR%"
 
-mkdir %WORK_DIR%
+mkdir "%WORK_DIR%"
 
 call "%QT_CMAKE_CMD%" --version
 "%QT_BIN_DIR_UNQUOTED%\windeployqt" -v
 cmake --version
 
-cd %PROJECT_DIR%
-call cmake . -B %WORK_DIR% -G "Visual Studio 17 2022" -A x64 "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_PREFIX_DIR%" "-DZLIB_ROOT=%ZLIB_ROOT%"
+cd /d "%PROJECT_DIR%"
+set "CMAKE_GENERATOR_NAME=%CMAKE_GENERATOR%"
+set CMAKE_GENERATOR_PLATFORM_ARG=
+set CMAKE_BUILD_EXTRA_ARGS=
+if "%CMAKE_GENERATOR_NAME%"=="" (
+    set "VSWHERE_CMD=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+    set "VS_INSTALL_DIR="
+    if exist "!VSWHERE_CMD!" (
+        for /f "usebackq tokens=*" %%I in (`"!VSWHERE_CMD!" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VS_INSTALL_DIR=%%I"
+    )
+    if not "!VS_INSTALL_DIR!"=="" (
+        set "CMAKE_GENERATOR_NAME=Visual Studio 17 2022"
+        set "CMAKE_GENERATOR_PLATFORM_ARG=-A x64"
+        set "CMAKE_BUILD_EXTRA_ARGS=-- /p:UseMultiToolTask=true /m"
+    ) else (
+        where ninja >nul 2>nul
+        if errorlevel 1 (
+            echo "Neither Visual Studio 2022 Build Tools nor Ninja were found."
+            exit /b 1
+        )
+        set "CMAKE_GENERATOR_NAME=Ninja"
+        set "CMAKE_BUILD_EXTRA_ARGS=--parallel"
+    )
+) else (
+    if /I "%CMAKE_GENERATOR_NAME%"=="Visual Studio 17 2022" (
+        set "CMAKE_GENERATOR_PLATFORM_ARG=-A x64"
+        set "CMAKE_BUILD_EXTRA_ARGS=-- /p:UseMultiToolTask=true /m"
+    )
+    if /I "%CMAKE_GENERATOR_NAME%"=="Ninja" (
+        set "CMAKE_BUILD_EXTRA_ARGS=--parallel"
+    )
+)
+
+echo "Using CMake generator: %CMAKE_GENERATOR_NAME% %CMAKE_GENERATOR_PLATFORM_ARG%"
+if "%CMAKE_GENERATOR_PLATFORM_ARG%"=="" (
+    call cmake . -B "%WORK_DIR%" -G "%CMAKE_GENERATOR_NAME%" "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_PREFIX_DIR%" "-DZLIB_ROOT=%ZLIB_ROOT%"
+) else (
+    call cmake . -B "%WORK_DIR%" -G "%CMAKE_GENERATOR_NAME%" %CMAKE_GENERATOR_PLATFORM_ARG% "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_PREFIX_DIR%" "-DZLIB_ROOT=%ZLIB_ROOT%"
+)
 if %errorlevel% neq 0 (
     echo "CMake configure failed."
     if exist "%WORK_DIR%\CMakeFiles\CMakeOutput.log" (
@@ -159,8 +197,8 @@ if %errorlevel% neq 0 (
     exit /b %errorlevel%
 )
 
-cd %WORK_DIR%
-cmake --build . --config release -- /p:UseMultiToolTask=true /m
+cd /d "%WORK_DIR%"
+cmake --build . --config Release %CMAKE_BUILD_EXTRA_ARGS%
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo "Deploying..."
@@ -206,7 +244,7 @@ del "%OUT_APP_DIR%\%CMAKEOUT_SERVICE_FILENAME%" 2>nul
 copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\FBLinkVPN.ico" >nul
 
 echo "Signing exe"
-cd %OUT_APP_DIR%
+cd /d "%OUT_APP_DIR%"
 if not "%SIGN_CERT_THUMBPRINT%"=="" (
     signtool sign /v /sha1 "%SIGN_CERT_THUMBPRINT%" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe || echo "Signing skipped (thumbprint signing failed)"
 ) else (
@@ -251,7 +289,7 @@ echo "Verifying service runtime compatibility..."
 powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%\verify_windows_runtime.ps1" "%OUT_APP_DIR%" "%SERVICE_FILENAME%"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cd %SCRIPT_DIR%
+cd /d "%SCRIPT_DIR%"
 xcopy %SCRIPT_DIR:"=%\installer  %WORK_DIR:"=%\installer /s /e /y /i /f
 
 set COMPONENT_SCRIPT=%WORK_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\meta\componentscript.js
@@ -278,17 +316,17 @@ mkdir %INSTALLER_DATA_DIR%
 echo "Deploy finished, content:"
 dir %OUT_APP_DIR%
 
-cd %OUT_APP_DIR%
+cd /d "%OUT_APP_DIR%"
 echo "Compressing data..."
 call "%QIF_ARCHIVEGEN_CMD%" -c 9 %INSTALLER_DATA_DIR:"=%\%APP_NAME:"=%.7z .
 
-cd "%WORK_DIR:"=%\installer"
+cd /d "%WORK_DIR:"=%\installer"
 echo "Creating installer..."
 call "%QIF_BINARYCREATOR_CMD%" --offline-only -v -c config\windows.xml -p packages -f %TARGET_FILENAME%
 
 timeout 5
 
-cd %PROJECT_DIR%
+cd /d "%PROJECT_DIR%"
 if not "%SIGN_CERT_THUMBPRINT%"=="" (
     signtool sign /v /sha1 "%SIGN_CERT_THUMBPRINT%" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%" || echo "Signing skipped (thumbprint signing failed)"
 ) else (
@@ -302,7 +340,7 @@ xcopy "%OUT_APP_DIR%" "%STAGE_DIR%" /s /e /y /i /f >nul
 
 echo "Building MSI via CPack..."
 rmdir /Q /S "%WORK_DIR%\_CPack_Packages"
-cd %WORK_DIR%
+cd /d "%WORK_DIR%"
 cpack -G WIX -C Release --config "%WORK_DIR%\CPackConfig.cmake"
 if exist "%WORK_DIR%\_CPack_Packages\win64\WIX\wix.log" (
     echo ---------------------------------------------
@@ -331,7 +369,7 @@ if %errorlevel% neq 0 (
     goto :FINISH
 )
 
-cd %PROJECT_DIR%
+cd /d "%PROJECT_DIR%"
 if not "%SIGN_CERT_THUMBPRINT%"=="" (
     signtool sign /v /sha1 "%SIGN_CERT_THUMBPRINT%" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_MSI_FILENAME%" || echo "Signing skipped (thumbprint signing failed)"
 ) else (

@@ -91,7 +91,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     env:
       QT_VERSION: 6.10.1
@@ -141,7 +141,7 @@ jobs:
         py7zrversion: '==0.22.*'  
         extra: '--base ${{ env.QT_MIRROR }}' 
 
-    - name: 'Setup mvsc'
+    - name: 'Setup MSVC'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: 'x64'
