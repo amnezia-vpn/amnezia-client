@@ -46,6 +46,9 @@ public:
     int getStatusBarHeight();
     int getNavigationBarHeight();
     void startQrReaderActivity();
+    void startPairingQrEmbeddedCamera();
+    void stopPairingQrEmbeddedCamera();
+    void setPairingQrEmbeddedTorch(bool enabled);
     void setSaveLogs(bool enabled);
     void exportLogsFile(const QString &fileName);
     void clearLogs();

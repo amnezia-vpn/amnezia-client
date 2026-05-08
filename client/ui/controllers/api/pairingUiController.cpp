@@ -166,7 +166,9 @@ bool PairingUiController::isPairingCameraAccessGranted() const
 #if defined(Q_OS_ANDROID)
     return AndroidController::instance()->isCameraPermissionGranted();
 #elif defined(Q_OS_IOS)
-    return amneziaIosPairingCameraAccessGranted();
+    const bool ok = amneziaIosPairingCameraAccessGranted();
+    qInfo() << "[PairingUi] iOS isPairingCameraAccessGranted =" << ok;
+    return ok;
 #else
     return true;
 #endif
@@ -178,6 +180,7 @@ void PairingUiController::requestPairingCameraAccess()
     AndroidController::instance()->requestCameraPermissionForQrPairing();
 #elif defined(Q_OS_IOS)
     amneziaIosRequestPairingCameraAccess([this](bool granted) {
+        qInfo() << "[PairingUi] iOS requestPairingCameraAccess callback granted =" << granted;
         QMetaObject::invokeMethod(
                 this, [this, granted]() { emit pairingCameraAccessFinished(granted); }, Qt::QueuedConnection);
     });
@@ -192,6 +195,44 @@ void PairingUiController::openPairingCameraAppSettings()
     AndroidController::instance()->openApplicationDetailsSettings();
 #elif defined(Q_OS_IOS)
     amneziaIosOpenApplicationSettings();
+#endif
+}
+
+void PairingUiController::setEmbeddedPairingQrCameraActive(bool active)
+{
+    if (m_embeddedPairingQrCameraActive == active) {
+        return;
+    }
+    m_embeddedPairingQrCameraActive = active;
+#if defined(Q_OS_IOS)
+    qInfo() << "[PairingUi] iOS embeddedPairingQrCameraActive ->" << active;
+    amneziaIosApplyEmbeddedCameraUnderlayToQtView(active);
+#endif
+#if defined(Q_OS_ANDROID)
+    if (active) {
+        AndroidController::instance()->startPairingQrEmbeddedCamera();
+    } else {
+        AndroidController::instance()->stopPairingQrEmbeddedCamera();
+    }
+#endif
+    emit embeddedPairingQrCameraActiveChanged();
+}
+
+void PairingUiController::syncIosEmbeddedPairingQrNativeBottomExtra(int extraPt)
+{
+#if defined(Q_OS_IOS)
+    amneziaIosSetPairingEmbeddedCameraNativeBottomExtraPt(extraPt);
+#else
+    Q_UNUSED(extraPt);
+#endif
+}
+
+void PairingUiController::setPairingQrTorchEnabled(bool enabled)
+{
+#if defined(Q_OS_ANDROID)
+    AndroidController::instance()->setPairingQrEmbeddedTorch(enabled);
+#else
+    Q_UNUSED(enabled);
 #endif
 }
 
@@ -522,6 +563,8 @@ void PairingUiController::cancelAllPairingActivity()
     }
 
     cancelTvQrSession();
+
+    setEmbeddedPairingQrCameraActive(false);
 }
 
 void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIndex)

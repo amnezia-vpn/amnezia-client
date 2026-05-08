@@ -4,6 +4,9 @@ import QtQuick.Controls
 StackView {
     id: root
 
+    /** Allow pages (e.g. pairing QR dim) to paint outside stack bounds into tab bar / safe areas. */
+    clip: false
+
     pushEnter: Transition {
         PropertyAnimation {
             property: "opacity"

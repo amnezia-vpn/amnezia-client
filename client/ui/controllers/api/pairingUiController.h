@@ -35,6 +35,9 @@ class PairingUiController : public QObject
                        lastSuccessfulPhonePairingDisplayNameChanged)
     /** TV flow for QA: 0=idle, 1=waitingForPeer, 2=error, 3=sessionExpired */
     Q_PROPERTY(int tvPairingUiPhase READ tvPairingUiPhase NOTIFY tvPairingUiPhaseChanged)
+    /** Full-screen pairing QR camera under QML (mobile); drives translucent main window. */
+    Q_PROPERTY(bool embeddedPairingQrCameraActive READ embeddedPairingQrCameraActive WRITE setEmbeddedPairingQrCameraActive NOTIFY
+                       embeddedPairingQrCameraActiveChanged)
 
 public:
     PairingUiController(PairingController *pairingController, ServersController *serversController,
@@ -55,6 +58,10 @@ public:
     void setPendingPhonePairingUuid(const QString &uuid);
     QString lastSuccessfulPhonePairingDisplayName() const { return m_lastSuccessfulPhonePairingDisplayName; }
     int tvPairingUiPhase() const { return m_tvPairingUiPhase; }
+    bool embeddedPairingQrCameraActive() const { return m_embeddedPairingQrCameraActive; }
+    Q_INVOKABLE void setEmbeddedPairingQrCameraActive(bool active);
+    /** iOS: native dim strip height uses safe bottom + extraPt (see PageSettingsApiQrPairingSend scanDimBleedBottom). No-op elsewhere. */
+    Q_INVOKABLE void syncIosEmbeddedPairingQrNativeBottomExtra(int extraPt);
 
 #if defined(Q_OS_ANDROID)
     static bool tryConsumeAndroidQrScan(const QString &code);
@@ -80,6 +87,8 @@ public slots:
     Q_INVOKABLE void requestPairingCameraAccess();
     /** Open system settings for this app (camera can be enabled there). No-op on desktop. */
     Q_INVOKABLE void openPairingCameraAppSettings();
+    /** Android: torch for embedded pairing camera. No-op elsewhere. */
+    Q_INVOKABLE void setPairingQrTorchEnabled(bool enabled);
 
     /** If \a raw contains a session UUID (not vpn://), emits pairingUuidFromScan and returns true. */
     bool applyScannedTextAsPairingUuid(const QString &raw);
@@ -106,6 +115,7 @@ signals:
     void tvPairingUiPhaseChanged();
     /** After requestPairingCameraAccess(): true if OS granted camera access. */
     void pairingCameraAccessFinished(bool granted);
+    void embeddedPairingQrCameraActiveChanged();
 
 private:
     void setTvBusy(bool busy);
@@ -138,6 +148,8 @@ private:
     QPointer<QFutureWatcher<QPair<amnezia::ErrorCode, QByteArray>>> m_phoneWatcher;
     QPointer<QNetworkReply> m_phoneNetworkReply;
     quint64 m_phoneSessionGeneration { 0 };
+
+    bool m_embeddedPairingQrCameraActive = false;
 };
 
 #endif // PAIRINGUICONTROLLER_H

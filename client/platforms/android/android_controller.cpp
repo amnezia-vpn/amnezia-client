@@ -243,6 +243,21 @@ void AndroidController::startQrReaderActivity()
     callActivityMethod("startQrCodeReader", "()V");
 }
 
+void AndroidController::startPairingQrEmbeddedCamera()
+{
+    callActivityMethod("startPairingQrEmbeddedCamera", "()V");
+}
+
+void AndroidController::stopPairingQrEmbeddedCamera()
+{
+    callActivityMethod("stopPairingQrEmbeddedCamera", "()V");
+}
+
+void AndroidController::setPairingQrEmbeddedTorch(bool enabled)
+{
+    callActivityMethod("setPairingQrEmbeddedTorch", "(Z)V", enabled);
+}
+
 void AndroidController::setSaveLogs(bool enabled)
 {
     callActivityMethod("setSaveLogs", "(Z)V", enabled);

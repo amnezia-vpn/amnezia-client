@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Window
 
 import PageEnum 1.0
 import Style 1.0
@@ -17,6 +18,87 @@ PageType {
 
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
+
+    /** Loud colors (tab bar base green, extra overlap) when true — pair with PageSettingsApiQrPairingSend.pairingQrChromeDebug. */
+    property bool pairingQrChromeDebug: false
+
+    /** Opaque extension of tab bar background upward (iOS embedded QR); see PairingTabChrome deltaY vs stack bottom. */
+    readonly property int tabBarChromeOverlapUp: (PairingUiController.embeddedPairingQrCameraActive && GC.isMobile()
+                                                  && Qt.platform.os !== "android")
+                                                 ? (root.pairingQrChromeDebug ? 24 : 18) : 0
+
+    /** Pull stack under tab chrome so TabBar.background overlap fully covers stack bottom pixels. */
+    readonly property int tabStackPairingUnderlapDown: (PairingUiController.embeddedPairingQrCameraActive && GC.isMobile()
+                                                       && Qt.platform.os !== "android") ? 8 : 0
+
+    readonly property bool pairingTabChromeLogActive: PairingUiController.embeddedPairingQrCameraActive && GC.isMobile()
+                                                        && Qt.platform.os !== "android"
+
+    function logPairingTabChromeLayout(tag) {
+        if (!root.pairingTabChromeLogActive) {
+            return
+        }
+        const w = Window.window
+        const ci = w && w.contentItem ? w.contentItem : null
+        let msg = "[PairingTabChrome] " + tag
+        msg += " PageStart=" + Math.round(root.width) + "x" + Math.round(root.height)
+        msg += " tabBar=" + Math.round(tabBar.width) + "x" + Math.round(tabBar.height) + " y=" + tabBar.y.toFixed(2)
+        msg += " imeBM=" + PageController.imeHeight
+        msg += " stack=" + Math.round(tabBarStackView.width) + "x" + Math.round(tabBarStackView.height)
+        msg += " overlapUp=" + tabBarChromeOverlapUp + " stackUnderlap=" + tabStackPairingUnderlapDown
+        msg += " tabBgRootH=" + (tabBarBackgroundRoot ? tabBarBackgroundRoot.height.toFixed(2) : "n/a")
+        if (ci) {
+            const tabOrigin = tabBar.mapToItem(ci, 0, 0)
+            const tabBandTop = tabBar.mapToItem(ci, 0, -tabBarChromeOverlapUp)
+            const stackOrigin = tabBarStackView.mapToItem(ci, 0, 0)
+            const stackBottomMid = tabBarStackView.mapToItem(ci, tabBarStackView.width * 0.5, tabBarStackView.height)
+            const bgTopLeft = tabBarBackgroundRoot.mapToItem(ci, 0, 0)
+            msg += " ci.tab(0,0)=" + tabOrigin.x.toFixed(1) + "," + tabOrigin.y.toFixed(1)
+            msg += " ci.tab(0,-ov)=" + tabBandTop.x.toFixed(1) + "," + tabBandTop.y.toFixed(1)
+            msg += " ci.stack(0,0)=" + stackOrigin.x.toFixed(1) + "," + stackOrigin.y.toFixed(1)
+            msg += " ci.stackMidBot=" + stackBottomMid.x.toFixed(1) + "," + stackBottomMid.y.toFixed(1)
+            msg += " ci.tabBgRoot(0,0)=" + bgTopLeft.x.toFixed(1) + "," + bgTopLeft.y.toFixed(1)
+            msg += " deltaY_tabBandTop_minus_stackMidBot=" + (tabBandTop.y - stackBottomMid.y).toFixed(2)
+        } else {
+            msg += " ci=missing"
+        }
+        console.warn(msg)
+    }
+
+    Timer {
+        id: pairingTabChromeLogTimer50
+        interval: 50
+        repeat: false
+        onTriggered: root.logPairingTabChromeLayout("t50")
+    }
+    Timer {
+        id: pairingTabChromeLogTimer350
+        interval: 350
+        repeat: false
+        onTriggered: root.logPairingTabChromeLayout("t350")
+    }
+
+    Connections {
+        target: PairingUiController
+
+        function onEmbeddedPairingQrCameraActiveChanged() {
+            if (PairingUiController.embeddedPairingQrCameraActive && GC.isMobile() && Qt.platform.os !== "android") {
+                pairingTabChromeLogTimer50.restart()
+                pairingTabChromeLogTimer350.restart()
+            }
+        }
+    }
+
+    onWidthChanged: {
+        if (root.pairingTabChromeLogActive) {
+            pairingTabChromeLogTimer50.restart()
+        }
+    }
+    onHeightChanged: {
+        if (root.pairingTabChromeLogActive) {
+            pairingTabChromeLogTimer50.restart()
+        }
+    }
 
     Connections {
         objectName: "pageControllerConnection"
@@ -257,6 +339,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: tabBar.top
+        anchors.bottomMargin: -root.tabStackPairingUnderlapDown
 
         enabled: !root.isControlsDisabled
 
@@ -303,6 +386,8 @@ PageType {
         id: tabBar
         objectName: "tabBar"
 
+        clip: false
+
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
@@ -319,24 +404,43 @@ PageType {
 
         enabled: !root.isControlsDisabled && !root.isTabBarDisabled
 
-        background: Shape {
-            objectName: "backgroundShape"
+        background: Item {
+            id: tabBarBackgroundRoot
+            objectName: "tabBarBackgroundRoot"
 
-            width: parent.width
-            height: parent.height
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: parent.height + root.tabBarChromeOverlapUp
 
-            ShapePath {
-                startX: 0
-                startY: 0
+            /** Opaque base: Shape alone can show the window-layer camera through anti-aliased edges when the window is clear (iOS QR pairing). */
+            Rectangle {
+                anchors.fill: parent
+                color: root.pairingQrChromeDebug ? "#00ff66" : AmneziaStyle.color.onyxBlack
+            }
+            /** Stroke around tab row; hidden during iOS embedded QR overlap — top horizontal slateGray reads as a hairline “strip” above tabs. */
+            Shape {
+                id: tabBarChromeShape
+                objectName: "backgroundShape"
+                visible: root.tabBarChromeOverlapUp === 0
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: tabBar.height
 
-                PathLine { x: width; y: 0 }
-                PathLine { x: width; y: tabBar.height - 1 }
-                PathLine { x: 0; y: tabBar.height - 1 }
-                PathLine { x: 0; y: 0 }
+                ShapePath {
+                    startX: 0
+                    startY: 0
 
-                strokeWidth: 1
-                strokeColor: AmneziaStyle.color.slateGray
-                fillColor: AmneziaStyle.color.onyxBlack
+                    PathLine { x: tabBarChromeShape.width; y: 0 }
+                    PathLine { x: tabBarChromeShape.width; y: tabBarChromeShape.height - 1 }
+                    PathLine { x: 0; y: tabBarChromeShape.height - 1 }
+                    PathLine { x: 0; y: 0 }
+
+                    strokeWidth: 1
+                    strokeColor: AmneziaStyle.color.slateGray
+                    fillColor: "transparent"
+                }
             }
         }
 

@@ -100,6 +100,8 @@ class AmneziaActivity : QtActivity() {
     private var pendingOpenFileUri: String? = null
     private var openFileDeliveryScheduled = false
 
+    private var pairingQrEmbeddedCamera: PairingQrEmbeddedCamera? = null
+
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
             override fun handleMessage(msg: Message) {
@@ -979,6 +981,26 @@ class AmneziaActivity : QtActivity() {
         val density = resources.displayMetrics.density
         val heightDp = (heightPx / density).toInt()
         return heightDp
+    }
+
+    @Suppress("unused")
+    fun startPairingQrEmbeddedCamera() {
+        Log.v(TAG, "startPairingQrEmbeddedCamera")
+        if (pairingQrEmbeddedCamera == null) {
+            pairingQrEmbeddedCamera = PairingQrEmbeddedCamera(this)
+        }
+        pairingQrEmbeddedCamera?.start()
+    }
+
+    @Suppress("unused")
+    fun stopPairingQrEmbeddedCamera() {
+        Log.v(TAG, "stopPairingQrEmbeddedCamera")
+        pairingQrEmbeddedCamera?.stop()
+    }
+
+    @Suppress("unused")
+    fun setPairingQrEmbeddedTorch(enabled: Boolean) {
+        pairingQrEmbeddedCamera?.setTorch(enabled)
     }
 
     @Suppress("unused")
