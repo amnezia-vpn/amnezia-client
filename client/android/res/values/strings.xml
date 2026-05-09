@@ -27,6 +27,10 @@
     <string name="cameraPermissionDialogTitle">Camera access</string>
     <string name="cameraPermissionDialogMessage">To scan a QR code for device pairing, Amnezia VPN needs access to the camera.</string>
     <string name="cameraPermissionContinue">Continue</string>
+    <string name="camera_torch">Flashlight</string>
+    <string name="pairing_qr_camera_title">Add device via QR</string>
+    <string name="pairing_qr_camera_subtitle">Scan the session QR shown on the device you want to add. You will confirm before the subscription is sent.</string>
+    <string name="pairing_qr_camera_back">Back</string>
 
     <string name="tvNoFileBrowser">Please install a file management utility to browse files</string>
 </resources>

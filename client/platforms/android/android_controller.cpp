@@ -105,7 +105,9 @@ bool AndroidController::initialize()
         {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)},
         {"onActivityPaused", "()V", reinterpret_cast<void *>(onActivityPaused)},
         {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)},
-        {"onCameraPermissionResult", "(Z)V", reinterpret_cast<void *>(onCameraPermissionResult)}
+        {"onCameraPermissionResult", "(Z)V", reinterpret_cast<void *>(onCameraPermissionResult)},
+        {"onPairingQrCameraClosed", "()V", reinterpret_cast<void *>(onPairingQrCameraClosed)},
+        {"onPairingQrCameraUserDismissed", "()V", reinterpret_cast<void *>(onPairingQrCameraUserDismissed)}
     };
 
     QJniEnvironment env;
@@ -241,6 +243,11 @@ int AndroidController::getNavigationBarHeight()
 void AndroidController::startQrReaderActivity()
 {
     callActivityMethod("startQrCodeReader", "()V");
+}
+
+void AndroidController::startPairingQrReaderActivity()
+{
+    callActivityMethod("startPairingQrCodeReader", "()V");
 }
 
 void AndroidController::startPairingQrEmbeddedCamera()
@@ -621,6 +628,24 @@ void AndroidController::onCameraPermissionResult(JNIEnv *env, jobject thiz, jboo
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->cameraPermissionResult(static_cast<bool>(granted));
+}
+
+// static
+void AndroidController::onPairingQrCameraClosed(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    PairingUiController::notifyAndroidPairingQrCameraClosed();
+}
+
+// static
+void AndroidController::onPairingQrCameraUserDismissed(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    PairingUiController::notifyAndroidPairingQrCameraUserDismissed();
 }
 
 

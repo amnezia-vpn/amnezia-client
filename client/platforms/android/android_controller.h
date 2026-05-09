@@ -46,6 +46,7 @@ public:
     int getStatusBarHeight();
     int getNavigationBarHeight();
     void startQrReaderActivity();
+    void startPairingQrReaderActivity();
     void startPairingQrEmbeddedCamera();
     void stopPairingQrEmbeddedCamera();
     void setPairingQrEmbeddedTorch(bool enabled);
@@ -117,6 +118,8 @@ private:
     static void onActivityPaused(JNIEnv *env, jobject thiz);
     static void onActivityResumed(JNIEnv *env, jobject thiz);
     static void onCameraPermissionResult(JNIEnv *env, jobject thiz, jboolean granted);
+    static void onPairingQrCameraClosed(JNIEnv *env, jobject thiz);
+    static void onPairingQrCameraUserDismissed(JNIEnv *env, jobject thiz);
 
     template <typename Ret, typename ...Args>
     static auto callActivityMethod(const char *methodName, const char *signature, Args &&...args);

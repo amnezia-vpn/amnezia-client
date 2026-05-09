@@ -2,9 +2,11 @@
 
 #include <QCoreApplication>
 #include <QDataStream>
+#include <QDateTime>
 #include <QDebug>
 #include <QIODevice>
 #include <QMetaObject>
+#include <QPointer>
 #include <QRegularExpression>
 #include <QTimer>
 #include <QUuid>
@@ -96,6 +98,33 @@ bool tryDecodeLegacyChunkedPairingQrPayload(const QString &t, QString *outUuid)
     *outUuid = u.toString(QUuid::WithoutBraces);
     return true;
 }
+
+/**
+ * Extract a pairing session UUID from raw QR text without touching QObject / signals.
+ * Safe from CameraX / JNI threads while AmneziaActivity is stopped (Qt event loop may not run).
+ */
+QString extractPairingSessionUuidFromScanText(const QString &raw)
+{
+    const QString t = raw.trimmed();
+    if (t.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+        return {};
+    }
+    static const QRegularExpression reV4(QStringLiteral(
+            "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}"));
+    const QRegularExpressionMatch m = reV4.match(t);
+    if (m.hasMatch()) {
+        return m.captured(0);
+    }
+    QString fromLegacy;
+    if (tryDecodeLegacyChunkedPairingQrPayload(t, &fromLegacy)) {
+        return fromLegacy;
+    }
+    const QUuid parsed = QUuid::fromString(t);
+    if (!parsed.isNull()) {
+        return parsed.toString(QUuid::WithoutBraces);
+    }
+    return {};
+}
 } // namespace
 
 #if defined(Q_OS_ANDROID)
@@ -107,6 +136,15 @@ PairingUiController *g_pairingUiForAndroidQr = nullptr;
 bool PairingUiController::iosNativePairingQrOverlayBuild() const
 {
 #if defined(Q_OS_IOS)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool PairingUiController::androidNativePairingQrOverlayBuild() const
+{
+#if defined(Q_OS_ANDROID)
     return true;
 #else
     return false;
@@ -173,7 +211,7 @@ void PairingUiController::openPairingQrScanner()
 {
 #if defined(Q_OS_ANDROID)
     qInfo() << "[PairingUi] openPairingQrScanner (Android native activity)";
-    AndroidController::instance()->startQrReaderActivity();
+    AndroidController::instance()->startPairingQrReaderActivity();
 #endif
 }
 
@@ -319,34 +357,18 @@ bool PairingUiController::applyScannedTextAsPairingUuid(const QString &raw)
 {
     const QString t = raw.trimmed();
     qInfo() << "[PairingUi] scan raw len=" << t.size();
-    if (t.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
-        qInfo() << "[PairingUi] scan rejected: looks like vpn:// bundle, not session UUID";
+    const QString uuid = extractPairingSessionUuidFromScanText(raw);
+    if (uuid.isEmpty()) {
+        if (t.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+            qInfo() << "[PairingUi] scan rejected: looks like vpn:// bundle, not session UUID";
+        } else {
+            qInfo() << "[PairingUi] scan rejected: no session UUID recognized in payload";
+        }
         return false;
     }
-    static const QRegularExpression reV4(QStringLiteral(
-            "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}"));
-    const QRegularExpressionMatch m = reV4.match(t);
-    if (m.hasMatch()) {
-        const QString uuid = m.captured(0);
-        qInfo() << "[PairingUi] scan accepted uuid=" << uuid.left(13) << "...";
-        emit pairingUuidFromScan(uuid);
-        return true;
-    }
-    QString fromLegacy;
-    if (tryDecodeLegacyChunkedPairingQrPayload(t, &fromLegacy)) {
-        qInfo() << "[PairingUi] scan accepted legacy chunked QR uuid=" << fromLegacy.left(13) << "...";
-        emit pairingUuidFromScan(fromLegacy);
-        return true;
-    }
-    const QUuid parsed = QUuid::fromString(t);
-    if (!parsed.isNull()) {
-        const QString canon = parsed.toString(QUuid::WithoutBraces);
-        qInfo() << "[PairingUi] scan accepted QUuid::fromString uuid=" << canon.left(13) << "...";
-        emit pairingUuidFromScan(canon);
-        return true;
-    }
-    qInfo() << "[PairingUi] scan rejected: no session UUID recognized in payload";
-    return false;
+    qInfo() << "[PairingUi] scan accepted uuid=" << uuid.left(13) << "...";
+    emit pairingUuidFromScan(uuid);
+    return true;
 }
 
 #if defined(Q_OS_ANDROID)
@@ -356,24 +378,64 @@ bool PairingUiController::tryConsumeAndroidQrScan(const QString &code)
         qWarning() << "[PairingUi] tryConsumeAndroidQrScan: no controller (g_pairingUiForAndroidQr null)";
         return false;
     }
-    PairingUiController *const ctl = g_pairingUiForAndroidQr;
-    bool consumed = false;
     const QString codeCopy = code;
-    QObject *const app = QCoreApplication::instance();
-    if (!app) {
+    // Parse on this thread: while CameraActivity is foreground, AmneziaActivity is stopped and the Qt
+    // event loop may not process BlockingQueuedConnection until the user returns — UI would lag behind.
+    if (extractPairingSessionUuidFromScanText(codeCopy).isEmpty()) {
         return false;
     }
-    // CameraActivity / ML Kit may invoke JNI from a non-Qt thread. Signals and QML must run on the Qt GUI thread.
-    QMetaObject::invokeMethod(
-            app,
-            [ctl, codeCopy, &consumed]() {
-                consumed = ctl->applyScannedTextAsPairingUuid(codeCopy);
-            },
-            Qt::BlockingQueuedConnection);
-    qInfo() << "[PairingUi] tryConsumeAndroidQrScan consumed=" << consumed << "rawLen=" << codeCopy.size();
-    return consumed;
+    PairingUiController *const ctl = g_pairingUiForAndroidQr;
+    QPointer<PairingUiController> ctlPtr(ctl);
+    QTimer::singleShot(0, ctl, [ctlPtr, codeCopy]() {
+        if (!ctlPtr) {
+            return;
+        }
+        ctlPtr->applyScannedTextAsPairingUuid(codeCopy);
+    });
+    qInfo() << "[PairingUi] tryConsumeAndroidQrScan: scheduled apply on Qt thread, rawLen=" << codeCopy.size();
+    return true;
+}
+
+void PairingUiController::notifyAndroidPairingQrCameraClosed()
+{
+    if (g_pairingUiForAndroidQr) {
+        g_pairingUiForAndroidQr->suppressAndroidNativePairingReaderStarts(2000);
+    }
+}
+
+void PairingUiController::notifyAndroidPairingQrCameraUserDismissed()
+{
+    if (!g_pairingUiForAndroidQr) {
+        return;
+    }
+    PairingUiController *const ctl = g_pairingUiForAndroidQr;
+    QPointer<PairingUiController> ptr(ctl);
+    QTimer::singleShot(0, ctl, [ptr]() {
+        if (!ptr) {
+            return;
+        }
+        emit ptr->pairingAndroidNativeQrScannerUserDismissed();
+    });
 }
 #endif
+
+void PairingUiController::suppressAndroidNativePairingReaderStarts(int ms)
+{
+    if (ms <= 0) {
+        return;
+    }
+#if defined(Q_OS_ANDROID)
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const qint64 until = now + ms;
+    if (until <= m_androidPairingReaderCooldownUntilEpochMs) {
+        return;
+    }
+    m_androidPairingReaderCooldownUntilEpochMs = until;
+    emit androidPairingReaderCooldownUntilEpochMsChanged();
+#else
+    Q_UNUSED(ms);
+#endif
+}
 
 QVariantList PairingUiController::tvQrCodes() const
 {

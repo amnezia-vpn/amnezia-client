@@ -1,7 +1,9 @@
 package org.amnezia.vpn
 
 import android.graphics.Color
+import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
+import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.camera.core.Camera
@@ -19,6 +21,8 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import org.amnezia.vpn.qt.QtAndroidController
 import org.amnezia.vpn.util.Log
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 private const val TAG = "PairingQrEmbedded"
 
@@ -33,6 +37,10 @@ class PairingQrEmbeddedCamera(private val activity: AmneziaActivity) {
 
     private val windowBgOpaque = ColorDrawable(Color.parseColor("#0E0E11"))
 
+    private var savedWindowFormat: Int? = null
+
+    private var imageAnalysisExecutor: ExecutorService? = null
+
     fun start() {
         activity.runOnUiThread {
             if (previewView != null) {
@@ -40,15 +48,26 @@ class PairingQrEmbeddedCamera(private val activity: AmneziaActivity) {
             }
             checkedBarcodes.clear()
             activity.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            val lp = activity.window.attributes
+            if (savedWindowFormat == null) {
+                savedWindowFormat = lp.format
+            }
+            lp.format = PixelFormat.TRANSLUCENT
+            activity.window.attributes = lp
 
             val content = activity.findViewById<ViewGroup>(android.R.id.content)
+            content.clipChildren = false
+            content.clipToPadding = false
             val pv = PreviewView(activity).apply {
                 layoutParams = FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
+                // TextureView-style path so preview can show through “holes” in Qt Quick on some OEMs (e.g. Samsung).
                 implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                 scaleType = PreviewView.ScaleType.FILL_CENTER
+                setBackgroundColor(Color.TRANSPARENT)
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             }
             content.addView(pv, 0)
             for (i in 1 until content.childCount) {
@@ -61,6 +80,10 @@ class PairingQrEmbeddedCamera(private val activity: AmneziaActivity) {
                 try {
                     cameraProvider = cameraProviderFuture.get()
                     bindUseCases(pv)
+                    pv.post {
+                        pv.requestLayout()
+                        pv.invalidate()
+                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "Camera bind failed: $e")
                     stop()
@@ -72,6 +95,8 @@ class PairingQrEmbeddedCamera(private val activity: AmneziaActivity) {
     private fun bindUseCases(viewFinder: PreviewView) {
         val provider = cameraProvider ?: return
         provider.unbindAll()
+        imageAnalysisExecutor?.shutdown()
+        imageAnalysisExecutor = Executors.newSingleThreadExecutor()
 
         val preview = Preview.Builder().build().also {
             it.setSurfaceProvider(viewFinder.surfaceProvider)
@@ -94,7 +119,13 @@ class PairingQrEmbeddedCamera(private val activity: AmneziaActivity) {
                 .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
                 .setZoomSuggestionOptions(
                     ZoomSuggestionOptions.Builder { zoomLevel ->
-                        cam.cameraControl.setZoomRatio(zoomLevel)
+                        activity.runOnUiThread {
+                            try {
+                                cam.cameraControl.setZoomRatio(zoomLevel)
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Zoom: $e")
+                            }
+                        }
                         true
                     }.apply {
                         cam.cameraInfo.zoomState.value?.maxZoomRatio?.let { maxZoom ->
@@ -105,28 +136,32 @@ class PairingQrEmbeddedCamera(private val activity: AmneziaActivity) {
         )
 
         val scanner = barcodeScanner!!
-        imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(activity)) { imageProxy ->
+        val analysisExecutor = imageAnalysisExecutor!!
+        imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
             val mediaImage = imageProxy.image ?: run {
                 imageProxy.close()
                 return@setAnalyzer
             }
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-            scanner.process(image).addOnSuccessListener { barcodes ->
-                barcodes.firstOrNull()?.displayValue?.let { code ->
-                    if (code.isNotEmpty() && code !in checkedBarcodes) {
-                        checkedBarcodes.add(code)
-                        if (QtAndroidController.decodeQrCode(code)) {
-                            scanner.close()
-                            barcodeScanner = null
-                            stop()
+            scanner.process(image)
+                .addOnSuccessListener(analysisExecutor) { barcodes ->
+                    barcodes.firstOrNull()?.displayValue?.let { code ->
+                        if (code.isNotEmpty() && code !in checkedBarcodes) {
+                            checkedBarcodes.add(code)
+                            if (QtAndroidController.decodeQrCode(code)) {
+                                scanner.close()
+                                barcodeScanner = null
+                                activity.runOnUiThread { stop() }
+                            }
                         }
                     }
                 }
-            }.addOnFailureListener {
-                Log.e(TAG, "QR process failed: ${it.message}")
-            }.addOnCompleteListener {
-                imageProxy.close()
-            }
+                .addOnFailureListener(analysisExecutor) {
+                    Log.e(TAG, "QR process failed: ${it.message}")
+                }
+                .addOnCompleteListener(analysisExecutor) {
+                    imageProxy.close()
+                }
         }
     }
 
@@ -142,6 +177,8 @@ class PairingQrEmbeddedCamera(private val activity: AmneziaActivity) {
 
     fun stop() {
         activity.runOnUiThread {
+            imageAnalysisExecutor?.shutdown()
+            imageAnalysisExecutor = null
             try {
                 boundCamera?.cameraControl?.enableTorch(false)
             } catch (_: Exception) {
@@ -158,6 +195,12 @@ class PairingQrEmbeddedCamera(private val activity: AmneziaActivity) {
             previewView = null
 
             activity.window.setBackgroundDrawable(windowBgOpaque)
+            savedWindowFormat?.let { fmt ->
+                val lp = activity.window.attributes
+                lp.format = fmt
+                activity.window.attributes = lp
+                savedWindowFormat = null
+            }
         }
     }
 }

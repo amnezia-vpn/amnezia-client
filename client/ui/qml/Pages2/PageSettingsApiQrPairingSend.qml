@@ -25,9 +25,17 @@ PageType {
     /** iOS-only: full-screen UIKit UIWindow scanner (PairingUiController.iosNativePairingQrOverlayBuild — not Qt.platform.os). */
     readonly property bool useIosNativePairingQrOverlay: PairingUiController.iosNativePairingQrOverlayBuild
 
+    /** Android: full-screen CameraActivity — Qt cannot reliably composite CameraX under QML on some OEMs (e.g. Samsung). */
+    readonly property bool useAndroidNativePairingQrScanner: GC.isMobile() && Qt.platform.os === "android"
+    /** Android: iOS-like flow — titles and camera preview only in CameraActivity; QML hides duplicate scan chrome. */
+    readonly property bool useAndroidNativePairingQrOverlay: PairingUiController.androidNativePairingQrOverlayBuild
+                                                             && GC.isMobile()
+                                                             && Qt.platform.os === "android"
+
     /** Let dimming draw into window chrome (status bar + tab bar) when camera underlay is active. */
     readonly property bool extendScanDimToScreenEdges: GC.isMobile() && pairingWizardStep === 0
                                                      && PairingUiController.embeddedPairingQrCameraActive
+                                                     && !root.useAndroidNativePairingQrOverlay
     clip: !extendScanDimToScreenEdges
 
     /** QQuickWindow (not Item); do not type as Item — breaks binding on Qt 6. */
@@ -140,6 +148,8 @@ PageType {
     property bool awaitingCameraPermissionForScan: false
     property bool waitingSettingsReturnForScan: false
     property bool torchOn: false
+    /** Suppress double startActivity when StackView fires both Component.onCompleted and onVisibleChanged. */
+    property int _androidPairingReaderLastStartMs: 0
 
     Timer {
         id: pairingCameraKickTimer
@@ -171,9 +181,18 @@ PageType {
         if (!root.visible) {
             return
         }
+        /** Confirm step (or transition to it): never reopen native / embedded scanner from stray taps or visibility. */
+        if (root.pairingWizardStep !== 0) {
+            return
+        }
+        if (addDeviceConfirmNavigationScheduled) {
+            return
+        }
         console.warn("[PairingQrSend] startMobileScanner Qt.platform.os=", Qt.platform.os,
                        "iosNativePairingQrOverlayBuild=", PairingUiController.iosNativePairingQrOverlayBuild,
-                       "useIosNativePairingQrOverlay=", root.useIosNativePairingQrOverlay)
+                       "useIosNativePairingQrOverlay=", root.useIosNativePairingQrOverlay,
+                       "androidNativePairingQrOverlayBuild=", PairingUiController.androidNativePairingQrOverlayBuild,
+                       "useAndroidNativePairingQrOverlay=", root.useAndroidNativePairingQrOverlay)
         if (!PairingUiController.isPairingCameraAccessGranted()) {
             awaitingCameraPermissionForScan = true
             PairingUiController.requestPairingCameraAccess()
@@ -184,6 +203,23 @@ PageType {
                         qsTr("Add device via QR"),
                         qsTr("Scan the session QR shown on the device you want to add. You will confirm before the subscription is sent."))
             /** Do not run pairingCameraKickTimer here: restartCapture during first startRunning races the session (torch needs 2–3 taps). */
+            return
+        }
+        if (root.useAndroidNativePairingQrScanner) {
+            const coolUntil = PairingUiController.androidPairingReaderCooldownUntilEpochMs
+            if (Date.now() < coolUntil) {
+                console.warn("[PairingQrSend] startMobileScanner: skip (native camera cooldown), ms left=",
+                             (coolUntil - Date.now()))
+                return
+            }
+            const now = Date.now()
+            if (now - _androidPairingReaderLastStartMs < 700) {
+                console.warn("[PairingQrSend] startMobileScanner: skip duplicate Android CameraActivity within",
+                             (now - _androidPairingReaderLastStartMs), "ms")
+                return
+            }
+            _androidPairingReaderLastStartMs = now
+            PairingUiController.openPairingQrScanner()
             return
         }
         PairingUiController.embeddedPairingQrCameraActive = true
@@ -249,13 +285,15 @@ PageType {
 
     onVisibleChanged: {
         if (visible) {
-            addDeviceConfirmNavigationScheduled = false
+            /** Only reset confirm flag on scan step; clearing it on confirm breaks guards if visible flickers. */
             if (pairingWizardStep === 0) {
+                addDeviceConfirmNavigationScheduled = false
                 Qt.callLater(startMobileScanner)
             }
         } else {
             pairingCameraKickTimer.stop()
             stopMobileScanner()
+            _androidPairingReaderLastStartMs = 0
             pairingWizardStep = 0
             waitingSettingsReturnForScan = false
             if (!keepPhonePairingInBackgroundOnClose && !PairingUiController.phonePairingBusy) {
@@ -268,6 +306,10 @@ PageType {
         if (pairingWizardStep !== 0) {
             stopMobileScanner()
         } else if (root.visible) {
+            /**
+             * Android native: use Qt.callLater like iOS — a multi-second Timer delay left the QML scan chrome
+             * visible with an empty (black) viewport until CameraActivity opened.
+             */
             Qt.callLater(startMobileScanner)
         }
     }
@@ -348,10 +390,31 @@ PageType {
     Item {
         anchors.fill: parent
 
+        /** Brief Qt backdrop + back while CameraActivity is starting (native holds title/instructions like iOS overlay). */
+        Rectangle {
+            anchors.fill: parent
+            visible: pairingWizardStep === 0 && root.useAndroidNativePairingQrOverlay
+            color: AmneziaStyle.color.midnightBlack
+            z: 1
+        }
+        BackButtonType {
+            visible: pairingWizardStep === 0 && root.useAndroidNativePairingQrOverlay
+            anchors.top: parent.top
+            anchors.topMargin: PageController.safeAreaTopMargin
+            anchors.left: parent.left
+            width: parent.width
+            z: 2
+            backButtonFunction: function() {
+                PageController.closePage()
+            }
+        }
+
         Item {
             id: scanStep
             anchors.fill: parent
-            visible: pairingWizardStep === 0
+            visible: pairingWizardStep === 0 && !root.useAndroidNativePairingQrOverlay
+            /** Extra guard: invisible alone can race one frame on some stacks; deny input off scan step. */
+            enabled: pairingWizardStep === 0 && !root.useAndroidNativePairingQrOverlay
 
             readonly property real sqSz: Math.floor(Math.min(width, height) * 0.72)
             readonly property real sqX: (width - sqSz) / 2
@@ -653,16 +716,16 @@ PageType {
             anchors.leftMargin: 0
             anchors.rightMargin: 0
             visible: pairingWizardStep === 1
+            z: 10
             spacing: 16
 
             BackButtonType {
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
                 Layout.leftMargin: 0
                 backButtonFunction: function() {
-                    PairingUiController.cancelAllPairingActivity()
-                    pairingWizardStep = 0
                     addDeviceConfirmNavigationScheduled = false
-                    Qt.callLater(startMobileScanner)
+                    pairingWizardStep = 0
+                    PairingUiController.cancelAllPairingActivity()
                 }
             }
 
@@ -714,10 +777,9 @@ PageType {
                 text: qsTr("Cancel")
 
                 clickedFunc: function() {
-                    PairingUiController.cancelAllPairingActivity()
-                    pairingWizardStep = 0
                     addDeviceConfirmNavigationScheduled = false
-                    Qt.callLater(startMobileScanner)
+                    pairingWizardStep = 0
+                    PairingUiController.cancelAllPairingActivity()
                 }
             }
 
@@ -736,7 +798,9 @@ PageType {
             }
             awaitingCameraPermissionForScan = false
             if (granted) {
-                startMobileScanner()
+                if (root.pairingWizardStep === 0) {
+                    startMobileScanner()
+                }
             } else {
                 waitingSettingsReturnForScan = true
                 showScanCameraDeniedDrawer()
@@ -750,9 +814,8 @@ PageType {
             addDeviceConfirmNavigationScheduled = true
             stopMobileScanner()
             PairingUiController.pendingPhonePairingUuid = uuid
-            Qt.callLater(function() {
-                pairingWizardStep = 1
-            })
+            /** Immediate step switch so scan chrome is not hit-testable for another frame (avoids reopening CameraActivity). */
+            pairingWizardStep = 1
         }
 
         function onPairingSendQrScanRejectedInvalidPayload() {
@@ -769,6 +832,17 @@ PageType {
 
         function onPairingIosNativeQrOverlayBackRequested() {
             stopMobileScanner()
+            PageController.closePage()
+        }
+
+        /** Native CameraActivity back: leave pairing flow (same as iOS overlay back). Do NOT reopen scanner. */
+        function onPairingAndroidNativeQrScannerUserDismissed() {
+            if (!root.useAndroidNativePairingQrOverlay) {
+                return
+            }
+            stopMobileScanner()
+            PairingUiController.cancelAllPairingActivity()
+            addDeviceConfirmNavigationScheduled = false
             PageController.closePage()
         }
     }

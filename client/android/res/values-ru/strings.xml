@@ -24,5 +24,10 @@
     <string name="notificationSettingsDialogMessage">Для показа уведомлений необходимо включить уведомления в системных настройках</string>
     <string name="openNotificationSettings">Открыть настройки уведомлений</string>
 
+    <string name="camera_torch">Фонарик</string>
+    <string name="pairing_qr_camera_title">Добавить устройство по QR</string>
+    <string name="pairing_qr_camera_subtitle">Отсканируйте QR сессии на устройстве, которое хотите добавить. Перед отправкой подписки будет подтверждение.</string>
+    <string name="pairing_qr_camera_back">Назад</string>
+
     <string name="tvNoFileBrowser">Пожалуйста, установите приложение для просмотра файлов</string>
 </resources>

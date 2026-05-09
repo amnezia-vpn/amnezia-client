@@ -42,6 +42,9 @@ import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
@@ -79,7 +82,12 @@ private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
 private const val KEY_PENDING_OPEN_FILE_URI = "pending_open_file_uri"
 
-class AmneziaActivity : QtActivity() {
+class AmneziaActivity : QtActivity(), LifecycleOwner {
+
+    private val lifecycleRegistry = LifecycleRegistry(this)
+
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
 
     private lateinit var mainScope: CoroutineScope
     private val qtInitialized = CompletableDeferred<Unit>()
@@ -101,6 +109,7 @@ class AmneziaActivity : QtActivity() {
     private var openFileDeliveryScheduled = false
 
     private var pairingQrEmbeddedCamera: PairingQrEmbeddedCamera? = null
+    private var lastPairingQrReaderStartUptimeMs: Long = 0L
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -208,6 +217,7 @@ class AmneziaActivity : QtActivity() {
         registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -265,6 +275,7 @@ class AmneziaActivity : QtActivity() {
 
     override fun onStart() {
         super.onStart()
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         Log.d(TAG, "Start Amnezia activity")
         mainScope.launch {
             qtInitialized.await()
@@ -288,6 +299,7 @@ class AmneziaActivity : QtActivity() {
             qtInitialized.await()
             QtAndroidController.onServiceDisconnected()
         }
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         super.onStop()
     }
 
@@ -360,6 +372,7 @@ class AmneziaActivity : QtActivity() {
         if (qtInitialized.isCompleted) {
             QtAndroidController.onActivityPaused()
         }
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         super.onPause()
         isActivityResumed = false
         // Cancel all pending operations when activity pauses
@@ -370,6 +383,7 @@ class AmneziaActivity : QtActivity() {
 
     override fun onResume() {
         super.onResume()
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
         isActivityResumed = true
         Log.d(TAG, "Resume Amnezia activity")
         if (qtInitialized.isCompleted) {
@@ -486,6 +500,7 @@ class AmneziaActivity : QtActivity() {
         unregisterBroadcastReceiver(notificationStateReceiver)
         notificationStateReceiver = null
         mainScope.cancel()
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         super.onDestroy()
     }
 
@@ -1007,6 +1022,21 @@ class AmneziaActivity : QtActivity() {
     fun startQrCodeReader() {
         Log.v(TAG, "Start camera")
         Intent(this, CameraActivity::class.java).also {
+            startActivity(it)
+        }
+    }
+
+    @Suppress("unused")
+    fun startPairingQrCodeReader() {
+        val now = SystemClock.uptimeMillis()
+        if (now - lastPairingQrReaderStartUptimeMs < 1200L) {
+            Log.w(TAG, "startPairingQrCodeReader: suppressed duplicate (${now - lastPairingQrReaderStartUptimeMs}ms)")
+            return
+        }
+        lastPairingQrReaderStartUptimeMs = now
+        Log.v(TAG, "Start pairing QR camera")
+        Intent(this, CameraActivity::class.java).also {
+            it.putExtra(CameraActivity.EXTRA_PAIRING_QR_CAMERA, true)
             startActivity(it)
         }
     }
