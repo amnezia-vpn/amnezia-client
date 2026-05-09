@@ -47,6 +47,8 @@ class PairingQrScanOverlayView @JvmOverloads constructor(
 
     private val bracketPaths = arrayOfNulls<Path>(4)
 
+    private val dimPath = Path()
+
     private var pairingHeaderBottomPx = 0f
 
     fun setPairingHeaderBottomPx(px: Float) {
@@ -98,16 +100,18 @@ class PairingQrScanOverlayView @JvmOverloads constructor(
         super.onDraw(canvas)
         val w = width.toFloat()
         val h = height.toFloat()
-        val holeLeft = hole.left
-        val holeTop = hole.top
-        val holeRight = hole.right
-        val holeBottom = hole.bottom
-
-        // Four dim rects (same idea as QML dimLayer)
-        canvas.drawRect(0f, 0f, w, holeTop, dimPaint)
-        canvas.drawRect(0f, holeBottom, w, h, dimPaint)
-        canvas.drawRect(0f, holeTop, holeLeft, holeBottom, dimPaint)
-        canvas.drawRect(holeRight, holeTop, w, holeBottom, dimPaint)
+        val side = hole.width()
+        if (side > 0f) {
+            val d = resources.displayMetrics.density
+            val rx = PairingQrScanGeometry.pairingIosStyleHoleCornerRadiusPx(side, d)
+            dimPath.rewind()
+            dimPath.fillType = Path.FillType.EVEN_ODD
+            dimPath.addRect(0f, 0f, w, h, Path.Direction.CW)
+            dimPath.addRoundRect(hole, rx, rx, Path.Direction.CW)
+            canvas.drawPath(dimPath, dimPaint)
+        } else {
+            canvas.drawRect(0f, 0f, w, h, dimPaint)
+        }
 
         for (i in 0..3) {
             bracketPaths[i]?.let { canvas.drawPath(it, bracketPaint) }

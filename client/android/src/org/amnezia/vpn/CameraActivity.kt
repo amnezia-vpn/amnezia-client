@@ -127,7 +127,7 @@ class CameraActivity : ComponentActivity() {
             viewBinding.pairingScanOverlay.visibility = View.VISIBLE
             viewBinding.pairingChrome.visibility = View.VISIBLE
             viewBinding.root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-                onPairingLayoutGeometryChanged()
+                viewBinding.root.post { onPairingLayoutGeometryChanged() }
             }
             viewBinding.root.post {
                 onPairingLayoutGeometryChanged()
@@ -302,11 +302,22 @@ class CameraActivity : ComponentActivity() {
             density
         )
         val torchSizePx = (56f * density).roundToInt().coerceAtLeast(1)
-        val lp = viewBinding.torchButton.layoutParams as FrameLayout.LayoutParams
-        lp.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-        lp.topMargin = (torchCy - torchSizePx / 2f).roundToInt().coerceAtLeast(0)
-        lp.bottomMargin = 0
-        viewBinding.torchButton.layoutParams = lp
+        val topMargin = (torchCy - torchSizePx / 2f).roundToInt().coerceAtLeast(0)
+        val wantGravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+        viewBinding.torchButton.post {
+            if (!::viewBinding.isInitialized || !intent.getBooleanExtra(EXTRA_PAIRING_QR_CAMERA, false)) {
+                return@post
+            }
+            val btn = viewBinding.torchButton
+            val lp = btn.layoutParams as FrameLayout.LayoutParams
+            if (lp.gravity == wantGravity && lp.topMargin == topMargin && lp.bottomMargin == 0) {
+                return@post
+            }
+            lp.gravity = wantGravity
+            lp.topMargin = topMargin
+            lp.bottomMargin = 0
+            btn.layoutParams = lp
+        }
     }
 
     /** Matches iOS pairing overlay torch on/off chrome (background + golden border). */
@@ -471,16 +482,20 @@ class CameraActivity : ComponentActivity() {
         if (intent.getBooleanExtra(EXTRA_PAIRING_QR_CAMERA, false)) {
             previewTransformLayoutListener?.let { viewFinder.removeOnLayoutChangeListener(it) }
             val layoutListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-                scheduleCachedPreviewOutputTransformRefresh()
-                onPairingLayoutGeometryChanged()
+                viewFinder.post {
+                    scheduleCachedPreviewOutputTransformRefresh()
+                    onPairingLayoutGeometryChanged()
+                }
             }
             previewTransformLayoutListener = layoutListener
             viewFinder.addOnLayoutChangeListener(layoutListener)
             previewStreamStateObserver?.let { viewFinder.previewStreamState.removeObserver(it) }
             val streamObserver = Observer<PreviewView.StreamState> { state ->
                 if (state == PreviewView.StreamState.STREAMING) {
-                    scheduleCachedPreviewOutputTransformRefresh()
-                    viewFinder.post { onPairingLayoutGeometryChanged() }
+                    viewFinder.post {
+                        scheduleCachedPreviewOutputTransformRefresh()
+                        onPairingLayoutGeometryChanged()
+                    }
                 }
             }
             previewStreamStateObserver = streamObserver
