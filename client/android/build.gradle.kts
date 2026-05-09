@@ -15,6 +15,9 @@ kotlin {
 val qtTargetSdkVersion: String by gradleProperties
 val qtTargetAbiList: String by gradleProperties
 val outputBaseName: String by gradleProperties
+val requestedAbis = qtTargetAbiList.split(',')
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
 
 android {
     namespace = "com.fblink.vpn"
@@ -37,6 +40,14 @@ android {
     defaultConfig {
         applicationId = "com.fblink.vpn"
         targetSdk = qtTargetSdkVersion.toInt()
+
+        ndk {
+            // Keep transitive Android native libraries aligned with the Qt ABI set.
+            // Otherwise Gradle may package x86/x86_64 helper .so files while the Qt
+            // application binary exists only for ARM, and Android will choose a
+            // non-matching ABI at launch.
+            abiFilters.addAll(requestedAbis)
+        }
 
         // keeps language resources for only the locales specified below
         resourceConfigurations += listOf("en", "ru", "b+zh+Hans")
@@ -88,7 +99,7 @@ android {
             // Build a single APK instead of per-ABI split APKs.
             isEnable = false
             reset()
-            include(*qtTargetAbiList.split(',').toTypedArray())
+            include(*requestedAbis.toTypedArray())
             isUniversalApk = false
         }
     }
