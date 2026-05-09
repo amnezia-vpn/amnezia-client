@@ -765,7 +765,19 @@ jobs:
         py7zrversion: '==0.22.*'
         extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Build Android TV APK (x86_64 + arm64-v8a)'
+    - name: 'Install android_x86 Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_x86'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Build Android TV APK (x86 + x86_64 + arm64-v8a)'
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
         QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
@@ -773,7 +785,7 @@ jobs:
         ANDROID_KEYSTORE_KEY_ALIAS: ${{ env.ANDROID_KEYSTORE_KEY_ALIAS }}
         ANDROID_KEYSTORE_KEY_PASS: ${{ env.ANDROID_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh --tv --apk 'x86_64;arm64-v8a' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+      run: ./deploy/build_android.sh --tv --apk 'x86;x86_64;arm64-v8a' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
     - name: 'Rename Android TV APK'
       run: |

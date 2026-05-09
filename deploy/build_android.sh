@@ -368,6 +368,17 @@ missing = []
 abis_to_check = sorted(detected_abis)
 if requested_abis:
     requested_set = set(requested_abis)
+    unexpected_abis = sorted(detected_abis - requested_set)
+    if unexpected_abis:
+        print(
+            "ERROR: APK contains native libraries for ABI(s) that were not requested: "
+            f"{', '.join(unexpected_abis)}. "
+            "This can make Android choose an ABI without the matching Qt application binary."
+        )
+        print(f"APK: {apk_path}")
+        print(f"Requested ABIs: {', '.join(requested_abis)}")
+        print(f"Detected ABIs in APK: {', '.join(sorted(detected_abis))}")
+        sys.exit(1)
     abis_to_check = sorted(requested_set & detected_abis)
     if not abis_to_check:
         print(
