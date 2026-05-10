@@ -114,6 +114,23 @@ namespace amnezia
         constexpr QLatin1String amneziaAwg("amnezia-awg");
         constexpr QLatin1String amneziaXray("amnezia-xray");
         constexpr QLatin1String amneziaSsxray("amnezia-ssxray");
+        constexpr QLatin1String amneziaMasterDnsVpn("amnezia-masterdnsvpn");
+
+        // MasterDnsVPN-specific JSON keys for the protocol_config_data wrapper.
+        constexpr QLatin1String mdvDomains("domains");
+        constexpr QLatin1String mdvBind("bind");
+        constexpr QLatin1String mdvEncryptionMethod("encryptionMethod");
+        constexpr QLatin1String mdvEncryptionKey("encryptionKey");
+        constexpr QLatin1String mdvProtocolType("protocolType");
+        constexpr QLatin1String mdvDnsUpstreamServers("dnsUpstreamServers");
+        constexpr QLatin1String mdvForwardIp("forwardIp");
+        constexpr QLatin1String mdvForwardPort("forwardPort");
+        constexpr QLatin1String mdvUseExternalSocks5("useExternalSocks5");
+        constexpr QLatin1String mdvSocks5Auth("socks5Auth");
+        constexpr QLatin1String mdvSocks5User("socks5User");
+        constexpr QLatin1String mdvSocks5Pass("socks5Pass");
+        constexpr QLatin1String mdvAdditionalConfig("additionalConfig");
+        constexpr QLatin1String mdvListenPort("listenPort");
 
         constexpr QLatin1String clientName("clientName");
         constexpr QLatin1String userData("userData");

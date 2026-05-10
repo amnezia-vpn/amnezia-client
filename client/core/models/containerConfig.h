@@ -50,7 +50,10 @@ struct ContainerConfig {
     
     XrayProtocolConfig* getXrayProtocolConfig();
     const XrayProtocolConfig* getXrayProtocolConfig() const;
-    
+
+    MasterDnsVpnProtocolConfig* getMasterDnsVpnProtocolConfig();
+    const MasterDnsVpnProtocolConfig* getMasterDnsVpnProtocolConfig() const;
+
     SftpProtocolConfig* getSftpProtocolConfig();
     const SftpProtocolConfig* getSftpProtocolConfig() const;
     

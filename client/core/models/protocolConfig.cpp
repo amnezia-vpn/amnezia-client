@@ -28,6 +28,8 @@ Proto ProtocolConfig::type() const
             return Proto::OpenVpn;
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
             return Proto::Xray;
+        } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
+            return Proto::MasterDnsVpn;
         } else if constexpr (std::is_same_v<T, SftpProtocolConfig>) {
             return Proto::Sftp;
         } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
@@ -54,6 +56,8 @@ QString ProtocolConfig::port() const
         } else if constexpr (std::is_same_v<T, OpenVpnProtocolConfig>) {
             return arg.serverConfig.port;
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
+            return arg.serverConfig.port;
+        } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
             return arg.serverConfig.port;
         } else if constexpr (std::is_same_v<T, SftpProtocolConfig>) {
             return arg.port;
@@ -82,6 +86,10 @@ QString ProtocolConfig::transportProto() const
             return arg.serverConfig.transportProto;
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
             return arg.serverConfig.transportProto;
+        } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
+            // Always UDP (DNS envelopes); the server-side TOML doesn't carry a
+            // string in the same wire slot, so we synthesize the literal here.
+            return QStringLiteral("udp");
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             return QString();
         } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
@@ -101,6 +109,7 @@ bool ProtocolConfig::hasClientConfig() const
                       std::is_same_v<T, WireGuardProtocolConfig> ||
                       std::is_same_v<T, OpenVpnProtocolConfig> ||
                       std::is_same_v<T, XrayProtocolConfig> ||
+                      std::is_same_v<T, MasterDnsVpnProtocolConfig> ||
                       std::is_same_v<T, Ikev2ProtocolConfig>) {
             return arg.hasClientConfig();
         }
@@ -125,6 +134,10 @@ QString ProtocolConfig::clientId() const
                 return arg.clientConfig->clientId;
             }
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->id;
+            }
+        } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
             if (arg.clientConfig.has_value()) {
                 return arg.clientConfig->id;
             }
@@ -157,6 +170,10 @@ QJsonObject ProtocolConfig::getClientConfigJson() const
             if (arg.hasClientConfig()) {
                 return arg.clientConfig->toJson();
             }
+        } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
+            if (arg.hasClientConfig()) {
+                return arg.clientConfig->toJson();
+            }
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             if (arg.hasClientConfig()) {
                 return arg.clientConfig->toJson();
@@ -178,6 +195,8 @@ void ProtocolConfig::setClientConfigJson(const QJsonObject& json)
             arg.setClientConfig(OpenVpnClientConfig::fromJson(json));
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
             arg.setClientConfig(XrayClientConfig::fromJson(json));
+        } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
+            arg.setClientConfig(MasterDnsVpnClientConfig::fromJson(json));
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             arg.setClientConfig(Ikev2ClientConfig::fromJson(json));
         }
@@ -192,6 +211,7 @@ void ProtocolConfig::clearClientConfig()
                       std::is_same_v<T, WireGuardProtocolConfig> ||
                       std::is_same_v<T, OpenVpnProtocolConfig> ||
                       std::is_same_v<T, XrayProtocolConfig> ||
+                      std::is_same_v<T, MasterDnsVpnProtocolConfig> ||
                       std::is_same_v<T, Ikev2ProtocolConfig>) {
             arg.clearClientConfig();
         }
@@ -215,6 +235,10 @@ QString ProtocolConfig::nativeConfig() const
                 return arg.clientConfig->nativeConfig;
             }
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                return arg.clientConfig->nativeConfig;
+            }
+        } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
             if (arg.clientConfig.has_value()) {
                 return arg.clientConfig->nativeConfig;
             }
@@ -247,6 +271,10 @@ void ProtocolConfig::setNativeConfig(const QString &config)
             if (arg.clientConfig.has_value()) {
                 arg.clientConfig->nativeConfig = config;
             }
+        } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
+            if (arg.clientConfig.has_value()) {
+                arg.clientConfig->nativeConfig = config;
+            }
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             if (arg.clientConfig.has_value()) {
                 arg.clientConfig->nativeConfig = config;
@@ -263,6 +291,7 @@ bool ProtocolConfig::isThirdPartyConfig() const
                       std::is_same_v<T, WireGuardProtocolConfig> ||
                       std::is_same_v<T, OpenVpnProtocolConfig> ||
                       std::is_same_v<T, XrayProtocolConfig> ||
+                      std::is_same_v<T, MasterDnsVpnProtocolConfig> ||
                       std::is_same_v<T, Ikev2ProtocolConfig>) {
             return arg.serverConfig.isThirdPartyConfig;
         }
@@ -289,6 +318,8 @@ ProtocolConfig ProtocolConfig::fromJson(const QJsonObject& json, Proto type)
     case Proto::Xray:
     case Proto::SSXray:
         return ProtocolConfig{XrayProtocolConfig::fromJson(json)};
+    case Proto::MasterDnsVpn:
+        return ProtocolConfig{MasterDnsVpnProtocolConfig::fromJson(json)};
     case Proto::Sftp:
         return ProtocolConfig{SftpProtocolConfig::fromJson(json)};
     case Proto::Socks5Proxy:

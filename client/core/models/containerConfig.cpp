@@ -93,6 +93,16 @@ const XrayProtocolConfig* ContainerConfig::getXrayProtocolConfig() const
     return protocolConfig.as<XrayProtocolConfig>();
 }
 
+MasterDnsVpnProtocolConfig* ContainerConfig::getMasterDnsVpnProtocolConfig()
+{
+    return protocolConfig.as<MasterDnsVpnProtocolConfig>();
+}
+
+const MasterDnsVpnProtocolConfig* ContainerConfig::getMasterDnsVpnProtocolConfig() const
+{
+    return protocolConfig.as<MasterDnsVpnProtocolConfig>();
+}
+
 SftpProtocolConfig* ContainerConfig::getSftpProtocolConfig()
 {
     return protocolConfig.as<SftpProtocolConfig>();
