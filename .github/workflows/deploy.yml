@@ -91,7 +91,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     env:
       QT_VERSION: 6.10.1
@@ -141,7 +141,7 @@ jobs:
         py7zrversion: '==0.22.*'  
         extra: '--base ${{ env.QT_MIRROR }}' 
 
-    - name: 'Setup mvsc'
+    - name: 'Setup MSVC'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: 'x64'
@@ -750,6 +750,60 @@ jobs:
       with:
         name: FBLinkVPN-android
         path: deploy/build/FBLink-release.aab
+        compression-level: 0
+        retention-days: 7
+
+    - name: 'Install android_x86_64 Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_x86_64'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install android_x86 Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_x86'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Build Android TV APK (x86 + x86_64 + arm64-v8a)'
+      env:
+        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        QT_HOST_PATH: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
+        ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
+        ANDROID_KEYSTORE_KEY_ALIAS: ${{ env.ANDROID_KEYSTORE_KEY_ALIAS }}
+        ANDROID_KEYSTORE_KEY_PASS: ${{ env.ANDROID_KEYSTORE_KEY_PASS }}
+      shell: bash
+      run: ./deploy/build_android.sh --tv --apk 'x86;x86_64;arm64-v8a' --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+
+    - name: 'Rename Android TV APK'
+      run: |
+        cd deploy/build
+        mv FBLinkTV-release.apk FBLinkTV_${VERSION}_androidtv_universal.apk
+        cd ../..
+
+    - name: 'Verify signed Android TV APK'
+      shell: bash
+      run: |
+        APKSIGNER=$(find "${ANDROID_HOME}/build-tools" -type f -name apksigner | sort -V | tail -1)
+        "$APKSIGNER" verify --verbose "deploy/build/FBLinkTV_${VERSION}_androidtv_universal.apk"
+
+    - name: 'Upload Android TV APK'
+      uses: actions/upload-artifact@v4
+      with:
+        name: FBLinkTV_${{ env.VERSION }}_androidtv_universal.apk
+        path: deploy/build/FBLinkTV_${{ env.VERSION }}_androidtv_universal.apk
         compression-level: 0
         retention-days: 7
 

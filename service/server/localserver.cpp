@@ -8,12 +8,16 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QString>
+#include <QStringList>
 #include <QTimer>
 #include <functional>
 
 #include "ipc.h"
 #include "killswitch.h"
 #include "logger.h"
+#include "../client/protocols/protocols_defs.h"
+#include "router.h"
+#include "xray.h"
 
 #ifdef Q_OS_WIN
     #include "tapcontroller_win.h"
@@ -24,6 +28,55 @@ Logger logger("WgDaemonServer");
 constexpr int kKillSwitchInitRetryDelayMs = 1500;
 constexpr int kKillSwitchInitMaxRetries = 20;
 constexpr int kKillSwitchInitLongRetryDelayMs = 10000;
+
+#ifdef Q_OS_WIN
+constexpr int kWindowsWakeRecoveryDelayMs = 2500;
+const QStringList kWindowsXrayFullTunnelRoutes = {
+    QStringLiteral("1.0.0.0/8"),
+    QStringLiteral("2.0.0.0/7"),
+    QStringLiteral("4.0.0.0/6"),
+    QStringLiteral("8.0.0.0/5"),
+    QStringLiteral("16.0.0.0/4"),
+    QStringLiteral("32.0.0.0/3"),
+    QStringLiteral("64.0.0.0/2"),
+    QStringLiteral("128.0.0.0/1"),
+};
+
+void recoverWindowsNetworkState(WindowsDaemon &daemon, const char *reason)
+{
+    logger.info() << "Recovering Windows network state:" << reason;
+
+    daemon.recoverNetworkState();
+
+    if (!Router::clearSavedRoutes()) {
+        logger.warning() << "Windows network recovery: failed to clear saved routes";
+    }
+    if (!Router::StartRoutingIpv6()) {
+        logger.warning() << "Windows network recovery: failed to restore IPv6 routing";
+    }
+    if (!Router::restoreResolvers()) {
+        logger.warning() << "Windows network recovery: failed to restore DNS resolvers";
+    }
+    const int removedXrayRoutes = Router::routeDeleteList(
+        QString::fromLatin1(fblink::protocols::xray::defaultLocalAddr),
+        kWindowsXrayFullTunnelRoutes);
+    if (removedXrayRoutes > 0) {
+        logger.info() << "Windows network recovery: removed stale XRay full-tunnel routes:"
+                      << removedXrayRoutes;
+    }
+    if (!Router::deleteTun(QStringLiteral("tun2"))) {
+        logger.warning() << "Windows network recovery: failed to delete stale TUN routes";
+    }
+    if (!Router::deleteTun(QStringLiteral("FBLink"))) {
+        logger.warning() << "Windows network recovery: failed to delete stale FBLink tunnel routes";
+    }
+    Router::flushDns();
+
+    if (!Xray::getInstance().recoverState()) {
+        logger.warning() << "Windows network recovery: failed to stop XRay cleanly";
+    }
+}
+#endif
 }
 
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
@@ -69,7 +122,25 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
     m_networkWatcher.initialize();
     connect(&m_networkWatcher, &NetworkWatcher::networkChanged, &m_ipcServer, &IpcServer::networkChanged);
-    connect(&m_networkWatcher, &NetworkWatcher::wakeup, &m_ipcServer, &IpcServer::wakeup);
+    connect(&m_networkWatcher, &NetworkWatcher::wakeup, this, [this]() {
+#ifdef Q_OS_WIN
+        recoverWindowsNetworkState(daemon, "wakeup");
+        QTimer::singleShot(kWindowsWakeRecoveryDelayMs, this, [this]() {
+            recoverWindowsNetworkState(daemon, "delayed wakeup");
+            QMetaObject::invokeMethod(&m_ipcServer, "wakeup", Qt::DirectConnection);
+        });
+#else
+        QMetaObject::invokeMethod(&m_ipcServer, "wakeup", Qt::DirectConnection);
+#endif
+    });
+
+#ifdef Q_OS_WIN
+    recoverWindowsNetworkState(daemon, "service startup");
+    QTimer::singleShot(kWindowsWakeRecoveryDelayMs, this, [this]() {
+        recoverWindowsNetworkState(daemon, "delayed service startup");
+    });
+#endif
+
     auto retriesLeft = QSharedPointer<int>::create(kKillSwitchInitMaxRetries);
     auto initKillSwitch = QSharedPointer<std::function<void()>>::create();
     *initKillSwitch = [this, retriesLeft, initKillSwitch]() {
@@ -102,23 +173,47 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 #ifdef Q_OS_LINUX
     // Signal handling for a proper shutdown.
     QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { LinuxDaemon::instance()->deactivate(); });
+                     this, [this]() { shutdown(); });
 #endif
 
 #ifdef Q_OS_MAC
     // Signal handling for a proper shutdown.
     QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { MacOSDaemon::instance()->deactivate(); });
+                     this, [this]() { shutdown(); });
 #endif
 
 #ifdef Q_OS_WIN
     // Signal handling for a proper shutdown.
     QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { WindowsDaemon::instance()->deactivate(); });
+                     this, [this]() { shutdown(); });
 #endif
 }
 
 LocalServer::~LocalServer()
 {
+    shutdown();
     qDebug() << "Local server stopped";
+}
+
+void LocalServer::shutdown()
+{
+    if (m_shutdownStarted) {
+        return;
+    }
+    m_shutdownStarted = true;
+
+    logger.info() << "LocalServer shutdown: cleaning up VPN network state";
+
+#ifdef Q_OS_LINUX
+    LinuxDaemon::instance()->deactivate();
+#endif
+
+#ifdef Q_OS_MAC
+    MacOSDaemon::instance()->deactivate();
+#endif
+
+#ifdef Q_OS_WIN
+    daemon.deactivate();
+    recoverWindowsNetworkState(daemon, "service shutdown");
+#endif
 }

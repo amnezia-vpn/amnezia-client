@@ -23,16 +23,18 @@ Options:
                                   By default, the latest available platform is used
  -m, --move                       Move the build result to the root of the build directory
  -f, --fdroid                     Build for F-Droid
+ -t, --tv                         Build Android TV UI variant APK/AAB artifact
  -h, --help                       Display this help
 
 EOT
 }
 
 BUILD_TYPE="release"
+TV_BUILD=0
 DEFAULT_ANDROID_ABIS="armeabi-v7a;arm64-v8a"
 SUPPORTED_ANDROID_ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
 
-opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,help -o "dua:b:mfh" -- "$@")
+opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,tv,help -o "dua:b:mfth" -- "$@")
 eval set -- "$opts"
 while true; do
   case "$1" in
@@ -42,6 +44,7 @@ while true; do
     -b | --build-platform) ANDROID_BUILD_PLATFORM=$2; shift 2;;
     -m | --move) MOVE_RESULT=1; shift;;
     -f | --fdroid) FDROID=1; shift;;
+    -t | --tv) TV_BUILD=1; shift;;
     -h | --help) usage; exit 0;;
     --) shift; break;;
   esac
@@ -76,6 +79,9 @@ elif [[ -v AAB ]]; then
   build_suffix="aab"
 else
   build_suffix="android"
+fi
+if [[ $TV_BUILD -eq 1 ]]; then
+  build_suffix="tv-$build_suffix"
 fi
 BUILD_DIR=$ARTIFACT_DIR/work/$build_suffix
 OUT_APP_DIR=$BUILD_DIR/client
@@ -258,6 +264,59 @@ stage_missing_qt_runtime_plugins() {
   done
 }
 
+stage_android_third_party_libs() {
+  local android_build_out_dir=$1
+  local abi_list=$2
+  local project_dir=$3
+
+  if [[ -z "$abi_list" ]]; then
+    return 0
+  fi
+
+  local prebuilt_root="$project_dir/client/3rd-prebuilt/3rd-prebuilt"
+  IFS=';' read -r -a abi_array <<< "$abi_list"
+  for abi in "${abi_array[@]}"
+  do
+    [[ -z "$abi" ]] && continue
+
+    local dest_dir="$android_build_out_dir/libs/$abi"
+    mkdir -p "$dest_dir"
+
+    local lib_specs=(
+      "amneziawg/android/$abi/libwg-go.so|1"
+      "openvpn/android/$abi/libck-ovpn-plugin.so|1"
+      "openvpn/android/$abi/libovpn3.so|1"
+      "openvpn/android/$abi/libovpnutil.so|1"
+      "openvpn/android/$abi/librsapss.so|1"
+      "openssl/android/$abi/libcrypto_3.so|1"
+      "openssl/android/$abi/libssl_3.so|1"
+      "libssh/android/$abi/libssh.so|1"
+    )
+
+    for spec in "${lib_specs[@]}"
+    do
+      local rel="${spec%%|*}"
+      local required="${spec##*|}"
+      local src="$prebuilt_root/$rel"
+      local dst="$dest_dir/$(basename "$rel")"
+
+      if [[ -f "$dst" ]]; then
+        continue
+      fi
+
+      if [[ -f "$src" ]]; then
+        cp "$src" "$dst"
+        echo "Staged Android third-party lib for $abi: $src -> $dst"
+      elif [[ "$required" = "1" ]]; then
+        echo "ERROR: Required Android third-party lib not found for ABI=$abi: $src"
+        return 1
+      else
+        echo "WARN: Optional Android third-party lib not found for ABI=$abi: $src"
+      fi
+    done
+  done
+}
+
 stage_missing_gamepad_qml_libs() {
   local android_build_out_dir=$1
   local abi_list=$2
@@ -362,6 +421,17 @@ missing = []
 abis_to_check = sorted(detected_abis)
 if requested_abis:
     requested_set = set(requested_abis)
+    unexpected_abis = sorted(detected_abis - requested_set)
+    if unexpected_abis:
+        print(
+            "ERROR: APK contains native libraries for ABI(s) that were not requested: "
+            f"{', '.join(unexpected_abis)}. "
+            "This can make Android choose an ABI without the matching Qt application binary."
+        )
+        print(f"APK: {apk_path}")
+        print(f"Requested ABIs: {', '.join(requested_abis)}")
+        print(f"Detected ABIs in APK: {', '.join(sorted(detected_abis))}")
+        sys.exit(1)
     abis_to_check = sorted(requested_set & detected_abis)
     if not abis_to_check:
         print(
@@ -372,7 +442,21 @@ if requested_abis:
         sys.exit(0)
 
 for abi in abis_to_check:
+    abi_underscores = abi.replace("-", "_")
+    app_lib_candidates = [
+        f"lib/{abi}/libFBLink_{abi}.so",
+        f"lib/{abi}/libFBLink_{abi_underscores}.so",
+        f"lib/{abi}/libFBLink.so",
+    ]
+    if not any(candidate in names for candidate in app_lib_candidates):
+        missing.append(" or ".join(app_lib_candidates))
+
     expected_templates = [
+        "lib/{abi}/libQt6Core_{abi}.so",
+        "lib/{abi}/libQt6Gui_{abi}.so",
+        "lib/{abi}/libQt6Qml_{abi}.so",
+        "lib/{abi}/libQt6Quick_{abi}.so",
+        "lib/{abi}/libQt6Network_{abi}.so",
         "lib/{abi}/libplugins_platforms_qtforandroid_{abi}.so",
         "lib/{abi}/libplugins_imageformats_qsvg_{abi}.so",
         "lib/{abi}/libplugins_iconengines_qsvgicon_{abi}.so",
@@ -383,8 +467,23 @@ for abi in abis_to_check:
         if expected not in names:
             missing.append(expected)
 
+    required_third_party_libs = [
+        "libwg-go.so",
+        "libck-ovpn-plugin.so",
+        "libovpn3.so",
+        "libovpnutil.so",
+        "librsapss.so",
+        "libcrypto_3.so",
+        "libssl_3.so",
+        "libssh.so",
+    ]
+    for lib_name in required_third_party_libs:
+        expected = f"lib/{abi}/{lib_name}"
+        if expected not in names:
+            missing.append(expected)
+
 if missing:
-    print(f"ERROR: APK is missing required Qt runtime plugin(s): {', '.join(missing)}")
+    print(f"ERROR: APK is missing required native runtime library/plugin(s): {', '.join(missing)}")
     print(f"APK: {apk_path}")
     print(f"Detected ABIs in APK: {', '.join(sorted(detected_abis))}")
     if requested_abis:
@@ -456,20 +555,14 @@ fi
 # Run qt-cmake to configure build
 qt_cmake_opts=()
 
-if [[ $CONFIGURE_ALL_ABIS -eq 1 ]]; then
-  qt_cmake_opts+=(
-    -DQT_ANDROID_BUILD_ALL_ABIS=ON
-    -DQT_ANDROID_ABIS="$ABIS"
-  )
-else
-  qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABIS")
-fi
+qt_cmake_opts+=(-DQT_ANDROID_ABIS="$ABIS")
 
 # QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL=ON - Skip building apks as part of the default 'ALL' target
 # We'll build apks during androiddeployqt
 $QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -B $BUILD_DIR \
   -DQT_NO_GLOBAL_APK_TARGET_PART_OF_ALL=ON \
   -DQT_USE_TARGET_ANDROID_BUILD_DIR=ON \
+  -DFBLINK_ANDROID_TV=$([[ $TV_BUILD -eq 1 ]] && echo ON || echo OFF) \
   -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
   "${qt_cmake_opts[@]}"
 
@@ -581,6 +674,8 @@ patch_legacy_awg_package_path "$ANDROID_BUILD_OUT_DIR"
 stage_missing_qt_platform_plugins "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}"
 # Ensure required Qt runtime plugins (SVG/TLS/icon engine) are present.
 stage_missing_qt_runtime_plugins "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}"
+# Ensure native protocol/runtime dependencies are present for every packaged ABI.
+stage_android_third_party_libs "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}" "$PROJECT_DIR"
 # Ensure vendored QtGamepad QML runtime lib is present when gamepad support is enabled.
 stage_missing_gamepad_qml_libs "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}" "$BUILD_DIR"
 
@@ -631,6 +726,9 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
       exit 1
     fi
     mv -u "$AAB_FILE" $ARTIFACT_DIR/FBLink-$BUILD_TYPE.aab
+    if [[ $TV_BUILD -eq 1 ]]; then
+      mv -u $ARTIFACT_DIR/FBLink-$BUILD_TYPE.aab $ARTIFACT_DIR/FBLinkTV-$BUILD_TYPE.aab
+    fi
   fi
 
   if [ -v ABIS ]; then
@@ -647,9 +745,17 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
     UNIVERSAL_APK_UNSIGNED=$(find "$APK_OUT_DIR" -maxdepth 1 -type f -name "*$suffix*unsigned*.apk" 2>/dev/null | head -1)
     # Prefer a universal output when available.
     if [ -f "$UNIVERSAL_APK_SIGNED" ]; then
-      mv -u "$UNIVERSAL_APK_SIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+      if [[ $TV_BUILD -eq 1 ]]; then
+        mv -u "$UNIVERSAL_APK_SIGNED" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+      else
+        mv -u "$UNIVERSAL_APK_SIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+      fi
     elif [ -f "$UNIVERSAL_APK_UNSIGNED" ] && [ -v FDROID ]; then
-      mv -u "$UNIVERSAL_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+      if [[ $TV_BUILD -eq 1 ]]; then
+        mv -u "$UNIVERSAL_APK_UNSIGNED" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+      else
+        mv -u "$UNIVERSAL_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$suffix.apk
+      fi
     else
       IFS=';' read -r -a abi_array <<< "$ABIS"
       for ABI in "${abi_array[@]}"
@@ -659,10 +765,18 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
 
         if [ -f "$PER_ABI_APK" ]; then
           # Standard per-ABI APK (Qt < 6.7 behaviour)
-          mv -u "$PER_ABI_APK" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+          if [[ $TV_BUILD -eq 1 ]]; then
+            mv -u "$PER_ABI_APK" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+          else
+            mv -u "$PER_ABI_APK" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+          fi
         elif [ -f "$PER_ABI_APK_UNSIGNED" ] && [ -v FDROID ]; then
           # Unsigned APK (no signing key configured)
-          mv -u "$PER_ABI_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+          if [[ $TV_BUILD -eq 1 ]]; then
+            mv -u "$PER_ABI_APK_UNSIGNED" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+          else
+            mv -u "$PER_ABI_APK_UNSIGNED" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+          fi
         else
           # Try a broader find: ABI in filename OR in directory path (Qt 6.3+ sub-projects)
           FOUND=$(find "$OUT_APP_DIR" -type f \( \
@@ -674,7 +788,11 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
               echo "ERROR: Found only an unsigned APK for ABI=$ABI in release mode: $FOUND"
               exit 1
             fi
-            mv -u "$FOUND" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+            if [[ $TV_BUILD -eq 1 ]]; then
+              mv -u "$FOUND" $ARTIFACT_DIR/FBLinkTV-$suffix.apk
+            else
+              mv -u "$FOUND" $ARTIFACT_DIR/FBLink-$ABI-$suffix.apk
+            fi
           else
             if [ -f "$PER_ABI_APK_UNSIGNED" ] || [ -f "$UNIVERSAL_APK_UNSIGNED" ]; then
               echo "ERROR: Only unsigned APK artifacts were produced for ABI=$ABI in release mode."

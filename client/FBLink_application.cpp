@@ -126,12 +126,17 @@ void FBLinkApplication::init()
     m_engine = new QQmlApplicationEngine;
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
+    qInfo() << "Loading root QML:" << url;
     QObject::connect(
         m_engine, &QQmlApplicationEngine::objectCreated, this,
         [this, url](QObject *obj, const QUrl &objUrl) {
             if (!obj && url == objUrl) {
+                qCritical() << "Failed to load root QML:" << objUrl;
                 QCoreApplication::exit(-1);
                 return;
+            }
+            if (obj && url == objUrl) {
+                qInfo() << "Root QML loaded:" << objUrl;
             }
             // install filter on main window
             if (auto win = qobject_cast<QQuickWindow*>(obj)) {

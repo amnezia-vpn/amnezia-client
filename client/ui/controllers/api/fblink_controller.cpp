@@ -19,6 +19,8 @@
 #include <QLocale>
 #include <memory>
 
+#include "core/qrCodeUtils.h"
+
 // Backend API URL
 const QString BACKEND_URL = "https://srv.frakebit.com/api/v1";
 
@@ -624,7 +626,10 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                             selectedFBLinkContainer = currentDefaultServer.value("defaultContainer").toString();
                             if (!selectedFBLinkHostName.isEmpty()) {
                                 qSettings.setValue(kLastSelectedFBLinkHostNameKey, selectedFBLinkHostName);
-                                const QJsonValue serverIdValue = currentDefaultServer.value("id");
+                                QJsonValue serverIdValue = currentDefaultServer.value("server_id");
+                                if (serverIdValue.isUndefined()) {
+                                    serverIdValue = currentDefaultServer.value("id");
+                                }
                                 if (serverIdValue.isDouble()) {
                                     qSettings.setValue(kLastSelectedServerIdKey, serverIdValue.toInt());
                                 } else if (serverIdValue.isString()) {
@@ -659,12 +664,8 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         return "FBLink VPN - " + hostName;
                     };
 
-                    // Use pinned-host fast-path only when we already have a local FBLink server list.
-                    // After reinstall, Android Auto Backup may restore selected host in settings,
-                    // while local servers are empty. In that bootstrap case we must import full list.
-                    const bool hasLocalFBLinkSnapshot = !existingFBLinkServerIndices.isEmpty();
-                    const bool hasPinnedSelectedHost =
-                            hasLocalFBLinkSnapshot && !selectedFBLinkHostName.isEmpty();
+                    // Preserve the selected server while still reconciling the full backend list.
+                    const bool hasPinnedSelectedHost = !selectedFBLinkHostName.isEmpty();
                     bool selectedConfigSeenInResponse = false;
 
                     for (const QString &configData : configStrings) {
@@ -672,13 +673,6 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                             QJsonObject newConfig = QJsonDocument::fromJson(m_importController->getConfig().toUtf8()).object();
                             QString newHostName = newConfig.value("hostName").toString();
 
-                            // Fast-path sync mode: when user already selected a server,
-                            // apply only that server config and ignore the rest.
-                            if (hasPinnedSelectedHost
-                                && newHostName.compare(selectedFBLinkHostName, Qt::CaseInsensitive) != 0) {
-                                m_importController->clearConfigFileName();
-                                continue;
-                            }
                             if (hasPinnedSelectedHost
                                 && newHostName.compare(selectedFBLinkHostName, Qt::CaseInsensitive) == 0) {
                                 selectedConfigSeenInResponse = true;
@@ -729,20 +723,16 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         }
                     }
 
-                    // Full cleanup is safe only when there is no pinned selected server.
-                    // With pinned selection we keep old servers untouched if backend
-                    // returned only a partial config set.
-                    if (!hasPinnedSelectedHost) {
-                        // Remove any FBLink VPN servers that were not in the new config
-                        // Iterate backwards so indices don't shift during removal
-                        for (int i = existingFBLinkServerIndices.size() - 1; i >= 0; --i) {
-                            int serverIndex = existingFBLinkServerIndices.at(i);
-                            if (!updatedIndices.contains(serverIndex)) {
-                                m_serversModel->removeServer(serverIndex);
-                            }
+                    // Remove FBLink VPN servers that are no longer returned by backend.
+                    // Iterate backwards so indices don't shift during removal.
+                    for (int i = existingFBLinkServerIndices.size() - 1; i >= 0; --i) {
+                        int serverIndex = existingFBLinkServerIndices.at(i);
+                        if (!updatedIndices.contains(serverIndex)) {
+                            m_serversModel->removeServer(serverIndex);
                         }
-                    } else if (!selectedConfigSeenInResponse) {
-                        qWarning() << "[FBLink] fetchConfig: selected server config was not returned, keeping current local snapshot:"
+                    }
+                    if (hasPinnedSelectedHost && !selectedConfigSeenInResponse) {
+                        qWarning() << "[FBLink] fetchConfig: selected server config was not returned by backend:"
                                    << selectedFBLinkHostName;
                     }
 
@@ -804,7 +794,10 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                                 const QString finalHost = finalServer.value("hostName").toString();
                                 if (!finalHost.isEmpty()) {
                                     qSettings.setValue(kLastSelectedFBLinkHostNameKey, finalHost);
-                                    const QJsonValue serverIdValue = finalServer.value("id");
+                                    QJsonValue serverIdValue = finalServer.value("server_id");
+                                    if (serverIdValue.isUndefined()) {
+                                        serverIdValue = finalServer.value("id");
+                                    }
                                     if (serverIdValue.isDouble()) {
                                         qSettings.setValue(kLastSelectedServerIdKey, serverIdValue.toInt());
                                     } else if (serverIdValue.isString()) {
@@ -817,6 +810,7 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                         }
                     }
 
+                    fetchServerMetadata(true);
                     emit configFetched();
                 } else {
                     emit configError(tr("Внутренняя ошибка: Контроллеры не инициализированы"));
@@ -875,6 +869,9 @@ void FBLinkController::fetchConfig(bool allowRefreshRetry)
                  }
              }
 
+             if (!authFailure) {
+                 fetchServerMetadata(true);
+             }
              emit configError(errStr);
              rerunCoalescedFetch();
         }
@@ -897,12 +894,338 @@ void FBLinkController::clearExistingFBLinkServers()
     }
 }
 
-void FBLinkController::createPayment(const QString &plan)
+void FBLinkController::mergeServerMetadata(const QJsonArray &metadataServers)
 {
-    createPayment(plan, true);
+    if (!m_settings || !m_serversModel) {
+        return;
+    }
+
+    for (const QJsonValue &value : metadataServers) {
+        const QJsonObject metadata = value.toObject();
+        const int serverId = metadata.value("id").toInt(-1);
+        const QString hostName = metadata.value("host_name").toString().trimmed();
+        const QString region = metadata.value("region").toString().trimmed();
+        const QString name = metadata.value("name").toString().trimmed();
+        const QString countryCode = metadata.value("country_code").toString().trimmed().toUpper();
+        const bool isVipOnly = metadata.value("is_vip_only").toBool(false);
+        const bool isAvailable = metadata.value("is_available").toBool(true);
+
+        int matchedIndex = -1;
+        QJsonArray servers = m_settings->serversArray();
+        for (int i = 0; i < servers.size(); ++i) {
+            const QJsonObject server = servers.at(i).toObject();
+            if (!isFBLinkServer(server)) {
+                continue;
+            }
+
+            bool matched = false;
+            const QJsonValue existingID = server.value("server_id");
+            if (serverId > 0) {
+                if (existingID.isDouble() && existingID.toInt() == serverId) {
+                    matched = true;
+                } else if (existingID.isString() && existingID.toString().toInt() == serverId) {
+                    matched = true;
+                }
+            }
+            if (!matched && !hostName.isEmpty()
+                && server.value("hostName").toString().compare(hostName, Qt::CaseInsensitive) == 0) {
+                matched = true;
+            }
+            if (!matched && !region.isEmpty()
+                && server.value("description").toString().compare("FBLink VPN - " + region, Qt::CaseInsensitive) == 0) {
+                matched = true;
+            }
+            if (!matched && !name.isEmpty()
+                && (server.value("name").toString().compare(name, Qt::CaseInsensitive) == 0
+                    || server.value("description").toString().compare(name, Qt::CaseInsensitive) == 0)) {
+                matched = true;
+            }
+
+            if (matched) {
+                matchedIndex = i;
+                break;
+            }
+        }
+
+        if (matchedIndex >= 0) {
+            QJsonObject server = m_settings->serversArray().at(matchedIndex).toObject();
+            if (serverId > 0) {
+                server["server_id"] = serverId;
+            }
+            server["is_vip_only"] = isVipOnly;
+            server["is_available"] = isAvailable;
+            server["fblink_server"] = true;
+            if (isVipOnly && !isAvailable) {
+                server["containers"] = QJsonArray();
+                server["defaultContainer"] = "";
+            }
+            if (!countryCode.isEmpty()) {
+                server["country_code"] = countryCode;
+                server["server_country_code"] = countryCode;
+            }
+            m_serversModel->editServer(server, matchedIndex);
+            continue;
+        }
+
+        if (!isVipOnly || isAvailable) {
+            continue;
+        }
+
+        QJsonObject lockedServer;
+        lockedServer["description"] = region.isEmpty() ? (name.isEmpty() ? hostName : name) : "FBLink VPN - " + region;
+        lockedServer["name"] = lockedServer.value("description").toString();
+        lockedServer["hostName"] = hostName;
+        lockedServer["server_id"] = serverId;
+        lockedServer["is_vip_only"] = true;
+        lockedServer["is_available"] = false;
+        lockedServer["fblink_server"] = true;
+        lockedServer["containers"] = QJsonArray();
+        lockedServer["defaultContainer"] = "";
+        if (!countryCode.isEmpty()) {
+            lockedServer["country_code"] = countryCode;
+            lockedServer["server_country_code"] = countryCode;
+        }
+        m_serversModel->addServer(lockedServer);
+    }
+
+    const int defaultIndex = m_serversModel->getDefaultServerIndex();
+    const QJsonArray currentServers = m_settings->serversArray();
+    if (defaultIndex >= 0 && defaultIndex < currentServers.size()) {
+        const QJsonObject defaultServer = currentServers.at(defaultIndex).toObject();
+        if (defaultServer.value("is_vip_only").toBool(false)
+            && !defaultServer.value("is_available").toBool(true)) {
+            for (int i = 0; i < currentServers.size(); ++i) {
+                const QJsonObject candidate = currentServers.at(i).toObject();
+                if (isFBLinkServer(candidate) && candidate.value("is_available").toBool(true)) {
+                    m_serversModel->setDefaultServerIndex(i);
+                    m_serversModel->setProcessedServerIndex(i);
+                    const QString hostName = candidate.value("hostName").toString();
+                    if (!hostName.isEmpty()) {
+                        QSettings qSettings = appSettings();
+                        qSettings.setValue(kLastSelectedFBLinkHostNameKey, hostName);
+                        qSettings.setValue(kLastSelectedServerIdKey, candidate.value("server_id").toVariant());
+                        qSettings.sync();
+                    }
+                    break;
+                }
+            }
+        }
+    }
 }
 
-void FBLinkController::createPayment(const QString &plan, bool allowRefreshRetry)
+void FBLinkController::fetchServerMetadata(bool allowRefreshRetry)
+{
+    const QString token = getJwtToken();
+    if (token.isEmpty()) {
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest("/me/servers", false, true);
+    QNetworkReply *reply = m_nam->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, allowRefreshRetry]() {
+        reply->deleteLater();
+        if (reply->error() == QNetworkReply::NoError) {
+            const QJsonObject obj = QJsonDocument::fromJson(reply->readAll()).object();
+            mergeServerMetadata(obj.value("servers").toArray());
+            return;
+        }
+
+        logApiFailure("fetch-server-metadata", reply);
+        if (allowRefreshRetry && shouldRefreshToken(reply)) {
+            refreshAccessToken([this]() {
+                fetchServerMetadata(false);
+            });
+        }
+    });
+}
+
+void FBLinkController::clearTvLoginState()
+{
+    m_tvLoginDeviceCode.clear();
+    m_tvLoginUserCode.clear();
+    m_tvLoginVerificationUrl.clear();
+    m_tvLoginQrCodeImage.clear();
+    m_tvLoginStatus.clear();
+    m_tvLoginError.clear();
+    m_tvLoginPollIntervalMs = 8000;
+}
+
+void FBLinkController::completeTokenLogin(const QJsonObject &obj)
+{
+    saveJwtToken(obj["access_token"].toString());
+    if (obj.contains("refresh_token")) {
+        saveRefreshToken(obj["refresh_token"].toString());
+    }
+    setUserEmail("");
+    saveSubscriptionInfo("", "", "");
+    clearTvLoginState();
+    emit tvLoginChanged();
+    emit tvLoginApproved();
+    emit loginSuccess();
+    emit loginStateChanged();
+    emit subscriptionChanged();
+    beginSessionSync();
+}
+
+void FBLinkController::startTvLogin()
+{
+    clearTvLoginState();
+    m_tvLoginStatus = "starting";
+    emit tvLoginChanged();
+
+    QNetworkRequest request = createApiRequest("/auth/tv/start", true, false);
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(QJsonObject()).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        const QByteArray data = reply->readAll();
+        const QJsonObject obj = QJsonDocument::fromJson(data).object();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            m_tvLoginStatus = "error";
+            m_tvLoginError = obj.value("error").toString(reply->errorString());
+            logApiFailure("tv-login-start", reply);
+            emit tvLoginChanged();
+            return;
+        }
+
+        m_tvLoginDeviceCode = obj.value("device_code").toString();
+        m_tvLoginUserCode = obj.value("user_code").toString();
+        m_tvLoginVerificationUrl = obj.value("verification_uri_complete").toString();
+        if (m_tvLoginVerificationUrl.isEmpty()) {
+            m_tvLoginVerificationUrl = obj.value("verification_uri").toString();
+        }
+        const int intervalSec = obj.value("interval").toInt(8);
+        m_tvLoginPollIntervalMs = qMax(3000, intervalSec * 1000);
+
+        if (!m_tvLoginVerificationUrl.isEmpty()) {
+            const auto qr = qrCodeUtils::generateQrCode(m_tvLoginVerificationUrl.toUtf8());
+            m_tvLoginQrCodeImage = qrCodeUtils::svgToBase64(QString::fromStdString(toSvgString(qr, 4)));
+        }
+
+        m_tvLoginStatus = "pending";
+        m_tvLoginError.clear();
+        emit tvLoginChanged();
+    });
+}
+
+void FBLinkController::pollTvLogin()
+{
+    if (m_tvLoginDeviceCode.isEmpty() || m_tvLoginStatus == "approved") {
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest("/auth/tv/token", true, false);
+    QJsonObject json;
+    json["device_code"] = m_tvLoginDeviceCode;
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        const QByteArray data = reply->readAll();
+        const QJsonObject obj = QJsonDocument::fromJson(data).object();
+
+        if (reply->error() == QNetworkReply::NoError && obj.contains("access_token")) {
+            m_tvLoginStatus = "approved";
+            completeTokenLogin(obj);
+            return;
+        }
+
+        if (httpStatus == 202 || obj.value("status").toString() == "pending") {
+            m_tvLoginStatus = "pending";
+            m_tvLoginError.clear();
+            emit tvLoginChanged();
+            return;
+        }
+
+        if (httpStatus == 429) {
+            m_tvLoginStatus = "pending";
+            m_tvLoginPollIntervalMs = qMax(m_tvLoginPollIntervalMs, obj.value("interval").toInt(8) * 1000);
+            m_tvLoginError.clear();
+            emit tvLoginChanged();
+            return;
+        }
+
+        m_tvLoginStatus = "error";
+        m_tvLoginError = obj.value("error").toString(reply->errorString());
+        logApiFailure("tv-login-token", reply);
+        emit tvLoginChanged();
+    });
+}
+
+void FBLinkController::cancelTvLogin()
+{
+    clearTvLoginState();
+    emit tvLoginChanged();
+}
+
+void FBLinkController::createPayment(const QString &plan)
+{
+    createPayment(plan, QString(), true);
+}
+
+void FBLinkController::createPaymentWithPromo(const QString &plan, const QString &promoCode)
+{
+    createPayment(plan, promoCode, true);
+}
+
+void FBLinkController::previewPaymentWithPromo(const QString &plan, const QString &promoCode)
+{
+    previewPaymentWithPromo(plan, promoCode, true);
+}
+
+void FBLinkController::previewPaymentWithPromo(const QString &plan, const QString &promoCode, bool allowRefreshRetry)
+{
+    QString token = getJwtToken();
+    if (token.isEmpty()) {
+        emit paymentPreviewError(tr("Необходимо войти в аккаунт"));
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest("/payments/preview", true, true);
+
+    QJsonObject json;
+    json["plan"] = plan;
+    const QString normalizedPromoCode = promoCode.trimmed().toUpper();
+    if (!normalizedPromoCode.isEmpty()) {
+        json["promo_code"] = normalizedPromoCode;
+    }
+
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, plan, normalizedPromoCode, allowRefreshRetry]() {
+        reply->deleteLater();
+
+        QByteArray responseData = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(responseData);
+        QJsonObject obj = doc.object();
+
+        if (reply->error() == QNetworkReply::NoError) {
+            emit paymentPreviewReady(
+                obj.value("amount").toDouble(),
+                obj.value("original_amount").toDouble(),
+                obj.value("discount_amount").toDouble(),
+                obj.value("discount_percent").toInt(),
+                obj.value("promo_applied").toBool());
+        } else {
+            logApiFailure("payment-preview", reply);
+
+            if (allowRefreshRetry && shouldRefreshToken(reply)) {
+                refreshAccessToken([this, plan, normalizedPromoCode]() {
+                    previewPaymentWithPromo(plan, normalizedPromoCode, false);
+                });
+                return;
+            }
+
+            QString errStr = obj.contains("error") ? obj["error"].toString()
+                                                    : tr("Не удалось проверить промокод");
+            emit paymentPreviewError(errStr);
+        }
+    });
+}
+
+void FBLinkController::createPayment(const QString &plan, const QString &promoCode, bool allowRefreshRetry)
 {
     QString token = getJwtToken();
     if (token.isEmpty()) {
@@ -914,10 +1237,14 @@ void FBLinkController::createPayment(const QString &plan, bool allowRefreshRetry
 
     QJsonObject json;
     json["plan"] = plan;
+    const QString normalizedPromoCode = promoCode.trimmed().toUpper();
+    if (!normalizedPromoCode.isEmpty()) {
+        json["promo_code"] = normalizedPromoCode;
+    }
 
     QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, plan, allowRefreshRetry]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, plan, normalizedPromoCode, allowRefreshRetry]() {
         reply->deleteLater();
 
         QByteArray responseData = reply->readAll();
@@ -926,13 +1253,19 @@ void FBLinkController::createPayment(const QString &plan, bool allowRefreshRetry
 
         if (reply->error() == QNetworkReply::NoError) {
             QString confirmUrl = obj.value("confirmation_url").toString();
-            emit paymentCreated(confirmUrl);
+            QString status = obj.value("status").toString();
+            if (confirmUrl.isEmpty() && status == "succeeded") {
+                fetchSubscription();
+                emit paymentActivated();
+            } else {
+                emit paymentCreated(confirmUrl);
+            }
         } else {
             logApiFailure("create-payment", reply);
 
             if (allowRefreshRetry && shouldRefreshToken(reply)) {
-                refreshAccessToken([this, plan]() {
-                    createPayment(plan, false);
+                refreshAccessToken([this, plan, normalizedPromoCode]() {
+                    createPayment(plan, normalizedPromoCode, false);
                 });
                 return;
             }
@@ -1067,6 +1400,8 @@ void FBLinkController::logout()
     m_isRefreshing = false;
     setLoadingState(false);
     setPendingRoutingSync(false);
+    clearTvLoginState();
+    emit tvLoginChanged();
     {
         QSettings qSettings = appSettings();
         qSettings.setValue(kVIPAdBlockStatusKey, "");
@@ -1283,6 +1618,36 @@ bool FBLinkController::isConfigSyncing() const
 bool FBLinkController::hasPendingRoutingSync() const
 {
     return m_hasPendingRoutingSync;
+}
+
+QString FBLinkController::tvLoginUserCode() const
+{
+    return m_tvLoginUserCode;
+}
+
+QString FBLinkController::tvLoginVerificationUrl() const
+{
+    return m_tvLoginVerificationUrl;
+}
+
+QString FBLinkController::tvLoginQrCodeImage() const
+{
+    return m_tvLoginQrCodeImage;
+}
+
+QString FBLinkController::tvLoginStatus() const
+{
+    return m_tvLoginStatus;
+}
+
+QString FBLinkController::tvLoginError() const
+{
+    return m_tvLoginError;
+}
+
+int FBLinkController::tvLoginPollIntervalMs() const
+{
+    return m_tvLoginPollIntervalMs;
 }
 
 void FBLinkController::setAutoRenew(bool enabled)

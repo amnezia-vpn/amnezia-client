@@ -34,11 +34,11 @@ func buildSubscriptionCapabilities(sub models.Subscription) subscriptionCapabili
 	}
 
 	switch sub.Plan {
-	case models.PlanTrial, models.PlanBasic:
+	case models.PlanTrial, models.PlanBasic, models.PlanBasic3M:
 		return subscriptionCapabilities{
 			AllowedProtocols: []string{"awg"},
 		}
-	case models.PlanVIP:
+	case models.PlanVIP, models.PlanVIP3M:
 		return subscriptionCapabilities{
 			AllowedProtocols:         []string{"vless"},
 			CanUseSiteSplitTunnel:    false, // deprecated: site routing now only via VIP profiles
@@ -49,6 +49,13 @@ func buildSubscriptionCapabilities(sub models.Subscription) subscriptionCapabili
 	default:
 		return subscriptionCapabilities{AllowedProtocols: []string{}}
 	}
+}
+
+func isVIPSubscription(sub models.Subscription) bool {
+	if sub.Status != models.SubActive || time.Now().After(sub.ExpiresAt) {
+		return false
+	}
+	return sub.Plan == models.PlanVIP || sub.Plan == models.PlanVIP3M
 }
 
 func canManageVIPFeatures(sub models.Subscription) bool {

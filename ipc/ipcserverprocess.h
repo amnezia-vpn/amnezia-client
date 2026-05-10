@@ -40,6 +40,7 @@ signals:
 private:
     fblink::PermittedProcess m_program = fblink::PermittedProcess::Invalid;
     QSharedPointer<QProcess> m_process;
+    bool m_isKilled = false;
 };
 
 #else

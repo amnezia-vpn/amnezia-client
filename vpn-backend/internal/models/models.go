@@ -27,10 +27,12 @@ type User struct {
 type PlanType string
 
 const (
-	PlanFree  PlanType = "free"
-	PlanTrial PlanType = "trial"
-	PlanBasic PlanType = "basic"
-	PlanVIP   PlanType = "vip"
+	PlanFree     PlanType = "free"
+	PlanTrial    PlanType = "trial"
+	PlanBasic    PlanType = "basic"
+	PlanBasic3M  PlanType = "basic_3m"
+	PlanVIP      PlanType = "vip"
+	PlanVIP3M    PlanType = "vip_3m"
 )
 
 type SubscriptionStatus string
@@ -52,6 +54,29 @@ type Subscription struct {
 	VIPAdBlockEnabled bool   `gorm:"column:vip_ad_block_enabled;default:false"`
 }
 
+type TVLoginStatus string
+
+const (
+	TVLoginPending  TVLoginStatus = "pending"
+	TVLoginApproved TVLoginStatus = "approved"
+	TVLoginConsumed TVLoginStatus = "consumed"
+	TVLoginExpired  TVLoginStatus = "expired"
+)
+
+type TVLogin struct {
+	gorm.Model
+	DeviceCodeHash string        `gorm:"uniqueIndex;not null"`
+	UserCodeHash   string        `gorm:"index;not null"`
+	UserID         *uint
+	Status         TVLoginStatus `gorm:"default:pending;not null"`
+	ExpiresAt      time.Time     `gorm:"not null"`
+	LastPolledAt   *time.Time
+	ApprovedAt     *time.Time
+	ConsumedAt     *time.Time
+
+	User *User
+}
+
 type VPNServer struct {
 	gorm.Model
 	Name        string `gorm:"not null"`
@@ -61,6 +86,7 @@ type VPNServer struct {
 	Region      string
 	CountryCode string `gorm:"default:''"` // ISO 3166-1 alpha-2, e.g. "RU", "US", "DE"
 	Active      bool   `gorm:"default:true"`
+	VIPOnly     bool   `gorm:"column:vip_only;default:false"`
 
 	// FBLinkWG 2 параметры (обфускация)
 	AWGPort  int    `gorm:"default:51820"`
@@ -192,16 +218,35 @@ const (
 
 type Payment struct {
 	gorm.Model
-	UserID      uint          `gorm:"not null"`
-	YooKassaID  string        `gorm:"uniqueIndex"`
-	Amount      float64       `gorm:"not null"`
-	Currency    string        `gorm:"default:RUB"`
-	Status      PaymentStatus `gorm:"default:pending"`
-	Plan        PlanType      `gorm:"not null"`
-	ConfirmURL  string        // URL для оплаты (от ЮKassa)
-	ConfirmedAt *time.Time
+	UserID         uint          `gorm:"not null"`
+	YooKassaID     string        `gorm:"uniqueIndex"`
+	Amount         float64       `gorm:"not null"`
+	OriginalAmount float64       `gorm:"not null;default:0"`
+	DiscountAmount float64       `gorm:"not null;default:0"`
+	Currency       string        `gorm:"default:RUB"`
+	Status         PaymentStatus `gorm:"default:pending"`
+	Plan           PlanType      `gorm:"not null"`
+	ConfirmURL     string // URL для оплаты (от ЮKassa)
+	ConfirmedAt    *time.Time
+	PromoCodeID    *uint
 
-	User User
+	User      User
+	PromoCode *PromoCode
+}
+
+type PromoCode struct {
+	gorm.Model
+	Code            string `gorm:"uniqueIndex;not null"`
+	Description     string `gorm:"default:''"`
+	DiscountPercent int    `gorm:"not null"`
+	MaxUses         int    `gorm:"default:0"`
+	UsedCount       int    `gorm:"default:0"`
+	Active          bool   `gorm:"default:true"`
+	ApplicablePlans string `gorm:"default:'all'"`
+	OncePerUser     bool   `gorm:"default:true"`
+	ExpiresAt       *time.Time
+
+	Payments []Payment
 }
 
 type VerificationCode struct {

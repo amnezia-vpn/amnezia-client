@@ -57,6 +57,9 @@ void SystemService::start()
 
 void SystemService::stop()
 {
-    delete m_localServer;
-    m_localServer = nullptr;
+    if (m_localServer) {
+        m_localServer->shutdown();
+        delete m_localServer;
+        m_localServer = nullptr;
+    }
 }

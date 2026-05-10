@@ -257,6 +257,11 @@
         <file>ui/qml/Pages2/PageShareFullAccess.qml</file>
         <file>ui/qml/Pages2/PageShareConnection.qml</file>
         <file>ui/qml/Pages2/PageStart.qml</file>
+        <file>ui/qml/Pages2/PageTvRoot.qml</file>
+        <file>ui/qml/Pages2/PageTvLogin.qml</file>
+        <file>ui/qml/Pages2/PageTvHome.qml</file>
+        <file>ui/qml/Pages2/PageTvServers.qml</file>
+        <file>ui/qml/Components/TvButton.qml</file>
         <file>ui/qml/Components/RenameServerDrawer.qml</file>
         <file>ui/qml/Controls2/ListViewType.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiSupport.qml</file>
@@ -264,6 +269,7 @@
         <file>ui/qml/Pages2/PageSettingsApiNativeConfigs.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiDevices.qml</file>
         <file>images/controls/monitor.svg</file>
+        <file>images/operator.png</file>
         <file>ui/qml/Components/AwgTextField.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml</file>
         <file>ui/qml/Components/SmartScroll.qml</file>

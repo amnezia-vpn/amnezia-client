@@ -36,6 +36,8 @@ class LocalServer : public QObject
 public:
     explicit LocalServer(QObject* parent = nullptr);
     ~LocalServer();
+    void shutdown();
+
     QSharedPointer<QLocalServer> m_server;
     IpcServer m_ipcServer;
     QRemoteObjectHost m_serverNode;
@@ -54,6 +56,9 @@ public:
     DaemonLocalServer server{qApp};
     MacOSDaemon daemon;
 #endif
+
+private:
+    bool m_shutdownStarted = false;
 };
 
 #endif // LOCALSERVER_H

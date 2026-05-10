@@ -18,6 +18,21 @@ import "../Components"
 PageType {
     id: root
     readonly property bool hasLocationsAccess: FBLinkController.isSubscribed
+    property double lastServersRefreshMs: 0
+
+    function refreshServersFromBackend() {
+        if (FBLinkController.isLoggedIn && FBLinkController.isSubscribed) {
+            const now = Date.now()
+            if (now - root.lastServersRefreshMs < 5000) {
+                return
+            }
+            root.lastServersRefreshMs = now
+            FBLinkController.fetchConfig()
+        }
+    }
+
+    Component.onCompleted: root.refreshServersFromBackend()
+    onVisibleChanged: if (visible) root.refreshServersFromBackend()
 
     function guessCountryCode(serverName) {
         const name = (serverName || "").toLowerCase()
@@ -89,6 +104,7 @@ PageType {
                     radius: 12
 
                     readonly property bool selected: index === ServersModel.defaultIndex
+                    readonly property bool lockedByPlan: isVipOnly && !isAvailableForCurrentPlan
                     readonly property string resolvedCountryCode: apiServerCountryCode !== ""
                         ? apiServerCountryCode
                         : root.guessCountryCode(name)
@@ -98,6 +114,7 @@ PageType {
                         : (serverMouseArea.containsMouse ? Qt.rgba(38/255, 38/255, 38/255, 0.9) : "transparent")
                     border.width: selected ? 1 : 0
                     border.color: selected ? Qt.rgba(234/255, 179/255, 8/255, 0.60) : "transparent"
+                    opacity: lockedByPlan ? 0.62 : 1.0
 
                     RowLayout {
                         anchors.fill: parent
@@ -127,18 +144,31 @@ PageType {
                             Layout.fillWidth: true
                             spacing: 2
 
-                            LabelTextType {
+                            RowLayout {
                                 Layout.fillWidth: true
-                                text: name
-                                font.pixelSize: 17
-                                font.weight: serverCard.selected ? 700 : 500
-                                color: "#F4F4F5"
-                                elide: Text.ElideRight
+                                spacing: 8
+
+                                LabelTextType {
+                                    Layout.fillWidth: true
+                                    text: name
+                                    font.pixelSize: 17
+                                    font.weight: serverCard.selected ? 700 : 500
+                                    color: "#F4F4F5"
+                                    elide: Text.ElideRight
+                                }
+
+                                PremiumBadge {
+                                    visible: isVipOnly
+                                    text: qsTr("VIP")
+                                    tone: "accent"
+                                    iconSource: "qrc:/images/controls/crown.svg"
+                                    compact: true
+                                }
                             }
 
                             CaptionTextType {
                                 Layout.fillWidth: true
-                                text: hostName !== "" ? hostName : serverDescription
+                                text: serverCard.lockedByPlan ? qsTr("VIP only") : (hostName !== "" ? hostName : serverDescription)
                                 color: FBLinkStyle.color.mutedGray
                                 elide: Text.ElideRight
                             }
@@ -160,6 +190,10 @@ PageType {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
+                            if (serverCard.lockedByPlan) {
+                                PageController.showNotificationMessage(qsTr("VIP only server"))
+                                return
+                            }
                             if (ConnectionController.isConnected) {
                                 PageController.showNotificationMessage(qsTr("Нельзя менять сервер во время активного подключения"))
                                 return

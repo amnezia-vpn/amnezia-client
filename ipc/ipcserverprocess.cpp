@@ -52,6 +52,7 @@ IpcServerProcess::IpcServerProcess(QObject *parent) :
     connect(m_process.data(), &QProcess::stateChanged, this, &IpcServerProcess::stateChanged);
 
     connect(m_process.data(), &QProcess::errorOccurred, [&](QProcess::ProcessError error){
+        if (m_isKilled && error == QProcess::Crashed) return;
         qWarning() << "IpcServerProcess errorOccurred"
                    << processErrorToString(error)
                    << "program=" << m_process->program()
@@ -62,6 +63,7 @@ IpcServerProcess::IpcServerProcess(QObject *parent) :
     });
     connect(m_process.data(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, [&](int exitCode, QProcess::ExitStatus exitStatus) {
+        if (m_isKilled && exitStatus == QProcess::CrashExit) return;
         qWarning() << "IpcServerProcess finished"
                    << "program=" << m_process->program()
                    << "arguments=" << m_process->arguments()
@@ -97,6 +99,7 @@ void IpcServerProcess::start()
     }
 
     Utils::killProcessByName(m_process->program());
+    m_isKilled = false;
     m_process->start();
     qDebug() << "IpcServerProcess start requested"
              << "program=" << m_process->program()
@@ -116,6 +119,7 @@ void IpcServerProcess::terminate() {
 }
 
 void IpcServerProcess::kill() {
+    m_isKilled = true;
     m_process->kill();
 }
 

@@ -25,7 +25,6 @@ import android.os.Messenger
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.provider.Settings
-import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -184,7 +183,7 @@ class FBLinkActivity : QtActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "Create FBLink activity")
+        Log.d(TAG, "Create FBLink activity, isOnTv=${isOnTv()}, model=${Build.MODEL}")
 
         // Configure window for edge-to-edge display
         configureWindowForEdgeToEdge()
@@ -337,42 +336,41 @@ class FBLinkActivity : QtActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val deviceId = event.deviceId
-        val keyCode = event.keyCode
-        val pressed = event.action == KeyEvent.ACTION_DOWN
-        val source = event.source
+        // Let Android TV remotes and gamepads flow through Qt Keys. This keeps
+        // startup/navigation independent from the optional QtGamepadLegacy plugin.
+        val isTvNavigationKey = event.keyCode == KeyEvent.KEYCODE_DPAD_UP ||
+            event.keyCode == KeyEvent.KEYCODE_DPAD_DOWN ||
+            event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT ||
+            event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ||
+            event.keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+            event.keyCode == KeyEvent.KEYCODE_BUTTON_A ||
+            event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER ||
+            event.keyCode == KeyEvent.KEYCODE_BACK
 
-        if (deviceId < 0 && pressed) {
-            when (keyCode) {
-                KeyEvent.KEYCODE_BUTTON_A,
-                KeyEvent.KEYCODE_BUTTON_B,
-                KeyEvent.KEYCODE_BUTTON_X,
-                KeyEvent.KEYCODE_BUTTON_Y,
-                KeyEvent.KEYCODE_BUTTON_START,
-                KeyEvent.KEYCODE_BUTTON_SELECT,
-                KeyEvent.KEYCODE_DPAD_CENTER -> {
-                    nativeGamepadKeyEvent(0, keyCode, true)
-                    nativeGamepadKeyEvent(0, keyCode, false)
-                    return true
-                }
-            }
+        if (event.action == KeyEvent.ACTION_DOWN && isTvNavigationKey) {
+            Log.d(TAG, "dispatchKeyEvent: keyCode=${event.keyCode}, source=${event.source}, repeat=${event.repeatCount}")
         }
 
-        // Real gamepad events (deviceId >= 0)
-        if (deviceId >= 0) {
-            val isGamepad = (source and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
-            val isJoystick = (source and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
-            val isDpad = (source and InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
-            if (isGamepad || isJoystick || isDpad) {
-                nativeGamepadKeyEvent(deviceId, keyCode, pressed)
-                return true
-            }
+        if (event.keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+            event.keyCode == KeyEvent.KEYCODE_BUTTON_A ||
+            event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER
+        ) {
+            val enterEvent = KeyEvent(
+                event.downTime,
+                event.eventTime,
+                event.action,
+                KeyEvent.KEYCODE_ENTER,
+                event.repeatCount,
+                event.metaState,
+                event.deviceId,
+                event.scanCode,
+                event.flags,
+                event.source
+            )
+            return super.dispatchKeyEvent(enterEvent)
         }
-
         return super.dispatchKeyEvent(event)
     }
-
-    private external fun nativeGamepadKeyEvent(deviceId: Int, keyCode: Int, pressed: Boolean)
 
     override fun onPause() {
         super.onPause()
@@ -682,7 +680,7 @@ class FBLinkActivity : QtActivity() {
      */
     @Suppress("unused")
     fun qtAndroidControllerInitialized() {
-        Log.v(TAG, "Qt Android controller initialized")
+        Log.v(TAG, "Qt Android controller initialized, isOnTv=${isOnTv()}")
         qtInitialized.complete(Unit)
     }
 

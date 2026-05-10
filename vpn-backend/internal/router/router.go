@@ -93,6 +93,9 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			authGroup.POST("/refresh", authH.Refresh)
 			authGroup.POST("/forgot-password", authH.ForgotPassword)
 			authGroup.POST("/reset-password", authH.ResetPassword)
+			authGroup.POST("/tv/start", authH.TVStart)
+			authGroup.POST("/tv/approve", authH.TVApprove)
+			authGroup.POST("/tv/token", authH.TVToken)
 		}
 
 		// Client Updates (Public)
@@ -116,6 +119,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		{
 			me.GET("", userH.GetMe)
 			me.GET("/subscription", userH.GetSubscription)
+			me.GET("/servers", userH.GetServers)
 			me.PATCH("/subscription/auto-renew", userH.SetAutoRenew)
 			me.PATCH("/subscription/ad-block", userH.SetVIPAdBlock)
 			me.DELETE("/card", userH.DeleteCard)
@@ -131,6 +135,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 		payments := api.Group("/payments", auth)
 		{
+			payments.POST("/preview", payH.PreviewPayment)
 			payments.POST("/create", payH.CreatePayment)
 		}
 
@@ -151,6 +156,10 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			adminGrp.DELETE("/servers/:id", adminH.DeleteServer)
 			adminGrp.GET("/payments", adminH.GetPayments)
 			adminGrp.POST("/payments/:id/approve", adminH.ApprovePayment)
+			adminGrp.GET("/promo-codes", adminH.GetPromoCodes)
+			adminGrp.POST("/promo-codes", adminH.CreatePromoCode)
+			adminGrp.PUT("/promo-codes/:id", adminH.UpdatePromoCode)
+			adminGrp.DELETE("/promo-codes/:id", adminH.DeletePromoCode)
 			adminGrp.GET("/stats", adminH.GetStats)
 			adminGrp.GET("/export/:entity", adminH.ExportCSV)
 			adminGrp.POST("/backup/send", adminH.TriggerBackup)
@@ -164,6 +173,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 	// Веб-панель администратора
 	r.Static("/admin", "./admin")
+	r.GET("/tv", authH.TVApprovePage)
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(302, "/admin/")
 	})

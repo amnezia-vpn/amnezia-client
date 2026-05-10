@@ -37,22 +37,8 @@ func sanitizeSupportText(value string) string {
 	return sanitized
 }
 
-const pendingPaymentSyncWindow = 30 * time.Minute
-
 func NewUserHandler(db *gorm.DB, cfg *config.Config) *UserHandler {
 	return &UserHandler{db: db, cfg: cfg}
-}
-
-func shouldSyncPendingPayment(payment models.Payment) bool {
-	if payment.YooKassaID == "" || payment.Status != models.PaymentPending {
-		return false
-	}
-
-	if payment.CreatedAt.IsZero() {
-		return true
-	}
-
-	return time.Since(payment.CreatedAt) <= pendingPaymentSyncWindow
 }
 
 // GET /api/v1/me
@@ -77,21 +63,8 @@ func (h *UserHandler) GetMe(c *gin.Context) {
 func (h *UserHandler) GetSubscription(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
-	// Проверяем доступность пробного периода
-	var trialCount int64
-	if err := h.db.Model(&models.Payment{}).
-		Where("user_id = ? AND plan = ? AND status = ?", userID, models.PlanTrial, models.PaymentSucceeded).
-		Count(&trialCount).Error; err != nil {
-		if isDatabaseBusyError(err) {
-			respondDatabaseBusy(c)
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
-		return
-	}
-	trialAvailable := trialCount == 0
-
-	sub, err := ensureDefaultSubscription(h.db, userID)
+	// Пробный период доступен только до первой успешной покупки подписки.
+	trialAvailable, err := trialAvailableForUser(h.db, userID)
 	if err != nil {
 		if isDatabaseBusyError(err) {
 			respondDatabaseBusy(c)
@@ -101,35 +74,14 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 		return
 	}
 
-	if h.cfg != nil && h.cfg.YooKassaShopID != "" && h.cfg.YooKassaKey != "" {
-		var pending models.Payment
-		if err := h.db.Where("user_id = ? AND status = ?", userID, models.PaymentPending).
-			Order("created_at desc").
-			First(&pending).Error; err == nil {
-			if shouldSyncPendingPayment(pending) {
-				go func(p models.Payment) {
-					if status, err := verifyYooKassaPaymentStatus(h.cfg.YooKassaShopID, h.cfg.YooKassaKey, p.YooKassaID); err == nil && status == "succeeded" {
-						_ = h.db.Transaction(func(tx *gorm.DB) error {
-							now := time.Now()
-							if err := tx.Model(&p).Updates(map[string]interface{}{
-								"status":       models.PaymentSucceeded,
-								"confirmed_at": now,
-							}).Error; err != nil {
-								return err
-							}
-							return activateSubscriptionFromPayment(tx, &p, "")
-						})
-					}
-				}(pending)
-			}
-		} else if !isRecordNotFoundError(err) {
-			if isDatabaseBusyError(err) {
-				respondDatabaseBusy(c)
-				return
-			}
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
+	sub, err := ensureDefaultSubscription(h.db, userID)
+	if err != nil {
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
 			return
 		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
+		return
 	}
 
 	capabilities := buildSubscriptionCapabilities(sub)
@@ -158,6 +110,47 @@ func (h *UserHandler) GetSubscription(c *gin.Context) {
 		"can_manage_routing_profiles":  capabilities.CanManageRoutingProfiles,
 		"can_use_ad_block":             capabilities.CanUseAdBlock,
 	})
+}
+
+// GET /api/v1/me/servers
+func (h *UserHandler) GetServers(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	sub, err := ensureDefaultSubscription(h.db, userID)
+	if err != nil {
+		if isDatabaseBusyError(err) {
+			respondDatabaseBusy(c)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load subscription"})
+		return
+	}
+
+	isVIP := isVIPSubscription(sub)
+	var servers []models.VPNServer
+	if err := h.db.Where("active = ?", true).Order("id asc").Find(&servers).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load servers"})
+		return
+	}
+
+	result := make([]gin.H, 0, len(servers))
+	for _, server := range servers {
+		hostName := strings.TrimSpace(server.Endpoint)
+		if hostName == "" {
+			hostName = strings.TrimSpace(server.Host)
+		}
+		result = append(result, gin.H{
+			"id":           server.ID,
+			"name":         server.Name,
+			"region":       server.Region,
+			"country_code": server.CountryCode,
+			"host_name":    hostName,
+			"is_vip_only":  server.VIPOnly,
+			"is_available": !server.VIPOnly || isVIP,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"servers": result})
 }
 
 // PATCH /api/v1/me/subscription/auto-renew

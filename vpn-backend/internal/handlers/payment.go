@@ -32,16 +32,88 @@ func (h *PaymentHandler) verifyYooKassaPayment(paymentID string) (string, error)
 }
 
 type createPaymentRequest struct {
-	Plan string `json:"plan" binding:"required,oneof=trial basic vip"`
+	Plan      string `json:"plan" binding:"required,oneof=trial basic basic_3m vip vip_3m"`
+	PromoCode string `json:"promo_code"`
 }
 
 var planPrices = map[models.PlanType]struct {
 	Amount       float64
 	DurationDays int
 }{
-	models.PlanTrial: {Amount: 5.00, DurationDays: 3},
-	models.PlanBasic: {Amount: 199.00, DurationDays: 30},
-	models.PlanVIP:   {Amount: 399.00, DurationDays: 30},
+	models.PlanTrial:   {Amount: 5.00,    DurationDays: 3},
+	models.PlanBasic:   {Amount: 199.00,  DurationDays: 30},
+	models.PlanBasic3M: {Amount: 505.00,  DurationDays: 90},
+	models.PlanVIP:     {Amount: 399.00,  DurationDays: 30},
+	models.PlanVIP3M:   {Amount: 1015.00, DurationDays: 90},
+}
+
+func trialAvailableForUser(db *gorm.DB, userID uint) (bool, error) {
+	var successfulPayments int64
+	err := db.Model(&models.Payment{}).
+		Where("user_id = ? AND status = ? AND plan IN ?", userID, models.PaymentSucceeded, []models.PlanType{
+			models.PlanTrial,
+			models.PlanBasic,
+			models.PlanBasic3M,
+			models.PlanVIP,
+			models.PlanVIP3M,
+		}).
+		Count(&successfulPayments).Error
+	return successfulPayments == 0, err
+}
+
+func paymentPreviewResponse(plan models.PlanType, promoCode string, app *promoApplication) gin.H {
+	applied := app.PromoCode != nil
+	return gin.H{
+		"plan":             plan,
+		"promo_code":       normalizePromoCode(promoCode),
+		"promo_applied":    applied,
+		"discount_percent": func() int {
+			if app.PromoCode == nil {
+				return 0
+			}
+			return app.PromoCode.DiscountPercent
+		}(),
+		"original_amount": app.OriginalAmount,
+		"discount_amount": app.DiscountAmount,
+		"amount":          app.FinalAmount,
+	}
+}
+
+// POST /api/v1/payments/preview
+func (h *PaymentHandler) PreviewPayment(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	var req createPaymentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Выберите тариф для оплаты"})
+		return
+	}
+
+	plan := models.PlanType(req.Plan)
+	priceInfo, ok := planPrices[plan]
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Неизвестный тариф"})
+		return
+	}
+	if plan == models.PlanTrial {
+		available, err := trialAvailableForUser(h.db, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось проверить доступность пробного периода"})
+			return
+		}
+		if !available {
+			c.JSON(http.StatusConflict, gin.H{"error": "Пробный период доступен только новым пользователям"})
+			return
+		}
+	}
+
+	app, err := validatePromoCode(h.db, userID, plan, req.PromoCode, priceInfo.Amount)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, paymentPreviewResponse(plan, req.PromoCode, app))
 }
 
 // POST /api/v1/payments/create
@@ -50,31 +122,83 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 
 	var req createPaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Выберите тариф для оплаты"})
 		return
 	}
 
 	plan := models.PlanType(req.Plan)
 
-	// Пробный период — только если не было успешных trial оплат
+	// Пробный период — только если пользователь ещё не покупал подписку.
 	if plan == models.PlanTrial {
-		var trialCount int64
-		h.db.Model(&models.Payment{}).
-			Where("user_id = ? AND plan = ? AND status = ?", userID, models.PlanTrial, models.PaymentSucceeded).
-			Count(&trialCount)
-		if trialCount > 0 {
-			c.JSON(http.StatusConflict, gin.H{"error": "Пробный период уже был использован"})
+		available, err := trialAvailableForUser(h.db, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось проверить доступность пробного периода"})
+			return
+		}
+		if !available {
+			c.JSON(http.StatusConflict, gin.H{"error": "Пробный период доступен только новым пользователям"})
 			return
 		}
 	}
 
-	priceInfo := planPrices[plan]
+	priceInfo, ok := planPrices[plan]
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Неизвестный тариф"})
+		return
+	}
+	promoApplication, err := validatePromoCode(h.db, userID, plan, req.PromoCode, priceInfo.Amount)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if promoApplication.FinalAmount == 0 {
+		now := time.Now()
+		payment := models.Payment{
+			UserID:         userID,
+			YooKassaID:     "promo-" + uuid.New().String(),
+			Amount:         0,
+			OriginalAmount: promoApplication.OriginalAmount,
+			DiscountAmount: promoApplication.DiscountAmount,
+			Currency:       "RUB",
+			Status:         models.PaymentSucceeded,
+			Plan:           plan,
+			ConfirmedAt:    &now,
+		}
+		if promoApplication.PromoCode != nil {
+			payment.PromoCodeID = &promoApplication.PromoCode.ID
+		}
+		err := h.db.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Create(&payment).Error; err != nil {
+				return err
+			}
+			if err := activateSubscriptionFromPayment(tx, &payment, ""); err != nil {
+				return err
+			}
+			return markPromoCodeUsed(tx, &payment)
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось применить промокод"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"payment_id":       payment.ID,
+			"confirmation_url": "",
+			"amount":           payment.Amount,
+			"original_amount":  payment.OriginalAmount,
+			"discount_amount":  payment.DiscountAmount,
+			"promo_code":       normalizePromoCode(req.PromoCode),
+			"plan":             plan,
+			"status":           models.PaymentSucceeded,
+		})
+		return
+	}
 
 	// Создаём платёж в ЮKassa
 	idempotencyKey := uuid.New().String()
 	ykPayload := map[string]interface{}{
 		"amount": map[string]interface{}{
-			"value":    fmt.Sprintf("%.2f", priceInfo.Amount),
+			"value":    fmt.Sprintf("%.2f", promoApplication.FinalAmount),
 			"currency": "RUB",
 		},
 		"confirmation": map[string]interface{}{
@@ -85,8 +209,9 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 		"save_payment_method": true, // сохраняем карту для автосписания
 		"description":         fmt.Sprintf("Mr.Frake VPN — %s", planLabel(plan)),
 		"metadata": map[string]interface{}{
-			"user_id": userID,
-			"plan":    plan,
+			"user_id":    userID,
+			"plan":       plan,
+			"promo_code": normalizePromoCode(req.PromoCode),
 		},
 	}
 
@@ -98,7 +223,7 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create payment"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось создать платёж"})
 		return
 	}
 	defer resp.Body.Close()
@@ -107,7 +232,7 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 	json.NewDecoder(resp.Body).Decode(&ykResp)
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "YooKassa error", "details": ykResp})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Платёжная система не приняла запрос", "details": ykResp})
 		return
 	}
 
@@ -118,21 +243,33 @@ func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 
 	// Сохраняем платёж в БД
 	payment := models.Payment{
-		UserID:     userID,
-		YooKassaID: fmt.Sprintf("%v", ykResp["id"]),
-		Amount:     priceInfo.Amount,
-		Currency:   "RUB",
-		Status:     models.PaymentPending,
-		Plan:       plan,
-		ConfirmURL: confirmURL,
+		UserID:         userID,
+		YooKassaID:     fmt.Sprintf("%v", ykResp["id"]),
+		Amount:         promoApplication.FinalAmount,
+		OriginalAmount: promoApplication.OriginalAmount,
+		DiscountAmount: promoApplication.DiscountAmount,
+		Currency:       "RUB",
+		Status:         models.PaymentPending,
+		Plan:           plan,
+		ConfirmURL:     confirmURL,
 	}
-	h.db.Create(&payment)
+	if promoApplication.PromoCode != nil {
+		payment.PromoCodeID = &promoApplication.PromoCode.ID
+	}
+	if err := h.db.Create(&payment).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось сохранить платёж"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"payment_id":       payment.ID,
 		"confirmation_url": confirmURL,
-		"amount":           priceInfo.Amount,
+		"amount":           payment.Amount,
+		"original_amount":  payment.OriginalAmount,
+		"discount_amount":  payment.DiscountAmount,
+		"promo_code":       normalizePromoCode(req.PromoCode),
 		"plan":             plan,
+		"status":           payment.Status,
 	})
 }
 
@@ -172,7 +309,7 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 		}
 
 		if payment.Status == models.PaymentSucceeded {
-			return nil // Уже обработано
+			return markPromoCodeUsed(tx, &payment)
 		}
 
 		now := time.Now()
@@ -180,6 +317,8 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 			"status":       models.PaymentSucceeded,
 			"confirmed_at": now,
 		})
+		payment.Status = models.PaymentSucceeded
+		payment.ConfirmedAt = &now
 
 		paymentMethodID := ""
 		if pm, ok := obj["payment_method"].(map[string]interface{}); ok {
@@ -192,7 +331,10 @@ func (h *PaymentHandler) Webhook(c *gin.Context) {
 		if err := tx.Where("user_id = ?", payment.UserID).First(&sub).Error; err != nil && err != gorm.ErrRecordNotFound {
 			return err
 		}
-		return activateSubscriptionFromPayment(tx, &payment, paymentMethodID)
+		if err := activateSubscriptionFromPayment(tx, &payment, paymentMethodID); err != nil {
+			return err
+		}
+		return markPromoCodeUsed(tx, &payment)
 	})
 
 	if txErr != nil {
@@ -209,8 +351,12 @@ func planLabel(plan models.PlanType) string {
 		return "Пробный период (3 дня)"
 	case models.PlanBasic:
 		return "Базовый (30 дней)"
+	case models.PlanBasic3M:
+		return "Premium 3 месяца (90 дней)"
 	case models.PlanVIP:
 		return "VIP (30 дней)"
+	case models.PlanVIP3M:
+		return "VIP 3 месяца (90 дней)"
 	default:
 		return string(plan)
 	}

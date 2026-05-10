@@ -16,6 +16,7 @@ Button {
     property string pressedColor: FBLinkStyle.color.mutedGray
 
     property string textColor: FBLinkStyle.color.midnightBlack
+    property bool richText: false
 
     property string borderColor: FBLinkStyle.color.paleGray
     property string borderFocusedColor: FBLinkStyle.color.paleGray
@@ -169,6 +170,7 @@ Button {
                 Layout.fillWidth: true
                 color: root.textColor
                 text: root.text
+                textFormat: root.richText ? Text.RichText : Text.AutoText
                 visible: root.text === "" ? false : true
 
                 wrapMode: Text.NoWrap

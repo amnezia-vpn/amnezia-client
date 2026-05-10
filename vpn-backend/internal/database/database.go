@@ -54,11 +54,13 @@ func AutoMigrate(db *gorm.DB) {
 	err := db.AutoMigrate(
 		&models.User{},
 		&models.Subscription{},
+		&models.TVLogin{},
 		&models.VPNServer{},
 		&models.VPNKey{},
 		&models.VLESSServerTemplate{},
 		&models.VLESSCredential{},
 		&models.RoutingProfile{},
+		&models.PromoCode{},
 		&models.Payment{},
 		&models.VerificationCode{},
 	)

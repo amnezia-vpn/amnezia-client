@@ -450,25 +450,16 @@ PageType {
                         }
                     }
 
-                    Rectangle {
-                        visible: FBLinkController.isSubscribed && FBLinkController.subscriptionPlan === "vip"
+                    PremiumBadge {
+                        visible: ServersModel.defaultServerIsVipOnly
                         anchors.top: parent.top
                         anchors.right: parent.right
                         anchors.topMargin: 8
                         anchors.rightMargin: 8
-                        radius: 6
-                        color: "#EAB308"
-                        implicitWidth: vipTagText.implicitWidth + 8
-                        implicitHeight: vipTagText.implicitHeight + 4
-
-                        CaptionTextType {
-                            id: vipTagText
-                            anchors.centerIn: parent
-                            text: "VIP"
-                            color: "#111111"
-                            font.bold: true
-                            font.pixelSize: 9
-                        }
+                        text: qsTr("VIP")
+                        tone: "accent"
+                        iconSource: "qrc:/images/controls/crown.svg"
+                        compact: true
                     }
 
                     MouseArea {

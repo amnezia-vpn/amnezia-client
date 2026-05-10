@@ -42,12 +42,21 @@ class FBLinkController : public QObject
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY loadingChanged)
     Q_PROPERTY(bool isConfigSyncing READ isConfigSyncing NOTIFY configSyncChanged)
     Q_PROPERTY(bool hasPendingRoutingSync READ hasPendingRoutingSync NOTIFY routingSyncPendingChanged)
+    Q_PROPERTY(QString tvLoginUserCode READ tvLoginUserCode NOTIFY tvLoginChanged)
+    Q_PROPERTY(QString tvLoginVerificationUrl READ tvLoginVerificationUrl NOTIFY tvLoginChanged)
+    Q_PROPERTY(QString tvLoginQrCodeImage READ tvLoginQrCodeImage NOTIFY tvLoginChanged)
+    Q_PROPERTY(QString tvLoginStatus READ tvLoginStatus NOTIFY tvLoginChanged)
+    Q_PROPERTY(QString tvLoginError READ tvLoginError NOTIFY tvLoginChanged)
+    Q_PROPERTY(int tvLoginPollIntervalMs READ tvLoginPollIntervalMs NOTIFY tvLoginChanged)
 
 public:
     explicit FBLinkController(ImportController *importController, const std::shared_ptr<Settings> &settings,
                                ServersModel *serversModel = nullptr, QObject *parent = nullptr);
 
     Q_INVOKABLE void login(const QString &email, const QString &password);
+    Q_INVOKABLE void startTvLogin();
+    Q_INVOKABLE void pollTvLogin();
+    Q_INVOKABLE void cancelTvLogin();
     Q_INVOKABLE void registerUser(const QString &email, const QString &password);
     Q_INVOKABLE void verifyEmail(const QString &email, const QString &code);
     Q_INVOKABLE void forgotPassword(const QString &email);
@@ -57,6 +66,8 @@ public:
     Q_INVOKABLE void fetchSubscription();
     Q_INVOKABLE void syncAll();
     Q_INVOKABLE void createPayment(const QString &plan);
+    Q_INVOKABLE void createPaymentWithPromo(const QString &plan, const QString &promoCode);
+    Q_INVOKABLE void previewPaymentWithPromo(const QString &plan, const QString &promoCode);
     Q_INVOKABLE void setAutoRenew(bool enabled);
     Q_INVOKABLE void setVipAdBlockEnabled(bool enabled);
     Q_INVOKABLE void deleteCard();
@@ -93,6 +104,12 @@ public:
     bool isLoading() const;
     bool isConfigSyncing() const;
     bool hasPendingRoutingSync() const;
+    QString tvLoginUserCode() const;
+    QString tvLoginVerificationUrl() const;
+    QString tvLoginQrCodeImage() const;
+    QString tvLoginStatus() const;
+    QString tvLoginError() const;
+    int tvLoginPollIntervalMs() const;
 
 signals:
     void loginSuccess();
@@ -112,7 +129,10 @@ signals:
     void subscriptionFetched();
     void subscriptionError(const QString &errorMessage);
     void paymentCreated(const QString &confirmationUrl);
+    void paymentActivated();
     void paymentError(const QString &errorMessage);
+    void paymentPreviewReady(double amount, double originalAmount, double discountAmount, int discountPercent, bool promoApplied);
+    void paymentPreviewError(const QString &errorMessage);
     void autoRenewChanged(bool enabled);
     void vipAdBlockChanged(bool enabled);
     void cardDeleted();
@@ -128,6 +148,8 @@ signals:
     void configSyncChanged();
     void userEmailChanged();
     void routingSyncPendingChanged();
+    void tvLoginChanged();
+    void tvLoginApproved();
 
 private:
     QNetworkAccessManager *m_nam;
@@ -145,13 +167,15 @@ private:
     void setPendingRoutingSync(bool pending);
 
     void fetchConfig(bool allowRefreshRetry);
+    void fetchServerMetadata(bool allowRefreshRetry);
     void fetchSubscription(bool allowRefreshRetry);
     void fetchRoutingProfiles(bool allowRefreshRetry);
     void saveRoutingProfile(const QVariantMap &profile, bool allowRefreshRetry);
     void deleteRoutingProfile(int id, bool allowRefreshRetry);
     void copySystemRoutingProfile(const QString &code, bool allowRefreshRetry);
     void submitBugReport(const QString &note, bool allowRefreshRetry);
-    void createPayment(const QString &plan, bool allowRefreshRetry);
+    void previewPaymentWithPromo(const QString &plan, const QString &promoCode, bool allowRefreshRetry);
+    void createPayment(const QString &plan, const QString &promoCode, bool allowRefreshRetry);
     void setAutoRenew(bool enabled, bool allowRefreshRetry);
     void setVipAdBlockEnabled(bool enabled, bool allowRefreshRetry);
     void deleteCard(bool allowRefreshRetry);
@@ -169,6 +193,9 @@ private:
                               bool canUseAppSplitTunneling = false, bool canManageRoutingProfiles = false,
                               bool canUseAdBlock = false, bool vipAdBlockEnabled = false);
     void clearExistingFBLinkServers();
+    void mergeServerMetadata(const QJsonArray &metadataServers);
+    void clearTvLoginState();
+    void completeTokenLogin(const QJsonObject &obj);
 
     bool m_isRefreshing = false;
     bool m_isFetchingConfig = false;
@@ -186,6 +213,13 @@ private:
     int m_configSyncOperationsCount = 0;
     bool m_fetchConfigAfterSubscription = false;
     QVector<std::function<void()>> m_pendingRefreshCallbacks;
+    QString m_tvLoginDeviceCode;
+    QString m_tvLoginUserCode;
+    QString m_tvLoginVerificationUrl;
+    QString m_tvLoginQrCodeImage;
+    QString m_tvLoginStatus;
+    QString m_tvLoginError;
+    int m_tvLoginPollIntervalMs = 8000;
     // Защита от обхода подписки: время последней серверной верификации
     // Если прошло > 24ч — при следующем isSubscribed() принудительно обновляем
     qint64 m_lastSubscriptionVerifiedAt = 0;

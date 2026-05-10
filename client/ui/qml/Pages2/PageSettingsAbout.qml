@@ -164,6 +164,7 @@ PageType {
                 text: title
                 descriptionText: description
                 leftImageSource: imageSource
+                rightImageSource: (typeof rightImage !== "undefined") ? rightImage : ""
 
                 clickedFunction: handler
             }
@@ -274,11 +275,13 @@ PageType {
     QtObject {
         id: telegramSupport
 
-        readonly property string title: qsTr("Telegram поддержка")
-        readonly property string description: qsTr("Задайте вопрос нашей команде")
-        readonly property string imageSource: "qrc:/images/controls/telegram.svg"
+        readonly property string title: qsTr("Поддержка в мессенджерах")
+        readonly property string description: "8 (996) 673-26-28"
+        readonly property string imageSource: "qrc:/images/operator.png"
+        readonly property string rightImage: "qrc:/images/controls/copy.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally("https://t.me/frakebit_support")
+            GC.copyToClipBoard("89966732628")
+            PageController.showNotificationMessage(qsTr("Номер скопирован"))
         }
     }
 

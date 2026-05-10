@@ -457,16 +457,15 @@ void CoreController::initPrepareConfigHandler()
 
         const bool hasPendingRoutingSync = m_fbLinkController && m_fbLinkController->hasPendingRoutingSync();
         const bool isBackendConfigSyncing = m_fbLinkController && m_fbLinkController->isConfigSyncing();
-        const bool isBackendMutationInFlight = m_fbLinkController && m_fbLinkController->isLoading();
         if (m_fbLinkController
-            && (isBackendConfigSyncing || hasPendingRoutingSync || isBackendMutationInFlight || requiresServerConfigRefresh)) {
+            && (isBackendConfigSyncing || hasPendingRoutingSync || requiresServerConfigRefresh)) {
             qDebug() << "[FBLink] prepareConfig: backend config sync is in progress. Waiting for configFetched...";
              
             // Set state to Preparing IMMEDIATELY so the user sees a loading animation while waiting for API
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
             m_connectionController->setConnectionStateText(tr("Обновление..."));
 
-            if ((hasPendingRoutingSync || requiresServerConfigRefresh) && !isBackendConfigSyncing && !isBackendMutationInFlight) {
+            if ((hasPendingRoutingSync || requiresServerConfigRefresh) && !isBackendConfigSyncing) {
                 qDebug() << "[FBLink] prepareConfig: forcing fetchConfig() before connect";
                 m_fbLinkController->fetchConfig();
             }

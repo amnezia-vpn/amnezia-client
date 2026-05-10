@@ -17,6 +17,48 @@ PageType {
 
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
+    property bool mobileTabBarVisible: true
+    readonly property bool tvInterfaceActive: SettingsController.isTvInterfaceActive
+
+    Loader {
+        id: tvRootLoader
+        anchors.fill: parent
+        active: root.tvInterfaceActive
+        visible: active
+        source: active ? "PageTvRoot.qml" : ""
+        onStatusChanged: console.log("TV root loader status:", status, "source:", source)
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        visible: root.tvInterfaceActive && tvRootLoader.status === Loader.Error
+        color: "#08090B"
+        z: 100
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            width: Math.min(parent.width - 96, 720)
+            spacing: 14
+
+            Label {
+                Layout.fillWidth: true
+                text: "TV UI failed to load"
+                color: "#F8FAFC"
+                font.pixelSize: 36
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Label {
+                Layout.fillWidth: true
+                text: "Source: " + tvRootLoader.source + "\nStatus: " + tvRootLoader.status
+                color: "#A1A1AA"
+                font.pixelSize: 20
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+        }
+    }
 
     Connections {
         objectName: "pageControllerConnection"
@@ -25,10 +67,10 @@ PageType {
 
         function onGoToPageHome() {
             if (PageController.isStartPageVisible() && !FBLinkController.isLoggedIn) {
-                tabBar.visible = false
+                root.mobileTabBarVisible = false
                 tabBarStackView.goToTabBarPage(PageEnum.PageFBLinkLogin)
             } else {
-                tabBar.visible = true
+                root.mobileTabBarVisible = true
                 tabBar.setCurrentIndex(0)
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
             }
@@ -159,9 +201,9 @@ PageType {
             // Adding servers manually is disabled — redirect to login/subscription
             if (!FBLinkController.isLoggedIn) {
                 tabBarStackView.goToTabBarPage(PageEnum.PageFBLinkLogin)
-                tabBar.visible = false
+                root.mobileTabBarVisible = false
             } else if (!FBLinkController.isSubscribed) {
-                tabBar.visible = true
+                root.mobileTabBarVisible = true
                 tabBar.setCurrentIndex(0)
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
             } else {
@@ -251,7 +293,8 @@ PageType {
         anchors.left: parent.left
         anchors.bottom: tabBar.top
 
-        enabled: !root.isControlsDisabled
+        visible: !root.tvInterfaceActive
+        enabled: !root.tvInterfaceActive && !root.isControlsDisabled
 
         function goToTabBarPage(page) {
             var pagePath = PageController.getPagePath(page)
@@ -260,12 +303,16 @@ PageType {
         }
 
         Component.onCompleted: {
+            if (root.tvInterfaceActive) {
+                console.log("PageStart: TV interface active, skipping mobile stack")
+                return
+            }
             var pagePath
             if (PageController.isStartPageVisible() && !FBLinkController.isLoggedIn) {
-                tabBar.visible = false
+                root.mobileTabBarVisible = false
                 pagePath = PageController.getPagePath(PageEnum.PageFBLinkLogin)
             } else {
-                tabBar.visible = true
+                root.mobileTabBarVisible = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
                 ServersModel.processedIndex = ServersModel.defaultIndex
             }
@@ -296,6 +343,7 @@ PageType {
     TabBar {
         id: tabBar
         objectName: "tabBar"
+        visible: !root.tvInterfaceActive && root.mobileTabBarVisible
 
         anchors.right: parent.right
         anchors.left: parent.left

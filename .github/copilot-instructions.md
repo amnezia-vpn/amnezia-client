@@ -1,0 +1,7 @@
+# GitHub Copilot bootstrap instructions
+
+Authoritative behavior rules live in `AGENTS.md`.
+
+Before acting:
+1. Read `AGENTS.md`.
+2. Load dynamic context from `.antigravity/` (`conventions.md`, `structure.md`, decisions, memory).

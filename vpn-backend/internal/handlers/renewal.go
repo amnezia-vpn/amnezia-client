@@ -152,11 +152,12 @@ func chargeAutoRenewal(db *gorm.DB, shopID, key string, sub models.Subscription)
 	// Сохраняем платёж в БД
 	now := time.Now()
 	payment := models.Payment{
-		UserID:     sub.UserID,
-		YooKassaID: ykPaymentID,
-		Amount:     priceInfo.Amount,
-		Currency:   "RUB",
-		Plan:       sub.Plan,
+		UserID:         sub.UserID,
+		YooKassaID:     ykPaymentID,
+		Amount:         priceInfo.Amount,
+		OriginalAmount: priceInfo.Amount,
+		Currency:       "RUB",
+		Plan:           sub.Plan,
 	}
 
 	if status == "succeeded" {

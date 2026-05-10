@@ -51,6 +51,8 @@ public:
         AdHeaderRole,
         AdDescriptionRole,
         AdEndpointRole,
+        IsVipOnlyRole,
+        IsAvailableForCurrentPlanRole,
 
         HasFBLinkDns
     };
@@ -75,6 +77,7 @@ public:
     Q_PROPERTY(QString defaultServerImagePathCollapsed READ getDefaultServerImagePathCollapsed NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerDescriptionExpanded READ getDefaultServerDescriptionExpanded NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerEndpointHost READ getDefaultServerEndpointHost NOTIFY defaultServerEndpointHostChanged)
+    Q_PROPERTY(bool defaultServerIsVipOnly READ defaultServerIsVipOnly NOTIFY defaultServerVipOnlyChanged)
     Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY
                        defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
@@ -146,6 +149,7 @@ public slots:
     QVariant getDefaultServerData(const QString roleString);
     QString getDefaultServerPingTarget();
     const QString getDefaultServerEndpointHost();
+    bool defaultServerIsVipOnly() const;
 
     QVariant getProcessedServerData(const QString roleString);
     bool setProcessedServerData(const QString &roleString, const QVariant &value);
@@ -172,6 +176,7 @@ signals:
     void defaultServerNameChanged();
     void defaultServerDescriptionChanged();
     void defaultServerEndpointHostChanged();
+    void defaultServerVipOnlyChanged();
 
     void containersUpdated(const QJsonArray &containers);
     void defaultServerContainersUpdated(const QJsonArray &containers);

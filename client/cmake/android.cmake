@@ -46,8 +46,9 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.cpp
 )
 
-foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
-    set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_EXTRA_LIBS
+set(FBLINK_ANDROID_EXTRA_LIBS)
+foreach(abi IN LISTS QT_ANDROID_ABIS)
+    list(APPEND FBLINK_ANDROID_EXTRA_LIBS
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/amneziawg/android/${abi}/libwg-go.so
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libck-ovpn-plugin.so
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpn3.so
@@ -58,6 +59,7 @@ foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/android/${abi}/libssh.so
     )
 endforeach()
+set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_EXTRA_LIBS ${FBLINK_ANDROID_EXTRA_LIBS})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/xray/android/libxray.aar
         DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray)
