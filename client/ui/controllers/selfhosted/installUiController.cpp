@@ -63,6 +63,7 @@ InstallUiController::InstallUiController(InstallController *installController,
                                          WireGuardConfigModel *wireGuardConfigModel,
                                          OpenVpnConfigModel *openVpnConfigModel,
                                          XrayConfigModel *xrayConfigModel,
+                                         MasterDnsVpnConfigModel *masterDnsVpnConfigModel,
                                          TorConfigModel *torConfigModel,
 #ifdef Q_OS_WINDOWS
                                          Ikev2ConfigModel *ikev2ConfigModel,
@@ -80,6 +81,7 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_wireGuardConfigModel(wireGuardConfigModel),
       m_openVpnConfigModel(openVpnConfigModel),
       m_xrayConfigModel(xrayConfigModel),
+      m_masterDnsVpnConfigModel(masterDnsVpnConfigModel),
       m_torConfigModel(torConfigModel),
 #ifdef Q_OS_WINDOWS
       m_ikev2ConfigModel(ikev2ConfigModel),
@@ -227,6 +229,10 @@ void InstallUiController::updateContainer(int serverIndex, int containerIndex, i
     case Proto::Xray:
     case Proto::SSXray: {
         containerConfig.protocolConfig = m_xrayConfigModel->getProtocolConfig();
+        break;
+    }
+    case Proto::MasterDnsVpn: {
+        containerConfig.protocolConfig = m_masterDnsVpnConfigModel->getProtocolConfig();
         break;
     }
     case Proto::TorWebSite: {
@@ -481,6 +487,9 @@ void InstallUiController::updateProtocolConfigModel(int serverIndex, int contain
     case Proto::WireGuard: updateIfPresent(m_wireGuardConfigModel, containerConfig.getWireGuardProtocolConfig()); break;
     case Proto::OpenVpn: updateIfPresent(m_openVpnConfigModel, containerConfig.getOpenVpnProtocolConfig()); break;
     case Proto::Xray: updateIfPresent(m_xrayConfigModel, containerConfig.getXrayProtocolConfig()); break;
+    case Proto::MasterDnsVpn:
+        updateIfPresent(m_masterDnsVpnConfigModel, containerConfig.getMasterDnsVpnProtocolConfig());
+        break;
     case Proto::TorWebSite: updateIfPresent(m_torConfigModel, containerConfig.getTorProtocolConfig()); break;
     case Proto::Sftp: updateIfPresent(m_sftpConfigModel, containerConfig.getSftpProtocolConfig()); break;
     case Proto::Socks5Proxy: updateIfPresent(m_socks5ConfigModel, containerConfig.getSocks5ProxyProtocolConfig()); break;

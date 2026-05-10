@@ -66,6 +66,7 @@ namespace PageLoader
 
         PageProtocolOpenVpnSettings,
         PageProtocolXraySettings,
+        PageProtocolMasterDnsVpnSettings,
         PageProtocolWireGuardSettings,
         PageProtocolAwgSettings,
         PageProtocolIKev2Settings,

@@ -20,6 +20,7 @@
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "ui/models/protocols/openvpnConfigModel.h"
 #include "ui/models/protocols/xrayConfigModel.h"
+#include "ui/models/protocols/masterDnsVpnConfigModel.h"
 #ifdef Q_OS_WINDOWS
 #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
@@ -42,6 +43,7 @@ public:
                                WireGuardConfigModel* wireGuardConfigModel,
                                OpenVpnConfigModel* openVpnConfigModel,
                                XrayConfigModel* xrayConfigModel,
+                               MasterDnsVpnConfigModel* masterDnsVpnConfigModel,
                                TorConfigModel* torConfigModel,
 #ifdef Q_OS_WINDOWS
                                Ikev2ConfigModel* ikev2ConfigModel,
@@ -134,6 +136,7 @@ private:
     WireGuardConfigModel* m_wireGuardConfigModel;
     OpenVpnConfigModel* m_openVpnConfigModel;
     XrayConfigModel* m_xrayConfigModel;
+    MasterDnsVpnConfigModel* m_masterDnsVpnConfigModel;
     TorConfigModel* m_torConfigModel;
 #ifdef Q_OS_WINDOWS
     Ikev2ConfigModel* m_ikev2ConfigModel;
