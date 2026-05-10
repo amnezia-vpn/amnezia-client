@@ -264,6 +264,59 @@ stage_missing_qt_runtime_plugins() {
   done
 }
 
+stage_android_third_party_libs() {
+  local android_build_out_dir=$1
+  local abi_list=$2
+  local project_dir=$3
+
+  if [[ -z "$abi_list" ]]; then
+    return 0
+  fi
+
+  local prebuilt_root="$project_dir/client/3rd-prebuilt/3rd-prebuilt"
+  IFS=';' read -r -a abi_array <<< "$abi_list"
+  for abi in "${abi_array[@]}"
+  do
+    [[ -z "$abi" ]] && continue
+
+    local dest_dir="$android_build_out_dir/libs/$abi"
+    mkdir -p "$dest_dir"
+
+    local lib_specs=(
+      "amneziawg/android/$abi/libwg-go.so|1"
+      "openvpn/android/$abi/libck-ovpn-plugin.so|1"
+      "openvpn/android/$abi/libovpn3.so|1"
+      "openvpn/android/$abi/libovpnutil.so|1"
+      "openvpn/android/$abi/librsapss.so|1"
+      "openssl/android/$abi/libcrypto_3.so|1"
+      "openssl/android/$abi/libssl_3.so|1"
+      "libssh/android/$abi/libssh.so|1"
+    )
+
+    for spec in "${lib_specs[@]}"
+    do
+      local rel="${spec%%|*}"
+      local required="${spec##*|}"
+      local src="$prebuilt_root/$rel"
+      local dst="$dest_dir/$(basename "$rel")"
+
+      if [[ -f "$dst" ]]; then
+        continue
+      fi
+
+      if [[ -f "$src" ]]; then
+        cp "$src" "$dst"
+        echo "Staged Android third-party lib for $abi: $src -> $dst"
+      elif [[ "$required" = "1" ]]; then
+        echo "ERROR: Required Android third-party lib not found for ABI=$abi: $src"
+        return 1
+      else
+        echo "WARN: Optional Android third-party lib not found for ABI=$abi: $src"
+      fi
+    done
+  done
+}
+
 stage_missing_gamepad_qml_libs() {
   local android_build_out_dir=$1
   local abi_list=$2
@@ -414,8 +467,23 @@ for abi in abis_to_check:
         if expected not in names:
             missing.append(expected)
 
+    required_third_party_libs = [
+        "libwg-go.so",
+        "libck-ovpn-plugin.so",
+        "libovpn3.so",
+        "libovpnutil.so",
+        "librsapss.so",
+        "libcrypto_3.so",
+        "libssl_3.so",
+        "libssh.so",
+    ]
+    for lib_name in required_third_party_libs:
+        expected = f"lib/{abi}/{lib_name}"
+        if expected not in names:
+            missing.append(expected)
+
 if missing:
-    print(f"ERROR: APK is missing required Qt runtime plugin(s): {', '.join(missing)}")
+    print(f"ERROR: APK is missing required native runtime library/plugin(s): {', '.join(missing)}")
     print(f"APK: {apk_path}")
     print(f"Detected ABIs in APK: {', '.join(sorted(detected_abis))}")
     if requested_abis:
@@ -606,6 +674,8 @@ patch_legacy_awg_package_path "$ANDROID_BUILD_OUT_DIR"
 stage_missing_qt_platform_plugins "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}"
 # Ensure required Qt runtime plugins (SVG/TLS/icon engine) are present.
 stage_missing_qt_runtime_plugins "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}"
+# Ensure native protocol/runtime dependencies are present for every packaged ABI.
+stage_android_third_party_libs "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}" "$PROJECT_DIR"
 # Ensure vendored QtGamepad QML runtime lib is present when gamepad support is enabled.
 stage_missing_gamepad_qml_libs "$ANDROID_BUILD_OUT_DIR" "${ANDROID_ABIS_FOR_PACKAGING:-}" "$BUILD_DIR"
 
