@@ -338,6 +338,37 @@ class FBLinkActivity : QtActivity() {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         // Let Android TV remotes and gamepads flow through Qt Keys. This keeps
         // startup/navigation independent from the optional QtGamepadLegacy plugin.
+        val isTvNavigationKey = event.keyCode == KeyEvent.KEYCODE_DPAD_UP ||
+            event.keyCode == KeyEvent.KEYCODE_DPAD_DOWN ||
+            event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT ||
+            event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ||
+            event.keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+            event.keyCode == KeyEvent.KEYCODE_BUTTON_A ||
+            event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER ||
+            event.keyCode == KeyEvent.KEYCODE_BACK
+
+        if (event.action == KeyEvent.ACTION_DOWN && isTvNavigationKey) {
+            Log.d(TAG, "dispatchKeyEvent: keyCode=${event.keyCode}, source=${event.source}, repeat=${event.repeatCount}")
+        }
+
+        if (event.keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+            event.keyCode == KeyEvent.KEYCODE_BUTTON_A ||
+            event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER
+        ) {
+            val enterEvent = KeyEvent(
+                event.downTime,
+                event.eventTime,
+                event.action,
+                KeyEvent.KEYCODE_ENTER,
+                event.repeatCount,
+                event.metaState,
+                event.deviceId,
+                event.scanCode,
+                event.flags,
+                event.source
+            )
+            return super.dispatchKeyEvent(enterEvent)
+        }
         return super.dispatchKeyEvent(event)
     }
 

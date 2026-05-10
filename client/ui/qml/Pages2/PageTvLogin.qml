@@ -2,23 +2,29 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import Style 1.0
-
-Item {
+FocusScope {
     id: root
 
-    property bool emailMode: false
     property string errorMessage: ""
 
     anchors.fill: parent
     focus: true
 
+    function isOkKey(event) {
+        return event.key === Qt.Key_Return
+            || event.key === Qt.Key_Enter
+            || event.key === Qt.Key_Select
+            || event.key === Qt.Key_Space
+    }
+
+    function submitLogin() {
+        root.errorMessage = ""
+        FBLinkController.login(emailField.text.trim(), passwordField.text)
+    }
+
     Component.onCompleted: {
         console.log("PageTvLogin loaded")
-        if (FBLinkController.tvLoginStatus === "") {
-            FBLinkController.startTvLogin()
-        }
-        codeTab.forceActiveFocus()
+        emailField.forceActiveFocus()
     }
 
     Connections {
@@ -26,204 +32,162 @@ Item {
         function onLoginError(message) { root.errorMessage = message }
     }
 
-    Timer {
-        id: pollTimer
-        interval: Math.max(3000, FBLinkController.tvLoginPollIntervalMs)
-        repeat: true
-        running: !root.emailMode && FBLinkController.tvLoginStatus === "pending"
-        onTriggered: FBLinkController.pollTvLogin()
-    }
-
-    Keys.onPressed: function(event) {
-        if (event.key === Qt.Key_Left || event.key === Qt.Key_Right) {
-            root.emailMode = !root.emailMode
-            root.emailMode ? emailTab.forceActiveFocus() : codeTab.forceActiveFocus()
-            event.accepted = true
-        }
-    }
-
     Rectangle {
         anchors.fill: parent
-        color: "#08090B"
+        color: "#070707"
     }
 
-    ColumnLayout {
-        anchors.centerIn: parent
-        width: Math.min(parent.width - 120, 1040)
-        spacing: 28
+    RowLayout {
+        anchors.fill: parent
+        anchors.margins: 72
+        spacing: 58
 
-        Label {
-            Layout.fillWidth: true
-            text: "FBLink VPN TV"
-            color: "#F8FAFC"
-            font.pixelSize: 52
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
-        }
+        ColumnLayout {
+            Layout.preferredWidth: 430
+            Layout.fillHeight: true
+            spacing: 28
 
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 14
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 250
 
-            Button {
-                id: codeTab
-                text: "Code / QR"
-                font.pixelSize: 24
-                padding: 18
-                highlighted: !root.emailMode
-                onClicked: root.emailMode = false
-                KeyNavigation.right: emailTab
-                KeyNavigation.down: refreshCodeButton
+                Image {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 210
+                    height: 210
+                    source: "qrc:/images/fblink_logo.png"
+                    fillMode: Image.PreserveAspectFit
+                }
             }
 
-            Button {
-                id: emailTab
-                text: "Email / password"
-                font.pixelSize: 24
-                padding: 18
-                highlighted: root.emailMode
-                onClicked: root.emailMode = true
-                KeyNavigation.left: codeTab
-                KeyNavigation.down: emailField
+            Label {
+                Layout.fillWidth: true
+                text: "FBLink VPN"
+                color: "#F8FAFC"
+                font.pixelSize: 50
+                font.bold: true
             }
+
+            Label {
+                Layout.fillWidth: true
+                text: "Вход для Android TV"
+                color: "#FACC15"
+                font.pixelSize: 28
+                font.bold: true
+            }
+
+            Label {
+                Layout.fillWidth: true
+                text: "Используйте email и пароль от аккаунта. Вход по коду включим отдельно, когда подтверждение появится в мобильном приложении."
+                color: "#A1A1AA"
+                font.pixelSize: 24
+                lineHeight: 1.18
+                wrapMode: Text.WordWrap
+            }
+
+            Item { Layout.fillHeight: true }
         }
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: root.emailMode ? 390 : 430
-            radius: 22
-            color: "#111216"
+            Layout.maximumWidth: 720
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredHeight: 560
+            radius: 28
+            color: "#121212"
             border.width: 2
-            border.color: "#2D3038"
+            border.color: "#2F2F2F"
 
-            Item {
+            ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 34
+                anchors.margins: 42
+                spacing: 22
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    spacing: 18
-                    visible: !root.emailMode
+                Label {
+                    Layout.fillWidth: true
+                    text: "Войти"
+                    color: "#F8FAFC"
+                    font.pixelSize: 38
+                    font.bold: true
+                }
 
-                    Label {
-                        Layout.fillWidth: true
-                        text: "Open the link on your phone, or scan the QR code."
-                        color: "#D4D4D8"
-                        font.pixelSize: 24
-                        horizontalAlignment: Text.AlignHCenter
-                        wrapMode: Text.WordWrap
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        spacing: 30
-
-                        Rectangle {
-                            Layout.preferredWidth: 250
-                            Layout.preferredHeight: 250
-                            Layout.alignment: Qt.AlignVCenter
-                            radius: 16
-                            color: "#FFFFFF"
-
-                            Image {
-                                anchors.fill: parent
-                                anchors.margins: 14
-                                source: FBLinkController.tvLoginQrCodeImage
-                                fillMode: Image.PreserveAspectFit
-                            }
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignVCenter
-                            spacing: 12
-
-                            Label {
-                                Layout.fillWidth: true
-                                text: FBLinkController.tvLoginUserCode === "" ? "Loading code..." : FBLinkController.tvLoginUserCode
-                                color: "#FACC15"
-                                font.pixelSize: 54
-                                font.bold: true
-                                horizontalAlignment: Text.AlignHCenter
-                            }
-
-                            Label {
-                                Layout.fillWidth: true
-                                text: FBLinkController.tvLoginVerificationUrl
-                                color: "#A1A1AA"
-                                font.pixelSize: 20
-                                wrapMode: Text.WrapAnywhere
-                                horizontalAlignment: Text.AlignHCenter
-                            }
-
-                            Label {
-                                Layout.fillWidth: true
-                                text: FBLinkController.tvLoginError !== "" ? FBLinkController.tvLoginError : "Waiting for confirmation..."
-                                color: FBLinkController.tvLoginError !== "" ? "#F87171" : "#A1A1AA"
-                                font.pixelSize: 20
-                                horizontalAlignment: Text.AlignHCenter
-                            }
-
-                            Button {
-                                id: refreshCodeButton
-                                Layout.alignment: Qt.AlignHCenter
-                                text: "New code"
-                                font.pixelSize: 22
-                                padding: 16
-                                onClicked: FBLinkController.startTvLogin()
-                                KeyNavigation.up: codeTab
-                            }
+                TextField {
+                    id: emailField
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 72
+                    placeholderText: "Email"
+                    font.pixelSize: 26
+                    inputMethodHints: Qt.ImhEmailCharactersOnly
+                    KeyNavigation.down: passwordField
+                    Keys.onPressed: function(event) {
+                        if (root.isOkKey(event)) {
+                            passwordField.forceActiveFocus()
+                            event.accepted = true
                         }
                     }
                 }
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    spacing: 16
-                    visible: root.emailMode
-
-                    TextField {
-                        id: emailField
-                        Layout.fillWidth: true
-                        placeholderText: "Email"
-                        font.pixelSize: 24
-                        inputMethodHints: Qt.ImhEmailCharactersOnly
-                        KeyNavigation.down: passwordField
-                    }
-
-                    TextField {
-                        id: passwordField
-                        Layout.fillWidth: true
-                        placeholderText: "Password"
-                        echoMode: TextInput.Password
-                        font.pixelSize: 24
-                        KeyNavigation.up: emailField
-                        KeyNavigation.down: loginButton
-                    }
-
-                    Label {
-                        Layout.fillWidth: true
-                        text: root.errorMessage
-                        visible: text !== ""
-                        color: "#F87171"
-                        font.pixelSize: 18
-                        wrapMode: Text.WordWrap
-                    }
-
-                    Button {
-                        id: loginButton
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 70
-                        text: FBLinkController.isLoading ? "Signing in..." : "Sign in"
-                        font.pixelSize: 26
-                        enabled: !FBLinkController.isLoading
-                        KeyNavigation.up: passwordField
-                        onClicked: {
-                            root.errorMessage = ""
-                            FBLinkController.login(emailField.text.trim(), passwordField.text)
+                TextField {
+                    id: passwordField
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 72
+                    placeholderText: "Пароль"
+                    echoMode: TextInput.Password
+                    font.pixelSize: 26
+                    KeyNavigation.up: emailField
+                    KeyNavigation.down: loginButton
+                    Keys.onPressed: function(event) {
+                        if (root.isOkKey(event)) {
+                            loginButton.forceActiveFocus()
+                            event.accepted = true
                         }
                     }
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: visible ? implicitHeight : 0
+                    text: root.errorMessage
+                    visible: text !== ""
+                    color: "#F87171"
+                    font.pixelSize: 22
+                    wrapMode: Text.WordWrap
+                }
+
+                Button {
+                    id: loginButton
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 78
+                    text: FBLinkController.isLoading ? "Входим..." : "Войти"
+                    font.pixelSize: 28
+                    enabled: !FBLinkController.isLoading
+                    highlighted: activeFocus
+                    KeyNavigation.up: passwordField
+                    KeyNavigation.down: appCodeButton
+                    onClicked: root.submitLogin()
+                    Keys.onPressed: function(event) {
+                        if (root.isOkKey(event)) {
+                            clicked()
+                            event.accepted = true
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: "#2F2F2F"
+                }
+
+                Button {
+                    id: appCodeButton
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 72
+                    text: "Вход через приложение скоро"
+                    font.pixelSize: 24
+                    enabled: false
+                    KeyNavigation.up: loginButton
                 }
             }
         }

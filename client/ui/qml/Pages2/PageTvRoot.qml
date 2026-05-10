@@ -4,10 +4,11 @@ import QtQuick.Layouts
 
 import Style 1.0
 
-Item {
+FocusScope {
     id: root
 
     anchors.fill: parent
+    focus: true
 
     Component.onCompleted: {
         console.log("PageTvRoot loaded, loggedIn =", FBLinkController.isLoggedIn)
@@ -36,6 +37,12 @@ Item {
         id: tvStack
         anchors.fill: parent
         focus: true
+
+        onCurrentItemChanged: {
+            if (currentItem) {
+                currentItem.forceActiveFocus()
+            }
+        }
 
         Keys.onPressed: function(event) {
             if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
