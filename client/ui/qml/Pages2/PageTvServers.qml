@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "../Components"
 
 FocusScope {
     id: root
@@ -61,12 +62,12 @@ FocusScope {
                     font.bold: true
                 }
 
-                Button {
+                TvButton {
                     id: backButton
+                    Layout.preferredWidth: 160
+                    Layout.preferredHeight: 76
                     text: "Back"
-                    font.pixelSize: 26
-                    padding: 20
-                    highlighted: activeFocus
+                    tvFontPixelSize: 26
                     KeyNavigation.down: serverList
                     onClicked: root.goBack()
                     Keys.onPressed: function(event) {

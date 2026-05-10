@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "../Components"
 
 FocusScope {
     id: root
@@ -80,12 +81,12 @@ FocusScope {
                     }
                 }
 
-                Button {
+                TvButton {
                     id: logoutButton
+                    Layout.preferredWidth: 180
+                    Layout.preferredHeight: 76
                     text: "Logout"
-                    font.pixelSize: 26
-                    padding: 20
-                    highlighted: activeFocus
+                    tvFontPixelSize: 26
                     KeyNavigation.down: locationsButton
                     onClicked: FBLinkController.logout()
                     Keys.onPressed: function(event) {
@@ -178,13 +179,12 @@ FocusScope {
                 Layout.fillWidth: true
                 spacing: 22
 
-                Button {
+                TvButton {
                     id: connectButton
                     Layout.fillWidth: true
                     Layout.preferredHeight: 96
                     text: ConnectionController.isConnected ? "Disconnect" : "Connect"
-                    font.pixelSize: 34
-                    highlighted: activeFocus
+                    tvFontPixelSize: 34
                     KeyNavigation.up: logoutButton
                     KeyNavigation.right: locationsButton
                     onClicked: ConnectionController.toggleConnection()
@@ -196,13 +196,12 @@ FocusScope {
                     }
                 }
 
-                Button {
+                TvButton {
                     id: locationsButton
                     Layout.fillWidth: true
                     Layout.preferredHeight: 96
                     text: "Locations"
-                    font.pixelSize: 34
-                    highlighted: activeFocus
+                    tvFontPixelSize: 34
                     KeyNavigation.up: logoutButton
                     KeyNavigation.left: connectButton
                     KeyNavigation.right: refreshButton
@@ -215,14 +214,13 @@ FocusScope {
                     }
                 }
 
-                Button {
+                TvButton {
                     id: refreshButton
                     Layout.fillWidth: true
                     Layout.preferredHeight: 96
                     text: FBLinkController.isConfigSyncing ? "Refreshing..." : "Refresh"
-                    font.pixelSize: 34
+                    tvFontPixelSize: 34
                     enabled: !FBLinkController.isConfigSyncing
-                    highlighted: activeFocus
                     KeyNavigation.up: logoutButton
                     KeyNavigation.left: locationsButton
                     onClicked: FBLinkController.syncAll()
