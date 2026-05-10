@@ -131,6 +131,12 @@ namespace amnezia
         constexpr QLatin1String mdvSocks5Pass("socks5Pass");
         constexpr QLatin1String mdvAdditionalConfig("additionalConfig");
         constexpr QLatin1String mdvListenPort("listenPort");
+        constexpr QLatin1String mdvResolvers("resolvers");
+        constexpr QLatin1String mdvBalancingStrategy("balancingStrategy");
+        constexpr QLatin1String mdvPacketDuplication("packetDuplication");
+        constexpr QLatin1String mdvSetupPacketDuplication("setupPacketDuplication");
+        constexpr QLatin1String mdvUploadCompression("uploadCompression");
+        constexpr QLatin1String mdvDownloadCompression("downloadCompression");
 
         constexpr QLatin1String clientName("clientName");
         constexpr QLatin1String userData("userData");

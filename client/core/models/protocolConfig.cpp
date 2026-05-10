@@ -239,9 +239,10 @@ QString ProtocolConfig::nativeConfig() const
                 return arg.clientConfig->nativeConfig;
             }
         } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
-            if (arg.clientConfig.has_value()) {
-                return arg.clientConfig->nativeConfig;
-            }
+            // No imported-config-as-string slot for MasterDnsVPN: per-client
+            // state is structured JSON consumed by the in-process engine.
+            // The "nativeConfig" concept doesn't apply.
+            return QString();
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             if (arg.clientConfig.has_value()) {
                 return arg.clientConfig->nativeConfig;
@@ -272,9 +273,8 @@ void ProtocolConfig::setNativeConfig(const QString &config)
                 arg.clientConfig->nativeConfig = config;
             }
         } else if constexpr (std::is_same_v<T, MasterDnsVpnProtocolConfig>) {
-            if (arg.clientConfig.has_value()) {
-                arg.clientConfig->nativeConfig = config;
-            }
+            // No-op: see ProtocolConfig::nativeConfig() above for rationale.
+            (void)config;
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             if (arg.clientConfig.has_value()) {
                 arg.clientConfig->nativeConfig = config;

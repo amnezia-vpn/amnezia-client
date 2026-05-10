@@ -58,6 +58,7 @@ QJsonObject MasterDnsVpnServerConfig::toJson() const
         obj[configKey::mdvAdditionalConfig] = additionalConfig;
     }
     if (isThirdPartyConfig) {
+
         obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
     }
 
@@ -82,7 +83,7 @@ MasterDnsVpnServerConfig MasterDnsVpnServerConfig::fromJson(const QJsonObject &j
     config.socks5Auth = json.value(configKey::mdvSocks5Auth).toBool(false);
     config.socks5User = json.value(configKey::mdvSocks5User).toString();
     config.socks5Pass = json.value(configKey::mdvSocks5Pass).toString();
-    config.additionalConfig = json.value(configKey::mdvAdditionalConfig).toString();
+    config.additionalConfig = json.value(configKey::mdvAdditionalConfig).toObject();
     config.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
 
     return config;
@@ -92,9 +93,6 @@ QJsonObject MasterDnsVpnClientConfig::toJson() const
 {
     QJsonObject obj;
 
-    if (!nativeConfig.isEmpty()) {
-        obj[configKey::config] = nativeConfig;
-    }
     if (!listenPort.isEmpty()) {
         obj[configKey::mdvListenPort] = listenPort;
     }
@@ -103,6 +101,27 @@ QJsonObject MasterDnsVpnClientConfig::toJson() const
     }
     if (!socks5Pass.isEmpty()) {
         obj[configKey::mdvSocks5Pass] = socks5Pass;
+    }
+    if (!resolvers.isEmpty()) {
+        obj[configKey::mdvResolvers] = resolvers;
+    }
+    if (balancingStrategy != 0) {
+        obj[configKey::mdvBalancingStrategy] = balancingStrategy;
+    }
+    if (packetDuplication != 0) {
+        obj[configKey::mdvPacketDuplication] = packetDuplication;
+    }
+    if (setupPacketDuplication != 0) {
+        obj[configKey::mdvSetupPacketDuplication] = setupPacketDuplication;
+    }
+    if (uploadCompression != 0) {
+        obj[configKey::mdvUploadCompression] = uploadCompression;
+    }
+    if (downloadCompression != 0) {
+        obj[configKey::mdvDownloadCompression] = downloadCompression;
+    }
+    if (!additionalConfig.isEmpty()) {
+        obj[configKey::mdvAdditionalConfig] = additionalConfig;
     }
     if (!id.isEmpty()) {
         obj[configKey::clientId] = id;
@@ -115,10 +134,18 @@ MasterDnsVpnClientConfig MasterDnsVpnClientConfig::fromJson(const QJsonObject &j
 {
     MasterDnsVpnClientConfig config;
 
-    config.nativeConfig = json.value(configKey::config).toString();
     config.listenPort = json.value(configKey::mdvListenPort).toString();
     config.socks5User = json.value(configKey::mdvSocks5User).toString();
     config.socks5Pass = json.value(configKey::mdvSocks5Pass).toString();
+    config.resolvers = json.value(configKey::mdvResolvers).toArray();
+    // Defaults match upstream sample config when an operator omits a field;
+    // the engine clamps these to sane ranges before use.
+    config.balancingStrategy = json.value(configKey::mdvBalancingStrategy).toInt(5);
+    config.packetDuplication = json.value(configKey::mdvPacketDuplication).toInt(3);
+    config.setupPacketDuplication = json.value(configKey::mdvSetupPacketDuplication).toInt(4);
+    config.uploadCompression = json.value(configKey::mdvUploadCompression).toInt(0);
+    config.downloadCompression = json.value(configKey::mdvDownloadCompression).toInt(0);
+    config.additionalConfig = json.value(configKey::mdvAdditionalConfig).toObject();
     config.id = json.value(configKey::clientId).toString();
 
     return config;

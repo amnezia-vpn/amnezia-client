@@ -49,9 +49,12 @@ struct MasterDnsVpnServerConfig
     QString socks5User;
     QString socks5Pass;
 
-    // Free-form TOML appended verbatim to server_config.toml on the operator side.
-    // Carried for round-trip integrity; the desktop client doesn't manipulate it.
-    QString additionalConfig;
+    // Free-form JSON object merged into the wire config the operator side
+    // emits, carried through for round-trip integrity. The native engine
+    // does not introspect this — keys outside the documented schema flow
+    // through unchanged so the operator can extend the format independently
+    // of an Amnezia release.
+    QJsonObject additionalConfig;
 
     // True when imported from a third-party "vpn config" string (i.e. operator
     // doesn't have shell access to install the server via Amnezia's docker flow).
@@ -61,25 +64,49 @@ struct MasterDnsVpnServerConfig
     static MasterDnsVpnServerConfig fromJson(const QJsonObject &json);
 };
 
-// Per-client config — what gets handed to a single end user's mdnsvpn client.
-// Shares the singleton encryption key from the server config; differs only in
-// resolver selection, local listening port, and optional local SOCKS5 auth.
+// Per-client config — what gets handed to a single end user's MasterDnsVPN
+// peer. Shares the singleton encryption key from the server config; differs
+// in resolver selection, local listening port, and runtime tuning.
+//
+// Everything is structured JSON — the native engine consumes these fields
+// directly. No TOML round-trip, no subprocess hand-off. The operator-side
+// renderer (e.g. awg-easy-rs) produces this exact shape; users without an
+// operator-side panel can synthesise it from the documented schema.
 struct MasterDnsVpnClientConfig
 {
-    // The full client_config.toml body the user feeds to `mdnsvpn -config <path>`.
-    // Round-tripped verbatim so that the operator's exact upstream-format file
-    // is what reaches the user (no Amnezia-side reformatting).
-    QString nativeConfig;
-
-    // Local SOCKS5 listen port for the mdnsvpn client. tun2socks dials this.
+    // Local SOCKS5 listen port the engine binds for user-app traffic.
     QString listenPort;
 
     // Optional local SOCKS5 auth — empty disables.
     QString socks5User;
     QString socks5Pass;
 
+    // Public DNS resolvers the engine talks through. JSON array of strings,
+    // each "ip[:port]" or "[v6]:port".
+    QJsonArray resolvers;
+
+    // RESOLVER_BALANCING_STRATEGY (1..8) — matches upstream values:
+    //   1 = Random, 2 = Round Robin, 3 = Least Loss,
+    //   4 = Lowest Latency, 5 = Hybrid Score,
+    //   6 = Loss Then Latency, 7 = Least-Loss-Top-Random,
+    //   8 = Least-Loss-Top-Round-Robin.
+    int balancingStrategy = 5;
+
+    // Packet duplication factor for normal data packets (clamped 1..10
+    // by the engine) and setup packets (clamped to [packetDuplication, 12]).
+    int packetDuplication = 3;
+    int setupPacketDuplication = 4;
+
+    // Compression negotiation. 0 = off, 1 = ZSTD, 2 = LZ4, 3 = ZLIB.
+    int uploadCompression = 0;
+    int downloadCompression = 0;
+
+    // Free-form JSON object passed through verbatim. The engine surfaces
+    // unrecognised keys via debug logging; they don't break operation.
+    QJsonObject additionalConfig;
+
     // Stable identity slot used by Amnezia's per-peer revoke / expiry UX.
-    // Mirrors XrayClientConfig::id; for mdnsvpn it's a free-form name.
+    // Mirrors XrayClientConfig::id.
     QString id;
 
     QJsonObject toJson() const;

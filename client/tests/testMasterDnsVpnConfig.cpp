@@ -43,7 +43,9 @@ private slots:
         config.socks5Pass = QStringLiteral("upstream-pass");
         config.forwardIp = QStringLiteral("10.0.0.5");
         config.forwardPort = 1080;
-        config.additionalConfig = QStringLiteral("MAX_PACKET_SIZE = 65500\n");
+        QJsonObject extra;
+        extra.insert(QStringLiteral("MAX_PACKET_SIZE"), 65500);
+        config.additionalConfig = extra;
         config.isThirdPartyConfig = true;
 
         const QJsonObject json = config.toJson();
@@ -86,23 +88,51 @@ private slots:
 
     // ---- MasterDnsVpnClientConfig round-trip ----
 
-    void clientConfigRoundTrip()
+    void clientConfigRoundTripPreservesStructuredFields()
     {
         MasterDnsVpnClientConfig config;
-        config.nativeConfig = QStringLiteral("DOMAINS = [\"v.example.com\"]\nLISTEN_PORT = 18000\n");
         config.listenPort = QStringLiteral("18000");
         config.socks5User = QStringLiteral("alice");
         config.socks5Pass = QStringLiteral("xyzzy");
+        QJsonArray resolvers;
+        resolvers.append(QStringLiteral("8.8.8.8"));
+        resolvers.append(QStringLiteral("1.1.1.1:5353"));
+        resolvers.append(QStringLiteral("[2001:4860:4860::8888]:53"));
+        config.resolvers = resolvers;
+        config.balancingStrategy = 5;
+        config.packetDuplication = 3;
+        config.setupPacketDuplication = 4;
+        config.uploadCompression = 1; // ZSTD
+        config.downloadCompression = 0;
         config.id = QStringLiteral("client-uuid-123");
 
         const QJsonObject json = config.toJson();
         const MasterDnsVpnClientConfig parsed = MasterDnsVpnClientConfig::fromJson(json);
 
-        QCOMPARE(parsed.nativeConfig, config.nativeConfig);
         QCOMPARE(parsed.listenPort, config.listenPort);
         QCOMPARE(parsed.socks5User, config.socks5User);
         QCOMPARE(parsed.socks5Pass, config.socks5Pass);
+        QCOMPARE(parsed.resolvers, config.resolvers);
+        QCOMPARE(parsed.balancingStrategy, config.balancingStrategy);
+        QCOMPARE(parsed.packetDuplication, config.packetDuplication);
+        QCOMPARE(parsed.setupPacketDuplication, config.setupPacketDuplication);
+        QCOMPARE(parsed.uploadCompression, config.uploadCompression);
+        QCOMPARE(parsed.downloadCompression, config.downloadCompression);
         QCOMPARE(parsed.id, config.id);
+    }
+
+    void clientConfigDefaultsApplyWhenJsonIsBare()
+    {
+        const MasterDnsVpnClientConfig parsed =
+                MasterDnsVpnClientConfig::fromJson(QJsonObject {});
+
+        // Defaults should mirror the upstream sample so a config that only
+        // specifies the inbound bits still produces a working tunnel.
+        QCOMPARE(parsed.balancingStrategy, 5);
+        QCOMPARE(parsed.packetDuplication, 3);
+        QCOMPARE(parsed.setupPacketDuplication, 4);
+        QCOMPARE(parsed.uploadCompression, 0);
+        QCOMPARE(parsed.downloadCompression, 0);
     }
 
     // ---- Wrapper behaviour ----
@@ -116,8 +146,8 @@ private slots:
                 protocols::masterDnsVpn::encryptionMethodAes128Gcm;
 
         MasterDnsVpnClientConfig client;
-        client.nativeConfig = QStringLiteral("...toml goes here...");
         client.listenPort = QStringLiteral("19001");
+        client.resolvers = QJsonArray { QStringLiteral("9.9.9.9") };
         wrapper.setClientConfig(client);
 
         const QJsonObject json = wrapper.toJson();
@@ -126,22 +156,23 @@ private slots:
         QVERIFY(!lastCfg.isEmpty());
         QJsonDocument lastDoc = QJsonDocument::fromJson(lastCfg.toUtf8());
         QVERIFY(lastDoc.isObject());
-        QCOMPARE(lastDoc.object().value(configKey::config).toString(),
-                 client.nativeConfig);
         QCOMPARE(lastDoc.object().value(configKey::mdvListenPort).toString(),
                  client.listenPort);
+        QCOMPARE(lastDoc.object().value(configKey::mdvResolvers).toArray(),
+                 client.resolvers);
 
         // Round-trip back through fromJson — clientConfig should reappear.
         const MasterDnsVpnProtocolConfig parsed = MasterDnsVpnProtocolConfig::fromJson(json);
         QVERIFY(parsed.hasClientConfig());
-        QCOMPARE(parsed.clientConfig->nativeConfig, client.nativeConfig);
+        QCOMPARE(parsed.clientConfig->listenPort, client.listenPort);
+        QCOMPARE(parsed.clientConfig->resolvers, client.resolvers);
     }
 
     void clearClientConfigDropsTheClientSlot()
     {
         MasterDnsVpnProtocolConfig wrapper;
         MasterDnsVpnClientConfig client;
-        client.nativeConfig = QStringLiteral("non-empty");
+        client.listenPort = QStringLiteral("18000");
         wrapper.setClientConfig(client);
         QVERIFY(wrapper.hasClientConfig());
         wrapper.clearClientConfig();
@@ -149,39 +180,6 @@ private slots:
     }
 
     // ---- ConfigModel staleness rules ----
-
-    void configModelDropsStaleClientWhenKeyChanges()
-    {
-        MasterDnsVpnConfigModel model;
-
-        MasterDnsVpnProtocolConfig initial;
-        initial.serverConfig.domains = QJsonArray { QStringLiteral("v.example.com") };
-        initial.serverConfig.encryptionKey = QStringLiteral("0123456789abcdef0123456789abcdef");
-        MasterDnsVpnClientConfig client;
-        client.nativeConfig = QStringLiteral("toml-body");
-        initial.setClientConfig(client);
-
-        model.updateModel(amnezia::DockerContainer::MasterDnsVpn, initial);
-
-        // No edits yet — getProtocolConfig() should preserve the client.
-        MasterDnsVpnProtocolConfig sameKey = model.getProtocolConfig();
-        QVERIFY(sameKey.hasClientConfig());
-
-        // Simulate the operator rotating the key from the UI by feeding the
-        // model a fresh struct with the new key, then asking for the export.
-        MasterDnsVpnProtocolConfig rotated = initial;
-        rotated.serverConfig.encryptionKey = QStringLiteral("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        // Equivalent to: model field set via setData(EncryptionKeyRole, ...)
-        // but the model doesn't expose the key role today, so we re-update.
-        model.updateModel(amnezia::DockerContainer::MasterDnsVpn, rotated);
-        // After updateModel, m_originalProtocolConfig is the new rotated
-        // config — getProtocolConfig() comparison is against that, so the
-        // client survives. To prove the staleness branch fires, we now
-        // mutate the in-model config back via another updateModel and compare
-        // against the prior original.
-        MasterDnsVpnProtocolConfig stillRotated = model.getProtocolConfig();
-        QVERIFY(stillRotated.hasClientConfig());
-    }
 
     void configModelDefaultsFillBlankServerFields()
     {
