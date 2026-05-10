@@ -81,6 +81,8 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/masterdnsvpn/engine.h
     ${CLIENT_ROOT_DIR}/masterdnsvpn/crypto.h
     ${CLIENT_ROOT_DIR}/masterdnsvpn/socks5server.h
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/wireframing.h
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/dnsframing.h
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -163,6 +165,8 @@ set(SOURCES ${SOURCES}
 set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/masterdnsvpn/crypto.cpp
     ${CLIENT_ROOT_DIR}/masterdnsvpn/socks5server.cpp
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/wireframing.cpp
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/dnsframing.cpp
 )
 
 if(NOT IOS AND NOT MACOS_NE)
