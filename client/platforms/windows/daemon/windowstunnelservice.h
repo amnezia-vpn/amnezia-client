@@ -25,6 +25,7 @@ class WindowsTunnelService final : public QObject {
   bool isRunning();
   QString uapiCommand(const QString& command);
   QString lastFailureReason() const { return m_lastFailureReason; }
+  static bool stopStaleService();
 
  signals:
   void backendFailure();

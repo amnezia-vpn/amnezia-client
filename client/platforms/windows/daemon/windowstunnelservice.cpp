@@ -40,14 +40,7 @@ WindowsTunnelService::WindowsTunnelService(QObject* parent) : QObject(parent) {
     WindowsUtils::windowsLog("Failed to open SCManager");
   }
 
-  // Is the service already running? Terminate it.
-  SC_HANDLE service =
-      OpenService((SC_HANDLE)m_scm, TUNNEL_SERVICE_NAME, SERVICE_ALL_ACCESS);
-  if (service != nullptr) {
-    logger.info() << "Tunnel already exists. Terminating it.";
-    stopAndDeleteTunnelService(service);
-    CloseServiceHandle(service);
-  }
+  stopStaleService();
 
   connect(&m_timer, &QTimer::timeout, this, &WindowsTunnelService::timeout);
 }
@@ -217,6 +210,29 @@ bool WindowsTunnelService::start(const QString& configData) {
   return false;
 }
 
+bool WindowsTunnelService::stopStaleService() {
+  SC_HANDLE scm = OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
+  if (scm == nullptr) {
+    WindowsUtils::windowsLog("Failed to open SCManager for stale tunnel cleanup");
+    return false;
+  }
+  auto cleanupScm = qScopeGuard([&] { CloseServiceHandle(scm); });
+
+  SC_HANDLE service = OpenService(scm, TUNNEL_SERVICE_NAME, SERVICE_ALL_ACCESS);
+  if (service == nullptr) {
+    const DWORD error = GetLastError();
+    if (error != ERROR_SERVICE_DOES_NOT_EXIST && error != ERROR_FILE_NOT_FOUND) {
+      WindowsUtils::windowsLog("Failed to open stale tunnel service");
+      return false;
+    }
+    return true;
+  }
+  auto cleanupService = qScopeGuard([&] { CloseServiceHandle(service); });
+
+  logger.info() << "Stale tunnel service exists. Stopping and deleting it.";
+  return stopAndDeleteTunnelService(service);
+}
+
 static bool stopAndDeleteTunnelService(SC_HANDLE service) {
   SERVICE_STATUS status;
   if (!QueryServiceStatus(service, &status)) {
@@ -230,8 +246,11 @@ static bool stopAndDeleteTunnelService(SC_HANDLE service) {
   if (status.dwCurrentState != SERVICE_STOPPED) {
     logger.debug() << "The service is not stopped yet.";
     if (!ControlService(service, SERVICE_CONTROL_STOP, &status)) {
-      WindowsUtils::windowsLog("Failed to control the service");
-      return false;
+      const DWORD error = GetLastError();
+      if (error != ERROR_SERVICE_NOT_ACTIVE) {
+        WindowsUtils::windowsLog("Failed to control the service");
+        return false;
+      }
     }
 
     if (!waitForServiceStatus(service, SERVICE_STOPPED)) {
@@ -243,8 +262,11 @@ static bool stopAndDeleteTunnelService(SC_HANDLE service) {
   logger.debug() << "Proceeding with the deletion";
 
   if (!DeleteService(service)) {
-    WindowsUtils::windowsLog("Failed to delete the service");
-    return false;
+    const DWORD error = GetLastError();
+    if (error != ERROR_SERVICE_MARKED_FOR_DELETE && error != ERROR_SERVICE_DOES_NOT_EXIST) {
+      WindowsUtils::windowsLog("Failed to delete the service");
+      return false;
+    }
   }
 
   return true;

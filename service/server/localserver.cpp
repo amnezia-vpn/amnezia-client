@@ -8,12 +8,14 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QString>
+#include <QStringList>
 #include <QTimer>
 #include <functional>
 
 #include "ipc.h"
 #include "killswitch.h"
 #include "logger.h"
+#include "../client/protocols/protocols_defs.h"
 #include "router.h"
 #include "xray.h"
 
@@ -29,6 +31,16 @@ constexpr int kKillSwitchInitLongRetryDelayMs = 10000;
 
 #ifdef Q_OS_WIN
 constexpr int kWindowsWakeRecoveryDelayMs = 2500;
+const QStringList kWindowsXrayFullTunnelRoutes = {
+    QStringLiteral("1.0.0.0/8"),
+    QStringLiteral("2.0.0.0/7"),
+    QStringLiteral("4.0.0.0/6"),
+    QStringLiteral("8.0.0.0/5"),
+    QStringLiteral("16.0.0.0/4"),
+    QStringLiteral("32.0.0.0/3"),
+    QStringLiteral("64.0.0.0/2"),
+    QStringLiteral("128.0.0.0/1"),
+};
 
 void recoverWindowsNetworkState(WindowsDaemon &daemon, const char *reason)
 {
@@ -45,12 +57,22 @@ void recoverWindowsNetworkState(WindowsDaemon &daemon, const char *reason)
     if (!Router::restoreResolvers()) {
         logger.warning() << "Windows network recovery: failed to restore DNS resolvers";
     }
+    const int removedXrayRoutes = Router::routeDeleteList(
+        QString::fromLatin1(fblink::protocols::xray::defaultLocalAddr),
+        kWindowsXrayFullTunnelRoutes);
+    if (removedXrayRoutes > 0) {
+        logger.info() << "Windows network recovery: removed stale XRay full-tunnel routes:"
+                      << removedXrayRoutes;
+    }
     if (!Router::deleteTun(QStringLiteral("tun2"))) {
         logger.warning() << "Windows network recovery: failed to delete stale TUN routes";
     }
+    if (!Router::deleteTun(QStringLiteral("FBLink"))) {
+        logger.warning() << "Windows network recovery: failed to delete stale FBLink tunnel routes";
+    }
     Router::flushDns();
 
-    if (!Xray::getInstance().stopXray()) {
+    if (!Xray::getInstance().recoverState()) {
         logger.warning() << "Windows network recovery: failed to stop XRay cleanly";
     }
 }

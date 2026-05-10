@@ -60,6 +60,10 @@ WindowsDaemon::~WindowsDaemon() {
 void WindowsDaemon::recoverNetworkState() {
   logger.info() << "Recovering stale Windows VPN state";
 
+  if (!WindowsTunnelService::stopStaleService()) {
+    logger.warning() << "Failed to stop stale tunnel service during Windows network recovery";
+  }
+
   if (m_splitTunnelManager) {
     m_splitTunnelManager->stop();
   }

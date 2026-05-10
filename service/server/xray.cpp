@@ -80,6 +80,12 @@ bool Xray::stopXray()
     return stopEmbeddedXray(false);
 }
 
+bool Xray::recoverState()
+{
+    qDebug() << "Xray::recoverState()";
+    return stopEmbeddedXray(true);
+}
+
 void Xray::logHandler(char* str)
 {
     QMetaObject::invokeMethod(qApp, [str = QString::fromUtf8(str)] {

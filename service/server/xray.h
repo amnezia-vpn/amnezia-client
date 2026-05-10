@@ -14,6 +14,7 @@ public:
 
     bool startXray(const QString& cfg);
     bool stopXray();
+    bool recoverState();
 
 private:
     static void ctxSockCallback(uintptr_t fd, void* ctx) {
