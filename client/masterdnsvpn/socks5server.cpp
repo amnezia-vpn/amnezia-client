@@ -1,0 +1,294 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "socks5server.h"
+
+#include <QHostAddress>
+#include <QTcpSocket>
+#include <QtEndian>
+#include <cstring>
+
+namespace amnezia::masterdnsvpn {
+
+namespace {
+
+// SOCKS5 protocol constants (RFC 1928 / 1929).
+constexpr quint8 kVer5 = 0x05;
+constexpr quint8 kAuthVer = 0x01;
+constexpr quint8 kAuthNone = 0x00;
+constexpr quint8 kAuthUserPass = 0x02;
+constexpr quint8 kAuthNoneAcceptable = 0xFF;
+
+constexpr quint8 kCmdConnect = 0x01;
+constexpr quint8 kAtypIpv4 = 0x01;
+constexpr quint8 kAtypDomain = 0x03;
+constexpr quint8 kAtypIpv6 = 0x04;
+
+constexpr quint8 kRepSucceeded = 0x00;
+constexpr quint8 kRepGeneralFailure = 0x01;
+constexpr quint8 kRepCmdUnsupported = 0x07;
+constexpr quint8 kRepAtypUnsupported = 0x08;
+
+// How long we wait at each handshake step before giving up. SOCKS5 clients
+// (browsers, system proxy stacks) speak the handshake in milliseconds; 5 s
+// is generous enough to absorb network hiccups and tight enough that a
+// wedged client doesn't park a socket forever.
+constexpr int kStepTimeoutMs = 5'000;
+
+// Block-on-read helper. Returns the requested number of bytes or empty on
+// timeout / disconnect. Built on QTcpSocket's blocking API; safe inside the
+// per-client handler because each client runs its handshake on the calling
+// thread (Engine spins us up on its own QThread, so the GUI loop is fine).
+QByteArray readExact(QTcpSocket *socket, qsizetype n)
+{
+    QByteArray out;
+    out.reserve(n);
+    while (out.size() < n) {
+        if (!socket->bytesAvailable()) {
+            if (!socket->waitForReadyRead(kStepTimeoutMs)) {
+                return {};
+            }
+        }
+        const QByteArray chunk = socket->read(n - out.size());
+        if (chunk.isEmpty()) {
+            // Peer closed during handshake — abandon.
+            return {};
+        }
+        out.append(chunk);
+    }
+    return out;
+}
+
+bool writeAll(QTcpSocket *socket, const QByteArray &data)
+{
+    qint64 written = 0;
+    while (written < data.size()) {
+        const qint64 n = socket->write(data.constData() + written, data.size() - written);
+        if (n < 0) {
+            return false;
+        }
+        written += n;
+        if (!socket->waitForBytesWritten(kStepTimeoutMs)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Build the SOCKS5 reply preamble (VER REP RSV ATYP BND.ADDR BND.PORT).
+// We always reply with BND = 0.0.0.0:0 because the tunnel's egress address
+// isn't observable from the client side, and SOCKS clients ignore BND in
+// practice when CONNECT succeeds.
+QByteArray buildReply(quint8 rep)
+{
+    QByteArray r;
+    r.append(static_cast<char>(kVer5));
+    r.append(static_cast<char>(rep));
+    r.append(static_cast<char>(0x00)); // RSV
+    r.append(static_cast<char>(kAtypIpv4));
+    r.append(QByteArray(4, '\0')); // BND.ADDR = 0.0.0.0
+    r.append(static_cast<char>(0x00)); // BND.PORT high
+    r.append(static_cast<char>(0x00)); // BND.PORT low
+    return r;
+}
+
+} // namespace
+
+Socks5Server::Socks5Server(QObject *parent) : QObject(parent)
+{
+    connect(&m_listener, &QTcpServer::newConnection, this, &Socks5Server::onIncomingConnection);
+}
+
+Socks5Server::~Socks5Server()
+{
+    stop();
+}
+
+bool Socks5Server::start(quint16 port, const Socks5Auth &auth, StreamSink sink)
+{
+    if (m_listener.isListening()) {
+        return true;
+    }
+    m_auth = auth;
+    m_sink = std::move(sink);
+
+    if (!m_listener.listen(QHostAddress::LocalHost, port)) {
+        emit clientFailed(QStringLiteral("listen failed: %1").arg(m_listener.errorString()));
+        return false;
+    }
+    return true;
+}
+
+void Socks5Server::stop()
+{
+    if (m_listener.isListening()) {
+        m_listener.close();
+    }
+    m_sink = nullptr;
+    m_auth = {};
+}
+
+bool Socks5Server::isListening() const
+{
+    return m_listener.isListening();
+}
+
+quint16 Socks5Server::listenPort() const
+{
+    return m_listener.serverPort();
+}
+
+void Socks5Server::onIncomingConnection()
+{
+    while (m_listener.hasPendingConnections()) {
+        QTcpSocket *socket = m_listener.nextPendingConnection();
+        if (!socket) {
+            continue;
+        }
+        // Negotiate inline. Each client is short-lived during the handshake,
+        // so we don't fork a thread per connection — the listener is bound to
+        // the engine's worker thread anyway.
+        handleClient(socket);
+    }
+}
+
+void Socks5Server::handleClient(QTcpSocket *socket)
+{
+    auto fail = [&](quint8 rep, const char *why) {
+        if (rep != 0xFF) {
+            // Best-effort error reply; ignore write failures, we're tearing down.
+            (void)writeAll(socket, buildReply(rep));
+        }
+        emit clientFailed(QString::fromLatin1(why));
+        socket->disconnectFromHost();
+        socket->deleteLater();
+    };
+
+    // ---- Method-selection (greeting) ----
+    QByteArray greet = readExact(socket, 2);
+    if (greet.size() != 2 || static_cast<quint8>(greet[0]) != kVer5) {
+        return fail(0xFF, "bad greeting");
+    }
+    const int nMethods = static_cast<quint8>(greet[1]);
+    if (nMethods <= 0) {
+        return fail(0xFF, "no methods advertised");
+    }
+    QByteArray methods = readExact(socket, nMethods);
+    if (methods.size() != nMethods) {
+        return fail(0xFF, "short methods list");
+    }
+
+    quint8 chosen = kAuthNoneAcceptable;
+    if (m_auth.isEnabled()) {
+        if (methods.contains(static_cast<char>(kAuthUserPass))) {
+            chosen = kAuthUserPass;
+        }
+    } else if (methods.contains(static_cast<char>(kAuthNone))) {
+        chosen = kAuthNone;
+    }
+
+    QByteArray methodReply;
+    methodReply.append(static_cast<char>(kVer5));
+    methodReply.append(static_cast<char>(chosen));
+    if (!writeAll(socket, methodReply) || chosen == kAuthNoneAcceptable) {
+        return fail(0xFF, "no acceptable auth method");
+    }
+
+    // ---- USERNAME/PASSWORD sub-negotiation (RFC 1929) ----
+    if (chosen == kAuthUserPass) {
+        QByteArray hdr = readExact(socket, 2);
+        if (hdr.size() != 2 || static_cast<quint8>(hdr[0]) != kAuthVer) {
+            return fail(0xFF, "bad auth version");
+        }
+        const int ulen = static_cast<quint8>(hdr[1]);
+        QByteArray username = readExact(socket, ulen);
+        QByteArray plenByte = readExact(socket, 1);
+        if (plenByte.size() != 1) {
+            return fail(0xFF, "short auth plen");
+        }
+        const int plen = static_cast<quint8>(plenByte[0]);
+        QByteArray password = readExact(socket, plen);
+
+        const bool ok = (QString::fromUtf8(username) == m_auth.username
+                         && QString::fromUtf8(password) == m_auth.password);
+        QByteArray authReply;
+        authReply.append(static_cast<char>(kAuthVer));
+        authReply.append(static_cast<char>(ok ? 0x00 : 0x01));
+        if (!writeAll(socket, authReply) || !ok) {
+            return fail(0xFF, "auth failed");
+        }
+    }
+
+    // ---- CONNECT request ----
+    QByteArray req = readExact(socket, 4);
+    if (req.size() != 4 || static_cast<quint8>(req[0]) != kVer5) {
+        return fail(kRepGeneralFailure, "bad connect header");
+    }
+    if (static_cast<quint8>(req[1]) != kCmdConnect) {
+        return fail(kRepCmdUnsupported, "only CONNECT supported");
+    }
+    const quint8 atyp = static_cast<quint8>(req[3]);
+
+    Socks5Destination dest;
+    switch (atyp) {
+    case kAtypIpv4: {
+        QByteArray addr = readExact(socket, 4);
+        if (addr.size() != 4) {
+            return fail(kRepGeneralFailure, "short v4 addr");
+        }
+        QHostAddress h(qFromBigEndian<quint32>(addr.constData()));
+        dest.host = h.toString();
+        dest.isDomainName = false;
+        break;
+    }
+    case kAtypIpv6: {
+        QByteArray addr = readExact(socket, 16);
+        if (addr.size() != 16) {
+            return fail(kRepGeneralFailure, "short v6 addr");
+        }
+        Q_IPV6ADDR raw;
+        std::memcpy(&raw, addr.constData(), 16);
+        QHostAddress h(raw);
+        dest.host = h.toString();
+        dest.isDomainName = false;
+        break;
+    }
+    case kAtypDomain: {
+        QByteArray lenByte = readExact(socket, 1);
+        if (lenByte.size() != 1) {
+            return fail(kRepGeneralFailure, "short domain len");
+        }
+        const int dlen = static_cast<quint8>(lenByte[0]);
+        QByteArray name = readExact(socket, dlen);
+        if (name.size() != dlen) {
+            return fail(kRepGeneralFailure, "short domain");
+        }
+        dest.host = QString::fromLatin1(name);
+        dest.isDomainName = true;
+        break;
+    }
+    default:
+        return fail(kRepAtypUnsupported, "unknown ATYP");
+    }
+
+    QByteArray portBytes = readExact(socket, 2);
+    if (portBytes.size() != 2) {
+        return fail(kRepGeneralFailure, "short port");
+    }
+    dest.port = qFromBigEndian<quint16>(portBytes.constData());
+
+    if (!m_sink) {
+        return fail(kRepGeneralFailure, "no sink configured");
+    }
+
+    // Send the success reply *before* handing off to the sink. The sink
+    // takes ownership of the now-tunnel-ready socket and is responsible
+    // for plumbing both directions.
+    if (!writeAll(socket, buildReply(kRepSucceeded))) {
+        socket->deleteLater();
+        return;
+    }
+
+    m_sink(socket, dest);
+}
+
+} // namespace amnezia::masterdnsvpn

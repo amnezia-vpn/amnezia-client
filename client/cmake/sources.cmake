@@ -74,6 +74,15 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/mozilla/controllerimpl.h
 )
 
+# MasterDnsVPN native engine — sibling to mozilla/. Cross-platform Qt-using
+# C++ that implements the full DNS-tunnel protocol stack in-process; consumed
+# directly by the desktop protocol class and via JNI by the Android module.
+set(HEADERS ${HEADERS}
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/engine.h
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/crypto.h
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/socks5server.h
+)
+
 if(NOT IOS AND NOT MACOS_NE)
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/platforms/ios/QRCodeReaderBase.h
@@ -148,6 +157,12 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/mozilla/models/server.cpp
     ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.cpp
     ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.cpp
+)
+
+# MasterDnsVPN native engine sources — see HEADERS list above for rationale.
+set(SOURCES ${SOURCES}
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/crypto.cpp
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/socks5server.cpp
 )
 
 if(NOT IOS AND NOT MACOS_NE)
