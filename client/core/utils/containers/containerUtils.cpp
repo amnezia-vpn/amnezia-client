@@ -68,6 +68,7 @@ QMap<DockerContainer, QString> ContainerUtils::containerHumanNames()
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
              { DockerContainer::SSXray, "Shadowsocks"},
+             { DockerContainer::MasterDnsVpn, QObject::tr("MasterDnsVPN") },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
              { DockerContainer::Dns, QObject::tr("AmneziaDNS") },
@@ -95,6 +96,10 @@ QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
              { DockerContainer::Ipsec,
                QObject::tr("IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
+             { DockerContainer::MasterDnsVpn,
+               QObject::tr("MasterDnsVPN tunnels TCP traffic inside DNS queries that traverse public resolvers. "
+                           "Designed to keep working when only DNS leaves the network — useful in heavily filtered or "
+                           "captive-portal environments.") },
 
              { DockerContainer::TorWebSite, QObject::tr("Deploy a WordPress site on the Tor network in two clicks.") },
              { DockerContainer::Dns,
@@ -164,6 +169,17 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
                       "* Minimal configuration required\n"
                       "* Detectable by DPI analysis systems(easily blocked)\n"
                       "* Operates over UDP protocol(ports 500 and 4500)") },
+        { DockerContainer::MasterDnsVpn,
+          QObject::tr("MasterDnsVPN is a DNS-tunnel transport: the client encrypts and fragments TCP traffic into "
+                      "DNS queries that travel through public DNS resolvers, and the server listens on UDP/53 for "
+                      "the tunnel envelopes via an NS-delegated subdomain. Optimised for harsh networks where only "
+                      "DNS leaves the host (captive portals, deep filtering, lossy or paid mobile data).\n"
+                      "\nFeatures:\n"
+                      "* Survives blackout networks where only DNS resolves\n"
+                      "* Encrypted with operator-chosen cipher (XOR / ChaCha20 / AES-128/192/256-GCM)\n"
+                      "* Resilient to packet loss via ARQ retransmission and per-resolver MTU discovery\n"
+                      "* Higher latency and lower throughput than direct VPN protocols (DNS-frame overhead)\n"
+                      "* Operator must own a domain and create an NS delegation pointing to the server") },
 
         { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
         { DockerContainer::Dns, QObject::tr("DNS Service") },
@@ -192,6 +208,7 @@ Proto ContainerUtils::defaultProtocol(DockerContainer c)
     case DockerContainer::Xray: return Proto::Xray;
     case DockerContainer::Ipsec: return Proto::Ikev2;
     case DockerContainer::SSXray: return Proto::SSXray;
+    case DockerContainer::MasterDnsVpn: return Proto::MasterDnsVpn;
 
     case DockerContainer::TorWebSite: return Proto::TorWebSite;
     case DockerContainer::Dns: return Proto::Dns;
@@ -245,6 +262,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::Ipsec: return false;
+    case DockerContainer::MasterDnsVpn: return false; // pending macOS build of mdnsvpn binary
     default: return true;
     }
 
@@ -256,6 +274,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
+    case DockerContainer::MasterDnsVpn: return true;
     default: return false;
     }
 
@@ -346,6 +365,7 @@ int ContainerUtils::installPageOrder(DockerContainer container)
     case DockerContainer::Xray: return 3;
     case DockerContainer::Ipsec: return 7;
     case DockerContainer::SSXray: return 8;
+    case DockerContainer::MasterDnsVpn: return 9;
     default: return 0;
     }
 }

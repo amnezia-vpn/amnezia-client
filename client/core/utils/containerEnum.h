@@ -18,6 +18,7 @@ namespace amnezia
             Ipsec,
             Xray,
             SSXray,
+            MasterDnsVpn,
 
             // non-vpn
             TorWebSite,

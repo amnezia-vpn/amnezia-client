@@ -174,6 +174,41 @@ namespace amnezia
             constexpr char proxyConfigPath[] = "/usr/local/3proxy/conf/3proxy.cfg";
         }
 
+        namespace masterDnsVpn
+        {
+            // Operator-facing TUN gateway / address. Mirrors xray's defaultLocalAddr —
+            // arbitrary RFC1918 range that won't collide with the operator's LAN.
+            constexpr char defaultLocalAddr[] = "10.34.0.2";
+
+            // Local SOCKS5 the bundled mdnsvpn client opens; tun2socks dials this.
+            constexpr char defaultLocalProxyPort[] = "18000";
+
+            // Default UDP port the operator's mdnsvpn server listens on (a NS-delegated
+            // tunnel subdomain points public resolvers here).
+            constexpr char defaultPort[] = "53";
+
+            // JSON keys in the mdnsvpn_config_data wrapper carried over the wire.
+            constexpr char domains[] = "domains";
+            constexpr char encryptionMethod[] = "encryptionMethod";
+            constexpr char encryptionKey[] = "encryptionKey";
+            constexpr char protocolType[] = "protocolType";
+            constexpr char resolvers[] = "resolvers";
+            constexpr char listenPort[] = "listenPort";
+            constexpr char socks5User[] = "socks5User";
+            constexpr char socks5Pass[] = "socks5Pass";
+            constexpr char additionalConfig[] = "additionalConfig";
+
+            // Encryption methods accepted by the mdnsvpn core.
+            // 0 = None, 1 = XOR, 2 = ChaCha20, 3..5 = AES-128/192/256-GCM.
+            constexpr int encryptionMethodNone = 0;
+            constexpr int encryptionMethodXor = 1;
+            constexpr int encryptionMethodChaCha20 = 2;
+            constexpr int encryptionMethodAes128Gcm = 3;
+            constexpr int encryptionMethodAes192Gcm = 4;
+            constexpr int encryptionMethodAes256Gcm = 5;
+            constexpr int defaultEncryptionMethod = encryptionMethodXor;
+        }
+
     } // namespace protocols
 }
 
