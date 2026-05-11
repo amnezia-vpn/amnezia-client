@@ -97,8 +97,8 @@ void SecureQSettings::setValue(const QString &key, const QVariant &value)
             QByteArray encryptedValue = encryptText(decryptedValue);
             m_settings.setValue(key, magicString + encryptedValue);
         } else {
-            qCritical() << "SecureQSettings::setValue Encryption required, but key is empty";
-            return;
+            qCritical() << "SecureQSettings::setValue Keystore unavailable, storing unencrypted";
+            m_settings.setValue(key, value);
         }
 
     } else {
@@ -211,7 +211,7 @@ bool SecureQSettings::encryptionRequired() const
     // QtKeyChain failing on Linux
     return false;
 #endif
-    return true;
+    return m_keystoreAvailable;
 }
 
 QByteArray SecureQSettings::getEncKey() const
@@ -237,6 +237,7 @@ QByteArray SecureQSettings::getEncKey() const
         m_key = getSecTag(settingsKeyTag);
         if (key != m_key) {
             qCritical() << "SecureQSettings::getEncKey Unable to store key in keychain" << key.size() << m_key.size();
+            m_keystoreAvailable = false;
             return {};
         }
     }
@@ -265,6 +266,7 @@ QByteArray SecureQSettings::getEncIv() const
         m_iv = getSecTag(settingsIvTag);
         if (iv != m_iv) {
             qCritical() << "SecureQSettings::getEncIv Unable to store IV in keychain" << iv.size() << m_iv.size();
+            m_keystoreAvailable = false;
             return {};
         }
     }

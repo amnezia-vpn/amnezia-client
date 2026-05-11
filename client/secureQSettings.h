@@ -50,6 +50,7 @@ private:
 
     mutable QByteArray m_key;
     mutable QByteArray m_iv;
+    mutable bool m_keystoreAvailable = true;
 
     const QByteArray magicString { "EncData" }; // Magic keyword used for mark encrypted QByteArray
 
