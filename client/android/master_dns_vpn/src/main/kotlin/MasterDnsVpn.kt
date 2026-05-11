@@ -77,6 +77,7 @@ class MasterDnsVpn : Protocol() {
 
         val mdnsvpnConfig = parseConfig(config, configData, socksPort)
 
+        var startupSucceeded = false
         try {
             buildVpnInterface(mdnsvpnConfig, vpnBuilder)
             vpnBuilder.establish().use { tunFd ->
@@ -88,9 +89,11 @@ class MasterDnsVpn : Protocol() {
                 Log.d(TAG, "Run tun2Socks (SOCKS5 backend = native MasterDnsVpn engine)")
                 runTun2Socks(mdnsvpnConfig, tunFd.detachFd())
             }
-        } catch (e: Exception) {
-            MasterDnsVpnNative.nativeStop()
-            throw e
+            startupSucceeded = true
+        } finally {
+            if (!startupSucceeded) {
+                MasterDnsVpnNative.nativeStop()
+            }
         }
 
         state.value = CONNECTED
@@ -189,10 +192,23 @@ class MasterDnsVpn : Protocol() {
         return 0
     }
 
+    /**
+     * Connect-probe the native engine's SOCKS5 listener on 127.0.0.1.
+     *
+     * This deliberately uses a plain [Socket] (no TLS): the destination is
+     * always the local loopback address bound by the engine's own SOCKS5
+     * server in the same process. The probe never crosses a network
+     * interface and there is no transport-security concern. The connection
+     * is closed immediately on success without exchanging any bytes.
+     */
+    @Suppress("UnsafeSocketUsage")
     private fun probeSocks(port: Int): Boolean {
         return try {
             Socket().use { sock ->
-                sock.connect(InetSocketAddress("127.0.0.1", port), SOCKS_PROBE_INTERVAL_MS)
+                sock.connect(
+                    InetSocketAddress(LOOPBACK_ADDRESS, port),
+                    SOCKS_PROBE_INTERVAL_MS,
+                )
                 sock.isConnected
             }
         } catch (_: IOException) {
@@ -200,9 +216,15 @@ class MasterDnsVpn : Protocol() {
         }
     }
 
+    /**
+     * Process-wide singleton plus the timing constants for the SOCKS5
+     * listener handshake. Mirrors the pattern used by the Xray protocol
+     * module in the same package.
+     */
     companion object {
         private const val SOCKS_WAIT_TIMEOUT_MS = 60_000
         private const val SOCKS_PROBE_INTERVAL_MS = 250
+        private const val LOOPBACK_ADDRESS = "127.0.0.1"
 
         val instance: MasterDnsVpn by lazy { MasterDnsVpn() }
     }

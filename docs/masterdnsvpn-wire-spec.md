@@ -24,7 +24,7 @@ A reliable transport (ARQ) and a session/stream multiplexer ride on top of layer
 
 For every byte the client wants to send, it emits *one* DNS query of `QTYPE = TXT`, `QCLASS = IN`, where the QNAME has the form
 
-```
+```text
 <encoded-frame>.<DOMAIN>
 ```
 
@@ -90,7 +90,7 @@ Truncation: the server **never** sets `TC=1`. If the answer is too big for one T
 
   | Field    | Width | Value                                                  |
   |----------|-------|--------------------------------------------------------|
-  | NAME     | var   | Same QNAME as the question. The 2nd, 3rd, … RRs use a name-pointer compression to the first answer's NAME at offset `0xC0|<offset>`. |
+  | NAME     | var   | Same QNAME as the question. The 2nd, 3rd, … RRs use a name-pointer compression to the first answer's NAME at offset `0xC0\|<offset>`. |
   | TYPE     | 2 B   | `0x0010` (TXT)                                         |
   | CLASS    | 2 B   | `0x0001` (IN)                                          |
   | TTL      | 4 B   | `0x00000000` always                                    |
