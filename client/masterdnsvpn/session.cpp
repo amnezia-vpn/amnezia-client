@@ -45,7 +45,7 @@ QByteArray randomBytes(int n)
 }
 
 QByteArray buildSessionInitPayload(int uploadMtu, int downloadMtu, int upComp, int downComp,
-                                   QByteArray *verifyCodeOut)
+                                   QByteArray *verifyCode)
 {
     QByteArray payload(10, '\0');
     payload[0] = 0; // raw TXT chunks; matches `BASE_ENCODE_DATA = false`
@@ -53,11 +53,19 @@ QByteArray buildSessionInitPayload(int uploadMtu, int downloadMtu, int upComp, i
     qToBigEndian<quint16>(static_cast<quint16>(uploadMtu), payload.data() + 2);
     qToBigEndian<quint16>(static_cast<quint16>(downloadMtu), payload.data() + 4);
 
-    QByteArray verify = randomBytes(4);
-    std::memcpy(payload.data() + 6, verify.constData(), 4);
-
-    if (verifyCodeOut) {
-        *verifyCodeOut = verify;
+    // Caller may pass an existing verify code to be embedded (retry path —
+    // see spec §13(9): the code is persistent across SESSION_INIT attempts
+    // until SESSION_ACCEPT or lifecycle reset). An empty buffer triggers a
+    // fresh mint, which is written back to *verifyCode for the caller to
+    // cache.
+    if (verifyCode == nullptr) {
+        QByteArray fresh = randomBytes(4);
+        std::memcpy(payload.data() + 6, fresh.constData(), 4);
+    } else if (verifyCode->size() == 4) {
+        std::memcpy(payload.data() + 6, verifyCode->constData(), 4);
+    } else {
+        *verifyCode = randomBytes(4);
+        std::memcpy(payload.data() + 6, verifyCode->constData(), 4);
     }
     return payload;
 }
@@ -242,6 +250,7 @@ bool Session::start(const QJsonObject &config)
     }
     m_tickTimer->start(kTickIntervalMs);
 
+    m_initVerifyCode.clear();
     setState(State::Initialising);
     return true;
 }
@@ -426,9 +435,13 @@ void Session::onInnerPacket(const Packet &packet)
         return;
     }
     case PacketType::ErrorDrop:
-        // §7.6 — server says "I don't recognise this cookie". Re-init.
+        // §7.6 — server says "I don't recognise this cookie". The server has
+        // forgotten any prior in-flight handshake, so spec §13(9)'s
+        // persistence window has closed: mint a fresh verify code on the
+        // next SESSION_INIT.
         m_sessionId = 0;
         m_sessionCookie = 0;
+        m_initVerifyCode.clear();
         sendSessionInit();
         return;
     default:
@@ -591,11 +604,15 @@ void Session::sendSessionInit()
 {
     const int upMtu = std::max(64, m_resolvers->syncedUploadMtu());
     const int downMtu = std::max(255, m_resolvers->syncedDownloadMtu());
-    QByteArray verify;
+
+    // Spec §13(9): verify code persists across SESSION_INIT retries within
+    // one handshake lifecycle. A fresh value is only minted at lifecycle
+    // boundaries (Session::start, ErrorDrop re-init); back-to-back retries
+    // (SESSION_BUSY, no-response) reuse the cached code so any accept that
+    // arrives for a prior in-flight attempt still validates.
     QByteArray payload = buildSessionInitPayload(upMtu, downMtu,
                                                   m_uploadCompression, m_downloadCompression,
-                                                  &verify);
-    m_initVerifyCode = verify;
+                                                  &m_initVerifyCode);
 
     Packet init;
     init.sessionId = 0; // pre-session
@@ -626,6 +643,8 @@ void Session::onSessionAccept(const Packet &packet)
     m_uploadCompression = std::min(m_uploadCompression, (grantedComp >> 4) & 0x0F);
     m_downloadCompression = std::min(m_downloadCompression, grantedComp & 0x0F);
 
+    // Spec §13(9): retire the verify code once the handshake completes.
+    m_initVerifyCode.clear();
     setState(State::Established);
 }
 

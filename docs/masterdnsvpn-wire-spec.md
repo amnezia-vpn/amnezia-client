@@ -723,24 +723,51 @@ Pings are stream-0 packets; the ping manager pushes them into stream-0's ARQ TX 
 
 ---
 
-## 13. Open questions / ambiguities
+## 13. Resolved interop notes
 
-The following points are either under-specified by the source, or warrant runtime experimentation by the C++ implementer to confirm interoperability.
+The following points were grounded against the upstream Go reference at the corresponding source locations. Each is normative for the C++ port; the citations are the file paths inside `masterking32/MasterDnsVPN`'s repo.
 
-1. **Initial ARQ sequence numbers** — the reference starts at 0 and increments. The wire protocol does not advertise the initial sequence; the implementer must follow the same convention or the receiver's `rcvNxt` will desync on the first packet. Confirm that `STREAM_SYN` itself carries `SequenceNum = 1` (or 0?) — this is implementation-defined and not on the wire as a "first sequence" field. Test against the reference server to nail down the value.
-2. **Cookie 0 in pre-session traffic** — `SESSION_INIT`, `MTU_UP_REQ`, `MTU_DOWN_REQ` all have `SessionCookie = 0` in the integrity footer. The reference accepts this. The header check still includes it. C++ implementations must zero-fill the cookie byte (not omit it) for these packets.
-3. **PACKET_SESSION_BUSY's StreamID** — the reference builder leaves it at zero (the packet has no stream extension at all). Confirm the parser side accepts that.
-4. **`ARQ_DATA_NACK_INITIAL_DELAY_SECONDS`** — the config knob exists but the reference appears to use it only when > 0. With the default of 0 the first NACK fires immediately on gap detection. The implementer should expose this knob even if it defaults to 0.
-5. **Compression of fragments** — when a logical message is fragmented (e.g. `STREAM_DATA` with `TotalFragments > 1`), is the **whole logical payload** compressed before fragmentation, or each fragment compressed independently? The reference compresses **per packet** (i.e. per fragment after the message is already split). Verify this empirically before writing the C++ side.
-6. **TXT chunking with `baseEncode = false`** — the per-chunk pre-base64 size is 255 bytes for chunk 0 but `255 - 1` bytes for chunks 1+ (chunk-index byte). The reference tolerates this by reserving 1 byte for the index. C++ implementations must mirror this reservation.
-7. **EDNS(0) OPT** — the client always asserts a 4096-byte UDP buffer in OPT. The server's behaviour for clients that omit OPT is unverified by inspection — likely just answers without resizing, but the C++ client should always include OPT for safety.
-8. **Name compression in answers** — the reference uses the standard `0xC0 | offset` 14-bit pointer when emitting multiple TXT RRs. The first RR's NAME is **not** compressed; subsequent RRs point to the first RR's NAME location. C++ parsers must handle pointer following per RFC 1035.
-9. **Verify code re-use** — across multiple parallel `SESSION_INIT` attempts the same verify code is reused. The server's `SESSION_BUSY` may echo it before a successful `SESSION_ACCEPT`. Ensure the client doesn't accept a `SESSION_ACCEPT` whose verify code matches a *previous* (cancelled) attempt — the reference clears the verify state on success but it's a subtle race.
-10. **Server-policy clamping** — `MAX_ALLOWED_CLIENT_*` and `MIN_*` fields in `SESSION_ACCEPT` are advisory: the client clamps its local config to the server's bounds and continues. There is no on-the-wire renegotiation; if the client violates the bounds anyway, the server simply treats incoming packets per its own configured limits (e.g. discards anything beyond `MaxARQWindowSize`).
-11. **MTU probe `effectiveDownloadMTUProbeSize`** — the reference computes a "reserved" cap so that the response can fit a max-header `MTU_DOWN_RES` plus 1+4+2 bytes of meta. The exact formula: `reserve = MaxHeaderRawSize - HeaderRawSize(MTU_DOWN_RES) = 11 - 11 = 0` for current packet types — i.e. effectively no reserve. C++ implementations should follow the same formula in case future packet types change the maximum.
-12. **Round-robin counter wraparound** — the dispatcher uses `atomic.Uint64` counters modulo set length. Effectively unbounded.
-13. **Lower-base32 vs lower-base36** — selectable at compile time; the on-the-wire bytes obviously differ. C++ implementations must match the server's expectation. The reference defaults to **base36** in the codec module's switch.
-14. **`PACKET_ERROR_DROP` payload nonce** — payload format is `'I','N','V'` + 4-byte xorshift nonce + 1 byte (`byte(nonce)`); 8 bytes total. C++ clients should not parse the nonce — just recognise the type and re-init.
+1. **Initial ARQ sequence numbers — 0.**
+   `ARQ.sndNxt` and `ARQ.rcvNxt` are `uint16` and are left at their zero value by the `NewARQ` constructor (`internal/arq/arq.go:332-415` does not touch them; the struct fields at `:135-136` default to 0). The data-plane sender uses `sn := a.sndNxt; a.sndNxt++` (`:1168-1169`), so the first data packet on each stream carries `SequenceNum = 0`. The setup-side `STREAM_SYN` is sent through the control-reliability path with an explicit `sequenceNum = 0` (`internal/client/tcp_stream.go:47-57`). Receivers therefore start with `rcvNxt = 0` and accept the first packet as in-order.
+
+2. **Cookie 0 in pre-session traffic — zero-filled, never omitted.**
+   The cookie byte sits in the integrity footer and is always written, regardless of which extensions the packet type carries (`internal/vpnproto/builder.go:69-70`). For `SESSION_INIT`, `MTU_UP_REQ`, `MTU_UP_RES`, `MTU_DOWN_REQ`, `MTU_DOWN_RES` and any pre-handshake traffic, the caller passes `SessionCookie = 0` and the byte is laid down as `0x00`. The header check byte (`computeHeaderCheckByte`) covers the zero, so the C++ side must also zero-fill, not omit.
+
+3. **`PACKET_SESSION_BUSY` carries no StreamID at all.**
+   `SESSION_BUSY` appears only in the `validOnly` set in `internal/vpnproto/parser.go:225` — no `streamAndSeq`, no `frag`, no `comp`. The serialiser therefore writes a 4-byte header (SessionID + PacketType + Cookie + check) followed straight by the 4-byte verify-code payload. Earlier spec drafts that referred to "StreamID = 0" in `SESSION_BUSY` were misleading: the field is absent, not zero.
+
+4. **`ARQ_DATA_NACK_INITIAL_DELAY_SECONDS` default is 0.1s on the client, 0.3s on the server.**
+   Client default at `internal/config/client.go:213`, server default at `internal/config/server.go:172`. Both are passed through `defaultFloatAtMostZero(..., default)` then `clampFloat(value, 0.01, 60.0)` for the client / `clampFloat(value, 0.01, 30.0)` for the server (`client.go:411`, `server.go:453`). The first NACK is delayed by this amount after gap detection; the C++ engine encodes this as `dataNackInitialDelayMs = 100` in `ArqConfig` and is correct.
+
+5. **Compression is applied per packet, after fragmentation.**
+   `BuildRawAuto`/`BuildEncodedAuto` call `PreparePayload` immediately before each packet is serialised (`internal/vpnproto/payload.go:65-81`), so a fragmented `STREAM_DATA` message has each fragment compressed independently. The compression-extension byte sits in the per-packet header, not a logical-message header, which is consistent with this ordering.
+
+6. **TXT chunking reserves more than one byte on chunk 0.**
+   Reference at `internal/dnsparser/transport.go:479-553`. `maxChunk = 255` when `baseEncode = false` (`maxTXTAnswerPayload`) and `maxChunk = 191` when `baseEncode = true` (`maxTXTEncodedChunk`, sized so 191 bytes raw fits in 256 bytes encoded after base64). Chunk 0's prefix is **2 bytes** (`0x00` marker + total-chunk count) **plus the full inner VPN header**, so the usable data on chunk 0 is `maxChunk - 2 - headerLen`. Chunks 1+ reserve a single chunk-index byte, so usable data is `maxChunk - 1`. C++ implementations must mirror exactly this when emitting (server-side) or assembling (client-side parser).
+
+7. **The client always emits EDNS(0) OPT with a 4096-byte UDP buffer.**
+   `EDnsSafeUDPSize = 4096` (`internal/client/client.go:32`), passed into `BuildTunnelTXTQuestionPacket*` on every outbound query (`internal/client/tunnel_query.go:24`, `internal/client/async_runtime.go:726,741`). The server mirrors the OPT record back in its response (`internal/dnsparser/response.go:85-112`). Clients that omit OPT are not exercised by the reference; the C++ client must always include OPT.
+
+8. **Name compression in multi-RR answers uses the 14-bit pointer `0xC000 | firstAnswerNameOffset`.**
+   `internal/dnsparser/transport.go:213-247`: only when more than one TXT RR is emitted, and only if the first answer's name offset fits in 14 bits. The first RR's NAME is written in full; subsequent RRs emit a 2-byte pointer in its place. C++ parsers must follow `0xC0`-prefixed length bytes as pointers (already handled in `client/masterdnsvpn/dnsframing.cpp`'s `skipName`).
+
+9. **Verify code is persistent across re-attempts; no race.**
+   The session-init builder caches `sessionInitPayload`, `sessionInitBase64`, and `sessionInitVerify` behind `sessionInitReady` (`internal/client/session.go:380-409`). Subsequent `nextSessionInitAttempt` calls reuse the same verify code until a successful `SESSION_ACCEPT` triggers `resetSessionInitStateLocked()` at `:174`. A `SESSION_BUSY` does not clear the cache, so back-to-back retries always present the same verify code — there is no "previous (cancelled) attempt" with a stale code. Earlier wording about a race was incorrect.
+
+10. **Server-policy fields in `SESSION_ACCEPT` clamp unilaterally on the client; no on-the-wire renegotiation.**
+    `applySessionClientPolicy` runs in-line with the accept-path and overwrites the local cfg from `VpnProto.ApplySessionAcceptClientPolicy(before, policy)` (`internal/client/session.go:182-240`). The server then enforces its own configured limits on incoming packets independently — anything outside the bounds is simply discarded server-side. C++ port must apply the clamp at SESSION_ACCEPT time and not attempt to renegotiate.
+
+11. **MTU probe `effectiveDownloadMTUProbeSize` is additive, not subtractive.**
+    Formula at `internal/client/mtu.go:1528-1534`: `effectiveDownloadMTUProbeSize(downloadMTU) = downloadMTU + reserve`, where `reserve = max(0, MaxHeaderRawSize() - HeaderRawSize(PACKET_MTU_DOWN_RES))` (`:41-47`). For the current packet-type catalogue, `MaxHeaderRawSize() = 11` (the `S,N,F,C` types) and `HeaderRawSize(PACKET_MTU_DOWN_RES) = 11`, so `reserve = 0` and the effective probe size equals the negotiated download MTU. The formula generalises if a future packet type increases the maximum.
+
+12. **Round-robin counters are unbounded `atomic.Uint64`.**
+    The dispatcher reads `counter.Add(1) % len(set)` per request; uint64 wrap is irrelevant on any realistic uptime. C++ port can use `std::atomic<uint64_t>` identically.
+
+13. **Default base codec is lowercase base36.**
+    `internal/basecodec/codec.go:23-32` aliases `Encode`/`Decode`/`DecodeString` directly onto `EncodeLowerBase36*` / `DecodeLowerBase36*`. The comment on line 22 reading "default: LowerBase32" is upstream documentation rot — the actual dispatch is base36. C++ port must use base36 to interop with the stock server. The comment also documents how to flip to base32 by editing the alias body, so the codec choice is a build-time switch on the server.
+
+14. **`PACKET_ERROR_DROP` payload is `'I','N','V'` + 4-byte big-endian xorshift nonce + 1-byte `byte(nonce)` = 8 bytes total.**
+    Built at `internal/udpserver/server_session.go:608-621`: `payload[0..2] = "INV"`, `binary.BigEndian.PutUint32(payload[3:7], nonce)` where `nonce = s.pongNonce.Add(1)` xorshifted with shifts (13, 17, 5), then `payload[7] = byte(nonce)`. C++ clients should recognise the type byte and the 3-byte `INV` prefix, then re-init the session; the nonce is anti-replay seasoning and need not be parsed.
 
 ---
 
