@@ -178,6 +178,13 @@ private:
     quint8 m_sessionCookie = 0;
     QByteArray m_initVerifyCode; // 4 bytes random; echoed back by server
 
+    // §7 client-policy sync. When the server emits the optional 13-byte
+    // SessionAcceptClientPolicy tail, the values land here. Future passes
+    // will clamp ARQ window, MTU, ping pacing, etc. against this struct;
+    // for now it's retained for diagnostics + integration tests.
+    SessionAcceptClientPolicy m_serverPolicy;
+    bool m_hasServerPolicy = false;
+
     PingPacingConfig m_pingPacing;
     PingPacingState  m_pingState;
 

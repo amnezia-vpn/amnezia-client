@@ -22,6 +22,7 @@
 
 #include <QByteArray>
 #include <QtGlobal>
+#include <array>
 #include <cstdint>
 #include <optional>
 
@@ -158,6 +159,85 @@ std::optional<Packet> decode(const QByteArray &wire);
 // 1-byte rolling check algorithm (§3.2). Exposed for the unit tests; the
 // encode/decode pair already applies it.
 quint8 computeCheck(const QByteArray &headerBytes);
+
+// ----- SESSION_ACCEPT payload (§7) --------------------------------------
+
+// Server-defined per-client capacity bounds appended to the SESSION_ACCEPT
+// payload (bytes 7..19). Decoded by the client and used to clamp local
+// behavior knobs to whatever the server is willing to handle. Mirrors
+// upstream `internal/vpnproto/session_accept.go::SessionAcceptClientPolicy`.
+//
+// Wire layout (13 bytes, all big-endian):
+//   byte 0  : upper nibble = MaxSetupDuplicationCount, lower = MaxPacketDuplicationCount
+//   byte 1  : MaxUploadMTU (uint8)
+//   bytes 2-3 : MaxDownloadMTU (uint16)
+//   byte 4  : MaxRxTxWorkers (uint8)
+//   byte 5  : MinPingAggressiveInterval (scaled byte, 0..255 → 0.05..1.00 s)
+//   byte 6  : MaxPacketsPerBatch (uint8)
+//   bytes 7-8 : MaxARQWindowSize (uint16)
+//   byte 9  : MaxARQDataNackMaxGap (uint8)
+//   bytes 10-11 : MinCompressionMinSize (uint16)
+//   byte 12 : MinARQInitialRTOSeconds (scaled byte)
+struct SessionAcceptClientPolicy {
+    int maxPacketDuplicationCount = 0;
+    int maxSetupDuplicationCount = 0;
+    int maxUploadMTU = 0;
+    int maxDownloadMTU = 0;
+    int maxRxTxWorkers = 0;
+    double minPingAggressiveInterval = 0.0;
+    int maxPacketsPerBatch = 0;
+    int maxARQWindowSize = 0;
+    int maxARQDataNackMaxGap = 0;
+    int minCompressionMinSize = 0;
+    double minARQInitialRTOSeconds = 0.0;
+};
+
+// Full SESSION_ACCEPT payload structure including the optional policy tail.
+// Bytes 0..6 = base payload, bytes 7..19 = policy when hasClientPolicySync.
+struct SessionAcceptPayload {
+    quint8 sessionId = 0;
+    quint8 sessionCookie = 0;
+    quint8 compressionPair = 0; // upload<<4 | download
+    std::array<quint8, 4> verifyCode{};
+    SessionAcceptClientPolicy clientPolicy;
+    bool hasClientPolicySync = false;
+};
+
+constexpr int kSessionAcceptBasePayloadSize = 7;
+constexpr int kSessionAcceptPolicyPayloadSize = 13;
+constexpr int kSessionAcceptPayloadSize =
+        kSessionAcceptBasePayloadSize + kSessionAcceptPolicyPayloadSize;
+
+constexpr double kSessionPolicyScaledMin = 0.05;
+constexpr double kSessionPolicyScaledMax = 1.0;
+
+// Encode a `value` in [kSessionPolicyScaledMin, kSessionPolicyScaledMax]
+// as a uint8 in [0, 255] (linear interpolation; rounding via std::round).
+// Out-of-range values are clamped first. Mirrors upstream
+// `EncodeSessionScaledByte`.
+quint8 encodeSessionScaledByte(double value);
+
+// Inverse of encodeSessionScaledByte — uint8 → value in [min, max].
+double decodeSessionScaledByte(quint8 value);
+
+// 13-byte client-policy codec — returns the binary payload (always
+// kSessionAcceptPolicyPayloadSize bytes; clamps every field to its
+// wire-width budget). Mirrors `EncodeSessionAcceptClientPolicy`.
+QByteArray encodeSessionAcceptClientPolicy(const SessionAcceptClientPolicy &policy);
+
+// Inverse — returns std::nullopt if the payload is shorter than
+// kSessionAcceptPolicyPayloadSize. Mirrors `DecodeSessionAcceptClientPolicy`.
+std::optional<SessionAcceptClientPolicy>
+decodeSessionAcceptClientPolicy(const QByteArray &payload);
+
+// Full SESSION_ACCEPT payload codec. Encode produces a 7-byte payload when
+// hasClientPolicySync is false, or 20 bytes when true. Decode auto-detects
+// the policy tail when payload.size() >= 20 and sets hasClientPolicySync.
+// Returns std::nullopt only when payload.size() < 7 (too short for base).
+// Mirrors `EncodeSessionAcceptPayload` / `DecodeSessionAcceptPayload`.
+QByteArray encodeSessionAcceptPayload(const SessionAcceptPayload &payload);
+std::optional<SessionAcceptPayload>
+decodeSessionAcceptPayload(const QByteArray &payload);
 
 // ----- Packed control blocks (§4) ---------------------------------------
 

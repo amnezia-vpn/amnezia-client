@@ -1959,16 +1959,103 @@ private slots:
 
     void testSessionAcceptClientPolicyRoundTrip()
     {
-        QSKIP("SessionAcceptClientPolicy encode/decode not yet implemented "
-              "in C++ port — Session::onSessionAccept reads only base "
-              "payload (sessionId, cookie, compression, verifyCode) and "
-              "ignores the 13-byte policy tail. Needs port of "
-              "internal/vpnproto/session_accept.go.");
+        // Upstream: TestSessionAcceptClientPolicyRoundTrip
+        // (vpnproto/session_accept_test.go:5). Encode + decode a fully
+        // populated policy and assert every field round-trips, with the
+        // two scaled-byte fields (ping interval, initial RTO) within a
+        // tolerance of ±0.005 (one quantum step at 256 levels over the
+        // 0.05..1.0 range).
+        SessionAcceptClientPolicy policy;
+        policy.maxPacketDuplicationCount = 5;
+        policy.maxSetupDuplicationCount = 6;
+        policy.maxUploadMTU = 150;
+        policy.maxDownloadMTU = 4000;
+        policy.maxRxTxWorkers = 255;
+        policy.minPingAggressiveInterval = 0.05;
+        policy.maxPacketsPerBatch = 10;
+        policy.maxARQWindowSize = 8000;
+        policy.maxARQDataNackMaxGap = 128;
+        policy.minCompressionMinSize = 120;
+        policy.minARQInitialRTOSeconds = 0.25;
+
+        const QByteArray encoded = encodeSessionAcceptClientPolicy(policy);
+        QCOMPARE(encoded.size(), kSessionAcceptPolicyPayloadSize);
+
+        const auto decoded = decodeSessionAcceptClientPolicy(encoded);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(decoded->maxPacketDuplicationCount, policy.maxPacketDuplicationCount);
+        QCOMPARE(decoded->maxSetupDuplicationCount, policy.maxSetupDuplicationCount);
+        QCOMPARE(decoded->maxUploadMTU, policy.maxUploadMTU);
+        QCOMPARE(decoded->maxDownloadMTU, policy.maxDownloadMTU);
+        QCOMPARE(decoded->maxRxTxWorkers, policy.maxRxTxWorkers);
+        QVERIFY(decoded->minPingAggressiveInterval >= 0.049
+                && decoded->minPingAggressiveInterval <= 0.051);
+        QCOMPARE(decoded->maxPacketsPerBatch, policy.maxPacketsPerBatch);
+        QCOMPARE(decoded->maxARQWindowSize, policy.maxARQWindowSize);
+        QCOMPARE(decoded->maxARQDataNackMaxGap, policy.maxARQDataNackMaxGap);
+        QCOMPARE(decoded->minCompressionMinSize, policy.minCompressionMinSize);
+        QVERIFY(decoded->minARQInitialRTOSeconds >= 0.245
+                && decoded->minARQInitialRTOSeconds <= 0.255);
     }
 
     void testSessionAcceptPayloadRoundTrip()
     {
-        QSKIP("SessionAcceptPayload full encode/decode not in C++ port.");
+        // Upstream: TestSessionAcceptPayloadRoundTrip
+        // (vpnproto/session_accept_test.go:61). Full SESSION_ACCEPT
+        // payload with hasClientPolicySync=true round-trips.
+        SessionAcceptPayload payload;
+        payload.sessionId = 7;
+        payload.sessionCookie = 11;
+        payload.compressionPair = 3;
+        payload.verifyCode = { 1, 2, 3, 4 };
+        payload.clientPolicy.maxPacketDuplicationCount = 5;
+        payload.clientPolicy.maxSetupDuplicationCount = 6;
+        payload.clientPolicy.maxUploadMTU = 150;
+        payload.clientPolicy.maxDownloadMTU = 4096;
+        payload.clientPolicy.maxRxTxWorkers = 32;
+        payload.clientPolicy.minPingAggressiveInterval = 0.10;
+        payload.clientPolicy.maxPacketsPerBatch = 10;
+        payload.clientPolicy.maxARQWindowSize = 4096;
+        payload.clientPolicy.maxARQDataNackMaxGap = 64;
+        payload.clientPolicy.minCompressionMinSize = 120;
+        payload.clientPolicy.minARQInitialRTOSeconds = 0.20;
+        payload.hasClientPolicySync = true;
+
+        const QByteArray encoded = encodeSessionAcceptPayload(payload);
+        QCOMPARE(encoded.size(), kSessionAcceptPayloadSize);
+
+        const auto decoded = decodeSessionAcceptPayload(encoded);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(decoded->sessionId, payload.sessionId);
+        QCOMPARE(decoded->sessionCookie, payload.sessionCookie);
+        QCOMPARE(decoded->compressionPair, payload.compressionPair);
+        QCOMPARE(decoded->verifyCode, payload.verifyCode);
+        QVERIFY(decoded->hasClientPolicySync);
+    }
+
+    void testSessionAcceptPayloadBaseOnlyRoundTrip()
+    {
+        // Companion: encode a base-only payload (hasClientPolicySync=false)
+        // and verify the wire form is exactly 7 bytes and decode reports
+        // hasClientPolicySync=false. Not in upstream verbatim — covers the
+        // mixed-presence branch separately.
+        SessionAcceptPayload payload;
+        payload.sessionId = 42;
+        payload.sessionCookie = 99;
+        payload.compressionPair = 0x12;
+        payload.verifyCode = { 0xDE, 0xAD, 0xBE, 0xEF };
+        payload.hasClientPolicySync = false;
+
+        const QByteArray encoded = encodeSessionAcceptPayload(payload);
+        QCOMPARE(encoded.size(), kSessionAcceptBasePayloadSize);
+
+        const auto decoded = decodeSessionAcceptPayload(encoded);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(decoded->sessionId, payload.sessionId);
+        QCOMPARE(decoded->sessionCookie, payload.sessionCookie);
+        QCOMPARE(decoded->compressionPair, payload.compressionPair);
+        QCOMPARE(decoded->verifyCode, payload.verifyCode);
+        QVERIFY(!decoded->hasClientPolicySync);
     }
 
     // ====================================================================

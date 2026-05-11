@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QtEndian>
 #include <QVector>
+#include <algorithm>
+#include <cmath>
+#include <cstring>
 
 namespace amnezia::masterdnsvpn {
 
@@ -341,6 +344,145 @@ QVector<PackedBlock> unpackBlocks(const QByteArray &payload)
         b.totalFragments = static_cast<quint8>(payload[offset + 6]);
         out.append(b);
         offset += 7;
+    }
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+// SESSION_ACCEPT payload codec (§7)
+// ---------------------------------------------------------------------------
+
+namespace {
+
+int clampInt(int value, int lo, int hi)
+{
+    return std::max(lo, std::min(hi, value));
+}
+
+double clampDouble(double value, double lo, double hi)
+{
+    return std::max(lo, std::min(hi, value));
+}
+
+} // namespace
+
+quint8 encodeSessionScaledByte(double value)
+{
+    const double clamped = clampDouble(value,
+                                       kSessionPolicyScaledMin,
+                                       kSessionPolicyScaledMax);
+    constexpr double span = kSessionPolicyScaledMax - kSessionPolicyScaledMin;
+    if (span <= 0.0) {
+        return 0;
+    }
+    const double normalized = (clamped - kSessionPolicyScaledMin) / span;
+    const double scaled = std::round(normalized * 255.0);
+    return static_cast<quint8>(clampInt(static_cast<int>(scaled), 0, 255));
+}
+
+double decodeSessionScaledByte(quint8 value)
+{
+    const double normalized = static_cast<double>(value) / 255.0;
+    return kSessionPolicyScaledMin
+            + normalized * (kSessionPolicyScaledMax - kSessionPolicyScaledMin);
+}
+
+QByteArray encodeSessionAcceptClientPolicy(const SessionAcceptClientPolicy &policy)
+{
+    QByteArray out(kSessionAcceptPolicyPayloadSize, '\0');
+    auto *p = reinterpret_cast<quint8 *>(out.data());
+
+    // byte 0: nibble pack
+    p[0] = static_cast<quint8>(
+            (clampInt(policy.maxSetupDuplicationCount, 0, 15) << 4)
+            | clampInt(policy.maxPacketDuplicationCount, 0, 15));
+    p[1] = static_cast<quint8>(clampInt(policy.maxUploadMTU, 0, 0xFF));
+    qToBigEndian<quint16>(static_cast<quint16>(
+                                  clampInt(policy.maxDownloadMTU, 0, 0xFFFF)),
+                          p + 2);
+    p[4] = static_cast<quint8>(clampInt(policy.maxRxTxWorkers, 0, 0xFF));
+    p[5] = encodeSessionScaledByte(policy.minPingAggressiveInterval);
+    p[6] = static_cast<quint8>(clampInt(policy.maxPacketsPerBatch, 0, 0xFF));
+    qToBigEndian<quint16>(static_cast<quint16>(
+                                  clampInt(policy.maxARQWindowSize, 0, 0xFFFF)),
+                          p + 7);
+    p[9] = static_cast<quint8>(clampInt(policy.maxARQDataNackMaxGap, 0, 0xFF));
+    qToBigEndian<quint16>(static_cast<quint16>(
+                                  clampInt(policy.minCompressionMinSize, 0, 0xFFFF)),
+                          p + 10);
+    p[12] = encodeSessionScaledByte(policy.minARQInitialRTOSeconds);
+
+    return out;
+}
+
+std::optional<SessionAcceptClientPolicy>
+decodeSessionAcceptClientPolicy(const QByteArray &payload)
+{
+    if (payload.size() < kSessionAcceptPolicyPayloadSize) {
+        return std::nullopt;
+    }
+    const auto *p = reinterpret_cast<const quint8 *>(payload.constData());
+
+    SessionAcceptClientPolicy out;
+    out.maxPacketDuplicationCount = p[0] & 0x0F;
+    out.maxSetupDuplicationCount = (p[0] >> 4) & 0x0F;
+    out.maxUploadMTU = p[1];
+    out.maxDownloadMTU = qFromBigEndian<quint16>(p + 2);
+    out.maxRxTxWorkers = p[4];
+    out.minPingAggressiveInterval = decodeSessionScaledByte(p[5]);
+    out.maxPacketsPerBatch = p[6];
+    out.maxARQWindowSize = qFromBigEndian<quint16>(p + 7);
+    out.maxARQDataNackMaxGap = p[9];
+    out.minCompressionMinSize = qFromBigEndian<quint16>(p + 10);
+    out.minARQInitialRTOSeconds = decodeSessionScaledByte(p[12]);
+    return out;
+}
+
+QByteArray encodeSessionAcceptPayload(const SessionAcceptPayload &payload)
+{
+    const int size = payload.hasClientPolicySync
+            ? kSessionAcceptPayloadSize
+            : kSessionAcceptBasePayloadSize;
+    QByteArray out(size, '\0');
+    auto *p = reinterpret_cast<quint8 *>(out.data());
+
+    p[0] = payload.sessionId;
+    p[1] = payload.sessionCookie;
+    p[2] = payload.compressionPair;
+    std::memcpy(p + 3, payload.verifyCode.data(), 4);
+
+    if (payload.hasClientPolicySync) {
+        const QByteArray policy = encodeSessionAcceptClientPolicy(payload.clientPolicy);
+        std::memcpy(p + kSessionAcceptBasePayloadSize,
+                    policy.constData(),
+                    static_cast<size_t>(kSessionAcceptPolicyPayloadSize));
+    }
+    return out;
+}
+
+std::optional<SessionAcceptPayload>
+decodeSessionAcceptPayload(const QByteArray &payload)
+{
+    if (payload.size() < kSessionAcceptBasePayloadSize) {
+        return std::nullopt;
+    }
+    const auto *p = reinterpret_cast<const quint8 *>(payload.constData());
+
+    SessionAcceptPayload out;
+    out.sessionId = p[0];
+    out.sessionCookie = p[1];
+    out.compressionPair = p[2];
+    std::memcpy(out.verifyCode.data(), p + 3, 4);
+
+    if (payload.size() >= kSessionAcceptPayloadSize) {
+        auto policy = decodeSessionAcceptClientPolicy(
+                payload.mid(kSessionAcceptBasePayloadSize,
+                            kSessionAcceptPolicyPayloadSize));
+        if (!policy) {
+            return std::nullopt;
+        }
+        out.clientPolicy = *policy;
+        out.hasClientPolicySync = true;
     }
     return out;
 }

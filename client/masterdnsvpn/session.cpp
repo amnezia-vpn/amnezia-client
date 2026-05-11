@@ -858,24 +858,32 @@ void Session::sendSessionInit()
 
 void Session::onSessionAccept(const Packet &packet)
 {
-    if (packet.payload.size() < 7) {
+    const auto decoded = decodeSessionAcceptPayload(packet.payload);
+    if (!decoded) {
         return;
     }
-    const quint8 grantedSession = static_cast<quint8>(packet.payload[0]);
-    const quint8 grantedCookie = static_cast<quint8>(packet.payload[1]);
-    const quint8 grantedComp = static_cast<quint8>(packet.payload[2]);
-    const QByteArray echoVerify = packet.payload.mid(3, 4);
-
+    const QByteArray echoVerify(reinterpret_cast<const char *>(decoded->verifyCode.data()), 4);
     if (echoVerify != m_initVerifyCode) {
         return;
     }
-    m_sessionId = grantedSession;
-    m_sessionCookie = grantedCookie;
+    m_sessionId = decoded->sessionId;
+    m_sessionCookie = decoded->sessionCookie;
 
     // Server may have downgraded our compression preference; record what
     // it actually permitted so future packets honour the constraint.
-    m_uploadCompression = std::min(m_uploadCompression, (grantedComp >> 4) & 0x0F);
-    m_downloadCompression = std::min(m_downloadCompression, grantedComp & 0x0F);
+    m_uploadCompression = std::min(m_uploadCompression,
+                                   (decoded->compressionPair >> 4) & 0x0F);
+    m_downloadCompression = std::min(m_downloadCompression,
+                                     decoded->compressionPair & 0x0F);
+
+    // §7 client-policy sync: when the server appends the 13-byte policy
+    // tail, retain it for the engine layer to clamp its config against.
+    // Future commits wire applyClientPolicy(...) into the actual knobs;
+    // for now the values land in m_serverPolicy for inspection / logging.
+    if (decoded->hasClientPolicySync) {
+        m_serverPolicy = decoded->clientPolicy;
+        m_hasServerPolicy = true;
+    }
 
     // Spec §13(9): retire the verify code once the handshake completes.
     m_initVerifyCode.clear();
