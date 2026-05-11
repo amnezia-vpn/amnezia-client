@@ -1577,11 +1577,38 @@ private slots:
     void testArqControlAckUpdatesAdaptiveBaseRTO()
     {
         // Upstream: TestARQ_ControlAckUpdatesAdaptiveBaseRTO (1059).
-        // The C++ engine doesn't yet track outstanding control packets
-        // in a separate buffer (controlSndBuf) — control reliability is
-        // partial.
-        QSKIP("Control-plane adaptive RTO not implemented in C++ port "
-              "(no controlSndBuf equivalent yet).");
+        // Seed a control sndBuf entry for STREAM_SYN seq=3 with a 180ms-
+        // old timestamp; receipt of STREAM_SYN_ACK must raise the
+        // adaptive control-plane RTO above its initial value and below
+        // its ceiling.
+        ArqConfig cfg;
+        cfg.windowSize = 32;
+        cfg.initialDataRtoMs = 100;
+        cfg.maxDataRtoMs = 500;
+        cfg.initialControlRtoMs = 80;
+        cfg.maxControlRtoMs = 400;
+        cfg.enableControlReliability = true;
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+        ArqStream::PendingSend seed;
+        seed.seq = 3;
+        seed.type = PacketType::StreamSyn;
+        seed.firstSentMs = nowMs - 180;
+        seed.lastSentMs = nowMs - 180;
+        seed.sampleEligible = true;
+        const quint32 key = ArqStream::controlKey(PacketType::StreamSyn, 3, 0);
+        a.m_controlSndBuf.insert(key, seed);
+
+        const qint64 rtoBefore = a.m_currentControlRtoMs;
+        QVERIFY(a.ReceiveControlAck(PacketType::StreamSynAck, 3, 0));
+        QVERIFY2(a.m_currentControlRtoMs > rtoBefore,
+                 "expected control adaptive RTO to rise above initial");
+        QVERIFY2(a.m_currentControlRtoMs <= a.m_cfg.maxControlRtoMs,
+                 "expected control adaptive RTO bounded by max");
     }
 
     void testArqOutOfOrderReceive()

@@ -261,6 +261,21 @@ private:
     // upstream `seqBehind` (arq.go:2022).
     static bool seqBehind(quint16 base, quint16 candidate);
 
+    // Map an inbound control ACK packet type back to the originating
+    // packet type it acks (SYN_ACK → SYN, CONNECTED_ACK → CONNECTED, …).
+    // Returns std::nullopt for types that don't ack anything trackable.
+    // Mirrors upstream `Enums.ReverseControlAckFor`.
+    static std::optional<PacketType> reverseControlAckFor(PacketType ackType);
+
+    // Composite key into m_controlSndBuf: PacketType << 24 | seq << 8 |
+    // fragId. Mirrors upstream's controlSndBuf keying.
+    static quint32 controlKey(PacketType type, quint16 seq, quint8 fragId)
+    {
+        return (static_cast<quint32>(type) << 24)
+                | (static_cast<quint32>(seq) << 8)
+                | static_cast<quint32>(fragId);
+    }
+
     quint16 m_streamId;
     ArqConfig m_cfg;
     Sink m_sink;
@@ -272,6 +287,14 @@ private:
     // Send-side state
     quint16 m_sndNxt = 1;          // initial sequence per spec (clients use 1+)
     QMap<quint16, PendingSend> m_sndBuf; // seq -> pending
+
+    // Outstanding control packets awaiting their type-specific ACK
+    // (SYN/SYN_ACK, CONNECTED/CONNECTED_ACK, CLOSE_WRITE/_ACK etc.).
+    // Keyed by (packetType << 24) | (seq << 8) | fragId to match upstream's
+    // controlSndBuf encoding. The dispatcher seeds entries when sending
+    // reliable control packets; receipt of the corresponding ack consumes
+    // them and feeds an RTT sample to the control-plane EWMA.
+    QMap<quint32, PendingSend> m_controlSndBuf;
     qint64 m_dataSrttMs = 0;
     qint64 m_dataRttvarMs = 0;
     qint64 m_currentDataRtoMs;

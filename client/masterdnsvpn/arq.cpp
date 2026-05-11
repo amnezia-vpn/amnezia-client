@@ -700,18 +700,70 @@ bool ArqStream::HandleAckPacket(PacketType packetType, quint16 sn, quint8 /*frag
     return ReceiveControlAck(packetType, sn, 0);
 }
 
-bool ArqStream::ReceiveControlAck(PacketType ackPacketType, quint16 sn, quint8 /*fragmentId*/)
+bool ArqStream::ReceiveControlAck(PacketType ackPacketType, quint16 sn, quint8 fragmentId)
 {
-    // Mirrors upstream `ReceiveControlAck` (arq.go:2250). The C++ engine
-    // doesn't yet track outstanding control packets explicitly; ACKs are
-    // handled as state-machine transitions on receipt. Returns true if we
-    // recognised the ack, false otherwise.
+    // Mirrors upstream `ReceiveControlAck` (arq.go:2250). Look the
+    // outstanding control entry up by (originType, seq, fragId); on
+    // tracked hits, drop the entry and feed a control-plane RTT sample.
+    const auto originPtype = reverseControlAckFor(ackPacketType);
+    if (originPtype) {
+        const quint32 key = controlKey(*originPtype, sn, fragmentId);
+        auto it = m_controlSndBuf.find(key);
+        if (it != m_controlSndBuf.end()) {
+            if (it->sampleEligible && it->firstSentMs > 0) {
+                const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+                const qint64 sampleMs = nowMs - it->firstSentMs;
+                if (sampleMs > 0) {
+                    updateRttSample(sampleMs, /*isControl=*/true);
+                }
+            }
+            m_controlSndBuf.erase(it);
+            // Also route through the state-machine for half-close /
+            // RST acks; harmless if the original type doesn't need it.
+            Packet pkt;
+            pkt.type = ackPacketType;
+            pkt.streamId = m_streamId;
+            pkt.sequenceNum = sn;
+            onPacketReceived(pkt);
+            return true;
+        }
+    }
+    // Unrecognised / untracked — still route to the state machine so the
+    // existing half-close handler observes the ACK.
     Packet pkt;
     pkt.type = ackPacketType;
     pkt.streamId = m_streamId;
     pkt.sequenceNum = sn;
     onPacketReceived(pkt);
-    return true;
+    return originPtype.has_value();
+}
+
+std::optional<PacketType> ArqStream::reverseControlAckFor(PacketType ackType)
+{
+    switch (ackType) {
+    case PacketType::StreamSynAck:           return PacketType::StreamSyn;
+    case PacketType::StreamConnectedAck:     return PacketType::StreamConnected;
+    case PacketType::StreamConnectFailAck:   return PacketType::StreamConnectFail;
+    case PacketType::StreamCloseWriteAck:    return PacketType::StreamCloseWrite;
+    case PacketType::StreamCloseReadAck:     return PacketType::StreamCloseRead;
+    case PacketType::StreamRstAck:           return PacketType::StreamRst;
+    case PacketType::Socks5SynAck:           return PacketType::Socks5Syn;
+    case PacketType::Socks5ConnectedAck:     return PacketType::Socks5Connected;
+    case PacketType::Socks5ConnectFailAck:   return PacketType::Socks5ConnectFail;
+    case PacketType::Socks5RulesetDeniedAck: return PacketType::Socks5RulesetDenied;
+    case PacketType::Socks5NetworkUnreachableAck:    return PacketType::Socks5NetworkUnreachable;
+    case PacketType::Socks5HostUnreachableAck:       return PacketType::Socks5HostUnreachable;
+    case PacketType::Socks5ConnectionRefusedAck:     return PacketType::Socks5ConnectionRefused;
+    case PacketType::Socks5TtlExpiredAck:            return PacketType::Socks5TtlExpired;
+    case PacketType::Socks5CommandUnsupportedAck:    return PacketType::Socks5CommandUnsupported;
+    case PacketType::Socks5AddressTypeUnsupportedAck:return PacketType::Socks5AddressTypeUnsupported;
+    case PacketType::Socks5AuthFailedAck:            return PacketType::Socks5AuthFailed;
+    case PacketType::Socks5UpstreamUnavailableAck:   return PacketType::Socks5UpstreamUnavailable;
+    case PacketType::DnsQueryReqAck:                 return PacketType::DnsQueryReq;
+    case PacketType::DnsQueryResAck:                 return PacketType::DnsQueryRes;
+    default:
+        return std::nullopt;
+    }
 }
 
 void ArqStream::MarkCloseReadReceived()
