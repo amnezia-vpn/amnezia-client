@@ -2,7 +2,9 @@
 
 #include "arq.h"
 
+#include <QDateTime>
 #include <QDebug>
+#include <QSet>
 #include <algorithm>
 
 namespace amnezia::masterdnsvpn {
@@ -167,7 +169,10 @@ void ArqStream::onPacketReceived(const Packet &pkt)
         if (pkt.sequenceNum) onAck(*pkt.sequenceNum);
         break;
     case PacketType::StreamDataNack:
-        if (pkt.sequenceNum) onNack(*pkt.sequenceNum);
+        // Inbound NACK: route through HandleDataNack, which honours the
+        // per-seq cooldown and does NOT bump retries / RTO. (Upstream
+        // semantics — `internal/arq/arq.go::HandleDataNack`.)
+        if (pkt.sequenceNum) HandleDataNack(*pkt.sequenceNum);
         break;
     case PacketType::StreamCloseRead:
         onCloseRead();
@@ -191,6 +196,7 @@ void ArqStream::onDataPacket(const Packet &pkt)
         return;
     }
     const quint16 sn = *pkt.sequenceNum;
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
 
     // Always ACK — duplicates produce duplicate ACKs which the sender
     // silently dedups (§6.7).
@@ -210,15 +216,16 @@ void ArqStream::onDataPacket(const Packet &pkt)
         }
         ++m_rcvNxt;
         deliverContiguous();
+        // After rcvNxt advances, NACK state for now-resolved seqs must
+        // be dropped so subsequent gaps can re-arm them. Mirrors upstream
+        // post-delivery cleanup via clearSentDataNack on each filled gap.
+        pruneDataNackStateLocked(m_rcvNxt);
     } else {
-        // Out-of-order: buffer until contiguous.
+        // Out-of-order: buffer the payload, then run the bounded NACK
+        // path. m_rcvBuf must be populated FIRST so maybeSendDataNacks
+        // can skip already-buffered seqs in the gap (per upstream).
         m_rcvBuf.insert(sn, { sn, pkt.payload });
-        // NACK throttling — only emit one NACK per missing sequence per
-        // dataNackRepeatMs.
-        for (quint16 missing = m_rcvNxt; isAhead(sn, missing); ++missing) {
-            if (missing == sn) break; // reached the held packet
-            emitDataNack(missing);
-        }
+        maybeSendDataNacks(sn, nowMs);
     }
 }
 
@@ -246,38 +253,30 @@ void ArqStream::onAck(quint16 ackedSeq)
         return; // duplicate or already-ACKed
     }
     if (it->sampleEligible && it->firstSentMs > 0) {
-        // RTT sample only when the packet wasn't a retransmit.
-        // We don't know the wall-clock here; the sample is in milliseconds
-        // delta and the dispatcher sets firstSentMs via tickMs. Skipping
-        // sample-collection if firstSentMs is 0 is safe — the next ACK
-        // with a real timestamp will populate the EWMA.
-        // The dispatcher tracks current time and feeds it via the next
-        // tick; in practice this matters for adaptive RTO but doesn't
-        // change correctness.
+        // Karn's algorithm: only sample RTT for packets that were sent
+        // exactly once (sampleEligible flips to false on any retransmit
+        // or HandleDataNack-driven resend). Mirrors upstream
+        // `ARQ.noteSuccessfulDataSample` (internal/arq/arq.go:1858).
+        const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+        const qint64 sampleMs = nowMs - it->firstSentMs;
+        if (sampleMs > 0) {
+            updateRttSample(sampleMs, /*isControl=*/false);
+        }
     }
     m_sndBuf.erase(it);
 }
 
-void ArqStream::onNack(quint16 nackedSeq)
-{
-    auto it = m_sndBuf.find(nackedSeq);
-    if (it == m_sndBuf.end()) {
-        return;
-    }
-    // Re-emit immediately (treated as a retransmit so RTO sample is dropped).
-    it->retries++;
-    it->sampleEligible = false;
-
-    Packet p;
-    p.type = PacketType::StreamResend;
-    p.streamId = m_streamId;
-    p.sequenceNum = nackedSeq;
-    p.fragmentId = 0;
-    p.totalFragments = 1;
-    p.compression = 0;
-    p.payload = it->payload;
-    dispatch(p, /*retransmit=*/true);
-}
+// ---------------------------------------------------------------------------
+// Inbound STREAM_DATA_NACK path
+// ---------------------------------------------------------------------------
+//
+// Receipt of a peer's STREAM_DATA_NACK is dispatched through
+// HandleDataNack (the receive-side public wrapper) — see
+// onPacketReceived → HandleDataNack. The retransmit semantics are
+// described there: no retries bump, no RTO growth, with a per-seq
+// cooldown gate. The RTO-driven retransmit path lives in
+// scheduleRetransmits and follows separate semantics (does bump
+// retries + grow RTO per §6.4/§6.5).
 
 void ArqStream::onCloseRead()
 {
@@ -422,21 +421,149 @@ void ArqStream::emitDataAck(quint16 seq)
     dispatch(p, false);
 }
 
-void ArqStream::emitDataNack(quint16 seq)
+// ---------------------------------------------------------------------------
+// Bounded NACK gap + frontier sampling (§6.7)
+// ---------------------------------------------------------------------------
+//
+// On every out-of-order arrival we compute the set of still-missing seqs
+// in the gap [rcvNxt..sn) and emit at most one STREAM_DATA_NACK per
+// missing seq, subject to a per-seq cooldown and the dataNackMaxGap
+// bound. Two regimes:
+//
+//   1. Gap fits in dataNackMaxGap: walk the gap inline, skip any seqs
+//      already buffered in m_rcvBuf, NACK the rest.
+//   2. Gap exceeds the bound: NACK a small recent-window sample
+//      (sampleCount ≈ 5% of dataNackMaxGap, floor 1), then one frontier
+//      seq at the trailing edge of the window. This bounds NACK traffic
+//      when many seqs are missing simultaneously.
+//
+// Mirrors upstream `ARQ.maybeSendDataNacks` (internal/arq/arq.go:1919).
+void ArqStream::maybeSendDataNacks(quint16 sn, qint64 nowMs)
 {
-    // Throttle — at most one NACK per `dataNackRepeatMs` per missing seq.
-    // Real time tracking happens in the dispatcher's tick; we maintain a
-    // monotonic check here that's coarse-grained.
-    auto it = m_lastNackSentMs.find(seq);
-    if (it != m_lastNackSentMs.end()) {
+    if (m_cfg.dataNackMaxGap <= 0) {
         return;
     }
-    m_lastNackSentMs.insert(seq, 1); // sentinel — proper time tracked on tick
-    Packet p;
-    p.type = PacketType::StreamDataNack;
-    p.streamId = m_streamId;
-    p.sequenceNum = seq;
-    dispatch(p, false);
+    if (m_state == ArqState::Closed || m_state == ArqState::Reset) {
+        return;
+    }
+
+    // diff is the wrap-aware distance from rcvNxt to sn (sn must be
+    // strictly ahead). diff in [1, 32767] means "sn is ahead of rcvNxt";
+    // diff in [32768, 65535] means "sn is behind". diff == 0 → no gap.
+    const quint16 diff = static_cast<quint16>(sn - m_rcvNxt);
+    if (diff == 0 || diff >= 32768) {
+        return;
+    }
+
+    pruneDataNackStateLocked(m_rcvNxt);
+
+    const quint16 windowSpan = static_cast<quint16>(m_cfg.dataNackMaxGap);
+    QVector<quint16> missingSeqs;
+    missingSeqs.reserve(m_cfg.dataNackMaxGap);
+
+    if (diff <= windowSpan) {
+        // Full-walk path: every seq in [rcvNxt..sn) that isn't already
+        // buffered gets enqueued as a NACK candidate.
+        for (quint16 missing = m_rcvNxt; missing != sn; ++missing) {
+            if (m_rcvBuf.contains(missing)) {
+                continue;
+            }
+            missingSeqs.append(missing);
+        }
+    } else {
+        // Frontier-sample path: cap the candidates at sampleCount from
+        // the head + one frontier seq at the trailing window edge.
+        const int sampleCount = std::max(1, (m_cfg.dataNackMaxGap + 19) / 20);
+        QSet<quint16> seen;
+        seen.reserve(std::max(2, m_cfg.dataNackMaxGap / 20 + 1));
+
+        int added = 0;
+        for (quint16 missing = m_rcvNxt;
+             missing != sn && added < sampleCount;
+             ++missing) {
+            if (m_rcvBuf.contains(missing)) {
+                continue;
+            }
+            missingSeqs.append(missing);
+            seen.insert(missing);
+            ++added;
+        }
+
+        // The frontier: the trailing edge of the bounded NACK window —
+        // either dataNackMaxGap-1 ahead of rcvNxt, or the first unbuffered
+        // seq scanning down from there.
+        const quint16 frontier = static_cast<quint16>(
+                static_cast<quint32>(m_rcvNxt) + static_cast<quint32>(windowSpan) - 1);
+        for (quint16 candidate = frontier;; --candidate) {
+            if (!m_rcvBuf.contains(candidate)) {
+                if (!seen.contains(candidate)) {
+                    missingSeqs.append(candidate);
+                }
+                break;
+            }
+            if (candidate == m_rcvNxt) {
+                break;
+            }
+        }
+    }
+
+    for (quint16 missing : missingSeqs) {
+        if (!shouldSendDataNack(missing, nowMs)) {
+            continue;
+        }
+        Packet p;
+        p.type = PacketType::StreamDataNack;
+        p.streamId = m_streamId;
+        p.sequenceNum = missing;
+        dispatch(p, /*retransmit=*/false);
+        noteDataNackSent(missing, nowMs);
+    }
+}
+
+bool ArqStream::shouldSendDataNack(quint16 sn, qint64 nowMs)
+{
+    auto firstIt = m_firstDataNackSeenMs.find(sn);
+    if (firstIt == m_firstDataNackSeenMs.end()) {
+        // First observation of this missing seq — record the moment, then
+        // gate on initial-delay (zero → send immediately; positive → wait).
+        m_firstDataNackSeenMs.insert(sn, nowMs);
+        return m_cfg.dataNackInitialDelayMs <= 0;
+    }
+    if (m_cfg.dataNackInitialDelayMs > 0
+        && (nowMs - firstIt.value()) < m_cfg.dataNackInitialDelayMs) {
+        return false;
+    }
+    auto lastIt = m_lastNackSentMs.find(sn);
+    if (lastIt == m_lastNackSentMs.end()) {
+        return true;
+    }
+    return (nowMs - lastIt.value()) >= m_cfg.dataNackRepeatMs;
+}
+
+bool ArqStream::seqBehind(quint16 base, quint16 candidate)
+{
+    if (candidate == base) {
+        return false;
+    }
+    return static_cast<quint16>(base - candidate) < 0x8000;
+}
+
+void ArqStream::pruneDataNackStateLocked(quint16 rcvNxt)
+{
+    for (auto it = m_firstDataNackSeenMs.begin(); it != m_firstDataNackSeenMs.end();) {
+        if (seqBehind(rcvNxt, it.key())) {
+            it = m_firstDataNackSeenMs.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (auto it = m_lastNackSentMs.begin(); it != m_lastNackSentMs.end();) {
+        if (seqBehind(rcvNxt, it.key())) {
+            it = m_lastNackSentMs.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void ArqStream::emitControl(PacketType type, quint16 seq)
@@ -505,16 +632,36 @@ bool ArqStream::ReceiveAck(PacketType packetType, quint16 sn)
 
 bool ArqStream::HandleDataNack(quint16 sn)
 {
-    auto before = m_sndBuf.find(sn);
-    if (before == m_sndBuf.end()) {
+    // Mirrors upstream `ARQ.HandleDataNack` (internal/arq/arq.go:1873).
+    // Receipt of an inbound STREAM_DATA_NACK schedules ONE immediate
+    // STREAM_RESEND for the named seq, gated by a per-seq cooldown
+    // (dataNackRepeatMs). It is NOT a retransmit in the RTO sense —
+    // retries and currentRto are left unchanged; only sampleEligible
+    // flips to false (the seq is no longer a clean RTT sample source).
+    if (m_state == ArqState::Closed || m_state == ArqState::Reset) {
         return false;
     }
-    // Mirrors upstream `HandleDataNack` (internal/arq/arq.go:1873): only
-    // schedules a resend if the cooldown for this sequence has elapsed.
-    // The C++ engine currently re-emits unconditionally — this wrapper
-    // returns whether a packet was actually dispatched (observable via
-    // the sink), letting tests assert cooldown behavior.
-    onNack(sn);
+    auto it = m_sndBuf.find(sn);
+    if (it == m_sndBuf.end()) {
+        return false;
+    }
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (it->lastNackSentMs > 0
+        && (nowMs - it->lastNackSentMs) < m_cfg.dataNackRepeatMs) {
+        return false;
+    }
+    it->lastNackSentMs = nowMs;
+    it->sampleEligible = false;
+
+    Packet p;
+    p.type = PacketType::StreamResend;
+    p.streamId = m_streamId;
+    p.sequenceNum = sn;
+    p.fragmentId = 0;
+    p.totalFragments = 1;
+    p.compression = 0;
+    p.payload = it->payload;
+    dispatch(p, /*retransmit=*/true);
     return true;
 }
 
@@ -558,13 +705,13 @@ void ArqStream::MarkRstReceived()
     onRst();
 }
 
-void ArqStream::noteDataNackSent(quint16 sn, qint64 /*nowMs*/)
+void ArqStream::noteDataNackSent(quint16 sn, qint64 nowMs)
 {
-    // The C++ engine's `m_lastNackSentMs` map holds the "we sent a NACK
-    // for this seq" sentinel. We don't yet honour a time-based cooldown —
-    // any entry blocks re-emission, matching upstream's coarse behavior
-    // when DataNackRepeatSeconds is the dominant gate.
-    m_lastNackSentMs.insert(sn, 1);
+    // Records the actual wall-clock millisecond at which we emitted a
+    // STREAM_DATA_NACK for `sn`. Subsequent `shouldSendDataNack` calls
+    // compare `now - lastSent` against `dataNackRepeatMs` to enforce the
+    // per-seq throttle. Mirrors upstream `ARQ.noteDataNackSent`.
+    m_lastNackSentMs.insert(sn, nowMs);
 }
 
 void ArqStream::clearAllQueues(bool includeDataNacks)
@@ -573,6 +720,7 @@ void ArqStream::clearAllQueues(bool includeDataNacks)
     m_rcvBuf.clear();
     if (includeDataNacks) {
         m_lastNackSentMs.clear();
+        m_firstDataNackSeenMs.clear();
     }
 }
 

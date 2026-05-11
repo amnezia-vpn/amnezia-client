@@ -346,13 +346,15 @@ private slots:
                     if (!d.bytes.isEmpty()) delivered.append(d.bytes);
                 });
 
-        // Simulate incoming STREAM_DATA seq=1 ... seq=3 in order.
-        for (quint16 seq = 1; seq <= 3; ++seq) {
+        // Simulate incoming STREAM_DATA seq=0 ... seq=2 in order. ARQ
+        // expects the first data seq to be 0 (matches upstream's rcvNxt
+        // zero-default).
+        for (quint16 seq = 0; seq <= 2; ++seq) {
             Packet p;
             p.type = PacketType::StreamData;
             p.streamId = 1;
             p.sequenceNum = seq;
-            p.payload = QByteArray(1, 'a' + seq - 1);
+            p.payload = QByteArray(1, 'a' + seq);
             stream.onPacketReceived(p);
         }
         QCOMPARE(delivered.size(), 3);
@@ -379,11 +381,12 @@ private slots:
                     if (!d.bytes.isEmpty()) delivered.append(d.bytes);
                 });
 
-        // seq=3 arrives before seq=1 and seq=2.
+        // seq=2 arrives before seq=0 and seq=1. (Upstream rcvNxt defaults
+        // to 0; the first contiguous seq the peer sends is 0.)
         Packet third;
         third.type = PacketType::StreamData;
         third.streamId = 1;
-        third.sequenceNum = 3;
+        third.sequenceNum = 2;
         third.payload = QByteArrayLiteral("c");
         stream.onPacketReceived(third);
         QCOMPARE(delivered.size(), 0); // held in rcvBuf
@@ -391,7 +394,7 @@ private slots:
         Packet first;
         first.type = PacketType::StreamData;
         first.streamId = 1;
-        first.sequenceNum = 1;
+        first.sequenceNum = 0;
         first.payload = QByteArrayLiteral("a");
         stream.onPacketReceived(first);
         QCOMPARE(delivered.size(), 1); // "a" delivered, "c" still held
@@ -399,7 +402,7 @@ private slots:
         Packet second;
         second.type = PacketType::StreamData;
         second.streamId = 1;
-        second.sequenceNum = 2;
+        second.sequenceNum = 1;
         second.payload = QByteArrayLiteral("b");
         stream.onPacketReceived(second);
         QCOMPARE(delivered.size(), 3); // "b" + drained "c"
@@ -422,7 +425,7 @@ private slots:
         Packet p;
         p.type = PacketType::StreamData;
         p.streamId = 1;
-        p.sequenceNum = 1;
+        p.sequenceNum = 0; // first contiguous seq matches rcvNxt default
         p.payload = QByteArrayLiteral("hello");
         stream.onPacketReceived(p);
         stream.onPacketReceived(p); // duplicate
@@ -1146,12 +1149,9 @@ private slots:
         // Upstream: TestARQ_ReceiveDataDoesNotNackFarGap (607). With
         // DataNackMaxGap=2 and seq 3 arriving (gap of 3 missing seqs),
         // only the bounded subset should be NACKed via frontier sampling:
-        // exactly seq 0 and seq 1, NOT seq 2.
-        //
-        // GAP: the C++ engine currently NACKs every missing seq in the
-        // gap (no DataNackMaxGap bound). This test fails until the
-        // engine implements bounded NACK gap + frontier sampling per
-        // upstream `internal/arq/arq.go::pruneDataNackStateLocked`.
+        // exactly seq 0 (head) and seq 1 (frontier), NOT seq 2. The
+        // C++ engine implements the bounded NACK + frontier sample path
+        // in `ArqStream::maybeSendDataNacks`.
         ArqConfig cfg;
         cfg.windowSize = 64;
         cfg.initialDataRtoMs = 200;
@@ -1207,11 +1207,10 @@ private slots:
         QCOMPARE(sent[0].type, PacketType::StreamResend);
         QCOMPARE(*sent[0].sequenceNum, quint16(7));
 
-        // The C++ engine's onNack increments retries when re-emitting —
-        // upstream's HandleDataNack does NOT bump retries (the NACK
-        // path is non-retransmit). This test asserts upstream's
-        // semantics; current C++ behavior bumps retries → fails until
-        // we split the two paths.
+        // Upstream's HandleDataNack does NOT bump retries / RTO — the
+        // NACK path is non-retransmit. The C++ engine now matches this
+        // semantics: HandleDataNack updates `lastNackSentMs` + flips
+        // `sampleEligible` only.
         QVERIFY(a.m_sndBuf.contains(7));
         QCOMPARE(a.m_sndBuf[7].retries, 0);
         QCOMPARE(a.m_currentDataRtoMs, rtoBefore);
@@ -1223,10 +1222,11 @@ private slots:
         // (685). Two HandleDataNack(7) calls back-to-back: the second must
         // be suppressed by the per-seq cooldown.
         //
-        // GAP: the C++ engine doesn't yet enforce a time-based cooldown
-        // on HandleDataNack — it currently re-emits unconditionally.
-        // Will fail until upstream's `lastDataNackSent` cooldown is
-        // ported into the C++ HandleDataNack wrapper.
+        // The C++ engine honours upstream's per-seq cooldown via the
+        // `PendingSend::lastNackSentMs` field (mirrors arqDataItem.
+        // LastNackSentAt). Two HandleDataNack(7) calls back-to-back:
+        // the second is suppressed because the elapsed wall-clock
+        // delta is far below DataNackRepeatSeconds.
         ArqConfig cfg;
         cfg.windowSize = 64;
         cfg.initialDataRtoMs = 200;
@@ -1288,20 +1288,77 @@ private slots:
     void testArqReceiveDataWaitsForInitialNackDelay()
     {
         // Upstream: TestARQ_ReceiveDataWaitsForInitialNackDelay (760).
-        // GAP: the C++ engine emits NACKs immediately on gap detection.
-        // Upstream's `dataNackInitialDelay` defers the FIRST NACK by
-        // that interval; this test fails until the initial-delay path
-        // is ported.
-        QSKIP("Initial-NACK-delay not implemented in C++ port — see "
-              "internal/arq/arq.go::firstDataNackSeen handling. Engine "
-              "currently emits NACK immediately on gap, no deferral.");
+        // With DataNackInitialDelay=200ms, the first NACK for a freshly
+        // detected gap must be deferred until at least 200ms have passed
+        // since `firstDataNackSeen[sn]` was recorded. The second
+        // ReceiveData (after the delay) re-triggers the gap-walk, and
+        // shouldSendDataNack now returns true → NACK emitted.
+        ArqConfig cfg;
+        cfg.windowSize = 64;
+        cfg.initialDataRtoMs = 200;
+        cfg.maxDataRtoMs = 1000;
+        cfg.dataNackMaxGap = 2;
+        cfg.dataNackInitialDelayMs = 200;
+        cfg.dataNackRepeatMs = 1000;
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        a.ReceiveData(1, QByteArrayLiteral("packet 1"));
+        // Inside the delay window: only the ACK should be observed.
+        QCOMPARE(sent.size(), 1);
+        QCOMPARE(sent[0].type, PacketType::StreamDataAck);
+
+        QTest::qWait(220); // exceed the 200ms initial delay
+        sent.clear();
+
+        // Re-trigger gap-walk via a duplicate ReceiveData.
+        a.ReceiveData(1, QByteArrayLiteral("packet 1"));
+
+        int acks = 0;
+        QVector<quint16> nackSeqs;
+        for (const Packet &p : sent) {
+            if (p.type == PacketType::StreamDataAck) ++acks;
+            if (p.type == PacketType::StreamDataNack) nackSeqs.append(*p.sequenceNum);
+        }
+        QCOMPARE(acks, 1);
+        QCOMPARE(nackSeqs.size(), 1);
+        QCOMPARE(nackSeqs[0], quint16(0));
     }
 
     void testArqReceiveDataClearsPendingInitialNackDelayWhenGapArrives()
     {
-        // Upstream: TestARQ_ReceiveDataClearsPendingInitialNackDelay…
-        // (800). Same dependency on dataNackInitialDelay as above.
-        QSKIP("Initial-NACK-delay not implemented in C++ port.");
+        // Upstream: TestARQ_ReceiveDataClearsPendingInitialNackDelay (800).
+        // ReceiveData(2) records firstSeen[0] and firstSeen[1]. Then
+        // ReceiveData(0) advances rcvNxt to 1, pruning firstSeen[0].
+        // After the delay elapses, ReceiveData(1) fills the second gap
+        // and rcvNxt advances to 3 — firstSeen[1] is pruned, so no
+        // post-delay NACK ever fires.
+        ArqConfig cfg;
+        cfg.windowSize = 64;
+        cfg.initialDataRtoMs = 200;
+        cfg.maxDataRtoMs = 1000;
+        cfg.dataNackMaxGap = 3;
+        cfg.dataNackInitialDelayMs = 200;
+        cfg.dataNackRepeatMs = 1000;
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        a.ReceiveData(2, QByteArrayLiteral("packet 2"));
+        a.ReceiveData(0, QByteArrayLiteral("packet 0"));
+        QTest::qWait(220);
+        a.ReceiveData(1, QByteArrayLiteral("packet 1"));
+
+        // No NACK should ever have fired — initial delay covered the
+        // pre-fill window, post-fill pruning dropped both gap seqs.
+        for (const Packet &p : sent) {
+            if (p.type == PacketType::StreamDataNack) {
+                QFAIL("unexpected NACK after gap was filled before initial delay");
+            }
+        }
     }
 
     void testArqReceiveDataDoesNotNackAlreadyBufferedGap()
@@ -1323,6 +1380,11 @@ private slots:
         a.ReceiveData(1, QByteArrayLiteral("packet 1"));
         sent.clear();
 
+        // Upstream sleeps 120ms here so that the per-seq NACK cooldown
+        // (DataNackRepeatSeconds=0.1) elapses; without this wait the
+        // re-NACK for seq 0 would be suppressed.
+        QTest::qWait(120);
+
         a.ReceiveData(3, QByteArrayLiteral("packet 3"));
 
         int acks = 0;
@@ -1340,24 +1402,64 @@ private slots:
     void testArqReceiveDataNacksRecentWindowWhenRcvNxtStalls()
     {
         // Upstream: TestARQ_ReceiveDataNacksRecentWindowWhenRcvNxtStalls
-        // (882). seq=10 arrives, rcvNxt=0. With DataNackMaxGap=4,
-        // upstream emits NACKs for seq 0 + frontier seq 3 (skipping
-        // 1, 2 — "recent window" sampling).
-        //
-        // GAP: the C++ engine NACKs every missing seq in the gap, no
-        // recent-window sampling. Fails until upstream's
-        // `pruneDataNackStateLocked` + frontier logic is ported.
-        QSKIP("Recent-window NACK sampling not implemented in C++ port.");
+        // (882). seq=10 arrives with rcvNxt=0 and DataNackMaxGap=4.
+        // Gap diff (10) exceeds windowSpan (4) → frontier-sample path:
+        // sampleCount = max(1, (4+19)/20) = 1 → one head seq (0); then
+        // frontier = rcvNxt + windowSpan - 1 = 3. Expected NACKs:
+        // [0, 3] (no 1, 2 — the whole point of the bound).
+        ArqConfig cfg;
+        cfg.windowSize = 128;
+        cfg.initialDataRtoMs = 200;
+        cfg.maxDataRtoMs = 1000;
+        cfg.dataNackMaxGap = 4;
+        cfg.dataNackRepeatMs = 100;
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        a.ReceiveData(10, QByteArrayLiteral("packet 10"));
+
+        int acks = 0;
+        QVector<quint16> nackSeqs;
+        for (const Packet &p : sent) {
+            if (p.type == PacketType::StreamDataAck) ++acks;
+            if (p.type == PacketType::StreamDataNack) nackSeqs.append(*p.sequenceNum);
+        }
+        QCOMPARE(acks, 1);
+        QCOMPARE(nackSeqs.size(), 2);
+        QCOMPARE(nackSeqs[0], quint16(0));
+        QCOMPARE(nackSeqs[1], quint16(3));
     }
 
     void testArqReceiveDataLargeGapSamplesFrontierInsteadOfFloodingNacks()
     {
         // Upstream: TestARQ_ReceiveDataLargeGapSamplesFrontierInsteadOfFloodingNacks
-        // (912). seq=140 arrives, rcvNxt=0, DataNackMaxGap=100. Expected
-        // NACKs: seqs 0, 1, 2, 3, 4, 99 (frontier sample).
-        //
-        // GAP: same as above — frontier sampling not in C++ port.
-        QSKIP("Frontier NACK sampling not implemented in C++ port.");
+        // (912). seq=140 arrives with rcvNxt=0 and DataNackMaxGap=100.
+        // sampleCount = max(1, (100+19)/20) = 5 → head seqs [0,1,2,3,4];
+        // frontier = 99. Expected: NACKs for [0,1,2,3,4,99].
+        ArqConfig cfg;
+        cfg.windowSize = 256;
+        cfg.initialDataRtoMs = 200;
+        cfg.maxDataRtoMs = 1000;
+        cfg.dataNackMaxGap = 100;
+        cfg.dataNackRepeatMs = 100;
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        a.ReceiveData(140, QByteArrayLiteral("packet 140"));
+
+        int acks = 0;
+        QVector<quint16> nackSeqs;
+        for (const Packet &p : sent) {
+            if (p.type == PacketType::StreamDataAck) ++acks;
+            if (p.type == PacketType::StreamDataNack) nackSeqs.append(*p.sequenceNum);
+        }
+        QCOMPARE(acks, 1);
+        const QVector<quint16> expected{ 0, 1, 2, 3, 4, 99 };
+        QCOMPARE(nackSeqs, expected);
     }
 
     void testArqReceiveDataClearsQueuedNackWhenMissingDataArrives()
@@ -1411,20 +1513,65 @@ private slots:
     {
         // Upstream: TestARQ_DataAckUpdatesAdaptiveBaseRTO (989). After
         // seeding sndBuf[7] with a 220ms-old send timestamp, a
-        // ReceiveAck must raise the adaptive base RTO above the initial.
-        //
-        // GAP: the C++ engine's `updateRttSample` is implemented but
-        // `onAck` only stubs the call (see arq.cpp:248-257 — the
-        // sample integration is commented out). Fails until sample
-        // collection on ack is wired.
-        QSKIP("Adaptive RTO sample-on-ack not wired in C++ port (arq.cpp:248-257 stubs the call).");
+        // ReceiveAck must raise the adaptive base RTO above the initial
+        // (and stay <= max). The C++ engine wires sample-on-ack via
+        // `updateRttSample` from `onAck`.
+        ArqConfig cfg;
+        cfg.windowSize = 32;
+        cfg.initialDataRtoMs = 100;
+        cfg.maxDataRtoMs = 500;
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+        ArqStream::PendingSend seed;
+        seed.seq = 7;
+        seed.payload = QByteArrayLiteral("hello");
+        seed.type = PacketType::StreamData;
+        seed.firstSentMs = nowMs - 220;
+        seed.lastSentMs = nowMs - 220;
+        seed.sampleEligible = true;
+        a.m_sndBuf.insert(7, seed);
+
+        const qint64 initialRto = a.m_currentDataRtoMs;
+        QVERIFY(a.ReceiveAck(PacketType::StreamDataAck, 7));
+
+        QVERIFY2(a.m_currentDataRtoMs > initialRto,
+                 "expected adaptive base RTO to rise above initial");
+        QVERIFY2(a.m_currentDataRtoMs <= a.m_cfg.maxDataRtoMs,
+                 "expected adaptive base RTO bounded by max");
     }
 
     void testArqDataAckSkipsAdaptiveSampleAfterRetransmit()
     {
         // Upstream: TestARQ_DataAckSkipsAdaptiveSampleAfterRetransmit
-        // (1027). Same gap — depends on adaptive RTO being wired.
-        QSKIP("Adaptive RTO sample-on-ack not wired in C++ port.");
+        // (1027). After seeding sndBuf[8] with SampleEligible=false (the
+        // post-retransmit Karn state), the ack must NOT update the
+        // adaptive RTO — currentDataRto stays unchanged.
+        ArqConfig cfg;
+        cfg.windowSize = 32;
+        cfg.initialDataRtoMs = 100;
+        cfg.maxDataRtoMs = 500;
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+        ArqStream::PendingSend seed;
+        seed.seq = 8;
+        seed.payload = QByteArrayLiteral("hello");
+        seed.type = PacketType::StreamData;
+        seed.firstSentMs = nowMs - 220;
+        seed.lastSentMs = nowMs - 220;
+        seed.sampleEligible = false; // simulates post-retransmit
+        a.m_sndBuf.insert(8, seed);
+
+        const qint64 rtoBefore = a.m_currentDataRtoMs;
+        QVERIFY(a.ReceiveAck(PacketType::StreamDataAck, 8));
+        QCOMPARE(a.m_currentDataRtoMs, rtoBefore);
     }
 
     void testArqControlAckUpdatesAdaptiveBaseRTO()

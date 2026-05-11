@@ -51,7 +51,7 @@ struct ArqConfig {
     qint64 dataPacketTtlMs = 2'400'000;
     qint64 controlPacketTtlMs = 1'200'000;
     int dataNackMaxGap = 32;         // ARQ_DATA_NACK_MAX_GAP
-    qint64 dataNackInitialDelayMs = 100;
+    qint64 dataNackInitialDelayMs = 0; // upstream Config zero default; raise via cfg if desired
     qint64 dataNackRepeatMs = 800;
     qint64 terminalDrainMs = 60'000;
     qint64 terminalAckWaitMs = 30'000;
@@ -211,6 +211,11 @@ private:
         PacketType type = PacketType::StreamData;
         qint64 firstSentMs = 0;
         qint64 lastSentMs = 0;
+        // Last time we emitted a STREAM_RESEND for this seq in response to an
+        // inbound STREAM_DATA_NACK (HandleDataNack). Used as the per-seq
+        // cooldown gate so back-to-back NACKs don't flood resends. Mirrors
+        // upstream arqDataItem.LastNackSentAt (internal/arq/arq.go:1886).
+        qint64 lastNackSentMs = 0;
         int retries = 0;
         bool sampleEligible = true; // per §6.4 — false after a retransmit
     };
@@ -222,19 +227,39 @@ private:
 
     void dispatch(const Packet &pkt, bool retransmit);
     void emitDataAck(quint16 seq);
-    void emitDataNack(quint16 seq);
     void emitControl(PacketType type, quint16 seq);
     void scheduleRetransmits(qint64 nowMs);
     void deliverContiguous();
     void onDataPacket(const Packet &pkt);
     void onAck(quint16 ackedSeq);
-    void onNack(quint16 nackedSeq);
     void onCloseRead();
     void onCloseWrite();
     void onRst();
     void updateRttSample(qint64 sampleMs, bool isControl);
     qint64 currentRto(bool isControl) const;
     bool isAhead(quint16 sn, quint16 baseline) const;
+
+    // §6.7 NACK-gap path. `sn` is the seq of the just-arrived out-of-order
+    // packet; we compute the bounded list of still-missing seqs in the gap
+    // [m_rcvNxt..sn) — either the full slice when the gap is within
+    // dataNackMaxGap, or sample + frontier when it isn't — and emit a
+    // STREAM_DATA_NACK per missing seq subject to the per-seq cooldown.
+    void maybeSendDataNacks(quint16 sn, qint64 nowMs);
+
+    // Decision oracle for a single missing seq. Mirrors upstream
+    // `ARQ.shouldSendDataNack` (internal/arq/arq.go:1996). Side-effect: on
+    // the first observation of a missing seq, records firstSeenMs[sn].
+    bool shouldSendDataNack(quint16 sn, qint64 nowMs);
+
+    // Drops firstSeen / lastSent entries for any seq strictly behind
+    // `rcvNxt` (the gap is no longer relevant). Mirrors upstream
+    // `pruneDataNackStateLocked` (arq.go:2026).
+    void pruneDataNackStateLocked(quint16 rcvNxt);
+
+    // Sequence wrap-around: returns true if `candidate` is strictly behind
+    // `base` (i.e., `(base - candidate)` is in (0, 32768)). Mirrors
+    // upstream `seqBehind` (arq.go:2022).
+    static bool seqBehind(quint16 base, quint16 candidate);
 
     quint16 m_streamId;
     ArqConfig m_cfg;
@@ -255,9 +280,19 @@ private:
     qint64 m_currentControlRtoMs;
 
     // Receive-side state
-    quint16 m_rcvNxt = 1;
+    //
+    // m_rcvNxt: next contiguous in-order sequence number expected from the
+    // peer. Defaults to 0 — peers begin emitting data with seq=0 after the
+    // SYN handshake (matches upstream `ARQ.rcvNxt` zero default in
+    // internal/arq/arq.go).
+    quint16 m_rcvNxt = 0;
     QMap<quint16, PendingReceive> m_rcvBuf;
-    QMap<quint16, qint64> m_lastNackSentMs; // throttling per missing seq
+
+    // Per-missing-seq NACK throttle state. Values are real monotonic
+    // millisecond timestamps (QDateTime::currentMSecsSinceEpoch()), not
+    // sentinels. Mirrors upstream `firstDataNackSeen` / `lastDataNackSent`.
+    QMap<quint16, qint64> m_firstDataNackSeenMs;
+    QMap<quint16, qint64> m_lastNackSentMs;
 
     // Terminal lifecycle bookkeeping
     qint64 m_terminalStartMs = 0;
