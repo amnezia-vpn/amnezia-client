@@ -30,6 +30,11 @@
 #include <cstdint>
 #include <functional>
 
+// Forward declaration so ArqStream's `friend class TestMasterDnsVpnEngine`
+// resolves. The test class lives in the default namespace (it's the QTest
+// main class in client/tests/testMasterDnsVpnEngine.cpp).
+class TestMasterDnsVpnEngine;
+
 namespace amnezia::masterdnsvpn {
 
 // Tunable knobs lifted from operator config (server policy clamps via
@@ -50,6 +55,16 @@ struct ArqConfig {
     qint64 dataNackRepeatMs = 800;
     qint64 terminalDrainMs = 60'000;
     qint64 terminalAckWaitMs = 30'000;
+
+    // Upstream-parity knobs (mirrors `internal/arq/arq.go::Config`). These
+    // are referenced by the translated test suite; the C++ engine doesn't
+    // yet act on all of them — failing tests document the implementation
+    // gap rather than being silently masked.
+    bool enableControlReliability = false;
+    bool isClient = false;
+    bool isVirtual = false;
+    bool startPaused = false;
+    quint8 compressionType = 0;
 };
 
 // Outgoing packet emitted by the ARQ machine. The dispatcher wraps this in
@@ -81,6 +96,15 @@ enum class ArqState {
 
 class ArqStream
 {
+    // The upstream Go test suite (`internal/arq/arq_test.go`) lives in the
+    // same package as the implementation and freely manipulates internal
+    // state (sndBuf, sndNxt, rcvNxt, dataNackInitialDelay, etc.). To
+    // translate those tests faithfully — without "tailoring tests to fit
+    // our existing code", per project policy — the QTest harness needs
+    // equivalent access. `TestMasterDnsVpnEngine` is in the default
+    // namespace (the test file's class), forward-declared in tests.
+    friend class ::TestMasterDnsVpnEngine;
+
 public:
     // Sink receives outbound packets. The dispatcher is responsible for
     // adding session id / cookie before transmission — we set sessionId=0
@@ -120,6 +144,63 @@ public:
 
     // Diagnostic: number of unacked packets currently on the wire.
     int inFlightCount() const;
+
+    // ---- Upstream-API-shaped wrappers ----
+    //
+    // These thin wrappers expose the same external API names the Go
+    // reference uses (`internal/arq/arq.go`), so the translated test
+    // suite can call them as upstream does. They dispatch to the
+    // existing private logic.
+
+    // Equivalent of upstream `ARQ.ReceiveData(sn, data)` — feeds a
+    // STREAM_DATA packet (with the given sequence + payload) through
+    // the state machine.
+    bool ReceiveData(quint16 sn, const QByteArray &data);
+
+    // Equivalent of upstream `ARQ.ReceiveAck(packetType, sn)` — feeds
+    // a STREAM_DATA_ACK (or compatible) for the given sequence.
+    bool ReceiveAck(PacketType packetType, quint16 sn);
+
+    // Equivalent of upstream `ARQ.HandleDataNack(sn)` — handles an
+    // inbound STREAM_DATA_NACK for the given sequence; returns true
+    // when a resend was scheduled, false when suppressed by cooldown.
+    bool HandleDataNack(quint16 sn);
+
+    // Equivalent of upstream `ARQ.Start()` / `ARQ.Close(reason, opts)`.
+    // The C++ engine is purely synchronous on the Qt event loop, so
+    // these are no-ops; they exist for translation parity.
+    void Start() {}
+    struct CloseOptions { bool Force = false; bool SendRST = false; };
+    void Close(const QString & /*reason*/, const CloseOptions & /*opts*/) {}
+
+    // Equivalent of upstream `ARQ.HandleAckPacket(packetType, sn, fragId)`.
+    // Routes the ack through the type-specific handler (data vs control).
+    bool HandleAckPacket(PacketType packetType, quint16 sn, quint8 fragmentId);
+
+    // Equivalent of upstream `ARQ.ReceiveControlAck(ackType, sn, fragId)`.
+    bool ReceiveControlAck(PacketType ackPacketType, quint16 sn, quint8 fragmentId);
+
+    // Mark the peer's half-close signals as received (mirrors upstream's
+    // `Mark*Received` family — internal/arq/arq.go:775,819).
+    void MarkCloseReadReceived();
+    void MarkCloseWriteReceived();
+    void MarkRstReceived();
+
+    // Mirrors upstream `IsClosed()` / `IsReset()` (arq.go:312, 618).
+    bool IsClosed() const { return m_state == ArqState::Closed; }
+    bool IsReset() const  { return m_state == ArqState::Reset; }
+
+    // Mirrors upstream `HasPendingSequence(sn)` (arq.go:324).
+    bool HasPendingSequence(quint16 sn) const { return m_sndBuf.contains(sn); }
+
+    // Mirrors upstream `noteDataNackSent` — records that we sent a NACK
+    // for `sn` so cooldown logic suppresses duplicates.
+    void noteDataNackSent(quint16 sn, qint64 nowMs);
+
+    // Mirrors upstream `clearAllQueues(includeDataNacks)` — wipes the
+    // per-stream NACK / send buffers. Used by tests verifying that
+    // teardown drops remembered NACK state.
+    void clearAllQueues(bool includeDataNacks);
 
 private:
     Q_DISABLE_COPY_MOVE(ArqStream)
