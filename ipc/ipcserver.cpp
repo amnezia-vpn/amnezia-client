@@ -17,6 +17,7 @@
 #include "router.h"
 #include "killswitch.h"
 #include "xray.h"
+#include "master_dns_vpn_service.h"
 
 #ifdef Q_OS_WIN
     #include "tapcontroller_win.h"
@@ -320,4 +321,25 @@ bool IpcServer::xrayStop()
 #endif
 
     return Xray::getInstance().stopXray();
+}
+
+bool IpcServer::masterDnsVpnStart(const QString& cfg)
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::masterDnsVpnStart";
+#endif
+    return MasterDnsVpnService::getInstance().start(cfg);
+}
+
+bool IpcServer::masterDnsVpnStop()
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::masterDnsVpnStop";
+#endif
+    return MasterDnsVpnService::getInstance().stop();
+}
+
+quint16 IpcServer::masterDnsVpnSocksPort()
+{
+    return MasterDnsVpnService::getInstance().socksPort();
 }

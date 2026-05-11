@@ -44,6 +44,9 @@ public:
     virtual bool restoreResolvers() override;
     virtual bool xrayStart(const QString& cfg) override;
     virtual bool xrayStop() override;
+    virtual bool masterDnsVpnStart(const QString& cfg) override;
+    virtual bool masterDnsVpnStop() override;
+    virtual quint16 masterDnsVpnSocksPort() override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;
 

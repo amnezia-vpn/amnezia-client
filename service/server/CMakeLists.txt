@@ -37,6 +37,15 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/killswitch.h
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
     ${CMAKE_CURRENT_LIST_DIR}/xray.h
+    ${CMAKE_CURRENT_LIST_DIR}/master_dns_vpn_service.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/engine.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/session.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/crypto.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/socks5server.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/wireframing.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/dnsframing.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/arq.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/resolverpool.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${QSIMPLECRYPTO_DIR}/include/QAead.h
     ${QSIMPLECRYPTO_DIR}/include/QBlockCipher.h
@@ -59,6 +68,15 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/killswitch.cpp
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xray.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/master_dns_vpn_service.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/engine.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/session.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/crypto.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/socks5server.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/wireframing.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/dnsframing.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/arq.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/resolverpool.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QAead.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QBlockCipher.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QRsa.cpp
@@ -93,6 +111,7 @@ set(HEADERS ${HEADERS}
 include_directories(../../client/mozilla)
 include_directories(../../client/mozilla/shared)
 include_directories(../../client/mozilla/models)
+include_directories(../../client/masterdnsvpn)
 include_directories(../../client/platforms/)
 
 # Mozilla sources
