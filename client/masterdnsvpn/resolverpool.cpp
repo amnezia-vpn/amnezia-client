@@ -73,6 +73,17 @@ public:
         decayCounters();
     }
 
+    // Increment the "sent" counter without emitting a packet. Used by the
+    // dispatcher feedback path (Balancer.ReportSend equivalent) so the
+    // loss-score denominator is fed when the dispatcher tracks the send
+    // path itself rather than calling send() here. The actual send()
+    // method below also bumps m_sent inline.
+    void markSent()
+    {
+        ++m_sent;
+        decayCounters();
+    }
+
 signals:
     void incoming(int resolverIndex, quint16 transactionId, const QByteArray &bytes);
 
@@ -179,6 +190,60 @@ void ResolverPool::setSyncedMtu(int uploadMtu, int downloadMtu)
     m_syncedUploadMtu = std::max(m_syncedUploadMtu, std::min(uploadMtu, m_cfg.maxUploadMtu));
     m_syncedDownloadMtu = std::max(m_syncedDownloadMtu, std::min(downloadMtu, m_cfg.maxDownloadMtu));
     QTimer::singleShot(0, this, [this]() { emit readyForUse(); });
+}
+
+void ResolverPool::reportSend(int index)
+{
+    if (index < 0 || index >= m_connections.size()) {
+        return;
+    }
+    m_connections[index]->markSent();
+}
+
+void ResolverPool::reportSuccess(int index, qint64 rttMicros)
+{
+    if (index < 0 || index >= m_connections.size()) {
+        return;
+    }
+    m_connections[index]->recordAcked(rttMicros);
+}
+
+void ResolverPool::reportTimeout(int index)
+{
+    if (index < 0 || index >= m_connections.size()) {
+        return;
+    }
+    m_connections[index]->recordLost();
+}
+
+qint64 ResolverPool::resolverSentForTesting(int index) const
+{
+    if (index < 0 || index >= m_connections.size()) return 0;
+    return m_connections[index]->sent();
+}
+
+qint64 ResolverPool::resolverAckedForTesting(int index) const
+{
+    if (index < 0 || index >= m_connections.size()) return 0;
+    return m_connections[index]->acked();
+}
+
+qint64 ResolverPool::resolverLostForTesting(int index) const
+{
+    if (index < 0 || index >= m_connections.size()) return 0;
+    return m_connections[index]->lost();
+}
+
+qint64 ResolverPool::resolverRttCountForTesting(int index) const
+{
+    if (index < 0 || index >= m_connections.size()) return 0;
+    return m_connections[index]->rttCount();
+}
+
+bool ResolverPool::resolverActive(int index) const
+{
+    if (index < 0 || index >= m_connections.size()) return false;
+    return m_connections[index]->isActive();
 }
 
 void ResolverPool::markResolverInactive(int index)
@@ -323,11 +388,18 @@ ResolverPick ResolverPool::pickPrimary()
     }
 
     case BalancingStrategy::HybridScore: {
-        // Spec §9.3 strategy 5: lossScore * 8 + clamp(latencyMs, 0, 1000)
-        // (latency 200 if unknown).
+        // Spec §9.3 strategy 5: lossScore * 8 + clamp(latencyMs, 0, 1000).
+        // Latency defaults to 200ms when unknown. Falls back to round-robin
+        // until at least one resolver crosses the 5-sample probation
+        // threshold (otherwise all scores tie at 1800 and we'd always pick
+        // the first resolver — upstream's parity behavior is RR fallback).
+        bool anyHasSamples = false;
         int bestScore = INT_MAX;
         ResolverConnection *best = nullptr;
         for (auto *c : active) {
+            if (c->sent() >= 5 || c->rttCount() >= 5) {
+                anyHasSamples = true;
+            }
             const int loss = lossScore(*c);
             int latencyMs = (c->rttCount() < 5)
                     ? 200
@@ -339,7 +411,7 @@ ResolverPick ResolverPool::pickPrimary()
                 best = c;
             }
         }
-        if (!best) {
+        if (!anyHasSamples || !best) {
             return pickRoundRobin();
         }
         return { best->index(), best->spec().tunnelDomain };
@@ -392,6 +464,15 @@ ResolverPick ResolverPool::pickPrimary()
     case BalancingStrategy::LeastLossTopRandom:
     case BalancingStrategy::LeastLossTopRoundRobin: {
         // Spec §9.3 strategies 7/8. Sort by loss; take the top max(2, ⌈N/10⌉).
+        // Falls back to plain round-robin when no resolver has crossed the
+        // 5-sample probation threshold yet — matches upstream behavior.
+        bool anyHasSamples = false;
+        for (auto *c : active) {
+            if (c->sent() >= 5) { anyHasSamples = true; break; }
+        }
+        if (!anyHasSamples) {
+            return pickRoundRobin();
+        }
         QVector<ResolverConnection *> sorted = active;
         std::sort(sorted.begin(), sorted.end(),
                   [](ResolverConnection *a, ResolverConnection *b) {

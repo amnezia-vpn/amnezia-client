@@ -31,6 +31,10 @@
 #include <cstdint>
 #include <memory>
 
+// Forward declaration so ResolverPool's `friend class TestMasterDnsVpnEngine`
+// resolves. The test class lives in the default namespace.
+class TestMasterDnsVpnEngine;
+
 namespace amnezia::masterdnsvpn {
 
 // 8 balancing strategies + the "0 = default" alias from §9.3.
@@ -67,6 +71,13 @@ class ResolverConnection;
 class ResolverPool : public QObject
 {
     Q_OBJECT
+
+    // Test-only access for seeding per-resolver stats and inspecting the
+    // connection vector (mirrors the friend-class pattern used by
+    // ArqStream). The upstream Go balancer tests freely manipulate per-
+    // resolver counters via package-private fields; the QTest harness
+    // does the same through this friend hook.
+    friend class ::TestMasterDnsVpnEngine;
 
 public:
     struct Config {
@@ -128,6 +139,44 @@ public:
     // resolvers that fail MTU validation
     // (internal/client/mtu.go:optimizeMTUResolvers).
     void markResolverInactive(int index);
+
+    // ---- Dispatcher feedback API (mirrors upstream's Balancer.Report*) ----
+    //
+    // The dispatcher (Session) calls these as it observes the outcome of
+    // each tunnel envelope it shipped. The pool feeds them into the per-
+    // resolver rolling-loss / RTT-EWMA counters, which the balancer
+    // strategies (§9.3 strategies 3..8) consult on the next pickPrimary().
+
+    // Record a send attempt against `index` (increments the "sent"
+    // counter). Mirrors upstream `Balancer.ReportSend`. Called even on
+    // socket-write failure — the failure is then captured via
+    // reportTimeout / reportSendFailure.
+    void reportSend(int index);
+
+    // Record a successful round-trip for `index` (an ACK arrived for a
+    // packet we sent there). `rttMicros` feeds the per-resolver RTT EWMA.
+    // Mirrors upstream `Balancer.ReportSuccess`.
+    void reportSuccess(int index, qint64 rttMicros);
+
+    // Record a timeout / loss against `index` (ACK never arrived).
+    // Mirrors upstream `Balancer.ReportTimeout`.
+    void reportTimeout(int index);
+
+    // ---- Test introspection ------------------------------------------------
+    //
+    // ResolverConnection lives in resolverpool.cpp's anonymous namespace,
+    // so its internal stat counters aren't reachable from test code without
+    // a hook. These accessors expose the four upstream-equivalent counters
+    // so QTest can verify decay / accumulation behavior without otherwise
+    // breaking encapsulation.
+    qint64 resolverSentForTesting(int index) const;
+    qint64 resolverAckedForTesting(int index) const;
+    qint64 resolverLostForTesting(int index) const;
+    qint64 resolverRttCountForTesting(int index) const;
+
+    // Reports whether the resolver at `index` is currently active. Used by
+    // tests that exercise auto-disable + reactivation paths.
+    bool resolverActive(int index) const;
 
 signals:
     // Fires when the first resolver completes MTU discovery, OR when MTU

@@ -286,8 +286,8 @@ std::optional<QByteArray> decodeBase32(const QByteArray &encoded)
 
 namespace {
 
-constexpr quint16 kQTypeTxt = 0x0010;
-constexpr quint16 kQClassIn = 0x0001;
+// kDnsRecordTypeTxt / kDnsQClassIn are exported from dnsframing.h —
+// referenced here directly without re-declaring.
 constexpr quint16 kFlagsClientStdQueryRd = 0x0100;
 
 // Append a length-prefixed label sequence for `domain` followed by the
@@ -385,8 +385,8 @@ QByteArray buildQuery(quint16 transactionId,
     }
 
     // QTYPE + QCLASS
-    appendU16(out, kQTypeTxt);
-    appendU16(out, kQClassIn);
+    appendU16(out, kDnsRecordTypeTxt);
+    appendU16(out, kDnsQClassIn);
 
     // EDNS(0) OPT pseudo-RR (11 bytes total).
     out.append(static_cast<char>(0x00)); // root name
@@ -509,7 +509,7 @@ std::optional<DnsResponse> parseResponse(const QByteArray &wire, bool wasBase64M
         if (pos + rdLen > wire.size()) {
             return std::nullopt;
         }
-        if (type != kQTypeTxt) {
+        if (type != kDnsRecordTypeTxt) {
             // Skip non-TXT — could be OPT or other ARs; not fatal.
             pos += rdLen;
             continue;

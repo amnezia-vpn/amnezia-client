@@ -24,9 +24,33 @@
 #include <QByteArray>
 #include <QString>
 #include <QVector>
+#include <QtGlobal>
 #include <optional>
 
 namespace amnezia::masterdnsvpn {
+
+// ---- DNS protocol constants (RFC 1035 / RFC 6891) ------------------------
+//
+// Exposed publicly so test code can pin the wire values. The naming mirrors
+// upstream's enums package (internal/enums/dns.go) — we expose only the
+// subset the client engine references; the full DNS qtype table lives in
+// upstream Go but the client only ever needs TXT/OPT in practice.
+
+// DNS QTYPE — record type a question asks about (RFC 1035 §3.2.2).
+constexpr quint16 kDnsRecordTypeTxt = 16;
+constexpr quint16 kDnsRecordTypeOpt = 41;
+
+// DNS QCLASS — record class (RFC 1035 §3.2.4). MasterDnsVPN only uses IN.
+constexpr quint16 kDnsQClassIn = 1;
+
+// DNS RCODE — server response code (RFC 1035 §4.1.1). The full table runs
+// 0..10 but the client only acts on NO_ERROR / REFUSED in practice.
+constexpr quint8 kDnsRCodeNoError       = 0;
+constexpr quint8 kDnsRCodeFormatError   = 1;
+constexpr quint8 kDnsRCodeServerFailure = 2;
+constexpr quint8 kDnsRCodeNameError     = 3;
+constexpr quint8 kDnsRCodeNotImpl       = 4;
+constexpr quint8 kDnsRCodeRefused       = 5;
 
 // ---- base36 / base32 codec ------------------------------------------------
 

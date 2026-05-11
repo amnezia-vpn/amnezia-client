@@ -2288,38 +2288,266 @@ private slots:
     // ====================================================================
     // Upstream parity: internal/client/balancer_test.go
     //
-    // The 16 balancer tests exercise upstream's `NewBalancer` /
-    // `GetBestConnection` / `ReportSend` / `ReportSuccess` /
-    // `SetConnectionValidity` API surface. The C++ ResolverPool has the
-    // 8 strategies (BalancingStrategy enum) and `pickPrimary()` but does
-    // NOT expose a test-friendly API to seed health stats — those are
-    // mutated internally via `recordAcked`/`recordLost` from the pool's
-    // own send/receive flow.
-    //
-    // Translating these tests faithfully requires either (a) exposing a
-    // `setStatsForTesting` API on ResolverConnection (and lifting it
-    // from a .cpp-local class to the header so the friend declaration
-    // works), or (b) routing realistic packet traffic through the pool
-    // until the stats converge. Both are follow-up work; the
-    // strategies themselves are implemented but currently un-tested.
+    // The C++ ResolverPool combines upstream's `NewBalancer` +
+    // `Connection` registry into one object. `reportSend / reportSuccess
+    // / reportTimeout` mirror upstream's `Balancer.Report*` and feed the
+    // rolling-loss / RTT-EWMA counters consulted by `pickPrimary()`.
+    // Tests use the For-Testing accessors (`resolverSentForTesting` etc.)
+    // to inspect the same counters upstream exposes via `stats.snapshot`.
     // ====================================================================
 
-    void testBalancerLeastLossFallsBackToRoundRobinWithoutStats() { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerLowestLatencyUsesRuntimeStats()              { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerHybridPrefersLowerLossWhenLatencyIsClose()   { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerHybridPrefersLowerLatencyWhenLossIsEqual()   { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerHybridFallsBackToRoundRobinWithoutStats()    { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerLossThenLatencyPrefersLowerLossFirst()       { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerLossThenLatencyUsesLatencyInsideLossTier()   { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerLossThenLatencyRoundRobinsAcrossNearTopCandidates() { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerLeastLossTopRandomFallsBackToRoundRobinWithoutStats() { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerLeastLossTopRandomUsesTopLossTier()          { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerLeastLossTopRoundRobinUsesTopLossTier()      { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerStatsHalfLifeAlsoAppliesOnSend()             { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerStatsHalfLifePreservesRelativeSuccessSignal() { QSKIP("ResolverConnection stats not exposed for test seeding."); }
-    void testBalancerSetConnectionsCopiesSourceDomain()           { QSKIP("Pool reconfiguration after start() not supported in C++; would need API."); }
-    void testBalancerSetConnectionValidityDoesNotPullSourceMutation() { QSKIP("Pool reconfiguration not supported."); }
-    void testBalancerSetConnectionMTUUpdatesBalancerOnly()        { QSKIP("ResolverConnection.setMtu not exposed for test seeding."); }
+    // Build a balancer-only pool with `n` resolvers, configured against
+    // the given strategy. No real network is needed (the constituent
+    // ResolverConnections bind ephemeral UDP sockets but don't transmit).
+    static std::unique_ptr<ResolverPool> makeBalancerPool(BalancingStrategy s, int n)
+    {
+        auto pool = std::make_unique<ResolverPool>();
+        QVector<ResolverSpec> specs;
+        for (int i = 0; i < n; ++i) {
+            ResolverSpec spec;
+            spec.address = QHostAddress::LocalHost;
+            spec.port = static_cast<quint16>(53000 + i); // unused
+            spec.tunnelDomain = QString("d%1.example").arg(QChar('a' + i));
+            specs.append(spec);
+        }
+        ResolverPool::Config cfg;
+        cfg.strategy = s;
+        pool->configure(specs, cfg);
+        return pool;
+    }
+
+    void testBalancerLeastLossFallsBackToRoundRobinWithoutStats()
+    {
+        // Upstream: TestBalancerLeastLossFallsBackToRoundRobinWithoutStats (8).
+        // With no stats recorded, LeastLoss falls back to round-robin.
+        auto pool = makeBalancerPool(BalancingStrategy::LeastLoss, 3);
+        const auto a = pool->pickPrimary();
+        const auto b = pool->pickPrimary();
+        const auto c = pool->pickPrimary();
+        QCOMPARE(a.index, 0);
+        QCOMPARE(b.index, 1);
+        QCOMPARE(c.index, 2);
+    }
+
+    void testBalancerLowestLatencyUsesRuntimeStats()
+    {
+        // Upstream: TestBalancerLowestLatencyUsesRuntimeStats (38).
+        auto pool = makeBalancerPool(BalancingStrategy::LowestLatency, 2);
+        for (int i = 0; i < 6; ++i) {
+            pool->reportSend(0);
+            pool->reportSuccess(0, 8000); // 8 ms in μs
+            pool->reportSend(1);
+            pool->reportSuccess(1, 2000); // 2 ms
+        }
+        const auto best = pool->pickPrimary();
+        QCOMPARE(best.index, 1);
+    }
+
+    void testBalancerHybridPrefersLowerLossWhenLatencyIsClose()
+    {
+        // Upstream: TestBalancerHybridPrefersLowerLossWhenLatencyIsClose (64).
+        auto pool = makeBalancerPool(BalancingStrategy::HybridScore, 2);
+        for (int i = 0; i < 10; ++i) {
+            pool->reportSend(0);
+            pool->reportSuccess(0, 12000);
+            pool->reportSend(1);
+            pool->reportSuccess(1, 8000);
+        }
+        for (int i = 0; i < 3; ++i) {
+            pool->reportSend(0);
+            pool->reportTimeout(0);
+        }
+        const auto best = pool->pickPrimary();
+        QCOMPARE(best.index, 1);
+    }
+
+    void testBalancerHybridPrefersLowerLatencyWhenLossIsEqual()
+    {
+        // Upstream: TestBalancerHybridPrefersLowerLatencyWhenLossIsEqual (94).
+        auto pool = makeBalancerPool(BalancingStrategy::HybridScore, 2);
+        for (int i = 0; i < 6; ++i) {
+            pool->reportSend(0);
+            pool->reportSuccess(0, 12000);
+            pool->reportSend(1);
+            pool->reportSuccess(1, 3000);
+        }
+        const auto best = pool->pickPrimary();
+        QCOMPARE(best.index, 1);
+    }
+
+    void testBalancerHybridFallsBackToRoundRobinWithoutStats()
+    {
+        // Upstream: TestBalancerHybridFallsBackToRoundRobinWithoutStats (120).
+        // No samples → all scores tie at 1800; the C++ HybridScore branch
+        // detects "no probation threshold crossed" and falls through to
+        // round-robin. Three sequential picks should produce 0, 1, 2.
+        auto pool = makeBalancerPool(BalancingStrategy::HybridScore, 3);
+        QCOMPARE(pool->pickPrimary().index, 0);
+        QCOMPARE(pool->pickPrimary().index, 1);
+        QCOMPARE(pool->pickPrimary().index, 2);
+    }
+
+    void testBalancerLossThenLatencyPrefersLowerLossFirst()
+    {
+        // Upstream: TestBalancerLossThenLatencyPrefersLowerLossFirst (150).
+        auto pool = makeBalancerPool(BalancingStrategy::LossThenLatency, 2);
+        for (int i = 0; i < 10; ++i) {
+            pool->reportSend(0);
+            pool->reportSuccess(0, 4000);
+            pool->reportSend(1);
+            pool->reportSuccess(1, 10000);
+        }
+        for (int i = 0; i < 2; ++i) {
+            pool->reportSend(0);
+            pool->reportTimeout(0);
+        }
+        const auto best = pool->pickPrimary();
+        QCOMPARE(best.index, 1);
+    }
+
+    void testBalancerLossThenLatencyUsesLatencyInsideLossTier()
+    {
+        // Upstream: TestBalancerLossThenLatencyUsesLatencyInsideLossTier (180).
+        auto pool = makeBalancerPool(BalancingStrategy::LossThenLatency, 2);
+        for (int i = 0; i < 8; ++i) {
+            pool->reportSend(0);
+            pool->reportSuccess(0, 15000);
+            pool->reportSend(1);
+            pool->reportSuccess(1, 4000);
+        }
+        const auto best = pool->pickPrimary();
+        QCOMPARE(best.index, 1);
+    }
+
+    void testBalancerLossThenLatencyRoundRobinsAcrossNearTopCandidates()
+    {
+        // Upstream: TestBalancerLossThenLatencyRoundRobinsAcrossNearTopCandidates
+        // (206). Two candidates within both loss-tolerance and latency-
+        // tolerance bands should round-robin across them.
+        auto pool = makeBalancerPool(BalancingStrategy::LossThenLatency, 2);
+        for (int i = 0; i < 8; ++i) {
+            pool->reportSend(0);
+            pool->reportSuccess(0, 10000);
+            pool->reportSend(1);
+            pool->reportSuccess(1, 12000);
+        }
+        QSet<int> seen;
+        for (int i = 0; i < 10; ++i) {
+            seen.insert(pool->pickPrimary().index);
+        }
+        QVERIFY2(seen.contains(0) && seen.contains(1),
+                 "expected near-top candidates to share random/RR pick");
+    }
+
+    void testBalancerLeastLossTopRandomFallsBackToRoundRobinWithoutStats()
+    {
+        // Upstream: TestBalancerLeastLossTopRandomFallsBackToRoundRobinWithoutStats
+        // (237). With no stats, top-random falls back to round-robin
+        // across the full pool — three sequential picks give 0, 1, 2.
+        auto pool = makeBalancerPool(BalancingStrategy::LeastLossTopRandom, 3);
+        QCOMPARE(pool->pickPrimary().index, 0);
+        QCOMPARE(pool->pickPrimary().index, 1);
+        QCOMPARE(pool->pickPrimary().index, 2);
+    }
+
+    void testBalancerLeastLossTopRandomUsesTopLossTier()
+    {
+        // Upstream: TestBalancerLeastLossTopRandomUsesTopLossTier (257).
+        // 4 resolvers; c+d are timed out. Picks must come only from {a, b}.
+        auto pool = makeBalancerPool(BalancingStrategy::LeastLossTopRandom, 4);
+        for (int i = 0; i < 10; ++i) {
+            for (int idx = 0; idx < 4; ++idx) {
+                pool->reportSend(idx);
+                pool->reportSuccess(idx, 5000);
+            }
+        }
+        pool->reportSend(2);
+        pool->reportTimeout(2);
+        pool->reportSend(3);
+        pool->reportTimeout(3);
+
+        QSet<int> seen;
+        for (int i = 0; i < 20; ++i) {
+            const auto pick = pool->pickPrimary();
+            QVERIFY2(pick.index == 0 || pick.index == 1,
+                     QString("expected top-tier pick (a or b), got index %1").arg(pick.index).toLocal8Bit().constData());
+            seen.insert(pick.index);
+        }
+        QVERIFY2(seen.contains(0) && seen.contains(1),
+                 "expected both top-tier candidates picked");
+    }
+
+    void testBalancerLeastLossTopRoundRobinUsesTopLossTier()
+    {
+        // Upstream: TestBalancerLeastLossTopRoundRobinUsesTopLossTier (300).
+        auto pool = makeBalancerPool(BalancingStrategy::LeastLossTopRoundRobin, 4);
+        for (int i = 0; i < 10; ++i) {
+            for (int idx = 0; idx < 4; ++idx) {
+                pool->reportSend(idx);
+                pool->reportSuccess(idx, 5000);
+            }
+        }
+        pool->reportSend(2);
+        pool->reportTimeout(2);
+        pool->reportSend(3);
+        pool->reportTimeout(3);
+
+        const int first = pool->pickPrimary().index;
+        const int second = pool->pickPrimary().index;
+        QVERIFY2(first == 0 || first == 1,
+                 "expected first pick from top tier");
+        QVERIFY2(second == 0 || second == 1,
+                 "expected second pick from top tier");
+        QVERIFY2(first != second, "expected round-robin across top tier");
+    }
+
+    void testBalancerStatsHalfLifeAlsoAppliesOnSend()
+    {
+        // Upstream: TestBalancerStatsHalfLifeAlsoAppliesOnSend (342).
+        // The C++ half-life threshold is 1001 (any counter > 1000). After
+        // 1001 send reports, sent should halve and acked stay zero.
+        auto pool = makeBalancerPool(BalancingStrategy::LeastLoss, 1);
+        for (int i = 0; i < 1001; ++i) {
+            pool->reportSend(0);
+        }
+        QCOMPARE(pool->resolverSentForTesting(0), qint64(1001 / 2));
+        QCOMPARE(pool->resolverAckedForTesting(0), qint64(0));
+        QCOMPARE(pool->resolverRttCountForTesting(0), qint64(0));
+    }
+
+    void testBalancerStatsHalfLifePreservesRelativeSuccessSignal()
+    {
+        // Upstream: TestBalancerStatsHalfLifePreservesRelativeSuccessSignal
+        // (367). After 800 sends + 400 successes + 401 more sends (total
+        // 1201 sends + 400 successes), the half-life kicks at counter
+        // 1001. Result should be: sent=700, acked=200, rttCount=200.
+        auto pool = makeBalancerPool(BalancingStrategy::LeastLoss, 1);
+        for (int i = 0; i < 800; ++i) {
+            pool->reportSend(0);
+        }
+        for (int i = 0; i < 400; ++i) {
+            pool->reportSuccess(0, 5000); // 5 ms
+        }
+        for (int i = 0; i < 401; ++i) {
+            pool->reportSend(0);
+        }
+        QCOMPARE(pool->resolverSentForTesting(0), qint64(700));
+        QCOMPARE(pool->resolverAckedForTesting(0), qint64(200));
+        QCOMPARE(pool->resolverRttCountForTesting(0), qint64(200));
+    }
+
+    // These three still require pool-reconfiguration after start() or
+    // a per-resolver MTU setter that the C++ engine doesn't expose
+    // separately (MTU is published pool-wide via setSyncedMtu).
+    void testBalancerSetConnectionsCopiesSourceDomain() {
+        QSKIP("Pool reconfiguration after configure() not supported in C++ engine.");
+    }
+    void testBalancerSetConnectionValidityDoesNotPullSourceMutation() {
+        QSKIP("Pool reconfiguration not supported; configuration is one-shot.");
+    }
+    void testBalancerSetConnectionMTUUpdatesBalancerOnly() {
+        QSKIP("Per-resolver MTU setter not exposed — MTU is pool-wide via setSyncedMtu.");
+    }
 
     // ====================================================================
     // Upstream parity: internal/client/mtu_math_test.go
@@ -2742,15 +2970,15 @@ private slots:
 
     void testDNSRecordAndRCodeValues()
     {
-        // Upstream: TestDNSRecordAndRCodeValues (86). DNS qtype + rcode +
-        // qclass values must be RFC-stable. The C++ engine inlines these
-        // constants in dnsframing.cpp rather than exposing them as a
-        // named-constants header. The values themselves are RFC 1035 /
-        // RFC 6891 stable (TXT=16, OPT=41, NO_ERROR=0, REFUSED=5, IN=1);
-        // exporting them is a separate refactor.
-        QSKIP("DNS qtype/rcode/qclass constants not exported from C++ "
-              "engine — they live inside dnsframing.cpp's anonymous "
-              "namespace. Follow-up commit exposes them in a header.");
+        // Upstream: TestDNSRecordAndRCodeValues (enums/dns_test.go:86).
+        // Anchor the wire-stable DNS qtype / rcode / qclass values
+        // exposed by dnsframing.h. The constants are RFC 1035 + RFC 6891
+        // stable — any drift here is a wire-incompat bug.
+        QCOMPARE(kDnsRecordTypeTxt, quint16(16));
+        QCOMPARE(kDnsRecordTypeOpt, quint16(41));
+        QCOMPARE(kDnsRCodeNoError, quint8(0));
+        QCOMPARE(kDnsRCodeRefused, quint8(5));
+        QCOMPARE(kDnsQClassIn, quint16(1));
     }
 
     // ====================================================================
