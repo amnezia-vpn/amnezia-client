@@ -149,6 +149,15 @@ target_link_libraries(test_master_dns_vpn_config PRIVATE
     test_common
 )
 
+add_executable(test_master_dns_vpn_engine
+    testMasterDnsVpnEngine.cpp
+)
+
+target_link_libraries(test_master_dns_vpn_engine PRIVATE
+    Qt6::Test
+    test_common
+)
+
 enable_testing()
 add_test(NAME ImportExportTest COMMAND test_import_export)
 add_test(NAME MultipleImportsTest COMMAND test_multiple_imports)
@@ -163,3 +172,4 @@ add_test(NAME SettingsSignalsTest COMMAND test_settings_signals)
 add_test(NAME UiServersModelAndControllerTest COMMAND test_ui_servers_model_and_controller)
 add_test(NAME SelfHostedServerSetupTest COMMAND test_self_hosted_server_setup)
 add_test(NAME MasterDnsVpnConfigTest COMMAND test_master_dns_vpn_config)
+add_test(NAME MasterDnsVpnEngineTest COMMAND test_master_dns_vpn_engine)
