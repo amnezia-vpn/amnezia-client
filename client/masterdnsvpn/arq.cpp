@@ -198,14 +198,38 @@ void ArqStream::onDataPacket(const Packet &pkt)
     const quint16 sn = *pkt.sequenceNum;
     const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
 
-    // Always ACK — duplicates produce duplicate ACKs which the sender
-    // silently dedups (§6.7).
-    emitDataAck(sn);
-
-    // Behind rcvNxt → duplicate; drop after the ACK.
+    // Behind rcvNxt → duplicate: emit a refreshing ACK so the peer can
+    // retire the sndBuf entry, then drop the payload. (Upstream emits
+    // an ACK in this branch and returns immediately —
+    // internal/arq/arq.go:1576-1583.)
     if (!isAhead(sn, m_rcvNxt) && sn != m_rcvNxt) {
+        emitDataAck(sn);
         return;
     }
+
+    // Receive-window cap. Upstream maintains
+    // `receiveWindowSize = 2 * windowSize` and drops seqs that would
+    // expand rcvBuf beyond that bound. Two distinct checks:
+    //   (a) the seq itself is too far ahead of rcvNxt (would overrun
+    //       the window), and
+    //   (b) the rcvBuf is already at capacity and this seq isn't the
+    //       in-order frontier.
+    // Either rejects the packet outright (no ACK, no buffering) — the
+    // sender will retry once its RTO fires. Mirrors
+    // internal/arq/arq.go:1586-1595.
+    const int receiveWindowSize = m_cfg.windowSize * 2;
+    const quint16 diff = static_cast<quint16>(sn - m_rcvNxt);
+    if (static_cast<int>(diff) > receiveWindowSize) {
+        return;
+    }
+    if (sn != m_rcvNxt
+        && !m_rcvBuf.contains(sn)
+        && m_rcvBuf.size() >= receiveWindowSize) {
+        return;
+    }
+
+    // Always ACK on accept — duplicates already returned above.
+    emitDataAck(sn);
 
     if (sn == m_rcvNxt) {
         // In-order: deliver immediately, advance, drain backlog.

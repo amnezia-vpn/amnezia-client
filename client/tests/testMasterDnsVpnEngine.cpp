@@ -1748,23 +1748,30 @@ private slots:
     void testArqReceiveWindowAllowsTwiceSendWindowOutOfOrder()
     {
         // Upstream: TestARQ_ReceiveWindowAllowsTwiceSendWindowOutOfOrder
-        // (2212). With windowSize=64, the receive buffer must accept up
-        // to 128 out-of-order entries before pressing back.
-        //
-        // The C++ engine's `m_rcvBuf` is unbounded today (no receive-
-        // window cap). Upstream caps via `receiveWindowSize` (2*window).
+        // (2212). Upstream test seeds windowSize=100 and
+        // receiveWindowSize=200 directly via friend access (bypassing the
+        // upstream's own min-300 floor). Then:
+        //   * processReceivedData(150) → in-window, buffered.
+        //   * processReceivedData(250) → out-of-window, silently dropped.
+        // We mirror by overwriting m_cfg.windowSize post-construction
+        // (cap is computed as windowSize*2 = 200 in onDataPacket).
         ArqConfig cfg;
-        cfg.windowSize = 64;
+        cfg.windowSize = 100;
         QVector<Packet> sent;
         ArqStream a(1, cfg,
                     [&sent](const ArqOutbound &o) { sent.append(o.packet); },
                     [](const ArqDelivery &) {});
+        // Bypass the 300-floor: the upstream test does the same to make
+        // the cap observable with small seq numbers.
+        a.m_cfg.windowSize = 100;
 
-        // Accept ~128 out-of-order packets without complaint.
-        for (quint16 sn = 1; sn <= 128; ++sn) {
-            a.ReceiveData(sn, QByteArrayLiteral("x"));
-        }
-        QCOMPARE(a.m_rcvBuf.size(), 128);
+        a.ReceiveData(150, QByteArrayLiteral("in-window"));
+        QVERIFY2(a.m_rcvBuf.contains(150),
+                 "expected seq 150 (within 2x window) to be buffered");
+
+        a.ReceiveData(250, QByteArrayLiteral("too-far"));
+        QVERIFY2(!a.m_rcvBuf.contains(250),
+                 "expected seq 250 (beyond receive window) to be dropped");
     }
 
     void testArqBackpressure()
@@ -2331,9 +2338,8 @@ private slots:
     void testDecodeLowerBase36AcceptsUppercaseASCII()
     {
         // Upstream: TestDecodeLowerBase36AcceptsUppercaseASCII (61).
-        // GAP: the C++ decodeBase36 may not accept uppercase (case
-        // sensitivity differs by implementation). Faithful translation:
-        // assert acceptance.
+        // The C++ decodeBase36 builds a case-insensitive lookup table
+        // (dnsframing.cpp:29-32) so A-Z fold to a-z transparently.
         const QByteArray original = QByteArray::fromHex("0001abcdef");
         const QByteArray encoded = encodeBase36(original);
         QByteArray upper = encoded;
