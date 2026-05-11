@@ -181,4 +181,9 @@ QVector<PackedBlock> unpackBlocks(const QByteArray &payload);
 
 } // namespace amnezia::masterdnsvpn
 
+// Register PacketType for use across Qt's signal/slot meta-system —
+// signals like MtuProber::nextProbe(PacketType, ...) need this for
+// queued connections and for QVariant value extraction in tests.
+Q_DECLARE_METATYPE(amnezia::masterdnsvpn::PacketType)
+
 #endif // MASTERDNSVPN_WIREFRAMING_H

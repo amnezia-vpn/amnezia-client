@@ -9,6 +9,7 @@
 #include "masterdnsvpn/arq.h"
 #include "masterdnsvpn/crypto.h"
 #include "masterdnsvpn/dnsframing.h"
+#include "masterdnsvpn/mtuprober.h"
 #include "masterdnsvpn/pingpacer.h"
 #include "masterdnsvpn/wireframing.h"
 
@@ -567,6 +568,295 @@ private slots:
         state.notify(PacketType::Ping, /*inbound=*/false, /*now=*/5'000);
         QCOMPARE(state.lastPingSentMs, qint64(5'000));
         QCOMPARE(state.lastNonPingSentMs, before);
+    }
+
+    // ----- §9 MTU prober ----------------------------------------------------
+
+    // Helper: synthesise a well-formed MTU_UP_RES payload for the prober's
+    // most recently announced challenge + candidate. Format mirrors
+    // upstream's `sendUploadMTUProbe` validator (6 bytes: code + size).
+    static QByteArray makeUploadResponse(quint32 challenge, int size)
+    {
+        QByteArray buf(6, '\0');
+        qToBigEndian<quint32>(challenge, buf.data());
+        qToBigEndian<quint16>(static_cast<quint16>(size), buf.data() + 4);
+        return buf;
+    }
+
+    // Helper: well-formed MTU_DOWN_RES payload of the requested effective
+    // size. `effectiveSize` mirrors upstream's `effectiveDownloadProbeSize`
+    // — for the current packet catalogue it equals the download MTU itself.
+    static QByteArray makeDownloadResponse(quint32 challenge, int effectiveSize)
+    {
+        QByteArray buf(effectiveSize, '\0');
+        qToBigEndian<quint32>(challenge, buf.data());
+        qToBigEndian<quint16>(static_cast<quint16>(effectiveSize), buf.data() + 4);
+        return buf;
+    }
+
+    // Helper: extract the challenge code embedded in the *last* probe the
+    // prober emitted, so tests don't have to know the internal counter.
+    static quint32 challengeFromLastProbe(const QSignalSpy &spy)
+    {
+        const QList<QVariant> args = spy.last();
+        const QByteArray payload = args.at(1).toByteArray();
+        // Probe payload layout: [mode 1B][code 4B BE][filler...]
+        return qFromBigEndian<quint32>(payload.constData() + 1);
+    }
+
+    void mtuProberHighSucceedsTerminatesImmediately()
+    {
+        // If the max-MTU probe passes on first try, the binary search
+        // skips the middle and reports `high` directly — same shortcut
+        // upstream uses (mtu.go:1075-1080).
+        MtuProber prober;
+        QSignalSpy probeSpy(&prober, &MtuProber::nextProbe);
+        QSignalSpy doneSpy(&prober, &MtuProber::finished);
+
+        MtuProber::Config cfg;
+        cfg.minUpload = 10;
+        cfg.maxUpload = 100;
+        cfg.minDownload = 20;
+        cfg.maxDownload = 200;
+        cfg.maxRetries = 0;
+        prober.start(cfg);
+
+        // First emission is the upload probe at `high = 100`.
+        QCOMPARE(probeSpy.count(), 1);
+        QCOMPARE(probeSpy.last().at(0).value<PacketType>(), PacketType::MtuUpReq);
+        QCOMPARE(probeSpy.last().at(2).toBool(), true);
+        quint32 ch = challengeFromLastProbe(probeSpy);
+        prober.feedResponse(PacketType::MtuUpRes, makeUploadResponse(ch, 100));
+
+        // Phase pivots to download immediately; next probe is MtuDownReq at `high = 200`.
+        QCOMPARE(probeSpy.count(), 2);
+        QCOMPARE(probeSpy.last().at(0).value<PacketType>(), PacketType::MtuDownReq);
+        QCOMPARE(probeSpy.last().at(2).toBool(), false);
+        ch = challengeFromLastProbe(probeSpy);
+        prober.feedResponse(PacketType::MtuDownRes, makeDownloadResponse(ch, 200));
+
+        QCOMPARE(doneSpy.count(), 1);
+        QCOMPARE(doneSpy.last().at(0).toBool(), true);
+        QCOMPARE(doneSpy.last().at(1).toInt(), 100);
+        QCOMPARE(doneSpy.last().at(2).toInt(), 200);
+    }
+
+    void mtuProberBinarySearchConvergesToHighestPassing()
+    {
+        // High fails, low passes — prober steps through the middle,
+        // succeeding only at sizes <= 64. Should converge on `best = 64`.
+        MtuProber prober;
+        QSignalSpy probeSpy(&prober, &MtuProber::nextProbe);
+        QSignalSpy doneSpy(&prober, &MtuProber::finished);
+
+        MtuProber::Config cfg;
+        cfg.minUpload = 10;
+        cfg.maxUpload = 100;
+        cfg.minDownload = 20;
+        cfg.maxDownload = 20; // trivial download — just match floor
+        cfg.maxRetries = 0;
+        prober.start(cfg);
+
+        auto respondAccordingTo = [&](int sizeCap) {
+            const QList<QVariant> args = probeSpy.last();
+            const QByteArray payload = args.at(1).toByteArray();
+            const quint32 ch = qFromBigEndian<quint32>(payload.constData() + 1);
+            const int candidateSize = payload.size();
+            const bool isUpload = args.at(0).value<PacketType>() == PacketType::MtuUpReq;
+            if (isUpload) {
+                if (candidateSize <= sizeCap) {
+                    prober.feedResponse(PacketType::MtuUpRes, makeUploadResponse(ch, candidateSize));
+                } else {
+                    prober.feedResponse(PacketType::MtuUpRes, makeUploadResponse(ch + 1, candidateSize));
+                }
+            }
+        };
+
+        // Drive the upload search while a 64-byte ceiling exists.
+        const int sizeCap = 64;
+        while (probeSpy.last().at(0).value<PacketType>() == PacketType::MtuUpReq) {
+            respondAccordingTo(sizeCap);
+            if (probeSpy.last().at(0).value<PacketType>() != PacketType::MtuUpReq) {
+                break;
+            }
+        }
+
+        // Once upload converged, prober pivots to download. Let it pass.
+        const QList<QVariant> downArgs = probeSpy.last();
+        if (downArgs.at(0).value<PacketType>() == PacketType::MtuDownReq) {
+            const quint32 ch = qFromBigEndian<quint32>(downArgs.at(1).toByteArray().constData() + 1);
+            prober.feedResponse(PacketType::MtuDownRes, makeDownloadResponse(ch, 20));
+        }
+
+        QCOMPARE(doneSpy.count(), 1);
+        QCOMPARE(doneSpy.last().at(0).toBool(), true);
+        QCOMPARE(doneSpy.last().at(1).toInt(), 64);
+        QCOMPARE(doneSpy.last().at(2).toInt(), 20);
+    }
+
+    void mtuProberBothBoundariesFailingAbortsSearch()
+    {
+        // High fails, low fails → `finished(false, 0, 0)`. Mirrors upstream
+        // `binarySearchMTU` mtu.go:1092-1100.
+        MtuProber prober;
+        QSignalSpy probeSpy(&prober, &MtuProber::nextProbe);
+        QSignalSpy doneSpy(&prober, &MtuProber::finished);
+
+        MtuProber::Config cfg;
+        cfg.minUpload = 10;
+        cfg.maxUpload = 100;
+        cfg.maxRetries = 0; // single-attempt per candidate
+        prober.start(cfg);
+
+        // First emission: high. Reply with wrong challenge → counts as fail.
+        prober.feedResponse(PacketType::MtuUpRes, makeUploadResponse(0xDEADBEEF, 100));
+        // Second emission: low. Reply with wrong challenge → counts as fail.
+        prober.feedResponse(PacketType::MtuUpRes, makeUploadResponse(0xDEADBEEF, 10));
+
+        QCOMPARE(doneSpy.count(), 1);
+        QCOMPARE(doneSpy.last().at(0).toBool(), false);
+        QCOMPARE(doneSpy.last().at(1).toInt(), 0);
+        QCOMPARE(doneSpy.last().at(2).toInt(), 0);
+    }
+
+    void mtuProberRetriesBeforeFailing()
+    {
+        // With maxRetries = 2 each candidate gets 3 total attempts (initial
+        // + 2 retries). Two failures followed by a pass should accept the
+        // candidate. Mirrors upstream mtu.go:1058-1071.
+        MtuProber prober;
+        QSignalSpy probeSpy(&prober, &MtuProber::nextProbe);
+        QSignalSpy doneSpy(&prober, &MtuProber::finished);
+
+        MtuProber::Config cfg;
+        cfg.minUpload = 10;
+        cfg.maxUpload = 100;
+        cfg.minDownload = 20;
+        cfg.maxDownload = 20;
+        cfg.maxRetries = 2;
+        prober.start(cfg);
+
+        // First high probe — emit a wrong-challenge response (fails).
+        prober.feedResponse(PacketType::MtuUpRes, makeUploadResponse(0xDEADBEEF, 100));
+        QCOMPARE(probeSpy.count(), 2); // second attempt at high triggered
+
+        // Second attempt also fails.
+        prober.feedResponse(PacketType::MtuUpRes, makeUploadResponse(0xDEADBEEF, 100));
+        QCOMPARE(probeSpy.count(), 3); // third attempt
+
+        // Third attempt: feed a well-formed response for the latest probe.
+        const quint32 ch = challengeFromLastProbe(probeSpy);
+        prober.feedResponse(PacketType::MtuUpRes, makeUploadResponse(ch, 100));
+
+        // High accepted → pivot to download.
+        QCOMPARE(probeSpy.last().at(0).value<PacketType>(), PacketType::MtuDownReq);
+        const quint32 dch = challengeFromLastProbe(probeSpy);
+        prober.feedResponse(PacketType::MtuDownRes, makeDownloadResponse(dch, 20));
+
+        QCOMPARE(doneSpy.count(), 1);
+        QCOMPARE(doneSpy.last().at(0).toBool(), true);
+        QCOMPARE(doneSpy.last().at(1).toInt(), 100);
+    }
+
+    void mtuProberTickAdvancesPastDeadline()
+    {
+        // No response inside the timeout → tick after the deadline retries
+        // up to the budget, then declares this candidate failed.
+        MtuProber prober;
+        QSignalSpy probeSpy(&prober, &MtuProber::nextProbe);
+        QSignalSpy doneSpy(&prober, &MtuProber::finished);
+
+        MtuProber::Config cfg;
+        cfg.minUpload = 10;
+        cfg.maxUpload = 100;
+        cfg.minDownload = 20;
+        cfg.maxDownload = 20;
+        cfg.timeoutMs = 100;
+        cfg.maxRetries = 0; // strict single attempt
+        prober.start(cfg);
+
+        // High probe out. Tick past deadline — this counts as one failure
+        // with no retries left, advancing to low.
+        prober.tick(QDateTime::currentMSecsSinceEpoch() + 200);
+        QCOMPARE(probeSpy.count(), 2); // low probe issued
+
+        // Tick past deadline again — low also failed; the whole search aborts.
+        prober.tick(QDateTime::currentMSecsSinceEpoch() + 400);
+        QCOMPARE(doneSpy.count(), 1);
+        QCOMPARE(doneSpy.last().at(0).toBool(), false);
+    }
+
+    void mtuProberRejectsWrongSizeResponses()
+    {
+        // Upload response with payload size != 6 must be rejected as a
+        // probe failure, not silently dropped — otherwise a corrupt
+        // response could hang the search.
+        MtuProber prober;
+        QSignalSpy probeSpy(&prober, &MtuProber::nextProbe);
+        QSignalSpy doneSpy(&prober, &MtuProber::finished);
+
+        MtuProber::Config cfg;
+        cfg.minUpload = 10;
+        cfg.maxUpload = 100;
+        cfg.maxRetries = 0;
+        prober.start(cfg);
+
+        // Send a 7-byte response (wrong size) for high.
+        QByteArray bad(7, '\0');
+        prober.feedResponse(PacketType::MtuUpRes, bad);
+
+        // Prober should have advanced to probing `low` after the failure.
+        QCOMPARE(probeSpy.count(), 2);
+    }
+
+    void mtuProberIgnoresUnrelatedPacketTypes()
+    {
+        // Non-MTU packet types fed in while a probe is outstanding must
+        // not advance the state machine.
+        MtuProber prober;
+        QSignalSpy probeSpy(&prober, &MtuProber::nextProbe);
+        QSignalSpy doneSpy(&prober, &MtuProber::finished);
+
+        MtuProber::Config cfg;
+        prober.start(cfg);
+        const int beforeProbes = probeSpy.count();
+
+        prober.feedResponse(PacketType::Pong, QByteArray());
+        prober.feedResponse(PacketType::SessionAccept, QByteArray());
+        prober.feedResponse(PacketType::StreamData, QByteArray());
+
+        QCOMPARE(probeSpy.count(), beforeProbes);
+        QCOMPARE(doneSpy.count(), 0);
+    }
+
+    void mtuProberProbePayloadLayout()
+    {
+        // Wire format check: probe payload[0] is the response-mode byte;
+        // payload[1..5] is the BE challenge. For download probes,
+        // payload[5..7] is the requested effective response size.
+        MtuProber prober;
+        QSignalSpy probeSpy(&prober, &MtuProber::nextProbe);
+
+        MtuProber::Config cfg;
+        cfg.minUpload = 10;
+        cfg.maxUpload = 100;
+        cfg.minDownload = 20;
+        cfg.maxDownload = 200;
+        cfg.baseEncodeReply = true;
+        prober.start(cfg);
+
+        QByteArray upPayload = probeSpy.last().at(1).toByteArray();
+        QCOMPARE(static_cast<quint8>(upPayload[0]), quint8(1)); // base64 mode = 1
+        QVERIFY(upPayload.size() == 100);                       // size == upload MTU
+        const quint32 upCh = qFromBigEndian<quint32>(upPayload.constData() + 1);
+        QVERIFY(upCh != 0);                                     // counter starts at 1
+
+        // Drive the upload to success so the prober pivots to download.
+        prober.feedResponse(PacketType::MtuUpRes, makeUploadResponse(upCh, 100));
+        QByteArray downPayload = probeSpy.last().at(1).toByteArray();
+        QCOMPARE(static_cast<quint8>(downPayload[0]), quint8(1));
+        const int reqDownSize = qFromBigEndian<quint16>(downPayload.constData() + 5);
+        QCOMPARE(reqDownSize, 200);
     }
 };
 
