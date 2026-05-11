@@ -30,6 +30,8 @@ class WindowsDaemon final : public Daemon {
   bool run(Op op, const InterfaceConfig& config) override;
   WireguardUtils* wgutils() const override { return m_wgutils.get(); }
   DnsUtils* dnsutils() override { return m_dnsutils; }
+  WireguardUtils* createWgUtils() override;
+  void replaceActiveWgUtils(WireguardUtils* newUtils) override;
 
  private:
   void monitorBackendFailure();

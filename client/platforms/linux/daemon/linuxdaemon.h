@@ -26,6 +26,15 @@ class LinuxDaemon final : public Daemon {
   bool supportIPUtils() const override { return true; }
   IPUtils* iputils() override { return m_iputils; }
 
+  WireguardUtils* createWgUtils() override {
+    return new WireguardUtilsLinux(this);
+  }
+
+  void replaceActiveWgUtils(WireguardUtils* newUtils) override {
+    delete m_wgutils;
+    m_wgutils = static_cast<WireguardUtilsLinux*>(newUtils);
+  }
+
  private:
   WireguardUtilsLinux* m_wgutils = nullptr;
   DnsUtilsLinux* m_dnsutils = nullptr;

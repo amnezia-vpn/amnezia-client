@@ -112,3 +112,15 @@ void WindowsDaemon::monitorBackendFailure() {
   emit backendFailure();
   deactivate();
 }
+
+WireguardUtils* WindowsDaemon::createWgUtils() {
+  auto utils = WireguardUtilsWindows::create(m_firewallManager, this);
+  if (!utils) return nullptr;
+  connect(utils.get(), &WireguardUtilsWindows::backendFailure, this,
+          &WindowsDaemon::monitorBackendFailure);
+  return utils.release();
+}
+
+void WindowsDaemon::replaceActiveWgUtils(WireguardUtils* newUtils) {
+  m_wgutils.reset(static_cast<WireguardUtilsWindows*>(newUtils));
+}
