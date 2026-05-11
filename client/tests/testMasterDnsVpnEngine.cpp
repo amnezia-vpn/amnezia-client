@@ -2002,6 +2002,143 @@ private slots:
               "server-side; the C++ client only parses responses.");
     }
 
+    // ====================================================================
+    // Upstream parity: internal/socksproto/target_test.go
+    //
+    // ParseTargetPayload + ParseUDPDatagram + BuildUDPDatagram are upstream's
+    // SOCKS5-inner-protocol helpers — they parse the post-handshake target
+    // address bytes (IPv4 / IPv6 / domain ATYP) and the UDP-associate
+    // datagram format. The C++ engine handles SOCKS5 inline in
+    // socks5server.cpp and doesn't expose these as standalone helpers; UDP
+    // ASSOCIATE isn't implemented at all (TCP-only today).
+    // ====================================================================
+
+    void testParseTargetPayloadIPv4()
+    {
+        QSKIP("ParseTargetPayload not exposed as a standalone helper in "
+              "C++ Socks5Server — target parsing is inline in the CONNECT "
+              "handshake path. Refactoring to extract a public helper is "
+              "a follow-up commit.");
+    }
+
+    void testParseTargetPayloadDomain()
+    {
+        QSKIP("ParseTargetPayload not exposed; see above.");
+    }
+
+    void testParseTargetPayloadRejectsUnsupportedType()
+    {
+        QSKIP("ParseTargetPayload not exposed; see above.");
+    }
+
+    void testParseAndBuildUDPDatagram()
+    {
+        QSKIP("UDP ASSOCIATE not implemented in C++ port — Socks5Server "
+              "is TCP CONNECT only. Follow-up commit ports "
+              "internal/socksproto/target.go's UDP datagram codec.");
+    }
+
+    void testParseUDPDatagramRejectsFragments()
+    {
+        QSKIP("UDP ASSOCIATE not implemented; see above.");
+    }
+
+    // ====================================================================
+    // Upstream parity: internal/client/balancer_test.go
+    //
+    // The 16 balancer tests exercise upstream's `NewBalancer` /
+    // `GetBestConnection` / `ReportSend` / `ReportSuccess` /
+    // `SetConnectionValidity` API surface. The C++ ResolverPool has the
+    // 8 strategies (BalancingStrategy enum) and `pickPrimary()` but does
+    // NOT expose a test-friendly API to seed health stats — those are
+    // mutated internally via `recordAcked`/`recordLost` from the pool's
+    // own send/receive flow.
+    //
+    // Translating these tests faithfully requires either (a) exposing a
+    // `setStatsForTesting` API on ResolverConnection (and lifting it
+    // from a .cpp-local class to the header so the friend declaration
+    // works), or (b) routing realistic packet traffic through the pool
+    // until the stats converge. Both are follow-up work; the
+    // strategies themselves are implemented but currently un-tested.
+    // ====================================================================
+
+    void testBalancerLeastLossFallsBackToRoundRobinWithoutStats() { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerLowestLatencyUsesRuntimeStats()              { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerHybridPrefersLowerLossWhenLatencyIsClose()   { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerHybridPrefersLowerLatencyWhenLossIsEqual()   { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerHybridFallsBackToRoundRobinWithoutStats()    { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerLossThenLatencyPrefersLowerLossFirst()       { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerLossThenLatencyUsesLatencyInsideLossTier()   { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerLossThenLatencyRoundRobinsAcrossNearTopCandidates() { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerLeastLossTopRandomFallsBackToRoundRobinWithoutStats() { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerLeastLossTopRandomUsesTopLossTier()          { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerLeastLossTopRoundRobinUsesTopLossTier()      { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerStatsHalfLifeAlsoAppliesOnSend()             { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerStatsHalfLifePreservesRelativeSuccessSignal() { QSKIP("ResolverConnection stats not exposed for test seeding."); }
+    void testBalancerSetConnectionsCopiesSourceDomain()           { QSKIP("Pool reconfiguration after start() not supported in C++; would need API."); }
+    void testBalancerSetConnectionValidityDoesNotPullSourceMutation() { QSKIP("Pool reconfiguration not supported."); }
+    void testBalancerSetConnectionMTUUpdatesBalancerOnly()        { QSKIP("ResolverConnection.setMtu not exposed for test seeding."); }
+
+    // ====================================================================
+    // Upstream parity: internal/client/mtu_math_test.go
+    //
+    // The first two tests exercise `encodedCharsForPayload` and
+    // `canBuildUploadPayload` — Client-internal capacity math that the
+    // C++ engine doesn't have a direct analog for (the equivalent
+    // budgeting is inlined into MtuProber). The third is already covered
+    // by `mtuProberProbePayloadLayout` (mode byte + BE challenge + zero
+    // tail), translated under MtuProber's own section above.
+    // ====================================================================
+
+    void testEncodedCharsForPayloadUsesWorstCaseUploadPacketType()
+    {
+        QSKIP("encodedCharsForPayload + encodedCharsForPacketPayload not "
+              "exposed in C++ port — capacity math is inlined into "
+              "MtuProber's Config bounds.");
+    }
+
+    void testEncodedCharsForPayloadMatchesMaxUploadProbeCapacityModel()
+    {
+        QSKIP("canBuildUploadPayload not in C++ port — see above.");
+    }
+
+    void testBuildMTUProbePayloadWritesModeAndProbeCodeWithoutFillingTail()
+    {
+        // Translated as `mtuProberProbePayloadLayout` above; this
+        // upstream-named entry exists for inventory parity.
+        QSKIP("Translated as mtuProberProbePayloadLayout earlier in this file.");
+    }
+
+    // ====================================================================
+    // Upstream parity: internal/client/ping_manager_test.go
+    //
+    // These exercise stream-0's PING enqueue + uint16 sequence wrap. The
+    // C++ engine's `PingPacer` is a pure tier-selection FSM with no
+    // queue (it tells Session when to emit, but doesn't buffer). The
+    // queueing behavior tested here is at the dispatcher/ARQ layer in
+    // upstream, which is the same layer where my MtuProber correlates
+    // probes — there's no direct C++ analog for stream-0 ping queue.
+    // ====================================================================
+
+    void testStreamZeroAllowsMultipleQueuedPingsWithDifferentSequence()
+    {
+        QSKIP("Stream-0 ping queueing not modeled in C++ — pingpacer "
+              "emits PINGs synchronously when tier interval elapses.");
+    }
+
+    void testPingQueueDropsWhenCongested()
+    {
+        QSKIP("No ping queue in C++ port; see above.");
+    }
+
+    void testPingManagerSequenceWrapsThroughUint16()
+    {
+        QSKIP("PING is in `kNone` extension class (§3.4) — no on-the-wire "
+              "sequence number, so wrap behavior is irrelevant. The "
+              "internal nextPingSeq counter exists in upstream but never "
+              "appears on the wire; C++ engine omits it entirely.");
+    }
+
     void mtuProberProbePayloadLayout()
     {
         // Wire format check: probe payload[0] is the response-mode byte;
