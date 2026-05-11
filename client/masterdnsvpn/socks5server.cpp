@@ -164,6 +164,81 @@ parseTargetPayload(const QByteArray &payload, int *consumedBytes)
     return dest;
 }
 
+// ---------------------------------------------------------------------------
+// Target / UDP datagram codecs
+// ---------------------------------------------------------------------------
+
+QByteArray buildTargetPayload(const Socks5Destination &dest)
+{
+    QByteArray out;
+    const quint8 atyp = dest.addressType != 0
+            ? dest.addressType
+            : (dest.isDomainName ? kSocks5AtypDomain
+                                 : (dest.host.contains(QChar(':'))
+                                            ? kSocks5AtypIPv6
+                                            : kSocks5AtypIPv4));
+
+    out.append(static_cast<char>(atyp));
+    switch (atyp) {
+    case kSocks5AtypIPv4: {
+        const QHostAddress addr(dest.host);
+        const quint32 raw = addr.toIPv4Address();
+        char be[4];
+        qToBigEndian<quint32>(raw, be);
+        out.append(be, 4);
+        break;
+    }
+    case kSocks5AtypIPv6: {
+        const QHostAddress addr(dest.host);
+        const Q_IPV6ADDR raw = addr.toIPv6Address();
+        out.append(reinterpret_cast<const char *>(&raw), 16);
+        break;
+    }
+    case kSocks5AtypDomain: {
+        const QByteArray h = dest.host.toLatin1();
+        out.append(static_cast<char>(h.size() & 0xFF));
+        out.append(h);
+        break;
+    }
+    default:
+        return {};
+    }
+    char beport[2];
+    qToBigEndian<quint16>(dest.port, beport);
+    out.append(beport, 2);
+    return out;
+}
+
+std::optional<Socks5UdpDatagram> parseUdpDatagram(const QByteArray &packet)
+{
+    if (packet.size() < 4) {
+        return std::nullopt;
+    }
+    // FRAG must be 0 — RFC 1928 §7. Upstream returns ErrUDPFragmented when
+    // packet[2] != 0.
+    if (static_cast<quint8>(packet[2]) != 0) {
+        return std::nullopt;
+    }
+    int consumed = 0;
+    const auto target = parseTargetPayload(packet.mid(3), &consumed);
+    if (!target) {
+        return std::nullopt;
+    }
+    Socks5UdpDatagram dgram;
+    dgram.target = *target;
+    dgram.payload = packet.mid(3 + consumed);
+    return dgram;
+}
+
+QByteArray buildUdpDatagram(const Socks5Destination &target, const QByteArray &payload)
+{
+    QByteArray out;
+    out.append('\0').append('\0').append('\0'); // RSV(2) + FRAG(1)
+    out.append(buildTargetPayload(target));
+    out.append(payload);
+    return out;
+}
+
 Socks5Server::Socks5Server(QObject *parent) : QObject(parent)
 {
     connect(&m_listener, &QTcpServer::newConnection, this, &Socks5Server::onIncomingConnection);

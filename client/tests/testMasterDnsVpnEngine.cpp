@@ -2296,14 +2296,33 @@ private slots:
 
     void testParseAndBuildUDPDatagram()
     {
-        QSKIP("UDP ASSOCIATE not implemented in C++ port — Socks5Server "
-              "is TCP CONNECT only. Follow-up commit ports "
-              "internal/socksproto/target.go's UDP datagram codec.");
+        // Upstream: TestParseAndBuildUDPDatagram (socksproto/target_test.go:38).
+        // Codec round-trip: build a datagram for example.com:53 carrying
+        // 3 payload bytes, then parse it back.
+        Socks5Destination target;
+        target.host = QStringLiteral("example.com");
+        target.port = 53;
+        target.isDomainName = true;
+        target.addressType = kSocks5AtypDomain;
+        const QByteArray payload = QByteArray::fromRawData("\x01\x02\x03", 3);
+
+        const QByteArray packet = buildUdpDatagram(target, payload);
+        const auto parsed = parseUdpDatagram(packet);
+        QVERIFY(parsed.has_value());
+        QCOMPARE(parsed->target.host, target.host);
+        QCOMPARE(parsed->target.port, target.port);
+        QCOMPARE(parsed->payload, payload);
     }
 
     void testParseUDPDatagramRejectsFragments()
     {
-        QSKIP("UDP ASSOCIATE not implemented; see above.");
+        // Upstream: TestParseUDPDatagramRejectsFragments (57). FRAG=1 must
+        // be rejected — RFC 1928 §7 mandates support, but the spec also
+        // permits implementations to refuse fragmented datagrams.
+        const QByteArray packet = QByteArray::fromRawData(
+                "\x00\x00\x01\x01\x7F\x00\x00\x01\x00\x35\xAA", 11);
+        const auto parsed = parseUdpDatagram(packet);
+        QVERIFY(!parsed.has_value());
     }
 
     // ====================================================================
