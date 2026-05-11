@@ -85,6 +85,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/masterdnsvpn/dnsframing.h
     ${CLIENT_ROOT_DIR}/masterdnsvpn/arq.h
     ${CLIENT_ROOT_DIR}/masterdnsvpn/resolverpool.h
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/session.h
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -171,6 +172,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/masterdnsvpn/dnsframing.cpp
     ${CLIENT_ROOT_DIR}/masterdnsvpn/arq.cpp
     ${CLIENT_ROOT_DIR}/masterdnsvpn/resolverpool.cpp
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/session.cpp
 )
 
 if(NOT IOS AND NOT MACOS_NE)
