@@ -7,6 +7,7 @@
 #include "wireframing.h"
 
 #include <climits>
+#include <cmath>
 #include <QDateTime>
 #include <QDebug>
 #include <QHostAddress>
@@ -224,6 +225,13 @@ bool Session::start(const QJsonObject &config)
             config.value(QStringLiteral("packetDuplication")).toInt(3);
     rcfg.setupPacketDuplicationCount =
             config.value(QStringLiteral("setupPacketDuplication")).toInt(4);
+
+    // Cache the operator-configured duplication counts in Session — these
+    // are what sendPacket() actually reads when fanning packets out (the
+    // pool only consults its own Config for stat displays). Server policy
+    // can later clamp them via applyServerPolicy().
+    m_packetDuplication = rcfg.packetDuplicationCount;
+    m_setupPacketDuplication = rcfg.setupPacketDuplicationCount;
 
     m_resolvers = std::make_unique<ResolverPool>();
     if (!m_resolvers->configure(resolverSpecs, rcfg)) {
@@ -538,7 +546,7 @@ void Session::sendPacket(const Packet &packet, bool isSetupPacket)
     auto [payload, codec] = compression::prepareOutgoingPayload(
             outbound.type, outbound.payload,
             static_cast<quint8>(m_uploadCompression),
-            compression::DefaultMinSize);
+            m_compressionMinSize);
     outbound.payload = payload;
     outbound.compression = codec;
 
@@ -548,8 +556,8 @@ void Session::sendPacket(const Packet &packet, bool isSetupPacket)
         return;
     }
     const auto picks = isSetupPacket
-            ? m_resolvers->pickDuplicates(4, /*setup=*/true)
-            : m_resolvers->pickDuplicates(3, /*setup=*/false);
+            ? m_resolvers->pickDuplicates(m_setupPacketDuplication, /*setup=*/true)
+            : m_resolvers->pickDuplicates(m_packetDuplication, /*setup=*/false);
     for (const ResolverPick &pick : picks) {
         const quint16 txId = nextTransactionId();
         const QByteArray dnsBytes = buildQuery(txId, encoded, pick.tunnelDomain);
@@ -702,9 +710,8 @@ void Session::onSocks5Accepted(QTcpSocket *socket, const Socks5Destination &dest
     }
     const quint16 streamId = allocStreamId();
 
-    ArqConfig acfg;
     auto stream = std::make_unique<ArqStream>(
-            streamId, acfg,
+            streamId, m_arqCfg,
             [this, streamId](const ArqOutbound &out) { onArqOutbound(streamId, out); },
             [this, streamId](const ArqDelivery &d) { onArqDelivery(streamId, d); });
     m_streams.insert(streamId, std::move(stream));
@@ -876,18 +883,69 @@ void Session::onSessionAccept(const Packet &packet)
     m_downloadCompression = std::min(m_downloadCompression,
                                      decoded->compressionPair & 0x0F);
 
-    // §7 client-policy sync: when the server appends the 13-byte policy
-    // tail, retain it for the engine layer to clamp its config against.
-    // Future commits wire applyClientPolicy(...) into the actual knobs;
-    // for now the values land in m_serverPolicy for inspection / logging.
+    // §7 client-policy sync: capture the server-declared per-client caps,
+    // then clamp the local config knobs against them. Streams created
+    // after this point honour the clamped config; the resolver pool's
+    // duplication / MTU caps are tightened immediately so the next
+    // sendPacket() and pickDuplicates() see them.
     if (decoded->hasClientPolicySync) {
         m_serverPolicy = decoded->clientPolicy;
         m_hasServerPolicy = true;
+        applyServerPolicy();
     }
 
     // Spec §13(9): retire the verify code once the handshake completes.
     m_initVerifyCode.clear();
     setState(State::Established);
+}
+
+void Session::applyServerPolicy()
+{
+    // Mirrors upstream `Client.applySessionClientPolicy`
+    // (internal/client/session.go:182). The pattern is one-way: caps
+    // tighten the existing knobs (never relax them). Each branch is
+    // gated on a positive policy value so a zero-default policy field
+    // is treated as "no opinion".
+    const SessionAcceptClientPolicy &p = m_serverPolicy;
+
+    // ARQ window — clamp from above.
+    if (p.maxARQWindowSize > 0) {
+        m_arqCfg.windowSize = std::min(m_arqCfg.windowSize, p.maxARQWindowSize);
+    }
+    // NACK gap — clamp from above.
+    if (p.maxARQDataNackMaxGap > 0) {
+        m_arqCfg.dataNackMaxGap = std::min(m_arqCfg.dataNackMaxGap, p.maxARQDataNackMaxGap);
+    }
+    // ARQ initial RTO — server may FLOOR (raise) the minimum.
+    if (p.minARQInitialRTOSeconds > 0.0) {
+        const qint64 floorMs = static_cast<qint64>(
+                std::round(p.minARQInitialRTOSeconds * 1000.0));
+        m_arqCfg.initialDataRtoMs = std::max(m_arqCfg.initialDataRtoMs, floorMs);
+        m_arqCfg.initialControlRtoMs =
+                std::max(m_arqCfg.initialControlRtoMs, floorMs);
+    }
+    // Ping aggressive interval — server may FLOOR.
+    if (p.minPingAggressiveInterval > 0.0) {
+        const qint64 floorMs = static_cast<qint64>(
+                std::round(p.minPingAggressiveInterval * 1000.0));
+        m_pingPacing.aggressiveMs = std::max(m_pingPacing.aggressiveMs, floorMs);
+    }
+    // Compression min-size — server may RAISE (so small payloads aren't
+    // compressed against the server's preference).
+    if (p.minCompressionMinSize > 0) {
+        m_compressionMinSize = std::max(m_compressionMinSize, p.minCompressionMinSize);
+    }
+    // Duplication counts — server caps from above.
+    if (p.maxPacketDuplicationCount > 0) {
+        m_packetDuplication = std::min(m_packetDuplication, p.maxPacketDuplicationCount);
+    }
+    if (p.maxSetupDuplicationCount > 0) {
+        m_setupPacketDuplication = std::min(m_setupPacketDuplication,
+                                            p.maxSetupDuplicationCount);
+        // Setup count must still cover packet count — match
+        // pool::configure() clamp semantics.
+        m_setupPacketDuplication = std::max(m_setupPacketDuplication, m_packetDuplication);
+    }
 }
 
 void Session::onSessionBusy(const Packet &packet)

@@ -1611,6 +1611,51 @@ private slots:
                  "expected control adaptive RTO bounded by max");
     }
 
+    void testArqControlSndBufSeededOnHalfCloseAndConsumedByAck()
+    {
+        // Integration: halfCloseWrite() should seed m_controlSndBuf with
+        // a STREAM_CLOSE_WRITE entry (when control-reliability is on);
+        // receipt of STREAM_CLOSE_WRITE_ACK drains it. Mirrors the
+        // upstream send-side track + receive-side consume cycle that
+        // backs `ARQ.ReceiveControlAck` (internal/arq/arq.go:2250).
+        ArqConfig cfg;
+        cfg.enableControlReliability = true;
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        a.halfCloseWrite();
+        QVERIFY2(!sent.isEmpty(),
+                 "halfCloseWrite must emit a STREAM_CLOSE_WRITE packet");
+        QCOMPARE(sent[0].type, PacketType::StreamCloseWrite);
+        const quint16 seq = *sent[0].sequenceNum;
+        const quint32 key = ArqStream::controlKey(PacketType::StreamCloseWrite, seq, 0);
+        QVERIFY2(a.m_controlSndBuf.contains(key),
+                 "m_controlSndBuf must be seeded with the close-write entry");
+
+        QVERIFY(a.ReceiveControlAck(PacketType::StreamCloseWriteAck, seq, 0));
+        QVERIFY2(!a.m_controlSndBuf.contains(key),
+                 "ack must drain the m_controlSndBuf entry");
+    }
+
+    void testArqControlSndBufNotSeededWhenReliabilityDisabled()
+    {
+        // Companion: with enableControlReliability=false (default),
+        // halfCloseWrite must NOT seed the control buffer — upstream
+        // parity.
+        ArqConfig cfg; // enableControlReliability defaults to false
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        a.halfCloseWrite();
+        QVERIFY(!sent.isEmpty());
+        QVERIFY2(a.m_controlSndBuf.isEmpty(),
+                 "control buffer must stay empty when reliability is off");
+    }
+
     void testArqOutOfOrderReceive()
     {
         // Upstream: TestARQ_OutOfOrderReceive (1103). Send 1, 2, 0 —

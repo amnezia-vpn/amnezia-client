@@ -126,8 +126,10 @@ void ArqStream::halfCloseWrite()
     Packet p;
     p.type = PacketType::StreamCloseWrite;
     p.streamId = m_streamId;
-    p.sequenceNum = m_sndNxt++;
+    const quint16 seq = m_sndNxt++;
+    p.sequenceNum = seq;
     dispatch(p, /*retransmit=*/false);
+    trackControlSent(PacketType::StreamCloseWrite, seq, 0);
 
     if (m_state == ArqState::HalfClosedRemote) {
         m_state = ArqState::Closing;
@@ -144,8 +146,10 @@ void ArqStream::reset()
     Packet p;
     p.type = PacketType::StreamRst;
     p.streamId = m_streamId;
-    p.sequenceNum = m_sndNxt++;
+    const quint16 seq = m_sndNxt++;
+    p.sequenceNum = seq;
     dispatch(p, /*retransmit=*/false);
+    trackControlSent(PacketType::StreamRst, seq, 0);
     m_state = ArqState::Reset;
 }
 
@@ -332,6 +336,7 @@ void ArqStream::onRst()
     m_state = ArqState::Reset;
     m_sndBuf.clear();
     m_rcvBuf.clear();
+    m_controlSndBuf.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -738,6 +743,21 @@ bool ArqStream::ReceiveControlAck(PacketType ackPacketType, quint16 sn, quint8 f
     return originPtype.has_value();
 }
 
+void ArqStream::trackControlSent(PacketType type, quint16 seq, quint8 fragId)
+{
+    if (!m_cfg.enableControlReliability) {
+        return;
+    }
+    PendingSend entry;
+    entry.seq = seq;
+    entry.type = type;
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    entry.firstSentMs = nowMs;
+    entry.lastSentMs = nowMs;
+    entry.sampleEligible = true;
+    m_controlSndBuf.insert(controlKey(type, seq, fragId), entry);
+}
+
 std::optional<PacketType> ArqStream::reverseControlAckFor(PacketType ackType)
 {
     switch (ackType) {
@@ -794,6 +814,7 @@ void ArqStream::clearAllQueues(bool includeDataNacks)
 {
     m_sndBuf.clear();
     m_rcvBuf.clear();
+    m_controlSndBuf.clear();
     if (includeDataNacks) {
         m_lastNackSentMs.clear();
         m_firstDataNackSeenMs.clear();

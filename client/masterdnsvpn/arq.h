@@ -267,6 +267,11 @@ private:
     // Mirrors upstream `Enums.ReverseControlAckFor`.
     static std::optional<PacketType> reverseControlAckFor(PacketType ackType);
 
+    // Track that a reliable control packet was just dispatched, so the
+    // matching ACK can drop the entry and feed an RTT sample. No-op when
+    // `enableControlReliability` is false (upstream parity).
+    void trackControlSent(PacketType type, quint16 seq, quint8 fragId);
+
     // Composite key into m_controlSndBuf: PacketType << 24 | seq << 8 |
     // fragId. Mirrors upstream's controlSndBuf keying.
     static quint32 controlKey(PacketType type, quint16 seq, quint8 fragId)

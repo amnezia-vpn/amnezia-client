@@ -179,14 +179,36 @@ private:
     QByteArray m_initVerifyCode; // 4 bytes random; echoed back by server
 
     // §7 client-policy sync. When the server emits the optional 13-byte
-    // SessionAcceptClientPolicy tail, the values land here. Future passes
-    // will clamp ARQ window, MTU, ping pacing, etc. against this struct;
-    // for now it's retained for diagnostics + integration tests.
+    // SessionAcceptClientPolicy tail the values land here, and
+    // applyServerPolicy() clamps the relevant config knobs below against
+    // the server-declared caps.
     SessionAcceptClientPolicy m_serverPolicy;
     bool m_hasServerPolicy = false;
 
+    // ARQ config used when a new stream's ArqStream is constructed.
+    // Clamped against m_serverPolicy on SESSION_ACCEPT.
+    ArqConfig m_arqCfg;
+
+    // Compression min-size budget for outbound packets. Defaults to the
+    // protocol-level floor; raised by server policy when applicable.
+    int m_compressionMinSize = 100; // matches compression::DefaultMinSize
+
+    // Packet duplication counts (normal vs setup) consulted by
+    // sendPacket() when fanning a single inner packet across resolvers.
+    // Defaults match upstream's per-spec sane values; operator config can
+    // override at start() time, server policy clamps from above.
+    int m_packetDuplication = 3;
+    int m_setupPacketDuplication = 4;
+
     PingPacingConfig m_pingPacing;
     PingPacingState  m_pingState;
+
+    // Apply the server-declared SessionAcceptClientPolicy to engine
+    // config knobs. Called from onSessionAccept after m_serverPolicy is
+    // populated. Existing in-flight streams keep their original config;
+    // future streams (and pingpacer / compression behavior) honor the
+    // clamps from this point on.
+    void applyServerPolicy();
 
     // §9 MTU probe sweep state. `m_probers` is sized at session start;
     // entries are non-null while their resolver is being probed. `m_probeResults`
