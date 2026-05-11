@@ -9,6 +9,7 @@
 
 #include <QByteArray>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QLocalSocket>
 #include <QTimer>
@@ -58,11 +59,12 @@ void WireguardUtilsMacos::tunnelErrorOccurred(QProcess::ProcessError error) {
 }
 
 bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
-  Q_UNUSED(config);
   if (m_tunnel.state() != QProcess::NotRunning) {
     logger.warning() << "Unable to start: tunnel process already running";
     return false;
   }
+
+  const QString ifname = config.m_ifname.isEmpty() ? QString(WG_INTERFACE) : config.m_ifname;
 
   QDir wgRuntimeDir(WG_RUNTIME_DIR);
   if (!wgRuntimeDir.exists()) {
@@ -70,7 +72,7 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   }
 
   QProcessEnvironment pe = QProcessEnvironment::systemEnvironment();
-  QString wgNameFile = wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name");
+  QString wgNameFile = wgRuntimeDir.filePath(ifname + ".name");
   pe.insert("WG_TUN_NAME_FILE", wgNameFile);
 #ifdef MZ_DEBUG
   pe.insert("LOG_LEVEL", "debug");
@@ -92,6 +94,7 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
     m_tunnel.kill();
     return false;
   }
+  QFile::remove(wgNameFile);
   logger.debug() << "Created wireguard interface" << m_ifname;
 
   // Start the routing table monitor.
@@ -189,10 +192,6 @@ bool WireguardUtilsMacos::deleteInterface() {
     m_tunnel.kill();
     m_tunnel.waitForFinished(WG_TUN_PROC_TIMEOUT);
   }
-
-  // Garbage collect.
-  QDir wgRuntimeDir(WG_RUNTIME_DIR);
-  QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
 
   // double-check + ensure our firewall is installed and enabled
   KillSwitch::instance()->disableKillSwitch();
@@ -389,12 +388,8 @@ bool WireguardUtilsMacos::excludeLocalNetworks(const QList<IPAddress>& routes) {
 
 QString WireguardUtilsMacos::uapiCommand(const QString& command) {
   QLocalSocket socket;
-  QTimer uapiTimeout;
   QDir wgRuntimeDir(WG_RUNTIME_DIR);
   QString wgSocketFile = wgRuntimeDir.filePath(m_ifname + ".sock");
-
-  uapiTimeout.setSingleShot(true);
-  uapiTimeout.start(WG_TUN_PROC_TIMEOUT);
 
   socket.connectToServer(wgSocketFile, QIODevice::ReadWrite);
   if (!socket.waitForConnected(WG_TUN_PROC_TIMEOUT)) {
@@ -410,13 +405,15 @@ QString WireguardUtilsMacos::uapiCommand(const QString& command) {
   }
   socket.write(message);
 
+  QElapsedTimer elapsed;
+  elapsed.start();
   QByteArray reply;
   while (!reply.contains("\n\n")) {
-    if (!uapiTimeout.isActive()) {
+    const qint64 remaining = WG_TUN_PROC_TIMEOUT - elapsed.elapsed();
+    if (remaining <= 0 || !socket.waitForReadyRead(static_cast<int>(remaining))) {
       logger.error() << "UAPI command timed out";
       return QString();
     }
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     reply.append(socket.readAll());
   }
 

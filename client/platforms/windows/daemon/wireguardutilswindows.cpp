@@ -117,8 +117,8 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
 
   // Determine the interface LUID
   NET_LUID luid;
-  QString ifAlias = interfaceName();
-  DWORD result = ConvertInterfaceAliasToLuid((wchar_t*)ifAlias.utf16(), &luid);
+  const QString ifname = config.m_ifname.isEmpty() ? interfaceName() : config.m_ifname;
+  DWORD result = ConvertInterfaceAliasToLuid((wchar_t*)ifname.utf16(), &luid);
   if (result != 0) {
     logger.error() << "Failed to lookup LUID:" << result;
     return false;
