@@ -1,9 +1,6 @@
 package org.amnezia.vpn.protocol.masterdnsvpn
 
 import android.net.VpnService.Builder
-import java.io.IOException
-import java.net.InetSocketAddress
-import java.net.Socket
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
@@ -171,19 +168,19 @@ class MasterDnsVpn : Protocol() {
 
     private fun waitForSocksListener(): Int {
         // Up to 60 s — the engine's MTU discovery + handshake can take a
-        // bit on a fresh connect. Once the SOCKS5 port is non-zero we
-        // additionally probe via TCP connect to confirm the listener is
-        // accept()ing (handles the brief window between bind and listen).
+        // bit on a fresh connect. The native engine publishes a non-zero
+        // SOCKS5 port only after its underlying QTcpServer.listen() has
+        // succeeded, so any positive value already means "accepting
+        // connections" (QTcpServer.serverPort() returns 0 until listen
+        // returns true). No follow-up TCP probe required.
         val deadline = System.currentTimeMillis() + SOCKS_WAIT_TIMEOUT_MS
         while (System.currentTimeMillis() < deadline) {
             val port = MasterDnsVpnNative.nativeSocksPort()
             if (port > 0) {
-                if (probeSocks(port)) {
-                    return port
-                }
+                return port
             }
             try {
-                Thread.sleep(SOCKS_PROBE_INTERVAL_MS.toLong())
+                Thread.sleep(SOCKS_POLL_INTERVAL_MS.toLong())
             } catch (_: InterruptedException) {
                 Thread.currentThread().interrupt()
                 return 0
@@ -193,38 +190,13 @@ class MasterDnsVpn : Protocol() {
     }
 
     /**
-     * Connect-probe the native engine's SOCKS5 listener on 127.0.0.1.
-     *
-     * This deliberately uses a plain [Socket] (no TLS): the destination is
-     * always the local loopback address bound by the engine's own SOCKS5
-     * server in the same process. The probe never crosses a network
-     * interface and there is no transport-security concern. The connection
-     * is closed immediately on success without exchanging any bytes.
-     */
-    @Suppress("UnsafeSocketUsage")
-    private fun probeSocks(port: Int): Boolean {
-        return try {
-            Socket().use { sock ->
-                sock.connect(
-                    InetSocketAddress(LOOPBACK_ADDRESS, port),
-                    SOCKS_PROBE_INTERVAL_MS,
-                )
-                sock.isConnected
-            }
-        } catch (_: IOException) {
-            false
-        }
-    }
-
-    /**
      * Process-wide singleton plus the timing constants for the SOCKS5
      * listener handshake. Mirrors the pattern used by the Xray protocol
      * module in the same package.
      */
     companion object {
         private const val SOCKS_WAIT_TIMEOUT_MS = 60_000
-        private const val SOCKS_PROBE_INTERVAL_MS = 250
-        private const val LOOPBACK_ADDRESS = "127.0.0.1"
+        private const val SOCKS_POLL_INTERVAL_MS = 250
 
         val instance: MasterDnsVpn by lazy { MasterDnsVpn() }
     }
