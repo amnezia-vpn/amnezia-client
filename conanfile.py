@@ -45,3 +45,12 @@ class AmneziaVPN(ConanFile):
         self.requires("libssh/0.11.3@amnezia")
         self.requires("openssl/3.6.1")
         self.requires("zlib/1.3.2")
+
+        # MasterDnsVPN engine (§8) — compression codecs negotiated via
+        # SESSION_ACCEPT's compression pair byte. Server-selectable per
+        # direction; clients ship/accept any of OFF (1), ZSTD (2), LZ4 (3),
+        # ZLIB-raw-deflate (4). zlib is already a hard dep above; zstd and
+        # lz4 are added here so the codec path mirrors upstream's
+        # internal/compression/types.go feature surface.
+        self.requires("zstd/1.5.6")
+        self.requires("lz4/1.10.0")

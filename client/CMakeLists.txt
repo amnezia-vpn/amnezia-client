@@ -40,11 +40,20 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
+# MasterDnsVPN engine compression layer (§8) — zlib raw deflate, zstd, lz4.
+# Pulled in via conan (see conanfile.py).
+find_package(ZLIB REQUIRED)
+find_package(zstd REQUIRED)
+find_package(lz4 REQUIRED)
+
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
+    ZLIB::ZLIB
+    zstd::libzstd
+    lz4::lz4
 )
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))

@@ -2,6 +2,7 @@
 
 #include "session.h"
 
+#include "compression.h"
 #include "dnsframing.h"
 #include "wireframing.h"
 
@@ -527,7 +528,21 @@ void Session::sendPacket(const Packet &packet, bool isSetupPacket)
     if (!m_resolvers) {
         return;
     }
-    const QByteArray plaintext = encode(packet);
+
+    // Spec §8: apply the negotiated upload codec to packet types that
+    // carry the compression extension. `prepareOutgoingPayload` is a
+    // no-op for non-eligible types, undersized payloads, or when the
+    // compressed result isn't smaller than the input — matching upstream's
+    // `PreparePayload` semantics (internal/vpnproto/payload.go:19-31).
+    Packet outbound = packet;
+    auto [payload, codec] = compression::prepareOutgoingPayload(
+            outbound.type, outbound.payload,
+            static_cast<quint8>(m_uploadCompression),
+            compression::DefaultMinSize);
+    outbound.payload = payload;
+    outbound.compression = codec;
+
+    const QByteArray plaintext = encode(outbound);
     const QByteArray encoded = sealAndEncode(plaintext);
     if (encoded.isEmpty()) {
         return;
@@ -574,6 +589,22 @@ void Session::onResolverResponse(int resolverIndex, quint16 transactionId, const
     if (!pkt) {
         return;
     }
+
+    // Spec §8: if the per-packet compression extension is non-zero, the
+    // payload was compressed by the peer. Inflate it before dispatching
+    // so consumers downstream operate on the original plaintext. A
+    // compression byte of 0 is a pass-through. Mirrors upstream's
+    // `InflatePayload` (internal/vpnproto/payload.go:34-45) — a corrupt
+    // stream silently drops the packet rather than crashing.
+    if (pkt->compression.has_value() && pkt->compression.value() != compression::TypeOff) {
+        auto inflated = compression::tryDecompressPayload(pkt->payload, *pkt->compression);
+        if (!inflated) {
+            return;
+        }
+        pkt->payload = *inflated;
+        pkt->compression = compression::TypeOff;
+    }
+
     onInnerPacket(*pkt, resolverIndex);
 }
 

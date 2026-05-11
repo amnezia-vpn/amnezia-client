@@ -88,6 +88,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/masterdnsvpn/session.h
     ${CLIENT_ROOT_DIR}/masterdnsvpn/pingpacer.h
     ${CLIENT_ROOT_DIR}/masterdnsvpn/mtuprober.h
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/compression.h
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -177,6 +178,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/masterdnsvpn/session.cpp
     ${CLIENT_ROOT_DIR}/masterdnsvpn/engine.cpp
     ${CLIENT_ROOT_DIR}/masterdnsvpn/mtuprober.cpp
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/compression.cpp
 )
 
 if(NOT IOS AND NOT MACOS_NE)
