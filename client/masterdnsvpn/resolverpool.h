@@ -113,9 +113,34 @@ public:
     int syncedUploadMtu() const;
     int syncedDownloadMtu() const;
 
+    // Number of configured resolvers (active or otherwise). Used by Session
+    // to spin one MtuProber per resolver before SESSION_INIT.
+    int resolverCount() const { return m_connections.size(); }
+
+    // Override the conservative synced MTU defaults with values discovered
+    // by MtuProber. Session calls this after the §9 probe sweep completes;
+    // values feed back into syncedUploadMtu()/syncedDownloadMtu() that the
+    // SESSION_INIT payload advertises.
+    void setSyncedMtu(int uploadMtu, int downloadMtu);
+
+    // Mark a single resolver inactive — used when its MTU probe fails so
+    // the dispatcher stops picking it. Mirrors upstream's auto-removal of
+    // resolvers that fail MTU validation
+    // (internal/client/mtu.go:optimizeMTUResolvers).
+    void markResolverInactive(int index);
+
 signals:
-    // Fires when the first resolver completes MTU discovery.
+    // Fires when the first resolver completes MTU discovery, OR when MTU
+    // probing has finalised across all resolvers — whichever the caller's
+    // orchestrator (Session) prefers as the "good to send SESSION_INIT"
+    // signal. With the §9 probe sweep wired, Session waits for the sweep
+    // to finish before consulting this signal.
     void readyForUse();
+
+    // Fires once all UDP sockets are bound and ready to send/receive.
+    // Session uses this to gate the §9 MTU probe sweep — it must happen
+    // after sockets exist but before SESSION_INIT.
+    void socketsBound();
 
     // Per-resolver MTU update — useful for operator dashboards. `index` is
     // the active-pool index (changes as resolvers move between active /

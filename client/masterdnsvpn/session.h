@@ -23,6 +23,7 @@
 
 #include "arq.h"
 #include "crypto.h"
+#include "mtuprober.h"
 #include "pingpacer.h"
 #include "resolverpool.h"
 #include "socks5server.h"
@@ -47,7 +48,8 @@ class Session : public QObject
 public:
     enum class State {
         Idle,
-        Initialising,    // sockets up, MTU baseline known, doing SESSION_INIT
+        Initialising,    // sockets bound; pending §9 MTU probe sweep
+        MtuProbing,      // upload+download binary search per resolver
         Authenticating,  // SESSION_INIT sent, awaiting SESSION_ACCEPT
         Established,     // SOCKS5 listener up, traffic flowing
         TearingDown,
@@ -83,6 +85,18 @@ private:
     void setState(State s);
     void fail(const QString &reason);
     void onResolverPoolReady();
+    void onSocketsBound();
+
+    // §9 MTU sweep — spawn one prober per resolver, wait for all to finish
+    // (or a global timeout), aggregate min(upload)/min(download) across the
+    // successful ones and feed back into the pool's synced-MTU pair.
+    void startMtuProbeSweep();
+    void onProbeNextRequested(int resolverIndex,
+                               PacketType type,
+                               const QByteArray &payload,
+                               bool isUpload);
+    void onProbeFinished(int resolverIndex, bool ok, int uploadMtu, int downloadMtu);
+    void maybeFinaliseMtuProbeSweep();
 
     // ---- Outbound ----
     // Wraps a wireframing::Packet in encryption + DNS framing and ships it
@@ -103,8 +117,10 @@ private:
     void onResolverResponse(int resolverIndex, quint16 transactionId, const QByteArray &bytes);
 
     // Dispatch a decoded inner Packet to the right per-stream ARQ instance
-    // or the session-level handler (SESSION_ACCEPT, PING, etc.).
-    void onInnerPacket(const Packet &packet);
+    // or the session-level handler (SESSION_ACCEPT, PING, etc.). The
+    // resolverIndex flag lets us route MTU probe responses back to the
+    // prober that owns the outstanding probe (one prober per resolver).
+    void onInnerPacket(const Packet &packet, int resolverIndex);
 
     // ---- SOCKS5 → tunnel glue ----
     // Called by Socks5Server for each accepted CONNECT. We allocate a
@@ -164,6 +180,21 @@ private:
 
     PingPacingConfig m_pingPacing;
     PingPacingState  m_pingState;
+
+    // §9 MTU probe sweep state. `m_probers` is sized at session start;
+    // entries are non-null while their resolver is being probed. `m_probeResults`
+    // accumulates per-resolver outcomes — once `m_probesPending == 0` we
+    // aggregate min(upload)/min(download) across the successful ones and
+    // push to ResolverPool::setSyncedMtu.
+    QVector<std::unique_ptr<MtuProber>> m_probers;
+    struct ProbeOutcome {
+        bool finished = false;
+        bool ok = false;
+        int uploadMtu = 0;
+        int downloadMtu = 0;
+    };
+    QVector<ProbeOutcome> m_probeResults;
+    int m_probesPending = 0;
 
     // Stream-id allocator + map of active streams.
     quint16 m_nextStreamId = 1;

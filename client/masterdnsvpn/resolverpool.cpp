@@ -162,12 +162,36 @@ void ResolverPool::start()
     }
     m_started = true;
 
-    // Initial MTU baseline — the dispatcher refines via real probes once it
-    // has a session. Pool reports the conservative defaults until then so
-    // the engine can start serving traffic before MTU discovery completes.
+    // Initial MTU baseline — conservative floors that let the dispatcher
+    // ship SESSION_INIT and basic packets before §9 probing refines them.
+    // Session::onSocketsBound runs the probe sweep, then calls
+    // setSyncedMtu() to publish the discovered values.
     m_syncedUploadMtu = std::min(64, m_cfg.maxUploadMtu);
     m_syncedDownloadMtu = std::min(255, m_cfg.maxDownloadMtu);
+    QTimer::singleShot(0, this, [this]() { emit socketsBound(); });
+}
+
+void ResolverPool::setSyncedMtu(int uploadMtu, int downloadMtu)
+{
+    // Floor-clamp against the conservative defaults so a partial probe
+    // sweep (e.g. one resolver succeeded, others timed out) can never
+    // narrow the working MTU below what we already knew was safe.
+    m_syncedUploadMtu = std::max(m_syncedUploadMtu, std::min(uploadMtu, m_cfg.maxUploadMtu));
+    m_syncedDownloadMtu = std::max(m_syncedDownloadMtu, std::min(downloadMtu, m_cfg.maxDownloadMtu));
     QTimer::singleShot(0, this, [this]() { emit readyForUse(); });
+}
+
+void ResolverPool::markResolverInactive(int index)
+{
+    if (index < 0 || index >= m_connections.size()) {
+        return;
+    }
+    auto &conn = m_connections[index];
+    if (!conn->isActive()) {
+        return;
+    }
+    conn->setActive(false);
+    emit resolverStateChanged(index, false);
 }
 
 void ResolverPool::stop()

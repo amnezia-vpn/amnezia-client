@@ -5,6 +5,7 @@
 #include "dnsframing.h"
 #include "wireframing.h"
 
+#include <climits>
 #include <QDateTime>
 #include <QDebug>
 #include <QHostAddress>
@@ -228,6 +229,8 @@ bool Session::start(const QJsonObject &config)
         m_lastError = QStringLiteral("resolver pool configure failed");
         return false;
     }
+    connect(m_resolvers.get(), &ResolverPool::socketsBound,
+            this, &Session::onSocketsBound);
     connect(m_resolvers.get(), &ResolverPool::readyForUse,
             this, &Session::onResolverPoolReady);
     connect(m_resolvers.get(), &ResolverPool::responseReceived,
@@ -306,11 +309,179 @@ void Session::stop()
 
 void Session::onResolverPoolReady()
 {
-    if (m_state != State::Initialising) {
+    // ResolverPool::readyForUse now signals "MTU sweep finalised; synced
+    // MTU is the discovered minimum" (see ResolverPool::setSyncedMtu).
+    // Session::onSocketsBound drove the §9 sweep; we land here only after
+    // it completes (or times out and falls back to conservative defaults).
+    if (m_state != State::MtuProbing) {
         return;
     }
     setState(State::Authenticating);
     sendSessionInit();
+}
+
+void Session::onSocketsBound()
+{
+    if (m_state != State::Initialising) {
+        return;
+    }
+    setState(State::MtuProbing);
+    startMtuProbeSweep();
+}
+
+void Session::startMtuProbeSweep()
+{
+    // Spec §9 — fan out one MtuProber per resolver, run them in parallel.
+    // Each prober's `nextProbe(packetType, payload, isUpload)` signal is
+    // bridged here into a real wire send through this resolver only; the
+    // probe response routes back via onInnerPacket using the resolverIndex
+    // that ResolverPool already tags every inbound datagram with.
+    const int n = m_resolvers ? m_resolvers->resolverCount() : 0;
+    if (n <= 0) {
+        // No resolvers — short-circuit to the conservative defaults that
+        // ResolverPool::start() already published. Session can still
+        // attempt SESSION_INIT and let the failure surface naturally.
+        m_resolvers->setSyncedMtu(m_resolvers->syncedUploadMtu(),
+                                  m_resolvers->syncedDownloadMtu());
+        return;
+    }
+
+    m_probers.clear();
+    m_probers.reserve(n);
+    m_probeResults.clear();
+    m_probeResults.resize(n);
+    m_probesPending = n;
+
+    for (int i = 0; i < n; ++i) {
+        auto prober = std::make_unique<MtuProber>(this);
+        const int idx = i;
+        connect(prober.get(), &MtuProber::nextProbe, this,
+                [this, idx](PacketType t, const QByteArray &p, bool up) {
+                    onProbeNextRequested(idx, t, p, up);
+                });
+        connect(prober.get(), &MtuProber::finished, this,
+                [this, idx](bool ok, int up, int down) {
+                    onProbeFinished(idx, ok, up, down);
+                });
+
+        MtuProber::Config cfg;
+        // The conservative defaults the pool published when sockets came up
+        // are now the upper bounds for the search — probing only refines
+        // them upward. Future commits can plumb operator-config-supplied
+        // max bounds through here.
+        cfg.maxUpload = std::max(m_resolvers->syncedUploadMtu(), 150);
+        cfg.maxDownload = std::max(m_resolvers->syncedDownloadMtu(), 4096);
+        cfg.baseEncodeReply = false; // mirrors SESSION_INIT byte 0 = 0
+        m_probers.push_back(std::move(prober));
+        m_probers.back()->start(cfg);
+    }
+}
+
+void Session::onProbeNextRequested(int resolverIndex,
+                                    PacketType type,
+                                    const QByteArray &payload,
+                                    bool /*isUpload*/)
+{
+    if (!m_resolvers || resolverIndex < 0 || resolverIndex >= m_resolvers->resolverCount()) {
+        return;
+    }
+
+    // Build the inner-VPN packet per spec §9 / mtu.go:1369-1378. The MTU
+    // probe phase uses a magic SessionID = 0xFF and Cookie = 0 (the
+    // pre-session sentinel), StreamID/SeqNum/FragId = (1, 1, 0/1) just
+    // like upstream's buildMTUProbeQuery does.
+    Packet inner;
+    inner.sessionId = 0xFF;
+    inner.cookie = 0;
+    inner.type = type;
+    inner.streamId = 1;
+    inner.sequenceNum = 1;
+    inner.fragmentId = 0;
+    inner.totalFragments = 1;
+    inner.compression = 0;
+    inner.payload = payload;
+
+    const QByteArray plaintext = encode(inner);
+    const QByteArray encoded = sealAndEncode(plaintext);
+    if (encoded.isEmpty()) {
+        return;
+    }
+
+    // Send to THIS resolver only — not duplicated across the pool. Probe
+    // results are per-resolver and must not be cross-contaminated.
+    const QString domain = [&]() -> QString {
+        // Look up tunnel domain via a pickPrimary() round if needed;
+        // for now we trust the pool to expose it inline with the send.
+        // ResolverPool::pickPrimary uses balancing — but we want a
+        // specific index. Fall back to the first tunnel domain the
+        // operator configured.
+        return m_tunnelDomains.isEmpty() ? QStringLiteral("") : m_tunnelDomains.first();
+    }();
+    if (domain.isEmpty()) {
+        return;
+    }
+    const quint16 txId = nextTransactionId();
+    const QByteArray dnsBytes = buildQuery(txId, encoded, domain);
+    m_outstandingQueries.insert(txId, resolverIndex);
+    m_resolvers->send(resolverIndex, dnsBytes);
+    m_bytesTx += dnsBytes.size();
+}
+
+void Session::onProbeFinished(int resolverIndex, bool ok, int uploadMtu, int downloadMtu)
+{
+    if (resolverIndex < 0 || resolverIndex >= m_probeResults.size()) {
+        return;
+    }
+    if (m_probeResults[resolverIndex].finished) {
+        // Defensive — should never happen since MtuProber emits exactly
+        // one terminal signal per `start()` lifecycle.
+        return;
+    }
+    m_probeResults[resolverIndex].finished = true;
+    m_probeResults[resolverIndex].ok = ok;
+    m_probeResults[resolverIndex].uploadMtu = uploadMtu;
+    m_probeResults[resolverIndex].downloadMtu = downloadMtu;
+
+    if (!ok && m_resolvers) {
+        // Spec §9 — resolvers that fail MTU probing get pulled from the
+        // active set so the dispatcher never tries to send through a
+        // resolver that can't carry our packets.
+        m_resolvers->markResolverInactive(resolverIndex);
+    }
+    --m_probesPending;
+    maybeFinaliseMtuProbeSweep();
+}
+
+void Session::maybeFinaliseMtuProbeSweep()
+{
+    if (m_probesPending > 0) {
+        return;
+    }
+    // Aggregate min upload/download across the resolvers that succeeded.
+    // If none succeeded, the conservative defaults published at start
+    // remain in effect — SESSION_INIT will go out at the safe minimum.
+    int minUp = INT_MAX;
+    int minDown = INT_MAX;
+    int okCount = 0;
+    for (const ProbeOutcome &r : m_probeResults) {
+        if (!r.ok) continue;
+        ++okCount;
+        if (r.uploadMtu < minUp)   minUp = r.uploadMtu;
+        if (r.downloadMtu < minDown) minDown = r.downloadMtu;
+    }
+    if (okCount > 0) {
+        m_resolvers->setSyncedMtu(minUp, minDown);
+    } else {
+        // Re-emit setSyncedMtu with the existing values just to fire the
+        // readyForUse signal — this gates Session::onResolverPoolReady.
+        m_resolvers->setSyncedMtu(m_resolvers->syncedUploadMtu(),
+                                  m_resolvers->syncedDownloadMtu());
+    }
+    // Probers can be released — they've done their job. Clearing the
+    // vector also nulls out the pointers used by onInnerPacket's MTU
+    // response router, which is correct because no more probes are
+    // outstanding from this point forward.
+    m_probers.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -384,7 +555,6 @@ void Session::sendPacket(const Packet &packet, bool isSetupPacket)
 
 void Session::onResolverResponse(int resolverIndex, quint16 transactionId, const QByteArray &bytes)
 {
-    Q_UNUSED(resolverIndex);
     m_bytesRx += bytes.size();
     auto outIt = m_outstandingQueries.find(transactionId);
     if (outIt != m_outstandingQueries.end()) {
@@ -404,15 +574,26 @@ void Session::onResolverResponse(int resolverIndex, quint16 transactionId, const
     if (!pkt) {
         return;
     }
-    onInnerPacket(*pkt);
+    onInnerPacket(*pkt, resolverIndex);
 }
 
-void Session::onInnerPacket(const Packet &packet)
+void Session::onInnerPacket(const Packet &packet, int resolverIndex)
 {
     // Spec §12: every inbound packet feeds the tiered-pacing FSM so the
     // next PING is scheduled against actual conversation activity, not a
     // static interval.
     m_pingState.notify(packet.type, /*inbound=*/true, QDateTime::currentMSecsSinceEpoch());
+
+    // Spec §9 MTU probe responses are routed back to the prober that owns
+    // the outstanding probe for this resolver. They never reach the rest
+    // of the dispatch — and conversely, no other code path constructs an
+    // MtuUpRes/MtuDownRes packet, so this is the only consumer.
+    if (packet.type == PacketType::MtuUpRes || packet.type == PacketType::MtuDownRes) {
+        if (resolverIndex >= 0 && resolverIndex < m_probers.size() && m_probers[resolverIndex]) {
+            m_probers[resolverIndex]->feedResponse(packet.type, packet.payload);
+        }
+        return;
+    }
 
     switch (packet.type) {
     case PacketType::SessionAccept:
@@ -446,7 +627,11 @@ void Session::onInnerPacket(const Packet &packet)
                 synthetic.fragmentId = b.fragmentId;
                 synthetic.totalFragments = b.totalFragments;
             }
-            onInnerPacket(synthetic);
+            // Packed-block content never carries MTU probe responses
+            // (those types aren't in the packable catalogue), so the
+            // resolverIndex is irrelevant here — pass -1 to make that
+            // explicit. Real MTU responses arrive as standalone packets.
+            onInnerPacket(synthetic, /*resolverIndex=*/-1);
         }
         return;
     }
@@ -599,6 +784,17 @@ void Session::onTick()
         const qint64 interval = pingNextIntervalMs(m_pingPacing, m_pingState, now);
         if (now - m_pingState.lastPingSentMs >= interval) {
             emitPing(now);
+        }
+    }
+
+    // Spec §9 MTU probers are passive — they only emit `nextProbe` when
+    // a response arrives. We drive their timeout deadlines here so a
+    // resolver that goes silent doesn't stall the whole sweep forever.
+    if (m_state == State::MtuProbing) {
+        for (auto &p : m_probers) {
+            if (p) {
+                p->tick(now);
+            }
         }
     }
 }
