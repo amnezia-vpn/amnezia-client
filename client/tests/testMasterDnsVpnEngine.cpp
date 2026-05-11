@@ -9,6 +9,7 @@
 #include "masterdnsvpn/arq.h"
 #include "masterdnsvpn/crypto.h"
 #include "masterdnsvpn/dnsframing.h"
+#include "masterdnsvpn/pingpacer.h"
 #include "masterdnsvpn/wireframing.h"
 
 #include <QByteArray>
@@ -478,6 +479,94 @@ private slots:
         stream.halfCloseWrite();
         QCOMPARE(static_cast<int>(stream.state()),
                  static_cast<int>(ArqState::HalfClosedLocal));
+    }
+
+    // ----- §12 ping pacing FSM ----------------------------------------------
+
+    void pingPacerStartsInAggressiveTier()
+    {
+        // Seeded state mimics a freshly-handshaken session — all four
+        // timestamps equal `now`, so idle is 0 and we must be in the
+        // aggressive tier irrespective of any threshold.
+        PingPacingConfig cfg;
+        PingPacingState state;
+        state.seed(1'000'000);
+        QCOMPARE(pingNextIntervalMs(cfg, state, 1'000'000), cfg.aggressiveMs);
+    }
+
+    void pingPacerPromotesThroughTiersAsTrafficQuiets()
+    {
+        PingPacingConfig cfg; // 100 / 750 / 2000 / 15000 ; thresholds 8000 / 20000 / 30000
+        PingPacingState state;
+        state.seed(0);
+        const qint64 lazyEntry     = cfg.warmThreshMs;        //  8000
+        const qint64 cooldownEntry = cfg.coolThreshMs;        // 20000
+        const qint64 coldEntry     = cfg.coldThreshMs;        // 30000
+
+        QCOMPARE(pingNextIntervalMs(cfg, state, cfg.warmThreshMs - 1), cfg.aggressiveMs);
+        QCOMPARE(pingNextIntervalMs(cfg, state, lazyEntry),            cfg.lazyMs);
+        QCOMPARE(pingNextIntervalMs(cfg, state, cfg.coolThreshMs - 1), cfg.lazyMs);
+        QCOMPARE(pingNextIntervalMs(cfg, state, cooldownEntry),        cfg.cooldownMs);
+        QCOMPARE(pingNextIntervalMs(cfg, state, cfg.coldThreshMs - 1), cfg.cooldownMs);
+        QCOMPARE(pingNextIntervalMs(cfg, state, coldEntry),            cfg.coldMs);
+        QCOMPARE(pingNextIntervalMs(cfg, state, coldEntry + 1'000'000), cfg.coldMs);
+    }
+
+    void pingPacerNotifyResetsConversationTimers()
+    {
+        // After 25s of idle (cooldown tier), a single non-PING send must
+        // pull us back to aggressive — the FSM is `min(idleSent, idleRecv)`
+        // so reviving one direction is enough.
+        PingPacingConfig cfg;
+        PingPacingState state;
+        state.seed(0);
+        QCOMPARE(pingNextIntervalMs(cfg, state, 25'000), cfg.cooldownMs);
+
+        state.notify(PacketType::StreamData, /*inbound=*/false, /*now=*/25'000);
+        QCOMPARE(pingNextIntervalMs(cfg, state, 25'000), cfg.aggressiveMs);
+    }
+
+    void pingPacerPingPongDoNotResetConversationTimers()
+    {
+        // Pings/pongs are the keepalive itself — they must NOT count as
+        // conversation traffic, or the tier would never advance. The FSM
+        // only looks at non-ping/non-pong activity for tier selection.
+        PingPacingConfig cfg;
+        PingPacingState state;
+        state.seed(0);
+        QCOMPARE(pingNextIntervalMs(cfg, state, 25'000), cfg.cooldownMs);
+
+        state.notify(PacketType::Ping, /*inbound=*/false, /*now=*/25'000);
+        state.notify(PacketType::Pong, /*inbound=*/true,  /*now=*/25'000);
+        QCOMPARE(pingNextIntervalMs(cfg, state, 25'000), cfg.cooldownMs);
+    }
+
+    void pingPacerInboundOnlyTrafficKeepsAggressive()
+    {
+        // Asymmetric: server sends data, client only acks. Even with no
+        // outbound non-ping traffic, the warm-threshold check is an OR
+        // across the two directions, so we stay aggressive while the
+        // server is talking to us.
+        PingPacingConfig cfg;
+        PingPacingState state;
+        state.seed(0);
+        QCOMPARE(pingNextIntervalMs(cfg, state, 25'000), cfg.cooldownMs);
+
+        state.notify(PacketType::StreamData, /*inbound=*/true, /*now=*/25'000);
+        QCOMPARE(pingNextIntervalMs(cfg, state, 25'000), cfg.aggressiveMs);
+    }
+
+    void pingPacerLastPingTimestampUpdatedOnPingSend()
+    {
+        // Sending a PING must update `lastPingSentMs` but NOT
+        // `lastNonPingSentMs` — otherwise the FSM would falsely interpret
+        // a keepalive as conversation activity.
+        PingPacingState state;
+        state.seed(1'000);
+        const qint64 before = state.lastNonPingSentMs;
+        state.notify(PacketType::Ping, /*inbound=*/false, /*now=*/5'000);
+        QCOMPARE(state.lastPingSentMs, qint64(5'000));
+        QCOMPARE(state.lastNonPingSentMs, before);
     }
 };
 

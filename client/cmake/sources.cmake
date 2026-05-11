@@ -86,6 +86,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/masterdnsvpn/arq.h
     ${CLIENT_ROOT_DIR}/masterdnsvpn/resolverpool.h
     ${CLIENT_ROOT_DIR}/masterdnsvpn/session.h
+    ${CLIENT_ROOT_DIR}/masterdnsvpn/pingpacer.h
 )
 
 if(NOT IOS AND NOT MACOS_NE)

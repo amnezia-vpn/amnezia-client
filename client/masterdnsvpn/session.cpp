@@ -251,6 +251,12 @@ bool Session::start(const QJsonObject &config)
     m_tickTimer->start(kTickIntervalMs);
 
     m_initVerifyCode.clear();
+
+    // Seed the ping FSM so we start in the aggressive tier and let staged
+    // promotions push us toward cold as traffic quiets — mirrors upstream's
+    // `newPingManager` (internal/client/ping_manager.go:35-47).
+    m_pingState.seed(QDateTime::currentMSecsSinceEpoch());
+
     setState(State::Initialising);
     return true;
 }
@@ -365,6 +371,11 @@ void Session::sendPacket(const Packet &packet, bool isSetupPacket)
         m_resolvers->send(pick.index, dnsBytes);
         m_bytesTx += dnsBytes.size();
     }
+
+    // Spec §12: every outbound packet feeds the tiered-pacing FSM so the
+    // next PING is scheduled against actual conversation activity, not a
+    // static interval.
+    m_pingState.notify(packet.type, /*inbound=*/false, QDateTime::currentMSecsSinceEpoch());
 }
 
 // ---------------------------------------------------------------------------
@@ -398,6 +409,11 @@ void Session::onResolverResponse(int resolverIndex, quint16 transactionId, const
 
 void Session::onInnerPacket(const Packet &packet)
 {
+    // Spec §12: every inbound packet feeds the tiered-pacing FSM so the
+    // next PING is scheduled against actual conversation activity, not a
+    // static interval.
+    m_pingState.notify(packet.type, /*inbound=*/true, QDateTime::currentMSecsSinceEpoch());
+
     switch (packet.type) {
     case PacketType::SessionAccept:
         onSessionAccept(packet);
@@ -576,23 +592,14 @@ void Session::onTick()
         }
     }
 
-    // Periodic ping when established. We use the simplest constant-rate
-    // policy here; tiered pacing per §12 lands as a follow-up.
-    static qint64 lastPing = 0;
-    if (m_state == State::Established && now - lastPing > 8'000) {
-        Packet ping;
-        ping.sessionId = m_sessionId;
-        ping.cookie = m_sessionCookie;
-        ping.type = PacketType::Ping;
-        // §3.4 PING payload: 7 bytes `P` `O` `:` <4 random>.
-        QByteArray pingPayload;
-        pingPayload.append('P');
-        pingPayload.append('O');
-        pingPayload.append(':');
-        pingPayload.append(randomBytes(4));
-        ping.payload = pingPayload;
-        sendPacket(ping, /*isSetupPacket=*/false);
-        lastPing = now;
+    // Spec §12 tiered ping pacing. The interval is recomputed every tick
+    // against live conversation timestamps; we fire a PING only when the
+    // configured tier interval has elapsed since the last PING.
+    if (m_state == State::Established) {
+        const qint64 interval = pingNextIntervalMs(m_pingPacing, m_pingState, now);
+        if (now - m_pingState.lastPingSentMs >= interval) {
+            emitPing(now);
+        }
     }
 }
 
@@ -679,6 +686,34 @@ quint16 Session::allocStreamId()
 quint16 Session::nextTransactionId()
 {
     return ++m_dnsTxIdCounter;
+}
+
+// ---------------------------------------------------------------------------
+// §12 ping pacing — synthesises the PING packet; tier-selection math + the
+// notify bookkeeping live in pingpacer.h so they're unit-testable.
+// ---------------------------------------------------------------------------
+
+void Session::emitPing(qint64 /*now*/)
+{
+    Packet ping;
+    ping.sessionId = m_sessionId;
+    ping.cookie = m_sessionCookie;
+    ping.type = PacketType::Ping;
+    // PING is in `kNone` extensions per §3.4, so no stream/seq is serialised
+    // even if set — the encoder drops the optional fields by packet type.
+
+    // §3.4 PING payload: 7 bytes — `P`, `O`, `:`, then 4 random bytes.
+    QByteArray payload;
+    payload.reserve(7);
+    payload.append('P');
+    payload.append('O');
+    payload.append(':');
+    payload.append(randomBytes(4));
+    ping.payload = payload;
+
+    sendPacket(ping, /*isSetupPacket=*/false);
+    // `sendPacket` -> notifyPacket(Ping, outbound) already advances
+    // `m_pingState.lastPingSentMs`; no manual update needed here.
 }
 
 } // namespace amnezia::masterdnsvpn

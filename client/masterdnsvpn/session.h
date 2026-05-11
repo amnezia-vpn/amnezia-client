@@ -23,6 +23,7 @@
 
 #include "arq.h"
 #include "crypto.h"
+#include "pingpacer.h"
 #include "resolverpool.h"
 #include "socks5server.h"
 
@@ -121,6 +122,11 @@ private:
     // ---- Periodic tick (ARQ + ping pacing) ----
     void onTick();
 
+    // Spec §12 tiered ping pacing — see pingpacer.h for the FSM. Session
+    // owns the state + config and synthesises a PING when the configured
+    // tier interval has elapsed since the last one was sent.
+    void emitPing(qint64 now);
+
     // ---- Handshake ----
     void sendSessionInit();
     void onSessionAccept(const Packet &packet);
@@ -155,6 +161,9 @@ private:
     quint8 m_sessionId = 0;
     quint8 m_sessionCookie = 0;
     QByteArray m_initVerifyCode; // 4 bytes random; echoed back by server
+
+    PingPacingConfig m_pingPacing;
+    PingPacingState  m_pingState;
 
     // Stream-id allocator + map of active streams.
     quint16 m_nextStreamId = 1;
