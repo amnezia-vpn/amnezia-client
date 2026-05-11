@@ -208,6 +208,56 @@ bool Session::start(const QJsonObject &config)
     m_downloadCompression = std::clamp(
             config.value(QStringLiteral("downloadCompression")).toInt(0), 0, 3);
 
+    // ---- ARQ / ping-pacing tunables (all optional) ----
+    //
+    // Operators can override any of these via the JSON config; defaults
+    // remain in place if a key is absent. ArqConfig's constructor clamps
+    // each field to its protocol floor (windowSize >= 300, RTOs >= 50ms,
+    // etc.), so out-of-range values are silently corrected rather than
+    // rejected.
+    if (config.contains(QStringLiteral("arqWindowSize"))) {
+        m_arqCfg.windowSize =
+                config.value(QStringLiteral("arqWindowSize")).toInt(m_arqCfg.windowSize);
+    }
+    if (config.contains(QStringLiteral("arqInitialRtoMs"))) {
+        m_arqCfg.initialDataRtoMs = static_cast<qint64>(
+                config.value(QStringLiteral("arqInitialRtoMs")).toInt(
+                        static_cast<int>(m_arqCfg.initialDataRtoMs)));
+    }
+    if (config.contains(QStringLiteral("arqMaxRtoMs"))) {
+        m_arqCfg.maxDataRtoMs = static_cast<qint64>(
+                config.value(QStringLiteral("arqMaxRtoMs")).toInt(
+                        static_cast<int>(m_arqCfg.maxDataRtoMs)));
+    }
+    if (config.contains(QStringLiteral("arqDataNackMaxGap"))) {
+        m_arqCfg.dataNackMaxGap = config.value(QStringLiteral("arqDataNackMaxGap"))
+                                          .toInt(m_arqCfg.dataNackMaxGap);
+    }
+    if (config.contains(QStringLiteral("arqDataNackInitialDelayMs"))) {
+        m_arqCfg.dataNackInitialDelayMs = static_cast<qint64>(
+                config.value(QStringLiteral("arqDataNackInitialDelayMs"))
+                        .toInt(static_cast<int>(m_arqCfg.dataNackInitialDelayMs)));
+    }
+    if (config.contains(QStringLiteral("arqDataNackRepeatMs"))) {
+        m_arqCfg.dataNackRepeatMs = static_cast<qint64>(
+                config.value(QStringLiteral("arqDataNackRepeatMs"))
+                        .toInt(static_cast<int>(m_arqCfg.dataNackRepeatMs)));
+    }
+    if (config.contains(QStringLiteral("arqEnableControlReliability"))) {
+        m_arqCfg.enableControlReliability =
+                config.value(QStringLiteral("arqEnableControlReliability")).toBool(false);
+    }
+    if (config.contains(QStringLiteral("pingAggressiveMs"))) {
+        m_pingPacing.aggressiveMs = static_cast<qint64>(
+                config.value(QStringLiteral("pingAggressiveMs"))
+                        .toInt(static_cast<int>(m_pingPacing.aggressiveMs)));
+    }
+    if (config.contains(QStringLiteral("compressionMinSize"))) {
+        m_compressionMinSize = std::max(1,
+                config.value(QStringLiteral("compressionMinSize"))
+                        .toInt(m_compressionMinSize));
+    }
+
     // ---- Resolvers ----
     const QJsonArray resolversJson = config.value(QStringLiteral("resolvers")).toArray();
     const QVector<ResolverSpec> resolverSpecs =
