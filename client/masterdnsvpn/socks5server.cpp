@@ -19,9 +19,11 @@ constexpr quint8 kAuthUserPass = 0x02;
 constexpr quint8 kAuthNoneAcceptable = 0xFF;
 
 constexpr quint8 kCmdConnect = 0x01;
-constexpr quint8 kAtypIpv4 = 0x01;
-constexpr quint8 kAtypDomain = 0x03;
-constexpr quint8 kAtypIpv6 = 0x04;
+// ATYP values come from the public header (kSocks5AtypIPv4 etc.). The
+// short aliases below stay for source-readability inside this file.
+constexpr quint8 kAtypIpv4 = kSocks5AtypIPv4;
+constexpr quint8 kAtypDomain = kSocks5AtypDomain;
+constexpr quint8 kAtypIpv6 = kSocks5AtypIPv6;
 
 constexpr quint8 kRepSucceeded = 0x00;
 constexpr quint8 kRepGeneralFailure = 0x01;
@@ -92,6 +94,75 @@ QByteArray buildReply(quint8 rep)
 }
 
 } // namespace
+
+// ---------------------------------------------------------------------------
+// Standalone target-payload parser
+// ---------------------------------------------------------------------------
+//
+// Mirrors upstream `internal/socksproto/target.go::ParseTargetPayload`.
+// The C++ Socks5Server's CONNECT handler reads from a streaming socket;
+// this helper handles the case where the ATYP+addr+port tail is already
+// in a buffer (TCP CONNECT after the 4-byte header is read, or UDP
+// ASSOCIATE datagram framing). On success, `*consumedBytes` is set to
+// the number of bytes parsed; on error returns std::nullopt.
+std::optional<Socks5Destination>
+parseTargetPayload(const QByteArray &payload, int *consumedBytes)
+{
+    if (payload.size() < 3) {
+        return std::nullopt; // ATYP + at-least-1 byte of addr + 0 port = 3
+    }
+
+    Socks5Destination dest;
+    dest.addressType = static_cast<quint8>(payload[0]);
+    int offset = 1;
+
+    switch (dest.addressType) {
+    case kSocks5AtypIPv4: {
+        if (payload.size() < offset + 4 + 2) {
+            return std::nullopt;
+        }
+        const quint32 raw = qFromBigEndian<quint32>(payload.constData() + offset);
+        dest.host = QHostAddress(raw).toString();
+        dest.isDomainName = false;
+        offset += 4;
+        break;
+    }
+    case kSocks5AtypDomain: {
+        if (payload.size() < offset + 1) {
+            return std::nullopt;
+        }
+        const int domainLen = static_cast<quint8>(payload[offset]);
+        ++offset;
+        if (domainLen < 1 || payload.size() < offset + domainLen + 2) {
+            return std::nullopt;
+        }
+        dest.host = QString::fromLatin1(payload.constData() + offset, domainLen);
+        dest.isDomainName = true;
+        offset += domainLen;
+        break;
+    }
+    case kSocks5AtypIPv6: {
+        if (payload.size() < offset + 16 + 2) {
+            return std::nullopt;
+        }
+        Q_IPV6ADDR raw{};
+        std::memcpy(&raw, payload.constData() + offset, 16);
+        dest.host = QHostAddress(raw).toString();
+        dest.isDomainName = false;
+        offset += 16;
+        break;
+    }
+    default:
+        return std::nullopt; // unsupported ATYP
+    }
+
+    dest.port = qFromBigEndian<quint16>(payload.constData() + offset);
+    offset += 2;
+    if (consumedBytes != nullptr) {
+        *consumedBytes = offset;
+    }
+    return dest;
+}
 
 Socks5Server::Socks5Server(QObject *parent) : QObject(parent)
 {

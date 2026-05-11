@@ -23,6 +23,7 @@
 #include <QString>
 #include <QTcpServer>
 #include <functional>
+#include <optional>
 
 class QTcpSocket;
 
@@ -36,7 +37,29 @@ struct Socks5Destination
     QString host;
     quint16 port = 0;
     bool isDomainName = false;
+    // Wire-level address type — preserved separately from `isDomainName`
+    // so callers can distinguish IPv4 (0x01) from IPv6 (0x04) when they
+    // matter (e.g. UDP-associate response framing). Matches upstream's
+    // `Target.AddressType` (internal/socksproto/target.go:29).
+    quint8 addressType = 0;
 };
+
+// SOCKS5 ATYP byte values (RFC 1928 §5).
+constexpr quint8 kSocks5AtypIPv4   = 0x01;
+constexpr quint8 kSocks5AtypDomain = 0x03;
+constexpr quint8 kSocks5AtypIPv6   = 0x04;
+
+// Standalone parser for the SOCKS5 target tail (ATYP + addr + PORT), as
+// used by the CONNECT request's address bytes and the UDP-associate
+// datagram header. Returns std::nullopt for any structural error
+// (truncation, unsupported ATYP, zero-length domain). Mirrors upstream
+// `ParseTargetPayload` (internal/socksproto/target.go:34).
+//
+// `consumedBytes` (if non-null) is set on success to the number of bytes
+// consumed from `payload` — useful when the buffer contains additional
+// trailing data (UDP datagram payload, framing).
+std::optional<Socks5Destination> parseTargetPayload(const QByteArray &payload,
+                                                    int *consumedBytes = nullptr);
 
 // Auth profile applied to the listener. Empty username = no authentication
 // required (NOAUTH); operator config can populate it for shared-host setups.

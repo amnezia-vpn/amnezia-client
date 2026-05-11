@@ -2257,20 +2257,41 @@ private slots:
 
     void testParseTargetPayloadIPv4()
     {
-        QSKIP("ParseTargetPayload not exposed as a standalone helper in "
-              "C++ Socks5Server — target parsing is inline in the CONNECT "
-              "handshake path. Refactoring to extract a public helper is "
-              "a follow-up commit.");
+        // Upstream: TestParseTargetPayloadIPv4 (socksproto/target_test.go:12).
+        const QByteArray payload = QByteArray::fromRawData(
+                "\x01\x7F\x00\x00\x01\x01\xBB", 7);
+        int consumed = 0;
+        const auto dest = parseTargetPayload(payload, &consumed);
+        QVERIFY(dest.has_value());
+        QCOMPARE(dest->host, QStringLiteral("127.0.0.1"));
+        QCOMPARE(dest->port, quint16(443));
+        QVERIFY(!dest->isDomainName);
+        QCOMPARE(dest->addressType, quint8(kSocks5AtypIPv4));
+        QCOMPARE(consumed, 7);
     }
 
     void testParseTargetPayloadDomain()
     {
-        QSKIP("ParseTargetPayload not exposed; see above.");
+        // Upstream: TestParseTargetPayloadDomain (22).
+        const QByteArray payload = QByteArray::fromRawData(
+                "\x03\x0Bexample.com\x00\x35", 15);
+        int consumed = 0;
+        const auto dest = parseTargetPayload(payload, &consumed);
+        QVERIFY(dest.has_value());
+        QCOMPARE(dest->host, QStringLiteral("example.com"));
+        QCOMPARE(dest->port, quint16(53));
+        QVERIFY(dest->isDomainName);
+        QCOMPARE(dest->addressType, quint8(kSocks5AtypDomain));
+        QCOMPARE(consumed, 15);
     }
 
     void testParseTargetPayloadRejectsUnsupportedType()
     {
-        QSKIP("ParseTargetPayload not exposed; see above.");
+        // Upstream: TestParseTargetPayloadRejectsUnsupportedType (32).
+        const QByteArray payload = QByteArray::fromRawData(
+                "\x05\x00\x35", 3);
+        const auto dest = parseTargetPayload(payload);
+        QVERIFY(!dest.has_value());
     }
 
     void testParseAndBuildUDPDatagram()
