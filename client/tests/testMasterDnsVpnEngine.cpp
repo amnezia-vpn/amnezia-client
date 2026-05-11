@@ -9,9 +9,12 @@
 #include "masterdnsvpn/arq.h"
 #include "masterdnsvpn/compression.h"
 #include "masterdnsvpn/crypto.h"
+#include "masterdnsvpn/dnscache.h"
 #include "masterdnsvpn/dnsframing.h"
+#include "masterdnsvpn/dnsmsg.h"
 #include "masterdnsvpn/mtuprober.h"
 #include "masterdnsvpn/pingpacer.h"
+#include "masterdnsvpn/socks5server.h"
 #include "masterdnsvpn/wireframing.h"
 
 #include <QByteArray>
@@ -3124,24 +3127,184 @@ private slots:
     }
 
     // ====================================================================
-    // Upstream parity: internal/fragmentstore/store_test.go
+    // DNS query layer — lite parser, local cache, reassembly store
     //
-    // FragmentStore is upstream's request/response fragment cache used by
-    // the DNS-tunnel query layer (DNS_QUERY_REQ / RES). The C++ engine
-    // doesn't have a separate fragment store — fragmentation lives
-    // per-stream in ARQ for STREAM_DATA / STREAM_RESEND. These tests
-    // exercise a layer that doesn't exist in C++.
+    // Anchors the SOCKS5 UDP ASSOCIATE → DNS_QUERY_REQ → tunnel →
+    // DNS_QUERY_RES path. The "upstream parity: fragmentstore" tests
+    // below cover the equivalent reassembly behavior — translated to
+    // the C++ engine's DnsReassemblyStore.
     // ====================================================================
 
+    void testDnsLiteParseExtractsTxidAndFirstQuestion()
+    {
+        // Hand-built DNS query: txid=0xBEEF, RD flag, 1 question for
+        // "example.com" A IN. Header (12 bytes) + question section.
+        QByteArray q;
+        q.append(static_cast<char>(0xBE)).append(static_cast<char>(0xEF)); // txid
+        q.append(static_cast<char>(0x01)).append(static_cast<char>(0x00)); // flags: RD
+        q.append(static_cast<char>(0x00)).append(static_cast<char>(0x01)); // QDCOUNT=1
+        q.append(static_cast<char>(0x00)).append(static_cast<char>(0x00)); // ANCOUNT=0
+        q.append(static_cast<char>(0x00)).append(static_cast<char>(0x00)); // NSCOUNT
+        q.append(static_cast<char>(0x00)).append(static_cast<char>(0x00)); // ARCOUNT
+        q.append(static_cast<char>(7)).append("example");
+        q.append(static_cast<char>(3)).append("com");
+        q.append(static_cast<char>(0));                                    // root label
+        q.append(static_cast<char>(0)).append(static_cast<char>(1));       // QTYPE=A
+        q.append(static_cast<char>(0)).append(static_cast<char>(1));       // QCLASS=IN
+
+        const auto parsed = parseDnsLite(q);
+        QVERIFY(parsed.has_value());
+        QCOMPARE(parsed->txid, quint16(0xBEEF));
+        QVERIFY(parsed->hasQuestion);
+        QCOMPARE(parsed->firstQuestion.name, QStringLiteral("example.com"));
+        QCOMPARE(parsed->firstQuestion.type, quint16(1));
+        QCOMPARE(parsed->firstQuestion.cls,  quint16(1));
+    }
+
+    void testDnsLiteParseLowercasesName()
+    {
+        // Same query but the labels are uppercased. Canonical cache keys
+        // require lowercased names.
+        QByteArray q;
+        q.append(static_cast<char>(0x12)).append(static_cast<char>(0x34));
+        q.append(static_cast<char>(0x01)).append(static_cast<char>(0x00));
+        q.append(static_cast<char>(0x00)).append(static_cast<char>(0x01));
+        q.append(static_cast<char>(0x00)).append(static_cast<char>(0x00));
+        q.append(static_cast<char>(0x00)).append(static_cast<char>(0x00));
+        q.append(static_cast<char>(0x00)).append(static_cast<char>(0x00));
+        q.append(static_cast<char>(7)).append("EXAMPLE");
+        q.append(static_cast<char>(3)).append("COM");
+        q.append(static_cast<char>(0));
+        q.append(static_cast<char>(0)).append(static_cast<char>(1));
+        q.append(static_cast<char>(0)).append(static_cast<char>(1));
+
+        const auto parsed = parseDnsLite(q);
+        QVERIFY(parsed.has_value());
+        QCOMPARE(parsed->firstQuestion.name, QStringLiteral("example.com"));
+    }
+
+    void testDnsLiteParseRejectsTooShort()
+    {
+        const QByteArray q = QByteArray::fromRawData("\x00\x00\x00", 3);
+        QVERIFY(!parseDnsLite(q).has_value());
+    }
+
+    void testPatchDnsTxidReplacesFirstTwoBytes()
+    {
+        QByteArray response = QByteArray::fromRawData("\xAA\xBB\x80\x00", 4);
+        const QByteArray patched = patchDnsTxid(response, quint16(0xCAFE));
+        QCOMPARE(static_cast<quint8>(patched[0]), quint8(0xCA));
+        QCOMPARE(static_cast<quint8>(patched[1]), quint8(0xFE));
+        // Rest of payload preserved.
+        QCOMPARE(patched.size(), 4);
+        QCOMPARE(static_cast<quint8>(patched[2]), quint8(0x80));
+        QCOMPARE(static_cast<quint8>(patched[3]), quint8(0x00));
+    }
+
+    void testDnsLocalCacheMissThenReadyThenHit()
+    {
+        DnsLocalCache cache;
+        const DnsCacheKey k{ QStringLiteral("example.com"), 1, 1 };
+        const qint64 t0 = 1'000'000;
+        QCOMPARE(cache.lookupOrCreatePending(k, t0), DnsCacheStatus::Miss);
+        // Second lookup finds the pending entry.
+        QCOMPARE(cache.lookupOrCreatePending(k, t0), DnsCacheStatus::Pending);
+        // Once the tunnel response lands the entry transitions to Ready.
+        const QByteArray resp = QByteArrayLiteral("dns-response-bytes");
+        cache.setReady(k, resp, t0);
+        QCOMPARE(cache.lookupOrCreatePending(k, t0), DnsCacheStatus::Ready);
+        QCOMPARE(cache.readyResponseFor(k), resp);
+    }
+
+    void testDnsLocalCacheTtlSweepDropsExpired()
+    {
+        DnsLocalCache cache;
+        cache.setTtlMs(100);
+        const DnsCacheKey k{ QStringLiteral("a.example"), 1, 1 };
+        cache.setReady(k, QByteArrayLiteral("x"), 0);
+        QCOMPARE(cache.size(), 1);
+        const int purged = cache.sweepExpired(200); // > TTL → expire
+        QCOMPARE(purged, 1);
+        QCOMPARE(cache.size(), 0);
+    }
+
+    void testDnsReassemblySingleFragmentCompletesImmediately()
+    {
+        DnsReassemblyStore store;
+        DnsInFlight inflight;
+        inflight.clientTxid = 0x1234;
+        inflight.createdMs = 1000;
+        store.track(7, inflight);
+
+        DnsInFlight out;
+        QByteArray assembled;
+        const bool done = store.addFragment(
+                7, /*fragId=*/0, /*total=*/1,
+                QByteArrayLiteral("response-bytes"),
+                out, assembled);
+        QVERIFY(done);
+        QCOMPARE(assembled, QByteArrayLiteral("response-bytes"));
+        QCOMPARE(out.clientTxid, quint16(0x1234));
+        // Entry consumed on completion.
+        QVERIFY(!store.contains(7));
+    }
+
+    void testDnsReassemblyMultiFragmentAssembles()
+    {
+        DnsReassemblyStore store;
+        DnsInFlight inflight;
+        inflight.clientTxid = 0xABCD;
+        inflight.createdMs = 1000;
+        store.track(8, inflight);
+
+        DnsInFlight out;
+        QByteArray assembled;
+
+        // First fragment — not yet complete.
+        QVERIFY(!store.addFragment(8, 0, 3, QByteArrayLiteral("aaa"), out, assembled));
+        // Second fragment — still pending.
+        QVERIFY(!store.addFragment(8, 1, 3, QByteArrayLiteral("bbb"), out, assembled));
+        // Final fragment — completes.
+        QVERIFY(store.addFragment(8, 2, 3, QByteArrayLiteral("ccc"), out, assembled));
+
+        QCOMPARE(assembled, QByteArrayLiteral("aaabbbccc"));
+        QCOMPARE(out.clientTxid, quint16(0xABCD));
+        QVERIFY(!store.contains(8));
+    }
+
+    // Upstream parity tests — internal/fragmentstore/store_test.go.
+    // Translated to the C++ DnsReassemblyStore.
     void testCollectSingleFragmentMarksCompletedWithinRetention()
     {
-        QSKIP("FragmentStore not in C++ port — fragmentation is per-stream "
-              "in ArqStream rather than via a separate cache.");
+        // Upstream: TestCollect_SingleFragmentMarksCompletedWithinRetention.
+        // A single-fragment entry completes instantly and the store no
+        // longer reports the key after consumption.
+        DnsReassemblyStore store;
+        DnsInFlight inflight;
+        inflight.createdMs = 0;
+        store.track(42, inflight);
+
+        DnsInFlight out;
+        QByteArray assembled;
+        QVERIFY(store.addFragment(42, 0, 1, QByteArrayLiteral("payload"),
+                                  out, assembled));
+        QCOMPARE(assembled, QByteArrayLiteral("payload"));
+        QVERIFY(!store.contains(42));
     }
 
     void testRemoveIfClearsItemsAndCompletedEntries()
     {
-        QSKIP("FragmentStore not in C++ port; see above.");
+        // Upstream: TestRemoveIf_ClearsItemsAndCompletedEntries. C++
+        // equivalent: sweepExpired drops in-flight entries past TTL.
+        DnsReassemblyStore store;
+        DnsInFlight inflight;
+        inflight.createdMs = 0;
+        store.track(99, inflight);
+        QVERIFY(store.contains(99));
+
+        const int purged = store.sweepExpired(/*nowMs=*/15'000, /*ttlMs=*/10'000);
+        QCOMPARE(purged, 1);
+        QVERIFY(!store.contains(99));
     }
 
     void mtuProberProbePayloadLayout()

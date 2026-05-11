@@ -659,15 +659,28 @@ Enabled by `LOCAL_DNS_ENABLED = true` on the client. Exposes a UDP DNS listener 
 
 ### 11.1 Local cache
 
-A bounded LRU + TTL cache (`LOCAL_DNS_CACHE_MAX_RECORDS` × `LOCAL_DNS_CACHE_TTL_SECONDS`). On a request:
+A bounded TTL cache keyed on `(name, type, class)`. On a SOCKS5-UDP DNS request:
 
-1. The client lite-parses the DNS query, extracts the first question (`name`, `type`, `class`).
+1. The client lite-parses the DNS query, extracts transaction ID + first question (`name`, `type`, `class`).
 2. Looks up `(name, type, class)` in the cache.
 3. **Cache hit** — patches the cached response's transaction ID to match the new query and returns it immediately.
-4. **Cache pending** (already in flight) — drops the second request silently.
-5. **Cache miss** — dispatches to the tunnel (fire-and-forget; the response will arrive asynchronously).
+4. **Cache pending** (already in flight) — drops the second request silently (the in-flight tunnel response will populate the cache; the next retry hits).
+5. **Cache miss** — dispatches to the tunnel and tracks the in-flight query.
 
 Optional persistence: `LOCAL_DNS_CACHE_PERSIST_TO_FILE`, flushed every `LOCAL_DNS_CACHE_FLUSH_INTERVAL_SECONDS`.
+
+### 11.1a Cache-miss response semantics
+
+There are two valid client-side designs for what to do on cache miss:
+
+* **Upstream (Go) `masterking32/MasterDnsVPN`**: dispatch to tunnel, then *close the SOCKS5 UDP association* — forcing the local app to retry. The retry hits the cache (now populated by the tunnel response) and returns instantly.
+* **C++ port (this implementation)**: dispatch to tunnel, *track the in-flight query by wire seq*, send the tunnel response back to the SOCKS5 client directly when it arrives. No association teardown.
+
+**Wire-protocol behavior is byte-for-byte identical** between the two — DNS_QUERY_REQ fragmentation, encryption, resolver fan-out, retries, all match. The divergence is purely at the SOCKS5 loopback boundary.
+
+The C++ port deliberately diverges here for OPSEC: upstream's close-on-miss pattern is unique to MasterDnsVPN (no normal DNS resolver — `dnsmasq`, `systemd-resolved`, `unbound` — closes its listening socket on cache miss). A local observer watching loopback can fingerprint the resolver as "MasterDnsVPN-shaped" purely from the socket-churn pattern. The C++ port's behavior matches a standard cache-then-forward DNS resolver and is indistinguishable at the loopback layer.
+
+Both designs share the same cache layer; the divergence only matters on the cache-miss path.
 
 ### 11.2 Tunnel dispatch (PACKET_DNS_QUERY_REQ)
 

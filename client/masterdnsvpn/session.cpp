@@ -4,6 +4,7 @@
 
 #include "compression.h"
 #include "dnsframing.h"
+#include "dnsmsg.h"
 #include "wireframing.h"
 
 #include <climits>
@@ -298,6 +299,10 @@ bool Session::start(const QJsonObject &config)
 
     // ---- SOCKS5 listener ----
     m_socks5 = std::make_unique<Socks5Server>();
+    m_socks5->setUdpQuerySink(
+            [this](quint64 assocId, const QByteArray &query, const Socks5Destination &target) {
+                return onSocks5DnsQuery(assocId, query, target);
+            });
     if (!m_socks5->start(
                 m_listenPort, m_socks5Auth,
                 [this](QTcpSocket *s, const Socks5Destination &d) { onSocks5Accepted(s, d); })) {
@@ -699,6 +704,9 @@ void Session::onInnerPacket(const Packet &packet, int resolverIndex)
         // pacing the spec describes. Counters are bookkeeping only —
         // resolver health updates land in onArqOutbound's ACK plumbing.
         return;
+    case PacketType::DnsQueryRes:
+        onDnsQueryRes(packet);
+        return;
     case PacketType::PackedControlBlocks: {
         const QVector<PackedBlock> blocks = unpackBlocks(packet.payload);
         for (const PackedBlock &b : blocks) {
@@ -750,6 +758,141 @@ void Session::onInnerPacket(const Packet &packet, int resolverIndex)
 // ---------------------------------------------------------------------------
 // SOCKS5 → tunnel
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// DNS query layer — SOCKS5 UDP ASSOCIATE entry + tunnel response handler
+// ---------------------------------------------------------------------------
+//
+// Design departs from upstream's "close-on-miss, retry-from-client-cache"
+// pattern for OPSEC reasons: a local observer watching loopback should
+// see "DNS forwarder with cache" (matches `dnsmasq` / `systemd-resolved`
+// behaviour), not socket-teardown patterns unique to this implementation.
+// See docs/masterdnsvpn-wire-spec.md §11 for the full rationale.
+//
+// Wire protocol is identical to upstream: DNS_QUERY_REQ / DNS_QUERY_RES
+// packets carry the same fragmentation + cipher framing. The divergence
+// is entirely client-internal (cache + direct-response on miss instead
+// of cache + close-on-miss + retry).
+
+bool Session::onSocks5DnsQuery(quint64 assocId,
+                               const QByteArray &query,
+                               const Socks5Destination &target)
+{
+    Q_UNUSED(target); // already validated as port 53 by Socks5Server
+    if (m_state != State::Established) {
+        return false;
+    }
+    // Lite-parse the DNS query to extract txid + first question (cache
+    // key). Malformed queries are dropped silently — there's no useful
+    // SOCKS5-UDP error reply for DNS-layer issues.
+    const auto parsed = parseDnsLite(query);
+    if (!parsed) {
+        return false;
+    }
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+
+    if (parsed->hasQuestion) {
+        const DnsCacheKey key{
+            parsed->firstQuestion.name,
+            parsed->firstQuestion.type,
+            parsed->firstQuestion.cls,
+        };
+        const DnsCacheStatus status = m_dnsCache.lookupOrCreatePending(key, nowMs);
+        if (status == DnsCacheStatus::Ready) {
+            // Cache hit — patch txid and reply immediately. No tunnel hit.
+            const QByteArray cached = m_dnsCache.readyResponseFor(key);
+            const QByteArray reply = patchDnsTxid(cached, parsed->txid);
+            m_socks5->sendUdpReply(assocId, target, reply);
+            return true;
+        }
+        if (status == DnsCacheStatus::Pending) {
+            // Another in-flight tunnel query is resolving this same key.
+            // Drop this duplicate — when the response arrives it'll
+            // populate the cache and a subsequent retry from the local
+            // app (DNS apps always retry on timeout) will be a hit.
+            return true;
+        }
+        // Miss — fall through to tunnel dispatch.
+    }
+
+    // Allocate a fresh wire seq for this query and stash the reply
+    // route. The DNS_QUERY_RES handler matches on this seq.
+    const quint16 seq = ++m_dnsQuerySeq;
+    DnsInFlight inflight;
+    inflight.replyAddr = QHostAddress(); // unused — Socks5Server tracks per-assoc peer
+    inflight.replyPort = 0;
+    inflight.clientTxid = parsed->txid;
+    inflight.cacheKey = parsed->hasQuestion
+            ? DnsCacheKey{ parsed->firstQuestion.name,
+                           parsed->firstQuestion.type,
+                           parsed->firstQuestion.cls }
+            : DnsCacheKey{};
+    inflight.createdMs = nowMs;
+    inflight.totalFragments = 0;
+    // Bundle the SOCKS5 association + target into the in-flight entry by
+    // co-stashing them in QHash-side state. The reassembly store only
+    // tracks DnsInFlight — but we also need (assocId, target) for the
+    // reply route. Store them in a parallel mapping keyed by seq.
+    m_dnsReassembly.track(seq, inflight);
+    m_dnsReplyRoutes.insert(seq, DnsReplyRoute{ assocId, target });
+
+    // Fragment the query against the current upload-MTU budget. The
+    // syncedUploadMtu reports the per-fragment raw-payload budget after
+    // accounting for header / encoding overhead, so we split at exactly
+    // that boundary. Mirrors upstream `fragmentPayload(query, mtu)` in
+    // internal/client/client_utils.go.
+    const int mtu = std::max(16, m_resolvers ? m_resolvers->syncedUploadMtu() : 64);
+    const int fragmentCount = std::max(1, (int(query.size()) + mtu - 1) / mtu);
+    const int totalFrags = std::min(fragmentCount, 255);
+    for (int i = 0; i < totalFrags; ++i) {
+        const int off = i * mtu;
+        const int len = std::min<int>(mtu, query.size() - off);
+        Packet p;
+        p.type = PacketType::DnsQueryReq;
+        p.streamId = quint16(0);          // session control stream
+        p.sequenceNum = seq;
+        p.fragmentId = static_cast<quint8>(i);
+        p.totalFragments = static_cast<quint8>(totalFrags);
+        p.compression = 0;
+        p.payload = query.mid(off, len);
+        sendPacket(p, /*isSetupPacket=*/false);
+    }
+    return true;
+}
+
+void Session::onDnsQueryRes(const Packet &packet)
+{
+    if (!packet.sequenceNum || !packet.fragmentId || !packet.totalFragments) {
+        return; // wire-spec violation — DNS_QUERY_RES carries S/N/F extensions
+    }
+    DnsInFlight inflight;
+    QByteArray assembled;
+    if (!m_dnsReassembly.addFragment(*packet.sequenceNum,
+                                     *packet.fragmentId,
+                                     *packet.totalFragments,
+                                     packet.payload,
+                                     inflight,
+                                     assembled)) {
+        return; // more fragments still pending, or seq not tracked
+    }
+    auto routeIt = m_dnsReplyRoutes.find(*packet.sequenceNum);
+    if (routeIt == m_dnsReplyRoutes.end()) {
+        return; // orphan response — drop
+    }
+    const DnsReplyRoute route = routeIt.value();
+    m_dnsReplyRoutes.erase(routeIt);
+
+    // Cache the response by the original query key, then patch its txid
+    // to match the inbound query and send it back to the SOCKS5 client.
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (!inflight.cacheKey.name.isEmpty()) {
+        m_dnsCache.setReady(inflight.cacheKey, assembled, nowMs);
+    }
+    const QByteArray reply = patchDnsTxid(assembled, inflight.clientTxid);
+    if (m_socks5) {
+        m_socks5->sendUdpReply(route.assocId, route.target, reply);
+    }
+}
 
 void Session::onSocks5Accepted(QTcpSocket *socket, const Socks5Destination &dest)
 {
@@ -872,6 +1015,21 @@ void Session::onTick()
         const qint64 interval = pingNextIntervalMs(m_pingPacing, m_pingState, now);
         if (now - m_pingState.lastPingSentMs >= interval) {
             emitPing(now);
+        }
+    }
+
+    // DNS-layer TTL sweeps. The local cache drops stale entries past
+    // their TTL; the reassembly store drops in-flight queries whose
+    // tunnel response never fully arrived; reply-route entries whose
+    // matching reassembly entry was just dropped get purged here too
+    // so memory doesn't leak. Companion to spec §11.
+    m_dnsCache.sweepExpired(now);
+    m_dnsReassembly.sweepExpired(now);
+    for (auto it = m_dnsReplyRoutes.begin(); it != m_dnsReplyRoutes.end();) {
+        if (!m_dnsReassembly.contains(it.key())) {
+            it = m_dnsReplyRoutes.erase(it);
+        } else {
+            ++it;
         }
     }
 

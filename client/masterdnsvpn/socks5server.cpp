@@ -4,6 +4,7 @@
 
 #include <QHostAddress>
 #include <QTcpSocket>
+#include <QUdpSocket>
 #include <QtEndian>
 #include <cstring>
 
@@ -19,11 +20,18 @@ constexpr quint8 kAuthUserPass = 0x02;
 constexpr quint8 kAuthNoneAcceptable = 0xFF;
 
 constexpr quint8 kCmdConnect = 0x01;
+constexpr quint8 kCmdUdpAssociate = 0x03;
 // ATYP values come from the public header (kSocks5AtypIPv4 etc.). The
 // short aliases below stay for source-readability inside this file.
 constexpr quint8 kAtypIpv4 = kSocks5AtypIPv4;
 constexpr quint8 kAtypDomain = kSocks5AtypDomain;
 constexpr quint8 kAtypIpv6 = kSocks5AtypIPv6;
+
+// SOCKS5 UDP relay only tunnels DNS queries (port 53) — matches upstream
+// MasterDnsVPN. Non-53 targets are silently dropped (upstream sends a
+// SOCKS5 reply 0xFF to the control conn; we just ignore the datagram —
+// no client expects a TCP reply for a UDP error).
+constexpr quint16 kDnsPort = 53;
 
 constexpr quint8 kRepSucceeded = 0x00;
 constexpr quint8 kRepGeneralFailure = 0x01;
@@ -269,7 +277,14 @@ void Socks5Server::stop()
     if (m_listener.isListening()) {
         m_listener.close();
     }
+    // Tear down any outstanding UDP-ASSOCIATE relays. Iterate a copy of
+    // keys because teardownUdpAssociation mutates m_udpAssocs.
+    const auto ids = m_udpAssocs.keys();
+    for (quint64 id : ids) {
+        teardownUdpAssociation(id);
+    }
     m_sink = nullptr;
+    m_udpSink = nullptr;
     m_auth = {};
 }
 
@@ -369,8 +384,9 @@ void Socks5Server::handleClient(QTcpSocket *socket)
     if (req.size() != 4 || static_cast<quint8>(req[0]) != kVer5) {
         return fail(kRepGeneralFailure, "bad connect header");
     }
-    if (static_cast<quint8>(req[1]) != kCmdConnect) {
-        return fail(kRepCmdUnsupported, "only CONNECT supported");
+    const quint8 cmd = static_cast<quint8>(req[1]);
+    if (cmd != kCmdConnect && cmd != kCmdUdpAssociate) {
+        return fail(kRepCmdUnsupported, "only CONNECT and UDP_ASSOCIATE supported");
     }
     const quint8 atyp = static_cast<quint8>(req[3]);
 
@@ -421,6 +437,23 @@ void Socks5Server::handleClient(QTcpSocket *socket)
         return fail(kRepGeneralFailure, "short port");
     }
     dest.port = qFromBigEndian<quint16>(portBytes.constData());
+    dest.addressType = atyp;
+
+    // UDP ASSOCIATE branches off here. The DST.ADDR / DST.PORT we just
+    // consumed are the client's *expected* incoming UDP peer — clients
+    // usually send 0.0.0.0:0 meaning "anything". We don't enforce
+    // strict filtering on that. handleUdpAssociate takes ownership of
+    // the TCP control connection; it sends its own success reply.
+    if (cmd == kCmdUdpAssociate) {
+        if (!m_udpSink) {
+            return fail(kRepCmdUnsupported, "UDP_ASSOCIATE not configured (no sink)");
+        }
+        if (!handleUdpAssociate(socket, atyp)) {
+            // handleUdpAssociate already failed the request + cleaned up.
+            return;
+        }
+        return;
+    }
 
     if (!m_sink) {
         return fail(kRepGeneralFailure, "no sink configured");
@@ -435,6 +468,138 @@ void Socks5Server::handleClient(QTcpSocket *socket)
     }
 
     m_sink(socket, dest);
+}
+
+// ---------------------------------------------------------------------------
+// SOCKS5 UDP ASSOCIATE
+// ---------------------------------------------------------------------------
+
+bool Socks5Server::handleUdpAssociate(QTcpSocket *control, quint8 /*atyp*/)
+{
+    // RFC 1928 §6 — bind a UDP relay socket on the loopback interface,
+    // reply with our bound (ATYP, BND.ADDR, BND.PORT). The TCP control
+    // connection stays open for the lifetime of the association; if the
+    // client closes it we tear down the relay.
+    auto assoc = std::make_shared<Socks5UdpAssociation>();
+    assoc->control = control;
+    assoc->relay = std::make_shared<QUdpSocket>(this);
+    if (!assoc->relay->bind(QHostAddress(QHostAddress::LocalHost), 0)) {
+        (void)writeAll(control, buildReply(kRepGeneralFailure));
+        emit clientFailed(QStringLiteral("UDP relay bind failed"));
+        control->disconnectFromHost();
+        control->deleteLater();
+        return false;
+    }
+    const quint16 boundPort = assoc->relay->localPort();
+
+    // Build the success reply with BND.ADDR=127.0.0.1, BND.PORT=boundPort.
+    QByteArray reply;
+    reply.append(static_cast<char>(0x05));    // VER
+    reply.append(static_cast<char>(0x00));    // REP = succeeded
+    reply.append(static_cast<char>(0x00));    // RSV
+    reply.append(static_cast<char>(kAtypIpv4)); // ATYP
+    reply.append(static_cast<char>(127));
+    reply.append(static_cast<char>(0));
+    reply.append(static_cast<char>(0));
+    reply.append(static_cast<char>(1));
+    char beport[2];
+    qToBigEndian<quint16>(boundPort, beport);
+    reply.append(beport, 2);
+    if (!writeAll(control, reply)) {
+        control->disconnectFromHost();
+        control->deleteLater();
+        return false;
+    }
+
+    const quint64 assocId = m_nextAssocId++;
+    m_udpAssocs.insert(assocId, assoc);
+
+    // Wire the relay's readyRead to onUdpRelayReadable(assocId).
+    connect(assoc->relay.get(), &QUdpSocket::readyRead, this,
+            [this, assocId]() { onUdpRelayReadable(assocId); });
+
+    // Teardown when the TCP control connection drops. We keep the control
+    // socket alive until then (do NOT deleteLater here).
+    connect(control, &QTcpSocket::disconnected, this,
+            [this, assocId]() { teardownUdpAssociation(assocId); });
+    return true;
+}
+
+void Socks5Server::onUdpRelayReadable(quint64 assocId)
+{
+    auto it = m_udpAssocs.find(assocId);
+    if (it == m_udpAssocs.end()) {
+        return;
+    }
+    auto &assoc = *it.value();
+    QUdpSocket *relay = assoc.relay.get();
+    while (relay && relay->hasPendingDatagrams()) {
+        const qint64 size = relay->pendingDatagramSize();
+        QByteArray buf(static_cast<int>(size), '\0');
+        QHostAddress peerAddr;
+        quint16 peerPort = 0;
+        const qint64 read = relay->readDatagram(buf.data(), buf.size(),
+                                                &peerAddr, &peerPort);
+        if (read <= 0) continue;
+
+        // Remember the first client peer so sendUdpReply can route back.
+        if (!assoc.sawFirstClientPacket) {
+            assoc.clientAddr = peerAddr;
+            assoc.clientPort = peerPort;
+            assoc.sawFirstClientPacket = true;
+        }
+
+        // Parse the SOCKS5-UDP framing (RSV(2)+FRAG(1)+ATYP+ADDR+PORT+DATA).
+        const auto dgram = parseUdpDatagram(buf);
+        if (!dgram) continue; // malformed or fragmented; drop silently
+
+        // MasterDnsVPN: only port 53 traffic is tunneled. Anything else
+        // is silently dropped (matches upstream's narrow-scope policy).
+        if (dgram->target.port != kDnsPort) {
+            continue;
+        }
+        if (m_udpSink) {
+            (void)m_udpSink(assocId, dgram->payload, dgram->target);
+        }
+    }
+}
+
+void Socks5Server::sendUdpReply(quint64 assocId,
+                                const Socks5Destination &target,
+                                const QByteArray &responseBytes)
+{
+    auto it = m_udpAssocs.find(assocId);
+    if (it == m_udpAssocs.end()) {
+        return;
+    }
+    const auto &assoc = *it.value();
+    if (!assoc.sawFirstClientPacket || !assoc.relay) {
+        return;
+    }
+    const QByteArray packet = buildUdpDatagram(target, responseBytes);
+    assoc.relay->writeDatagram(packet, assoc.clientAddr, assoc.clientPort);
+}
+
+void Socks5Server::closeUdpAssociation(quint64 assocId)
+{
+    teardownUdpAssociation(assocId);
+}
+
+void Socks5Server::teardownUdpAssociation(quint64 assocId)
+{
+    auto it = m_udpAssocs.find(assocId);
+    if (it == m_udpAssocs.end()) {
+        return;
+    }
+    auto assoc = it.value();
+    m_udpAssocs.erase(it);
+    if (assoc->relay) {
+        assoc->relay->close();
+    }
+    if (assoc->control) {
+        assoc->control->disconnectFromHost();
+        assoc->control->deleteLater();
+    }
 }
 
 } // namespace amnezia::masterdnsvpn

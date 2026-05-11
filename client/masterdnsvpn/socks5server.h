@@ -18,14 +18,18 @@
 #ifndef MASTERDNSVPN_SOCKS5SERVER_H
 #define MASTERDNSVPN_SOCKS5SERVER_H
 
+#include <QHash>
 #include <QHostAddress>
 #include <QObject>
+#include <QPointer>
 #include <QString>
 #include <QTcpServer>
 #include <functional>
+#include <memory>
 #include <optional>
 
 class QTcpSocket;
+class QUdpSocket;
 
 namespace amnezia::masterdnsvpn {
 
@@ -100,6 +104,17 @@ struct Socks5Auth
     bool isEnabled() const { return !username.isEmpty(); }
 };
 
+// One in-flight SOCKS5 UDP ASSOCIATE association. The TCP control
+// connection is kept open while the UDP relay socket is bound; when the
+// control connection closes the relay tears down.
+struct Socks5UdpAssociation {
+    QPointer<QTcpSocket> control;   // SOCKS5 TCP control connection
+    std::shared_ptr<QUdpSocket> relay; // UDP relay socket (server-side bound)
+    QHostAddress clientAddr;        // First seen client UDP peer (set on first datagram)
+    quint16 clientPort = 0;
+    bool sawFirstClientPacket = false;
+};
+
 class Socks5Server : public QObject
 {
     Q_OBJECT
@@ -112,6 +127,18 @@ public:
     using StreamSink = std::function<void(QTcpSocket *socket,
                                           const Socks5Destination &dest)>;
 
+    // Called for each inbound SOCKS5 UDP datagram whose target is a valid
+    // DNS query target (port 53). `query` is the raw DNS query bytes.
+    // `assocId` identifies the SOCKS5 UDP association, so the caller can
+    // route the response back via sendUdpReply().
+    //
+    // Returning false from this callback signals "no immediate response
+    // available; teardown the association" — matches upstream's
+    // close-on-miss pattern is NOT used here. Default return true.
+    using UdpQuerySink = std::function<bool(quint64 assocId,
+                                            const QByteArray &query,
+                                            const Socks5Destination &target)>;
+
     explicit Socks5Server(QObject *parent = nullptr);
     ~Socks5Server() override;
 
@@ -123,6 +150,24 @@ public:
     bool isListening() const;
     quint16 listenPort() const;
 
+    // Wire the UDP-query sink (optional). If not set, UDP ASSOCIATE
+    // requests are rejected with reply code 0x07 (CMD_UNSUPPORTED).
+    void setUdpQuerySink(UdpQuerySink sink) { m_udpSink = std::move(sink); }
+
+    // Send `responseBytes` as a SOCKS5 UDP reply on the association
+    // identified by `assocId`. Wraps the bytes in RSV+FRAG+target+payload
+    // framing and writes them to the relay socket addressed at the
+    // association's recorded client peer. No-op if the association has
+    // closed or if the relay never saw a first client datagram.
+    void sendUdpReply(quint64 assocId,
+                      const Socks5Destination &target,
+                      const QByteArray &responseBytes);
+
+    // Tear down a UDP association (closes relay + control). Used when
+    // the upper layer detects the association is no longer needed
+    // (session reset, fatal error).
+    void closeUdpAssociation(quint64 assocId);
+
 signals:
     void clientFailed(const QString &reason);
 
@@ -132,9 +177,22 @@ private:
     void onIncomingConnection();
     void handleClient(QTcpSocket *socket);
 
+    // SOCKS5 UDP ASSOCIATE plumbing. `assocId` is a per-association
+    // monotonic counter; the association entry lives in m_udpAssocs
+    // until either the control TCP connection drops or closeUdpAssociation
+    // is called.
+    bool handleUdpAssociate(QTcpSocket *control, quint8 atyp);
+    void onUdpRelayReadable(quint64 assocId);
+    void teardownUdpAssociation(quint64 assocId);
+
     QTcpServer m_listener;
     Socks5Auth m_auth;
     StreamSink m_sink;
+
+    // UDP-relay state.
+    UdpQuerySink m_udpSink;
+    QHash<quint64, std::shared_ptr<Socks5UdpAssociation>> m_udpAssocs;
+    quint64 m_nextAssocId = 1;
 };
 
 } // namespace amnezia::masterdnsvpn

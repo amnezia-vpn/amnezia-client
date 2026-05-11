@@ -23,6 +23,7 @@
 
 #include "arq.h"
 #include "crypto.h"
+#include "dnscache.h"
 #include "mtuprober.h"
 #include "pingpacer.h"
 #include "resolverpool.h"
@@ -127,6 +128,28 @@ private:
     // fresh stream id, send PACKET_SOCKS5_SYN, and bridge the TCP socket's
     // read traffic into the matching ArqStream.
     void onSocks5Accepted(QTcpSocket *socket, const Socks5Destination &dest);
+
+    // ---- DNS query layer (SOCKS5 UDP ASSOCIATE) ----
+    // Called by Socks5Server for each inbound DNS query datagram. Looks
+    // the query up in the local cache; on hit, the response is patched
+    // with the new txid and sent back directly. On miss, dispatches
+    // DNS_QUERY_REQ packets through the tunnel (fragmented per MTU)
+    // and tracks the in-flight query in m_dnsInFlight; the response
+    // arrives via onDnsQueryRes() and is routed back to the SOCKS5
+    // client via Socks5Server::sendUdpReply().
+    //
+    // Returns true unconditionally — the C++ port uses direct-response
+    // semantics (cache hit OR wait + respond), not upstream's
+    // close-on-miss pattern. See docs/masterdnsvpn-wire-spec.md §11.
+    bool onSocks5DnsQuery(quint64 assocId,
+                          const QByteArray &query,
+                          const Socks5Destination &target);
+
+    // Handler for inbound DNS_QUERY_RES packets from the tunnel.
+    // Reassembles fragments via m_dnsReassembly, patches the txid, and
+    // both populates the local DNS cache and routes the response back
+    // to the originating SOCKS5 UDP association.
+    void onDnsQueryRes(const Packet &packet);
 
     // Per-stream ArqStream::Sink callback — packs into outer wire frame.
     void onArqOutbound(quint16 streamId, const ArqOutbound &out);
@@ -234,6 +257,26 @@ private:
     // tick to time out queries that never see a response.
     QHash<quint16, int> m_outstandingQueries;
     quint16 m_dnsTxIdCounter = 0;
+
+    // SOCKS5 UDP DNS-tunneling state. The local cache answers repeat
+    // queries without a tunnel round-trip; the reassembly store
+    // accumulates fragmented DNS_QUERY_RES packets and routes them back
+    // to the originating SOCKS5 UDP association. The seq counter is a
+    // monotonic wrap-around 16-bit value used as the wire-level seq on
+    // DNS_QUERY_REQ packets (and matched against incoming
+    // DNS_QUERY_RES packets).
+    DnsLocalCache m_dnsCache;
+    DnsReassemblyStore m_dnsReassembly;
+    quint16 m_dnsQuerySeq = 0;
+
+    // Per-in-flight-query reply route (SOCKS5 UDP association + target
+    // descriptor). Kept parallel to m_dnsReassembly because the
+    // reassembly store is generic; the route is engine-specific.
+    struct DnsReplyRoute {
+        quint64 assocId = 0;
+        Socks5Destination target;
+    };
+    QHash<quint16, DnsReplyRoute> m_dnsReplyRoutes;
 
     // Stats.
     quint64 m_bytesRx = 0;
