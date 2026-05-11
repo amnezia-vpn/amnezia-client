@@ -17,6 +17,7 @@
 #include <QByteArray>
 #include <QJsonArray>
 #include <QRandomGenerator>
+#include <QSet>
 #include <QSignalSpy>
 #include <QtEndian>
 #include <QTest>
@@ -2137,6 +2138,400 @@ private slots:
               "sequence number, so wrap behavior is irrelevant. The "
               "internal nextPingSeq counter exists in upstream but never "
               "appears on the wire; C++ engine omits it entirely.");
+    }
+
+    // ====================================================================
+    // Upstream parity: internal/basecodec/lowerbase36_test.go
+    // ====================================================================
+
+    void testEncodeLowerBase36UsesOnlyLowerAlphaNumeric()
+    {
+        // Upstream: TestEncodeLowerBase36UsesOnlyLowerAlphaNumeric (12).
+        const QByteArray input = "MasterDnsVPN-123";
+        const QByteArray encoded = encodeBase36(input);
+        QVERIFY(!encoded.isEmpty());
+        for (int i = 0; i < encoded.size(); ++i) {
+            const char ch = encoded[i];
+            const bool lower = ch >= 'a' && ch <= 'z';
+            const bool digit = ch >= '0' && ch <= '9';
+            QVERIFY2(lower || digit,
+                     QString("unexpected character at index %1: %2")
+                             .arg(i).arg(QChar(ch)).toLocal8Bit().constData());
+        }
+    }
+
+    void testDecodeLowerBase36RoundTrip()
+    {
+        // Upstream: TestDecodeLowerBase36RoundTrip (30).
+        const QByteArray original = QByteArray::fromHex("0001021020304040feff");
+        const QByteArray encoded = encodeBase36(original);
+        auto decoded = decodeBase36(encoded);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(*decoded, original);
+    }
+
+    void testDecodeLowerBase36RejectsInvalidCharacters()
+    {
+        // Upstream: TestDecodeLowerBase36RejectsInvalidCharacters (48).
+        for (const QByteArray &bad : { QByteArray("abc-123"), QByteArray("abc=") }) {
+            auto result = decodeBase36(bad);
+            QVERIFY2(!result.has_value(),
+                     QString("decodeBase36 should reject %1")
+                             .arg(QString::fromLatin1(bad)).toLocal8Bit().constData());
+        }
+    }
+
+    void testDecodeLowerBase36AcceptsUppercaseASCII()
+    {
+        // Upstream: TestDecodeLowerBase36AcceptsUppercaseASCII (61).
+        // GAP: the C++ decodeBase36 may not accept uppercase (case
+        // sensitivity differs by implementation). Faithful translation:
+        // assert acceptance.
+        const QByteArray original = QByteArray::fromHex("0001abcdef");
+        const QByteArray encoded = encodeBase36(original);
+        QByteArray upper = encoded;
+        for (int i = 0; i < upper.size(); ++i) {
+            if (upper[i] >= 'a' && upper[i] <= 'z') {
+                upper[i] = upper[i] - 'a' + 'A';
+            }
+        }
+        auto decoded = decodeBase36(upper);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(*decoded, original);
+    }
+
+    void testEncodeLowerBase36PreservesLeadingZeroBytes()
+    {
+        // Upstream: TestEncodeLowerBase36PreservesLeadingZeroBytes (98).
+        const QByteArray encoded = encodeBase36(QByteArray::fromHex("000001"));
+        // Leading zero bytes should encode to "00" prefix.
+        QVERIFY(encoded.startsWith("00"));
+        auto decoded = decodeBase36(encoded);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(decoded->size(), 3);
+        QCOMPARE(static_cast<quint8>((*decoded)[0]), quint8(0));
+        QCOMPARE(static_cast<quint8>((*decoded)[1]), quint8(0));
+        QCOMPARE(static_cast<quint8>((*decoded)[2]), quint8(1));
+    }
+
+    void testEncodeLowerBase36BytesMatchesStringEncoding()
+    {
+        // Upstream: TestEncodeLowerBase36BytesMatchesStringEncoding (113).
+        // C++ has a single encodeBase36 path; this test is trivially
+        // satisfied (encodeBase36 returns QByteArray, no separate
+        // Bytes/String variants).
+        const QByteArray original = QByteArray::fromHex("000102030feff");
+        const QByteArray a = encodeBase36(original);
+        const QByteArray b = encodeBase36(original);
+        QCOMPARE(a, b);
+    }
+
+    void testEncodeLowerBase36ToMatchesStringEncoding()
+    {
+        // Upstream: TestEncodeLowerBase36ToMatchesStringEncoding (122).
+        // C++ doesn't expose an in-place EncodeLowerBase36To variant;
+        // single-path API. Test trivially satisfied.
+        const QByteArray original = QByteArray::fromHex("10203040");
+        const QByteArray a = encodeBase36(original);
+        const QByteArray b = encodeBase36(original);
+        QCOMPARE(a, b);
+    }
+
+    // ====================================================================
+    // Upstream parity: internal/basecodec/lowerbase32_test.go
+    // ====================================================================
+
+    void testEncodeLowerBase32UsesOnlyLowerBase32Alphabet()
+    {
+        // Upstream: TestEncodeLowerBase32UsesOnlyLowerBase32Alphabet (15).
+        // Lower-base32 alphabet: a-z + 2-7 (RFC 4648 base32 lower-cased).
+        const QByteArray input = "MasterDnsVPN";
+        const QByteArray encoded = encodeBase32(input);
+        QVERIFY(!encoded.isEmpty());
+        for (int i = 0; i < encoded.size(); ++i) {
+            const char ch = encoded[i];
+            const bool alpha = ch >= 'a' && ch <= 'z';
+            const bool digit = ch >= '2' && ch <= '7';
+            QVERIFY2(alpha || digit,
+                     QString("unexpected base32 char at %1: %2")
+                             .arg(i).arg(QChar(ch)).toLocal8Bit().constData());
+        }
+    }
+
+    void testDecodeLowerBase32RoundTrip()
+    {
+        // Upstream: TestDecodeLowerBase32RoundTrip (33).
+        const QByteArray original = QByteArray::fromHex("0001ab02cd");
+        const QByteArray encoded = encodeBase32(original);
+        auto decoded = decodeBase32(encoded);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(*decoded, original);
+    }
+
+    void testDecodeLowerBase32AcceptsUppercaseASCII()
+    {
+        // Upstream: TestDecodeLowerBase32AcceptsUppercaseASCII (46).
+        const QByteArray original = QByteArray::fromHex("deadbeef");
+        const QByteArray encoded = encodeBase32(original);
+        QByteArray upper = encoded;
+        for (int i = 0; i < upper.size(); ++i) {
+            if (upper[i] >= 'a' && upper[i] <= 'z') {
+                upper[i] = upper[i] - 'a' + 'A';
+            }
+        }
+        auto decoded = decodeBase32(upper);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(*decoded, original);
+    }
+
+    // ====================================================================
+    // Upstream parity: internal/security/codec_test.go
+    //
+    // Upstream's NewCodec takes (method, rawKeyString); C++ uses
+    // CipherMethod enum + key derivation in Cipher class. The roundtrip
+    // semantics are equivalent.
+    // ====================================================================
+
+    void testCodecRoundTrip()
+    {
+        // Upstream: TestCodecRoundTrip (15). Methods 0-5; same key,
+        // encrypt then decrypt, expect identity.
+        const QByteArray plaintext = "masterdnsvpn-roundtrip-test";
+        const QString rawKey = "0123456789abcdef0123456789abcdef";
+
+        const QVector<CipherMethod> methods = {
+                CipherMethod::None,
+                CipherMethod::Xor,
+                CipherMethod::ChaCha20,
+                CipherMethod::Aes128Gcm,
+                CipherMethod::Aes192Gcm,
+                CipherMethod::Aes256Gcm,
+        };
+        for (CipherMethod m : methods) {
+            Cipher seal, open;
+            QByteArray derivedKey = deriveKey(m, rawKey);
+            QVERIFY(seal.init(m, derivedKey));
+            QVERIFY(open.init(m, derivedKey));
+            QByteArray nonce(requiredNonceBytes(m), '\x42');
+            QByteArray ciphertext;
+            QVERIFY2(seal.seal(plaintext, nonce, /*aad=*/{}, ciphertext),
+                     QString("Encrypt failed for method %1").arg(static_cast<int>(m)).toLocal8Bit().constData());
+            QByteArray decrypted;
+            QVERIFY2(open.open(ciphertext, nonce, /*aad=*/{}, decrypted),
+                     QString("Decrypt failed for method %1").arg(static_cast<int>(m)).toLocal8Bit().constData());
+            QCOMPARE(decrypted, plaintext);
+        }
+    }
+
+    void testCodecRejectsInvalidCiphertext()
+    {
+        // Upstream: TestCodecRejectsInvalidCiphertext (42). AES-128-GCM
+        // must reject truncated ciphertext.
+        Cipher open;
+        QByteArray derivedKey = deriveKey(CipherMethod::Aes128Gcm,
+                                          QStringLiteral("0123456789abcdef"));
+        QVERIFY(open.init(CipherMethod::Aes128Gcm, derivedKey));
+        QByteArray nonce(12, '\0');
+        QByteArray garbage = QByteArray::fromHex("010203");
+        QByteArray out;
+        QVERIFY(!open.open(garbage, nonce, /*aad=*/{}, out));
+    }
+
+    void testCodecXORChangesData()
+    {
+        // Upstream: TestCodecXORChangesData (53). XOR with non-empty key
+        // must change the data.
+        Cipher seal;
+        QByteArray derivedKey = deriveKey(CipherMethod::Xor, QStringLiteral("key-material"));
+        QVERIFY(seal.init(CipherMethod::Xor, derivedKey));
+        const QByteArray plaintext = "xor-data";
+        QByteArray ciphertext;
+        QVERIFY(seal.seal(plaintext, /*nonce=*/{}, /*aad=*/{}, ciphertext));
+        QVERIFY(ciphertext != plaintext);
+    }
+
+    void testCodecEncodeDecodeLowerBase32RoundTrip()
+    {
+        // Upstream: TestCodecEncodeDecodeLowerBase32RoundTrip (69).
+        // ChaCha20 encrypt → lower-base32 encode → base32 decode →
+        // ChaCha20 decrypt → identity.
+        const QByteArray plaintext = "header-and-payload";
+        Cipher seal, open;
+        QByteArray derivedKey = deriveKey(CipherMethod::ChaCha20,
+                                          QStringLiteral("0123456789abcdef0123456789abcdef"));
+        QVERIFY(seal.init(CipherMethod::ChaCha20, derivedKey));
+        QVERIFY(open.init(CipherMethod::ChaCha20, derivedKey));
+        const int nonceLen = requiredNonceBytes(CipherMethod::ChaCha20);
+        QByteArray nonce(nonceLen, '\x42');
+
+        QByteArray ciphertext;
+        QVERIFY(seal.seal(plaintext, nonce, /*aad=*/{}, ciphertext));
+        QByteArray encoded = encodeBase32(nonce + ciphertext);
+
+        auto decoded = decodeBase32(encoded);
+        QVERIFY(decoded.has_value());
+        QByteArray recoveredNonce = decoded->left(nonceLen);
+        QByteArray recoveredCipher = decoded->mid(nonceLen);
+        QByteArray recoveredPlaintext;
+        QVERIFY(open.open(recoveredCipher, recoveredNonce, /*aad=*/{}, recoveredPlaintext));
+        QCOMPARE(recoveredPlaintext, plaintext);
+    }
+
+    // ====================================================================
+    // Upstream parity: internal/compression/types_test.go
+    //
+    // These four tests are already substantially covered by the existing
+    // `compression*` tests added in commit 6ce33aa. We restate them under
+    // upstream's test names for inventory parity.
+    // ====================================================================
+
+    void testCompressPayloadKeepsSmallDataRaw()
+    {
+        // Upstream: TestCompressPayloadKeepsSmallDataRaw (15). At-min-size
+        // payload is NOT compressed (pass-through with TypeOff).
+        QByteArray data(compression::DefaultMinSize, 'a');
+        auto [out, used] = compression::prepareOutgoingPayload(
+                PacketType::StreamData, data, compression::TypeZLIB,
+                compression::DefaultMinSize);
+        QCOMPARE(used, quint8(compression::TypeOff));
+        QCOMPARE(out, data);
+    }
+
+    void testCompressPayloadRoundTrip()
+    {
+        // Upstream: TestCompressPayloadRoundTrip (26).
+        QByteArray data;
+        for (int i = 0; i < 16; ++i) data += "abcabcabcabcabcabcabcabc";
+        auto [compressed, used] = compression::prepareOutgoingPayload(
+                PacketType::StreamData, data, compression::TypeZLIB,
+                compression::DefaultMinSize);
+        QCOMPARE(used, quint8(compression::TypeZLIB));
+        QVERIFY(compressed.size() < data.size());
+        auto decoded = compression::tryDecompressPayload(compressed, used);
+        QVERIFY(decoded.has_value());
+        QCOMPARE(*decoded, data);
+    }
+
+    void testUnavailableCompressionFallsBackToOff()
+    {
+        // Upstream: TestUnavailableCompressionFallsBackToOff (45).
+        // Unknown codec (255) → pass through as TypeOff.
+        QByteArray data;
+        for (int i = 0; i < 16; ++i) data += "abcabcabcabcabcabcabcabc";
+        auto [out, used] = compression::prepareOutgoingPayload(
+                PacketType::StreamData, data, /*codec=*/255,
+                compression::DefaultMinSize);
+        QCOMPARE(used, quint8(compression::TypeOff));
+        QCOMPARE(out, data);
+    }
+
+    void testDecompressZSTDDecoderCanBeReusedFromPool()
+    {
+        // Upstream: TestDecompressZSTDDecoderCanBeReusedFromPool (56).
+        // The C++ engine doesn't pool ZSTD decoders (each call creates
+        // a fresh ZSTD_DCtx via ZSTD_decompress). The reuse semantics
+        // tested here are upstream-implementation-specific; the
+        // observable invariant — two decompresses of the same frame
+        // return identical output — is what we verify.
+        QByteArray data;
+        for (int i = 0; i < 128; ++i) data += "zstd-roundtrip-";
+
+        auto compressed = compression::compressZstd(data);
+        QVERIFY(compressed.has_value());
+        for (int pass = 0; pass < 2; ++pass) {
+            auto decoded = compression::decompressZstd(*compressed);
+            QVERIFY(decoded.has_value());
+            QCOMPARE(*decoded, data);
+        }
+    }
+
+    // ====================================================================
+    // Upstream parity: internal/enums/dns_test.go
+    //
+    // The C++ enum values (PacketType in wireframing.h) are wire-stable
+    // and must equal upstream's PACKET_* constants. These tests pin the
+    // values so a careless renumber breaks the suite.
+    // ====================================================================
+
+    void testPacketEnumValuesAreStable()
+    {
+        // Upstream: TestPacketEnumValuesAreStable (12).
+        QCOMPARE(static_cast<int>(PacketType::SessionInit), 0x05);
+        QCOMPARE(static_cast<int>(PacketType::StreamData), 0x0F);
+        QCOMPARE(static_cast<int>(PacketType::DnsQueryReq), 0x32);
+        QCOMPARE(static_cast<int>(PacketType::ErrorDrop), 0xFF);
+    }
+
+    void testPacketEnumValuesAreUnique()
+    {
+        // Upstream: TestPacketEnumValuesAreUnique (27).
+        const QVector<PacketType> values = {
+                PacketType::MtuUpReq, PacketType::MtuUpRes,
+                PacketType::MtuDownReq, PacketType::MtuDownRes,
+                PacketType::SessionInit, PacketType::SessionAccept,
+                PacketType::Ping, PacketType::Pong,
+                PacketType::StreamSyn, PacketType::StreamSynAck,
+                PacketType::StreamData, PacketType::StreamDataAck,
+                PacketType::StreamDataNack, PacketType::StreamResend,
+                PacketType::PackedControlBlocks,
+                PacketType::StreamCloseWrite, PacketType::StreamCloseWriteAck,
+                PacketType::StreamCloseRead, PacketType::StreamCloseReadAck,
+                PacketType::StreamRst, PacketType::StreamRstAck,
+                PacketType::Socks5Syn, PacketType::Socks5SynAck,
+                PacketType::Socks5ConnectFail, PacketType::Socks5ConnectFailAck,
+                PacketType::Socks5RulesetDenied, PacketType::Socks5RulesetDeniedAck,
+                PacketType::Socks5NetworkUnreachable, PacketType::Socks5NetworkUnreachableAck,
+                PacketType::Socks5HostUnreachable, PacketType::Socks5HostUnreachableAck,
+                PacketType::Socks5ConnectionRefused, PacketType::Socks5ConnectionRefusedAck,
+                PacketType::Socks5TtlExpired, PacketType::Socks5TtlExpiredAck,
+                PacketType::Socks5CommandUnsupported, PacketType::Socks5CommandUnsupportedAck,
+                PacketType::Socks5AddressTypeUnsupported, PacketType::Socks5AddressTypeUnsupportedAck,
+                PacketType::Socks5AuthFailed, PacketType::Socks5AuthFailedAck,
+                PacketType::Socks5UpstreamUnavailable, PacketType::Socks5UpstreamUnavailableAck,
+                PacketType::DnsQueryReq, PacketType::DnsQueryRes,
+                PacketType::ErrorDrop,
+        };
+        QSet<int> seen;
+        for (PacketType pt : values) {
+            const int v = static_cast<int>(pt);
+            QVERIFY2(!seen.contains(v),
+                     QString("duplicate enum value 0x%1").arg(v, 0, 16).toLocal8Bit().constData());
+            seen.insert(v);
+        }
+    }
+
+    void testDNSRecordAndRCodeValues()
+    {
+        // Upstream: TestDNSRecordAndRCodeValues (86). DNS qtype + rcode +
+        // qclass values must be RFC-stable. The C++ engine inlines these
+        // constants in dnsframing.cpp rather than exposing them as a
+        // named-constants header. The values themselves are RFC 1035 /
+        // RFC 6891 stable (TXT=16, OPT=41, NO_ERROR=0, REFUSED=5, IN=1);
+        // exporting them is a separate refactor.
+        QSKIP("DNS qtype/rcode/qclass constants not exported from C++ "
+              "engine — they live inside dnsframing.cpp's anonymous "
+              "namespace. Follow-up commit exposes them in a header.");
+    }
+
+    // ====================================================================
+    // Upstream parity: internal/fragmentstore/store_test.go
+    //
+    // FragmentStore is upstream's request/response fragment cache used by
+    // the DNS-tunnel query layer (DNS_QUERY_REQ / RES). The C++ engine
+    // doesn't have a separate fragment store — fragmentation lives
+    // per-stream in ARQ for STREAM_DATA / STREAM_RESEND. These tests
+    // exercise a layer that doesn't exist in C++.
+    // ====================================================================
+
+    void testCollectSingleFragmentMarksCompletedWithinRetention()
+    {
+        QSKIP("FragmentStore not in C++ port — fragmentation is per-stream "
+              "in ArqStream rather than via a separate cache.");
+    }
+
+    void testRemoveIfClearsItemsAndCompletedEntries()
+    {
+        QSKIP("FragmentStore not in C++ port; see above.");
     }
 
     void mtuProberProbePayloadLayout()
