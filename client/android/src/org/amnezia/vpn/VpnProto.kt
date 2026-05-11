@@ -2,6 +2,7 @@ package org.amnezia.vpn
 
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.awg.Awg
+import org.amnezia.vpn.protocol.masterdnsvpn.MasterDnsVpn
 import org.amnezia.vpn.protocol.openvpn.OpenVpn
 import org.amnezia.vpn.protocol.wireguard.Wireguard
 import org.amnezia.vpn.protocol.xray.Xray
@@ -49,6 +50,14 @@ enum class VpnProto(
         XrayService::class.java
     ) {
         override fun createProtocol(): Protocol = Xray.instance
+    },
+
+    MASTERDNSVPN(
+        "MasterDnsVPN",
+        "org.amnezia.vpn:amneziaMasterDnsVpnService",
+        MasterDnsVpnService::class.java
+    ) {
+        override fun createProtocol(): Protocol = MasterDnsVpn.instance
     };
 
     private var _protocol: Protocol? = null

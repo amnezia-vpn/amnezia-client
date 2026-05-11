@@ -40,6 +40,11 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/protocols/androidVpnProtocol.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/installedAppsImageProvider.cpp
+    # JNI bridge into the native MasterDnsVPN engine. Compiled into the main
+    # Qt-for-Android shared library so the Java loader resolves
+    # Java_org_amnezia_vpn_protocol_masterdnsvpn_MasterDnsVpnNative_*
+    # via the same .so the activity already pulls in.
+    ${CMAKE_CURRENT_SOURCE_DIR}/masterdnsvpn/android_jni.cpp
 )
 
 

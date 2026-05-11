@@ -192,6 +192,19 @@
         </service>
 
         <service
+            android:name=".MasterDnsVpnService"
+            android:process=":amneziaMasterDnsVpnService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="systemExempted"
+            android:exported="false"
+            tools:ignore="ForegroundServicePermission">
+
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".AmneziaTileService"
             android:process=":amneziaTileService"
             android:icon="@drawable/ic_amnezia_round"
