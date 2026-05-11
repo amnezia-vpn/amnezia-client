@@ -153,7 +153,7 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
     }
 
     if (rtm->rtm_type == RTN_UNICAST) {
-    int index = if_nametoindex(WG_INTERFACE);
+    int index = if_nametoindex(m_ifname.toUtf8().constData());
 
     if (index <= 0) {
         logger.error() << "if_nametoindex() failed:" << strerror(errno);

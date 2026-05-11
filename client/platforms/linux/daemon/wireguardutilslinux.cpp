@@ -8,6 +8,7 @@
 
 #include <QByteArray>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QLocalSocket>
 #include <QTimer>
@@ -59,11 +60,12 @@ void WireguardUtilsLinux::tunnelErrorOccurred(QProcess::ProcessError error) {
 }
 
 bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
-    Q_UNUSED(config);
     if (m_tunnel.state() != QProcess::NotRunning) {
         logger.warning() << "Unable to start: tunnel process already running";
         return false;
     }
+
+    const QString ifname = config.m_ifname.isEmpty() ? QString(WG_INTERFACE) : config.m_ifname;
 
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
     if (!wgRuntimeDir.exists()) {
@@ -71,7 +73,7 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     }
 
     QProcessEnvironment pe = QProcessEnvironment::systemEnvironment();
-    QString wgNameFile = wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".sock");
+    QString wgNameFile = wgRuntimeDir.filePath(ifname + ".sock");
     pe.insert("WG_TUN_NAME_FILE", wgNameFile);
 #ifdef MZ_DEBUG
     pe.insert("LOG_LEVEL", "debug");
@@ -79,7 +81,7 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     m_tunnel.setProcessEnvironment(pe);
 
     QDir appPath(QCoreApplication::applicationDirPath());
-    QStringList wgArgs = {"-f", "amn0"};
+    QStringList wgArgs = {"-f", ifname};
     m_tunnel.start(appPath.filePath("amneziawg-go"), wgArgs);
     if (!m_tunnel.waitForStarted(WG_TUN_PROC_TIMEOUT)) {
         logger.error() << "Unable to start tunnel process due to timeout";
@@ -194,7 +196,7 @@ bool WireguardUtilsLinux::deleteInterface() {
 
     // Garbage collect.
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
-    QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
+    QFile::remove(wgRuntimeDir.filePath(m_ifname + ".name"));
 
     // double-check + ensure our firewall is installed and enabled
     KillSwitch::instance()->disableKillSwitch();
@@ -237,8 +239,10 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     // Exclude the server address, except for multihop exit servers.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+        if (!config.m_serverIpv4AddrIn.isEmpty())
+            m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+        if (!config.m_serverIpv6AddrIn.isEmpty())
+            m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
     }
 
     int err = uapiErrno(uapiCommand(message));
@@ -255,8 +259,10 @@ bool WireguardUtilsLinux::deletePeer(const InterfaceConfig& config) {
     // Clear exclustion routes for this peer.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+        if (!config.m_serverIpv4AddrIn.isEmpty())
+            m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+        if (!config.m_serverIpv6AddrIn.isEmpty())
+            m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
     }
 
     QString message;
@@ -389,12 +395,8 @@ bool WireguardUtilsLinux::excludeLocalNetworks(const QList<IPAddress>& routes) {
 
 QString WireguardUtilsLinux::uapiCommand(const QString& command) {
     QLocalSocket socket;
-    QTimer uapiTimeout;
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
     QString wgSocketFile = wgRuntimeDir.filePath(m_ifname + ".sock");
-
-    uapiTimeout.setSingleShot(true);
-    uapiTimeout.start(WG_TUN_PROC_TIMEOUT);
 
     socket.connectToServer(wgSocketFile, QIODevice::ReadWrite);
     if (!socket.waitForConnected(WG_TUN_PROC_TIMEOUT)) {
@@ -410,13 +412,15 @@ QString WireguardUtilsLinux::uapiCommand(const QString& command) {
     }
     socket.write(message);
 
+    QElapsedTimer elapsed;
+    elapsed.start();
     QByteArray reply;
     while (!reply.contains("\n\n")) {
-        if (!uapiTimeout.isActive()) {
+        const qint64 remaining = WG_TUN_PROC_TIMEOUT - elapsed.elapsed();
+        if (remaining <= 0 || !socket.waitForReadyRead(static_cast<int>(remaining))) {
             logger.error() << "UAPI command timed out";
             return QString();
         }
-        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         reply.append(socket.readAll());
     }
 
@@ -442,19 +446,13 @@ QString WireguardUtilsLinux::waitForTunnelName(const QString& filename) {
     timeout.setSingleShot(true);
     timeout.start(WG_TUN_PROC_TIMEOUT);
 
-    QFile file(filename);
-
     while ((m_tunnel.state() == QProcess::Running) && timeout.isActive()) {
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-        QString ifname = "amn0";
 
-        // Test-connect to the UAPI socket.
         QLocalSocket sock;
-        QDir wgRuntimeDir(WG_RUNTIME_DIR);
-        QString sockName = wgRuntimeDir.filePath(ifname + ".sock");
-        sock.connectToServer(sockName, QIODevice::ReadWrite);
+        sock.connectToServer(filename, QIODevice::ReadWrite);
         if (sock.waitForConnected(100)) {
-            return ifname;
+            return QFileInfo(filename).baseName();
         }
     }
 

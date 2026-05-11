@@ -47,7 +47,7 @@ bool IPUtilsLinux::setMTUAndUp(const InterfaceConfig& config) {
 
   // Setup the interface to interact with
   struct ifreq ifr;
-  strncpy(ifr.ifr_name, WG_INTERFACE, IFNAMSIZ);
+  strncpy(ifr.ifr_name, config.m_ifname.toUtf8().constData(), IFNAMSIZ);
 
   // MTU
   // FIXME: We need to know how many layers deep this particular
@@ -76,7 +76,7 @@ bool IPUtilsLinux::addIP4AddressToDevice(const InterfaceConfig& config) {
   struct sockaddr_in* ifrAddr = (struct sockaddr_in*)&ifr.ifr_addr;
 
   // Name the interface and set family
-  strncpy(ifr.ifr_name, WG_INTERFACE, IFNAMSIZ);
+  strncpy(ifr.ifr_name, config.m_ifname.toUtf8().constData(), IFNAMSIZ);
   ifr.ifr_addr.sa_family = AF_INET;
 
   // Get the device address to add to interface
@@ -126,7 +126,7 @@ bool IPUtilsLinux::addIP6AddressToDevice(const InterfaceConfig& config) {
 
   // Get the index of named ifr and link with ifr6
   struct ifreq ifr;
-  strncpy(ifr.ifr_name, WG_INTERFACE, IFNAMSIZ);
+  strncpy(ifr.ifr_name, config.m_ifname.toUtf8().constData(), IFNAMSIZ);
   ifr.ifr_addr.sa_family = AF_INET6;
   int ret = ioctl(sockfd, SIOGIFINDEX, &ifr);
   if (ret) {
