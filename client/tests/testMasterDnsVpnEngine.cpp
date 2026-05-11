@@ -1656,6 +1656,36 @@ private slots:
                  "control buffer must stay empty when reliability is off");
     }
 
+    void testArqControlPacketRetransmitsAfterRto()
+    {
+        // tickMs past the control-RTO must re-emit a STREAM_CLOSE_WRITE
+        // entry from m_controlSndBuf. Mirrors the data-plane
+        // testArqRetransmission, but on the control path.
+        ArqConfig cfg;
+        cfg.enableControlReliability = true;
+        cfg.initialControlRtoMs = 100;
+        cfg.maxControlRtoMs = 500;
+        QVector<Packet> sent;
+        ArqStream a(1, cfg,
+                    [&sent](const ArqOutbound &o) { sent.append(o.packet); },
+                    [](const ArqDelivery &) {});
+
+        const qint64 t0 = QDateTime::currentMSecsSinceEpoch();
+        a.halfCloseWrite();
+        QCOMPARE(sent.size(), 1);
+        QCOMPARE(sent[0].type, PacketType::StreamCloseWrite);
+        const quint16 seq = *sent[0].sequenceNum;
+        QVERIFY(a.m_controlSndBuf.contains(
+                ArqStream::controlKey(PacketType::StreamCloseWrite, seq, 0)));
+
+        // Drive tick past the control RTO so the retransmit fires.
+        a.tickMs(t0 + 200);
+        QVERIFY2(sent.size() >= 2,
+                 "expected a retransmit STREAM_CLOSE_WRITE after RTO expiry");
+        QCOMPARE(sent.last().type, PacketType::StreamCloseWrite);
+        QCOMPARE(*sent.last().sequenceNum, seq);
+    }
+
     void testArqOutOfOrderReceive()
     {
         // Upstream: TestARQ_OutOfOrderReceive (1103). Send 1, 2, 0 —

@@ -358,6 +358,7 @@ void ArqStream::tickMs(qint64 nowMs)
     }
 
     scheduleRetransmits(nowMs);
+    scheduleControlRetransmits(nowMs);
 
     // Terminal-drain watchdog.
     if (m_state == ArqState::Closing && m_sndBuf.isEmpty()) {
@@ -426,6 +427,61 @@ void ArqStream::scheduleRetransmits(qint64 nowMs)
         p.totalFragments = 1;
         p.compression = 0;
         p.payload = it->payload;
+        dispatch(p, /*retransmit=*/true);
+    }
+}
+
+void ArqStream::scheduleControlRetransmits(qint64 nowMs)
+{
+    // Walk the per-control-packet send buffer and re-emit entries whose
+    // control RTO has expired. Mirrors the data-plane scheduleRetransmits
+    // (same RTO-doubling + max-retries terminate semantics) but uses the
+    // control-RTO knobs and never reads from the data-plane sndBuf.
+    if (!m_cfg.enableControlReliability || m_controlSndBuf.isEmpty()) {
+        return;
+    }
+
+    QVector<quint32> due;
+    for (auto it = m_controlSndBuf.begin(); it != m_controlSndBuf.end(); ++it) {
+        if (it->lastSentMs == 0) {
+            it->lastSentMs = nowMs;
+            if (it->firstSentMs == 0) {
+                it->firstSentMs = nowMs;
+            }
+            continue;
+        }
+        if (nowMs - it->lastSentMs >= currentRto(/*isControl=*/true)) {
+            due.append(it.key());
+        }
+    }
+
+    if (due.isEmpty()) {
+        return;
+    }
+
+    for (const quint32 key : due) {
+        auto it = m_controlSndBuf.find(key);
+        if (it == m_controlSndBuf.end()) {
+            continue;
+        }
+        ++it->retries;
+        if (it->retries > m_cfg.maxControlRetries) {
+            // Spec §6.8 — terminate after max retries.
+            reset();
+            return;
+        }
+        it->sampleEligible = false;
+        it->lastSentMs = nowMs;
+
+        // Backoff — control RTO grows at the control-side factor.
+        m_currentControlRtoMs = clamp64(
+                static_cast<qint64>(m_currentControlRtoMs * kControlGrowthFactor),
+                m_cfg.initialControlRtoMs, m_cfg.maxControlRtoMs);
+
+        Packet p;
+        p.type = it->type;
+        p.streamId = m_streamId;
+        p.sequenceNum = it->seq;
         dispatch(p, /*retransmit=*/true);
     }
 }

@@ -229,6 +229,12 @@ private:
     void emitDataAck(quint16 seq);
     void emitControl(PacketType type, quint16 seq);
     void scheduleRetransmits(qint64 nowMs);
+
+    // Control-plane analogue of scheduleRetransmits: walks
+    // m_controlSndBuf, re-emits entries whose RTO has expired, and
+    // grows the control-RTO on each retransmit. Bounded by
+    // m_cfg.maxControlRetries — stream is reset when exceeded.
+    void scheduleControlRetransmits(qint64 nowMs);
     void deliverContiguous();
     void onDataPacket(const Packet &pkt);
     void onAck(quint16 ackedSeq);
