@@ -25,6 +25,15 @@ class MacOSDaemon final : public Daemon {
   bool supportIPUtils() const override { return true; }
   IPUtils* iputils() override { return m_iputils; }
 
+  WireguardUtils* createWgUtils() override {
+    return new WireguardUtilsMacos(this);
+  }
+
+  void replaceActiveWgUtils(WireguardUtils* newUtils) override {
+    delete m_wgutils;
+    m_wgutils = static_cast<WireguardUtilsMacos*>(newUtils);
+  }
+
  private:
   WireguardUtilsMacos* m_wgutils = nullptr;
   DnsUtilsMacos* m_dnsutils = nullptr;

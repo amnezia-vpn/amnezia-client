@@ -69,6 +69,10 @@ class Daemon : public QObject {
   virtual bool supportServerSwitching(const InterfaceConfig& config) const;
   virtual bool switchServer(const InterfaceConfig& config);
   virtual WireguardUtils* wgutils() const = 0;
+  virtual WireguardUtils* createWgUtils() = 0;
+  virtual void replaceActiveWgUtils(WireguardUtils* newUtils) = 0;
+
+  WireguardUtils* m_stagingWgutils = nullptr;
   virtual bool supportIPUtils() const { return false; }
   virtual IPUtils* iputils() { return nullptr; }
   virtual DnsUtils* dnsutils() { return nullptr; }
