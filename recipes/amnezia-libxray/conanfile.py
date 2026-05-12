@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import Environment
+from conan.tools.env import Environment, VirtualBuildEnv
 
 import os
 import stat
@@ -37,6 +37,7 @@ class AmneziaLibxray(ConanFile):
         )
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
         env = Environment()
         ndk_path_str = self.conf.get("tools.android:ndk_path")
         if ndk_path_str:
@@ -44,6 +45,14 @@ class AmneziaLibxray(ConanFile):
             if len(ndk_path.parts) > 2:
                 sdk_path = ndk_path.parents[1]
                 env.define("ANDROID_HOME", str(sdk_path))
+        # proxy.golang.org resets the HTTP/2 stream mid-download often enough
+        # in CI to fail the build ("stream error ... INTERNAL_ERROR"); go's
+        # module fetches work fine over HTTP/1.1, so force that instead.
+        env.define("GODEBUG", "http2client=0")
+        # sum.golang.org is sometimes unreachable from CI runners entirely
+        # ("connection refused"); go.sum already pins the exact hashes we
+        # need, so the extra public-transparency-log check isn't required.
+        env.define("GOSUMDB", "off")
         env.vars(self).save_script("conan_provide_androidhome")
 
     def _patch_sources(self):
@@ -54,12 +63,15 @@ class AmneziaLibxray(ConanFile):
 
     def build(self):
         self._patch_sources()
-        self.run("./build.sh android")
+        if self.settings_build.os == "Windows":
+            self.run("bash build.sh android")
+        else:
+            self.run("./build.sh android")
 
     def package(self):
         copy(self, "libxray.aar", src=self.build_folder, dst=os.path.join(self.package_folder, "aar"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_extra_variables", {
-            "AMNEZIA_LIBXRAY_PATH": os.path.join(self.package_folder, "aar", "libxray.aar"),
+            "AMNEZIA_LIBXRAY_PATH": Path(self.package_folder, "aar", "libxray.aar").as_posix(),
         })
