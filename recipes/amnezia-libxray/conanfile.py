@@ -54,12 +54,15 @@ class AmneziaLibxray(ConanFile):
 
     def build(self):
         self._patch_sources()
-        self.run("./build.sh android")
+        if self.settings_build.os == "Windows":
+            self.run("bash build.sh android")
+        else:
+            self.run("./build.sh android")
 
     def package(self):
         copy(self, "libxray.aar", src=self.build_folder, dst=os.path.join(self.package_folder, "aar"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_extra_variables", {
-            "AMNEZIA_LIBXRAY_PATH": os.path.join(self.package_folder, "aar", "libxray.aar"),
+            "AMNEZIA_LIBXRAY_PATH": Path(self.package_folder, "aar", "libxray.aar").as_posix(),
         })
