@@ -57,15 +57,15 @@ private slots:
     {
         QSignalSpy finishedSpy(m_coreController->m_appSplitTunnelingUiController, &AppSplitTunnelingUiController::finished);
         QSignalSpy errorOccurredSpy(m_coreController->m_appSplitTunnelingUiController, &AppSplitTunnelingUiController::errorOccurred);
-        QSignalSpy isSplitTunnelingChangedSpy(m_coreController->m_appSplitTunnelingUiController, &AppSplitTunnelingUiController::isTunnelingEnabledChanged);
+        QSignalSpy isSplitTunnelingChangedSpy(m_coreController->m_appSplitTunnelingUiController, &AppSplitTunnelingUiController::isSplitTunnelingEnabledChanged);
 
         m_coreController->m_appSplitTunnelingUiController->toggleSplitTunneling(true);
         QVERIFY2(isSplitTunnelingChangedSpy.count() == 1, "isSplitTunnelingChangedSpy signal should be emitted");
-        QVERIFY2(m_coreController->m_appSplitTunnelingUiController->isTunnelingEnabled() == true, "AppSplitTunneling should be enabled");
+        QVERIFY2(m_coreController->m_appSplitTunnelingUiController->isSplitTunnelingEnabled() == true, "AppSplitTunneling should be enabled");
 
         m_coreController->m_appSplitTunnelingUiController->toggleSplitTunneling(false);
         QVERIFY2(isSplitTunnelingChangedSpy.count() == 2, "isSplitTunnelingChangedSpy signal should be emitted 2nd time");
-        QVERIFY2(m_coreController->m_appSplitTunnelingUiController->isTunnelingEnabled() == false, "AppSplitTunneling should be disabled");
+        QVERIFY2(m_coreController->m_appSplitTunnelingUiController->isSplitTunnelingEnabled() == false, "AppSplitTunneling should be disabled");
 
         QString app = getValueFromIni("paths/TEST_APP_PATH");
 

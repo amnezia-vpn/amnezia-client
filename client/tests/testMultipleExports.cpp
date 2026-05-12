@@ -108,7 +108,7 @@ private slots:
 
         QString clientName = "MultipleExports Test Client";
 
-        auto exportResultAwg = m_coreController->m_exportController->generateAwgConfig(serverIndex, clientName);
+        auto exportResultAwg = m_coreController->m_exportController->generateAwgConfig(serverIndex, DockerContainer::Awg2, clientName);
         auto exportResultWg = m_coreController->m_exportController->generateWireGuardConfig(serverIndex, clientName);
         auto exportResultOvpn = m_coreController->m_exportController->generateOpenVpnConfig(serverIndex, clientName);
         auto exportResultXray = m_coreController->m_exportController->generateXrayConfig(serverIndex, clientName);

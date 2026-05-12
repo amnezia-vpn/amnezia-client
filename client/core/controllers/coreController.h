@@ -90,7 +90,7 @@ class TestSelfHostedServerSetup;
 class TestMultipleExports;
 class TestSerialization;
 class TestUiLanguageModelAndController;
-class TestUiSitesModelAndController;
+class TestUiIpModelAndController;
 class TestUiAppSTModelAndController;
 class TestUiAllowedDnsModelAndController;
 class TestUiNewsModelAndController;
@@ -115,7 +115,7 @@ class CoreController : public QObject
     friend class TestMultipleExports;
     friend class TestSerialization;
     friend class TestUiLanguageModelAndController;
-    friend class TestUiSitesModelAndController;
+    friend class TestUiIpModelAndController;
     friend class TestUiAppSTModelAndController;
     friend class TestUiAllowedDnsModelAndController;
     friend class TestUiNewsModelAndController;

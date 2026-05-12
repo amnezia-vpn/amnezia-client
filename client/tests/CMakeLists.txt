@@ -170,11 +170,11 @@ target_link_libraries(test_ui_language_model_and_controller PRIVATE
     test_common
 )
 
-add_executable(test_ui_sites_model_and_controller
-    testUiSitesModelAndController.cpp
+add_executable(test_ui_ip_model_and_controller
+    testUiIpModelAndController.cpp
 )
 
-target_link_libraries(test_ui_sites_model_and_controller PRIVATE
+target_link_libraries(test_ui_ip_model_and_controller PRIVATE
     Qt6::Test
     test_common
 )
@@ -222,6 +222,6 @@ add_test(NAME SelfHostedServerSetupTest COMMAND test_self_hosted_server_setup)
 add_test(NAME MultipleExportsTest COMMAND test_exports)
 add_test(NAME SerializationTest COMMAND test_serialization)
 add_test(NAME UiLanguageModelAndControllerTest COMMAND test_ui_language_model_and_controller)
-add_test(NAME UiSitesModelAndControllerTest COMMAND test_ui_sites_model_and_controller)
+add_test(NAME UiIpModelAndControllerTest COMMAND test_ui_ip_model_and_controller)
 add_test(NAME UiAppSTModelAndControllerTest COMMAND test_ui_app_st_model_and_controller)
 add_test(NAME UiAllowedDnsModelAndControllerTest COMMAND test_ui_allowed_dns_model_and_controller)
