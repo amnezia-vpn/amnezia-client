@@ -58,7 +58,7 @@ struct ApiConfig
     
     QString stackType;
     QString cliVersion;
-    bool isTestPurchase;
+    bool isTestPurchase = false;
     bool isInAppPurchase = false;
     bool subscriptionExpiredByServer = false;
     

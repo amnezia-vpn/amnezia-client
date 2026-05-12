@@ -41,14 +41,21 @@ enum ProtocolScriptType {
     xray_template
 };
 
+enum ClientScriptType {
+    // Client-side scripts
+    linux_installer,
+    mac_installer
+};
 
 QString scriptFolder(DockerContainer container);
 
 QString scriptName(SharedScriptType type);
 QString scriptName(ProtocolScriptType type);
+QString scriptName(ClientScriptType type);
 
 QString scriptData(SharedScriptType type);
 QString scriptData(ProtocolScriptType type, DockerContainer container);
+QString scriptData(ClientScriptType type);
 
 ScriptVars genBaseVars(const ServerCredentials &credentials, 
                        DockerContainer container,

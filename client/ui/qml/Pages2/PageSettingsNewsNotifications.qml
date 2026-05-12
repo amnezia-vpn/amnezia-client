@@ -69,8 +69,10 @@ PageType {
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                     clickedFunction: function() {
+                        if (!isUpdate) {
                             NewsModel.markAsRead(index)
-                            NewsModel.processedIndex = index
+                        }
+                        NewsModel.processedIndex = index
                         PageController.goToPage(PageEnum.PageSettingsNewsDetail)
                     }
                 }

@@ -214,10 +214,7 @@ class AmneziaActivity : QtActivity() {
 
     private fun loadLibs() {
         listOf(
-            "rsapss",
-            "crypto_3",
-            "ssl_3",
-            "ssh"
+            "rsapss"
         ).forEach {
             loadSharedLibrary(this.applicationContext, it)
         }
