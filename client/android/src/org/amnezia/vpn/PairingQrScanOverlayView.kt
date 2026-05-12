@@ -12,10 +12,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import kotlin.math.max
 
-/**
- * iOS-style pairing scan chrome: dim outside a central square + white corner brackets.
- * Hole layout matches iOS `layoutScanOverlayGeometry` ([pairingIosStyleHoleRectF]).
- */
 class PairingQrScanOverlayView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -27,12 +23,11 @@ class PairingQrScanOverlayView @JvmOverloads constructor(
         isFocusable = false
     }
 
-    /** Let taps reach [PreviewView] below for tap-to-focus. */
     @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean = false
 
     private val dimPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0x8C000000.toInt() // ~55% black, same role as QML dimAlpha 0.55
+        color = 0x8C000000.toInt()
         style = Paint.Style.FILL
     }
 

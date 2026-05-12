@@ -214,6 +214,13 @@ func handleGenerateQR(w http.ResponseWriter, r *http.Request) {
 
 	mu.Lock()
 	cleanupExpiredSessions(time.Now())
+	if _, exists := sessions[req.QRUUID]; exists {
+		mu.Unlock()
+		writeJSON(w, http.StatusConflict, map[string]string{
+			"message": "Conflict: QR session with this UUID already exists.",
+		})
+		return
+	}
 	sessions[req.QRUUID] = session
 	mu.Unlock()
 
@@ -271,7 +278,7 @@ func handleScanQR(w http.ResponseWriter, r *http.Request) {
 	// Keep compatibility with current gateway behavior: key problems are mapped to 403.
 	if req.AuthData.APIKey == "invalid" {
 		writeJSON(w, http.StatusForbidden, map[string]string{
-			"detail": "Forbidden: Invalid API key or unauthorized request.",
+			"message": "Forbidden: Invalid API key or unauthorized request.",
 		})
 		return
 	}
