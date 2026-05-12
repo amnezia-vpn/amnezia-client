@@ -967,61 +967,65 @@ jobs:
 # ------------------------------------------------------
 
   Test-Windows:
-    runs-on: windows-latest
+      runs-on: windows-latest
 
-    env:
-      QT_VERSION: 6.10.1
+      env:
+        QT_VERSION: 6.10.1
 
-    steps:
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
+      steps:
+      - name: 'Get sources'
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          fetch-depth: 10
 
-    - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'windows'
-        target: 'desktop'
-        arch: 'win64_msvc2022_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        set-env: 'true'
+      - name: 'Install Qt'
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2022_64'
+          modules: 'qtremoteobjects qt5compat qtshadertools'
+          dir: ${{ runner.temp }}
+          setup-python: 'true'
+          tools: 'tools_ifw'
+          set-env: 'true'
+          aqtversion: '==3.3.0'
+          py7zrversion: '==0.22.*'
 
-    - name: 'Setup MSVC'
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: 'x64'
+      - name: 'Setup MSVC'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: 'x64'
 
-    - name: 'Install dependencies'
-      shell: bash
-      run: |
-        choco install ninja -y
+      - name: 'Install dependencies'
+        shell: bash
+        run: |
+          choco install ninja -y
 
-    - name: 'Configure'
-      shell: cmd
-      run: |
-        cmake -B build -G Ninja ^
-        -DCMAKE_BUILD_TYPE=Release ^
-        -DBUILD_TESTING=ON
+      - name: 'Configure'
+        shell: cmd
+        run: |
+          cmake -S . -B build -G Ninja ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DBUILD_TESTING=ON
 
-    - name: 'Build'
-      shell: cmd
-      run: cmake --build build --config Release
+      - name: 'Build'
+        shell: cmd
+        run: cmake --build build --config Release
 
-    - name: 'Deploy Qt dependencies'
-      shell: cmd
-      run: |
-        for %%f in (build\client\test_*.exe) do (windeployqt %%f)
+      - name: 'Deploy Qt dependencies'
+        shell: cmd
+        run: |
+          for %%f in (build\client\test_*.exe) do ("%Qt6_DIR%\bin\windeployqt.exe" %%f)
 
-    - name: 'Run tests'
-      shell: cmd
-      run: |
-        set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
-        set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
-        ctest --test-dir build\client --output-on-failure
+      - name: 'Run tests'
+        shell: cmd
+        run: |
+          set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
+          set PATH=%PATH%;%Qt6_DIR%\bin
+          ctest --test-dir build\client --output-on-failure
 
 # ------------------------------------------------------
 
