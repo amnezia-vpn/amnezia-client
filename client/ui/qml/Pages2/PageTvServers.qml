@@ -15,7 +15,6 @@ FocusScope {
         return event.key === Qt.Key_Return
             || event.key === Qt.Key_Enter
             || event.key === Qt.Key_Select
-            || event.key === Qt.Key_Space
     }
 
     function goBack() {
@@ -33,9 +32,19 @@ FocusScope {
         }
     }
 
+    Keys.onPressed: function(event) {
+        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
+            root.goBack()
+            event.accepted = true
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
-        color: "#070707"
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#08090B" }
+            GradientStop { position: 1.0; color: "#0F0A02" }
+        }
     }
 
     Item {
@@ -56,7 +65,7 @@ FocusScope {
 
                 Label {
                     Layout.fillWidth: true
-                    text: "Locations"
+                    text: qsTr("Локации")
                     color: "#F8FAFC"
                     font.pixelSize: 54
                     font.bold: true
@@ -64,9 +73,9 @@ FocusScope {
 
                 TvButton {
                     id: backButton
-                    Layout.preferredWidth: 160
+                    Layout.preferredWidth: 180
                     Layout.preferredHeight: 76
-                    text: "Back"
+                    text: qsTr("Назад")
                     tvFontPixelSize: 26
                     KeyNavigation.down: serverList
                     onClicked: root.goBack()
@@ -144,11 +153,11 @@ FocusScope {
 
                     function selectServer() {
                         if (locked) {
-                            PageController.showNotificationMessage("VIP only")
+                            PageController.showNotificationMessage(qsTr("Доступно только с VIP-подпиской"))
                             return
                         }
                         if (ConnectionController.isConnected) {
-                            PageController.showNotificationMessage("Disconnect VPN first")
+                            PageController.showNotificationMessage(qsTr("Сначала отключите VPN"))
                             return
                         }
                         ServersModel.defaultIndex = index
@@ -203,7 +212,7 @@ FocusScope {
 
                             Label {
                                 Layout.fillWidth: true
-                                text: row.locked ? "VIP only" : serverDescription
+                                text: row.locked ? qsTr("Только для VIP") : serverDescription
                                 color: row.locked ? "#FACC15" : "#A1A1AA"
                                 font.pixelSize: 22
                                 elide: Text.ElideRight
@@ -221,7 +230,7 @@ FocusScope {
 
                             Label {
                                 anchors.centerIn: parent
-                                text: row.locked ? "LOCK" : "VIP"
+                                text: row.locked ? qsTr("LOCK") : "VIP"
                                 color: "#FACC15"
                                 font.pixelSize: 18
                                 font.bold: true
