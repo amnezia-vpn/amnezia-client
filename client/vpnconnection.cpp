@@ -342,14 +342,18 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     // pfctl is reloading its ruleset on macOS). Landing a new activate on
     // top of that in-flight teardown is what causes the hang. Defer by up
     // to 500 ms to let the daemon settle.
-    if (m_vpnProtocol.isNull() && m_lastDisconnectMsec > 0) {
-        const qint64 elapsed = QDateTime::currentMSecsSinceEpoch() - m_lastDisconnectMsec;
+    if (m_vpnProtocol.isNull() && m_disconnectElapsed.isValid()) {
+        const qint64 elapsed = m_disconnectElapsed.elapsed();
         if (elapsed >= 0 && elapsed < 500) {
             const int rawDelay = static_cast<int>(500 - elapsed);
             const int delayMs = std::max(50, std::min(500, rawDelay));
             qDebug() << "VpnConnection::connectToVpn(): daemon grace window, deferring" << delayMs << "ms";
-            m_lastDisconnectMsec = 0;
+            m_disconnectElapsed.invalidate();
             QTimer::singleShot(delayMs, this, [this]() {
+                if (m_userRequestedDisconnect) {
+                    qDebug() << "VpnConnection::connectToVpn(): grace-window timer fired after user disconnect - aborting";
+                    return;
+                }
                 startNewConnection(m_lastContainer, m_lastVpnConfiguration);
             });
             return;
@@ -651,6 +655,16 @@ void VpnConnection::reconnectToVpn() {
     // progress: the desktop service fires networkChanged the moment the new
     // default route is installed, which collides with our own in-flight
     // Connecting attempt during a server switch.
+    //
+    // Trade-off (deliberate, see FEAT-002): a genuine user network
+    // transition (WiFi <-> LTE) during the initial Connecting phase no
+    // longer triggers an immediate stop()+start() retry. Instead it falls
+    // through to the 28 s state watchdog + ~1.2 s recovery-reconnect path.
+    // The server-switch networkChanged collision above is the hazard this
+    // guard closes and it takes priority over the flap-during-initial-connect
+    // case. A more elegant fix - distinguishing "server-switch route install"
+    // from "user network transition" at the networkChanged source - is left
+    // as a future improvement.
     if (m_connectionState != Vpn::ConnectionState::Connected
         && m_connectionState != Vpn::ConnectionState::Reconnecting) {
         qWarning() << QString("Reconnect triggered during inappropriate state: %1; ignoring slot")
@@ -742,9 +756,11 @@ void VpnConnection::disconnectFromVpn()
     });
 #endif
 
-    // Stamp the disconnect time so connectToVpn's desktop grace window can
-    // detect a rapid Connect-after-Disconnect and defer the new activate.
-    m_lastDisconnectMsec = QDateTime::currentMSecsSinceEpoch();
+    // Stamp the disconnect time on a monotonic QElapsedTimer so connectToVpn's
+    // desktop grace window can detect a rapid Connect-after-Disconnect and
+    // defer the new activate. QElapsedTimer is immune to wall-clock / NTP
+    // adjustments that could otherwise perturb the 500 ms window.
+    m_disconnectElapsed.start();
 }
 
 void VpnConnection::setConnectionState(Vpn::ConnectionState state)
