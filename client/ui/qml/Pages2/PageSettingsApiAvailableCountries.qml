@@ -108,7 +108,7 @@ PageType {
 
                 actionButtonFunction: function() {
                     PageController.showBusyIndicator(true)
-                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
+                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.processedServerIndex), false)
                     PageController.showBusyIndicator(false)
                     if (!result) {
                         return
@@ -148,7 +148,7 @@ PageType {
                 text: qsTr("Renew subscription")
 
                 clickedFunc: function() {
-                    SubscriptionUiController.getRenewalLink(ServersUiController.getProcessedServerIndex())
+                    SubscriptionUiController.getRenewalLink(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                 }
             }
 
@@ -200,7 +200,7 @@ PageType {
                             PageController.showBusyIndicator(true)
                             var prevIndex = ApiCountryModel.currentIndex
                             ApiCountryModel.currentIndex = index
-                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.getProcessedServerIndex(), countryCode, countryName)) {
+                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.getServerId(ServersUiController.processedServerIndex), countryCode, countryName)) {
                                 ApiCountryModel.currentIndex = prevIndex
                             }
                             PageController.showBusyIndicator(false)

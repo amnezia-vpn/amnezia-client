@@ -9,11 +9,11 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/utilities.h"
 #include "core/utils/networkUtilities.h"
+#include "core/utils/api/apiEnums.h"
 #include "version.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
 
@@ -51,7 +51,7 @@ void ConnectionController::setConnectionState(Vpn::ConnectionState state)
     }
 }
 
-ErrorCode ConnectionController::prepareConnection(int serverIndex,
+ErrorCode ConnectionController::prepareConnection(const QString &serverId,
                                                  QJsonObject& vpnConfiguration,
                                                  DockerContainer& container)
 {
@@ -59,35 +59,104 @@ ErrorCode ConnectionController::prepareConnection(int serverIndex,
         return ErrorCode::AmneziaServiceNotRunning;
     }
 
-    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-    container = serverConfigModel.defaultContainer();
+    ContainerConfig containerConfigModel;
+    QPair<QString, QString> dns;
+    QString hostName;
+    QString description;
+    int configVersion = 0;
+    bool isApiConfig = false;
+
+    const auto kind = m_serversRepository->serverKind(serverId);
+    switch (kind) {
+    case SecureServersRepository::ServerConfigKind::SelfHostedAdmin: {
+        const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!cfg.has_value()) return ErrorCode::InternalError;
+        container = cfg->defaultContainer;
+        containerConfigModel = cfg->containerConfig(container);
+        dns = { cfg->dns1, cfg->dns2 };
+        hostName = cfg->hostName;
+        description = cfg->description;
+        break;
+    }
+    case SecureServersRepository::ServerConfigKind::SelfHostedUser: {
+        const auto cfg = m_serversRepository->selfHostedUserConfig(serverId);
+        if (!cfg.has_value()) return ErrorCode::InternalError;
+        container = cfg->defaultContainer;
+        containerConfigModel = cfg->containerConfig(container);
+        dns = { cfg->dns1, cfg->dns2 };
+        hostName = cfg->hostName;
+        description = cfg->description;
+        break;
+    }
+    case SecureServersRepository::ServerConfigKind::Native: {
+        const auto cfg = m_serversRepository->nativeConfig(serverId);
+        if (!cfg.has_value()) return ErrorCode::InternalError;
+        container = cfg->defaultContainer;
+        containerConfigModel = cfg->containerConfig(container);
+        dns = { cfg->dns1, cfg->dns2 };
+        hostName = cfg->hostName;
+        description = cfg->description;
+        break;
+    }
+    case SecureServersRepository::ServerConfigKind::LegacyApiV1: {
+        const auto cfg = m_serversRepository->legacyApiConfig(serverId);
+        if (!cfg.has_value()) return ErrorCode::InternalError;
+        container = cfg->defaultContainer;
+        containerConfigModel = cfg->containerConfig(container);
+        dns = { cfg->dns1, cfg->dns2 };
+        hostName = cfg->hostName;
+        description = cfg->description;
+        configVersion = apiDefs::ConfigSource::Telegram;
+        isApiConfig = true;
+        break;
+    }
+    case SecureServersRepository::ServerConfigKind::ApiV2: {
+        const auto cfg = m_serversRepository->apiV2Config(serverId);
+        if (!cfg.has_value()) return ErrorCode::InternalError;
+        container = cfg->defaultContainer;
+        containerConfigModel = cfg->containerConfig(container);
+        dns = { cfg->dns1, cfg->dns2 };
+        hostName = cfg->hostName;
+        description = cfg->description;
+        configVersion = apiDefs::ConfigSource::AmneziaGateway;
+        isApiConfig = true;
+        break;
+    }
+    case SecureServersRepository::ServerConfigKind::Invalid:
+        return ErrorCode::InternalError;
+    }
 
     if (!isContainerSupported(container)) {
         return ErrorCode::NotSupportedOnThisPlatform;
     }
+    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
+        if (m_appSettingsRepository->useAmneziaDns()) {
+            dns.first = protocols::dns::amneziaDnsIp;
+        } else {
+            dns.first = m_appSettingsRepository->primaryDns();
+        }
+    }
+    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
+        dns.second = m_appSettingsRepository->secondaryDns();
+    }
 
-    ContainerConfig containerConfigModel = m_serversRepository->containerConfig(serverIndex, container);
-
-    auto dns = serverConfigModel.getDnsPair(m_appSettingsRepository->useAmneziaDns(),
-                                            m_appSettingsRepository->primaryDns(),
-                                            m_appSettingsRepository->secondaryDns());
-
-    vpnConfiguration = createConnectionConfiguration(dns, serverConfigModel, containerConfigModel, container);
+    vpnConfiguration = createConnectionConfiguration(dns, isApiConfig, hostName, description, configVersion,
+                                                     containerConfigModel, container);
 
     return ErrorCode::NoError;
 }
 
-ErrorCode ConnectionController::openConnection(int serverIndex)
+ErrorCode ConnectionController::openConnection(const QString &serverId)
 {
     QJsonObject vpnConfiguration;
     DockerContainer container;
 
-    ErrorCode errorCode = prepareConnection(serverIndex, vpnConfiguration, container);
+    ErrorCode errorCode = prepareConnection(serverId, vpnConfiguration, container);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
 
-    emit openConnectionRequested(serverIndex, container, vpnConfiguration);
+    emit openConnectionRequested(serverId, container, vpnConfiguration);
     return ErrorCode::NoError;
 }
 
@@ -120,7 +189,10 @@ ErrorCode ConnectionController::lastConnectionError() const
 }
 
 QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QString, QString> &dns,
-                                                              const ServerConfig &serverConfig,
+                                                              bool isApiConfig,
+                                                              const QString &hostName,
+                                                              const QString &description,
+                                                              int configVersion,
                                                               const ContainerConfig &containerConfig,
                                                               DockerContainer container)
 {
@@ -134,7 +206,7 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
 
     ConnectionSettings connectionSettings = {
         { dns.first, dns.second },
-        serverConfig.isApiConfig(),
+        isApiConfig,
         {
             m_appSettingsRepository->isSitesSplitTunnelingEnabled(),
             m_appSettingsRepository->routeMode()
@@ -160,10 +232,9 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     vpnConfiguration[configKey::dns1] = dns.first;
     vpnConfiguration[configKey::dns2] = dns.second;
 
-    vpnConfiguration[configKey::hostName] = serverConfig.hostName();
-    vpnConfiguration[configKey::description] = serverConfig.description();
-
-    vpnConfiguration[configKey::configVersion] = serverConfig.configVersion();
+    vpnConfiguration[configKey::hostName] = hostName;
+    vpnConfiguration[configKey::description] = description;
+    vpnConfiguration[configKey::configVersion] = configVersion;
 
     return vpnConfiguration;
 }

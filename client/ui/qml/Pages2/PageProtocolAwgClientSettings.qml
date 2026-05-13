@@ -441,7 +441,7 @@ PageType {
                 }
 
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Awg)
+                InstallController.updateContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, ProtocolEnum.Awg)
             }
 
             var noButtonFunction = function() {}

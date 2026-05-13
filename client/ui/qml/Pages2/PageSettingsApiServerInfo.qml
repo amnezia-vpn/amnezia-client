@@ -186,7 +186,7 @@ PageType {
                 textColor: AmneziaStyle.color.midnightBlack
 
                 clickedFunc: function() {
-                    SubscriptionUiController.getRenewalLink(ServersUiController.getProcessedServerIndex())
+                    SubscriptionUiController.getRenewalLink(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                 }
             }
         }
@@ -246,7 +246,7 @@ PageType {
                 text: qsTr("Renew subscription")
 
                 clickedFunc: function() {
-                    SubscriptionUiController.getRenewalLink(ServersUiController.getProcessedServerIndex())
+                    SubscriptionUiController.getRenewalLink(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                 }
             }
 
@@ -258,7 +258,7 @@ PageType {
             SwitcherType {
                 id: switcher
 
-                readonly property bool isVlessProtocol: SubscriptionUiController.isVlessProtocol(ServersUiController.getProcessedServerIndex())
+                readonly property bool isVlessProtocol: SubscriptionUiController.isVlessProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                 readonly property bool isProtocolSwitchBlocked: ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
 
                 Layout.fillWidth: true
@@ -276,8 +276,8 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
                     } else {
                         PageController.showBusyIndicator(true)
-                        SubscriptionUiController.setCurrentProtocol(ServersUiController.getProcessedServerIndex(), switcher.isVlessProtocol ? "awg" : "vless")
-                        SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedIndex, "", "", true)
+                        SubscriptionUiController.setCurrentProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex), switcher.isVlessProtocol ? "awg" : "vless")
+                        SubscriptionUiController.updateServiceFromGateway(ServersUiController.getServerId(ServersUiController.processedServerIndex), "", "", true)
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -325,7 +325,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
                     PageController.showBusyIndicator(true)
 
-                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getServerId(ServersUiController.processedServerIndex))
 
                     PageController.showBusyIndicator(false)
                 }
@@ -431,7 +431,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot reload API config during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedIndex, "", "", true)
+                            SubscriptionUiController.updateServiceFromGateway(ServersUiController.getServerId(ServersUiController.processedServerIndex), "", "", true)
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -469,8 +469,8 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (SubscriptionUiController.deactivateDevice(ServersUiController.getProcessedServerIndex())) {
-                                SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), true)
+                            if (SubscriptionUiController.deactivateDevice(ServersUiController.getServerId(ServersUiController.processedServerIndex))) {
+                                SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.processedServerIndex), true)
                             }
                             PageController.showBusyIndicator(false)
                         }
@@ -506,7 +506,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            InstallController.removeServer(ServersUiController.getProcessedServerIndex())
+                            InstallController.removeServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                             PageController.showBusyIndicator(false)
                         }
                     }

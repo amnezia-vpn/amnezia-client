@@ -1,13 +1,18 @@
 #ifndef SECURESERVERSREPOSITORY_H
 #define SECURESERVERSREPOSITORY_H
 
+#include <QHash>
+#include <QJsonObject>
 #include <QObject>
 #include <QVector>
-#include <QJsonArray>
-#include <QJsonDocument>
 #include <QtGlobal>
+#include <optional>
 
-#include "core/models/serverConfig.h"
+#include "core/models/selfhosted/selfHostedAdminServerConfig.h"
+#include "core/models/selfhosted/selfHostedUserServerConfig.h"
+#include "core/models/selfhosted/nativeServerConfig.h"
+#include "core/models/api/apiV2ServerConfig.h"
+#include "core/models/api/legacyApiServerConfig.h"
 #include "core/models/containerConfig.h"
 #include "secureQSettings.h"
 
@@ -18,47 +23,68 @@ class SecureServersRepository : public QObject
     Q_OBJECT
 
 public:
-    explicit SecureServersRepository(SecureQSettings* settings, QObject *parent = nullptr);
+    enum class ServerConfigKind
+    {
+        Invalid,
+        SelfHostedAdmin,
+        SelfHostedUser,
+        Native,
+        ApiV2,
+        LegacyApiV1
+    };
 
-    void addServer(const ServerConfig &server);
-    void editServer(int index, const ServerConfig &server);
-    void removeServer(int index);
-    ServerConfig server(int index) const;
-    QVector<ServerConfig> servers() const;
+    explicit SecureServersRepository(SecureQSettings *settings, QObject *parent = nullptr);
+
+    QString addServer(const QString &serverId, const QJsonObject &serverJson, ServerConfigKind kind);
+    void editServer(const QString &serverId, const QJsonObject &serverJson, ServerConfigKind kind);
+    void removeServer(const QString &serverId);
+    ServerConfigKind serverKind(const QString &serverId) const;
+    ServerConfigKind kindFromJson(const QJsonObject &serverJson) const;
+
+    std::optional<SelfHostedAdminServerConfig> selfHostedAdminConfig(const QString &serverId) const;
+    std::optional<SelfHostedUserServerConfig> selfHostedUserConfig(const QString &serverId) const;
+    std::optional<NativeServerConfig> nativeConfig(const QString &serverId) const;
+    std::optional<ApiV2ServerConfig> apiV2Config(const QString &serverId) const;
+    std::optional<LegacyApiServerConfig> legacyApiConfig(const QString &serverId) const;
+
     int serversCount() const;
+    int indexOfServerId(const QString &serverId) const;
+    QString serverIdAt(int index) const;
+    QVector<QString> orderedServerIds() const;
 
     int defaultServerIndex() const;
-    void setDefaultServer(int index);
+    QString defaultServerId() const;
+    void setDefaultServer(const QString &serverId);
 
-    void setDefaultContainer(int serverIndex, DockerContainer container);
-    ContainerConfig containerConfig(int serverIndex, DockerContainer container) const;
-    void setContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config);
-    void clearLastConnectionConfig(int serverIndex, DockerContainer container);
-
-    ServerCredentials serverCredentials(int index) const;
-    bool hasServerWithVpnKey(const QString &vpnKey) const;
-    bool hasServerWithCrc(quint16 crc) const;
-
-    void setServersArray(const QJsonArray &servers);
+    void clearServers();
 
     void invalidateCache();
 
 signals:
-    void serverAdded(ServerConfig config);
-    void serverEdited(int index, ServerConfig config);
-    void serverRemoved(int index);
-    void defaultServerChanged(int index);
+    void serverAdded(const QString &serverId);
+    void serverEdited(const QString &serverId);
+    void serverRemoved(const QString &serverId, int removedIndex);
+    void defaultServerChanged(const QString &defaultServerId);
 
 private:
+    void loadFromStorage();
+    void updateDefaultServerFromStorage();
+    void persistDefaultServerFields();
+
+    QString normalizedOrGeneratedServerId(const QString &candidateId) const;
+
     void syncToStorage();
-    QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
+    QVariant value(const QString &key, const QVariant &defaultValue) const;
     void setValue(const QString &key, const QVariant &value);
-    
-    SecureQSettings* m_settings;
-    
-    QVector<ServerConfig> m_servers;
-    int m_defaultServerIndex = 0;
+
+    void clearServerStateMaps();
+
+    SecureQSettings *m_settings;
+
+    QHash<QString, QJsonObject> m_serverJsonById;
+    QVector<QString> m_orderedServerIds;
+
+    QString m_defaultServerId;
 };
 
 #endif // SECURESERVERSREPOSITORY_H
-

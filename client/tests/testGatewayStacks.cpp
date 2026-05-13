@@ -5,7 +5,8 @@
 #include <QSignalSpy>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
+#include "tests/testServerRepositoryHelpers.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
@@ -37,7 +38,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -55,15 +56,13 @@ private slots:
         QVERIFY2(serverAddedSpy.count() == 1, "serverAdded signal should be emitted");
         QVERIFY2(m_coreController->m_serversController->gatewayStacks().isEmpty(), "Gateway stacks should be empty for self-hosted servers");
 
-        ServerConfig serverConfig = m_coreController->m_serversController->getServerConfig(0);
-        serverConfig.visit([](auto& arg) {
-            arg.description = "Edited Server";
-        });
-        m_coreController->m_serversController->editServer(0, serverConfig);
+        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
+                                            m_coreController->m_serversController->getServerId(0),
+                                            QStringLiteral("Edited Server"));
 
         QVERIFY2(serverEditedSpy.count() == 1, "serverEdited signal should be emitted");
 
-        m_coreController->m_serversController->removeServer(0);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(0));
 
         QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");
         QVERIFY2(m_coreController->m_serversController->gatewayStacks().isEmpty(), "Gateway stacks should remain empty");

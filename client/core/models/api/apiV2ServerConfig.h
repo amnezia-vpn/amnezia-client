@@ -21,6 +21,7 @@ using namespace ContainerEnumNS;
 
 struct ApiV2ServerConfig {
     QString description;
+    QString displayName;
     QString hostName;
     QMap<DockerContainer, ContainerConfig> containers;
     DockerContainer defaultContainer;

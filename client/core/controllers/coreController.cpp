@@ -8,7 +8,6 @@
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/selfhosted/importController.h"
 #include "core/controllers/coreSignalHandlers.h"
-#include "core/models/serverConfig.h"
 #include "logger.h"
 #include "secureQSettings.h"
 
@@ -165,7 +164,7 @@ void CoreController::initControllers()
         setQmlContextProperty("FocusController", m_focusController);
     }
 
-    m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_protocolsModel, m_usersController, 
+    m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_protocolsModel, m_usersController,
                                                      m_awgConfigModel, m_wireGuardConfigModel, m_openVpnConfigModel, m_xrayConfigModel, m_torConfigModel,
 #ifdef Q_OS_WINDOWS
                                                      m_ikev2ConfigModel,
@@ -322,11 +321,16 @@ PageController* CoreController::pageController() const
 
 void CoreController::openConnectionByIndex(int serverIndex)
 {
+    const QString serverId =
+        m_serversUiController ? m_serversUiController->getServerId(serverIndex) : QString();
+    if (serverId.isEmpty()) {
+        return;
+    }
     if (m_serversModel) {
         m_serversModel->setProcessedServerIndex(serverIndex);
     }
     if (m_serversController) {
-        m_serversController->setDefaultServerIndex(serverIndex);
+        m_serversController->setDefaultServer(serverId);
     }
     m_connectionUiController->toggleConnection();
 }

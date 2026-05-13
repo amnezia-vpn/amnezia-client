@@ -27,7 +27,6 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/qrCodeUtils.h"
-#include "core/models/serverConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -381,18 +380,29 @@ void ImportController::importConfig(const QJsonObject &config)
     credentials.secretData = config.value(configKey::password).toString();
 
     if (credentials.isValid() || config.contains(configKey::containers)) {
-        ServerConfig serverConfig = ServerConfig::fromJson(config);
-        m_serversRepository->addServer(serverConfig);
+        m_serversRepository->addServer(QString(), config, m_serversRepository->kindFromJson(config));
         emit importFinished();
     } else if (config.contains(configKey::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(config).toJson());
-        if (m_serversRepository->hasServerWithCrc(crc)) {
+        bool hasServerWithCrc = false;
+        const QVector<QString> ids = m_serversRepository->orderedServerIds();
+        for (const QString &id : ids) {
+            const auto apiV2 = m_serversRepository->apiV2Config(id);
+            if (!apiV2.has_value()) {
+                continue;
+            }
+            if (static_cast<quint16>(apiV2->crc) == crc) {
+                hasServerWithCrc = true;
+                break;
+            }
+        }
+
+        if (hasServerWithCrc) {
             emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
             QJsonObject configWithCrc = config;
             configWithCrc.insert(configKey::crc, crc);
-            ServerConfig serverConfig = ServerConfig::fromJson(configWithCrc);
-            m_serversRepository->addServer(serverConfig);
+            m_serversRepository->addServer(QString(), configWithCrc, m_serversRepository->kindFromJson(configWithCrc));
             emit importFinished();
         }
     } else {

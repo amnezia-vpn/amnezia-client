@@ -18,6 +18,7 @@ namespace amnezia
 
         constexpr QLatin1String serverIndex("serverIndex");
         constexpr QLatin1String description("description");
+        constexpr QLatin1String displayName("displayName");
         constexpr QLatin1String name("name");
         constexpr QLatin1String cert("cert");
         constexpr QLatin1String accessToken("api_key");
@@ -121,6 +122,8 @@ namespace amnezia
         constexpr QLatin1String latestHandshake("latestHandshake");
         constexpr QLatin1String dataReceived("dataReceived");
         constexpr QLatin1String dataSent("dataSent");
+
+        constexpr QLatin1String storageServerId("storageServerId");
     }
 }
 
