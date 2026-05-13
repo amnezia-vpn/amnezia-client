@@ -72,14 +72,8 @@ inline void setServerDescription(SecureServersRepository *repo, const QString &s
         repo->editServer(serverId, cfg->toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
         return;
     }
-    case SecureServersRepository::ServerConfigKind::LegacyApiV1: {
-        auto cfg = repo->legacyApiConfig(serverId);
-        if (!cfg.has_value()) return;
-        cfg->description = description;
-        cfg->displayName = description;
-        repo->editServer(serverId, cfg->toJson(), SecureServersRepository::ServerConfigKind::LegacyApiV1);
+    case SecureServersRepository::ServerConfigKind::LegacyApiV1:
         return;
-    }
     case SecureServersRepository::ServerConfigKind::Invalid:
         return;
     }

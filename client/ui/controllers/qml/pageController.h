@@ -163,6 +163,8 @@ signals:
     void showPassphraseRequestDrawer();
     void passphraseRequestDrawerClosed(QString passphrase);
 
+    void unsupportedConnectDrawerRequested();
+
     void escapePressed();
     void closeTopDrawer();
 

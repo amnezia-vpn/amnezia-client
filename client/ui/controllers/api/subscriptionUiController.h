@@ -81,6 +81,8 @@ signals:
 
     void vpnKeyExportReady();
 
+    void unsupportedConnectDrawerRequested();
+
 private:
     QList<QString> getQrCodes();
     int getQrCodesCount();

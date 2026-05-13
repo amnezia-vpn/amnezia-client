@@ -78,6 +78,7 @@ void CoreSignalHandlers::initAllHandlers()
     initAllowedDnsModelUpdateHandler();
     initAppSplitTunnelingModelUpdateHandler();
     initPrepareConfigHandler();
+    initUnsupportedConnectDrawerHandler();
     initStrictKillSwitchHandler();
     initAndroidSettingsHandler();
     initAndroidConnectionHandler();
@@ -334,6 +335,12 @@ void CoreSignalHandlers::initPrepareConfigHandler()
 
         m_coreController->m_connectionUiController->openConnection();
     });
+}
+
+void CoreSignalHandlers::initUnsupportedConnectDrawerHandler()
+{
+    connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::unsupportedConnectDrawerRequested,
+            m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
 }
 
 void CoreSignalHandlers::initStrictKillSwitchHandler()

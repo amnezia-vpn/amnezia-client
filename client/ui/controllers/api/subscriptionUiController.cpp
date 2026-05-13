@@ -366,6 +366,12 @@ bool SubscriptionUiController::deactivateExternalDevice(const QString &serverId,
 void SubscriptionUiController::validateConfig()
 {
     const QString serverId = m_serversController->getDefaultServerId();
+    if (!serverId.isEmpty() && m_serversController->isLegacyApiV1Server(serverId)) {
+        emit unsupportedConnectDrawerRequested();
+        emit configValidated(false);
+        return;
+    }
+
     bool hasInstalledContainers = m_serversController->hasInstalledContainers(serverId);
 
     ErrorCode errorCode = m_subscriptionController->validateAndUpdateConfig(serverId, hasInstalledContainers);

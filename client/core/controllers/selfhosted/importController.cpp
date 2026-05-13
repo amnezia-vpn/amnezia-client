@@ -213,6 +213,12 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
             result.config[apiDefs::key::apiConfig] = apiConfig;
         }
 
+        if (m_serversRepository->kindFromJson(result.config) == SecureServersRepository::ServerConfigKind::LegacyApiV1) {
+            result.errorCode = ErrorCode::LegacyApiV1NotSupportedError;
+            result.config = {};
+            return result;
+        }
+
         processAmneziaConfig(result.config);
         if (!result.config.empty()) {
             checkForMaliciousStrings(result.config, result.maliciousWarningText);

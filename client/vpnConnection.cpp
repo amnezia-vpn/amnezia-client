@@ -105,13 +105,8 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
         }
         break;
     }
-    case SecureServersRepository::ServerConfigKind::LegacyApiV1: {
-        const auto cfg = m_serversRepository->legacyApiConfig(defaultServerId);
-        if (cfg.has_value()) {
-            container = cfg->defaultContainer;
-        }
+    case SecureServersRepository::ServerConfigKind::LegacyApiV1:
         break;
-    }
     case SecureServersRepository::ServerConfigKind::Invalid:
         break;
     }

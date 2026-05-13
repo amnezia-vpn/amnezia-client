@@ -119,13 +119,8 @@ void ServersController::setDefaultContainer(const QString &serverId, DockerConta
         m_serversRepository->editServer(serverId, cfg->toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
         return;
     }
-    case SecureServersRepository::ServerConfigKind::LegacyApiV1: {
-        auto cfg = m_serversRepository->legacyApiConfig(serverId);
-        if (!cfg.has_value()) return;
-        cfg->defaultContainer = container;
-        m_serversRepository->editServer(serverId, cfg->toJson(), SecureServersRepository::ServerConfigKind::LegacyApiV1);
+    case SecureServersRepository::ServerConfigKind::LegacyApiV1:
         return;
-    }
     case SecureServersRepository::ServerConfigKind::Invalid:
         return;
     }
@@ -397,4 +392,10 @@ bool ServersController::hasInstalledContainers(const QString &serverId) const
         }
     }
     return false;
+}
+
+bool ServersController::isLegacyApiV1Server(const QString &serverId) const
+{
+    return !serverId.isEmpty()
+            && m_serversRepository->serverKind(serverId) == SecureServersRepository::ServerConfigKind::LegacyApiV1;
 }

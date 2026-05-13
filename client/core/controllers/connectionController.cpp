@@ -98,18 +98,6 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         description = cfg->description;
         break;
     }
-    case SecureServersRepository::ServerConfigKind::LegacyApiV1: {
-        const auto cfg = m_serversRepository->legacyApiConfig(serverId);
-        if (!cfg.has_value()) return ErrorCode::InternalError;
-        container = cfg->defaultContainer;
-        containerConfigModel = cfg->containerConfig(container);
-        dns = { cfg->dns1, cfg->dns2 };
-        hostName = cfg->hostName;
-        description = cfg->description;
-        configVersion = apiDefs::ConfigSource::Telegram;
-        isApiConfig = true;
-        break;
-    }
     case SecureServersRepository::ServerConfigKind::ApiV2: {
         const auto cfg = m_serversRepository->apiV2Config(serverId);
         if (!cfg.has_value()) return ErrorCode::InternalError;
@@ -122,6 +110,8 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         isApiConfig = true;
         break;
     }
+    case SecureServersRepository::ServerConfigKind::LegacyApiV1:
+        return ErrorCode::InternalError;
     case SecureServersRepository::ServerConfigKind::Invalid:
         return ErrorCode::InternalError;
     }

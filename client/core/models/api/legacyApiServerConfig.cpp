@@ -19,37 +19,6 @@ ContainerConfig LegacyApiServerConfig::containerConfig(DockerContainer container
     return containers.value(container);
 }
 
-QJsonObject LegacyApiServerConfig::toJson() const
-{
-    QJsonObject obj;
-
-    if (!name.isEmpty()) {
-        obj[configKey::name] = name;
-    }
-    if (!description.isEmpty()) {
-        obj[configKey::description] = description;
-    }
-    if (!displayName.isEmpty()) {
-        obj[configKey::displayName] = displayName;
-    }
-
-    obj[configKey::configVersion] = configVersion;
-
-    if (!apiEndpoint.isEmpty()) {
-        obj[apiDefs::key::apiEndpoint] = apiEndpoint;
-    }
-
-    if (!hostName.isEmpty()) {
-        obj[configKey::hostName] = hostName;
-    }
-
-    if (crc > 0) {
-        obj[configKey::crc] = crc;
-    }
-
-    return obj;
-}
-
 LegacyApiServerConfig LegacyApiServerConfig::fromJson(const QJsonObject &json)
 {
     LegacyApiServerConfig config;

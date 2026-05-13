@@ -316,16 +316,6 @@ void ServersUiController::setProcessedServerId(const QString &serverId)
         return;
     }
 
-    if (!serverId.isEmpty()) {
-        for (const auto &description : m_orderedServerDescriptions) {
-            if (description.serverId == serverId && description.isApiV1) {
-                emit errorOccurred(tr("Legacy API v1 configs are no longer supported. Remove this server to continue."));
-                emit finished(tr("Use the remove action to delete this legacy config."));
-                return;
-            }
-        }
-    }
-
     if (m_processedServerIndex != index || m_processedServerId != serverId) {
         m_processedServerIndex = index;
         m_processedServerId = serverId;
