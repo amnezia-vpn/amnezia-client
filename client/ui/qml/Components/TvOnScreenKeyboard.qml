@@ -16,8 +16,7 @@ import QtQuick.Layouts
 //                          consuming UI (this component doesn't mask, the
 //                          parent does).
 //   - `accepted()`       : emitted when the user activates the "Done" key.
-//   - `dismissed()`      : emitted when the user activates the "Cancel"
-//                          key or presses Back / Escape.
+//   - `dismissed()`      : emitted when the user presses Back / Escape.
 FocusScope {
     id: root
 
@@ -29,13 +28,7 @@ FocusScope {
     signal dismissed()
 
     implicitWidth: 920
-    implicitHeight: 360
-
-    function isOkKey(event) {
-        return event.key === Qt.Key_Return
-            || event.key === Qt.Key_Enter
-            || event.key === Qt.Key_Select
-    }
+    implicitHeight: 420
 
     function appendChar(ch) {
         if (root.value.length >= root.maxLength) {
@@ -53,43 +46,71 @@ FocusScope {
 
     // ---- Layouts ---------------------------------------------------------
     //
-    // Each row is a JS array of strings — single character keys plus
-    // optional widened special keys whose codes are kept distinct so the
-    // delegate can render them.
+    // Each layout is a flat array of exactly 40 characters arranged in 4
+    // rows of 10. Single-character codes only; widened special keys live
+    // in the dedicated function row below.
     QtObject {
         id: layouts
         readonly property var en: [
-            ["1","2","3","4","5","6","7","8","9","0"],
-            ["q","w","e","r","t","y","u","i","o","p"],
-            ["a","s","d","f","g","h","j","k","l","-"],
-            ["z","x","c","v","b","n","m",".","_","@"]
+            "1","2","3","4","5","6","7","8","9","0",
+            "q","w","e","r","t","y","u","i","o","p",
+            "a","s","d","f","g","h","j","k","l","-",
+            "z","x","c","v","b","n","m",".","_","@"
         ]
         readonly property var enShift: [
-            ["!","\"","#","$","%","&","'","(",")","*"],
-            ["Q","W","E","R","T","Y","U","I","O","P"],
-            ["A","S","D","F","G","H","J","K","L","+"],
-            ["Z","X","C","V","B","N","M",":","/","?"]
+            "1","2","3","4","5","6","7","8","9","0",
+            "Q","W","E","R","T","Y","U","I","O","P",
+            "A","S","D","F","G","H","J","K","L","-",
+            "Z","X","C","V","B","N","M",".","_","@"
         ]
         readonly property var ru: [
-            ["1","2","3","4","5","6","7","8","9","0"],
-            ["й","ц","у","к","е","н","г","ш","щ","з"],
-            ["ф","ы","в","а","п","р","о","л","д","ж"],
-            ["я","ч","с","м","и","т","ь","б","ю","х"]
+            "1","2","3","4","5","6","7","8","9","0",
+            "й","ц","у","к","е","н","г","ш","щ","з",
+            "ф","ы","в","а","п","р","о","л","д","ж",
+            "я","ч","с","м","и","т","ь","б","ю","х"
         ]
         readonly property var ruShift: [
-            ["!","\"","№",";","%",":","?","*","(",")"],
-            ["Й","Ц","У","К","Е","Н","Г","Ш","Щ","З"],
-            ["Ф","Ы","В","А","П","Р","О","Л","Д","Ж"],
-            ["Я","Ч","С","М","И","Т","Ь","Б","Ю","Х"]
+            "1","2","3","4","5","6","7","8","9","0",
+            "Й","Ц","У","К","Е","Н","Г","Ш","Щ","З",
+            "Ф","Ы","В","А","П","Р","О","Л","Д","Ж",
+            "Я","Ч","С","М","И","Т","Ь","Б","Ю","Х"
+        ]
+        readonly property var symbols: [
+            "1","2","3","4","5","6","7","8","9","0",
+            "!","@","#","$","%","&","*","+","-","=",
+            "(",")","[","]","{","}","<",">","/","\\",
+            "?",",",".",";",":","'","\"","_","`","~"
         ]
     }
 
-    property int layoutIndex: 0   // 0=en, 1=ru
-    property bool shifted: false
+    // ---- Modes -----------------------------------------------------------
+    enum Mode {
+        Letters,
+        Symbols
+    }
 
-    readonly property var activeRows: {
+    property int layoutIndex: 0   // 0=en, 1=ru — for letters mode only.
+    property bool shifted: false
+    property int mode: TvOnScreenKeyboard.Mode.Letters
+
+    readonly property var activeKeys: {
+        if (mode === TvOnScreenKeyboard.Mode.Symbols) {
+            return layouts.symbols
+        }
         if (layoutIndex === 0) return shifted ? layouts.enShift : layouts.en
         return shifted ? layouts.ruShift : layouts.ru
+    }
+
+    function functionTargetForColumn(col) {
+        // Map a column in the bottom-most character row to a key in the
+        // function row underneath. Layout: Shift(2) Lang/Sym(2) Space(2)
+        // Sym/ABC(1) Backspace(1) Done(2).
+        if (col < 2) return shiftKey
+        if (col < 4) return langKey
+        if (col < 6) return spaceKey
+        if (col < 7) return symKey
+        if (col < 8) return backspaceKey
+        return doneKey
     }
 
     Keys.onPressed: function(event) {
@@ -112,79 +133,90 @@ FocusScope {
         anchors.margins: 18
         spacing: 10
 
-        // ---- Character grid ------------------------------------------
-        GridLayout {
-            id: grid
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            columns: 10
-            rowSpacing: 8
-            columnSpacing: 8
+        // ---- 4 rows × 10 keys ---------------------------------------
+        //
+        // We build the character grid as a vertical column of horizontal
+        // rows so each row gets an equal slice of the available vertical
+        // space (`Layout.fillHeight`), instead of all keys collapsing to
+        // their preferred height (which is what a GridLayout produces
+        // when every cell has `preferredHeight: 1`).
+        Repeater {
+            id: rowsRepeater
+            model: 4
 
-            Repeater {
-                id: keysRepeater
-                model: 40
+            RowLayout {
+                id: keyRow
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredHeight: 1
+                spacing: 8
 
-                TvKeyboardKey {
-                    id: cell
+                readonly property int rowIndex: index
+                property alias cells: rowCells
 
-                    readonly property int rowIndex: Math.floor(index / 10)
-                    readonly property int colIndex: index % 10
-                    readonly property string ch:
-                        root.activeRows[rowIndex] ? root.activeRows[rowIndex][colIndex] : ""
+                Repeater {
+                    id: rowCells
+                    model: 10
 
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.preferredWidth: 1
-                    Layout.preferredHeight: 1
-                    text: cell.ch
-                    // First row receives focus when the keyboard opens.
-                    focus: cell.rowIndex === 0 && cell.colIndex === 0
-                    KeyNavigation.up: cell.rowIndex === 0
-                            ? null
-                            : keysRepeater.itemAt(index - 10)
-                    KeyNavigation.down: cell.rowIndex === 3
-                            ? (cell.colIndex < 2 ? shiftKey
-                               : cell.colIndex < 4 ? layoutKey
-                               : cell.colIndex < 8 ? spaceKey
-                               : cell.colIndex === 8 ? backspaceKey
-                               : doneKey)
-                            : keysRepeater.itemAt(index + 10)
-                    KeyNavigation.left: cell.colIndex === 0
-                            ? null
-                            : keysRepeater.itemAt(index - 1)
-                    KeyNavigation.right: cell.colIndex === 9
-                            ? null
-                            : keysRepeater.itemAt(index + 1)
-                    onActivated: root.appendChar(cell.ch)
+                    TvKeyboardKey {
+                        readonly property int colIndex: index
+                        readonly property int flatIndex:
+                                keyRow.rowIndex * 10 + colIndex
+                        readonly property string ch:
+                                root.activeKeys[flatIndex] || ""
+
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: 1
+                        text: ch
+                        focus: keyRow.rowIndex === 0 && colIndex === 0
+                        KeyNavigation.left: colIndex === 0
+                                ? null
+                                : rowCells.itemAt(colIndex - 1)
+                        KeyNavigation.right: colIndex === 9
+                                ? null
+                                : rowCells.itemAt(colIndex + 1)
+                        KeyNavigation.up: keyRow.rowIndex === 0
+                                ? null
+                                : rowsRepeater.itemAt(keyRow.rowIndex - 1)
+                                        .cells.itemAt(colIndex)
+                        KeyNavigation.down: keyRow.rowIndex === 3
+                                ? root.functionTargetForColumn(colIndex)
+                                : rowsRepeater.itemAt(keyRow.rowIndex + 1)
+                                        .cells.itemAt(colIndex)
+                        onActivated: root.appendChar(ch)
+                    }
                 }
             }
         }
 
         // ---- Function row -------------------------------------------
         RowLayout {
+            id: functionRow
             Layout.fillWidth: true
             Layout.preferredHeight: 70
             spacing: 8
 
             TvKeyboardKey {
                 id: shiftKey
+                Layout.preferredWidth: 1
                 Layout.fillWidth: true
-                Layout.preferredHeight: 70
+                Layout.fillHeight: true
                 text: root.shifted ? "abc" : "ABC"
                 emphasized: true
-                KeyNavigation.up: keysRepeater.itemAt(30)
-                KeyNavigation.right: layoutKey
+                enabled: root.mode === TvOnScreenKeyboard.Mode.Letters
+                KeyNavigation.right: langKey
                 onActivated: root.shifted = !root.shifted
             }
 
             TvKeyboardKey {
-                id: layoutKey
+                id: langKey
+                Layout.preferredWidth: 1
                 Layout.fillWidth: true
-                Layout.preferredHeight: 70
+                Layout.fillHeight: true
                 text: root.layoutIndex === 0 ? "RU" : "EN"
                 emphasized: true
-                KeyNavigation.up: keysRepeater.itemAt(31)
+                enabled: root.mode === TvOnScreenKeyboard.Mode.Letters
                 KeyNavigation.left: shiftKey
                 KeyNavigation.right: spaceKey
                 onActivated: {
@@ -195,34 +227,54 @@ FocusScope {
 
             TvKeyboardKey {
                 id: spaceKey
-                Layout.preferredWidth: 280
-                Layout.preferredHeight: 70
+                Layout.preferredWidth: 2
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 text: "␣"
-                KeyNavigation.up: keysRepeater.itemAt(34)
-                KeyNavigation.left: layoutKey
-                KeyNavigation.right: backspaceKey
+                KeyNavigation.left: langKey
+                KeyNavigation.right: symKey
                 onActivated: root.appendChar(" ")
             }
 
             TvKeyboardKey {
-                id: backspaceKey
+                id: symKey
+                Layout.preferredWidth: 1
                 Layout.fillWidth: true
-                Layout.preferredHeight: 70
-                text: "⌫"
-                KeyNavigation.up: keysRepeater.itemAt(38)
+                Layout.fillHeight: true
+                text: root.mode === TvOnScreenKeyboard.Mode.Symbols
+                        ? "ABC"
+                        : "?123"
+                emphasized: true
                 KeyNavigation.left: spaceKey
+                KeyNavigation.right: backspaceKey
+                onActivated: {
+                    root.mode =
+                            root.mode === TvOnScreenKeyboard.Mode.Symbols
+                                    ? TvOnScreenKeyboard.Mode.Letters
+                                    : TvOnScreenKeyboard.Mode.Symbols
+                    root.shifted = false
+                }
+            }
+
+            TvKeyboardKey {
+                id: backspaceKey
+                Layout.preferredWidth: 1
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                iconSource: "qrc:/images/controls/delete.svg"
+                KeyNavigation.left: symKey
                 KeyNavigation.right: doneKey
                 onActivated: root.backspace()
             }
 
             TvKeyboardKey {
                 id: doneKey
+                Layout.preferredWidth: 1.4
                 Layout.fillWidth: true
-                Layout.preferredHeight: 70
+                Layout.fillHeight: true
                 text: qsTr("Готово")
                 emphasized: true
                 accent: true
-                KeyNavigation.up: keysRepeater.itemAt(39)
                 KeyNavigation.left: backspaceKey
                 onActivated: root.accepted()
             }
