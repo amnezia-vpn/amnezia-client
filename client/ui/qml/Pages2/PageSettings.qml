@@ -617,7 +617,7 @@ PageType {
 
                             CaptionTextType {
                                 Layout.fillWidth: true
-                                text: qsTr("Подтвердить вход на Android TV по коду")
+                                text: qsTr("Сканировать QR-код или ввести код с экрана")
                                 color: FBLinkStyle.color.mutedGray
                             }
                         }

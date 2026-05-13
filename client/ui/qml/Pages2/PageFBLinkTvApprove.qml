@@ -11,20 +11,20 @@ import "../Config"
 import "../Controls2/TextTypes"
 import "../Components"
 
-// FBLink VPN — "I have a TV" approval page for the mobile/desktop client.
+// FBLink VPN — "I have a TV" entry point on the mobile / desktop client.
 //
-// The TV-side login uses a device-flow / QR-code: the TV shows a short
-// `XXXX-XXXX` user code and asks the user to confirm sign-in elsewhere.
-// This page is the in-app confirmation surface so users don't have to
-// open a browser at all — they pick the page from PageHome, type the
-// code shown on the TV, tap "Подтвердить вход", and the backend
-// approves the TV's pending login under the currently signed-in user.
+// The TV side starts a device-flow login and shows the user a QR code and
+// a short XXXX-XXXX code. This page is the in-app surface where the
+// already-signed-in user confirms that sign-in: either by scanning the
+// QR with the phone camera (opens PageFBLinkTvScan) or by typing the
+// short code into a TextField and tapping "Подтвердить вход".
 PageType {
     id: root
 
     property bool isLoading: false
     property string errorMessage: ""
     property bool approvedShown: false
+    property bool codeMode: false
     readonly property bool wideLayout: GC.isWideWidth(width)
     readonly property real sideMargin: GC.pageHorizontalMargin(width)
     readonly property real maxContentWidth: GC.pageMaxWidth(width)
@@ -97,7 +97,7 @@ PageType {
 
                         CaptionTextType {
                             Layout.fillWidth: true
-                            text: qsTr("Откройте FBLink VPN на Android TV, выберите вход по QR-коду и введите ниже код, который покажет телевизор. После подтверждения ТВ войдёт автоматически.")
+                            text: qsTr("Откройте FBLink VPN на Android TV — приложение покажет QR-код и код. Отсканируйте QR камерой или введите код вручную, и ТВ войдёт автоматически.")
                             color: FBLinkStyle.color.mutedGray
                             font.pixelSize: 14
                             wrapMode: Text.WordWrap
@@ -123,6 +123,38 @@ PageType {
                             textColor: "#B6F2D2"
                         }
 
+                        // ---- Chooser tiles (default) ------------------
+                        BasicButtonType {
+                            Layout.fillWidth: true
+                            visible: !root.approvedShown && !root.codeMode
+                            implicitHeight: 64
+                            defaultColor: "#EAB308"
+                            hoveredColor: "#FACC15"
+                            pressedColor: "#CA8A04"
+                            textColor: "#111111"
+                            text: qsTr("Сканировать QR-код")
+                            clickedFunc: function() {
+                                root.errorMessage = ""
+                                PageController.goToPage(PageEnum.PageFBLinkTvScan)
+                            }
+                        }
+
+                        BasicButtonType {
+                            Layout.fillWidth: true
+                            visible: !root.approvedShown && !root.codeMode
+                            implicitHeight: 56
+                            defaultColor: "#27272A"
+                            hoveredColor: "#3F3F46"
+                            pressedColor: "#18181B"
+                            textColor: "#F5F5F5"
+                            text: qsTr("Ввести код вручную")
+                            clickedFunc: function() {
+                                root.errorMessage = ""
+                                root.codeMode = true
+                            }
+                        }
+
+                        // ---- Manual code entry ------------------------
                         TextFieldWithHeaderType {
                             id: codeField
                             Layout.fillWidth: true
@@ -130,12 +162,12 @@ PageType {
                             textField.placeholderText: "XXXX-XXXX"
                             textField.inputMethodHints: Qt.ImhUppercaseOnly | Qt.ImhLatinOnly | Qt.ImhNoPredictiveText
                             textField.maximumLength: 16
-                            visible: !root.approvedShown
+                            visible: !root.approvedShown && root.codeMode
                         }
 
                         BasicButtonType {
                             Layout.fillWidth: true
-                            visible: !root.approvedShown
+                            visible: !root.approvedShown && root.codeMode
                             implicitHeight: 56
                             defaultColor: "#EAB308"
                             hoveredColor: "#FACC15"
@@ -156,6 +188,21 @@ PageType {
                                 root.isLoading = true
                                 PageController.showBusyIndicator(true)
                                 FBLinkController.approveTvLogin(code)
+                            }
+                        }
+
+                        BasicButtonType {
+                            Layout.fillWidth: true
+                            visible: !root.approvedShown && root.codeMode
+                            implicitHeight: 48
+                            defaultColor: "transparent"
+                            hoveredColor: Qt.rgba(255/255, 255/255, 255/255, 0.05)
+                            pressedColor: Qt.rgba(255/255, 255/255, 255/255, 0.03)
+                            textColor: FBLinkStyle.color.mutedGray
+                            text: qsTr("Назад к выбору")
+                            clickedFunc: function() {
+                                root.codeMode = false
+                                root.errorMessage = ""
                             }
                         }
 
