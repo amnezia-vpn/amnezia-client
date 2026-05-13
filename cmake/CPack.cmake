@@ -62,8 +62,6 @@ if(WIN32)
     install(FILES
         ${CMAKE_SOURCE_DIR}/deploy/data/windows/post_install.cmd
         ${CMAKE_SOURCE_DIR}/deploy/data/windows/post_uninstall.cmd
-        ${CMAKE_SOURCE_DIR}/deploy/data/windows/enable-dev-split-driver.ps1
-        ${CMAKE_SOURCE_DIR}/deploy/data/windows/enable-dev-split-driver.cmd
         DESTINATION "."
         COMPONENT AmneziaVPN
     )

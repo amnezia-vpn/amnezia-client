@@ -9,24 +9,13 @@
   toolset appears only under VS Community/Professional, this script prefers that MSBuild over
   Build Tools when Build Tools lack the driver toolset.
 
-  Optional signing (set env or pass parameters):
-    $env:AMNEZIA_SPLIT_TUNNEL_PFX = path to .pfx
-    $env:AMNEZIA_SPLIT_TUNNEL_PFX_PASSWORD = password
-  Or: -PfxPath -PfxPassword
   Override MSBuild (must already have WindowsKernelModeDriver10.0 toolset):
     -MsBuildPath "C:\...\MSBuild.exe"
 #>
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-    'PSAvoidUsingPlainTextForPassword',
-    'PfxPassword',
-    Justification = 'signtool.exe requires a plaintext password argument; this is a local dev signing script.'
-)]
 param(
     [string]$Configuration = "Release",
     [string]$Platform = "x64",
     [string]$WinSplitTunnelRoot = "",
-    [string]$PfxPath = "",
-    [string]$PfxPassword = "",
     [string]$MsBuildPath = "",
     [string]$WdkVersion = "",
     [switch]$DisableSpectreMitigation
@@ -167,42 +156,3 @@ if (-not (Test-Path $built)) {
 $out = Join-Path $here "mullvad-split-tunnel.sys"
 Copy-Item -Force $built $out
 Write-Host "Copied driver to $out"
-
-$pfx = $PfxPath
-if (-not $pfx) { $pfx = $env:AMNEZIA_SPLIT_TUNNEL_PFX }
-$pw = $PfxPassword
-if (-not $pw) { $pw = $env:AMNEZIA_SPLIT_TUNNEL_PFX_PASSWORD }
-
-if ($pfx -and (Test-Path $pfx)) {
-    $signtool = $null
-    foreach ($w in @(
-            "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe",
-            "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe",
-            "${env:ProgramFiles(x86)}\Windows Kits\10\bin\x64\signtool.exe"
-        )) {
-        if (Test-Path $w) { $signtool = $w; break }
-    }
-    if (-not $signtool) {
-        $kitsBin = Join-Path ${env:ProgramFiles(x86)} "Windows Kits\10\bin"
-        if (Test-Path $kitsBin) {
-            $signtool = Get-ChildItem -Path $kitsBin -Filter signtool.exe -Recurse -ErrorAction SilentlyContinue |
-                Where-Object { $_.DirectoryName -match '\\x64$' } |
-                Sort-Object { [version]($_.Directory.Parent.Name) } -Descending |
-                Select-Object -First 1 -ExpandProperty FullName
-        }
-    }
-    if (-not $signtool) {
-        Write-Warning "signtool.exe not found; skip signing."
-    }
-    else {
-        $signArgs = @("sign", "/fd", "SHA256", "/f", $pfx, "/tr", "http://timestamp.digicert.com", "/td", "SHA256")
-        if ($pw) { $signArgs += @("/p", $pw) }
-        $signArgs += $out
-        & $signtool @signArgs
-        if ($LASTEXITCODE -ne 0) { throw "signtool failed with exit code $LASTEXITCODE" }
-        Write-Host "Signed $out"
-    }
-}
-else {
-    Write-Host "No PFX provided — driver copied unsigned. For production, sign with your EV/OV cert."
-}

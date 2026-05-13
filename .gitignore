@@ -27,7 +27,6 @@ Makefile*
 *build-*
 !client/platforms/windows/drivers/build-split-tunnel.ps1
 !client/platforms/windows/drivers/check-split-tunnel-build-prereqs.ps1
-!client/platforms/windows/drivers/run-build-sign.ps1
 compile_commands.json
 
 # fastlane

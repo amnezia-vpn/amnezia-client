@@ -19,7 +19,7 @@
 > If the [Amnezia website](https://amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-en) is blocked in your region, you can use an [Alternative website link](https://storage.googleapis.com/amnezia/amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-en-mirror).
 
 > [!NOTE]
-> **Windows per-app “only listed apps use VPN”** relies on the split-tunnel kernel driver, not usermode WFP alone; background and options are in [`docs/WINDOWS_PER_APP_WHITELIST_VPN.md`](docs/WINDOWS_PER_APP_WHITELIST_VPN.md) and [`docs/WINDOWS_PER_APP_WHITELIST_ROADMAP.md`](docs/WINDOWS_PER_APP_WHITELIST_ROADMAP.md). For local development builds with a custom-signed driver, see [`docs/WINDOWS_DEV_SIGNED_DRIVER.md`](docs/WINDOWS_DEV_SIGNED_DRIVER.md).
+> **Windows per-app “only listed apps use VPN”** relies on the split-tunnel kernel driver, not usermode WFP alone; background and options are in [`docs/WINDOWS_PER_APP_WHITELIST_VPN.md`](docs/WINDOWS_PER_APP_WHITELIST_VPN.md) and [`docs/WINDOWS_PER_APP_WHITELIST_ROADMAP.md`](docs/WINDOWS_PER_APP_WHITELIST_ROADMAP.md).
 
 <a href="https://amnezia.org/en/downloads?utm_source=github&utm_campaign=amnezia_button-readme-en"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/download-website.svg" width="150" style="max-width: 100%; margin-right: 10px"></a>
 <a href="https://storage.googleapis.com/amnezia/amnezia.org?m-path=/en/downloads&utm_source=github&utm_campaign=amnezia_button-readme-en-mirrow"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/download-alt.svg" width="150" style="max-width: 100%;"></a>
