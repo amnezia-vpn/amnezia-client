@@ -346,7 +346,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
         const qint64 elapsed = m_disconnectElapsed.elapsed();
         if (elapsed >= 0 && elapsed < 500) {
             const int rawDelay = static_cast<int>(500 - elapsed);
-            const int delayMs = std::max(50, std::min(500, rawDelay));
+            const int delayMs = (std::max)(50, (std::min)(500, rawDelay));
             qDebug() << "VpnConnection::connectToVpn(): daemon grace window, deferring" << delayMs << "ms";
             m_disconnectElapsed.invalidate();
             QTimer::singleShot(delayMs, this, [this]() {
