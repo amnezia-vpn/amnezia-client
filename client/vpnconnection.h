@@ -94,6 +94,7 @@ private:
    int m_recoveryAttempts = 0;
    int m_failureBurst = 0;
    qint64 m_failureWindowStartedAt = 0;
+   qint64 m_lastDisconnectMsec = 0;
    int m_lastServerIndex = -1;
    ServerCredentials m_lastCredentials;
    DockerContainer m_lastContainer = DockerContainer::None;

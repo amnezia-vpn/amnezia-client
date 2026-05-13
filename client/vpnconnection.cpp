@@ -1,5 +1,7 @@
 #include "vpnconnection.h"
 
+#include <algorithm>
+
 #include <QDebug>
 #include <QEventLoop>
 #include <QFile>
@@ -125,16 +127,24 @@ void VpnConnection::onKillSwitchModeChanged(bool enabled)
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([enabled](QSharedPointer<IpcInterfaceReplica> iface){
         QRemoteObjectPendingReply<bool> reply = iface->refreshKillSwitch(enabled);
-        if (reply.waitForFinished() && reply.returnValue())
+        if (reply.waitForFinished(1500) && reply.returnValue())
             qDebug() << "VpnConnection::onKillSwitchModeChanged: Killswitch refreshed";
         else
-            qWarning() << "VpnConnection::onKillSwitchModeChanged: Failed to execute remote refreshKillSwitch call";
+            qWarning() << "VpnConnection::onKillSwitchModeChanged: Failed to execute remote refreshKillSwitch call (or 1500 ms IPC timeout)";
     });
 #endif
 }
 
 void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
+    // Defensive: same-state re-entries must not reissue desktop IPC RPCs.
+    // setConnectionState already filters same-state transitions before calling
+    // us, but we guard here too so a future reorder of setConnectionState's
+    // body cannot double-issue flushDns / clearSavedRoutes / resetIpStack.
+    if (state == m_connectionState) {
+        return;
+    }
+
 #ifdef AMNEZIA_DESKTOP
     auto container = m_settings->defaultContainer(m_settings->defaultServerIndex());
 
@@ -148,10 +158,10 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                 }
 
                 auto flushDns = iface->flushDns();
-                if (flushDns.waitForFinished() && flushDns.returnValue())
+                if (flushDns.waitForFinished(1500) && flushDns.returnValue())
                     qDebug() << "VpnConnection::onConnectionStateChanged: Successfully flushed DNS";
                 else
-                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS";
+                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS (or 1500 ms IPC timeout)";
 
 
                 if (!ContainerProps::isAwgContainer(container) &&
@@ -166,16 +176,16 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             case Vpn::ConnectionState::Disconnected:
             case Vpn::ConnectionState::Error: {
                 auto flushDns = iface->flushDns();
-                if (flushDns.waitForFinished() && flushDns.returnValue())
+                if (flushDns.waitForFinished(1500) && flushDns.returnValue())
                     qDebug() << "VpnConnection::onConnectionStateChanged: Successfully flushed DNS";
                 else
-                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS";
+                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS (or 1500 ms IPC timeout)";
 
                 auto clearSavedRoutes = iface->clearSavedRoutes();
-                if (clearSavedRoutes.waitForFinished() && clearSavedRoutes.returnValue())
+                if (clearSavedRoutes.waitForFinished(1500) && clearSavedRoutes.returnValue())
                     qDebug() << "VpnConnection::onConnectionStateChanged: Successfully cleared saved routes";
                 else
-                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to clear saved routes";
+                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to clear saved routes (or 1500 ms IPC timeout)";
             } break;
             default:
                 break;
@@ -324,6 +334,29 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
         m_vpnProtocol.reset();
     }
 
+#ifdef AMNEZIA_DESKTOP
+    // Desktop grace window: if the user just tapped Disconnect and is now
+    // re-tapping Connect, the fblink daemon may still be tearing down the
+    // previous tunnel (deleteInterface() runs waitForFinished(5000) on the
+    // wg process on Linux, WFP firewall rules are being refreshed on Windows,
+    // pfctl is reloading its ruleset on macOS). Landing a new activate on
+    // top of that in-flight teardown is what causes the hang. Defer by up
+    // to 500 ms to let the daemon settle.
+    if (m_vpnProtocol.isNull() && m_lastDisconnectMsec > 0) {
+        const qint64 elapsed = QDateTime::currentMSecsSinceEpoch() - m_lastDisconnectMsec;
+        if (elapsed >= 0 && elapsed < 500) {
+            const int rawDelay = static_cast<int>(500 - elapsed);
+            const int delayMs = std::max(50, std::min(500, rawDelay));
+            qDebug() << "VpnConnection::connectToVpn(): daemon grace window, deferring" << delayMs << "ms";
+            m_lastDisconnectMsec = 0;
+            QTimer::singleShot(delayMs, this, [this]() {
+                startNewConnection(m_lastContainer, m_lastVpnConfiguration);
+            });
+            return;
+        }
+    }
+#endif
+
     startNewConnection(container, vpnConfiguration);
 }
 
@@ -412,7 +445,12 @@ void VpnConnection::handleSwitchWatchdogTimeout()
 void VpnConnection::createProtocolConnections()
 {
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-    connect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState);
+    // Use Qt::QueuedConnection so a protocol that emits Disconnected
+    // synchronously inside stop() (desktop OpenVPN / WireGuard do this) can
+    // not re-enter setConnectionState -> onConnectionStateChanged and spin
+    // a nested event loop while stop() is still on the stack.
+    connect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState,
+            Qt::QueuedConnection);
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 
 #ifdef AMNEZIA_DESKTOP
@@ -607,11 +645,13 @@ void VpnConnection::reconnectToVpn() {
         return;
     }
 
-    // Allow reconnect while the previous attempt is still in flight
-    // (Connecting / Reconnecting) so a rapid networkChanged/wakeup sequence
-    // from IpcInterfaceReplica is not dropped on the floor.
+    // Allow reconnect only for Connected / Reconnecting states. Dropping
+    // Connecting from the allowed set prevents networkChanged/wakeup from
+    // tearing the tunnel down while the initial handshake is still in
+    // progress: the desktop service fires networkChanged the moment the new
+    // default route is installed, which collides with our own in-flight
+    // Connecting attempt during a server switch.
     if (m_connectionState != Vpn::ConnectionState::Connected
-        && m_connectionState != Vpn::ConnectionState::Connecting
         && m_connectionState != Vpn::ConnectionState::Reconnecting) {
         qWarning() << QString("Reconnect triggered during inappropriate state: %1; ignoring slot")
                               .arg(QMetaEnum::fromType<Vpn::ConnectionState>().valueToKey(m_connectionState));
@@ -670,6 +710,16 @@ void VpnConnection::disconnectFromVpn()
                           });
 #endif
 
+    // Fence: detach protocol signals from this so the synchronous Disconnected
+    // emission inside stop() on desktop protocols cannot re-enter
+    // setConnectionState -> onConnectionStateChanged -> nested event loop.
+    // On AMNEZIA_DESKTOP the protocol is destroyed synchronously via the
+    // QSharedPointer ref drop below (no deleteLater) because desktop
+    // protocols do not spin their own event loop and their destructors call
+    // back into stop() if state != Disconnected - this fence keeps that
+    // destructor path safe by ensuring no signals can be delivered into
+    // `this` during the destruction window.
+    disconnect(m_vpnProtocol.data(), nullptr, this, nullptr);
     m_vpnProtocol->stop();
 
 #if !defined(Q_OS_ANDROID) && !defined(AMNEZIA_DESKTOP)
@@ -678,13 +728,23 @@ void VpnConnection::disconnectFromVpn()
 
     m_vpnProtocol = nullptr;
 
-#if !defined(Q_OS_ANDROID)
+#ifdef AMNEZIA_DESKTOP
+    // Desktop: stop() has returned synchronously, force the terminal
+    // state now. Signals from m_vpnProtocol were detached above so no
+    // re-entrant onConnectionStateChanged can fire.
+    setConnectionState(Vpn::ConnectionState::Disconnected);
+#elif !defined(Q_OS_ANDROID)
+    // iOS / other fallbacks: let the 200 ms timer settle the state.
     QTimer::singleShot(200, this, [this]() {
         if (m_connectionState == Vpn::ConnectionState::Disconnecting) {
             setConnectionState(Vpn::ConnectionState::Disconnected);
         }
     });
 #endif
+
+    // Stamp the disconnect time so connectToVpn's desktop grace window can
+    // detect a rapid Connect-after-Disconnect and defer the new activate.
+    m_lastDisconnectMsec = QDateTime::currentMSecsSinceEpoch();
 }
 
 void VpnConnection::setConnectionState(Vpn::ConnectionState state)
