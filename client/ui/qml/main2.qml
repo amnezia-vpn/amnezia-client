@@ -65,9 +65,18 @@ Window  {
         id: defaultFocusItem
         objectName: "defaultFocusItem"
 
-        focus: true
+        // On Android TV the StackView inside PageTvRoot owns the focus chain
+        // and consumes the D-pad keys directly. If this hidden Item takes
+        // focus at Window scope, its Keys.onPressed below routes the arrow
+        // keys through the mobile FocusController and the TV FocusScope never
+        // sees them, so the app looks frozen to the remote.
+        focus: !SettingsController.isTvInterfaceActive
 
         Keys.onPressed: function(event) {
+            if (SettingsController.isTvInterfaceActive) {
+                // Let the event propagate to PageTvRoot's StackView untouched.
+                return
+            }
             switch (event.key) {
             case Qt.Key_Tab:
             case Qt.Key_Down:

@@ -67,6 +67,13 @@ private:
     bool m_isConnectionInProgress = false;
     QString m_connectionStateText = tr("Подключиться");
     qint64 m_lastConnectAttemptMsec = 0;
+    // Set true whenever m_state enters a terminal state (Disconnected / Error /
+    // Unknown). Consumed by openConnection() to let the first attempt per
+    // terminal-entry through the 1200 ms throttle. Ensures that rapid
+    // double-taps while the UI is still showing Disconnected cannot stack two
+    // connectToVpn messages onto the worker thread and tear the first one
+    // down via the switch-wait path.
+    bool m_retryPrimed = false;
 
     Vpn::ConnectionState m_state;
 };

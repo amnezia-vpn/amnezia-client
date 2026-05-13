@@ -100,6 +100,13 @@ open class FBLinkService : VpnService() {
     private var disconnectionJob: Job? = null
     private var trafficStatsUpdateJob: Job? = null
     // private var statisticsSendingJob: Job? = null
+    // Touched from both the Main thread (writes in connectToVpn) and
+    // Dispatchers.IO (the disconnect coroutine's finally drains it).
+    // @Volatile gives us defensive happens-before on the field itself; the
+    // drain additionally reposts the write back to mainScope so read and
+    // write stay single-threaded in the steady state.
+    @Volatile
+    private var pendingConfig: String? = null
     private lateinit var networkState: NetworkState
     private lateinit var trafficStats: TrafficStats
     private var controlReceiver: BroadcastReceiver? = null
@@ -490,7 +497,22 @@ open class FBLinkService : VpnService() {
 
     @MainThread
     private fun connectToVpn(vpnConfig: String) {
-        if (isConnected || protocolState.value == CONNECTING || protocolState.value == DISCONNECTING) return
+        if (protocolState.value == DISCONNECTING) {
+            // A disconnect is still unwinding on connectionScope. Stash the
+            // config and let the disconnect's finally-block pick it up when
+            // the state reaches DISCONNECTED. Otherwise the new CONNECT is
+            // silently dropped and the Qt UI appears to hang.
+            Log.d(TAG, "connectToVpn: service is DISCONNECTING, queueing config to apply after teardown")
+            pendingConfig = vpnConfig
+            return
+        }
+        if (isConnected || protocolState.value == CONNECTING) {
+            // A connect attempt is already live; keep it idempotent and drop
+            // any stale pending config to avoid double-connect on rapid
+            // toggle sequences.
+            pendingConfig = null
+            return
+        }
 
         Log.d(TAG, "Start VPN connection")
 
@@ -556,6 +578,21 @@ open class FBLinkService : VpnService() {
                     protocolState.value = DISCONNECTED
                 }
                 disconnectionJob = null
+
+                // Drain any CONNECT that arrived while we were tearing the
+                // tunnel down so a rapid server-switch sequence does not
+                // leave the user stuck in Disconnected. Route read-and-clear
+                // through mainScope so pendingConfig writes are all on Main
+                // (connectToVpn writes it from Main too); this avoids the
+                // non-atomic read-then-write race with a UI CONNECT landing
+                // between the two statements.
+                mainScope.launch {
+                    val queuedConfig = pendingConfig
+                    pendingConfig = null
+                    if (queuedConfig != null) {
+                        connectToVpn(queuedConfig)
+                    }
+                }
             }
         }
     }
