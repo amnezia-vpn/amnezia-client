@@ -32,6 +32,7 @@ class LinuxRouteMonitor final : public QObject {
   bool rtmSendRoute(int action, int flags, int type,
                     const IPAddress& prefix);
   QString m_ifname;
+  QString m_physicalGateway;
   unsigned int m_ifindex = 0;
   int m_nlsock = -1;
   int m_nlseq = 0;
