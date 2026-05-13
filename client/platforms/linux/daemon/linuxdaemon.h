@@ -20,6 +20,8 @@ class LinuxDaemon final : public Daemon {
 
   static LinuxDaemon* instance();
 
+  bool deactivate(bool emitSignals = true) override;
+
  protected:
   WireguardUtils* wgutils() const override { return m_wgutils; }
   DnsUtils* dnsutils() override { return m_dnsutils; }
