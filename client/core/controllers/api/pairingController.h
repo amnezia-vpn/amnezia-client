@@ -29,13 +29,14 @@ public:
 
     QJsonObject buildGenerateQrPayload(const QString &qrUuid) const;
     QJsonObject buildScanQrPayload(const QString &qrUuid, const QString &vpnConfig, const QJsonObject &serviceInfo,
-                                   const QJsonArray &supportedProtocols, const QString &apiKey) const;
+                                   const QJsonArray &supportedProtocols, const QString &apiKey, const QString &serviceType,
+                                   const QString &userCountryCode) const;
 
     static amnezia::ErrorCode parseGenerateQrResponseBody(const QByteArray &responseBody, QrPairingConfigPayload &outPayload);
     static amnezia::ErrorCode parseScanQrResponseBody(const QByteArray &responseBody, QString *outOptionalDisplayName = nullptr);
 
-    /** Length bounds before `scan_qr` (avoids huge JSON / abuse). */
-    static amnezia::ErrorCode validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey);
+    static amnezia::ErrorCode validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey,
+                                                        const QString &serviceType, const QString &userCountryCode);
 
 private:
     SecureAppSettingsRepository *m_appSettingsRepository;

@@ -35,8 +35,8 @@ var (
 	issued   = map[string]issuedConfigInfo{} // installation_uuid -> issued config info shown in /v1/account_info
 
 	// Configured from flags / env in main().
-	pairingSessionTTL    = 30 * time.Second
-	longPollWaitLimit    = 30 * time.Second
+	pairingSessionTTL    = 60 * time.Second
+	longPollWaitLimit    = 60 * time.Second
 	rateLimitExcessAfter = 0 // Set to 5 to mimic "more than 5 requests per 24h". 0 = first amnezia-free request may return CAPTCHA.
 	// No trailing slash; used by POST /v1/updater_endpoint so remote clients (e.g. iOS) poll the Mac, not 127.0.0.1 on-device.
 	publicUpdaterBaseURL string
@@ -62,6 +62,8 @@ type scanQRRequest struct {
 	InstallationUUID string         `json:"installation_uuid"`
 	AppVersion       string         `json:"app_version"`
 	OSVersion        string         `json:"os_version"`
+	ServiceType      string         `json:"service_type"`
+	UserCountryCode  string         `json:"user_country_code"`
 }
 
 type pairingResult struct {
@@ -159,6 +161,8 @@ func validateGenerateQRRequest(req generateQRRequest) bool {
 }
 
 func validateScanQRRequest(req scanQRRequest) bool {
+	st := strings.TrimSpace(req.ServiceType)
+	cc := strings.TrimSpace(req.UserCountryCode)
 	return req.QRUUID != "" &&
 		req.Config != "" &&
 		req.ServiceInfo != nil &&
@@ -166,7 +170,9 @@ func validateScanQRRequest(req scanQRRequest) bool {
 		req.AuthData.APIKey != "" &&
 		req.InstallationUUID != "" &&
 		req.AppVersion != "" &&
-		req.OSVersion != ""
+		req.OSVersion != "" &&
+		st != "" &&
+		cc != ""
 }
 
 func pruneRequests(uuid string) {
@@ -184,6 +190,38 @@ func pruneRequests(uuid string) {
 func overLimit(uuid string) bool {
 	pruneRequests(uuid)
 	return len(requests[uuid]) > rateLimitExcessAfter
+}
+
+// waitGenerateQRResponse blocks until scan completes, errors, or long-poll timeout (matches client pairingLongPollTimeout).
+func waitGenerateQRResponse(w http.ResponseWriter, session *pairingSession, qrUUID string) {
+	timer := time.NewTimer(longPollWaitLimit)
+	defer timer.Stop()
+
+	select {
+	case <-session.Done:
+		mu.Lock()
+		result := session.Result
+		if sessions[qrUUID] == session {
+			delete(sessions, qrUUID)
+		}
+		mu.Unlock()
+		if result == nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{
+				"message": "Internal Server Error: Pairing completed without payload.",
+			})
+			return
+		}
+		writeJSON(w, http.StatusOK, result)
+	case <-timer.C:
+		mu.Lock()
+		if sessions[qrUUID] == session {
+			delete(sessions, qrUUID)
+		}
+		mu.Unlock()
+		writeJSON(w, http.StatusRequestTimeout, map[string]string{
+			"message": "Request Timeout: No config received within the allowed time.",
+		})
+	}
 }
 
 func handleGenerateQR(w http.ResponseWriter, r *http.Request) {
@@ -204,6 +242,21 @@ func handleGenerateQR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	mu.Lock()
+	cleanupExpiredSessions(time.Now())
+	if ex, ok := sessions[req.QRUUID]; ok {
+		now := time.Now()
+		if now.After(ex.ExpiresAt) || ex.Completed {
+			delete(sessions, req.QRUUID)
+		} else {
+			sess := ex
+			mu.Unlock()
+			log.Printf("pairing RESUME uuid=%s install=%s", shortID(req.QRUUID), shortID(req.InstallationUUID))
+			waitGenerateQRResponse(w, sess, req.QRUUID)
+			return
+		}
+	}
+
 	session := &pairingSession{
 		QRUUID:             req.QRUUID,
 		DesktopInstallUUID: req.InstallationUUID,
@@ -211,50 +264,13 @@ func handleGenerateQR(w http.ResponseWriter, r *http.Request) {
 		ExpiresAt:          time.Now().Add(pairingSessionTTL),
 		Done:               make(chan struct{}),
 	}
-
-	mu.Lock()
-	cleanupExpiredSessions(time.Now())
-	if _, exists := sessions[req.QRUUID]; exists {
-		mu.Unlock()
-		writeJSON(w, http.StatusConflict, map[string]string{
-			"message": "Conflict: QR session with this UUID already exists.",
-		})
-		return
-	}
 	sessions[req.QRUUID] = session
 	mu.Unlock()
 
 	log.Printf("pairing REGISTERED uuid=%s install=%s ttl=%s app=%s os=%s",
 		shortID(req.QRUUID), shortID(req.InstallationUUID), pairingSessionTTL, req.AppVersion, req.OSVersion)
 
-	timer := time.NewTimer(longPollWaitLimit)
-	defer timer.Stop()
-
-	select {
-	case <-session.Done:
-		mu.Lock()
-		result := session.Result
-		if sessions[req.QRUUID] == session {
-			delete(sessions, req.QRUUID)
-		}
-		mu.Unlock()
-		if result == nil {
-			writeJSON(w, http.StatusInternalServerError, map[string]string{
-				"message": "Internal Server Error: Pairing completed without payload.",
-			})
-			return
-		}
-		writeJSON(w, http.StatusOK, result)
-	case <-timer.C:
-		mu.Lock()
-		if sessions[req.QRUUID] == session {
-			delete(sessions, req.QRUUID)
-		}
-		mu.Unlock()
-		writeJSON(w, http.StatusRequestTimeout, map[string]string{
-			"message": "Request Timeout: No config received within the allowed time.",
-		})
-	}
+	waitGenerateQRResponse(w, session, req.QRUUID)
 }
 
 func handleScanQR(w http.ResponseWriter, r *http.Request) {
@@ -716,8 +732,8 @@ func main() {
 	publicFlag := flag.String("public-base", strings.TrimSpace(os.Getenv("LOCAL_GATEWAY_PUBLIC_BASE")),
 		"Base URL without trailing slash for /v1/updater_endpoint (required for iOS-on-LAN). Env: LOCAL_GATEWAY_PUBLIC_BASE")
 	autoPublic := flag.Bool("auto-public", true, "If public-base empty, derive http://<first-lan-ipv4>:port")
-	pairTTL := flag.Duration("pairing-ttl", 30*time.Second, "QR pairing session TTL")
-	longPoll := flag.Duration("long-poll", 30*time.Second, "Long-poll max wait for POST /api/v1/generate_qr")
+	pairTTL := flag.Duration("pairing-ttl", 60*time.Second, "QR pairing session TTL (align with tmp/updated_spec.yaml)")
+	longPoll := flag.Duration("long-poll", 60*time.Second, "Long-poll max wait for POST /api/v1/generate_qr")
 	rateN := flag.Int("rate-limit-excess-after", 0, "Amnezia Free: allow N requests per 24h window before rate-limit/CAPTCHA (0=tight)")
 	flag.Parse()
 

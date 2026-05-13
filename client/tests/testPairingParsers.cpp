@@ -112,15 +112,25 @@ private slots:
     {
         QString vpnKey;
         vpnKey.fill(QLatin1Char('x'), 256 * 1024 + 1);
-        QCOMPARE(PairingController::validatePairingScanFields(QStringLiteral("ab"), vpnKey, QStringLiteral("k")),
+        QCOMPARE(PairingController::validatePairingScanFields(QStringLiteral("ab"), vpnKey, QStringLiteral("k"),
+                                                              QStringLiteral("amnezia-premium"), QStringLiteral("ru")),
                  ErrorCode::ApiPairingPayloadTooLargeError);
     }
 
     void validateScanFields_uuidTooLong()
     {
         QString uuid(200, QLatin1Char('a'));
-        QCOMPARE(PairingController::validatePairingScanFields(uuid, QStringLiteral("vpn://a"), QStringLiteral("k")),
+        QCOMPARE(PairingController::validatePairingScanFields(uuid, QStringLiteral("vpn://a"), QStringLiteral("k"),
+                                                              QStringLiteral("amnezia-premium"), QStringLiteral("ru")),
                  ErrorCode::ApiConfigEmptyError);
+    }
+
+    void validateScanFields_missingServiceType()
+    {
+        QCOMPARE(PairingController::validatePairingScanFields(QStringLiteral("ab"), QStringLiteral("vpn://x"),
+                                                              QStringLiteral("k"), QString(),
+                                                              QStringLiteral("ru")),
+                 ErrorCode::ApiPairingMissingMetadataError);
     }
 
     void pairingUi_applyScanned_extractsUuid_emitsSignal()

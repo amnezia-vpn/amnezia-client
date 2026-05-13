@@ -15,6 +15,8 @@ namespace
 constexpr qsizetype kPairingMaxQrUuidChars = 128;
 constexpr qsizetype kPairingMaxVpnConfigChars = 256 * 1024;
 constexpr qsizetype kPairingMaxApiKeyChars = 8192;
+constexpr qsizetype kPairingMaxServiceTypeChars = 64;
+constexpr qsizetype kPairingMaxUserCountryCodeChars = 32;
 
 ErrorCode applyGatewayOrOpenApiGenerateError(const QJsonObject &obj, PairingController::QrPairingConfigPayload &outPayload)
 {
@@ -132,7 +134,8 @@ ErrorCode PairingController::parseScanQrResponseBody(const QByteArray &responseB
     return ErrorCode::NoError;
 }
 
-ErrorCode PairingController::validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey)
+ErrorCode PairingController::validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey,
+                                                       const QString &serviceType, const QString &userCountryCode)
 {
     if (qrUuid.size() > kPairingMaxQrUuidChars) {
         return ErrorCode::ApiConfigEmptyError;
@@ -141,6 +144,14 @@ ErrorCode PairingController::validatePairingScanFields(const QString &qrUuid, co
         return ErrorCode::ApiPairingPayloadTooLargeError;
     }
     if (apiKey.size() > kPairingMaxApiKeyChars) {
+        return ErrorCode::ApiPairingPayloadTooLargeError;
+    }
+    const QString st = serviceType.trimmed();
+    const QString cc = userCountryCode.trimmed();
+    if (st.isEmpty() || cc.isEmpty()) {
+        return ErrorCode::ApiPairingMissingMetadataError;
+    }
+    if (st.size() > kPairingMaxServiceTypeChars || cc.size() > kPairingMaxUserCountryCodeChars) {
         return ErrorCode::ApiPairingPayloadTooLargeError;
     }
     return ErrorCode::NoError;
@@ -153,7 +164,7 @@ PairingController::PairingController(SecureAppSettingsRepository *appSettingsRep
 
 int PairingController::pairingLongPollTimeoutMsecs() const
 {
-    return 30 * 1000;
+    return 60 * 1000;
 }
 
 QJsonObject PairingController::buildGenerateQrPayload(const QString &qrUuid) const
@@ -167,7 +178,8 @@ QJsonObject PairingController::buildGenerateQrPayload(const QString &qrUuid) con
 }
 
 QJsonObject PairingController::buildScanQrPayload(const QString &qrUuid, const QString &vpnConfig, const QJsonObject &serviceInfo,
-                                                  const QJsonArray &supportedProtocols, const QString &apiKey) const
+                                                    const QJsonArray &supportedProtocols, const QString &apiKey,
+                                                    const QString &serviceType, const QString &userCountryCode) const
 {
     QJsonObject auth;
     auth[apiDefs::key::apiKey] = apiKey;
@@ -181,5 +193,7 @@ QJsonObject PairingController::buildScanQrPayload(const QString &qrUuid, const Q
     o[apiDefs::key::installationUuid] = m_appSettingsRepository->getInstallationUuid(true);
     o[apiDefs::key::appVersion] = QString(APP_VERSION);
     o[apiDefs::key::osVersion] = QSysInfo::productType();
+    o[apiDefs::key::serviceType] = serviceType;
+    o[apiDefs::key::userCountryCode] = userCountryCode;
     return o;
 }

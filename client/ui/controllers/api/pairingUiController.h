@@ -129,7 +129,8 @@ private:
     QString tvFailureMessage(amnezia::ErrorCode code) const;
     void dispatchTvGenerateQrAttempt(quint64 generation, int retryAttempt);
     void dispatchPhoneScanQrAttempt(const QString &qrUuid, bool isTestPurchase, const QString &vpnKey, const QJsonObject &serviceInfo,
-                                    const QJsonArray &supportedProtocols, const QString &apiKey, quint64 generation, int retryAttempt);
+                                    const QJsonArray &supportedProtocols, const QString &apiKey, const QString &serviceType,
+                                    const QString &userCountryCode, quint64 generation, int retryAttempt);
     void setTvPairingUiPhase(int phase);
 
     PairingController *m_pairingController {};

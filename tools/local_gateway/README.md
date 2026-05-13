@@ -25,7 +25,7 @@ go run -buildvcs=false .
 | `-listen` / `LOCAL_GATEWAY_LISTEN` | Адрес привязки, например `0.0.0.0:8080` (порт можно опустить — подставится `:8080`). |
 | `-public-base` / `LOCAL_GATEWAY_PUBLIC_BASE` | Базовый URL **без** хвостового `/` для тела **`POST /v1/updater_endpoint`** (`url`). Нужен для **iOS по LAN** (иначе `127.0.0.1` указывает на сам телефон). |
 | `-auto-public` (по умолчанию `true`) | Если `public-base` пуст, взять первый подходящий **не loopback** IPv4 и собрать `http://IP:порт`. |
-| `-pairing-ttl`, `-long-poll` | TTL сессии QR и long-poll (по умолчанию **120s**, как раньше). |
+| `-pairing-ttl`, `-long-poll` | TTL сессии QR и long-poll (по умолчанию **60s**, как в `tmp/updated_spec.yaml`; можно уменьшить для быстрых тестов). |
 | `-rate-limit-excess-after` | Порог для мока Amnezia Free / CAPTCHA (по умолчанию **0**). |
 
 Пример для iPhone + Mac:
@@ -64,8 +64,8 @@ bash verify.sh http://127.0.0.1:8080
 | `POST` | `/v1/updater_endpoint` | `{"url":"…"}` — база из **`-public-base` / `LOCAL_GATEWAY_PUBLIC_BASE`** или **`-auto-public`**; затем клиент делает GET `/VERSION` на этом хосте. |
 | `POST` | `/v1/revoke_config` | Успех, тело не разбирается при `NoError`. |
 | `POST` | `/v1/revoke_native_config` | То же. |
-| `POST` | `/api/v1/generate_qr` | Pairing: long-poll (**120s** mock). |
-| `POST` | `/api/v1/scan_qr` | Pairing: завершение по `qr_uuid`. |
+| `POST` | `/api/v1/generate_qr` | Pairing: long-poll (дефолт **60s**); повтор с тем же `qr_uuid` до истечения TTL **продолжает** ожидание (resume). |
+| `POST` | `/api/v1/scan_qr` | Pairing: завершение по `qr_uuid`; тело должно включать **`service_type`** и **`user_country_code`** (как в спецификации). |
 
 **Не реализовано** (нужен осмысленный `vpn://` / IAP): `POST /v1/trial`, `POST /v1/subscriptions`, `POST /v1/native_config`, `POST /v1/proxy_config` (Telegram). При необходимости — отдельная доработка или прод gateway.
 

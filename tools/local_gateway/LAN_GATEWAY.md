@@ -20,7 +20,7 @@ This document is the **implementation checklist** for `tools/local_gateway` plus
 | **`-listen` / `LOCAL_GATEWAY_LISTEN`** | Default `0.0.0.0:8080`; append `:8080` if port omitted. Still **`tcp4`** only (macOS LAN / curl oddities). |
 | **`-public-base` / `LOCAL_GATEWAY_PUBLIC_BASE`** | Base URL **without** trailing slash; fed into **`POST /v1/updater_endpoint`** as `{"url":…}`. |
 | **`-auto-public`** (default true) | If `public-base` empty, pick first **non-loopback IPv4** (prefers **private** / link-local over public). |
-| **`-pairing-ttl` / `-long-poll` / `-rate-limit-excess-after`** | Replace hardcoded **120s** / **120s** / **0** for pairing and Free mock. |
+| **`-pairing-ttl` / `-long-poll` / `-rate-limit-excess-after`** | Defaults **60s** / **60s** / **0** for pairing (aligned with `tmp/updated_spec.yaml`) and Free mock. |
 | **Startup banner** | Logs listen address, chosen **`publicUpdaterBaseURL`**, and **every** `http://<ipv4>:port/` candidate per interface. |
 | **Request logging** | `REQ start` (remote, method, path, query, UA, `X-Client-Request-ID`, content type/length) + `REQ end` (status, duration). |
 | **Pairing logs** | Extra fields on register/complete (`installation_uuid` short, app/os, `config_len`, protocol count). |
@@ -51,7 +51,7 @@ Firewall: allow incoming TCP on the chosen port (e.g. **8080**) for **local subn
 |------|--------|
 | `NetworkUtilities::hostIsPrivateLanAddress` | Shared predicate for gateway + pairing + sandbox endpoint retention. |
 | `GatewayController::prepareRequest` | Plaintext path for LAN when `AMNEZIA_LAN_PLAINTEXT_GATEWAY` is defined. |
-| `PairingController::isLocalGatewayHost` | Treats LAN like mock for **120s** long-poll alignment with `tools/local_gateway`. |
+| `PairingController::pairingLongPollTimeoutMsecs` | Client long-poll for `generate_qr` (**60s**) aligned with mock defaults. |
 | `SecureAppSettingsRepository::getGatewayEndpoint(true)` | Keeps user’s LAN mock URL under **test purchase** (same idea as loopback). |
 
 Configure iOS dev build with both options, set gateway in app to **`http://<mac-ip>:8080/`** (trailing slash as today).

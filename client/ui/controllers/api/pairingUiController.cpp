@@ -757,7 +757,11 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
         return;
     }
 
-    const ErrorCode fieldErr = PairingController::validatePairingScanFields(trimmedUuid, vpnKey, apiKey);
+    const QString serviceType = apiV2->apiConfig.serviceType.trimmed();
+    const QString userCountryCode = apiV2->apiConfig.userCountryCode.trimmed();
+
+    const ErrorCode fieldErr =
+            PairingController::validatePairingScanFields(trimmedUuid, vpnKey, apiKey, serviceType, userCountryCode);
     if (fieldErr != ErrorCode::NoError) {
         emit errorOccurred(fieldErr);
         return;
@@ -776,12 +780,13 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     setPhoneBusy(true);
 
     dispatchPhoneScanQrAttempt(trimmedUuid, apiV2->apiConfig.isTestPurchase, vpnKey, serviceInfo, supportedProtocols, apiKey,
-                               phoneGeneration, 0);
+                               serviceType, userCountryCode, phoneGeneration, 0);
 }
 
 void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, const bool isTestPurchase, const QString &vpnKey,
                                                      const QJsonObject &serviceInfo, const QJsonArray &supportedProtocols,
-                                                     const QString &apiKey, quint64 generation, int retryAttempt)
+                                                     const QString &apiKey, const QString &serviceType, const QString &userCountryCode,
+                                                     quint64 generation, int retryAttempt)
 {
     if (!m_pairingController || !m_appSettingsRepository) {
         return;
@@ -795,7 +800,8 @@ void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, cons
                                                                        apiDefs::requestTimeoutMsecs,
                                                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    const QJsonObject payload = m_pairingController->buildScanQrPayload(qrUuid, vpnKey, serviceInfo, supportedProtocols, apiKey);
+    const QJsonObject payload = m_pairingController->buildScanQrPayload(qrUuid, vpnKey, serviceInfo, supportedProtocols, apiKey,
+                                                                        serviceType, userCountryCode);
     QNetworkReply *replyRaw = nullptr;
     const QFuture<QPair<ErrorCode, QByteArray>> future =
             gatewayController->postAsync(QString::fromLatin1(kScanQrPath), payload, &replyRaw);
@@ -805,7 +811,7 @@ void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, cons
     m_phoneWatcher = watcher;
     QObject::connect(watcher, &QFutureWatcher<QPair<ErrorCode, QByteArray>>::finished, this,
                      [this, gatewayController, watcher, generation, retryAttempt, qrUuid, isTestPurchase, vpnKey, serviceInfo,
-                      supportedProtocols, apiKey]() {
+                      supportedProtocols, apiKey, serviceType, userCountryCode]() {
                          Q_UNUSED(gatewayController);
                          const auto result = watcher->result();
                          watcher->deleteLater();
@@ -840,14 +846,14 @@ void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, cons
 
                          if (isPairingRetriableError(logicalErr) && retryAttempt + 1 < kPairingRetryMaxAttempts) {
                              const int delayMs = pairingRetryDelayMs(retryAttempt);
-                             QTimer::singleShot(delayMs, this, [this, qrUuid, isTestPurchase, vpnKey, serviceInfo, supportedProtocols,
-                                                              apiKey, generation, retryAttempt]() {
-                                 if (generation != m_phoneSessionGeneration) {
-                                     return;
-                                 }
-                                 dispatchPhoneScanQrAttempt(qrUuid, isTestPurchase, vpnKey, serviceInfo, supportedProtocols, apiKey,
-                                                            generation, retryAttempt + 1);
-                             });
+                            QTimer::singleShot(delayMs, this, [this, qrUuid, isTestPurchase, vpnKey, serviceInfo, supportedProtocols,
+                                                             apiKey, serviceType, userCountryCode, generation, retryAttempt]() {
+                                if (generation != m_phoneSessionGeneration) {
+                                    return;
+                                }
+                                dispatchPhoneScanQrAttempt(qrUuid, isTestPurchase, vpnKey, serviceInfo, supportedProtocols, apiKey,
+                                                           serviceType, userCountryCode, generation, retryAttempt + 1);
+                            });
                              return;
                          }
 
