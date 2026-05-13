@@ -9,6 +9,11 @@
 #include "core/utils/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"
+
+#ifdef Q_OS_IOS
+#include "platforms/ios/ios_controller.h"
+#include <QThread>
+#endif
 #include "core/models/serverConfig.h"
 #include <QClipboard>
 #include <QDebug>
