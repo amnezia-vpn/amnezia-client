@@ -86,8 +86,8 @@ using ProcessInfo = struct {
     (((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method))
 #endif
 
-// Known ControlCodes
-#define IOCTL_INITIALIZE CTL_CODE(0x8000, 1, METHOD_NEITHER, FILE_ANY_ACCESS)
+// IOCTL_ST_INITIALIZE — must match win-split-tunnel `defs/ioctl.h` (METHOD_BUFFERED).
+#define IOCTL_INITIALIZE CTL_CODE(0x8000, 1, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
 #define IOCTL_DEQUEUE_EVENT \
   CTL_CODE(0x8000, 2, METHOD_BUFFERED, FILE_ANY_ACCESS)
@@ -116,6 +116,9 @@ using ProcessInfo = struct {
   CTL_CODE(0x8000, 10, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
 #define IOCTL_ST_RESET CTL_CODE(0x8000, 11, METHOD_NEITHER, FILE_ANY_ACCESS)
+
+#define IOCTL_SET_SPLIT_POLICY \
+  CTL_CODE(0x8000, 12, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
 constexpr static const auto DRIVER_SYMLINK = L"\\\\.\\MULLVADSPLITTUNNEL";
 constexpr static const auto DRIVER_FILENAME = "mullvad-split-tunnel.sys";
@@ -224,15 +227,18 @@ std::unique_ptr<WindowsSplitTunnel> WindowsSplitTunnel::create(
       return nullptr;
     }
   }
-  if (!initDriver(driverFile)) {
+  SplitTunnelDriverSublayerGuids initGuids{};
+  WindowsFirewall::splitTunnelDriverInitGuids(&initGuids);
+  if (!initDriver(driverFile, initGuids)) {
     logger.error() << "Failed to init driver";
     return nullptr;
   }
   // We're ready to talk to the driver, it's alive and setup.
-  return std::make_unique<WindowsSplitTunnel>(driverFile);
+  return std::make_unique<WindowsSplitTunnel>(driverFile, initGuids);
 }
 
-bool WindowsSplitTunnel::initDriver(HANDLE driverIO) {
+bool WindowsSplitTunnel::initDriver(
+    HANDLE driverIO, const SplitTunnelDriverSublayerGuids& initGuids) {
   // We need to now check the state and init it, if required
   auto state = getState(driverIO);
   if (state == STATE_UNKNOWN) {
@@ -253,8 +259,9 @@ bool WindowsSplitTunnel::initDriver(HANDLE driverIO) {
   }
 
   DWORD bytesReturned;
-  auto ok = DeviceIoControl(driverIO, IOCTL_INITIALIZE, nullptr, 0, nullptr, 0,
-                            &bytesReturned, nullptr);
+  auto ok = DeviceIoControl(driverIO, IOCTL_INITIALIZE, (LPVOID)&initGuids,
+                            (DWORD)sizeof(initGuids), nullptr, 0, &bytesReturned,
+                            nullptr);
   if (!ok) {
     auto err = GetLastError();
     logger.error() << "Driver init failed err -" << err;
@@ -266,7 +273,9 @@ bool WindowsSplitTunnel::initDriver(HANDLE driverIO) {
   return true;
 }
 
-WindowsSplitTunnel::WindowsSplitTunnel(HANDLE driverIO) : m_driver(driverIO) {
+WindowsSplitTunnel::WindowsSplitTunnel(
+    HANDLE driverIO, const SplitTunnelDriverSublayerGuids& initGuids)
+    : m_driver(driverIO), m_driverInitGuids(initGuids) {
   logger.debug() << "Connected to the Driver";
 
   Q_ASSERT(getState() == STATE_INITIALIZED);
@@ -277,7 +286,8 @@ WindowsSplitTunnel::~WindowsSplitTunnel() {
   uninstallDriver();
 }
 
-bool WindowsSplitTunnel::excludeApps(const QStringList& appPaths) {
+bool WindowsSplitTunnel::configureAppSplit(const QStringList& appPaths,
+                                           bool forwardOnlyListedApps) {
   auto state = getState();
   if (state != STATE_READY && state != STATE_RUNNING) {
     logger.warning() << "Driver is not in the right State to set Rules"
@@ -285,14 +295,23 @@ bool WindowsSplitTunnel::excludeApps(const QStringList& appPaths) {
     return false;
   }
 
-  logger.debug() << "Pushing new Ruleset for Split-Tunnel " << state;
+  ULONG mode = forwardOnlyListedApps ? 1UL : 0UL;
+  DWORD bytesReturned;
+  if (!DeviceIoControl(m_driver, IOCTL_SET_SPLIT_POLICY, &mode, sizeof(mode),
+                       nullptr, 0, &bytesReturned, nullptr)) {
+    auto err = GetLastError();
+    WindowsUtils::windowsLog("Set split policy failed:");
+    logger.error() << "Failed to set split policy err code " << err;
+    return false;
+  }
+
+  logger.debug() << "Pushing new Ruleset for Split-Tunnel " << state
+                 << " forwardOnlyListedApps=" << forwardOnlyListedApps;
   auto config = generateAppConfiguration(appPaths);
 
-  DWORD bytesReturned;
-  auto ok = DeviceIoControl(m_driver, IOCTL_SET_CONFIGURATION, &config[0],
-                            (DWORD)config.size(), nullptr, 0, &bytesReturned,
-                            nullptr);
-  if (!ok) {
+  if (!DeviceIoControl(m_driver, IOCTL_SET_CONFIGURATION, &config[0],
+                       (DWORD)config.size(), nullptr, 0, &bytesReturned,
+                       nullptr)) {
     auto err = GetLastError();
     WindowsUtils::windowsLog("Set Config Failed:");
     logger.error() << "Failed to set Config err code " << err;
@@ -300,6 +319,10 @@ bool WindowsSplitTunnel::excludeApps(const QStringList& appPaths) {
   }
   logger.debug() << "New Configuration applied: " << stateString();
   return true;
+}
+
+bool WindowsSplitTunnel::excludeApps(const QStringList& appPaths) {
+  return configureAppSplit(appPaths, false);
 }
 
 bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
@@ -311,8 +334,10 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   if (getState() == STATE_STARTED) {
     logger.debug() << "Driver needs Init Call";
     DWORD bytesReturned;
-    auto ok = DeviceIoControl(m_driver, IOCTL_INITIALIZE, nullptr, 0, nullptr,
-                              0, &bytesReturned, nullptr);
+    auto ok =
+        DeviceIoControl(m_driver, IOCTL_INITIALIZE, (LPVOID)&m_driverInitGuids,
+                        (DWORD)sizeof(m_driverInitGuids), nullptr, 0,
+                        &bytesReturned, nullptr);
     if (!ok) {
       logger.error() << "Driver init failed";
       return false;

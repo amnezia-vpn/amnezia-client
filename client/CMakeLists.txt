@@ -142,6 +142,22 @@ if(WIN32)
     )
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+
+    set(AMNEZIA_SPLIT_TUNNEL_SYS "${CMAKE_SOURCE_DIR}/client/platforms/windows/drivers/mullvad-split-tunnel.sys")
+    if(EXISTS "${AMNEZIA_SPLIT_TUNNEL_SYS}")
+        add_custom_command(TARGET ${PROJECT} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${AMNEZIA_SPLIT_TUNNEL_SYS}"
+                "$<TARGET_FILE_DIR:${PROJECT}>/mullvad-split-tunnel.sys"
+            COMMENT "Copy split-tunnel kernel driver next to executable"
+        )
+        install(FILES "${AMNEZIA_SPLIT_TUNNEL_SYS}"
+            DESTINATION ${CMAKE_INSTALL_BINDIR}
+            COMPONENT AmneziaVPN
+        )
+    else()
+        message(WARNING "mullvad-split-tunnel.sys missing at ${AMNEZIA_SPLIT_TUNNEL_SYS}. Build/sign the driver (see client/platforms/windows/drivers/build-split-tunnel.ps1) before packaging.")
+    endif()
 endif()
 
 if(APPLE)

@@ -111,7 +111,7 @@ PageType {
 
             headerText: qsTr("Mode")
 
-            enabled: (Qt.platform.os === "android") && root.pageEnabled
+            enabled: (Qt.platform.os === "android" || Qt.platform.os === "windows") && root.pageEnabled
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -151,7 +151,7 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            textString: qsTr("Only \"Apps from the list should not have access via VPN\" mode is available on Windows")
+            textString: qsTr("On Windows, \"only listed apps\" mode requires the Amnezia split-tunnel driver build that supports include-only policy (IOCTL 12).")
             iconPath: "qrc:/images/controls/alert-circle.svg"
 
             visible: (Qt.platform.os === "windows") && root.pageEnabled

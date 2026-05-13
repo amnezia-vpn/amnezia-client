@@ -25,6 +25,9 @@ qrc_*.cpp
 ui_*.h
 Makefile*
 *build-*
+!client/platforms/windows/drivers/build-split-tunnel.ps1
+!client/platforms/windows/drivers/check-split-tunnel-build-prereqs.ps1
+!client/platforms/windows/drivers/run-build-sign.ps1
 compile_commands.json
 
 # fastlane
@@ -143,4 +146,9 @@ macos-signed-build.sh
 macos-with-sign-build.sh
 DeveloperIdApplicationCertificate.p12
 DeveloperIdInstallerCertificate.p12
+
+# Windows split-tunnel driver build outputs (keep scripts; build/sign locally)
+client/platforms/windows/drivers/*.sys
+client/platforms/windows/drivers/*.cat
+client/platforms/windows/drivers/*.pdb
 

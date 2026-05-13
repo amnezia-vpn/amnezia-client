@@ -51,6 +51,19 @@ constexpr uint8_t HIGH_WEIGHT = 13;
 constexpr uint8_t MAX_WEIGHT = 15;
 }  // namespace
 
+void WindowsFirewall::splitTunnelDriverInitGuids(SplitTunnelDriverSublayerGuids* out) {
+  if (!out) {
+    return;
+  }
+  //
+  // Amnezia currently registers a single WFP sublayer for split tunneling.
+  // The driver expects distinct baseline and DNS sublayer keys; using the same
+  // GUID for both keeps filters on the one sublayer we create in initSublayer().
+  //
+  out->baseline = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+  out->dns = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+}
+
 WindowsFirewall* WindowsFirewall::create(QObject* parent) {
   if (s_instance != nullptr) {
     // Only one instance of the firewall is allowed

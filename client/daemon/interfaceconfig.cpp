@@ -62,6 +62,12 @@ QJsonObject InterfaceConfig::toJson() const {
   }
   json.insert("vpnDisabledApps", disabledApps);
 
+  QJsonArray forwardOnlyApps;
+  for (const QString& i : m_vpnForwardOnlyApps) {
+    forwardOnlyApps.append(QJsonValue(i));
+  }
+  json.insert("vpnForwardOnlyApps", forwardOnlyApps);
+
   return json;
 }
 

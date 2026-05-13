@@ -244,11 +244,17 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
         }
     }
 
+    const int appSplitTunnelType =
+        configStr.value(amnezia::configKey::appSplitTunnelType).toInt();
     for (const QJsonValue &i : configStr.value(amnezia::configKey::splitTunnelApps).toArray()) {
         if (!i.isString()) {
             break;
         }
-        config.m_vpnDisabledApps.append(i.toString());
+        if (appSplitTunnelType == 1) {
+            config.m_vpnForwardOnlyApps.append(i.toString());
+        } else if (appSplitTunnelType == 2) {
+            config.m_vpnDisabledApps.append(i.toString());
+        }
     }
 
     for (auto dns : configStr.value(amnezia::configKey::allowedDnsServers).toArray()) {

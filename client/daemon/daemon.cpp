@@ -384,6 +384,9 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!parseStringList(obj, "vpnDisabledApps", config.m_vpnDisabledApps)) {
     return false;
   }
+  if (!parseStringList(obj, "vpnForwardOnlyApps", config.m_vpnForwardOnlyApps)) {
+    return false;
+  }
   if (!parseStringList(obj, "allowedDnsServers", config.m_allowedDnsServers)) {
     return false;
   }

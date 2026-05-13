@@ -39,6 +39,8 @@ class InterfaceConfig {
   QList<IPAddress> m_allowedIPAddressRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;
+  /// Windows split-tunnel driver (include-only / whitelist): these paths stay in the tunnel.
+  QStringList m_vpnForwardOnlyApps;
   QStringList m_allowedDnsServers;
   bool m_killSwitchEnabled;
 #if defined(MZ_ANDROID) || defined(MZ_IOS)

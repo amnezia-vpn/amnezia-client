@@ -240,7 +240,18 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   json.insert("excludedAddresses", jsExcludedAddresses);
 
-  json.insert("vpnDisabledApps", splitTunnelApps);
+  // App split: 0 = all via VPN, 1 = only listed apps via VPN (Windows driver include-only),
+  // 2 = listed apps excluded from VPN (Mullvad-style exclude list).
+  if (appSplitTunnelType == 1) {
+    json.insert("vpnForwardOnlyApps", splitTunnelApps);
+    json.insert("vpnDisabledApps", QJsonArray());
+  } else if (appSplitTunnelType == 2) {
+    json.insert("vpnForwardOnlyApps", QJsonArray());
+    json.insert("vpnDisabledApps", splitTunnelApps);
+  } else {
+    json.insert("vpnForwardOnlyApps", QJsonArray());
+    json.insert("vpnDisabledApps", QJsonArray());
+  }
 
   json.insert("allowedDnsServers", allowedDns);
 

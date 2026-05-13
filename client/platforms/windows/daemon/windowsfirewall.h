@@ -20,6 +20,12 @@
 
 #include "../client/daemon/interfaceconfig.h"
 
+/// Must match `ST_SUBLAYER_GUIDS` in the Mullvad split-tunnel driver (ioctl initialize).
+struct SplitTunnelDriverSublayerGuids {
+  GUID baseline;
+  GUID dns;
+};
+
 class IpAdressRange;
 struct FWP_VALUE0_;
 struct FWP_CONDITION_VALUE0_;
@@ -37,6 +43,9 @@ class WindowsFirewall final : public QObject {
    */
   static WindowsFirewall* create(QObject* parent);
   ~WindowsFirewall() override;
+
+  /// GUIDs passed to the split-tunnel driver on `IOCTL_ST_INITIALIZE` (WFP sublayers).
+  static void splitTunnelDriverInitGuids(SplitTunnelDriverSublayerGuids* out);
 
   bool enableInterface(int vpnAdapterIndex);
   bool enableLanBypass(const QList<IPAddress>& ranges);
