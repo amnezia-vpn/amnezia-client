@@ -46,6 +46,19 @@
 	</dict>
 	<key>CFBundleIcons</key>
         <dict/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>org.amnezia.AmneziaVPN.vpn-deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>vpn</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+		</dict>
+	</array>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>

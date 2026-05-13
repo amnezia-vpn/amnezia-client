@@ -340,3 +340,19 @@ void CoreController::importConfigFromData(const QString &data)
         m_importController->importConfig();
     }
 }
+
+void CoreController::openVpnKeyImportPreview(const QString &data)
+{
+    if (!m_importController || data.isEmpty()) {
+        return;
+    }
+
+    emit m_pageController->goToPageHome();
+    if (!m_importController->extractConfigFromData(data)) {
+        return;
+    }
+    emit m_pageController->goToPageViewConfig();
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    emit m_pageController->raiseMainWindow();
+#endif
+}

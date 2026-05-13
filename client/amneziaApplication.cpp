@@ -15,6 +15,9 @@
 #include <QEvent>
 #include <QDir>
 #include <QSettings>
+#include <QFileOpenEvent>
+#include <QUrl>
+#include <QCoreApplication>
 #include <QtQuick/QQuickWindow>  
 #include <QWindow>     
 
@@ -80,6 +83,44 @@ AmneziaApplication::~AmneziaApplication()
         delete m_engine;
     }
 }
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+namespace {
+QString vpnUrlFromArguments(const QStringList &args)
+{
+    for (const QString &arg : args) {
+        const QString t = arg.trimmed();
+        if (t.startsWith(QLatin1String("vpn://"), Qt::CaseInsensitive)) {
+            return t;
+        }
+    }
+    return {};
+}
+} // namespace
+#endif
+
+#if defined(Q_OS_WIN) && !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+namespace {
+void registerWindowsVpnUrlSchemeIfNeeded()
+{
+    QSettings flag(ORGANIZATION_NAME, APPLICATION_NAME);
+    if (flag.value(QStringLiteral("protocolHandler/vpnRegistered")).toBool()) {
+        return;
+    }
+
+    const QString exe = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+
+    QSettings vpnKey(QStringLiteral("HKEY_CURRENT_USER\\Software\\Classes\\vpn"), QSettings::NativeFormat);
+    vpnKey.setValue(QStringLiteral("."), QStringLiteral("URL:AmneziaVPN"));
+    vpnKey.setValue(QStringLiteral("URL Protocol"), QString());
+
+    QSettings cmdKey(QStringLiteral("HKEY_CURRENT_USER\\Software\\Classes\\vpn\\shell\\open\\command"), QSettings::NativeFormat);
+    cmdKey.setValue(QStringLiteral("."), QStringLiteral("\"%1\" \"%2\"").arg(exe, QStringLiteral("%1")));
+
+    flag.setValue(QStringLiteral("protocolHandler/vpnRegistered"), true);
+}
+} // namespace
+#endif
 
 #ifdef Q_OS_ANDROID
 namespace {
@@ -190,6 +231,18 @@ void AmneziaApplication::init()
             });
         }
     }
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#    ifdef Q_OS_WIN
+    registerWindowsVpnUrlSchemeIfNeeded();
+#    endif
+    if (!m_parser.isSet(m_optImport)) {
+        const QString vpnArg = vpnUrlFromArguments(QCoreApplication::arguments());
+        if (!vpnArg.isEmpty()) {
+            QTimer::singleShot(0, this, [this, vpnArg]() { deliverVpnDeepLink(vpnArg); });
+        }
+    }
+#endif
 }
 
 void AmneziaApplication::registerTypes()
@@ -250,20 +303,70 @@ bool AmneziaApplication::parseCommands()
 }
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-void AmneziaApplication::startLocalServer() {
-    const QString serverName("AmneziaVPNInstance");
+void AmneziaApplication::startLocalServer()
+{
+    const QString serverName(QStringLiteral("AmneziaVPNInstance"));
     QLocalServer::removeServer(serverName);
 
     QLocalServer *server = new QLocalServer(this);
-    server->listen(serverName);
+    if (!server->listen(serverName)) {
+        qWarning() << "QLocalServer::listen failed:" << server->errorString();
+    }
 
-    QObject::connect(server, &QLocalServer::newConnection, this, [server, this]() {
-        if (server) {
-            QLocalSocket *clientConnection = server->nextPendingConnection();
-            clientConnection->deleteLater();
+    QObject::connect(server, &QLocalServer::newConnection, this, [this, server]() {
+        QLocalSocket *sock = server->nextPendingConnection();
+        if (!sock) {
+            return;
         }
-        emit m_coreController->pageController()->raiseMainWindow(); //TODO
+
+        QString vpnPayload;
+        if (sock->waitForReadyRead(3000)) {
+            const QByteArray buf = sock->readAll();
+            static const QByteArray prefix = QByteArrayLiteral("VPN\n");
+            if (buf.startsWith(prefix)) {
+                vpnPayload = QString::fromUtf8(buf.mid(prefix.size())).trimmed();
+            }
+        }
+        sock->deleteLater();
+
+        if (!vpnPayload.isEmpty()) {
+            QTimer::singleShot(0, this, [this, vpnPayload]() { deliverVpnDeepLink(vpnPayload); });
+        }
+
+        QTimer::singleShot(0, this, [this]() {
+            if (m_coreController && m_coreController->pageController()) {
+                emit m_coreController->pageController()->raiseMainWindow();
+            }
+        });
     });
+}
+#endif
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+void AmneziaApplication::deliverVpnDeepLink(const QString &payload)
+{
+    if (!m_coreController) {
+        return;
+    }
+    const QString trimmed = payload.trimmed();
+    if (trimmed.isEmpty()) {
+        return;
+    }
+    m_coreController->openVpnKeyImportPreview(trimmed);
+}
+
+bool AmneziaApplication::event(QEvent *event)
+{
+    if (event->type() == QEvent::FileOpen) {
+        auto *foe = static_cast<QFileOpenEvent *>(event);
+        const QUrl url = foe->url();
+        if (url.scheme().compare(QLatin1String("vpn"), Qt::CaseInsensitive) == 0) {
+            const QString payload = url.toString(QUrl::PrettyDecoded);
+            QTimer::singleShot(0, this, [this, payload]() { deliverVpnDeepLink(payload); });
+            return true;
+        }
+    }
+    return AMNEZIA_BASE_CLASS::event(event);
 }
 #endif
 

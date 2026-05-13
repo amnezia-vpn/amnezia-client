@@ -387,6 +387,7 @@ void ImportController::importConfig(const QJsonObject &config)
     } else if (config.contains(configKey::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(config).toJson());
         if (m_serversRepository->hasServerWithCrc(crc)) {
+            // Same API key / subscription blob already present (incl. deep link re-import).
             emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
             QJsonObject configWithCrc = config;
