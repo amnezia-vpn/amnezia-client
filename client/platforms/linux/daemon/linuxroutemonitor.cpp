@@ -55,6 +55,8 @@ LinuxRouteMonitor::LinuxRouteMonitor(const QString& ifname, QObject* parent)
   MZ_COUNT_CTOR(LinuxRouteMonitor);
   logger.debug() << "LinuxRouteMonitor created.";
 
+  m_physicalGateway = NetworkUtilities::getGatewayAndIface().first;
+
   m_nlsock = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
   if (m_nlsock < 0) {
       logger.warning() << "Failed to create netlink socket:" << strerror(errno);
@@ -63,7 +65,7 @@ LinuxRouteMonitor::LinuxRouteMonitor(const QString& ifname, QObject* parent)
   struct sockaddr_nl nladdr;
   memset(&nladdr, 0, sizeof(nladdr));
   nladdr.nl_family = AF_NETLINK;
-  nladdr.nl_pid = getpid();
+  nladdr.nl_pid = 0;
   if (bind(m_nlsock, (struct sockaddr*)&nladdr, sizeof(nladdr)) != 0) {
       logger.warning() << "Failed to bind netlink socket:" << strerror(errno);
   }
@@ -164,14 +166,15 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
     }
 
     if (rtm->rtm_type == RTN_THROW) {
-    QString gateway = NetworkUtilities::getGatewayAndIface().first;
-    if (gateway.isEmpty()) {
-        logger.warning() << "No default gateway available, skipping exclusion route";
-        return false;
+    if (action == RTM_NEWROUTE) {
+        if (m_physicalGateway.isEmpty()) {
+            logger.warning() << "No physical gateway available, skipping exclusion route";
+            return false;
+        }
+        struct in_addr ip4;
+        inet_pton(AF_INET, m_physicalGateway.toUtf8(), &ip4);
+        nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
     }
-    struct in_addr ip4;
-    inet_pton(AF_INET, gateway.toUtf8(), &ip4);
-    nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
     nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
     rtm->rtm_type = RTN_UNICAST;
     }
