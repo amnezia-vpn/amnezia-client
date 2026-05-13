@@ -241,6 +241,26 @@ PageType {
 
             DividerType {}
         }
+
+        footer: ColumnLayout {
+            width: listView.width
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+
+                text: qsTr("Configuration Files: %1").arg(ApiAccountInfoModel.data("configurationFilesCount"))
+                descriptionText: qsTr("Generated configuration files also count towards the device limit")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    SubscriptionUiController.updateApiCountryModel()
+                    PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
+                }
+            }
+
+            DividerType {}
+        }
     }
 
     function deactivateExternalDevice(serverIndex, supportTag, countryCode) {

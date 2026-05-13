@@ -521,26 +521,51 @@ func handleAccountInfo(w http.ResponseWriter, r *http.Request) {
 	drainBody(r)
 
 	mu.Lock()
-	issuedConfigs := make([]issuedConfigInfo, 0, len(issued))
+	gatewayConfigs := make([]issuedConfigInfo, 0, len(issued))
 	for _, cfg := range issued {
-		issuedConfigs = append(issuedConfigs, cfg)
+		gatewayConfigs = append(gatewayConfigs, cfg)
 	}
 	mu.Unlock()
-	sort.Slice(issuedConfigs, func(i, j int) bool {
-		return issuedConfigs[i].InstallationUUID < issuedConfigs[j].InstallationUUID
+	sort.Slice(gatewayConfigs, func(i, j int) bool {
+		return gatewayConfigs[i].InstallationUUID < gatewayConfigs[j].InstallationUUID
 	})
+
+	// Seed country_config rows so the client can verify "Configuration Files: N" (ApiAccountInfoModel counts these).
+	// active_device_count must reflect gateway devices only, not these synthetic file rows.
+	nowISO := time.Now().UTC().Format(time.RFC3339)
+	mockCountryConfigs := []issuedConfigInfo{
+		{
+			InstallationUUID:  "mock-country-config-de",
+			WorkerLastUpdated: nowISO,
+			LastDownloaded:    nowISO,
+			SourceType:        "country_config",
+			OSVersion:         "",
+			ServerCountryCode: "de",
+			ServerCountryName: "Germany",
+		},
+		{
+			InstallationUUID:  "mock-country-config-nl",
+			WorkerLastUpdated: nowISO,
+			LastDownloaded:    nowISO,
+			SourceType:        "country_config",
+			OSVersion:         "",
+			ServerCountryCode: "nl",
+			ServerCountryName: "Netherlands",
+		},
+	}
+	allIssued := append(append([]issuedConfigInfo{}, gatewayConfigs...), mockCountryConfigs...)
 
 	// Keys match client/core/utils/constants/apiKeys.h (snake_case).
 	endDate := time.Now().UTC().AddDate(1, 0, 0).Format(time.RFC3339)
 	resp := map[string]any{
-		"active_device_count":      len(issuedConfigs),
+		"active_device_count":      len(gatewayConfigs),
 		"max_device_count":         5,
 		"subscription_end_date":    endDate,
 		"subscription_description": "Local mock (tools/local_gateway)",
 		"is_renewal_available":     false,
 		"supported_protocols":      []string{"awg", "vless"},
 		"available_countries":      []any{},
-		"issued_configs":           issuedConfigs,
+		"issued_configs":           allIssued,
 		"support_info": map[string]any{
 			"telegram":      "amnezia_support",
 			"email":         "support@example.com",

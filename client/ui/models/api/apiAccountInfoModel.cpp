@@ -11,6 +11,8 @@
 namespace
 {
     Logger logger("AccountInfoModel");
+
+    constexpr QLatin1String kCountryConfigSourceType("country_config");
 }
 
 ApiAccountInfoModel::ApiAccountInfoModel(QObject *parent) : QAbstractListModel(parent)
@@ -121,6 +123,9 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         const int spare = m_accountInfoData.maxDeviceCount - m_accountInfoData.activeDeviceCount;
         return qMax(0, spare);
     }
+    case ConfigurationFilesCountRole: {
+        return m_accountInfoData.configurationFilesCount;
+    }
     }
 
     return QVariant();
@@ -134,6 +139,15 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
 
     m_availableCountries = accountInfoObject.value(apiDefs::key::availableCountries).toArray();
     m_issuedConfigsInfo = accountInfoObject.value(apiDefs::key::issuedConfigs).toArray();
+
+    int configurationFilesCount = 0;
+    for (int i = 0; i < m_issuedConfigsInfo.size(); ++i) {
+        const QJsonObject issued = m_issuedConfigsInfo.at(i).toObject();
+        if (issued.value(apiDefs::key::sourceType).toString() == kCountryConfigSourceType) {
+            ++configurationFilesCount;
+        }
+    }
+    accountInfoData.configurationFilesCount = configurationFilesCount;
 
     accountInfoData.activeDeviceCount = accountInfoObject.value(apiDefs::key::activeDeviceCount).toInt();
     accountInfoData.maxDeviceCount = accountInfoObject.value(apiDefs::key::maxDeviceCount).toInt();
@@ -223,6 +237,7 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[ActiveDeviceCountRole] = "activeDeviceCount";
     roles[MaxDeviceCountRole] = "maxDeviceCount";
     roles[AvailableDeviceSlotsRole] = "availableDeviceSlots";
+    roles[ConfigurationFilesCountRole] = "configurationFilesCount";
 
     return roles;
 }

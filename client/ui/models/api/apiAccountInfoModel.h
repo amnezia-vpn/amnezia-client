@@ -28,7 +28,8 @@ public:
         IsInAppPurchaseRole,
         ActiveDeviceCountRole,
         MaxDeviceCountRole,
-        AvailableDeviceSlotsRole
+        AvailableDeviceSlotsRole,
+        ConfigurationFilesCountRole
     };
 
     explicit ApiAccountInfoModel(QObject *parent = nullptr);
@@ -67,6 +68,7 @@ private:
 
         bool isInAppPurchase = false;
         bool isRenewalAvailable = false;
+        int configurationFilesCount = 0;
     };
 
     AccountInfoData m_accountInfoData;

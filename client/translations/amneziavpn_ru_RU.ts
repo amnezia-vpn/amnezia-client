@@ -1807,6 +1807,16 @@ Thank you for staying with us!</source>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="252"/>
+        <source>Configuration Files: %1</source>
+        <translation>Файлы конфигурации: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="253"/>
+        <source>Generated configuration files also count towards the device limit</source>
+        <translation>Сгенерированные файлы конфигурации тоже учитываются в лимите устройств</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsApiInstructions</name>
