@@ -354,6 +354,10 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
                     qDebug() << "VpnConnection::connectToVpn(): grace-window timer fired after user disconnect - aborting";
                     return;
                 }
+                if (!m_vpnProtocol.isNull()) {
+                    qDebug() << "VpnConnection::connectToVpn(): grace-window timer fired with active protocol - aborting";
+                    return;
+                }
                 startNewConnection(m_lastContainer, m_lastVpnConfiguration);
             });
             return;
@@ -688,6 +692,15 @@ void VpnConnection::disconnectFromVpn()
     m_userRequestedDisconnect = true;
     clearRecoveryState();
 
+    // Stamp the disconnect time on a monotonic QElapsedTimer so connectToVpn's
+    // desktop grace window can detect a rapid Connect-after-Disconnect and
+    // defer the new activate. Stamped BEFORE the m_vpnProtocol.isNull()
+    // early-return so a Disconnect tap on an already-disconnected state
+    // still refreshes the monotonic timer. QElapsedTimer is immune to
+    // wall-clock / NTP adjustments that could otherwise perturb the 500 ms
+    // window.
+    m_disconnectElapsed.start();
+
     // Cancel any pending server-switch handover so the 4 s watchdog cannot
     // resurrect a connection after the user asked to tear it down.
     if (m_switchWatchdog.isActive()) {
@@ -755,12 +768,6 @@ void VpnConnection::disconnectFromVpn()
         }
     });
 #endif
-
-    // Stamp the disconnect time on a monotonic QElapsedTimer so connectToVpn's
-    // desktop grace window can detect a rapid Connect-after-Disconnect and
-    // defer the new activate. QElapsedTimer is immune to wall-clock / NTP
-    // adjustments that could otherwise perturb the 500 ms window.
-    m_disconnectElapsed.start();
 }
 
 void VpnConnection::setConnectionState(Vpn::ConnectionState state)
