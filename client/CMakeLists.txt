@@ -34,11 +34,6 @@ add_definitions(-DDEV_S3_ENDPOINT="$ENV{DEV_S3_ENDPOINT}")
 add_definitions(-DFREE_V2_ENDPOINT="$ENV{FREE_V2_ENDPOINT}")
 add_definitions(-DPREM_V1_ENDPOINT="$ENV{PREM_V1_ENDPOINT}")
 
-set(AMNEZIA_QR_PAIRING_ALLOW ON)
-if(AMNEZIA_QR_PAIRING_ALLOW)
-    include(../.cache/agw_rsa_public_keys.cmake)
-endif()
-
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
