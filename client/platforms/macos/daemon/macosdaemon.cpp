@@ -15,6 +15,7 @@
 #include <QTextStream>
 #include <QtGlobal>
 
+#include "killswitch.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -49,4 +50,10 @@ MacOSDaemon::~MacOSDaemon() {
 MacOSDaemon* MacOSDaemon::instance() {
   Q_ASSERT(s_daemon);
   return s_daemon;
+}
+
+bool MacOSDaemon::deactivate(bool emitSignals) {
+  bool result = Daemon::deactivate(emitSignals);
+  KillSwitch::instance()->disableKillSwitch();
+  return result;
 }
