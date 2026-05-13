@@ -251,6 +251,7 @@
         <file>ui/qml/Pages2/PageFBLinkForgotPassword.qml</file>
         <file>ui/qml/Pages2/PageFBLinkSubscription.qml</file>
         <file>ui/qml/Pages2/PageFBLinkTvApprove.qml</file>
+        <file>ui/qml/Pages2/PageFBLinkTvScan.qml</file>
         <file>ui/qml/Components/SubscriptionBanner.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardTextKey.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardViewConfig.qml</file>
