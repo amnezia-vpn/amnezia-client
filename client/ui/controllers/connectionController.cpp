@@ -45,16 +45,24 @@ void ConnectionController::openConnection()
     }
 
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    const bool canBypassThrottle =
-            m_state == Vpn::ConnectionState::Disconnected
-            || m_state == Vpn::ConnectionState::Error
-            || m_state == Vpn::ConnectionState::Unknown;
+    // Let the first attempt through after m_state entered a terminal state
+    // (Disconnected / Error / Unknown) so a legitimate retry after a failed
+    // server switch is not swallowed by the 1200 ms throttle. The flag is
+    // armed by onConnectionStateChanged() on terminal transitions and cleared
+    // here on pass-through. Subsequent rapid taps fall back to the throttle,
+    // which prevents two connectToVpn messages from stacking on the worker
+    // thread before m_state updates to Connecting.
+    const bool canBypassThrottle = m_retryPrimed
+            && (m_state == Vpn::ConnectionState::Disconnected
+                || m_state == Vpn::ConnectionState::Error
+                || m_state == Vpn::ConnectionState::Unknown);
     if (!canBypassThrottle
         && m_state != Vpn::ConnectionState::Connected
         && (now - m_lastConnectAttemptMsec) < 1200) {
         qWarning() << "ConnectionController::openConnection: connect attempt throttled";
         return;
     }
+    m_retryPrimed = false;
     m_lastConnectAttemptMsec = now;
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
@@ -104,7 +112,25 @@ ErrorCode ConnectionController::getLastConnectionError()
 
 void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
 {
+    const Vpn::ConnectionState previousState = m_state;
     m_state = state;
+
+    // Prime the throttle bypass exactly on the edge into a terminal state so
+    // openConnection()'s first attempt per entry gets through. Subsequent
+    // attempts while still terminal stay throttled at 1200 ms, which prevents
+    // rapid double-taps from stacking two connectToVpn messages on the worker
+    // thread before the state updates to Connecting.
+    const bool isTerminal = state == Vpn::ConnectionState::Disconnected
+            || state == Vpn::ConnectionState::Error
+            || state == Vpn::ConnectionState::Unknown;
+    const bool wasTerminal = previousState == Vpn::ConnectionState::Disconnected
+            || previousState == Vpn::ConnectionState::Error
+            || previousState == Vpn::ConnectionState::Unknown;
+    if (isTerminal && !wasTerminal) {
+        m_retryPrimed = true;
+    } else if (!isTerminal) {
+        m_retryPrimed = false;
+    }
 
     m_isConnected = false;
     m_connectionStateText = tr("Подключение...");

@@ -248,6 +248,10 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     // during a server-switch handover while the old protocol is shutting down.
     setConnectionState(Vpn::ConnectionState::Connecting);
 
+    // Note: on iOS / MACOS_NE, m_vpnProtocol is never set by startNewConnection
+    // (IosController is used directly), so protoIsLive is always false and the
+    // switch-wait block below is intentionally a no-op on those platforms.
+    // If that changes, wire the iOS teardown through the same fence.
     // If a previous protocol exists and is still actively running or tearing
     // down, wait for it to reach a terminal state before starting the new one.
     // Otherwise the Android service sees the new CONNECT while still in
@@ -298,14 +302,19 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
                     QMetaObject::invokeMethod(
                         this,
                         [this]() {
-                            startNewConnection(m_lastServerIndex, m_lastCredentials,
-                                               m_lastContainer, m_lastVpnConfiguration);
+                            startNewConnection(m_lastContainer, m_lastVpnConfiguration);
                         },
                         Qt::QueuedConnection);
                 });
 
-            m_vpnProtocol->stop();
+            // Arm the watchdog BEFORE stop() so that if stop() drives the
+            // protocol synchronously to a terminal state (possible on
+            // desktop), the one-shot lambda above observes an active
+            // watchdog and can disarm it. Otherwise we would leave the
+            // watchdog armed against the fresh connection we are about to
+            // start, and at 4 s it would tear the new connection down.
             m_switchWatchdog.start(4000);
+            m_vpnProtocol->stop();
             return;
         }
 
@@ -315,15 +324,11 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
         m_vpnProtocol.reset();
     }
 
-    startNewConnection(serverIndex, credentials, container, vpnConfiguration);
+    startNewConnection(container, vpnConfiguration);
 }
 
-void VpnConnection::startNewConnection(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
-                                       const QJsonObject &vpnConfiguration)
+void VpnConnection::startNewConnection(DockerContainer container, const QJsonObject &vpnConfiguration)
 {
-    Q_UNUSED(serverIndex);
-    Q_UNUSED(credentials);
-
     m_vpnConfiguration = vpnConfiguration;
 
 #ifdef AMNEZIA_DESKTOP
@@ -371,6 +376,24 @@ void VpnConnection::startNewConnection(int serverIndex, const ServerCredentials 
 
 void VpnConnection::handleSwitchWatchdogTimeout()
 {
+    // Belt-and-braces: if the user initiated a Disconnect while the
+    // switch-wait was pending, do not resurrect the connection. disconnectFromVpn()
+    // stops this timer already, but a race between timer fire and
+    // queued disconnect delivery is still possible on the worker thread.
+    if (m_userRequestedDisconnect) {
+        qDebug() << "VpnConnection: switch watchdog fired after user disconnect - not restarting";
+
+        if (m_protocolShutdownConn) {
+            QObject::disconnect(m_protocolShutdownConn);
+            m_protocolShutdownConn = QMetaObject::Connection();
+        }
+        if (m_vpnProtocol) {
+            disconnect(m_vpnProtocol.data(), nullptr, this, nullptr);
+            m_vpnProtocol.reset();
+        }
+        return;
+    }
+
     qWarning() << "VpnConnection: switch watchdog expired - previous protocol did not reach terminal state in time, forcing new connection";
 
     if (m_protocolShutdownConn) {
@@ -383,7 +406,7 @@ void VpnConnection::handleSwitchWatchdogTimeout()
         m_vpnProtocol.reset();
     }
 
-    startNewConnection(m_lastServerIndex, m_lastCredentials, m_lastContainer, m_lastVpnConfiguration);
+    startNewConnection(m_lastContainer, m_lastVpnConfiguration);
 }
 
 void VpnConnection::createProtocolConnections()
@@ -573,6 +596,17 @@ void VpnConnection::reconnectToVpn() {
     if (m_vpnProtocol.isNull())
         return;
 
+    // While a server-switch handover is pending, m_vpnProtocol still points
+    // at the OLD server's protocol. Replaying stop()+start() here would send
+    // the old config to the platform service and can race the switch-wait's
+    // deferred startNewConnection, ending up connected to the wrong server.
+    // m_protocolShutdownConn is the single source of truth for "switch-wait in flight".
+    if (m_protocolShutdownConn
+        || m_vpnProtocol->connectionState() == Vpn::ConnectionState::Disconnecting) {
+        qDebug() << "Reconnect ignored: server-switch handover in progress";
+        return;
+    }
+
     // Allow reconnect while the previous attempt is still in flight
     // (Connecting / Reconnecting) so a rapid networkChanged/wakeup sequence
     // from IpcInterfaceReplica is not dropped on the floor.
@@ -599,6 +633,16 @@ void VpnConnection::disconnectFromVpn()
 {
     m_userRequestedDisconnect = true;
     clearRecoveryState();
+
+    // Cancel any pending server-switch handover so the 4 s watchdog cannot
+    // resurrect a connection after the user asked to tear it down.
+    if (m_switchWatchdog.isActive()) {
+        m_switchWatchdog.stop();
+    }
+    if (m_protocolShutdownConn) {
+        QObject::disconnect(m_protocolShutdownConn);
+        m_protocolShutdownConn = QMetaObject::Connection();
+    }
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.

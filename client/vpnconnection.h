@@ -104,8 +104,7 @@ private:
    void armStateWatchdog(Vpn::ConnectionState state);
    void handleStateWatchdogTimeout();
    void handleSwitchWatchdogTimeout();
-   void startNewConnection(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
-                           const QJsonObject &vpnConfiguration);
+   void startNewConnection(DockerContainer container, const QJsonObject &vpnConfiguration);
    void clearRecoveryState();
    void scheduleRecoveryReconnect();
    void registerFailureAndMaybeEnterSafeMode();
