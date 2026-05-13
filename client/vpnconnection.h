@@ -89,6 +89,8 @@ private:
    Vpn::ConnectionState m_connectionState;
    QTimer m_stateWatchdogTimer;
    QTimer m_recoveryTimer;
+   QTimer m_switchWatchdog;
+   QMetaObject::Connection m_protocolShutdownConn;
    int m_recoveryAttempts = 0;
    int m_failureBurst = 0;
    qint64 m_failureWindowStartedAt = 0;
@@ -101,6 +103,9 @@ private:
    void createProtocolConnections();
    void armStateWatchdog(Vpn::ConnectionState state);
    void handleStateWatchdogTimeout();
+   void handleSwitchWatchdogTimeout();
+   void startNewConnection(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
+                           const QJsonObject &vpnConfiguration);
    void clearRecoveryState();
    void scheduleRecoveryReconnect();
    void registerFailureAndMaybeEnterSafeMode();

@@ -45,7 +45,12 @@ void ConnectionController::openConnection()
     }
 
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    if (m_state != Vpn::ConnectionState::Connected
+    const bool canBypassThrottle =
+            m_state == Vpn::ConnectionState::Disconnected
+            || m_state == Vpn::ConnectionState::Error
+            || m_state == Vpn::ConnectionState::Unknown;
+    if (!canBypassThrottle
+        && m_state != Vpn::ConnectionState::Connected
         && (now - m_lastConnectAttemptMsec) < 1200) {
         qWarning() << "ConnectionController::openConnection: connect attempt throttled";
         return;

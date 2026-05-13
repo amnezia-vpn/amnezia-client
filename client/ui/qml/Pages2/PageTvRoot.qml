@@ -21,6 +21,9 @@ FocusScope {
 
     Component.onCompleted: {
         console.log("PageTvRoot loaded, loggedIn =", FBLinkController.isLoggedIn)
+        // Claim focus for the TV FocusScope as soon as the Loader finishes so
+        // the Window-scope defaultFocusItem cannot grab keys between pages.
+        root.forceActiveFocus()
         tvStack.replace(FBLinkController.isLoggedIn ? "PageTvHome.qml" : "PageTvLogin.qml")
     }
 
@@ -78,7 +81,15 @@ FocusScope {
 
         onCurrentItemChanged: {
             if (currentItem) {
-                currentItem.forceActiveFocus()
+                // Defer forceActiveFocus() until after the inner page's own
+                // Component.onCompleted has run, otherwise the StackView and
+                // the page's xxxButton.forceActiveFocus() race and focus can
+                // land on neither.
+                Qt.callLater(function() {
+                    if (tvStack.currentItem) {
+                        tvStack.currentItem.forceActiveFocus()
+                    }
+                })
             }
         }
 

@@ -74,6 +74,7 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent
     m_connectionState = Vpn::ConnectionState::Disconnected;
     m_stateWatchdogTimer.setParent(this);
     m_recoveryTimer.setParent(this);
+    m_switchWatchdog.setParent(this);
 
     m_stateWatchdogTimer.setSingleShot(true);
     connect(&m_stateWatchdogTimer, &QTimer::timeout, this, &VpnConnection::handleStateWatchdogTimeout);
@@ -87,6 +88,9 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent
         m_reconnectScheduled = false;
         connectToVpn(m_lastServerIndex, m_lastCredentials, m_lastContainer, m_lastVpnConfiguration);
     });
+
+    m_switchWatchdog.setSingleShot(true);
+    connect(&m_switchWatchdog, &QTimer::timeout, this, &VpnConnection::handleSwitchWatchdogTimeout);
 
 #ifdef Q_OS_ANDROID
     if (auto *app = qobject_cast<QGuiApplication *>(QCoreApplication::instance())) {
@@ -223,8 +227,6 @@ ErrorCode VpnConnection::lastError() const
 void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &vpnConfiguration)
 {
-    const Vpn::ConnectionState previousConnectionState = m_connectionState;
-
     if (!m_reconnectScheduled) {
         clearRecoveryState();
     }
@@ -242,27 +244,95 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     m_remoteAddress = NetworkUtilities::getIPAddress(credentials.hostName);
     m_vpnConfiguration = vpnConfiguration;
 
-#ifdef AMNEZIA_DESKTOP
+    // Show "Connecting" immediately so the UI doesn't flicker to Disconnected
+    // during a server-switch handover while the old protocol is shutting down.
+    setConnectionState(Vpn::ConnectionState::Connecting);
+
+    // If a previous protocol exists and is still actively running or tearing
+    // down, wait for it to reach a terminal state before starting the new one.
+    // Otherwise the Android service sees the new CONNECT while still in
+    // DISCONNECTING and silently drops it, which is the user-visible hang.
     if (m_vpnProtocol) {
-        // Disconnect all old protocol signals first, otherwise its stop()
-        // may emit Disconnected and race with a fresh Connecting state.
+        const Vpn::ConnectionState protoState = m_vpnProtocol->connectionState();
+        const bool protoIsLive =
+                protoState == Vpn::ConnectionState::Connecting
+                || protoState == Vpn::ConnectionState::Connected
+                || protoState == Vpn::ConnectionState::Reconnecting
+                || protoState == Vpn::ConnectionState::Disconnecting;
+
+        // Detach old protocol's signals so its terminal broadcast isn't
+        // surfaced to the UI as a Disconnected flicker. Our one-shot handler
+        // below observes the terminal transition we care about.
         disconnect(m_vpnProtocol.data(), nullptr, this, nullptr);
-        // When previous attempt already ended in Disconnected/Error, calling
-        // stop() again may emit an extra daemon-level "disconnected" broadcast
-        // that can be observed by a freshly created protocol instance.
-        // In this case, just drop the old object.
-        if (previousConnectionState != Vpn::ConnectionState::Disconnected
-            && previousConnectionState != Vpn::ConnectionState::Error) {
+
+        if (protoIsLive) {
+            qDebug() << "VpnConnection::connectToVpn(): waiting for previous protocol to shut down, state ="
+                     << protoState;
+
+            if (m_protocolShutdownConn) {
+                QObject::disconnect(m_protocolShutdownConn);
+                m_protocolShutdownConn = QMetaObject::Connection();
+            }
+
+            m_protocolShutdownConn = connect(
+                m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this,
+                [this](Vpn::ConnectionState state) {
+                    if (state != Vpn::ConnectionState::Disconnected
+                        && state != Vpn::ConnectionState::Error
+                        && state != Vpn::ConnectionState::Unknown) {
+                        return;
+                    }
+
+                    qDebug() << "VpnConnection: previous protocol reached terminal state" << state
+                             << "- starting deferred connection";
+
+                    if (m_protocolShutdownConn) {
+                        QObject::disconnect(m_protocolShutdownConn);
+                        m_protocolShutdownConn = QMetaObject::Connection();
+                    }
+                    if (m_switchWatchdog.isActive()) {
+                        m_switchWatchdog.stop();
+                    }
+                    m_vpnProtocol.reset();
+
+                    QMetaObject::invokeMethod(
+                        this,
+                        [this]() {
+                            startNewConnection(m_lastServerIndex, m_lastCredentials,
+                                               m_lastContainer, m_lastVpnConfiguration);
+                        },
+                        Qt::QueuedConnection);
+                });
+
             m_vpnProtocol->stop();
-        } else {
-            qDebug() << "VpnConnection::connectToVpn(): skipping stop() for already inactive protocol";
+            m_switchWatchdog.start(4000);
+            return;
         }
+
+        // Previous protocol is Disconnected / Error / Unknown / Preparing,
+        // safe to drop immediately without waiting.
+        qDebug() << "VpnConnection::connectToVpn(): dropping already-inactive protocol, state =" << protoState;
         m_vpnProtocol.reset();
     }
+
+    startNewConnection(serverIndex, credentials, container, vpnConfiguration);
+}
+
+void VpnConnection::startNewConnection(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
+                                       const QJsonObject &vpnConfiguration)
+{
+    Q_UNUSED(serverIndex);
+    Q_UNUSED(credentials);
+
+    m_vpnConfiguration = vpnConfiguration;
+
+#ifdef AMNEZIA_DESKTOP
     appendKillSwitchConfig();
 #endif
 
-    setConnectionState(Vpn::ConnectionState::Connecting);
+    if (m_connectionState != Vpn::ConnectionState::Connecting) {
+        setConnectionState(Vpn::ConnectionState::Connecting);
+    }
 
     appendSplitTunnelingConfig();
     if (hasMissingManagedRoutingRules()) {
@@ -297,6 +367,23 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
         setConnectionState(Vpn::ConnectionState::Error);
         emit vpnProtocolError(err);
     }
+}
+
+void VpnConnection::handleSwitchWatchdogTimeout()
+{
+    qWarning() << "VpnConnection: switch watchdog expired - previous protocol did not reach terminal state in time, forcing new connection";
+
+    if (m_protocolShutdownConn) {
+        QObject::disconnect(m_protocolShutdownConn);
+        m_protocolShutdownConn = QMetaObject::Connection();
+    }
+
+    if (m_vpnProtocol) {
+        disconnect(m_vpnProtocol.data(), nullptr, this, nullptr);
+        m_vpnProtocol.reset();
+    }
+
+    startNewConnection(m_lastServerIndex, m_lastCredentials, m_lastContainer, m_lastVpnConfiguration);
 }
 
 void VpnConnection::createProtocolConnections()
@@ -486,8 +573,13 @@ void VpnConnection::reconnectToVpn() {
     if (m_vpnProtocol.isNull())
         return;
 
-    if (m_connectionState != Vpn::ConnectionState::Connected) {
-        qWarning() << QString("Reconnect triggered on %1 during inappropriate state: %2; ignoring slot")
+    // Allow reconnect while the previous attempt is still in flight
+    // (Connecting / Reconnecting) so a rapid networkChanged/wakeup sequence
+    // from IpcInterfaceReplica is not dropped on the floor.
+    if (m_connectionState != Vpn::ConnectionState::Connected
+        && m_connectionState != Vpn::ConnectionState::Connecting
+        && m_connectionState != Vpn::ConnectionState::Reconnecting) {
+        qWarning() << QString("Reconnect triggered during inappropriate state: %1; ignoring slot")
                               .arg(QMetaEnum::fromType<Vpn::ConnectionState>().valueToKey(m_connectionState));
         return;
     }
