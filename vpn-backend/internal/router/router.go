@@ -101,6 +101,12 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		// Client Updates (Public)
 		api.GET("/client/latest-version", handlers.GetLatestClientVersion(cfg))
 
+		// TV approve confirmation page, also exposed under /tv at the
+		// root for the original device-flow URL. Mounted under the API
+		// group too so it is always reachable through reverse proxies
+		// that only forward /api/v1/* to the backend.
+		api.GET("/tv", authH.TVApprovePage)
+
 		// Webhook — IP whitelist + rate limit
 		api.POST("/payments/webhook",
 			middleware.RateLimit(webhookLimiter),

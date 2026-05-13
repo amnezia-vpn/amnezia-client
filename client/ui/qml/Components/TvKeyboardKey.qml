@@ -8,6 +8,7 @@ FocusScope {
     id: control
 
     property string text: ""
+    property string iconSource: ""
     property bool emphasized: false
     property bool accent: false
 
@@ -45,12 +46,22 @@ FocusScope {
 
     Text {
         anchors.centerIn: parent
+        visible: control.iconSource === ""
         text: control.text
         color: control.accent
                 ? (control.activeFocus ? "#111111" : "#FAFAFA")
                 : "#F8FAFC"
         font.pixelSize: control.emphasized || control.accent ? 22 : 26
         font.bold: control.activeFocus || control.emphasized || control.accent
+    }
+
+    Image {
+        anchors.centerIn: parent
+        visible: control.iconSource !== ""
+        source: control.iconSource
+        sourceSize.width: 28
+        sourceSize.height: 28
+        smooth: true
     }
 
     scale: control.activeFocus ? 1.06 : 1.0

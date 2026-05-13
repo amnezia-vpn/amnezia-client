@@ -180,8 +180,12 @@ func (h *AuthHandler) TVStart(c *gin.Context) {
 		return
 	}
 
+	// We hand the device the API-prefixed URL because reverse proxies in
+	// production are typically configured to forward only /api/v1/* to
+	// the backend. The same handler is also mounted at /tv for direct
+	// access without a proxy.
 	baseURL := requestBaseURL(c)
-	verificationURI := baseURL + "/tv"
+	verificationURI := baseURL + "/api/v1/tv"
 	c.JSON(http.StatusOK, tvStartResponse{
 		DeviceCode:              deviceCode,
 		UserCode:                userCode[:4] + "-" + userCode[4:],
