@@ -57,6 +57,7 @@ public:
     Q_INVOKABLE void startTvLogin();
     Q_INVOKABLE void pollTvLogin();
     Q_INVOKABLE void cancelTvLogin();
+    Q_INVOKABLE void approveTvLogin(const QString &userCode);
     Q_INVOKABLE void registerUser(const QString &email, const QString &password);
     Q_INVOKABLE void verifyEmail(const QString &email, const QString &code);
     Q_INVOKABLE void forgotPassword(const QString &email);
@@ -150,6 +151,8 @@ signals:
     void routingSyncPendingChanged();
     void tvLoginChanged();
     void tvLoginApproved();
+    void tvApproveSuccess();
+    void tvApproveError(const QString &errorMessage);
 
 private:
     QNetworkAccessManager *m_nam;

@@ -1160,6 +1160,43 @@ void FBLinkController::cancelTvLogin()
     emit tvLoginChanged();
 }
 
+void FBLinkController::approveTvLogin(const QString &userCode)
+{
+    const QString normalized = userCode.trimmed();
+    if (normalized.isEmpty()) {
+        emit tvApproveError(tr("Введите код, отображённый на ТВ"));
+        return;
+    }
+
+    if (getJwtToken().isEmpty()) {
+        emit tvApproveError(tr("Необходимо войти в аккаунт"));
+        return;
+    }
+
+    QNetworkRequest request = createApiRequest("/me/tv/approve", true, true);
+    QJsonObject json;
+    json["user_code"] = normalized;
+    QNetworkReply *reply = m_nam->post(request, QJsonDocument(json).toJson());
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        const QByteArray data = reply->readAll();
+        const QJsonObject obj = QJsonDocument::fromJson(data).object();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            QString errorMessage = obj.value("error").toString();
+            if (errorMessage.isEmpty()) {
+                errorMessage = reply->errorString();
+            }
+            logApiFailure("tv-approve-authenticated", reply);
+            emit tvApproveError(errorMessage);
+            return;
+        }
+
+        emit tvApproveSuccess();
+    });
+}
+
 void FBLinkController::createPayment(const QString &plan)
 {
     createPayment(plan, QString(), true);

@@ -9,6 +9,7 @@ import (
 	"html"
 	"math/big"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -65,6 +66,10 @@ type tvApproveRequest struct {
 	UserCode string `json:"user_code" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
+}
+
+type tvApproveAuthenticatedRequest struct {
+	UserCode string `json:"user_code" binding:"required"`
 }
 
 type tvTokenRequest struct {
@@ -227,6 +232,61 @@ func (h *AuthHandler) TVApprove(c *gin.Context) {
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+		return
+	}
+
+	now := time.Now()
+	if err := h.db.Model(&login).Updates(map[string]interface{}{
+		"user_id":     user.ID,
+		"status":      models.TVLoginApproved,
+		"approved_at": &now,
+	}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to approve tv login"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "approved"})
+}
+
+// POST /api/v1/me/tv/approve
+//
+// Same effect as TVApprove, but authenticates the user via the existing
+// JWT instead of asking for email+password again. Designed for the
+// "I have a TV" flow inside the FBLink mobile/desktop client: the user
+// is already signed in there, they just type the code shown on the TV
+// and tap Confirm.
+func (h *AuthHandler) TVApproveAuthenticated(c *gin.Context) {
+	h.expireStaleTVLogins()
+
+	userID := c.GetUint("user_id")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var req tvApproveAuthenticatedRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userCode := normalizeTVUserCode(req.UserCode)
+	if !h.allowTVAttempt(h.tvApproveAttempts, "approve-user:"+strconv.FormatUint(uint64(userID), 10), 60, 10*time.Minute) ||
+		!h.allowTVAttempt(h.tvApproveAttempts, "approve-user-code:"+strconv.FormatUint(uint64(userID), 10)+":"+userCode, 8, 10*time.Minute) {
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": "too_many_attempts"})
+		return
+	}
+
+	var login models.TVLogin
+	if err := h.db.Where("user_code_hash = ? AND status = ? AND expires_at > ?",
+		h.hashTVCode(userCode), models.TVLoginPending, time.Now()).First(&login).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid or expired code"})
+		return
+	}
+
+	var user models.User
+	if err := h.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
 		return
 	}
 

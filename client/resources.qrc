@@ -250,6 +250,7 @@
         <file>ui/qml/Pages2/PageFBLinkRegister.qml</file>
         <file>ui/qml/Pages2/PageFBLinkForgotPassword.qml</file>
         <file>ui/qml/Pages2/PageFBLinkSubscription.qml</file>
+        <file>ui/qml/Pages2/PageFBLinkTvApprove.qml</file>
         <file>ui/qml/Components/SubscriptionBanner.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardTextKey.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardViewConfig.qml</file>
@@ -263,7 +264,9 @@
         <file>ui/qml/Pages2/PageTvServers.qml</file>
         <file>ui/qml/Pages2/PageTvSubscription.qml</file>
         <file>ui/qml/Components/TvButton.qml</file>
-        <file>ui/qml/Components/TvTextField.qml</file>
+        <file>ui/qml/Components/TvLoginRow.qml</file>
+        <file>ui/qml/Components/TvOnScreenKeyboard.qml</file>
+        <file>ui/qml/Components/TvKeyboardKey.qml</file>
         <file>ui/qml/Components/RenameServerDrawer.qml</file>
         <file>ui/qml/Controls2/ListViewType.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiSupport.qml</file>
