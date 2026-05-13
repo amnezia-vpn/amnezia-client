@@ -570,6 +570,74 @@ PageType {
                     }
                 }
 
+                // "I have a TV" — confirm Android TV sign-in from this phone.
+                Rectangle {
+                    Layout.fillWidth: true
+                    visible: FBLinkController.isLoggedIn
+                    radius: 16
+                    color: Qt.rgba(18/255, 18/255, 18/255, 1.0)
+                    border.width: 1
+                    border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+                    implicitHeight: 78
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 14
+                        anchors.rightMargin: 14
+                        spacing: 12
+
+                        Rectangle {
+                            Layout.preferredWidth: 40
+                            Layout.preferredHeight: 40
+                            radius: 10
+                            color: Qt.rgba(10/255, 10/255, 10/255, 1.0)
+                            border.width: 1
+                            border.color: Qt.rgba(63/255, 63/255, 70/255, 0.9)
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/images/controls/monitor.svg"
+                                sourceSize: Qt.size(18, 18)
+                                layer.enabled: true
+                                layer.effect: ColorOverlay { color: FBLinkStyle.color.mutedGray }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            LabelTextType {
+                                Layout.fillWidth: true
+                                text: qsTr("Войти на телевизоре")
+                                color: FBLinkStyle.color.paleGray
+                                font.pixelSize: 14
+                                font.weight: 600
+                            }
+
+                            CaptionTextType {
+                                Layout.fillWidth: true
+                                text: qsTr("Подтвердить вход на Android TV по коду")
+                                color: FBLinkStyle.color.mutedGray
+                            }
+                        }
+
+                        Image {
+                            source: "qrc:/images/controls/chevron-right.svg"
+                            sourceSize: Qt.size(18, 18)
+                            layer.enabled: true
+                            layer.effect: ColorOverlay { color: FBLinkStyle.color.charcoalGray }
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.goTo(PageEnum.PageFBLinkTvApprove)
+                    }
+                }
+
                 CaptionTextType {
                     Layout.fillWidth: true
                     text: qsTr("ПРИЛОЖЕНИЕ")

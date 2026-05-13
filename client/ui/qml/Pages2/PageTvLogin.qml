@@ -3,23 +3,20 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../Components"
 
-// FBLink VPN — TV sign-in screen.
+// FBLink VPN — Android TV sign-in screen.
 //
-// The primary flow is the QR code "device authorization" pattern that the
-// backend already exposes through `/auth/tv/start` and `/auth/tv/token`:
+// Primary path: QR / device-flow login.
+//   - Auto-starts `FBLinkController.startTvLogin()` on entry.
+//   - Renders the QR code, user code and verification URL.
+//   - Polls `pollTvLogin()` on a timer until the controller emits
+//     `tvLoginApproved` (which `PageTvRoot` reacts to).
 //
-//   1. The TV calls `FBLinkController.startTvLogin()` on load and shows a
-//      short user code plus a QR code that points at the verification URL.
-//   2. The user scans the code on a phone, signs in there, and approves
-//      the TV.
-//   3. The TV polls `FBLinkController.pollTvLogin()` on a timer and is
-//      transitioned to `PageTvHome` by `PageTvRoot` once the controller
-//      emits `tvLoginApproved`.
-//
-// The email/password form is kept as a fall-back ("Sign in with email")
-// for users who cannot use a phone. The form uses `TvTextField`, which
-// keeps the D-pad working sensibly together with the Android TV on-screen
-// keyboard (arrow keys move the caret, only Back / Escape leave the field).
+// Fallback path: email/password using an in-app TV keyboard.
+//   - Android TV remotes can not reliably drive Qt's TextInput together
+//     with the system OSK (D-pad ends up navigating between fields
+//     instead of between IME keys). We side-step that by rendering our
+//     own keyboard via `TvOnScreenKeyboard` and binding it to one of
+//     two `TvLoginRow` display widgets.
 FocusScope {
     id: root
 
@@ -28,8 +25,18 @@ FocusScope {
     focus: true
     clip: true
 
+    enum InputTarget {
+        None,
+        Email,
+        Password
+    }
+
     property string errorMessage: ""
     property bool useEmailFallback: false
+    property string emailValue: ""
+    property string passwordValue: ""
+    property int activeInput: PageTvLogin.InputTarget.None
+    property string keyboardBuffer: ""
 
     function isOkKey(event) {
         return event.key === Qt.Key_Return
@@ -42,19 +49,60 @@ FocusScope {
         FBLinkController.startTvLogin()
     }
 
+    function openKeyboard(target) {
+        root.activeInput = target
+        root.keyboardBuffer = target === PageTvLogin.InputTarget.Email
+                ? root.emailValue
+                : root.passwordValue
+        Qt.callLater(function() {
+            if (keyboardLoader.item && keyboardLoader.item.keyboard) {
+                keyboardLoader.item.keyboard.forceActiveFocus()
+            }
+        })
+    }
+
+    function commitKeyboard() {
+        if (root.activeInput === PageTvLogin.InputTarget.Email) {
+            root.emailValue = root.keyboardBuffer
+        } else if (root.activeInput === PageTvLogin.InputTarget.Password) {
+            root.passwordValue = root.keyboardBuffer
+        }
+        const previousTarget = root.activeInput
+        root.activeInput = PageTvLogin.InputTarget.None
+        Qt.callLater(function() {
+            if (previousTarget === PageTvLogin.InputTarget.Email) {
+                passwordRow.forceActiveFocus()
+            } else if (previousTarget === PageTvLogin.InputTarget.Password) {
+                loginButton.forceActiveFocus()
+            }
+        })
+    }
+
+    function dismissKeyboard() {
+        const previousTarget = root.activeInput
+        root.activeInput = PageTvLogin.InputTarget.None
+        Qt.callLater(function() {
+            if (previousTarget === PageTvLogin.InputTarget.Email) {
+                emailRow.forceActiveFocus()
+            } else if (previousTarget === PageTvLogin.InputTarget.Password) {
+                passwordRow.forceActiveFocus()
+            }
+        })
+    }
+
     function submitLogin() {
         root.errorMessage = ""
-        if (emailField.text.trim() === "") {
+        if (root.emailValue.trim() === "") {
             root.errorMessage = qsTr("Введите email")
-            emailField.textField.forceActiveFocus()
+            emailRow.forceActiveFocus()
             return
         }
-        if (passwordField.text === "") {
+        if (root.passwordValue === "") {
             root.errorMessage = qsTr("Введите пароль")
-            passwordField.textField.forceActiveFocus()
+            passwordRow.forceActiveFocus()
             return
         }
-        FBLinkController.login(emailField.text.trim(), passwordField.text)
+        FBLinkController.login(root.emailValue.trim(), root.passwordValue)
     }
 
     Component.onCompleted: {
@@ -112,13 +160,12 @@ FocusScope {
         scale: Math.min(1, root.width / width, root.height / height) * 0.94
         anchors.centerIn: parent
 
-        // Brand panel — left side.
+        // Left — branding panel.
         ColumnLayout {
-            id: brandPane
-            x: 160
-            y: 140
+            x: 140
+            y: 130
             width: 720
-            spacing: 24
+            spacing: 22
 
             Image {
                 Layout.preferredWidth: 220
@@ -139,17 +186,17 @@ FocusScope {
                 Layout.fillWidth: true
                 text: qsTr("Android TV")
                 color: "#FACC15"
-                font.pixelSize: 36
+                font.pixelSize: 34
                 font.bold: true
             }
 
             Label {
                 Layout.fillWidth: true
                 text: root.useEmailFallback
-                        ? qsTr("Войдите по email и паролю. Кнопка OK на пульте откроет экранную клавиатуру.")
-                        : qsTr("Откройте указанную ссылку на телефоне или отсканируйте QR-код, введите код и подтвердите вход.")
+                        ? qsTr("Выделите поле и нажмите OK, чтобы вызвать встроенную клавиатуру. Перемещение по клавишам — стрелками пульта, ввод символа — кнопкой OK.")
+                        : qsTr("Отсканируйте QR-код, либо откройте указанную ссылку, введите код и подтвердите вход. ТВ войдёт автоматически.")
                 color: "#A1A1AA"
-                font.pixelSize: 30
+                font.pixelSize: 26
                 lineHeight: 1.2
                 wrapMode: Text.WordWrap
             }
@@ -159,24 +206,24 @@ FocusScope {
                 visible: root.errorMessage !== ""
                 text: root.errorMessage
                 color: "#F87171"
-                font.pixelSize: 26
+                font.pixelSize: 24
                 wrapMode: Text.WordWrap
             }
         }
 
-        // Auth card — right side.
+        // Right — auth card.
         Rectangle {
             id: authCard
             x: 1000
-            y: 180
-            width: 760
-            height: 770
+            y: 100
+            width: 800
+            height: 880
             radius: 32
             color: "#101013"
             border.width: 2
             border.color: "#2A2A2D"
 
-            // ----- QR pane (default) -----
+            // ---- QR pane ------------------------------------------
             Item {
                 id: qrPane
                 anchors.fill: parent
@@ -185,13 +232,13 @@ FocusScope {
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 56
-                    spacing: 28
+                    spacing: 22
 
                     Label {
                         Layout.fillWidth: true
                         text: qsTr("Вход по QR-коду")
                         color: "#F8FAFC"
-                        font.pixelSize: 44
+                        font.pixelSize: 42
                         font.bold: true
                     }
 
@@ -205,7 +252,6 @@ FocusScope {
                         elide: Text.ElideRight
                     }
 
-                    // QR / status box.
                     Item {
                         id: qrCard
                         Layout.alignment: Qt.AlignHCenter
@@ -215,13 +261,11 @@ FocusScope {
                         activeFocusOnTab: true
 
                         Rectangle {
-                            id: qrBg
                             anchors.fill: parent
                             radius: 24
                             color: "#FAFAFA"
                             border.width: qrCard.activeFocus ? 4 : 1
                             border.color: qrCard.activeFocus ? "#FACC15" : "#27272A"
-
                             Behavior on border.color { ColorAnimation { duration: 120 } }
                         }
 
@@ -282,7 +326,7 @@ FocusScope {
                             }
                         }
                         color: FBLinkController.tvLoginStatus === "error" ? "#F87171" : "#A1A1AA"
-                        font.pixelSize: 24
+                        font.pixelSize: 22
                         wrapMode: Text.WordWrap
                     }
 
@@ -297,7 +341,7 @@ FocusScope {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 78
                             text: qsTr("Обновить код")
-                            tvFontPixelSize: 26
+                            tvFontPixelSize: 24
                             KeyNavigation.up: qrCard
                             KeyNavigation.right: emailModeButton
                             onClicked: root.startQrLogin()
@@ -314,7 +358,7 @@ FocusScope {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 78
                             text: qsTr("Войти по email")
-                            tvFontPixelSize: 26
+                            tvFontPixelSize: 24
                             KeyNavigation.up: qrCard
                             KeyNavigation.left: refreshCodeButton
                             onClicked: {
@@ -322,7 +366,7 @@ FocusScope {
                                 FBLinkController.cancelTvLogin()
                                 root.useEmailFallback = true
                                 Qt.callLater(function() {
-                                    emailField.textField.forceActiveFocus()
+                                    emailRow.forceActiveFocus()
                                 })
                             }
                             Keys.onPressed: function(event) {
@@ -336,7 +380,7 @@ FocusScope {
                 }
             }
 
-            // ----- Email / password fallback -----
+            // ---- Email/password fallback ----------------------------
             Item {
                 id: emailPane
                 anchors.fill: parent
@@ -344,62 +388,41 @@ FocusScope {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 56
-                    spacing: 22
+                    anchors.margins: 48
+                    spacing: 18
 
                     Label {
                         Layout.fillWidth: true
                         text: qsTr("Вход по email")
                         color: "#F8FAFC"
-                        font.pixelSize: 44
+                        font.pixelSize: 38
                         font.bold: true
                     }
 
-                    Label {
+                    TvLoginRow {
+                        id: emailRow
                         Layout.fillWidth: true
-                        text: qsTr("Нажмите OK на поле, чтобы открыть экранную клавиатуру. Стрелки двигают курсор внутри поля.")
-                        color: "#A1A1AA"
-                        font.pixelSize: 22
-                        wrapMode: Text.WordWrap
-                    }
-
-                    Item { Layout.preferredHeight: 6 }
-
-                    Label {
-                        Layout.fillWidth: true
-                        text: qsTr("Email")
-                        color: "#A1A1AA"
-                        font.pixelSize: 22
-                    }
-
-                    TvTextField {
-                        id: emailField
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 86
-                        placeholderText: "you@example.com"
-                        inputMethodHints: Qt.ImhEmailCharactersOnly | Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+                        Layout.preferredHeight: 78
+                        title: qsTr("Email")
+                        placeholder: "you@example.com"
+                        value: root.emailValue
+                        passwordMode: false
                         KeyNavigation.up: backToQrButton
-                        KeyNavigation.down: passwordField
-                        onAccepted: passwordField.textField.forceActiveFocus()
+                        KeyNavigation.down: passwordRow
+                        onActivated: root.openKeyboard(PageTvLogin.InputTarget.Email)
                     }
 
-                    Label {
+                    TvLoginRow {
+                        id: passwordRow
                         Layout.fillWidth: true
-                        text: qsTr("Пароль")
-                        color: "#A1A1AA"
-                        font.pixelSize: 22
-                    }
-
-                    TvTextField {
-                        id: passwordField
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 86
-                        placeholderText: "••••••••"
-                        echoMode: TextInput.Password
-                        inputMethodHints: Qt.ImhSensitiveData | Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
-                        KeyNavigation.up: emailField
+                        Layout.preferredHeight: 78
+                        title: qsTr("Пароль")
+                        placeholder: "••••••••"
+                        value: root.passwordValue
+                        passwordMode: true
+                        KeyNavigation.up: emailRow
                         KeyNavigation.down: loginButton
-                        onAccepted: loginButton.forceActiveFocus()
+                        onActivated: root.openKeyboard(PageTvLogin.InputTarget.Password)
                     }
 
                     Label {
@@ -416,11 +439,13 @@ FocusScope {
                     TvButton {
                         id: loginButton
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 90
-                        text: FBLinkController.isLoading ? qsTr("Вход...") : qsTr("Войти")
-                        tvFontPixelSize: 30
+                        Layout.preferredHeight: 84
+                        text: FBLinkController.isLoading
+                                ? qsTr("Вход...")
+                                : qsTr("Войти")
+                        tvFontPixelSize: 28
                         enabled: !FBLinkController.isLoading
-                        KeyNavigation.up: passwordField
+                        KeyNavigation.up: passwordRow
                         KeyNavigation.down: backToQrButton
                         onClicked: root.submitLogin()
                         Keys.onPressed: function(event) {
@@ -434,7 +459,7 @@ FocusScope {
                     TvButton {
                         id: backToQrButton
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 70
+                        Layout.preferredHeight: 64
                         text: qsTr("Вернуться к QR-коду")
                         tvFontPixelSize: 22
                         KeyNavigation.up: loginButton
@@ -452,6 +477,82 @@ FocusScope {
                                 event.accepted = true
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // ---- On-screen keyboard overlay ---------------------------------
+        //
+        // Rendered only while a field is being edited. While visible it
+        // captures D-pad input and the rest of the page is dimmed. The
+        // overlay sits at the bottom of the stage and is large enough to
+        // be readable on a 1080p TV from couch distance.
+        Rectangle {
+            id: keyboardScrim
+            anchors.fill: parent
+            color: "#000000"
+            opacity: root.activeInput !== PageTvLogin.InputTarget.None ? 0.55 : 0.0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: 140 } }
+            MouseArea { anchors.fill: parent; onClicked: { /* swallow */ } }
+        }
+
+        Loader {
+            id: keyboardLoader
+            x: (stage.width - 1080) / 2
+            y: stage.height - 460
+            width: 1080
+            height: 420
+            active: root.activeInput !== PageTvLogin.InputTarget.None
+
+            sourceComponent: FocusScope {
+                id: keyboardScope
+                property alias keyboard: kb
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 10
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 56
+                        radius: 14
+                        color: "#0F0F11"
+                        border.width: 1
+                        border.color: "#27272A"
+
+                        Label {
+                            anchors.fill: parent
+                            anchors.margins: 14
+                            verticalAlignment: Text.AlignVCenter
+                            text: {
+                                const value = root.keyboardBuffer
+                                if (root.activeInput === PageTvLogin.InputTarget.Password) {
+                                    return value.length > 0
+                                            ? "•".repeat(value.length)
+                                            : qsTr("Введите пароль")
+                                }
+                                return value.length > 0
+                                        ? value
+                                        : qsTr("Введите email")
+                            }
+                            color: root.keyboardBuffer.length > 0 ? "#F8FAFC" : "#52525B"
+                            font.pixelSize: 24
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    TvOnScreenKeyboard {
+                        id: kb
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        value: root.keyboardBuffer
+                        passwordMode: root.activeInput === PageTvLogin.InputTarget.Password
+                        focus: true
+                        onValueChanged: root.keyboardBuffer = value
+                        onAccepted: root.commitKeyboard()
+                        onDismissed: root.dismissKeyboard()
                     }
                 }
             }

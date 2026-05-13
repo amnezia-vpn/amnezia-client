@@ -55,6 +55,7 @@ namespace PageLoader
         PageFBLinkRegister,
         PageFBLinkForgotPassword,
         PageFBLinkSubscription,
+        PageFBLinkTvApprove,
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,

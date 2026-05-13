@@ -131,6 +131,7 @@ func New(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			me.POST("/support/bug-report", userH.SubmitBugReport)
 			me.GET("/config", vpnH.GetConfig)
 			me.POST("/config/revoke", vpnH.RevokeConfig)
+			me.POST("/tv/approve", authH.TVApproveAuthenticated)
 		}
 
 		payments := api.Group("/payments", auth)
