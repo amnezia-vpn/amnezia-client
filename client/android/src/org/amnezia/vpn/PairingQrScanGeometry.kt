@@ -7,40 +7,7 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * Same proportions as [PageSettingsApiQrPairingSend.qml] (iOS embedded scan): sq = 0.72 * min(w,h),
- * vertical bias -0.06 * height (square shifted up slightly).
- */
 object PairingQrScanGeometry {
-    const val SQ_FRACTION = 0.72f
-    const val VERTICAL_BIAS = 0.06f
-
-    fun holeRectF(viewW: Int, viewH: Int): RectF {
-        val w = viewW.toFloat()
-        val h = viewH.toFloat()
-        val side = min(w, h) * SQ_FRACTION
-        val left = (w - side) / 2f
-        var top = (h - side) / 2f - h * VERTICAL_BIAS
-        top = max(0f, top)
-        var bottom = top + side
-        if (bottom > h) {
-            bottom = h
-        }
-        val adjSide = bottom - top
-        return RectF(left, top, left + adjSide, bottom)
-    }
-
-    /** ML Kit [Barcode] box is in [InputImage] pixel space (same as analysis frame WxH). */
-    fun barcodeCenterInPairingHole(imageW: Int, imageH: Int, barcode: Barcode): Boolean {
-        val box = barcode.boundingBox ?: return true
-        val r = holeRectF(imageW, imageH)
-        return r.contains(box.centerX().toFloat(), box.centerY().toFloat())
-    }
-
-    /**
-     * Maps a rectangle in [PreviewView] / overlay pixel space to [InputImage] pixel space,
-     * assuming the preview uses default FILL_CENTER scaling (same as typical CameraX [PreviewView]).
-     */
     fun viewRectToInputImageRectFillCenter(
         viewW: Int,
         viewH: Int,
@@ -59,16 +26,6 @@ object PairingQrScanGeometry {
         )
     }
 
-    /** Pairing hole (same geometry as overlay) expressed in ML Kit / [InputImage] coordinates. */
-    fun pairingHoleInImageCoords(viewW: Int, viewH: Int, imageW: Int, imageH: Int): RectF {
-        val holeView = holeRectF(viewW, viewH)
-        return viewRectToInputImageRectFillCenter(viewW, viewH, imageW, imageH, holeView)
-    }
-
-    /**
-     * Rounded scan window corner radius — same formula as iOS `layoutScanOverlayGeometry` (`holeR`).
-     * [sidePx] is the scan square side in pixels.
-     */
     fun pairingIosStyleHoleCornerRadiusPx(sidePx: Float, density: Float): Float {
         val d = density
         var holeR = min(28f * d, max(10f * d, sidePx * 0.056f))
@@ -77,7 +34,6 @@ object PairingQrScanGeometry {
         return max(holeR, 1f)
     }
 
-    /** Area(roi ∩ box) / area(box); 0 if disjoint. */
     fun barcodeBoxOverlapFraction(roi: RectF, box: Rect): Float {
         val bf = RectF(box)
         val inter = RectF(roi)
@@ -87,40 +43,6 @@ object PairingQrScanGeometry {
         return if (boxArea <= 0f) 0f else interArea / boxArea
     }
 
-    /**
-     * Accept only codes whose bounding box overlaps the on-screen pairing square by at least
-     * [minOverlapFraction] when that square is mapped into image space (preview FILL_CENTER model).
-     */
-    fun barcodeMostlyInsidePairingHole(
-        viewW: Int,
-        viewH: Int,
-        imageW: Int,
-        imageH: Int,
-        barcode: Barcode,
-        minOverlapFraction: Float = 0.82f
-    ): Boolean {
-        val box = barcode.boundingBox ?: return true
-        if (viewW <= 0 || viewH <= 0 || imageW <= 0 || imageH <= 0) {
-            return barcodeCenterInPairingHole(imageW, imageH, barcode)
-        }
-        val roi = pairingHoleInImageCoords(viewW, viewH, imageW, imageH)
-        val inset = 0.02f * min(imageW, imageH)
-        roi.inset(inset, inset)
-        if (roi.width() <= 0f || roi.height() <= 0f) {
-            return barcodeCenterInPairingHole(imageW, imageH, barcode)
-        }
-        return barcodeBoxOverlapFraction(roi, box) >= minOverlapFraction
-    }
-
-    /**
-     * Pairing send: accept only if the QR lies fully inside the on-screen square.
-     * [roiInImageSpace] is [holeRectF] in [PreviewView] coords mapped into the same space as ML Kit
-     * geometry ([CoordinateTransform] in [CameraActivity]).
-     *
-     * When [Barcode.getCornerPoints] is present (typical for QR), all corners must lie inside the ROI —
-     * tighter than [BoundingBox], which is often padded.
-     * Otherwise falls back to bbox center inside ROI plus [minOverlapFraction] of bbox area inside ROI.
-     */
     fun barcodeMatchesPairingHole(
         roiInImageSpace: RectF,
         imageW: Int,
@@ -161,14 +83,8 @@ object PairingQrScanGeometry {
         return barcodeBoxOverlapFraction(roi, box) >= minOverlapFraction
     }
 
-    /** Bbox-only fallback when corner points are missing (unusual for QR). */
     private const val PAIRING_SEND_MIN_OVERLAP_BBOX_FALLBACK = 0.72f
 
-    /**
-     * Native pairing scan hole — same rules as iOS `layoutScanOverlayGeometry` in
-     * `iosPairingQrOverlayWindow.mm` (0.72 × min side, header / bottom band clamps).
-     * [headerBottomPx] is the bottom edge of the chrome row in this view’s coordinate system.
-     */
     fun pairingIosStyleHoleRectF(
         viewW: Int,
         viewH: Int,
@@ -201,9 +117,6 @@ object PairingQrScanGeometry {
         return RectF(sqX, sqY, sqX + sqSz, sqY + sqSz)
     }
 
-    /**
-     * Vertical center of the torch control in px (same math as iOS `torchCenterYConstraint` update).
-     */
     fun pairingIosStyleTorchCenterYPx(
         holeBottomPx: Float,
         bandBottomPx: Float,
@@ -224,7 +137,6 @@ object PairingQrScanGeometry {
         return max(torchCy, hdr)
     }
 
-    /** [pairingIosStyleHoleRectF] mapped with the legacy FILL_CENTER preview model (transform fallback). */
     fun pairingIosStyleHoleInImageCoords(
         viewW: Int,
         viewH: Int,

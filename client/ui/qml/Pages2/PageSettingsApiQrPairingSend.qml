@@ -16,31 +16,24 @@ import "../Components"
 PageType {
     id: root
 
-    /** Loud dim colors when true (red/blue/cyan/orange regions). Sync with PageStart.pairingQrChromeDebug. */
     property bool pairingQrChromeDebug: false
 
-    /** iOS (and any non-Android mobile): native QRCodeReader; Qt may not always report os === "ios". */
     readonly property bool useIosStyleNativeQrReader: GC.isMobile() && Qt.platform.os !== "android"
 
-    /** iOS-only: full-screen UIKit UIWindow scanner (PairingUiController.iosNativePairingQrOverlayBuild — not Qt.platform.os). */
     readonly property bool useIosNativePairingQrOverlay: PairingUiController.iosNativePairingQrOverlayBuild
 
-    /** Android: full-screen CameraActivity — Qt cannot reliably composite CameraX under QML on some OEMs (e.g. Samsung). */
     readonly property bool useAndroidNativePairingQrScanner: GC.isMobile() && Qt.platform.os === "android"
-    /** Android: iOS-like flow — titles and camera preview only in CameraActivity; QML hides duplicate scan chrome. */
     readonly property bool useAndroidNativePairingQrOverlay: PairingUiController.androidNativePairingQrOverlayBuild
                                                              && GC.isMobile()
                                                              && Qt.platform.os === "android"
 
-    /** Let dimming draw into window chrome (status bar + tab bar) when camera underlay is active. */
     readonly property bool extendScanDimToScreenEdges: GC.isMobile() && pairingWizardStep === 0
                                                      && PairingUiController.embeddedPairingQrCameraActive
                                                      && !root.useAndroidNativePairingQrOverlay
     clip: !extendScanDimToScreenEdges
 
-    /** QQuickWindow (not Item); do not type as Item — breaks binding on Qt 6. */
+    /** QQuickWindow as var — typing as Item breaks bindings on Qt 6. */
     readonly property var appWindow: Window.window
-    /** Pixels of window above this page (status bar / safe area gap). */
     readonly property real scanDimBleedTop: {
         if (!extendScanDimToScreenEdges || !appWindow || !appWindow.contentItem)
             return 0
@@ -49,7 +42,6 @@ PageType {
             bleed = Math.max(bleed, PageController.safeAreaTopMargin)
         return bleed
     }
-    /** Pixels of window below this page (tab bar + home indicator). */
     readonly property real scanDimBleedBottom: {
         if (!extendScanDimToScreenEdges || !appWindow || !appWindow.contentItem)
             return 0
@@ -63,15 +55,9 @@ PageType {
         return bleed
     }
 
-    /**
-     * Bottom bleed for dimLayer only. On iOS embedded native QR, keep dim inside the page — semi-opaque dim
-     * extended into the tab stack seam composites badly with opaque tab chrome (persistent hairline).
-     * Native bottom mask still uses scanDimBleedBottom via pushIosNativeBottomBleedSync().
-     */
     readonly property real scanDimBleedBottomForDimLayer: (root.useIosStyleNativeQrReader
                                                           && PairingUiController.embeddedPairingQrCameraActive) ? 0 : scanDimBleedBottom
 
-    /** iOS: extend UIKit bottom dim under QML tab bar (see iosPairingCameraAccess + PairingUiController). */
     function pushIosNativeBottomBleedSync() {
         if (!root.useIosStyleNativeQrReader || !PairingUiController.embeddedPairingQrCameraActive) {
             return
@@ -85,61 +71,16 @@ PageType {
         }
     }
 
-    Timer {
-        id: pairingScanLayoutLogTimer
-        interval: 50
-        repeat: false
-        onTriggered: root.logPairingScanLayout("timer")
-    }
-
     Connections {
         target: PairingUiController
 
         function onEmbeddedPairingQrCameraActiveChanged() {
             if (PairingUiController.embeddedPairingQrCameraActive) {
-                pairingScanLayoutLogTimer.restart()
                 Qt.callLater(root.pushIosNativeBottomBleedSync)
             }
         }
     }
 
-    function logPairingScanLayout(tag) {
-        const w = Window.window
-        const ci = w && w.contentItem ? w.contentItem : null
-        let m00 = null
-        let m0h = null
-        let scanBot = null
-        let dimTL = null
-        let dimBR = null
-        let dimHoleB = null
-        if (ci) {
-            m00 = root.mapToItem(ci, 0, 0)
-            m0h = root.mapToItem(ci, 0, root.height)
-            scanBot = scanStep.mapToItem(ci, 0, scanStep.height)
-            dimTL = dimLayer.mapToItem(ci, 0, 0)
-            dimBR = dimLayer.mapToItem(ci, dimLayer.width, dimLayer.height)
-            dimHoleB = dimLayer.holeBottom
-        }
-        console.warn("[PairingQrLayout]", tag,
-                     "extend=", extendScanDimToScreenEdges,
-                     "clip=", clip,
-                     "root=", root.width, "x", root.height,
-                     "win=", w ? w.width : -1, "x", w ? w.height : -1,
-                     "contentItem=", ci ? ci.width : -1, "x", ci ? ci.height : -1,
-                     "bleedT/B=", scanDimBleedTop, scanDimBleedBottom,
-                     "dimLayerBleedB=", root.scanDimBleedBottomForDimLayer,
-                     "safeT/B=", PageController.safeAreaTopMargin, PageController.safeAreaBottomMargin,
-                     "map00=", m00 ? m00.x + "," + m00.y : "n/a",
-                     "map0h=", m0h ? m0h.x + "," + m0h.y : "n/a",
-                     "ci.scanStepBot=", scanBot ? scanBot.x.toFixed(1) + "," + scanBot.y.toFixed(1) : "n/a",
-                     "ci.dimTL/BR=", dimTL ? dimTL.x.toFixed(1) + "," + dimTL.y.toFixed(1) : "n/a",
-                     dimBR ? dimBR.x.toFixed(1) + "," + dimBR.y.toFixed(1) : "n/a",
-                     "dimHoleB=", dimHoleB !== null ? dimHoleB.toFixed(1) : "n/a",
-                     "win.screen=", w && w.screen ? w.screen.width + "x" + w.screen.height : "n/a",
-                     "dimLayer wh=", dimLayer.width, "x", dimLayer.height)
-    }
-
-    /** 0 = scan QR, 1 = confirm before sending subscription */
     property int pairingWizardStep: 0
     property bool keepPhonePairingInBackgroundOnClose: false
 
@@ -188,11 +129,6 @@ PageType {
         if (addDeviceConfirmNavigationScheduled) {
             return
         }
-        console.warn("[PairingQrSend] startMobileScanner Qt.platform.os=", Qt.platform.os,
-                       "iosNativePairingQrOverlayBuild=", PairingUiController.iosNativePairingQrOverlayBuild,
-                       "useIosNativePairingQrOverlay=", root.useIosNativePairingQrOverlay,
-                       "androidNativePairingQrOverlayBuild=", PairingUiController.androidNativePairingQrOverlayBuild,
-                       "useAndroidNativePairingQrOverlay=", root.useAndroidNativePairingQrOverlay)
         if (!PairingUiController.isPairingCameraAccessGranted()) {
             awaitingCameraPermissionForScan = true
             PairingUiController.requestPairingCameraAccess()
@@ -208,14 +144,10 @@ PageType {
         if (root.useAndroidNativePairingQrScanner) {
             const coolUntil = PairingUiController.androidPairingReaderCooldownUntilEpochMs
             if (Date.now() < coolUntil) {
-                console.warn("[PairingQrSend] startMobileScanner: skip (native camera cooldown), ms left=",
-                             (coolUntil - Date.now()))
                 return
             }
             const now = Date.now()
             if (now - _androidPairingReaderLastStartMs < 700) {
-                console.warn("[PairingQrSend] startMobileScanner: skip duplicate Android CameraActivity within",
-                             (now - _androidPairingReaderLastStartMs), "ms")
                 return
             }
             _androidPairingReaderLastStartMs = now
@@ -314,14 +246,8 @@ PageType {
         }
     }
 
-    /**
-     * StackView often instantiates the page already visible — onVisibleChanged(true) may never run, so
-     * startMobileScanner (and native overlay present) would be skipped; only stop/dismiss runs. Same pattern as
-     * PageSetupWizardApiQrPairingReceive (Component.onCompleted + visible).
-     */
     Component.onCompleted: {
         if (GC.isMobile() && root.visible && pairingWizardStep === 0) {
-            console.warn("[PairingQrSend] Component.onCompleted: schedule startMobileScanner (page created visible)")
             Qt.callLater(startMobileScanner)
         }
     }
@@ -347,29 +273,21 @@ PageType {
                 })
                 return
             }
-            /**
-             * No fixed ms delay: f1 reapply UIView transparency; f2 restart AVCapture; f3 refresh again —
-             * after restartPairingIosCamera, QUIMetalView / render thread often rebuilds opaque layers (same bug
-             * as status-bar-only camera) until underlay is reapplied once more.
-             */
             Qt.callLater(function () {
                 if (!root.visible || root.pairingWizardStep !== 0 || !GC.isMobile()) {
                     return
                 }
-                console.warn("[PairingQrResume] ApplicationActive f1 underlay")
                 PairingUiController.embeddedPairingQrCameraActive = true
                 PairingUiController.refreshIosEmbeddedPairingQrChrome()
                 Qt.callLater(function () {
                     if (!root.visible || root.pairingWizardStep !== 0) {
                         return
                     }
-                    console.warn("[PairingQrResume] ApplicationActive f2 restart camera")
                     root.restartPairingIosCamera()
                     Qt.callLater(function () {
                         if (!root.visible || root.pairingWizardStep !== 0) {
                             return
                         }
-                        console.warn("[PairingQrResume] ApplicationActive f3 underlay post-camera")
                         PairingUiController.refreshIosEmbeddedPairingQrChrome()
                     })
                 })

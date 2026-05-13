@@ -55,7 +55,6 @@ int pairingRetryDelayMs(int zeroBasedAttempt)
     return baseMs * (1 << zeroBasedAttempt);
 }
 
-/** Legacy TV QR: generateQrCodeImageSeries base64url-wrapped QDataStream chunk (see qrCodeUtils.cpp). */
 bool tryDecodeLegacyChunkedPairingQrPayload(const QString &t, QString *outUuid)
 {
     static const QRegularExpression binUrlSafe(QStringLiteral("^[A-Za-z0-9_-]+$"));
@@ -99,10 +98,6 @@ bool tryDecodeLegacyChunkedPairingQrPayload(const QString &t, QString *outUuid)
     return true;
 }
 
-/**
- * Extract a pairing session UUID from raw QR text without touching QObject / signals.
- * Safe from CameraX / JNI threads while AmneziaActivity is stopped (Qt event loop may not run).
- */
 QString extractPairingSessionUuidFromScanText(const QString &raw)
 {
     const QString t = raw.trimmed();

@@ -254,10 +254,6 @@ bool AmneziaApplication::parseCommands()
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
 void AmneziaApplication::startLocalServer() {
-#ifdef AMNEZIA_QR_PAIRING_ALLOW
-    return;
-#endif
-
     const QString serverName("AmneziaVPNInstance");
     QLocalServer::removeServer(serverName);
 

@@ -211,10 +211,6 @@ if(AMNEZIA_QR_PAIRING_ALLOW)
     target_compile_definitions(${PROJECT} PRIVATE AMNEZIA_QR_PAIRING_ALLOW)
 endif()
 
-if(AMNEZIA_QR_PAIRING_ALLOW_DUPLICATE_VPN_KEY)
-    target_compile_definitions(${PROJECT} PRIVATE AMNEZIA_QR_PAIRING_ALLOW_DUPLICATE_VPN_KEY)
-endif()
-
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 
 # Finalize the executable so Qt can gather/deploy QML modules and plugins correctly (Android needs this).

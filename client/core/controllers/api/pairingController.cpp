@@ -2,7 +2,6 @@
 
 #include <QJsonDocument>
 #include <QSysInfo>
-#include "core/controllers/gatewayController.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/constants/apiConstants.h"
@@ -13,8 +12,6 @@ using namespace amnezia;
 
 namespace
 {
-constexpr auto kGenerateQrEndpoint = "%1api/v1/generate_qr";
-constexpr auto kScanQrEndpoint = "%1api/v1/scan_qr";
 constexpr qsizetype kPairingMaxQrUuidChars = 128;
 constexpr qsizetype kPairingMaxVpnConfigChars = 256 * 1024;
 constexpr qsizetype kPairingMaxApiKeyChars = 8192;
@@ -185,51 +182,4 @@ QJsonObject PairingController::buildScanQrPayload(const QString &qrUuid, const Q
     o[apiDefs::key::appVersion] = QString(APP_VERSION);
     o[apiDefs::key::osVersion] = QSysInfo::productType();
     return o;
-}
-
-ErrorCode PairingController::startPairing(const QString &qrUuid, QrPairingConfigPayload &outPayload)
-{
-    outPayload = QrPairingConfigPayload {};
-    if (qrUuid.isEmpty()) {
-        return ErrorCode::ApiConfigEmptyError;
-    }
-
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(),
-                                        pairingLongPollTimeoutMsecs(), m_appSettingsRepository->isStrictKillSwitchEnabled());
-
-    QByteArray responseBody;
-    const ErrorCode transportError = gatewayController.post(QString::fromLatin1(kGenerateQrEndpoint), buildGenerateQrPayload(qrUuid), responseBody);
-    if (transportError != ErrorCode::NoError) {
-        return transportError;
-    }
-
-    const QJsonObject obj = QJsonDocument::fromJson(responseBody).object();
-    return interpretGenerateQrJson(obj, outPayload);
-}
-
-ErrorCode PairingController::completePairing(const QString &qrUuid, const QString &vpnConfig, const QJsonObject &serviceInfo,
-                                             const QJsonArray &supportedProtocols, const QString &apiKey)
-{
-    if (qrUuid.isEmpty() || vpnConfig.isEmpty() || apiKey.isEmpty()) {
-        return ErrorCode::ApiConfigEmptyError;
-    }
-
-    const ErrorCode fieldErr = validatePairingScanFields(qrUuid, vpnConfig, apiKey);
-    if (fieldErr != ErrorCode::NoError) {
-        return fieldErr;
-    }
-
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(),
-                                        apiDefs::requestTimeoutMsecs, m_appSettingsRepository->isStrictKillSwitchEnabled());
-
-    QByteArray responseBody;
-    const ErrorCode transportError =
-            gatewayController.post(QString::fromLatin1(kScanQrEndpoint),
-                                   buildScanQrPayload(qrUuid, vpnConfig, serviceInfo, supportedProtocols, apiKey), responseBody);
-    if (transportError != ErrorCode::NoError) {
-        return transportError;
-    }
-
-    const QJsonObject obj = QJsonDocument::fromJson(responseBody).object();
-    return interpretScanQrJson(obj);
 }
