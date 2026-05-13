@@ -3,6 +3,16 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../Components"
 
+// FBLink VPN — TV home screen.
+//
+// Layout:
+//   * Top row — branding, connection status, subscription / logout buttons.
+//   * Middle — currently selected server card (or a hint to pick one).
+//   * Bottom — primary actions: connect / locations / refresh.
+//
+// All buttons participate in an explicit D-pad chain so the focus is never
+// "lost" between rows. Up from the action row goes back to the header row;
+// Down from the header row enters the action row.
 FocusScope {
     id: root
 
@@ -11,16 +21,34 @@ FocusScope {
     focus: true
     clip: true
 
-    readonly property string selectedName: ServersModel.defaultServerName !== "" ? ServersModel.defaultServerName : "No location selected"
-    readonly property string stateText: ConnectionController.isConnected
-        ? "Connected"
-        : (ConnectionController.isConnectionInProgress ? "Connecting..." : "Ready")
+    readonly property string selectedName:
+        ServersModel.defaultServerName !== ""
+            ? ServersModel.defaultServerName
+            : qsTr("Локация не выбрана")
+    readonly property string stateText:
+        ConnectionController.isConnected
+            ? qsTr("Подключено")
+            : (ConnectionController.isConnectionInProgress
+                ? qsTr("Подключение...")
+                : qsTr("Готово к подключению"))
+    readonly property color stateColor:
+        ConnectionController.isConnected
+            ? "#4ADE80"
+            : (ConnectionController.isConnectionInProgress ? "#FACC15" : "#A1A1AA")
+
+    readonly property bool hasSubscriptionInfo:
+        FBLinkController.subscriptionPlan !== "" || FBLinkController.isSubscribed
+    readonly property string subscriptionText:
+        FBLinkController.isSubscribed
+            ? (FBLinkController.subscriptionPlan !== ""
+                ? qsTr("Подписка: ") + FBLinkController.subscriptionPlan
+                : qsTr("Подписка активна"))
+            : qsTr("Подписка не активна")
 
     function isOkKey(event) {
         return event.key === Qt.Key_Return
             || event.key === Qt.Key_Enter
             || event.key === Qt.Key_Select
-            || event.key === Qt.Key_Space
     }
 
     function openServers() {
@@ -29,28 +57,41 @@ FocusScope {
         }
     }
 
+    function openSubscription() {
+        if (StackView.view) {
+            StackView.view.push("PageTvSubscription.qml")
+        }
+    }
+
     Component.onCompleted: {
         console.log("PageTvHome loaded")
         connectButton.forceActiveFocus()
+        if (FBLinkController.isLoggedIn) {
+            FBLinkController.fetchSubscription()
+        }
     }
 
     Rectangle {
         anchors.fill: parent
-        color: "#070707"
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#08090B" }
+            GradientStop { position: 1.0; color: "#0F0A02" }
+        }
     }
 
     Item {
         id: stage
         width: 1920
         height: 1080
-        scale: Math.min(1, root.width / width, root.height / height) * 0.92
+        scale: Math.min(1, root.width / width, root.height / height) * 0.94
         anchors.centerIn: parent
 
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: 86
-            spacing: 36
+            spacing: 32
 
+            // Header row.
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 24
@@ -75,9 +116,26 @@ FocusScope {
 
                     Label {
                         text: root.stateText
-                        color: ConnectionController.isConnected ? "#4ADE80" : "#FACC15"
-                        font.pixelSize: 30
+                        color: root.stateColor
+                        font.pixelSize: 28
                         font.bold: true
+                    }
+                }
+
+                TvButton {
+                    id: subscriptionButton
+                    Layout.preferredWidth: 240
+                    Layout.preferredHeight: 76
+                    text: qsTr("Подписка")
+                    tvFontPixelSize: 24
+                    KeyNavigation.right: logoutButton
+                    KeyNavigation.down: connectButton
+                    onClicked: root.openSubscription()
+                    Keys.onPressed: function(event) {
+                        if (root.isOkKey(event)) {
+                            clicked()
+                            event.accepted = true
+                        }
                     }
                 }
 
@@ -85,9 +143,10 @@ FocusScope {
                     id: logoutButton
                     Layout.preferredWidth: 180
                     Layout.preferredHeight: 76
-                    text: "Logout"
-                    tvFontPixelSize: 26
-                    KeyNavigation.down: locationsButton
+                    text: qsTr("Выйти")
+                    tvFontPixelSize: 24
+                    KeyNavigation.left: subscriptionButton
+                    KeyNavigation.down: refreshButton
                     onClicked: FBLinkController.logout()
                     Keys.onPressed: function(event) {
                         if (root.isOkKey(event)) {
@@ -98,13 +157,14 @@ FocusScope {
                 }
             }
 
+            // Selected server card.
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 300
+                Layout.preferredHeight: 280
                 radius: 28
-                color: "#121212"
-                border.width: 3
-                border.color: ServersModel.defaultServerIsVipOnly ? "#FACC15" : "#2F2F2F"
+                color: "#101013"
+                border.width: 2
+                border.color: ServersModel.defaultServerIsVipOnly ? "#FACC15" : "#27272A"
 
                 RowLayout {
                     anchors.fill: parent
@@ -130,7 +190,7 @@ FocusScope {
 
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 16
+                        spacing: 14
 
                         RowLayout {
                             Layout.fillWidth: true
@@ -156,7 +216,7 @@ FocusScope {
 
                                 Label {
                                     anchors.centerIn: parent
-                                    text: "VIP server"
+                                    text: qsTr("VIP-сервер")
                                     color: "#FACC15"
                                     font.pixelSize: 21
                                     font.bold: true
@@ -168,13 +228,21 @@ FocusScope {
                             Layout.fillWidth: true
                             text: ServersModel.defaultServerEndpointHost
                             color: "#A1A1AA"
-                            font.pixelSize: 26
+                            font.pixelSize: 24
                             elide: Text.ElideRight
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: root.subscriptionText
+                            color: FBLinkController.isSubscribed ? "#4ADE80" : "#A1A1AA"
+                            font.pixelSize: 22
                         }
                     }
                 }
             }
 
+            // Action row.
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 22
@@ -182,10 +250,12 @@ FocusScope {
                 TvButton {
                     id: connectButton
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 96
-                    text: ConnectionController.isConnected ? "Disconnect" : "Connect"
-                    tvFontPixelSize: 34
-                    KeyNavigation.up: logoutButton
+                    Layout.preferredHeight: 110
+                    text: ConnectionController.isConnected
+                            ? qsTr("Отключиться")
+                            : qsTr("Подключиться")
+                    tvFontPixelSize: 36
+                    KeyNavigation.up: subscriptionButton
                     KeyNavigation.right: locationsButton
                     onClicked: ConnectionController.toggleConnection()
                     Keys.onPressed: function(event) {
@@ -199,10 +269,10 @@ FocusScope {
                 TvButton {
                     id: locationsButton
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 96
-                    text: "Locations"
-                    tvFontPixelSize: 34
-                    KeyNavigation.up: logoutButton
+                    Layout.preferredHeight: 110
+                    text: qsTr("Локации")
+                    tvFontPixelSize: 36
+                    KeyNavigation.up: subscriptionButton
                     KeyNavigation.left: connectButton
                     KeyNavigation.right: refreshButton
                     onClicked: root.openServers()
@@ -217,9 +287,11 @@ FocusScope {
                 TvButton {
                     id: refreshButton
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 96
-                    text: FBLinkController.isConfigSyncing ? "Refreshing..." : "Refresh"
-                    tvFontPixelSize: 34
+                    Layout.preferredHeight: 110
+                    text: FBLinkController.isConfigSyncing
+                            ? qsTr("Обновление...")
+                            : qsTr("Обновить")
+                    tvFontPixelSize: 36
                     enabled: !FBLinkController.isConfigSyncing
                     KeyNavigation.up: logoutButton
                     KeyNavigation.left: locationsButton
