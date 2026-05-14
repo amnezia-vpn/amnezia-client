@@ -34,13 +34,18 @@ android {
         jniLibs.useLegacyPackaging = true
     }
 
+    val abiList = qtTargetAbiList.split(",")
+
     defaultConfig {
         applicationId = "org.amnezia.vpn"
         targetSdk = qtTargetSdkVersion.toInt()
 
         // keeps language resources for only the locales specified below
         resourceConfigurations += listOf("en", "ru", "b+zh+Hans")
-        ndk.abiFilters += qtTargetAbiList.split(",")
+        // ndk.abiFilters is only used for single-ABI builds; multi-ABI uses splits below
+        if (abiList.size == 1) {
+            ndk.abiFilters += abiList
+        }
     }
 
     signingConfigs {
@@ -100,9 +105,10 @@ android {
 
     splits {
         abi {
-            isEnable = true
+            // splits only make sense for multi-ABI builds; single-ABI uses ndk.abiFilters
+            isEnable = abiList.size > 1
             reset()
-            include(*qtTargetAbiList.split(',').toTypedArray())
+            include(*abiList.toTypedArray())
             isUniversalApk = false
         }
     }
