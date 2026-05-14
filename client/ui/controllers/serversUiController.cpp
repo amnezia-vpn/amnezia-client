@@ -179,7 +179,7 @@ QString ServersUiController::getDefaultServerName() const
     const QString defaultServerId = m_serversController->getDefaultServerId();
     for (const auto &description : m_orderedServerDescriptions) {
         if (description.serverId == defaultServerId) {
-            return description.nameForNameRole;
+            return description.serverName;
         }
     }
     return QString();
@@ -401,7 +401,7 @@ QString ServersUiController::getDefaultServerDescription(const QString &serverId
 {
     for (const auto &description : m_orderedServerDescriptions) {
         if (description.serverId == serverId) {
-            return description.descriptionSnippet;
+            return description.baseDescription;
         }
     }
     return QString();

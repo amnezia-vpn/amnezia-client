@@ -53,9 +53,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case NameRole:
-        return row.nameForNameRole;
+        return row.serverName;
     case ServerDescriptionRole:
-        return configVersion ? row.descriptionSnippet : (row.descriptionSnippet + row.hostName);
+        return configVersion ? row.baseDescription : (row.baseDescription + row.hostName);
     case CollapsedServerDescriptionRole:
         return row.collapsedServerDescription;
     case ExpandedServerDescriptionRole:

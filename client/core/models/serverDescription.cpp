@@ -8,6 +8,8 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/containers/containerUtils.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/models/protocols/awgProtocolConfig.h"
 
 using namespace amnezia;
 
@@ -36,7 +38,7 @@ ServerDescription buildBaseDescription(const T &server)
     return row;
 }
 
-QString selfHostedSnippet(const QMap<DockerContainer, ContainerConfig> &containers,
+QString getBaseDescription(const QMap<DockerContainer, ContainerConfig> &containers,
                          bool isAmneziaDnsEnabled,
                          bool hasWriteAccess,
                          bool primaryDnsIsAmnezia)
@@ -51,6 +53,26 @@ QString selfHostedSnippet(const QMap<DockerContainer, ContainerConfig> &containe
         description += QStringLiteral("Amnezia DNS | ");
     }
     return description;
+}
+
+QString getProtocolName(DockerContainer defaultContainer, const QMap<DockerContainer, ContainerConfig> &containers)
+{
+    QString containerName = ContainerUtils::containerHumanNames().value(defaultContainer);
+    QString protocolVersion;
+
+    if (ContainerUtils::isAwgContainer(defaultContainer)) {
+        const auto it = containers.constFind(defaultContainer);
+        if (it != containers.cend()) {
+            if (const AwgProtocolConfig *awg = it->getAwgProtocolConfig()) {
+                protocolVersion = ProtocolUtils::getProtocolVersionString(awg->toJson());
+                if (defaultContainer == DockerContainer::Awg && !awg->serverConfig.isThirdPartyConfig) {
+                    containerName = QStringLiteral("AmneziaWG Legacy");
+                }
+            }
+        }
+    }
+
+    return containerName + protocolVersion + QStringLiteral(" | ");
 }
 
 } // namespace
@@ -69,12 +91,12 @@ ServerDescription buildServerDescription(const SelfHostedAdminServerConfig &serv
     row.hasWriteAccess = !row.selfHostedSshCredentials.userName.isEmpty()
                          && !row.selfHostedSshCredentials.secretData.isEmpty();
 
-    row.nameForNameRole = server.displayName;
-    row.descriptionSnippet = selfHostedSnippet(server.containers, isAmneziaDnsEnabled, row.hasWriteAccess, row.primaryDnsIsAmnezia);
+    row.serverName = server.displayName;
+    row.baseDescription = getBaseDescription(server.containers, isAmneziaDnsEnabled, row.hasWriteAccess, row.primaryDnsIsAmnezia);
 
-    const QString fullDescriptionForCollapsed = row.descriptionSnippet + row.hostName;
-    row.collapsedServerDescription = fullDescriptionForCollapsed;
-    row.expandedServerDescription = fullDescriptionForCollapsed;
+    const QString protocolName = getProtocolName(server.defaultContainer, server.containers);
+    row.expandedServerDescription = row.baseDescription + row.hostName;
+    row.collapsedServerDescription = row.baseDescription + protocolName + row.hostName;
     return row;
 }
 
@@ -85,12 +107,12 @@ ServerDescription buildServerDescription(const SelfHostedUserServerConfig &serve
     row.selfHostedSshCredentials.port = 22;
     row.hasWriteAccess = false;
 
-    row.nameForNameRole = server.displayName;
-    row.descriptionSnippet = selfHostedSnippet(server.containers, isAmneziaDnsEnabled, row.hasWriteAccess, row.primaryDnsIsAmnezia);
+    row.serverName = server.displayName;
+    row.baseDescription = getBaseDescription(server.containers, isAmneziaDnsEnabled, row.hasWriteAccess, row.primaryDnsIsAmnezia);
 
-    const QString fullDescriptionForCollapsed = row.descriptionSnippet + row.hostName;
-    row.collapsedServerDescription = fullDescriptionForCollapsed;
-    row.expandedServerDescription = fullDescriptionForCollapsed;
+    const QString protocolName = getProtocolName(server.defaultContainer, server.containers);
+    row.expandedServerDescription = row.baseDescription + row.hostName;
+    row.collapsedServerDescription = row.baseDescription + protocolName + row.hostName;
     return row;
 }
 
@@ -99,12 +121,12 @@ ServerDescription buildServerDescription(const NativeServerConfig &server, bool 
     ServerDescription row = buildBaseDescription(server);
     row.hasWriteAccess = false;
 
-    row.nameForNameRole = server.displayName;
-    row.descriptionSnippet = selfHostedSnippet(server.containers, isAmneziaDnsEnabled, row.hasWriteAccess, row.primaryDnsIsAmnezia);
+    row.serverName = server.displayName;
+    row.baseDescription = getBaseDescription(server.containers, isAmneziaDnsEnabled, row.hasWriteAccess, row.primaryDnsIsAmnezia);
 
-    const QString fullDescriptionForCollapsed = row.descriptionSnippet + row.hostName;
-    row.collapsedServerDescription = fullDescriptionForCollapsed;
-    row.expandedServerDescription = fullDescriptionForCollapsed;
+    const QString protocolName = getProtocolName(server.defaultContainer, server.containers);
+    row.expandedServerDescription = row.baseDescription + row.hostName;
+    row.collapsedServerDescription = row.baseDescription + protocolName + row.hostName;
     return row;
 }
 
@@ -116,10 +138,10 @@ ServerDescription buildServerDescription(const LegacyApiServerConfig &server, bo
     row.isServerFromGatewayApi = false;
     row.hasWriteAccess = false;
 
-    row.nameForNameRole = server.displayName;
-    row.descriptionSnippet = server.description;
+    row.serverName = server.displayName;
+    row.baseDescription = server.description;
 
-    const QString fullDescriptionForCollapsed = row.descriptionSnippet;
+    const QString fullDescriptionForCollapsed = row.baseDescription;
     row.collapsedServerDescription = fullDescriptionForCollapsed;
     row.expandedServerDescription = fullDescriptionForCollapsed;
     return row;
@@ -134,8 +156,8 @@ ServerDescription buildServerDescription(const ApiV2ServerConfig &server, bool /
     row.isPremium = server.isPremium() || server.isExternalPremium();
     row.hasWriteAccess = false;
 
-    row.nameForNameRole = server.displayName;
-    row.descriptionSnippet = server.apiConfig.serverCountryCode.isEmpty() ? server.description : server.apiConfig.serverCountryName;
+    row.serverName = server.displayName;
+    row.baseDescription = server.apiConfig.serverCountryCode.isEmpty() ? server.description : server.apiConfig.serverCountryName;
 
     row.isCountrySelectionAvailable = !server.apiConfig.availableCountries.isEmpty();
     row.apiAvailableCountries = server.apiConfig.availableCountries;
@@ -156,7 +178,7 @@ ServerDescription buildServerDescription(const ApiV2ServerConfig &server, bool /
         }
     }
 
-    const QString fullDescriptionForCollapsed = row.descriptionSnippet;
+    const QString fullDescriptionForCollapsed = row.baseDescription;
     row.collapsedServerDescription = fullDescriptionForCollapsed;
     row.expandedServerDescription = fullDescriptionForCollapsed;
     return row;

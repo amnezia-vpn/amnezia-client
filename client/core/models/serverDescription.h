@@ -19,8 +19,8 @@ struct ServerDescription
 {
     QString serverId;
 
-    QString nameForNameRole;
-    QString descriptionSnippet;
+    QString serverName;
+    QString baseDescription;
     QString hostName;
 
     int configVersion = 0;
